@@ -9,7 +9,7 @@
 open Hh_prelude
 open Aast
 
-let static_method_check reified_params m =
+let static_method_check env reified_params m =
   let visitor =
     object (this)
       inherit [_] Aast.iter as super
@@ -19,6 +19,7 @@ let static_method_check reified_params m =
         | Aast.Habstr (t, args) ->
           if SSet.mem t reified_params then
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 primary
                 @@ Primary.Static_meth_with_class_reified_generic
@@ -27,14 +28,14 @@ let static_method_check reified_params m =
         | _ -> super#on_hint env (pos, h)
     end
   in
-  List.iter m.m_params ~f:(visitor#on_fun_param ());
-  visitor#on_type_hint () m.m_ret
+  List.iter m.m_params ~f:(visitor#on_fun_param env);
+  visitor#on_type_hint env m.m_ret
 
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_class_ _env c =
+    method! at_class_ env c =
       let (_, static_methods, _) = split_methods c.c_methods in
       if
         not
@@ -48,5 +49,5 @@ let handler =
                 None)
           |> SSet.of_list
         in
-        List.iter static_methods ~f:(static_method_check reified_params)
+        List.iter static_methods ~f:(static_method_check env reified_params)
   end

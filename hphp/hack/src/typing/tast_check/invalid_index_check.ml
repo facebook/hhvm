@@ -93,6 +93,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
                  (get_reason ty_have)))
       in
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           primary
           @@ Primary.Index_type_mismatch

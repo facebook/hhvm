@@ -426,7 +426,7 @@ module Eval_primary = struct
       in
       (Error_code.ShapeAccessWithNonExistentField, claim, reason, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Shape in
       match t with
       | Invalid_shape_field_type { pos; ty_pos; ty_name; trail } ->
@@ -657,7 +657,7 @@ module Eval_primary = struct
       in
       (Error_code.IncompatibleEnumInclusion, claim, lazy [], [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Enum in
       match t with
       | Enum_type_bad { pos; is_enum_class; ty_name; trail } ->
@@ -753,7 +753,7 @@ module Eval_primary = struct
       in
       (Error_code.MemberNotFound, claim, lazy [], [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Expr_tree in
       match t with
       | Expression_tree_non_public_member { pos; decl_pos } ->
@@ -863,7 +863,7 @@ module Eval_primary = struct
       and reason = lazy [(decl_pos, "Did you mean to " ^ suggestion ^ "?")] in
       (Error_code.ReadonlyClosureCall, claim, reason, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Readonly in
       match t with
       | Readonly_modified { pos; reason_opt } ->
@@ -958,7 +958,7 @@ module Eval_primary = struct
       in
       (Error_code.ContextImplicitPolicyLeakage, claim, reasons, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Ifc in
       match t with
       | Illegal_information_flow
@@ -1030,7 +1030,7 @@ module Eval_primary = struct
       in
       (err_code, claim, reasons, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Coeffect in
       match t with
       | Op_coeffect_error
@@ -1156,7 +1156,7 @@ module Eval_primary = struct
         lazy [],
         [] )
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Wellformedness in
       match t with
       | Missing_return { pos; hint_pos; is_async } ->
@@ -1363,7 +1363,7 @@ module Eval_primary = struct
       in
       (error_code, claim, reason, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Modules in
       match t with
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
@@ -1461,7 +1461,7 @@ module Eval_primary = struct
       in
       (Error_code.MissingXhpRequiredAttr, claim, ty_reason_msg, [])
 
-    let to_error t =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Xhp in
       match t with
       | Xhp_required { pos; why_xhp; ty_reason_msg } ->
@@ -4215,18 +4215,18 @@ module Eval_primary = struct
       lazy [],
       [] )
 
-  let to_error t =
+  let to_error t ~env =
     let open Typing_error.Primary in
     match t with
-    | Coeffect err -> Eval_coeffect.to_error err
-    | Enum err -> Eval_enum.to_error err
-    | Expr_tree err -> Eval_expr_tree.to_error err
-    | Ifc err -> Eval_ifc.to_error err
-    | Modules err -> Eval_modules.to_error err
-    | Readonly err -> Eval_readonly.to_error err
-    | Shape err -> Eval_shape.to_error err
-    | Wellformedness err -> Eval_wellformedness.to_error err
-    | Xhp err -> Eval_xhp.to_error err
+    | Coeffect err -> Eval_coeffect.to_error err ~env
+    | Enum err -> Eval_enum.to_error err ~env
+    | Expr_tree err -> Eval_expr_tree.to_error err ~env
+    | Ifc err -> Eval_ifc.to_error err ~env
+    | Modules err -> Eval_modules.to_error err ~env
+    | Readonly err -> Eval_readonly.to_error err ~env
+    | Shape err -> Eval_shape.to_error err ~env
+    | Wellformedness err -> Eval_wellformedness.to_error err ~env
+    | Xhp err -> Eval_xhp.to_error err ~env
     | Unify_error { pos; msg_opt; reasons_opt } ->
       unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg
@@ -4768,17 +4768,23 @@ module Eval_primary = struct
 end
 
 module rec Eval_error : sig
-  val eval : Typing_error.Error.t -> current_span:Pos.t -> error Eval_result.t
+  val eval :
+    Typing_error.Error.t ->
+    env:Typing_env_types.env ->
+    current_span:Pos.t ->
+    error Eval_result.t
 
   val to_user_error :
     Typing_error.Error.t ->
+    env:Typing_env_types.env ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 end = struct
-  let eval t ~current_span =
+  let eval t ~env ~current_span =
     let open Typing_error.Error in
     let rec aux ~k = function
-      | Primary base -> k @@ Eval_result.single @@ Eval_primary.to_error base
+      | Primary base ->
+        k @@ Eval_result.single @@ Eval_primary.to_error base ~env
       | With_code (t, code) ->
         aux t ~k:(fun res ->
             k
@@ -4792,17 +4798,28 @@ end = struct
             k
             @@ Eval_result.bind t ~f:(fun (code, claim, reasons, quickfixes) ->
                    Eval_result.single
-                   @@ Eval_callback.apply cb ~code ~claim ~reasons ~quickfixes))
+                   @@ Eval_callback.apply
+                        cb
+                        ~env
+                        ~code
+                        ~claim
+                        ~reasons
+                        ~quickfixes))
       | Apply_reasons (cb, snd_err) ->
         k
         @@ Eval_result.bind ~f:(fun (code, reasons) ->
-               Eval_reasons_callback.apply_help cb ~code ~reasons ~current_span)
-        @@ Eval_secondary.eval snd_err ~current_span
+               Eval_reasons_callback.apply_help
+                 cb
+                 ~code
+                 ~reasons
+                 ~env
+                 ~current_span)
+        @@ Eval_secondary.eval snd_err ~env ~current_span
       | Assert_in_current_decl (snd_err, ctx) ->
         k
         @@ Eval_result.bind ~f:(fun e ->
                Eval_result.of_option @@ Common.eval_assert ctx current_span e)
-        @@ Eval_secondary.eval snd_err ~current_span
+        @@ Eval_secondary.eval snd_err ~env ~current_span
     and auxs ~k = function
       | [] -> k []
       | next :: rest ->
@@ -4817,13 +4834,14 @@ end = struct
       (Lazy.force reasons)
       ~quickfixes
 
-  let to_user_error t ~current_span =
-    Eval_result.map ~f:make_error @@ eval t ~current_span
+  let to_user_error t ~env ~current_span =
+    Eval_result.map ~f:make_error @@ eval t ~env ~current_span
 end
 
 and Eval_secondary : sig
   val eval :
     Typing_error.Secondary.t ->
+    env:Typing_env_types.env ->
     current_span:Pos.t ->
     (Error_code.t * Pos_or_decl.t Message.t list Lazy.t) Eval_result.t
 end = struct
@@ -5529,7 +5547,7 @@ end = struct
     ( Error_code.UnifyError,
       lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")] )
 
-  let eval t ~current_span =
+  let eval t ~env ~current_span =
     let open Typing_error.Secondary in
     match t with
     | Of_error err ->
@@ -5541,7 +5559,7 @@ end = struct
               return (Message.map ~f:Pos_or_decl.of_raw_pos x :: xs))
           in
           (code, reasons))
-      @@ Eval_error.eval err ~current_span
+      @@ Eval_error.eval err ~env ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (fun_too_many_args pos decl_pos actual expected)
     | Fun_too_few_args { pos; decl_pos; actual; expected } ->
@@ -5711,6 +5729,7 @@ and Eval_callback : sig
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Pos.t Quickfix.t list ->
     Typing_error.Callback.t ->
+    env:Typing_env_types.env ->
     claim:Pos.t Message.t Lazy.t ->
     error
 end = struct
@@ -5721,17 +5740,17 @@ end = struct
     quickfixes: Pos.t Quickfix.t list;
   }
 
-  let rec eval t st =
+  let rec eval t ~env ~st =
     let open Typing_error.Callback in
     match t with
     | With_side_effect (t, eff) ->
       eff ();
-      eval t st
+      eval t ~env ~st
     | Always err ->
-      let (code, claim, reasons, quickfixes) = Eval_primary.to_error err in
+      let (code, claim, reasons, quickfixes) = Eval_primary.to_error err ~env in
       (code, Some claim, reasons, quickfixes)
     | Of_primary err ->
-      let (code, _claim, _reasons, qfs) = Eval_primary.to_error err in
+      let (code, _claim, _reasons, qfs) = Eval_primary.to_error err ~env in
       ( Option.value ~default:code st.code_opt,
         st.claim_opt,
         st.reasons,
@@ -5747,18 +5766,18 @@ end = struct
               return (Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: reasons)))
           st.claim_opt
       in
-      let (_, claim, _, _) = Eval_primary.to_error claim_from in
-      eval err { st with claim_opt = Some claim; reasons }
-    | Retain_code t -> eval t { st with code_opt = None }
+      let (_, claim, _, _) = Eval_primary.to_error claim_from ~env in
+      eval err ~env ~st:{ st with claim_opt = Some claim; reasons }
+    | Retain_code t -> eval t ~env ~st:{ st with code_opt = None }
     | With_code (code, qfs) ->
       ( Option.value ~default:code st.code_opt,
         st.claim_opt,
         st.reasons,
         qfs @ st.quickfixes )
 
-  let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~claim =
+  let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~env ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
-    let (code, claim_opt, reasons, quickfixes) = eval t st in
+    let (code, claim_opt, reasons, quickfixes) = eval t ~env ~st in
     (code, Option.value ~default:claim claim_opt, reasons, quickfixes)
 end
 
@@ -5769,6 +5788,7 @@ and Eval_reasons_callback : sig
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Pos.t Quickfix.t list ->
     Typing_error.Reasons_callback.t ->
+    env:Typing_env_types.env ->
     current_span:Pos.t ->
     error Eval_result.t
 
@@ -5778,6 +5798,7 @@ and Eval_reasons_callback : sig
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Pos.t Quickfix.t list ->
     Typing_error.Reasons_callback.t ->
+    env:Typing_env_types.env ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 end = struct
@@ -5793,9 +5814,10 @@ end = struct
       { t with code_opt = Option.first_some t.code_opt code_opt }
 
     let prepend_secondary
-        { claim_opt; reasons_opt; quickfixes_opt; _ } snd_err ~current_span =
+        { claim_opt; reasons_opt; quickfixes_opt; _ } snd_err ~env ~current_span
+        =
       Eval_result.map
-        (Eval_secondary.eval snd_err ~current_span)
+        (Eval_secondary.eval snd_err ~env ~current_span)
         ~f:(fun (code, reasons) ->
           let reasons_opt =
             Some
@@ -5810,26 +5832,30 @@ end = struct
 
     (** Replace any missing values in the error state with those of the error *)
     let with_defaults
-        { code_opt; claim_opt; reasons_opt; quickfixes_opt } err ~current_span =
+        { code_opt; claim_opt; reasons_opt; quickfixes_opt }
+        err
+        ~env
+        ~current_span =
       Eval_result.map ~f:(fun (code, claim, reasons, quickfixes) ->
           Option.
             ( value code_opt ~default:code,
               value claim_opt ~default:claim,
               value reasons_opt ~default:reasons,
               value quickfixes_opt ~default:quickfixes ))
-      @@ Eval_error.eval err ~current_span
+      @@ Eval_error.eval err ~env ~current_span
   end
 
   let eval_callback
-      k Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
+      k Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~env ~claim =
     Eval_callback.apply
       ?code:code_opt
       ?reasons:reasons_opt
       ?quickfixes:quickfixes_opt
+      ~env
       ~claim
       k
 
-  let eval t ~st ~current_span =
+  let eval t ~env ~st ~current_span =
     let open Typing_error.Reasons_callback in
     let rec aux t st =
       match t with
@@ -5841,10 +5867,10 @@ end = struct
         in
         f ?code ?quickfixes reasons;
         Eval_result.empty
-      | Always err -> Eval_error.eval err ~current_span
-      | Of_error err -> Error_state.with_defaults st err ~current_span
+      | Always err -> Eval_error.eval err ~env ~current_span
+      | Of_error err -> Error_state.with_defaults st err ~env ~current_span
       | Of_callback (k, claim) ->
-        Eval_result.single @@ eval_callback k st ~claim
+        Eval_result.single @@ eval_callback k st ~env ~claim
       | Assert_in_current_decl (default, ctx) ->
         let Error_state.{ code_opt; reasons_opt; _ } = st in
         let crs =
@@ -5882,7 +5908,7 @@ end = struct
       | Prepend_on_apply (t, snd_err) ->
         Eval_result.bind
           ~f:(aux t)
-          (Error_state.prepend_secondary st snd_err ~current_span)
+          (Error_state.prepend_secondary st snd_err ~env ~current_span)
       | Drop_reasons_on_apply t ->
         let st = Error_state.{ st with reasons_opt = Some (lazy []) } in
         aux t st
@@ -5914,7 +5940,7 @@ end = struct
     in
     aux t st
 
-  let apply_help ?code ?claim ?reasons ?quickfixes t ~current_span =
+  let apply_help ?code ?claim ?reasons ?quickfixes t ~env ~current_span =
     let claim =
       Option.map claim ~f:(Lazy.map ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
     in
@@ -5927,6 +5953,7 @@ end = struct
     in
     eval
       t
+      ~env
       ~st:
         Error_state.
           {
@@ -5937,7 +5964,7 @@ end = struct
           }
       ~current_span
 
-  let apply ?code ?claim ?reasons ?quickfixes t ~current_span =
+  let apply ?code ?claim ?reasons ?quickfixes t ~env ~current_span =
     let f (code, claim, reasons, quickfixes) =
       User_error.make
         (Error_code.to_enum code)
@@ -5946,22 +5973,23 @@ end = struct
         ~quickfixes
     in
     Eval_result.map ~f
-    @@ apply_help ?code ?claim ?reasons ?quickfixes t ~current_span
+    @@ apply_help ?code ?claim ?reasons ?quickfixes t ~env ~current_span
 end
 
 let is_suppressed User_error.{ claim; code; _ } =
   Errors.fixme_present Message.(get_message_pos claim) code
 
-let add_typing_error err =
+let add_typing_error err ~env =
   Eval_result.iter ~f:Errors.add_error
   @@ Eval_result.suppress_intersection ~is_suppressed
-  @@ Eval_error.to_user_error err ~current_span:(Errors.get_current_span ())
+  @@ Eval_error.to_user_error
+       err
+       ~env
+       ~current_span:(Errors.get_current_span ())
 
 (* Until we return a list of errors from typing, we have to apply
    'client errors' to a callback for using in subtyping *)
-let apply_callback_to_errors :
-    Errors.t -> Typing_error.Reasons_callback.t -> unit =
- fun errors on_error ->
+let apply_callback_to_errors errors on_error ~env =
   let on_error
       User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
     let code = Option.value_exn (Error_code.of_enum code) in
@@ -5972,11 +6000,13 @@ let apply_callback_to_errors :
          ~code
          ~claim:(lazy claim)
          ~reasons:(lazy reasons)
+         ~env
          ~current_span:(Errors.get_current_span ())
   in
   Errors.iter errors ~f:on_error
 
-let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
+let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err ~env
+    =
   Eval_result.iter ~f:Errors.add_error
   @@ Eval_result.suppress_intersection ~is_suppressed
   @@ Eval_reasons_callback.apply
@@ -5985,6 +6015,7 @@ let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
        ?reasons
        ?quickfixes
        err
+       ~env
        ~current_span:(Errors.get_current_span ())
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
@@ -5992,8 +6023,7 @@ let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
 
 (** TODO: Remove use of `User_error.t` representation for nested error &
     callback application *)
-let ambiguous_inheritance
-    pos class_ origin error (on_error : Typing_error.Reasons_callback.t) =
+let ambiguous_inheritance pos class_ origin error on_error ~env =
   let User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
     error
   in
@@ -6011,3 +6041,4 @@ let ambiguous_inheritance
     on_error
     ~code
     ~reasons:(lazy ((claim_as_reason claim :: reasons) @ [(pos, message)]))
+    ~env

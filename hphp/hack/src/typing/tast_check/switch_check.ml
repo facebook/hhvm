@@ -20,7 +20,7 @@ type kind =
   | EnumClass
   | EnumClassLabel
 
-let get_constant tc kind (seen, has_default) case =
+let get_constant env tc kind (seen, has_default) case =
   let (kind, is_enum_class_label) =
     match kind with
     | Enum -> ("enum ", false)
@@ -31,6 +31,7 @@ let get_constant tc kind (seen, has_default) case =
     (* wish:T109260699 *)
     if String.( <> ) cls (Cls.name tc) then (
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           enum
           @@ Primary.Enum.Enum_switch_wrong_class
@@ -46,6 +47,7 @@ let get_constant tc kind (seen, has_default) case =
       | None -> (SMap.add const pos seen, has_default)
       | Some old_pos ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             enum
             @@ Primary.Enum.Enum_switch_redundant
@@ -61,11 +63,12 @@ let get_constant tc kind (seen, has_default) case =
     check_case pos cls const
   | Case ((_, pos, _), _) ->
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(enum @@ Primary.Enum.Enum_switch_not_const pos);
     (seen, has_default)
 
-let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
-    =
+let check_enum_exhaustiveness
+    env pos tc kind (caselist, dfl) coming_from_unresolved =
   let str_kind =
     match kind with
     | Enum -> "Enum"
@@ -79,13 +82,13 @@ let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
     let state = (SMap.empty, false) in
     let state =
       List.fold_left
-        ~f:(fun state c -> get_constant tc kind state (Aast.Case c))
+        ~f:(fun state c -> get_constant env tc kind state (Aast.Case c))
         ~init:state
         caselist
     in
     let state =
       Option.fold
-        ~f:(fun state c -> get_constant tc kind state (Aast.Default c))
+        ~f:(fun state c -> get_constant env tc kind state (Aast.Default c))
         ~init:state
         dfl
     in
@@ -116,7 +119,9 @@ let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
     | _ -> None
   in
   Option.iter enum_err_opt ~f:(fun err ->
-      Typing_error_utils.add_typing_error @@ Typing_error.enum err)
+      Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
+      @@ Typing_error.enum err)
 
 (* Small reminder:
  * - enums are localized to `Tnewtype (name, _, _)` where name is the name of
@@ -169,7 +174,13 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
         dep;
 
     let tc = unsafe_opt @@ Env.get_enum env id in
-    check_enum_exhaustiveness pos tc kind caselist enum_coming_from_unresolved;
+    check_enum_exhaustiveness
+      env
+      pos
+      tc
+      kind
+      caselist
+      enum_coming_from_unresolved;
     env
   in
   match get_node ty with

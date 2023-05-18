@@ -174,6 +174,7 @@ let property_import_via_diamond_error
     ~second_using_trait =
   let trait_name = class_elt.Typing_defs.ce_origin in
   Typing_error_utils.add_typing_error
+    ~env
     Typing_error.(
       primary
       @@ Primary.Property_import_via_diamond

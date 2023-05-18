@@ -19,11 +19,13 @@ let handler =
       function
       | (_, _, Obj_get (_, (_, p, This), _, _)) ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$this" })
       | (_, _, Obj_get (_, (_, p, Lplaceholder _), _, _)) ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$_" })

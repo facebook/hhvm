@@ -32,6 +32,7 @@ let rec enforce_not_awaitable env p ty =
   | Tclass ((_, awaitable), _, _)
     when String.equal awaitable SN.Classes.cAwaitable ->
     Typing_error_utils.add_typing_error
+      ~env:(Env.tast_env_as_typing_env env)
       Typing_error.(
         primary
         @@ Primary.Discarded_awaitable { pos = p; decl_pos = get_pos ety })

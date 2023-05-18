@@ -53,7 +53,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       pos
       cty
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   match get_node cty with
   | Tany _
   | Tdynamic ->

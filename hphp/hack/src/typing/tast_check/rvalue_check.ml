@@ -22,6 +22,7 @@ let check_valid_rvalue pos env ty =
       (match deref ety with
       | (r, Tprim Tnoreturn) ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Noreturn_usage
@@ -36,6 +37,7 @@ let check_valid_rvalue pos env ty =
         env
       | (r, Tprim Tvoid) ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Void_usage

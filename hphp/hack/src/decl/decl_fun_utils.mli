@@ -43,7 +43,7 @@ val where_constraint :
   Nast.xhp_attr_hint * 'a * Nast.xhp_attr_hint ->
   Typing_defs.decl_ty * 'a * Typing_defs.decl_ty
 
-val check_params : Nast.fun_param list -> unit
+val check_params : Nast.fun_param list -> Typing_error.t option
 
 val make_params :
   Decl_env.env ->

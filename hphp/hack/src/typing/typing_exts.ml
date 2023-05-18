@@ -98,7 +98,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
       | Some
           ( (env, ty_err_opt),
             { ft_params = pars; ft_ret = { et_type = ty; _ }; _ } ) ->
-        Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
           match get_node ty with
@@ -145,6 +145,7 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
       (env, add_reason good_args @ xs)
     | (env, None) ->
       Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary
           @@ Primary.Format_string
@@ -242,6 +243,7 @@ let retype_magic_func
               :: argl) )
         | (env, Left pos) ->
           Typing_error_utils.add_typing_error
+            ~env
             Typing_error.(primary @@ Primary.Expected_literal_format_string pos);
           (env, None))
       | None -> (env, None)

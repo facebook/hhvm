@@ -50,7 +50,7 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     in
     let ((env, ty_err), ty) = Phase.localize ~ety_env env ts in
     let ty = with_reason ty r in
-    Option.iter ~f:Typing_error_utils.add_typing_error ty_err;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err;
     (env, ty)
   | _ ->
     (* Should not hit this because TypeStructure should always be defined *)
@@ -64,7 +64,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       pos
       ty
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely
    *)

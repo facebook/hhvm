@@ -14,7 +14,8 @@ module Env = Tast_env
 
 let check_xhp_children env pos ty =
   let (is_xhp_child, subty_err_opt) = Env.is_xhp_child env pos ty in
-  Option.iter subty_err_opt ~f:Typing_error_utils.add_typing_error;
+  let tenv = Tast_env.tast_env_as_typing_env env in
+  Option.iter subty_err_opt ~f:(Typing_error_utils.add_typing_error ~env:tenv);
   if not is_xhp_child then
     let ty_str = lazy (Env.print_error_ty ~ignore_dynamic:true env ty) in
     let ty_reason_msg =
@@ -22,6 +23,7 @@ let check_xhp_children env pos ty =
           Reason.to_string ("This is " ^ ty_str) (get_reason ty))
     in
     Typing_error_utils.add_typing_error
+      ~env:tenv
       Typing_error.(xhp @@ Primary.Xhp.Illegal_xhp_child { pos; ty_reason_msg })
 
 let handler =

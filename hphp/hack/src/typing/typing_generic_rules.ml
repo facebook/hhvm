@@ -117,7 +117,7 @@ let apply_rules_with_array_index_value_ty_mismatches
       let (is_nonnull, ty_err_opt) =
         Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
       in
-      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, res) =
         Typing_utils.run_on_intersection env ~f:(iter ~is_nonnull) tyl
       in

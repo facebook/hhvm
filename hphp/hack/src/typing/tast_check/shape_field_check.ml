@@ -62,12 +62,14 @@ let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
     match status with
     | `DoesExist decl_pos ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           shape
           @@ Primary.Shape.Shapes_key_exists_always_true
                { pos = pos1; field_name = snd field_name; decl_pos })
     | `DoesNotExist (decl_pos, reason) ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           shape
           @@ Primary.Shape.Shapes_key_exists_always_false
@@ -84,6 +86,7 @@ let shapes_method_access_with_non_existent_field
     Lint.shape_idx_access_required_field pos1 (snd field_name)
   | (`DoesNotExist (decl_pos, reason), _) ->
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_method_access_with_non_existent_field
@@ -105,6 +108,7 @@ let shape_access_with_non_existent_field pos1 env (shape, _, _) field_name =
   match (status, optional) with
   | (`DoesNotExist (decl_pos, reason), _) ->
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_access_with_non_existent_field

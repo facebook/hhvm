@@ -40,6 +40,7 @@ let handler =
                     ty
                     (fun pos ty_info ->
                       Typing_error_utils.add_typing_error
+                        ~env:(Tast_env.tast_env_as_typing_env env)
                         Typing_error.(
                           primary
                           @@ Primary.Invalid_enforceable_type

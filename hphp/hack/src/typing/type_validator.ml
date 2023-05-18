@@ -62,7 +62,7 @@ class virtual type_validator =
       let ((env, ty_err_opt), root) =
         Typing_phase.localize acc.env ~ety_env:acc.ety_env root
       in
-      Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let (env, tyl) =
         Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
       in

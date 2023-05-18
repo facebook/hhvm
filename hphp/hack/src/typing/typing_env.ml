@@ -1307,19 +1307,19 @@ let get_local_check_defined env (p, x) =
 let set_local_expr_id env x new_eid =
   let per_cont_env = env.lenv.per_cont_env in
   match LEnvC.get_cont_option C.Next per_cont_env with
-  | None -> env
+  | None -> Ok env
   | Some next_cont -> begin
     match LID.Map.find_opt x next_cont.LEnvC.local_types with
     | Some (type_, pos, eid)
       when not (Typing_local_types.equal_expression_id eid new_eid) ->
-      if Ident.is_immutable eid then
-        Typing_error_utils.add_typing_error
-          Typing_error.(primary @@ Primary.Immutable_local pos);
       let local = (type_, pos, new_eid) in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
       let env = { env with lenv = { env.lenv with per_cont_env } } in
-      env
-    | _ -> env
+      if Ident.is_immutable eid then
+        Error (env, Typing_error.(primary @@ Primary.Immutable_local pos))
+      else
+        Ok env
+    | _ -> Ok env
   end
 
 let get_local_expr_id env x =

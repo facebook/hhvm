@@ -14,21 +14,23 @@ module SN = Naming_special_names
 
 let unwrap_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->
-    (pos, class_name, type_parameters)
+    ((pos, class_name, type_parameters), None)
   | (p, Habstr _) ->
-    Typing_error_utils.add_typing_error
+    let err =
       Typing_error.(
         primary
         @@ Primary.Expected_class
-             { suffix = Some (lazy " or interface but got a generic"); pos = p });
-    (Pos.none, "", [])
+             { suffix = Some (lazy " or interface but got a generic"); pos = p })
+    in
+    ((Pos.none, "", []), Some err)
   | (p, _) ->
-    Typing_error_utils.add_typing_error
+    let err =
       Typing_error.(
         primary
         @@ Primary.Expected_class
-             { suffix = Some (lazy " or interface"); pos = p });
-    (Pos.none, "", [])
+             { suffix = Some (lazy " or interface"); pos = p })
+    in
+    ((Pos.none, "", []), Some err)
 
 let unwrap_class_type ty =
   match deref ty with

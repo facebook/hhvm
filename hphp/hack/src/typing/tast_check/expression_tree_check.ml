@@ -39,6 +39,7 @@ let handler =
                   expr_tree
                   @@ Primary.Expr_tree.Experimental_expression_trees pos)
           in
-          Option.iter err_opt ~f:Typing_error_utils.add_typing_error
+          let tenv = Tast_env.tast_env_as_typing_env env in
+          Option.iter err_opt ~f:(Typing_error_utils.add_typing_error ~env:tenv)
       | _ -> ()
   end

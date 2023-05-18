@@ -215,6 +215,6 @@ let err_if_var_in_ty_pure env var ty =
 let err_if_var_in_ty env var ty =
   match err_if_var_in_ty_pure env var ty with
   | (ty, Some err) ->
-    Typing_error_utils.add_typing_error err;
+    Typing_error_utils.add_typing_error ~env err;
     ty
   | (ty, _) -> ty

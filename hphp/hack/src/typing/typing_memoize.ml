@@ -34,7 +34,7 @@ let check_param : env -> Nast.fun_param -> unit =
       let ((env, ty_err_opt), ty, _) =
         Typing_tdef.force_expand_typedef ~ety_env env ty
       in
-      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       if not (Typing_utils.is_tyvar_error env ty) then
         match get_node ty with
         | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum) ->
@@ -46,7 +46,7 @@ let check_param : env -> Nast.fun_param -> unit =
           let (_ : env) = Typing_local_ops.enforce_memoize_object pos env in
           ()
         | Tprim (Tvoid | Tresource | Tnoreturn) ->
-          Typing_error_utils.add_typing_error
+          Typing_error_utils.add_typing_error ~env
           @@ Typing_error.primary
           @@ error ty
         | Toption ty -> check_memoizable env ty
@@ -111,7 +111,7 @@ let check_param : env -> Nast.fun_param -> unit =
           in
           let env = Env.set_tyvar_variance env container_type in
           let (env, e1) = Typing_solver.close_tyvars_and_solve env in
-          Option.iter ~f:Typing_error_utils.add_typing_error e1;
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
           if is_container then
             check_memoizable env type_param
           else
@@ -135,7 +135,7 @@ let check_param : env -> Nast.fun_param -> unit =
                 env
                 ty
             in
-            Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+            Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
             ignore
               (Typing.call
                  ~expected:None
@@ -150,7 +150,7 @@ let check_param : env -> Nast.fun_param -> unit =
         | Taccess _ -> ()
         | Tfun _
         | Tvar _ ->
-          Typing_error_utils.add_typing_error
+          Typing_error_utils.add_typing_error ~env
           @@ Typing_error.primary
           @@ error ty
     in
@@ -163,7 +163,7 @@ let check_param : env -> Nast.fun_param -> unit =
     let ((env, ty_err_opt), ty) =
       Typing_phase.localize_hint_no_subst env ~ignore_errors:true hint
     in
-    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     check_memoizable env hint_pos ty
 
 let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =

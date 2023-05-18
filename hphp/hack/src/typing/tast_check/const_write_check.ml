@@ -19,6 +19,7 @@ let check_static_const_prop tenv class_ (pos, id) =
   Option.iter scprop ~f:(fun ce ->
       if get_ce_const ce then
         Typing_error_utils.add_typing_error
+          ~env:tenv
           Typing_error.(primary @@ Primary.Mutating_const_property pos))
 
 (* Requires id to be a property *)
@@ -33,6 +34,7 @@ let check_const_prop env tenv class_ (pos, id) cty =
             Tast_env.is_sub_type env (Env.get_self_ty_exn env) cty)
         then
           Typing_error_utils.add_typing_error
+            ~env:tenv
             Typing_error.(primary @@ Primary.Mutating_const_property pos))
 
 let check_prop env c pid cty_opt =

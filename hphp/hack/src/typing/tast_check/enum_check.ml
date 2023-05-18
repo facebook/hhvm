@@ -59,6 +59,7 @@ let handler =
       match find_cycle env c_name with
       | Some stack ->
         Typing_error_utils.add_typing_error
+          ~env:(Env.tast_env_as_typing_env env)
           Typing_error.(primary @@ Primary.Cyclic_class_def { pos; stack })
       | None -> ()
   end

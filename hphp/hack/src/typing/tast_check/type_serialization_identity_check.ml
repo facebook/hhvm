@@ -117,6 +117,7 @@ let handler =
           let deserialized_ty = strip_ty deserialized_ty in
           if not (ty_equal ty deserialized_ty) then
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 primary
                 @@ Primary.Unserializable_type
@@ -134,6 +135,7 @@ let handler =
         | Error (Not_supported _) -> ()
         | Error (Wrong_phase message) ->
           Typing_error_utils.add_typing_error
+            ~env:(Tast_env.tast_env_as_typing_env env)
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -148,6 +150,7 @@ let handler =
                    })
         | Error (Deserialization_error message) ->
           Typing_error_utils.add_typing_error
+            ~env:(Tast_env.tast_env_as_typing_env env)
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -163,6 +166,7 @@ let handler =
       with
       | e ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Unserializable_type

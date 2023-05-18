@@ -94,10 +94,12 @@ let decl_error_to_typing_error decl_error =
   in
   Typing_error.primary primary
 
-let add_decl_error decl_error =
-  Typing_error_utils.add_typing_error (decl_error_to_typing_error decl_error)
+let add_decl_error decl_error ~env =
+  Typing_error_utils.add_typing_error
+    ~env
+    (decl_error_to_typing_error decl_error)
 
-let add_decl_errors = List.iter ~f:add_decl_error
+let add_decl_errors ~env = List.iter ~f:(add_decl_error ~env)
 
 (*****************************************************************************)
 (* Handling function/method arguments *)

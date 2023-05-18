@@ -40,7 +40,8 @@ val set_tyvars_variance_in_callable :
 
 val has_accept_disposable_attribute : ('a, 'b) Aast.fun_param -> bool
 
-val add_decl_errors : Decl_defs.decl_error list -> unit
+val add_decl_errors :
+  env:Typing_env_types.env -> Decl_defs.decl_error list -> unit
 
 val with_timeout :
   Typing_env_types.env ->

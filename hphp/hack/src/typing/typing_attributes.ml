@@ -120,6 +120,7 @@ let check_implements
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then (
         Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Wrong_expression_kind_attribute

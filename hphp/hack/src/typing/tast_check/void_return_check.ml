@@ -106,6 +106,7 @@ let validate_state fun_span fun_kind env s =
       ( false,
         lazy
           (Typing_error_utils.add_typing_error
+             ~env:(Tast_env.tast_env_as_typing_env env)
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness
@@ -155,6 +156,7 @@ let validate_state fun_span fun_kind env s =
       ( false,
         lazy
           (Typing_error_utils.add_typing_error
+             ~env:(Tast_env.tast_env_as_typing_env env)
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness.Returns_with_and_without_value
@@ -276,6 +278,7 @@ let visitor =
           | Some (pos2, Hprim Tvoid) ->
             (* Property 1 *)
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 primary
                 @@ Primary.Return_in_void { pos = return_pos; decl_pos = pos2 })

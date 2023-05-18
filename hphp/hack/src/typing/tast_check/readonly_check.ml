@@ -202,18 +202,20 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
     not (Typing_subtype.is_type_disjoint env ty union)
 
 (* Check that function calls which return readonly are wrapped in readonly *)
-let rec check_readonly_return_call pos caller_ty is_readonly =
+let rec check_readonly_return_call env pos caller_ty is_readonly =
   if is_readonly then
     ()
   else
     let open Typing_defs in
     match get_node caller_ty with
     | Tunion tyl ->
-      List.iter tyl ~f:(fun ty -> check_readonly_return_call pos ty is_readonly)
+      List.iter tyl ~f:(fun ty ->
+          check_readonly_return_call env pos ty is_readonly)
     | _ ->
       (match get_fty caller_ty with
       | Some fty when get_ft_returns_readonly fty ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             readonly
             @@ Primary.Readonly.Explicit_readonly_cast
@@ -233,6 +235,7 @@ let check_readonly_property env obj get obj_ro =
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) ->
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -251,6 +254,7 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         readonly
         @@ Primary.Readonly.Explicit_readonly_cast
@@ -288,6 +292,7 @@ let rec assign env lval rval =
     match mutable_prop with
     | Some elt when not (Typing_defs.get_ce_readonly_prop elt) ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -314,6 +319,7 @@ let rec assign env lval rval =
       | _ -> ())
     | (Mut, Readonly) ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -325,6 +331,7 @@ let rec assign env lval rval =
                })
     | (Readonly, _) ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_modified
@@ -343,6 +350,7 @@ let rec assign env lval rval =
       match ty_expr env obj with
       | Readonly ->
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             readonly
             @@ Primary.Readonly.Readonly_modified
@@ -359,7 +367,7 @@ let rec assign env lval rval =
   | _ -> ()
 
 (* Method call invocation *)
-let method_call caller =
+let method_call env caller =
   let open Typing_defs in
   match caller with
   (* Readonly call checks *)
@@ -367,6 +375,7 @@ let method_call caller =
     (match get_fty ty with
     | Some fty when not (get_ft_readonly_this fty) ->
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_method_call
@@ -381,6 +390,7 @@ let check_special_function env caller args =
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(readonly @@ Primary.Readonly.Readonly_invalid_as_mut pos)
     else
       ()
@@ -422,6 +432,7 @@ let call
         | _ -> "declaring this as a `readonly` function"
       in
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_closure_call
@@ -429,11 +440,12 @@ let call
     | _ -> ()
   in
   (* Checks a single arg against a parameter *)
-  let check_arg param (_, arg) =
+  let check_arg env param (_, arg) =
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           readonly
           @@ Primary.Readonly.Readonly_mismatch
@@ -449,17 +461,17 @@ let call
   in
 
   (* Check that readonly arguments match their parameters *)
-  let check_args caller_ty args unpacked_arg =
+  let check_args env caller_ty args unpacked_arg =
     match get_fty caller_ty with
     | Some fty ->
       let rec check args params =
         match (args, params) with
         (* Remaining args should be checked against variadic *)
         | (x1 :: args1, [x2]) when get_ft_variadic fty ->
-          check_arg x2 x1;
+          check_arg env x2 x1;
           check args1 [x2]
         | (x1 :: args1, x2 :: params2) ->
-          check_arg x2 x1;
+          check_arg env x2 x1;
           check args1 params2
         | ([], _) ->
           (* If args are empty, it's either a type error already or a default arg that's not filled in
@@ -479,8 +491,8 @@ let call
     | None -> ()
   in
   check_readonly_closure caller_ty caller_rty;
-  check_readonly_return_call pos caller_ty is_readonly;
-  check_args caller_ty args unpacked_arg
+  check_readonly_return_call env pos caller_ty is_readonly;
+  check_args env caller_ty args unpacked_arg
 
 let caller_is_special_builtin caller =
   match caller with
@@ -514,7 +526,7 @@ let check =
             args
             unpacked_arg;
         check_special_function env caller args;
-        method_call caller;
+        method_call env caller;
         default ()
       (* Non readonly calls *)
       | (_, _, Call (caller, _, args, unpacked_arg)) ->
@@ -531,7 +543,7 @@ let check =
             args
             unpacked_arg;
         check_special_function env caller args;
-        method_call caller;
+        method_call env caller;
         super#on_expr env e
       | (_, _, ReadonlyExpr (_, _, Obj_get (obj, get, nullable, is_prop_call)))
         ->
@@ -654,7 +666,7 @@ let handler =
         let caller_pos = Tast.get_position caller in
         let caller_ty = Tast.get_type caller in
         let (_, caller_ty) = Tast_env.expand_type env caller_ty in
-        check_readonly_return_call caller_pos caller_ty false
+        check_readonly_return_call env caller_pos caller_ty false
 
     method! at_expr env e =
       (* this check is already handled by the readonly analysis,

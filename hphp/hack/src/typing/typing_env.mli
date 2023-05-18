@@ -363,7 +363,10 @@ val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Aast.lid -> locl_ty
 
 val set_local_expr_id :
-  env -> Local_id.t -> Typing_local_types.expression_id -> env
+  env ->
+  Local_id.t ->
+  Typing_local_types.expression_id ->
+  (env, env * Typing_error.t) result
 
 val get_local_expr_id :
   env -> Local_id.t -> Typing_local_types.expression_id option

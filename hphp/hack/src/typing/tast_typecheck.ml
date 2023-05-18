@@ -27,6 +27,7 @@ let expect_ty_equal
     let actual_ty = lazy (Typing_print.debug env ty) in
     let expected_ty = lazy (Typing_print.debug env expected_ty) in
     Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(
         primary @@ Primary.Unexpected_ty_in_tast { pos; actual_ty; expected_ty })
 

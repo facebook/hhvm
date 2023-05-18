@@ -157,7 +157,7 @@ let coerce_type_like_strip
     (match ty_err_opt_like with
     | None -> (env2, None, true, fresh_ty)
     | Some _ ->
-      Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env:env1);
       let ty_mismatch =
         Option.map ty_err_opt ~f:Fn.(const (ty_have, ty_expect))
       in

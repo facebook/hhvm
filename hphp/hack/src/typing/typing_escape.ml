@@ -192,6 +192,7 @@ let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
       Typing_error.Secondary.Rigid_tvar_escape { pos = rtv_pos; name }
     in
     Typing_error_utils.add_typing_error
+      ~env:renv.env
       Typing_error.(
         apply_reasons
           ~on_error:(Reasons_callback.retain_code renv.on_error)
@@ -476,7 +477,7 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
       ({ renv with env }, Typing_error.multiple_opt ty_errs)
   in
   Option.(
-    iter ~f:Typing_error_utils.add_typing_error
+    iter ~f:(Typing_error_utils.add_typing_error ~env:renv.env)
     @@ merge e1 e2 ~f:Typing_error.both);
   renv
 

@@ -58,12 +58,12 @@
  (libraries
   asserter
   errors
+  parsing_error
+  nast_check_error
   pos
   pos_or_decl
   relative_path
   sys_utils
   test_injector_config
-  parsing_error
-  typing_error_utils
   unit_test
   utils_core))

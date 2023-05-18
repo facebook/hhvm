@@ -113,6 +113,7 @@ let handler =
                 ~f:(fun cc_pos ->
                   if find_cycle env c_name cc_name then
                     Typing_error_utils.add_typing_error
+                      ~env:(Env.tast_env_as_typing_env env)
                       Typing_error.(
                         primary
                         @@ Primary.Cyclic_class_constant

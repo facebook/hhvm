@@ -23,6 +23,7 @@ let check_expr env (_, pos, e) =
       when Ast_defs.is_c_abstract (Cls.kind parent_class)
            && Option.is_none (fst (Cls.construct parent_class)) ->
       Typing_error_utils.add_typing_error
+        ~env:(Env.tast_env_as_typing_env env)
         Typing_error.(
           primary
           @@ Primary.Parent_abstract_call

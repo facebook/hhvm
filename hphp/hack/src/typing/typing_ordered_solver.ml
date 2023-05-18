@@ -713,7 +713,7 @@ type prop_to_env_acc = env * Equiv.t * cc_dep_list
     - add bounds to given environment
     - update connected components
     - update a list of CC dependencies *)
-let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) :
+let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) ~env :
     prop_to_env_acc =
   match prop with
   | TL.IsSubtype (None, ty_sub, ty_super) ->
@@ -721,20 +721,21 @@ let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) :
   | TL.IsSubtype (_dd, _ty_sub, _ty_super) ->
     (* For global inference, for now, we don't do coercion. *)
     assert false
-  | TL.Conj props -> conj_prop_to_env_cc acc props
-  | TL.Disj (err_f, props) -> disj_prop_to_env_cc acc err_f props
+  | TL.Conj props -> conj_prop_to_env_cc acc props ~env
+  | TL.Disj (err_f, props) -> disj_prop_to_env_cc acc err_f props ~env
 
-and conj_prop_to_env_cc acc props = List.fold props ~init:acc ~f:prop_to_env_cc
+and conj_prop_to_env_cc acc props ~env =
+  List.fold props ~init:acc ~f:(prop_to_env_cc ~env)
 
-and disj_prop_to_env_cc acc fail props =
+and disj_prop_to_env_cc acc fail props ~env =
   match props with
   | [] ->
     (* Add error as a side effect *)
-    Option.iter ~f:Typing_error_utils.add_typing_error fail;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) fail;
     acc
   | prop :: _props ->
     (* Stupidly take the first proposition for now. *)
-    prop_to_env_cc acc prop
+    prop_to_env_cc acc prop ~env
 
 and is_sub_prop_to_env_cc (env, cc, deps) ty_sub ty_super =
   match (get_var_i ty_sub, get_var_i ty_super) with
@@ -796,7 +797,7 @@ and is_sub_prop_to_env_cc (env, cc, deps) ty_sub ty_super =
 let prop_to_env_cc ((env, cc, deps) : prop_to_env_acc) (prop : TL.subtype_prop)
     : prop_to_env_acc =
   let env_before = env in
-  let (env, cc, deps) = prop_to_env_cc (env, cc, deps) prop in
+  let (env, cc, deps) = prop_to_env_cc (env, cc, deps) prop ~env in
   let env = Env.log_env_change "prop_to_env_cc" env_before env in
   (env, cc, deps)
 

@@ -94,6 +94,7 @@ let check_attrs pos env sid attrs =
                 (Reason.Rwitness_from_decl pos))
         in
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             xhp
             @@ Primary.Xhp.Missing_xhp_required_attr

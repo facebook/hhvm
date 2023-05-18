@@ -17,17 +17,17 @@ let is_sub_dynamic env t =
   let (r, e) =
     Typing_solver.is_sub_type env t (MakeType.dynamic Reason.Rnone)
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error e;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
 let is_float env t =
   let (r, e) = Typing_solver.is_sub_type env t (MakeType.float Reason.Rnone) in
-  Option.iter ~f:Typing_error_utils.add_typing_error e;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
 let is_int env t =
   let (r, e) = Typing_solver.is_sub_type env t (MakeType.int Reason.Rnone) in
-  Option.iter ~f:Typing_error_utils.add_typing_error e;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e;
   r
 
 (* Checking of numeric operands for arithmetic operators that work only
@@ -47,7 +47,7 @@ let check_dynamic_or_enforce_int env p t r err =
       { et_type; et_enforced = Enforced }
       err
   in
-  Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+  Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, et_type)) in
   (env, Typing_utils.is_dynamic env t, ty_mismatch)
 
@@ -152,14 +152,14 @@ let check_for_float_result p env p1 ty1 p2 ty2 =
   let ((env, ty_err_opt), ty1) =
     expand_type_and_try_narrow_to_float env p1 ty1
   in
-  Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+  Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   if Typing_subtype.is_sub_type env ty1 float_no_reason then
     (env, make_float_type ~use_ty1_reason:true)
   else
     let ((env, ty_err_opt), ty2) =
       expand_type_and_try_narrow_to_float env p2 ty2
     in
-    Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+    Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     if Typing_subtype.is_sub_type env ty2 float_no_reason then
       (env, make_float_type ~use_ty1_reason:false)
     else
@@ -262,7 +262,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                 p1
                 ty1
             in
-            Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+            Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
             (* If the first type solved a subtype of int, and the second was
                already int, then it is sound to return int. *)
             let is_int1 = Typing_subtype.is_sub_type env ty1 int_no_reason in
@@ -282,7 +282,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                     p2
                     ty2
                 in
-                Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+                Option.iter
+                  ty_err_opt
+                  ~f:(Typing_error_utils.add_typing_error ~env);
                 if
                   Typing_subtype.is_sub_type env ty1 nothing_no_reason
                   && Typing_subtype.is_sub_type env ty2 nothing_no_reason
@@ -328,11 +330,11 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
           let ((env, ty_err_opt), ty1) =
             expand_type_and_try_narrow_to_nothing env p1 ty1
           in
-          Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+          Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
           let ((env, ty_err_opt), ty2) =
             expand_type_and_try_narrow_to_nothing env p2 ty2
           in
-          Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+          Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
           if
             Typing_subtype.is_sub_type env ty1 nothing_no_reason
             && Typing_subtype.is_sub_type env ty2 nothing_no_reason
@@ -456,6 +458,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         let tys1 = lazy (Typing_print.error env ty1)
         and tys2 = lazy (Typing_print.error env ty2) in
         Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Strict_eq_value_incompatible_types
@@ -523,6 +526,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       let tys1 = Lazy.map ty1 ~f:(fun ty -> (ty, Typing_print.error env ty))
       and tys2 = Lazy.map ty2 ~f:(fun ty -> (ty, Typing_print.error env ty)) in
       Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary
           @@ Primary.Comparison_invalid_types
@@ -566,7 +570,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         let ty_mismatch =
           Option.map ty_err_opt ~f:(Fn.const (ty, stringlike))
         in
-        Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         (env, ty_mismatch)
       in
 
@@ -662,7 +666,7 @@ let unop p env uop te ty =
       let ((env, ty_err_opt), (ty : locl_ty)) =
         expand_type_and_narrow_to_numeric ~allow_nothing env p ty
       in
-      Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let result_ty =
         if Typing_subtype.is_sub_type env ty (MakeType.nothing Reason.none) then
           MakeType.nothing (get_reason ty)

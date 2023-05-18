@@ -74,7 +74,7 @@ let refine_shape field_name pos env shape =
       sft_ty
   in
   let sft = { sft_optional = false; sft_ty } in
-  Option.iter ~f:Typing_error_utils.add_typing_error e1;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
   Typing_intersection.intersect
     env
     ~r:(Reason.Rwitness pos)
@@ -213,7 +213,7 @@ let shapes_idx_not_null env shape_ty fld =
   let ((env, ty_err_opt), res) =
     shapes_idx_not_null_with_ty_err env shape_ty fld
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
@@ -275,7 +275,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
     | _ -> (env, res)
   in
 
-  Option.iter ty_err_opt ~f:Typing_error_utils.add_typing_error;
+  Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   make_locl_like_type env res
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
@@ -289,7 +289,7 @@ let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
 
 let remove_key p env shape_ty field =
   let ((env, ty_err_opt), res) = remove_key_with_ty_err p env shape_ty field in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let to_collection env pos shape_ty res return_type =
@@ -329,7 +329,7 @@ let to_collection env pos shape_ty res return_type =
                             const.cc_type
                         in
                         Option.iter
-                          ~f:Typing_error_utils.add_typing_error
+                          ~f:(Typing_error_utils.add_typing_error ~env)
                           ty_err_opt;
                         (env, lty)
                       | None -> Env.fresh_type_error env pos
@@ -401,7 +401,7 @@ let to_dict env pos shape_ty res =
       pos
       shape_ty
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error e1;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
   let shape_ty =
     Typing_utils.get_base_type ~expand_supportdyn:true env shape_ty
   in
@@ -425,7 +425,7 @@ let check_shape_keys_validity env keys =
     | Ast_defs.SFlit_int _ -> (env, key_pos, None)
     | Ast_defs.SFlit_str (_, key_name) ->
       (if Int.equal 0 (String.length key_name) then
-        Typing_error_utils.add_typing_error
+        Typing_error_utils.add_typing_error ~env
         @@ Typing_error.(
              shape
              @@ Primary.Shape.Invalid_shape_field_name
@@ -439,7 +439,7 @@ let check_shape_keys_validity env keys =
       | Some cd ->
         (match Env.get_const env cd y with
         | None ->
-          Typing_error_utils.add_typing_error
+          Typing_error_utils.add_typing_error ~env
           @@ Typing_object_get.smember_not_found
                p
                ~is_const:true
@@ -455,7 +455,7 @@ let check_shape_keys_validity env keys =
           let ((env, ty_err_opt), ty) =
             Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
           in
-          Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           let r = Reason.Rwitness key_pos in
           let (env, e2) =
             Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
@@ -471,7 +471,7 @@ let check_shape_keys_validity env keys =
                             trail = [];
                           })))
           in
-          Option.iter ~f:Typing_error_utils.add_typing_error e2;
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e2;
           (env, key_pos, Some (cls, ty)))
     end
   in
@@ -554,7 +554,7 @@ let check_shape_keys_validity env keys =
           | (env, _) -> (env, ty_errs))
     in
     let ty_err_opt = Typing_error.multiple_opt ty_errs in
-    Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
 let update_param : decl_fun_param -> decl_ty -> decl_fun_param =

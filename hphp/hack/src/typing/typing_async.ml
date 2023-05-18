@@ -119,15 +119,15 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   in
   let env = Env.open_tyvars env p in
   let ((env, ty_err_opt), ty) = extract_inner env opt_ty_maybe in
-  let env = Typing_solver.close_tyvars_and_solve env in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
-  (env, ty)
+  let (env, err) = Typing_solver.close_tyvars_and_solve env in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  ((env, err), ty)
 
 let overload_extract_from_awaitable env ~p opt_ty_maybe =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let overload_extract_from_awaitable_list_with_ty_err env p tyl =
@@ -153,7 +153,7 @@ let overload_extract_from_awaitable_list env p tyl =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_list_with_ty_err env p tyl
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let overload_extract_from_awaitable_shape_with_ty_err env p fdm =
@@ -169,5 +169,5 @@ let overload_extract_from_awaitable_shape env p fdm =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_shape_with_ty_err env p fdm
   in
-  Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)

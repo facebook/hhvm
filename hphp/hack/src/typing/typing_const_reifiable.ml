@@ -14,6 +14,7 @@ let check_reifiable env tc attr_pos =
   let check_impl kind ty =
     let emit_err pos ty_info =
       Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary @@ Primary.Reifiable_attr { pos; ty_info; attr_pos; kind })
     in

@@ -44,7 +44,9 @@ let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
     | _ -> Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
   in
   Option.iter err_opt ~f:(fun err ->
-      Typing_error_utils.add_typing_error @@ Typing_error.primary err)
+      Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
+      @@ Typing_error.primary err)
 
 let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let upper_bounds =
@@ -62,6 +64,7 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
     let constraints = List.map ~f:Cls.name valid_classes in
     let (pos, tp_name) = tparam.tp_name in
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         primary
         @@ Primary.Invalid_newable_typaram_constraints
@@ -93,6 +96,7 @@ let verify_targ_valid env reification tparam targ =
       let (decl_pos, param_name) = tparam.tp_name in
       let emit_error pos arg_info =
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Invalid_reified_arg
@@ -112,6 +116,7 @@ let verify_targ_valid env reification tparam targ =
       (fun pos ty_info ->
         let (tp_pos, tp_name) = tparam.tp_name in
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Invalid_enforceable_type
@@ -127,6 +132,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     if Int.( <> ) tparams_length targs_length then
       if Int.( = ) targs_length 0 then
         Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
       else
@@ -136,6 +142,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
     Typing_error_utils.add_typing_error
+      ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
         primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
   else
@@ -160,12 +167,14 @@ let handler =
       | (_, call_pos, Class_get ((_, _, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Typing_error_utils.add_typing_error
+            ~env:(Tast_env.tast_env_as_typing_env env)
             Typing_error.(primary @@ Primary.Class_get_reified call_pos)
       | (fun_ty, pos, Method_caller _) ->
         (match get_ft_tparams fun_ty with
         | Some (ft_tparams, _) ->
           if tparams_has_reified ft_tparams then
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(primary @@ Primary.Reified_function_reference pos)
         | None -> ())
       | ( _,
@@ -178,6 +187,7 @@ let handler =
           (* If we get Tgeneric here, the underlying type was reified *)
           | Tgeneric (ci, _) when String.equal ci class_id ->
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 expr_tree
                 @@ Primary.Expr_tree.Reified_static_method_in_expr_tree pos)
@@ -204,6 +214,7 @@ let handler =
              higher-kinded type-parameters *)
           if not (Env.get_newable env ci) then
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(
                 primary @@ Primary.New_without_newable { pos; name = ci })
         (* No need to report a separate error here if targs is non-empty:
@@ -239,6 +250,7 @@ let handler =
                   | _ -> failwith "Unexpected match"
                 in
                 Typing_error_utils.add_typing_error
+                  ~env:(Tast_env.tast_env_as_typing_env env)
                   Typing_error.(
                     primary
                     @@ Primary.New_class_reified
@@ -293,6 +305,7 @@ let handler =
               (Cls.tparams cls)
           then
             Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
               Typing_error.(primary @@ Primary.Consistent_construct_reified pos)
         | _ -> ()
       end

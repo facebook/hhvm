@@ -64,6 +64,7 @@ let ft_redundant_generics env tparams ty =
             match super_bounds with
             | [] ->
               Typing_error_utils.add_typing_error
+                ~env:(Tast_env.tast_env_as_typing_env env)
                 Typing_error.(
                   primary
                   @@ Primary.Redundant_covariant
@@ -74,6 +75,7 @@ let ft_redundant_generics env tparams ty =
                        })
             | [(_, t)] ->
               Typing_error_utils.add_typing_error
+                ~env:(Tast_env.tast_env_as_typing_env env)
                 Typing_error.(
                   primary
                   @@ Primary.Redundant_covariant

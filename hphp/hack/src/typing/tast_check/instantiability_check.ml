@@ -15,7 +15,7 @@ module Cls = Decl_provider.Class
 (* This TAST check raises an error when an abstract final
    class or a trait appears outside of classname<_>. *)
 
-let rec validate_classname (pos, hint) =
+let rec validate_classname env (pos, hint) =
   match hint with
   | Aast.Happly _
   | Aast.Hthis
@@ -30,7 +30,7 @@ let rec validate_classname (pos, hint) =
   | Aast.Hlike _
   | Aast.Hnothing ->
     ()
-  | Aast.Hrefinement (h, _) -> validate_classname h
+  | Aast.Hrefinement (h, _) -> validate_classname env h
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
@@ -42,6 +42,7 @@ let rec validate_classname (pos, hint) =
   | Aast.Hfun_context _
   | Aast.Hvar _ ->
     Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(primary @@ Primary.Invalid_classname pos)
 
 let rec check_hint env (pos, hint) =
@@ -70,11 +71,15 @@ let rec check_hint env (pos, hint) =
                    reason_ty_opt = None;
                  })
         in
-        Typing_error_utils.add_typing_error err
+        Typing_error_utils.add_typing_error
+          ~env:(Tast_env.tast_env_as_typing_env env)
+          err
       | _ -> ()
     end;
     if String.equal class_id SN.Classes.cClassname then
-      Option.iter (List.hd tal) ~f:validate_classname
+      Option.iter
+        (List.hd tal)
+        ~f:(validate_classname (Tast_env.tast_env_as_typing_env env))
     else
       List.iter tal ~f:(check_hint env)
   | Aast.Hrefinement (h, members) ->

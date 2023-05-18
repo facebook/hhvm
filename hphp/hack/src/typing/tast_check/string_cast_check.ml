@@ -73,6 +73,7 @@ let handler =
         let (ty, _, _) = te in
         if not (is_stringish env ty) then
           Typing_error_utils.add_typing_error
+            ~env:(Tast_env.tast_env_as_typing_env env)
             Typing_error.(
               primary
               @@ Primary.String_cast

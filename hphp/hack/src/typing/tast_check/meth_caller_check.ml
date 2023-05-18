@@ -11,7 +11,7 @@ open Aast
 open Typing_defs
 
 (* meth_caller does not support methods with inout parameters *)
-let check_parameters =
+let check_parameters env =
   let get_illegal_parameter ftype =
     List.find
       ~f:(fun ft_param ->
@@ -31,6 +31,7 @@ let check_parameters =
           | FPnormal -> "normal"
         in
         Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Invalid_meth_caller_calling_convention
@@ -52,6 +53,7 @@ let check_readonly_return env pos ft =
       let r = get_reason expanded_ty in
       let rpos = Typing_reason.to_pos r in
       Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(
           primary
           @@ Primary.Invalid_meth_caller_readonly_return
@@ -73,7 +75,7 @@ let handler =
       match e with
       | (ft, pos, Method_caller _) ->
         let ft = strip_supportdyn ft in
-        check_parameters pos ft;
+        check_parameters (Tast_env.tast_env_as_typing_env env) pos ft;
         check_readonly_return env pos ft
       | _ -> ()
   end

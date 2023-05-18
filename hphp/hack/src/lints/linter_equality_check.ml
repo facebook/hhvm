@@ -27,7 +27,7 @@ let enum_base_type env cid =
       let ((env, ty_err_opt), ty) =
         Typing_phase.localize_no_subst env ~ignore_errors:true te.te_base
       in
-      Option.iter ~f:Typing_error_utils.add_typing_error ty_err_opt;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       (env, Some ty))
 
 let opaque_enum_expander =

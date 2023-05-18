@@ -13,9 +13,10 @@ open Typing_defs
 module Env = Tast_env
 module Cls = Decl_provider.Class
 
-let error_inherited_base member_type base_name parent_name base_elt parent_elt :
-    unit =
+let error_inherited_base
+    env member_type base_name parent_name base_elt parent_elt : unit =
   Typing_error_utils.add_typing_error
+    ~env
     Typing_error.(
       primary
       @@ Primary.Inherited_class_member_with_different_case
@@ -30,6 +31,7 @@ let error_inherited_base member_type base_name parent_name base_elt parent_elt :
            })
 
 let check_inheritance_case
+    env
     (member_type : string)
     (class_id : Aast.sid)
     ((name, elt) : string * class_elt)
@@ -43,13 +45,14 @@ let check_inheritance_case
     | (a, b) when String.equal a b -> ()
     (* new is the current class *)
     | (base_cls, _) when String.equal cls_name base_cls ->
-      error_inherited_base member_type name prev_name elt prev_elt
+      error_inherited_base env member_type name prev_name elt prev_elt
     (* prev is the current class *)
     | (_, base_cls) when String.equal cls_name base_cls ->
-      error_inherited_base member_type prev_name name prev_elt elt
+      error_inherited_base env member_type prev_name name prev_elt elt
     (* Otherwise, this class inherited two methods that differ only by case *)
     | (class1, class2) ->
       Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary
           @@ Primary.Multiple_inherited_class_member_with_different_case
@@ -68,6 +71,7 @@ let check_inheritance_case
   SMap.add canonical_name (name, elt) acc
 
 let check_inheritance_cases
+    env
     (member_type : string)
     (name : Aast.sid)
     (class_elts : (string * class_elt) list) =
@@ -76,7 +80,7 @@ let check_inheritance_cases
      the same canonical name, we raise an error. *)
   let (_ : (string * class_elt) SMap.t) =
     List.fold_right
-      ~f:(check_inheritance_case member_type name)
+      ~f:(check_inheritance_case env member_type name)
       ~init:SMap.empty
       class_elts
   in
@@ -98,5 +102,9 @@ let handler =
         let all_methods = methods @ smethods in
         (* All methods are treated the same when it comes to inheritance *)
         (* Member type may be useful for properties, constants, etc later *)
-        check_inheritance_cases "method" c.c_name all_methods
+        check_inheritance_cases
+          (Env.tast_env_as_typing_env env)
+          "method"
+          c.c_name
+          all_methods
   end

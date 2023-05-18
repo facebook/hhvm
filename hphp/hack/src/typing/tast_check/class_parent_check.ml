@@ -92,7 +92,7 @@ let hint_happly_to_string h =
   | Aast.Happly ((_, name), _) -> Some name
   | _ -> None
 
-let duplicated_used_traits c =
+let duplicated_used_traits env c =
   let traits = Hashtbl.create (module String) in
   List.iter
     ~f:(fun (p, h) ->
@@ -105,6 +105,7 @@ let duplicated_used_traits c =
       if List.length data > 1 then
         let (pos, class_name) = c.c_name in
         Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Trait_reuse_inside_class
@@ -123,7 +124,7 @@ let handler =
     method! at_class_ env c =
       let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
       List.iter c.c_uses ~f:(check_is_trait env);
-      duplicated_used_traits c;
+      duplicated_used_traits (Env.tast_env_as_typing_env env) c;
       List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
       List.iter
         c.c_implements

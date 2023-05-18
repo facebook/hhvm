@@ -64,6 +64,8 @@
     pos
     pos_or_decl
     typing_error
+    typing_env_types
+    typing_print
     user_error))
 
 (library
@@ -248,6 +250,7 @@
   pcre
   procs_procs
   typing_common
+  typing_error_utils
   type_mapper
   typing_modules)
  (preprocess
@@ -370,7 +373,7 @@
  (name typing_utils)
  (wrapped false)
  (modules typing_utils)
- (libraries typing_env typing_logic typing_error errors)
+ (libraries typing_env typing_logic typing_error typing_error_utils errors)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -383,10 +386,18 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name typing_print)
+ (wrapped false)
+ (modules typing_print)
+ (libraries decl_provider hackfmt typing_logic typing_env_types)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name typing_log)
  (wrapped false)
- (modules typing_log typing_print)
- (libraries decl_provider hackfmt typing_logic typing_env_types)
+ (modules typing_log )
+ (libraries decl_provider hackfmt typing_logic typing_env_types typing_print)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -21,11 +21,10 @@ let handler =
 
     method! at_expr env (_, _, e) =
       let validate hint op =
-        Typing_enforceable_hint.validate_hint
-          (Tast_env.tast_env_as_typing_env env)
-          hint
-          (fun pos reasons ->
+        let tenv = Tast_env.tast_env_as_typing_env env in
+        Typing_enforceable_hint.validate_hint tenv hint (fun pos reasons ->
             Typing_error_utils.add_typing_error
+              ~env:tenv
               Typing_error.(
                 primary
                 @@ Primary.Invalid_is_as_expression_hint { op; pos; reasons }))

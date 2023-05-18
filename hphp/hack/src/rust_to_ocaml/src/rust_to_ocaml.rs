@@ -53,9 +53,9 @@ fn main() -> Result<()> {
 
     let config = Box::leak(Box::new(match opts.config {
         Some(path) => {
-            let contents = std::fs::read(&path)
+            let contents = std::fs::read_to_string(&path)
                 .with_context(|| format!("Failed to read config file at {}", path.display()))?;
-            toml::from_slice(&contents)
+            toml::from_str(&contents)
                 .with_context(|| format!("Failed to parse config file at {}", path.display()))?
         }
         None => Config::default(),

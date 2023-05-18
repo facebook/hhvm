@@ -173,3 +173,18 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("HPHP::Array (Dict)"):
+            self.run_until_breakpoint("takeArrayDict")
+            _, output = self.run_commands(["p v"])
+            expected_lines = [
+                "(HPHP::Array) 5 element(s) {",
+                "19122942 = { Boolean, True }",
+                "302 = { String, \"Salutations, earth!\" }",
+                "2 = { Double, 3.14 }",
+                "\"key4\" = { Double, 2.718 }",
+                "\"key5\" = { String, \"Hello, world!\" }",
+                "}"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)

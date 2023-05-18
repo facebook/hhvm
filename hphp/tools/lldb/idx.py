@@ -148,6 +148,7 @@ def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
     return tv
 
 def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
+    # base is a generic pointer to the start of the array of typed values
     try:
         if utils.Global('HPHP::VanillaVec::stores_unaligned_typed_values', base.target):
             return _unaligned_tv_at_pos_to_tv(base, idx)
@@ -157,12 +158,45 @@ def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
         print(f"error while trying to get element #{idx} of vec {str(base)}: {ex}", file=sys.stderr)
         return None
 
-def dict_at(_base, _idx):
-    print("Printing contents of dicts is not yet supported; instead run `expression -R -- <your-variable>` to see its raw value")
+def dict_at(base, idx) -> (str, lldb.SBValue):
+    vde_type = utils.Type("HPHP::VanillaDictElm", base.target)
+    utils.debug_print(f"Dict base address (i.e. first element): 0x{base.load_addr:x}")
+    offset = vde_type.size * idx
+    elt = base.CreateValueFromAddress("val", base.load_addr + offset, vde_type)
+    utils.debug_print(f"Element #{idx} address: 0x{elt.load_addr:x}")
 
-def keyset_at(_base, _idx):
+    try:
+        if utils.get(elt, "data", "m_type").signed == -128:
+            rawkey = key = '<deleted>'
+        elif utils.get(elt, "data", "m_aux", "u_hash").signed < 0:
+            ikey = utils.get(elt, "ikey").signed
+            rawkey = key = ikey
+        else:
+            skey = utils.get(elt, "skey")
+            rawkey = utils.string_data_val(skey)
+            key = f'"{rawkey}"'
+    except Exception as e:
+        print(f"Failed to get dictionary key with error: {str(e)}", file=sys.stderr)
+        rawkey = key = '<invalid>'
+
+    utils._Current_key = rawkey
+
+    try:
+        data_raw = utils.get(elt, "data")
+        tv_type = utils.Type("HPHP::TypedValue", base.target)
+        data = data_raw.Cast(tv_type)
+    except Exception as e:
+        print(f"Failed to get dictionary value with error: {str(e)}", file=sys.stderr)
+        data = '<invalid>'
+    finally:
+        utils._Current_key = None
+
+    data = data.Clone(str(key))
+    return data
+
+def keyset_at(base, idx):
+    # base is a pointer to an HPHP::VanillaKeysetElm
     print("Printing contents of keysets is not yet supported; instead run `expression -R -- <your-variable>` to see its raw value")
-
 
 def idx(container: lldb.SBValue, index, hasher=None):
     if container.type.IsPointerType():

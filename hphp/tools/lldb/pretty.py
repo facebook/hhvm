@@ -3,6 +3,7 @@
 """ Pretty printers for HPHP types """
 
 import lldb
+import sys
 import typing
 
 try:
@@ -179,7 +180,15 @@ class pp_ArrayData:
         self.update()
 
     def num_children(self) -> int:
-        return self.m_size.unsigned
+        if self._is('Vec'):
+            m_size = utils.get(self.val_obj, "m_size")
+            return m_size.unsigned
+        elif self._is('Dict') or self._is('Keyset'):
+            m_used = utils.get(self.val_obj.children[1].children[0], "m_used")
+            return m_used.unsigned
+        else:
+            print("Invalid array type!", file=sys.stderr)
+            return 0
 
     def get_child_index(self, name: str) -> int:
         try:
@@ -198,7 +207,15 @@ class pp_ArrayData:
         # base = self.val_obj.CreateChildAtOffset("tmp", self.val_obj.type.size, char_ptr_type)
         base = self.val_obj.CreateValueFromAddress("tmp", self.val_obj.load_addr + self.val_obj.type.size, char_ptr_type)
         assert base.IsValid(), "Couldn't get base address of array"
-        return self._index_function(base, index)
+        if self._is('Vec'):
+            return idx.vec_at(base, index)
+        elif self._is('Dict'):
+            return idx.dict_at(base, index)
+        elif self._is('Keyset'):
+            return idx.keyset_at(base, index)
+        else:
+            print("Invalid array type!", file=sys.stderr)
+            return None
 
     def update(self):
         # Doing all of this logic in here, rather than __init__(), because the API
@@ -206,20 +223,23 @@ class pp_ArrayData:
         # state of variables can change since the last invocation).
         heap_obj = self.val_obj.children[0].children[0]  # HPHP::HeapObject
         self.m_kind = utils.get(heap_obj, "m_kind")
-        self.m_size = utils.get(self.val_obj, "m_size")
         self.m_count = utils.get(heap_obj, "m_count").unsigned
-        self._index_function = {
-            self._kind('Vec'): idx.vec_at,
-            self._kind('Dict'): idx.dict_at,
-            self._kind('Keyset'): idx.keyset_at
-        }[self.m_kind.unsigned]
+        if self._is('Vec'):
+            pass
+        elif self._is('Dict'):
+            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaDict", self.val_obj.target))
+        elif self._is('Keyset'):
+            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaKeySet", self.val_obj.target))
+        else:
+            print(f"Invalid array type! Run `expression -R -- {self.val_obj.name}` to see its raw form", file=sys.stderr)
 
         # Return false to make sure we always update this object every time we
         # stop. If we return True, then the value will never update again.
         return False
 
-    def _kind(self, member: str) -> int:
-        return utils.Enum("HPHP::ArrayData::ArrayKind", "k" + member + "Kind", self.val_obj.target).unsigned
+    def _is(self, member: str) -> bool:
+        kind = utils.Enum("HPHP::ArrayData::ArrayKind", "k" + member + "Kind", self.val_obj.target).unsigned
+        return self.m_kind.unsigned == kind
 
 
 @format("^HPHP::Array$", regex=True, synthetic_children=True)

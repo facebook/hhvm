@@ -523,6 +523,7 @@ def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
 #------------------------------------------------------------------------------
 # TypedValue helpers
 
+_Current_key = None
 
 def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     """ Get the pretty string representation of a TypedValue (or its subclasses)

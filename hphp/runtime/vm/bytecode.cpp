@@ -5592,6 +5592,20 @@ PcPair lookup_cti(const Func* func, PC pc) {
   return {lookup_cti(func, cti_entry, unitpc, pc), pc};
 }
 
+uint64_t packJitResumeAddr(JitResumeAddr addr) {
+  auto const h = reinterpret_cast<uint64_t>(addr.handler);
+  auto const a = reinterpret_cast<uint64_t>(addr.arg);
+  assertx((h >> 32) == 0);
+  assertx((a >> 32) == 0);
+  return h << 32 | a;
+}
+
+JitResumeAddr unpackJitResumeAddr(uint64_t packedAddr) {
+  auto const arg = reinterpret_cast<TCA>(packedAddr & 0xFFFFFFFFu);
+  auto const handler = reinterpret_cast<TCA>(packedAddr >> 32);
+  return {handler, arg};
+}
+
 template <bool breakOnCtlFlow>
 JitResumeAddr dispatchThreaded(bool coverage) {
   auto modes = breakOnCtlFlow ? ExecMode::BB : ExecMode::Normal;
@@ -5601,9 +5615,9 @@ JitResumeAddr dispatchThreaded(bool coverage) {
   DEBUGGER_ATTACHED_ONLY(modes = modes | ExecMode::Debugger);
   auto target = lookup_cti(vmfp()->func(), vmpc());
   CALLEE_SAVED_BARRIER();
-  auto retAddr = g_enterCti(modes, target, rds::header());
+  auto retAddr = unpackJitResumeAddr(g_enterCti(modes, target, rds::header()));
   CALLEE_SAVED_BARRIER();
-  return JitResumeAddr::trans(retAddr);
+  return retAddr;
 }
 #endif
 using ModeType = std::underlying_type_t<ExecMode>;
@@ -5827,20 +5841,18 @@ static PcPair popPrediction() {
 NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
   if (modes & ExecMode::Debugger) phpDebuggerOpcodeHook(pc);
   if (modes & ExecMode::Coverage) recordCodeCoverage(pc);
-  if (modes & ExecMode::BB) {
-    //Stats::inc(Stats::Instr_InterpBB##name);
-  }
 }
 
-template<Op opcode, bool repo_auth, class Iop>
+template<Op opcode, bool repo_auth, bool breakOnCtlFlow, class Iop>
 PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
            Iop iop) {
   assert(vmpc() == pc);
   assert(peek_op(pc) == opcode);
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
          instrToString(pc, vmfp()->func()));
-  if (!repo_auth) {
-    if (UNLIKELY(modes != ExecMode::Normal)) {
+  if constexpr (!repo_auth) {
+    static_assert((int)ExecMode::Normal == 0 && (int)ExecMode::BB == 1);
+    if (UNLIKELY(modes > ExecMode::BB)) {
       execModeHelper(pc, modes);
     }
   }
@@ -5849,21 +5861,21 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   auto retAddr = iop(pc);
   vmpc() = pc;
   assert(!isThrow(opcode));
-  if (isSimple(opcode)) {
+  if constexpr (isSimple(opcode)) {
     // caller ignores rax return value, invokes next bytecode
     return {nullptr, pc};
   }
-  if (isBranch(opcode) || isUnconditionalJmp(opcode)) {
-    // callsites have no ability to indirect-jump out of bytecode.
+  if constexpr (isBranch(opcode) || isUnconditionalJmp(opcode)) {
+    // Regular branches have no ability to indirect-jump out of bytecode,
     // so smash the return address to &g_exitCti
     // if we need to exit because of dispatchBB() mode.
     // TODO: t6019406 use surprise checks to eliminate BB mode
-    if (modes & ExecMode::BB) {
+    if constexpr (breakOnCtlFlow) {
       *returnaddr = g_exitCti;
-      // FIXME(T115315816): properly handle JitResumeAddr
-      return {nullptr, (PC)retAddr.handler};  // exit stub will return retAddr
+      return {nullptr, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
+    } else {
+      return {nullptr, pc};
     }
-    return {nullptr, pc};
   }
   // call & indirect branch: caller will jump to address returned in rax
   if (instrCanHalt(opcode) && !pc) {
@@ -5875,19 +5887,20 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     // the TC. We only actually return callToExit to our caller if that
     // caller is dispatchBB().
     assert(isCallToExit((uint64_t)retAddr.arg));
-    if (!(modes & ExecMode::BB)) retAddr = JitResumeAddr::none();
-    // FIXME(T115315816): properly handle JitResumeAddr
-    return {g_exitCti, (PC)retAddr.handler};
+    if constexpr (breakOnCtlFlow) {
+      return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
+    } else {
+      return {g_exitCti, nullptr};
+    }
   }
-  if (instrIsControlFlow(opcode) && (modes & ExecMode::BB)) {
-    // FIXME(T115315816): properly handle JitResumeAddr
-    return {g_exitCti, (PC)retAddr.handler};
+  if constexpr (breakOnCtlFlow && instrIsControlFlow(opcode)) {
+    return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
   }
-  if (isReturnish(opcode)) {
+  if constexpr (isReturnish(opcode)) {
     auto target = popPrediction();
     if (pc == target.pc) return target;
   }
-  if (isFCall(opcode)) {
+  if constexpr (isFCall(opcode)) {
     // call-like opcodes predict return to next bytecode
     assert(nextpc == origPc + instrLen(origPc));
     pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
@@ -5922,10 +5935,19 @@ namespace cti {
 #define O(opcode, imm, push, pop, flags)\
 PcPair opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(tl, modes, returnaddr);\
-  return run<Op::opcode,true>(returnaddr, modes, tl, nextpc, pc,\
-      [](PC& pc) {\
-    return iopWrap##opcode<false>(pc);\
-  });\
+  if (modes & ExecMode::BB) {\
+    return run<Op::opcode,true,true>(returnaddr, modes, tl, nextpc, pc,\
+      [&](PC& pc) {\
+        return iopWrap##opcode<true>(pc);\
+      }\
+    );\
+  } else {\
+    return run<Op::opcode,true,false>(returnaddr, modes, tl, nextpc, pc,\
+      [&](PC& pc) {\
+        return iopWrap##opcode<false>(pc);\
+      }\
+    );\
+  };\
 }
 OPCODES
 #undef O
@@ -5934,10 +5956,19 @@ OPCODES
 #define O(opcode, imm, push, pop, flags)\
 PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(tl, modes, returnaddr);\
-  return run<Op::opcode,false>(returnaddr, modes, tl, nextpc, pc,\
-      [](PC& pc) {\
-    return iopWrap##opcode<false>(pc);\
-  });\
+  if (modes & ExecMode::BB) {\
+    return run<Op::opcode,false,true>(returnaddr, modes, tl, nextpc, pc,\
+      [&](PC& pc) {\
+        return iopWrap##opcode<true>(pc);\
+      }\
+    );\
+  } else {\
+    return run<Op::opcode,false,false>(returnaddr, modes, tl, nextpc, pc,\
+      [&](PC& pc) {\
+        return iopWrap##opcode<false>(pc);\
+      }\
+    );\
+  };\
 }
 OPCODES
 #undef O

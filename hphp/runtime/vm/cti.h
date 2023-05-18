@@ -36,11 +36,12 @@ struct ExecutionContext;
 
 enum class ExecMode : uint32_t { Normal=0, BB=1, Debugger=2, Coverage=4 };
 
-// native and virtual pc pair. passed and stored by value
+// ip is always a native code address, pc can either be a virtual pc
+// or a packed JitResumeAddr. Passed and stored by value.
 struct PcPair { CodeAddress ip; PC pc; };
 
 // signature for g_enterBytecode
-using EntryStub = jit::TCA (*)(ExecMode, PcPair, rds::Header*);
+using EntryStub = uint64_t(*)(ExecMode, PcPair, rds::Header*);
 
 inline ExecMode operator|(ExecMode m1, ExecMode m2) {
   return ExecMode(int(m1) | int(m2));

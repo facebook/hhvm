@@ -1095,5 +1095,26 @@ TEST(PatchTest, IsPatch) {
   static_assert(!is_patch_v<CounterfeitBoolPatch>);
 }
 
+TEST(PatchTest, ListPatchShift) {
+  ListPatch p1, p2;
+  p1.push_front(10);
+  p2.patchAt(1) += 1;
+
+  ListPatch::value_type value1 = {1, 2}, value2 = {1, 2};
+
+  p1.apply(value1);
+  p2.apply(value1);
+  EXPECT_EQ(value1, (ListPatch::value_type{10, 2, 2}));
+
+  p1.merge(p2);
+  p1.apply(value2);
+
+  // FIXME: it's a bug that when we apply the merged patch to a value, the
+  // result is different than applying each individual patch one by one to the
+  // same value. The problem is that push_front(...) shifted index of each
+  // element, but the merge function doesn't take this into account.
+  EXPECT_EQ(value2, (ListPatch::value_type{10, 1, 3}));
+}
+
 } // namespace
 } // namespace apache::thrift

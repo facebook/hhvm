@@ -4626,9 +4626,7 @@ and expr_
       else
         Env.fresh_type_error env p
     in
-    let (_, pos, tm) = tm in
     let env = might_throw env in
-    let (env, tm) = Typing_utils.make_simplify_typed_expr env pos ty tm in
     make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }

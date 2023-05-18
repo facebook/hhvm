@@ -140,6 +140,10 @@ Errors:
   [126:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
+  [120:8-10] You are using the return value of a `void` function
+  [120:8-10] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+  [130:9-11] You are using the return value of a `void` function
+  [130:9-11] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
   [143:10-12] You are using the return value of a `void` function
   [143:10-12] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
   [147:12-14] You are using the return value of a `void` function
@@ -327,7 +331,7 @@ Errors:
              ([110:3-13],
               (Expr
                  ((nothing), [110:3-12],
-                  (Call (((nothing), [110:3-10], (Class_get (((Foo), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGexpr ((nothing), [110:8-10], (Lvar ([110:8-10], $x)))), Is_method))), [], [], None)))));
+                  (Call (((nothing), [110:3-10], (Class_get (((Foo), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGexpr ((dynamic), [110:8-10], (Lvar ([110:8-10], $x)))), Is_method))), [], [], None)))));
              ([111:3-12],
               (Expr
                  ((dynamic), [111:3-11],
@@ -349,7 +353,7 @@ Errors:
              ([120:3-13],
               (Expr
                  ((nothing), [120:3-12],
-                  (Call (((nothing), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((nothing), [120:8-10], (Lplaceholder [120:8-10]))), Is_method))), [], [], None)))));
+                  (Call (((nothing), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((void), [120:8-10], (Lplaceholder [120:8-10]))), Is_method))), [], [], None)))));
              ([121:3-15],
               (Expr ((int), [121:3-14], (Call ((((function(): int)), [121:4-11], (Class_get (((Foo), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))), [], [], None)))));
              ([123:3-13], (Expr ((nothing), [123:3-12], (Class_get (((Foo), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
@@ -357,7 +361,7 @@ Errors:
              ([125:3-15],
               (Expr
                  ((nothing), [125:3-14],
-                  (Call (((nothing), [125:3-12], (Class_get (((Foo), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGexpr ((nothing), [125:9-11], (Lvar ([125:9-11], $x)))), Is_method))), [], [], None)))));
+                  (Call (((nothing), [125:3-12], (Class_get (((Foo), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGexpr ((dynamic), [125:9-11], (Lvar ([125:9-11], $x)))), Is_method))), [], [], None)))));
              ([126:3-17],
               (Expr ((nothing), [126:3-16], (Call (((nothing), [126:4-13], (Class_get (((Foo), [126:4-7], (CI ([126:4-7], "\\Foo"))), (CGstring ([126:10-12], "$x")), Is_prop))), [], [], None)))));
              ([128:3-13], (Expr (((function(): int)), [128:3-12], (Class_get (((Foo), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGstring ([128:9-11], "$_")), Is_prop)))));
@@ -365,7 +369,7 @@ Errors:
              ([130:3-15],
               (Expr
                  ((nothing), [130:3-14],
-                  (Call (((nothing), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((nothing), [130:9-11], (Lplaceholder [130:9-11]))), Is_method))), [], [], None)))));
+                  (Call (((nothing), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((void), [130:9-11], (Lplaceholder [130:9-11]))), Is_method))), [], [], None)))));
              ([131:3-17],
               (Expr ((int), [131:3-16], (Call ((((function(): int)), [131:4-13], (Class_get (((Foo), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))), [], [], None)))));
              ([133:3-18],
@@ -374,7 +378,7 @@ Errors:
                   (Call (
                      ((nothing), [133:3-15],
                       (Class_get (((Foo), [133:3-6], (CI ([133:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [133:9-14], (Call ((((function(): string)), [133:9-12], (Id ([133:9-12], "\\bar"))), [], [], None)))), Is_method))),
+                         (CGexpr ((string), [133:9-14], (Call ((((function(): string)), [133:9-12], (Id ([133:9-12], "\\bar"))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([134:3-34],
               (Expr
@@ -383,7 +387,7 @@ Errors:
                      ((nothing), [134:3-31],
                       (Class_get (((Foo), [134:3-6], (CI ([134:3-6], "\\Foo"))),
                          (CGexpr
-                            ((nothing), [134:9-30],
+                            ((_), [134:9-30],
                              (Call ((((function(mixed $format, mixed $args)[]: _)), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), 
                                 [], [(Pnormal, ((string), [134:18-22], (String "%s"))); (Pnormal, ((string), [134:24-29], (String "wow")))], None)))),
                          Is_method))),
@@ -395,7 +399,7 @@ Errors:
                      ((nothing), [135:3-29],
                       (Class_get (((Foo), [135:3-6], (CI ([135:3-6], "\\Foo"))),
                          (CGexpr
-                            ((nothing), [135:9-28],
+                            ((string), [135:9-28],
                              (Cast (([135:10-16], (Hprim Tstring)), ((int), [135:18-27], (Binop { bop = Plus; lhs = ((int), [135:18-21], (Int "123")); rhs = ((int), [135:24-27], (Int "456")) })))))),
                          Is_method))),
                      [], [], None)))));
@@ -405,7 +409,7 @@ Errors:
                   (Call (
                      ((nothing), [137:3-18],
                       (Class_get (((Foo), [137:3-6], (CI ([137:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [137:9-17], (Binop { bop = Dot; lhs = ((string), [137:9-13], (String "ba")); rhs = ((string), [137:14-17], (String "r")) }))), Is_method))),
+                         (CGexpr ((string), [137:9-17], (Binop { bop = Dot; lhs = ((string), [137:9-13], (String "ba")); rhs = ((string), [137:14-17], (String "r")) }))), Is_method))),
                      [], [], None)))));
              ([139:3-26],
               (Expr
@@ -413,21 +417,21 @@ Errors:
                   (Call (
                      ((nothing), [139:3-23],
                       (Class_get (((Foo), [139:3-6], (CI ([139:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [139:9-22], (Binop { bop = Dot; lhs = ((string), [139:9-16], (String "bar\\")); rhs = ((string), [139:17-22], (String "baz")) }))), Is_method))),
+                         (CGexpr ((string), [139:9-22], (Binop { bop = Dot; lhs = ((string), [139:9-16], (String "bar\\")); rhs = ((string), [139:17-22], (String "baz")) }))), Is_method))),
                      [], [], None)))));
              ([141:3-17],
               (Expr
                  ((nothing), [141:3-16],
                   (Call (
                      ((nothing), [141:3-14],
-                      (Class_get (((Foo), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((nothing), [141:9-13], (String2 [((dynamic), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method))),
+                      (Class_get (((Foo), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((string), [141:9-13], (String2 [((dynamic), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method))),
                      [], [], None)))));
              ([143:3-17],
               (Expr
                  ((nothing), [143:3-16],
                   (Call (
                      ((nothing), [143:3-14],
-                      (Class_get (((Foo), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((nothing), [143:9-13], (String2 [((void), [143:10-12], (Lplaceholder [143:10-12]))]))), Is_method))),
+                      (Class_get (((Foo), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((string), [143:9-13], (String2 [((void), [143:10-12], (Lplaceholder [143:10-12]))]))), Is_method))),
                      [], [], None)))));
              ([145:3-19],
               (Expr
@@ -435,7 +439,7 @@ Errors:
                   (Call (
                      ((nothing), [145:3-16],
                       (Class_get (((Foo), [145:3-6], (CI ([145:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [145:9-15], (String2 [((string), [145:10-12], (String "ba")); ((dynamic), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method))),
+                         (CGexpr ((string), [145:9-15], (String2 [((string), [145:10-12], (String "ba")); ((dynamic), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method))),
                      [], [], None)))));
              ([147:3-19],
               (Expr
@@ -443,14 +447,14 @@ Errors:
                   (Call (
                      ((nothing), [147:3-16],
                       (Class_get (((Foo), [147:3-6], (CI ([147:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [147:9-15], (String2 [((string), [147:10-12], (String "ba")); ((void), [147:12-14], (Lplaceholder [147:12-14]))]))), Is_method))),
+                         (CGexpr ((string), [147:9-15], (String2 [((string), [147:10-12], (String "ba")); ((void), [147:12-14], (Lplaceholder [147:12-14]))]))), Is_method))),
                      [], [], None)))));
              ([149:3-17],
               (Expr
                  ((nothing), [149:3-16],
                   (Call (
                      ((nothing), [149:3-14],
-                      (Class_get (((Foo), [149:3-6], (CI ([149:3-6], "\\Foo"))), (CGexpr ((nothing), [149:9-13], (Call (((dynamic), [149:9-11], (Lvar ([149:9-11], $x))), [], [], None)))), Is_method))),
+                      (Class_get (((Foo), [149:3-6], (CI ([149:3-6], "\\Foo"))), (CGexpr ((dynamic), [149:9-13], (Call (((dynamic), [149:9-11], (Lvar ([149:9-11], $x))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([151:3-17],
               (Expr
@@ -465,7 +469,7 @@ Errors:
                   (Call (
                      ((nothing), [153:3-156:4],
                       (Class_get (((Foo), [153:3-6], (CI ([153:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [153:9-155:4], (String2 [((_), [154:1-6], (Lvar ([154:1-6], $much))); ((string), [154:6-11], (String " doge"))]))), Is_method))),
+                         (CGexpr ((string), [153:9-155:4], (String2 [((_), [154:1-6], (Lvar ([154:1-6], $much))); ((string), [154:6-11], (String " doge"))]))), Is_method))),
                      [], [], None)))))
              ]
            };

@@ -285,7 +285,7 @@ Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
     env,
     CallSpec::direct(hash_int64),
     callDest(hash),
-    SyncOptions::Sync,
+    SyncOptions::None,
     argGroup(env, inst).reg(arr)
   );
   return hash;

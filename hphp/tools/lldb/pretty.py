@@ -7,15 +7,17 @@ import typing
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    import idx
     import utils
 except ModuleNotFoundError:
+    import hhvm_lldb.idx as idx
     import hhvm_lldb.utils as utils
 
 
 Formatters = []
 
 
-def format(datatype: str, regex: bool = False):
+def format(datatype: str, regex: bool = False, synthetic_children: bool = False):
     """ Wrapper for pretty printer functions.
 
     Add the command needed to register the pretty printer with the LLDB debugger
@@ -28,12 +30,25 @@ def format(datatype: str, regex: bool = False):
     Returns:
         The original function.
     """
-    def inner(func):
-        Formatters.append(lambda top_module:
-            f'type summary add {"-x" if regex else ""} '
-            f'-F {top_module + "." if top_module else ""}pretty.{func.__name__} {datatype}'
-        )
-        return func
+    def inner(func_or_class):
+        if synthetic_children:
+            assert isinstance(func_or_class, type), "Can only use synthetic_children=True in @format decorator on classes"
+            Formatters.append(lambda top_module:
+                f'type synthetic add {"-x" if regex else ""} '
+                f'--python-class {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
+            )
+            # Modify the top-level summary of this type
+            if hasattr(func_or_class, "summary"):
+                Formatters.append(lambda top_module:
+                    f'type summary add --expand {"-x" if regex else ""} '
+                    f'--summary-string "{func_or_class.summary()}" "{datatype}"'
+                )
+        else:
+            Formatters.append(lambda top_module:
+                f'type summary add {"-x" if regex else ""} '
+                f'--python-function {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
+            )
+        return func_or_class
     return inner
 
 
@@ -53,7 +68,7 @@ def format(datatype: str, regex: bool = False):
 #------------------------------------------------------------------------------
 # TypedValues and its subtypes
 
-@format("^HPHP::(TypedValue|Variant|VarNR)$", regex=True)
+@format("^HPHP::((Unaligned)?TypedValue|Variant|VarNR)$", regex=True)
 def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     if val_obj.type.IsPointerType():
         return ''
@@ -141,43 +156,77 @@ def pp_Optional(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 #------------------------------------------------------------------------------
 # Arrays
 
-def pretty_array_data(val_obj: lldb.SBValue) -> typing.Optional[str]:
-    # NOTE: Currently only supports ArrayKind::kVecKind.
-    if val_obj.type.IsPointerType():
-        return ''
 
-    # array_kind = val_obj.target.FindFirstType("HPHP::ArrayData::ArrayKind")
-    # array_kind_enums = array_kind.GetEnumMembers()
-    heap_obj = val_obj.children[0].children[0]  # HPHP::HeapObject
-    m_kind = heap_obj.GetChildMemberWithName("m_kind")
+@format("^HPHP::ArrayData$", regex=True, synthetic_children=True)
+class pp_ArrayData:
+    """ This conforms to the SyntheticChildrenProvider interface """
 
-    # TODO Try and just compare enums: left is lldb.SBValue, right is lldb.SBTypeEnumMember
-    # if m_kind.unsigned != array_kind_enums['kVecKind'].unsigned:
-    #     return val_obj
+    @staticmethod
+    def summary():
+        # Ideally we'd print the refcount and kind (e.g. Vec/Dict/Keyset),
+        # but there's no easy way to do that with the synthetic children API
+        # (we have access to a limited set of formatting summary elements),
+        # and it doesn't look like we can supply a summary function when
+        # supplying a synthetic children provider.
+        # return f"ArrayData[{self.m_kind.value}]: {self.m_size} element(s) refcount={self.m_count}"
+        return "${svar%#} element(s)"
 
-    m_size = val_obj.GetChildMemberWithName("m_size").unsigned
-    m_count = heap_obj.GetChildMemberWithName("m_count").unsigned
+    def __init__(self, val_obj, _internal_dict):
+        # We use this class for both the synthetic children and for the summary.
+        # For the summary, we will be given the synthetic lldb.SBValue so we
+        # must make sure to get the non-synthetic lldb.SBValue.
+        self.val_obj = val_obj.GetNonSyntheticValue()
+        self.update()
 
-    # TODO show elements
-    elements = "{ (Showing elements not yet implemented) }"
+    def num_children(self) -> int:
+        return self.m_size.unsigned
 
-    return (
-        f"({val_obj.addr}) ArrayData[{m_kind.value}]: {m_size} element(s) refcount={m_count}"
-        + "\n\t" + elements
-    )
+    def get_child_index(self, name: str) -> int:
+        try:
+            return int(name.lstrip('[').rstrip(']'))
+        except ValueError:
+            return -1
+
+    def get_child_at_index(self, index: int) -> lldb.SBValue:
+        if index < 0:
+            return None
+        if index >= self.num_children():
+            return None
+        char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()
+        # Note: use CreateChildAtOffset was working when pretty printing the dereferenced m_arr
+        # from an Array struct, but not when pretty printing an ArrayData itself.
+        # base = self.val_obj.CreateChildAtOffset("tmp", self.val_obj.type.size, char_ptr_type)
+        base = self.val_obj.CreateValueFromAddress("tmp", self.val_obj.load_addr + self.val_obj.type.size, char_ptr_type)
+        assert base.IsValid(), "Couldn't get base address of array"
+        return self._index_function(base, index)
+
+    def update(self):
+        # Doing all of this logic in here, rather than __init__(), because the API
+        # says we should be re-updating internal state as much as possible (since the
+        # state of variables can change since the last invocation).
+        heap_obj = self.val_obj.children[0].children[0]  # HPHP::HeapObject
+        self.m_kind = utils.get(heap_obj, "m_kind")
+        self.m_size = utils.get(self.val_obj, "m_size")
+        self.m_count = utils.get(heap_obj, "m_count").unsigned
+        self._index_function = {
+            self._kind('Vec'): idx.vec_at,
+            self._kind('Dict'): idx.dict_at,
+            self._kind('Keyset'): idx.keyset_at
+        }[self.m_kind.unsigned]
+
+        # Return false to make sure we always update this object every time we
+        # stop. If we return True, then the value will never update again.
+        return False
+
+    def _kind(self, member: str) -> int:
+        return utils.Enum("HPHP::ArrayData::ArrayKind", "k" + member + "Kind", self.val_obj.target).unsigned
 
 
-@format("^HPHP::Array$", regex=True)
-def pp_Array(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
-    val = utils.deref(utils.get(val_obj, "m_arr"))
-    return pretty_array_data(val)
-
-
-@format("HPHP::ArrayData")
-def pp_ArrayData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    return pretty_array_data(val_obj)
+@format("^HPHP::Array$", regex=True, synthetic_children=True)
+class pp_Array(pp_ArrayData):
+    def __init__(self, val_obj, _internal_dict):
+        val = utils.deref(utils.get(val_obj, "m_arr"))
+        super().__init__(val, _internal_dict)
 
 
 #------------------------------------------------------------------------------

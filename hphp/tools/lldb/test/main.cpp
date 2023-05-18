@@ -152,6 +152,7 @@ void takeOptional(Optional<String> UNUSED v) { return; }
 void takeLowPtr(LowPtr<Class> UNUSED v) { return; }
 void takeLowStrPtr(LowStrPtr UNUSED v) { return; }
 void takeExtension(Extension UNUSED v) { return; }
+void takeArrayData(ArrayData UNUSED *v) { return; }
 void takeArrayVec(Array UNUSED v) { return; }
 void takeArrayDict(Array UNUSED v) { return; }
 void takeArrayKeyset(Array UNUSED v) { return; }
@@ -174,6 +175,7 @@ void buildOtherValues() {
   takeLowPtr(LowPtr(TestObject->getVMClass()));
   takeLowStrPtr(LowStrPtr(StringData::MakeStatic("hello")));
   takeExtension(Extension("test-extension", "0.5", "test-oncall"));
+  takeArrayData(vec.get());
   takeArrayVec(vec);
   takeArrayDict(dict);
   takeArrayKeyset(keyset);

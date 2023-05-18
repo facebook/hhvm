@@ -10,6 +10,8 @@ import re
 import sys
 import typing
 
+_Debug = False
+
 class Command(abc.ABC):
 
     """ The name used to call the command """
@@ -126,7 +128,9 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
         SBValue wrapping the global variable
     """
     g = target.FindFirstGlobalVariable(name)
-    assert g.IsValid(), f"couldn't find global variable '{name}'"
+    if not g.IsValid():
+        debug_print(f"couldn't find global variable '{name}'; attempting to find it by evaluating it")
+        return Value(name, target)
     return g
 
 
@@ -630,3 +634,10 @@ def reg(name: str, frame: lldb.SBFrame) -> typing.Optional[lldb.SBValue]:
     """
     name = arch_regs(frame.thread.process.target)[name]
     return frame.register[name]
+
+
+#------------------------------------------------------------------------------
+# Debugging
+def debug_print(message: str, file=sys.stderr) -> None:
+    if _Debug:
+        print(message)

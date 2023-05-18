@@ -2,6 +2,7 @@
 
 import lldb
 import shlex
+import sys
 import typing
 
 try:
@@ -105,6 +106,62 @@ def idx_accessors():
         "HPHP::CompactVector": compact_vector_at,
         "HPHP::FixedVector": fixed_vector_at,
     }
+
+def _unaligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
+    utv_type = utils.Type("HPHP::UnalignedTypedValue", base.target)
+    offset = utv_type.size * idx
+
+    utils.debug_print(f"Loading UnalignedTypedValue (base address: 0x{base.load_addr:x}, offset: {offset})")
+
+    # TODO(michristensen) I believe that creating a child at offset is the preferred way of
+    # doing this, but it's not currently working (it's being filled with garbage).
+    # utv = base.CreateChildAtOffset('[' + str(idx) + ']', offset, utv_type)
+
+    utv = base.CreateValueFromAddress('[' + str(idx) + ']', base.load_addr + offset, utv_type)
+
+    # Note that we're returning a lldb.SBValue, rather than printing the string,
+    # because this is used by a synthetic child provider, and lldb will call the
+    # pretty printer associated with it automatically.
+    return utv
+
+def _aligned_tv_at_pos_to_tv(base: lldb.SBValue, idx: int) -> lldb.SBValue:
+    target = base.target
+    quot = idx // 8
+    rem = idx % 8
+    chunk = base.load_addr + utils.Type("HPHP::PackedBlock", target).size * quot
+
+    val_type = utils.Type("HPHP::Value", target)
+    valaddr = chunk + val_type.size * (1 + rem)
+    val = base.CreateValueFromAddress("val", valaddr, val_type)
+
+    ty_type = utils.Type("HPHP::DataType", target)
+    tyaddr = chunk + rem
+    ty = base.CreateValueFromAddress("datatype", tyaddr, ty_type)
+
+    data = val.GetData()
+    success = data.Append(ty.data)
+    assert success, "Couldn't construct a raw TypedValue"
+
+    tv_type = utils.Type("HPHP::TypedValue", base.target)
+    tv = base.CreateValueFromData('[' + str(idx) + ']', data, tv_type)
+
+    return tv
+
+def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
+    try:
+        if utils.Global('HPHP::VanillaVec::stores_unaligned_typed_values', base.target):
+            return _unaligned_tv_at_pos_to_tv(base, idx)
+        else:
+            return _aligned_tv_at_pos_to_tv(base, idx)
+    except Exception as ex:
+        print(f"error while trying to get element #{idx} of vec {str(base)}: {ex}", file=sys.stderr)
+        return None
+
+def dict_at(_base, _idx):
+    print("Printing contents of dicts is not yet supported; instead run `expression -R -- <your-variable>` to see its raw value")
+
+def keyset_at(_base, _idx):
+    print("Printing contents of keysets is not yet supported; instead run `expression -R -- <your-variable>` to see its raw value")
 
 
 def idx(container: lldb.SBValue, index, hasher=None):

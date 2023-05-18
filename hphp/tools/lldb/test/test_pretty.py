@@ -146,29 +146,30 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_output = r'\(HPHP::Extension\) test-extension \(version: 0.5, oncall: test-oncall\)'
             self.assertRegex(output.strip(), expected_output)
 
+        with self.subTest("HPHP::ArrayData"):
+            self.run_until_breakpoint("takeArrayData")
+            _, output = self.run_commands(["p *v"])
+            expected_lines = [
+                "(HPHP::ArrayData) 4 element(s) {",
+                "[0] = { Int64, 1 }",
+                "[1] = { Int64, 2 }",
+                "[2] = { Int64, 3 }",
+                "[3] = { Int64, 4 }",
+                "}"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
         with self.subTest("HPHP::Array (Vec)"):
             self.run_until_breakpoint("takeArrayVec")
             _, output = self.run_commands(["p v"])
-            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Vec\]: 4 element\(s\) refcount=2'
-            expected_line2 = "{ (Showing elements not yet implemented) }"
-            actual_line1, actual_line2, _ = output.split("\n")
-            self.assertRegex(actual_line1.strip(), expected_line1)
-            self.assertEqual(actual_line2.strip(), expected_line2)
-
-        with self.subTest("HPHP::Array (Dict)"):
-            self.run_until_breakpoint("takeArrayDict")
-            _, output = self.run_commands(["p v"])
-            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Dict\]: 3 element\(s\) refcount=2'
-            expected_line2 = "{ (Showing elements not yet implemented) }"
-            actual_line1, actual_line2, _ = output.split("\n")
-            self.assertRegex(actual_line1.strip(), expected_line1)
-            self.assertEqual(actual_line2.strip(), expected_line2)
-
-        with self.subTest("HPHP::Array (Keyset)"):
-            self.run_until_breakpoint("takeArrayDict")
-            _, output = self.run_commands(["p v"])
-            expected_line1 = r'\(HPHP::Array\) \(0x[0-9a-f]+\) ArrayData\[Dict\]: 3 element\(s\) refcount=2'
-            expected_line2 = "{ (Showing elements not yet implemented) }"
-            actual_line1, actual_line2, _ = output.split("\n")
-            self.assertRegex(actual_line1.strip(), expected_line1)
-            self.assertEqual(actual_line2.strip(), expected_line2)
+            expected_lines = [
+                "(HPHP::Array) 4 element(s) {",
+                "[0] = { Int64, 1 }",
+                "[1] = { Int64, 2 }",
+                "[2] = { Int64, 3 }",
+                "[3] = { Int64, 4 }",
+                "}"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)

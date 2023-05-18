@@ -5,11 +5,11 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(): (int, _) {\n    $return1 = 100;\n    $local = 500 + $return1;\n    $return2 = new Foo($local);\n    return tuple($return1, $return2);\n  }\n\n",
+            "newText":"  private function method0(): (int, _) {\n    $return1 = 100;\n    $local = 500 + $return1;\n    $return2 = new Foo($local);\n    return tuple($return1, $return2);\n  }\n\n",
             "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
           },
           {
-            "newText":"list($return1, $return2) = self::method0();",
+            "newText":"list($return1, $return2) = $this->method0();",
             "range":{"end":{"character":31,"line":12},"start":{"character":4,"line":10}}
           }
         ]

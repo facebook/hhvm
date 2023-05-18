@@ -5,11 +5,11 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(): int {\n    $return = 100;\n    return $return;\n  }\n\n",
+            "newText":"  private function method0(): int {\n    $return = 100;\n    return $return;\n  }\n\n",
             "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
           },
           {
-            "newText":"$return = self::method0();",
+            "newText":"$return = $this->method0();",
             "range":{"end":{"character":18,"line":6},"start":{"character":4,"line":6}}
           }
         ]

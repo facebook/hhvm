@@ -5,11 +5,11 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(\\HH\\Awaitable<void> $awaitable, int $n): int {\n    $x = $n * 2;\n    $y = $awaitable;\n    return $x;\n  }\n\n",
+            "newText":"  private function method0(\\HH\\Awaitable<void> $awaitable, int $n): int {\n    $x = $n * 2;\n    $y = $awaitable;\n    return $x;\n  }\n\n",
             "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
           },
           {
-            "newText":"$x = self::method0($awaitable, $n);",
+            "newText":"$x = $this->method0($awaitable, $n);",
             "range":{"end":{"character":20,"line":9},"start":{"character":4,"line":8}}
           }
         ]

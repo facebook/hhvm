@@ -64,9 +64,6 @@ type candidate = {
       (** The returns for the method we extract, along with their types.
   We simulate multiple returns using tuple types and `list()`
   *)
-  is_static: bool;
-      (** Whether the method we are extracting can be static.
-  If the selected code contains `$this` then we do not extract a static method. *)
   iterator_kind: iterator_kind option;
       (** Describes the method we are extracting. For example, if the selected code
   contains `yield 3` then the [iterator_kind] will be `Some Iterator` and if the selected
@@ -78,4 +75,7 @@ type candidate = {
       (** Describes the method containing the user's selection.
   Used to calculate indentation for the code we generate.
   *)
+  method_is_static: bool;
+      (** Describes the method containing the user's selection.
+  If the method we are extracting *from* is static then the method we extract will be static.  *)
 }

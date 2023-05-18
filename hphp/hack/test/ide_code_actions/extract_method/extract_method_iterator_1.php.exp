@@ -24,11 +24,11 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(): Iterator<_> {\n    yield 2;\n  }\n\n",
+            "newText":"  private function method0(): Iterator<_> {\n    yield 2;\n  }\n\n",
             "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
           },
           {
-            "newText":"foreach (self::method0() as $value__) {\n      \n    }",
+            "newText":"foreach ($this->method0() as $value__) {\n      \n    }",
             "range":{"end":{"character":12,"line":5},"start":{"character":4,"line":5}}
           }
         ]

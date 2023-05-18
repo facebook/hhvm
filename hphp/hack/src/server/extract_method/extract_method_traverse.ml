@@ -40,7 +40,6 @@ module Region = struct
     referenced: T.var_tys;
         (** variables referenced from the region, along with their types *)
     defined: Scopes.t;  (** what variables are defined in the region *)
-    is_static: bool;  (** true iff the region uses `this` *)
     iterator_kind: T.iterator_kind option;
     is_async: bool;
     has_return: bool;
@@ -53,7 +52,6 @@ module Region = struct
     {
       referenced = String.Map.empty;
       defined = Scopes.empty;
-      is_static = true;
       iterator_kind = None;
       is_async = false;
       has_return = false;
@@ -80,12 +78,12 @@ let plus_candidate (a : T.candidate option) (b : T.candidate option) =
           (* For these fields, just take [b]'s value, since [a] and [b]
              are always the same anyway *)
           method_pos = b.method_pos;
+          method_is_static = b.method_is_static;
           placeholder_name = b.placeholder_name;
           selection_kind = b.selection_kind;
           (* We grow `pos` to fill the selection
              and learn more about whether to make an async or static function, etc. *)
           pos = Pos.merge a.pos b.pos;
-          is_static = a.is_static && b.is_static;
           is_async = a.is_async || b.is_async;
           (* Note:  if `(a, b)` is `(Some it_kind_a, Some it_kind_b)` then it doesn't matter whether
              we use a or b assuming the user was consistent in yielding values or yielding key=>value pairs.
@@ -105,7 +103,8 @@ let plus_candidate (a : T.candidate option) (b : T.candidate option) =
         }
   | _ -> Option.first_some a b
 
-let positions_visitor (selection : Pos.t) ~method_pos ~method_names =
+let positions_visitor
+    (selection : Pos.t) ~method_pos ~method_is_static ~method_names =
   (* These refs are used to accumulate context top->down left->right *)
   (*
 The region before the user's selection. This is important for finding
@@ -186,11 +185,11 @@ See [selection region]
                {
                  pos;
                  method_pos;
+                 method_is_static;
                  placeholder_name;
                  selection_kind;
                  params;
                  return;
-                 is_static = !selection_region.Region.is_static;
                  is_async = !selection_region.Region.is_async;
                  iterator_kind = !selection_region.Region.iterator_kind;
                }
@@ -321,9 +320,6 @@ See [selection region]
         | Aast.Await _ ->
           (region := Region.{ !region with is_async = true });
           super#on_expr env expr
-        | Aast.This ->
-          (region := Region.{ !region with is_static = false });
-          super#on_expr env expr
         | _ -> super#on_expr env expr
       in
       make acc pos ty_string
@@ -357,6 +353,7 @@ let top_visitor ~(selection : Pos.t) =
                  positions_visitor
                    selection
                    ~method_pos:meth.Aast.m_span
+                   ~method_is_static:meth.Aast.m_static
                    ~method_names
                in
                visitor#on_method_ env meth)

@@ -102,12 +102,18 @@ let method_string_of_candidate
     ~source_text
     ~(params : (string * T.ty_string) list)
     ~(return : (string * T.ty_string) list)
-    (T.{ placeholder_name; is_static; is_async; method_pos; _ } as candidate) =
+    (T.{ placeholder_name; method_is_static; is_async; method_pos; _ } as
+    candidate) =
   let return_type_string = return_type_string_of_candidate ~return candidate in
   let body_string = body_string_of_candidate ~source_text ~return candidate in
   let add_modifiers : string -> string =
     let static_string =
-      if is_static then
+      if method_is_static then
+        (*
+      The extracted function is static iff the function we are extracting from is static.
+      We could "Principle of Least Privilege" and default to `static` if `this` isn't used *but*
+      that would make things harder to mock and some people like mocking.
+      *)
         "static "
       else
         ""
@@ -149,7 +155,7 @@ let method_call_string_of_candidate
     T.
       {
         placeholder_name;
-        is_static;
+        method_is_static;
         selection_kind;
         is_async;
         iterator_kind;
@@ -159,7 +165,7 @@ let method_call_string_of_candidate
       } =
   let args_string = params |> List.map ~f:fst |> String.concat ~sep:", " in
   let receiver_string =
-    if is_static then
+    if method_is_static then
       "self::"
     else
       "$this->"

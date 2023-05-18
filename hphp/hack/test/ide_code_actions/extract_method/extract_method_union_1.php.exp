@@ -5,11 +5,11 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"  private static function method0(_ $z): _ {\n    $x = $z;\n    return $x;\n  }\n\n",
+            "newText":"  private function method0(_ $z): _ {\n    $x = $z;\n    return $x;\n  }\n\n",
             "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
           },
           {
-            "newText":"$x = self::method0($z);",
+            "newText":"$x = $this->method0($z);",
             "range":{"end":{"character":12,"line":11},"start":{"character":4,"line":11}}
           }
         ]

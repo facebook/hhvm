@@ -32,8 +32,8 @@ type candidate = {
   selection_kind: selection_kind;
   params: var_tys;
   return: var_tys;
-  is_static: bool;
   iterator_kind: iterator_kind option;
   is_async: bool;
   method_pos: Pos.t;
+  method_is_static: bool;
 }

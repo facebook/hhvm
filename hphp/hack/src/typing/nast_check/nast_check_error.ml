@@ -160,6 +160,26 @@ type t =
       x: string;
     }
   | Attribute_no_auto_dynamic of Pos.t
+  | Generic_at_runtime of {
+      pos: Pos.t;
+      prefix: string;
+    }
+  | Generics_not_allowed of Pos.t
+  | Local_variable_modified_and_used of {
+      pos: Pos.t;
+      pos_useds: Pos.t list;
+    }
+  | Local_variable_modified_twice of {
+      pos: Pos.t;
+      pos_modifieds: Pos.t list;
+    }
+  | Assign_during_case of Pos.t
+  | Read_before_write of {
+      pos: Pos.t;
+      member_name: string;
+    }
+  | Lateinit_with_default of Pos.t
+  | Missing_assign of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -704,6 +724,66 @@ let attribute_no_auto_dynamic pos =
     (pos, "This attribute is not yet supported in user code")
     []
 
+let generic_at_runtime p prefix =
+  User_error.make
+    Error_codes.Typing.(to_enum ErasedGenericAtRuntime)
+    ( p,
+      prefix
+      ^ " generics can only be used in type hints because they do not exist at runtime."
+    )
+    []
+
+let generics_not_allowed p =
+  User_error.make
+    Error_codes.Typing.(to_enum GenericsNotAllowed)
+    (p, "Generics are not allowed in this position.")
+    []
+
+let local_variable_modified_and_used pos_modified pos_used_l =
+  let used_msg p = (Pos_or_decl.of_raw_pos p, "And accessed here") in
+  User_error.make
+    Error_codes.Typing.(to_enum LocalVariableModifedAndUsed)
+    ( pos_modified,
+      "Unsequenced modification and access to local variable. Modified here" )
+    (List.map pos_used_l ~f:used_msg)
+
+let local_variable_modified_twice pos_modified pos_modified_l =
+  let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
+  User_error.make
+    Error_codes.Typing.(to_enum LocalVariableModifedTwice)
+    (pos_modified, "Unsequenced modifications to local variable. Modified here")
+    (List.map pos_modified_l ~f:modified_msg)
+
+let assign_during_case p =
+  User_error.make
+    Error_codes.Typing.(to_enum AssignDuringCase)
+    (p, "Don't assign to variables inside of case labels")
+    []
+
+let read_before_write (pos, v) =
+  User_error.make
+    Error_codes.Typing.(to_enum ReadBeforeWrite)
+    ( pos,
+      Utils.sl
+        [
+          "Read access to ";
+          Markdown_lite.md_codify ("$this->" ^ v);
+          " before initialization";
+        ] )
+    []
+
+let lateinit_with_default pos =
+  User_error.make
+    Error_codes.Typing.(to_enum LateInitWithDefault)
+    (pos, "A late-initialized property cannot have a default value")
+    []
+
+let missing_assign pos =
+  User_error.make
+    Error_codes.Typing.(to_enum MissingAssign)
+    (pos, "Please assign a value")
+    []
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -784,3 +864,14 @@ let to_user_error = function
     attribute_not_exact_number_of_args pos name expected actual
   | Attribute_param_type { pos; x } -> attribute_param_type pos x
   | Attribute_no_auto_dynamic pos -> attribute_no_auto_dynamic pos
+  | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
+  | Generics_not_allowed pos -> generics_not_allowed pos
+  | Local_variable_modified_and_used { pos; pos_useds } ->
+    local_variable_modified_and_used pos pos_useds
+  | Local_variable_modified_twice { pos; pos_modifieds } ->
+    local_variable_modified_twice pos pos_modifieds
+  | Assign_during_case pos -> assign_during_case pos
+  | Read_before_write { pos; member_name } ->
+    read_before_write (pos, member_name)
+  | Lateinit_with_default pos -> lateinit_with_default pos
+  | Missing_assign pos -> missing_assign pos

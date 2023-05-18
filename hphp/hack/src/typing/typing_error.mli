@@ -260,7 +260,6 @@ module Primary : sig
           with_value_pos: Pos.t;
           without_value_pos_opt: Pos.t option;
         }
-      | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           is_async: bool;
           hint_pos: Pos.t;
@@ -681,11 +680,6 @@ module Primary : sig
         class_id: string;
         id: string;
       }
-    | Generic_at_runtime of {
-        pos: Pos.t;
-        prefix: string;
-      }
-    | Generics_not_allowed of Pos.t
     | Trivial_strict_eq of {
         pos: Pos.t;
         result: bool;
@@ -724,15 +718,6 @@ module Primary : sig
         class_pos: Pos.t;
         class_name: string;
       }
-    | Local_variable_modified_and_used of {
-        pos: Pos.t;
-        pos_useds: Pos.t list;
-      }
-    | Local_variable_modified_twice of {
-        pos: Pos.t;
-        pos_modifieds: Pos.t list;
-      }
-    | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
     | Illegal_type_structure of {
         pos: Pos.t;
@@ -756,7 +741,6 @@ module Primary : sig
         class_self: string;
         class_subclass: string;
       }
-    | Lateinit_with_default of Pos.t
     | Unserializable_type of {
         pos: Pos.t;
         message: string;
@@ -1101,10 +1085,6 @@ module Primary : sig
     | Trait_prop_const_class of {
         pos: Pos.t;
         name: string;
-      }
-    | Read_before_write of {
-        pos: Pos.t;
-        member_name: string;
       }
     | Implement_abstract of {
         pos: Pos.t;

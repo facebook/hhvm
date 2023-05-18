@@ -1118,12 +1118,6 @@ module Eval_primary = struct
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
-    let missing_assign pos =
-      ( Error_code.MissingAssign,
-        lazy (pos, "Please assign a value"),
-        lazy [],
-        [] )
-
     let non_void_annotation_on_return_void_function is_async hint_pos =
       let (async_indicator, return_type) =
         if is_async then
@@ -1172,7 +1166,6 @@ module Eval_primary = struct
       | Returns_with_and_without_value
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
-      | Missing_assign pos -> missing_assign pos
       | Non_void_annotation_on_return_void_function { is_async; hint_pos } ->
         non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
@@ -2566,22 +2559,6 @@ module Eval_primary = struct
       lazy [],
       [] )
 
-  let generic_at_runtime p prefix =
-    ( Error_code.ErasedGenericAtRuntime,
-      lazy
-        ( p,
-          prefix
-          ^ " generics can only be used in type hints because they do not exist at runtime."
-        ),
-      lazy [],
-      [] )
-
-  let generics_not_allowed p =
-    ( Error_code.GenericsNotAllowed,
-      lazy (p, "Generics are not allowed in this position."),
-      lazy [],
-      [] )
-
   let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
   let trivial_strict_eq p b left right left_trail right_trail =
@@ -2664,31 +2641,6 @@ module Eval_primary = struct
         ],
       [] )
 
-  let local_variable_modified_and_used pos_modified pos_used_l =
-    let used_msg p = (Pos_or_decl.of_raw_pos p, "And accessed here") in
-    ( Error_code.LocalVariableModifedAndUsed,
-      lazy
-        ( pos_modified,
-          "Unsequenced modification and access to local variable. Modified here"
-        ),
-      lazy (List.map pos_used_l ~f:used_msg),
-      [] )
-
-  let local_variable_modified_twice pos_modified pos_modified_l =
-    let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
-    ( Error_code.LocalVariableModifedTwice,
-      lazy
-        ( pos_modified,
-          "Unsequenced modifications to local variable. Modified here" ),
-      lazy (List.map pos_modified_l ~f:modified_msg),
-      [] )
-
-  let assign_during_case p =
-    ( Error_code.AssignDuringCase,
-      lazy (p, "Don't assign to variables inside of case labels"),
-      lazy [],
-      [] )
-
   let invalid_classname p =
     ( Error_code.InvalidClassname,
       lazy (p, "Not a valid class name"),
@@ -2767,12 +2719,6 @@ module Eval_primary = struct
           ^ Markdown_lite.md_codify name
           ^ " is ambiguous" ),
       reason,
-      [] )
-
-  let lateinit_with_default pos =
-    ( Error_code.LateInitWithDefault,
-      lazy (pos, "A late-initialized property cannot have a default value"),
-      lazy [],
       [] )
 
   let unserializable_type pos message =
@@ -3851,19 +3797,6 @@ module Eval_primary = struct
       lazy [],
       [] )
 
-  let read_before_write (pos, v) =
-    ( Error_code.ReadBeforeWrite,
-      lazy
-        ( pos,
-          Utils.sl
-            [
-              "Read access to ";
-              Markdown_lite.md_codify ("$this->" ^ v);
-              " before initialization";
-            ] ),
-      lazy [],
-      [] )
-
   let implement_abstract pos1 is_final pos2 x kind qfxs trace =
     let kind =
       match kind with
@@ -4486,8 +4419,6 @@ module Eval_primary = struct
       override_per_trait (pos, class_name) meth_name trait_name meth_pos
     | Should_not_be_override { pos; class_id; id } ->
       should_not_be_override pos class_id id
-    | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
-    | Generics_not_allowed pos -> generics_not_allowed pos
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
       trivial_strict_eq pos result left right left_trail right_trail
     | Trivial_strict_not_nullable_compare_null { pos; result; ty_reason_msg } ->
@@ -4505,11 +4436,6 @@ module Eval_primary = struct
       deprecated_use pos ~pos_def:decl_pos_opt msg
     | Cannot_declare_constant { pos; class_pos; class_name } ->
       cannot_declare_constant pos (class_pos, class_name)
-    | Local_variable_modified_and_used { pos; pos_useds } ->
-      local_variable_modified_and_used pos pos_useds
-    | Local_variable_modified_twice { pos; pos_modifieds } ->
-      local_variable_modified_twice pos pos_modifieds
-    | Assign_during_case pos -> assign_during_case pos
     | Invalid_classname pos -> invalid_classname pos
     | Illegal_type_structure { pos; msg } -> illegal_type_structure pos msg
     | Illegal_typeconst_direct_access pos -> illegal_typeconst_direct_access pos
@@ -4540,7 +4466,6 @@ module Eval_primary = struct
         subclass_pos
         class_self
         class_subclass
-    | Lateinit_with_default pos -> lateinit_with_default pos
     | Unserializable_type { pos; message } -> unserializable_type pos message
     | Invalid_arraykey_constraint { pos; ty_name } ->
       invalid_arraykey_constraint pos @@ Lazy.force ty_name
@@ -4779,8 +4704,6 @@ module Eval_primary = struct
     | Sealed_not_subtype { pos; name; child_kind; child_pos; child_name } ->
       sealed_not_subtype pos name child_name child_kind child_pos
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name
-    | Read_before_write { pos; member_name } ->
-      read_before_write (pos, member_name)
     | Implement_abstract
         { pos; is_final; decl_pos; trace; name; kind; quickfixes } ->
       implement_abstract pos is_final decl_pos name kind quickfixes trace

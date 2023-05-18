@@ -160,5 +160,25 @@ type t =
       x: string;
     }
   | Attribute_no_auto_dynamic of Pos.t
+  | Generic_at_runtime of {
+      pos: Pos.t;
+      prefix: string;
+    }
+  | Generics_not_allowed of Pos.t
+  | Local_variable_modified_and_used of {
+      pos: Pos.t;
+      pos_useds: Pos.t list;
+    }
+  | Local_variable_modified_twice of {
+      pos: Pos.t;
+      pos_modifieds: Pos.t list;
+    }
+  | Assign_during_case of Pos.t
+  | Read_before_write of {
+      pos: Pos.t;
+      member_name: string;
+    }
+  | Lateinit_with_default of Pos.t
+  | Missing_assign of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

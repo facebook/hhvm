@@ -121,19 +121,19 @@ let check_type_name
     | Some reified ->
       (* TODO: These throw typing errors instead of naming errors *)
       if not allow_generics then
-        Typing_error_utils.add_typing_error
-          Typing_error.(primary @@ Primary.Generics_not_allowed pos);
+        Errors.add_error
+          Nast_check_error.(to_user_error @@ Generics_not_allowed pos);
       begin
         match reified with
         | Aast.Erased ->
-          Typing_error_utils.add_typing_error
-            Typing_error.(
-              primary @@ Primary.Generic_at_runtime { pos; prefix = "Erased" })
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error @@ Generic_at_runtime { pos; prefix = "Erased" })
         | Aast.SoftReified ->
-          Typing_error_utils.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Generic_at_runtime { pos; prefix = "Soft reified" })
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error
+              @@ Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
     | None -> begin

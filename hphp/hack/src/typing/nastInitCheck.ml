@@ -475,8 +475,9 @@ and expr_ env acc p e =
   | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, Is_prop) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       let (pos, member_name) = v in
-      Typing_error_utils.add_typing_error
-        Typing_error.(primary @@ Primary.Read_before_write { pos; member_name });
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error @@ Read_before_write { pos; member_name });
       acc
     ) else if
         SSet.mem vx env.parent_cstr_props
@@ -488,8 +489,9 @@ and expr_ env acc p e =
          constructor, but we haven't called the parent constructor
          yet. *)
       let (pos, member_name) = v in
-      Typing_error_utils.add_typing_error
-        Typing_error.(primary @@ Primary.Read_before_write { pos; member_name });
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error @@ Read_before_write { pos; member_name });
       acc
     ) else
       acc
@@ -649,9 +651,9 @@ let class_ tenv c =
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
-          Typing_error_utils.add_typing_error
-            Typing_error.(
-              primary @@ Primary.Lateinit_with_default (fst cv.cv_id))
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error @@ Lateinit_with_default (fst cv.cv_id))
         | None when cv.cv_is_static ->
           let ty_opt =
             Option.map
@@ -665,10 +667,8 @@ let class_ tenv c =
           then
             ()
           else
-            Typing_error_utils.add_typing_error
-              Typing_error.(
-                wellformedness
-                @@ Primary.Wellformedness.Missing_assign (fst cv.cv_id))
+            Errors.add_error
+              Nast_check_error.(to_user_error @@ Missing_assign (fst cv.cv_id))
         | _ -> ());
   let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with

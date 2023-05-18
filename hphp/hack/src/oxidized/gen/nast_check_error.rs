@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9b692ed5f637fba5c6e43c995ba39bbf>>
+// @generated SignedSource<<627c906c3afc284fc1345b0b17258d0b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -269,4 +269,32 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Attribute_no_auto_dynamic")]
     AttributeNoAutoDynamic(pos::Pos),
+    #[rust_to_ocaml(name = "Generic_at_runtime")]
+    GenericAtRuntime {
+        pos: pos::Pos,
+        prefix: String,
+    },
+    #[rust_to_ocaml(name = "Generics_not_allowed")]
+    GenericsNotAllowed(pos::Pos),
+    #[rust_to_ocaml(name = "Local_variable_modified_and_used")]
+    LocalVariableModifiedAndUsed {
+        pos: pos::Pos,
+        pos_useds: Vec<pos::Pos>,
+    },
+    #[rust_to_ocaml(name = "Local_variable_modified_twice")]
+    LocalVariableModifiedTwice {
+        pos: pos::Pos,
+        pos_modifieds: Vec<pos::Pos>,
+    },
+    #[rust_to_ocaml(name = "Assign_during_case")]
+    AssignDuringCase(pos::Pos),
+    #[rust_to_ocaml(name = "Read_before_write")]
+    ReadBeforeWrite {
+        pos: pos::Pos,
+        member_name: String,
+    },
+    #[rust_to_ocaml(name = "Lateinit_with_default")]
+    LateinitWithDefault(pos::Pos),
+    #[rust_to_ocaml(name = "Missing_assign")]
+    MissingAssign(pos::Pos),
 }

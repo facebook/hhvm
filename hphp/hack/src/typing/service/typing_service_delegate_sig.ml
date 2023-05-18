@@ -28,9 +28,9 @@ module type Delegate_sig = sig
 
   val stop : state -> state
 
-  val merge : state -> Errors.t -> typing_progress -> state
+  val merge : state -> Errors.t -> TypingProgress.t -> state
 
-  val process : delegate_job_sig -> typing_result * typing_progress
+  val process : delegate_job_sig -> typing_result * workitem list
 
   val dispatch :
     state ->

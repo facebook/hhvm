@@ -297,15 +297,9 @@ let get_stats ~include_slightly_costly_stats tally :
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 type workitem_accumulator = {
-  progress: typing_progress;
   errors: Errors.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
-}
-
-type process_workitem_result = {
-  acc: workitem_accumulator;
-  workitem_ends_under_cap: bool;
 }
 
 let process_one_workitem
@@ -315,16 +309,9 @@ let process_one_workitem
     ~memory_cap
     ~longlived_workers
     ~error_count_at_start_of_batch
-    ~(acc : workitem_accumulator) : process_workitem_result =
-  let { progress; errors; tally; stats } = acc in
-
-  let { remaining; completed; deferred } = progress in
-  let (fn, remaining) =
-    match remaining with
-    | [] -> failwith "progress.remaining wasn't expected to be empty"
-    | fn :: remaining -> (fn, remaining)
-  in
-
+    (fn : workitem)
+    ({ errors; tally; stats } : workitem_accumulator) :
+    TypingProgress.progress_outcome * workitem_accumulator =
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
       memory_cap
@@ -337,7 +324,7 @@ let process_one_workitem
       .HackEventLogger.PerFileProfilingConfig.profile_type_check_twice
   in
 
-  let (file, decl, mid_stats, file_errors, new_deferred, tally) =
+  let (file, decl, mid_stats, file_errors, deferred_workitems, tally) =
     match fn with
     | Check file ->
       (* We'll show at least the first five errors in the project. Maybe more,
@@ -433,23 +420,13 @@ let process_one_workitem
     ~workitem_end_stats
     ~workitem_end_second_stats;
 
-  let progress =
-    {
-      completed = fn :: completed;
-      remaining;
-      deferred = List.concat [new_deferred; deferred];
-    }
-  in
-
-  {
-    acc = { progress; errors; tally; stats = final_stats };
-    workitem_ends_under_cap;
-  }
+  ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
+    { errors; tally; stats = final_stats } )
 
 let process_workitems
     (ctx : Provider_context.t)
     ({ errors; dep_edges; profiling_info } : typing_result)
-    (progress : typing_progress)
+    (progress : TypingProgress.t)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
@@ -457,7 +434,7 @@ let process_workitems
     ~(batch_number : int)
     ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
-    typing_result * typing_progress =
+    typing_result * TypingProgress.t =
   Decl_counters.set_mode
     check_info.per_file_profiling
       .HackEventLogger.PerFileProfilingConfig.profile_decling;
@@ -467,7 +444,7 @@ let process_workitems
       ~typecheck_info
       ~worker_id
       ~batch_number
-      ~batch_size:(List.length progress.remaining)
+      ~batch_size:(List.length (TypingProgress.remaining progress))
       ~start_batch_stats:
         (get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty)
   in
@@ -476,40 +453,24 @@ let process_workitems
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
-  let rec process_workitems_loop ~(acc : workitem_accumulator) :
-      workitem_accumulator =
-    match acc.progress.remaining with
-    | [] -> acc
-    | _ ->
-      let { acc; workitem_ends_under_cap } =
-        process_one_workitem
-          ~ctx
-          ~check_info
-          ~batch_info
-          ~error_count_at_start_of_batch
-          ~memory_cap
-          ~longlived_workers
-          ~acc
-      in
-      if workitem_ends_under_cap then
-        process_workitems_loop ~acc
-      else
-        acc
-  in
-
   (* Process as many files as we can, and merge in their errors *)
-  let { progress; errors; tally = _; stats = _ } =
-    process_workitems_loop
-      ~acc:
-        {
-          progress;
-          errors;
-          tally = ProcessFilesTally.empty;
-          stats =
-            get_stats
-              ~include_slightly_costly_stats:true
-              ProcessFilesTally.empty;
-        }
+  let (progress, { errors; tally = _; stats = _ }) =
+    let init =
+      {
+        errors;
+        tally = ProcessFilesTally.empty;
+        stats =
+          get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty;
+      }
+    in
+    TypingProgress.progress_through ~init progress
+    @@ process_one_workitem
+         ~ctx
+         ~check_info
+         ~batch_info
+         ~error_count_at_start_of_batch
+         ~memory_cap
+         ~longlived_workers
   in
 
   (* Update edges *)
@@ -541,7 +502,7 @@ let process_workitems
 let load_and_process_workitems
     (ctx : Provider_context.t)
     (typing_result : typing_result)
-    (progress : typing_progress)
+    (progress : TypingProgress.t)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
@@ -549,7 +510,7 @@ let load_and_process_workitems
     ~(batch_number : int)
     ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
-    typing_result * typing_progress =
+    typing_result * TypingProgress.t =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
       let file = Caml.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf" in
       Daemon.start_memtracing file);
@@ -575,7 +536,7 @@ let load_and_process_workitems
 (*****************************************************************************)
 
 let possibly_push_new_errors_to_lsp_client :
-    progress:Typing_service_types.typing_progress ->
+    progress:Typing_service_types.TypingProgress.t ->
     Errors.t ->
     Diagnostic_pusher.t option ->
     Diagnostic_pusher.t option * seconds_since_epoch option =
@@ -584,7 +545,7 @@ let possibly_push_new_errors_to_lsp_client :
   | None -> (None, None)
   | Some diag ->
     let rechecked =
-      progress.completed
+      TypingProgress.completed progress
       |> List.filter_map ~f:(function
              | Check { path; was_already_deferred = _ } -> Some path
              | Declare _
@@ -620,7 +581,7 @@ let merge
     (time_first_error : seconds_since_epoch option ref)
     ( (worker_id : string),
       (produced_by_job : typing_result),
-      ({ kind = progress_kind; progress : typing_progress } : job_progress) )
+      ({ kind = progress_kind; progress : TypingProgress.t } : job_progress) )
     (acc : typing_result) : typing_result =
   (* Update batch count *)
   begin
@@ -650,16 +611,23 @@ let merge
   end;
 
   workitems_to_process :=
-    BigList.append progress.remaining !workitems_to_process;
+    BigList.append (TypingProgress.remaining progress) !workitems_to_process;
 
   (* Let's also prepend the deferred files! *)
-  workitems_to_process := BigList.append progress.deferred !workitems_to_process;
+  workitems_to_process :=
+    BigList.append (TypingProgress.deferred progress) !workitems_to_process;
 
   (* Prefetch the deferred files, if necessary *)
   workitems_to_process :=
-    if should_prefetch_deferred_files && List.length progress.deferred > 10 then
+    if
+      should_prefetch_deferred_files
+      && List.length (TypingProgress.deferred progress) > 10
+    then
       let files_to_prefetch =
-        List.fold progress.deferred ~init:[] ~f:(fun acc computation ->
+        List.fold
+          (TypingProgress.deferred progress)
+          ~init:[]
+          ~f:(fun acc computation ->
             match computation with
             | Declare (path, _) -> path :: acc
             | _ -> acc)
@@ -686,7 +654,7 @@ let merge
           | _ -> acc
         end
         | _ -> acc)
-      progress.completed
+      (TypingProgress.completed progress)
   in
 
   (* Deferred type check computations should be subtracted from completed
@@ -698,7 +666,9 @@ let merge
     | Check _ -> true
     | _ -> false
   in
-  let deferred_check_count = List.count ~f:is_check progress.deferred in
+  let deferred_check_count =
+    List.count ~f:is_check (TypingProgress.deferred progress)
+  in
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
@@ -751,11 +721,7 @@ let next
        writing OCaml or anything. *)
     workitems_to_process := remaining_jobs;
     List.iter ~f:(Hash_set.Poly.add workitems_in_progress) current_bucket;
-    Bucket.Job
-      {
-        kind;
-        progress = { completed = []; remaining = current_bucket; deferred = [] };
-      }
+    Bucket.Job { kind; progress = TypingProgress.init current_bucket }
   in
   fun () ->
     Measure.time ~record "time" @@ fun () ->
@@ -1131,8 +1097,11 @@ let process_in_parallel
             |> Option.value ~default:0)
           typing_result
           progress.progress
-      | DelegateProgress job -> Delegate.process job
-      | SimpleDelegateProgress job -> Delegate.process job
+      | DelegateProgress job
+      | SimpleDelegateProgress job ->
+        let (result, completed) = Delegate.process job in
+        let progress = TypingProgress.of_completed completed in
+        (result, progress)
     in
     (worker_id, typing_result, { progress with progress = computation_progress })
   in
@@ -1161,7 +1130,9 @@ let process_in_parallel
   in
   let paths_of (unfinished : job_progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : job_progress) =
-      let cancelled_computations = cancelled_progress.progress.remaining in
+      let cancelled_computations =
+        TypingProgress.remaining cancelled_progress.progress
+      in
       let paths_of paths (cancelled_workitem : workitem) =
         match cancelled_workitem with
         | Check { path; _ } -> path :: paths

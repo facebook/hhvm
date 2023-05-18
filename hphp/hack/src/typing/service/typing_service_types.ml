@@ -28,16 +28,85 @@ type remote_computation_payload = {
 }
 [@@deriving show]
 
-(** This type is used for both input and output of typechecker jobs.
-INPUT: [remaining] is the list of files that this job is expected to process, and [completed], [deferred] are empty.
-OUTPUT: all the files that were processed by the job are placed in [completed] or [deferred];
-if the job had to stop early, then [remaining] are the leftover files that the job failed to process. *)
-type typing_progress = {
-  remaining: workitem list;
-  completed: workitem list;
-  deferred: workitem list;
-}
-[@@deriving show]
+module TypingProgress : sig
+  type t
+
+  type progress_outcome = {
+    deferred_workitems: workitem list;
+    continue: bool;
+  }
+
+  val init : workitem list -> t
+
+  val of_completed : workitem list -> t
+
+  val remaining : t -> workitem list
+
+  val completed : t -> workitem list
+
+  val deferred : t -> workitem list
+
+  val progress_through :
+    init:'acc -> t -> (workitem -> 'acc -> progress_outcome * 'acc) -> t * 'acc
+end = struct
+  (** This type is used for both input and output of typechecker jobs.
+    INPUT: [remaining] is the list of files that this job is expected to process, and [completed], [deferred] are empty.
+    OUTPUT: all the files that were processed by the job are placed in [completed] or [deferred];
+    if the job had to stop early, then [remaining] are the leftover files that the job failed to process. *)
+  type t = {
+    remaining: workitem list;
+    completed: workitem list;
+    deferred: workitem list;
+  }
+
+  type progress_outcome = {
+    deferred_workitems: workitem list;
+    continue: bool;
+  }
+
+  let init remaining = { remaining; completed = []; deferred = [] }
+
+  let of_completed completed = { remaining = []; completed; deferred = [] }
+
+  let remaining t = t.remaining
+
+  let completed t = t.completed
+
+  let deferred t = t.deferred
+
+  let advance
+      ({ remaining; completed; deferred } : t)
+      (acc : 'acc)
+      (f : workitem -> 'acc -> progress_outcome * 'acc) :
+      (t * 'acc * bool) option =
+    match remaining with
+    | [] -> None
+    | x :: remaining ->
+      let ({ deferred_workitems; continue }, acc) = f x acc in
+      let progress =
+        {
+          remaining;
+          completed = x :: completed;
+          deferred = deferred_workitems @ deferred;
+        }
+      in
+      Some (progress, acc, continue)
+
+  let progress_through
+      ~(init : 'acc)
+      (progress : t)
+      (f : workitem -> 'acc -> progress_outcome * 'acc) : t * 'acc =
+    let rec go (progress : t) (acc : 'acc) =
+      match advance progress acc f with
+      | None -> (progress, acc)
+      | Some (progress, acc, continue) ->
+        if continue then
+          go progress acc
+        else
+          (progress, acc)
+    in
+    go progress init
+end
 
 (** This type is used for both input and output of typechecker jobs.
 It is also used to accumulate the results of all typechecker jobs.
@@ -75,18 +144,16 @@ let accumulate_job_output
         accumulated_so_far.profiling_info;
   }
 
-type delegate_job_sig = unit -> typing_result * typing_progress
-
-type simple_delegate_job_sig = unit -> typing_result * typing_progress
+type delegate_job_sig = unit -> typing_result * workitem list
 
 type progress_kind =
   | Progress
   | DelegateProgress of delegate_job_sig
-  | SimpleDelegateProgress of simple_delegate_job_sig
+  | SimpleDelegateProgress of delegate_job_sig
 
 type job_progress = {
   kind: progress_kind;
-  progress: typing_progress;
+  progress: TypingProgress.t;
 }
 
 type check_info = {

@@ -161,7 +161,7 @@ module Common = struct
     in
     (claim, reasons)
 
-  let eval_assert ctx current_span (code, reasons, quickfixes) : error option =
+  let eval_assert ctx current_span (code, reasons) : error option =
     match Lazy.force reasons with
     | (pos, msg) :: rest as reasons ->
       let (claim, reasons) =
@@ -177,7 +177,7 @@ module Common = struct
             ~current_span
             reasons
       in
-      Some (code, claim, lazy reasons, quickfixes)
+      Some (code, claim, lazy reasons, [])
     | _ -> None
 end
 
@@ -4920,13 +4920,8 @@ end = struct
                    @@ Eval_callback.apply cb ~code ~claim ~reasons ~quickfixes))
       | Apply_reasons (cb, snd_err) ->
         k
-        @@ Eval_result.bind ~f:(fun (code, reasons, quickfixes) ->
-               Eval_reasons_callback.apply_help
-                 cb
-                 ~code
-                 ~reasons
-                 ~quickfixes
-                 ~current_span)
+        @@ Eval_result.bind ~f:(fun (code, reasons) ->
+               Eval_reasons_callback.apply_help cb ~code ~reasons ~current_span)
         @@ Eval_secondary.eval snd_err ~current_span
       | Assert_in_current_decl (snd_err, ctx) ->
         k
@@ -4955,8 +4950,7 @@ and Eval_secondary : sig
   val eval :
     Typing_error.Secondary.t ->
     current_span:Pos.t ->
-    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Pos.t Quickfix.t list)
-    Eval_result.t
+    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t) Eval_result.t
 end = struct
   let fun_too_many_args pos decl_pos actual expected =
     let reasons =
@@ -4970,7 +4964,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    (Error_code.FunTooManyArgs, reasons, [])
+    (Error_code.FunTooManyArgs, reasons)
 
   let fun_too_few_args pos decl_pos actual expected =
     let reasons =
@@ -4984,7 +4978,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    (Error_code.FunTooFewArgs, reasons, [])
+    (Error_code.FunTooFewArgs, reasons)
 
   let fun_unexpected_nonvariadic pos decl_pos =
     let reasons =
@@ -4994,7 +4988,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    (Error_code.FunUnexpectedNonvariadic, reasons, [])
+    (Error_code.FunUnexpectedNonvariadic, reasons)
 
   let fun_variadicity_hh_vs_php56 pos decl_pos =
     let reasons =
@@ -5004,7 +4998,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    (Error_code.FunVariadicityHhVsPhp56, reasons, [])
+    (Error_code.FunVariadicityHhVsPhp56, reasons)
 
   let type_arity_mismatch pos actual decl_pos expected =
     let reasons =
@@ -5014,7 +5008,7 @@ end = struct
           (decl_pos, "This one has " ^ string_of_int expected);
         ]
     in
-    (Error_code.TypeArityMismatch, reasons, [])
+    (Error_code.TypeArityMismatch, reasons)
 
   let violated_constraint cstrs reasons =
     let reason =
@@ -5032,7 +5026,7 @@ end = struct
           let msgs = List.concat_map ~f cstrs in
           msgs @ reasons)
     in
-    (Error_code.TypeConstraintViolation, reason, [])
+    (Error_code.TypeConstraintViolation, reason)
 
   let concrete_const_interface_override pos parent_pos name parent_origin =
     let reasons =
@@ -5049,7 +5043,7 @@ end = struct
             ^ "." );
         ]
     in
-    (Error_code.ConcreteConstInterfaceOverride, reasons, [])
+    (Error_code.ConcreteConstInterfaceOverride, reasons)
 
   let interface_or_trait_const_multiple_defs
       pos origin parent_pos parent_origin name =
@@ -5073,7 +5067,7 @@ end = struct
              ^ "." );
          ])
     in
-    (Error_code.ConcreteConstInterfaceOverride, reasons, [])
+    (Error_code.ConcreteConstInterfaceOverride, reasons)
 
   let interface_typeconst_multiple_defs
       pos parent_pos name origin parent_origin is_abstract =
@@ -5106,7 +5100,7 @@ end = struct
              ^ "." );
          ])
     in
-    (Error_code.ConcreteConstInterfaceOverride, reasons, [])
+    (Error_code.ConcreteConstInterfaceOverride, reasons)
 
   let missing_field pos name decl_pos =
     let reasons =
@@ -5116,7 +5110,7 @@ end = struct
           (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
         ]
     in
-    (Error_code.MissingField, reasons, [])
+    (Error_code.MissingField, reasons)
 
   let shape_fields_unknown pos decl_pos =
     let reasons =
@@ -5130,7 +5124,7 @@ end = struct
           );
         ]
     in
-    (Error_code.ShapeFieldsUnknown, reasons, [])
+    (Error_code.ShapeFieldsUnknown, reasons)
 
   let abstract_tconst_not_allowed pos decl_pos tconst_name =
     let reasons =
@@ -5143,7 +5137,7 @@ end = struct
               (Markdown_lite.md_codify tconst_name) );
         ]
     in
-    (Error_code.AbstractTconstNotAllowed, reasons, [])
+    (Error_code.AbstractTconstNotAllowed, reasons)
 
   let invalid_destructure pos decl_pos ty_name =
     let reasons =
@@ -5155,7 +5149,7 @@ end = struct
           (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
         ]
     in
-    (Error_code.InvalidDestructure, reasons, [])
+    (Error_code.InvalidDestructure, reasons)
 
   let unpack_array_required_argument pos decl_pos =
     let reasons =
@@ -5167,7 +5161,7 @@ end = struct
           (decl_pos, "Definition is here");
         ]
     in
-    (Error_code.SplatArrayRequired, reasons, [])
+    (Error_code.SplatArrayRequired, reasons)
 
   let unpack_array_variadic_argument pos decl_pos =
     let reasons =
@@ -5179,7 +5173,7 @@ end = struct
           (decl_pos, "Definition is here");
         ]
     in
-    (Error_code.SplatArrayRequired, reasons, [])
+    (Error_code.SplatArrayRequired, reasons)
 
   let overriding_prop_const_mismatch pos is_const parent_pos =
     let reasons =
@@ -5192,7 +5186,7 @@ end = struct
          in
          [(pos, msg); (parent_pos, reason_msg)])
     in
-    (Error_code.OverridingPropConstMismatch, reasons, [])
+    (Error_code.OverridingPropConstMismatch, reasons)
 
   let visibility_extends pos vis parent_pos parent_vis =
     let reasons =
@@ -5202,7 +5196,7 @@ end = struct
           (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
         ]
     in
-    (Error_code.VisibilityExtends, reasons, [])
+    (Error_code.VisibilityExtends, reasons)
 
   let visibility_override_internal pos module_name parent_module parent_pos =
     let reasons =
@@ -5224,11 +5218,11 @@ end = struct
                parent_module );
          ])
     in
-    (Error_code.ModuleError, reasons, [])
+    (Error_code.ModuleError, reasons)
 
   let missing_constructor pos =
     let reasons = lazy [(pos, "The constructor is not implemented")] in
-    (Error_code.MissingConstructor, reasons, [])
+    (Error_code.MissingConstructor, reasons)
 
   let accept_disposable_invariant pos decl_pos =
     let reasons =
@@ -5238,7 +5232,7 @@ end = struct
           (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
         ]
     in
-    (Error_code.AcceptDisposableInvariant, reasons, [])
+    (Error_code.AcceptDisposableInvariant, reasons)
 
   let ifc_external_contravariant pos_sub pos_super =
     let reasons =
@@ -5250,7 +5244,7 @@ end = struct
           (pos_sub, "But this parameter is not marked `<<__External>>`");
         ]
     in
-    (Error_code.IFCExternalContravariant, reasons, [])
+    (Error_code.IFCExternalContravariant, reasons)
 
   let required_field_is_optional pos name decl_pos def_pos =
     let reasons =
@@ -5264,7 +5258,7 @@ end = struct
           (def_pos, Markdown_lite.md_codify name ^ " is defined here");
         ]
     in
-    (Error_code.RequiredFieldIsOptional, reasons, [])
+    (Error_code.RequiredFieldIsOptional, reasons)
 
   let return_disposable_mismatch pos_sub is_marked_return_disposable pos_super =
     let reasons =
@@ -5279,7 +5273,7 @@ end = struct
          in
          [(pos_super, msg); (pos_sub, reason_msg)])
     in
-    (Error_code.ReturnDisposableMismatch, reasons, [])
+    (Error_code.ReturnDisposableMismatch, reasons)
 
   let ifc_policy_mismatch pos policy pos_super policy_super =
     let reasons =
@@ -5293,7 +5287,7 @@ end = struct
             ^ policy_super );
         ]
     in
-    (Error_code.IFCPolicyMismatch, reasons, [])
+    (Error_code.IFCPolicyMismatch, reasons)
 
   let override_final pos parent_pos =
     let reasons =
@@ -5303,7 +5297,7 @@ end = struct
           (parent_pos, "It was declared as final");
         ]
     in
-    (Error_code.OverrideFinal, reasons, [])
+    (Error_code.OverrideFinal, reasons)
 
   let override_async pos parent_pos =
     let reasons =
@@ -5313,7 +5307,7 @@ end = struct
           (parent_pos, "It was declared as async");
         ]
     in
-    (Error_code.OverrideAsync, reasons, [])
+    (Error_code.OverrideAsync, reasons)
 
   let override_lsb pos member_name parent_pos =
     let reasons =
@@ -5326,7 +5320,7 @@ end = struct
           (parent_pos, "This is being overridden");
         ]
     in
-    (Error_code.OverrideLSB, reasons, [])
+    (Error_code.OverrideLSB, reasons)
 
   let multiple_concrete_defs pos origin name parent_pos parent_origin class_name
       =
@@ -5355,11 +5349,11 @@ end = struct
              ^ " with a compatible signature." );
          ])
     in
-    (Error_code.MultipleConcreteDefs, reasons, [])
+    (Error_code.MultipleConcreteDefs, reasons)
 
   let cyclic_enum_constraint pos =
     let reasons = lazy [(pos, "Cyclic enum constraint")] in
-    (Error_code.CyclicEnumConstraint, reasons, [])
+    (Error_code.CyclicEnumConstraint, reasons)
 
   let inoutness_mismatch pos decl_pos =
     let reasons =
@@ -5369,7 +5363,7 @@ end = struct
           (decl_pos, "It is incompatible with a normal parameter");
         ]
     in
-    (Error_code.InoutnessMismatch, reasons, [])
+    (Error_code.InoutnessMismatch, reasons)
 
   let decl_override_missing_hint pos =
     let reasons =
@@ -5380,7 +5374,7 @@ end = struct
           );
         ]
     in
-    (Error_code.DeclOverrideMissingHint, reasons, [])
+    (Error_code.DeclOverrideMissingHint, reasons)
 
   let bad_lateinit_override pos parent_pos parent_is_lateinit =
     let reasons =
@@ -5399,7 +5393,7 @@ end = struct
          ])
     in
 
-    (Error_code.BadLateInitOverride, reasons, [])
+    (Error_code.BadLateInitOverride, reasons)
 
   let bad_xhp_attr_required_override pos parent_pos parent_tag tag =
     let reasons =
@@ -5411,7 +5405,7 @@ end = struct
           );
         ]
     in
-    (Error_code.BadXhpAttrRequiredOverride, reasons, [])
+    (Error_code.BadXhpAttrRequiredOverride, reasons)
 
   let coeffect_subtyping pos cap pos_expected cap_expected =
     let reasons =
@@ -5422,7 +5416,7 @@ end = struct
           (pos, "But got a function that requires " ^ Lazy.force cap);
         ]
     in
-    (Error_code.SubtypeCoeffects, reasons, [])
+    (Error_code.SubtypeCoeffects, reasons)
 
   let not_sub_dynamic pos ty_name dynamic_part =
     let reasons =
@@ -5436,7 +5430,7 @@ end = struct
               );
             ])
     in
-    (Error_code.UnifyError, reasons, [])
+    (Error_code.UnifyError, reasons)
 
   let override_method_support_dynamic_type
       pos method_name parent_origin parent_pos =
@@ -5452,7 +5446,7 @@ end = struct
           (parent_pos, "Overridden method is defined here.");
         ]
     in
-    (Error_code.ImplementsDynamic, reasons, [])
+    (Error_code.ImplementsDynamic, reasons)
 
   let readonly_mismatch pos kind reason_sub reason_super =
     let reasons =
@@ -5468,7 +5462,7 @@ end = struct
            :: reason_sub
           @ reason_super))
     in
-    (Error_code.ReadonlyMismatch, reasons, [])
+    (Error_code.ReadonlyMismatch, reasons)
 
   let cross_package_mismatch pos reason_sub reason_super =
     let reasons =
@@ -5477,7 +5471,7 @@ end = struct
         reason_super >>= fun reason_super ->
         return (((pos, "Cross package mismatch") :: reason_sub) @ reason_super))
     in
-    (Error_code.InvalidCrossPackage, reasons, [])
+    (Error_code.InvalidCrossPackage, reasons)
 
   let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
@@ -5488,7 +5482,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, [])
+    (code, reasons)
 
   let typing_too_few_args pos decl_pos actual expected =
     let (code, claim, reasons) =
@@ -5499,7 +5493,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, [])
+    (code, reasons)
 
   let non_object_member pos ctxt ty_name member_name kind decl_pos =
     let (code, claim, reasons) =
@@ -5516,12 +5510,11 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, [])
+    (code, reasons)
 
   let rigid_tvar_escape pos name =
     ( Error_code.RigidTVarEscape,
-      lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")],
-      [] )
+      lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")] )
 
   let smember_not_found pos kind member_name class_name class_pos hint =
     let (code, claim, reasons) =
@@ -5532,7 +5525,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, [])
+    (code, reasons)
 
   let bad_method_override pos member_name =
     let reasons =
@@ -5544,7 +5537,7 @@ end = struct
             ^ " is not compatible with the overridden method" );
         ]
     in
-    (Error_code.BadMethodOverride, reasons, [])
+    (Error_code.BadMethodOverride, reasons)
 
   let bad_prop_override pos member_name =
     let reasons =
@@ -5556,9 +5549,9 @@ end = struct
             ^ " has the wrong type" );
         ]
     in
-    (Error_code.BadMethodOverride, reasons, [])
+    (Error_code.BadMethodOverride, reasons)
 
-  let subtyping_error reasons = (Error_code.UnifyError, reasons, [])
+  let subtyping_error reasons = (Error_code.UnifyError, reasons)
 
   let method_not_dynamically_callable pos parent_pos =
     let reasons =
@@ -5568,7 +5561,7 @@ end = struct
           (pos, "This method is **not**.");
         ]
     in
-    (Error_code.BadMethodOverride, reasons, [])
+    (Error_code.BadMethodOverride, reasons)
 
   let this_final pos_sub pos_super class_name =
     let reasons =
@@ -5578,7 +5571,7 @@ end = struct
          let message2 = "this might not be a " ^ n in
          [(pos_super, message1); (pos_sub, message2)])
     in
-    (Error_code.ThisFinal, reasons, [])
+    (Error_code.ThisFinal, reasons)
 
   let typeconst_concrete_concrete_override pos parent_pos =
     ( Error_code.TypeconstConcreteConcreteOverride,
@@ -5586,8 +5579,7 @@ end = struct
         [
           (pos, "Cannot re-declare this type constant");
           (parent_pos, "Previously defined here");
-        ],
-      [] )
+        ] )
 
   let abstract_concrete_override pos parent_pos kind =
     let reasons =
@@ -5604,7 +5596,7 @@ end = struct
            (parent_pos, "Previously defined here");
          ])
     in
-    (Error_code.AbstractConcreteOverride, reasons, [])
+    (Error_code.AbstractConcreteOverride, reasons)
 
   let override_no_default_typeconst pos parent_pos =
     ( Error_code.OverrideNoDefaultTypeconst,
@@ -5614,13 +5606,11 @@ end = struct
           ( parent_pos,
             "It cannot override an abstract type constant that has a default type"
           );
-        ],
-      [] )
+        ] )
 
   let unsupported_refinement pos =
     ( Error_code.UnsupportedRefinement,
-      lazy [(pos, "Unsupported refinement, only class types can be refined")],
-      [] )
+      lazy [(pos, "Unsupported refinement, only class types can be refined")] )
 
   let missing_class_constant pos class_name const_name =
     ( Error_code.SmemberNotFound,
@@ -5631,8 +5621,7 @@ end = struct
               "Class %s has no constant %s"
               (Render.strip_ns class_name |> Markdown_lite.md_codify)
               (Markdown_lite.md_codify const_name) );
-        ],
-      [] )
+        ] )
 
   let invalid_refined_const_kind
       pos class_name const_name correct_kind wrong_kind =
@@ -5646,8 +5635,7 @@ end = struct
               (Render.strip_ns class_name |> Markdown_lite.md_codify)
               wrong_kind
               correct_kind );
-        ],
-      [] )
+        ] )
 
   let inexact_tconst_access pos id =
     ( Error_code.InexactTConstAccess,
@@ -5655,8 +5643,7 @@ end = struct
         [
           (fst id, "Type member `" ^ snd id ^ "` cannot be accessed");
           (pos, "  on a loose refinement");
-        ],
-      [] )
+        ] )
 
   let violated_refinement_constraint (kind, pos) =
     let kind =
@@ -5665,14 +5652,9 @@ end = struct
       | `Super -> "`super`"
     in
     ( Error_code.UnifyError,
-      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")],
-      [] )
+      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")] )
 
-  let eval t ~current_span :
-      (Error_code.t
-      * Pos_or_decl.t Message.t list Lazy.t
-      * Pos.t Quickfix.t list)
-      Eval_result.t =
+  let eval t ~current_span =
     let open Typing_error.Secondary in
     match t with
     | Of_error err ->
@@ -5683,7 +5665,7 @@ end = struct
               reasons >>= fun xs ->
               return (Message.map ~f:Pos_or_decl.of_raw_pos x :: xs))
           in
-          (code, reasons, []))
+          (code, reasons))
       @@ Eval_error.eval err ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (fun_too_many_args pos decl_pos actual expected)
@@ -5946,7 +5928,7 @@ end = struct
         { claim_opt; reasons_opt; quickfixes_opt; _ } snd_err ~current_span =
       Eval_result.map
         (Eval_secondary.eval snd_err ~current_span)
-        ~f:(fun (code, reasons, quickfixes) ->
+        ~f:(fun (code, reasons) ->
           let reasons_opt =
             Some
               (match reasons_opt with
@@ -5956,13 +5938,7 @@ end = struct
                   rlz >>= fun rlz ->
                   reasons >>= fun reasons -> return (reasons @ rlz)))
           in
-          {
-            code_opt = Some code;
-            claim_opt;
-            reasons_opt;
-            quickfixes_opt =
-              Some (quickfixes @ Option.value ~default:[] quickfixes_opt);
-          })
+          { code_opt = Some code; claim_opt; reasons_opt; quickfixes_opt })
 
     (** Replace any missing values in the error state with those of the error *)
     let with_defaults
@@ -6002,12 +5978,9 @@ end = struct
       | Of_callback (k, claim) ->
         Eval_result.of_option @@ eval_callback k st ~claim
       | Assert_in_current_decl (default, ctx) ->
-        let Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } = st in
+        let Error_state.{ code_opt; reasons_opt; _ } = st in
         let crs =
-          Option.
-            ( value ~default code_opt,
-              value ~default:(lazy []) reasons_opt,
-              value ~default:[] quickfixes_opt )
+          Option.(value ~default code_opt, value ~default:(lazy []) reasons_opt)
         in
         let res_opt = Common.eval_assert ctx current_span crs in
         Eval_result.of_option res_opt

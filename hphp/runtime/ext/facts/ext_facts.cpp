@@ -86,7 +86,7 @@ constexpr size_t kSchemaVersion = 1916337637;
 
 constexpr std::string_view kEUIDPlaceholder = "%{euid}";
 constexpr std::string_view kSchemaPlaceholder = "%{schema}";
-constexpr std::chrono::seconds kDefaultExpirationTime{30 * 60};
+constexpr std::chrono::seconds kDefaultIdleSec{30 * 60};
 constexpr int32_t kDefaultWatchmanRetries = 0;
 
 struct RepoOptionsParseExc : public std::runtime_error {
@@ -184,10 +184,7 @@ bool hasWatchedFileExtension(const std::filesystem::path& path) {
   return ext == ".php" || ext == ".hck" || ext == ".inc";
 }
 
-SQLiteKey getDBKey(
-    const fs::path& root,
-    const folly::dynamic& queryExpr,
-    const RepoOptions& repoOptions) {
+SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   assertx(root.is_absolute());
 
   auto trustedDBPath = [&]() -> fs::path {
@@ -251,7 +248,7 @@ struct WatchmanAutoloadMapKey {
       }
     }();
 
-    auto dbKey = getDBKey(root, queryExpr, repoOptions);
+    auto dbKey = getDBKey(root, repoOptions);
 
     return WatchmanAutoloadMapKey{
         .m_root = std::move(root),
@@ -468,9 +465,9 @@ struct WatchmanAutoloadMapFactory final : public FactsFactory {
 
   /**
    * Delete AutoloadMaps which haven't been accessed in the last
-   * `expirationTime` seconds.
+   * `idleSec` seconds.
    */
-  void garbageCollectUnusedAutoloadMaps(std::chrono::seconds expirationTime);
+  void garbageCollectUnusedAutoloadMaps(std::chrono::seconds idleSec);
 
  private:
   std::mutex m_mutex;
@@ -506,16 +503,11 @@ struct FactsExtension final : Extension {
     m_data = FactsData{};
 
     // An AutoloadMap may be freed after this many seconds since its last use
-    m_data->m_expirationTime = std::chrono::seconds{Config::GetInt64(
-        ini,
-        config,
-        "Autoload.MapIdleGCTimeSeconds",
-        kDefaultExpirationTime.count())};
-    if (m_data->m_expirationTime != kDefaultExpirationTime) {
+    m_data->m_idleSec = std::chrono::seconds{Config::GetInt64(
+        ini, config, "Autoload.MapIdleGCTimeSeconds", kDefaultIdleSec.count())};
+    if (m_data->m_idleSec != kDefaultIdleSec) {
       FTRACE(
-          3,
-          "Autoload.MapIdleGCTimeSeconds = {}\n",
-          m_data->m_expirationTime.count());
+          3, "Autoload.MapIdleGCTimeSeconds = {}\n", m_data->m_idleSec.count());
     }
 
     if (!RO::WatchmanDefaultSocket.empty()) {
@@ -540,7 +532,7 @@ struct FactsExtension final : Extension {
   }
 
   std::chrono::seconds getExpirationTime() const {
-    return m_data->m_expirationTime;
+    return m_data->m_idleSec;
   }
 
   const WatchmanWatcherOpts& getWatchmanWatcherOpts() const {
@@ -551,7 +543,7 @@ struct FactsExtension final : Extension {
   // Add new members to this struct instead of the top level so we can be sure
   // your new member is destroyed at the right time.
   struct FactsData {
-    std::chrono::seconds m_expirationTime{30 * 60};
+    std::chrono::seconds m_idleSec{kDefaultIdleSec};
     std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
     WatchmanWatcherOpts m_watchmanWatcherOpts;
   };
@@ -659,12 +651,12 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
 }
 
 void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
-    std::chrono::seconds expirationTime) {
+    std::chrono::seconds idleSec) {
   auto mapsToRemove = [&]() -> std::vector<std::shared_ptr<FactsStore>> {
     std::unique_lock g{m_mutex};
 
     // If a map was last used before this time, remove it
-    auto deadline = std::chrono::steady_clock::now() - expirationTime;
+    auto deadline = std::chrono::steady_clock::now() - idleSec;
 
     std::vector<WatchmanAutoloadMapKey> keysToRemove;
     for (auto const& [mapKey, _] : m_maps) {

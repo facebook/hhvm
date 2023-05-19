@@ -115,6 +115,13 @@ class ServerListGenerator {
     }
 
     void resetGenerator(Generator* g = nullptr, bool takeOwnership = false) {
+      // This function may get called when Generator is not instantiated.
+      // This can happen if the tier is down and hence the
+      // generator is not even created, but instead serverListAvailable gets
+      // called with empty list
+      if ((gen_ == nullptr) && (g == nullptr)) {
+        return;
+      }
       CHECK((gen_ == nullptr) ^ (g == nullptr)) << gen_ << " " << g;
 
       // Subclasses first call resetGenerator(gen, takeOwnership) after creating

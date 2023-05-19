@@ -7,7 +7,7 @@
  */
 
 #include <fizz/crypto/aead/AEGISCipher.h>
-
+#include <fizz/fizz-config.h>
 #if FIZZ_HAS_AEGIS
 
 #include <folly/lang/CheckedMath.h>
@@ -25,6 +25,7 @@ static_assert(
 namespace {
 
 std::unique_ptr<folly::IOBuf> aegisEncrypt(
+    AEGISCipher::EncryptFn encrypt,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
@@ -57,7 +58,7 @@ std::unique_ptr<folly::IOBuf> aegisEncrypt(
   }
 
   unsigned long long ciphertextLength;
-  int ret = crypto_aead_aegis128l_encrypt(
+  int ret = encrypt(
       output->writableData(),
       &ciphertextLength,
       input.data(),
@@ -74,6 +75,7 @@ std::unique_ptr<folly::IOBuf> aegisEncrypt(
 }
 
 folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
+    AEGISCipher::DecryptFn decrypt,
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
@@ -99,7 +101,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
   }
 
   unsigned long long decryptedLength;
-  if (crypto_aead_aegis128l_decrypt(
+  if (decrypt(
           output->writableData(),
           &decryptedLength,
           nullptr,
@@ -116,15 +118,35 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> aegisDecrypt(
 
 } // namespace
 
-std::unique_ptr<Aead> AEGISCipher::makeCipher() {
+AEGISCipher::AEGISCipher(
+    EncryptFn encrypt,
+    DecryptFn decrypt,
+    size_t keyLength,
+    size_t ivLength,
+    size_t tagLength)
+    : encrypt_(encrypt),
+      decrypt_(decrypt),
+      keyLength_(keyLength),
+      ivLength_(ivLength),
+      tagLength_(tagLength) {}
+
+std::unique_ptr<Aead> AEGISCipher::make128L() {
   return std::unique_ptr<Aead>(new AEGISCipher(
+      crypto_aead_aegis128l_encrypt,
+      crypto_aead_aegis128l_decrypt,
       crypto_aead_aegis128l_KEYBYTES,
       crypto_aead_aegis128l_NPUBBYTES,
       crypto_aead_aegis128l_ABYTES));
 }
 
-AEGISCipher::AEGISCipher(size_t keyLength, size_t ivLength, size_t tagLength)
-    : keyLength_(keyLength), ivLength_(ivLength), tagLength_(tagLength) {}
+std::unique_ptr<Aead> AEGISCipher::make256() {
+  return std::unique_ptr<Aead>(new AEGISCipher(
+      crypto_aead_aegis256_encrypt,
+      crypto_aead_aegis256_decrypt,
+      crypto_aead_aegis256_KEYBYTES,
+      crypto_aead_aegis256_NPUBBYTES,
+      crypto_aead_aegis256_ABYTES));
+}
 
 void AEGISCipher::setKey(TrafficKey trafficKey) {
   trafficKey.key->coalesce();
@@ -167,6 +189,7 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::encrypt(
     folly::ByteRange nonce,
     Aead::AeadOptions /*options*/) const {
   return aegisEncrypt(
+      encrypt_,
       std::move(plaintext),
       associatedData,
       nonce,
@@ -202,7 +225,12 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
     folly::ByteRange nonce,
     Aead::AeadOptions /*options*/) const {
   return aegisDecrypt(
-      std::move(ciphertext), associatedData, nonce, tagLength_, trafficKeyKey_);
+      decrypt_,
+      std::move(ciphertext),
+      associatedData,
+      nonce,
+      tagLength_,
+      trafficKeyKey_);
 }
 
 size_t AEGISCipher::getCipherOverhead() const {

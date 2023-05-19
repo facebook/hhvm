@@ -5,8 +5,8 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-#pragma once
 
+#pragma once
 #include <fizz/fizz-config.h>
 
 #if FIZZ_HAS_AEGIS
@@ -23,9 +23,31 @@
 namespace fizz {
 class AEGISCipher : public Aead {
  public:
+  using EncryptFn = int (*const)(
+      unsigned char* c,
+      unsigned long long* clen_p,
+      const unsigned char* m,
+      unsigned long long mlen,
+      const unsigned char* ad,
+      unsigned long long adlen,
+      const unsigned char* nsec,
+      const unsigned char* npub,
+      const unsigned char* k);
+  using DecryptFn = int (*const)(
+      unsigned char* m,
+      unsigned long long* mlen_p,
+      unsigned char* nsec,
+      const unsigned char* c,
+      unsigned long long clen,
+      const unsigned char* ad,
+      unsigned long long adlen,
+      const unsigned char* npub,
+      const unsigned char* k);
+
   static constexpr size_t kMaxIVLength = 32;
 
-  static std::unique_ptr<Aead> makeCipher();
+  static std::unique_ptr<Aead> make128L();
+  static std::unique_ptr<Aead> make256();
 
   void setKey(TrafficKey trafficKey) override;
   folly::Optional<TrafficKey> getKey() const override;
@@ -75,7 +97,12 @@ class AEGISCipher : public Aead {
   }
 
  private:
-  AEGISCipher(size_t keyLength, size_t ivLength, size_t tagLength);
+  AEGISCipher(
+      EncryptFn encrypt,
+      DecryptFn decrypt,
+      size_t keyLength,
+      size_t ivLength,
+      size_t tagLength);
 
   std::array<uint8_t, kMaxIVLength> createIV(uint64_t seqNum) const;
 
@@ -85,10 +112,11 @@ class AEGISCipher : public Aead {
   size_t headroom_{0};
 
   // set by the ctor
+  EncryptFn encrypt_;
+  DecryptFn decrypt_;
   size_t keyLength_;
   size_t ivLength_;
   size_t tagLength_;
 };
 } // namespace fizz
-
 #endif

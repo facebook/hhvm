@@ -15,7 +15,9 @@ HashFunction getHashFunction(CipherSuite cipher) {
     case CipherSuite::TLS_AES_128_GCM_SHA256:
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
     case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
+    case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
       return HashFunction::Sha256;
+    case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
     case CipherSuite::TLS_AES_256_GCM_SHA384:
       return HashFunction::Sha384;
   }

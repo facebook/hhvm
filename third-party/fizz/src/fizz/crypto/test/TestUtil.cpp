@@ -7,6 +7,11 @@
  */
 
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/fizz-config.h>
+
+#if FIZZ_HAS_AEGIS
+#include <fizz/crypto/aead/AEGISCipher.h>
+#endif
 
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/AESGCM256.h>
@@ -90,6 +95,14 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
       cipher = OpenSSLEVPCipher::makeCipher<AESOCB128>();
       break;
+#if FIZZ_HAS_AEGIS
+    case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
+      cipher = AEGISCipher::make128L();
+      break;
+    case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
+      cipher = AEGISCipher::make256();
+      break;
+#endif
     default:
       throw std::runtime_error("Invalid cipher");
   }

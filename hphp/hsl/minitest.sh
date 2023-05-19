@@ -8,11 +8,6 @@ fi
 
 if [ -z "$HHVM_BIN" ]; then
   HHVM_BIN="hhvm"
-
-  FBCODE_BUCK_HHVM="$(dirname "$0")/../../buck-out/gen/hphp/hhvm/hhvm/hhvm"
-  if [ -x "$FBCODE_BUCK_HHVM" ]; then
-    HHVM_BIN=$(realpath "$FBCODE_BUCK_HHVM")
-  fi
 fi
 
 if [ -e "hphp/hsl/.hhconfig" ]; then

@@ -307,19 +307,6 @@ namespace HH\Facts {
     classname<\HH\FileAttribute> $attribute,
   )[]: vec<dynamic>;
 
-  /**
-   * Return all symbols defined in the repo, as a dict mapping each symbol
-   * name to the path where the symbol lives in the repo.
-   *
-   * If a symbol is defined in more than one path, one of the paths defining the
-   * symbol will be chosen in an unspecified manner.
-   */
-  function all_modules()[]: dict<string, string>;
-  function all_types()[]: dict<classname<mixed>, string>;
-  function all_functions()[]: dict<string, string>;
-  function all_constants()[]: dict<string, string>;
-  function all_type_aliases()[]: dict<string, string>;
-
   type AttributeData = shape(
     'name' => string,
     'args' => vec<?arraykey>,

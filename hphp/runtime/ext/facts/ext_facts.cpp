@@ -925,22 +925,6 @@ Array HHVM_FUNCTION(
   return Facts::getFactsOrThrow().getFileAttrArgs(file, attr);
 }
 
-Array HHVM_FUNCTION(facts_all_types) {
-  return Facts::getFactsOrThrow().getAllTypes();
-}
-Array HHVM_FUNCTION(facts_all_functions) {
-  return Facts::getFactsOrThrow().getAllFunctions();
-}
-Array HHVM_FUNCTION(facts_all_constants) {
-  return Facts::getFactsOrThrow().getAllConstants();
-}
-Array HHVM_FUNCTION(facts_all_type_aliases) {
-  return Facts::getFactsOrThrow().getAllTypeAliases();
-}
-Array HHVM_FUNCTION(facts_all_modules) {
-  return Facts::getFactsOrThrow().getAllModules();
-}
-
 Array HHVM_FUNCTION(
     facts_extract,
     const Array& alteredPathsAndHashesArr,
@@ -1081,11 +1065,6 @@ void FactsExtension::moduleInit() {
   HHVM_NAMED_FE(
       HH\\Facts\\file_attribute_parameters,
       HHVM_FN(facts_file_attribute_parameters));
-  HHVM_NAMED_FE(HH\\Facts\\all_types, HHVM_FN(facts_all_types));
-  HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
-  HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
-  HHVM_NAMED_FE(HH\\Facts\\all_type_aliases, HHVM_FN(facts_all_type_aliases));
-  HHVM_NAMED_FE(HH\\Facts\\all_modules, HHVM_FN(facts_all_modules));
   HHVM_NAMED_FE(HH\\Facts\\extract, HHVM_FN(facts_extract));
   loadSystemlib();
 

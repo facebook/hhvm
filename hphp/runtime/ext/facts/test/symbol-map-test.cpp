@@ -471,16 +471,6 @@ struct MockAutoloadDB : public AutoloadDB {
    */
   MOCK_METHOD(MultiResult<PathAndHash>, getAllPathsAndHashes, (), (override));
 
-  /**
-   * Return a list of all symbols and paths defined in the given root.
-   *
-   * Returns results in the form of a lazy generator.
-   */
-  MOCK_METHOD(MultiResult<SymbolPath>, getAllTypePaths, (), (override));
-  MOCK_METHOD(MultiResult<SymbolPath>, getAllFunctionPaths, (), (override));
-  MOCK_METHOD(MultiResult<SymbolPath>, getAllConstantPaths, (), (override));
-  MOCK_METHOD(MultiResult<SymbolPath>, getAllModulePaths, (), (override));
-
   MOCK_METHOD(void, insertClock, (const Clock& clock), (override));
   MOCK_METHOD(Clock, getClock, (), (override));
   MOCK_METHOD(void, runPostBuildOptimizations, (), (override));
@@ -1089,7 +1079,6 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
   update(m1, "", "1:2:3", {path1, path2}, {}, {ff, ff});
   EXPECT_EQ(m1.getFileTypes(path1).at(0).slice(), "SomeClass");
   EXPECT_EQ(m1.getFileTypes(path2).at(0).slice(), "SomeClass");
-  EXPECT_EQ(m1.getAllPaths().size(), 2);
 
   m1.waitForDBUpdate();
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
@@ -1099,42 +1088,6 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
 
   EXPECT_EQ(m2.getFileTypes(path1).at(0).slice(), "SomeClass");
   EXPECT_EQ(m2.getFileTypes(path2).at(0).slice(), "SomeClass");
-  EXPECT_EQ(m2.getAllPaths().size(), 2);
-}
-
-TEST_F(SymbolMapTest, getAllSymbols) {
-  auto& m = make("/var/www");
-
-  FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
-           {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {"SomeFunction"},
-      .m_constants = {"SOME_CONSTANT"}};
-
-  fs::path p = {"some/path.php"};
-
-  update(m, "", "1", {p}, {}, {ff});
-
-  auto typePaths = m.getAllTypes();
-  EXPECT_EQ(typePaths.size(), 1);
-  EXPECT_EQ(typePaths.at(0).first.slice(), "SomeClass");
-  EXPECT_EQ(typePaths.at(0).second.slice(), p.native());
-
-  auto functionPaths = m.getAllFunctions();
-  EXPECT_EQ(functionPaths.size(), 1);
-  EXPECT_EQ(functionPaths.at(0).first.slice(), "SomeFunction");
-  EXPECT_EQ(functionPaths.at(0).second.slice(), p.native());
-
-  auto constantPaths = m.getAllConstants();
-  EXPECT_EQ(constantPaths.size(), 1);
-  EXPECT_EQ(constantPaths.at(0).first.slice(), "SOME_CONSTANT");
-  EXPECT_EQ(constantPaths.at(0).second.slice(), p.native());
-
-  auto typeAliasPaths = m.getAllTypeAliases();
-  EXPECT_EQ(typeAliasPaths.size(), 1);
-  EXPECT_EQ(typeAliasPaths.at(0).first.slice(), "SomeTypeAlias");
-  EXPECT_EQ(typeAliasPaths.at(0).second.slice(), p.native());
 }
 
 TEST_F(SymbolMapTest, CopiedFile) {
@@ -1180,16 +1133,13 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   waitForDB(m1, m_exec);
-  EXPECT_EQ(m1.getAllPaths().begin()->slice(), path.native());
 
   update(m2, "1:2:3", "1:2:4", {}, {path}, {});
   waitForDB(m2, m_exec);
   EXPECT_EQ(m2.getTypeFile("SomeClass"), nullptr);
-  EXPECT_TRUE(m2.getAllPaths().empty());
 
   update(m3, "1:2:4", "1:2:4", {}, {}, {});
   EXPECT_EQ(m3.getTypeFile("SomeClass"), nullptr);
-  EXPECT_TRUE(m3.getAllPaths().empty());
 }
 
 TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
@@ -1204,7 +1154,6 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
   // `update()` throws and we don't change any data in `m`.
   ASSERT_THROW(update(m, "4:5:6", "4:5:7", {path}, {}, {ff}), UpdateExc);
   EXPECT_EQ(m.getTypeFile("SomeClass"), nullptr);
-  EXPECT_TRUE(m.getAllPaths().empty());
 }
 
 TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {

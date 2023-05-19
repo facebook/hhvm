@@ -454,18 +454,6 @@ Array makeVecOfDynamic(DynamicIterable&& vector) {
   return ret.toArray();
 }
 
-/**
- * Create a `dict<string, string>` out of a container of static strings.
- */
-template <typename PairContainer>
-Array makeDictOfStringToString(PairContainer&& vector) {
-  auto ret = DictInit{vector.size()};
-  for (auto&& [k, v] : std::forward<PairContainer>(vector)) {
-    ret.set(StrNR{k.get()}, make_tv<KindOfPersistentString>(v.get()));
-  }
-  return ret.toArray();
-}
-
 template <typename F>
 auto logPerformance(std::string_view name, F&& func) {
   using namespace std::chrono_literals;
@@ -863,36 +851,6 @@ struct FactsStoreImpl final
     return logPerformance(__func__, [&]() {
       return makeVecOfDynamic(
           m_map.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
-    });
-  }
-
-  Array getAllTypes() override {
-    return logPerformance(__func__, [&]() {
-      return makeDictOfStringToString(m_map.getAllTypes());
-    });
-  }
-
-  Array getAllFunctions() override {
-    return logPerformance(__func__, [&]() {
-      return makeDictOfStringToString(m_map.getAllFunctions());
-    });
-  }
-
-  Array getAllConstants() override {
-    return logPerformance(__func__, [&]() {
-      return makeDictOfStringToString(m_map.getAllConstants());
-    });
-  }
-
-  Array getAllModules() override {
-    return logPerformance(__func__, [&]() {
-      return makeDictOfStringToString(m_map.getAllModules());
-    });
-  }
-
-  Array getAllTypeAliases() override {
-    return logPerformance(__func__, [&]() {
-      return makeDictOfStringToString(m_map.getAllTypeAliases());
     });
   }
 

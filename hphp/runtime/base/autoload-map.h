@@ -315,19 +315,6 @@ struct FactsStore : public AutoloadMap {
    * If the given file does not have the given attribute, return an empty vec.
    */
   virtual Array getFileAttrArgs(const String& file, const String& attr) = 0;
-
-  /**
-   * Return all symbols defined in the repo, as a dict mapping each symbol
-   * name to the path where the symbol lives in the repo.
-   *
-   * If a symbol is defined in more than one path, one of the paths defining the
-   * symbol will be chosen in an unspecified manner.
-   */
-  virtual Array getAllTypes() = 0;
-  virtual Array getAllFunctions() = 0;
-  virtual Array getAllConstants() = 0;
-  virtual Array getAllTypeAliases() = 0;
-  virtual Array getAllModules() = 0;
 };
 
 } // namespace HPHP

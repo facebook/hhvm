@@ -135,20 +135,6 @@ struct SymbolMap {
   Path getTypeAliasFile(const StringData& typeAlias);
 
   /**
-   * Return all symbols in the repo, along with the relative path defining
-   * them. For large repos, this will be slow.
-   *
-   * Results are returned in an unspecified order. If a symbol is defined in
-   * more than one path, the symbol will appear multiple times in the returned
-   * vector, with each path defining it.
-   */
-  std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypes();
-  std::vector<std::pair<Symbol<SymKind::Function>, Path>> getAllFunctions();
-  std::vector<std::pair<Symbol<SymKind::Constant>, Path>> getAllConstants();
-  std::vector<std::pair<Symbol<SymKind::Module>, Path>> getAllModules();
-  std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypeAliases();
-
-  /**
    * Return all symbols of a given kind declared in the given path.
    *
    * These methods may fill the map with information from the SQLite
@@ -434,11 +420,6 @@ struct SymbolMap {
   void waitForDBUpdate();
 
   /**
-   * Return every path we know about.
-   */
-  hphp_hash_set<Path> getAllPaths() const;
-
-  /**
    * Return a map from path to hash for every path we know about.
    */
   hphp_hash_map<Path, SHA1> getAllPathsWithHashes() const;
@@ -612,12 +593,6 @@ struct SymbolMap {
       AutoloadDB& db,
       Path path,
       Symbol<SymKind::Type> derivedType);
-
-  /**
-   * Get all symbols of kind k
-   */
-  template <SymKind k>
-  std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
 
   /**
    * Helper function to read from and write to m_synchronizedData.

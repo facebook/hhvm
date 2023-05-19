@@ -1245,66 +1245,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         }};
   }
 
-  MultiResult<SymbolPath> getAllTypePaths() override {
-    auto query = m_txn.query(m_typeStmts.m_getAll);
-    XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{
-        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
-          q.step();
-          if (!q.row()) {
-            return {};
-          }
-          return SymbolPath{
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
-  }
-
-  MultiResult<SymbolPath> getAllFunctionPaths() override {
-    auto query = m_txn.query(m_functionStmts.m_getAll);
-    XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{
-        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
-          q.step();
-          if (!q.row()) {
-            return {};
-          }
-          return SymbolPath{
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
-  }
-
-  MultiResult<SymbolPath> getAllConstantPaths() override {
-    auto query = m_txn.query(m_constantStmts.m_getAll);
-    XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{
-        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
-          q.step();
-          if (!q.row()) {
-            return {};
-          }
-          return SymbolPath{
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
-  }
-
-  MultiResult<SymbolPath> getAllModulePaths() override {
-    auto query = m_txn.query(m_moduleStmts.m_getAll);
-    XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{
-        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
-          q.step();
-          if (!q.row()) {
-            return {};
-          }
-          return SymbolPath{
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
-  }
-
   void insertClock(const Clock& clock) override {
     auto query = m_txn.query(m_clockStmts.m_insert);
     query.bindString("@clock", clock.m_clock);

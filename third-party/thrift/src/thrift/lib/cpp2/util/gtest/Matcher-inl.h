@@ -28,6 +28,7 @@
 #include <folly/lang/Pretty.h>
 #include <folly/portability/GMock.h>
 
+#include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
 namespace apache::thrift {
@@ -70,7 +71,7 @@ class ThriftFieldMatcher {
   // For field_ref, we want to forward the value pointed to the matcher
   // directly (it's fully transparent).
   // For optional_field_ref, we don't want to do it becase the mental model
-  // is as if it was an std::optional<field_ref>. If we were to forward the
+  // is as if it was an std::optional<T&>. If we were to forward the
   // value, it would be impossible to check if it is empty.
   // Instead, we send the optional_field_ref to the matcher. The user can
   // provide a testing::Optional matcher to match the value contained in it.
@@ -78,20 +79,19 @@ class ThriftFieldMatcher {
   template <typename ThriftStruct>
   class Impl : public testing::MatcherInterface<ThriftStruct> {
    private:
-    using FieldRef = decltype(Accessor{}(std::declval<ThriftStruct>()));
+    using ConstRefThriftStruct = const folly::remove_cvref_t<ThriftStruct>&;
+    using FieldRef = decltype(Accessor{}(std::declval<ConstRefThriftStruct>()));
     using FieldReferenceType = typename FieldRef::reference_type;
     inline static constexpr bool IsOptionalFieldRef =
         std::is_same_v<optional_field_ref<FieldReferenceType>, FieldRef>;
     // See above on why we do this switch
-    using MatchedValue = std::conditional_t<
-        IsOptionalFieldRef,
-        optional_field_ref<FieldReferenceType>,
-        FieldReferenceType>;
+    using MatchedType =
+        std::conditional_t<IsOptionalFieldRef, FieldRef, FieldReferenceType>;
 
    public:
     template <typename MatcherOrPolymorphicMatcher>
     explicit Impl(const MatcherOrPolymorphicMatcher& matcher)
-        : concrete_matcher_(testing::MatcherCast<MatchedValue>(matcher)) {}
+        : concrete_matcher_(testing::SafeMatcherCast<MatchedType>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
       *os << "is an object whose field `" << getFieldName<FieldTag>() << "` ";
@@ -106,26 +106,17 @@ class ThriftFieldMatcher {
     bool MatchAndExplain(
         ThriftStruct obj,
         testing::MatchResultListener* listener) const override {
-      *listener << "whose field `" << getFieldName<FieldTag>() << "` is ";
-      auto val = Accessor{}(obj);
-      // Using gtest internals??
-      // This function does some printing and formatting.
-      // Here we want the same behaviour as other matchers, so
-      // this allows us to save code and stay consistent.
-      // If in later gtest versions this breaks, we can either
-      //  1. use the new functionality looking at how
-      //     testing::FieldMatcher is implemented, or
-      //  2. copy the old implementation here.
-      using testing::internal::MatchPrintAndExplain;
+      *listener << "whose field `" << getFieldName<FieldTag>() << "` ";
+      FieldRef val = Accessor{}(std::as_const(obj));
       if constexpr (IsOptionalFieldRef) {
-        return MatchPrintAndExplain(val, concrete_matcher_, listener);
+        return concrete_matcher_.MatchAndExplain(val, listener);
       } else {
-        return MatchPrintAndExplain(*val, concrete_matcher_, listener);
+        return concrete_matcher_.MatchAndExplain(*val, listener);
       }
     }
 
    private:
-    const testing::Matcher<MatchedValue> concrete_matcher_;
+    const testing::Matcher<MatchedType> concrete_matcher_;
   }; // class Impl
 
   const InnerMatcher matcher_;
@@ -160,16 +151,16 @@ class IsThriftUnionWithMatcher {
   template <typename ThriftUnion>
   class Impl : public testing::MatcherInterface<ThriftUnion> {
    private:
-    using FieldRef = decltype(Accessor{}(std::declval<ThriftUnion>()));
+    using ConstRefThriftUnion = const folly::remove_cvref_t<ThriftUnion>&;
+    using FieldRef = decltype(Accessor{}(std::declval<ConstRefThriftUnion>()));
     // Unions do not support optional fields, so this is always a concrete
     // value (no optional_ref)
-    using FieldReferenceType = typename FieldRef::reference_type;
+    using MatchedType = typename FieldRef::reference_type;
 
    public:
     template <typename MatcherOrPolymorphicMatcher>
     explicit Impl(const MatcherOrPolymorphicMatcher& matcher)
-        : concrete_matcher_(testing::MatcherCast<FieldReferenceType>(matcher)) {
-    }
+        : concrete_matcher_(testing::SafeMatcherCast<MatchedType>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
       *os << "is an union with `" << getFieldName<FieldTag>()
@@ -195,12 +186,11 @@ class IsThriftUnionWithMatcher {
             using tag = typename descriptor::metadata::tag;
             auto active = fatal::enum_to_string(obj.getType(), "unknown");
             if constexpr (std::is_same_v<FieldTag, tag>) {
-              *listener << "whose active member `" << active << "` is ";
-              matches = testing::internal::MatchPrintAndExplain(
-                  descriptor::get(obj), concrete_matcher_, listener);
+              *listener << "whose active member `" << active << "` ";
+              matches = concrete_matcher_.MatchAndExplain(
+                  descriptor::get(std::as_const(obj)), listener);
             } else {
-              *listener << "whose active member `" << active << "` is "
-                        << testing::PrintToString(descriptor::get(obj));
+              *listener << "whose active member is `" << active << "`";
               matches = false;
             }
           });
@@ -212,7 +202,7 @@ class IsThriftUnionWithMatcher {
     }
 
    private:
-    const testing::Matcher<FieldReferenceType> concrete_matcher_;
+    const testing::Matcher<MatchedType> concrete_matcher_;
   }; // class Impl
 
   const InnerMatcher matcher_;

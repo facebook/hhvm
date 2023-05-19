@@ -126,3 +126,13 @@ TEST(
   EXPECT_THAT(r, IsThriftUnionWith<field::b>(_));
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(r, IsThriftUnionWith<field::a>(_)), "");
 }
+
+TEST(MatcherTest_ThriftMacher, CanBindToRValueMatcher) {
+  namespace field = apache::thrift::ident;
+  testing::Matcher<Person&&> _ = ThriftField<field::id>(testing::_);
+}
+
+TEST(ThriftMacher_Union, CanBindToRValueMatcher) {
+  namespace field = apache::thrift::ident;
+  testing::Matcher<SameType&&> _ = IsThriftUnionWith<field::a>(testing::_);
+}

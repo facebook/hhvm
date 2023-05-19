@@ -3617,17 +3617,9 @@ and expr_
         (env, supertype)
     in
     let (env, result_type) =
-      if
-        List.exists tys ~f:(fun ty ->
-            equal_locl_ty_ (get_node ty) (Typing_utils.tany env))
-      then
-        (* If one of the values comes from PHP land, we have to be conservative
-         * and consider that we don't know what the type of the values are. *)
-        (env, Typing_utils.mk_tany env p)
-      else
-        match bound with
-        | Some ty -> Inter.intersect env ~r:(get_reason ty) ty result_type
-        | None -> (env, result_type)
+      match bound with
+      | Some ty -> Inter.intersect env ~r:(get_reason ty) ty result_type
+      | None -> (env, result_type)
     in
     let exprs =
       List.map2_exn
@@ -9048,7 +9040,6 @@ and call
           match ty with
           | Tprim Tnull -> (env, mk (r, Tprim Tnull))
           | Tdynamic -> (env, MakeType.dynamic (Reason.Rdynamic_call expr_pos))
-          | Tany _ -> (env, Typing_utils.mk_tany env expr_pos)
           | Tvar _ when Typing_utils.is_tyvar_error env efty ->
             Env.fresh_type_error env expr_pos
           | Tunion []

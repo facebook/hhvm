@@ -60,6 +60,7 @@ enum class CrashReportStage {
   SpinOnCrash,
   CheckFD,
   CreateCppStack,
+  CreateCppStackFallback,
   ReportHeader,
   ReportAssertDetail,
   ReportTrap,
@@ -166,13 +167,19 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       }
       // fall through
     case CrashReportStage::CreateCppStack:
-      s_crash_report_stage = CrashReportStage::ReportHeader;
+      s_crash_report_stage = CrashReportStage::CreateCppStackFallback;
 
       // Turn on stack traces for coredumps
       StackTrace::Enabled = true;
       StackTrace::FunctionIgnorelist = s_newIgnorelist;
       StackTrace::FunctionIgnorelistCount = 5;
       st.emplace();
+      // fall through
+    case CrashReportStage::CreateCppStackFallback:
+      s_crash_report_stage = CrashReportStage::ReportHeader;
+      // If the attempt to create the cpp stack failed above, try it
+      // again, using a simpler fallback.
+      if (!st.has_value()) st.emplace(true, true);
       // fall through
     case CrashReportStage::ReportHeader:
       s_crash_report_stage = CrashReportStage::ReportAssertDetail;
@@ -190,7 +197,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 
           return 0;
         }();
-        st->log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
+        StackTraceNoHeap::log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
       }
       // fall through
     case CrashReportStage::ReportAssertDetail:
@@ -231,7 +238,12 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       // flush so if C++ stack walking crashes, we still have this output so far
       ::fsync(fd);
-      st->printStackTrace(fd);
+      if (st.has_value()) {
+        st->printStackTrace(fd);
+      } else {
+        folly::StringPiece msg{"(Unable to obtain cpp stack trace)"};
+        write(fd, msg.begin(), msg.size());
+      }
       // fall through
     case CrashReportStage::ReportPhpStack:
       // flush so if php stack-walking crashes, we still have this output so far

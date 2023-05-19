@@ -402,8 +402,14 @@ std::string StackFrameExtra::toString() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-StackTraceNoHeap::StackTraceNoHeap(bool trace) {
+StackTraceNoHeap::StackTraceNoHeap(bool trace, bool fallback) {
   if (trace && Enabled) {
+#if defined __GLIBC__
+    if (fallback) {
+      m_frame_count = backtrace(m_frames, kMaxFrame);
+      return;
+    }
+#endif
     m_frame_count = get_backtrace<true>(m_frames, kMaxFrame);
   }
 }
@@ -419,7 +425,7 @@ void StackTraceNoHeap::ClearAllExtraLogging() {
 }
 
 void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
-                           int debuggerCount) const {
+                           int debuggerCount) {
   assert(fd >= 0);
 
   printPair(fd, "Host", Process::GetHostName().c_str());

@@ -159,13 +159,13 @@ struct StackTraceNoHeap : StackTraceBase {
    * Construct the curent stacktrace if `trace' is true, else an empty
    * stacktrace.
    */
-  explicit StackTraceNoHeap(bool trace = true);
+  explicit StackTraceNoHeap(bool trace = true, bool fallback = false);
 
   /*
    * Log process/thread information, plus any extra logging that was queued.
    */
-  void log(const char* errorType, int fd, const char* buildId,
-           int debuggerCount) const;
+  static void log(const char* errorType, int fd, const char* buildId,
+                  int debuggerCount);
 
   /*
    * Log the C++ stack trace

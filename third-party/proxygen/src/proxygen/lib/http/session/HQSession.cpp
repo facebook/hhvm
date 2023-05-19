@@ -1228,19 +1228,19 @@ void HQSession::dispatchControlStream(quic::StreamId id,
 }
 
 void HQSession::rejectStream(quic::StreamId id) {
-  // Do not read data for unknown unidirectional stream types.
-  // setReadCallback will send STOP_SENDING and rely on the peer sending a RESET
-  // to clear the stream in the transport. It is safe to stop reading from this
-  // stream. The peer is supposed to reset it on receipt of a STOP_SENDING
   if (!sock_) {
     return;
   }
-  sock_->setReadCallback(
-      id, nullptr, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-  sock_->setPeekCallback(id, nullptr);
+  // Do not read data for unknown unidirectional stream types.  Send
+  // STOP_SENDING and rely on the peer sending a RESET to clear the stream in
+  // the transport, or the transport to detect if the peer has sent everything.
+  VLOG(4) << "rejectStream id=" << id;
+  sock_->stopSending(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   if (sock_->isBidirectionalStream(id)) {
     sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   }
+  sock_->setReadCallback(id, nullptr, folly::none);
+  sock_->setPeekCallback(id, nullptr);
 }
 
 size_t HQSession::cleanupPendingStreams() {

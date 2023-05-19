@@ -266,6 +266,10 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 folly::Optional<ApplicationErrorCode> error) -> ReadCBResult {
               checkNotWriteOnlyStream(id);
               auto& stream = streams_[id];
+              if (cb == nullptr && stream.readCB == nullptr) {
+                // matches real transport
+                return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
+              }
               stream.readCB = cb;
               if (cb == nullptr && error.hasValue()) {
                 stream.error = error.value();

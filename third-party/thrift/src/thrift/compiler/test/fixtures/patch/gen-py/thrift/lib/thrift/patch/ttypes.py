@@ -86,8 +86,8 @@ class PatchOp:
 
 class GeneratePatch:
   r"""
-  An annotation that indicates a patch representation
-  should be generated for the associated definition.
+  An annotation that indicates a patch representation should be generated for
+  the associated definition.
   """
 
   thrift_spec = None

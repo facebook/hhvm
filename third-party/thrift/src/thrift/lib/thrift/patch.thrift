@@ -37,8 +37,8 @@ namespace go thrift.lib.thrift.patch
 namespace py thrift.lib.thrift.patch
 
 /**
- * An annotation that indicates a patch representation
- * should be generated for the associated definition.
+ * An annotation that indicates a patch representation should be generated for
+ * the associated definition.
  */
 @scope.Program
 @scope.Structured

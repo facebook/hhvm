@@ -52,7 +52,7 @@ typedef binary (cpp.type = "folly::fbstring") ByteString
 /**
  * Typedef for binary data.
  *
- * Each language can map this type into a customized memory efficient object
+ * Each language can map this type into a customized memory efficient object.
  * May be used for zero-copy slice of data.
  */
 @java.Adapter{

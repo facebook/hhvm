@@ -120,8 +120,8 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 }
 
 /**
- * An annotation that indicates a patch representation
- * should be generated for the associated definition.
+ * An annotation that indicates a patch representation should be generated for
+ * the associated definition.
  *
  * Original thrift struct:-
  * GeneratePatch

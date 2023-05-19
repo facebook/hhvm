@@ -116,7 +116,7 @@
         "value" : {}
       }
         },
-        "docstring" : "An annotation that indicates a patch representation\nshould be generated for the associated definition.\n",
+        "docstring" : "An annotation that indicates a patch representation should be generated for\nthe associated definition.\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 43

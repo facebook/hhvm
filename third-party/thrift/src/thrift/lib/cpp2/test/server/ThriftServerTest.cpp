@@ -374,7 +374,7 @@ class ServerErrorCallback : public RequestCallback {
   }
   void requestSent() override {}
   void replyReceived(ClientReceiveState&& state) override {
-    header_ = *state.extractHeader();
+    header_ = std::move(*state.extractHeader());
     ew_ = TestServiceAsyncClient::recv_wrapped_voidResponse(state);
     baton_.post();
   }

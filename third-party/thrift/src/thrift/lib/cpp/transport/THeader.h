@@ -139,6 +139,34 @@ using apache::thrift::protocol::T_COMPACT_PROTOCOL;
  */
 class THeader final {
  public:
+  // Non-copiable, but movable. Reasons to avoid copies:
+  //   - Normal request flows should never copy THeader, since they're
+  //     highly performance-sensitive.
+  //   - Additionally, any copy must take special care with thread-safety on
+  //     the objects pointed to by all the copies (e.g.  `httpClientParser_`
+  //     and `routingData_`.
+  //   - When `fds` are **received** into THeader, we require unique ownership
+  //     semantics -- otherwise, any confusion about which copy is allowed
+  //     to close the FD can result in operations on invalid FDs, which
+  //     can trivially cause data loss and worse due to FD reuse.
+  // If your application requires you to copy THeaders that are being sent,
+  // use `copyOrDfatalIfReceived` with due care.  That said, I've only seen
+  // one legitimate use for copying THeader -- creating shadow requests.
+  THeader(const THeader&) = delete;
+  THeader operator=(const THeader&) = delete;
+  THeader(THeader&&) = default;
+  THeader& operator=(THeader&&) = default;
+
+  // The docblock on constructors explains why copying "received" `THeaders`
+  // is not allowed.  Since, the same type is used for "send" and "receive",
+  // we need a runtime check for when FDs are being received.  While it
+  // would be more usable to disallow all "received" copies, there is no way
+  // to distinguish the objects unless they bear FDs.
+  THeader copyOrDfatalIfReceived() const {
+    // Future: handle `fds` here.
+    return THeader(c_);
+  }
+
   enum {
     ALLOW_BIG_FRAMES = 1 << 0,
   };
@@ -483,6 +511,9 @@ class THeader final {
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
   };
+
+  // Supports `copyOrDfatalIfReceived` above.
+  explicit THeader(TriviallyCopiable c) : c_(c) {}
 
   TriviallyCopiable c_;
 };

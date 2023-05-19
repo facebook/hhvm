@@ -120,6 +120,35 @@ struct GenCountGuard {
 
 //////////////////////////////////////////////////////////////////////
 
+char const* getSessionKindName(SessionKind value) {
+  switch(value) {
+    case SessionKind::None: return "None";
+    case SessionKind::DebuggerClient: return "DebuggerClient";
+    case SessionKind::PreloadRepo: return "PreloadRepo";
+    case SessionKind::Watchman: return "Watchman";
+    case SessionKind::Vsdebug: return "VSDebug";
+    case SessionKind::FactsWorker: return "FactsWorker";
+    case SessionKind::CLIServer: return "CLIServer";
+    case SessionKind::AdminPort: return "AdminRequest";
+    case SessionKind::HttpRequest: return "HttpRequest";
+    case SessionKind::RpcRequest: return "RpcRequest";
+    case SessionKind::TranslateWorker: return "TranslateWorker";
+    case SessionKind::Retranslate: return "Retranslate";
+    case SessionKind::RetranslateAll: return "RetranslateAll";
+    case SessionKind::ProfData: return "ProfData";
+    case SessionKind::UnitTests: return "UnitTests";
+    case SessionKind::CompileRepo: return "CompileRepo";
+    case SessionKind::HHBBC: return "HHBBC";
+    case SessionKind::CompilerEmit: return "CompilerEmit";
+    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
+    case SessionKind::CLISession: return "CLISession";
+    case SessionKind::UnitReaper: return "UnitReaper";
+  }
+  return "";
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Get the ID of the thread to abort in case the treadmill gets stuck for too
  * long.  In general, this is the oldest thread, but special treatment is used
@@ -128,11 +157,11 @@ struct GenCountGuard {
  * bulk of the JITing.  In such cases, we want to abort the oldest JIT worker,
  * to capture its backtrace, instead of the main retranslate-all thread.
  */
-pthread_t getThreadIdToAbort() {
+TreadmillRequestInfo getRequestToAbort() {
   int64_t oldestStart = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  TreadmillRequestInfo* oldest = nullptr;
-  TreadmillRequestInfo* oldestWorker = nullptr;
-  for (auto& req : s_inflightRequests) {
+  const TreadmillRequestInfo* oldest = nullptr;
+  const TreadmillRequestInfo* oldestWorker = nullptr;
+  for (auto const& req : s_inflightRequests) {
     if (req.startTime == oldestStart) oldest = &req;
     if (req.sessionKind == SessionKind::TranslateWorker &&
         (oldestWorker == nullptr || req.startTime < oldestWorker->startTime)) {
@@ -141,27 +170,39 @@ pthread_t getThreadIdToAbort() {
   }
   always_assert(oldest != nullptr);
   if (oldest->sessionKind != SessionKind::RetranslateAll) {
-    return oldest->pthreadId;
+    return *oldest;
   }
   if (oldestWorker != nullptr) {
-    return oldestWorker->pthreadId;
+    return *oldestWorker;
   }
-  return oldest->pthreadId;
+  return *oldest;
 }
 
-void checkOldest() {
+void checkOldest(Optional<GenCountGuard>& guard) {
   int64_t limit =
     RuntimeOption::MaxRequestAgeFactor * RuntimeOption::RequestTimeoutSeconds;
   if (debug || !limit) return;
 
-  int64_t ageOldest = getAgeOldestRequest();
-  if (ageOldest > limit) {
-    auto msg = folly::format("Oldest request has been running for {} "
-                             "seconds. Aborting the server.", ageOldest).str();
-    Logger::Error(msg);
-    pthread_t abortTid = getThreadIdToAbort();
-    pthread_kill(abortTid, SIGABRT);
-  }
+  auto const ageOldest = getAgeOldestRequest();
+  if (ageOldest <= limit) return;
+
+  auto const request = getRequestToAbort();
+  auto const msg = folly::sformat(
+    "Oldest request ({}, {}, {}) has been running for {} "
+    "seconds. Aborting the server.",
+    request.requestId,
+    request.startTime,
+    getSessionKindName(request.sessionKind),
+    ageOldest
+  );
+  Logger::Error(msg);
+  // Drop the lock since the SIGABRT we're about to send will try to
+  // acquire it.
+  guard.reset();
+  pthread_kill(request.pthreadId, SIGABRT);
+  // We're going to die, wait for it and don't bother proceeding.
+  ::pause();
+  always_assert(false);
 }
 
 void refreshStats() {
@@ -198,9 +239,11 @@ void startRequest(SessionKind session_kind) {
 
   GenCount startTime = getTime();
   {
-    GenCountGuard g;
+    Optional<GenCountGuard> g;
+    g.emplace();
+
     refreshStats();
-    checkOldest();
+    checkOldest(g);
     if (requestIdx >= s_inflightRequests.size()) {
       s_inflightRequests.resize(
         requestIdx + 1, {kIdleGenCount, 0, 0, SessionKind::None});
@@ -335,33 +378,6 @@ void deferredFree(void* p) {
   enqueue([p] { free(p); });
 }
 
-char const* getSessionKindName(SessionKind value) {
-  switch(value) {
-    case SessionKind::None: return "None";
-    case SessionKind::DebuggerClient: return "DebuggerClient";
-    case SessionKind::PreloadRepo: return "PreloadRepo";
-    case SessionKind::Watchman: return "Watchman";
-    case SessionKind::Vsdebug: return "VSDebug";
-    case SessionKind::FactsWorker: return "FactsWorker";
-    case SessionKind::CLIServer: return "CLIServer";
-    case SessionKind::AdminPort: return "AdminRequest";
-    case SessionKind::HttpRequest: return "HttpRequest";
-    case SessionKind::RpcRequest: return "RpcRequest";
-    case SessionKind::TranslateWorker: return "TranslateWorker";
-    case SessionKind::Retranslate: return "Retranslate";
-    case SessionKind::RetranslateAll: return "RetranslateAll";
-    case SessionKind::ProfData: return "ProfData";
-    case SessionKind::UnitTests: return "UnitTests";
-    case SessionKind::CompileRepo: return "CompileRepo";
-    case SessionKind::HHBBC: return "HHBBC";
-    case SessionKind::CompilerEmit: return "CompilerEmit";
-    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
-    case SessionKind::CLISession: return "CLISession";
-    case SessionKind::UnitReaper: return "UnitReaper";
-  }
-  return "";
-}
-
 std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
   Optional<GenCountGuard> g;
@@ -369,12 +385,14 @@ std::string dumpTreadmillInfo(bool forCrash) {
   if (!forCrash) {
     g.emplace();
   } else {
-    if (pthread_mutex_trylock(&s_genLock) != 0) {
-      folly::format(
-        &out,
-        "Attempting to dump treadmill without acquiring GenCountGuard: {}\n",
-        folly::errnoStr(errno)
-      );
+    // Make an attempt to grab the lock even if we're dumping for a
+    // crash. Only wait one second and then give up. If we don't grab
+    // the lock, then proceed anyways and hope for the best.
+    struct timespec timeout;
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    ++timeout.tv_sec;
+    if (pthread_mutex_timedlock(&s_genLock, &timeout) != 0) {
+      out += "Attempting to dump treadmill without acquiring GenCountGuard\n";
     } else {
       g.emplace(GenCountGuard::Locked{});
     }

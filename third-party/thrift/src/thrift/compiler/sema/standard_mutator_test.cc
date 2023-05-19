@@ -57,24 +57,6 @@ TEST_F(StandardMutatorTest, Empty) {
   mutate();
 }
 
-TEST_F(StandardMutatorTest, GenEnumDefaultValue) {
-  t_program* program = root_program();
-  auto& code = program->add_def(std::make_unique<t_enum>(program, "ErrorCode"));
-  code.append_value(std::make_unique<t_enum_value>("Ok", 0));
-  auto& noZ1 = program->add_def(std::make_unique<t_enum>(program, "NoZero1"));
-  auto& noZ2 = program->add_def(std::make_unique<t_enum>(program, "NoZero2"));
-
-  auto annot = gen::gen_default_enum_value_builder(*program);
-  noZ2.add_structured_annotation(annot.make());
-  program->add_structured_annotation(annot.make("Default"));
-
-  mutate();
-
-  EXPECT_EQ(code.find_value(0)->get_name(), "Ok");
-  EXPECT_EQ(noZ1.find_value(0)->get_name(), "Default");
-  EXPECT_EQ(noZ2.find_value(0)->get_name(), "Unspecified");
-}
-
 TEST_F(StandardMutatorTest, TerseWriteField) {
   t_program* program = root_program();
   auto terse_field =

@@ -41,14 +41,12 @@ class Metasyntactic:
   BAR = 2
   BAZ = 3
   BAX = 4
-  Unspecified = 0
 
   _VALUES_TO_NAMES = {
     1: "FOO",
     2: "BAR",
     3: "BAZ",
     4: "BAX",
-    0: "Unspecified",
   }
 
   _NAMES_TO_VALUES = {
@@ -56,33 +54,32 @@ class Metasyntactic:
     "BAR": 2,
     "BAZ": 3,
     "BAX": 4,
-    "Unspecified": 0,
   }
 
 class MyEnum1:
+  ME1_0 = 0
   ME1_1 = 1
   ME1_2 = 2
   ME1_3 = 3
   ME1_5 = 5
   ME1_6 = 6
-  ME1_0 = 0
 
   _VALUES_TO_NAMES = {
+    0: "ME1_0",
     1: "ME1_1",
     2: "ME1_2",
     3: "ME1_3",
     5: "ME1_5",
     6: "ME1_6",
-    0: "ME1_0",
   }
 
   _NAMES_TO_VALUES = {
+    "ME1_0": 0,
     "ME1_1": 1,
     "ME1_2": 2,
     "ME1_3": 3,
     "ME1_5": 5,
     "ME1_6": 6,
-    "ME1_0": 0,
   }
 
 class MyEnum2:
@@ -133,14 +130,12 @@ class MyEnum4:
   ME4_B = 2147483646
   ME4_C = 2147483647
   ME4_D = -2147483648
-  Unspecified = 0
 
   _VALUES_TO_NAMES = {
     2147483645: "ME4_A",
     2147483646: "ME4_B",
     2147483647: "ME4_C",
     -2147483648: "ME4_D",
-    0: "Unspecified",
   }
 
   _NAMES_TO_VALUES = {
@@ -148,47 +143,40 @@ class MyEnum4:
     "ME4_B": 2147483646,
     "ME4_C": 2147483647,
     "ME4_D": -2147483648,
-    "Unspecified": 0,
   }
 
 class MyBitmaskEnum1:
   ONE = 1
   TWO = 2
   FOUR = 4
-  Unspecified = 0
 
   _VALUES_TO_NAMES = {
     1: "ONE",
     2: "TWO",
     4: "FOUR",
-    0: "Unspecified",
   }
 
   _NAMES_TO_VALUES = {
     "ONE": 1,
     "TWO": 2,
     "FOUR": 4,
-    "Unspecified": 0,
   }
 
 class MyBitmaskEnum2:
   ONE = 1
   TWO = 2
   FOUR = 4
-  Unspecified = 0
 
   _VALUES_TO_NAMES = {
     1: "ONE",
     2: "TWO",
     4: "FOUR",
-    0: "Unspecified",
   }
 
   _NAMES_TO_VALUES = {
     "ONE": 1,
     "TWO": 2,
     "FOUR": 4,
-    "Unspecified": 0,
   }
 
 class SomeStruct:

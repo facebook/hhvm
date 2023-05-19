@@ -2057,12 +2057,6 @@ class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 }
 
 /**
- * Adds a default enum value (0), with the given name, if one is not
- * already defined.
- * 
- * All v1+ enums must have an explicitly defined default value (0).
- * This annotation automatically adds such a value if not already present.
- *
  * Original thrift struct:-
  * GenDefaultEnumValue
  */
@@ -2071,44 +2065,19 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'name',
-      'type' => \TType::STRING,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
-    'name' => 1,
   ];
 
   const type TConstructorShape = shape(
-    ?'name' => ?string,
   );
 
   const type TShape = shape(
-    'name' => string,
     ...
   );
-  const int STRUCTURAL_ID = 2593878277785201336;
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   * 
-   * Original thrift field:-
-   * 1: string name
-   */
-  public string $name;
+  const int STRUCTURAL_ID = 957977401221134810;
 
-  public function __construct(?string $name = null)[] {
-    $this->name = $name ?? "Unspecified";
+  public function __construct()[] {
   }
 
   public static function withDefaultValues()[]: this {
@@ -2117,7 +2086,6 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'name'),
     );
   }
 
@@ -2132,19 +2100,6 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "thrift.GenDefaultEnumValue",
-        "fields" => vec[
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "name",
-            )
-          ),
-        ],
         "is_union" => false,
       )
     );
@@ -2154,10 +2109,6 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\Program' => \facebook\thrift\annotation\Program::fromShape(
           shape(
           )
         ),
@@ -2173,13 +2124,11 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      $shape['name'],
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
-      'name' => $this->name,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -2193,9 +2142,6 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
-    if (idx($parsed, 'name') !== null) {
-      $this->name = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['name']);
-    }
   }
 
 }
@@ -2494,10 +2440,6 @@ class v1beta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
     return shape(
       'struct' => dict[
         '\facebook\thrift\annotation\v1' => \facebook\thrift\annotation\v1::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
           shape(
           )
         ),

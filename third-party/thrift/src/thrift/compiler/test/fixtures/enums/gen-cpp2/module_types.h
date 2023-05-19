@@ -68,18 +68,17 @@ enum class Metasyntactic {
   BAR = 2,
   BAZ = 3,
   BAX = 4,
-  Unspecified = 0,
 };
 
 
 
 enum class MyEnum1 {
+  ME1_0 = 0,
   ME1_1 = 1,
   ME1_2 = 2,
   ME1_3 = 3,
   ME1_5 = 5,
   ME1_6 = 6,
-  ME1_0 = 0,
 };
 
 
@@ -108,7 +107,6 @@ enum class MyEnum4 {
   ME4_B = 2147483646,
   ME4_C = 2147483647,
   ME4_D = -2147483648,
-  Unspecified = 0,
 };
 
 
@@ -117,7 +115,6 @@ enum class MyBitmaskEnum1 {
   ONE = 1,
   TWO = 2,
   FOUR = 4,
-  Unspecified = 0,
 };
 
 
@@ -126,7 +123,6 @@ enum class MyBitmaskEnum2 {
   ONE = 1,
   TWO = 2,
   FOUR = 4,
-  Unspecified = 0,
 };
 
 
@@ -158,7 +154,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::Metasyntactic>;
 template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   using type = ::test::fixtures::enums::Metasyntactic;
 
-  static constexpr std::size_t const size = 5;
+  static constexpr std::size_t const size = 4;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 
@@ -176,7 +172,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
     (void)findName(value, &ret);
     return ret.data();
   }
-  static constexpr type min() { return type::Unspecified; }
+  static constexpr type min() { return type::FOO; }
   static constexpr type max() { return type::BAX; }
 };
 
@@ -270,7 +266,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyEnum4>;
 template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   using type = ::test::fixtures::enums::MyEnum4;
 
-  static constexpr std::size_t const size = 5;
+  static constexpr std::size_t const size = 4;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 
@@ -298,7 +294,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>;
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   using type = ::test::fixtures::enums::MyBitmaskEnum1;
 
-  static constexpr std::size_t const size = 4;
+  static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 
@@ -316,7 +312,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
     (void)findName(value, &ret);
     return ret.data();
   }
-  static constexpr type min() { return type::Unspecified; }
+  static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
 };
 
@@ -326,7 +322,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>;
 template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   using type = ::test::fixtures::enums::MyBitmaskEnum2;
 
-  static constexpr std::size_t const size = 4;
+  static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 
@@ -344,7 +340,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
     (void)findName(value, &ret);
     return ret.data();
   }
-  static constexpr type min() { return type::Unspecified; }
+  static constexpr type min() { return type::ONE; }
   static constexpr type max() { return type::FOUR; }
 };
 

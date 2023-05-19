@@ -52,6 +52,7 @@ if err != nil {
 type PatchOp int32
 
 const (
+    PatchOp_Unspecified PatchOp = 0
     PatchOp_Assign PatchOp = 1
     PatchOp_Clear PatchOp = 2
     PatchOp_PatchPrior PatchOp = 3
@@ -61,12 +62,12 @@ const (
     PatchOp_Remove PatchOp = 7
     PatchOp_Add PatchOp = 8
     PatchOp_Put PatchOp = 9
-    PatchOp_Unspecified PatchOp = 0
 )
 
 // Enum value maps for PatchOp
 var (
     PatchOpToName = map[PatchOp]string {
+        PatchOp_Unspecified: "Unspecified",
         PatchOp_Assign: "Assign",
         PatchOp_Clear: "Clear",
         PatchOp_PatchPrior: "PatchPrior",
@@ -76,10 +77,10 @@ var (
         PatchOp_Remove: "Remove",
         PatchOp_Add: "Add",
         PatchOp_Put: "Put",
-        PatchOp_Unspecified: "Unspecified",
     }
 
     PatchOpToValue = map[string]PatchOp {
+        "Unspecified": PatchOp_Unspecified,
         "Assign": PatchOp_Assign,
         "Clear": PatchOp_Clear,
         "PatchPrior": PatchOp_PatchPrior,
@@ -89,10 +90,10 @@ var (
         "Remove": PatchOp_Remove,
         "Add": PatchOp_Add,
         "Put": PatchOp_Put,
-        "Unspecified": PatchOp_Unspecified,
     }
 
     PatchOpNames = []string{
+        "Unspecified",
         "Assign",
         "Clear",
         "PatchPrior",
@@ -102,10 +103,10 @@ var (
         "Remove",
         "Add",
         "Put",
-        "Unspecified",
     }
 
     PatchOpValues = []PatchOp{
+        PatchOp_Unspecified,
         PatchOp_Assign,
         PatchOp_Clear,
         PatchOp_PatchPrior,
@@ -115,7 +116,6 @@ var (
         PatchOp_Remove,
         PatchOp_Add,
         PatchOp_Put,
-        PatchOp_Unspecified,
     }
 )
 

@@ -48,7 +48,6 @@ void EnumMetadata<::test::fixtures::enums::MyEnum1>::gen(ThriftMetadata& metadat
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("thrift.GenDefaultEnumValue", {{"name", cvString("ME1_0")}}).cv_struct_ref());
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.MyEnum2", ::apache::thrift::metadata::ThriftEnum{});
@@ -61,7 +60,6 @@ void EnumMetadata<::test::fixtures::enums::MyEnum2>::gen(ThriftMetadata& metadat
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("thrift.GenDefaultEnumValue", {}).cv_struct_ref());
 }
 void EnumMetadata<::test::fixtures::enums::MyEnum3>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("module.MyEnum3", ::apache::thrift::metadata::ThriftEnum{});

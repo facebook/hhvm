@@ -16,8 +16,7 @@ public enum Metasyntactic implements com.facebook.thrift.enums.BaseEnum, com.fac
     FOO(1),
     BAR(2),
     BAZ(3),
-    BAX(4),
-    UNSPECIFIED(0);
+    BAX(4);
 
     private final int value;
 
@@ -40,8 +39,6 @@ public enum Metasyntactic implements com.facebook.thrift.enums.BaseEnum, com.fac
             return BAZ;
         case 4:
             return BAX;
-        case 0:
-            return UNSPECIFIED;
         default:
             return null;
         }

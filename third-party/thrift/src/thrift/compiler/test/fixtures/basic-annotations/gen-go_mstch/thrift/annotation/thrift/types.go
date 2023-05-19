@@ -1932,58 +1932,12 @@ func (x *BitmaskEnum) Read(p thrift.Protocol) error {
 
 
 type GenDefaultEnumValue struct {
-    Name string `thrift:"name,1" json:"name" db:"name"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &GenDefaultEnumValue{}
 
 func NewGenDefaultEnumValue() *GenDefaultEnumValue {
-    return (&GenDefaultEnumValue{}).
-        SetNameNonCompat("Unspecified")
-}
-
-func (x *GenDefaultEnumValue) GetNameNonCompat() string {
-    return x.Name
-}
-
-func (x *GenDefaultEnumValue) GetName() string {
-    return x.Name
-}
-
-func (x *GenDefaultEnumValue) SetNameNonCompat(value string) *GenDefaultEnumValue {
-    x.Name = value
-    return x
-}
-
-func (x *GenDefaultEnumValue) SetName(value string) *GenDefaultEnumValue {
-    x.Name = value
-    return x
-}
-
-func (x *GenDefaultEnumValue) writeField1(p thrift.Protocol) error {  // Name
-    if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetNameNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *GenDefaultEnumValue) readField1(p thrift.Protocol) error {  // Name
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetNameNonCompat(result)
-    return nil
+    return (&GenDefaultEnumValue{})
 }
 
 func (x *GenDefaultEnumValue) String() string {
@@ -2002,11 +1956,6 @@ func NewGenDefaultEnumValueBuilder() *GenDefaultEnumValueBuilder {
     }
 }
 
-func (x *GenDefaultEnumValueBuilder) Name(value string) *GenDefaultEnumValueBuilder {
-    x.obj.Name = value
-    return x
-}
-
 func (x *GenDefaultEnumValueBuilder) Emit() *GenDefaultEnumValue {
     var objCopy GenDefaultEnumValue = *x.obj
     return &objCopy
@@ -2015,10 +1964,6 @@ func (x *GenDefaultEnumValueBuilder) Emit() *GenDefaultEnumValue {
 func (x *GenDefaultEnumValue) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GenDefaultEnumValue"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -2047,10 +1992,6 @@ func (x *GenDefaultEnumValue) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 1:  // name
-            if err := x.readField1(p); err != nil {
-                return err
-            }
         default:
             if err := p.Skip(typ); err != nil {
                 return err

@@ -47,6 +47,7 @@ class PatchOp:
   Patch field ids are interpreted at runtime, as a dynamic patch protocol,
   without any additional schema derived from IDL patch definitions.
   """
+  Unspecified = 0
   Assign = 1
   Clear = 2
   PatchPrior = 3
@@ -56,9 +57,9 @@ class PatchOp:
   Remove = 7
   Add = 8
   Put = 9
-  Unspecified = 0
 
   _VALUES_TO_NAMES = {
+    0: "Unspecified",
     1: "Assign",
     2: "Clear",
     3: "PatchPrior",
@@ -68,10 +69,10 @@ class PatchOp:
     7: "Remove",
     8: "Add",
     9: "Put",
-    0: "Unspecified",
   }
 
   _NAMES_TO_VALUES = {
+    "Unspecified": 0,
     "Assign": 1,
     "Clear": 2,
     "PatchPrior": 3,
@@ -81,7 +82,6 @@ class PatchOp:
     "Remove": 7,
     "Add": 8,
     "Put": 9,
-    "Unspecified": 0,
   }
 
 class GeneratePatch:

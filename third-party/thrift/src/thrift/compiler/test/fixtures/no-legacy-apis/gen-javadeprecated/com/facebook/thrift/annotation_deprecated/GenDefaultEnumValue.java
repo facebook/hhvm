@@ -23,42 +23,14 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * Adds a default enum value (0), with the given name, if one is not
- * already defined.
- * 
- * All v1+ enums must have an explicitly defined default value (0).
- * This annotation automatically adds such a value if not already present.
- */
 @SuppressWarnings({ "unused", "serial" })
 public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneable, Comparable<GenDefaultEnumValue> {
   private static final TStruct STRUCT_DESC = new TStruct("GenDefaultEnumValue");
-  private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
-
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   */
-  public String name;
-  public static final int NAME = 1;
-
-  // isset id assignments
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT, 
-        new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -67,30 +39,15 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
   }
 
   public GenDefaultEnumValue() {
-    this.name = "Unspecified";
-
-  }
-
-  public GenDefaultEnumValue(
-      String name) {
-    this();
-    this.name = name;
   }
 
   public static class Builder {
-    private String name;
 
     public Builder() {
     }
 
-    public Builder setName(final String name) {
-      this.name = name;
-      return this;
-    }
-
     public GenDefaultEnumValue build() {
       GenDefaultEnumValue result = new GenDefaultEnumValue();
-      result.setName(this.name);
       return result;
     }
   }
@@ -103,75 +60,14 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
    * Performs a deep copy on <i>other</i>.
    */
   public GenDefaultEnumValue(GenDefaultEnumValue other) {
-    if (other.isSetName()) {
-      this.name = TBaseHelper.deepCopy(other.name);
-    }
   }
 
   public GenDefaultEnumValue deepCopy() {
     return new GenDefaultEnumValue(this);
   }
 
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   */
-  public String getName() {
-    return this.name;
-  }
-
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   */
-  public GenDefaultEnumValue setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public void unsetName() {
-    this.name = null;
-  }
-
-  // Returns true if field name is set (has been assigned a value) and false otherwise
-  public boolean isSetName() {
-    return this.name != null;
-  }
-
-  public void setNameIsSet(boolean __value) {
-    if (!__value) {
-      this.name = null;
-    }
-  }
-
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
-    case NAME:
-      if (__value == null) {
-        unsetName();
-      } else {
-        setName((String)__value);
-      }
-      break;
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -179,9 +75,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
 
   public Object getFieldValue(int fieldID) {
     switch (fieldID) {
-    case NAME:
-      return getName();
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -197,14 +90,12 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
       return false;
     GenDefaultEnumValue that = (GenDefaultEnumValue)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetName(), that.isSetName(), this.name, that.name)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {name});
+    return Arrays.deepHashCode(new Object[] {});
   }
 
   @Override
@@ -219,14 +110,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
     }
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetName()).compareTo(other.isSetName());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(name, other.name);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     return 0;
   }
 
@@ -241,13 +124,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
       }
       switch (__field.id)
       {
-        case NAME:
-          if (__field.type == TType.STRING) {
-            this.name = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -265,11 +141,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.name != null) {
-      oprot.writeFieldBegin(NAME_FIELD_DESC);
-      oprot.writeString(this.name);
-      oprot.writeFieldEnd();
-    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -290,16 +161,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
     sb.append(newLine);
     boolean first = true;
 
-    sb.append(indentStr);
-    sb.append("name");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getName() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getName(), indent + 1, prettyPrint));
-    }
-    first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
     sb.append(")");
     return sb.toString();

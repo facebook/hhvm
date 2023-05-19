@@ -16,8 +16,7 @@ public enum MyEnum4 implements com.facebook.thrift.TEnum {
   ME4_A(2147483645),
   ME4_B(2147483646),
   ME4_C(2147483647),
-  ME4_D(-2147483648),
-  Unspecified(0);
+  ME4_D(-2147483648);
 
   private final int value;
 
@@ -46,8 +45,6 @@ public enum MyEnum4 implements com.facebook.thrift.TEnum {
         return ME4_C;
       case -2147483648:
         return ME4_D;
-      case 0:
-        return Unspecified;
       default:
         return null;
     }

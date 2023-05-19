@@ -21,74 +21,22 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * Adds a default enum value (0), with the given name, if one is not
- * already defined.
- * 
- * All v1+ enums must have an explicitly defined default value (0).
- * This annotation automatically adds such a value if not already present.
- */
 @SuppressWarnings({ "unused", "serial" })
 public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("GenDefaultEnumValue");
-  private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
 
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   */
-  public final String name;
-  public static final int NAME = 1;
 
-  public GenDefaultEnumValue(
-      String name) {
-    this.name = name;
+  public GenDefaultEnumValue() {
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
   public GenDefaultEnumValue(GenDefaultEnumValue other) {
-    if (other.isSetName()) {
-      this.name = TBaseHelper.deepCopy(other.name);
-    } else {
-      this.name = null;
-    }
   }
 
   public GenDefaultEnumValue deepCopy() {
     return new GenDefaultEnumValue(this);
-  }
-
-  /**
-   * The name to use for the generated enum value.
-   * 
-   * This intentionally does **not** use the most common 'zero' enum value name,
-   * 'Default', by default; as, defining a `Default = 0` enum value explicitly
-   * is a useful means of self-documenting that setting an explicit value is
-   * never required. In which case, it is part of the API, and should not be
-   * removed in favor of an implicitly generated value.
-   * 
-   * On the other hand, 'Unspecified' clearly indicates that the requirements
-   * are not intrinsic to the enum. In which case, the relevant documentation
-   * should be consulted (e.g. the doc strings on the function or field).
-   */
-  public String getName() {
-    return this.name;
-  }
-
-  // Returns true if field name is set (has been assigned a value) and false otherwise
-  public boolean isSetName() {
-    return this.name != null;
   }
 
   @Override
@@ -101,14 +49,12 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
       return false;
     GenDefaultEnumValue that = (GenDefaultEnumValue)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetName(), that.isSetName(), this.name, that.name)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {name});
+    return Arrays.deepHashCode(new Object[] {});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -117,7 +63,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
   }
 
   public static GenDefaultEnumValue deserialize(TProtocol iprot) throws TException {
-    String tmp_name = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -128,13 +73,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
       }
       switch (__field.id)
       {
-        case NAME:
-          if (__field.type == TType.STRING) {
-            tmp_name = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -145,7 +83,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
 
     GenDefaultEnumValue _that;
     _that = new GenDefaultEnumValue(
-      tmp_name
     );
     _that.validate();
     return _that;
@@ -155,11 +92,6 @@ public class GenDefaultEnumValue implements TBase, java.io.Serializable, Cloneab
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.name != null) {
-      oprot.writeFieldBegin(NAME_FIELD_DESC);
-      oprot.writeString(this.name);
-      oprot.writeFieldEnd();
-    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }

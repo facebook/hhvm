@@ -15,8 +15,7 @@ import org.apache.thrift.protocol.TProtocol;
 public enum MyBitmaskEnum1 implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
     ONE(1),
     TWO(2),
-    FOUR(4),
-    UNSPECIFIED(0);
+    FOUR(4);
 
     private final int value;
 
@@ -37,8 +36,6 @@ public enum MyBitmaskEnum1 implements com.facebook.thrift.enums.BaseEnum, com.fa
             return TWO;
         case 4:
             return FOUR;
-        case 0:
-            return UNSPECIFIED;
         default:
             return null;
         }

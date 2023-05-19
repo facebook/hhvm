@@ -19,6 +19,7 @@
     "PatchOp" : {
       "lineno" : 262,
       "constants" : {
+        "Unspecified" : 0,
         "Assign" : 1,
         "Clear" : 2,
         "PatchPrior" : 3,
@@ -27,8 +28,7 @@
         "PatchAfter" : 6,
         "Remove" : 7,
         "Add" : 8,
-        "Put" : 9,
-        "Unspecified" : 0
+        "Put" : 9
       },
       "source_range" : {
         "begin" : {
@@ -36,7 +36,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 333,
+          "line" : 334,
           "column" : 2
         }
       }
@@ -44,16 +44,16 @@
   },
   "typedefs" : {
     "ListPatchIndex" : {
-      "lineno" : 336,
+      "lineno" : 337,
       "type_enum" : "I32",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 336,
+          "line" : 337,
           "column" : 1
         },
         "end" : {
-          "line" : 339,
+          "line" : 340,
           "column" : 27
         }
       }

@@ -15,8 +15,7 @@ import java.util.HashMap;
 public enum MyBitmaskEnum2 implements com.facebook.thrift.TEnum {
   ONE(1),
   TWO(2),
-  FOUR(4),
-  Unspecified(0);
+  FOUR(4);
 
   private final int value;
 
@@ -43,8 +42,6 @@ public enum MyBitmaskEnum2 implements com.facebook.thrift.TEnum {
         return TWO;
       case 4:
         return FOUR;
-      case 0:
-        return Unspecified;
       default:
         return null;
     }

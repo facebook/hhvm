@@ -20,6 +20,7 @@ namespace facebook\thrift\op;
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/PatchOp'))>>
 enum PatchOp: int {
+  Unspecified = 0;
   /**
    * Set the value. Supersedes all other ops.
    * 
@@ -86,7 +87,6 @@ enum PatchOp: int {
    * - 'invert' for boolean.
    */
   Put = 9;
-  Unspecified = 0;
 }
 
 class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -95,6 +95,7 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
       shape(
         "name" => "patch.PatchOp",
         "elements" => dict[
+          0 => "Unspecified",
           1 => "Assign",
           2 => "Clear",
           3 => "PatchPrior",
@@ -104,7 +105,6 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           7 => "Remove",
           8 => "Add",
           9 => "Put",
-          0 => "Unspecified",
         ],
       )
     );
@@ -112,12 +112,7 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[
-        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'enum' => dict[],
       'constants' => dict[
       ],
     );

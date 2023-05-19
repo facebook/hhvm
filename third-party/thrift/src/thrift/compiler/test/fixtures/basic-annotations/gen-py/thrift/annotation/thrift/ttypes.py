@@ -1911,31 +1911,10 @@ class BitmaskEnum:
     return self
 
 class GenDefaultEnumValue:
-  r"""
-  Adds a default enum value (0), with the given name, if one is not
-  already defined.
-  
-  All v1+ enums must have an explicitly defined default value (0).
-  This annotation automatically adds such a value if not already present.
-  
-  Attributes:
-   - name: The name to use for the generated enum value.
-  
-  This intentionally does **not** use the most common 'zero' enum value name,
-  'Default', by default; as, defining a `Default = 0` enum value explicitly
-  is a useful means of self-documenting that setting an explicit value is
-  never required. In which case, it is part of the API, and should not be
-  removed in favor of an implicitly generated value.
-  
-  On the other hand, 'Unspecified' clearly indicates that the requirements
-  are not intrinsic to the enum. In which case, the relevant documentation
-  should be consulted (e.g. the doc strings on the function or field).
-  """
 
   thrift_spec = None
   thrift_field_annotations = None
   thrift_struct_annotations = None
-  __init__ = None
   @staticmethod
   def isUnion():
     return False
@@ -1952,11 +1931,6 @@ class GenDefaultEnumValue:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1970,10 +1944,6 @@ class GenDefaultEnumValue:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
     oprot.writeStructBegin('GenDefaultEnumValue')
-    if self.name != None:
-      oprot.writeFieldBegin('name', TType.STRING, 1)
-      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
-      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -1989,16 +1959,10 @@ class GenDefaultEnumValue:
     json_obj = json
     if is_text:
       json_obj = loads(json)
-    if 'name' in json_obj and json_obj['name'] is not None:
-      self.name = json_obj['name']
 
   def __repr__(self):
     L = []
     padding = ' ' * 4
-    if self.name is not None:
-      value = pprint.pformat(self.name, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    name=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -2012,7 +1976,6 @@ class GenDefaultEnumValue:
 
   def __dir__(self):
     return (
-      'name',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -3067,26 +3030,12 @@ BitmaskEnum.thrift_field_annotations = {
 
 all_structs.append(GenDefaultEnumValue)
 GenDefaultEnumValue.thrift_spec = (
-  None, # 0
-  (1, TType.STRING, 'name', True, "Unspecified", 2, ), # 1
 )
 
 GenDefaultEnumValue.thrift_struct_annotations = {
 }
 GenDefaultEnumValue.thrift_field_annotations = {
 }
-
-def GenDefaultEnumValue__init__(self, name=GenDefaultEnumValue.thrift_spec[1][4],):
-  self.name = name
-
-GenDefaultEnumValue.__init__ = GenDefaultEnumValue__init__
-
-def GenDefaultEnumValue__setstate__(self, state):
-  state.setdefault('name', "Unspecified")
-  self.__dict__ = state
-
-GenDefaultEnumValue.__getstate__ = lambda self: self.__dict__.copy()
-GenDefaultEnumValue.__setstate__ = GenDefaultEnumValue__setstate__
 
 all_structs.append(GenEnumSet)
 GenEnumSet.thrift_spec = (

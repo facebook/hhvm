@@ -18,7 +18,6 @@ enum Metasyntactic: int {
   BAR = 2;
   BAZ = 3;
   BAX = 4;
-  Unspecified = 0;
 }
 
 class Metasyntactic_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -31,7 +30,6 @@ class Metasyntactic_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           2 => "BAR",
           3 => "BAZ",
           4 => "BAX",
-          0 => "Unspecified",
         ],
       )
     );
@@ -52,12 +50,12 @@ class Metasyntactic_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/enums/MyEnum1'))>>
 enum MyEnum1: int {
+  ME1_0 = 0;
   ME1_1 = 1;
   ME1_2 = 2;
   ME1_3 = 3;
   ME1_5 = 5;
   ME1_6 = 6;
-  ME1_0 = 0;
 }
 
 class MyEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -66,12 +64,12 @@ class MyEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
       shape(
         "name" => "module.MyEnum1",
         "elements" => dict[
+          0 => "ME1_0",
           1 => "ME1_1",
           2 => "ME1_2",
           3 => "ME1_3",
           5 => "ME1_5",
           6 => "ME1_6",
-          0 => "ME1_0",
         ],
       )
     );
@@ -79,13 +77,7 @@ class MyEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[
-        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-          shape(
-            "name" => "ME1_0",
-          )
-        ),
-      ],
+      'enum' => dict[],
       'constants' => dict[
       ],
     );
@@ -119,12 +111,7 @@ class MyEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[
-        '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'enum' => dict[],
       'constants' => dict[
       ],
     );
@@ -181,7 +168,6 @@ enum MyEnum4: int {
   ME4_B = 2147483646;
   ME4_C = 2147483647;
   ME4_D = -2147483648;
-  Unspecified = 0;
 }
 
 class MyEnum4_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -194,7 +180,6 @@ class MyEnum4_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           2147483646 => "ME4_B",
           2147483647 => "ME4_C",
           -2147483648 => "ME4_D",
-          0 => "Unspecified",
         ],
       )
     );
@@ -217,7 +202,6 @@ final class MyBitmaskEnum1 extends \Flags {
   const int   ONE = 1;
   const int   TWO = 2;
   const int   FOUR = 4;
-  const int   Unspecified = 0;
 }
 
 class MyBitmaskEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -229,7 +213,6 @@ class MyBitmaskEnum1_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           1 => "ONE",
           2 => "TWO",
           4 => "FOUR",
-          0 => "Unspecified",
         ],
       )
     );
@@ -252,7 +235,6 @@ final class MyBitmaskEnum2 extends \Flags {
   const int   ONE = 1;
   const int   TWO = 2;
   const int   FOUR = 4;
-  const int   Unspecified = 0;
 }
 
 class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -264,7 +246,6 @@ class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           1 => "ONE",
           2 => "TWO",
           4 => "FOUR",
-          0 => "Unspecified",
         ],
       )
     );
@@ -703,35 +684,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     return shape(
       'struct' => dict[],
       'fields' => dict[
-        'me2_3' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
-        'me1_t1' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-              shape(
-                "name" => "ME1_0",
-              )
-            ),
-          ],
-        ),
-        'me1_t2' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\GenDefaultEnumValue' => \facebook\thrift\annotation\GenDefaultEnumValue::fromShape(
-              shape(
-                "name" => "ME1_0",
-              )
-            ),
-          ],
-        ),
       ],
     );
   }

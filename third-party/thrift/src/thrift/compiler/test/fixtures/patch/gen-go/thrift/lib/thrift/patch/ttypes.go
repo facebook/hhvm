@@ -37,6 +37,7 @@ var GoUnusedProtection__ int;
 //without any additional schema derived from IDL patch definitions.
 type PatchOp int64
 const (
+  PatchOp_Unspecified PatchOp = 0
   PatchOp_Assign PatchOp = 1
   PatchOp_Clear PatchOp = 2
   PatchOp_PatchPrior PatchOp = 3
@@ -46,10 +47,10 @@ const (
   PatchOp_Remove PatchOp = 7
   PatchOp_Add PatchOp = 8
   PatchOp_Put PatchOp = 9
-  PatchOp_Unspecified PatchOp = 0
 )
 
 var PatchOpToName = map[PatchOp]string {
+  PatchOp_Unspecified: "Unspecified",
   PatchOp_Assign: "Assign",
   PatchOp_Clear: "Clear",
   PatchOp_PatchPrior: "PatchPrior",
@@ -59,10 +60,10 @@ var PatchOpToName = map[PatchOp]string {
   PatchOp_Remove: "Remove",
   PatchOp_Add: "Add",
   PatchOp_Put: "Put",
-  PatchOp_Unspecified: "Unspecified",
 }
 
 var PatchOpToValue = map[string]PatchOp {
+  "Unspecified": PatchOp_Unspecified,
   "Assign": PatchOp_Assign,
   "Clear": PatchOp_Clear,
   "PatchPrior": PatchOp_PatchPrior,
@@ -72,10 +73,10 @@ var PatchOpToValue = map[string]PatchOp {
   "Remove": PatchOp_Remove,
   "Add": PatchOp_Add,
   "Put": PatchOp_Put,
-  "Unspecified": PatchOp_Unspecified,
 }
 
 var PatchOpNames = []string {
+  "Unspecified",
   "Assign",
   "Clear",
   "PatchPrior",
@@ -85,10 +86,10 @@ var PatchOpNames = []string {
   "Remove",
   "Add",
   "Put",
-  "Unspecified",
 }
 
 var PatchOpValues = []PatchOp {
+  PatchOp_Unspecified,
   PatchOp_Assign,
   PatchOp_Clear,
   PatchOp_PatchPrior,
@@ -98,7 +99,6 @@ var PatchOpValues = []PatchOp {
   PatchOp_Remove,
   PatchOp_Add,
   PatchOp_Put,
-  PatchOp_Unspecified,
 }
 
 func (p PatchOp) String() string {

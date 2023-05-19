@@ -599,14 +599,6 @@
 },
         "value" : {}
       },
-          "scope.Program" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Program",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
           "thrift.Beta" : {
         "type" : {
   "type" : "struct",
@@ -615,21 +607,9 @@
         "value" : {}
       }
         },
-        "docstring" : "Adds a default enum value (0), with the given name, if one is not\nalready defined.\n\nAll v1+ enums must have an explicitly defined default value (0).\nThis annotation automatically adds such a value if not already present.\n",
-        "fields" : {
-          "name" : {
-            "name" : "name",
-            "default_value" : "Unspecified",
-            "docstring" : "The name to use for the generated enum value.\n\nThis intentionally does **not** use the most common 'zero' enum value name,\n'Default', by default; as, defining a `Default = 0` enum value explicitly\nis a useful means of self-documenting that setting an explicit value is\nnever required. In which case, it is part of the API, and should not be\nremoved in favor of an implicitly generated value.\n\nOn the other hand, 'Unspecified' clearly indicates that the requirements\nare not intrinsic to the enum. In which case, the relevant documentation\nshould be consulted (e.g. the doc strings on the function or field).\n",
-            "key" : 1,
-            "lineno" : 260,
-            "required" : "opt-in-req-out",
-            "type" : "string"
-                  }
-        },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 243
+        "lineno" : 233
       },
       "GenEnumSet" : {
         "name" : "GenEnumSet",
@@ -664,14 +644,14 @@
             "name" : "name",
             "docstring" : "If a custom name is not provided, `{EnumName}Set` is used.\n",
             "key" : 1,
-            "lineno" : 289,
+            "lineno" : 263,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 284
+        "lineno" : 258
       },
       "v1" : {
         "name" : "v1",
@@ -688,7 +668,7 @@
         "docstring" : "Enables all released v1 features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 298
+        "lineno" : 272
       },
       "v1beta" : {
         "name" : "v1beta",
@@ -697,13 +677,6 @@
         "type" : {
   "type" : "struct",
   "name" : "v1"
-},
-        "value" : {}
-      },
-          "thrift.GenDefaultEnumValue" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "GenDefaultEnumValue"
 },
         "value" : {}
       },
@@ -726,7 +699,7 @@
         "docstring" : "Enables all beta v1 features.\n\nBeta features are guaranteed to *not* break unrelated Thrift features\nso they should be relatively safe to test alongside other beta or\nreleased Thrift features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 309
+        "lineno" : 283
       },
       "v1alpha" : {
         "name" : "v1alpha",
@@ -764,7 +737,7 @@
         "docstring" : "Enables all experimental v1 features.\n\nUse with *caution* and only with explicit permission. This may enable\nfeatures may change significantly without notice or not work correctly\nin all contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 324
+        "lineno" : 297
       },
       "v1test" : {
         "name" : "v1test",
@@ -802,7 +775,7 @@
         "docstring" : "Enables experimental features, even those that are known to break common\nuse cases.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 334
+        "lineno" : 307
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -828,14 +801,14 @@
           "field" : {
             "name" : "field",
             "key" : 1,
-            "lineno" : 350,
+            "lineno" : 323,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 347
+        "lineno" : 320
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -893,14 +866,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 365,
+            "lineno" : 338,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 358
+        "lineno" : 331
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -924,7 +897,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 372
+        "lineno" : 345
       }
       },
   "source_path" : "thrift/annotation/thrift",

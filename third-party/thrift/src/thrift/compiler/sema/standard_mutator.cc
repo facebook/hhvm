@@ -261,26 +261,6 @@ void normalize_return_type(
   }
 }
 
-void gen_default_enum_values(
-    diagnostic_context& ctx, mutator_context&, t_enum& node) {
-  const auto* annot =
-      ctx.program().inherit_annotation_or_null(node, kGenDefaultEnumValueUri);
-  if (annot == nullptr || node.find_value(0) != nullptr) {
-    return;
-  }
-
-  std::string name;
-  if (auto* customName =
-          annot->get_value_from_structured_annotation_or_null("name")) {
-    name = customName->get_string();
-  } else {
-    name = "Unspecified";
-  }
-  auto defaultValue = std::make_unique<t_enum_value>(std::move(name), 0);
-  defaultValue->set_generated();
-  node.append_value(std::move(defaultValue));
-}
-
 template <typename Nde>
 void generate_runtime_schema(
     diagnostic_context& ctx,
@@ -452,7 +432,6 @@ ast_mutators standard_mutators() {
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
     initial.add_definition_visitor(&set_release_state);
-    initial.add_enum_visitor(&gen_default_enum_values);
   }
 
   {

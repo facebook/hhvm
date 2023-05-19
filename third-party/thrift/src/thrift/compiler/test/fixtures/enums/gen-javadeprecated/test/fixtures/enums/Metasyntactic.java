@@ -16,8 +16,7 @@ public enum Metasyntactic implements com.facebook.thrift.TEnum {
   FOO(1),
   BAR(2),
   BAZ(3),
-  BAX(4),
-  Unspecified(0);
+  BAX(4);
 
   private final int value;
 
@@ -46,8 +45,6 @@ public enum Metasyntactic implements com.facebook.thrift.TEnum {
         return BAZ;
       case 4:
         return BAX;
-      case 0:
-        return Unspecified;
       default:
         return null;
     }

@@ -582,15 +582,10 @@ class GenDefaultEnumValue:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
-        name: str = ...
+        self
     ) -> None:
         ...
 
-    @__property__
-    def name(self) -> str: ...
-    @name.setter
-    def name(self, value: str) -> None: ...
 
 
     def isUnion(self) -> bool: ...

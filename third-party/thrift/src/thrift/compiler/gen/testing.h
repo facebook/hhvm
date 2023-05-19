@@ -82,20 +82,6 @@ struct adapter_builder : base_thrift_annotation_builder {
   }
 };
 
-struct gen_default_enum_value_builder : base_thrift_annotation_builder {
-  explicit gen_default_enum_value_builder(t_program& p)
-      : base_thrift_annotation_builder(p, "GenDefaultEnumValue") {}
-
-  std::unique_ptr<t_const> make(const char* name = nullptr) {
-    auto map = std::make_unique<t_const_value>();
-    map->set_map();
-    if (name != nullptr) {
-      map->add_map(make_string("name"), make_string(name));
-    }
-    return make_inst(std::move(map));
-  }
-};
-
 struct inject_metadata_fields_builder : base_thrift_annotation_builder {
   explicit inject_metadata_fields_builder(t_program& p)
       : base_thrift_annotation_builder(p, "InjectMetadataFields") {}

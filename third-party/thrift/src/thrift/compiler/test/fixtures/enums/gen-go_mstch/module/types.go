@@ -24,7 +24,6 @@ const (
     Metasyntactic_BAR Metasyntactic = 2
     Metasyntactic_BAZ Metasyntactic = 3
     Metasyntactic_BAX Metasyntactic = 4
-    Metasyntactic_Unspecified Metasyntactic = 0
 )
 
 // Enum value maps for Metasyntactic
@@ -34,7 +33,6 @@ var (
         Metasyntactic_BAR: "BAR",
         Metasyntactic_BAZ: "BAZ",
         Metasyntactic_BAX: "BAX",
-        Metasyntactic_Unspecified: "Unspecified",
     }
 
     MetasyntacticToValue = map[string]Metasyntactic {
@@ -42,7 +40,6 @@ var (
         "BAR": Metasyntactic_BAR,
         "BAZ": Metasyntactic_BAZ,
         "BAX": Metasyntactic_BAX,
-        "Unspecified": Metasyntactic_Unspecified,
     }
 
     MetasyntacticNames = []string{
@@ -50,7 +47,6 @@ var (
         "BAR",
         "BAZ",
         "BAX",
-        "Unspecified",
     }
 
     MetasyntacticValues = []Metasyntactic{
@@ -58,7 +54,6 @@ var (
         Metasyntactic_BAR,
         Metasyntactic_BAZ,
         Metasyntactic_BAX,
-        Metasyntactic_Unspecified,
     }
 )
 
@@ -90,50 +85,50 @@ func MetasyntacticPtr(v Metasyntactic) *Metasyntactic {
 type MyEnum1 int32
 
 const (
+    MyEnum1_ME1_0 MyEnum1 = 0
     MyEnum1_ME1_1 MyEnum1 = 1
     MyEnum1_ME1_2 MyEnum1 = 2
     MyEnum1_ME1_3 MyEnum1 = 3
     MyEnum1_ME1_5 MyEnum1 = 5
     MyEnum1_ME1_6 MyEnum1 = 6
-    MyEnum1_ME1_0 MyEnum1 = 0
 )
 
 // Enum value maps for MyEnum1
 var (
     MyEnum1ToName = map[MyEnum1]string {
+        MyEnum1_ME1_0: "ME1_0",
         MyEnum1_ME1_1: "ME1_1",
         MyEnum1_ME1_2: "ME1_2",
         MyEnum1_ME1_3: "ME1_3",
         MyEnum1_ME1_5: "ME1_5",
         MyEnum1_ME1_6: "ME1_6",
-        MyEnum1_ME1_0: "ME1_0",
     }
 
     MyEnum1ToValue = map[string]MyEnum1 {
+        "ME1_0": MyEnum1_ME1_0,
         "ME1_1": MyEnum1_ME1_1,
         "ME1_2": MyEnum1_ME1_2,
         "ME1_3": MyEnum1_ME1_3,
         "ME1_5": MyEnum1_ME1_5,
         "ME1_6": MyEnum1_ME1_6,
-        "ME1_0": MyEnum1_ME1_0,
     }
 
     MyEnum1Names = []string{
+        "ME1_0",
         "ME1_1",
         "ME1_2",
         "ME1_3",
         "ME1_5",
         "ME1_6",
-        "ME1_0",
     }
 
     MyEnum1Values = []MyEnum1{
+        MyEnum1_ME1_0,
         MyEnum1_ME1_1,
         MyEnum1_ME1_2,
         MyEnum1_ME1_3,
         MyEnum1_ME1_5,
         MyEnum1_ME1_6,
-        MyEnum1_ME1_0,
     }
 )
 
@@ -304,7 +299,6 @@ const (
     MyEnum4_ME4_B MyEnum4 = 2147483646
     MyEnum4_ME4_C MyEnum4 = 2147483647
     MyEnum4_ME4_D MyEnum4 = -2147483648
-    MyEnum4_Unspecified MyEnum4 = 0
 )
 
 // Enum value maps for MyEnum4
@@ -314,7 +308,6 @@ var (
         MyEnum4_ME4_B: "ME4_B",
         MyEnum4_ME4_C: "ME4_C",
         MyEnum4_ME4_D: "ME4_D",
-        MyEnum4_Unspecified: "Unspecified",
     }
 
     MyEnum4ToValue = map[string]MyEnum4 {
@@ -322,7 +315,6 @@ var (
         "ME4_B": MyEnum4_ME4_B,
         "ME4_C": MyEnum4_ME4_C,
         "ME4_D": MyEnum4_ME4_D,
-        "Unspecified": MyEnum4_Unspecified,
     }
 
     MyEnum4Names = []string{
@@ -330,7 +322,6 @@ var (
         "ME4_B",
         "ME4_C",
         "ME4_D",
-        "Unspecified",
     }
 
     MyEnum4Values = []MyEnum4{
@@ -338,7 +329,6 @@ var (
         MyEnum4_ME4_B,
         MyEnum4_ME4_C,
         MyEnum4_ME4_D,
-        MyEnum4_Unspecified,
     }
 )
 
@@ -373,7 +363,6 @@ const (
     MyBitmaskEnum1_ONE MyBitmaskEnum1 = 1
     MyBitmaskEnum1_TWO MyBitmaskEnum1 = 2
     MyBitmaskEnum1_FOUR MyBitmaskEnum1 = 4
-    MyBitmaskEnum1_Unspecified MyBitmaskEnum1 = 0
 )
 
 // Enum value maps for MyBitmaskEnum1
@@ -382,28 +371,24 @@ var (
         MyBitmaskEnum1_ONE: "ONE",
         MyBitmaskEnum1_TWO: "TWO",
         MyBitmaskEnum1_FOUR: "FOUR",
-        MyBitmaskEnum1_Unspecified: "Unspecified",
     }
 
     MyBitmaskEnum1ToValue = map[string]MyBitmaskEnum1 {
         "ONE": MyBitmaskEnum1_ONE,
         "TWO": MyBitmaskEnum1_TWO,
         "FOUR": MyBitmaskEnum1_FOUR,
-        "Unspecified": MyBitmaskEnum1_Unspecified,
     }
 
     MyBitmaskEnum1Names = []string{
         "ONE",
         "TWO",
         "FOUR",
-        "Unspecified",
     }
 
     MyBitmaskEnum1Values = []MyBitmaskEnum1{
         MyBitmaskEnum1_ONE,
         MyBitmaskEnum1_TWO,
         MyBitmaskEnum1_FOUR,
-        MyBitmaskEnum1_Unspecified,
     }
 )
 
@@ -438,7 +423,6 @@ const (
     MyBitmaskEnum2_ONE MyBitmaskEnum2 = 1
     MyBitmaskEnum2_TWO MyBitmaskEnum2 = 2
     MyBitmaskEnum2_FOUR MyBitmaskEnum2 = 4
-    MyBitmaskEnum2_Unspecified MyBitmaskEnum2 = 0
 )
 
 // Enum value maps for MyBitmaskEnum2
@@ -447,28 +431,24 @@ var (
         MyBitmaskEnum2_ONE: "ONE",
         MyBitmaskEnum2_TWO: "TWO",
         MyBitmaskEnum2_FOUR: "FOUR",
-        MyBitmaskEnum2_Unspecified: "Unspecified",
     }
 
     MyBitmaskEnum2ToValue = map[string]MyBitmaskEnum2 {
         "ONE": MyBitmaskEnum2_ONE,
         "TWO": MyBitmaskEnum2_TWO,
         "FOUR": MyBitmaskEnum2_FOUR,
-        "Unspecified": MyBitmaskEnum2_Unspecified,
     }
 
     MyBitmaskEnum2Names = []string{
         "ONE",
         "TWO",
         "FOUR",
-        "Unspecified",
     }
 
     MyBitmaskEnum2Values = []MyBitmaskEnum2{
         MyBitmaskEnum2_ONE,
         MyBitmaskEnum2_TWO,
         MyBitmaskEnum2_FOUR,
-        MyBitmaskEnum2_Unspecified,
     }
 )
 

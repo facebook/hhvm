@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 @SuppressWarnings({ "unused" })
 public enum PatchOp implements com.facebook.thrift.TEnum {
+  Unspecified(0),
   /**
    * Set the value. Supersedes all other ops.
    * 
@@ -78,8 +79,7 @@ public enum PatchOp implements com.facebook.thrift.TEnum {
    * - 'append' for list, string or binary; and
    * - 'invert' for boolean.
    */
-  Put(9),
-  Unspecified(0);
+  Put(9);
 
   private final int value;
 
@@ -100,6 +100,8 @@ public enum PatchOp implements com.facebook.thrift.TEnum {
    */
   public static PatchOp findByValue(int value) { 
     switch (value) {
+      case 0:
+        return Unspecified;
       case 1:
         return Assign;
       case 2:
@@ -118,8 +120,6 @@ public enum PatchOp implements com.facebook.thrift.TEnum {
         return Add;
       case 9:
         return Put;
-      case 0:
-        return Unspecified;
       default:
         return null;
     }

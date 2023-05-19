@@ -28,8 +28,6 @@ constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
 constexpr auto kInternBoxUri = "facebook.com/thrift/annotation/InternBox";
 constexpr auto kExceptionMessageUri =
     "facebook.com/thrift/annotation/ExceptionMessage";
-constexpr auto kGenDefaultEnumValueUri =
-    "facebook.com/thrift/annotation/GenDefaultEnumValue";
 constexpr auto kGenerateRuntimeSchemaUri =
     "facebook.com/thrift/annotation/GenerateRuntimeSchema";
 constexpr auto kInjectMetadataFieldsUri =

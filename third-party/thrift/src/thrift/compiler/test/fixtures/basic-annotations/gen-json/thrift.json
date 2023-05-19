@@ -506,45 +506,29 @@
       }
     },
     "GenDefaultEnumValue" : {
-      "lineno" : 243,
+      "lineno" : 233,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
         "scope.Enum" : {  },
-        "scope.Program" : {  },
         "Beta" : {  }
       },
       "fields" : {
-        "name" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : "Unspecified",
-          "source_range" : {
-            "begin" : {
-              "line" : 260,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 260,
-              "column" : 34
-            }
-          }
-        }
+
       },
       "source_range" : {
         "begin" : {
-          "line" : 243,
+          "line" : 233,
           "column" : 1
         },
         "end" : {
-          "line" : 261,
-          "column" : 2
+          "line" : 235,
+          "column" : 30
         }
       }
     },
     "GenEnumSet" : {
-      "lineno" : 284,
+      "lineno" : 258,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -559,11 +543,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 289,
+              "line" : 263,
               "column" : 3
             },
             "end" : {
-              "line" : 289,
+              "line" : 263,
               "column" : 18
             }
           }
@@ -571,17 +555,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 284,
+          "line" : 258,
           "column" : 1
         },
         "end" : {
-          "line" : 290,
+          "line" : 264,
           "column" : 2
         }
       }
     },
     "v1" : {
-      "lineno" : 298,
+      "lineno" : 272,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -592,22 +576,21 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 298,
+          "line" : 272,
           "column" : 1
         },
         "end" : {
-          "line" : 299,
+          "line" : 273,
           "column" : 13
         }
       }
     },
     "v1beta" : {
-      "lineno" : 309,
+      "lineno" : 283,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
         "v1" : {  },
-        "GenDefaultEnumValue" : {  },
         "Beta" : {  },
         "scope.Transitive" : {  }
       },
@@ -616,17 +599,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 309,
+          "line" : 283,
           "column" : 1
         },
         "end" : {
-          "line" : 315,
+          "line" : 288,
           "column" : 17
         }
       }
     },
     "v1alpha" : {
-      "lineno" : 324,
+      "lineno" : 297,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -640,17 +623,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 324,
+          "line" : 297,
           "column" : 1
         },
         "end" : {
-          "line" : 328,
+          "line" : 301,
           "column" : 18
         }
       }
     },
     "v1test" : {
-      "lineno" : 334,
+      "lineno" : 307,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -664,17 +647,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 334,
+          "line" : 307,
           "column" : 1
         },
         "end" : {
-          "line" : 338,
+          "line" : 311,
           "column" : 17
         }
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 347,
+      "lineno" : 320,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -688,11 +671,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 350,
+              "line" : 323,
               "column" : 3
             },
             "end" : {
-              "line" : 350,
+              "line" : 323,
               "column" : 19
             }
           }
@@ -700,17 +683,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 347,
+          "line" : 320,
           "column" : 1
         },
         "end" : {
-          "line" : 351,
+          "line" : 324,
           "column" : 2
         }
       }
     },
     "GenerateRuntimeSchema" : {
-      "lineno" : 358,
+      "lineno" : 331,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -728,11 +711,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 365,
+              "line" : 338,
               "column" : 3
             },
             "end" : {
-              "line" : 365,
+              "line" : 338,
               "column" : 18
             }
           }
@@ -740,17 +723,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 358,
+          "line" : 331,
           "column" : 1
         },
         "end" : {
-          "line" : 366,
+          "line" : 339,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 372,
+      "lineno" : 345,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -762,11 +745,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 372,
+          "line" : 345,
           "column" : 1
         },
         "end" : {
-          "line" : 374,
+          "line" : 347,
           "column" : 20
         }
       }

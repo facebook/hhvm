@@ -42,7 +42,6 @@ impl Metasyntactic {
     pub const BAR: Self = Metasyntactic(2i32);
     pub const BAZ: Self = Metasyntactic(3i32);
     pub const BAX: Self = Metasyntactic(4i32);
-    pub const Unspecified: Self = Metasyntactic(0i32);
 }
 
 impl ::fbthrift::ThriftEnum for Metasyntactic {
@@ -52,7 +51,6 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
             (Self::BAR, "BAR"),
             (Self::BAZ, "BAZ"),
             (Self::BAX, "BAX"),
-            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -62,7 +60,6 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
             "BAR",
             "BAZ",
             "BAX",
-            "Unspecified",
         ]
     }
 
@@ -72,7 +69,6 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
             Self::BAR,
             Self::BAZ,
             Self::BAX,
-            Self::Unspecified,
         ]
     }
 }
@@ -107,7 +103,6 @@ impl ::std::convert::From<::std::primitive::i32> for Metasyntactic {
 impl ::std::fmt::Display for Metasyntactic {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
-            ("Unspecified", 0),
             ("FOO", 1),
             ("BAR", 2),
             ("BAZ", 3),
@@ -132,7 +127,6 @@ impl ::std::str::FromStr for Metasyntactic {
             ("BAX", 4),
             ("BAZ", 3),
             ("FOO", 1),
-            ("Unspecified", 0),
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Metasyntactic").map(Self)
     }
@@ -172,45 +166,45 @@ where
 pub struct MyEnum1(pub ::std::primitive::i32);
 
 impl MyEnum1 {
+    pub const ME1_0: Self = MyEnum1(0i32);
     pub const ME1_1: Self = MyEnum1(1i32);
     pub const ME1_2: Self = MyEnum1(2i32);
     pub const ME1_3: Self = MyEnum1(3i32);
     pub const ME1_5: Self = MyEnum1(5i32);
     pub const ME1_6: Self = MyEnum1(6i32);
-    pub const ME1_0: Self = MyEnum1(0i32);
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum1 {
     fn enumerate() -> &'static [(Self, &'static str)] {
         &[
+            (Self::ME1_0, "ME1_0"),
             (Self::ME1_1, "ME1_1"),
             (Self::ME1_2, "ME1_2"),
             (Self::ME1_3, "ME1_3"),
             (Self::ME1_5, "ME1_5"),
             (Self::ME1_6, "ME1_6"),
-            (Self::ME1_0, "ME1_0"),
         ]
     }
 
     fn variants() -> &'static [&'static str] {
         &[
+            "ME1_0",
             "ME1_1",
             "ME1_2",
             "ME1_3",
             "ME1_5",
             "ME1_6",
-            "ME1_0",
         ]
     }
 
     fn variant_values() -> &'static [Self] {
         &[
+            Self::ME1_0,
             Self::ME1_1,
             Self::ME1_2,
             Self::ME1_3,
             Self::ME1_5,
             Self::ME1_6,
-            Self::ME1_0,
         ]
     }
 }
@@ -578,7 +572,6 @@ impl MyEnum4 {
     pub const ME4_B: Self = MyEnum4(2147483646i32);
     pub const ME4_C: Self = MyEnum4(2147483647i32);
     pub const ME4_D: Self = MyEnum4(-2147483648i32);
-    pub const Unspecified: Self = MyEnum4(0i32);
 }
 
 impl ::fbthrift::ThriftEnum for MyEnum4 {
@@ -588,7 +581,6 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
             (Self::ME4_B, "ME4_B"),
             (Self::ME4_C, "ME4_C"),
             (Self::ME4_D, "ME4_D"),
-            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -598,7 +590,6 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
             "ME4_B",
             "ME4_C",
             "ME4_D",
-            "Unspecified",
         ]
     }
 
@@ -608,7 +599,6 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
             Self::ME4_B,
             Self::ME4_C,
             Self::ME4_D,
-            Self::Unspecified,
         ]
     }
 }
@@ -644,7 +634,6 @@ impl ::std::fmt::Display for MyEnum4 {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
             ("ME4_D", -2147483648),
-            ("Unspecified", 0),
             ("ME4_A", 2147483645),
             ("ME4_B", 2147483646),
             ("ME4_C", 2147483647),
@@ -668,7 +657,6 @@ impl ::std::str::FromStr for MyEnum4 {
             ("ME4_B", 2147483646),
             ("ME4_C", 2147483647),
             ("ME4_D", -2147483648),
-            ("Unspecified", 0),
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyEnum4").map(Self)
     }
@@ -711,7 +699,6 @@ impl MyBitmaskEnum1 {
     pub const ONE: Self = MyBitmaskEnum1(1i32);
     pub const TWO: Self = MyBitmaskEnum1(2i32);
     pub const FOUR: Self = MyBitmaskEnum1(4i32);
-    pub const Unspecified: Self = MyBitmaskEnum1(0i32);
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
@@ -720,7 +707,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
             (Self::ONE, "ONE"),
             (Self::TWO, "TWO"),
             (Self::FOUR, "FOUR"),
-            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -729,7 +715,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
             "ONE",
             "TWO",
             "FOUR",
-            "Unspecified",
         ]
     }
 
@@ -738,7 +723,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
             Self::ONE,
             Self::TWO,
             Self::FOUR,
-            Self::Unspecified,
         ]
     }
 }
@@ -773,7 +757,6 @@ impl ::std::convert::From<::std::primitive::i32> for MyBitmaskEnum1 {
 impl ::std::fmt::Display for MyBitmaskEnum1 {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
-            ("Unspecified", 0),
             ("ONE", 1),
             ("TWO", 2),
             ("FOUR", 4),
@@ -796,7 +779,6 @@ impl ::std::str::FromStr for MyBitmaskEnum1 {
             ("FOUR", 4),
             ("ONE", 1),
             ("TWO", 2),
-            ("Unspecified", 0),
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum1").map(Self)
     }
@@ -839,7 +821,6 @@ impl MyBitmaskEnum2 {
     pub const ONE: Self = MyBitmaskEnum2(1i32);
     pub const TWO: Self = MyBitmaskEnum2(2i32);
     pub const FOUR: Self = MyBitmaskEnum2(4i32);
-    pub const Unspecified: Self = MyBitmaskEnum2(0i32);
 }
 
 impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
@@ -848,7 +829,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
             (Self::ONE, "ONE"),
             (Self::TWO, "TWO"),
             (Self::FOUR, "FOUR"),
-            (Self::Unspecified, "Unspecified"),
         ]
     }
 
@@ -857,7 +837,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
             "ONE",
             "TWO",
             "FOUR",
-            "Unspecified",
         ]
     }
 
@@ -866,7 +845,6 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
             Self::ONE,
             Self::TWO,
             Self::FOUR,
-            Self::Unspecified,
         ]
     }
 }
@@ -901,7 +879,6 @@ impl ::std::convert::From<::std::primitive::i32> for MyBitmaskEnum2 {
 impl ::std::fmt::Display for MyBitmaskEnum2 {
     fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
-            ("Unspecified", 0),
             ("ONE", 1),
             ("TWO", 2),
             ("FOUR", 4),
@@ -924,7 +901,6 @@ impl ::std::str::FromStr for MyBitmaskEnum2 {
             ("FOUR", 4),
             ("ONE", 1),
             ("TWO", 2),
-            ("Unspecified", 0),
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "MyBitmaskEnum2").map(Self)
     }

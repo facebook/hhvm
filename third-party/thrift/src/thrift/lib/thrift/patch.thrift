@@ -259,8 +259,9 @@ struct BinaryPatch {
  * Patch field ids are interpreted at runtime, as a dynamic patch protocol,
  * without any additional schema derived from IDL patch definitions.
  */
-@thrift.GenDefaultEnumValue
 enum PatchOp {
+  Unspecified = 0,
+
   /**
    * Set the value. Supersedes all other ops.
    *

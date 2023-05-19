@@ -82,10 +82,6 @@ namespace HH {
   // autoload-map
   function could_include(\HH\FIXME\MISSING_PARAM_TYPE $file): bool;
   function autoload_is_native(): bool;
-  function autoload_set_paths(
-    KeyedContainer<string, KeyedContainer<string, string>> $map,
-    string $root,
-  ): bool;
 
   /**
    * Get the path which uniquely defines the given symbol.

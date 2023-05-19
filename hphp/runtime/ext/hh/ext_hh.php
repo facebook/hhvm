@@ -29,49 +29,12 @@ interface UNSAFESingletonMemoizeParam extends IMemoizeParam {
 }
 
 /**
- * Return true if we're using a native autoloader.
- *
- * If we are using a native autoloader, all symbols will be loaded from the
- * first line, and there's no need to call `autoload_set_paths`.
- *
- * If you *do* call `autoload_set_paths` while natively autoloading, you'll
- * disable the native autoloader in favor of your userland autoloader.
- *
- * ```
- * HH\autoload_is_native(); // true
- * HH\autoload_set_paths(darray['class' => darray[]]); // true
- * HH\autoload_is_native(); // false
- * ```
+ * Return true if we're using a native autoloader. If this returns
+ * false, HHVM was not configured to enable autoloading; code can
+ * still access symbols in the same files, or included by require_once().
  */
 <<__Native>>
 function autoload_is_native(): bool;
-
-/** Specify a map containing autoload data.
- *
- * The map has the form:
- *
- * ```
- *  array('class'    => array('cls' => 'cls_file.php', ...),
- *        'function' => array('fun' => 'fun_file.php', ...),
- *        'constant' => array('con' => 'con_file.php', ...),
- *        'type'     => array('type' => 'type_file.php', ...),
- *        'failure'  => callable);
- * ```
- *
- *  If the 'failure' element exists, it will be called if the
- *  lookup in the map fails, or the file cant be included. It
- *  takes a kind ('class', 'function' or 'constant') and the
- *  name of the entity we're trying to autoload.
- *
- * If $root is non empty, it is prepended to every filename.
- *
- * @param map The autoload map.
- * @param root Root to be prepended to all paths in the map.
- *
- * @return Boolean TRUE if successful, FALSE otherwise.
- */
-<<__Native>>
-function autoload_set_paths(mixed $map, string $root): bool;
 
 /**
  * Get the path which uniquely defines the given symbol.

@@ -55,7 +55,6 @@ type t =
       pos: Pos.t;
       name: string;
       prev_pos: Pos.t;
-      prev_name: string;
     }
   | Unbound_name of {
       pos: Pos.t;

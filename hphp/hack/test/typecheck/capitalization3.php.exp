@@ -1,4 +1,4 @@
 File "capitalization3.php", line 7, characters 7-15:
 Name already bound: `CAMELCASE` (Naming[2012])
 File "capitalization3.php", line 3, characters 7-15:
-Previous definition `C~~amel~~C~~ase~~` differs only by case 
+Previous definition is here

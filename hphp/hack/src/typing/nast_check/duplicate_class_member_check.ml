@@ -20,8 +20,7 @@ let error_if_repeated_name member_or_const =
         Errors.add_error
           Naming_error.(
             to_user_error
-            @@ Error_name_already_bound
-                 { pos; name; prev_name = name; prev_pos = p' })
+            @@ Error_name_already_bound { pos; name; prev_pos = p' })
       | None -> Caml.Hashtbl.replace seen name pos)
 
 let handler =

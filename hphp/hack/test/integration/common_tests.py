@@ -455,9 +455,9 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         self.test_driver.check_cmd(
             [
                 "{root}foo_4.php:3:19,21: Name already bound: `FOO` (Naming[2012])",
-                "  {root}foo_3.php:7:15,17: Previous definition `F~~oo~~` differs only by case ",
+                "  {root}foo_3.php:7:15,17: Previous definition is here",
                 "{root}foo_4.php:4:22,22: Name already bound: `H` (Naming[2012])",
-                "  {root}foo_3.php:3:18,18: Previous definition `~~h~~` differs only by case ",
+                "  {root}foo_3.php:3:18,18: Previous definition is here",
             ]
         )
 

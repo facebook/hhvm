@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b4db1a77ae361ea735ba3f424e133314>>
+// @generated SignedSource<<d1c6d7e2ddfab536cf0a211758e7c460>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -144,7 +144,6 @@ pub enum NamingError {
         pos: pos::Pos,
         name: String,
         prev_pos: pos::Pos,
-        prev_name: String,
     },
     #[rust_to_ocaml(name = "Unbound_name")]
     UnboundName {

@@ -245,13 +245,12 @@ module Env = struct
             ~canonical_id:(pc, canonical, None)
         then
           let (pos, name) = GEnv.get_fun_full_pos ctx (p, name) in
-          let (prev_pos, prev_name) =
+          let (prev_pos, _prev_name) =
             GEnv.get_fun_full_pos ctx (pc, canonical)
           in
           Errors.add_error
             Naming_error.(
-              to_user_error
-              @@ Error_name_already_bound { pos; name; prev_pos; prev_name })
+              to_user_error @@ Error_name_already_bound { pos; name; prev_pos })
       end;
       current_file_symbols_acc
     | None ->
@@ -279,13 +278,12 @@ module Env = struct
             ~canonical_id:(pc, canonical, None)
         then
           let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
-          let (prev_pos, prev_name) =
+          let (prev_pos, _prev_name) =
             GEnv.get_type_full_pos ctx (pc, canonical)
           in
           Errors.add_error
             Naming_error.(
-              to_user_error
-              @@ Error_name_already_bound { pos; prev_pos; name; prev_name })
+              to_user_error @@ Error_name_already_bound { pos; prev_pos; name })
       end;
       current_file_symbols_acc
     | None ->
@@ -311,12 +309,10 @@ module Env = struct
             ~canonical_id:(pc, name, None)
         then
           let (pos, name) = GEnv.get_const_full_pos ctx (p, name) in
-          let (prev_pos, name) = GEnv.get_const_full_pos ctx (pc, name) in
+          let (prev_pos, _prev_name) = GEnv.get_const_full_pos ctx (pc, name) in
           Errors.add_error
             Naming_error.(
-              to_user_error
-              @@ Error_name_already_bound
-                   { name; prev_name = name; pos; prev_pos })
+              to_user_error @@ Error_name_already_bound { name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->
@@ -349,12 +345,12 @@ module Env = struct
             ~canonical_id:(pc, name, None)
         then
           let (pos, name) = GEnv.get_module_full_pos ctx (p, name) in
-          let (prev_pos, name) = GEnv.get_module_full_pos ctx (pc, name) in
+          let (prev_pos, _prev_name) =
+            GEnv.get_module_full_pos ctx (pc, name)
+          in
           Errors.add_error
             Naming_error.(
-              to_user_error
-              @@ Error_name_already_bound
-                   { name; prev_name = name; pos; prev_pos })
+              to_user_error @@ Error_name_already_bound { name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->

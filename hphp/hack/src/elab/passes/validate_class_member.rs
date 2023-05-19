@@ -32,7 +32,6 @@ fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
                 pos: pos.clone(),
                 prev_pos: prev_pos.clone(),
                 name: name.clone(),
-                prev_name: name.clone(),
             });
         }
     }

@@ -59,7 +59,6 @@ type t =
       pos: Pos.t;
       name: string;
       prev_pos: Pos.t;
-      prev_name: string;
     }
   | Unbound_name of {
       pos: Pos.t;
@@ -512,8 +511,8 @@ let method_name_already_bound pos meth_name =
       @@ Markdown_lite.md_codify meth_name )
     []
 
-let error_name_already_bound pos name prev_name prev_pos =
-  let (name, prev_name) = Render.(strip_ns name, strip_ns prev_name) in
+let error_name_already_bound pos name prev_pos =
+  let name = Render.strip_ns name in
 
   let hhi_msg =
     "This appears to be defined in an hhi file included in your project "
@@ -531,17 +530,7 @@ let error_name_already_bound pos name prev_name prev_pos =
       []
   in
   let reasons =
-    [
-      ( Pos_or_decl.of_raw_pos prev_pos,
-        if String.equal name prev_name then
-          "Previous definition is here"
-        else
-          "Previous definition "
-          ^ (Render.highlight_differences name prev_name
-            |> Markdown_lite.md_codify)
-          ^ " differs only by case " );
-    ]
-    @ suffix
+    [(Pos_or_decl.of_raw_pos prev_pos, "Previous definition is here")] @ suffix
   in
 
   User_error.make
@@ -1262,8 +1251,8 @@ let to_user_error = function
   | Already_bound { pos; name } -> already_bound pos name
   | Method_name_already_bound { pos; meth_name } ->
     method_name_already_bound pos meth_name
-  | Error_name_already_bound { pos; name; prev_name; prev_pos } ->
-    error_name_already_bound pos name prev_name prev_pos
+  | Error_name_already_bound { pos; name; prev_pos } ->
+    error_name_already_bound pos name prev_pos
   | Invalid_fun_pointer { pos; name } -> invalid_fun_pointer pos name
   | Undefined { pos; var_name; did_you_mean } ->
     undefined pos var_name did_you_mean

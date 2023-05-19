@@ -168,8 +168,8 @@ TEST(SchematizerTest, Service) {
   auto schema = schematizer().gen_schema(svc);
   auto map = flatten_map(*schema);
   auto dfns = map.at("definitions")->get_list();
-  EXPECT_EQ(dfns.size(), 1);
-  auto dfn_map = flatten_map(*dfns.at(0));
+  EXPECT_EQ(dfns.size(), 4);
+  auto dfn_map = flatten_map(*dfns.at(3));
 
   auto svc_map = flatten_map(*dfn_map.at("serviceDef"));
   validateDefinition(svc_map, service_name, service_uri);

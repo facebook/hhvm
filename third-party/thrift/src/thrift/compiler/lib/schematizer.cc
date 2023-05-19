@@ -214,15 +214,9 @@ std::unique_ptr<t_const_value> gen_type(
       }
       break;
     case t_type::type::t_enum: {
-      if (defns_schema && program && generator) {
-        auto raw_type = program->scope()->find_def(resolved_type.uri());
-        if (!raw_type) {
-          raw_type =
-              program->scope()->find_type(resolved_type.get_scoped_name());
-        }
-
-        auto found_type = dynamic_cast<const t_enum*>(raw_type);
-        auto enum_schema = generator->gen_schema(*found_type);
+      if (defns_schema && generator) {
+        auto enum_schema =
+            generator->gen_schema(static_cast<const t_enum&>(resolved_type));
         add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
       auto enm = val();
@@ -234,28 +228,21 @@ std::unique_ptr<t_const_value> gen_type(
       break;
     }
     case t_type::type::t_struct: {
-      if (defns_schema && program && generator) {
-        auto raw_type = program->scope()->find_def(resolved_type.uri());
-        if (!raw_type) {
-          raw_type =
-              program->scope()->find_type(resolved_type.get_scoped_name());
-        }
-        auto is_union = dynamic_cast<const t_union*>(raw_type);
-        if (is_union) {
-          auto union_schema = generator->gen_schema(*is_union);
+      if (defns_schema && generator) {
+        if (auto union_type = dynamic_cast<const t_union*>(&resolved_type)) {
+          auto union_schema = generator->gen_schema(*union_type);
           add_as_definition(*defns_schema, "unionDef", std::move(union_schema));
+        } else if (
+            auto exception_type =
+                dynamic_cast<const t_exception*>(&resolved_type)) {
+          auto ex_schema = generator->gen_schema(*exception_type);
+          add_as_definition(
+              *defns_schema, "exceptionDef", std::move(ex_schema));
         } else {
-          auto is_exception = dynamic_cast<const t_exception*>(raw_type);
-          if (is_exception) {
-            auto ex_schema = generator->gen_schema(*is_exception);
-            add_as_definition(
-                *defns_schema, "exceptionDef", std::move(ex_schema));
-          } else {
-            auto struct_def = dynamic_cast<const t_struct*>(raw_type);
-            auto struct_schema = generator->gen_schema(*struct_def);
-            add_as_definition(
-                *defns_schema, "structDef", std::move(struct_schema));
-          }
+          auto struct_type = static_cast<const t_struct*>(&resolved_type);
+          auto struct_schema = generator->gen_schema(*struct_type);
+          add_as_definition(
+              *defns_schema, "structDef", std::move(struct_schema));
         }
       }
       auto structured = val();

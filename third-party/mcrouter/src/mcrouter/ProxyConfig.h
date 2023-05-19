@@ -11,6 +11,7 @@
 #include <string>
 
 #include <folly/Range.h>
+#include <folly/container/F14Set.h>
 #include <folly/experimental/StringKeyedUnorderedMap.h>
 
 namespace folly {
@@ -101,7 +102,7 @@ class ProxyConfig {
   }
 
   folly::StringKeyedUnorderedMap<
-      std::unordered_set<std::shared_ptr<const AccessPoint>>>&
+      folly::F14FastSet<std::shared_ptr<const AccessPoint>>>&
   getAccessPoints() {
     return accessPoints_;
   }
@@ -113,7 +114,7 @@ class ProxyConfig {
   // config (after all RouteHandles) because its keys are being referenced
   // by object in the Config.
   folly::StringKeyedUnorderedMap<
-      std::unordered_set<std::shared_ptr<const AccessPoint>>>
+      folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
       accessPoints_;
 
   // pool source name -> (allow_partial_reconfig, [(pool_config,[pool_names])])

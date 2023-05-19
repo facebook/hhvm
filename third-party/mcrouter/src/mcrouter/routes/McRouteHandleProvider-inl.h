@@ -355,7 +355,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
 
         auto it = accessPoints_.find(name);
         if (it == accessPoints_.end()) {
-          std::unordered_set<std::shared_ptr<const AccessPoint>> accessPoints;
+          folly::F14FastSet<std::shared_ptr<const AccessPoint>> accessPoints;
           it = accessPoints_.emplace(name, std::move(accessPoints)).first;
         }
         folly::StringPiece nameSp = it->first;

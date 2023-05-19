@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <folly/Range.h>
+#include <folly/container/F14Set.h>
 #include <folly/json.h>
 
 #include "mcrouter/PoolFactory.h"
@@ -143,7 +144,7 @@ class McRouteHandleProvider
     return std::move(partialConfigs_);
   }
   folly::StringKeyedUnorderedMap<
-      std::unordered_set<std::shared_ptr<const AccessPoint>>>
+      folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
   releaseAccessPoints() {
     return std::move(accessPoints_);
   }
@@ -174,7 +175,7 @@ class McRouteHandleProvider
 
   // poolName -> AccessPoints
   folly::StringKeyedUnorderedMap<
-      std::unordered_set<std::shared_ptr<const AccessPoint>>>
+      folly::F14FastSet<std::shared_ptr<const AccessPoint>>>
       accessPoints_;
 
   const RouteHandleFactoryMap routeMap_;

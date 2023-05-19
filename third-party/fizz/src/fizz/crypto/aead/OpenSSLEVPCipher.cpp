@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/crypto/aead/CryptoUtil.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <folly/lang/CheckedMath.h>
 #include <functional>
@@ -435,7 +436,8 @@ std::unique_ptr<folly::IOBuf> OpenSSLEVPCipher::encrypt(
     const folly::IOBuf* associatedData,
     uint64_t seqNum,
     Aead::AeadOptions options) const {
-  auto iv = createIV(seqNum);
+  auto iv = createIV<OpenSSLEVPCipher::kMaxIVLength>(
+      seqNum, ivLength_, trafficIvKey_);
   return encrypt(
       std::move(plaintext),
       associatedData,
@@ -463,7 +465,8 @@ std::unique_ptr<folly::IOBuf> OpenSSLEVPCipher::inplaceEncrypt(
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     uint64_t seqNum) const {
-  auto iv = createIV(seqNum);
+  auto iv = createIV<OpenSSLEVPCipher::kMaxIVLength>(
+      seqNum, ivLength_, trafficIvKey_);
   return evpEncrypt(
       std::move(plaintext),
       associatedData,
@@ -481,7 +484,8 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> OpenSSLEVPCipher::tryDecrypt(
     const folly::IOBuf* associatedData,
     uint64_t seqNum,
     Aead::AeadOptions options) const {
-  auto iv = createIV(seqNum);
+  auto iv = createIV<OpenSSLEVPCipher::kMaxIVLength>(
+      seqNum, ivLength_, trafficIvKey_);
   return tryDecrypt(
       std::move(ciphertext),
       associatedData,
@@ -548,17 +552,5 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> OpenSSLEVPCipher::tryDecrypt(
 
 size_t OpenSSLEVPCipher::getCipherOverhead() const {
   return tagLength_;
-}
-
-std::array<uint8_t, OpenSSLEVPCipher::kMaxIVLength> OpenSSLEVPCipher::createIV(
-    uint64_t seqNum) const {
-  std::array<uint8_t, kMaxIVLength> iv;
-  uint64_t bigEndianSeqNum = folly::Endian::big(seqNum);
-  const size_t prefixLength = ivLength_ - sizeof(uint64_t);
-  memset(iv.data(), 0, prefixLength);
-  memcpy(iv.data() + prefixLength, &bigEndianSeqNum, sizeof(uint64_t));
-  folly::MutableByteRange mutableIv{iv.data(), ivLength_};
-  XOR(trafficIvKey_, mutableIv);
-  return iv;
 }
 } // namespace fizz

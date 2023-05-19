@@ -111,8 +111,6 @@ class OpenSSLEVPCipher : public Aead {
       bool operatesInBlocks,
       bool requiresPresetTagLen);
 
-  std::array<uint8_t, kMaxIVLength> createIV(uint64_t seqNum) const;
-
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
   size_t headroom_{5};

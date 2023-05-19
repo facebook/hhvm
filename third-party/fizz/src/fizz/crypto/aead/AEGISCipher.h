@@ -104,8 +104,6 @@ class AEGISCipher : public Aead {
       size_t ivLength,
       size_t tagLength);
 
-  std::array<uint8_t, kMaxIVLength> createIV(uint64_t seqNum) const;
-
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
   folly::ByteRange trafficKeyKey_;

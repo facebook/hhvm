@@ -664,30 +664,30 @@ and default_subtype
          * t1 <: t /\ ... /\ tn <: t
          * We want this even if t is a type variable e.g. consider
          *   int | v <: v
+         *
+         * Prioritize types that aren't dynamic or intersections with dynamic
+         * to get better error messages
          *)
-        let (tyl, has_dyn) =
-          match Typing_utils.try_strip_dynamic_from_union env tyl with
-          | None -> (tyl, false)
-          | Some non_dyn -> (non_dyn, true)
+        let rec f ty =
+          Typing_defs.is_dynamic ty
+          ||
+          match get_node ty with
+          | Tintersection tyl -> List.exists ~f tyl
+          | _ -> false
         in
-        List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
-            res
-            &&& simplify_subtype_i
-                  ~subtype_env
-                  ~sub_supportdyn
-                  ~super_like
-                  (LoclType ty_sub)
-                  ty_super)
-        &&&
-        if has_dyn then
-          simplify_subtype_i
-            ~subtype_env
-            ~sub_supportdyn
-            ~super_like
-            (LoclType (Typing_make_type.dynamic (get_reason lty_sub)))
-            ty_super
-        else
-          valid
+        let (last_tyl, first_tyl) = Typing_utils.partition_union ~f tyl in
+        let subtype_list env prop tyl =
+          List.fold_left tyl ~init:(env, prop) ~f:(fun res ty_sub ->
+              res
+              &&& simplify_subtype_i
+                    ~subtype_env
+                    ~sub_supportdyn
+                    ~super_like
+                    (LoclType ty_sub)
+                    ty_super)
+        in
+        let (env, prop) = subtype_list env TL.valid first_tyl in
+        subtype_list env prop last_tyl
       (*| (_, Terr) ->
         if subtype_env.no_top_bottom then
           default env

@@ -541,3 +541,8 @@ val make_simplify_typed_expr :
   Typing_defs.locl_ty ->
   (Typing_defs.locl_ty, Tast.saved_env) Aast_defs.expr_ ->
   Typing_env_types.env * Tast.expr
+
+val partition_union :
+  f:('a Typing_defs.ty -> bool) ->
+  'a Typing_defs.ty list ->
+  'a Typing_defs.ty list * 'a Typing_defs.ty list

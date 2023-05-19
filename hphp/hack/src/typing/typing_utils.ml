@@ -771,33 +771,34 @@ and has_ancestor_including_req_refl env sub_id super_id =
   | None -> false
   | Some cls -> has_ancestor_including_req env cls super_id
 
+(* search through tyl, and any unions directly-recursively contained in tyl,
+   and return those that satisfy f, and those that do not, separately.*)
+let rec partition_union ~f tyl =
+  match tyl with
+  | [] -> ([], [])
+  | t :: tyl ->
+    let (dyns, nondyns) = partition_union ~f tyl in
+    if f t then
+      (t :: dyns, nondyns)
+    else (
+      match get_node t with
+      | Tunion tyl ->
+        (match strip_union ~f tyl with
+        | Some (sub_dyns, sub_nondyns) ->
+          ( sub_dyns @ dyns,
+            Typing_make_type.union (get_reason t) sub_nondyns :: nondyns )
+        | None -> (dyns, t :: nondyns))
+      | _ -> (dyns, t :: nondyns)
+    )
+
+and strip_union tyl ~f =
+  let (dyns, nondyns) = partition_union ~f tyl in
+  match (dyns, nondyns) with
+  | ([], _) -> None
+  | (_, _) -> Some (dyns, nondyns)
+
 let rec try_strip_dynamic_from_union _env tyl =
-  (* search through tyl, and any unions directly-recursively contained in tyl,
-     and return those that satisfy f, and those that do not, separately.*)
-  let rec partition_union tyl ~f =
-    match tyl with
-    | [] -> ([], [])
-    | t :: tyl ->
-      let (dyns, nondyns) = partition_union tyl ~f in
-      if f t then
-        (t :: dyns, nondyns)
-      else (
-        match get_node t with
-        | Tunion tyl ->
-          (match strip_union tyl with
-          | Some (sub_dyns, sub_nondyns) ->
-            ( sub_dyns @ dyns,
-              Typing_make_type.union (get_reason t) sub_nondyns :: nondyns )
-          | None -> (dyns, t :: nondyns))
-        | _ -> (dyns, t :: nondyns)
-      )
-  and strip_union tyl =
-    let (dyns, nondyns) = partition_union tyl ~f:Typing_defs.is_dynamic in
-    match (dyns, nondyns) with
-    | ([], _) -> None
-    | (_, _) -> Some (dyns, nondyns)
-  in
-  match strip_union tyl with
+  match strip_union ~f:Typing_defs.is_dynamic tyl with
   | None -> None
   | Some (_, tyl) -> Some tyl
 

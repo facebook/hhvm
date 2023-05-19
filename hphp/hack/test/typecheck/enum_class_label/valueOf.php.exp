@@ -1,12 +1,12 @@
 File "valueOf.php", line 29, characters 11-17:
 No static method `valueOf` in `E` (Typing[4090])
-  File "BuiltinEnum.hhi", line 90, characters 34-39:
+  File "BuiltinEnum.hhi", line 96, characters 34-39:
   Did you mean `nameOf` instead?
   File "valueOf.php", line 4, characters 21-21:
   Declaration of `E` is here
 File "valueOf.php", line 31, characters 11-17:
 No static method `valueOf` in `E` (Typing[4090])
-  File "BuiltinEnum.hhi", line 90, characters 34-39:
+  File "BuiltinEnum.hhi", line 96, characters 34-39:
   Did you mean `nameOf` instead?
   File "valueOf.php", line 4, characters 21-21:
   Declaration of `E` is here

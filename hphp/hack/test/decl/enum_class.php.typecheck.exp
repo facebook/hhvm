@@ -12,7 +12,7 @@ Wrong type hint (Typing[4338])
   Expected `int`
   File "enum_class.php", line 12, characters 3-10:
   But got `arraykey`
-  File "BuiltinEnum.hhi", line 78, characters 44-48:
+  File "BuiltinEnum.hhi", line 84, characters 44-48:
     via this generic `TType`
 File "enum_class.php", line 8, characters 7-7:
 Wrong type hint (Typing[4338])
@@ -20,5 +20,5 @@ Wrong type hint (Typing[4338])
   Expected `int`
   File "enum_class.php", line 12, characters 3-10:
   But got `arraykey`
-  File "BuiltinEnum.hhi", line 78, characters 44-48:
+  File "BuiltinEnum.hhi", line 84, characters 44-48:
     via this generic `TType`

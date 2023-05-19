@@ -30,6 +30,7 @@ namespace HH {
      *
      * @return darray['CONST_NAME' => $value, ...]
      */
+    <<__NoAutoDynamic>>
     final public static function getValues()[]: darray<string, T>;
 
     /**
@@ -38,6 +39,7 @@ namespace HH {
      *
      * @return darray[$value => 'CONST_NAME', ...]
      */
+    <<__NoAutoDynamic>>
     final public static function getNames()[]: darray<T, string>
     where
       T as arraykey;
@@ -45,24 +47,28 @@ namespace HH {
     /**
      * Returns whether or not the value is defined as a constant.
      */
+    <<__NoAutoDynamic>>
     final public static function isValid(mixed $value)[]: bool;
 
     /**
      * Coerce to a valid value or null.
      * This is useful for typing deserialized enum values.
      */
+    <<__NoAutoDynamic>>
     final public static function coerce(mixed $value)[]: ?T;
 
     /**
      * Coerce to valid value or throw UnexpectedValueException
      * This is useful for typing deserialized enum values.
      */
+    <<__NoAutoDynamic>>
     final public static function assert(mixed $value)[]: T;
 
     /**
      * Coerce all the values in a traversable. If the value is not an
      * array of valid items, an UnexpectedValueException is thrown
      */
+    <<__NoAutoDynamic, __SupportDynamicType>>
     final public static function assertAll(
       Traversable<mixed> $values,
     )[]: Container<T>;

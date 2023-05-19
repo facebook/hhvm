@@ -11,7 +11,7 @@ test = false
 doctest = false
 
 [build-dependencies]
-clap = { version = "3.2.23", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
+clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 gen_hhi_contents_lib = { version = "0.0.0", path = "cargo/gen_hhi_contents_lib" }
 generate_hhi_lib = { version = "0.0.0", path = "../../generate_hhi/cargo/generate_hhi_lib" }
 walkdir = "2.3"

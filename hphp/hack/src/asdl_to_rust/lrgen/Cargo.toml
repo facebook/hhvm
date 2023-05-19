@@ -11,5 +11,5 @@ path = "lrgen.rs"
 
 [dependencies]
 cfgrammar = { version = "0.12", features = ["serde"] }
-clap = { version = "3.2.23", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
+clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 lrlex = "0.12"

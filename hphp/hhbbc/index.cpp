@@ -415,6 +415,35 @@ PropState make_unknown_propstate(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
+bool func_supports_AER(const php::Func* func) {
+  // Async functions always support async eager return, and no other
+  // functions support it yet.
+  return func->isAsync && !func->isGenerator;
+}
+
+uint32_t func_num_inout(const php::Func* func) {
+  if (!func->hasInOutArgs) return 0;
+  uint32_t count = 0;
+  for (auto& p : func->params) count += p.inout;
+  return count;
+}
+
+PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
+  auto const sz = f->params.size();
+  if (paramId >= sz) return PrepKind{TriBool::No, TriBool::No};
+  PrepKind kind;
+  kind.inOut = yesOrNo(f->params[paramId].inout);
+  kind.readonly = yesOrNo(f->params[paramId].readonly);
+  return kind;
+}
+
+uint32_t numNVArgs(const php::Func& f) {
+  uint32_t cnt = f.params.size();
+  return cnt && f.params[cnt - 1].isVariadic ? cnt - 1 : cnt;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 /*
@@ -1834,26 +1863,6 @@ const ClassInfo* ClassInfo::withoutNonRegularEquivalent() {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-uint32_t numNVArgs(const php::Func& f) {
-  uint32_t cnt = f.params.size();
-  return cnt && f.params[cnt - 1].isVariadic ? cnt - 1 : cnt;
-}
-
-PrepKind func_param_prep(const php::Func* f, uint32_t paramId) {
-  auto const sz = f->params.size();
-  if (paramId >= sz) return PrepKind{TriBool::No, TriBool::No};
-  PrepKind kind;
-  kind.inOut = yesOrNo(f->params[paramId].inout);
-  kind.readonly = yesOrNo(f->params[paramId].readonly);
-  return kind;
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 namespace res {
 
 bool Class::same(const Class& o) const {
@@ -3153,6 +3162,8 @@ Class Class::unresolvedWaitHandle() {
   return Class { s_Awaitable.get() };
 }
 
+//////////////////////////////////////////////////////////////////////
+
 Func::Func(Rep val)
   : val(val)
 {}
@@ -3552,6 +3563,252 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
         if (!coeffects) coeffects = info.m_coeffectRules.get_pointer();
       }
       return coeffects;
+    }
+  );
+}
+
+TriBool Func::supportsAsyncEagerReturn() const {
+  return match<TriBool>(
+    val,
+    [&] (FuncName)   { return TriBool::Maybe; },
+    [&] (MethodName) { return TriBool::Maybe; },
+    [&] (Fun f)      { return yesOrNo(func_supports_AER(f.finfo->func)); },
+    [&] (Fun2 f)     { return yesOrNo(func_supports_AER(f.finfo->func)); },
+    [&] (Method m)   { return yesOrNo(func_supports_AER(m.finfo->func)); },
+    [&] (Method2 m)  { return yesOrNo(func_supports_AER(m.finfo->func)); },
+    [&] (MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
+    },
+    [&] (MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_supportsAER;
+    },
+    [&] (MethodOrMissing m)  {
+      return yesOrNo(func_supports_AER(m.finfo->func));
+    },
+    [&] (MethodOrMissing2 m) {
+      return yesOrNo(func_supports_AER(m.finfo->func));
+    },
+    [&] (Missing) { return TriBool::No; },
+    [&] (const Isect& i) {
+      auto aer = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_supportsAER == TriBool::Maybe) continue;
+        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
+        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
+      }
+      return aer;
+    },
+    [&] (const Isect2& i) {
+      auto aer = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
+        if (info.m_supportsAER == TriBool::Maybe) continue;
+        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
+        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
+      }
+      return aer;
+    }
+  );
+}
+
+Optional<uint32_t> Func::lookupNumInoutParams() const {
+  return match<Optional<uint32_t>>(
+    val,
+    [&] (FuncName s)   -> Optional<uint32_t> { return std::nullopt; },
+    [&] (MethodName s) -> Optional<uint32_t> { return std::nullopt; },
+    [&] (Fun f)     { return func_num_inout(f.finfo->func); },
+    [&] (Fun2 f)    { return func_num_inout(f.finfo->func); },
+    [&] (Method m)  { return func_num_inout(m.finfo->func); },
+    [&] (Method2 m) { return func_num_inout(m.finfo->func); },
+    [&] (MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_numInOut;
+    },
+    [&] (MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_numInOut;
+    },
+    [&] (MethodOrMissing m)  { return func_num_inout(m.finfo->func); },
+    [&] (MethodOrMissing2 m) { return func_num_inout(m.finfo->func); },
+    [&] (Missing)            { return 0; },
+    [&] (const Isect& i) {
+      Optional<uint32_t> numInOut;
+      for (auto const ff : i.families) {
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_numInOut) continue;
+        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
+        if (!numInOut) numInOut = info.m_numInOut;
+      }
+      return numInOut;
+    },
+    [&] (const Isect2& i) {
+      Optional<uint32_t> numInOut;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
+        if (!info.m_numInOut) continue;
+        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
+        if (!numInOut) numInOut = info.m_numInOut;
+      }
+      return numInOut;
+    }
+  );
+}
+
+PrepKind Func::lookupParamPrep(uint32_t paramId) const {
+  auto const fromFuncFamily = [&] (FuncFamily* ff, bool regularOnly) {
+    auto const& info = *ff->infoFor(regularOnly).m_static;
+    if (paramId >= info.m_paramPreps.size()) {
+      return PrepKind{TriBool::No, TriBool::No};
+    }
+    return info.m_paramPreps[paramId];
+  };
+  auto const fromFuncFamily2 = [&] (const FuncFamily2* ff, bool regularOnly) {
+    auto const& info = ff->infoFor(regularOnly);
+    if (paramId >= info.m_paramPreps.size()) {
+      return PrepKind{TriBool::No, TriBool::No};
+    }
+    return info.m_paramPreps[paramId];
+  };
+
+  return match<PrepKind>(
+    val,
+    [&] (FuncName s)         { return PrepKind{TriBool::Maybe, TriBool::Maybe}; },
+    [&] (MethodName s)       { return PrepKind{TriBool::Maybe, TriBool::Maybe}; },
+    [&] (Fun f)              { return func_param_prep(f.finfo->func, paramId); },
+    [&] (Fun2 f)             { return func_param_prep(f.finfo->func, paramId); },
+    [&] (Method m)           { return func_param_prep(m.finfo->func, paramId); },
+    [&] (Method2 m)          { return func_param_prep(m.finfo->func, paramId); },
+    [&] (MethodFamily f)     { return fromFuncFamily(f.family, f.regularOnly); },
+    [&] (MethodFamily2 f)    { return fromFuncFamily2(f.family, f.regularOnly); },
+    [&] (MethodOrMissing m)  { return func_param_prep(m.finfo->func, paramId); },
+    [&] (MethodOrMissing2 m) { return func_param_prep(m.finfo->func, paramId); },
+    [&] (Missing)            { return PrepKind{TriBool::No, TriBool::Yes}; },
+    [&] (const Isect& i) {
+      auto inOut = TriBool::Maybe;
+      auto readonly = TriBool::Maybe;
+
+      for (auto const ff : i.families) {
+        auto const prepKind = fromFuncFamily(ff, i.regularOnly);
+        if (prepKind.inOut != TriBool::Maybe) {
+          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
+          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
+        }
+
+        if (prepKind.readonly != TriBool::Maybe) {
+          assertx(
+            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
+          );
+          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
+        }
+      }
+
+      return PrepKind{inOut, readonly};
+    },
+    [&] (const Isect2& i) {
+      auto inOut = TriBool::Maybe;
+      auto readonly = TriBool::Maybe;
+
+      for (auto const ff : i.families) {
+        auto const prepKind = fromFuncFamily2(ff, i.regularOnly);
+        if (prepKind.inOut != TriBool::Maybe) {
+          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
+          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
+        }
+
+        if (prepKind.readonly != TriBool::Maybe) {
+          assertx(
+            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
+          );
+          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
+        }
+      }
+
+      return PrepKind{inOut, readonly};
+    }
+  );
+}
+
+TriBool Func::lookupReturnReadonly() const {
+  return match<TriBool>(
+    val,
+    [&] (FuncName s)   { return TriBool::Maybe; },
+    [&] (MethodName s) { return TriBool::Maybe; },
+    [&] (Fun f)        { return yesOrNo(f.finfo->func->isReadonlyReturn); },
+    [&] (Fun2 f)       { return yesOrNo(f.finfo->func->isReadonlyReturn); },
+    [&] (Method m)     { return yesOrNo(m.finfo->func->isReadonlyReturn); },
+    [&] (Method2 m)    { return yesOrNo(m.finfo->func->isReadonlyReturn); },
+    [&] (MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyReturn;
+    },
+    [&] (MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_isReadonlyReturn;
+    },
+    [&] (MethodOrMissing m)  { return yesOrNo(m.finfo->func->isReadonlyReturn); },
+    [&] (MethodOrMissing2 m) { return yesOrNo(m.finfo->func->isReadonlyReturn); },
+    [&] (Missing)            { return TriBool::No; },
+    [&] (const Isect& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyReturn));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
+      }
+      return readOnly;
+    },
+    [&] (const Isect2& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
+        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyReturn));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
+      }
+      return readOnly;
+    }
+  );
+}
+
+TriBool Func::lookupReadonlyThis() const {
+  return match<TriBool>(
+    val,
+    [&] (FuncName s)   { return TriBool::Maybe; },
+    [&] (MethodName s) { return TriBool::Maybe; },
+    [&] (Fun f)        { return yesOrNo(f.finfo->func->isReadonlyThis); },
+    [&] (Fun2 f)       { return yesOrNo(f.finfo->func->isReadonlyThis); },
+    [&] (Method m)     { return yesOrNo(m.finfo->func->isReadonlyThis); },
+    [&] (Method2 m)    { return yesOrNo(m.finfo->func->isReadonlyThis); },
+    [&] (MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyThis;
+    },
+    [&] (MethodFamily2 fam) {
+      return fam.family->infoFor(fam.regularOnly).m_isReadonlyThis;
+    },
+    [&] (MethodOrMissing m)  { return yesOrNo(m.finfo->func->isReadonlyThis); },
+    [&] (MethodOrMissing2 m) { return yesOrNo(m.finfo->func->isReadonlyThis); },
+    [&] (Missing)            { return TriBool::No; },
+    [&] (const Isect& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyThis));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
+      }
+      return readOnly;
+    },
+    [&] (const Isect2& i) {
+      auto readOnly = TriBool::Maybe;
+      for (auto const ff : i.families) {
+        auto const& info = ff->infoFor(i.regularOnly);
+        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyThis));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
+      }
+      return readOnly;
     }
   );
 }
@@ -3965,21 +4222,6 @@ struct TMIOps {
 };
 
 using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
-
-//////////////////////////////////////////////////////////////////////
-
-uint32_t func_num_inout(const php::Func* func) {
-  if (!func->hasInOutArgs) return 0;
-  uint32_t count = 0;
-  for (auto& p : func->params) count += p.inout;
-  return count;
-}
-
-bool func_supports_AER(const php::Func* func) {
-  // Async functions always support async eager return, and no other
-  // functions support it yet.
-  return func->isAsync && !func->isGenerator;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -14441,60 +14683,6 @@ bool Index::could_have_reified_type(Context ctx,
   return cls->couldHaveReifiedGenerics();
 }
 
-TriBool
-Index::supports_async_eager_return(res::Func rfunc) const {
-  return match<TriBool>(
-    rfunc.val,
-    [&](res::Func::FuncName)   { return TriBool::Maybe; },
-    [&](res::Func::MethodName) { return TriBool::Maybe; },
-    [&](res::Func::Fun f) {
-      return yesOrNo(func_supports_AER(f.finfo->func));
-    },
-    [&](res::Func::Fun2 f) {
-      return yesOrNo(func_supports_AER(f.finfo->func));
-    },
-    [&](res::Func::Method m) {
-      return yesOrNo(func_supports_AER(m.finfo->func));
-    },
-    [&](res::Func::Method2 m) {
-      return yesOrNo(func_supports_AER(m.finfo->func));
-    },
-    [&](res::Func::MethodFamily fam) {
-      return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
-    },
-    [&](res::Func::MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_supportsAER;
-    },
-    [&](res::Func::MethodOrMissing m) {
-      return yesOrNo(func_supports_AER(m.finfo->func));
-    },
-    [&](res::Func::MethodOrMissing2 m) {
-      return yesOrNo(func_supports_AER(m.finfo->func));
-    },
-    [&](res::Func::Missing) { return TriBool::No; },
-    [&](const res::Func::Isect& i) {
-      auto aer = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = *ff->infoFor(i.regularOnly).m_static;
-        if (info.m_supportsAER == TriBool::Maybe) continue;
-        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
-        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
-      }
-      return aer;
-    },
-    [&](const res::Func::Isect2& i) {
-      auto aer = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
-        if (info.m_supportsAER == TriBool::Maybe) continue;
-        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
-        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
-      }
-      return aer;
-    }
-  );
-}
-
 bool Index::is_effect_free_raw(const php::Func* func) const {
   return func_info(*m_data, func)->effectFree;
 }
@@ -15147,280 +15335,6 @@ std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const 
     return { it->returnTy, it->returnRefinements };
   }
   return { TInitCell, 0 };
-}
-
-Optional<uint32_t> Index::lookup_num_inout_params(
-  Context,
-  res::Func rfunc
-) const {
-  return match<Optional<uint32_t>>(
-    rfunc.val,
-    [&] (res::Func::FuncName s) -> Optional<uint32_t> {
-      return std::nullopt;
-    },
-    [&] (res::Func::MethodName s) -> Optional<uint32_t> {
-      return std::nullopt;
-    },
-    [&] (res::Func::Fun f) {
-      return func_num_inout(f.finfo->func);
-    },
-    [&] (res::Func::Fun2 f) {
-      return func_num_inout(f.finfo->func);
-    },
-    [&] (res::Func::Method m) {
-      return func_num_inout(m.finfo->func);
-    },
-    [&] (res::Func::Method2 m) {
-      return func_num_inout(m.finfo->func);
-    },
-    [&] (res::Func::MethodFamily fam) -> Optional<uint32_t> {
-      return fam.family->infoFor(fam.regularOnly).m_static->m_numInOut;
-    },
-    [&] (res::Func::MethodFamily2 fam) -> Optional<uint32_t> {
-      return fam.family->infoFor(fam.regularOnly).m_numInOut;
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      return func_num_inout(m.finfo->func);
-    },
-    [&] (res::Func::MethodOrMissing2 m) {
-      return func_num_inout(m.finfo->func);
-    },
-    [&] (res::Func::Missing) { return 0; },
-    [&] (const res::Func::Isect& i) {
-      Optional<uint32_t> numInOut;
-      for (auto const ff : i.families) {
-        auto const& info = *ff->infoFor(i.regularOnly).m_static;
-        if (!info.m_numInOut) continue;
-        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
-        if (!numInOut) numInOut = info.m_numInOut;
-      }
-      return numInOut;
-    },
-    [&] (const res::Func::Isect2& i) {
-      Optional<uint32_t> numInOut;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
-        if (!info.m_numInOut) continue;
-        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
-        if (!numInOut) numInOut = info.m_numInOut;
-      }
-      return numInOut;
-    }
-  );
-}
-
-PrepKind Index::lookup_param_prep(Context,
-                                  res::Func rfunc,
-                                  uint32_t paramId) const {
-  auto const fromFuncFamily = [&] (FuncFamily* ff, bool regularOnly) {
-    auto const& info = *ff->infoFor(regularOnly).m_static;
-    if (paramId >= info.m_paramPreps.size()) {
-      return PrepKind{TriBool::No, TriBool::No};
-    }
-    return info.m_paramPreps[paramId];
-  };
-  auto const fromFuncFamily2 = [&] (const FuncFamily2* ff, bool regularOnly) {
-    auto const& info = ff->infoFor(regularOnly);
-    if (paramId >= info.m_paramPreps.size()) {
-      return PrepKind{TriBool::No, TriBool::No};
-    }
-    return info.m_paramPreps[paramId];
-  };
-
-  return match<PrepKind>(
-    rfunc.val,
-    [&] (res::Func::FuncName s) {
-      return PrepKind{TriBool::Maybe, TriBool::Maybe};
-    },
-    [&] (res::Func::MethodName s) {
-      return PrepKind{TriBool::Maybe, TriBool::Maybe};
-    },
-    [&] (res::Func::Fun f) {
-      return func_param_prep(f.finfo->func, paramId);
-    },
-    [&] (res::Func::Fun2 f) {
-      return func_param_prep(f.finfo->func, paramId);
-    },
-    [&] (res::Func::Method m) {
-      return func_param_prep(m.finfo->func, paramId);
-    },
-    [&] (res::Func::Method2 m) {
-      return func_param_prep(m.finfo->func, paramId);
-    },
-    [&] (res::Func::MethodFamily fam) {
-      return fromFuncFamily(fam.family, fam.regularOnly);
-    },
-    [&] (res::Func::MethodFamily2 fam) {
-      return fromFuncFamily2(fam.family, fam.regularOnly);
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      return func_param_prep(m.finfo->func, paramId);
-    },
-    [&] (res::Func::MethodOrMissing2 m) {
-      return func_param_prep(m.finfo->func, paramId);
-    },
-    [&] (res::Func::Missing) {
-      return PrepKind{TriBool::No, TriBool::Yes};
-    },
-    [&] (const res::Func::Isect& i) {
-      auto inOut = TriBool::Maybe;
-      auto readonly = TriBool::Maybe;
-
-      for (auto const ff : i.families) {
-        auto const prepKind = fromFuncFamily(ff, i.regularOnly);
-        if (prepKind.inOut != TriBool::Maybe) {
-          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
-          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
-        }
-
-        if (prepKind.readonly != TriBool::Maybe) {
-          assertx(
-            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
-          );
-          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
-        }
-      }
-
-      return PrepKind{inOut, readonly};
-    },
-    [&] (const res::Func::Isect2& i) {
-      auto inOut = TriBool::Maybe;
-      auto readonly = TriBool::Maybe;
-
-      for (auto const ff : i.families) {
-        auto const prepKind = fromFuncFamily2(ff, i.regularOnly);
-        if (prepKind.inOut != TriBool::Maybe) {
-          assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
-          if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
-        }
-
-        if (prepKind.readonly != TriBool::Maybe) {
-          assertx(
-            IMPLIES(readonly != TriBool::Maybe, readonly == prepKind.readonly)
-          );
-          if (readonly == TriBool::Maybe) readonly = prepKind.readonly;
-        }
-      }
-
-      return PrepKind{inOut, readonly};
-    }
-  );
-}
-
-TriBool Index::lookup_return_readonly(
-  Context,
-  res::Func rfunc
-) const {
-  return match<TriBool>(
-    rfunc.val,
-    [&] (res::Func::FuncName s) { return TriBool::Maybe; },
-    [&] (res::Func::MethodName s) { return TriBool::Maybe; },
-    [&] (res::Func::Fun f) {
-      return yesOrNo(f.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::Fun2 f) {
-      return yesOrNo(f.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::Method m) {
-      return yesOrNo(m.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::Method2 m) {
-      return yesOrNo(m.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::MethodFamily fam) {
-      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyReturn;
-    },
-    [&] (res::Func::MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_isReadonlyReturn;
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      return yesOrNo(m.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::MethodOrMissing2 m) {
-      return yesOrNo(m.finfo->func->isReadonlyReturn);
-    },
-    [&] (res::Func::Missing) { return TriBool::No; },
-    [&] (const res::Func::Isect& i) {
-      auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = *ff->infoFor(i.regularOnly).m_static;
-        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
-        assertx(IMPLIES(readOnly != TriBool::Maybe,
-                        readOnly == info.m_isReadonlyReturn));
-        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
-      }
-      return readOnly;
-    },
-    [&] (const res::Func::Isect2& i) {
-      auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
-        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
-        assertx(IMPLIES(readOnly != TriBool::Maybe,
-                        readOnly == info.m_isReadonlyReturn));
-        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
-      }
-      return readOnly;
-    }
-  );
-}
-
-TriBool Index::lookup_readonly_this(
-  Context,
-  res::Func rfunc
-) const {
-  return match<TriBool>(
-    rfunc.val,
-    [&] (res::Func::FuncName s) { return TriBool::Maybe; },
-    [&] (res::Func::MethodName s) { return TriBool::Maybe; },
-    [&] (res::Func::Fun f) {
-      return yesOrNo(f.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::Fun2 f) {
-      return yesOrNo(f.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::Method m) {
-      return yesOrNo(m.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::Method2 m) {
-      return yesOrNo(m.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::MethodFamily fam) {
-      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyThis;
-    },
-    [&] (res::Func::MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_isReadonlyThis;
-    },
-    [&] (res::Func::MethodOrMissing m) {
-      return yesOrNo(m.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::MethodOrMissing2 m) {
-      return yesOrNo(m.finfo->func->isReadonlyThis);
-    },
-    [&] (res::Func::Missing) { return TriBool::No; },
-    [&] (const res::Func::Isect& i) {
-      auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = *ff->infoFor(i.regularOnly).m_static;
-        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
-        assertx(IMPLIES(readOnly != TriBool::Maybe,
-                        readOnly == info.m_isReadonlyThis));
-        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
-      }
-      return readOnly;
-    },
-    [&] (const res::Func::Isect2& i) {
-      auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
-        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
-        assertx(IMPLIES(readOnly != TriBool::Maybe,
-                        readOnly == info.m_isReadonlyThis));
-        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
-      }
-      return readOnly;
-    }
-  );
 }
 
 PropState

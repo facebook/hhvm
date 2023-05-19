@@ -3556,7 +3556,7 @@ bool fcallOptimizeChecks(
     if (inOutNum == fca.numRets() - 1) {
       bool match = true;
       for (auto i = 0; i < fca.numArgs(); ++i) {
-        auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
+        auto const kind = func.lookupParamPrep(i);
         if (kind.inOut == TriBool::Maybe) {
           match = false;
           break;
@@ -3599,7 +3599,7 @@ bool fcallOptimizeChecks(
     bool match = true;
     for (auto i = 0; i < fca.numArgs(); ++i) {
       if (!fca.isReadonly(i)) continue;
-      auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
+      auto const kind = func.lookupParamPrep(i);
       if (kind.readonly == TriBool::Maybe) {
         match = false;
         break;
@@ -3622,14 +3622,14 @@ bool fcallOptimizeChecks(
   }
 
   if (fca.enforceMutableReturn()) {
-    if (env.index.lookup_return_readonly(env.ctx, func) == TriBool::No) {
+    if (func.lookupReturnReadonly() == TriBool::No) {
       reduce(env, fcallWithFCA(fca.withoutEnforceMutableReturn()));
       return true;
     }
   }
 
   if (fca.enforceReadonlyThis()) {
-    if (env.index.lookup_readonly_this(env.ctx, func) == TriBool::Yes) {
+    if (func.lookupReadonlyThis() == TriBool::Yes) {
       reduce(env, fcallWithFCA(fca.withoutEnforceReadonlyThis()));
       return true;
     }
@@ -3637,7 +3637,7 @@ bool fcallOptimizeChecks(
 
   // Infer whether the callee supports async eager return.
   if (fca.asyncEagerTarget() != NoBlockId) {
-    if (env.index.supports_async_eager_return(func) == TriBool::No) {
+    if (func.supportsAsyncEagerReturn() == TriBool::No) {
       reduce(env, fcallWithFCA(fca.withoutAsyncEagerTarget()));
       return true;
     }
@@ -3912,7 +3912,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
   };
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0) ||
@@ -4065,7 +4065,7 @@ void fcallObjMethodImpl(ISS& env, const FCallArgs& fca, SString methName,
   auto const rfunc = env.index.resolve_method(ctx, ctxTy, methName);
 
   auto const numInOut = fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
@@ -4139,7 +4139,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
   };
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 1)) {
@@ -4361,7 +4361,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
@@ -4553,7 +4553,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   auto const numExtraInputs = extraInput ? 1 : 0;
@@ -4741,7 +4741,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
   };
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
+    ? rfunc.lookupNumInoutParams()
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);

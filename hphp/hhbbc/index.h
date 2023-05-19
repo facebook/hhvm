@@ -632,6 +632,32 @@ struct Func {
   uint32_t maxNonVariadicParams() const;
 
   /*
+   * Return if the function supports async eager return.
+   */
+  TriBool supportsAsyncEagerReturn() const;
+
+  /*
+   * Returns the number of inout parameters expected by func (if known).
+   */
+  Optional<uint32_t> lookupNumInoutParams() const;
+
+  /*
+   * Returns the parameter preparation kind (if known) for parameter
+   * `paramId' on this function.
+   */
+  PrepKind lookupParamPrep(uint32_t paramId) const;
+
+  /*
+   * Returns whether the function's return value is readonly
+   */
+  TriBool lookupReturnReadonly() const;
+
+  /*
+   * Returns whether the function is marked as readonly
+   */
+  TriBool lookupReadonlyThis() const;
+
+  /*
    * Coeffects
    */
   const RuntimeCoeffects* requiredCoeffects() const;
@@ -1136,27 +1162,6 @@ struct Index {
                             bool move = false) const;
 
   /*
-   * Returns the parameter preparation kind (if known) for parameter
-   * `paramId' on the given resolved Func.
-   */
-  PrepKind lookup_param_prep(Context, res::Func, uint32_t paramId) const;
-
-  /*
-   * Returns the number of inout parameters expected by func (if known).
-   */
-  Optional<uint32_t> lookup_num_inout_params(Context, res::Func) const;
-
-  /*
-   * Returns whether the function's return value is readonly
-   */
-  TriBool lookup_return_readonly(Context, res::Func) const;
-
-  /*
-   * Returns whether the function is marked as readonly
-   */
-  TriBool lookup_readonly_this(Context, res::Func) const;
-
-  /*
    * Returns the control-flow insensitive inferred private instance
    * property types for a Class.  The Class doesn't need to be
    * resolved, because private properties don't depend on the
@@ -1410,11 +1415,6 @@ struct Index {
   void refine_bad_initial_prop_values(const php::Class* cls,
                                       bool value,
                                       DependencyContextSet& deps);
-
-  /*
-   * Return true if the resolved function supports async eager return.
-   */
-  TriBool supports_async_eager_return(res::Func rfunc) const;
 
   /*
    * Return true if the function is effect free.

@@ -368,7 +368,10 @@ t_struct& patch_generator::add_ensure_struct(
   StructGen gen{
       annot, gen_suffix_struct(annot, orig, "EnsureStruct"), program_};
   gen.add_frozen_exclude();
-  for (const auto& field : orig.fields_id_order()) {
+  for (const t_field* field : orig.fields_id_order()) {
+    if (!field->type().resolved()) {
+      continue;
+    }
     box(gen.field(field->id(), field->type(), field->name()));
   }
   return gen;
@@ -380,6 +383,9 @@ t_struct& patch_generator::add_field_patch(
   // creating FieldPatch.
   std::map<t_field_id, t_type_ref> types; // Ordered by field id.
   for (const auto& field : orig.fields()) {
+    if (!field.type().resolved()) {
+      continue;
+    }
     if (t_type_ref patch_type =
             find_patch_type(get_field_annotation(annot, field), orig, field)) {
       types[field.id()] = patch_type;
@@ -591,14 +597,16 @@ t_struct& patch_generator::gen_patch(
   } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
     // TODO(afuller): support 'removeIf' op.
     // TODO(afuller): support 'replace' op.
-    auto val_patch_type = find_patch_type(
-        annot, orig, map->val_type(), field_id, traversal_order + 1);
-    gen.patchPrior(inst_map(map->key_type(), val_patch_type));
-    gen.addMap(type);
-    gen.patchAfter(inst_map(map->key_type(), val_patch_type));
-    gen.remove(inst_set(map->key_type()));
-    gen.put(type);
-    gen.set_adapter("MapPatchAdapter");
+    if (map->key_type().resolved() && map->val_type().resolved()) {
+      auto val_patch_type = find_patch_type(
+          annot, orig, map->val_type(), field_id, traversal_order + 1);
+      gen.patchPrior(inst_map(map->key_type(), val_patch_type));
+      gen.addMap(type);
+      gen.patchAfter(inst_map(map->key_type(), val_patch_type));
+      gen.remove(inst_set(map->key_type()));
+      gen.put(type);
+      gen.set_adapter("MapPatchAdapter");
+    }
   } else {
     gen.set_adapter("AssignPatchAdapter");
   }

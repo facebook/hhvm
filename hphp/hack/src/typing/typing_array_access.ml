@@ -572,8 +572,9 @@ let rec array_get
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         got_dynamic ()
-      | Tdynamic -> (env, (ty1, dflt_arr_res, Ok ty2))
-      | Tany _ -> (env, (TUtils.mk_tany env expr_pos, dflt_arr_res, Ok ty2))
+      | Tdynamic
+      | Tany _ ->
+        (env, (ty1, dflt_arr_res, Ok ty2))
       | Tprim Tstring ->
         let ty = MakeType.string (Reason.Rwitness expr_pos) in
         let (_, p2, _) = e2 in

@@ -278,11 +278,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
   | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
-  | Tany _ -> ((env, None), mk (r, TUtils.tany env))
   | Tvar _var ->
     let (env, tv) = Env.new_global_tyvar env r in
     ((env, None), tv)
-  | (Tnonnull | Tprim _ | Tdynamic) as x -> ((env, None), mk (r, x))
+  | (Tnonnull | Tprim _ | Tdynamic | Tany _) as x -> ((env, None), mk (r, x))
   | Tmixed -> ((env, None), MakeType.mixed r)
   | Tthis ->
     let ty =

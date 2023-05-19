@@ -7860,8 +7860,7 @@ and class_get_inner
   let (env, cty) = Env.expand_type env cty in
   let dflt_rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) coerce_from_ty in
   match deref cty with
-  | (r, Tany _) -> (env, (mk (r, Typing_utils.tany env), []), dflt_rval_err)
-  | (_, Tdynamic) -> (env, (cty, []), dflt_rval_err)
+  | (_, (Tdynamic | Tany _)) -> (env, (cty, []), dflt_rval_err)
   | (_, Tunion tyl) ->
     let (env, pairs, rval_err_opts) =
       List.fold_left

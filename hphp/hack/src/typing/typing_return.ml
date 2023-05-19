@@ -26,10 +26,6 @@ let strip_awaitable fun_kind env et =
     | Tclass ((_, class_name), _, [ty])
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       { et with et_type = ty }
-    (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
-    | Tclass ((_, class_name), _, [])
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-      { et with et_type = mk (Reason.Rnone, TUtils.tany env) }
     | _ -> et
 
 let enforce_return_not_disposable ret_pos fun_kind env et =

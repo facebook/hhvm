@@ -83,7 +83,6 @@ ListPatch genListPatch() {
   ListPatch p;
   p.push_front(randInt());
   p.push_back(randInt());
-  p.erase(randInt());
   p.patchAt(randInt()) += randInt();
   return p;
 }
@@ -99,7 +98,6 @@ ListDequePatch genListDequePatch() {
   ListDequePatch p;
   p.push_front(randInt());
   p.push_back(randInt());
-  p.erase(randInt());
   p.patchAt(randInt()) += randInt();
   return p;
 }
@@ -242,7 +240,6 @@ ListStringPatch genListLongStringPatch() {
   ListStringPatch p;
   p.push_front(randLongStr());
   p.push_back(randLongStr());
-  p.erase(randLongStr());
   p.patchAt(randInt()) += randLongStr();
   return p;
 }

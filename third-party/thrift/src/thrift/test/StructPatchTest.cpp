@@ -424,18 +424,6 @@ TEST(StructPatchTest, ListPatch) {
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
       {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
 
-  ListPatch erasePatch;
-  erasePatch.erase(1);
-  test::expectPatch(
-      erasePatch,
-      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-      {2, 3, 4, 5, 6, 7, 8, 9, 10});
-
-  ListPatch removePatch;
-  removePatch.remove({1, 2, 3, 4});
-  test::expectPatch(
-      removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
-
   ListPatch elementPatch;
   elementPatch.patchAt(0) += 1;
   test::expectPatch(elementPatch, {1, 2, 3}, {2, 2, 3}, {3, 2, 3});
@@ -455,18 +443,6 @@ TEST(StructPatchTest, ListDequePatch) {
       actual,
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
       {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
-
-  ListDequePatch erasePatch;
-  erasePatch.erase(1);
-  test::expectPatch(
-      erasePatch,
-      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-      {2, 3, 4, 5, 6, 7, 8, 9, 10});
-
-  ListDequePatch removePatch;
-  removePatch.remove({1, 2, 3, 4});
-  test::expectPatch(
-      removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
 
   ListDequePatch elementPatch;
   elementPatch.patchAt(0) += 1;

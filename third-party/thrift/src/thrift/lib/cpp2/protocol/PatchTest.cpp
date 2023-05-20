@@ -552,19 +552,6 @@ TEST_F(PatchTest, GeneratedListPatch) {
   patched = applyGeneratedPatch<type::list<type::i16_t>>(patched, patch);
   EXPECT_EQ(
       patched, (Vec{1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10}));
-
-  ListPatch erasePatch;
-  erasePatch.erase(1);
-  patched = applyGeneratedPatch<type::list<type::i16_t>>(
-      Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, erasePatch);
-  EXPECT_EQ(patched, (Vec{2, 3, 4, 5, 6, 7, 8, 9, 10}));
-
-  ListPatch removePatch;
-  removePatch.remove({1, 2, 3, 4});
-
-  patched = applyGeneratedPatch<type::list<type::i16_t>>(
-      Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, removePatch);
-  EXPECT_EQ(patched, (Vec{5, 6, 7, 8, 9, 10}));
 }
 
 TEST_F(PatchTest, Set) {

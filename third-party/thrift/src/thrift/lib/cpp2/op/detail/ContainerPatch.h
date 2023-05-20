@@ -148,30 +148,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     prepend.insert(prepend.begin(), std::forward<U>(val));
   }
 
-  /// Removes an element.
-  template <typename U = typename T::value_type>
-  void erase(U&& val) {
-    if (hasAssign()) {
-      auto& assign = *data_.assign();
-      auto it = std::find(assign.begin(), assign.end(), val);
-      if (it != assign.end()) {
-        assign.erase(it);
-      }
-    }
-    data_.remove()->push_back(std::forward<U>(val));
-  }
-
-  /// Removes all elements in the list.
-  template <typename C = std::unordered_set<typename T::value_type>>
-  void remove(C&& entries) {
-    if (hasAssign()) {
-      auto& assign = *data_.assign();
-      remove_all_values(assign, entries);
-    }
-    data_.remove()->insert(
-        data_.remove()->end(), entries.begin(), entries.end());
-  }
-
   /// Returns the patch that for the element in a given position.
   FOLLY_NODISCARD VP& patchAt(size_t pos) {
     if (*data_.clear()) {
@@ -188,7 +164,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   ///     struct Visitor {
   ///       void assign(const List&);
   ///       void clear();
-  ///       void remove(const std::vector<Element>&);
   ///       void prepend(const List&);
   ///       void append(const List&);
   ///       void patchIfSet(const std::unordered_map<ListPatchIndex,
@@ -212,7 +187,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       v.assign(T{});
       v.clear();
       v.patchIfSet(std::unordered_map<ListPatchIndex, VP>{});
-      v.remove(std::vector<typename T::value_type>{});
       v.prepend(T{});
       v.append(T{});
     }
@@ -222,7 +196,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     }
 
     v.patchIfSet(*data_.patch());
-    v.remove(*data_.remove());
     v.prepend(*data_.prepend());
     v.append(*data_.append());
   }
@@ -239,9 +212,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
             ep.second.apply(v[idx]);
           }
         }
-      }
-      void remove(const std::vector<typename T::value_type>& t) {
-        remove_all_values(v, t);
       }
       void prepend(const T& t) { v.insert(v.begin(), t.begin(), t.end()); }
       void append(const T& t) { v.insert(v.end(), t.begin(), t.end()); }

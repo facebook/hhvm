@@ -26,6 +26,7 @@
 #include <folly/Optional.h>
 #include <folly/String.h>
 #include <folly/Utility.h>
+#include <folly/io/async/fdsock/SocketFds.h>
 #include <folly/portability/Unistd.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
@@ -158,14 +159,11 @@ class THeader final {
   THeader& operator=(THeader&&) = default;
 
   // The docblock on constructors explains why copying "received" `THeaders`
-  // is not allowed.  Since, the same type is used for "send" and "receive",
+  // is not allowed.  Since the same type is used for "send" and "receive",
   // we need a runtime check for when FDs are being received.  While it
   // would be more usable to disallow all "received" copies, there is no way
-  // to distinguish the objects unless they bear FDs.
-  THeader copyOrDfatalIfReceived() const {
-    // Future: handle `fds` here.
-    return THeader(c_);
-  }
+  // to distinguish sent/received THeaders unless they bear FDs.
+  THeader copyOrDfatalIfReceived() const;
 
   enum {
     ALLOW_BIG_FRAMES = 1 << 0,
@@ -399,6 +397,8 @@ class THeader final {
     return std::move(c_.routingData_);
   }
 
+  folly::SocketFds fds; // No accessor, since this type **is** the API.
+
   // 0 and 16th bits must be 0 to differentiate from framed & unframed
   static const uint32_t HEADER_MAGIC = 0x0FFF0000;
   static const uint32_t HEADER_MASK = 0xFFFF0000;
@@ -512,8 +512,9 @@ class THeader final {
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
   };
 
-  // Supports `copyOrDfatalIfReceived` above.
-  explicit THeader(TriviallyCopiable c) : c_(c) {}
+  // Supports `copyOrDfatalIfReceived`.
+  explicit THeader(TriviallyCopiable c, folly::SocketFds f)
+      : fds(std::move(f)), c_(c) {}
 
   TriviallyCopiable c_;
 };

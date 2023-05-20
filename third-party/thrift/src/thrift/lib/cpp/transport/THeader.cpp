@@ -94,6 +94,12 @@ THeader::THeader::TriviallyCopiable::TriviallyCopiable(int options)
       flags_(0),
       allowBigFrames_(options & ALLOW_BIG_FRAMES) {}
 
+THeader THeader::copyOrDfatalIfReceived() const {
+  SocketFds newFds;
+  newFds.cloneToSendFromOrDfatal(fds);
+  return THeader(c_, std::move(newFds));
+}
+
 int8_t THeader::getProtocolVersion() const {
   return c_.protoVersion_;
 }

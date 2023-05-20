@@ -166,7 +166,7 @@ def dict_at(base, idx) -> (str, lldb.SBValue):
     utils.debug_print(f"Element #{idx} address: 0x{elt.load_addr:x}")
 
     try:
-        if utils.get(elt, "data", "m_type").signed == -128:
+        if utils.get(elt, "data", "m_type").signed == utils.Global("HPHP::kInvalidDataType", base.target).signed:
             rawkey = key = '<deleted>'
         elif utils.get(elt, "data", "m_aux", "u_hash").signed < 0:
             ikey = utils.get(elt, "ikey").signed
@@ -184,19 +184,47 @@ def dict_at(base, idx) -> (str, lldb.SBValue):
     try:
         data_raw = utils.get(elt, "data")
         tv_type = utils.Type("HPHP::TypedValue", base.target)
+        # Cast because data_raw is a TypedValueAux, and we'd like it to
+        # just be presented as a TypedValue.
         data = data_raw.Cast(tv_type)
+        # Clone so we can rename it; the name will be used on the
+        # left-hand side of the typed value representation, e.g.:
+        #   "mykey" = { Double, 3.14 }
+        data = data.Clone(str(key))
     except Exception as e:
         print(f"Failed to get dictionary value with error: {str(e)}", file=sys.stderr)
-        data = '<invalid>'
+        data = None
     finally:
         utils._Current_key = None
 
-    data = data.Clone(str(key))
     return data
 
 def keyset_at(base, idx):
-    # base is a pointer to an HPHP::VanillaKeysetElm
-    print("Printing contents of keysets is not yet supported; instead run `expression -R -- <your-variable>` to see its raw value")
+    vde_type = utils.Type("HPHP::VanillaKeysetElm", base.target)
+    utils.debug_print(f"Keyset base address (i.e. first element): 0x{base.load_addr:x}")
+    offset = vde_type.size * idx
+    elt = base.CreateValueFromAddress("val", base.load_addr + offset, vde_type)
+    utils.debug_print(f"Element #{idx} address: 0x{elt.load_addr:x}")
+
+    try:
+        if utils.get(elt, "tv", "m_type").signed == utils.Global("HPHP::kInvalidDataType", base.target).signed:
+            key = '<deleted>'
+        else:
+            key_raw = utils.get(elt, "tv")
+            tv_type = utils.Type("HPHP::TypedValue", base.target)
+            # Cast because data_raw is a TypedValueAux, and we'd like it to
+            # just be presented as a TypedValue
+            key = key_raw.Cast(tv_type)
+            # Clone so I can rename it (specifically, I don't want anything
+            # showing up as the 'index' portion of the listing, so it doesn't
+            # look like a vec).
+            key = key.Clone("")
+    except Exception as e:
+        print(f"Failed to get keyset entry with error: {str(e)}", file=sys.stderr)
+        key = None
+
+    return key
+
 
 def idx(container: lldb.SBValue, index, hasher=None):
     if container.type.IsPointerType():

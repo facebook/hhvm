@@ -229,7 +229,7 @@ class pp_ArrayData:
         elif self._is('Dict'):
             self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaDict", self.val_obj.target))
         elif self._is('Keyset'):
-            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaKeySet", self.val_obj.target))
+            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaKeyset", self.val_obj.target))
         else:
             print(f"Invalid array type! Run `expression -R -- {self.val_obj.name}` to see its raw form", file=sys.stderr)
 

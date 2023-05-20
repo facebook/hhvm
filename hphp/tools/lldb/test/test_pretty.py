@@ -188,3 +188,19 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("HPHP::Array (Keyset)"):
+            self.run_until_breakpoint("takeArrayKeyset")
+            _, output = self.run_commands(["p v"])
+            expected_lines = [
+                "(HPHP::Array) 6 element(s) {",
+                "= { Int64, 1 }",
+                "= { String, \"cats\" }",
+                "= { Int64, 2 }",
+                "= { Int64, 3 }",
+                "= { String, \"dogs\" }",
+                "= { Int64, 42 }",
+                "}"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)

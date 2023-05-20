@@ -161,7 +161,7 @@ void buildOtherValues() {
   TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
   Array vec = make_vec_array(1, 2, 3, 4);
   Array dict = make_dict_array(0x0123cafe, true, 302, "Salutations, earth!", 2, 3.14, "key4", 2.718, "key5", "Hello, world!");
-  Array keyset = make_keyset_array(1, 2, 3, 2, 3);
+  Array keyset = make_keyset_array(1, "cats", 2, 3, "cats", 2, 3, "dogs", 42);
 
   takeStringData(StringData::MakeStatic("hello"));
   takeString(String("hello"));

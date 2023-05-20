@@ -423,6 +423,8 @@ let saved_state_dirty_files_ok ~start_time:_ = ()
 
 let saved_state_dirty_files_failure _ ~start_time:_ = ()
 
+let saved_state_load_naming_table_on_disk _ ~start_time:_ = ()
+
 let monitor_update_status _ _ = ()
 
 let find_svn_rev_failed _ _ = ()

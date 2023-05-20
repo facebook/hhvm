@@ -7056,8 +7056,9 @@ private:
 
     if (cls.attrs & AttrInterface) return true;
 
+    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
     for (auto const& p : cls.properties) {
-      if (!add_property(cinfo, state, p.name, p, cinfo.name, false)) {
+      if (!add_property(cinfo, state, p.name, p, cinfo.name, false, clsHasModuleLevelTrait)) {
         return false;
       }
     }
@@ -7072,12 +7073,12 @@ private:
       auto const& trait = index.cls(traitName);
       auto const& traitInfo = index.classInfo(traitName);
       for (auto const& p : trait.properties) {
-        if (!add_property(cinfo, state, p.name, p, cinfo.name, true)) {
+        if (!add_property(cinfo, state, p.name, p, cinfo.name, true, false)) {
           return false;
         }
       }
       for (auto const& p : traitInfo.traitProps) {
-        if (!add_property(cinfo, state, p.name, p, cinfo.name, true)) {
+        if (!add_property(cinfo, state, p.name, p, cinfo.name, true, false)) {
           return false;
         }
       }
@@ -7091,7 +7092,15 @@ private:
                            SString name,
                            const php::Prop& prop,
                            SString src,
-                           bool trait) {
+                           bool trait,
+                           bool moduleLevelTrait) {
+    if (moduleLevelTrait && (prop.attrs & AttrInternal)) {
+      ITRACE(2,
+             "Adding property failed for `{}' because "
+             "property `{}' is internal and public traits cannot define internal properties\n",
+             cinfo.name, prop.name);
+      return false;
+    }
     auto const [it, emplaced] =
       state.m_propIndices.emplace(name, state.m_props.size());
     if (emplaced) {
@@ -7153,7 +7162,7 @@ private:
                                State& dst,
                                const State& src) {
     for (auto const& [name, src, prop] : src.m_props) {
-      if (!add_property(cinfo, dst, name, prop, src, false)) {
+      if (!add_property(cinfo, dst, name, prop, src, false, false)) {
         return false;
       }
     }
@@ -7566,9 +7575,17 @@ private:
     }
 
     auto idx = cinfo.methods.size();
+    auto clsHasModuleLevelTrait = cls.userAttributes.count(s___ModuleLevelTrait.get());
 
     // Now add our methods.
     for (auto const& m : cls.methods) {
+      if (clsHasModuleLevelTrait && (m->attrs & AttrInternal)) {
+        ITRACE(2,
+            "Adding methods failed for `{}' because "
+            "method `{}' is internal and public traits cannot define internal methods\n",
+            cls.name, m->name);
+        return false;
+      }
       auto const emplaced = cinfo.methods.emplace(m->name, MethTabEntry { *m });
       if (emplaced.second) {
         ITRACE(

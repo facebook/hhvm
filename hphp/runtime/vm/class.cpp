@@ -2184,6 +2184,9 @@ void Class::setMethods() {
   }
 
   static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
+
+  auto isPublicTrait = (attrs() & AttrTrait) && !(attrs() & AttrInternal);
+
   // Overlay/append this class's public/protected methods onto/to those of the
   // parent.
   for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
@@ -2198,6 +2201,15 @@ void Class::setMethods() {
          */
         continue;
       }
+    }
+    // Public traits cannot define internal methods.  Enforcing this property
+    // is especially important for traits labelled <<__ModuleLevelTraits>>
+    // (which are enforced to be public), as the jit would not handle correctly
+    // a call into an internal method of a <<__ModuleLevelTrait>>
+    if (isPublicTrait && method->isInternal()) {
+      raise_error(
+        "Trait %s is public and therefore cannot define the internal method %s",
+        m_preClass->name()->data(), method->name()->data());
     }
 
     MethodMapBuilder::iterator it2 = builder.find(method->name());
@@ -3016,9 +3028,21 @@ void Class::setProperties() {
         m_allFlags.m_hasDeepInitProps = true;
       }
 
+      auto isPublicTrait = isTrait(this) && !(isInternal());
+
       auto addNewProp = [&] {
         Prop prop;
         initProp(prop, preProp);
+
+        // Public traits cannot define internal properties.  Enforcing this
+        // is especially important for traits labelled <<__ModuleLevelTraits>>
+        // (which are enforced to be public), as the jit would not handle correctly
+        // accesses to internal properties of a <<__ModuleLevelTrait>>
+        if (isPublicTrait && prop.isInternal()) {
+          raise_error(
+             "Trait %s is public and therefore cannot define the internal property %s",
+             m_preClass->name()->data(), prop.name->data());
+        }
 
         curPropMap.add(preProp->name(), prop);
         curPropMap[serializationIdx++].serializationIdx = curPropMap.size() - 1;

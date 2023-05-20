@@ -1,0 +1,3 @@
+--inputs=__DIR__/module_level_traits_modules.inc
+--inputs=__DIR__/module_level_traits_8.inc0
+--inputs=__DIR__/module_level_traits_8.inc1

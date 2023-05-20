@@ -2264,8 +2264,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        // TODO(T126821336): Populate with module name. Do we know ctx is nonnull here always?
-        auto const propCtx = MemberLookupContext(ctx);
+        // TODO(T126821336): Populate with module name
+        auto const propCtx = MemberLookupContext(ctx, (StringData*)nullptr);
         auto const lookup = obj_cls->getDeclPropSlot(propCtx, memberName.get());
         auto const slot = lookup.slot;
 

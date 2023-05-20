@@ -1190,7 +1190,6 @@ TypedValue* Class::getSPropData(Slot index) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
-MemberLookupContext::MemberLookupContext(const Class* cls): MemberLookupContext(cls, (const StringData*) nullptr) {}
 
 MemberLookupContext::MemberLookupContext(const Class* cls,
                                          const Func* func)
@@ -1199,20 +1198,16 @@ MemberLookupContext::MemberLookupContext(const Class* cls,
 
 MemberLookupContext::MemberLookupContext(const Class* cls,
                                          const StringData* moduleName) {
-  if (cls) {
-    m_data = cls;
-  } else {
-    m_data = moduleName;
-  }
+  m_class = cls;
+  m_moduleName = moduleName;
 }
 
 const Class* MemberLookupContext::cls() const {
-  return m_data.left();
+  return m_class;
 }
 
 const StringData* MemberLookupContext::moduleName() const {
-  if (auto const cls = m_data.left()) return cls->moduleName();
-  return m_data.right();
+  return m_moduleName;
 }
 
 Class::PropSlotLookup Class::getDeclPropSlot(

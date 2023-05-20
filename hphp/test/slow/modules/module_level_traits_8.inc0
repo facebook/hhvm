@@ -1,0 +1,10 @@
+<?hh
+
+module MLT_A;
+
+<<__ModuleLevelTrait>>
+public trait T {
+  public function foo(): void {
+    $this->bar();
+  }
+}

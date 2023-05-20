@@ -370,7 +370,7 @@ String throwable_to_string(ObjectData* throwable) {
                      ex->getVMClass()->name()->slice(),
                      cls->name()->slice());
     }
-    auto message = throwable->getProp(MemberLookupContext{cls},
+    auto message = throwable->getProp(MemberLookupContext{cls, cls->moduleName()},
                                       makeStaticString("message"));
     if (!message) {
       Logger::Error("Throwable object doesn't have the expected message field");

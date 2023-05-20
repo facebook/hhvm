@@ -478,7 +478,10 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
   CoeffectsAutoGuard _2;
 
   auto const lookup = class_->getSPropIgnoreLateInit(
-    force ? MemberLookupContext(class_) // class is always nonnull here
+    force ?
+      // since force is true, set the MemberLookupContext so that
+      // the module boundary check always succeeds
+      MemberLookupContext(class_, class_->moduleName())
     : MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func()),
     prop.get()
   );
@@ -508,8 +511,11 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
   VMRegAnchor _;
   CoeffectsAutoGuard _2;
-  // class_ is always nonnull here so we don't need to pass in the module name
-  auto const ctx = force ? MemberLookupContext(class_)
+
+  auto const ctx = force ?
+    // since force is true, set the MemberLookupContext so that the module
+    // boundary check will always succeed if prop is defined in class_
+    MemberLookupContext(class_, class_->moduleName())
   : MemberLookupContext(arGetContextClass(vmfp()), vmfp()->func());
   auto const lookup = class_->getSPropIgnoreLateInit(
     ctx,
@@ -1831,7 +1837,8 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 static Variant reflection_extension_name_get(const Object& this_) {
   assertx(Reflection::s_ReflectionExtensionClass);
   auto const name = this_->getProp(
-    MemberLookupContext(Reflection::s_ReflectionExtensionClass),
+    MemberLookupContext(Reflection::s_ReflectionExtensionClass,
+                        Reflection::s_ReflectionExtensionClass->moduleName()),
     s___name.get()
   );
   return tvCastToString(name.tv());
@@ -1956,8 +1963,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
 
   auto data = Native::data<ReflectionPropHandle>(this_);
   assertx(cls);
-  // cls is always nonnull, no need to pass in module name
-  auto const ctx = MemberLookupContext(cls);
+  // cls is always nonnull, pass cls->moduleName() so that
+  // module boundary checks always succeed
+  auto const ctx = MemberLookupContext(cls, cls->moduleName());
   // is there a declared instance property?
   auto lookup = cls->getDeclPropSlot(ctx, prop_name.get());
   auto propIdx = lookup.slot;
@@ -2170,8 +2178,9 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // it was declared in); so if we don't want to store propIdx we have to
       // look it up by name.
       auto cls = prop->cls;
-      // cls is never null here
-      auto const propCtx = MemberLookupContext(cls);
+      // cls is never null here, pass cls->moduleName() so that
+      // module boundary checks always succeed
+      auto const propCtx = MemberLookupContext(cls, cls->moduleName());
       auto lookup = cls->getDeclPropSlot(propCtx, prop->name);
       auto propSlot = lookup.slot;
       assertx(propSlot != kInvalidSlot);

@@ -549,7 +549,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   auto const cls = obj->getVMClass();
 
   // TODO(T126821336): unserializing variable may require module name
-  auto const propCtx = MemberLookupContext(ctx);
+  auto const propCtx = MemberLookupContext(ctx, (StringData *)nullptr);
   auto const lookup = cls->getDeclPropSlot(propCtx, key.get());
   auto const slot = lookup.slot;
   tv_lval t;

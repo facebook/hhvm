@@ -348,7 +348,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   }
   assertx(cls);
   // Class is nonnull here, so no need to fill in module name in the lookup context
-  auto const lookup = cls->getDeclPropSlot(MemberLookupContext(cls), property.get());
+  auto const lookup = cls->getDeclPropSlot(
+    MemberLookupContext(cls, cls->moduleName()),
+    property.get());
   if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&

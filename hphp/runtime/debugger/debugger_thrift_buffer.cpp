@@ -84,7 +84,10 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
     // the class name.
     assertx(o->instanceof(SystemLib::s_ExceptionClass));
 
-    auto const info = o->getProp(MemberLookupContext(SystemLib::s_ExceptionClass), s_message.get());
+    auto const info = o->getProp(
+      MemberLookupContext(SystemLib::s_ExceptionClass,
+                          SystemLib::s_ExceptionClass->moduleName()),
+      s_message.get());
     if (info) {
       if (isStringType(info.type())) {
         data = folly::sformat(

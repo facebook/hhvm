@@ -343,7 +343,8 @@ void HHVM_METHOD(DateTime, __wakeup) {
                                  std::move(dtz_obj));
 
   // cleanup
-  auto const ctx = MemberLookupContext(this_->getVMClass());
+  auto const klass = this_->getVMClass();
+  auto const ctx = MemberLookupContext(klass, klass ? klass->moduleName() : nullptr);
   this_->unsetProp(ctx, s_date.get());
   this_->unsetProp(ctx, s_timezone_type.get());
   this_->unsetProp(ctx, s_timezone.get());
@@ -416,7 +417,9 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
     auto rval = datetime->getProp(
-      MemberLookupContext(SystemLib::s_DateTimeImmutableClass),
+      MemberLookupContext(
+        SystemLib::s_DateTimeImmutableClass,
+        SystemLib::s_DateTimeImmutableClass->moduleName()),
       s_data.get()
     );
     assertx(rval.is_set() && type(rval) == KindOfObject);

@@ -416,7 +416,8 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
-  auto const propCtx = MemberLookupContext(ctx);
+  auto const propCtx =
+    ctx ? MemberLookupContext(ctx, ctx->moduleName()) : nullctx;
 
   // Can't use propImpl here because if the property is not accessible and
   // there is no native get, propImpl will raise_error("Cannot access ...",
@@ -456,7 +457,8 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
-  auto const propCtx = MemberLookupContext(ctx);
+  auto const propCtx =
+    ctx ? MemberLookupContext(ctx, ctx->moduleName()) : nullctx;
 
   // Can't use setProp here because if the property is not accessible and
   // there is no native set, setProp will raise_error("Cannot access ...",
@@ -504,7 +506,8 @@ void ObjectData::o_setArray(const Array& properties) {
     // TODO(T126821336): property can be internal
     // This function is only used in ext_mysql.cpp,
     // but has its own encoding mechanism
-    auto const propCtx = MemberLookupContext(ctx);
+    auto const propCtx =
+      ctx ? MemberLookupContext(ctx, ctx->moduleName()) : nullctx;
     setProp(propCtx, k.get(), tvAssertPlausible(iter.secondVal()));
   }
 }
@@ -648,7 +651,8 @@ Array ObjectData::o_toIterArray(const String& context) {
   if (!context.empty()) {
     ctx = Class::lookup(context.get());
   }
-  auto const propCtx = MemberLookupContext(ctx);
+  auto const propCtx =
+    ctx ? MemberLookupContext(ctx, ctx->moduleName()) : nullctx;
 
   // Get all declared properties first, bottom-to-top in the inheritance
   // hierarchy, in declaration order.

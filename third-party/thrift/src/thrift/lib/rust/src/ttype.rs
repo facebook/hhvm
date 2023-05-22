@@ -19,6 +19,7 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::sync::Arc;
 
 use bytes::Bytes;
 use ordered_float::OrderedFloat;
@@ -209,4 +210,18 @@ where
     T: GetTType,
 {
     const TTYPE: TType = TType::List;
+}
+
+impl<T> GetTType for Box<T>
+where
+    T: GetTType,
+{
+    const TTYPE: TType = <T as GetTType>::TTYPE;
+}
+
+impl<T> GetTType for Arc<T>
+where
+    T: GetTType,
+{
+    const TTYPE: TType = <T as GetTType>::TTYPE;
 }

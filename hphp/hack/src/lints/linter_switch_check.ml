@@ -16,11 +16,6 @@ module Typing = Typing_defs
 module Cls = Decl_provider.Class
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel =
-  let is_subtype ty_sub ty_super = Env.can_subtype env ty_sub ty_super in
-  let ty_num = MakeType.num Reason.Rnone in
-  let ty_arraykey = MakeType.arraykey Reason.Rnone in
-  let ty_mixed = MakeType.mixed Reason.Rnone in
-  let ty_traversable = MakeType.traversable Typing_reason.Rnone ty_mixed in
   (* Enum class label === only consider the label name. No type information
    * is enforced as they might not be available to the runtime in all
    * use cases.
@@ -34,18 +29,13 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel =
     | Tnewtype (name, [_; _], _) -> String.equal name SN.Classes.cEnumClassLabel
     | _ -> false
   in
-  let compatible_types ty1 ty2 =
-    (is_label ty1 || is_label ty2)
-    || (is_subtype ty1 ty_num && is_subtype ty2 ty_num)
-    || (is_subtype ty1 ty_arraykey && is_subtype ty2 ty_arraykey)
-    || is_subtype ty1 ty_traversable
-       && is_subtype ty2 ty_traversable
-       && (is_subtype ty1 ty2 || is_subtype ty2 ty1)
-    || (is_subtype ty1 ty2 && is_subtype ty2 ty1)
-  in
   let ensure_valid_switch_case_value_type ((case_value_ty, case_value_p, _), _)
       =
-    if not (compatible_types case_value_ty scrutinee_ty) then
+    let tenv = Tast_env.tast_env_as_typing_env env in
+    if
+      (not (is_label case_value_ty || is_label scrutinee_ty))
+      && Typing_subtype.is_type_disjoint tenv case_value_ty scrutinee_ty
+    then
       Lints_errors.invalid_switch_case_value_type
         case_value_p
         (lazy (Env.print_ty env case_value_ty))

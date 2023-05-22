@@ -13,6 +13,6 @@ function main2(Wrap<float> $wf): void {
 }
 
 <<__SupportDynamicType>>
-function main2(vec<int> $_): void {
+function main3(vec<int> $_): void {
   (float) 42.0;
 }

@@ -14,10 +14,10 @@ function main2(Wrap<float> $wf): void {
 }
 
 <<__SupportDynamicType>>
-function main2(vec<int> $_): void {
+function main3(vec<int> $_): void {
   42.0;
 }
 
 
-There were input 3 patches for 1 files.
-Dropped patch count: 1 (1 overlapping, 0 original not found)
+There were input 2 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

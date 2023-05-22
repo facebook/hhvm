@@ -18,11 +18,7 @@ inline CipherSuite parse(folly::StringPiece s) {
       {"TLS_CHACHA20_POLY1305_SHA256",
        CipherSuite::TLS_CHACHA20_POLY1305_SHA256},
       {"TLS_AES_128_OCB_SHA256_EXPERIMENTAL",
-       CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL},
-      {"TLS_AEGIS_128L_SHA256_EXPERIMENTAL",
-       CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL},
-      {"TLS_AEGIS_256_SHA384_EXPERIMENTAL",
-       CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL}};
+       CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL}};
 
   auto location = stringToCiphers.find(s);
   if (location != stringToCiphers.end()) {

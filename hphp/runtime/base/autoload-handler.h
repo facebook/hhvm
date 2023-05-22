@@ -74,8 +74,6 @@ struct AutoloadHandler final : RequestEventHandler {
   Optional<AutoloadMap::FileResult> getFile(const String& name,
                                             AutoloadMap::KindOf kind);
 
-  Array getSymbols(const String& path, AutoloadMap::KindOf kind);
-
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
 
   /**

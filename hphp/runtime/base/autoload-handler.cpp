@@ -208,12 +208,6 @@ Optional<AutoloadMap::FileResult> AutoloadHandler::getFile(
   return m_map->getFile(kind, normalizeNS(clsName));
 }
 
-Array AutoloadHandler::getSymbols(const String& path,
-                                  AutoloadMap::KindOf kind) {
-  assertx(m_map);
-  return m_map->getSymbols(kind, path);
-}
-
 template <class T>
 bool
 AutoloadHandler::loadFromMapImpl(const String& clsName,

@@ -138,19 +138,6 @@ struct AutoloadMap {
     not_reached();
   }
 
-  Array getSymbols(KindOf kind, const String& path) {
-    always_assert(kind != AutoloadMap::KindOf::TypeOrTypeAlias);
-    switch (kind) {
-      case AutoloadMap::KindOf::TypeOrTypeAlias: not_reached();
-      case AutoloadMap::KindOf::Type: return getFileTypes(path);
-      case AutoloadMap::KindOf::Function: return getFileFunctions(path);
-      case AutoloadMap::KindOf::Constant: return getFileConstants(path);
-      case AutoloadMap::KindOf::TypeAlias: return getFileTypeAliases(path);
-      case AutoloadMap::KindOf::Module: return getFileModules(path);
-    }
-    not_reached();
-  }
-
   /**
    * Map symbols to files
    */

@@ -1,1 +1,1 @@
---shallow-class-diff --no-builtins
+--enable-sound-dynamic-type --everything-sdt --shallow-class-diff --no-builtins

@@ -1,6 +1,6 @@
 Typing[4110] Invalid return type [1]
 -> Expected int [2]
--> But got num [3]
+-> But got float [3]
 
 mul_union.php:16:10
      2 | // Copyright 2020-present Facebook. All Rights Reserved.

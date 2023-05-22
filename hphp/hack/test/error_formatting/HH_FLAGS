@@ -1,1 +1,1 @@
---error-format context
+--enable-sound-dynamic-type --everything-sdt --error-format context

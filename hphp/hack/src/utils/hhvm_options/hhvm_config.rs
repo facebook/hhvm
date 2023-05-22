@@ -23,6 +23,13 @@ impl HhvmConfig {
             |config, key| Ok(config.get_bool(key)?),
         )
     }
+    pub fn get_uint32(&self, key: &str) -> Result<Option<u32>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_uint32(key)?),
+        )
+    }
 
     fn get_helper<'a, T: 'a>(
         &'a self,

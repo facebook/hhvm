@@ -27,17 +27,10 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         }
     };
 
+    flags.jit_enable_rename_function = jit_enable_rename_function(config)?;
     init(&mut flags.ltr_assign, "php7.ltr_assign")?;
     init(&mut flags.uvs, "php7.uvs")?;
     init(&mut flags.repo_authoritative, "Repo.Authoritative")?;
-    init(
-        &mut flags.jit_enable_rename_function,
-        "Eval.JitEnableRenameFunction",
-    )?;
-    init(
-        &mut flags.jit_enable_rename_function,
-        "JitEnableRenameFunction",
-    )?;
     init(
         &mut flags.log_extern_compiler_perf,
         "Eval.LogExternCompilerPerf",
@@ -73,6 +66,16 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
     // Only hdf version
     flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
     Ok(flags)
+}
+
+pub fn jit_enable_rename_function(config: &HhvmConfig) -> Result<bool> {
+    match config.get_uint32("Eval.JitEnableRenameFunction")? {
+        Some(b) => Ok(b > 0),
+        None => match config.get_uint32("JitEnableRenameFunction")? {
+            Some(b1) => Ok(b1 > 0),
+            None => Ok(false),
+        },
+    }
 }
 
 pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {

@@ -18,6 +18,7 @@ pub(crate) mod ffi {
         fn remove(self: &Hdf, name: &CxxString) -> Result<()>;
 
         fn configGetBool(self: &Hdf, or_default: bool) -> Result<bool>;
+        fn configGetUInt32(self: &Hdf, or_default: u32) -> Result<u32>;
         unsafe fn configGet(self: &Hdf, or_default: *const c_char) -> Result<*const c_char>;
         fn exists(self: &Hdf) -> Result<bool>;
         fn toString(self: &Hdf) -> Result<*const c_char>;

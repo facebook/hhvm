@@ -154,7 +154,7 @@ void rename_function(const String& old_name, const String& new_name) {
       // wire non-AttrInterceptable Func*'s into the TC. Don't rename
       // functions.
       raise_error("fb_rename_function must be explicitly enabled"
-                  "(-v Eval.JitEnableRenameFunction=true)");
+                  "(-v Eval.JitEnableRenameFunction=1)");
     }
   }
 

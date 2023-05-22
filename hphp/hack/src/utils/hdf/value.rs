@@ -151,6 +151,15 @@ impl Value {
         }
     }
 
+    /// Gets the value and converts the value to a uint32 according to HDF rules.
+    /// If the value doesn't exist, return the default value.
+    pub fn get_uint32(&self, name: &str) -> Result<Option<u32>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetUInt32(0)?)),
+            None => Ok(None),
+        }
+    }
+
     /// Return the utf8 string value of this node, if it exists.
     /// Returns an error for Hdf internal errors or failed utf8 validation.
     pub fn as_str(&self) -> Result<Option<String>> {

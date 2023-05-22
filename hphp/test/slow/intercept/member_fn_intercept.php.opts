@@ -1,1 +1,1 @@
--vEval.JitEnableRenameFunction=true
+-vEval.JitEnableRenameFunction=1

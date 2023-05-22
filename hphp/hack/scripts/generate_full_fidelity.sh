@@ -10,4 +10,4 @@ FBCODE_ROOT="$(dirname "${BASH_SOURCE[0]}")/../../.."
 
 cd "${FBCODE_ROOT}"
 
-buck run //hphp/hack/src:generate_full_fidelity
+buck2 run //hphp/hack/src:generate_full_fidelity

@@ -1,1 +1,1 @@
---go-to-impl
+--enable-sound-dynamic-type --everything-sdt --go-to-impl 

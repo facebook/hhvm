@@ -1,1 +1,1 @@
---dump-inheritance
+--dump-inheritance --enable-sound-dynamic-type --everything-sdt

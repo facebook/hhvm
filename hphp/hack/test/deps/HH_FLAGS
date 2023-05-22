@@ -1,1 +1,1 @@
---dump-deps --no-builtins
+--dump-deps --no-builtins --enable-sound-dynamic-type --everything-sdt

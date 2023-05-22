@@ -6,4 +6,5 @@ Extends IFoo -> Type Foo
 Type Bar -> Type Foo
 Type FooParent -> Type Bar, Type Foo, Type IFoo
 Type G -> Type Bar, Type Foo, Type IFoo
+Type HH\supportdyn -> Type Foo, Type FooParent
 Type IFoo -> Type Foo

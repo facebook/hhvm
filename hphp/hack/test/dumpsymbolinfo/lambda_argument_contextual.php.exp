@@ -30,7 +30,7 @@
         "char_start":58,
         "char_end":59
       },
-      "type":"(function(Tv1): Tv2)",
+      "type":"(function(Tv1): ~Tv2)",
       "ident":0
     },
     {

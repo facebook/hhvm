@@ -20,6 +20,7 @@ use nast::ParamKind;
 use nast::Pos;
 use nast::Tparam;
 use nast::Typedef;
+use nast::TypedefVisibility;
 use nast::UserAttribute;
 use nast::UserAttributes;
 
@@ -241,10 +242,10 @@ impl Pass for ElabEverythingSdtPass {
             return Continue(());
         }
 
-        // If there isn't an "as constraint", produce a
+        // If there isn't an "as constraint", and this is not just a type alias, produce a
         // `Happly(\\HH\\supportdyn, Hmixed)` and write it into
         // `td.as_constraint` in-place.
-        if td.as_constraint.is_none() {
+        if td.as_constraint.is_none() && td.vis != TypedefVisibility::Transparent {
             let pos = td.name.pos().clone();
             td.as_constraint = Some(wrap_supportdyn(Hint(pos, Box::new(Hint_::Hmixed))));
         }

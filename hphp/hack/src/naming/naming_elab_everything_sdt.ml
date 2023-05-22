@@ -179,7 +179,12 @@ let on_typedef t ~ctx =
       if Env.implicit_sdt ctx then
         match t.t_as_constraint with
         | Some _ -> t.t_as_constraint
-        | None -> Some (pos, wrap_supportdyn pos Aast.Hmixed)
+        | None -> begin
+          (* If this isn't just a type alias then we need to add supportdyn<mixed> as upper bound *)
+          match t.t_vis with
+          | Transparent -> None
+          | _ -> Some (pos, wrap_supportdyn pos Aast.Hmixed)
+        end
       else
         t.t_as_constraint
     in

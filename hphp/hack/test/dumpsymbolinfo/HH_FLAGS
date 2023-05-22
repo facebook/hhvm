@@ -1,1 +1,1 @@
---dump-symbol-info
+--dump-symbol-info --enable-sound-dynamic-type --everything-sdt

@@ -1,1 +1,1 @@
---deregister-attributes
+--deregister-attributes --enable-sound-dynamic-type --everything-sdt

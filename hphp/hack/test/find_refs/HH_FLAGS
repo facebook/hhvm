@@ -1,1 +1,1 @@
---find-refs
+--enable-sound-dynamic-type --everything-sdt --find-refs 

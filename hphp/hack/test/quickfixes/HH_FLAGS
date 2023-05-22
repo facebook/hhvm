@@ -1,1 +1,1 @@
---allowed-fixme-codes-strict 4182
+--allowed-fixme-codes-strict 4182 --enable-sound-dynamic-type --everything-sdt

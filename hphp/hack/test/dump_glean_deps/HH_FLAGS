@@ -1,1 +1,1 @@
---dump-glean-deps --no-builtins
+--dump-glean-deps --no-builtins --enable-sound-dynamic-type --everything-sdt

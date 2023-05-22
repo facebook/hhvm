@@ -14,7 +14,16 @@ open Typing_defs
 (* Given a type declaration, return user-denotable syntax that
    represents it. This is lossy: we use mixed if there's no better
    syntax. *)
+let rec strip_supportdyn ty =
+  match get_node ty with
+  | Tapply (name, [ty])
+    when String.equal (snd name) Naming_special_names.Classes.cSupportDyn ->
+    strip_supportdyn ty
+  | _ -> ty
+
 let rec of_decl_ty (ty : decl_ty) : string =
+  (* TODO: when we start supporting NoAutoDynamic, revisit this *)
+  let ty = strip_supportdyn ty in
   match get_node ty with
   | Tprim p -> Aast_defs.string_of_tprim p
   | Tmixed
@@ -35,7 +44,8 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Tdynamic -> "dynamic"
   | Tthis -> "this"
   | Toption ty ->
-    (match get_node ty with
+    (* TODO: when we start supporting NoAutoDynamic, revisit this *)
+    (match get_node (strip_supportdyn ty) with
     | Typing_defs.Tnonnull -> "mixed"
     | _ -> "?" ^ of_decl_ty ty)
   | Tfun f ->
@@ -120,11 +130,12 @@ let param_source (param : decl_ty fun_param) ~(variadic : bool) : string =
     name
 
 (* Is this type of the form Awaitable<something> ? *)
-let is_awaitable (ty : decl_ty) : bool =
+let rec is_awaitable (ty : decl_ty) : bool =
   match get_node ty with
   | Tapply ((_, name), _)
     when String.equal name Naming_special_names.Classes.cAwaitable ->
     true
+  | Tlike ty -> is_awaitable ty
   | _ -> false
 
 let params_source ~variadic (params : decl_ty fun_params) : string =
@@ -147,7 +158,8 @@ let of_implicit_params (impl_params : decl_ty fun_implicit_params) : string =
 
 let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
     string =
-  let (_, ty_) = deref (Lazy.force meth.ce_type) in
+  (* TODO: when we start supporting NoAutoDynamic, revisit this *)
+  let (_, ty_) = deref (strip_supportdyn (Lazy.force meth.ce_type)) in
   let (params, return_ty, async_modifier, capabilities) =
     match ty_ with
     | Tfun ft ->

@@ -115,7 +115,6 @@ pub mod compile_ffi {
     #[derive(Debug)]
     enum TypeKind {
         Class,
-        Record,
         Interface,
         Enum,
         Trait,

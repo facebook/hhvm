@@ -45,8 +45,6 @@ inline constexpr std::string_view kTypeKindInterface = "interface";
 inline constexpr std::string_view kTypeKindEnum = "enum";
 inline constexpr std::string_view kTypeKindTrait = "trait";
 inline constexpr std::string_view kTypeKindTypeAlias = "typeAlias";
-inline constexpr std::string_view kTypeKindMixed = "mixed";
-inline constexpr std::string_view kTypeKindUnknown = "unknown";
 
 constexpr std::string_view toString(TypeKind kind) {
   switch (kind) {

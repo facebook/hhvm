@@ -13,7 +13,6 @@ impl From<compile_ffi::TypeKind> for facts::TypeKind {
     fn from(type_kind: compile_ffi::TypeKind) -> facts::TypeKind {
         match type_kind {
             compile_ffi::TypeKind::Class => facts::TypeKind::Class,
-            compile_ffi::TypeKind::Record => facts::TypeKind::Record,
             compile_ffi::TypeKind::Interface => facts::TypeKind::Interface,
             compile_ffi::TypeKind::Enum => facts::TypeKind::Enum,
             compile_ffi::TypeKind::Trait => facts::TypeKind::Trait,
@@ -28,7 +27,6 @@ impl From<facts::TypeKind> for compile_ffi::TypeKind {
     fn from(typekind: facts::TypeKind) -> compile_ffi::TypeKind {
         match typekind {
             facts::TypeKind::Class => compile_ffi::TypeKind::Class,
-            facts::TypeKind::Record => compile_ffi::TypeKind::Record,
             facts::TypeKind::Interface => compile_ffi::TypeKind::Interface,
             facts::TypeKind::Enum => compile_ffi::TypeKind::Enum,
             facts::TypeKind::Trait => compile_ffi::TypeKind::Trait,

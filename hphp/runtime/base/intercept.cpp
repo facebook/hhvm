@@ -163,6 +163,14 @@ void rename_function(const String& old_name, const String& new_name) {
     raise_error("Function already defined: %s", n3w->data());
   }
 
+  if (StructuredLog::enabled() &&
+    RuntimeOption::EvalDumpJitEnableRenameFunctionStats) {
+    StructuredLogEntry entry;
+    entry.setStr("old_function_name", old->data());
+    entry.setStr("new_function_name", n3w->data());
+    StructuredLog::log("hhvm_rename_function", entry);
+  }
+
   always_assert(
     !rds::isPersistentHandle(oldNe->getFuncHandle(func->fullName()))
   );

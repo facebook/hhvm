@@ -27,8 +27,8 @@ class D {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("D"))
-  // CHECK:   store &base <- $builtins.hack_string("bar"): *HackMixed
-  // CHECK:   n1 = $builtins.hack_dim_field_get(&base, n0)
+  // CHECK:   store &base <- n0: *HackMixed
+  // CHECK:   n1 = $builtins.hack_dim_field_get(&base, $builtins.hack_string("bar"))
   // CHECK:   n2 = $builtins.hack_string("foo")
   // CHECK:   n3 = $builtins.hack_dim_field_get(n1, n2)
   // CHECK:   n4: *HackMixed = load n3

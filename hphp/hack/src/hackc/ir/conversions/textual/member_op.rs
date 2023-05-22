@@ -105,8 +105,8 @@ fn write_base(
             loc: _,
         } => {
             // Get base from static property.
-            let base = base_from_vid(state, operands.next().unwrap())?;
             let prop = state.lookup_vid(operands.next().unwrap());
+            let base = base_from_vid(state, operands.next().unwrap())?;
             state.call_builtin(hack::Builtin::DimFieldGet, (base, prop))
         }
     }

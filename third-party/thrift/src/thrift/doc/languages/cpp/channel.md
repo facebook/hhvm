@@ -5,7 +5,7 @@ description: Channel in C++
 
 # Channels in C++
 
-Prerequisite: [Thrift Channels](../../spec/protocol/channel)
+Prerequisite: [Thrift Channels](/fb/server/channels.md)
 
 ## Untyped channel in C++
 

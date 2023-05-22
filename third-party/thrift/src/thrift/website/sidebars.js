@@ -101,7 +101,6 @@ module.exports = {
             id: 'spec/protocol/index',
           },
           items: [
-            "spec/protocol/channel",
             "spec/protocol/data",
             {
               type: 'category',
@@ -332,6 +331,7 @@ module.exports = {
         'fb/server/flavors-of-main',
         'fb/server/components',
         'fb/server/transport',
+        'fb/server/channels',
         'fb/server/threading-models',
         'fb/server/thrift-server-features',
         'fb/server/async-handling',

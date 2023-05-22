@@ -314,8 +314,8 @@ class C {
     }
   }
 
-  // TEST-CHECK-BAL: define C.test_const
-  // CHECK: define C.test_const($this: *C) : *void {
+  // TEST-CHECK-BAL: define .final C.test_const
+  // CHECK: define .final C.test_const($this: *C) : *void {
   // CHECK: local $x: *void
   // CHECK: #b0:
   // CHECK:   n0: *C = load &$this
@@ -324,7 +324,7 @@ class C {
   // CHECK:   store &$x <- n2: *HackMixed
   // CHECK:   ret null
   // CHECK: }
-  public function test_const(): void {
+  public final function test_const(): void {
     $x = C::MY_CONSTANT;
   }
 

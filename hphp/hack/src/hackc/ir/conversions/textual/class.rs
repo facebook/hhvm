@@ -253,13 +253,21 @@ impl ClassState<'_, '_, '_> {
         let ty = non_static_ty(self.class.name);
 
         let params = vec![(special_idents::THIS, &static_ty)];
+        let attributes = textual::FuncAttributes::default();
 
-        self.txf
-            .define_function(&name, Some(&self.class.src_loc), &params, &ty, &[], |fb| {
+        self.txf.define_function(
+            &name,
+            Some(&self.class.src_loc),
+            &attributes,
+            &params,
+            &ty,
+            &[],
+            |fb| {
                 let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.deref()))?;
                 fb.ret(obj)?;
                 Ok(())
-            })
+            },
+        )
     }
 
     fn write_method(&mut self, method: ir::Method<'_>) -> Result {
@@ -278,6 +286,7 @@ impl ClassState<'_, '_, '_> {
 
         let func_info = FuncInfo::Method(MethodInfo {
             name: method.name,
+            attrs: method.attrs,
             class: &self.class,
             is_static,
             flags: method.flags,

@@ -67,6 +67,7 @@ pub(crate) fn write_function(
 
     let func_info = FuncInfo::Function(FunctionInfo {
         name: function.name,
+        attrs: function.attrs,
     });
 
     lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
@@ -263,21 +264,33 @@ fn write_func(
     };
 
     let span = func.loc(func.loc_id).clone();
-    txf.define_function(&name, Some(&span), &tx_params, &ret_ty, &locals, {
-        let func_info = Arc::clone(&func_info);
-        |fb| {
-            let mut func = rewrite_jmp_ops(func);
-            ir::passes::clean::run(&mut func);
+    let attributes = textual::FuncAttributes {
+        is_final: func_info.attrs().is_final(),
+    };
 
-            let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
+    txf.define_function(
+        &name,
+        Some(&span),
+        &attributes,
+        &tx_params,
+        &ret_ty,
+        &locals,
+        {
+            let func_info = Arc::clone(&func_info);
+            |fb| {
+                let mut func = rewrite_jmp_ops(func);
+                ir::passes::clean::run(&mut func);
 
-            for bid in func.block_ids() {
-                write_block(&mut state, bid)?;
+                let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
+
+                for bid in func.block_ids() {
+                    write_block(&mut state, bid)?;
+                }
+
+                Ok(())
             }
-
-            Ok(())
-        }
-    })?;
+        },
+    )?;
 
     // For a user static method also generate an instance stub which forwards to
     // the static method.
@@ -353,32 +366,41 @@ fn write_instance_stub(
         IsStatic::NonStatic,
         method_info.name,
     );
+    let attributes = textual::FuncAttributes::default();
 
     let mut tx_params = tx_params.to_vec();
     let inst_ty = method_info.non_static_ty();
     tx_params[0].1 = &inst_ty;
 
     let locals = Vec::default();
-    txf.define_function(&name_str, Some(span), &tx_params, ret_ty, &locals, |fb| {
-        fb.comment("forward to the static method")?;
-        let this_str = strings.intern_str(special_idents::THIS);
-        let this_lid = LocalId::Named(this_str);
-        let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
-        let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
-        let target =
-            FunctionName::method(method_info.class.name, IsStatic::Static, method_info.name);
+    txf.define_function(
+        &name_str,
+        Some(span),
+        &attributes,
+        &tx_params,
+        ret_ty,
+        &locals,
+        |fb| {
+            fb.comment("forward to the static method")?;
+            let this_str = strings.intern_str(special_idents::THIS);
+            let this_lid = LocalId::Named(this_str);
+            let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
+            let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
+            let target =
+                FunctionName::method(method_info.class.name, IsStatic::Static, method_info.name);
 
-        let params: Vec<Sid> = std::iter::once(Ok(static_this))
-            .chain(tx_params.iter().skip(1).map(|(name, ty)| {
-                let lid = LocalId::Named(strings.intern_str(*name));
-                fb.load(ty, textual::Expr::deref(lid))
-            }))
-            .try_collect()?;
+            let params: Vec<Sid> = std::iter::once(Ok(static_this))
+                .chain(tx_params.iter().skip(1).map(|(name, ty)| {
+                    let lid = LocalId::Named(strings.intern_str(*name));
+                    fb.load(ty, textual::Expr::deref(lid))
+                }))
+                .try_collect()?;
 
-        let call = fb.call(&target, params)?;
-        fb.ret(call)?;
-        Ok(())
-    })?;
+            let call = fb.call(&target, params)?;
+            fb.ret(call)?;
+            Ok(())
+        },
+    )?;
 
     Ok(())
 }
@@ -1254,6 +1276,13 @@ impl<'a> FuncInfo<'a> {
             FuncInfo::Method(mi) => mi.name.id,
         }
     }
+
+    pub(crate) fn attrs(&self) -> &ir::Attr {
+        match self {
+            FuncInfo::Function(fi) => &fi.attrs,
+            FuncInfo::Method(mi) => &mi.attrs,
+        }
+    }
 }
 
 // Extra data associated with a (non-class) function that aren't stored on the
@@ -1261,12 +1290,14 @@ impl<'a> FuncInfo<'a> {
 #[derive(Clone)]
 pub(crate) struct FunctionInfo {
     pub(crate) name: FunctionId,
+    pub(crate) attrs: ir::Attr,
 }
 
 // Extra data associated with class methods that aren't stored on the Func.
 #[derive(Clone)]
 pub(crate) struct MethodInfo<'a> {
     pub(crate) name: MethodId,
+    pub(crate) attrs: ir::Attr,
     pub(crate) class: &'a ir::Class<'a>,
     pub(crate) is_static: IsStatic,
     pub(crate) flags: MethodFlags,

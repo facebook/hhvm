@@ -113,6 +113,7 @@ impl<'a> TextualFile<'a> {
         &mut self,
         name: &FunctionName,
         loc: Option<&SrcLoc>,
+        attributes: &FuncAttributes,
         params: &[(&str, &Ty)],
         ret_ty: &Ty,
         locals: &[(LocalId, &Ty)],
@@ -126,7 +127,13 @@ impl<'a> TextualFile<'a> {
             self.write_full_loc(loc)?;
         }
 
-        write!(self.w, "define {}(", name.display(&self.strings))?;
+        write!(self.w, "define ")?;
+
+        if attributes.is_final {
+            write!(self.w, ".final ")?;
+        }
+
+        write!(self.w, "{}(", name.display(&self.strings))?;
         let mut sep = "";
         for (name, ty) in params {
             write!(self.w, "{sep}{name}: {ty}", ty = ty.display(&self.strings))?;
@@ -224,22 +231,7 @@ impl<'a> TextualFile<'a> {
             )?;
 
             for attr in &f.attributes {
-                write!(self.w, ".{} ", attr.name().display(&self.strings))?;
-                match attr {
-                    FieldAttribute::Unparameterized { .. } => {}
-                    FieldAttribute::Parameterized {
-                        name: _,
-                        parameters,
-                    } => {
-                        let mut i = parameters.iter();
-                        let param = i.next().unwrap();
-                        write!(self.w, "= \"{param}\"")?;
-                        for param in i {
-                            write!(self.w, ", \"{param}\"")?;
-                        }
-                        write!(self.w, " ")?;
-                    }
-                }
+                write!(self.w, "{} ", attr.display(&self.strings))?;
             }
 
             write!(self.w, "{ty}", ty = f.ty.display(&self.strings))?;
@@ -414,6 +406,11 @@ impl<'a> TextualFile<'a> {
         writeln!(self.w, "// .line {}", src_loc.line_begin)?;
         Ok(())
     }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct FuncAttributes {
+    pub is_final: bool,
 }
 
 newtype_int!(Sid, u32, SidMap, SidSet);
@@ -1148,6 +1145,38 @@ impl FieldAttribute {
     fn name(&self) -> &TypeName {
         match self {
             Self::Unparameterized { name } | Self::Parameterized { name, .. } => name,
+        }
+    }
+
+    fn display<'a>(&'a self, strings: &'a StringInterner) -> impl fmt::Display + 'a {
+        struct D<'a> {
+            attr: &'a FieldAttribute,
+            strings: &'a StringInterner,
+        }
+        impl fmt::Display for D<'_> {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, ".{}", self.attr.name().display(self.strings))?;
+                match self.attr {
+                    FieldAttribute::Unparameterized { .. } => {}
+                    FieldAttribute::Parameterized {
+                        name: _,
+                        parameters,
+                    } => {
+                        let mut i = parameters.iter();
+                        let param = i.next().unwrap();
+                        write!(f, "= \"{param}\"")?;
+                        for param in i {
+                            write!(f, ", \"{param}\"")?;
+                        }
+                        write!(f, " ")?;
+                    }
+                }
+                Ok(())
+            }
+        }
+        D {
+            attr: self,
+            strings,
         }
     }
 }

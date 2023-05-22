@@ -15,7 +15,7 @@ namespace watchman {
 #ifndef _WIN32
 FileInformation::FileInformation(const struct stat& st)
     : mode(st.st_mode),
-      size(off_t(st.st_size)),
+      size(static_cast<uint64_t>(st.st_size)),
       uid(st.st_uid),
       gid(st.st_gid),
       ino(st.st_ino),

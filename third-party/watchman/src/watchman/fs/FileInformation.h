@@ -89,7 +89,7 @@ struct FileInformation {
   // so it is preferable to use isSymlink() rather than
   // S_ISLNK() on the mode value.
   mode_t mode{0};
-  off_t size{0};
+  uint64_t size{0};
 
   // On Windows systems, these fields are approximated
   // from cheaply available information in a way that is

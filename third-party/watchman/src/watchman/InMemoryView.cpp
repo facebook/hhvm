@@ -1202,7 +1202,8 @@ void InMemoryView::warmContentCache() {
 
       if (f->exists && f->stat.isFile() &&
           (maxFileSizeToWarmInContentCache_ <= 0 ||
-           f->stat.size <= maxFileSizeToWarmInContentCache_)) {
+           f->stat.size <=
+               static_cast<uint64_t>(maxFileSizeToWarmInContentCache_))) {
         // Note: we could also add an expression to further constrain
         // the things we warm up here.  Let's see if we need it before
         // going ahead and adding.

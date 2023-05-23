@@ -124,13 +124,9 @@ struct sparse_id_set {
           : nullptr
       }
   {
-    // Note: the sparse part of m_mem is deliberately uninitialized, but we do
-    // it for valgrind or asan builds.
-#if FOLLY_SANITIZE || defined(VALGRIND)
     if (m_mem) {
-      std::memset(m_mem, 0, sizeof(T) * universe_size);
+      std::memset(m_mem, 0, sizeof(T) * universe_size * 2);
     }
-#endif
   }
   ~sparse_id_set() { if (m_universe_size) std::free(m_mem); }
 
@@ -426,13 +422,10 @@ struct sparse_id_map {
           : nullptr
       }
   {
-    // Note: the sparse part of m_mem is deliberately uninitialized, but we do
-    // it for valgrind or asan builds.
-#if FOLLY_SANITIZE || defined(VALGRIND)
     if (m_mem) {
-      std::memset(m_mem, 0, sizeof(K) * universe_size);
+      std::memset(m_mem, 0,
+        sizeof(K) * universe_size + sizeof(value_type) * universe_size);
     }
-#endif
   }
   ~sparse_id_map() {
     if (!m_universe_size) return;
@@ -780,4 +773,3 @@ void swap(sparse_id_map<K,V,LK,LKE>& a, sparse_id_map<K,V,LK,LKE>& b) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

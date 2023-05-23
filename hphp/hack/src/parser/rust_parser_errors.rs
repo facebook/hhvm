@@ -104,6 +104,7 @@ enum UnstableFeatures {
     ExpressionTreeBlocks,
     Package,
     CaseTypes,
+    ModuleLevelTraits,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -131,6 +132,7 @@ impl UnstableFeatures {
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => Unstable,
             UnstableFeatures::CaseTypes => Unstable,
+            UnstableFeatures::ModuleLevelTraits => Unstable,
         }
     }
 }
@@ -5458,6 +5460,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
                 }
             }
+            OldAttributeSpecification(x) => {
+                self.old_attr_spec(node, &x.attributes);
+            }
             _ => {}
         }
 
@@ -5596,6 +5601,16 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env.context.active_expression_tree = false;
         self.fold_child_nodes(node);
         self.env.context.active_expression_tree = previous_state;
+    }
+
+    fn old_attr_spec(&mut self, node: S<'a>, attributes: S<'a>) {
+        let attributes = self.text(attributes).split(',');
+        attributes.for_each(|attr| match attr.trim() {
+            sn::user_attributes::MODULE_LEVEL_TRAIT => {
+                self.check_can_use_feature(node, &UnstableFeatures::ModuleLevelTraits)
+            }
+            _ => {}
+        });
     }
 
     fn check_nested_namespace(&mut self, node: S<'a>) {

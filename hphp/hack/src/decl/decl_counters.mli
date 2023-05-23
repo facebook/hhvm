@@ -40,6 +40,7 @@ type subdecl_kind =
   | Name
   | Module
   | Internal
+  | IsModuleLevelTrait
   | Pos
   | Tparams
   | Where_constraints

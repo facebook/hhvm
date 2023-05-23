@@ -63,6 +63,8 @@ module Api : sig
 
   val internal : t -> bool
 
+  val is_module_level_trait : t -> bool
+
   val pos : t -> Pos_or_decl.t
 
   val tparams : t -> decl_tparam list

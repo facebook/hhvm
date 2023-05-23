@@ -1,0 +1,4 @@
+File "module_level_traits_method_1_noattr.php--A.php", line 14, characters 9-11:
+You cannot access internal members inside a public trait (Typing[4112])
+  File "module_level_traits_method_1_noattr.php--A.php", line 9, characters 21-23:
+  This member is internal

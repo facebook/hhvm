@@ -189,6 +189,7 @@ pub struct FoldedClass<R: Reason> {
     pub support_dynamic_type: bool,
     pub enum_type: Option<EnumType<R>>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
+    pub is_module_level_trait: bool,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
     pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
     pub substs: IndexMap<TypeName, SubstContext<R>>,

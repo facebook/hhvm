@@ -1,0 +1,4 @@
+File "module_level_traits_toplevel_1_noattr.php--A.php", line 12, characters 5-7:
+Cannot access `internal` members inside a non-internal trait (Typing[4444])
+  File "module_level_traits_toplevel_1_noattr.php--A.php", line 10, characters 14-14:
+  This trait must be made `internal` to access other internal members

@@ -1,5 +1,7 @@
 <?hh
 
+<<file:__EnableUnstableFeatures('module_level_traits')>>
+
 trait T1 {}
 
 <<__ModuleLevelTrait>>

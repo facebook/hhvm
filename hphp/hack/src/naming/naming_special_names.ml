@@ -713,6 +713,14 @@ module UserAttributes = struct
                 "Marks this global variable as safe from mutation."
                 ^ " This ensures the global_access_check does NOT raise errors/warnings from writing to this global variable.";
             } );
+          ( uaModuleLevelTrait,
+            {
+              contexts = [cls];
+              autocomplete = false;
+              doc =
+                "Consider the trait to belong to the module where it is defined, "
+                ^ "rather than to the module of the class that uses it.";
+            } );
           ( uaSoftInternal,
             {
               (* Parameters are for constructor promotion: if someone tries to use it on a

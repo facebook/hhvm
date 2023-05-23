@@ -269,6 +269,7 @@ struct
       dc_is_xhp = dc.dc_is_xhp;
       dc_has_xhp_keyword = dc.dc_has_xhp_keyword;
       dc_module = dc.dc_module;
+      dc_is_module_level_trait = dc.dc_is_module_level_trait;
       dc_name = dc.dc_name;
       dc_pos = dc.dc_pos;
       dc_extends = dc.dc_extends;

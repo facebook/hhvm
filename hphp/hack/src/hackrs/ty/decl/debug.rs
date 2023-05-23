@@ -165,6 +165,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             support_dynamic_type,
             enum_type,
             module,
+            is_module_level_trait,
             tparams,
             where_constraints,
             substs,
@@ -222,6 +223,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if let Some(module) = module {
             s.field("module", module);
+        }
+        if *is_module_level_trait {
+            s.field("is_module_level_trait", is_module_level_trait);
         }
         if !tparams.is_empty() {
             s.field("tparams", tparams);

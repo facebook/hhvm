@@ -126,6 +126,12 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_internal
 
+  let is_module_level_trait (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.IsModuleLevelTrait
+    @@ fun () ->
+    let (c, _) = t in
+    c.Decl_defs.dc_is_module_level_trait
+
   let decl_errors (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Decl_errors @@ fun () ->
     let (c, _) = t in

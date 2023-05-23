@@ -305,6 +305,7 @@ pub mod user_attributes {
         lazy!(sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS);
     pub static uaIgnoreCoeffectLocalErrors: Lazy<TypeName> =
         lazy!(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS);
+    pub static uaModuleLevelTrait: Lazy<TypeName> = lazy!(sn::user_attributes::MODULE_LEVEL_TRAIT);
 
     pub fn iter() -> impl Iterator<Item = TypeName> {
         [

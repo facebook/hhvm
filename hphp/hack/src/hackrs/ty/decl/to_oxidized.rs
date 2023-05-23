@@ -465,6 +465,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             has_xhp_keyword,
             support_dynamic_type,
             module,
+            is_module_level_trait,
             tparams,
             where_constraints,
             substs,
@@ -504,6 +505,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
                 let (pos, id) = m.to_oxidized(arena);
                 obr::ast_defs::Id(pos, id)
             }),
+            is_module_level_trait: *is_module_level_trait,
             tparams: tparams.to_oxidized(arena),
             where_constraints: where_constraints.to_oxidized(arena),
             substs: substs.to_oxidized(arena),

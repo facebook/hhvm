@@ -26,7 +26,9 @@ let can_access_internal
     | Some self ->
       (match Env.get_class env self with
       | Some cls
-        when Ast_defs.is_c_trait (Cls.kind cls) && not (Cls.internal cls) ->
+        when Ast_defs.is_c_trait (Cls.kind cls)
+             && (not (Cls.internal cls))
+             && not (Cls.is_module_level_trait cls) ->
         `OutsideViaTrait (Cls.pos cls)
       | Some _
       | None ->

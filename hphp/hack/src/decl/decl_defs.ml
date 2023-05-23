@@ -88,6 +88,7 @@ type decl_class_type = {
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
   dc_module: Ast_defs.id option;
+  dc_is_module_level_trait: bool;
   dc_name: string;
   dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;

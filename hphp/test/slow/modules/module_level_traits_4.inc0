@@ -1,5 +1,7 @@
 <?hh
 
+<<file:__EnableUnstableFeatures('module_level_traits')>>
+
 module MLT_A;
 
 internal function foo(): void { echo "foo\n"; }

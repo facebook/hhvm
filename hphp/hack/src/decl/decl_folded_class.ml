@@ -1015,6 +1015,8 @@ and class_decl
       dc_is_xhp = c.sc_is_xhp;
       dc_has_xhp_keyword = c.sc_has_xhp_keyword;
       dc_module = c.sc_module;
+      dc_is_module_level_trait =
+        Attributes.mem SN.UserAttributes.uaModuleLevelTrait c.sc_user_attributes;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
       dc_tparams;

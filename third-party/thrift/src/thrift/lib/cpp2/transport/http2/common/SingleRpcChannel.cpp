@@ -206,15 +206,19 @@ void SingleRpcChannel::sendThriftRequest(
   if (auto other = metadata.otherMetadata_ref()) {
     otherMetadata = std::move(*other);
   }
-  if (auto tfm = metadata.frameworkMetadata_ref()) {
-    // HTTP headers need to be base64-encoded
-    auto bytes = (**tfm).coalesce();
-    auto start = bytes.data();
-    auto asChar = reinterpret_cast<const char*>(start);
-    std::string_view sv(asChar, bytes.size());
-    std::string encoded = folly::base64Encode(sv);
-    otherMetadata[detail::getFrameworkMetadataHttpKey()] = std::move(encoded);
+
+  if (!otherMetadata.contains(detail::getFrameworkMetadataHttpKey())) {
+    if (auto tfm_frc = metadata.frameworkMetadata_ref()) {
+      // HTTP headers need to be base64-encoded
+      auto bytes = (**tfm_frc).coalesce();
+      auto start = bytes.data();
+      auto asChar = reinterpret_cast<const char*>(start);
+      std::string_view sv(asChar, bytes.size());
+      std::string encoded = folly::base64Encode(sv);
+      otherMetadata[detail::getFrameworkMetadataHttpKey()] = std::move(encoded);
+    }
   }
+
   if (auto clientTimeoutMs = metadata.clientTimeoutMs_ref()) {
     otherMetadata[transport::THeader::CLIENT_TIMEOUT_HEADER] =
         folly::to<string>(*clientTimeoutMs);

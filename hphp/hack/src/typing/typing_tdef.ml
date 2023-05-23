@@ -12,6 +12,7 @@ open Typing_defs
 open Utils
 module Reason = Typing_reason
 module Env = Typing_env
+module SN = Naming_special_names
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module Phase = Typing_phase
@@ -108,16 +109,25 @@ let expand_typedef ety_env env r type_name argl =
  * of where the typedefs come from. *)
 let force_expand_typedef ~ety_env env (t : locl_ty) =
   let rec aux e1 ety_env env t =
+    let default () =
+      ( (env, e1),
+        t,
+        Typing_defs.Type_expansions.positions ety_env.type_expansions )
+    in
     match deref t with
-    | (r, Tnewtype (x, argl, _)) when not (Env.is_enum env x) ->
+    | (_, Tnewtype (x, _, _)) when String.equal SN.Classes.cEnumClassLabel x ->
+      (* Labels are Resources at runtime, so we don't want to force them
+       * to string. MemberOf on the other hand are "typed alias" on the
+       * underlying type so it's ok to force them. So we only special case
+       * Labels here *)
+      default ()
+    | (r, Tnewtype (x, argl, _))
+      when not (Env.is_enum env x || Env.is_enum_class env x) ->
       let ((env, e2), (ety_env, ty)) =
         expand_typedef_ ~force_expand:true ety_env env r x argl
       in
       aux (Option.merge e1 e2 ~f:Typing_error.both) ety_env env ty
-    | _ ->
-      ( (env, e1),
-        t,
-        Typing_defs.Type_expansions.positions ety_env.type_expansions )
+    | _ -> default ()
   in
   aux None ety_env env t
 

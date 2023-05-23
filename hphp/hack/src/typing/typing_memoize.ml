@@ -57,6 +57,12 @@ let check_param : env -> Nast.fun_param -> unit =
              the comment above about "stricter check_memoizables to come later" was added in revision
              in August 2015 *)
           ()
+        | Tnewtype (id, _, _) when String.equal SN.Classes.cEnumClassLabel id ->
+          (* The underlying representation of an Enum Class Label is a
+           * resource, so this must behave like Tresource. *)
+          Typing_error_utils.add_typing_error ~env
+          @@ Typing_error.primary
+          @@ error ty
         | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
           ->
           check_memoizable env ty

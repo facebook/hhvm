@@ -24,9 +24,9 @@ namespace cpp2 apache.thrift.test.patch
 namespace py3 thrift.test
 
 struct MyData {
-  string data1;
-  i32 data2;
-  optional string data3;
+  1: string data1;
+  2: i32 data2;
+  3: optional string data3;
 }
 
 union MyInnerUnion {
@@ -34,7 +34,7 @@ union MyInnerUnion {
 }
 
 union MyUnion {
-  string option1;
-  i32 option2;
-  MyInnerUnion option3;
+  1: string option1;
+  2: i32 option2;
+  3: MyInnerUnion option3;
 }

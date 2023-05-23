@@ -34,45 +34,45 @@ enum MyEnum {
 typedef list<i64> (cpp.template = "std::deque") LongList
 
 struct MyStruct {
-  bool boolVal;
-  byte byteVal;
-  i16 i16Val;
-  i32 i32Val;
-  i64 i64Val;
-  float floatVal;
-  double doubleVal;
-  string stringVal;
-  binary (cpp.type = "folly::IOBuf") binaryVal;
-  MyEnum enumVal;
-  StructPatchTestInclude.MyData structVal;
-  StructPatchTestInclude.MyUnion unionVal;
-  LateDefStruct lateStructVal;
+  1: bool boolVal;
+  2: byte byteVal;
+  3: i16 i16Val;
+  4: i32 i32Val;
+  5: i64 i64Val;
+  6: float floatVal;
+  7: double doubleVal;
+  8: string stringVal;
+  9: binary (cpp.type = "folly::IOBuf") binaryVal;
+  10: MyEnum enumVal;
+  11: StructPatchTestInclude.MyData structVal;
+  12: StructPatchTestInclude.MyUnion unionVal;
+  13: LateDefStruct lateStructVal;
 
-  optional bool optBoolVal;
-  optional byte optByteVal;
-  optional i16 optI16Val;
-  optional i32 optI32Val;
-  optional i64 optI64Val;
-  optional float optFloatVal;
-  optional double optDoubleVal;
-  optional string optStringVal;
-  optional binary (cpp.type = "folly::IOBuf") optBinaryVal;
-  optional MyEnum optEnumVal;
-  optional StructPatchTestInclude.MyData optStructVal;
-  optional LateDefStruct optLateStructVal;
+  14: optional bool optBoolVal;
+  15: optional byte optByteVal;
+  16: optional i16 optI16Val;
+  17: optional i32 optI32Val;
+  18: optional i64 optI64Val;
+  19: optional float optFloatVal;
+  20: optional double optDoubleVal;
+  21: optional string optStringVal;
+  22: optional binary (cpp.type = "folly::IOBuf") optBinaryVal;
+  23: optional MyEnum optEnumVal;
+  24: optional StructPatchTestInclude.MyData optStructVal;
+  25: optional LateDefStruct optLateStructVal;
 
-  optional list<i16> optListVal;
-  optional set<string> optSetVal;
-  optional map<string, string> optMapVal;
+  26: optional list<i16> optListVal;
+  27: optional set<string> optSetVal;
+  28: optional map<string, string> optMapVal;
 
-  LongList longList;
+  29: LongList longList;
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
 struct LateDefStruct {
   // TODO: There is a bug that `apache::thrift::clear` won't unset field with empty struct
   // we should remove this after the bug is fixed.
-  i32 field_do_not_use;
+  1: i32 field_do_not_use;
 }
 
 // AssignOnlyPatch annotation is required on struct level to avoid generating patchPrior
@@ -81,11 +81,11 @@ struct LateDefStruct {
 @patch.AssignOnlyPatch
 struct Bar {
   @patch.AssignOnlyPatch
-  MapStruct extraCycle;
+  1: MapStruct extraCycle;
 }
 
 struct WithRequiredFields {
-  required i64 requrired_int;
+  1: required i64 requrired_int;
 }
 
 @cpp.Frozen2Exclude
@@ -113,5 +113,5 @@ union IncludePatchUnion {
 } (py3.hidden)
 
 struct Strings {
-  list<string> strings;
+  1: list<string> strings;
 }

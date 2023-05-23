@@ -24,6 +24,7 @@ use naming_special_names_rust::classes;
 use naming_special_names_rust::members;
 use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
+use options::JitEnableRenameFunction;
 use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -323,5 +324,5 @@ pub fn from_ast<'a, 'arena, 'decl>(
 }
 
 fn is_method_interceptable(opts: &Options) -> bool {
-    opts.hhbc.jit_enable_rename_function
+    opts.hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable
 }

@@ -170,12 +170,21 @@ CompilerResult hackc_compile(
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 ) {
+  auto const getRenameFunctionValue = []() {
+    if (RO::EvalJitEnableRenameFunction == 1) {
+      return hackc::JitEnableRenameFunction::Enable;
+    } else if (RO::EvalJitEnableRenameFunction == 2) {
+      return hackc::JitEnableRenameFunction::RestrictedEnable;
+    } else {
+      return hackc::JitEnableRenameFunction::Disable;
+    }
+  };
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
+    .jit_enable_rename_function = getRenameFunctionValue(),
     .hhbc_flags = hackc::HhbcFlags {
       .repo_authoritative = RO::RepoAuthoritative,
-      .jit_enable_rename_function = RO::EvalJitEnableRenameFunction > 0,
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
       .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
       .emit_cls_meth_pointers = RO::EvalEmitClsMethPointers,

@@ -6,6 +6,7 @@
 use anyhow::Result;
 use hhvm_options::HhvmConfig;
 use options::HhbcFlags;
+use options::JitEnableRenameFunction;
 use options::ParserOptions;
 
 /**!
@@ -27,7 +28,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
         }
     };
 
-    flags.jit_enable_rename_function = jit_enable_rename_function(config)?;
     init(&mut flags.ltr_assign, "php7.ltr_assign")?;
     init(&mut flags.uvs, "php7.uvs")?;
     init(&mut flags.repo_authoritative, "Repo.Authoritative")?;
@@ -68,13 +68,18 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
     Ok(flags)
 }
 
-pub fn jit_enable_rename_function(config: &HhvmConfig) -> Result<bool> {
+pub fn jit_enable_rename_function(config: &HhvmConfig) -> Result<JitEnableRenameFunction> {
     match config.get_uint32("Eval.JitEnableRenameFunction")? {
-        Some(b) => Ok(b > 0),
-        None => match config.get_uint32("JitEnableRenameFunction")? {
-            Some(b1) => Ok(b1 > 0),
-            None => Ok(false),
-        },
+        Some(b) => {
+            if b == 1 {
+                Ok(JitEnableRenameFunction::Enable)
+            } else if b == 2 {
+                Ok(JitEnableRenameFunction::RestrictedEnable)
+            } else {
+                Ok(JitEnableRenameFunction::Disable)
+            }
+        }
+        None => Ok(JitEnableRenameFunction::Disable),
     }
 }
 

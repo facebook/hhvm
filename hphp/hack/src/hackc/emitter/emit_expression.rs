@@ -60,6 +60,7 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
+use options::JitEnableRenameFunction;
 use oxidized::aast;
 use oxidized::aast_defs;
 use oxidized::aast_visitor::visit;
@@ -843,7 +844,8 @@ pub fn emit_await<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
 
-    let cant_inline_gen_functions = !emitter.options().hhbc.jit_enable_rename_function;
+    let cant_inline_gen_functions =
+        !(emitter.options().hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable);
     match e.as_call() {
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
@@ -3303,7 +3305,8 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let jit_enable_rename_function = e.options().hhbc.jit_enable_rename_function;
+    let jit_enable_rename_function =
+        e.options().hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable;
     use ast::Expr;
     use ast::Expr_;
     match (&expr.2, &args[..], uarg) {

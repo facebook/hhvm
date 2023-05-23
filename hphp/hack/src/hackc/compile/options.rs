@@ -31,12 +31,21 @@ impl Default for CompilerFlags {
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
     pub parser_options: ParserOptions,
+    pub jit_enable_rename_function: JitEnableRenameFunction,
 }
 
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
         self.parser_options.po_auto_namespace_map.iter().cloned()
     }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub enum JitEnableRenameFunction {
+    #[default]
+    Disable,
+    Enable,
+    RestrictedEnable,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -79,7 +88,6 @@ pub struct HhbcFlags {
     pub uvs: bool,
 
     pub repo_authoritative: bool,
-    pub jit_enable_rename_function: bool,
     pub log_extern_compiler_perf: bool,
     pub enable_intrinsics_extension: bool,
     pub emit_cls_meth_pointers: bool,
@@ -98,7 +106,6 @@ impl Default for HhbcFlags {
             ltr_assign: false,
             uvs: false,
             repo_authoritative: false,
-            jit_enable_rename_function: false,
             log_extern_compiler_perf: false,
             enable_intrinsics_extension: false,
             emit_cls_meth_pointers: true,

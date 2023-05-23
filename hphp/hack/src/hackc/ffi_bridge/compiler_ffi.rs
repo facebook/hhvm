@@ -37,6 +37,11 @@ use sha1::Sha1;
 #[allow(clippy::derivable_impls)]
 #[cxx::bridge(namespace = "HPHP::hackc")]
 pub mod compile_ffi {
+    enum JitEnableRenameFunction {
+        Disable,
+        Enable,
+        RestrictedEnable,
+    }
     struct NativeEnv {
         /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
         decl_provider: usize,
@@ -44,6 +49,7 @@ pub mod compile_ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
+        jit_enable_rename_function: JitEnableRenameFunction,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
@@ -68,7 +74,6 @@ pub mod compile_ffi {
         ltr_assign: bool,
         uvs: bool,
         repo_authoritative: bool,
-        jit_enable_rename_function: bool,
         log_extern_compiler_perf: bool,
         enable_intrinsics_extension: bool,
         emit_cls_meth_pointers: bool,
@@ -229,7 +234,17 @@ pub struct DeclsHolder {
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
-
+impl From<compile_ffi::JitEnableRenameFunction> for options::JitEnableRenameFunction {
+    fn from(other: compile_ffi::JitEnableRenameFunction) -> Self {
+        match other {
+            compile_ffi::JitEnableRenameFunction::Enable => Self::Enable,
+            compile_ffi::JitEnableRenameFunction::Disable => Self::Disable,
+            compile_ffi::JitEnableRenameFunction::RestrictedEnable => Self::RestrictedEnable,
+            _ => panic!("Enum value does not match one of listed variants"),
+        }
+    }
+}
+///////////////////////////////////////////////////////////////////////////////////
 impl compile_ffi::NativeEnv {
     fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
@@ -241,6 +256,7 @@ impl compile_ffi::NativeEnv {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
                     .collect(),
+                jit_enable_rename_function: self.jit_enable_rename_function.into(),
                 parser_options: ParserOptions {
                     po_auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))
@@ -271,7 +287,6 @@ impl compile_ffi::NativeEnv {
                 ltr_assign: self.hhbc_flags.ltr_assign,
                 uvs: self.hhbc_flags.uvs,
                 repo_authoritative: self.hhbc_flags.repo_authoritative,
-                jit_enable_rename_function: self.hhbc_flags.jit_enable_rename_function,
                 log_extern_compiler_perf: self.hhbc_flags.log_extern_compiler_perf,
                 enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
                 emit_cls_meth_pointers: self.hhbc_flags.emit_cls_meth_pointers,

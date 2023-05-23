@@ -154,6 +154,7 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Resul
         hhvm: Hhvm {
             include_roots: Default::default(),
             parser_options,
+            jit_enable_rename_function: hhvm_config::jit_enable_rename_function(&hhvm_config)?,
         },
         flags: opts.env_flags.clone(),
     })

@@ -230,6 +230,7 @@ impl Opts {
             hhvm: Hhvm {
                 include_roots: Default::default(),
                 parser_options,
+                jit_enable_rename_function: hhvm_config::jit_enable_rename_function(&hhvm_config)?,
             },
             flags: self.env_flags.clone(),
             hhbc_flags,

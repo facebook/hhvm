@@ -433,7 +433,7 @@ let rec array_get
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) idx_ty_err_opt;
         let idx_err_res = mk_ty_mismatch_res ty2 tv idx_ty_err_opt in
-        (env, (ty1, dflt_arr_res, idx_err_res))
+        (env, (tv, dflt_arr_res, idx_err_res))
       in
       match ety1_ with
       | Tclass (((_, cn) as id), _, argl)
@@ -908,7 +908,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) val_ty_err_opt;
         let val_err_res = mk_ty_mismatch_res ty2 tv val_ty_err_opt in
-        (env, (ty1, Ok ty1, val_err_res))
+        (env, (tv, Ok tv, val_err_res))
       in
       match deref ty1 with
       | (_, Tany _) -> (env, (ty1, Ok ty1, Ok ty2))
@@ -1116,7 +1116,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         Option.(
           iter ~f:(Typing_error_utils.add_typing_error ~env)
           @@ merge ty_err1 ty_err2 ~f:Typing_error.both);
-        (env, (ety1, Ok ety1, idx_err_res, val_err_res))
+        (env, (tv, Ok tv, idx_err_res, val_err_res))
       in
       match ety1_ with
       | Tclass (((_, cn) as id), _, argl)

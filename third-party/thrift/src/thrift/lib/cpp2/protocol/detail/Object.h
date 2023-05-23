@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include <functional>
 #include <stack>
 #include <type_traits>
+#include <unordered_set>
 
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
@@ -841,9 +843,13 @@ void serializeValue(
         }
       }
 
-      // Remember which keys are in the maskedData. Cannot use unordered_map
-      // as Value doesn't have a hash function.
-      std::set<Value> keys{};
+      // Remember which keys are in the maskedData. Note that the ownership of
+      // keys are managed by the maskedData.
+      std::unordered_set<
+          std::reference_wrapper<const Value>,
+          std::hash<Value>,
+          std::equal_to<Value>>
+          keys;
       prot.writeMapBegin(keyType, valueType, size);
       for (auto& [keyValueId, nestedMaskedData] : *maskedData.values_ref()) {
         const Value& key = getByValueId(*protocolData.keys(), keyValueId);

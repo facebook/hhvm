@@ -225,95 +225,6 @@ function print_num_symbols(
   print "$path has $num_type_aliases type aliases\n";
 }
 
-function print_extracted_facts(vec<string> $files): void {
-  $files_with_hashes = vec[];
-  foreach ($files as $file) {
-    $actual_file = dirname(__FILE__)."/".$file;
-    $hash = sha1(file_get_contents($actual_file));
-    $files_with_hashes[] = tuple($file, $hash);
-  }
-  foreach (
-    HH\Facts\extract($files_with_hashes) as $file => $facts
-  ) {
-    print "Facts in $file:\n";
-
-    print "  modules:\n";
-    foreach ($facts['modules'] as $module) {
-      $name = $module['name'];
-      print "    name: $name\n";
-    }
-
-    print "  types:\n";
-    foreach ($facts['types'] as $type) {
-      $name = $type['name'];
-      print "    name: $name\n";
-
-      $kind = $type['kind'];
-      print "      kind: $kind\n";
-
-      $flags = $type['flags'];
-      print "      flags: $flags\n";
-
-      $base_types = $type['baseTypes'];
-      \sort(inout $base_types);
-      $base_types_json = \json_encode($base_types);
-      print "      baseTypes: $base_types_json\n";
-
-      $require_class = $type['requireClass'];
-      \sort(inout $require_class);
-      $require_class_json = \json_encode($require_class);
-      print "      requireClass: $require_class_json\n";
-
-      $require_extends = $type['requireExtends'];
-      \sort(inout $require_extends);
-      $require_extends_json = \json_encode($require_extends);
-      print "      requireExtends: $require_extends_json\n";
-
-      $require_implements = $type['requireImplements'];
-      \sort(inout $require_implements);
-      $require_implements_json = \json_encode($require_implements);
-      print "      requireImplements: $require_implements_json\n";
-
-      $attributes = $type['attributes'];
-      \usort(
-        inout $attributes,
-        ($attr1, $attr2) ==> $attr1['name'] <=> $attr2['name'],
-      );
-      $attributes_json = \json_encode($attributes);
-      print "      attributes: $attributes_json\n";
-
-      $methods = $type['methods'];
-      \usort(
-        inout $methods,
-        ($m1, $m2) ==> $m1['name'] <=> $m2['name'],
-      );
-      $methods_json = \json_encode($methods);
-      print "      methods: $methods_json\n";
-    }
-
-    $functions = $facts['functions'];
-    \sort(inout $functions);
-    $functions_json = \json_encode($functions);
-    print "  functions: $functions_json\n";
-
-    $constants = $facts['constants'];
-    \sort(inout $constants);
-    $constants_json = \json_encode($constants);
-    print "  constants: $constants_json\n";
-
-    $attributes = $facts['attributes'];
-    \usort(
-      inout $attributes,
-      ($attr1, $attr2) ==> $attr1['name'] <=> $attr2['name'],
-    );
-    $attributes_json = \json_encode($attributes);
-    print "  attributes: $attributes_json\n";
-
-    $sha1 = $facts['sha1sum'];
-    print "  sha1sum: $sha1\n";
-  }
-}
-
 <<__EntryPoint>>
 function facts(): void {
   var_dump(HH\Facts\enabled());
@@ -651,17 +562,5 @@ function facts(): void {
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');
-
-  print_extracted_facts(
-    vec[
-      'attribute-classes.inc',
-      'attribute-namespace.inc',
-      'base-class.inc',
-      'constants.inc',
-      'derived-class.inc',
-      'type_aliases.inc',
-      'types-with-kinds.inc',
-    ],
-  );
   print "Finished.\n";
 }

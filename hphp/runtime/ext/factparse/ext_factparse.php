@@ -11,8 +11,6 @@ enum FactTypeFlags : int {
 }
 
 /**
- * DEPRECATED: Use `HH\Facts\extract()` instead!
- *
  * Read a set of HH/PHP files and quickly extract the main features aka. "Facts"
  * about their contents. Compared to require'ing a source file this is much
  * faster and doesn't cause excessive memory consumption as compiled results are

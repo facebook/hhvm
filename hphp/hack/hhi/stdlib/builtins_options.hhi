@@ -137,7 +137,7 @@ function phpcredits(
 <<__PHPStdLib>>
 function phpinfo(int $what = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function phpversion(string $extension = ""): HH\FIXME\MISSING_RETURN_TYPE;
+function phpversion(string $extension = ""): mixed;
 <<__PHPStdLib>>
 function putenv(string $setting): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

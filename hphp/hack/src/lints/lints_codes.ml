@@ -45,7 +45,7 @@ module Codes = struct
 
   let is_always_false = 5610
 
-  let invalid_null_check = 5611
+  (* let deprecated_invalid_null_check = 5611 *)
 
   let invalid_switch_case_value_type = 5614
 
@@ -63,7 +63,7 @@ module Codes = struct
 
   (* let deprecated_pocket_universes_reserved_syntax = 5625 *)
 
-  let as_invalid_type = 5626
+  (* let deprecated_as_invalid_type = 5626 *)
 
   let class_overrides_all_trait_methods = 5627
 
@@ -71,7 +71,7 @@ module Codes = struct
 
   let as_always_fails = 5629
 
-  let redundant_nonnull_assertion = 5630
+  (* let deprecated_redundant_nonnull_assertion = 5630 *)
 
   let bool_method_return_hint = 5631
 

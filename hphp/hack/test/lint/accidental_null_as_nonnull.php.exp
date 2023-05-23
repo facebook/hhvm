@@ -1,0 +1,2 @@
+File "accidental_null_as_nonnull.php", line 4, characters 17-31:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`. (Lint[5629])

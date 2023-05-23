@@ -1,0 +1,2 @@
+File "never_null.php", line 6, characters 3-17:
+This `is` check is always `false`. The expression on the left has type `C` which shares no values with `null`. (Lint[5610])

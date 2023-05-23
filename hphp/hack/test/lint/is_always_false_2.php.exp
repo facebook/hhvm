@@ -1,2 +1,2 @@
 File "is_always_false_2.php", line 12, characters 7-13:
-This `is` check is always `false`. The expression on the left is an instance of `A`. It can never be an instance of `I` because there is no class that is both `A` and `I`. (Lint[5610])
+This `is` check is always `false`. The expression on the left has type `A` which shares no values with `I`. (Lint[5610])

@@ -1,2 +1,2 @@
 File "is_always_true1.php", line 9, characters 7-13:
-This `is` check is always `true`. The expression on the left is an instance of `B`. It is always an instance of `A` because `B` derives from `A`. (Lint[5609])
+This `is` check is always `true`. The expression on the left has type `B` which is a subtype of `A`. (Lint[5609])

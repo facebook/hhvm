@@ -1,0 +1,2 @@
+File "exception_as_int.php", line 4, characters 3-38:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Exception` which shares no values with `int`. (Lint[5629])

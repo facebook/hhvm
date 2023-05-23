@@ -48,27 +48,27 @@ final class HackAsWithInvalidTypeLintRuleTest {
   }
 
   public static function foo(): void {
-    $_ = self::int() as bool; // error
-    $_ = self::bool() as bool;
-    $_ = self::float() as num;
+    $_ = self::int() as bool; // error, never succeeds
+    $_ = self::bool() as bool; // error, always succeeds
+    $_ = self::float() as num; // error, always succeeds
     $_ = self::num() as float;
-    $_ = self::float() as int; // error
+    $_ = self::float() as int; // error, never succeeds
     $_ = self::arraykey() as num;
-    $_ = self::string() as arraykey;
-    $_ = self::string() as int; // error
+    $_ = self::string() as arraykey; // error, always succeeds
+    $_ = self::string() as int; // error, never succeeds
     $_ = self::mixed() as int;
-    $_ = self::int() as mixed;
+    $_ = self::int() as mixed; // error, always succeeds
     $_ = self::nullable(self::string()) as arraykey;
-    $_ = self::nullable(self::string()) as ?string;
+    $_ = self::nullable(self::string()) as ?string; // error, always succeeds
     $_ = self::nullable(self::string()) as ?int;
     $_ = self::stringEnum() as string;
     $_ = self::stringEnum() as ?string;
-    $_ = self::stringEnum() as int; // error
-    $_ = self::null() as mixed;
-    $_ = self::null() as null;
-    $_ = self::null() as ?int;
+    $_ = self::stringEnum() as int;
+    $_ = self::null() as mixed; // error, always succeeds
+    $_ = self::null() as null; // error, always succeeds
+    $_ = self::null() as ?int; // error, always succeeds
     $_ = self::nullable(self::int()) as null;
-    $_ = self::null() as int; //error
-    $_ = self::int() as null; //error
+    $_ = self::null() as int; // error, always succeeds
+    $_ = self::int() as null; // error, never succeeds
   }
 }

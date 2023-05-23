@@ -1,12 +1,26 @@
 File "as_invalid_type.php", line 51, characters 10-28:
-A value of type `int` will always throw an exception when refining to `bool` (Lint[5626])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `bool`. (Lint[5629])
+File "as_invalid_type.php", line 52, characters 10-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `bool` which is a subtype of `bool`. (Lint[5628])
+File "as_invalid_type.php", line 53, characters 10-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `float` which is a subtype of `num`. (Lint[5628])
 File "as_invalid_type.php", line 55, characters 10-29:
-A value of type `float` will always throw an exception when refining to `int` (Lint[5626])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `float` which shares no values with `int`. (Lint[5629])
+File "as_invalid_type.php", line 57, characters 10-35:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `string` which is a subtype of `arraykey`. (Lint[5628])
 File "as_invalid_type.php", line 58, characters 10-30:
-A value of type `string` will always throw an exception when refining to `int` (Lint[5626])
-File "as_invalid_type.php", line 66, characters 10-34:
-A value of type `HackAsInvalidTypeStringEnum` will always throw an exception when refining to `int` (Lint[5626])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. (Lint[5629])
+File "as_invalid_type.php", line 60, characters 10-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Lint[5628])
+File "as_invalid_type.php", line 62, characters 10-50:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `?string` which is a subtype of `?string`. (Lint[5628])
+File "as_invalid_type.php", line 67, characters 10-30:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `mixed`. (Lint[5628])
+File "as_invalid_type.php", line 68, characters 10-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `null`. (Lint[5628])
+File "as_invalid_type.php", line 69, characters 10-29:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?int`. (Lint[5628])
 File "as_invalid_type.php", line 71, characters 10-28:
-A value of type `null` will always throw an exception when refining to `int` (Lint[5626])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `int`. (Lint[5629])
 File "as_invalid_type.php", line 72, characters 10-28:
-A value of type `int` will always throw an exception when refining to `null` (Lint[5626])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `null`. (Lint[5629])

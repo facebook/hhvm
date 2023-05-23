@@ -1,2 +1,2 @@
 File "as_always_fails.php", line 8, characters 3-9:
-This `as` assertion will always fail. The expression on the left is an instance of `A`. It can never be an instance of `C` because there is no class that is both `A` and `C`. (Lint[5629])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `A` which shares no values with `C`. (Lint[5629])

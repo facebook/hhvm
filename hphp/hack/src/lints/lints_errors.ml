@@ -88,49 +88,33 @@ let invalid_contains_key_check p trv_key_ty key_ty =
        trv_key_ty
        (Markdown_lite.md_codify key_ty)
 
-let is_always_true p lhs_class rhs_class =
-  let lhs_class = Markdown_lite.md_codify lhs_class in
-  let rhs_class = Markdown_lite.md_codify rhs_class in
+let is_always_true p lhs_ty rhs_ty =
+  let lhs_ty = Markdown_lite.md_codify lhs_ty in
+  let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.is_always_true
     Lint_warning
     p
     (Printf.sprintf
-       "This `is` check is always `true`. The expression on the left is an instance of %s. It is always an instance of %s because %s derives from %s."
-       lhs_class
-       rhs_class
-       lhs_class
-       rhs_class)
+       "This `is` check is always `true`. The expression on the left has type %s which is a subtype of %s."
+       lhs_ty
+       rhs_ty)
 
-let is_always_false p lhs_class rhs_class =
-  let lhs_class = Markdown_lite.md_codify lhs_class in
-  let rhs_class = Markdown_lite.md_codify rhs_class in
+let is_always_false p lhs_ty rhs_ty =
+  let lhs_ty = Markdown_lite.md_codify lhs_ty in
+  let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.is_always_false
     Lint_warning
     p
     (Printf.sprintf
-       "This `is` check is always `false`. The expression on the left is an instance of %s. It can never be an instance of %s because there is no class that is both %s and %s."
-       lhs_class
-       rhs_class
-       lhs_class
-       rhs_class)
+       "This `is` check is always `false`. The expression on the left has type %s which shares no values with %s."
+       lhs_ty
+       rhs_ty)
 
-let as_always_succeeds
-    ~can_be_captured ~as_pos ~child_expr_pos lhs_class rhs_class =
-  let lhs_class = Markdown_lite.md_codify lhs_class in
-  let rhs_class = Markdown_lite.md_codify rhs_class in
-
-  let derive_message =
-    if String.equal lhs_class rhs_class then
-      ""
-    else
-      Printf.sprintf
-        ". It is always an instance of %s because %s derives from %s"
-        rhs_class
-        lhs_class
-        rhs_class
-  in
+let as_always_succeeds ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
+  let lhs_ty = Markdown_lite.md_codify lhs_ty in
+  let rhs_ty = Markdown_lite.md_codify rhs_ty in
   let autofix =
     Some
       (quickfix
@@ -144,33 +128,21 @@ let as_always_succeeds
     Lint_warning
     as_pos
     (Printf.sprintf
-       "This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of %s%s."
-       lhs_class
-       derive_message)
+       "This `as` assertion will always succeed and hence is redundant. The expression on the left has a type %s which is a subtype of %s."
+       lhs_ty
+       rhs_ty)
 
-let as_always_fails p lhs_class rhs_class =
-  let lhs_class = Markdown_lite.md_codify lhs_class in
-  let rhs_class = Markdown_lite.md_codify rhs_class in
+let as_always_fails p lhs_ty rhs_ty =
+  let lhs_ty = Markdown_lite.md_codify lhs_ty in
+  let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.as_always_fails
     Lint_warning
     p
     (Printf.sprintf
-       "This `as` assertion will always fail. The expression on the left is an instance of %s. It can never be an instance of %s because there is no class that is both %s and %s."
-       lhs_class
-       rhs_class
-       lhs_class
-       rhs_class)
-
-let as_invalid_type pos var hint =
-  Lints.add
-    Codes.as_invalid_type
-    Lint_error
-    pos
-    (Printf.sprintf
-       "A value of type %s will always throw an exception when refining to %s"
-       (Markdown_lite.md_codify var)
-       (Markdown_lite.md_codify hint))
+       "This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type %s which shares no values with %s."
+       lhs_ty
+       rhs_ty)
 
 let class_overrides_all_trait_methods pos class_name trait_name =
   Lints.add
@@ -195,26 +167,6 @@ let trait_requires_class_that_overrides_method
        (Utils.strip_ns class_name |> Markdown_lite.md_codify)
        (Utils.strip_ns trait_name |> Markdown_lite.md_codify)
        (Utils.strip_ns class_name |> Markdown_lite.md_codify))
-
-let invalid_null_check p ret ty =
-  Lints.add Codes.invalid_null_check Lint_warning p
-  @@ Printf.sprintf
-       "Invalid null check: This expression will always return %s.\nA value of type %s can never be null."
-       (string_of_bool ret |> Markdown_lite.md_codify)
-       (Markdown_lite.md_codify ty)
-
-let redundant_nonnull_assertion ~can_be_captured ~as_pos ~child_expr_pos ty =
-  let autofix =
-    Some
-      (quickfix
-         ~can_be_captured
-         ~original_pos:as_pos
-         ~replacement_pos:child_expr_pos)
-  in
-  Lints.add ~autofix Codes.redundant_nonnull_assertion Lint_warning as_pos
-  @@ Printf.sprintf
-       "This `as` assertion will always succeed and hence is redundant. A value of type %s can never be null."
-       (Markdown_lite.md_codify ty)
 
 let invalid_disjointness_check p name ty1 ty2 =
   Lints.add Codes.invalid_disjointness_check Lint_warning p

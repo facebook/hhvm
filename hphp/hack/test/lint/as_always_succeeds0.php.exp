@@ -1,2 +1,2 @@
 File "as_always_succeeds0.php", line 8, characters 3-9:
-This `as` assertion will always succeed and hence is redundant. The expression on the left is an instance of `A`. (Lint[5628])
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `A` which is a subtype of `A`. (Lint[5628])

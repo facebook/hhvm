@@ -59,6 +59,7 @@ class CompilerFailureTest(unittest.TestCase):
         out = out.decode(sys.getdefaultencoding())
         err = err.decode(sys.getdefaultencoding())
         err = err.replace("{}/".format(self.tmp), "")
+        err = err.replace("\r\n", "\n")
         return p.returncode, out, err
 
     def test_double_package(self):

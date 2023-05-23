@@ -170,8 +170,9 @@ class McRouteHandleProvider
           std::vector<std::string>>>>>
       partialConfigs_;
 
-  // poolName -> destinations
+  // poolName -> (destinations, weights)
   folly::StringKeyedUnorderedMap<std::vector<RouteHandlePtr>> pools_;
+  folly::StringKeyedUnorderedMap<std::optional<folly::dynamic>> poolWeights_;
 
   // poolName -> AccessPoints
   folly::StringKeyedUnorderedMap<
@@ -182,7 +183,8 @@ class McRouteHandleProvider
   const RouteHandleFactoryMapWithProxy routeMapWithProxy_;
   const RouteHandleFactoryMapForWrapper routeMapForWrapper_;
 
-  const std::vector<RouteHandlePtr>& makePool(
+  std::tuple<std::vector<RouteHandlePtr>, std::optional<folly::dynamic>>
+  makePool(
       RouteHandleFactory<RouteHandleIf>& factory,
       const PoolFactory::PoolJson& json);
 

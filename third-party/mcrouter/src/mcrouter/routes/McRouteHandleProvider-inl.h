@@ -68,7 +68,9 @@ makeFailoverRouteWithFailoverErrorSettings<
     FailoverErrorsSettings failoverErrors,
     const folly::dynamic* jFailoverPolicy);
 
-extern template const std::vector<MemcacheRouterInfo::RouteHandlePtr>&
+extern template std::tuple<
+    std::vector<MemcacheRouterInfo::RouteHandlePtr>,
+    std::optional<folly::dynamic>>
 McRouteHandleProvider<MemcacheRouterInfo>::makePool(
     RouteHandleFactory<MemcacheRouteHandleIf>& factory,
     const PoolFactory::PoolJson& json);
@@ -147,13 +149,16 @@ McRouteHandleProvider<RouterInfo>::wrapAxonLogRoute(
 }
 
 template <class RouterInfo>
-const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+std::tuple<
+    std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>,
+    std::optional<folly::dynamic>>
 McRouteHandleProvider<RouterInfo>::makePool(
     RouteHandleFactory<RouteHandleIf>& factory,
     const PoolFactory::PoolJson& jpool) {
   auto existingIt = pools_.find(jpool.name);
-  if (existingIt != pools_.end()) {
-    return existingIt->second;
+  auto existingWeightsIt = poolWeights_.find(jpool.name);
+  if (existingIt != pools_.end() && existingWeightsIt != poolWeights_.end()) {
+    return {existingIt->second, existingWeightsIt->second};
   }
 
   auto name = jpool.name.str();
@@ -306,9 +311,12 @@ McRouteHandleProvider<RouterInfo>::makePool(
       additionalFanout = jAdditionalFanout->getInt();
     }
     checkLogic(
-        additionalFanout <=
-            kMaxTotalFanout - proxy_.router().opts().num_proxies,
-        "additional_fanout + num_proxies must be <= {}",
+        static_cast<uint64_t>(additionalFanout + 1) *
+                static_cast<uint64_t>(proxy_.router().opts().num_proxies) <=
+            kMaxTotalFanout,
+        "(additional_fanout={} + 1) * num_proxies={} must be <= {}",
+        additionalFanout,
+        proxy_.router().opts().num_proxies,
         kMaxTotalFanout);
 
     checkLogic(
@@ -319,14 +327,27 @@ McRouteHandleProvider<RouterInfo>::makePool(
 
     std::vector<RouteHandlePtr> destinations;
     destinations.reserve(jservers->size());
+    auto jExistingWeights = json.get_ptr("weights");
+    auto jWeights = jExistingWeights;
+    if (jWeights &&
+        (!jWeights->isArray() || jWeights->size() != jservers->size())) {
+      jWeights = nullptr;
+    }
+    folly::dynamic jNewWeights = folly::dynamic::array;
     for (size_t i = 0; i < jservers->size(); ++i) {
       const auto& server = jservers->at(i);
       checkLogic(
           server.isString() || server.isObject(),
           "server #{} is not a string/object",
           i);
+      auto addDestination = [&](auto&& dest) {
+        destinations.push_back(std::move(dest));
+        if (jWeights) {
+          jNewWeights.push_back(jWeights->at(i));
+        }
+      };
       if (server.isObject()) {
-        destinations.push_back(factory.create(server));
+        addDestination(factory.create(server));
         continue;
       }
 
@@ -340,16 +361,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
         proxy_.stats().increment(dest_with_no_failure_domain_count_stat);
       }
 
-      uint32_t fanoutForThisProxy = 1;
-      uint32_t numProxies = proxy_.router().opts().num_proxies;
-      uint32_t proxyId = proxy_.getId();
-      assert(proxyId < numProxies); // is numProxies = 0 ever valid?
-      if (numProxies > 0 && additionalFanout > 0) {
-        uint32_t totalFanout = numProxies + additionalFanout;
-        fanoutForThisProxy =
-            totalFanout / numProxies + (proxyId < (totalFanout % numProxies));
-      }
-      for (uint32_t idx = 0; idx < fanoutForThisProxy; ++idx) {
+      for (uint32_t idx = 0; idx < (1 + additionalFanout); ++idx) {
         auto ap = createAccessPoint(
             server.stringPiece(), failureDomain, proxy_.router(), *apAttr);
 
@@ -385,7 +397,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
               keepRoutingPrefix,
               idx);
           it->second.insert(destResult.second);
-          destinations.push_back(std::move(destResult.first));
+          addDestination(std::move(destResult.first));
         } else {
           using Transport = AsyncMcClient;
           auto destResult = createDestinationRoute<Transport>(
@@ -402,7 +414,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
               keepRoutingPrefix,
               idx);
           it->second.insert(destResult.second);
-          destinations.push_back(std::move(destResult.first));
+          addDestination(std::move(destResult.first));
         }
       }
     } // servers
@@ -454,8 +466,19 @@ McRouteHandleProvider<RouterInfo>::makePool(
         }
       }
     }
-    return pools_.emplace(std::move(name), std::move(destinations))
-        .first->second;
+    /**
+     * For backwards compatibility, return invalidly sized "weights" array here
+     * anyway
+     */
+    return {
+        pools_.emplace(name, std::move(destinations)).first->second,
+        poolWeights_
+            .emplace(
+                name,
+                jWeights ? std::optional{jNewWeights}
+                         : (jExistingWeights ? std::optional{*jExistingWeights}
+                                             : std::nullopt))
+            .first->second};
   } catch (const std::exception& e) {
     throwLogic("Pool {}: {}", name, e.what());
   }
@@ -585,7 +608,7 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
   }
 
   auto poolJson = poolFactory_.parsePool(*jpool);
-  auto destinations = makePool(factory, poolJson);
+  auto [destinations, weights] = makePool(factory, poolJson);
 
   try {
     destinations = wrapPoolDestinations<RouterInfo>(
@@ -598,9 +621,9 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
 
     // add weights and override whatever we have in PoolRoute::hash
     folly::dynamic jhashWithWeights = folly::dynamic::object();
-    if (auto jWeights = poolJson.json.get_ptr("weights")) {
+    if (weights) {
       jhashWithWeights = folly::dynamic::object(
-          "hash_func", WeightedCh3HashFunc::type())("weights", *jWeights);
+          "hash_func", WeightedCh3HashFunc::type())("weights", *weights);
     }
 
     if (auto jTags = poolJson.json.get_ptr("tags")) {
@@ -806,7 +829,7 @@ McRouteHandleProvider<RouterInfo>::create(
     folly::StringPiece type,
     const folly::dynamic& json) {
   if (type == "Pool") {
-    return makePool(factory, poolFactory_.parsePool(json));
+    return std::get<0>(makePool(factory, poolFactory_.parsePool(json)));
   } else if (type == "ShadowRoute") {
     return makeShadowRoutes(factory, json, proxy_, *extraProvider_);
   } else if (type == "SaltedFailoverRoute") {

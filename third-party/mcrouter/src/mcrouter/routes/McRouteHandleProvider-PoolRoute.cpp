@@ -11,7 +11,9 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-template const std::vector<MemcacheRouterInfo::RouteHandlePtr>&
+template std::tuple<
+    std::vector<MemcacheRouterInfo::RouteHandlePtr>,
+    std::optional<folly::dynamic>>
 McRouteHandleProvider<MemcacheRouterInfo>::makePool(
     RouteHandleFactory<MemcacheRouteHandleIf>& factory,
     const PoolFactory::PoolJson& json);

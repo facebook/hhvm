@@ -60,7 +60,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::JitEnableRenameFunction;
 use oxidized::aast;
 use oxidized::aast_defs;
 use oxidized::aast_visitor::visit;
@@ -843,12 +842,10 @@ pub fn emit_await<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
-
-    let cant_inline_gen_functions =
-        !(emitter.options().hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable);
+    let can_inline_gen_functions = !emitter.options().builtin_is_renamable();
     match e.as_call() {
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
-            if (cant_inline_gen_functions
+            if (can_inline_gen_functions
                 && args.len() == 1
                 && string_utils::strip_global_ns(&id.1) == "gena") =>
         {
@@ -3305,8 +3302,6 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let jit_enable_rename_function =
-        e.options().hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable;
     use ast::Expr;
     use ast::Expr_;
     match (&expr.2, &args[..], uarg) {
@@ -3315,7 +3310,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         }
         (Expr_::Id(id), args, None)
             if (id.1 == fb::IDX || id.1 == fb::IDXREADONLY)
-                && !jit_enable_rename_function
+                && !e.options().builtin_is_renamable()
                 && (args.len() == 2 || args.len() == 3) =>
         {
             emit_idx(e, env, pos, args)

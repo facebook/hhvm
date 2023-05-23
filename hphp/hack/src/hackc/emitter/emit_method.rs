@@ -24,8 +24,6 @@ use naming_special_names_rust::classes;
 use naming_special_names_rust::members;
 use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
-use options::JitEnableRenameFunction;
-use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
 
@@ -57,7 +55,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_dyn_callable =
         emitter.systemlib() || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_interceptable = is_method_interceptable(emitter.options());
+    let is_interceptable = emitter.is_interceptable();
     let is_native_opcode_impl = hhbc::is_native_opcode_impl(user_attrs);
     let is_no_injection = hhbc::is_no_injection(user_attrs);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
@@ -321,8 +319,4 @@ pub fn from_ast<'a, 'arena, 'decl>(
         flags,
         attrs,
     })
-}
-
-fn is_method_interceptable(opts: &Options) -> bool {
-    opts.hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable
 }

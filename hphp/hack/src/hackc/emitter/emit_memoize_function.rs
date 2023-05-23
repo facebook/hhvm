@@ -29,8 +29,6 @@ use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::JitEnableRenameFunction;
-use options::Options;
 use oxidized::ast;
 use oxidized::pos::Pos;
 
@@ -38,11 +36,6 @@ use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_memoize_helpers;
 use crate::emit_param;
-
-pub fn is_interceptable(opts: &Options) -> bool {
-    opts.hhvm.jit_enable_rename_function == JitEnableRenameFunction::Enable
-        && !opts.hhbc.repo_authoritative
-}
 
 pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -60,7 +53,7 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
-    attrs.set(Attr::AttrInterceptable, is_interceptable(emitter.options()));
+    attrs.set(Attr::AttrInterceptable, emitter.is_interceptable());
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
     attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));

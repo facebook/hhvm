@@ -23,6 +23,7 @@ use hhbc::IncludePath;
 use hhbc::IncludePathSet;
 use hhbc::Local;
 use hhbc::SymbolRefs;
+use options::JitEnableRenameFunction;
 use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -234,6 +235,17 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     pub fn finish_symbol_refs(&mut self) -> SymbolRefs<'arena> {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas(self.alloc)
+    }
+
+    pub fn is_interceptable(&self) -> bool {
+        let repo_auth = self.options().hhbc.repo_authoritative;
+        match (repo_auth, self.systemlib()) {
+            (true, _) => false,
+            (false, true) => self.options().builtin_is_renamable(),
+            (false, false) => {
+                self.options().hhvm.jit_enable_rename_function != JitEnableRenameFunction::Disable
+            }
+        }
     }
 }
 

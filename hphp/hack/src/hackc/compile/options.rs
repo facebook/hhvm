@@ -60,6 +60,12 @@ impl Options {
     pub fn log_extern_compiler_perf(&self) -> bool {
         self.hhbc.log_extern_compiler_perf
     }
+    pub fn builtin_is_renamable(&self) -> bool {
+        match self.hhvm.jit_enable_rename_function {
+            JitEnableRenameFunction::Enable => true,
+            JitEnableRenameFunction::RestrictedEnable | JitEnableRenameFunction::Disable => false,
+        }
+    }
 }
 
 impl Default for Options {

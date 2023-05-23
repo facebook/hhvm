@@ -10,3 +10,15 @@ This class does not satisfy all the requirements of its traits or interfaces. (T
   This type argument to `Super` must match exactly (it is invariant)
   File "iface_require_incompat6.php", line 13, characters 25-27:
   But got `int`
+File "iface_require_incompat6.php", line 13, characters 7-9:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "iface_require_incompat6.php", line 14, characters 7-8:
+  This requires to extend or implement Super
+  File "iface_require_incompat6.php", line 6, characters 19-30:
+  Required here
+  File "iface_require_incompat6.php", line 13, characters 25-27:
+  Expected `int`
+  File "iface_require_incompat6.php", line 6, characters 25-29:
+  But got `float`
+  File "iface_require_incompat6.php", line 6, characters 25-29:
+  This type argument to `Super` must match exactly (it is invariant)

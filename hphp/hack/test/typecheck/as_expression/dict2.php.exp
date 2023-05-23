@@ -12,9 +12,21 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`
+File "dict2.php", line 13, characters 16-34:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 33-38:
+  Expected `string`
+  File "dict2.php", line 13, characters 16-26:
+  But got `mixed` from this "as" assertion
 File "dict2.php", line 16, characters 16-40:
 Invalid argument (Typing[4110])
   File "dict2.php", line 23, characters 28-30:
   Expected `int`
   File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`
+File "dict2.php", line 16, characters 16-40:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 33-38:
+  Expected `string`
+  File "dict2.php", line 16, characters 16-26:
+  But got `mixed` from this "as" assertion

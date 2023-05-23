@@ -1,6 +1,12 @@
 File "unify_error2.php", line 13, characters 14-18:
 Invalid argument (Typing[4110])
-File "unify_error2.php", line 3, characters 21-25:
-Expected `float`
-File "unify_error2.php", line 8, characters 17-17:
-But got `num`
+  File "unify_error2.php", line 3, characters 21-25:
+  Expected `float`
+  File "unify_error2.php", line 8, characters 17-17:
+  But got `num`
+File "unify_error2.php", line 13, characters 14-18:
+Invalid argument (Typing[4110])
+  File "unify_error2.php", line 3, characters 21-25:
+  Expected `float`
+  File "unify_error2.php", line 10, characters 23-27:
+  But got `string`

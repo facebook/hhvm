@@ -2,8 +2,20 @@ File "bad_math.php", line 9, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 9, characters 3-8:
   Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 9, characters 3-4:
+Typing error (Typing[4110])
+  File "bad_math.php", line 9, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
+File "bad_math.php", line 10, characters 3-4:
+Typing error (Typing[4110])
+  File "bad_math.php", line 10, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
 File "bad_math.php", line 10, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 10, characters 3-8:
@@ -14,14 +26,32 @@ File "bad_math.php", line 11, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 11, characters 3-8:
   Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 11, characters 3-4:
+Typing error (Typing[4110])
+  File "bad_math.php", line 11, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
 File "bad_math.php", line 12, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 12, characters 3-8:
   Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 12, characters 3-4:
+Typing error (Typing[4110])
+  File "bad_math.php", line 12, characters 3-8:
+  Expected `num` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
+File "bad_math.php", line 13, characters 3-4:
+Typing error (Typing[4110])
+  File "bad_math.php", line 13, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
 File "bad_math.php", line 13, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 13, characters 3-9:
@@ -38,8 +68,20 @@ File "bad_math.php", line 21, characters 3-5:
 Typing error (Typing[4110])
   File "bad_math.php", line 21, characters 3-5:
   Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 21, characters 3-5:
+Typing error (Typing[4110])
+  File "bad_math.php", line 21, characters 3-5:
+  Expected `num` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
+File "bad_math.php", line 22, characters 3-5:
+Typing error (Typing[4110])
+  File "bad_math.php", line 22, characters 3-5:
+  Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
 File "bad_math.php", line 22, characters 3-5:
 Typing error (Typing[4110])
   File "bad_math.php", line 22, characters 3-5:

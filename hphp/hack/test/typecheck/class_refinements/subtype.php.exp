@@ -18,6 +18,24 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `string`
   File "subtype.php", line 36, characters 33-35:
   But got `int`
+File "subtype.php", line 36, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 25, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 36, characters 39-64:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 25, characters 50-51:
+    via this generic `Tb`
+  File "subtype.php", line 36, characters 14-36:
+  But got `Box with { type T = int }`
+  File "subtype.php", line 25, characters 44-45:
+    via this generic `Ta`
+  File "subtype.php", line 36, characters 58-63:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 36, characters 33-35:
+  Expected `int`
+  File "subtype.php", line 36, characters 58-63:
+  But got `string`
 File "subtype.php", line 37, characters 3-12:
 A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 25, characters 10-19:
@@ -30,6 +48,42 @@ A `where` type constraint is violated here (Typing[4323])
   But got `Box`
   File "subtype.php", line 25, characters 44-45:
     via this generic `Ta`
+File "subtype.php", line 37, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 25, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 37, characters 19-44:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 25, characters 50-51:
+    via this generic `Tb`
+  File "subtype.php", line 37, characters 14-16:
+  But got `Box`
+  File "subtype.php", line 25, characters 44-45:
+    via this generic `Ta`
+  File "subtype.php", line 37, characters 38-43:
+  This `as` or `=` refinement constraint is violated
+  File "subtype.php", line 37, characters 38-43:
+  Expected `string`
+  File "subtype.php", line 11, characters 28-32:
+  But got `mixed`
+File "subtype.php", line 37, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 25, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 37, characters 19-44:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 25, characters 50-51:
+    via this generic `Tb`
+  File "subtype.php", line 37, characters 14-16:
+  But got `Box`
+  File "subtype.php", line 25, characters 44-45:
+    via this generic `Ta`
+  File "subtype.php", line 37, characters 38-43:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 11, characters 23-23:
+  Expected `nothing` because the type constant T lacks a constraint
+  File "subtype.php", line 37, characters 38-43:
+  But got `string`
 File "subtype.php", line 38, characters 3-12:
 A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 25, characters 10-19:
@@ -48,6 +102,24 @@ A `where` type constraint is violated here (Typing[4323])
   Expected `int`
   File "subtype.php", line 19, characters 18-23:
   But got `string`
+File "subtype.php", line 38, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 25, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 38, characters 22-44:
+  Expected a class with `{type T = int}`
+  File "subtype.php", line 25, characters 50-51:
+    via this generic `Tb`
+  File "subtype.php", line 38, characters 14-19:
+  But got `StrBox`
+  File "subtype.php", line 25, characters 44-45:
+    via this generic `Ta`
+  File "subtype.php", line 38, characters 41-43:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 19, characters 18-23:
+  Expected `string`
+  File "subtype.php", line 38, characters 41-43:
+  But got `int`
 File "subtype.php", line 39, characters 3-12:
 A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 25, characters 10-19:

@@ -60,3 +60,15 @@ Invalid constraint on `newtype` (Typing[4332])
   Expected `Stringish`
   File "case_type_wellformed.php", line 14, characters 77-79:
   But got `int`
+File "case_type_wellformed.php", line 14, characters 11-31:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 14, characters 46-54:
+  Expected `Stringish`
+  File "case_type_wellformed.php", line 14, characters 83-86:
+  But got `bool`
+File "case_type_wellformed.php", line 14, characters 11-31:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_wellformed.php", line 14, characters 57-64:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 14, characters 83-86:
+  But got `bool`

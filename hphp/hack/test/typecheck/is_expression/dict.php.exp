@@ -8,9 +8,21 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`
+File "dict.php", line 6, characters 18-19:
+Invalid argument (Typing[4110])
+  File "dict.php", line 25, characters 33-38:
+  Expected `string`
+  File "dict.php", line 4, characters 13-16:
+  But got `mixed` from this `is` expression test
 File "dict.php", line 13, characters 18-19:
 Invalid argument (Typing[4110])
   File "dict.php", line 25, characters 28-30:
   Expected `int`
   File "hackarray.hhi", line 33, characters 12-19:
   But got `arraykey`
+File "dict.php", line 13, characters 18-19:
+Invalid argument (Typing[4110])
+  File "dict.php", line 25, characters 33-38:
+  Expected `string`
+  File "dict.php", line 11, characters 13-22:
+  But got `mixed` from this `is` expression test

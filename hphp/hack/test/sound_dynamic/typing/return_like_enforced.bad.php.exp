@@ -8,5 +8,11 @@ File "return_like_enforced.bad.php", line 13, characters 10-11:
 Invalid return type (Typing[4110])
   File "return_like_enforced.bad.php", line 11, characters 24-31:
   Expected `vec<int>`
+  File "return_like_enforced.bad.php", line 5, characters 17-25:
+  But got `dynamic`
+File "return_like_enforced.bad.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+  File "return_like_enforced.bad.php", line 11, characters 24-31:
+  Expected `vec<int>`
   File "return_like_enforced.bad.php", line 5, characters 22-24:
   But got `int`

@@ -6,3 +6,11 @@ Invalid argument (Typing[4110])
   This type argument to `a` must match exactly (it is invariant)
   File "newtype5.php--file2.php", line 4, characters 18-21:
   But got `bool`
+File "newtype5.php--file2.php", line 5, characters 8-9:
+Invalid argument (Typing[4110])
+  File "newtype5.php--file2.php", line 4, characters 18-21:
+  Expected `bool`
+  File "newtype5.php--file2.php", line 3, characters 17-19:
+  But got `int`
+  File "newtype5.php--file2.php", line 3, characters 17-19:
+  This type argument to `a` must match exactly (it is invariant)

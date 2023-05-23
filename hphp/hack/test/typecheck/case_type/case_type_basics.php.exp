@@ -34,3 +34,9 @@ Invalid argument (Typing[4110])
   Expected `CT_Bounded`
   File "case_type_basics.php", line 15, characters 39-50:
   But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
+File "case_type_basics.php", line 27, characters 18-27:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 12, characters 25-34:
+  Expected `CT_Bounded`
+  File "case_type_basics.php", line 15, characters 39-50:
+  But got `nonnull` arising from an implicit `as ?nonnull` constraint on this type

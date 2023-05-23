@@ -24,12 +24,28 @@ Invalid return type (Typing[4110])
   But got `A`
 File "missing_generic.php", line 53, characters 10-11:
 Invalid return type (Typing[4110])
+  File "missing_generic.php", line 9, characters 22-22:
+  Expected `T`
+  File "missing_generic.php", line 52, characters 22-24:
+  But got `int`
+  File "missing_generic.php", line 52, characters 22-24:
+  This type argument to `C` must match exactly (it is invariant)
+File "missing_generic.php", line 53, characters 10-11:
+Invalid return type (Typing[4110])
   File "missing_generic.php", line 52, characters 22-24:
   Expected `int`
   File "missing_generic.php", line 52, characters 22-24:
   This type argument to `C` must match exactly (it is invariant)
   File "missing_generic.php", line 9, characters 22-22:
   But got `T`
+File "missing_generic.php", line 78, characters 10-11:
+Invalid return type (Typing[4110])
+  File "missing_generic.php", line 18, characters 21-21:
+  Expected `T`
+  File "missing_generic.php", line 77, characters 22-24:
+  But got `int`
+  File "missing_generic.php", line 77, characters 22-24:
+  This type argument to `C` must match exactly (it is invariant)
 File "missing_generic.php", line 78, characters 10-11:
 Invalid return type (Typing[4110])
   File "missing_generic.php", line 77, characters 22-24:

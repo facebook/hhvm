@@ -4,3 +4,9 @@ Invalid argument (Typing[4041])
   Too many mandatory arguments (expected 1 but got 2)
   File "functional_dots.php", line 12, characters 12-44:
   Because of this definition
+File "functional_dots.php", line 20, characters 5-85:
+Invalid argument (Typing[4110])
+  File "functional_dots.php", line 20, characters 22-27:
+  Expected `string`
+  File "functional_dots.php", line 12, characters 27-31:
+  But got `float`

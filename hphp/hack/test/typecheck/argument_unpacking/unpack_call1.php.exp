@@ -64,3 +64,15 @@ Invalid argument (Typing[4359])
   An array cannot be unpacked into the required arguments of a function
   File "unpack_call1.php", line 3, characters 10-10:
   Definition is here
+File "unpack_call1.php", line 85, characters 8-19:
+Invalid argument (Typing[4359])
+  File "unpack_call1.php", line 85, characters 8-19:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call1.php", line 3, characters 10-10:
+  Definition is here
+File "unpack_call1.php", line 87, characters 8-14:
+Invalid argument (Typing[4359])
+  File "unpack_call1.php", line 87, characters 8-14:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call1.php", line 3, characters 10-10:
+  Definition is here

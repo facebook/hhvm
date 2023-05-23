@@ -1,5 +1,13 @@
 File "nullable.bad.php", line 18, characters 10-11:
 Invalid argument (Typing[4110])
+  File "nullable.bad.php", line 5, characters 3-8:
+  Expected `string`
+  File "nullable.bad.php", line 8, characters 35-37:
+  But got `int`
+  File "nullable.bad.php", line 8, characters 35-37:
+  This type argument to `HH\EnumClass\Label` must match exactly (it is invariant)
+File "nullable.bad.php", line 18, characters 10-11:
+Invalid argument (Typing[4110])
   File "nullable.bad.php", line 8, characters 35-37:
   Expected `int`
   File "nullable.bad.php", line 8, characters 35-37:

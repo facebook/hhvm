@@ -1,5 +1,11 @@
 File "subtype_supportdynamic.bad.php", line 8, characters 5-6:
 Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 7, characters 20-24:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 8, characters 5-6:
+Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 23-29:
   Expected `nonnull`
   File "subtype_supportdynamic.bad.php", line 7, characters 20-24:

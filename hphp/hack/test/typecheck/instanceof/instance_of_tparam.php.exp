@@ -4,6 +4,12 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "instance_of_tparam.php", line 13, characters 13-34:
   But got `mixed` from this `is` expression test
+File "instance_of_tparam.php", line 14, characters 12-13:
+Invalid return type (Typing[4110])
+  File "instance_of_tparam.php", line 12, characters 48-53:
+  Expected `string`
+  File "instance_of_tparam.php", line 13, characters 13-34:
+  But got `mixed` from this `is` expression test
 File "instance_of_tparam.php", line 25, characters 12-13:
 Invalid return type (Typing[4110])
   File "instance_of_tparam.php", line 23, characters 33-34:
@@ -14,3 +20,13 @@ Invalid return type (Typing[4110])
   But got `Tx` from this `is` expression test
   File "instance_of_tparam.php", line 21, characters 22-22:
     via this generic `T`
+File "instance_of_tparam.php", line 25, characters 12-13:
+Invalid return type (Typing[4110])
+  File "instance_of_tparam.php", line 24, characters 13-16:
+  Expected `Tx` from this `is` expression test
+  File "instance_of_tparam.php", line 21, characters 22-22:
+    via this generic `T`
+  File "instance_of_tparam.php", line 23, characters 33-34:
+  But got `Ty`
+  File "instance_of_tparam.php", line 23, characters 33-34:
+  This type argument to `D` must match exactly (it is invariant)

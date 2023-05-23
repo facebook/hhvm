@@ -12,3 +12,13 @@ Constant does not match the type of the enum it is in (Typing[4328])
   But got `string`
   File "typing4.bad.php", line 12, characters 8-13:
   This type argument to `Box` must match exactly (it is invariant)
+File "typing4.bad.php", line 12, characters 16-16:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "typing4.bad.php", line 12, characters 8-13:
+  Expected `string`
+  File "typing4.bad.php", line 12, characters 8-13:
+  This type argument to `Box` must match exactly (it is invariant)
+  File "typing4.bad.php", line 11, characters 20-20:
+  But got `T`
+  File "typing4.bad.php", line 11, characters 20-20:
+  This type argument to `Box` must match exactly (it is invariant)

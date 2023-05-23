@@ -32,6 +32,12 @@ Invalid argument (Typing[4041])
   Too many mandatory arguments (expected 1 but got 2)
   File "mixed.php", line 94, characters 35-60:
   Because of this definition
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4041])
+  File "mixed.php", line 61, characters 10-51:
+  Too many mandatory arguments (expected 1 but got 2)
+  File "mixed.php", line 94, characters 35-60:
+  Because of this definition
 File "mixed.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
   File "mixed.php", line 102, characters 19-19:
@@ -62,3 +68,9 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "mixed.php", line 52, characters 36-41:
   But got `string`
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4110])
+  File "mixed.php", line 94, characters 54-59:
+  Expected `string`
+  File "mixed.php", line 61, characters 25-51:
+  But got `int` because this is the result of an integer arithmetic operation

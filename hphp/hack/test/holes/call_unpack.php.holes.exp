@@ -1,3 +1,7 @@
+Errors:
+  [36:15-17] Invalid argument
+  [36:15-17] An array cannot be unpacked into the required arguments of a function
+  [4:10-18] Definition is here
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

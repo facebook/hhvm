@@ -4,3 +4,21 @@ Invalid argument (Typing[4041])
   Too many mandatory arguments (expected 0 but got 2)
   File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
   Because of this definition
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
+Invalid argument (Typing[4042])
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
+  Should have a variadic argument
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
+  Because of this definition
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
+Invalid argument (Typing[4110])
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 23-25:
+  Expected `int`
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 34-38:
+  But got `mixed`
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-30:
+Invalid argument (Typing[4110])
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 31-36:
+  Expected `string`
+  File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 34-38:
+  But got `mixed`

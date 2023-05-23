@@ -6,3 +6,9 @@ Invalid assignment (Typing[4110])
   Expected `null`
   File "tuple_as_lvalue.php", line 12, characters 15-17:
   But got `int`
+File "tuple_as_lvalue.php", line 15, characters 3-20:
+Invalid assignment (Typing[4110])
+  File "tuple_as_lvalue.php", line 14, characters 8-11:
+  Expected `null`
+  File "tuple_as_lvalue.php", line 12, characters 20-25:
+  But got `string`

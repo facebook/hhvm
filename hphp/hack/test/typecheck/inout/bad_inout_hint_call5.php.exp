@@ -1,6 +1,12 @@
 File "bad_inout_hint_call5.php", line 7, characters 5-33:
 Invalid argument (Typing[4110])
-File "bad_inout_hint_call5.php", line 3, characters 30-32:
-Expected `int`
-File "bad_inout_hint_call5.php", line 7, characters 12-17:
-But got `string`
+  File "bad_inout_hint_call5.php", line 3, characters 30-32:
+  Expected `int`
+  File "bad_inout_hint_call5.php", line 7, characters 12-17:
+  But got `string`
+File "bad_inout_hint_call5.php", line 7, characters 5-33:
+Invalid argument (Typing[4110])
+  File "bad_inout_hint_call5.php", line 7, characters 12-17:
+  Expected `string`
+  File "bad_inout_hint_call5.php", line 3, characters 30-32:
+  But got `int`

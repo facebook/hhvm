@@ -86,6 +86,16 @@ and is_unsat p =
   | Disj (_, ps) -> List.for_all ps ~f:is_unsat
   | IsSubtype _ -> false
 
+let rec get_error_if_unsat p =
+  match p with
+  | Disj (err, ps) ->
+    if List.for_all ps ~f:is_unsat then
+      err
+    else
+      None
+  | Conj ps -> List.find_map ps ~f:get_error_if_unsat
+  | IsSubtype _ -> None
+
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =
   if equal_subtype_prop p1 p2 then

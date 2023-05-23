@@ -10,6 +10,12 @@ Invalid argument (Typing[4110])
   Expected `float`
   File "neg_num_arraykey.php", line 5, characters 10-12:
   But got `string`
+File "neg_num_arraykey.php", line 9, characters 18-19:
+Invalid argument (Typing[4110])
+  File "neg_num_arraykey.php", line 48, characters 23-27:
+  Expected `float`
+  File "neg_num_arraykey.php", line 7, characters 13-20:
+  But got `int` from this `is` expression test
 File "neg_num_arraykey.php", line 10, characters 16-17:
 Invalid argument (Typing[4110])
   File "neg_num_arraykey.php", line 47, characters 21-23:

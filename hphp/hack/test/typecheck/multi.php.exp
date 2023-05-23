@@ -1,0 +1,60 @@
+File "multi.php", line 11, characters 15-43:
+Invalid argument (Typing[4057])
+  File "multi.php", line 11, characters 15-43:
+  The field `c` is missing
+  File "multi.php", line 6, characters 53-55:
+  The field `c` is defined
+File "multi.php", line 13, characters 15-16:
+Invalid argument (Typing[4057])
+  File "multi.php", line 12, characters 8-36:
+  The field `c` is missing
+  File "multi.php", line 6, characters 53-55:
+  The field `c` is defined
+File "multi.php", line 9, characters 13-15:
+Invalid argument (Typing[4110])
+  File "multi.php", line 4, characters 20-22:
+  Expected `int`
+  File "multi.php", line 9, characters 13-15:
+  But got `string`
+File "multi.php", line 9, characters 18-20:
+Invalid argument (Typing[4110])
+  File "multi.php", line 4, characters 28-31:
+  Expected `bool`
+  File "multi.php", line 9, characters 18-20:
+  But got `float`
+File "multi.php", line 10, characters 14-28:
+Invalid argument (Typing[4110])
+  File "multi.php", line 5, characters 22-24:
+  Expected `int`
+  File "multi.php", line 10, characters 20-22:
+  But got `string`
+File "multi.php", line 10, characters 14-28:
+Invalid argument (Typing[4110])
+  File "multi.php", line 5, characters 26-29:
+  Expected `bool`
+  File "multi.php", line 10, characters 25-27:
+  But got `float`
+File "multi.php", line 11, characters 15-43:
+Invalid argument (Typing[4110])
+  File "multi.php", line 6, characters 35-37:
+  Expected `int`
+  File "multi.php", line 11, characters 28-30:
+  But got `string`
+File "multi.php", line 11, characters 15-43:
+Invalid argument (Typing[4110])
+  File "multi.php", line 6, characters 47-50:
+  Expected `bool`
+  File "multi.php", line 11, characters 40-42:
+  But got `float`
+File "multi.php", line 13, characters 15-16:
+Invalid argument (Typing[4110])
+  File "multi.php", line 6, characters 35-37:
+  Expected `int`
+  File "multi.php", line 12, characters 21-23:
+  But got `string`
+File "multi.php", line 13, characters 15-16:
+Invalid argument (Typing[4110])
+  File "multi.php", line 6, characters 47-50:
+  Expected `bool`
+  File "multi.php", line 12, characters 33-35:
+  But got `float`

@@ -4,3 +4,9 @@ Invalid argument (Typing[4110])
   Expected `Traversable<_>` (it is unpacked with `...`)
   File "unpack_call3.php", line 6, characters 11-18:
   But got `string`
+File "unpack_call3.php", line 7, characters 8-12:
+Invalid argument (Typing[4359])
+  File "unpack_call3.php", line 7, characters 8-12:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call3.php", line 3, characters 10-10:
+  Definition is here

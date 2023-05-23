@@ -101,7 +101,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     symbol_write_ignore_paths: &[],
     symbol_write_index_paths: &[],
     symbol_write_index_paths_file: None,
-    symbol_write_include_hhi: true,
+    symbol_write_include_hhi: false,
     symbol_write_index_paths_file_output: None,
     symbol_write_sym_hash_in: None,
     symbol_write_exclude_out: None,

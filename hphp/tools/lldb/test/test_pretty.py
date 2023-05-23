@@ -23,6 +23,77 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
         # Thus, the order here matters (i.e. use the order in the DataType enum and
         # order of other calls in the test binary).
 
+        with self.subTest("TypedValue (PersistentDict)"):
+            self.run_until_breakpoint("takeTypedValuePersistentDict")
+            _, output = self.run_commands(["p tv"])
+            expected_lines = [
+                "(HPHP::TypedValue) { PersistentDict, (HPHP::ArrayData) *parr = 3 element(s) {",
+                "\"key1\" = { Int64, 42 }",
+                "\"key2\" = { Double, 3.14 }",
+                "\"key3\" = { PersistentString, \"Salutations, earth!\" }",
+                "} }"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("TypedValue (Dict)"):
+            self.run_until_breakpoint("takeTypedValueDict")
+            _, output = self.run_commands(["p tv"])
+            expected_lines = [
+                "(HPHP::TypedValue) { Dict, (HPHP::ArrayData) *parr = 3 element(s) {",
+                "\"key1\" = { Int64, 1 }",
+                "\"key2\" = { Double, 2.718 }",
+                "\"key3\" = { String, \"Hello, world!\" }",
+                "} }"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("TypedValue (PersistentVec)"):
+            self.run_until_breakpoint("takeTypedValuePersistentVec")
+            _, output = self.run_commands(["p tv"])
+            expected_lines = [
+                "(HPHP::TypedValue) { PersistentVec, (HPHP::ArrayData) *parr = 3 element(s) {",
+                "[0] = { Int64, 42 }",
+                "[1] = { Double, 3.14 }",
+                "[2] = { PersistentString, \"This is not a pipe\" }",
+                "} }"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("TypedValue (Vec)"):
+            self.run_until_breakpoint("takeTypedValueVec")
+            _, output = self.run_commands(["p tv"])
+            expected_lines = [
+                "(HPHP::TypedValue) { Vec, (HPHP::ArrayData) *parr = 3 element(s) {",
+                "[0] = { Int64, 1 }",
+                "[1] = { Int64, 2 }",
+                "[2] = { Int64, 3 }",
+                "} }"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("TypedValue (PersistentKeyset)"):
+            self.run_until_breakpoint("takeTypedValuePersistentKeyset")
+            _, output = self.run_commands(["p tv"])
+            expected_output = "(HPHP::TypedValue) { PersistentKeyset, (HPHP::ArrayData) *parr = 0 element(s) {} }"
+            self.assertEqual(output.strip(), expected_output)
+
+        with self.subTest("TypedValue (Keyset)"):
+            self.run_until_breakpoint("takeTypedValueKeyset")
+            _, output = self.run_commands(["p tv"])
+            expected_lines = [
+                "(HPHP::TypedValue) { Keyset, (HPHP::ArrayData) *parr = 3 element(s) {",
+                "= { Int64, 1 }",
+                "= { Int64, 2 }",
+                "= { Int64, 3 }",
+                "} }"
+            ]
+            actual_lines = [line.strip() for line in output.split("\n") if line]
+            self.assertEqual(actual_lines, expected_lines)
+
         breakpoints_to_outputs = {
             "PersistentString": r'\(HPHP::TypedValue\) \{ PersistentString, "Hello, world!" \}',
             "String": r'\(HPHP::TypedValue\) \{ String, "Hello, world!" \}',
@@ -42,7 +113,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
         }
 
         for tv_name, expected_output in breakpoints_to_outputs.items():
-            with self.subTest(f"TypedValue {tv_name}"):
+            with self.subTest(f"TypedValue ({tv_name})"):
                 self.run_until_breakpoint(f"takeTypedValue{tv_name}")
                 _, output = self.run_commands(["p tv"])
                 self.assertRegex(output.strip(), expected_output)

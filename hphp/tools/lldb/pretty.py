@@ -230,8 +230,10 @@ class pp_ArrayData:
             self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaDict", self.val_obj.target))
         elif self._is('Keyset'):
             self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaKeyset", self.val_obj.target))
+        elif self._is('BespokeVec') or self._is('BespokeDict') or self._is('BespokeKeyset'):
+            print(f"Unsupported bespoke array type ('{self.m_kind}')! Run `expression -R -- {self.val_obj.path}` to see its raw form", file=sys.stderr)
         else:
-            print(f"Invalid array type! Run `expression -R -- {self.val_obj.name}` to see its raw form", file=sys.stderr)
+            print(f"Invalid array type ('{self.m_kind}')! Run `expression -R -- {self.val_obj.path}` to see its raw form", file=sys.stderr)
 
         # Return false to make sure we always update this object every time we
         # stop. If we return True, then the value will never update again.

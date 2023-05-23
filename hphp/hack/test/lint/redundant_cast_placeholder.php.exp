@@ -1,0 +1,14 @@
+File "redundant_cast_placeholder.php", line 18, characters 3-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `C<int, string, bool>` which is a subtype of `C<int, string, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 19, characters 3-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `C<T1, T2, T3>` which is a subtype of `C<T1, T2, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 20, characters 3-21:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `C<nothing, nothing, mixed>` which is a subtype of `C<nothing, nothing, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 21, characters 3-21:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `D<nothing, mixed>` which is a subtype of `C<nothing, int, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 22, characters 3-21:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `E` which is a subtype of `C<bool, int, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 23, characters 3-16:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `E` which is a subtype of `C<bool, int, nothing>`. (Lint[5628])
+File "redundant_cast_placeholder.php", line 24, characters 3-15:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `F<int, string>` which is a subtype of `F<int, string>`. (Lint[5628])

@@ -588,71 +588,6 @@
         "is_union" : false,
         "lineno" : 228
       },
-      "GenDefaultEnumValue" : {
-        "name" : "GenDefaultEnumValue",
-        "structured_annotations": {
-          "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "thrift.Beta" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Beta"
-},
-        "value" : {}
-      }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 233
-      },
-      "GenEnumSet" : {
-        "name" : "GenEnumSet",
-        "structured_annotations": {
-          "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "thrift.BitmaskEnum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "BitmaskEnum"
-},
-        "value" : {}
-      },
-          "scope.Transitive" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Transitive",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
-        },
-        "docstring" : "Adds a typedef of {enum}Set that is sutable for storing a `packed` set of\nvalues for the annotated enum.\n\nAny enum with this annotation must only have values between 1 and 32 inclusive.\n\nFor example:\n  @thrift.GenEnumSet\n  enum Flag {\n    Option1 = 1,\n    ...\n  }\n\nGenerates the equivalent of:\n  @cpp.Adapter(\"::apache::thrift::EnumSetAdapter<::ns::Flag>\")\n  ...\n  typedef i32 FlagSet\n\n`FlagSet` can then be used like a normal typedef.\n",
-        "fields" : {
-          "name" : {
-            "name" : "name",
-            "docstring" : "If a custom name is not provided, `{EnumName}Set` is used.\n",
-            "key" : 1,
-            "lineno" : 263,
-            "required" : "opt-in-req-out",
-            "type" : "string"
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 258
-      },
       "v1" : {
         "name" : "v1",
         "structured_annotations": {
@@ -668,7 +603,7 @@
         "docstring" : "Enables all released v1 features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 272
+        "lineno" : 238
       },
       "v1beta" : {
         "name" : "v1beta",
@@ -699,7 +634,7 @@
         "docstring" : "Enables all beta v1 features.\n\nBeta features are guaranteed to *not* break unrelated Thrift features\nso they should be relatively safe to test alongside other beta or\nreleased Thrift features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 283
+        "lineno" : 249
       },
       "v1alpha" : {
         "name" : "v1alpha",
@@ -737,7 +672,7 @@
         "docstring" : "Enables all experimental v1 features.\n\nUse with *caution* and only with explicit permission. This may enable\nfeatures may change significantly without notice or not work correctly\nin all contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 297
+        "lineno" : 263
       },
       "v1test" : {
         "name" : "v1test",
@@ -775,7 +710,7 @@
         "docstring" : "Enables experimental features, even those that are known to break common\nuse cases.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 307
+        "lineno" : 273
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -801,14 +736,14 @@
           "field" : {
             "name" : "field",
             "key" : 1,
-            "lineno" : 323,
+            "lineno" : 289,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 320
+        "lineno" : 286
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -866,14 +801,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 338,
+            "lineno" : 304,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 331
+        "lineno" : 297
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -897,7 +832,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 345
+        "lineno" : 311
       }
       },
   "source_path" : "thrift/annotation/thrift",

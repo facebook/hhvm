@@ -229,40 +229,6 @@ struct SerializeInFieldIdOrder {}
 @Experimental // TODO: Support in C++, Python, Java.
 struct BitmaskEnum {}
 
-// DEPRECATED!
-@scope.Enum
-@Beta
-struct GenDefaultEnumValue {}
-
-/**
- * Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
- * values for the annotated enum.
- *
- * Any enum with this annotation must only have values between 1 and 32 inclusive.
- *
- * For example:
- *   @thrift.GenEnumSet
- *   enum Flag {
- *     Option1 = 1,
- *     ...
- *   }
- *
- * Generates the equivalent of:
- *   @cpp.Adapter("::apache::thrift::EnumSetAdapter<::ns::Flag>")
- *   ...
- *   typedef i32 FlagSet
- *
- * `FlagSet` can then be used like a normal typedef.
- */
-// TODO(afuller): Implement
-@scope.Enum
-@BitmaskEnum
-@scope.Transitive
-struct GenEnumSet {
-  /** If a custom name is not provided, `{EnumName}Set` is used. */
-  1: string name;
-}
-
 ////
 // Thrift version annotations.
 ////

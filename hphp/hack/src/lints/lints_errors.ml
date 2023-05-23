@@ -88,11 +88,12 @@ let invalid_contains_key_check p trv_key_ty key_ty =
        trv_key_ty
        (Markdown_lite.md_codify key_ty)
 
-let is_always_true p lhs_ty rhs_ty =
+let is_always_true ~check_status p lhs_ty rhs_ty =
   let lhs_ty = Markdown_lite.md_codify lhs_ty in
   let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.is_always_true
+    ~check_status:(Some check_status)
     Lint_warning
     p
     (Printf.sprintf
@@ -100,11 +101,12 @@ let is_always_true p lhs_ty rhs_ty =
        lhs_ty
        rhs_ty)
 
-let is_always_false p lhs_ty rhs_ty =
+let is_always_false ~check_status p lhs_ty rhs_ty =
   let lhs_ty = Markdown_lite.md_codify lhs_ty in
   let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.is_always_false
+    ~check_status:(Some check_status)
     Lint_warning
     p
     (Printf.sprintf
@@ -112,7 +114,8 @@ let is_always_false p lhs_ty rhs_ty =
        lhs_ty
        rhs_ty)
 
-let as_always_succeeds ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
+let as_always_succeeds
+    ~check_status ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
   let lhs_ty = Markdown_lite.md_codify lhs_ty in
   let rhs_ty = Markdown_lite.md_codify rhs_ty in
   let autofix =
@@ -124,6 +127,7 @@ let as_always_succeeds ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
   in
   Lints.add
     ~autofix
+    ~check_status:(Some check_status)
     Codes.as_always_succeeds
     Lint_warning
     as_pos
@@ -132,11 +136,12 @@ let as_always_succeeds ~can_be_captured ~as_pos ~child_expr_pos lhs_ty rhs_ty =
        lhs_ty
        rhs_ty)
 
-let as_always_fails p lhs_ty rhs_ty =
+let as_always_fails ~check_status p lhs_ty rhs_ty =
   let lhs_ty = Markdown_lite.md_codify lhs_ty in
   let rhs_ty = Markdown_lite.md_codify rhs_ty in
   Lints.add
     Codes.as_always_fails
+    ~check_status:(Some check_status)
     Lint_warning
     p
     (Printf.sprintf

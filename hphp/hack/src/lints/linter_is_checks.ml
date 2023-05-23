@@ -65,6 +65,7 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_expr env =
+      let check_status = Env.get_check_status env in
       function
       | (_, p, Is ((lhs_ty, _, _), hint)) ->
         let hint_ty = Env.hint_to_ty env hint in
@@ -76,8 +77,8 @@ let handler =
           env
           lhs_ty
           hint_ty
-          ~always_subtype:Lints_errors.is_always_true
-          ~never_subtype:Lints_errors.is_always_false
+          ~always_subtype:(Lints_errors.is_always_true ~check_status)
+          ~never_subtype:(Lints_errors.is_always_false ~check_status)
       | (_, p, As ((lhs_ty, lhs_pos, lhs_expr), hint, false)) ->
         let hint_ty = Env.hint_to_ty env hint in
         let (env, hint_ty) =
@@ -86,6 +87,7 @@ let handler =
         let can_be_captured = Aast_utils.can_be_captured lhs_expr in
         let always_subtype p =
           Lints_errors.as_always_succeeds
+            ~check_status
             ~can_be_captured
             ~as_pos:p
             ~child_expr_pos:lhs_pos
@@ -96,6 +98,6 @@ let handler =
           lhs_ty
           hint_ty
           ~always_subtype
-          ~never_subtype:Lints_errors.as_always_fails
+          ~never_subtype:(Lints_errors.as_always_fails ~check_status)
       | _ -> ()
   end

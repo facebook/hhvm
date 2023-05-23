@@ -5920,8 +5920,8 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
 
 #ifdef __clang__
 #define DECLARE_FIXED(TL,MODES,RA)\
-  rds::Header* TL; asm volatile("mov %%r12, %0" : "=r"(TL) ::);\
-  ExecMode MODES;  asm volatile("mov %%r13d, %0" : "=r"(MODES) ::);\
+  rds::Header* TL; asm volatile("mov %%r12, %0" : "=r"(TL) :: "r13", "r14");\
+  ExecMode MODES;  asm volatile("mov %%r13d, %0" : "=r"(MODES) :: "r14");\
   TCA* RA;         asm volatile("mov %%r14, %0" : "=r"(RA) ::);
 #else
 #define DECLARE_FIXED(TL,MODES,RA)\

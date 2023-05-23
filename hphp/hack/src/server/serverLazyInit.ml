@@ -890,17 +890,17 @@ let write_symbol_info
   let paths = env.swriteopt.symbol_write_index_paths in
   let paths_file = env.swriteopt.symbol_write_index_paths_file in
   let referenced_file = env.swriteopt.symbol_write_referenced_out in
-  let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
+  let include_hhi = env.swriteopt.symbol_write_include_hhi in
   let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
   let incremental = env.swriteopt.symbol_write_sym_hash_in in
   let gen_sym_hash = env.swriteopt.symbol_write_sym_hash_out in
   let files =
     if List.length paths > 0 || Option.is_some paths_file then
-      Symbol_indexable.from_options ~paths ~paths_file
+      Symbol_indexable.from_options ~paths ~paths_file ~include_hhi
     else
       Symbol_indexable.from_naming_table
         env.naming_table
-        ~exclude_hhi
+        ~include_hhi
         ~ignore_paths
   in
   match env.swriteopt.symbol_write_index_paths_file_output with

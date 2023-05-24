@@ -520,6 +520,12 @@ let add_supportdyn_constraints p tparams =
   List.map tparams ~f:(fun tparam ->
       if
         Naming_special_names.Coeffects.is_generated_generic (snd tparam.tp_name)
+        || List.exists
+             ~f:(fun c ->
+               match c with
+               | (Ast_defs.Constraint_as, _) -> true
+               | _ -> false)
+             tparam.tp_constraints
       then
         tparam
       else

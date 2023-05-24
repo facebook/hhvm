@@ -278,6 +278,7 @@ add_library(
   transport/rocket/FdSocketMetadata.cpp
   transport/rocket/PayloadUtils.cpp
   transport/rocket/Types.cpp
+  transport/rocket/Compression.cpp
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp
   transport/rocket/client/RocketClient.cpp

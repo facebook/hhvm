@@ -23,7 +23,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
+#include <thrift/lib/cpp2/transport/rocket/Compression.h>
 
 namespace apache {
 namespace thrift {

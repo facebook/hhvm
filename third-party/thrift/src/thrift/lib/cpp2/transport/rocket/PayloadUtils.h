@@ -17,11 +17,9 @@
 #pragma once
 
 #include <fmt/core.h>
-#include <folly/Expected.h>
 #include <folly/Try.h>
-#include <folly/compression/Compression.h>
-#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -48,37 +46,6 @@ extern template Payload makePayload<>(
     const ResponseRpcMetadata&, std::unique_ptr<folly::IOBuf> data);
 extern template Payload makePayload<>(
     const StreamPayloadMetadata&, std::unique_ptr<folly::IOBuf> data);
-
-template <typename Metadata>
-void setCompressionCodec(
-    CompressionConfig compressionConfig,
-    Metadata& metadata,
-    size_t payloadSize);
-
-extern template void setCompressionCodec<>(
-    CompressionConfig compressionConfig,
-    RequestRpcMetadata& metadata,
-    size_t payloadSize);
-extern template void setCompressionCodec<>(
-    CompressionConfig compressionConfig,
-    ResponseRpcMetadata& metadata,
-    size_t payloadSize);
-extern template void setCompressionCodec<>(
-    CompressionConfig compressionConfig,
-    StreamPayloadMetadata& metadata,
-    size_t payloadSize);
-
-/**
- * Helper method to compress the payload before sending to the remote endpoint.
- */
-void compressPayload(
-    std::unique_ptr<folly::IOBuf>& data, CompressionAlgorithm compression);
-
-/**
- * Helper method to uncompress the payload from remote endpoint.
- */
-folly::Expected<std::unique_ptr<folly::IOBuf>, std::string> uncompressPayload(
-    CompressionAlgorithm compression, std::unique_ptr<folly::IOBuf> data);
 } // namespace detail
 
 template <typename T>
@@ -104,9 +71,6 @@ inline size_t unpackCompact(
   output = std::move(buffer);
   return 0;
 }
-
-std::unique_ptr<folly::IOBuf> uncompressBuffer(
-    std::unique_ptr<folly::IOBuf>&& buffer, CompressionAlgorithm compression);
 
 namespace detail {
 template <class T, bool uncompressPayload>

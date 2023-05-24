@@ -360,7 +360,7 @@ ParseFactsResult extract_facts(
     try {
       hackc::DeclParserConfig decl_config;
       options.initDeclConfig(decl_config);
-      auto const decls = hackc::direct_decl_parse(
+      auto const decls = hackc::direct_decl_parse_and_serialize(
         decl_config, filename, source_text
       );
       auto const facts = hackc::decls_to_facts(decls, actual_sha1);

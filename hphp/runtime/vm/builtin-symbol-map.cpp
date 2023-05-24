@@ -34,10 +34,10 @@ namespace {
  * where *a* decl in said blob has its name as the key.
  */
 using SymbolMap = hphp_fast_map<const StringData*,
-                                std::shared_ptr<hackc::DeclResult>>;
+                                std::shared_ptr<hackc::DeclsAndBlob>>;
 /** Represents a case insensitive version of [SymbolMap] */
 using ISymbolMap = hphp_fast_map<const StringData*,
-                                 std::shared_ptr<hackc::DeclResult>,
+                                 std::shared_ptr<hackc::DeclsAndBlob>,
                                  string_data_hash,
                                  string_data_isame>;
 
@@ -62,12 +62,12 @@ void registerBuiltinSymbols(
   hackc::DeclParserConfig options;
   defaults.flags().initDeclConfig(options);
 
-  auto decls = hackc::direct_decl_parse(options, name, contents);
+  auto decls = hackc::direct_decl_parse_and_serialize(options, name, contents);
   auto const facts = hackc::decls_to_facts(
     decls,
     "" // This is *meant* to be the hash of the source file, but it's not used
   );
-  auto const decls_ptr = std::make_shared<hackc::DeclResult>(std::move(decls));
+  auto const decls_ptr = std::make_shared<hackc::DeclsAndBlob>(std::move(decls));
   for (auto const& e : facts.facts.types) {
     s_types.emplace(
       makeStaticString(std::string(e.name)),
@@ -123,9 +123,9 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   not_reached();
 }
 
-hphp_fast_set<const hackc::DeclResult*> getAllBuiltinDecls() {
+hphp_fast_set<const hackc::DeclsAndBlob*> getAllBuiltinDecls() {
   assertx(RuntimeOption::EvalEnableDecl);
-  hphp_fast_set<const hackc::DeclResult*> res;
+  hphp_fast_set<const hackc::DeclsAndBlob*> res;
   for (const auto& it: s_types) {
     res.emplace(it.second.get());
   }

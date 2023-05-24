@@ -42,16 +42,18 @@ struct ExternalDeclProviderResult {
     return ExternalDeclProviderResult{Tag::Missing, {}};
   }
 
-  // Construct Decls from DeclResult decls
-  static ExternalDeclProviderResult from_decls(const DeclResult& decl_result) {
+  // Construct Decls from DeclsAndBlob decls
+  static ExternalDeclProviderResult from_decls(
+      const DeclsAndBlob& decl_result) {
     ExternalDeclProviderResult r;
     r.tag = Tag::Decls;
     r.decls._0 = &(*decl_result.decls);
     return r;
   }
 
-  // Construct Bytes from DeclResult serialized bytes in a rust::Vec
-  static ExternalDeclProviderResult from_bytes(const DeclResult& decl_result) {
+  // Construct Bytes from DeclsAndBlob serialized bytes in a rust::Vec
+  static ExternalDeclProviderResult from_bytes(
+      const DeclsAndBlob& decl_result) {
     ExternalDeclProviderResult r;
     r.tag = Tag::RustVec;
     r.rust_vec._0 = &decl_result.serialized;

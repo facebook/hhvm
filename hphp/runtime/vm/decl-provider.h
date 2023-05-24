@@ -90,9 +90,9 @@ struct HhvmDeclProvider: hackc::DeclProvider {
 
   hackc::DeclParserConfig m_config;
 
-  // Map from filename to DeclResult containing the cached results of calling
-  // hackc_direct_decl_parse().
-  hphp_hash_map<std::string, hackc::DeclResult> m_cache;
+  // Map from filename to DeclsAndBlob containing the cached results of calling
+  // hackc_direct_decl_parse_and_serialize().
+  hphp_hash_map<std::string, hackc::DeclsAndBlob> m_cache;
 
   // Record of dependencies collected from queries to the decl provider
   hphp_hash_map<DeclSym, DepInfo> m_deps;

@@ -24,7 +24,7 @@
 
 namespace HPHP::hackc {
   struct ExternalDeclProviderResult;
-  struct DeclResult;
+  struct DeclsAndBlob;
 }
 
 namespace HPHP::Native {
@@ -51,6 +51,6 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   AutoloadMap::KindOf kind
 );
 
-hphp_fast_set<const hackc::DeclResult*> getAllBuiltinDecls();
+hphp_fast_set<const hackc::DeclsAndBlob*> getAllBuiltinDecls();
 
 } // namespace HPHP::Native

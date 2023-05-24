@@ -110,7 +110,7 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
     };
 
-    auto decl_result = hackc::direct_decl_parse(m_config, filename, text);
+    auto decl_result = hackc::direct_decl_parse_and_serialize(m_config, filename, text);
     ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
     auto const norm_filename =
@@ -119,7 +119,7 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
     auto const hash = SHA1{string_sha1(text)};
     m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});
 
-    // Insert decl_result into the cache, return DeclResult::decls,
+    // Insert decl_result into the cache, return DeclsAndBlob::decls,
     // a pointer to rust decls in m_cache.
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
     return hackc::ExternalDeclProviderResult::from_decls(it->second);

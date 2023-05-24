@@ -110,7 +110,7 @@ pub mod compile_ffi {
         hhvm_compat_mode: bool,
     }
 
-    pub struct DeclResult {
+    pub struct DeclsAndBlob {
         serialized: Vec<u8>,
         decls: Box<DeclsHolder>,
         has_errors: bool,
@@ -198,23 +198,24 @@ pub mod compile_ffi {
         /// Compile Hack source code to either HHAS or an error.
         fn compile_from_text(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
 
-        /// Invoke the hackc direct decl parser and return every shallow decl in the file.
-        fn direct_decl_parse(
+        /// Invoke the hackc direct decl parser and return every shallow decl in the file,
+        /// as well as a serialized blob holding the same content.
+        fn direct_decl_parse_and_serialize(
             config: &DeclParserConfig,
             filename: &CxxString,
             text: &CxxString,
-        ) -> DeclResult;
+        ) -> DeclsAndBlob;
 
         fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
-        fn type_exists(decls: &DeclResult, symbol: &str) -> bool;
+        fn type_exists(decls: &DeclsAndBlob, symbol: &str) -> bool;
 
         /// For testing: return true if deserializing produces the expected Decls.
-        fn verify_deserialization(decls: &DeclResult) -> bool;
+        fn verify_deserialization(decls: &DeclsAndBlob) -> bool;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts(decls: &DeclResult, sha1sum: &CxxString) -> FactsResult;
+        fn decls_to_facts(decls: &DeclsAndBlob, sha1sum: &CxxString) -> FactsResult;
 
         /// Serialize a FactsResult to JSON
         fn facts_to_json(facts: FactsResult, pretty: bool) -> String;
@@ -354,7 +355,7 @@ fn compile_from_text(
     Ok(output)
 }
 
-fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
+fn type_exists(result: &compile_ffi::DeclsAndBlob, symbol: &str) -> bool {
     // TODO T123158488: fix case insensitive lookups
     result
         .decls
@@ -364,11 +365,11 @@ fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
         .any(|(sym, _)| *sym == symbol)
 }
 
-pub fn direct_decl_parse(
+pub fn direct_decl_parse_and_serialize(
     config: &compile_ffi::DeclParserConfig,
     filename: &CxxString,
     text: &CxxString,
-) -> compile_ffi::DeclResult {
+) -> compile_ffi::DeclsAndBlob {
     let decl_opts = DeclParserOptions {
         auto_namespace_map: (config.aliased_namespaces.iter())
             .map(|e| (e.key.clone(), e.value.clone()))
@@ -390,7 +391,7 @@ pub fn direct_decl_parse(
     let parsed_file: ParsedFile<'static> =
         direct_decl_parser::parse_decls_for_bytecode(&decl_opts, filename, text, alloc);
 
-    compile_ffi::DeclResult {
+    compile_ffi::DeclsAndBlob {
         serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
         decls: Box::new(DeclsHolder {
             parsed_file,
@@ -400,7 +401,7 @@ pub fn direct_decl_parse(
     }
 }
 
-fn verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
+fn verify_deserialization(result: &compile_ffi::DeclsAndBlob) -> bool {
     let arena = bumpalo::Bump::new();
     let decls = decl_provider::deserialize_decls(&arena, &result.serialized).unwrap();
     decls == result.decls.parsed_file.decls
@@ -457,7 +458,7 @@ pub fn facts_to_json(facts_result: compile_ffi::FactsResult, pretty: bool) -> St
 }
 
 pub fn decls_to_facts(
-    decl_result: &compile_ffi::DeclResult,
+    decl_result: &compile_ffi::DeclsAndBlob,
     sha1sum: &CxxString,
 ) -> compile_ffi::FactsResult {
     if decl_result.has_errors {

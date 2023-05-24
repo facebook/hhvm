@@ -5615,7 +5615,7 @@ JitResumeAddr dispatchThreaded(bool coverage) {
   DEBUGGER_ATTACHED_ONLY(modes = modes | ExecMode::Debugger);
   auto target = lookup_cti(vmfp()->func(), vmpc());
   CALLEE_SAVED_BARRIER();
-  auto retAddr = unpackJitResumeAddr(g_enterCti(modes, target, rds::header()));
+  auto retAddr = unpackJitResumeAddr(g_enterCti(modes, target));
   CALLEE_SAVED_BARRIER();
   return retAddr;
 }
@@ -5844,8 +5844,7 @@ NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
 }
 
 template<Op opcode, bool repo_auth, bool breakOnCtlFlow, class Iop>
-PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
-           Iop iop) {
+PcPair run(TCA* returnaddr, ExecMode modes, PC nextpc, PC pc, Iop iop) {
   assert(vmpc() == pc);
   assert(peek_op(pc) == opcode);
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
@@ -5914,18 +5913,22 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
 // rax = target of indirect branch instr (call, switch, etc)
 // rdx = pc (passed as 3rd arg register, 2nd return register)
 // rbx = next-pc after branch instruction, only if isBranch(op)
-// r12 = rds::Header* (vmtl)
 // r13 = modes
 // r14 = location of return address to cti caller on native stack
 
 #ifdef __clang__
-#define DECLARE_FIXED(TL,MODES,RA)\
-  rds::Header* TL; asm volatile("mov %%r12, %0" : "=r"(TL) :: "r13", "r14");\
-  ExecMode MODES;  asm volatile("mov %%r13d, %0" : "=r"(MODES) :: "r14");\
-  TCA* RA;         asm volatile("mov %%r14, %0" : "=r"(RA) ::);
+#define DECLARE_FIXED(MODES,RA)\
+  ExecMode MODES;\
+  TCA* RA;\
+  asm volatile(\
+    "mov %%r13d, %0\n\t"\
+    "mov %%r14, %1"\
+    : "=r"(MODES), "=r"(RA)\
+    :\
+    : "r13", "r14"\
+    );
 #else
-#define DECLARE_FIXED(TL,MODES,RA)\
-  register rds::Header* TL asm("r12");\
+#define DECLARE_FIXED(MODES,RA)\
   register ExecMode MODES  asm("r13");\
   register TCA* RA         asm("r14");
 #endif
@@ -5934,15 +5937,15 @@ namespace cti {
 // generate cti::op call-threaded function for each opcode
 #define O(opcode, imm, push, pop, flags)\
 PcPair opcode(PC nextpc, TCA*, PC pc) {\
-  DECLARE_FIXED(tl, modes, returnaddr);\
+  DECLARE_FIXED(modes, returnaddr);\
   if (modes & ExecMode::BB) {\
-    return run<Op::opcode,true,true>(returnaddr, modes, tl, nextpc, pc,\
+    return run<Op::opcode,true,true>(returnaddr, modes, nextpc, pc,\
       [&](PC& pc) {\
         return iopWrap##opcode<true>(pc);\
       }\
     );\
   } else {\
-    return run<Op::opcode,true,false>(returnaddr, modes, tl, nextpc, pc,\
+    return run<Op::opcode,true,false>(returnaddr, modes, nextpc, pc,\
       [&](PC& pc) {\
         return iopWrap##opcode<false>(pc);\
       }\
@@ -5955,15 +5958,15 @@ OPCODES
 // generate debug/coverage-capable opcode bodies (for non-repo-auth)
 #define O(opcode, imm, push, pop, flags)\
 PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
-  DECLARE_FIXED(tl, modes, returnaddr);\
+  DECLARE_FIXED(modes, returnaddr);\
   if (modes & ExecMode::BB) {\
-    return run<Op::opcode,false,true>(returnaddr, modes, tl, nextpc, pc,\
+    return run<Op::opcode,false,true>(returnaddr, modes, nextpc, pc,\
       [&](PC& pc) {\
         return iopWrap##opcode<true>(pc);\
       }\
     );\
   } else {\
-    return run<Op::opcode,false,false>(returnaddr, modes, tl, nextpc, pc,\
+    return run<Op::opcode,false,false>(returnaddr, modes, nextpc, pc,\
       [&](PC& pc) {\
         return iopWrap##opcode<false>(pc);\
       }\

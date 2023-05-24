@@ -127,7 +127,6 @@ auto const next_ip  = rax;  // returned by opcodes with unpredictable targets
 auto const next_reg = rbx;  // for conditional branches
 auto const nextpc_arg = rdi; // for predicted calls
 auto const modes_arg = edi; // for updateCoverageModeThreaded
-auto const tl_reg = r12;
 auto const modes_reg = r13d;
 auto const ra_reg = r14;
 auto const next_ip_saved = r15;  // used when next_ip needs to be moved to a
@@ -262,12 +261,11 @@ void compile_cti_stubs() {
   X64Assembler a{bc_section};
 
   // pc is passed/returned in rdx, but we don't access it here
-  // g_enterCti(modes, {ip, pc}, rds::Header*)
-  //            edi    rsi  rdx  rcx           r8, r9 unused
+  // g_enterCti(modes, {ip, pc})
+  //            edi    rsi  rdx            rcx, r8, r9 unused
   g_enterCti = (EntryStub) a.frontier();
   a.push  (rbp);
   a.movq  (rsp, rbp);
-  a.movq  (rcx, tl_reg);
   a.movl  (edi, modes_reg);
   a.lea   (rbp[-8], ra_reg);
   a.jmp   (rsi);

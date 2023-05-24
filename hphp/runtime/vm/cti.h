@@ -41,7 +41,7 @@ enum class ExecMode : uint32_t { Normal=0, BB=1, Debugger=2, Coverage=4 };
 struct PcPair { CodeAddress ip; PC pc; };
 
 // signature for g_enterBytecode
-using EntryStub = uint64_t(*)(ExecMode, PcPair, rds::Header*);
+using EntryStub = uint64_t(*)(ExecMode, PcPair);
 
 inline ExecMode operator|(ExecMode m1, ExecMode m2) {
   return ExecMode(int(m1) | int(m2));

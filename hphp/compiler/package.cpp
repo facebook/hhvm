@@ -1137,7 +1137,7 @@ Package::UnitDecls IndexJob::run(
   }
 
   // Get Facts from Decls, then populate IndexMeta.
-  auto facts = hackc::decls_to_facts(decls, "");
+  auto facts = hackc::decls_to_facts(*decls.decls, "");
   auto summary = summary_of_facts(facts);
   s_indexMetas.emplace_back(summary);
   if (!RO::EvalEnableDecl) {

@@ -64,7 +64,7 @@ void registerBuiltinSymbols(
 
   auto decls = hackc::direct_decl_parse_and_serialize(options, name, contents);
   auto const facts = hackc::decls_to_facts(
-    decls,
+    *decls.decls,
     "" // This is *meant* to be the hash of the source file, but it's not used
   );
   auto const decls_ptr = std::make_shared<hackc::DeclsAndBlob>(std::move(decls));

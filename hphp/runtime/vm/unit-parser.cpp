@@ -363,7 +363,10 @@ ParseFactsResult extract_facts(
       auto const decls = hackc::direct_decl_parse_and_serialize(
         decl_config, filename, source_text
       );
-      auto const facts = hackc::decls_to_facts(decls, actual_sha1);
+      if (decls.has_errors) {
+        return FactsJSONString { "" };
+      }
+      auto const facts = hackc::decls_to_facts(*decls.decls, actual_sha1);
       rust::String json = hackc::facts_to_json(
           facts, /* pretty= */ false
       );

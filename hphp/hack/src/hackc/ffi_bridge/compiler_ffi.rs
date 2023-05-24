@@ -182,7 +182,6 @@ pub mod compile_ffi {
     pub struct FactsResult {
         facts: Facts,
         sha1sum: String,
-        has_errors: bool,
     }
 
     extern "Rust" {
@@ -209,13 +208,13 @@ pub mod compile_ffi {
         fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
-        fn type_exists(decls: &DeclsAndBlob, symbol: &str) -> bool;
+        fn type_exists(decls: &DeclsHolder, symbol: &str) -> bool;
 
         /// For testing: return true if deserializing produces the expected Decls.
         fn verify_deserialization(decls: &DeclsAndBlob) -> bool;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts(decls: &DeclsAndBlob, sha1sum: &CxxString) -> FactsResult;
+        fn decls_to_facts(decls: &DeclsHolder, sha1sum: &CxxString) -> FactsResult;
 
         /// Serialize a FactsResult to JSON
         fn facts_to_json(facts: FactsResult, pretty: bool) -> String;
@@ -355,10 +354,9 @@ fn compile_from_text(
     Ok(output)
 }
 
-fn type_exists(result: &compile_ffi::DeclsAndBlob, symbol: &str) -> bool {
+fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
     // TODO T123158488: fix case insensitive lookups
-    result
-        .decls
+    holder
         .parsed_file
         .decls
         .types()
@@ -449,30 +447,14 @@ fn compile_unit_from_text(
 }
 
 pub fn facts_to_json(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
-    if facts_result.has_errors {
-        String::new()
-    } else {
-        let facts = facts::Facts::from(facts_result.facts);
-        facts.to_json(pretty, &facts_result.sha1sum)
-    }
+    let facts = facts::Facts::from(facts_result.facts);
+    facts.to_json(pretty, &facts_result.sha1sum)
 }
 
-pub fn decls_to_facts(
-    decl_result: &compile_ffi::DeclsAndBlob,
-    sha1sum: &CxxString,
-) -> compile_ffi::FactsResult {
-    if decl_result.has_errors {
-        compile_ffi::FactsResult {
-            has_errors: true,
-            ..Default::default()
-        }
-    } else {
-        let facts =
-            compile_ffi::Facts::from(facts::Facts::from_decls(&decl_result.decls.parsed_file));
-        compile_ffi::FactsResult {
-            facts,
-            sha1sum: sha1sum.to_string_lossy().to_string(),
-            has_errors: false,
-        }
+fn decls_to_facts(holder: &DeclsHolder, sha1sum: &CxxString) -> compile_ffi::FactsResult {
+    let facts = facts::Facts::from_decls(&holder.parsed_file);
+    compile_ffi::FactsResult {
+        facts: compile_ffi::Facts::from(facts),
+        sha1sum: sha1sum.to_string_lossy().to_string(),
     }
 }

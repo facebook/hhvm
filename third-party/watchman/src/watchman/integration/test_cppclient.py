@@ -21,6 +21,7 @@ TEST_BINARY = (
 )
 
 
+@unittest.skipIf(os.name == "nt", "cppclient doesn't run on Windows")
 class TestCppClient(unittest.TestCase):
     def setUp(self) -> None:
         self.tmpDirCtx = tempfile.TemporaryDirectory()  # noqa P201

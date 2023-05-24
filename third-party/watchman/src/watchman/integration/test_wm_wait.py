@@ -7,11 +7,13 @@
 import os
 import subprocess
 import sys
+import unittest
 
 from watchman.integration.lib import WatchmanTestCase
 
 
 @WatchmanTestCase.expand_matrix
+@unittest.skipIf(os.name == "nt", "Doesn't run on Windows")
 class TestWatchmanWait(WatchmanTestCase.WatchmanTestCase):
     def requiresPersistentSession(self) -> bool:
         return True

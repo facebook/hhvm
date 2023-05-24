@@ -97,8 +97,8 @@ int main(int argc, char** argv) {
     }
     dynamic relative_query = dynamic::object("fields", dynamic::array("name"))(
         "expression",
-        dynamic::array("name", empty_file_relative_path.native()));
-    auto subdir_ptr = c.watch(subdir.path().native()).get();
+        dynamic::array("name", empty_file_relative_path.string()));
+    auto subdir_ptr = c.watch(subdir.path().string()).get();
     auto result = c.query(relative_query, subdir_ptr).get();
     if (result.raw_["files"].empty()) {
       LOG(ERROR) << "FAIL: No files found in " << folly::toJson(result.raw_);

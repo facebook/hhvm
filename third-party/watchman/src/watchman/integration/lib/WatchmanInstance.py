@@ -258,11 +258,14 @@ class _Instance(object):
             time.sleep(0.03)
         return False
 
+    def _susresBinary(self) -> str:
+        return os.environ.get("WATCHMAN_SUSRES", "susres.exe")
+
     def suspend(self) -> None:
         if self.proc.poll() or self.pid <= 1:
             raise Exception("watchman process isn't running")
         if os.name == "nt":
-            subprocess.check_call(["susres.exe", "suspend", str(self.pid)])
+            subprocess.check_call([self._susresBinary(), "suspend", str(self.pid)])
         else:
             os.kill(self.pid, signal.SIGSTOP)
 
@@ -273,7 +276,7 @@ class _Instance(object):
         if self.proc.poll() or self.pid <= 1:
             raise Exception("watchman process isn't running")
         if os.name == "nt":
-            subprocess.check_call(["susres.exe", "resume", str(self.pid)])
+            subprocess.check_call([self._susresBinary(), "resume", str(self.pid)])
         else:
             os.kill(self.pid, signal.SIGCONT)
 

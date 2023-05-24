@@ -25,58 +25,58 @@
 // template specifications for thrift struct
 
 template <>
-thrift::benchmark::Empty create<thrift::benchmark::Empty>() {
+inline thrift::benchmark::Empty create<thrift::benchmark::Empty>() {
   return thrift::benchmark::Empty();
 }
 
 template <>
-thrift::benchmark::SmallInt create<thrift::benchmark::SmallInt>() {
+inline thrift::benchmark::SmallInt create<thrift::benchmark::SmallInt>() {
   thrift::benchmark::SmallInt d;
   *d.smallint_ref() = 5;
   return d;
 }
 
 template <>
-thrift::benchmark::BigInt create<thrift::benchmark::BigInt>() {
+inline thrift::benchmark::BigInt create<thrift::benchmark::BigInt>() {
   thrift::benchmark::BigInt d;
   *d.bigint_ref() = 0x1234567890abcdefL;
   return d;
 }
 
 template <>
-thrift::benchmark::SmallString create<thrift::benchmark::SmallString>() {
+inline thrift::benchmark::SmallString create<thrift::benchmark::SmallString>() {
   thrift::benchmark::SmallString d;
   *d.str_ref() = "small string";
   return d;
 }
 
 template <>
-thrift::benchmark::BigString create<thrift::benchmark::BigString>() {
+inline thrift::benchmark::BigString create<thrift::benchmark::BigString>() {
   thrift::benchmark::BigString d;
-  *d.str_ref() = std::string(10000, 'a');
+  *d.str_ref() = std::string(10'000, 'a');
   return d;
 }
 
 template <>
-thrift::benchmark::BigBinary create<thrift::benchmark::BigBinary>() {
-  auto buf = folly::IOBuf::create(10000);
-  buf->append(10000);
+inline thrift::benchmark::BigBinary create<thrift::benchmark::BigBinary>() {
+  auto buf = folly::IOBuf::create(10'000);
+  buf->append(10'000);
   thrift::benchmark::BigBinary d;
   *d.bin_ref() = std::move(buf);
   return d;
 }
 
 template <>
-thrift::benchmark::LargeBinary create<thrift::benchmark::LargeBinary>() {
-  auto buf = folly::IOBuf::create(10000000);
-  buf->append(10000000);
+inline thrift::benchmark::LargeBinary create<thrift::benchmark::LargeBinary>() {
+  auto buf = folly::IOBuf::create(10'000'000);
+  buf->append(10'000'000);
   thrift::benchmark::LargeBinary d;
   *d.bin_ref() = std::move(buf);
   return d;
 }
 
 template <>
-thrift::benchmark::Mixed create<thrift::benchmark::Mixed>() {
+inline thrift::benchmark::Mixed create<thrift::benchmark::Mixed>() {
   thrift::benchmark::Mixed d;
   *d.int32_ref() = 5;
   *d.int64_ref() = 12345;
@@ -86,7 +86,8 @@ thrift::benchmark::Mixed create<thrift::benchmark::Mixed>() {
 }
 
 template <>
-thrift::benchmark::SmallListInt create<thrift::benchmark::SmallListInt>() {
+inline thrift::benchmark::SmallListInt
+create<thrift::benchmark::SmallListInt>() {
   std::srand(1);
   std::vector<int> vec;
   for (int i = 0; i < 10; i++) {
@@ -98,10 +99,10 @@ thrift::benchmark::SmallListInt create<thrift::benchmark::SmallListInt>() {
 }
 
 template <>
-thrift::benchmark::BigListInt create<thrift::benchmark::BigListInt>() {
+inline thrift::benchmark::BigListInt create<thrift::benchmark::BigListInt>() {
   std::srand(1);
   std::vector<int> vec;
-  for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 10'000; i++) {
     vec.push_back(std::rand());
   }
   thrift::benchmark::BigListInt d;
@@ -110,25 +111,27 @@ thrift::benchmark::BigListInt create<thrift::benchmark::BigListInt>() {
 }
 
 template <>
-thrift::benchmark::BigListMixed create<thrift::benchmark::BigListMixed>() {
+inline thrift::benchmark::BigListMixed
+create<thrift::benchmark::BigListMixed>() {
   std::vector<thrift::benchmark::Mixed> vec(
-      10000, create<thrift::benchmark::Mixed>());
+      10'000, create<thrift::benchmark::Mixed>());
   thrift::benchmark::BigListMixed d;
   *d.lst_ref() = std::move(vec);
   return d;
 }
 
 template <>
-thrift::benchmark::LargeListMixed create<thrift::benchmark::LargeListMixed>() {
+inline thrift::benchmark::LargeListMixed
+create<thrift::benchmark::LargeListMixed>() {
   std::vector<thrift::benchmark::Mixed> vec(
-      1000000, create<thrift::benchmark::Mixed>());
+      1'000'000, create<thrift::benchmark::Mixed>());
   thrift::benchmark::LargeListMixed d;
   *d.lst_ref() = std::move(vec);
   return d;
 }
 
 template <>
-thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
+inline thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
   std::srand(1);
   thrift::benchmark::LargeSetInt l;
   for (int i = 0; i < 1'000'000; i++) {
@@ -138,17 +141,18 @@ thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
 }
 
 template <>
-thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
+inline thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
   std::srand(1);
   thrift::benchmark::LargeMapInt l;
-  for (int i = 0; i < 1000000; i++) {
+  for (int i = 0; i < 1'000'000; i++) {
     l.m_ref()[i] = std::rand();
   }
   return l;
 }
 
 template <>
-thrift::benchmark::NestedMapRaw create<thrift::benchmark::NestedMapRaw>() {
+inline thrift::benchmark::NestedMapRaw
+create<thrift::benchmark::NestedMapRaw>() {
   thrift::benchmark::NestedMapRaw map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
     map.m_ref()[i][j][k][l][m] = v;
@@ -157,7 +161,7 @@ thrift::benchmark::NestedMapRaw create<thrift::benchmark::NestedMapRaw>() {
 }
 
 template <>
-thrift::benchmark::SortedVecNestedMapRaw
+inline thrift::benchmark::SortedVecNestedMapRaw
 create<thrift::benchmark::SortedVecNestedMapRaw>() {
   thrift::benchmark::SortedVecNestedMapRaw map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
@@ -167,7 +171,7 @@ create<thrift::benchmark::SortedVecNestedMapRaw>() {
 }
 
 template <>
-thrift::benchmark::NestedMap create<thrift::benchmark::NestedMap>() {
+inline thrift::benchmark::NestedMap create<thrift::benchmark::NestedMap>() {
   thrift::benchmark::NestedMap map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
     map.m_ref()[i].m_ref()[j].m_ref()[k].m_ref()[l].m_ref()[m] = v;
@@ -176,7 +180,7 @@ thrift::benchmark::NestedMap create<thrift::benchmark::NestedMap>() {
 }
 
 template <>
-thrift::benchmark::SortedVecNestedMap
+inline thrift::benchmark::SortedVecNestedMap
 create<thrift::benchmark::SortedVecNestedMap>() {
   thrift::benchmark::SortedVecNestedMap map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
@@ -186,7 +190,7 @@ create<thrift::benchmark::SortedVecNestedMap>() {
 }
 
 template <>
-thrift::benchmark::LargeMixed create<thrift::benchmark::LargeMixed>() {
+inline thrift::benchmark::LargeMixed create<thrift::benchmark::LargeMixed>() {
   thrift::benchmark::LargeMixed d;
   *d.var1_ref() = 5;
   *d.var2_ref() = 12345;
@@ -292,7 +296,7 @@ thrift::benchmark::LargeMixed create<thrift::benchmark::LargeMixed>() {
 }
 
 template <>
-thrift::benchmark::MixedInt create<thrift::benchmark::MixedInt>() {
+inline thrift::benchmark::MixedInt create<thrift::benchmark::MixedInt>() {
   std::srand(1);
   thrift::benchmark::MixedInt d;
   *d.var1_ref() = std::rand();
@@ -311,17 +315,18 @@ thrift::benchmark::MixedInt create<thrift::benchmark::MixedInt>() {
 }
 
 template <>
-thrift::benchmark::BigListMixedInt
+inline thrift::benchmark::BigListMixedInt
 create<thrift::benchmark::BigListMixedInt>() {
   std::vector<thrift::benchmark::MixedInt> vec(
-      10000, create<thrift::benchmark::MixedInt>());
+      10'000, create<thrift::benchmark::MixedInt>());
   thrift::benchmark::BigListMixedInt d;
   *d.lst_ref() = std::move(vec);
   return d;
 }
 
 template <>
-thrift::benchmark::ComplexStruct create<thrift::benchmark::ComplexStruct>() {
+inline thrift::benchmark::ComplexStruct
+create<thrift::benchmark::ComplexStruct>() {
   thrift::benchmark::ComplexStruct d;
   *d.var1_ref() = create<thrift::benchmark::Empty>();
   *d.var2_ref() = create<thrift::benchmark::SmallInt>();

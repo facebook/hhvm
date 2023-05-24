@@ -5,6 +5,90 @@ Thrift Patch implementation **must** contain 2 parts.
 1. Functionalities of apply/merge without schema.
 2. User-friendly APIs to create/modify/read the patch. Patch created/modified by these APIs must always be valid. User should not interactive with the raw patch struct directly.
 
+## The High-level Implementation Of Thrift Patch
+
+Thrift Patch describes how Thrift value is mutated. Logically, it's a list of operations where each operation describes a single change to the Thrift value.
+
+Thrift Patch is implemented in an unconventional way — it’s a fixed-length list of operations and the type of operations are pre-arranged in a way that we can merge two patches into a single patch.
+
+For example, if `SetPatch` contains two types of operations — adding an element or removing an element, it can be implemented this way in C++.
+
+```cpp
+template<class E>
+class SetPatch {
+ private:
+  enum class Op { Add, Remove };
+  std::vector<std::pair<Op, E>> operations_;
+
+ public:
+  void add(E e) { operations_.emplace_back(Op::Add, e); }
+  void remove(E e) { operations_.emplace_back(Op::Remove, e); }
+  void apply(std::set<E>& v) {
+    for (auto [op, e]: operations_) {
+      op == Op::Add ? v.insert(e) : v.erase(e);
+    }
+  }
+}
+```
+
+So that we can loop over all operations and apply them to an actual set. However, the Thrift Patch implementation is similar to this:
+
+```cpp
+template<class E>
+class SetPatch {
+ private:
+  std::set<E> add_, remove_;
+
+ public:
+  void add(E e) { remove_.erase(e), add_.insert(e); }
+  void remove(E e) { add_.erase(e), remove_.insert(e); }
+  void apply(std::set<E>& v) {
+    for (auto i: add_) { v.insert(i); }
+    for (auto i: remove_) { v.erase(i); }
+  }
+}
+```
+
+:::note
+
+This is a high-level illustration. It is not the actual implementation.
+
+:::
+
+It only has two operations — inserting elements, and then removing elements. It doesn't use a list, but it has the same behavior as previous implementation. This is how Patch should be implemented in all languages.
+
+* **Pros**: In general, this provides better performance. In fact, for Numeric Types (integers and float pointers), the patch is guaranteed to have `O(1)` time/space when applying it, regardless how many operations we have.
+* **Cons**: We cannot create an arbitrary new operation. Any new operation we have added must be compatible with all existing ones. Basically, when a user adds an operation to the Patch, we need to be able swap them to the desired order without relying on the patched data (when creating the patch, we don’t know the patched data yet).
+
+For example, in the case above, the desired order is `add` elements first, then `remove` elements.
+
+If a user wants `remove(foo)` first, then `add(bar)`, we can reorder to `add(bar)`, then `remove(foo - bar)`, which is the desired order without changing the behvaior.
+
+Now consider if we want to create a new operation -- `remove_smallest()` -- that removes the smallest element in the set. We cannot add such operation without changing existing ones, since this operation is not compatible with `add`. We cannot swap `add(foo)` and `remove_smallest()` (as we do not know whether the smallest element is in `foo`, or the original list), vice versa. If we used the alternative approach to implement Patch as a list of operations, we wouldn't have the problem to create such new operation.
+
+On the other hand, if we want to create a new operation -- `clear()` -- that removes all elements, both `add(foo), clear()` and `remove(foo), clear()` can be replaced by just `clear()`, since once we cleared everything, it doesn't matter what we added/removed. We can change the implementation to
+
+```cpp
+template<class E>
+class SetPatch {
+ private:
+  bool clear_;
+  std::set<E> add_, remove_;
+
+ public:
+  void add(E e) { remove_.erase(e), add_.insert(e); }
+  void remove(E e) { add_.erase(e), remove_.insert(e); }
+  void clear() { add_.clear(), remove_.clear(), clear_ = true; }
+  void apply(std::set<E>& v) {
+    if (clear_) { v.clear(); }
+    for (auto i: add_) { v.insert(i); }
+    for (auto i: remove_) { v.erase(i); }
+  }
+}
+```
+
+The `clear` operation must be applied first, otherwise it won't work (Why? `add(foo), clear()` can be replaced with `clear(), add({})`, but `clear(), add(foo)` cannot be replaced with `add(something), clear()`).
+
 ## Patch Representation
 
 :::info

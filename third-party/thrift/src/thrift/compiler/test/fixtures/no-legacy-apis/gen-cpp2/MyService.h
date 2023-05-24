@@ -10,7 +10,6 @@
 
 #include "thrift/compiler/test/fixtures/no-legacy-apis/gen-cpp2/MyServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/no-legacy-apis/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_types.h"
 
 namespace folly {
   class IOBuf;

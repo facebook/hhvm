@@ -23,7 +23,6 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types
 import module.thrift_metadata
-import facebook.thrift.annotation.thrift.thrift_types
 
 class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
     @staticmethod

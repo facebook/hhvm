@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_metadata.h"
 
 
 namespace apache {

@@ -168,13 +168,13 @@ class mstch_go_program : public mstch_program {
   mstch::node go_gen_compat_setters() { return data_.compat_setters; }
   mstch::node thrift_imports() {
     mstch::array a;
-    for (const auto* program : program_->get_included_programs()) {
+    for (const auto* program : program_->get_includes_for_codegen()) {
       a.push_back(make_mstch_program_cached(program, context_));
     }
     return a;
   }
   mstch::node has_thrift_imports() {
-    return !program_->get_included_programs().empty();
+    return !program_->get_includes_for_codegen().empty();
   }
   mstch::node go_import_path() {
     return go::get_go_package_dir(program_, data_.package_override);
@@ -743,7 +743,7 @@ void t_mstch_go_generator::set_mstch_factories() {
 
 void t_mstch_go_generator::set_go_package_aliases() {
   auto program = get_program();
-  auto includes = program->get_included_programs();
+  auto includes = program->get_includes_for_codegen();
 
   // Prevent collisions with *this* program's package name
   auto pkg_name = go::get_go_package_base_name(program, data_.package_override);

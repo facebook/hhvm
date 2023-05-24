@@ -216,7 +216,7 @@ class python_mstch_program : public mstch_program {
 
   void gather_included_program_namespaces() {
     for (const t_program* included_program :
-         program_->get_included_programs()) {
+         program_->get_includes_for_codegen()) {
       bool has_types =
           !(included_program->objects().empty() &&
             included_program->enums().empty() &&

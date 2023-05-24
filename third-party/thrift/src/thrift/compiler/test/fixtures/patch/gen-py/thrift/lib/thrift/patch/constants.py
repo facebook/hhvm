@@ -16,9 +16,6 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.thrift.ttypes
-import thrift.annotation.scope.ttypes
-import thrift.annotation.cpp.ttypes
 import thrift.lib.thrift.standard.ttypes
 
 

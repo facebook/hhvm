@@ -15,9 +15,3 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/AdapterService.tcc"
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/cpp_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/python_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/scope_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/hack_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/rust_types_custom_protocol.h"

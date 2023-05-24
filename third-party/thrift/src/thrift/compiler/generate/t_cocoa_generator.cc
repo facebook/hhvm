@@ -346,7 +346,8 @@ std::string t_cocoa_generator::cocoa_thrift_imports() {
   }
 
   // Include other Thrift includes
-  const std::vector<t_program*>& includes = program_->get_included_programs();
+  const std::vector<t_program*>& includes =
+      program_->get_includes_for_codegen();
   for (size_t i = 0; i < includes.size(); ++i) {
     result += "#import \"" + includes[i]->name() + ".h\"" + "\n";
   }

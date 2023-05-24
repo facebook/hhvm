@@ -26,7 +26,6 @@ from thrift.py3.client cimport cClientWrapper
 
 cimport test.fixtures.nolegacy.module.types as _test_fixtures_nolegacy_module_types
 
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
 cdef extern from "thrift/compiler/test/fixtures/nolegacy/src/gen-cpp2/module_clients.h" namespace "::test::fixtures::nolegacy":
   cdef cppclass cMyServiceAsyncClient "::test::fixtures::nolegacy::MyServiceAsyncClient":

@@ -16,5 +16,4 @@
 
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/internal_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types_custom_protocol.h"

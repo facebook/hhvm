@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	cpp0 "thrift/annotation/cpp"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = cpp0.GoUnusedProtection__
 var MyStruct *MyStruct
 
 func init() {

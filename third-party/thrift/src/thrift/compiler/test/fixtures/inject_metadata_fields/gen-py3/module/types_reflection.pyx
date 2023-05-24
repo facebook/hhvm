@@ -14,7 +14,6 @@ from thrift.py3.reflection cimport (
     Qualifier as __Qualifier,
 )
 
-cimport facebook.thrift.annotation.internal.types as _facebook_thrift_annotation_internal_types
 cimport foo.types as _foo_types
 
 cimport module.types as _module_types

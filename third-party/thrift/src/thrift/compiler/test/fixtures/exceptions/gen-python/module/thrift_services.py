@@ -18,7 +18,6 @@ from thrift.python.server import ServiceInterface, oneway, PythonUserException
 
 import module.thrift_types
 import module.thrift_metadata
-import facebook.thrift.annotation.thrift.thrift_types
 
 class RaiserInterface(
     ServiceInterface,

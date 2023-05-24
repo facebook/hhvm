@@ -16,8 +16,6 @@ import apache.thrift.op.patch.thrift_types
 
 import apache.thrift.type.standard.thrift_types
 
-import facebook.thrift.annotation.thrift.thrift_types
-
 
 class MyData(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (

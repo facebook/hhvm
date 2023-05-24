@@ -20,8 +20,6 @@ from fbcode.thrift.python.server import ServiceInterface, oneway, PythonUserExce
 
 import module.thrift_types
 import module.thrift_metadata
-import facebook.thrift.annotation.cpp.thrift_types
-import facebook.thrift.annotation.python.thrift_types
 
 class SimpleServiceInterface(
     ServiceInterface,

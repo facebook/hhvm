@@ -13,7 +13,6 @@ import typing as _typing
 from types import TracebackType
 
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
 
 _MyServiceT = _typing.TypeVar('_MyServiceT', bound='MyService')

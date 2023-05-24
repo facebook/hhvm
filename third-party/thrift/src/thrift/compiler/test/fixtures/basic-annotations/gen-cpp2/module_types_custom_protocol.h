@@ -16,4 +16,3 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/cpp_types_custom_protocol.h"

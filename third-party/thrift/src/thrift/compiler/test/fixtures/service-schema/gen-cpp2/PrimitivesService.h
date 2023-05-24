@@ -10,7 +10,6 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_types.h"
 #include "thrift/lib/thrift/gen-cpp2/schema_types.h"
 
 namespace folly {

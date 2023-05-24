@@ -13,7 +13,6 @@ from thrift.py3.reflection cimport (
 
 import folly.iobuf as _fbthrift_iobuf
 
-cimport facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 

@@ -18,5 +18,3 @@
 
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/reflection_dep_B_types_custom_protocol.h"
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/reflection_dep_C_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/cpp_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

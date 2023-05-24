@@ -12,10 +12,6 @@ import __static__
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 
-import facebook.thrift.annotation.cpp.thrift_metadata
-
-import facebook.thrift.annotation.python.thrift_metadata
-
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_exception_SimpleException(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

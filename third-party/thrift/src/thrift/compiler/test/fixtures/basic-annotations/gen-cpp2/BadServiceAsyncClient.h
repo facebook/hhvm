@@ -9,7 +9,6 @@
 #include <thrift/lib/cpp2/gen/client_h.h>
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>

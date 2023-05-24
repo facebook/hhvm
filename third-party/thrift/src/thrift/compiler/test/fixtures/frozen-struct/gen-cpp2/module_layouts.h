@@ -8,8 +8,6 @@
 
 #include <thrift/lib/cpp2/frozen/Frozen.h>
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_layouts.h"
-#include "thrift/annotation/gen-cpp2/thrift_layouts.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_layouts.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_layouts.h"
 namespace apache { namespace thrift { namespace frozen {

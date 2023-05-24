@@ -11,7 +11,6 @@ pub mod types;
 
 #[doc(hidden)]
 pub mod dependencies {
-    pub use hack as hack;
 }
 
 pub mod services {

@@ -16,8 +16,6 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.hack.ttypes
-
 
 from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, MyDataItem, MyUnion, ReservedKeyword, UnionToBeRenamed
 

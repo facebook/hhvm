@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	cpp0 "thrift/annotation/cpp"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = cpp0.GoUnusedProtection__
 type MyService interface {
   Ping() (err error)
   GetRandomData() (_r string, err error)
@@ -523,22 +520,22 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
-  self2 := &MyServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self2.processorMap["ping"] = &myServiceProcessorPing{handler:handler}
-  self2.processorMap["getRandomData"] = &myServiceProcessorGetRandomData{handler:handler}
-  self2.processorMap["hasDataById"] = &myServiceProcessorHasDataById{handler:handler}
-  self2.processorMap["getDataById"] = &myServiceProcessorGetDataById{handler:handler}
-  self2.processorMap["putDataById"] = &myServiceProcessorPutDataById{handler:handler}
-  self2.processorMap["lobDataById"] = &myServiceProcessorLobDataById{handler:handler}
-  self2.processorMap["doNothing"] = &myServiceProcessorDoNothing{handler:handler}
-  self2.functionServiceMap["ping"] = "MyService"
-  self2.functionServiceMap["getRandomData"] = "MyService"
-  self2.functionServiceMap["hasDataById"] = "MyService"
-  self2.functionServiceMap["getDataById"] = "MyService"
-  self2.functionServiceMap["putDataById"] = "MyService"
-  self2.functionServiceMap["lobDataById"] = "MyService"
-  self2.functionServiceMap["doNothing"] = "MyService"
-  return self2
+  self1 := &MyServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self1.processorMap["ping"] = &myServiceProcessorPing{handler:handler}
+  self1.processorMap["getRandomData"] = &myServiceProcessorGetRandomData{handler:handler}
+  self1.processorMap["hasDataById"] = &myServiceProcessorHasDataById{handler:handler}
+  self1.processorMap["getDataById"] = &myServiceProcessorGetDataById{handler:handler}
+  self1.processorMap["putDataById"] = &myServiceProcessorPutDataById{handler:handler}
+  self1.processorMap["lobDataById"] = &myServiceProcessorLobDataById{handler:handler}
+  self1.processorMap["doNothing"] = &myServiceProcessorDoNothing{handler:handler}
+  self1.functionServiceMap["ping"] = "MyService"
+  self1.functionServiceMap["getRandomData"] = "MyService"
+  self1.functionServiceMap["hasDataById"] = "MyService"
+  self1.functionServiceMap["getDataById"] = "MyService"
+  self1.functionServiceMap["putDataById"] = "MyService"
+  self1.functionServiceMap["lobDataById"] = "MyService"
+  self1.functionServiceMap["doNothing"] = "MyService"
+  return self1
 }
 
 type myServiceProcessorPing struct {

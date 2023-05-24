@@ -18,7 +18,6 @@ from thrift.python.server import ServiceInterface, oneway, PythonUserException
 
 import test.fixtures.basic.module.thrift_types
 import test.fixtures.basic.module.thrift_metadata
-import facebook.thrift.annotation.hack.thrift_types
 
 class FooServiceInterface(
     ServiceInterface,

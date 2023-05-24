@@ -442,7 +442,7 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node thrift_includes() {
     mstch::array a;
-    for (const auto* program : program_->get_included_programs()) {
+    for (const auto* program : program_->get_includes_for_codegen()) {
       a.push_back(make_mstch_program_cached(program, context_));
     }
     return a;
@@ -698,7 +698,8 @@ class cpp_mstch_service : public mstch_service {
   }
   mstch::node thrift_includes() {
     mstch::array a;
-    for (const auto* program : service_->program()->get_included_programs()) {
+    for (const auto* program :
+         service_->program()->get_includes_for_codegen()) {
       a.push_back(make_mstch_program_cached(program, context_));
     }
     return a;

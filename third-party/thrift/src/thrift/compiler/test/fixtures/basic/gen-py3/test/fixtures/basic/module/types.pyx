@@ -54,8 +54,6 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
-cimport facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
-import facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
 
 cimport test.fixtures.basic.module.types_reflection as _types_reflection
 

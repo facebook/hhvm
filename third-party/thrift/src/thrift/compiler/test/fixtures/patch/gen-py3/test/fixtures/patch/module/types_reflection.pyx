@@ -14,7 +14,6 @@ from thrift.py3.reflection cimport (
     Qualifier as __Qualifier,
 )
 
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 

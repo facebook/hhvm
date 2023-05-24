@@ -26,7 +26,6 @@ from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
 
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 
 cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":

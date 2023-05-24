@@ -16,4 +16,3 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

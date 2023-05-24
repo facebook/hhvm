@@ -16,8 +16,6 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.thrift.ttypes
-
 
 from .ttypes import UTF8STRINGS, Metasyntactic, MyEnum1, MyEnum2, MyEnum3, MyEnum4, MyBitmaskEnum1, MyBitmaskEnum2, SomeStruct, MyStruct
 

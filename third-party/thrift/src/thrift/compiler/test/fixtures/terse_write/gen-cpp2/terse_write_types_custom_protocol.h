@@ -16,6 +16,3 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/cpp_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/hack_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

@@ -11,8 +11,6 @@ from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 _SomeServiceInterfaceT = _typing.TypeVar('_SomeServiceInterfaceT', bound='SomeServiceInterface')

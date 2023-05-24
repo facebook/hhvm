@@ -8,12 +8,10 @@ import (
     "context"
     "fmt"
 
-    hack "thrift/annotation/hack"
 
     "thrift/lib/go/thrift"
 )
 
-var _ = hack.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background

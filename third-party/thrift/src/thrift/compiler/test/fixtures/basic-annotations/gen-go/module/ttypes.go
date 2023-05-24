@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	cpp0 "thrift/annotation/cpp"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = cpp0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type MyEnum int64
@@ -666,13 +663,13 @@ func (p *MyStruct)  ReadField8(iprot thrift.Protocol) error {
   tSlice := make([]string, 0, size)
   p.CppTypeAnnotation =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem1 string
+    var _elem0 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem0 = v
     }
-    p.CppTypeAnnotation = append(p.CppTypeAnnotation, _elem1)
+    p.CppTypeAnnotation = append(p.CppTypeAnnotation, _elem0)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)

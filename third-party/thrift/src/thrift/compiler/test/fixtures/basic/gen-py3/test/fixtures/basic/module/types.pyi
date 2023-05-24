@@ -14,7 +14,6 @@ from typing_extensions import Final
 
 import sys
 import itertools
-import facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
 
 
 __property__ = property

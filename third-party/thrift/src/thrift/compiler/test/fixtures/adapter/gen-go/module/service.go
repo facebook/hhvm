@@ -10,13 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	cpp0 "thrift/annotation/cpp"
-	python1 "thrift/annotation/python"
-	thrift2 "thrift/annotation/thrift"
-	scope3 "thrift/annotation/scope"
-	hack4 "thrift/annotation/hack"
-	rust5 "thrift/annotation/rust"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -26,12 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = cpp0.GoUnusedProtection__
-var _ = python1.GoUnusedProtection__
-var _ = thrift2.GoUnusedProtection__
-var _ = scope3.GoUnusedProtection__
-var _ = hack4.GoUnusedProtection__
-var _ = rust5.GoUnusedProtection__
 type Service interface {
   // Parameters:
   //  - Arg1
@@ -234,10 +221,10 @@ func (p *ServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
-  self30 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self30.processorMap["func"] = &serviceProcessorFunc{handler:handler}
-  self30.functionServiceMap["func"] = "Service"
-  return self30
+  self24 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self24.processorMap["func"] = &serviceProcessorFunc{handler:handler}
+  self24.functionServiceMap["func"] = "Service"
+  return self24
 }
 
 type serviceProcessorFunc struct {

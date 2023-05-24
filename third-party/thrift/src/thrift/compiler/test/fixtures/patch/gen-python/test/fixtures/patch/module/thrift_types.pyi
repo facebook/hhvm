@@ -20,8 +20,6 @@ import apache.thrift.op.patch.thrift_types
 
 import apache.thrift.type.standard.thrift_types
 
-import facebook.thrift.annotation.thrift.thrift_types
-
 
 class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue0: MyEnum = ...

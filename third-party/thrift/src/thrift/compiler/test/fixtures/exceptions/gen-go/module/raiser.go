@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	thrift0 "thrift/annotation/thrift"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = thrift0.GoUnusedProtection__
 type Raiser interface {
   DoBland() (err error)
   DoRaise() (err error)
@@ -379,16 +376,16 @@ func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
-  self1 := &RaiserProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self1.processorMap["doBland"] = &raiserProcessorDoBland{handler:handler}
-  self1.processorMap["doRaise"] = &raiserProcessorDoRaise{handler:handler}
-  self1.processorMap["get200"] = &raiserProcessorGet200{handler:handler}
-  self1.processorMap["get500"] = &raiserProcessorGet500{handler:handler}
-  self1.functionServiceMap["doBland"] = "Raiser"
-  self1.functionServiceMap["doRaise"] = "Raiser"
-  self1.functionServiceMap["get200"] = "Raiser"
-  self1.functionServiceMap["get500"] = "Raiser"
-  return self1
+  self0 := &RaiserProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self0.processorMap["doBland"] = &raiserProcessorDoBland{handler:handler}
+  self0.processorMap["doRaise"] = &raiserProcessorDoRaise{handler:handler}
+  self0.processorMap["get200"] = &raiserProcessorGet200{handler:handler}
+  self0.processorMap["get500"] = &raiserProcessorGet500{handler:handler}
+  self0.functionServiceMap["doBland"] = "Raiser"
+  self0.functionServiceMap["doRaise"] = "Raiser"
+  self0.functionServiceMap["get200"] = "Raiser"
+  self0.functionServiceMap["get500"] = "Raiser"
+  return self0
 }
 
 type raiserProcessorDoBland struct {

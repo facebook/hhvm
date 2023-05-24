@@ -49,8 +49,6 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
 cimport test.fixtures.basic.module.services_reflection as _services_reflection
 

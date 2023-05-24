@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	scope0 "thrift/annotation/scope"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = scope0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 // Attributes:
@@ -215,13 +212,13 @@ func (p *Derive)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]string, 0, size)
   p.Derives =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem1 string
+    var _elem0 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem0 = v
     }
-    p.Derives = append(p.Derives, _elem1)
+    p.Derives = append(p.Derives, _elem0)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)

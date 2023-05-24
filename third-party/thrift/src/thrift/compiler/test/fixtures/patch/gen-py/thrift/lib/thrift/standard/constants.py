@@ -16,9 +16,6 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.thrift.ttypes
-import thrift.annotation.java.ttypes
-
 
 from .ttypes import UTF8STRINGS, Void, StandardProtocol, TypeUri, TypeName, ByteString, ByteBuffer, Uri
 

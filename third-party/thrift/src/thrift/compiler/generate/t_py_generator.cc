@@ -838,7 +838,7 @@ string t_py_generator::rename_reserved_keywords(const string& value) {
  * Renders all the imports necessary for including another Thrift program
  */
 string t_py_generator::render_includes() {
-  const vector<t_program*>& includes = program_->get_included_programs();
+  const vector<t_program*>& includes = program_->get_includes_for_codegen();
   string result = "";
   for (size_t i = 0; i < includes.size(); ++i) {
     result += "import " + get_real_py_module(includes[i]) + ".ttypes\n";

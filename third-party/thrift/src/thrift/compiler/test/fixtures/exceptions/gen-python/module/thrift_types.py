@@ -12,8 +12,6 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-import facebook.thrift.annotation.thrift.thrift_types
-
 
 class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (

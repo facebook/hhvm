@@ -9,12 +9,6 @@ import typing as __T
 from thrift import Thrift
 from thrift.protocol.TProtocol import TProtocolBase
 
-import thrift.annotation.cpp.ttypes
-import thrift.annotation.python.ttypes
-import thrift.annotation.thrift.ttypes
-import thrift.annotation.scope.ttypes
-import thrift.annotation.hack.ttypes
-import thrift.annotation.rust.ttypes
 import ::my
 import my
 from module.ttypes import *

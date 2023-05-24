@@ -14,7 +14,6 @@
 #else
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_clients.h"
 #endif
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

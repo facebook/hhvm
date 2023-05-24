@@ -14,8 +14,6 @@ import apache.thrift.op.patch.thrift_metadata
 
 import apache.thrift.type.standard.thrift_metadata
 
-import facebook.thrift.annotation.thrift.thrift_metadata
-
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_MyData(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

@@ -14,7 +14,6 @@ from typing_extensions import Final
 
 import sys
 import itertools
-import facebook.thrift.annotation.internal.types as _facebook_thrift_annotation_internal_types
 import foo.types as _foo_types
 
 

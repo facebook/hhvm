@@ -11,8 +11,6 @@ pub mod types;
 
 #[doc(hidden)]
 pub mod dependencies {
-    pub use rust as rust;
-    pub use scope as scope;
 }
 
 pub mod services {

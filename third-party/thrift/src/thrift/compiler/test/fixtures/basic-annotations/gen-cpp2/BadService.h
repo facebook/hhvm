@@ -10,7 +10,6 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/BadServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 

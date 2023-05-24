@@ -49,8 +49,6 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport module.types as _module_types
 import module.types as _module_types
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 cimport includes.types as _includes_types
 import includes.types as _includes_types
 

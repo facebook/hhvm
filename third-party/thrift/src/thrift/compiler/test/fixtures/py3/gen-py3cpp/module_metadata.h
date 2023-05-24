@@ -10,8 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
-#include "thrift/annotation/gen-py3cpp/cpp_metadata.h"
-#include "thrift/annotation/gen-py3cpp/python_metadata.h"
 
 namespace py3 {
 namespace simple {

@@ -16,4 +16,3 @@
 
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

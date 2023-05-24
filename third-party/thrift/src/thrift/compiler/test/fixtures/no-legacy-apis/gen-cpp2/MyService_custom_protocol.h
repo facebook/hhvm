@@ -15,4 +15,3 @@
 
 #include "thrift/compiler/test/fixtures/no-legacy-apis/gen-cpp2/MyService.tcc"
 #include "thrift/compiler/test/fixtures/no-legacy-apis/gen-cpp2/module_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

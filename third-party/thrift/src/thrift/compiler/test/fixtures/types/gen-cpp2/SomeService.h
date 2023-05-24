@@ -11,8 +11,6 @@
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/SomeServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_types.h"
 
 namespace folly {
   class IOBuf;

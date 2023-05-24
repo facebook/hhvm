@@ -6,11 +6,9 @@ package hack // [[[ program thrift source path ]]]
 import (
     "fmt"
 
-    scope "thrift/annotation/scope"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
-var _ = scope.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf

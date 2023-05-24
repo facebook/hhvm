@@ -10,8 +10,6 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
-import facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
-import facebook.thrift.annotation.hack.builders as _facebook_thrift_annotation_hack_builders
 
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 

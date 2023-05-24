@@ -53,8 +53,6 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport test.fixtures.nolegacy.module.types as _test_fixtures_nolegacy_module_types
 import test.fixtures.nolegacy.module.types as _test_fixtures_nolegacy_module_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
 cimport test.fixtures.nolegacy.module.services_reflection as _services_reflection
 

@@ -30,7 +30,6 @@ pub mod types;
 
 #[doc(hidden)]
 pub mod dependencies {
-    pub use cpp as cpp;
 }
 
 pub mod services {

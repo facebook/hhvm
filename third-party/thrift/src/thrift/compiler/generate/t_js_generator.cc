@@ -294,7 +294,7 @@ string t_js_generator::js_includes() {
  */
 string t_js_generator::render_includes() {
   if (gen_node_) {
-    const vector<t_program*>& includes = program_->get_included_programs();
+    const vector<t_program*>& includes = program_->get_includes_for_codegen();
     string result = "";
     for (size_t i = 0; i < includes.size(); ++i) {
       result += "var " + includes[i]->name() + "_ttypes = require('" +

@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	scope0 "thrift/annotation/scope"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = scope0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 // Indicates a definition/feature may change in incompatible ways.
@@ -461,13 +458,13 @@ func (p *ReserveIds)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.Ids =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem1 int32
+    var _elem0 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem0 = v
     }
-    p.Ids = append(p.Ids, _elem1)
+    p.Ids = append(p.Ids, _elem0)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -483,19 +480,19 @@ func (p *ReserveIds)  ReadField2(iprot thrift.Protocol) error {
   tMap := make(map[int32]int32, size)
   p.IdRanges =  tMap
   for i := 0; i < size; i ++ {
-    var _key2 int32
+    var _key1 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key2 = v
+      _key1 = v
     }
-    var _val3 int32
+    var _val2 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val3 = v
+      _val2 = v
     }
-    p.IdRanges[_key2] = _val3
+    p.IdRanges[_key1] = _val2
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)

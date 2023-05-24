@@ -41,8 +41,6 @@ from thrift.py3.common cimport (
     MetadataBox as __MetadataBox,
 )
 from folly.optional cimport cOptional as __cOptional
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 cimport apache.thrift.fixtures.types.module.types_fields as _fbthrift_types_fields

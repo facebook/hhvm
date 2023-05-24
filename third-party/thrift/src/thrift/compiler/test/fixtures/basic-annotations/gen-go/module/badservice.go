@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	cpp0 "thrift/annotation/cpp"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = cpp0.GoUnusedProtection__
 type BadService interface {
   Bar() (_r int32, err error)
 }
@@ -193,10 +190,10 @@ func (p *BadServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
-  self7 := &BadServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self7.processorMap["bar"] = &badServiceProcessorBar{handler:handler}
-  self7.functionServiceMap["bar"] = "BadService"
-  return self7
+  self6 := &BadServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self6.processorMap["bar"] = &badServiceProcessorBar{handler:handler}
+  self6.functionServiceMap["bar"] = "BadService"
+  return self6
 }
 
 type badServiceProcessorBar struct {

@@ -170,6 +170,23 @@ class t_program : public t_named {
     }
     return included_programs;
   }
+  /**
+   * As above, but excludes annotation files which shouldn't normally be
+   * included.
+   */
+  std::vector<t_program*> get_includes_for_codegen() const {
+    std::vector<t_program*> included_programs;
+    for (const auto& include : includes_) {
+      static const fmt::string_view prefix = "thrift/annotation/";
+      auto path = include->raw_path();
+      if (fmt::string_view(path.data(), std::min(path.size(), prefix.size())) ==
+          prefix) {
+        continue;
+      }
+      included_programs.push_back(include->get_program());
+    }
+    return included_programs;
+  }
 
   t_scope* scope() const { return scope_.get(); }
 

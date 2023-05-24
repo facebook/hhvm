@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	thrift0 "thrift/annotation/thrift"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = thrift0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type Metasyntactic int64
@@ -572,13 +569,13 @@ func (p *SomeStruct)  ReadField4(iprot thrift.Protocol) error {
   tSet := make([]int32, 0, size)
   p.Tags =  tSet
   for i := 0; i < size; i ++ {
-    var _elem1 int32
+    var _elem0 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem0 = v
     }
-    p.Tags = append(p.Tags, _elem1)
+    p.Tags = append(p.Tags, _elem0)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)

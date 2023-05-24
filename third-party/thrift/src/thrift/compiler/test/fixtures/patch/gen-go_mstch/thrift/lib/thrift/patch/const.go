@@ -4,16 +4,10 @@
 package patch // [[[ program thrift source path ]]]
 
 import (
-    thrift0 "thrift/annotation/thrift"
-    scope "thrift/annotation/scope"
-    cpp "thrift/annotation/cpp"
     standard "thrift/lib/thrift/standard"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
-var _ = thrift0.GoUnusedProtection__
-var _ = scope.GoUnusedProtection__
-var _ = cpp.GoUnusedProtection__
 var _ = standard.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO

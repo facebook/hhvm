@@ -9,8 +9,6 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
-#include "thrift/annotation/gen-py3cpp/cpp_types.h"
-#include "thrift/annotation/gen-py3cpp/python_types.h"
 
 namespace apache {
 namespace thrift {

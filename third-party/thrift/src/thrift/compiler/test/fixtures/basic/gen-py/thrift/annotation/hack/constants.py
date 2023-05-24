@@ -16,8 +16,6 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.scope.ttypes
-
 
 from .ttypes import UTF8STRINGS, FieldWrapper, Wrapper, Adapter, SkipCodegen, Name, UnionEnumAttributes, StructTrait, Attributes, StructAsTrait, ModuleInternal
 

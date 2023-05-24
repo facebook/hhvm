@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	hack0 "thrift/annotation/hack"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = hack0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type MyEnum int64
@@ -428,13 +425,13 @@ func (p *MyStruct)  ReadField8(iprot thrift.Protocol) error {
   tSet := make([]float32, 0, size)
   p.FloatSet =  tSet
   for i := 0; i < size; i ++ {
-    var _elem1 float32
+    var _elem0 float32
     if v, err := iprot.ReadFloat(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem0 = v
     }
-    p.FloatSet = append(p.FloatSet, _elem1)
+    p.FloatSet = append(p.FloatSet, _elem0)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -888,13 +885,13 @@ func (p *MyUnion)  ReadField4(iprot thrift.Protocol) error {
   tSet := make([]float32, 0, size)
   p.FloatSet =  tSet
   for i := 0; i < size; i ++ {
-    var _elem2 float32
+    var _elem1 float32
     if v, err := iprot.ReadFloat(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem2 = v
+      _elem1 = v
     }
-    p.FloatSet = append(p.FloatSet, _elem2)
+    p.FloatSet = append(p.FloatSet, _elem1)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)

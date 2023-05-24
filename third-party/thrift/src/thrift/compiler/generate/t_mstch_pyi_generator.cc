@@ -176,7 +176,7 @@ std::vector<std::string> gather_import_modules(
 
   std::vector<std::string> import_modules = {};
 
-  for (const auto* prog : program->get_included_programs()) {
+  for (const auto* prog : program->get_includes_for_codegen()) {
     if (prog->path() == program->path()) {
       continue;
     }

@@ -10,9 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	thrift0 "thrift/annotation/thrift"
-	java1 "thrift/annotation/java"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -22,8 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = thrift0.GoUnusedProtection__
-var _ = java1.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type Void int64

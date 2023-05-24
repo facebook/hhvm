@@ -14,9 +14,6 @@ from typing_extensions import Final
 
 import sys
 import itertools
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-import facebook.thrift.annotation.scope.types as _facebook_thrift_annotation_scope_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 

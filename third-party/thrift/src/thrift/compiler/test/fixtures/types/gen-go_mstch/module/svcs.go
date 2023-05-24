@@ -9,15 +9,11 @@ import (
     "fmt"
 
     included "included"
-    cpp "thrift/annotation/cpp"
-    thrift0 "thrift/annotation/thrift"
 
     "thrift/lib/go/thrift"
 )
 
 var _ = included.GoUnusedProtection__
-var _ = cpp.GoUnusedProtection__
-var _ = thrift0.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background

@@ -12,9 +12,6 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
-import thrift.annotation.scope.ttypes
-import thrift.annotation.thrift.ttypes
-
 
 from .ttypes import UTF8STRINGS, InjectMetadataFields
 

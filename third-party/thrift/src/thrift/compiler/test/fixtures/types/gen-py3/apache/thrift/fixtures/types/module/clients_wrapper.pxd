@@ -26,8 +26,6 @@ from thrift.py3.client cimport cClientWrapper
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_clients.h" namespace "::apache::thrift::fixtures::types":

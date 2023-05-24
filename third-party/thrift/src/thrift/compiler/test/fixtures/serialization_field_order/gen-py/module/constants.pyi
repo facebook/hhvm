@@ -6,6 +6,5 @@
 #
 import typing as __T
 
-import thrift.annotation.thrift.ttypes
 from module.ttypes import *
 

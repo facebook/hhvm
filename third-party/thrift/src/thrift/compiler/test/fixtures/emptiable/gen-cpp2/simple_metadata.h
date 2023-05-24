@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/emptiable/gen-cpp2/simple_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 
 
 namespace apache {

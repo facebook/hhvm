@@ -10,12 +10,6 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/ServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
-#include "thrift/annotation/gen-cpp2/python_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_types.h"
-#include "thrift/annotation/gen-cpp2/scope_types.h"
-#include "thrift/annotation/gen-cpp2/hack_types.h"
-#include "thrift/annotation/gen-cpp2/rust_types.h"
 
 namespace folly {
   class IOBuf;

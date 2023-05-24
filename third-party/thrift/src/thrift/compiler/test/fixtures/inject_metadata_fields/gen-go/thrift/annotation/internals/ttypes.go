@@ -10,9 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	scope0 "thrift/annotation/scope"
-	thrift1 "thrift/annotation/thrift"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -22,8 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = scope0.GoUnusedProtection__
-var _ = thrift1.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 // Attributes:

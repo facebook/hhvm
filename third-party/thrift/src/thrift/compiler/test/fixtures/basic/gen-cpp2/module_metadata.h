@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/hack_metadata.h"
 
 namespace test {
 namespace fixtures {

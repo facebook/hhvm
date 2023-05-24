@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	hack0 "thrift/annotation/hack"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = hack0.GoUnusedProtection__
 type FooService interface {
   SimpleRPC() (err error)
 }
@@ -187,10 +184,10 @@ func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
-  self3 := &FooServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self3.processorMap["simple_rpc"] = &fooServiceProcessorSimpleRPC{handler:handler}
-  self3.functionServiceMap["simple_rpc"] = "FooService"
-  return self3
+  self2 := &FooServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self2.processorMap["simple_rpc"] = &fooServiceProcessorSimpleRPC{handler:handler}
+  self2.functionServiceMap["simple_rpc"] = "FooService"
+  return self2
 }
 
 type fooServiceProcessorSimpleRPC struct {

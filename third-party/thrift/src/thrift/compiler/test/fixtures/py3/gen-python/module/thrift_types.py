@@ -14,10 +14,6 @@ import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-import facebook.thrift.annotation.cpp.thrift_types
-
-import facebook.thrift.annotation.python.thrift_types
-
 
 class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (

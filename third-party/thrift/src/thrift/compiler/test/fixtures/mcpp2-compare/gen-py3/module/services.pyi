@@ -11,7 +11,6 @@ from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
 import module.types as _module_types
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 import includes.types as _includes_types
 
 _EmptyServiceInterfaceT = _typing.TypeVar('_EmptyServiceInterfaceT', bound='EmptyServiceInterface')

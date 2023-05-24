@@ -15,5 +15,4 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/PrimitivesService.tcc"
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types_custom_protocol.h"
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"
 #include "thrift/lib/thrift/gen-cpp2/schema_types_custom_protocol.h"

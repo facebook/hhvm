@@ -23,7 +23,6 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types
 import test.fixtures.basic.module.thrift_metadata
-import facebook.thrift.annotation.hack.thrift_types
 
 class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"]):
     @staticmethod

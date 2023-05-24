@@ -17,13 +17,6 @@ if sys.version_info[0] >= 3:
   long = int
 
 from .ttypes import UTF8STRINGS, Color, ThriftAdaptedEnum, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, IndependentDirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, AdaptTestStruct, AdaptTemplatedTestStruct, AdaptTemplatedNestedTestStruct, AdaptTestUnion, AdaptedStruct, DirectlyAdaptedStruct, StructFieldAdaptedStruct, CircularAdaptee, CircularStruct, ReorderedStruct, DeclaredAfterStruct, RenamedStruct, SameNamespaceStruct, HeapAllocated, MoveOnly, AlsoMoveOnly, ApplyAdapter, TransitiveAdapted, CountingStruct, Person, Person2, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, StructWithAdapter, UnionWithAdapter, AdaptedA, DurationMs, AdaptedBool, AdaptedByte, AdaptedShort, AdaptedInteger, AdaptedLong, AdaptedDouble, AdaptedString, DoubleTypedefBool, CustomProtocolType, IndirectionString, AdaptedEnum, AdaptedTypedef, TypedefOfDirect, AdaptedCircularAdaptee, CountingInt
-import thrift.annotation.cpp.ttypes
-import thrift.annotation.python.ttypes
-import thrift.annotation.thrift.ttypes
-import thrift.annotation.scope.ttypes
-import thrift.annotation.hack.ttypes
-import thrift.annotation.rust.ttypes
-
 import ::my
 import my
 

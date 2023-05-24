@@ -53,10 +53,6 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 

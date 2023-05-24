@@ -13,8 +13,6 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 import included.ttypes
-import thrift.annotation.cpp.ttypes
-import thrift.annotation.thrift.ttypes
 
 
 import pprint

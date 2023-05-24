@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	hack0 "thrift/annotation/hack"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = hack0.GoUnusedProtection__
 type MyService interface {
   Ping() (err error)
   GetRandomData() (_r string, err error)
@@ -664,28 +661,28 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
-  self7 := &MyServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self7.processorMap["ping"] = &myServiceProcessorPing{handler:handler}
-  self7.processorMap["getRandomData"] = &myServiceProcessorGetRandomData{handler:handler}
-  self7.processorMap["sink"] = &myServiceProcessorSink{handler:handler}
-  self7.processorMap["putDataById"] = &myServiceProcessorPutDataById{handler:handler}
-  self7.processorMap["hasDataById"] = &myServiceProcessorHasDataById{handler:handler}
-  self7.processorMap["getDataById"] = &myServiceProcessorGetDataById{handler:handler}
-  self7.processorMap["deleteDataById"] = &myServiceProcessorDeleteDataById{handler:handler}
-  self7.processorMap["lobDataById"] = &myServiceProcessorLobDataById{handler:handler}
-  self7.processorMap["invalid_return_for_hack"] = &myServiceProcessorInvalidReturnForHack{handler:handler}
-  self7.processorMap["rpc_skipped_codegen"] = &myServiceProcessorRpcSkippedCodegen{handler:handler}
-  self7.functionServiceMap["ping"] = "MyService"
-  self7.functionServiceMap["getRandomData"] = "MyService"
-  self7.functionServiceMap["sink"] = "MyService"
-  self7.functionServiceMap["putDataById"] = "MyService"
-  self7.functionServiceMap["hasDataById"] = "MyService"
-  self7.functionServiceMap["getDataById"] = "MyService"
-  self7.functionServiceMap["deleteDataById"] = "MyService"
-  self7.functionServiceMap["lobDataById"] = "MyService"
-  self7.functionServiceMap["invalid_return_for_hack"] = "MyService"
-  self7.functionServiceMap["rpc_skipped_codegen"] = "MyService"
-  return self7
+  self6 := &MyServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self6.processorMap["ping"] = &myServiceProcessorPing{handler:handler}
+  self6.processorMap["getRandomData"] = &myServiceProcessorGetRandomData{handler:handler}
+  self6.processorMap["sink"] = &myServiceProcessorSink{handler:handler}
+  self6.processorMap["putDataById"] = &myServiceProcessorPutDataById{handler:handler}
+  self6.processorMap["hasDataById"] = &myServiceProcessorHasDataById{handler:handler}
+  self6.processorMap["getDataById"] = &myServiceProcessorGetDataById{handler:handler}
+  self6.processorMap["deleteDataById"] = &myServiceProcessorDeleteDataById{handler:handler}
+  self6.processorMap["lobDataById"] = &myServiceProcessorLobDataById{handler:handler}
+  self6.processorMap["invalid_return_for_hack"] = &myServiceProcessorInvalidReturnForHack{handler:handler}
+  self6.processorMap["rpc_skipped_codegen"] = &myServiceProcessorRpcSkippedCodegen{handler:handler}
+  self6.functionServiceMap["ping"] = "MyService"
+  self6.functionServiceMap["getRandomData"] = "MyService"
+  self6.functionServiceMap["sink"] = "MyService"
+  self6.functionServiceMap["putDataById"] = "MyService"
+  self6.functionServiceMap["hasDataById"] = "MyService"
+  self6.functionServiceMap["getDataById"] = "MyService"
+  self6.functionServiceMap["deleteDataById"] = "MyService"
+  self6.functionServiceMap["lobDataById"] = "MyService"
+  self6.functionServiceMap["invalid_return_for_hack"] = "MyService"
+  self6.functionServiceMap["rpc_skipped_codegen"] = "MyService"
+  return self6
 }
 
 type myServiceProcessorPing struct {
@@ -2901,13 +2898,13 @@ func (p *MyServiceInvalidReturnForHackResult)  ReadField0(iprot thrift.Protocol)
   tSet := make([]float32, 0, size)
   p.Success =  tSet
   for i := 0; i < size; i ++ {
-    var _elem9 float32
+    var _elem8 float32
     if v, err := iprot.ReadFloat(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem9 = v
+      _elem8 = v
     }
-    p.Success = append(p.Success, _elem9)
+    p.Success = append(p.Success, _elem8)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)

@@ -10,8 +10,6 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
-cimport facebook.thrift.annotation.hack.types as _facebook_thrift_annotation_hack_types
-cimport facebook.thrift.annotation.hack.builders as _facebook_thrift_annotation_hack_builders
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 

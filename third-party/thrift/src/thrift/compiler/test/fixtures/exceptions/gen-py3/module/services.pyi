@@ -11,7 +11,6 @@ from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
 import module.types as _module_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
 _RaiserInterfaceT = _typing.TypeVar('_RaiserInterfaceT', bound='RaiserInterface')
 

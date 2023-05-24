@@ -54,8 +54,6 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
-cimport facebook.thrift.annotation.internal.types as _facebook_thrift_annotation_internal_types
-import facebook.thrift.annotation.internal.types as _facebook_thrift_annotation_internal_types
 cimport foo.types as _foo_types
 import foo.types as _foo_types
 

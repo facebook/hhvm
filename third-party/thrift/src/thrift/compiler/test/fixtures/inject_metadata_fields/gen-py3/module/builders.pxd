@@ -10,8 +10,6 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
-cimport facebook.thrift.annotation.internal.types as _facebook_thrift_annotation_internal_types
-cimport facebook.thrift.annotation.internal.builders as _facebook_thrift_annotation_internal_builders
 cimport foo.types as _foo_types
 cimport foo.builders as _foo_builders
 

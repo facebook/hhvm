@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 #include "thrift/lib/thrift/gen-cpp2/patch_metadata.h"
 #include "thrift/lib/thrift/gen-cpp2/standard_metadata.h"
 

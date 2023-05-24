@@ -10,9 +10,8 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	thrift0 "thrift/annotation/thrift"
-	patch1 "thrift/lib/thrift/patch"
-	standard2 "thrift/lib/thrift/standard"
+	patch0 "thrift/lib/thrift/patch"
+	standard1 "thrift/lib/thrift/standard"
 
 )
 
@@ -23,9 +22,8 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = thrift0.GoUnusedProtection__
-var _ = patch1.GoUnusedProtection__
-var _ = standard2.GoUnusedProtection__
+var _ = patch0.GoUnusedProtection__
+var _ = standard1.GoUnusedProtection__
 
 func init() {
 }

@@ -49,10 +49,6 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
-cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 

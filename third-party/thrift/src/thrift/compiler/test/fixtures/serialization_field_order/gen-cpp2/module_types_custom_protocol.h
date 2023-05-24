@@ -16,4 +16,3 @@
 
 #include "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_types.tcc"
 
-#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

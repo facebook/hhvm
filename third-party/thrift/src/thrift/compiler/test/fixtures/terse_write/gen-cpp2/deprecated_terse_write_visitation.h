@@ -5,7 +5,6 @@
  *  @generated @nocommit
  */
 #pragma once
-#include "thrift/annotation/gen-cpp2/thrift_visitation.h"
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_for_each_field.h"
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_visit_union.h"
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_visit_by_thrift_field_metadata.h"

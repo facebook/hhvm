@@ -536,7 +536,7 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_package() { return get_import_name(program_, options_); }
   mstch::node rust_includes() {
     mstch::array includes;
-    for (auto* program : program_->get_included_programs()) {
+    for (auto* program : program_->get_includes_for_codegen()) {
       includes.push_back(
           context_.program_factory->make_mstch_object(program, context_, pos_));
     }

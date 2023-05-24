@@ -9,7 +9,6 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
-#include "thrift/annotation/gen-cpp2/internal_types.h"
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h"
 
 namespace apache {

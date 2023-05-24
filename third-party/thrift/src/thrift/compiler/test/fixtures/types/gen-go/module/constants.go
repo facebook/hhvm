@@ -11,8 +11,6 @@ import (
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	included0 "included"
-	cpp1 "thrift/annotation/cpp"
-	thrift2 "thrift/annotation/thrift"
 
 )
 
@@ -24,8 +22,6 @@ var _ = bytes.Equal
 var _ = context.Background
 
 var _ = included0.GoUnusedProtection__
-var _ = cpp1.GoUnusedProtection__
-var _ = thrift2.GoUnusedProtection__
 
 func init() {
 }

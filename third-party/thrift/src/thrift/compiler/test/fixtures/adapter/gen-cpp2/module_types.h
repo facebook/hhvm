@@ -9,12 +9,6 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
-#include "thrift/annotation/gen-cpp2/cpp_types.h"
-#include "thrift/annotation/gen-cpp2/python_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_types.h"
-#include "thrift/annotation/gen-cpp2/scope_types.h"
-#include "thrift/annotation/gen-cpp2/hack_types.h"
-#include "thrift/annotation/gen-cpp2/rust_types.h"
 #include "adapter_dependency.h"
 
 namespace apache {

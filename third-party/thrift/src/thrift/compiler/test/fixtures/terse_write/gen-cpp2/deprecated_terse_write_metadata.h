@@ -10,7 +10,6 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_types.h"
-#include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 
 
 namespace apache {

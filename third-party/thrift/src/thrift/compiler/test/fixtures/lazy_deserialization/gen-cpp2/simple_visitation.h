@@ -5,7 +5,6 @@
  *  @generated @nocommit
  */
 #pragma once
-#include "thrift/annotation/gen-cpp2/cpp_visitation.h"
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_for_each_field.h"
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_visit_union.h"
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_visit_by_thrift_field_metadata.h"

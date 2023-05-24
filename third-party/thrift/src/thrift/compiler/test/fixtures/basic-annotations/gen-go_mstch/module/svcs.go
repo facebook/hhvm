@@ -8,12 +8,10 @@ import (
     "context"
     "fmt"
 
-    cpp "thrift/annotation/cpp"
 
     "thrift/lib/go/thrift"
 )
 
-var _ = cpp.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background

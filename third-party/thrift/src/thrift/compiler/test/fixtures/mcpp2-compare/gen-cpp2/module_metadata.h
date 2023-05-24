@@ -11,7 +11,6 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h"
-#include "thrift/annotation/gen-cpp2/cpp_metadata.h"
 
 namespace some {
 namespace valid {

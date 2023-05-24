@@ -79,12 +79,6 @@ pub mod types;
 
 #[doc(hidden)]
 pub mod dependencies {
-    pub use cpp as cpp;
-    pub use python as python;
-    pub use thrift as thrift;
-    pub use scope as scope;
-    pub use hack as hack;
-    pub use rust as rust;
 }
 
 pub mod services {

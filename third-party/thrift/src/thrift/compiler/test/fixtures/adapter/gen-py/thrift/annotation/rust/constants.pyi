@@ -6,6 +6,5 @@
 #
 import typing as __T
 
-import thrift.annotation.scope.ttypes
 from thrift.annotation.rust.ttypes import *
 

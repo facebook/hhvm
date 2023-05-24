@@ -10,8 +10,6 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
-import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
-import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 import apache.thrift.op.patch.builders as _apache_thrift_op_patch_builders
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types

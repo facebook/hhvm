@@ -14,12 +14,6 @@ from thrift.protocol.TProtocol import TProtocolBase
 
 __property__ = property  # sometimes `property` is used as a field name
 
-import thrift.annotation.cpp.ttypes
-import thrift.annotation.python.ttypes
-import thrift.annotation.thrift.ttypes
-import thrift.annotation.scope.ttypes
-import thrift.annotation.hack.ttypes
-import thrift.annotation.rust.ttypes
 import ::my
 import my
 

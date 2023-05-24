@@ -4,11 +4,9 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-    cpp "thrift/annotation/cpp"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
-var _ = cpp.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
 

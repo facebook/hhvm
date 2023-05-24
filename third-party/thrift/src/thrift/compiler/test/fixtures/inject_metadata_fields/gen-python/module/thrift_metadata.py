@@ -10,8 +10,6 @@ from __future__ import annotations
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 
-import facebook.thrift.annotation.internal.thrift_metadata
-
 import foo.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts

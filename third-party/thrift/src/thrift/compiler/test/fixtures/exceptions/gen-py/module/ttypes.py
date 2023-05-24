@@ -12,8 +12,6 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
-import thrift.annotation.thrift.ttypes
-
 
 import pprint
 import warnings

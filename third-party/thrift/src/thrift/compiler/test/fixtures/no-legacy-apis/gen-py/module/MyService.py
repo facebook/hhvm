@@ -17,8 +17,6 @@ if sys.version_info[0] >= 3:
   long = int
 
 from .ttypes import UTF8STRINGS, MyEnum, MyStruct, MyUnion
-import thrift.annotation.thrift.ttypes
-
 from thrift.Thrift import TProcessor
 import pprint
 import warnings

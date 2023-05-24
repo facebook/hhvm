@@ -236,58 +236,72 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
         }
 
         if (err == ERROR_NOTIFY_ENUM_DIR) {
-          root->scheduleRecrawl("ERROR_NOTIFY_ENUM_DIR");
+          logf(
+              ERR,
+              "GetOverlappedResult failed with ERROR_NOTIFY_ENUM_DIR, recrawling.\n");
+          items.emplace_back(
+              w_string{root->root_path},
+              PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});
         } else {
           logf(ERR, "Cancelling watch for {}\n", root->root_path);
           root->cancel();
           break;
         }
       } else {
-        PFILE_NOTIFY_INFORMATION notify = (PFILE_NOTIFY_INFORMATION)buf.data();
+        if (bytes == 0) {
+          logf(ERR, "ReadDirectoryChangesW overflowed, recrawling.\n");
+          items.emplace_back(
+              w_string{root->root_path},
+              PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});
+        } else {
+          PFILE_NOTIFY_INFORMATION notify =
+              (PFILE_NOTIFY_INFORMATION)buf.data();
 
-        while (true) {
-          // FileNameLength is in BYTES, but FileName is WCHAR
-          DWORD n_chars = notify->FileNameLength / sizeof(notify->FileName[0]);
-          w_string name(notify->FileName, n_chars);
+          while (true) {
+            // FileNameLength is in BYTES, but FileName is WCHAR
+            DWORD n_chars =
+                notify->FileNameLength / sizeof(notify->FileName[0]);
+            w_string name(notify->FileName, n_chars);
 
-          auto full = w_string::pathCat({root->root_path, name});
+            auto full = w_string::pathCat({root->root_path, name});
 
-          if (!root->ignore.isIgnored(full.data(), full.size())) {
-            // If we have a delete or rename-away it may be part of
-            // a recursive tree remove or rename.  In that situation
-            // the notifications that we'll receive from the OS will
-            // be from the leaves and bubble up to the root of the
-            // delete/rename.  We want to flag those paths for recursive
-            // analysis so that we can prune children from the trie
-            // that is built when we pass this to the pending list
-            // later.  We don't do that here in this thread because
-            // we're trying to minimize latency in this context.
-            items.emplace_back(
-                w_string{full},
-                (notify->Action == FILE_ACTION_REMOVED ||
-                 notify->Action == FILE_ACTION_RENAMED_OLD_NAME)
-                    ? W_PENDING_RECURSIVE
-                    : 0);
+            if (!root->ignore.isIgnored(full.data(), full.size())) {
+              // If we have a delete or rename-away it may be part of
+              // a recursive tree remove or rename.  In that situation
+              // the notifications that we'll receive from the OS will
+              // be from the leaves and bubble up to the root of the
+              // delete/rename.  We want to flag those paths for recursive
+              // analysis so that we can prune children from the trie
+              // that is built when we pass this to the pending list
+              // later.  We don't do that here in this thread because
+              // we're trying to minimize latency in this context.
+              items.emplace_back(
+                  w_string{full},
+                  (notify->Action == FILE_ACTION_REMOVED ||
+                   notify->Action == FILE_ACTION_RENAMED_OLD_NAME)
+                      ? W_PENDING_RECURSIVE
+                      : 0);
 
-            if (!name.empty() &&
-                (notify->Action == FILE_ACTION_ADDED ||
-                 notify->Action == FILE_ACTION_REMOVED ||
-                 notify->Action == FILE_ACTION_RENAMED_OLD_NAME ||
-                 notify->Action == FILE_ACTION_RENAMED_NEW_NAME)) {
-              // ReadDirectoryChangesW provides change events when the child
-              // entry list changes, but may not provide a notification for the
-              // parent when its mtime changes. It should be rescanned, so
-              // synthesize an event for the IO thread here.
-              items.emplace_back(full.dirName(), PendingFlags{});
+              if (!name.empty() &&
+                  (notify->Action == FILE_ACTION_ADDED ||
+                   notify->Action == FILE_ACTION_REMOVED ||
+                   notify->Action == FILE_ACTION_RENAMED_OLD_NAME ||
+                   notify->Action == FILE_ACTION_RENAMED_NEW_NAME)) {
+                // ReadDirectoryChangesW provides change events when the child
+                // entry list changes, but may not provide a notification for
+                // the parent when its mtime changes. It should be rescanned, so
+                // synthesize an event for the IO thread here.
+                items.emplace_back(full.dirName(), PendingFlags{});
+              }
             }
-          }
 
-          // Advance to next item
-          if (notify->NextEntryOffset == 0) {
-            break;
+            // Advance to next item
+            if (notify->NextEntryOffset == 0) {
+              break;
+            }
+            notify =
+                (PFILE_NOTIFY_INFORMATION)(notify->NextEntryOffset + (char*)notify);
           }
-          notify =
-              (PFILE_NOTIFY_INFORMATION)(notify->NextEntryOffset + (char*)notify);
         }
 
         ResetEvent(olapEvent);

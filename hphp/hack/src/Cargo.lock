@@ -862,7 +862,6 @@ dependencies = [
  "hhbc",
  "itertools 0.10.5",
  "libc",
- "no_pos_hash",
  "ocamlrep",
  "options",
  "parser_core_types",

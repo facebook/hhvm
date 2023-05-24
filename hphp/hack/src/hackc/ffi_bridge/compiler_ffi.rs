@@ -111,7 +111,6 @@ pub mod compile_ffi {
     }
 
     pub struct DeclResult {
-        nopos_hash: u64,
         serialized: Vec<u8>,
         decls: Box<DeclsHolder>,
         has_errors: bool,
@@ -392,7 +391,6 @@ pub fn direct_decl_parse(
         direct_decl_parser::parse_decls_for_bytecode(&decl_opts, filename, text, alloc);
 
     compile_ffi::DeclResult {
-        nopos_hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
         serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
         decls: Box::new(DeclsHolder {
             parsed_file,

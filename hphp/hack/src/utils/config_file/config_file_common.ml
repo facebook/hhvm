@@ -50,11 +50,20 @@ let get_packages_absolute_path ~(hhconfig_path : string) =
 let parse_contents (contents : string) : t =
   Config_file_ffi_externs.parse_contents contents
 
+let hash ~(config_contents : string) ~(package_config : string option) : string
+    =
+  let contents =
+    match package_config with
+    | Some package_config -> config_contents ^ package_config
+    | None -> config_contents
+  in
+  Sha1.digest contents
+
 (* Non-lwt implementation of parse *)
 let parse (fn : string) : string * t =
   let contents = Sys_utils.cat fn in
   let parsed = parse_contents contents in
-  let hash = Sha1.digest contents in
+  let hash = hash ~config_contents:contents ~package_config:None in
   (hash, parsed)
 
 let parse_local_config (fn : string) : t =

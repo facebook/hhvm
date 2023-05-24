@@ -31,13 +31,12 @@ let parse_hhconfig (fn : string) : (string * t, string) Lwt_result.t =
     let package_path =
       Config_file_common.get_packages_absolute_path ~hhconfig_path:fn
     in
-    let%lwt extra_config = read_package_config package_path in
-    (match extra_config with
-    | Ok extra_config ->
-      let hash = Sha1.digest (contents ^ extra_config) in
-      Lwt.return_ok (hash, parsed)
-    | Error _ ->
-      let hash = Sha1.digest contents in
-      Lwt.return_ok (hash, parsed))
+    let%lwt package_config =
+      read_package_config package_path |> Lwt.map Result.ok
+    in
+    let hash =
+      Config_file_common.hash ~config_contents:contents ~package_config
+    in
+    Lwt.return_ok (hash, parsed)
   | Error message ->
     Lwt.return_error (Printf.sprintf "Could not load hhconfig: %s" message)

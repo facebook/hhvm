@@ -83,8 +83,7 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let full_contents = contents + &extra_contents;
-        let hash = format!("{:x}", Sha1::digest(full_contents.as_bytes()));
+        let hash = Self::hash(&contents, &extra_contents);
         hhconfig.apply_overrides(overrides);
         let hh_conf_path = hh_conf_path.as_ref();
         let mut hh_conf = ConfigFile::from_file(hh_conf_path)
@@ -104,6 +103,11 @@ impl HhConfig {
         let hh_conf_file = ConfigFile::from_file(&hh_conf_path)
             .with_context(|| hh_conf_path.display().to_string())?;
         Ok((hh_conf_file, hh_config_file))
+    }
+
+    fn hash(config_contents: &str, package_config: &str) -> String {
+        let full_contents = format!("{}{}", config_contents, package_config);
+        format!("{:x}", Sha1::digest(full_contents.as_bytes()))
     }
 
     pub fn from_slice(bytes: &[u8]) -> Result<Self> {

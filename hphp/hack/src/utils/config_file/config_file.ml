@@ -50,8 +50,10 @@ let parse_hhconfig (fn : string) : string * t =
   let package_path =
     Config_file_common.get_packages_absolute_path ~hhconfig_path:fn
   in
-  let extra_contents = cat_packages_file package_path in
-  let hash = Sha1.digest (contents ^ extra_contents) in
+  let package_config = Some (cat_packages_file package_path) in
+  let hash =
+    Config_file_common.hash ~config_contents:contents ~package_config
+  in
   (hash, parsed)
 
 let parse_local_config = Config_file_common.parse_local_config

@@ -66,6 +66,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 THRIFT_PLUGGABLE_FUNC_REGISTER(bool, isLocalIP, const folly::IPAddress& ip) {
   return ip.isLoopback();
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    bool, shouldMonitorTLSPeerCert, const ConnectionLoggingContext&) {
+  return true;
+}
 } // namespace detail
 
 namespace {

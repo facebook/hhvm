@@ -145,6 +145,8 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     const folly::AsyncTransportCertificate*);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(bool, isLocalIP, const folly::IPAddress& ip);
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    bool, shouldMonitorTLSPeerCert, const ConnectionLoggingContext& ctx);
 } // namespace detail
 
 const LoggingEventRegistry& getLoggingEventRegistry();

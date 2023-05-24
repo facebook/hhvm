@@ -42,6 +42,10 @@ void maybeLogTlsPeerCertEvent(
     const ConnectionLoggingContext& context,
     const folly::AsyncTransportCertificate* cert) {
   DCHECK(context.getWorker() && context.getWorker()->getServer());
+  if (!detail::shouldMonitorTLSPeerCert(context)) {
+    return;
+  }
+
   auto allowedIPs = detail::getAllowedIPsForCert(cert);
   if (allowedIPs.empty() || context.getPeerAddress() == nullptr ||
       !context.getPeerAddress()->isFamilyInet()) {

@@ -3100,7 +3100,7 @@ void parse_adata(AsmState& as) {
  * Following the type-constraint we encode the serialized type structure
  * corresponding to this alias.
  */
-void parse_alias(AsmState& as) {
+void parse_alias(AsmState& as, bool case_type) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttrs;
@@ -3141,7 +3141,7 @@ void parse_alias(AsmState& as) {
     typeName,
     typeName->empty() ? AnnotType::Mixed : ty.type(),
     (ty.flags() & TypeConstraintFlags::Nullable) != 0,
-    (ty.flags() & TypeConstraintFlags::CaseType) != 0,
+    case_type,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}
   );
@@ -3298,6 +3298,7 @@ void parse_file_attributes(AsmState& as) {
  *         |    ".adata"            directive-adata
  *         |    ".class"            directive-class
  *         |    ".alias"            directive-alias
+ *         |    ".case_type"        directive-alias
  *         |    ".includes"         directive-filepaths
  *         |    ".constant_refs"    directive-symbols
  *         |    ".function_refs"    directive-symbols
@@ -3315,7 +3316,8 @@ void parse(AsmState& as) {
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".alias")         { parse_alias(as)         ; continue; }
+    if (directive == ".alias")         { parse_alias(as, false)  ; continue; }
+    if (directive == ".case_type")     { parse_alias(as, true)   ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".const")         { parse_constant(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }

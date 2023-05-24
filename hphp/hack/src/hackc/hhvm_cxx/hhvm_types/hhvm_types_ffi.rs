@@ -83,7 +83,6 @@ pub mod ffi {
     enum TypeConstraintFlags {
         NoFlags = 0x0,
         Nullable = 0x1,
-        CaseType = 0x2,
         ExtendedHint = 0x4,
         TypeVar = 0x8,
         Soft = 0x10,

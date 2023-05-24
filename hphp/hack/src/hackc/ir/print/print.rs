@@ -2146,13 +2146,15 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         name,
         type_info,
         type_structure,
+        case_type,
     } = typedef;
 
     print_top_level_loc(w, Some(loc), strings)?;
 
     writeln!(
         w,
-        "typedef {name}: {ty} = {attributes}{ts} {attrs}",
+        "typedef {vis} {name}: {ty} = {attributes}{ts} {attrs}",
+        vis = if *case_type { "case_type" } else { "alias" },
         name = FmtIdentifierId(name.id, strings),
         ty = FmtTypeInfo(type_info, strings),
         attributes = FmtSep::new("<", ",", "> ", attributes, |w, attribute| FmtAttribute(

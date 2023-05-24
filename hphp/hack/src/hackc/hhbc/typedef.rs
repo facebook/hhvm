@@ -22,4 +22,5 @@ pub struct Typedef<'arena> {
     pub type_structure: TypedValue<'arena>,
     pub span: Span,
     pub attrs: Attr,
+    pub case_type: bool,
 }

@@ -983,6 +983,7 @@ fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result {
         type_structure: a_type_structure,
         span: a_span,
         attrs: a_attrs,
+        case_type: a_case_type,
     } = a;
     let Typedef {
         name: b_name,
@@ -991,6 +992,7 @@ fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result {
         type_structure: b_type_structure,
         span: b_span,
         attrs: b_attrs,
+        case_type: b_case_type,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
@@ -999,6 +1001,7 @@ fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result {
     cmp_eq(a_type_structure, b_type_structure).qualified("type_structure")?;
     cmp_eq(a_span, b_span).qualified("span")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
+    cmp_eq(a_case_type, b_case_type).qualified("case_type")?;
     Ok(())
 }
 

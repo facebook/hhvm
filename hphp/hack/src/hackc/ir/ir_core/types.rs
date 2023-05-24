@@ -294,4 +294,5 @@ pub struct Typedef {
     pub type_structure: TypedValue,
     pub loc: SrcLoc,
     pub attrs: Attr,
+    pub case_type: bool,
 }

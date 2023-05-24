@@ -184,7 +184,12 @@ impl<'a> UnitBuilder<'a> {
                 )?)
             }
             b".alias" => {
-                self.typedefs.push(assemble_typedef(alloc, token_iter)?);
+                self.typedefs
+                    .push(assemble_typedef(alloc, token_iter, false)?);
+            }
+            b".case_type" => {
+                self.typedefs
+                    .push(assemble_typedef(alloc, token_iter, true)?);
             }
             b".const" => {
                 assemble_const_or_type_const(
@@ -287,8 +292,14 @@ fn assemble_file_attributes<'arena>(
 fn assemble_typedef<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    case_type: bool,
 ) -> Result<hhbc::Typedef<'arena>> {
-    parse!(token_iter, ".alias"
+    if case_type {
+        parse!(token_iter, ".case_type");
+    } else {
+        parse!(token_iter, ".alias");
+    }
+    parse!(token_iter,
            <attrs:assemble_special_and_user_attrs(alloc)>
            <name:assemble_class_name(alloc)>
            "="
@@ -304,6 +315,7 @@ fn assemble_typedef<'arena>(
         type_structure,
         span,
         attrs,
+        case_type,
     })
 }
 
@@ -1388,7 +1400,6 @@ fn assemble_type_constraint(
         b"type_var" => Ok(TypeConstraintFlags::TypeVar),
         b"extended_hint" => Ok(TypeConstraintFlags::ExtendedHint),
         b"nullable" => Ok(TypeConstraintFlags::Nullable),
-        b"case_type" => Ok(TypeConstraintFlags::CaseType),
         _ => Err(tok.error("Unknown type constraint flag")),
     }
 }

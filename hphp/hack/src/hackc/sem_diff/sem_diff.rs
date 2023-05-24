@@ -697,6 +697,7 @@ fn sem_diff_typedef<'arena>(
         type_structure: a_type_structure,
         span: a_span,
         attrs: a_attrs,
+        case_type: a_case_type,
     } = a;
     let Typedef {
         name: b_name,
@@ -705,6 +706,7 @@ fn sem_diff_typedef<'arena>(
         type_structure: b_type_structure,
         span: b_span,
         attrs: b_attrs,
+        case_type: b_case_type,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
@@ -717,5 +719,6 @@ fn sem_diff_typedef<'arena>(
     )?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("attrs"), a_attrs, b_attrs)?;
+    sem_diff_eq(&path.qualified("cast_type"), a_case_type, b_case_type)?;
     Ok(())
 }

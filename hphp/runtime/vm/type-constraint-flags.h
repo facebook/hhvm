@@ -28,11 +28,6 @@ enum TypeConstraintFlags : uint16_t {
    */
   Nullable = 0x1,
 
- /*
-  * Case type such as int | bool | float
-  */
-  CaseType = 0x2,
-
   /*
    * Extended hints are hints that do not apply to normal, vanilla
    * php.  For example "?Foo".

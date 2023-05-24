@@ -361,7 +361,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     tname,
     tname->empty() ? AnnotType::Mixed : ty.type(),
     (ty.flags() & TypeConstraintFlags::Nullable) != 0,
-    (ty.flags() & TypeConstraintFlags::CaseType) != 0,
+    t.case_type,
     ArrNR{tys.m_data.parr},
     Array{}
   );

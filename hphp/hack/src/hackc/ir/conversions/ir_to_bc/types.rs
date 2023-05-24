@@ -103,6 +103,7 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
         type_structure,
         loc,
         attrs,
+        case_type,
     } = td;
 
     let name = strings.lookup_class_name(name);
@@ -121,5 +122,6 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
         type_structure,
         span,
         attrs,
+        case_type,
     }
 }

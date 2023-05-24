@@ -287,7 +287,7 @@ impl<'a> UnitParser<'a> {
     }
 
     fn parse_typedef(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
-        parse!(tokenizer, <name:parse_class_id> ":" <type_info:parse_type_info> "="
+        parse!(tokenizer, <vis:parse_user_id> <name:parse_class_id> ":" <type_info:parse_type_info> "="
                <attributes:parse_attributes("<")> <type_structure:parse_typed_value> <attrs:parse_attr>);
 
         let loc = self.get_cur_src_loc();
@@ -299,6 +299,7 @@ impl<'a> UnitParser<'a> {
             name,
             type_info,
             type_structure,
+            case_type: &vis.0 == b"case_type",
         });
         Ok(())
     }

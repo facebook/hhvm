@@ -6,11 +6,8 @@ use env::emitter::Emitter;
 use error::Result;
 use hhbc::ClassName;
 use hhbc::Span;
-use hhbc::TypeInfo;
 use hhbc::Typedef;
 use hhvm_types_ffi::ffi::Attr;
-use hhvm_types_ffi::ffi::TypeConstraintFlags;
-use oxidized::aast_defs::Hint;
 use oxidized::ast;
 
 use crate::emit_attribute;
@@ -41,11 +38,13 @@ fn emit_typedef<'a, 'arena, 'decl>(
     let name = ClassName::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
-    let type_info_res = kind_to_type_info(
+    let type_info_res = emit_type_hint::hint_to_type_info(
         emitter.alloc,
+        &emit_type_hint::Kind::TypeDef,
+        false,
+        typedef.kind.1.is_hoption(),
         &tparams,
         &typedef.kind,
-        typedef.vis.is_case_type(),
     );
     let type_structure_res = emit_type_constant::typedef_to_type_structure(
         emitter.alloc,
@@ -70,29 +69,8 @@ fn emit_typedef<'a, 'arena, 'decl>(
                 type_structure,
                 span,
                 attrs,
+                case_type: typedef.vis.is_case_type(),
             })
         })
     })
-}
-
-fn kind_to_type_info<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[&str],
-    h: &Hint,
-    is_case_type: bool,
-) -> Result<TypeInfo<'arena>> {
-    use emit_type_hint::Kind;
-    let mut type_info = emit_type_hint::hint_to_type_info(
-        alloc,
-        &Kind::TypeDef,
-        false,
-        h.1.is_hoption(),
-        tparams,
-        h,
-    )?;
-    if is_case_type {
-        type_info.type_constraint.flags =
-            type_info.type_constraint.flags | TypeConstraintFlags::CaseType;
-    }
-    Ok(type_info)
 }

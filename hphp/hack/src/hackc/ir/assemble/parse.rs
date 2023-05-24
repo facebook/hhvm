@@ -722,7 +722,6 @@ fn parse_type_constraint_flag(
         Some(match id {
             "extended" => TypeConstraintFlags::ExtendedHint,
             "nullable" => TypeConstraintFlags::Nullable,
-            "case_type" => TypeConstraintFlags::CaseType,
             "type_var" => TypeConstraintFlags::TypeVar,
             "soft" => TypeConstraintFlags::Soft,
             "type_constant" => TypeConstraintFlags::TypeConstant,

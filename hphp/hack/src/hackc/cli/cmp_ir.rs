@@ -1781,6 +1781,7 @@ fn cmp_typedef(
         type_structure: a_type_structure,
         loc: a_loc,
         attrs: a_attrs,
+        case_type: a_case_type,
     } = a;
     let Typedef {
         name: b_name,
@@ -1789,6 +1790,7 @@ fn cmp_typedef(
         type_structure: b_type_structure,
         loc: b_loc,
         attrs: b_attrs,
+        case_type: b_case_type,
     } = b;
     cmp_id(a_name.id, b_name.id).qualified("name")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
@@ -1797,6 +1799,7 @@ fn cmp_typedef(
         .qualified("type_structure")?;
     cmp_src_loc((a_loc, a_strings), (b_loc, b_strings)).qualified("loc")?;
     cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
+    cmp_eq(a_case_type, b_case_type).qualified("case_type")?;
     Ok(())
 }
 

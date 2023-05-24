@@ -106,6 +106,7 @@ pub(crate) fn convert_typedef<'a>(
         type_structure,
         span,
         attrs,
+        case_type,
     } = td;
 
     let loc = ir::SrcLoc::from_span(filename, span);
@@ -124,5 +125,6 @@ pub(crate) fn convert_typedef<'a>(
         type_structure,
         loc,
         attrs: *attrs,
+        case_type: *case_type,
     }
 }

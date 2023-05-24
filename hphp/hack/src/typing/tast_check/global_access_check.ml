@@ -30,6 +30,7 @@ module Cls = Decl_provider.Class
 module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
 module GlobalAccessCheck = Error_codes.GlobalAccessCheck
+module SN = Naming_special_names
 
 (* Recognize common patterns for global access (only writes for now). *)
 type global_access_pattern =
@@ -515,10 +516,17 @@ let rec print_global_expr env expr =
 (* Given a function call of type Aast.expr_, if it's memoized, return its function
    name, otherwise return None. *)
 let check_func_is_memoized func_expr env =
-  let (func_ty, _, te) = func_expr in
   let open Typing_defs in
-  match get_node func_ty with
-  | Tfun fty when get_ft_is_memoized fty -> Some (print_global_expr env te)
+  let rec find_fty ty =
+    match get_node ty with
+    | Tnewtype (name, _, ty) when String.equal name SN.Classes.cSupportDyn ->
+      find_fty ty
+    | Tfun fty -> Some fty
+    | _ -> None
+  in
+  let (func_ty, _, te) = func_expr in
+  match find_fty func_ty with
+  | Some fty when get_ft_is_memoized fty -> Some (print_global_expr env te)
   | _ -> None
 
 (* Check if type is a collection. *)

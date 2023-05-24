@@ -17,9 +17,9 @@ File "test_pattern.php", line 35, characters 5-26:
 File "test_pattern.php", line 40, characters 5-32:
 [Test::test_method_call]{Foo::$static_prop}(nothing)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is definitely written. (Other[11001])
 File "test_pattern.php", line 45, characters 5-76:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>)<WriteLiteral,WriteGlobalToGlobal> A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_dict}(~dict<string, int>)<WriteLiteral,WriteGlobalToGlobal> A global variable is definitely written. (Other[11001])
 File "test_pattern.php", line 46, characters 5-93:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_dict}(~dict<string, int>) A global variable is definitely written. (Other[11001])
 File "test_pattern.php", line 47, characters 5-30:
 [Test::test_method_call]{Foo::$static_dict}(dict<nothing, nothing>)<WriteEmptyOrNull> A global variable is definitely written. (Other[11001])
 File "test_pattern.php", line 48, characters 5-32:
@@ -45,6 +45,6 @@ File "test_pattern.php", line 42, characters 40-56:
 File "test_pattern.php", line 43, characters 40-56:
 [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
 File "test_pattern.php", line 45, characters 43-59:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_dict}(~dict<string, int>) A global variable is definitely read. (Other[11004])
 File "test_pattern.php", line 46, characters 43-59:
-[Test::test_method_call]{Foo::$static_dict}(dict<string, int>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_dict}(~dict<string, int>) A global variable is definitely read. (Other[11004])

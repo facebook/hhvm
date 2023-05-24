@@ -1,2 +1,4 @@
 --enable-global-access-check
 --allowed-fixme-codes-strict 11001,11002,11003,11004
+--enable-sound-dynamic-type
+--everything-sdt

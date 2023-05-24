@@ -21,7 +21,7 @@ File "test_memoized.php", line 51, characters 10-39:
 File "test_memoized.php", line 54, characters 10-23:
 [Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "test_memoized.php", line 57, characters 10-31:
-[Test::test_method_call]{\fun_memoized_vec_int}((function(): vec<int>)) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{\fun_memoized_vec_int}((function(): ~vec<int>)) A global variable is definitely read. (Other[11004])
 File "test_memoized.php", line 61, characters 10-43:
 [Test::test_method_call]{Foo->foo_instance_method_memoized}((function(): int)) A global variable is definitely read. (Other[11004])
 File "test_memoized.php", line 64, characters 10-47:

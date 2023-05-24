@@ -55,11 +55,11 @@ File "global_write.php", line 89, characters 10-28:
 File "global_write.php", line 92, characters 10-19:
 [Test::test_method_call]{\memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 95, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_vec_int}(~vec<int>) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 98, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_vec_bar}(~vec<Bar>) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 103, characters 10-27:
-[Test::test_method_call]{\memoized_vec_int}((function(): vec<int>)) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{\memoized_vec_int}((function(): ~vec<int>)) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 107, characters 22-30:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 110, characters 10-18:

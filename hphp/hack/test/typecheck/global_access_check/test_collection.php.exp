@@ -24,20 +24,18 @@ File "test_collection.php", line 68, characters 5-19:
 [Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_collection.php", line 14, characters 12-28:
 [Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is possibly written via function call. (Other[11003])
 File "test_collection.php", line 14, characters 12-28:
 [Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 22, characters 12-32:
-[Foo::get_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+[Foo::get_vec_int]{Foo::$static_vec_int}(~vec<int>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
+[Foo::get_vec_bar]{Foo::$static_vec_bar}(~vec<Bar>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 42, characters 10-25:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 47, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_vec_int}(~vec<int>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 54, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$static_vec_bar}(~vec<Bar>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 60, characters 39-54:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 61, characters 20-35:

@@ -68,7 +68,6 @@ FactsStore* getFactsForRequest() {
     return nullptr;
   }
 
-
   auto* map = factory->getForOptions(*repoOptions);
   if (!map) {
     return nullptr;
@@ -80,7 +79,7 @@ FactsStore* getFactsForRequest() {
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = repoOptions->dir();
-    Logger::FInfo(
+    Logger::FError(
         "Failed to update native autoloader, not natively autoloading {}. {}\n",
         repoRoot.native(),
         e.what());

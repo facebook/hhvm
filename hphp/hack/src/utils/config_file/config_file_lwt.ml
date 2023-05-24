@@ -35,7 +35,7 @@ let parse_hhconfig (fn : string) : (string * t, string) Lwt_result.t =
       read_package_config package_path |> Lwt.map Result.ok
     in
     let hash =
-      Config_file_common.hash ~config_contents:contents ~package_config
+      Config_file_common.hash parsed ~config_contents:contents ~package_config
     in
     Lwt.return_ok (hash, parsed)
   | Error message ->

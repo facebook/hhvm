@@ -23,68 +23,6 @@ let is_empty = Config_file_ffi_externs.is_empty
 let print_to_stderr (config : t) : unit =
   Config_file_ffi_externs.print_to_stderr config
 
-let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
-    : t =
-  if is_empty overrides then
-    config
-  else
-    let config = Config_file_ffi_externs.apply_overrides config overrides in
-    Option.iter log_reason ~f:(fun from ->
-        Printf.eprintf "*** Overrides from %s:\n%!" from;
-        print_to_stderr overrides;
-        Printf.eprintf "\n%!");
-    config
-
-(* Given an hhconfig_path, get the path to the PACKAGES.toml file in the same directory *)
-let get_packages_absolute_path ~(hhconfig_path : string) =
-  Path.make hhconfig_path
-  |> Path.dirname
-  |> (fun p -> Path.concat p pkgs_config_path_relative_to_repo_root)
-  |> Path.to_string
-
-(*
- * Config file format:
- * # Some comment. Indicate by a pound sign at the start of a new line
- * key = a possibly space-separated value
- *)
-let parse_contents (contents : string) : t =
-  Config_file_ffi_externs.parse_contents contents
-
-let hash ~(config_contents : string) ~(package_config : string option) : string
-    =
-  let contents =
-    match package_config with
-    | Some package_config -> config_contents ^ package_config
-    | None -> config_contents
-  in
-  Sha1.digest contents
-
-(* Non-lwt implementation of parse *)
-let parse (fn : string) : string * t =
-  let contents = Sys_utils.cat fn in
-  let parsed = parse_contents contents in
-  let hash = hash ~config_contents:contents ~package_config:None in
-  (hash, parsed)
-
-let parse_local_config (fn : string) : t =
-  try
-    let (_hash, config) = parse fn in
-    config
-  with
-  | e ->
-    Hh_logger.log "Loading config exception: %s" (Exn.to_string e);
-    Hh_logger.log "Could not load config at %s" fn;
-    empty ()
-
-let to_json t =
-  match Config_file_ffi_externs.to_json t with
-  | Ok json -> Hh_json.json_of_string json
-  | Error e -> failwith e
-
-let of_list = Config_file_ffi_externs.of_list
-
-let keys = Config_file_ffi_externs.keys
-
 module type Getters_S = sig
   val string_opt : string -> t -> string option
 
@@ -174,3 +112,69 @@ module Getters : Getters_S = struct
       else
         false
 end
+
+let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
+    : t =
+  if is_empty overrides then
+    config
+  else
+    let config = Config_file_ffi_externs.apply_overrides config overrides in
+    Option.iter log_reason ~f:(fun from ->
+        Printf.eprintf "*** Overrides from %s:\n%!" from;
+        print_to_stderr overrides;
+        Printf.eprintf "\n%!");
+    config
+
+(* Given an hhconfig_path, get the path to the PACKAGES.toml file in the same directory *)
+let get_packages_absolute_path ~(hhconfig_path : string) =
+  Path.make hhconfig_path
+  |> Path.dirname
+  |> (fun p -> Path.concat p pkgs_config_path_relative_to_repo_root)
+  |> Path.to_string
+
+(*
+ * Config file format:
+ * # Some comment. Indicate by a pound sign at the start of a new line
+ * key = a possibly space-separated value
+ *)
+let parse_contents (contents : string) : t =
+  Config_file_ffi_externs.parse_contents contents
+
+let hash
+    (parsed : t) ~(config_contents : string) ~(package_config : string option) :
+    string =
+  match Getters.string_opt "override_hhconfig_hash" parsed with
+  | Some hash -> hash
+  | None ->
+    let contents =
+      match package_config with
+      | Some package_config -> config_contents ^ package_config
+      | None -> config_contents
+    in
+    Sha1.digest contents
+
+(* Non-lwt implementation of parse *)
+let parse (fn : string) : string * t =
+  let contents = Sys_utils.cat fn in
+  let parsed = parse_contents contents in
+  let hash = hash parsed ~config_contents:contents ~package_config:None in
+  (hash, parsed)
+
+let parse_local_config (fn : string) : t =
+  try
+    let (_hash, config) = parse fn in
+    config
+  with
+  | e ->
+    Hh_logger.log "Loading config exception: %s" (Exn.to_string e);
+    Hh_logger.log "Could not load config at %s" fn;
+    empty ()
+
+let to_json t =
+  match Config_file_ffi_externs.to_json t with
+  | Ok json -> Hh_json.json_of_string json
+  | Error e -> failwith e
+
+let of_list = Config_file_ffi_externs.of_list
+
+let keys = Config_file_ffi_externs.keys

@@ -52,7 +52,7 @@ let parse_hhconfig (fn : string) : string * t =
   in
   let package_config = Some (cat_packages_file package_path) in
   let hash =
-    Config_file_common.hash ~config_contents:contents ~package_config
+    Config_file_common.hash parsed ~config_contents:contents ~package_config
   in
   (hash, parsed)
 

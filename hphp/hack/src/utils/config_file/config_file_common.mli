@@ -28,7 +28,7 @@ val parse_contents : string -> t
 val parse_local_config : string -> t
 
 (** Compute the hhconfig hash *)
-val hash : config_contents:string -> package_config:string option -> string
+val hash : t -> config_contents:string -> package_config:string option -> string
 
 val to_json : t -> Hh_json.json
 

@@ -83,7 +83,7 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let hash = Self::hash(&contents, &extra_contents);
+        let hash = Self::hash(&hhconfig, &contents, &extra_contents);
         hhconfig.apply_overrides(overrides);
         let hh_conf_path = hh_conf_path.as_ref();
         let mut hh_conf = ConfigFile::from_file(hh_conf_path)
@@ -105,7 +105,10 @@ impl HhConfig {
         Ok((hh_conf_file, hh_config_file))
     }
 
-    fn hash(config_contents: &str, package_config: &str) -> String {
+    fn hash(parsed: &ConfigFile, config_contents: &str, package_config: &str) -> String {
+        if let Some(hash) = parsed.get_str("override_hhconfig_hash") {
+            return hash.to_owned();
+        }
         let full_contents = format!("{}{}", config_contents, package_config);
         format!("{:x}", Sha1::digest(full_contents.as_bytes()))
     }
@@ -146,7 +149,9 @@ impl HhConfig {
 
         for (key, mut value) in hhconfig {
             match key.as_str() {
-                "current_saved_state_rollout_flag_index" | "deactivate_saved_state_rollout" => {
+                "current_saved_state_rollout_flag_index"
+                | "deactivate_saved_state_rollout"
+                | "override_hhconfig_hash" => {
                     // These were already queried for LocalConfig above.
                     // Ignore them so they aren't added to c.unknown.
                 }

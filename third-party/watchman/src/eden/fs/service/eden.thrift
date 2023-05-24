@@ -294,11 +294,35 @@ union FileInformationOrError {
  */
 enum FileAttributes {
   NONE = 0,
+  /**
+   * Returns the SHA-1 hash of a file. Returns an error for symlinks and directories,
+   * and non-regular files.
+   */
   SHA1_HASH = 1,
+  /**
+   * Returns the size of a file. Returns an error for symlinks and directories.
+   */
   FILE_SIZE = 2,
+  /**
+   * Returns the type of a file or directory if it has a corresponding "source
+   * control type" that can be represented in a source control type.
+   */
   SOURCE_CONTROL_TYPE = 4,
+  /**
+   * Returns an opaque identifier that can be used to know when a file or directory
+   * (recursively) has changed.
+   *
+   * If the file or directory (recursively) has been locally written to, no object ID
+   * will be returned. In that case, the caller should physically compare or search
+   * the directory structure.
+   *
+   * Do not attempt to parse this identifier. It is subject to change at any moment.
+   */
+  OBJECT_ID = 8,
 /* NEXT_ATTR = 2^x */
 } (cpp2.enum_type = 'uint64_t')
+
+typedef unsigned64 RequestedAttributes
 
 /**
  * Subset of attributes for a single file returned by getAttributesFromFiles()
@@ -339,6 +363,16 @@ union SourceControlTypeOrError {
   2: EdenError error;
 }
 
+union ObjectIdOrError {
+  // If the path has been locally written to, it will have no object ID. Therefore,
+  // it's possible for `objectId` to be unset even if there is no error.
+  //
+  // Notably, if path refers to a directory, no object ID will be returned if any
+  // child file or directory has been written to.
+  1: ThriftObjectId objectId;
+  2: EdenError error;
+}
+
 /**
  * Subset of attributes for a single file returned by getAttributesFromFiles()
  *
@@ -350,6 +384,7 @@ struct FileAttributeDataV2 {
   1: optional Sha1OrError sha1;
   2: optional SizeOrError size;
   3: optional SourceControlTypeOrError sourceControlType;
+  4: optional ObjectIdOrError objectId;
 }
 
 /**
@@ -409,7 +444,7 @@ struct SyncBehavior {
 struct GetAttributesFromFilesParams {
   1: PathString mountPoint;
   2: list<PathString> paths;
-  3: unsigned64 requestedAttributes;
+  3: RequestedAttributes requestedAttributes;
   4: SyncBehavior sync;
 }
 
@@ -428,7 +463,7 @@ struct GetAttributesFromFilesResultV2 {
 struct ReaddirParams {
   1: PathString mountPoint;
   2: list<PathString> directoryPaths;
-  3: unsigned64 requestedAttributes;
+  3: RequestedAttributes requestedAttributes;
   4: SyncBehavior sync;
 }
 

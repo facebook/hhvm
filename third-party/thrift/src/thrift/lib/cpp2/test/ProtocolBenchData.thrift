@@ -69,6 +69,10 @@ struct LargeListMixed {
   1: list<Mixed> lst;
 }
 
+struct LargeSetInt {
+  1: set<i32> s;
+}
+
 struct LargeMapInt {
   1: map<i32, i32> m;
 }

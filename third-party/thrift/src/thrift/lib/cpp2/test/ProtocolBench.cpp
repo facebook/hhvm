@@ -159,6 +159,7 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X2(Prefix, proto, BigListMixed)    \
   X2(Prefix, proto, BigListMixedInt) \
   X2(Prefix, proto, LargeListMixed)  \
+  X2(Prefix, proto, LargeSetInt)     \
   X2(Prefix, proto, LargeMapInt)     \
   X2(Prefix, proto, NestedMap)       \
   X2(Prefix, proto, ComplexStruct)

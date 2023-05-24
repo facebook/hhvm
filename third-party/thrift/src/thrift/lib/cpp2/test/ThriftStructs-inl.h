@@ -128,6 +128,16 @@ thrift::benchmark::LargeListMixed create<thrift::benchmark::LargeListMixed>() {
 }
 
 template <>
+thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
+  std::srand(1);
+  thrift::benchmark::LargeSetInt l;
+  for (int i = 0; i < 1'000'000; i++) {
+    l.s()->insert(std::rand());
+  }
+  return l;
+}
+
+template <>
 thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
   std::srand(1);
   thrift::benchmark::LargeMapInt l;

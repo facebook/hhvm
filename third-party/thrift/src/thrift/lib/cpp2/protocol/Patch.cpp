@@ -446,6 +446,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
       Value::Type::objectValue,
       {PatchOp::Assign,
        PatchOp::Clear,
+       PatchOp::Remove,
        PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::EnsureUnion,
@@ -514,6 +515,23 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 
   if (auto* patchFields = findOp(patch, PatchOp::PatchAfter)) {
     applyFieldPatch(patchFields);
+  }
+  if (auto* to_remove = findOp(patch, PatchOp::Remove)) {
+    if (!to_remove->is_set()) {
+      throw std::runtime_error(fmt::format(
+          "The `PatchOp::Remove` field in struct/union patch is not `set<i16>` but `{}`",
+          util::enumNameSafe(to_remove->getType())));
+    }
+
+    for (const auto& field_id : to_remove->as_set()) {
+      if (!field_id.is_i16()) {
+        throw std::runtime_error(fmt::format(
+            "The `PatchOp::Remove` field in struct/union patch is not `set<i16>` but `set<{}>`",
+            util::enumNameSafe(field_id.getType())));
+      }
+
+      value.erase(FieldId{field_id.as_i16()});
+    }
   }
   if (auto* addFields = findOp(patch, PatchOp::Add)) {
     // TODO(afuller): Implement field-wise add.

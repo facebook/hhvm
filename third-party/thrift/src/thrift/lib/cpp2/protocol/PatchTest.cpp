@@ -1658,5 +1658,53 @@ TEST_F(PatchTest, PrettyPrintPatch) {
 })");
 }
 
+TEST_F(PatchTest, RemoveField) {
+  Object obj;
+  obj[FieldId{1}].emplace_i32() = 10;
+  obj[FieldId{2}].emplace_i32() = 20;
+  obj[FieldId{3}].emplace_i32() = 30;
+
+  Object patch;
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {};
+  applyPatch(patch, obj);
+  EXPECT_TRUE(obj.contains(FieldId{1}));
+  EXPECT_TRUE(obj.contains(FieldId{2}));
+  EXPECT_TRUE(obj.contains(FieldId{3}));
+
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+      asValueStruct<type::i16_t>(1), asValueStruct<type::i16_t>(2)};
+  applyPatch(patch, obj);
+  EXPECT_FALSE(obj.contains(FieldId{1}));
+  EXPECT_FALSE(obj.contains(FieldId{2}));
+  EXPECT_TRUE(obj.contains(FieldId{3}));
+
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+      asValueStruct<type::i16_t>(3)};
+  applyPatch(patch, obj);
+  EXPECT_FALSE(obj.contains(FieldId{1}));
+  EXPECT_FALSE(obj.contains(FieldId{2}));
+  EXPECT_FALSE(obj.contains(FieldId{3}));
+
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_list() = {};
+  try {
+    applyPatch(patch, obj);
+    EXPECT_TRUE(false);
+  } catch (std::runtime_error& e) {
+    std::string msg = e.what();
+    EXPECT_NE(msg.find("is not `set<i16>` but `listValue`"), msg.npos) << msg;
+  }
+
+  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
+      asValueStruct<type::i32_t>(1)};
+  try {
+    applyPatch(patch, obj);
+    EXPECT_TRUE(false);
+  } catch (std::runtime_error& e) {
+    std::string msg = e.what();
+    EXPECT_NE(msg.find("is not `set<i16>` but `set<i32Value>`"), msg.npos)
+        << msg;
+  }
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

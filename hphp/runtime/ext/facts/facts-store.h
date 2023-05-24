@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
+#include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/watcher.h"
 #include "hphp/util/optional.h"
 

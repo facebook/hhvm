@@ -476,6 +476,10 @@ struct StaticString : String {
   }
   template<size_t N> explicit StaticString(char(&s)[N]) = delete;
 
+  explicit StaticString(std::string_view s) {
+    construct(s.data(), s.size());
+  }
+
   ~StaticString() {
     // prevent ~req::ptr from destroying contents.
     detach();

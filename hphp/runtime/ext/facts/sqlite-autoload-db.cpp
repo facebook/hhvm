@@ -302,6 +302,24 @@ TypeKind toTypeKind(const std::string_view kind) {
   }
 }
 
+inline std::string_view typeKindToSlice(TypeKind kind) {
+  switch (kind) {
+    case TypeKind::Class:
+      return kTypeKindClass;
+    case TypeKind::Enum:
+      return kTypeKindEnum;
+    case TypeKind::Interface:
+      return kTypeKindInterface;
+    case TypeKind::Trait:
+      return kTypeKindTrait;
+    case TypeKind::TypeAlias:
+      return kTypeKindTypeAlias;
+    case TypeKind::Unknown:
+      return "";
+  }
+  not_reached();
+}
+
 struct PathStmts {
   explicit PathStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -759,7 +777,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     auto query = m_txn.query(m_typeStmts.m_insertDetails);
     query.bindString("@name", type);
     query.bindString("@path", path.native());
-    query.bindString("@kind_of", toString(kind));
+    query.bindString("@kind_of", typeKindToSlice(kind));
     query.bindInt("@flags", flags);
     XLOGF(DBG9, "Running {}", query.sql());
     query.step();

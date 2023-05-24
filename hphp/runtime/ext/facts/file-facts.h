@@ -40,28 +40,11 @@ inline constexpr TypeKindMask kTypeKindAll = static_cast<int>(TypeKind::Class) |
     static_cast<int>(TypeKind::Interface) | static_cast<int>(TypeKind::Enum) |
     static_cast<int>(TypeKind::Trait) | static_cast<int>(TypeKind::TypeAlias);
 
-inline constexpr std::string_view kTypeKindClass = "class";
-inline constexpr std::string_view kTypeKindInterface = "interface";
-inline constexpr std::string_view kTypeKindEnum = "enum";
-inline constexpr std::string_view kTypeKindTrait = "trait";
-inline constexpr std::string_view kTypeKindTypeAlias = "typeAlias";
-
-constexpr std::string_view toString(TypeKind kind) {
-  switch (kind) {
-    case TypeKind::Class:
-      return kTypeKindClass;
-    case TypeKind::Enum:
-      return kTypeKindEnum;
-    case TypeKind::Interface:
-      return kTypeKindInterface;
-    case TypeKind::Trait:
-      return kTypeKindTrait;
-    case TypeKind::TypeAlias:
-      return kTypeKindTypeAlias;
-    default:
-      return "";
-  }
-}
+constexpr std::string_view kTypeKindClass = "class";
+constexpr std::string_view kTypeKindInterface = "interface";
+constexpr std::string_view kTypeKindEnum = "enum";
+constexpr std::string_view kTypeKindTrait = "trait";
+constexpr std::string_view kTypeKindTypeAlias = "typeAlias";
 
 using TypeFlagMask = int;
 enum class TypeFlag {

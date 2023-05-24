@@ -442,6 +442,33 @@ TypedValue tvFromDynamic(folly::dynamic&& dy) {
   return make_tv<KindOfNull>();
 }
 
+const StaticString s_TypeKindClass(kTypeKindClass);
+const StaticString s_TypeKindEnum(kTypeKindEnum);
+const StaticString s_TypeKindInterface(kTypeKindInterface);
+const StaticString s_TypeKindTrait(kTypeKindTrait);
+const StaticString s_TypeKindTypeAlias(kTypeKindTypeAlias);
+
+/**
+ * Return TypeKind as a string literal suitable for use in TypeDetails
+ */
+StaticString typeKindToString(TypeKind kind) {
+  switch (kind) {
+    case TypeKind::Class:
+      return s_TypeKindClass;
+    case TypeKind::Enum:
+      return s_TypeKindEnum;
+    case TypeKind::Interface:
+      return s_TypeKindInterface;
+    case TypeKind::Trait:
+      return s_TypeKindTrait;
+    case TypeKind::TypeAlias:
+      return s_TypeKindTypeAlias;
+    case TypeKind::Unknown:
+      return empty_string_ref;
+  }
+  not_reached();
+}
+
 /**
  * Convert a C++ folly::dynamic structure into a Hack `vec<dynamic>`.
  */
@@ -576,8 +603,8 @@ struct FactsStoreImpl final
 
   Variant getKind(const String& type) override {
     return logPerformance(__func__, [&]() {
-      auto const* kindStr = makeStaticString(
-          toString(m_map.getKind(Symbol<SymKind::Type>{*type.get()})));
+      auto const kind = m_map.getKind(Symbol<SymKind::Type>{*type.get()});
+      auto const kindStr = typeKindToString(kind).get();
 
       if (kindStr == nullptr || kindStr->empty()) {
         return Variant{Variant::NullInit{}};
@@ -1257,7 +1284,8 @@ struct FactsStoreImpl final
       derivedTypeTuple.append(make_tv<KindOfPersistentString>(type.get()));
       derivedTypeTuple.append(make_tv<KindOfPersistentString>(path.get()));
       derivedTypeTuple.append(
-          make_tv<KindOfPersistentString>(makeStaticString(toString(kind))));
+          make_tv<KindOfPersistentString>(typeKindToString(kind).get()));
+
       derivedTypeTuple.append(
           (flags & static_cast<TypeFlagMask>(TypeFlag::Abstract)) != 0);
       derivedTypeVec.append(std::move(derivedTypeTuple).toArray());

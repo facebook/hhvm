@@ -1945,23 +1945,6 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
-   * DEPRECATED -- use debugGetBlobMetadata instead.
-   * TODO: Remove Febuary 2023.
-   *
-   * Get the metadata about a source control Blob.
-   *
-   * This retrieves the metadata about a source control Blob.  This returns
-   * the size and contents SHA1 of the blob, which eden stores separately from
-   * the blob itself.  This can also be a useful alternative to
-   * debugGetScmBlob() when getting data about extremely large blobs.
-   */
-  ScmBlobMetadata debugGetScmBlobMetadata(
-    1: PathString mountPoint,
-    2: ThriftObjectId id,
-    3: bool localStoreOnly,
-  ) throws (1: EdenError ex);
-
-  /**
    * Get the metadata about a source control Blob.
    *
    * This retrieves the metadata about a source control Blob.  This returns

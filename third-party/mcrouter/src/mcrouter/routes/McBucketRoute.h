@@ -70,6 +70,11 @@ class McBucketRoute {
   bool traverse(
       const Request& req,
       const RouteHandleTraverser<RouteHandleIf>& t) const {
+    // when we execute traverse providing a pre-calculated bucket id,
+    // no need to recalculate it:
+    if (fiber_local<RouterInfo>::getBucketId().has_value()) {
+      return t(*rh_, req);
+    }
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
       return ch3_(getRoutingKey<Request>(req, this->salt_));
     });

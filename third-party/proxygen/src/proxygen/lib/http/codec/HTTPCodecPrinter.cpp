@@ -56,6 +56,8 @@ void HTTPCodecPrinter::onHeadersComplete(StreamID stream,
   std::cout << "HEADERS: stream_id=" << stream
             << ", numHeaders=" << msg->getHeaders().size() << std::endl;
   if (msg->isRequest()) {
+    std::cout << "Method= " << msg->getMethodString() << std::endl;
+    std::cout << "Path= " << msg->getPathAsStringPiece() << std::endl;
     std::cout << "URL=" << msg->getURL() << std::endl;
   } else {
     std::cout << "Status=" << msg->getStatusCode() << std::endl;

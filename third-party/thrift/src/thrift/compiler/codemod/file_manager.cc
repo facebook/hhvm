@@ -29,7 +29,7 @@ void file_manager::apply_replacements() {
   std::string new_content;
 
   if (replacements_.empty()) {
-    fmt::print("No replacements\n");
+    fmt::print("No changes produced\n");
     return;
   }
 

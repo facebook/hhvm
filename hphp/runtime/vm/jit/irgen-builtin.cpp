@@ -97,16 +97,10 @@ bool type_converts_to_number(Type ty) {
 jit::vector<SSATmp*> tokenize(
     IRGS& env, const StringData* format, SSATmp* args) {
   assertx(args->isA(TVec));
-  auto const numArgs = [&]() -> Optional<uint32_t> {
-    auto const rat = args->type().arrSpec().type();
-    if (!rat || rat->tag() != RepoAuthType::Array::Tag::Tuple) {
-      return std::nullopt;
-    }
-    return rat->size();
-  }();
 
   jit::vector<SSATmp*> result;
-  if (!numArgs.has_value()) {
+  auto const rat = args->type().arrSpec().type();
+  if (!rat || rat->tag() != RepoAuthType::Array::Tag::Tuple) {
     return result;
   }
 
@@ -150,7 +144,7 @@ jit::vector<SSATmp*> tokenize(
     tokens.push_back(makeStaticString(buf.detach()));
   }
 
-  if (numArgs < numStrTokens) {
+  if (rat->size() < numStrTokens) {
     return result;
   }
 

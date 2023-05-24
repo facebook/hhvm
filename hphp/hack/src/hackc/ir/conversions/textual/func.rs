@@ -281,7 +281,15 @@ fn write_func(
                 let mut func = rewrite_jmp_ops(func);
                 ir::passes::clean::run(&mut func);
 
-                let mut state = FuncState::new(fb, Arc::clone(&strings), &func, func_info);
+                let experimental_self_parent_in_trait =
+                    unit_state.experimental_self_parent_in_trait;
+                let mut state = FuncState::new(
+                    fb,
+                    Arc::clone(&strings),
+                    &func,
+                    func_info,
+                    experimental_self_parent_in_trait,
+                );
 
                 for bid in func.block_ids() {
                     write_block(&mut state, bid)?;
@@ -806,6 +814,9 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     use ir::instr::CallDetail;
     use ir::FCallArgsFlags;
 
+    // Temporary suppress warning. Will be remove in the next diff
+    let _ = state.experimental_self_parent_in_trait;
+
     let ir::Call {
         ref operands,
         context,
@@ -1032,6 +1043,7 @@ pub(crate) struct FuncState<'a, 'b, 'c> {
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     func_info: Arc<FuncInfo<'a>>,
     pub(crate) strings: Arc<StringInterner>,
+    pub(crate) experimental_self_parent_in_trait: bool,
 }
 
 impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
@@ -1040,6 +1052,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         strings: Arc<StringInterner>,
         func: &'a ir::Func<'a>,
         func_info: Arc<FuncInfo<'a>>,
+        experimental_self_parent_in_trait: bool,
     ) -> Self {
         Self {
             fb,
@@ -1047,6 +1060,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
             iid_mapping: Default::default(),
             func_info,
             strings,
+            experimental_self_parent_in_trait,
         }
     }
 

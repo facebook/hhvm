@@ -47,6 +47,11 @@ pub struct Opts {
     /// instructions for unimplemented code but will rather completely skip the file.
     #[clap(long)]
     skip_unimplemented: bool,
+
+    /// Experimental feature: change the way we process `self` and `parent` inside trait methods.
+    /// This is a temporary flag so we don't regress infer's analysis while this is deployed.
+    #[clap(long)]
+    experimental_self_parent_in_trait: bool,
 }
 
 pub fn run(opts: Opts) -> Result<()> {
@@ -93,7 +98,13 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
         let pre_alloc = bumpalo::Bump::default();
         build_ir(&pre_alloc, path, &content, &opts.single_file_opts).and_then(|unit| {
             let mut output = Vec::new();
-            textual::textual_writer(&mut output, path, unit, opts.no_builtins)?;
+            textual::textual_writer(
+                &mut output,
+                path,
+                unit,
+                opts.no_builtins,
+                opts.experimental_self_parent_in_trait,
+            )?;
             Ok(output)
         })
     };

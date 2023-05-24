@@ -26,6 +26,7 @@ pub fn textual_writer(
     path: &Path,
     unit: ir::Unit<'_>,
     no_builtins: bool,
+    experimental_self_parent_in_trait: bool,
 ) -> Result<()> {
     let mut txf = TextualFile::new(w, Arc::clone(&unit.strings));
 
@@ -35,7 +36,7 @@ pub fn textual_writer(
     txf.set_attribute(textual::FileAttribute::SourceLanguage("hack".to_string()))?;
     txf.debug_separator()?;
 
-    let mut state = UnitState::new(Arc::clone(&unit.strings));
+    let mut state = UnitState::new(Arc::clone(&unit.strings), experimental_self_parent_in_trait);
     check_fatal(path, unit.fatal.as_ref())?;
 
     for cls in unit.classes {

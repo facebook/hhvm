@@ -1934,21 +1934,6 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
-   * DEPRECATED -- use debugGetBlob instead.
-   * TODO: Remove January 2023.
-   *
-   * Get the contents of a source control Blob.
-   *
-   * This can be used to confirm if eden's LocalStore contains information
-   * for the blob, and that the information is correct.
-   */
-  binary debugGetScmBlob(
-    1: PathString mountPoint,
-    2: ThriftObjectId id,
-    3: bool localStoreOnly,
-  ) throws (1: EdenError ex);
-
-  /**
    * Get the contents of a source control Blob.
    *
    * The origins field can control where to check for the blob. This will

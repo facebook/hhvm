@@ -34,11 +34,11 @@ mod ffi {
         domains: Vec<String>,
     }
     extern "Rust" {
-        pub fn package_info_cpp_ffi(source_text: &CxxString) -> PackageInfo;
+        pub fn package_info(source_text: &CxxString) -> PackageInfo;
     }
 }
 
-pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
+pub fn package_info(source_text: &CxxString) -> ffi::PackageInfo {
     let s = package::PackageInfo::from_text(&source_text.to_string());
     match s {
         Ok(info) => {

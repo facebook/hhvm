@@ -63,7 +63,7 @@ void registerBuiltinSymbols(
   defaults.flags().initDeclConfig(options);
 
   auto decls = hackc::direct_decl_parse(options, name, contents);
-  auto const facts = hackc::decls_to_facts_cpp_ffi(
+  auto const facts = hackc::decls_to_facts(
     decls,
     "" // This is *meant* to be the hash of the source file, but it's not used
   );

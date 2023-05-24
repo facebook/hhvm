@@ -220,7 +220,7 @@ CompilerResult hackc_compile(
             .add("code_size", strlen(code));
         }
       };
-      return hackc::compile_unit_from_text_cpp_ffi(native_env, code);
+      return hackc::compile_unit_from_text(native_env, code);
     }();
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
@@ -243,7 +243,7 @@ CompilerResult hackc_compile(
             .add("code_size", strlen(code));
         }
       };
-      return hackc::compile_from_text_cpp_ffi(native_env, code);
+      return hackc::compile_from_text(native_env, code);
     }();
     auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
 
@@ -363,8 +363,8 @@ ParseFactsResult extract_facts(
       auto const decls = hackc::direct_decl_parse(
         decl_config, filename, source_text
       );
-      auto const facts = hackc::decls_to_facts_cpp_ffi(decls, actual_sha1);
-      rust::String json = hackc::facts_to_json_cpp_ffi(
+      auto const facts = hackc::decls_to_facts(decls, actual_sha1);
+      rust::String json = hackc::facts_to_json(
           facts, /* pretty= */ false
       );
       return FactsJSONString { std::string(json) };
@@ -392,7 +392,7 @@ FfpResult ffp_parse_file(
   const RepoOptionsFlags& options
 ) {
   auto const env = options.getParserEnvironment();
-  auto const json = hackc_parse_positioned_full_trivia_cpp_ffi(contents, env);
+  auto const json = hackc_parse_positioned_full_trivia(contents, env);
   return FfpJSONString { std::string(json.begin(), json.end()) };
 }
 

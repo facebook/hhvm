@@ -47,7 +47,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
     std::istreambuf_iterator<char>()
   };
 
-  auto info = package::package_info_cpp_ffi(packages_toml);
+  auto info = package::package_info(packages_toml);
 
   auto const convert = [&] (auto const& v) {
     hphp_vector_string_set result;

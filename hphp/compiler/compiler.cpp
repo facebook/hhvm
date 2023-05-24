@@ -859,7 +859,7 @@ namespace {
   ) {
     std::vector<coro::TaskWithExecutor<void>> tasks;
     auto const declCallback = [&](auto const* d) -> coro::Task<void> {
-      auto const facts = hackc::decls_to_facts_cpp_ffi(*d, "");
+      auto const facts = hackc::decls_to_facts(*d, "");
       auto summary = summary_of_facts(facts);
       callback(
         "",

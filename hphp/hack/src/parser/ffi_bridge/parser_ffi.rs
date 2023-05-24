@@ -30,14 +30,14 @@ mod ffi {
     }
 
     extern "Rust" {
-        pub fn hackc_parse_positioned_full_trivia_cpp_ffi(
+        pub fn hackc_parse_positioned_full_trivia(
             source_text: &CxxString,
             env: &ParserEnv,
         ) -> Vec<u8>;
     }
 }
 
-pub fn hackc_parse_positioned_full_trivia_cpp_ffi(
+pub fn hackc_parse_positioned_full_trivia(
     source_text: &CxxString,
     env: &ffi::ParserEnv,
 ) -> Vec<u8> {

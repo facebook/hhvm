@@ -191,13 +191,13 @@ pub mod compile_ffi {
         type UnitWrapper;
 
         /// Compile Hack source code to a Unit or an error.
-        unsafe fn compile_unit_from_text_cpp_ffi(
+        unsafe fn compile_unit_from_text(
             env: &NativeEnv,
             source_text: &CxxString,
         ) -> Result<Box<UnitWrapper>>;
 
         /// Compile Hack source code to either HHAS or an error.
-        fn compile_from_text_cpp_ffi(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
+        fn compile_from_text(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
 
         /// Invoke the hackc direct decl parser and return every shallow decl in the file.
         fn direct_decl_parse(
@@ -214,11 +214,11 @@ pub mod compile_ffi {
         /// For testing: return true if deserializing produces the expected Decls.
         fn verify_deserialization(decls: &DeclResult) -> bool;
 
-        /// Serialize a FactsResult to JSON
-        fn facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
-
         /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts_cpp_ffi(decls: &DeclResult, sha1sum: &CxxString) -> FactsResult;
+        fn decls_to_facts(decls: &DeclResult, sha1sum: &CxxString) -> FactsResult;
+
+        /// Serialize a FactsResult to JSON
+        fn facts_to_json(facts: FactsResult, pretty: bool) -> String;
     }
 }
 
@@ -316,7 +316,7 @@ fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
     hasher.finalize().into()
 }
 
-fn compile_from_text_cpp_ffi(
+fn compile_from_text(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
@@ -408,7 +408,7 @@ fn verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
     decls == result.decls.parsed_file.decls
 }
 
-fn compile_unit_from_text_cpp_ffi(
+fn compile_unit_from_text(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Box<UnitWrapper>, String> {
@@ -449,7 +449,7 @@ fn compile_unit_from_text_cpp_ffi(
     .map_err(|e| e.to_string())
 }
 
-pub fn facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
+pub fn facts_to_json(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
     if facts_result.has_errors {
         String::new()
     } else {
@@ -458,7 +458,7 @@ pub fn facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: boo
     }
 }
 
-pub fn decls_to_facts_cpp_ffi(
+pub fn decls_to_facts(
     decl_result: &compile_ffi::DeclResult,
     sha1sum: &CxxString,
 ) -> compile_ffi::FactsResult {

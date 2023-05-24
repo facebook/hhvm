@@ -95,7 +95,7 @@ class CompilerTest(unittest.TestCase):
         ]
     )
 
-    def compare_code(self, path1, path2):
+    def compare_code(self, path1, path2, cmd):
         gens = list(gen_find_recursive_files(path1))
         fixt = list(gen_find_recursive_files(path2))
         try:
@@ -118,6 +118,7 @@ class CompilerTest(unittest.TestCase):
                     lineterm="",
                 ):
                     msg.append(line)
+                msg.append("Command: {}".format(cmd))
                 self.fail("\n".join(msg))
         except Exception:
             print(self.MSG, file=sys.stderr)
@@ -206,7 +207,7 @@ class CompilerTest(unittest.TestCase):
 
             gen_code = os.path.join(self.tmp, fixture_dir, "gen-" + lang)
             fixture_code = os.path.join(fixture_dir, "gen-" + lang)
-            self.compare_code(gen_code, fixture_code)
+            self.compare_code(gen_code, fixture_code, args)
 
 
 def add_fixture(klazz, name):

@@ -108,7 +108,8 @@ jit::vector<SSATmp*> tokenize(
     return result;
   }
 
-  int size = 256 - kStringOverhead;
+  const int size = 256 - kStringOverhead;
+  static_assert(size >= 0);
   StringBuffer buf(size);
   jit::vector<const StringData*> tokens;
   size_t numStrTokens = 0;

@@ -1,6 +1,6 @@
 Besides `is`-expressions, Hack supports another form of type
 refinements, which we refer to as `with`-refinements in this section.
-This feature allows more precise typing of classes/interfaces/trait in
+This feature allows more precise typing of classes/interfaces/traits in
 a way that specific _type_ or _context_ constant(s) are more specific
 (i.e., refined).
 

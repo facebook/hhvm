@@ -5216,7 +5216,8 @@ and check_function_dynamically_callable
       (fun () ->
         fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind)
       (fun env_and_dynamic_body error ->
-        Errors.function_is_not_dynamically_callable name error;
+        if not @@ TypecheckerOptions.everything_sdt env.genv.tcopt then
+          Errors.function_is_not_dynamically_callable name error;
         env_and_dynamic_body)
   in
   (env, dynamic_params, dynamic_body, dynamic_return_ty)

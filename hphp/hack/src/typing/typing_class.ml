@@ -103,13 +103,14 @@ let method_dynamically_callable env cls m params_decl_ty return =
           m.m_body
           m.m_fun_kind)
       (fun env_and_dynamic_body error ->
-        Errors.method_is_not_dynamically_callable
-          pos
-          (snd m.m_name)
-          (Cls.name cls)
-          (Env.get_support_dynamic_type env)
-          None
-          (Some error);
+        if not @@ TypecheckerOptions.everything_sdt env.genv.tcopt then
+          Errors.method_is_not_dynamically_callable
+            pos
+            (snd m.m_name)
+            (Cls.name cls)
+            (Env.get_support_dynamic_type env)
+            None
+            (Some error);
         env_and_dynamic_body)
   in
   (env, dynamic_params, dynamic_body, dynamic_return_ty)

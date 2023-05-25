@@ -265,7 +265,7 @@ class hoist_annotated_types {
   std::string render_type(t_type_ref ref) {
     auto type = ref.get_type();
     auto name = type->get_full_name();
-    re2::RE2 prefix(fmt::format("\\b{}", prog_.scope_name("")));
+    re2::RE2 prefix(fmt::format("\\b{}\\.", prog_.name()));
     re2::RE2::GlobalReplace(&name, prefix, "");
     if (!needs_replacement(ref)) {
       return name;

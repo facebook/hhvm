@@ -37,11 +37,11 @@ class HoistAnnotatedTypes(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
-                typedef map<i32 (cpp.type = "uint32_t"), S> MyMap;
+                typedef map<i32 (cpp.type = "uint32_t"), S> fooMap;
 
                 struct S {
                     1: list<S (annotated)> (annotated) foo;
-                    2: map<string, map<i32, i32> (annotated)> bar;
+                    2: map<string, map<i32, fooMap> (annotated)> bar;
                     3: set<set<i16 (annotated)> (annotated)> nested;
                 }
 
@@ -61,11 +61,11 @@ class HoistAnnotatedTypes(unittest.TestCase):
             read_file("foo.thrift"),
             textwrap.dedent(
                 """\
-                typedef map<i32_7683, S> MyMap;
+                typedef map<i32_7683, S> fooMap;
 
                 struct S {
                     1: list<S_866> (annotated) foo;
-                    2: map<string, map_i32_i32_7359> bar;
+                    2: map<string, map_i32_fooMap_1878> bar;
                     3: set<set_i16_5922> nested;
                 }
 
@@ -80,7 +80,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 typedef S (moar_annotated = "1") S_8730
                 typedef i16 (annotated = "1") i16_2065
                 typedef i32 (cpp.type = "uint32_t") i32_7683
-                typedef map<i32, i32> (annotated = "1") map_i32_i32_7359
+                typedef map<i32, fooMap> (annotated = "1") map_i32_fooMap_1878
                 typedef set<i16_2065> (annotated = "1") set_i16_5922
                 """
             ),

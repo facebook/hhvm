@@ -50,6 +50,12 @@ File "enum_class.php--Arraykey.php", line 2, characters 12-19:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Arraykey.php", line 2, characters 12-19:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Bool.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Bool.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Bool.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Callable.php", line 2, characters 12-19:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Callable.php", line 2, characters 12-19:
@@ -66,6 +72,12 @@ File "enum_class.php--Dynamic.php", line 2, characters 12-18:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Dynamic.php", line 2, characters 12-18:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--False.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--False.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--False.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Float.php", line 2, characters 12-16:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Float.php", line 2, characters 12-16:
@@ -74,6 +86,12 @@ File "enum_class.php--Foo.php", line 5, characters 12-14:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Foo.php", line 5, characters 12-14:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Int.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Int.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Int.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Mixed.php", line 2, characters 12-16:
@@ -90,22 +108,64 @@ File "enum_class.php--Nothing.php", line 2, characters 12-18:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Nothing.php", line 2, characters 12-18:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Null.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Null.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Null.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Num.php", line 2, characters 12-14:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Num.php", line 2, characters 12-14:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Parent.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Parent.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Parent.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Resource.php", line 2, characters 12-19:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Resource.php", line 2, characters 12-19:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Self.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Self.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Self.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
+File "enum_class.php--Static.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Static.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Static.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
+File "enum_class.php--String.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--String.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--String.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--This.php", line 2, characters 12-15:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--This.php", line 2, characters 12-15:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--True.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--True.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--True.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--Varray.php", line 2, characters 12-17:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--Varray.php", line 2, characters 12-17:
 Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Void.php", line 2, characters 12-12:
+Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
+File "enum_class.php--Void.php", line 2, characters 12-12:
+Unbound name: `HH\MemberOf` (an object type) (Naming[2049])
+File "enum_class.php--Void.php", line 2, characters 12-12:
+Unbound name: `` (an object type) (Naming[2049])
 File "enum_class.php--_.php", line 2, characters 12-12:
 Unbound name: `HH\BuiltinEnumClass` (an object type) (Naming[2049])
 File "enum_class.php--_.php", line 2, characters 12-12:

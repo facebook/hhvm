@@ -256,11 +256,11 @@ let make_naming_table
   naming_table
 
 (** Type check given files. Create the dependency graph as a side effect. *)
-let type_check_make_depgraph
-    ctx options (defs_per_file : FileInfo.t Relative_path.Map.t) : unit =
-  Relative_path.Map.iter defs_per_file ~f:(fun file fileinfo ->
+let type_check_make_depgraph ctx options (files : Relative_path.t list) : unit =
+  List.iter files ~f:(fun file ->
+      let ast = Ast_provider.get_ast ctx file ~full:true in
       let (_ : Tast.def list * Errors.t) =
-        Typing_check_utils.type_file ctx file fileinfo
+        Typing_check_utils.type_file ctx file ast
       in
       ());
   if options.debug then Typing_deps.dump_current_edge_buffer_in_memory_mode ();
@@ -275,7 +275,7 @@ let process_pre_changes ctx options (files : Relative_path.t list) :
   (* TODO builtins and hhi stuff *)
   let defs_per_file = parse_defs ctx files in
   let naming_table = make_naming_table ctx options defs_per_file in
-  type_check_make_depgraph ctx options defs_per_file;
+  type_check_make_depgraph ctx options files;
   naming_table
 
 (** Process changed files by making those files available in the typechecker as a side effect

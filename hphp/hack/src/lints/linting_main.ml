@@ -80,21 +80,8 @@ let lint ctx fn content =
   Typing_deps.trace := false;
   Errors.ignore_ (fun () ->
       let parser_return = parse_and_lint fn content ctx in
-      let { Parser_return.file_mode; comments; ast; _ } = parser_return in
-      let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
+      let { Parser_return.file_mode; ast; _ } = parser_return in
       (* naming and typing currently don't produce any lint errors *)
-      let fi =
-        {
-          FileInfo.file_mode;
-          funs;
-          classes;
-          typedefs;
-          consts;
-          modules;
-          comments = Some comments;
-          hash = None;
-        }
-      in
       (* PHP files generate declarations via some fairly error-prone regexps,
        * so only try to lint Hack files *)
       match file_mode with
@@ -120,6 +107,6 @@ let lint ctx fn content =
                 tcopt)
             ctx
         in
-        let (tast, _) = Typing_check_utils.type_file ctx fn fi in
+        let (tast, _) = Typing_check_utils.type_file ctx fn ast in
         lint_tast ctx tast);
   Typing_deps.trace := orig_trace

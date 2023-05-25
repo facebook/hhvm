@@ -6,8 +6,12 @@
  *
  *)
 
+(** [type_file ctx fn ast] works as follows:
+1. uses [ast] to obtain a list of all classes, funs, ...
+2. uses [fn] for the error context
+3. confusingly, looks up the def of the file using [Ast_provider.get_ast fn], not [ast]. *)
 val type_file :
   Provider_context.t ->
   Relative_path.t ->
-  FileInfo.t ->
+  Nast.program ->
   Tast.def list * Errors.t

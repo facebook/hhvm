@@ -141,7 +141,6 @@ let should_report_duplicate
   let (pc, canonical, _) = canonical_id in
   (* helper, for the various paths below which want to log a bug *)
   let bug ~(desc : string) : unit =
-    let desc = "naming_duplicate_" ^ desc in
     let () =
       Hh_logger.log
         "INVARIANT_VIOLATION_BUG [%s] %s %s"
@@ -149,6 +148,9 @@ let should_report_duplicate
         name
         (FileInfo.show_pos p)
     in
+    Printf.eprintf
+      "%s\n%!"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     HackEventLogger.invariant_violation_bug
       desc
       ~path:(FileInfo.get_pos_filename p)
@@ -165,7 +167,7 @@ let should_report_duplicate
   begin
     match p with
     | Full _ -> ()
-    | File _ -> bug ~desc:"file_only_p"
+    | File _ -> bug ~desc:"naming_duplicate_file_only_p"
   end;
   let is_same_pos =
     match (pc, p) with
@@ -190,7 +192,7 @@ let should_report_duplicate
       Relative_path.equal fna fnb && equal_name_type a b
   in
   (* Detect anomaly if [id] and [canonical_id] are identical positions *)
-  if is_same_pos then bug ~desc:"same";
+  if is_same_pos then bug ~desc:"naming_duplicate_same";
   (* Detect anomaly where [canonical_id] is in the same file but not found in [current_file_symbols_acc] *)
   if
     (not is_same_pos)
@@ -199,7 +201,7 @@ let should_report_duplicate
          (FileInfo.get_pos_filename p)
     && not (List.mem current_file_symbols_acc pc ~equal:FileInfo.equal_pos)
   then
-    bug ~desc:"same_file_not_acc";
+    bug ~desc:"naming_duplicate_same_file_not_acc";
   (* Finally, should we report duplicates? Generally yes, except in that same anomalous case! *)
   not is_same_pos
 

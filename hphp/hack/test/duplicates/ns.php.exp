@@ -1,0 +1,23 @@
+name=\M\g, name_type=Fun, pos=File "ns.php", line 7, characters 12-12:
+   Naming_provider.fun_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.fun_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_fun_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "ns.php", line 7, characters 12-12:)  [Provider_context.entry]
+   Naming_provider.get_fun_canon_name(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_fun_canon_name(name): \M\g  [Provider_context.entry]
+   Decl_provider.get_fun(name) |> Option.is_some: false
+
+name=\N\f, name_type=Fun, pos=File "ns.php", line 4, characters 10-10:
+   Naming_provider.fun_exists(name): true
+   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "ns.php", line 4, characters 10-10:)
+   Naming_provider.get_fun_canon_name(name): \N\f
+   Decl_provider.get_fun(name) |> Option.is_some: true
+
+name=\N\M\g, name_type=Fun, pos=File "ns.php", line 7, characters 12-12:
+   Naming_provider.fun_exists(name): true  [hh_server / typing_check_service]
+   Naming_provider.fun_exists(name): false  [Provider_context.entry]
+   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "ns.php", line 7, characters 12-12:)  [hh_server / typing_check_service]
+   Naming_provider.get_fun_pos(name): [none]  [Provider_context.entry]
+   Naming_provider.get_fun_canon_name(name): \N\M\g
+   Decl_provider.get_fun(name) |> Option.is_some: true
+

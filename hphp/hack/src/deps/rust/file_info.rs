@@ -65,7 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
     Serialize,
     ToOcamlRep,
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, enum, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }), enum, ord)")]
 #[repr(u8)]
 pub enum NameType {
     Fun = 3,

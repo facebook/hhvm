@@ -1,0 +1,234 @@
+name=\c, name_type=Class, pos=File "type.php--a.php", line 28, characters 7-7:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 28, characters 7-7:)
+   Naming_provider.get_class_canon_name(name): \c
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\cc, name_type=Class, pos=File "type.php--a.php", line 13, characters 7-8:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 13, characters 7-8:)
+   Naming_provider.get_class_canon_name(name): \cc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\cc, name_type=Class, pos=File "type.php--a.php", line 14, characters 7-8:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 13, characters 7-8:)
+   Naming_provider.get_class_canon_name(name): \cc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\CCI, name_type=Class, pos=File "type.php--a.php", line 12, characters 7-9:
+   Naming_provider.class_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.class_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_class_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 12, characters 7-9:)  [Provider_context.entry]
+   Naming_provider.get_class_canon_name(name): \cci  [hh_server / typing_check_service]
+   Naming_provider.get_class_canon_name(name): \CCI  [Provider_context.entry]
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\cci, name_type=Class, pos=File "type.php--a.php", line 11, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 11, characters 7-9:)
+   Naming_provider.get_class_canon_name(name): \cci  [hh_server / typing_check_service]
+   Naming_provider.get_class_canon_name(name): \CCI  [Provider_context.entry]
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\ct, name_type=Class, pos=File "type.php--a.php", line 17, characters 7-8:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 17, characters 7-8:)
+   Naming_provider.get_class_canon_name(name): \ct
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\ct, name_type=Typedef, pos=File "type.php--a.php", line 18, characters 6-7:
+   Naming_provider.typedef_exists(name): false
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 17, characters 7-8:)
+   Naming_provider.get_typedef_canon_name(name): \ct
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\CTI, name_type=Typedef, pos=File "type.php--a.php", line 16, characters 6-8:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 16, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \cti
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\cti, name_type=Class, pos=File "type.php--a.php", line 15, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 15, characters 7-9:)
+   Naming_provider.get_class_canon_name(name): \cti
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mcc, name_type=Class, pos=File "type.php--a.php", line 3, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 3, characters 7-9:)
+   Naming_provider.get_class_canon_name(name): \mcc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mcc, name_type=Class, pos=File "type.php--b.php", line 3, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 3, characters 7-9:)  [hh_server / typing_check_service]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 3, characters 7-9:)  [Provider_context.entry]
+   Naming_provider.get_class_canon_name(name): \mcc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\MCCI, name_type=Class, pos=File "type.php--b.php", line 2, characters 7-10:
+   Naming_provider.class_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.class_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_class_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 2, characters 7-10:)  [Provider_context.entry]
+   Naming_provider.get_class_canon_name(name): \mcci  [hh_server / typing_check_service]
+   Naming_provider.get_class_canon_name(name): \MCCI  [Provider_context.entry]
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mcci, name_type=Class, pos=File "type.php--a.php", line 2, characters 7-10:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 2, characters 7-10:)
+   Naming_provider.get_class_canon_name(name): \mcci
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mct, name_type=Class, pos=File "type.php--a.php", line 5, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 5, characters 7-9:)
+   Naming_provider.get_class_canon_name(name): \mct
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mct, name_type=Typedef, pos=File "type.php--b.php", line 5, characters 6-8:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 5, characters 7-9:)  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 5, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \mct
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\MCTI, name_type=Typedef, pos=File "type.php--b.php", line 4, characters 6-9:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 4, characters 6-9:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \mcti  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_canon_name(name): \MCTI  [Provider_context.entry]
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\mcti, name_type=Class, pos=File "type.php--a.php", line 4, characters 7-10:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 4, characters 7-10:)
+   Naming_provider.get_class_canon_name(name): \mcti
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mtc, name_type=Class, pos=File "type.php--b.php", line 9, characters 7-9:
+   Naming_provider.class_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.class_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 9, characters 6-8:)  [hh_server / typing_check_service]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 9, characters 7-9:)  [Provider_context.entry]
+   Naming_provider.get_class_canon_name(name): \mtc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mtc, name_type=Typedef, pos=File "type.php--a.php", line 9, characters 6-8:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 9, characters 6-8:)
+   Naming_provider.get_typedef_canon_name(name): \mtc
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\MTCI, name_type=Class, pos=File "type.php--b.php", line 8, characters 7-10:
+   Naming_provider.class_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.class_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_class_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 8, characters 7-10:)  [Provider_context.entry]
+   Naming_provider.get_class_canon_name(name): \mtci  [hh_server / typing_check_service]
+   Naming_provider.get_class_canon_name(name): \MTCI  [Provider_context.entry]
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\mtci, name_type=Typedef, pos=File "type.php--a.php", line 8, characters 6-9:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 8, characters 6-9:)
+   Naming_provider.get_typedef_canon_name(name): \mtci
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\mtt, name_type=Typedef, pos=File "type.php--a.php", line 7, characters 6-8:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 7, characters 6-8:)
+   Naming_provider.get_typedef_canon_name(name): \mtt
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\mtt, name_type=Typedef, pos=File "type.php--b.php", line 7, characters 6-8:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 7, characters 6-8:)  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 7, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \mtt
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\MTTI, name_type=Typedef, pos=File "type.php--b.php", line 6, characters 6-9:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 6, characters 6-9:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \mtti  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_canon_name(name): \MTTI  [Provider_context.entry]
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\mtti, name_type=Typedef, pos=File "type.php--a.php", line 6, characters 6-9:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 6, characters 6-9:)
+   Naming_provider.get_typedef_canon_name(name): \mtti
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\t, name_type=Typedef, pos=File "type.php--a.php", line 29, characters 6-6:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 29, characters 6-6:)
+   Naming_provider.get_typedef_canon_name(name): \t
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\tc, name_type=Class, pos=File "type.php--a.php", line 26, characters 7-8:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 26, characters 7-8:)
+   Naming_provider.get_class_canon_name(name): \tc
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\tc, name_type=Typedef, pos=File "type.php--a.php", line 25, characters 6-7:
+   Naming_provider.typedef_exists(name): false
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 26, characters 7-8:)
+   Naming_provider.get_typedef_canon_name(name): \tc
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\TCI, name_type=Class, pos=File "type.php--a.php", line 24, characters 7-9:
+   Naming_provider.class_exists(name): true
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 24, characters 7-9:)
+   Naming_provider.get_class_canon_name(name): \TCI
+   Decl_provider.get_class(name) |> Option.is_some: true
+
+name=\tci, name_type=Typedef, pos=File "type.php--a.php", line 23, characters 6-8:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 23, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \TCI
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\tt, name_type=Typedef, pos=File "type.php--a.php", line 21, characters 6-7:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 21, characters 6-7:)
+   Naming_provider.get_typedef_canon_name(name): \tt
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\tt, name_type=Typedef, pos=File "type.php--a.php", line 22, characters 6-7:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 21, characters 6-7:)
+   Naming_provider.get_typedef_canon_name(name): \tt
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\TTI, name_type=Typedef, pos=File "type.php--a.php", line 20, characters 6-8:
+   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
+   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): [none]  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 20, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_canon_name(name): \tti  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_canon_name(name): \TTI  [Provider_context.entry]
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+
+name=\tti, name_type=Typedef, pos=File "type.php--a.php", line 19, characters 6-8:
+   Naming_provider.typedef_exists(name): true
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 19, characters 6-8:)
+   Naming_provider.get_typedef_canon_name(name): \tti  [hh_server / typing_check_service]
+   Naming_provider.get_typedef_canon_name(name): \TTI  [Provider_context.entry]
+   Decl_provider.get_typedef(name) |> Option.is_some: true
+

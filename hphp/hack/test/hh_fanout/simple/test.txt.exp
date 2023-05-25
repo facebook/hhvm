@@ -14,7 +14,7 @@ Fanout calculation on line 15
                                                        'num_outgoing_edges': 2,
                                                        'outgoing_files': ['uses_simple.php',
                                                                           'simple.php'],
-                                                       'type': 'FileInfo.Class'}],
+                                                       'type': 'Class'}],
                                  'removed_symbols': []}},
  'files': ['simple.php', 'uses_simple.php'],
  'telemetry': '<telemetry-redacted-for-test>'}

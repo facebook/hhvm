@@ -1,0 +1,55 @@
+name=F, name_type=Module, pos=File "module.php--b.php", line 2, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--b.php", line 2, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=f, name_type=Module, pos=File "module.php--a.php", line 2, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 2, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=g, name_type=Module, pos=File "module.php--a.php", line 3, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=g, name_type=Module, pos=File "module.php--b.php", line 3, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)  [hh_server / typing_check_service]
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--b.php", line 3, characters 12-12:)  [Provider_context.entry]
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=H, name_type=Module, pos=File "module.php--a.php", line 5, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 5, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=h, name_type=Module, pos=File "module.php--a.php", line 4, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 4, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=i, name_type=Module, pos=File "module.php--a.php", line 6, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 6, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=i, name_type=Module, pos=File "module.php--a.php", line 7, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 6, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+
+name=j, name_type=Module, pos=File "module.php--a.php", line 8, characters 12-12:
+   Naming_provider.module_exists(name): true
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 8, characters 12-12:)
+   Naming_provider.get_module_canon_name(name): [undefined]
+   Decl_provider.get_module(name) |> Option.is_some: true
+

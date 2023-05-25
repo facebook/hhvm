@@ -58,7 +58,7 @@ type name_type =
   | Typedef [@value 1]
   | Const [@value 4]
   | Module [@value 5]
-[@@deriving eq, show, enum, ord]
+[@@deriving eq, show { with_path = false }, enum, ord]
 
 (** We define two types of positions establishing the location of a given name:
  * a Full position contains the exact position of a name in a file, and a

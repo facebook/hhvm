@@ -297,6 +297,7 @@ let class_def ctx class_ =
 let typedef_def ctx typedef =
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
+  Errors.run_with_span typedef.t_span @@ fun () ->
   Typing_typedef.typedef_def ctx typedef
 
 let gconst_def ctx cst =

@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include <folly/Random.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_layouts.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_types.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_types_custom_protocol.h>
@@ -91,7 +92,7 @@ create<thrift::benchmark::SmallListInt>() {
   std::srand(1);
   std::vector<int> vec;
   for (int i = 0; i < 10; i++) {
-    vec.push_back(std::rand());
+    vec.push_back(folly::Random::rand32());
   }
   thrift::benchmark::SmallListInt d;
   *d.lst_ref() = std::move(vec);
@@ -103,7 +104,7 @@ inline thrift::benchmark::BigListInt create<thrift::benchmark::BigListInt>() {
   std::srand(1);
   std::vector<int> vec;
   for (int i = 0; i < 10'000; i++) {
-    vec.push_back(std::rand());
+    vec.push_back(folly::Random::rand32());
   }
   thrift::benchmark::BigListInt d;
   *d.lst_ref() = std::move(vec);
@@ -135,7 +136,7 @@ inline thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
   std::srand(1);
   thrift::benchmark::LargeSetInt l;
   for (int i = 0; i < 1'000'000; i++) {
-    l.s()->insert(std::rand());
+    l.s()->insert(folly::Random::rand32());
   }
   return l;
 }
@@ -145,7 +146,7 @@ inline thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
   std::srand(1);
   thrift::benchmark::LargeMapInt l;
   for (int i = 0; i < 1'000'000; i++) {
-    l.m_ref()[i] = std::rand();
+    l.m_ref()[i] = folly::Random::rand32();
   }
   return l;
 }
@@ -299,18 +300,18 @@ template <>
 inline thrift::benchmark::MixedInt create<thrift::benchmark::MixedInt>() {
   std::srand(1);
   thrift::benchmark::MixedInt d;
-  *d.var1_ref() = std::rand();
-  *d.var2_ref() = std::rand();
-  *d.var3_ref() = std::rand();
-  *d.var4_ref() = std::rand();
-  *d.var5_ref() = std::rand();
-  *d.var6_ref() = std::rand();
-  *d.var7_ref() = std::rand();
-  *d.var8_ref() = std::rand();
-  *d.var9_ref() = std::rand();
-  *d.varx_ref() = std::rand();
-  *d.vary_ref() = std::rand();
-  *d.varz_ref() = std::rand();
+  *d.var1_ref() = folly::Random::rand32();
+  *d.var2_ref() = folly::Random::rand32();
+  *d.var3_ref() = folly::Random::rand32();
+  *d.var4_ref() = folly::Random::rand32();
+  *d.var5_ref() = folly::Random::rand32();
+  *d.var6_ref() = folly::Random::rand32();
+  *d.var7_ref() = folly::Random::rand32();
+  *d.var8_ref() = folly::Random::rand32();
+  *d.var9_ref() = folly::Random::rand32();
+  *d.varx_ref() = folly::Random::rand32();
+  *d.vary_ref() = folly::Random::rand32();
+  *d.varz_ref() = folly::Random::rand32();
   return d;
 }
 

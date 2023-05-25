@@ -14,7 +14,7 @@ let recheck_naming ctx filename_l =
   List.iter filename_l ~f:(fun file ->
       Errors.ignore_ (fun () ->
           (* We only need to name to find references to locals *)
-          List.iter (Ast_provider.get_ast ctx file) ~f:(function
+          List.iter (Ast_provider.get_ast ctx file ~full:false) ~f:(function
               | Aast.Fun f ->
                 let _ = Naming.fun_def ctx f in
                 ()

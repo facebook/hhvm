@@ -22,7 +22,8 @@ let query_class_methods
         true
     in
     Naming_provider.get_class_path ctx class_name
-    >>= (fun file -> Ast_provider.find_class_in_file ctx file class_name)
+    >>= (fun file ->
+          Ast_provider.find_class_in_file ctx file class_name ~full:false)
     >>| (fun class_ -> class_.Aast.c_methods)
     >>| List.filter_map ~f:(fun m ->
             let (pos, name) = m.Aast.m_name in

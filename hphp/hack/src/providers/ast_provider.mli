@@ -8,7 +8,7 @@
  *)
 
 val find_class_in_file :
-  ?full:bool ->
+  full:bool ->
   Provider_context.t ->
   Relative_path.t ->
   string ->
@@ -18,7 +18,7 @@ val find_iclass_in_file :
   Provider_context.t -> Relative_path.t -> string -> Nast.class_ option
 
 val find_fun_in_file :
-  ?full:bool ->
+  full:bool ->
   Provider_context.t ->
   Relative_path.t ->
   string ->
@@ -28,7 +28,7 @@ val find_ifun_in_file :
   Provider_context.t -> Relative_path.t -> string -> Nast.fun_def option
 
 val find_typedef_in_file :
-  ?full:bool ->
+  full:bool ->
   Provider_context.t ->
   Relative_path.t ->
   string ->
@@ -38,24 +38,23 @@ val find_itypedef_in_file :
   Provider_context.t -> Relative_path.t -> string -> Nast.typedef option
 
 val find_gconst_in_file :
-  ?full:bool ->
+  full:bool ->
   Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.gconst option
 
 val find_module_in_file :
-  ?full:bool ->
+  full:bool ->
   Provider_context.t ->
   Relative_path.t ->
   string ->
   Nast.module_def option
 
-val get_ast :
-  ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
+val get_ast : full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
 val get_ast_with_error :
-  ?full:bool -> Provider_context.t -> Relative_path.t -> Errors.t * Nast.program
+  full:bool -> Provider_context.t -> Relative_path.t -> Errors.t * Nast.program
 
 (** Compute the AST for the given [Provider_context.entry]. *)
 val compute_ast :

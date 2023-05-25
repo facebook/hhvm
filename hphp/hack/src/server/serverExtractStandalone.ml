@@ -158,7 +158,7 @@ end = struct
   let get_fun =
     make_nast_getter
       ~get_pos:Decl.get_fun_pos
-      ~find_in_file:Ast_provider.find_fun_in_file
+      ~find_in_file:(Ast_provider.find_fun_in_file ~full:false)
       ~naming:Naming.fun_def
 
   let get_fun_exn ctx name = value_or_not_found name (get_fun ctx name)
@@ -166,7 +166,7 @@ end = struct
   let get_class =
     make_nast_getter
       ~get_pos:Decl.get_class_pos
-      ~find_in_file:Ast_provider.find_class_in_file
+      ~find_in_file:(Ast_provider.find_class_in_file ~full:false)
       ~naming:Naming.class_
 
   let get_class_exn ctx name = value_or_not_found name (get_class ctx name)
@@ -174,7 +174,7 @@ end = struct
   let get_typedef =
     make_nast_getter
       ~get_pos:Decl.get_typedef_pos
-      ~find_in_file:Ast_provider.find_typedef_in_file
+      ~find_in_file:(Ast_provider.find_typedef_in_file ~full:false)
       ~naming:Naming.typedef
 
   let get_typedef_exn ctx name = value_or_not_found name (get_typedef ctx name)
@@ -182,7 +182,7 @@ end = struct
   let get_gconst =
     make_nast_getter
       ~get_pos:Decl.get_gconst_pos
-      ~find_in_file:Ast_provider.find_gconst_in_file
+      ~find_in_file:(Ast_provider.find_gconst_in_file ~full:false)
       ~naming:Naming.global_const
 
   let get_gconst_exn ctx name = value_or_not_found name (get_gconst ctx name)

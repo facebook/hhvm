@@ -191,7 +191,7 @@ let compute_file_info
   let (funs, classes, typedefs, consts, modules) = Nast.get_def_names ast in
   { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts; modules }
 
-let get_ast_with_error ?(full = false) ctx path =
+let get_ast_with_error ~(full : bool) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->
   let parse_from_disk_no_caching ~apply_file_filter =
     let absolute_path = Relative_path.to_absolute path in
@@ -260,10 +260,10 @@ let get_ast_with_error ?(full = false) ctx path =
     (* reparsing the file over and over. *)
     get_from_local_cache ~full ctx path
 
-let get_ast ?(full = false) ctx path = get_ast_with_error ~full ctx path |> snd
+let get_ast ~(full : bool) ctx path = get_ast_with_error ~full ctx path |> snd
 
 let get_def
-    ?(full = false)
+    ~(full : bool)
     ctx
     file_name
     (node_getter : Nast.def -> ('a * string) option)
@@ -310,28 +310,28 @@ let iequal name =
   let name = Caml.String.lowercase_ascii name in
   (fun s -> String.equal name (Caml.String.lowercase_ascii s))
 
-let find_class_in_file ?(full = false) ctx file_name name =
+let find_class_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_class_impl (String.equal name)
 
 let find_iclass_in_file ctx file_name iname =
-  get_def ctx file_name find_class_impl (iequal iname)
+  get_def ctx file_name find_class_impl (iequal iname) ~full:false
 
-let find_fun_in_file ?(full = false) ctx file_name name =
+let find_fun_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_fun_impl (String.equal name)
 
 let find_ifun_in_file ctx file_name iname =
-  get_def ctx file_name find_fun_impl (iequal iname)
+  get_def ctx file_name find_fun_impl (iequal iname) ~full:false
 
-let find_typedef_in_file ?(full = false) ctx file_name name =
+let find_typedef_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_typedef_impl (String.equal name)
 
 let find_itypedef_in_file ctx file_name iname =
-  get_def ctx file_name find_typedef_impl (iequal iname)
+  get_def ctx file_name find_typedef_impl (iequal iname) ~full:false
 
-let find_gconst_in_file ?(full = false) ctx file_name name =
+let find_gconst_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_const_impl (String.equal name)
 
-let find_module_in_file ?(full = false) ctx file_name name =
+let find_module_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_module_impl (String.equal name)
 
 let local_changes_push_sharedmem_stack () =

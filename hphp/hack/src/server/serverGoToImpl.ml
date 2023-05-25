@@ -26,7 +26,9 @@ let find_positions_of_classes
           failwith ("Could not find definition of child class: " ^ child_class)
         | Some (FileInfo.Full pos) -> (child_class, pos)
         | Some (FileInfo.File (FileInfo.Class, path)) ->
-          (match Ast_provider.find_class_in_file ctx path child_class with
+          (match
+             Ast_provider.find_class_in_file ctx path child_class ~full:false
+           with
           | None ->
             failwith
               (Printf.sprintf

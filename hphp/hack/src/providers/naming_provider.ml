@@ -758,7 +758,7 @@ let get_module_full_pos ctx (pos, name) =
     | Provider_backend.Decl_service { decl; _ } ->
       Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
     | _ ->
-      Ast_provider.find_module_in_file ctx fn name
+      Ast_provider.find_module_in_file ctx fn name ~full:false
       |> Option.map ~f:(fun md -> fst md.Aast.md_name)
   end
   | FileInfo.(File ((Fun | Class | Typedef | Const), _fn)) -> None
@@ -771,7 +771,7 @@ let get_const_full_pos ctx (pos, name) =
     | Provider_backend.Decl_service { decl; _ } ->
       Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
     | _ ->
-      Ast_provider.find_gconst_in_file ctx fn name
+      Ast_provider.find_gconst_in_file ctx fn name ~full:false
       |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
   end
   | FileInfo.(File ((Fun | Class | Typedef | Module), _fn)) -> None
@@ -784,7 +784,7 @@ let get_fun_full_pos ctx (pos, name) =
     | Provider_backend.Decl_service { decl; _ } ->
       Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
     | _ ->
-      Ast_provider.find_fun_in_file ctx fn name
+      Ast_provider.find_fun_in_file ctx fn name ~full:false
       |> Option.map ~f:(fun fd -> fst fd.Aast.fd_name)
   end
   | FileInfo.(File ((Class | Typedef | Const | Module), _fn)) -> None
@@ -799,10 +799,10 @@ let get_type_full_pos ctx (pos, name) =
     | _ ->
       (match name_type with
       | FileInfo.Class ->
-        Ast_provider.find_class_in_file ctx fn name
+        Ast_provider.find_class_in_file ctx fn name ~full:false
         |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
       | FileInfo.Typedef ->
-        Ast_provider.find_typedef_in_file ctx fn name
+        Ast_provider.find_typedef_in_file ctx fn name ~full:false
         |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
       | FileInfo.(Fun | Const | Module) -> None))
 

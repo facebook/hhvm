@@ -34,22 +34,22 @@ and class_element_ =
 let get_class_by_name ctx x =
   Naming_provider.get_type_path ctx x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_class_in_file ctx fn x
+  Ast_provider.find_class_in_file ctx fn x ~full:false
 
 let get_function_by_name ctx x =
   Naming_provider.get_fun_path ctx x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_fun_in_file ctx fn x
+  Ast_provider.find_fun_in_file ctx fn x ~full:false
 
 let get_gconst_by_name ctx x =
   Naming_provider.get_const_path ctx x >>= fun fn ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_gconst_in_file ctx fn x
+  Ast_provider.find_gconst_in_file ctx fn x ~full:false
 
 let get_module_def_by_name ctx x =
   Naming_provider.get_module_path ctx x >>= fun md ->
   Ide_parser_cache.with_ide_cache @@ fun () ->
-  Ast_provider.find_module_in_file ctx md x
+  Ast_provider.find_module_in_file ctx md x ~full:false
 
 (* Span information is stored only in parsing AST *)
 let get_member_def (ctx : Provider_context.t) (x : class_element) =
@@ -102,10 +102,10 @@ let summarize_class_typedef ctx x =
   Naming_provider.get_type_path_and_kind ctx x >>= fun (fn, ct) ->
   match ct with
   | Naming_types.TClass ->
-    Ast_provider.find_class_in_file ctx fn x >>= fun c ->
+    Ast_provider.find_class_in_file ctx fn x ~full:false >>= fun c ->
     Some (FileOutline.summarize_class c ~no_children:true)
   | Naming_types.TTypedef ->
-    Ast_provider.find_typedef_in_file ctx fn x >>= fun tdef ->
+    Ast_provider.find_typedef_in_file ctx fn x ~full:false >>= fun tdef ->
     Some (FileOutline.summarize_typedef tdef)
 
 let go ctx ast result =

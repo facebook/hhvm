@@ -262,7 +262,7 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
       let get_class_by_name ctx x =
         let open Option.Monad_infix in
         Naming_provider.get_type_path ctx x >>= fun fn ->
-        Ast_provider.find_class_in_file ctx fn x
+        Ast_provider.find_class_in_file ctx fn x ~full:false
       in
       (match get_class_by_name ctx member_origin with
       | None -> Pos_or_decl.none

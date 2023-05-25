@@ -184,41 +184,6 @@ let get_files_with_stale_errors
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
-let push_errors env ~rechecked ~phase new_errors =
-  let (diagnostic_pusher, time_errors_pushed) =
-    Diagnostic_pusher.push_new_errors
-      env.diagnostic_pusher
-      ~rechecked
-      new_errors
-      ~phase
-  in
-  let env = { env with diagnostic_pusher } in
-  (env, time_errors_pushed)
-
-(** This function handles the three errors paradigms:
-* (1) env.errorl paradigm: it takes input [errors_acc], adds/updates/remove errors according to
-rechecked/new_errors/phase, and returns the updated list of all errors.
-* (2) persistent-connection paradigm: it sends error deltas over the persistent connection.
-* (3) errors-file: all [new_errors] are accumulated in errors.bin *)
-let push_and_accumulate_errors
-    ((env, errors_acc) : env * Errors.t)
-    ~(do_errors_file : bool)
-    ~(rechecked : Relative_path.Set.t)
-    (new_errors : Errors.t)
-    ~(phase : Errors.phase) : env * Errors.t * seconds_since_epoch option =
-  (* paradigm 1: env.errorl *)
-  let errors =
-    Errors.incremental_update ~old:errors_acc ~new_:new_errors ~rechecked phase
-  in
-  (* paradigm 2: persistent-connection *)
-  let (env, time_errors_pushed) =
-    push_errors env new_errors ~rechecked ~phase
-  in
-  (* paradigm 3: errors-file *)
-  if do_errors_file then ServerProgress.ErrorsWrite.report new_errors;
-  (* return *)
-  (env, errors, time_errors_pushed)
-
 (** This pushes all [phase] errors in errors, that aren't in [files],
 to the errors-file. *)
 let push_errors_outside_files_to_errors_file
@@ -545,7 +510,6 @@ functor
       SSet.union new_classes old_classes
 
     type naming_result = {
-      duplicate_name_errors: Errors.t;
       failed_naming: Relative_path.Set.t;
       naming_table: Naming_table.t;
       telemetry: Telemetry.t;
@@ -572,8 +536,7 @@ functor
       let start_t = Unix.gettimeofday () in
       let count = Relative_path.Map.cardinal defs_per_file_parsed in
       CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
-      (* Update name->filename reverse naming table (global, mutable),
-         and gather "duplicate name" errors *)
+      (* Update name->filename reverse naming table (global, mutable) *)
       remove_decls env defs_per_file_parsed;
       let failed_naming =
         Relative_path.Map.fold
@@ -585,8 +548,6 @@ functor
             in
             Relative_path.Set.union failed' failed)
       in
-      (* TODO(ljw): clean up empty errors *)
-      let duplicate_name_errors = Errors.empty in
       let t2 =
         Hh_logger.log_duration "Declare_names (name->filename)" start_t
       in
@@ -609,7 +570,7 @@ functor
              ~key:"failed_naming_count"
              ~value:(Relative_path.Set.cardinal failed_naming)
       in
-      { duplicate_name_errors; failed_naming; naming_table; telemetry }
+      { failed_naming; naming_table; telemetry }
 
     type redecl_result = {
       changed: Typing_deps.DepSet.t;
@@ -957,12 +918,7 @@ functor
         Telemetry.duration telemetry ~key:"naming_start" ~start_time
       in
       let ctx = Provider_utils.ctx_from_server_env env in
-      let {
-        duplicate_name_errors;
-        failed_naming;
-        naming_table;
-        telemetry = naming_telemetry;
-      } =
+      let { failed_naming; naming_table; telemetry = naming_telemetry } =
         do_naming env ctx ~defs_per_file_parsed ~cgroup_steps
         (* Note: although do_naming updates global reverse-naming-table maps,
            the updated forward-naming-table "naming_table" only gets assigned
@@ -973,23 +929,6 @@ functor
         telemetry
         |> Telemetry.duration ~key:"naming_end" ~start_time
         |> Telemetry.object_ ~key:"naming" ~value:naming_telemetry
-      in
-
-      let rechecked =
-        defs_per_file_parsed
-        |> Relative_path.Map.keys
-        |> Relative_path.Set.of_list
-      in
-      let (env, errors, time_errors_pushed) =
-        push_and_accumulate_errors
-          (env, errors)
-          duplicate_name_errors
-          ~do_errors_file
-          ~rechecked
-          ~phase:Errors.Naming
-      in
-      let time_first_error =
-        Option.first_some time_first_error time_errors_pushed
       in
 
       (* REDECL PHASE 1 ********************************************************)

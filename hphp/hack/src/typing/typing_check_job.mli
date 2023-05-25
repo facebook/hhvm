@@ -8,16 +8,14 @@
  *)
 
 val type_fun :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def list option
+  Provider_context.t -> full_ast:Nast.fun_def -> Tast.def list option
 
-val type_class :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
+val type_class : Provider_context.t -> full_ast:Nast.class_ -> Tast.def option
 
 val check_typedef :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
+  Provider_context.t -> full_ast:Nast.typedef -> Tast.def option
 
-val check_const :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
+val check_const : Provider_context.t -> full_ast:Nast.gconst -> Tast.def option
 
 val check_module :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
+  Provider_context.t -> full_ast:Nast.module_def -> Tast.def option

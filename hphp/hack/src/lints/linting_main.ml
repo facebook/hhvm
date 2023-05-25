@@ -80,7 +80,7 @@ let lint ctx fn content =
   Typing_deps.trace := false;
   Errors.ignore_ (fun () ->
       let parser_return = parse_and_lint fn content ctx in
-      let { Parser_return.file_mode; ast; _ } = parser_return in
+      let { Parser_return.file_mode; ast = full_ast; _ } = parser_return in
       (* naming and typing currently don't produce any lint errors *)
       (* PHP files generate declarations via some fairly error-prone regexps,
        * so only try to lint Hack files *)
@@ -107,6 +107,6 @@ let lint ctx fn content =
                 tcopt)
             ctx
         in
-        let (tast, _) = Typing_check_utils.type_file ctx fn ast in
+        let (tast, _) = Typing_check_utils.type_file ctx fn ~full_ast in
         lint_tast ctx tast);
   Typing_deps.trace := orig_trace

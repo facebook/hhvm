@@ -258,9 +258,9 @@ let make_naming_table
 (** Type check given files. Create the dependency graph as a side effect. *)
 let type_check_make_depgraph ctx options (files : Relative_path.t list) : unit =
   List.iter files ~f:(fun file ->
-      let ast = Ast_provider.get_ast ctx file ~full:true in
+      let full_ast = Ast_provider.get_ast ctx file ~full:true in
       let (_ : Tast.def list * Errors.t) =
-        Typing_check_utils.type_file ctx file ast
+        Typing_check_utils.type_file ctx file ~full_ast
       in
       ());
   if options.debug then Typing_deps.dump_current_edge_buffer_in_memory_mode ();

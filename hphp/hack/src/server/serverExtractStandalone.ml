@@ -922,14 +922,22 @@ end = struct
       Typing_deps.Dep.(
         match target with
         | Cmd.Function func ->
+          let full_ast =
+            Ast_provider.find_fun_in_file ctx filename func ~full:true
+          in
           let (_ : Tast.def list option) =
-            Typing_check_job.type_fun ctx filename func
+            Option.bind full_ast ~f:(fun full_ast ->
+                Typing_check_job.type_fun ctx ~full_ast)
           in
           add_implementation_dependencies ctx env;
           HashSet.remove env.dependencies (Fun func)
         | Cmd.Method (cls, m) ->
+          let full_ast =
+            Ast_provider.find_class_in_file ctx filename cls ~full:true
+          in
           let (_ : Tast.def option) =
-            Typing_check_job.type_class ctx filename cls
+            Option.bind full_ast ~f:(fun full_ast ->
+                Typing_check_job.type_class ctx ~full_ast)
           in
           HashSet.add env.dependencies (Method (cls, m));
           HashSet.add env.dependencies (SMethod (cls, m));

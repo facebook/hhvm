@@ -1109,9 +1109,9 @@ let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
   let profiling = Option.is_some profile_type_check_multi in
   if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn (_fileinfo : FileInfo.t) ->
-        let ast = Ast_provider.get_ast ctx fn ~full:true in
+        let full_ast = Ast_provider.get_ast ctx fn ~full:true in
         let start_time = Unix.gettimeofday () in
-        let _ = Typing_check_utils.type_file ctx fn ast in
+        let _ = Typing_check_utils.type_file ctx fn ~full_ast in
         print_elapsed fn "first typecheck+decl" ~start_time);
   let tracer =
     Option.map memtrace ~f:(fun filename ->
@@ -1136,10 +1136,10 @@ let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
       Relative_path.Map.fold
         files_info
         ~f:(fun fn _fileinfo (errors, timings) ->
-          let ast = Ast_provider.get_ast ctx fn in
+          let full_ast = Ast_provider.get_ast ctx fn ~full:true in
           let ((_, new_errors), timings) =
             add_timing fn timings
-            @@ lazy (Typing_check_utils.type_file ctx fn ast)
+            @@ lazy (Typing_check_utils.type_file ctx fn ~full_ast)
           in
           (errors @ Errors.get_sorted_error_list new_errors, timings))
         ~init:(errors, timings)
@@ -1961,8 +1961,8 @@ let handle_mode
     exit 2
   | Dump_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn _fileinfo ->
-        let ast = Ast_provider.get_ast ctx fn in
-        ignore @@ Typing_check_utils.type_file ctx fn ast);
+        let full_ast = Ast_provider.get_ast ctx fn ~full:true in
+        ignore @@ Typing_check_utils.type_file ctx fn ~full_ast);
     if Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
   | Dump_dep_hashes ->
     iter_over_files (fun _ ->
@@ -1971,8 +1971,8 @@ let handle_mode
             Dep_hash_to_symbol.dump nast))
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn _fileinfo ->
-        let ast = Ast_provider.get_ast ctx fn in
-        ignore @@ Typing_check_utils.type_file ctx fn ast);
+        let full_ast = Ast_provider.get_ast ctx fn ~full:true in
+        ignore @@ Typing_check_utils.type_file ctx fn ~full_ast);
     dump_debug_glean_deps dbg_glean_deps
   | Get_some_file_deps depth ->
     let file_deps = traverse_file_dependencies ctx filenames ~depth in

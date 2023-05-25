@@ -156,7 +156,8 @@ let process_file
     { file_errors; deferred_decls = [] }
   else
     let opts = Provider_context.get_tcopt ctx in
-    let (funs, classes, typedefs, gconsts, modules) = Nast.get_def_names ast in
+    let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
+    let snd (type def) ((_name, d) : FileInfo.id * def) : def = d in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     try
       let result =
@@ -168,24 +169,29 @@ let process_file
         @@ fun () ->
         Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
         let _fun_tasts =
-          List.map funs ~f:FileInfo.id_name
-          |> List.filter_map ~f:(Typing_check_job.type_fun ctx fn)
+          List.map funs ~f:snd
+          |> List.filter_map ~f:(fun full_ast ->
+                 Typing_check_job.type_fun ctx ~full_ast)
         in
         let _class_tasts =
-          List.map classes ~f:FileInfo.id_name
-          |> List.filter_map ~f:(Typing_check_job.type_class ctx fn)
+          List.map classes ~f:snd
+          |> List.filter_map ~f:(fun full_ast ->
+                 Typing_check_job.type_class ctx ~full_ast)
         in
         let _typedef_asts =
-          List.map typedefs ~f:FileInfo.id_name
-          |> List.filter_map ~f:(Typing_check_job.check_typedef ctx fn)
+          List.map typedefs ~f:snd
+          |> List.filter_map ~f:(fun full_ast ->
+                 Typing_check_job.check_typedef ctx ~full_ast)
         in
         let _const_asts =
-          List.map gconsts ~f:FileInfo.id_name
-          |> List.filter_map ~f:(Typing_check_job.check_const ctx fn)
+          List.map gconsts ~f:snd
+          |> List.filter_map ~f:(fun full_ast ->
+                 Typing_check_job.check_const ctx ~full_ast)
         in
         let _module_asts =
-          List.map modules ~f:FileInfo.id_name
-          |> List.filter_map ~f:(Typing_check_job.check_module ctx fn)
+          List.map modules ~f:snd
+          |> List.filter_map ~f:(fun full_ast ->
+                 Typing_check_job.check_module ctx ~full_ast)
         in
         ()
       in

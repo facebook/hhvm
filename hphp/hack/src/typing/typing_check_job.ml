@@ -34,70 +34,55 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     Errors.exception_occurred pos e;
     None
 
-let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
+let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
     Tast.def list option =
-  match Ast_provider.find_fun_in_file ~full:true ctx fn x with
-  | Some fd ->
-    let f = fd.Aast.fd_fun in
-    handle_exn_as_error f.Aast.f_span (fun () ->
-        let fun_ = Naming.fun_def ctx fd in
-        Nast_check.def ctx (Aast.Fun fun_);
-        let def_opt =
-          Typing_toplevel.fun_def ctx fun_
-          |> Option.map ~f:(fun fs -> List.map ~f:(fun f -> Aast.Fun f) fs)
-        in
-        Option.iter def_opt ~f:(fun fs -> List.iter fs ~f:(Tast_check.def ctx));
-        def_opt)
-  | None -> None
+  let f = full_ast.Aast.fd_fun in
+  handle_exn_as_error f.Aast.f_span (fun () ->
+      let fun_ = Naming.fun_def ctx full_ast in
+      Nast_check.def ctx (Aast.Fun fun_);
+      let def_opt =
+        Typing_toplevel.fun_def ctx fun_
+        |> Option.map ~f:(fun fs -> List.map ~f:(fun f -> Aast.Fun f) fs)
+      in
+      Option.iter def_opt ~f:(fun fs -> List.iter fs ~f:(Tast_check.def ctx));
+      def_opt)
 
-let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
+let type_class (ctx : Provider_context.t) ~(full_ast : Nast.class_) :
     Tast.def option =
-  match Ast_provider.find_class_in_file ~full:true ctx fn x with
-  | Some cls ->
-    handle_exn_as_error cls.Aast.c_span (fun () ->
-        let class_ = Naming.class_ ctx cls in
-        Nast_check.def ctx (Aast.Class class_);
-        let def_opt =
-          Typing_toplevel.class_def ctx class_
-          |> Option.map ~f:(fun c -> Aast.Class c)
-        in
-        Option.iter def_opt ~f:(fun f -> Tast_check.def ctx f);
-        def_opt)
-  | None -> None
+  handle_exn_as_error full_ast.Aast.c_span (fun () ->
+      let class_ = Naming.class_ ctx full_ast in
+      Nast_check.def ctx (Aast.Class class_);
+      let def_opt =
+        Typing_toplevel.class_def ctx class_
+        |> Option.map ~f:(fun c -> Aast.Class c)
+      in
+      Option.iter def_opt ~f:(fun f -> Tast_check.def ctx f);
+      def_opt)
 
-let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
-    : Tast.def option =
-  match Ast_provider.find_typedef_in_file ~full:true ctx fn x with
-  | Some t ->
-    handle_exn_as_error Pos.none (fun () ->
-        let typedef = Naming.typedef ctx t in
-        Nast_check.def ctx (Aast.Typedef typedef);
-        let ret = Typing_typedef.typedef_def ctx typedef in
-        let def = Aast.Typedef ret in
-        Tast_check.def ctx def;
-        Some def)
-  | None -> None
-
-let check_const (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
+let check_typedef (ctx : Provider_context.t) ~(full_ast : Nast.typedef) :
     Tast.def option =
-  match Ast_provider.find_gconst_in_file ~full:true ctx fn x with
-  | None -> None
-  | Some cst ->
-    handle_exn_as_error cst.Aast.cst_span (fun () ->
-        let cst = Naming.global_const ctx cst in
-        Nast_check.def ctx (Aast.Constant cst);
-        let def = Aast.Constant (Typing_toplevel.gconst_def ctx cst) in
-        Tast_check.def ctx def;
-        Some def)
+  handle_exn_as_error Pos.none (fun () ->
+      let typedef = Naming.typedef ctx full_ast in
+      Nast_check.def ctx (Aast.Typedef typedef);
+      let ret = Typing_typedef.typedef_def ctx typedef in
+      let def = Aast.Typedef ret in
+      Tast_check.def ctx def;
+      Some def)
 
-let check_module (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
-    : Tast.def option =
-  match Ast_provider.find_module_in_file ~full:true ctx fn x with
-  | None -> None
-  | Some md ->
-    handle_exn_as_error (fst md.Aast.md_name) (fun () ->
-        let md = Naming.module_ ctx md in
-        Nast_check.def ctx (Aast.Module md);
-        let def = Aast.Module (Typing_toplevel.module_def ctx md) in
-        Tast_check.def ctx def;
-        Some def)
+let check_const (ctx : Provider_context.t) ~(full_ast : Nast.gconst) :
+    Tast.def option =
+  handle_exn_as_error full_ast.Aast.cst_span (fun () ->
+      let cst = Naming.global_const ctx full_ast in
+      Nast_check.def ctx (Aast.Constant cst);
+      let def = Aast.Constant (Typing_toplevel.gconst_def ctx cst) in
+      Tast_check.def ctx def;
+      Some def)
+
+let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
+    Tast.def option =
+  handle_exn_as_error (fst full_ast.Aast.md_name) (fun () ->
+      let md = Naming.module_ ctx full_ast in
+      Nast_check.def ctx (Aast.Module md);
+      let def = Aast.Module (Typing_toplevel.module_def ctx md) in
+      Tast_check.def ctx def;
+      Some def)

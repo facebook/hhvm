@@ -9,13 +9,13 @@
 
 open Hh_prelude
 
-let type_file tcopt fn ast =
-  let (funs, classes, typedefs, consts, modules) = Nast.get_def_names ast in
-  let snd (_, x, _) = x in
+let type_file ctx fn ~full_ast =
+  let (funs, classes, typedefs, consts, modules) = Nast.get_defs full_ast in
   let (errors, tast) =
     Errors.do_with_context fn Errors.Typing (fun () ->
         let check ~f defs =
-          List.map defs ~f:snd |> List.filter_map ~f:(fun x -> f tcopt fn x)
+          List.map defs ~f:snd
+          |> List.filter_map ~f:(fun full_ast -> f ctx ~full_ast)
         in
         let fs = check ~f:Typing_check_job.type_fun funs |> List.concat in
         let cs = check ~f:Typing_check_job.type_class classes in

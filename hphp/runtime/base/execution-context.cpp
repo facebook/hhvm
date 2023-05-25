@@ -1479,6 +1479,10 @@ void ExecutionContext::requestExit() {
     clearLastError();
   }
 
+  if (!m_visitedFiles.isNull()) {
+    m_visitedFiles = Array();
+  }
+
   {
     m_deferredErrors = empty_vec_array();
   }

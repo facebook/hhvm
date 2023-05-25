@@ -1623,6 +1623,10 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
 
   auto const eContext = g_context.getNoCheck();
 
+  if (!eContext->m_visitedFiles.isNull()) {
+    eContext->m_visitedFiles.append(spath.asTypedValue());
+  }
+
   // Check if this file has already been included.
   if (!forPrefetch) {
     auto it = eContext->m_evaledFiles.find(spath.get());

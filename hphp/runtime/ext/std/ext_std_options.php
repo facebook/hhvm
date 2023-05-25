@@ -75,6 +75,19 @@ function get_required_files(): varray<string> {
   return get_included_files();
 }
 
+/* For the duration of the request, keep track of all files that were
+ * invovled in autoloading
+ */
+<<__Native>>
+function record_visited_files(): void;
+
+/* Return a list of all files that were involved in autoloading for
+ * this request. Recording of visited files starts when the method
+ * record_visited_files is called.
+ */
+<<__Native>>
+function get_visited_files(): keyset<string>;
+
 <<__Native>>
 function getenv(string $varname)[read_globals]: mixed;
 

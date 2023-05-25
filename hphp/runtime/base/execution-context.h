@@ -608,6 +608,7 @@ public:
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
   req::fast_set<Unit*> m_touchedUnits;
+  Array m_visitedFiles;
   int m_lambdaCounter;
   using VMStateVec = req::TinyVector<VMState, 32>;
   VMStateVec m_nestedVMs;

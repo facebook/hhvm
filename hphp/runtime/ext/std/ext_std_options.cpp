@@ -145,6 +145,18 @@ static Array HHVM_FUNCTION(get_included_files) {
   return vai.toArray();
 }
 
+static void HHVM_FUNCTION(record_visited_files) {
+  if (g_context->m_visitedFiles.isNull()) {
+    g_context->m_visitedFiles = ArrayData::CreateKeyset();
+  }
+}
+
+static Array HHVM_FUNCTION(get_visited_files) {
+  return g_context->m_visitedFiles.isNull()
+     ? empty_keyset()
+     : g_context->m_visitedFiles;
+}
+
 static Variant HHVM_FUNCTION(getenv, const String& varname) {
   String ret = g_context->getenv(varname);
   if (!ret.isNull()) {
@@ -1125,6 +1137,8 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
+  HHVM_FE(record_visited_files);
+  HHVM_FE(get_visited_files);
   HHVM_FE(getenv);
   HHVM_FE(getlastmod);
   HHVM_FE(getmygid);

@@ -51,7 +51,7 @@ using value_field_id =
     type::field_id_tag<static_cast<FieldId>(type::base_type_v<Tag>)>;
 
 template <typename Tag>
-using value_native_type = op::get_native_type<value_field_id<Tag>, Value>;
+using value_native_type = op::get_native_type<Value, value_field_id<Tag>>;
 
 PatchOp toOp(FieldId id) {
   auto op = static_cast<PatchOp>(id);

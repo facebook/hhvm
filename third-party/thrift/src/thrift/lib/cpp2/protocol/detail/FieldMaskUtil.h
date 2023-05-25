@@ -70,7 +70,7 @@ bool validate_fields(MaskRef ref) {
     }
     // Check if the field is a thrift struct type. It uses native_type
     // as we don't support adapted struct fields in field mask.
-    using FieldType = op::get_native_type<Ord, Struct>;
+    using FieldType = op::get_native_type<Struct, Ord>;
     if constexpr (is_thrift_struct_v<FieldType>) {
       // Need to validate the struct type.
       isValid &= validate_fields<FieldType>(next);
@@ -200,7 +200,7 @@ void ensure_fields(MaskRef ref, Struct& t) {
       auto&& field_ref = op::get<Ord>(t);
       op::ensure<FieldTag>(field_ref, t);
       // Need to ensure the struct object.
-      using FieldType = op::get_native_type<Ord, Struct>;
+      using FieldType = op::get_native_type<Struct, Ord>;
       if constexpr (is_thrift_struct_v<FieldType>) {
         auto& value = *op::getValueOrNull(field_ref);
         ensure_fields(next, value);
@@ -236,7 +236,7 @@ void clear_fields(MaskRef ref, Struct& t) {
         op::clear_field<FieldTag>(field_ref, t);
         return;
       }
-      using FieldType = op::get_native_type<Ord, Struct>;
+      using FieldType = op::get_native_type<Struct, Ord>;
       auto* field_value = op::getValueOrNull(field_ref);
       if (!field_value) {
         errorIfNotCompatible<op::get_type_tag<Struct, Ord>>(next.mask);
@@ -276,7 +276,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
         return;
       }
       using FieldTag = op::get_field_tag<DstStruct, Ord>;
-      using FieldType = op::get_native_type<Ord, DstStruct>;
+      using FieldType = op::get_native_type<DstStruct, Ord>;
       auto&& src_ref = op::get<Ord>(src);
       auto&& dst_ref = op::get<Ord>(dst);
       bool srcHasValue = bool(op::getValueOrNull(src_ref));

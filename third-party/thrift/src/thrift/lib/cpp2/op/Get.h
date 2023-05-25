@@ -125,7 +125,7 @@ using get_field_tag = typename std::conditional_t<
         get_type_tag<T, Id>,
         FieldContext<T, folly::to_underlying(get_field_id<T, Id>::value)>>>;
 
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_native_type = type::native_type<get_field_tag<T, Id>>;
 
 /// Gets the thrift field name, for example:

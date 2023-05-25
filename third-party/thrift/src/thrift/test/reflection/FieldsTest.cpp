@@ -263,7 +263,7 @@ TEST(FieldsTest, IsReflectionMetadata) {
   // op::get_ordinal<Struct, int>{}; // compile error
   // op::get_type_tag<Struct, int>{}; // compile error
   // op::get_ident<Struct, int>{}; // compile error
-  // op::get_native_type<int, Struct>{}; // compile error
+  // op::get_native_type<Struct, int>{}; // compile error
 }
 
 TEST(FieldsTest, NotFoundFieldInfo) {
@@ -303,9 +303,9 @@ bool isIdentTag(folly::tag_t<Ident>) {
 TEST(FieldsTest, HelperAPIs) {
   using Struct = test_cpp2::cpp_reflection::struct3;
 
-  test::same_tag<op::get_native_type<field_ordinal<1>, Struct>, std::int32_t>;
-  test::same_tag<op::get_native_type<ident::fieldA, Struct>, std::int32_t>;
-  test::same_tag<op::get_native_type<field_id<11>, Struct>, std::deque<std::string>>;
+  test::same_tag<op::get_native_type<Struct, field_ordinal<1>>, std::int32_t>;
+  test::same_tag<op::get_native_type<Struct, ident::fieldA>, std::int32_t>;
+  test::same_tag<op::get_native_type<Struct, field_id<11>>, std::deque<std::string>>;
   EXPECT_EQ((op::get_field_id_v<Struct, field_ordinal<1>>), FieldId{2});
   EXPECT_EQ((op::get_ordinal_v<Struct, field_id<2>>), FieldOrdinal{1});
 

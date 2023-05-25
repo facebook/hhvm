@@ -97,7 +97,7 @@ void compare_impl(
       return;
     }
     // check if nested fields need to be added to mask
-    using FieldType = op::get_native_type<Id, Struct>;
+    using FieldType = op::get_native_type<Struct, Id>;
     if constexpr (is_thrift_struct_v<FieldType>) {
       compare_impl(
           *original_ptr, *modified_ptr, mask[fieldId].includes_ref().emplace());

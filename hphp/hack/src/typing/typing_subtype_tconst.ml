@@ -123,31 +123,41 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
 (** For all type constants T of var, make its type equal to ty::T *)
 let make_all_type_consts_equal
     env var (ty : internal_type) ~on_error ~as_tyvar_with_cnstr =
-  let var_pos = Env.get_tyvar_pos env var in
-  let as_tyvar_with_cnstr =
-    if as_tyvar_with_cnstr then
-      Some var_pos
-    else
-      None
+  let is_mixed =
+    match ty with
+    | LoclType lty ->
+      let (_is_supportdyn, env, lty) = Typing_utils.strip_supportdyn env lty in
+      Typing_utils.is_mixed env lty
+    | _ -> false
   in
-  let (env, ty_errs) =
-    SMap.fold
-      (fun _ (tconstid, tconstty) (env, ty_errs) ->
-        match
-          make_type_const_equal
-            env
-            tconstty
-            ty
-            tconstid
-            ~on_error
-            ~as_tyvar_with_cnstr
-        with
-        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-        | (env, _) -> (env, ty_errs))
-      (Env.get_tyvar_type_consts env var)
-      (env, [])
-  in
-  (env, Typing_error.multiple_opt ty_errs)
+  if is_mixed then
+    (env, None)
+  else
+    let var_pos = Env.get_tyvar_pos env var in
+    let as_tyvar_with_cnstr =
+      if as_tyvar_with_cnstr then
+        Some var_pos
+      else
+        None
+    in
+    let (env, ty_errs) =
+      SMap.fold
+        (fun _ (tconstid, tconstty) (env, ty_errs) ->
+          match
+            make_type_const_equal
+              env
+              tconstty
+              ty
+              tconstid
+              ~on_error
+              ~as_tyvar_with_cnstr
+          with
+          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+          | (env, _) -> (env, ty_errs))
+        (Env.get_tyvar_type_consts env var)
+        (env, [])
+    in
+    (env, Typing_error.multiple_opt ty_errs)
 
 (** `p` is the position where var::tconstid was encountered. *)
 let get_tyvar_type_const env var tconstid ~on_error =

@@ -351,6 +351,7 @@ let rec type_of_result ~ignore_errors ctx env root res =
       else
         None
     in
+    (* TODO akenn: this is a source of unsoundness *)
     let ty =
       Typing_utils.mk_tany env (Pos_or_decl.unsafe_to_raw_pos (get_pos root))
     in
@@ -473,13 +474,17 @@ let rec expand ctx env root =
           root_kind;
         }
       in
-
+      let is_supportdyn_mixed t =
+        let (is_supportdyn, _, t) = Typing_utils.strip_supportdyn env t in
+        is_supportdyn && Typing_utils.is_mixed env t
+      in
       (* Ignore seen bounds to avoid infinite loops *)
       let upper_bounds =
         let ub = Env.get_upper_bounds env s tyargs in
         TySet.filter
           (fun ty ->
-            (* Also ignore ~T if we've seen T *)
+            (not (is_supportdyn_mixed ty))
+            && (* Also ignore ~T if we've seen T *)
             not
               (TySet.mem (Typing_utils.strip_dynamic env ty) ctx.generics_seen))
           ub

@@ -1824,8 +1824,6 @@ let setup_env_for_class_def_check ctx c =
   env
 
 let class_def ctx (c : _ class_) =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
-  Errors.run_with_span c.c_span @@ fun () ->
   let env = setup_env_for_class_def_check ctx c in
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in

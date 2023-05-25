@@ -64,7 +64,7 @@ let check_typedef (ctx : Provider_context.t) ~(full_ast : Nast.typedef) :
   handle_exn_as_error Pos.none (fun () ->
       let typedef = Naming.typedef ctx full_ast in
       Nast_check.def ctx (Aast.Typedef typedef);
-      let ret = Typing_typedef.typedef_def ctx typedef in
+      let ret = Typing_toplevel.typedef_def ctx typedef in
       let def = Aast.Typedef ret in
       Tast_check.def ctx def;
       Some def)

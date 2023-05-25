@@ -289,7 +289,15 @@ let fun_def ctx fd : Tast.fun_def list option =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   fundefs
 
-let class_def = Typing_class.class_def
+let class_def ctx class_ =
+  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Errors.run_with_span class_.c_span @@ fun () ->
+  Typing_class.class_def ctx class_
+
+let typedef_def ctx typedef =
+  let tcopt = Provider_context.get_tcopt ctx in
+  Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
+  Typing_typedef.typedef_def ctx typedef
 
 let gconst_def ctx cst =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -388,7 +396,7 @@ let nast_to_tast ~(do_tast_checks : bool) ctx nast : Tast.program =
       | None -> None
     end
     | Constant gc -> Some [Aast.Constant (gconst_def ctx gc)]
-    | Typedef td -> Some [Aast.Typedef (Typing_typedef.typedef_def ctx td)]
+    | Typedef td -> Some [Aast.Typedef (typedef_def ctx td)]
     | Class c -> begin
       match class_def ctx c with
       | Some c -> Some [Aast.Class c]

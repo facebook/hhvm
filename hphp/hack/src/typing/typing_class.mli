@@ -22,4 +22,5 @@ val method_def_standalone :
   string ->
   (Tast.method_ list * Typing_inference_env.t_global_with_pos) option
 
+(** This is a helper for [Typing_toplevel.class_def]. Call that instead. *)
 val class_def : Provider_context.t -> Nast.class_ -> Tast.class_ option

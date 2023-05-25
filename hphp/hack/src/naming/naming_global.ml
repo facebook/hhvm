@@ -43,22 +43,26 @@ module GEnv = struct
     raise File_provider.File_provider_stale
 
   let get_fun_full_pos ctx (pos, name) =
-    match Naming_provider.get_fun_full_pos ctx (pos, name) with
+    match Naming_provider.get_fun_full_pos_by_parsing_file ctx (pos, name) with
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
   let get_type_full_pos ctx (pos, name) =
-    match Naming_provider.get_type_full_pos ctx (pos, name) with
+    match Naming_provider.get_type_full_pos_by_parsing_file ctx (pos, name) with
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
   let get_const_full_pos ctx (pos, name) =
-    match Naming_provider.get_const_full_pos ctx (pos, name) with
+    match
+      Naming_provider.get_const_full_pos_by_parsing_file ctx (pos, name)
+    with
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 
   let get_module_full_pos ctx (pos, name) =
-    match Naming_provider.get_module_full_pos ctx (pos, name) with
+    match
+      Naming_provider.get_module_full_pos_by_parsing_file ctx (pos, name)
+    with
     | Some pos -> (pos, name)
     | None -> file_disappeared_under_our_feet (pos, name)
 

@@ -20,7 +20,7 @@ val get_const_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_const_full_pos :
+val get_const_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Record that a global constant with the given name was declared at the
@@ -45,7 +45,7 @@ val get_fun_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_fun_full_pos :
+val get_fun_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Look up the canonical name for the given global function.
@@ -85,7 +85,7 @@ val get_type_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_type_full_pos :
+val get_type_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Look up the file path declaring the given type in the reverse naming
@@ -161,7 +161,7 @@ val get_files :
   Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
 (** Resolve the given name & FileInfo.pos into an actual position*)
-val get_module_full_pos :
+val get_module_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 val get_module_pos : Provider_context.t -> string -> FileInfo.pos option

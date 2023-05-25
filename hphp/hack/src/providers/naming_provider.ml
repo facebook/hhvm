@@ -750,61 +750,42 @@ let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
     in
     Pos_or_decl.fill_in_filename filename pos
 
-let get_module_full_pos ctx (pos, name) =
+let get_module_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Module as name_type), fn) -> begin
-    match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-    | _ ->
-      Ast_provider.find_module_in_file ctx fn name ~full:false
-      |> Option.map ~f:(fun md -> fst md.Aast.md_name)
-  end
+  | FileInfo.File (FileInfo.Module, fn) ->
+    Ast_provider.find_module_in_file ctx fn name ~full:false
+    |> Option.map ~f:(fun md -> fst md.Aast.md_name)
   | FileInfo.(File ((Fun | Class | Typedef | Const), _fn)) -> None
 
-let get_const_full_pos ctx (pos, name) =
+let get_const_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Const as name_type), fn) -> begin
-    match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-    | _ ->
-      Ast_provider.find_gconst_in_file ctx fn name ~full:false
-      |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
-  end
+  | FileInfo.File (FileInfo.Const, fn) ->
+    Ast_provider.find_gconst_in_file ctx fn name ~full:false
+    |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
   | FileInfo.(File ((Fun | Class | Typedef | Module), _fn)) -> None
 
-let get_fun_full_pos ctx (pos, name) =
+let get_fun_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File ((FileInfo.Fun as name_type), fn) -> begin
-    match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-    | _ ->
-      Ast_provider.find_fun_in_file ctx fn name ~full:false
-      |> Option.map ~f:(fun fd -> fst fd.Aast.fd_name)
-  end
+  | FileInfo.File (FileInfo.Fun, fn) ->
+    Ast_provider.find_fun_in_file ctx fn name ~full:false
+    |> Option.map ~f:(fun fd -> fst fd.Aast.fd_name)
   | FileInfo.(File ((Class | Typedef | Const | Module), _fn)) -> None
 
-let get_type_full_pos ctx (pos, name) =
+let get_type_full_pos_by_parsing_file ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
   | FileInfo.File (name_type, fn) ->
-    (match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.Positioned.rpc_get_full_pos decl name_type name fn
-    | _ ->
-      (match name_type with
-      | FileInfo.Class ->
-        Ast_provider.find_class_in_file ctx fn name ~full:false
-        |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
-      | FileInfo.Typedef ->
-        Ast_provider.find_typedef_in_file ctx fn name ~full:false
-        |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
-      | FileInfo.(Fun | Const | Module) -> None))
+    (match name_type with
+    | FileInfo.Class ->
+      Ast_provider.find_class_in_file ctx fn name ~full:false
+      |> Option.map ~f:(fun ast -> fst ast.Aast.c_name)
+    | FileInfo.Typedef ->
+      Ast_provider.find_typedef_in_file ctx fn name ~full:false
+      |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
+    | FileInfo.(Fun | Const | Module) -> None)
 
 (** This removes the name->path mapping from the naming table (i.e. the combination
 of sqlite and delta). It is an error to call this method unless name->path exists.

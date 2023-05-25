@@ -70,17 +70,10 @@ let compute_tast_and_errors_unquarantined_internal
         ~popt:(Provider_context.get_popt ctx)
         ~entry
     in
-    (* Note: this only picks up errors during Naming.program.
-       It doesn't pick up "this name is already bound" errors.
-       How do other parts of the code pick them up? - during ServerTypeCheck.declare_names,
-       during the course of updating the reverse naming table.
-       There isn't a clean way to do the same here, and indeed
-       most consumers of Tast_provider such as serverHover don't
-       even care for such errors. *)
     let (naming_errors, nast) =
       Errors.do_with_context
         entry.Provider_context.path
-        Errors.Naming
+        Errors.Typing
         (fun () -> Naming.program ctx ast)
     in
     let (typing_errors, tast) =
@@ -89,6 +82,10 @@ let compute_tast_and_errors_unquarantined_internal
         | Compute_tast_only -> false
         | Compute_tast_and_errors -> true
       in
+      (* Note: duplicate name errors are normally caught during [nast_to_tast].
+         But the way [Naming_provider.find_symbol_in_context] works is it always
+         deems names in [entry] to be the winner; therefore, until Naming_provider
+         is changed, we will be unable to detect duplicate names in [entry]. *)
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Typing

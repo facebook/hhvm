@@ -35,6 +35,6 @@ struct MyDataPatchPatch {
 }
 
 @patch.GeneratePatch
-struct Bar {
+struct StructWithPatch {
   1: MyDataPatch foo;
 }

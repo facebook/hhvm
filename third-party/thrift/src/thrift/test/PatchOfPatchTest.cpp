@@ -19,22 +19,22 @@
 
 namespace apache::thrift::test::patch {
 TEST(PatchOfPatchTest, Example) {
-  Bar bar;
-  bar.foo()->patch<apache::thrift::ident::data1>() = "10";
+  StructWithPatch structWithPatch;
+  structWithPatch.foo()->patch<apache::thrift::ident::data1>() = "10";
 
   MyData myData;
-  bar.foo()->apply(myData);
+  structWithPatch.foo()->apply(myData);
   EXPECT_EQ(myData.data1(), "10");
 
   MyDataPatch myDataPatch;
   myDataPatch.patch<apache::thrift::ident::data1>() = "20";
 
-  BarPatch barPatch;
-  barPatch.patch<apache::thrift::ident::foo>() = myDataPatch;
+  StructWithPatchPatch structWithPatchPatch;
+  structWithPatchPatch.patch<apache::thrift::ident::foo>() = myDataPatch;
 
-  barPatch.apply(bar);
+  structWithPatchPatch.apply(structWithPatch);
 
-  bar.foo()->apply(myData);
+  structWithPatch.foo()->apply(myData);
   EXPECT_EQ(myData.data1(), "20");
 }
 } // namespace apache::thrift::test::patch

@@ -156,7 +156,7 @@ let process_file
     { file_errors; deferred_decls = [] }
   else
     let opts = Provider_context.get_tcopt ctx in
-    let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
+    let (funs, classes, typedefs, gconsts, modules) = Nast.get_def_names ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     try
       let result =

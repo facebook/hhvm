@@ -199,35 +199,35 @@ let get_defs (ast : program) =
         Aast.(
           match def with
           | Fun f ->
-            ( FileInfo.pos_full (to_id f.fd_name) :: funs,
+            ( (FileInfo.pos_full (to_id f.fd_name), f) :: funs,
               classes,
               typedefs,
               constants,
               modules )
           | Class c ->
             ( funs,
-              FileInfo.pos_full (to_id c.c_name) :: classes,
+              (FileInfo.pos_full (to_id c.c_name), c) :: classes,
               typedefs,
               constants,
               modules )
           | Typedef t ->
             ( funs,
               classes,
-              FileInfo.pos_full (to_id t.t_name) :: typedefs,
+              (FileInfo.pos_full (to_id t.t_name), t) :: typedefs,
               constants,
               modules )
           | Constant cst ->
             ( funs,
               classes,
               typedefs,
-              FileInfo.pos_full (to_id cst.cst_name) :: constants,
+              (FileInfo.pos_full (to_id cst.cst_name), cst) :: constants,
               modules )
           | Module md ->
             ( funs,
               classes,
               typedefs,
               constants,
-              FileInfo.pos_full (to_id md.md_name) :: modules )
+              (FileInfo.pos_full (to_id md.md_name), md) :: modules )
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
           | SetNamespaceEnv _
@@ -239,6 +239,14 @@ let get_defs (ast : program) =
             acc))
   in
   get_defs ast ([], [], [], [], [])
+
+let get_def_names ast =
+  let (funs, classes, typedefs, constants, modules) = get_defs ast in
+  ( List.map funs ~f:fst,
+    List.map classes ~f:fst,
+    List.map typedefs ~f:fst,
+    List.map constants ~f:fst,
+    List.map modules ~f:fst )
 
 type ignore_attribute_env = { ignored_attributes: string list }
 

@@ -10,7 +10,7 @@
 open Hh_prelude
 
 let type_file tcopt fn ast =
-  let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
+  let (funs, classes, typedefs, consts, modules) = Nast.get_def_names ast in
   let snd (_, x, _) = x in
   let (errors, tast) =
     Errors.do_with_context fn Errors.Typing (fun () ->

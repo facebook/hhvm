@@ -1107,17 +1107,10 @@ let post_saved_state_initialization
     }
   in
 
-  let (naming_error_files, _non_naming_error_files) =
-    SaveStateService.partition_error_files_tf old_errors [Errors.Naming]
-  in
   let files_with_old_errors = SaveStateService.fold_error_files old_errors in
   Hh_logger.log
     "Number of files with errors: %d"
     (Relative_path.Set.cardinal files_with_old_errors);
-
-  Hh_logger.log
-    "Number of files with Naming errors: %d"
-    (Relative_path.Set.cardinal naming_error_files);
 
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
@@ -1155,7 +1148,6 @@ let post_saved_state_initialization
       ~init:Relative_path.Set.empty
       ~f:Relative_path.Set.union
       [
-        naming_error_files;
         dirty_naming_files;
         dirty_master_files;
         dirty_local_files;

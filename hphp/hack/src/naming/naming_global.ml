@@ -438,11 +438,11 @@ let add_files_to_rename failed defl defs_in_env =
 let ndecl_file_skip_if_already_bound ctx fn fileinfo =
   make_env_skip_if_already_bound ctx fn fileinfo
 
-let ndecl_file_error_if_already_bound ctx fn fileinfo =
+let ndecl_file_and_get_conflict_files ctx fn fileinfo =
   Hh_logger.debug ~category "Naming decl: %s" (Relative_path.to_absolute fn);
   let is_okay = make_env_and_check_not_already_bound ctx fileinfo in
   if is_okay then
-    (Errors.empty, Relative_path.Set.empty)
+    Relative_path.Set.empty
   else
     (* IMPORTANT:
      * If a file has name collisions, we MUST add the list of files that
@@ -500,4 +500,4 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.modules (GEnv.module_pos ctx)
     in
-    (Errors.empty, failed)
+    failed

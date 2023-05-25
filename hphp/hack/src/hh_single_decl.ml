@@ -303,8 +303,8 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           Direct_decl_utils.direct_decl_parse ctx fn |> Option.value_exn
         in
         let fi = Direct_decl_utils.decls_to_fileinfo fn decls in
-        let (_naming_global_errors, _conflict_filenames) =
-          Naming_global.ndecl_file_error_if_already_bound ctx fn fi
+        let _conflict_filenames =
+          Naming_global.ndecl_file_and_get_conflict_files ctx fn fi
         in
         if decl_make_env then Decl.make_env ~sh:SharedMem.Uses ctx fn;
         (* Here we assemble top-level definitions as discovered by

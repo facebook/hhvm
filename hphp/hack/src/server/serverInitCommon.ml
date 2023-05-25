@@ -86,12 +86,11 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
       env.naming_table
       ~f:(fun k v env ->
         count := !count + 1;
-        let (errorl, failed_naming) =
-          Naming_global.ndecl_file_error_if_already_bound ctx k v
+        let failed_naming =
+          Naming_global.ndecl_file_and_get_conflict_files ctx k v
         in
         {
           env with
-          errorl = Errors.merge errorl env.errorl;
           failed_naming =
             Relative_path.Set.union env.failed_naming failed_naming;
         })

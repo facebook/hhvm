@@ -1211,10 +1211,10 @@ let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
-          let (errors, _failed_naming_fns) =
-            Naming_global.ndecl_file_error_if_already_bound ctx fn fileinfo
+          let _failed_naming_fns =
+            Naming_global.ndecl_file_and_get_conflict_files ctx fn fileinfo
           in
-          Errors.merge_into_current errors);
+          ());
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
 

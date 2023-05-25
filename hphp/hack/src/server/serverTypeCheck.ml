@@ -575,16 +575,18 @@ functor
       (* Update name->filename reverse naming table (global, mutable),
          and gather "duplicate name" errors *)
       remove_decls env defs_per_file_parsed;
-      let (duplicate_name_errors, failed_naming) =
+      let failed_naming =
         Relative_path.Map.fold
           defs_per_file_parsed
-          ~init:(Errors.empty, Relative_path.Set.empty)
-          ~f:(fun file fileinfo (errorl, failed) ->
-            let (errorl', failed') =
-              Naming_global.ndecl_file_error_if_already_bound ctx file fileinfo
+          ~init:Relative_path.Set.empty
+          ~f:(fun file fileinfo failed ->
+            let failed' =
+              Naming_global.ndecl_file_and_get_conflict_files ctx file fileinfo
             in
-            (Errors.merge errorl' errorl, Relative_path.Set.union failed' failed))
+            Relative_path.Set.union failed' failed)
       in
+      (* TODO(ljw): clean up empty errors *)
+      let duplicate_name_errors = Errors.empty in
       let t2 =
         Hh_logger.log_duration "Declare_names (name->filename)" start_t
       in

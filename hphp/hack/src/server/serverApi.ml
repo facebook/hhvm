@@ -251,7 +251,7 @@ let make_remote_server_api
       Hh_logger.log "Building naming table - Naming";
       let naming_table = Naming_table.create defs_per_file in
       Naming_table.iter naming_table ~f:(fun k v ->
-          let _ = Naming_global.ndecl_file_error_if_already_bound ctx k v in
+          let _ = Naming_global.ndecl_file_and_get_conflict_files ctx k v in
           ());
       Hh_logger.log "Building naming table - Done!";
       naming_table
@@ -404,7 +404,7 @@ let make_remote_server_api
         Naming_table.create fast_parsed
         |> Naming_table.iter ~f:(fun k v ->
                let _ =
-                 Naming_global.ndecl_file_error_if_already_bound ctx k v
+                 Naming_global.ndecl_file_and_get_conflict_files ctx k v
                in
                ());
         Ok ()

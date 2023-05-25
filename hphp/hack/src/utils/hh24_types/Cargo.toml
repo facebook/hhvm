@@ -14,7 +14,7 @@ derive_more = "0.99.17"
 file_info = { version = "0.0.0", path = "../../deps/rust/file_info" }
 hh_hash = { version = "0.0.0", path = "../hh_hash" }
 relative_path = { version = "0.0.0", path = "../rust/relative_path" }
-rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
+rusqlite = { version = "0.29.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 thiserror = "1.0.36"

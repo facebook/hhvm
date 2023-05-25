@@ -1770,6 +1770,18 @@ Optional<int> run_client(const char* sock_path,
   }
 }
 
+[[noreturn]] void waitAndExit(int pid, int options, int err) {
+  int status = 0;
+  if (waitpid(pid, &status, options) != pid) {
+    Logger::FError("Lost communication with child: {}",
+                   folly::errnoStr(err ? err : errno));
+    exit(EXIT_FAILURE);
+  }
+  if (WIFEXITED(status))   exit(WEXITSTATUS(status));
+  if (WIFSIGNALED(status)) kill(getpid(), WTERMSIG(status));
+  exit(EXIT_FAILURE);
+}
+
 void moveToBackground(int count) {
   int fg_pipe[2];
   if (pipe(fg_pipe) == -1) {
@@ -1789,21 +1801,12 @@ void moveToBackground(int count) {
   if (pid != 0) {
     int ret = -1;
     close(foreground_pipe);
-    try {
-      while (count--) {
-        if (folly::readFull(background_pipe, &ret, sizeof(ret)) == -1) {
-          throw std::system_error(errno, std::generic_category(),
-                                  "read failed");
-        }
+    while (count--) {
+      switch (folly::readFull(background_pipe, &ret, sizeof(ret))) {
+      case -1: waitAndExit(pid, WNOHANG, errno);
+      case 0:  waitAndExit(pid, 0, 0);
+      default: break;
       }
-    } catch (std::exception& ex) {
-      int status = 0;
-      if (waitpid(pid, &status, WNOHANG) == -1) {
-        Logger::FError("Lost communication with child: {}", ex.what());
-        exit(-1);
-      }
-      if (WIFEXITED(status))   exit(WEXITSTATUS(status));
-      if (WIFSIGNALED(status)) kill(getpid(), WTERMSIG(status));
     }
     exit(ret);
   }

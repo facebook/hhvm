@@ -47,8 +47,8 @@ val remove_decls_using_file_info : Provider_backend.t -> FileInfo.t -> unit
 (which is a wrapper for the reverse naming table). It handles "name already bound" errors as follows:
 - If any symbol from the FileInfo.t is already defined in a different file (with or without the
 same case), that other file is deemed to have the "canonical" definition of the symbol; this
-function leaves the naming-table-provider for the conflicting name as it is, and reports an error,
-and also returns the canonical's filename.
+function leaves the naming-table-provider for the conflicting name as it is, and also returns the
+canonical's filename plus this filename.
 - If any symbol from the FileInfo.t is defined twice within the FileInfo.t (with or without
 the same case), then the first occurrence is deemed to be the "canonical" definition of the symbol;
 this function ends with the first occurrence in the naming-table-provider, and reports an error
@@ -58,7 +58,10 @@ There are expectations of the caller:
 - This function doesn't touch the forward naming table; that's left to the caller.
 - The caller is expected to ensure that all names from the specified file have already been removed
 from the naming-table provider prior to calling this function.
-- The caller is expected to provide "full" positions in its FileInfo.t. *)
+- The caller is expected to provide "full" positions in its FileInfo.t.
+
+TODO(ljw): This function always returns an empty Errors.t. It never produces errors.
+All "already-bound" errors are produced during [Typing_toplevel]. *)
 val ndecl_file_error_if_already_bound :
   Provider_context.t ->
   Relative_path.t ->

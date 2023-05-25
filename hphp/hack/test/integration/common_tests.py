@@ -1485,6 +1485,8 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
+                ":2:11,14: Name already bound: `aaaa` (Naming[2012])",
+                "  {root}typing_error.php:2:11,14: Previous definition is here",
                 ":2:32,34: Invalid return type (Typing[4110])",
                 "  :2:19,21: Expected `int`",
                 "  {root}foo_3.php:3:23,28: But got `string`",

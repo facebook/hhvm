@@ -1825,15 +1825,15 @@ let setup_env_for_class_def_check ctx c =
 
 let class_def ctx (c : _ class_) =
   let env = setup_env_for_class_def_check ctx c in
-  let (name_pos, name) = c.c_name in
-  let tc = Env.get_class env name in
-  Typing_env.make_depend_on_current_module env;
-  match tc with
+  match Env.get_class env (snd c.c_name) with
   | None ->
-    (* This can happen if there was an error during the declaration
-     * of the class. *)
+    HackEventLogger.invariant_violation_bug
+      "Decl consistency: class_def, but can't find a decl"
+      ~data:(snd c.c_name)
+      ~pos:(Pos.to_relative_string (fst c.c_name) |> Pos.string);
     None
   | Some tc ->
+    Typing_env.make_depend_on_current_module env;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
     if
       not
@@ -1842,17 +1842,7 @@ let class_def ctx (c : _ class_) =
           .Saved_state_rollouts.no_ancestor_edges
     then
       Typing_env.make_depend_on_ancestors env tc;
-
-    (* If there are duplicate definitions of the class then we will end up
-     * checking one AST with respect to the decl corresponding to the other definition.
-     * Naming has already detected duplicates, so let's just avoid cascading unhelpful
-     * typing errors, and also avoid triggering the bad position assert
-     *)
-    if not (Pos.equal name_pos (Cls.pos tc |> Pos_or_decl.unsafe_to_raw_pos))
-    then
-      None
-    else
-      Some (class_def_ env c tc)
+    Some (class_def_ env c tc)
 
 type class_member_standalone_check_env = {
   cls: Cls.t;

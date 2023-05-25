@@ -46,12 +46,42 @@ let get_decl_function_header env function_id =
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
+let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
+  if String.is_empty name then
+    (* In case of some parse errors, the AST contains definitions with empty names.
+       There's no useful duplicate-name-check we can do here.
+       Return [false] because there's no such thing as the winner for the empty name. *)
+    false
+  else
+    match Decl_provider.is_this_def_the_winner ctx name_type (pos, name) with
+    | Decl_provider.Winner -> true
+    | Decl_provider.Loser_to prev_pos ->
+      Errors.add_error
+        Naming_error.(
+          to_user_error @@ Error_name_already_bound { name; pos; prev_pos });
+      false
+    | Decl_provider.Not_found ->
+      (* This is impossible! The fact that we have an AST def for [name] implies
+         that Decl_provider should be able to find at least one decl with this name.
+         Only explanations are (1) weirdness with Provider_context.entry which
+         gives slightly different answers from what direct-decl-parser provides
+         e.g. in case of incorrect parse trees, or order of winner; (2) disk race
+         where the file on disk has changed but we haven't yet updated naming table. *)
+      HackEventLogger.invariant_violation_bug
+        "Decl consistency: Ast definition but no decl"
+        ~data:name
+        ~pos:(Pos.to_relative_string pos |> Pos.string);
+      false
+
 let fun_def ctx fd : Tast.fun_def list option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
+  let (_ : bool) =
+    check_if_this_def_is_the_winner ctx FileInfo.Fun fd.fd_name
+  in
   let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
   with_timeout env fd.fd_name @@ fun env ->
   (* reset the expression dependent display ids for each function body *)
@@ -292,12 +322,21 @@ let fun_def ctx fd : Tast.fun_def list option =
 let class_def ctx class_ =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span class_.c_span @@ fun () ->
-  Typing_class.class_def ctx class_
+  if check_if_this_def_is_the_winner ctx FileInfo.Class class_.c_name then
+    (* [Typing_class.class_def] is unusual in that it can't work properly
+       unless it's the winner and has the same capitalization.
+       If either isn't met, it will report to telemetry and return None. *)
+    Typing_class.class_def ctx class_
+  else
+    None
 
 let typedef_def ctx typedef =
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
   Errors.run_with_span typedef.t_span @@ fun () ->
+  let (_ : bool) =
+    check_if_this_def_is_the_winner ctx FileInfo.Typedef typedef.t_name
+  in
   Typing_typedef.typedef_def ctx typedef
 
 let gconst_def ctx cst =
@@ -305,6 +344,9 @@ let gconst_def ctx cst =
   Profile.measure_elapsed_time_and_report tcopt None cst.cst_name @@ fun () ->
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
+  let (_ : bool) =
+    check_if_this_def_is_the_winner ctx FileInfo.Const cst.cst_name
+  in
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.global_constant env cst;
@@ -369,6 +411,9 @@ let gconst_def ctx cst =
 let module_def ctx md =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span md.md_span @@ fun () ->
+  let (_ : bool) =
+    check_if_this_def_is_the_winner ctx FileInfo.Module md.md_name
+  in
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
   let (env, file_attributes) =
     Typing.file_attributes env md.md_file_attributes

@@ -104,4 +104,5 @@ File \"/bar_expects_string.php\", line 2, characters 40-44:\nInvalid return type
   File \"/foo_returns_int.php\", line 2, characters 18-20:\n  But got `int`
 
 /foo_returns_int.php:
+/foo_returns_string_name.php:
 "

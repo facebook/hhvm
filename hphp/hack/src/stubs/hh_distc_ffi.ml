@@ -8,7 +8,7 @@
 
 type handle
 
-let spawn _ _ _ = failwith "start not implemented"
+let spawn ~root:_ ~ss_dir:_ ~hhdg_path:_ _ = failwith "start not implemented"
 
 let join _ = failwith "join_handle not implemented"
 

@@ -952,7 +952,8 @@ let rec event_loop
 let process_with_hh_distc
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
-    ~(check_info : check_info) :
+    ~(check_info : check_info)
+    ~(tcopt : TypecheckerOptions.t) :
     [> `Success of Errors.t * Typing_deps.dep_edges * 'env
     | `Error of log_message
     | `Cancel of 'env * MultiThreadedCall.cancel_reason
@@ -966,7 +967,11 @@ let process_with_hh_distc
     Path.(to_string @@ concat ss_dir "hh_mini_saved_state.hhdg")
   in
   let hh_distc_handle =
-    Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir) hhdg_path
+    Hh_distc_ffi.spawn
+      ~root:(Path.to_string root)
+      ~ss_dir:(Path.to_string ss_dir)
+      ~hhdg_path
+      tcopt
     |> Result.ok_or_failwith
   in
   let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
@@ -1249,8 +1254,8 @@ let go_with_interrupt
            (Telemetry.create ()))
       ~config:check_info.per_file_profiling
   in
-  let opts = Provider_context.get_tcopt ctx in
-  let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
+  let tcopt = Provider_context.get_tcopt ctx in
+  let sample_rate = TypecheckerOptions.typecheck_sample_rate tcopt in
   let original_fnl = fnl in
   let fnl = BigList.create fnl in
   ServerProgress.write "typechecking %d files" (BigList.length fnl);
@@ -1277,7 +1282,7 @@ let go_with_interrupt
     BigList.map fnl ~f:(fun path ->
         Check { path; was_already_deferred = false })
   in
-  let num_workers = TypecheckerOptions.num_local_workers opts in
+  let num_workers = TypecheckerOptions.num_local_workers tcopt in
   let workers =
     match (workers, num_workers) with
     | (Some workers, Some num_local_workers) ->
@@ -1306,7 +1311,7 @@ let go_with_interrupt
       if will_use_distc then (
         (* distc doesn't yet give any profiling_info about how its workers fared *)
         let profiling_info = Telemetry.create () in
-        match process_with_hh_distc ~root ~interrupt ~check_info with
+        match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
         | `Success (errors, dep_edges, env) ->
           Some
             ( { errors; dep_edges; profiling_info },

@@ -205,7 +205,15 @@ impl HhConfig {
                     go.tco_enable_strict_string_concat_interp = parse_json(&value)?;
                 }
                 "allowed_expression_tree_visitors" => {
-                    go.tco_allowed_expression_tree_visitors = parse_svec(&value);
+                    let mut allowed_expression_tree_visitors = parse_svec(&value);
+                    // Fix up type names so they will match with elaborated names.
+                    // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
+                    for ty in &mut allowed_expression_tree_visitors {
+                        if !ty.starts_with('\\') {
+                            *ty = format!("\\{}", ty)
+                        }
+                    }
+                    go.tco_allowed_expression_tree_visitors = allowed_expression_tree_visitors;
                 }
                 "locl_cache_capacity" => {
                     go.tco_locl_cache_capacity = parse_json(&value)?;

@@ -85,7 +85,7 @@ struct Bar {
 }
 
 struct WithRequiredFields {
-  1: required i64 requrired_int;
+  1: required i64 required_int;
 }
 
 @cpp.Frozen2Exclude

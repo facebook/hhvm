@@ -31,6 +31,7 @@ which does almost exactly the same thing, except it doesn't do [Naming], and
 there are minor differences in treatment of some toplevel nodes. *)
 val calc_errors_and_tast :
   Provider_context.t ->
+  ?drop_fixmed:bool ->
   Relative_path.t ->
   full_ast:Nast.program ->
   Errors.t * Tast.def list

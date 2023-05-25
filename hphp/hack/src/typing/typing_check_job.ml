@@ -87,12 +87,12 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
       Tast_check.def ctx def;
       Some def)
 
-let calc_errors_and_tast ctx fn ~full_ast =
+let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast =
   let (funs, classes, typedefs, consts, modules) = Nast.get_defs full_ast in
   let calc_tast ~f defs =
     List.map defs ~f:snd |> List.filter_map ~f:(fun full_ast -> f ctx ~full_ast)
   in
-  Errors.do_with_context fn Errors.Typing (fun () ->
+  Errors.do_with_context ~drop_fixmed fn Errors.Typing (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
          first, classes next, and so on. This is likely irrelevant to end user experience though,
          since user gets sorted errors. *)

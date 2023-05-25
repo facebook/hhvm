@@ -18,7 +18,11 @@ val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 Set [do_tast_checks] to [false] to skip running TAST checks on the resulting
 TAST. This means that the associated list of errors may be incomplete. This is
 useful for performance in cases where we want the TAST, but don't need a correct
-list of errors. *)
+list of errors.
+
+It is unfortunate that this routine exists alongside [Typing_check_job.calc_errors_and_tast]
+which does almost exactly the same thing, except it also does [Naming], and
+there are minor differences in treatment of some toplevel nodes. *)
 val nast_to_tast :
   do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program
 

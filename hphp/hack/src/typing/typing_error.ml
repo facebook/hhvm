@@ -1466,7 +1466,9 @@ and Secondary : sig
     (* Secondary only *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        reasons: Pos_or_decl.t Message.t list Lazy.t;
+        ty_sub: Typing_defs_core.internal_type;
+        ty_sup: Typing_defs_core.internal_type;
+        is_coeffect: bool;
       }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
@@ -1654,7 +1656,11 @@ and Secondary : sig
         ty_name: string Lazy.t;
         dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Subtyping_error of Pos_or_decl.t Message.t list Lazy.t
+    | Subtyping_error of {
+        ty_sub: Typing_defs_core.internal_type;
+        ty_sup: Typing_defs_core.internal_type;
+        is_coeffect: bool;
+      }
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -1748,7 +1754,9 @@ end = struct
     (* Secondary only *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        reasons: Pos_or_decl.t Message.t list Lazy.t;
+        ty_sub: Typing_defs_core.internal_type;
+        ty_sup: Typing_defs_core.internal_type;
+        is_coeffect: bool;
       }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
@@ -1936,7 +1944,11 @@ end = struct
         ty_name: string Lazy.t;
         dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Subtyping_error of Pos_or_decl.t Message.t list Lazy.t
+    | Subtyping_error of {
+        ty_sub: Typing_defs_core.internal_type;
+        ty_sup: Typing_defs_core.internal_type;
+        is_coeffect: bool;
+      }
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;

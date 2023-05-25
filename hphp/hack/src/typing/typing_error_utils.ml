@@ -4903,9 +4903,196 @@ end = struct
     in
     (Error_code.TypeArityMismatch, reasons)
 
-  let violated_constraint cstrs reasons =
+  (* In typing_coercion.ml we sometimes check t1 <: t2 by adding dynamic
+     to check t1 < t|dynamic. In that case, we use the Rdynamic_coercion
+     reason so that we can detect it here and not print the dynamic if there
+     is a type error. *)
+  let detect_attempting_dynamic_coercion_reason r ty =
+    let open Typing_defs_core in
+    match r with
+    | Typing_reason.Rdynamic_coercion r ->
+      (match ty with
+      | LoclType lty ->
+        (match get_node lty with
+        | Tunion [t1; t2] ->
+          (match (get_node t1, get_node t2) with
+          | (Tdynamic, _) -> (r, LoclType t2)
+          | (_, Tdynamic) -> (r, LoclType t1)
+          | _ -> (r, ty))
+        | _ -> (r, ty))
+      | _ -> (r, ty))
+    | _ -> (r, ty)
+
+  let describe_coeffect env ty =
+    lazy
+      (let (env, ty) = Typing_utils.simplify_intersections env ty in
+       Typing_print.coeffects env ty)
+
+  let describe_ty_default env ty =
+    Typing_print.with_blank_tyvars (fun () ->
+        Typing_print.full_strip_ns_i env ty)
+
+  let describe_ty ~is_coeffect =
+    (* Optimization: specialize on partial application, i.e.
+       *    let describe_ty_sub = describe_ty ~is_coeffect in
+       *  will check the flag only once, not every time the function is called *)
+    if not is_coeffect then
+      describe_ty_default
+    else
+      fun env -> function
+       | Typing_defs_core.LoclType ty -> Lazy.force @@ describe_coeffect env ty
+       | ty -> describe_ty_default env ty
+
+  let rec describe_ty_super ~is_coeffect env ty =
+    let open Typing_defs_core in
+    let describe_ty_super = describe_ty_super ~is_coeffect in
+    let print = (describe_ty ~is_coeffect) env in
+    let default () = print ty in
+    match ty with
+    | LoclType ty ->
+      let (env, ty) = Typing_env.expand_type env ty in
+      (match Typing_defs_core.get_node ty with
+      | Typing_defs_core.Tvar v ->
+        let upper_bounds =
+          Internal_type_set.elements (Typing_env.get_tyvar_upper_bounds env v)
+        in
+        (* The constraint graph is transitively closed so we can filter tyvars. *)
+        let upper_bounds =
+          List.filter upper_bounds ~f:(fun t -> not (Typing_defs.is_tyvar_i t))
+        in
+        (match upper_bounds with
+        | [] -> "some type not known yet"
+        | tyl ->
+          let (locl_tyl, cstr_tyl) =
+            List.partition_tf tyl ~f:Typing_defs.is_locl_type
+          in
+          let sep =
+            match (locl_tyl, cstr_tyl) with
+            | (_ :: _, _ :: _) -> " and "
+            | _ -> ""
+          in
+          let locl_descr =
+            match locl_tyl with
+            | [] -> ""
+            | tyl ->
+              "of type "
+              ^ (String.concat ~sep:" & " (List.map tyl ~f:print)
+                |> Markdown_lite.md_codify)
+          in
+          let cstr_descr =
+            String.concat
+              ~sep:" and "
+              (List.map cstr_tyl ~f:(describe_ty_super env))
+          in
+          "something " ^ locl_descr ^ sep ^ cstr_descr)
+      | Toption ty when Typing_defs.is_tyvar ty ->
+        "`null` or " ^ describe_ty_super env (LoclType ty)
+      | _ -> Markdown_lite.md_codify (default ()))
+    | ConstraintType ty ->
+      (match deref_constraint_type ty with
+      | (_, Thas_member hm) ->
+        let {
+          hm_name = (_, name);
+          hm_type = _;
+          hm_class_id = _;
+          hm_explicit_targs = targs;
+        } =
+          hm
+        in
+        (match targs with
+        | None -> Printf.sprintf "an object with property `%s`" name
+        | Some _ -> Printf.sprintf "an object with method `%s`" name)
+      | (_, Thas_type_member htm) ->
+        let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
+        if phys_equal lo up then
+          (* We use physical equality as a heuristic to generate
+             slightly more readable descriptions. *)
+          Printf.sprintf
+            "a class with `{type %s = %s}`"
+            id
+            (describe_ty ~is_coeffect:false env (LoclType lo))
+        else
+          let bound_desc ~prefix ~is_trivial bnd =
+            if is_trivial env bnd then
+              ""
+            else
+              prefix ^ describe_ty ~is_coeffect:false env (LoclType bnd)
+          in
+          Printf.sprintf
+            "a class with `{type %s%s%s}`"
+            id
+            (bound_desc
+               ~prefix:" super "
+               ~is_trivial:Typing_utils.is_nothing
+               lo)
+            (bound_desc ~prefix:" as " ~is_trivial:Typing_utils.is_mixed up)
+      | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
+      | (_, Tcan_index _) -> "an array that can be indexed"
+      | (_, Tdestructure _) ->
+        Markdown_lite.md_codify
+          (Typing_print.with_blank_tyvars (fun () ->
+               Typing_print.full_strip_ns_i env (ConstraintType ty)))
+      | (_, TCunion (lty, cty)) ->
+        Printf.sprintf
+          "%s or %s"
+          (describe_ty_super env (LoclType lty))
+          (describe_ty_super env (ConstraintType cty))
+      | (_, TCintersection (lty, cty)) ->
+        Printf.sprintf
+          "%s and %s"
+          (describe_ty_super env (LoclType lty))
+          (describe_ty_super env (ConstraintType cty)))
+
+  let describe_ty_sub ~is_coeffect env ety =
+    let ty_descr = describe_ty ~is_coeffect env ety in
+    let ty_constraints =
+      match ety with
+      | Typing_defs.LoclType ty -> Typing_print.constraints_for_type env ty
+      | Typing_defs.ConstraintType _ -> ""
+    in
+
+    let ( = ) = String.equal in
+    let ty_constraints =
+      (* Don't say `T as T` as it's not helpful (occurs in some coffect errors). *)
+      if ty_constraints = "as " ^ ty_descr then
+        ""
+      else if ty_constraints = "" then
+        ""
+      else
+        " " ^ ty_constraints
+    in
+    Markdown_lite.md_codify (ty_descr ^ ty_constraints)
+
+  let explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env =
+    lazy
+      (let r_super = Typing_defs.reason ty_sup in
+       let r_sub = Typing_defs.reason ty_sub in
+       let (r_super, ty_sup) =
+         detect_attempting_dynamic_coercion_reason r_super ty_sup
+       in
+       let ty_super_descr = describe_ty_super ~is_coeffect env ty_sup in
+       let ty_sub_descr = describe_ty_sub ~is_coeffect env ty_sub in
+       let (ty_super_descr, ty_sub_descr) =
+         if String.equal ty_super_descr ty_sub_descr then
+           ( "exactly the type " ^ ty_super_descr,
+             "the nonexact type " ^ ty_sub_descr )
+         else
+           (ty_super_descr, ty_sub_descr)
+       in
+       let left =
+         Typing_reason.to_string ("Expected " ^ ty_super_descr) r_super
+       in
+       let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
+       left @ right)
+
+  let subtyping_error is_coeffect ~ty_sub ~ty_sup env =
+    ( Error_code.UnifyError,
+      explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env )
+
+  let violated_constraint cstrs is_coeffect ~ty_sub ~ty_sup env =
     let reason =
-      Lazy.map reasons ~f:(fun reasons ->
+      Lazy.map
+        ~f:(fun reasons ->
           let pos_msg = "This type constraint is violated" in
           let f (p_cstr, (p_tparam, tparam)) =
             [
@@ -4918,6 +5105,7 @@ end = struct
           in
           let msgs = List.concat_map ~f cstrs in
           msgs @ reasons)
+        (explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env)
     in
     (Error_code.TypeConstraintViolation, reason)
 
@@ -5444,8 +5632,6 @@ end = struct
     in
     (Error_code.BadMethodOverride, reasons)
 
-  let subtyping_error reasons = (Error_code.UnifyError, reasons)
-
   let method_not_dynamically_callable pos parent_pos =
     let reasons =
       lazy
@@ -5570,8 +5756,9 @@ end = struct
       Eval_result.single (fun_variadicity_hh_vs_php56 pos decl_pos)
     | Type_arity_mismatch { pos; actual; decl_pos; expected } ->
       Eval_result.single (type_arity_mismatch pos actual decl_pos expected)
-    | Violated_constraint { cstrs; reasons; _ } ->
-      Eval_result.single (violated_constraint cstrs reasons)
+    | Violated_constraint { cstrs; ty_sub; ty_sup; is_coeffect } ->
+      Eval_result.single
+        (violated_constraint cstrs is_coeffect ~ty_sub ~ty_sup env)
     | Concrete_const_interface_override { pos; parent_pos; name; parent_origin }
       ->
       Eval_result.single
@@ -5693,7 +5880,8 @@ end = struct
       Eval_result.single (bad_method_override pos member_name)
     | Bad_prop_override { pos; member_name } ->
       Eval_result.single (bad_prop_override pos member_name)
-    | Subtyping_error reasons -> Eval_result.single (subtyping_error reasons)
+    | Subtyping_error { ty_sub; ty_sup; is_coeffect } ->
+      Eval_result.single (subtyping_error is_coeffect ~ty_sub ~ty_sup env)
     | Method_not_dynamically_callable { pos; parent_pos } ->
       Eval_result.single (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->

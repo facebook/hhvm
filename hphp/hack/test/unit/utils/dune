@@ -60,6 +60,7 @@
   errors
   parsing_error
   nast_check_error
+  heap_libc
   pos
   pos_or_decl
   relative_path

@@ -1,6 +1,6 @@
 File "asyncgen6.php", line 13, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "asyncgen6.php", line 13, characters 3-11:
-  Expected `Awaitable<_>`
+  Expected `Awaitable<nothing>`
   File "asyncgen6.php", line 7, characters 21-53:
   But got `AsyncGenerator<int, string, void>`

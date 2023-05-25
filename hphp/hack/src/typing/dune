@@ -65,7 +65,9 @@
     pos_or_decl
     typing_error
     typing_env_types
+    typing_env
     typing_print
+    typing_utils
     user_error))
 
 (library
@@ -357,7 +359,7 @@
  (name typing_disposable)
  (wrapped false)
  (modules typing_disposable)
- (libraries typing_utils)
+ (libraries typing_utils typing_error_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -373,7 +375,7 @@
  (name typing_utils)
  (wrapped false)
  (modules typing_utils)
- (libraries typing_env typing_logic typing_error typing_error_utils errors)
+ (libraries typing_env typing_logic typing_error errors)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -130,7 +130,11 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
   | (r, Tshape (_, _, fdm)) -> begin
-    match TUtils.shape_field_name env index_expr with
+    let (fld_opt, ty_err_opt) =
+      TUtils.shape_field_name_with_ty_err env index_expr
+    in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    match fld_opt with
     | None -> ((env, None), None)
     | Some field ->
       let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
@@ -658,7 +662,11 @@ let rec array_get
       | Tshape (_, _, fdm) ->
         let (_, p, _) = e2 in
         begin
-          match TUtils.shape_field_name env e2 with
+          let (fld_opt, ty_err_opt) =
+            Typing_utils.shape_field_name_with_ty_err env e2
+          in
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+          match fld_opt with
           | None ->
             (* there was already an error in shape_field name,
                don't report another one for a missing field *)
@@ -1381,7 +1389,11 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access
         end
       | Tshape (_, shape_kind, fdm) -> begin
-        match TUtils.shape_field_name env key with
+        let (fld_opt, ty_err_opt) =
+          Typing_utils.shape_field_name_with_ty_err env key
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        match fld_opt with
         | None -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
         | Some field ->
           let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in

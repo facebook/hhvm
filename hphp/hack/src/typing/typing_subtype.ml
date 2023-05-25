@@ -162,25 +162,6 @@ let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
       | _ -> subtype_env.tparam_constraints);
   }
 
-(* In typing_coercion.ml we sometimes check t1 <: t2 by adding dynamic
-   to check t1 < t|dynamic. In that case, we use the Rdynamic_coercion
-   reason so that we can detect it here and not print the dynamic if there
-   is a type error. *)
-let detect_attempting_dynamic_coercion_reason r ty =
-  match r with
-  | Reason.Rdynamic_coercion r ->
-    (match ty with
-    | LoclType lty ->
-      (match get_node lty with
-      | Tunion [t1; t2] ->
-        (match (get_node t1, get_node t2) with
-        | (Tdynamic, _) -> (r, LoclType t2)
-        | (_, Tdynamic) -> (r, LoclType t1)
-        | _ -> (r, ty))
-      | _ -> (r, ty))
-    | _ -> (r, ty))
-  | _ -> (r, ty)
-
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `constraints` any necessary and
  * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
@@ -435,26 +416,6 @@ let rec describe_ty_super ~is_coeffect env ty =
         "%s and %s"
         (describe_ty_super env (LoclType lty))
         (describe_ty_super env (ConstraintType cty)))
-
-let describe_ty_sub ~is_coeffect env ety =
-  let ty_descr = describe_ty ~is_coeffect env ety in
-  let ty_constraints =
-    match ety with
-    | Typing_defs.LoclType ty -> Typing_print.constraints_for_type env ty
-    | Typing_defs.ConstraintType _ -> ""
-  in
-
-  let ( = ) = String.equal in
-  let ty_constraints =
-    (* Don't say `T as T` as it's not helpful (occurs in some coffect errors). *)
-    if ty_constraints = "as " ^ ty_descr then
-      ""
-    else if ty_constraints = "" then
-      ""
-    else
-      " " ^ ty_constraints
-  in
-  Markdown_lite.md_codify (ty_descr ^ ty_constraints)
 
 let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype =
   match (ty_sub, ty_super) with
@@ -977,30 +938,22 @@ and simplify_subtype_i
       ~r_super:(reason ety_super)
   in
   let fail_snd_err =
-    let reasons =
-      lazy
-        (let r_super = reason ety_super in
-         let r_sub = reason ety_sub in
-         let (r_super, ety_super) =
-           detect_attempting_dynamic_coercion_reason r_super ety_super
-         in
-         let is_coeffect = subtype_env.is_coeffect in
-         let ty_super_descr = describe_ty_super ~is_coeffect env ety_super in
-         let ty_sub_descr = describe_ty_sub ~is_coeffect env ety_sub in
-         let (ty_super_descr, ty_sub_descr) =
-           if String.equal ty_super_descr ty_sub_descr then
-             ( "exactly the type " ^ ty_super_descr,
-               "the nonexact type " ^ ty_sub_descr )
-           else
-             (ty_super_descr, ty_sub_descr)
-         in
-         let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
-         let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub in
-         left @ right)
-    in
     match subtype_env.tparam_constraints with
-    | [] -> Typing_error.Secondary.Subtyping_error reasons
-    | cstrs -> Typing_error.Secondary.Violated_constraint { cstrs; reasons }
+    | [] ->
+      Typing_error.Secondary.Subtyping_error
+        {
+          ty_sub = ety_sub;
+          ty_sup = ety_super;
+          is_coeffect = subtype_env.is_coeffect;
+        }
+    | cstrs ->
+      Typing_error.Secondary.Violated_constraint
+        {
+          cstrs;
+          ty_sub = ety_sub;
+          ty_sup = ety_super;
+          is_coeffect = subtype_env.is_coeffect;
+        }
   in
   let fail_with_suffix snd_err_opt =
     let open Typing_error in

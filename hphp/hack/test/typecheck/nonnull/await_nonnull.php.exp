@@ -3,7 +3,7 @@ File "await_nonnull.php", line 3, characters 31-34:
 File "await_nonnull.php", line 4, characters 3-10:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "await_nonnull.php", line 4, characters 3-10:
-  Expected `Awaitable<_>`
+  Expected `Awaitable<nothing>`
   File "await_nonnull.php", line 3, characters 18-24:
   But got `nonnull`
 File "await_nonnull.php", line 3, characters 16-16:

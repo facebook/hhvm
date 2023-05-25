@@ -149,6 +149,13 @@ let show_name_results
         (Relative_path.show fn)
   in
   let name_type_lower = FileInfo.show_name_type name_type |> String.lowercase in
+  let show_winner (winner : Decl_provider.winner) : string =
+    match winner with
+    | Decl_provider.Winner -> "winner"
+    | Decl_provider.Loser_to pos ->
+      Printf.sprintf "Loser_to %s" (Pos.to_relative_string pos |> Pos.string)
+    | Decl_provider.Not_found -> "not_found"
+  in
   let print_item fmt arg ctx_arg =
     let (value, value_with_entry) = (ctx_arg ctx, ctx_arg ctx_with_entry) in
     Printf.eprintf fmt arg value;
@@ -181,6 +188,22 @@ let show_name_results
     "   Decl_provider.get_%s(name) |> Option.is_some: %s"
     name_type_lower
     (fun ctx -> f_decl_exists ctx name |> Option.is_some |> string_of_bool);
+  print_item
+    "   Decl_provider.get_pos_from_decl_of_winner%s(name_type,name): %s"
+    ""
+    (fun ctx ->
+      Decl_provider.get_pos_from_decl_of_winner_FOR_TESTS_ONLY
+        ctx
+        name_type
+        name
+      |> Option.value_map ~default:"[none]" ~f:(fun pos ->
+             Pos.to_relative_string pos |> Pos.string));
+  print_item
+    "   Decl_provider.is_this_def_the_winner%s(name_type,name,pos): %s"
+    ""
+    (fun ctx ->
+      Decl_provider.is_this_def_the_winner ctx name_type (pos, name)
+      |> show_winner);
   Printf.eprintf "\n%!";
   ()
 

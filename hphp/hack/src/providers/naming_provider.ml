@@ -46,6 +46,12 @@ let find_symbol_in_context
     (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
   Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun _path entry ->
+         (* CARE! This obtains names from the AST. They're usually similar to what we get from direct-decl-parser
+            (which is what's used to populate the naming table). But they disagree in cases like
+            "namespace N; namespace M {function f(){} }" where AST says "M\f" and direct-decl says "N\M\f".
+            We can therefore end in situations where if you're walking the AST and find a name, and you ask
+            for it, then Naming_provider will tell you it exists (via the Provider_context entry) but
+            Decl_provider will tell you it doesn't. *)
          let file_info =
            Ast_provider.compute_file_info
              ~popt:(Provider_context.get_popt ctx)

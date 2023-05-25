@@ -1180,8 +1180,7 @@ functor
           ~lazy_check_later
           ~check_reason
           ~cgroup_steps
-          ~files_with_naming_errors:
-            (Errors.get_failed_files errors Errors.Naming)
+          ~files_with_naming_errors:env.failed_naming
       in
       let time_first_error =
         Option.first_some time_first_error time_first_typing_error

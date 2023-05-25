@@ -13,10 +13,7 @@ type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, show]
 
 (* The analysis phase that the error is coming from. *)
-type phase =
-  | Naming
-  | Typing
-[@@deriving eq]
+type phase = Typing [@@deriving eq]
 
 module PhaseMap : sig
   include Reordered_argument_collections.Map_S with type key = phase

@@ -13,8 +13,6 @@ open Reordered_argument_collections
 type error_code = int
 
 type phase =
-  | Naming
-      (** these errors come from [ServerTypeCheck.type_check_core] when it indexes files that have changed, to update the naming table *)
   | Typing
       (** these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file *)
 [@@deriving eq, show, enum]
@@ -59,7 +57,6 @@ module PhaseMap = struct
     type t = phase
 
     let rank = function
-      | Naming -> 2
       | Typing -> 4
 
     let compare x y = rank x - rank y
@@ -343,12 +340,10 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (*****************************************************************************)
 let phase_to_string (phase : phase) : string =
   match phase with
-  | Naming -> "Naming"
   | Typing -> "Typing"
 
 let phase_of_string (value : string) : phase option =
   match Caml.String.lowercase_ascii value with
-  | "naming" -> Some Naming
   | "typing" -> Some Typing
   | _ -> None
 

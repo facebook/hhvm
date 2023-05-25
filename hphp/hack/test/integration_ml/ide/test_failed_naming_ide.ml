@@ -71,18 +71,12 @@ let test () =
   let (env, _) = Test.(run_loop_once env default_loop_input) in
   (* Files with parsing errors are not redeclared during lazy recheck, so
    * failed_naming should remain unchanged *)
-  let failed_naming =
-    Errors.get_failed_files env.ServerEnv.errorl Errors.Naming
-  in
+  let failed = Errors.get_failed_files env.ServerEnv.errorl Errors.Typing in
   let found =
-    Relative_path.Set.mem
-      failed_naming
-      (Relative_path.from_root ~suffix:foo1_name)
-    || Relative_path.Set.mem
-         failed_naming
-         (Relative_path.from_root ~suffix:foo2_name)
+    Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo1_name)
+    || Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo2_name)
   in
-  if not found then Test.fail "File missing from failed_naming";
+  if not found then Test.fail "File missing from failed";
 
   (* Remove the parsing error - there should be no errors after that *)
   let (env, _) = Test.edit_file env foo2_name "<?hh // strict" in

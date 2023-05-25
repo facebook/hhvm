@@ -145,10 +145,11 @@ let dump_naming_errors_decls
   (if Errors.is_empty errors then
     ()
   else
+    (* TODO(ljw): with only one phase, let's clean this up! *)
     let errors_in_phases : saved_state_errors =
       List.map
         ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-        [Errors.Naming; Errors.Typing]
+        [Errors.Typing]
     in
     save_contents (get_errors_filename output_filename) errors_in_phases);
   ()
@@ -156,10 +157,11 @@ let dump_naming_errors_decls
 (** Sorts and dumps the error relative paths in JSON format.
  * An empty JSON list will be dumped if there are no errors.*)
 let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
+  (* TODO(ljw): with only one phase, let's clean this up! *)
   let errors_in_phases =
     List.map
       ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-      [Errors.Naming; Errors.Typing]
+      [Errors.Typing]
   in
   let errors = fold_error_files errors_in_phases in
   let errors_json =

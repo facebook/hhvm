@@ -136,6 +136,7 @@ module RemoteTypeCheck = struct
         ~default:default.declaration_threshold
         config
     in
+    (* TODO(ljw): now that we're getting rid of phases, the following code can be cleaned up *)
     let enabled_on_errors =
       string_list
         "remote_type_check_enabled_on_errors"
@@ -147,7 +148,7 @@ module RemoteTypeCheck = struct
              | None -> acc)
     in
     let disabled_on_errors =
-      List.filter [Errors.Typing; Errors.Naming] ~f:(fun phase ->
+      List.filter [Errors.Typing] ~f:(fun phase ->
           not
             (List.exists enabled_on_errors ~f:(fun enabled_phase ->
                  Errors.equal_phase enabled_phase phase)))

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d92f9c21cf95e69ee0e989da68bf7f13>>
+// @generated SignedSource<<c978a1d59d9b92fc9e09dc57180256a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,8 +47,6 @@ pub type ErrorCode = isize;
 #[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
 #[repr(u8)]
 pub enum Phase {
-    /// these errors come from [ServerTypeCheck.type_check_core] when it indexes files that have changed, to update the naming table
-    Naming,
     /// these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file
     Typing,
 }

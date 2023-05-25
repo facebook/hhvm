@@ -22,6 +22,7 @@ concurrency:
 # https://github.com/actions/runner/issues/480
 env:
   OUT: ${{ format('{0}/out', github.workspace) }}
+  DEBIAN_FRONTEND: "noninteractive"
 
 jobs:
   build_ubuntu_focal_nightly:
@@ -32,8 +33,14 @@ jobs:
         DISTRO: ubuntu-20.04-focal
         IS_NIGHTLY: 1
     steps:
-    - name: Installing git
-      run: apt update -y && apt install -y git
+    - name: Installing dependencies to bootstrap env
+      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg
+    - name: Installing llvm
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        # Note: Keep this version in sync with the one in the Debian control file.
+        ./llvm.sh 12
     - name: Fetching HHVM and its submodules
       uses: actions/checkout@v3
       with:

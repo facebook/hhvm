@@ -216,8 +216,8 @@ pub mod compile_ffi {
         /// Extract Facts from Decls, passing along the source text hash.
         fn decls_to_facts(decls: &DeclsHolder, sha1sum: &CxxString) -> FactsResult;
 
-        /// Serialize a FactsResult to JSON
-        fn facts_to_json(facts: FactsResult, pretty: bool) -> String;
+        /// Extract Facts in condensed JSON format from Decls, including the source text hash.
+        fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String;
     }
 }
 
@@ -446,15 +446,15 @@ fn compile_unit_from_text(
     .map_err(|e| e.to_string())
 }
 
-pub fn facts_to_json(facts_result: compile_ffi::FactsResult, pretty: bool) -> String {
-    let facts = facts::Facts::from(facts_result.facts);
-    facts.to_json(pretty, &facts_result.sha1sum)
-}
-
 fn decls_to_facts(holder: &DeclsHolder, sha1sum: &CxxString) -> compile_ffi::FactsResult {
     let facts = facts::Facts::from_decls(&holder.parsed_file);
     compile_ffi::FactsResult {
         facts: compile_ffi::Facts::from(facts),
         sha1sum: sha1sum.to_string_lossy().to_string(),
     }
+}
+
+fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String {
+    let facts = facts::Facts::from_decls(&decls.parsed_file);
+    facts.to_json(false, &sha1sum.to_string_lossy())
 }

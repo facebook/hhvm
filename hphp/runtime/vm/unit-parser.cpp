@@ -366,10 +366,7 @@ ParseFactsResult extract_facts(
       if (decls.has_errors) {
         return FactsJSONString { "" };
       }
-      auto const facts = hackc::decls_to_facts(*decls.decls, actual_sha1);
-      rust::String json = hackc::facts_to_json(
-          facts, /* pretty= */ false
-      );
+      rust::String json = hackc::decls_to_facts_json(*decls.decls, actual_sha1);
       return FactsJSONString { std::string(json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC

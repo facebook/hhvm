@@ -10,6 +10,7 @@ type ('prim_pos, 'pos) t = {
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
   quickfixes: 'prim_pos Quickfix.t list;
+  custom_msgs: string list;
   is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
@@ -18,6 +19,7 @@ val make :
   int ->
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->
+  ?custom_msgs:string list ->
   'a Message.t ->
   'b Message.t list ->
   ('a, 'b) t

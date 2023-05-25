@@ -25,6 +25,7 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
                 code,
                 claim: Message(pos, msg),
                 reasons,
+                custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,
             },
@@ -60,6 +61,10 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
                 Styled(Color::Cyan.normal(), end, *is_term),
                 Styled(Color::Green.normal(), msg, *is_term),
             )?;
+        }
+        for msg in custom_msgs {
+            writeln!(f)?;
+            write!(f, " {}", Styled(Color::Green.normal(), msg, *is_term),)?;
         }
         Ok(())
     }

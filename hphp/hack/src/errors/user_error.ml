@@ -12,12 +12,19 @@ type ('prim_pos, 'pos) t = {
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
   quickfixes: 'prim_pos Quickfix.t list;
+  custom_msgs: string list;
   is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
 
-let make code ?(is_fixmed = false) ?(quickfixes = []) claim reasons =
-  { code; claim; reasons; quickfixes; is_fixmed }
+let make
+    code
+    ?(is_fixmed = false)
+    ?(quickfixes = [])
+    ?(custom_msgs = [])
+    claim
+    reasons =
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
 
 let get_code { code; _ } = code
 
@@ -32,22 +39,36 @@ let to_list_ { claim = (pos, claim); reasons; _ } =
 
 let get_messages = to_list
 
-let to_absolute { code; claim; reasons; quickfixes; is_fixmed } =
+let to_absolute { code; claim; reasons; quickfixes; custom_msgs; is_fixmed } =
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
 
 let make_absolute code = function
   | [] -> failwith "an error must have at least one message"
   | claim :: reasons ->
-    { code; claim; reasons; quickfixes = []; is_fixmed = false }
+    {
+      code;
+      claim;
+      reasons;
+      quickfixes = [];
+      custom_msgs = [];
+      is_fixmed = false;
+    }
 
 let to_absolute_for_test
-    { code; claim = (claim_pos, claim_msg); reasons; quickfixes; is_fixmed } =
+    {
+      code;
+      claim = (claim_pos, claim_msg);
+      reasons;
+      quickfixes;
+      custom_msgs;
+      is_fixmed;
+    } =
   let f (p, s) =
     let p = Pos_or_decl.unsafe_to_raw_pos p in
     let path = Pos.filename p in
@@ -62,7 +83,7 @@ let to_absolute_for_test
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { code; claim; reasons; quickfixes; is_fixmed }
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
 
 let error_kind error_code =
   match error_code / 1000 with
@@ -81,7 +102,7 @@ let error_code_to_string error_code =
 
 let to_string
     report_pos_from_reason
-    { code; claim; reasons; quickfixes = _; is_fixmed = _ } =
+    { code; claim; reasons; custom_msgs; quickfixes = _; is_fixmed = _ } =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
@@ -103,6 +124,9 @@ let to_string
     end;
   List.iter reasons ~f:(fun (p, w) ->
       let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
+      Buffer.add_string buf msg);
+  List.iter custom_msgs ~f:(fun w ->
+      let msg = Printf.sprintf "  %s\n" w in
       Buffer.add_string buf msg);
   Buffer.contents buf
 

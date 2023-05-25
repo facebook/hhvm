@@ -18,6 +18,7 @@ impl<PP, P> UserError<PP, P> {
         code: ErrorCode,
         claim: Message<PP>,
         reasons: Vec<Message<P>>,
+        custom_msgs: Vec<String>,
         quickfixes: Vec<Quickfix<PP>>,
     ) -> Self {
         Self {
@@ -25,6 +26,7 @@ impl<PP, P> UserError<PP, P> {
             claim,
             reasons,
             quickfixes,
+            custom_msgs,
             is_fixmed: false,
         }
     }
@@ -51,6 +53,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             code: self_code,
             claim: Message(self_pos, self_msg),
             reasons: self_reasons,
+            custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
         } = self;
@@ -58,6 +61,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             code: other_code,
             claim: Message(other_pos, other_msg),
             reasons: other_reasons,
+            custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
         } = other;
@@ -113,6 +117,7 @@ impl Naming {
             Message(p, "Field name already bound".into()),
             vec![],
             vec![],
+            vec![],
         )
     }
 
@@ -123,6 +128,7 @@ impl Naming {
                 p.clone(),
                 format!("No such type `{}`, did you mean `{}`?", name, correct_name).into(),
             ),
+            vec![],
             vec![],
             vec![Quickfix {
                 title: format!("Change to `{}`", correct_name),
@@ -144,6 +150,7 @@ impl Naming {
                 name_p,
                 "Methods need to be marked `public`, `private`, or `protected`.".into(),
             ),
+            vec![],
             vec![],
             vec![
                 Quickfix {
@@ -171,6 +178,7 @@ impl Naming {
             ),
             vec![],
             vec![],
+            vec![],
         )
     }
 
@@ -181,6 +189,7 @@ impl Naming {
                 p,
                 "insteadof is a PHP feature that is unsupported in Hack".into(),
             ),
+            vec![],
             vec![],
             vec![],
         )
@@ -198,6 +207,7 @@ impl NastCheck {
             ),
             vec![],
             vec![],
+            vec![],
         )
     }
 
@@ -208,6 +218,7 @@ impl NastCheck {
                 p,
                 "XHP classes can only contain one category declaration".into(),
             ),
+            vec![],
             vec![],
             vec![],
         )
@@ -224,6 +235,7 @@ impl NastCheck {
                 )
                 .into(),
             ),
+            vec![],
             vec![],
             vec![],
         )

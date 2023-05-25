@@ -6179,7 +6179,9 @@ let add_typing_error err ~env =
    'client errors' to a callback for using in subtyping *)
 let apply_callback_to_errors errors on_error ~env =
   let on_error
-      User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
+      User_error.
+        { code; claim; reasons; custom_msgs = _; quickfixes = _; is_fixmed = _ }
+      =
     let code = Option.value_exn (Error_code.of_enum code) in
     Eval_result.iter ~f:Errors.add_error
     @@ Eval_result.suppress_intersection ~is_suppressed
@@ -6212,7 +6214,9 @@ let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
 (** TODO: Remove use of `User_error.t` representation for nested error &
     callback application *)
 let ambiguous_inheritance pos class_ origin error on_error ~env =
-  let User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
+  let User_error.
+        { code; claim; reasons; custom_msgs = _; quickfixes = _; is_fixmed = _ }
+      =
     error
   in
   let origin = Render.strip_ns origin in

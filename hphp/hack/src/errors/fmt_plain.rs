@@ -21,6 +21,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
                 code,
                 claim: Message(pos, msg),
                 reasons,
+                custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,
             },
@@ -30,6 +31,9 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
         write!(f, "{}\n{} ({})", pos.absolute(ctx), msg, code)?;
         for Message(pos, msg) in reasons {
             write!(f, "\n  {}\n  {}", pos.absolute(ctx), msg)?;
+        }
+        for msg in custom_msgs {
+            write!(f, "\n  {}", msg)?;
         }
         Ok(())
     }

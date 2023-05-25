@@ -142,6 +142,8 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
       .advertisedInitialBidiLocalStreamWindowSize = 60 * 1024 * 1024,
       .numGROBuffers_ = quic::kMaxNumGROBuffers,
       .connectUDP = true,
+      .pacingEnabled = true,
+      .pacingTimerTickInterval = std::chrono::microseconds(200),
       .writeConnectionDataPacketsLimit = 50,
       .batchingMode = quic::QuicBatchingMode::BATCHING_MODE_GSO,
       .maxBatchSize = 50,
@@ -153,6 +155,9 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
   };
 
   auto sock = std::make_unique<folly::AsyncUDPSocket>(evb);
+  constexpr size_t kBufSize = 4 * 1024 * 1024;
+  sock->setRcvBuf(kBufSize);
+  sock->setSndBuf(kBufSize);
   auto quicClient = std::make_shared<quic::QuicClientTransport>(
       evb,
       std::move(sock),
@@ -160,6 +165,8 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
           .setFizzClientContext(getFizzContext(cfg))
           .setCertificateVerifier(getFizzVerifier(cfg))
           .build());
+  quicClient->setPacingTimer(
+      quic::TimerHighRes::newTimer(evb, std::chrono::microseconds(200)));
   quicClient->setTransportSettings(ts);
   quicClient->addNewPeerAddress(cfg.serverHost);
   auto quicAsyncTransport = new quic::QuicClientAsyncTransport(quicClient);

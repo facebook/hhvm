@@ -68,6 +68,17 @@ let string_list
   let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
+let string_list_opt
+    ?(truncate_list : int option)
+    ?(truncate_each_string : int option)
+    ~(key : string)
+    ~(value : string list option)
+    (telemetry : t) : t =
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value ->
+    string_list ?truncate_list ?truncate_each_string telemetry ~key ~value
+
 let object_list ~(key : string) ~(value : t list) (telemetry : t) : t =
   let value = List.map ~f:to_json value in
   (key, Hh_json.JSON_Array value) :: telemetry

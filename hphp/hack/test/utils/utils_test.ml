@@ -355,6 +355,22 @@ let test_telemetry_merge () =
     "merge m m";
   true
 
+let test_telemetry_string_list_opt () =
+  let some_val = Some ["hello"; "world"] in
+  let none_val = None in
+  let base = Telemetry.create () in
+  let t1 = base |> Telemetry.string_list_opt ~key:"v" ~value:some_val in
+  let t2 = base |> Telemetry.string_list_opt ~key:"v" ~value:none_val in
+  String_asserter.assert_equals
+    {|{"v":["hello","world"]}|}
+    (t1 |> Telemetry.to_string)
+    "string_list_opt should write list of strings";
+  String_asserter.assert_equals
+    {|{"v":null}|}
+    (t2 |> Telemetry.to_string)
+    "string_list_opt should omit None values";
+  true
+
 let () =
   Unit_test.run_all
     [
@@ -365,4 +381,5 @@ let () =
       ("test telemetry_diff", test_telemetry_diff);
       ("test telemetry_add", test_telemetry_add);
       ("test telemetry_merge", test_telemetry_merge);
+      ("test telemetry string list opt", test_telemetry_string_list_opt);
     ]

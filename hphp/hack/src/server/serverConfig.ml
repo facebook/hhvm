@@ -399,6 +399,8 @@ let load_config config options =
       (bool_opt "ide_should_use_hack_64_distc" config)
     ?tco_ide_load_naming_table_on_disk:
       (bool_opt "ide_load_naming_table_on_disk" config)
+    ?tco_ide_naming_table_update_threshold:
+      (int_opt "ide_naming_table_update_threshold" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =
@@ -515,6 +517,8 @@ let load ~silent options : t * ServerLocalConfig.t =
           (ServerArgs.enable_global_access_check options)
         ~tco_ide_load_naming_table_on_disk:
           local_config.ide_load_naming_table_on_disk
+        ~tco_ide_naming_table_update_threshold:
+          local_config.ide_naming_table_update_threshold
         GlobalOptions.default
     in
     load_config config local_config_opts

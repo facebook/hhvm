@@ -521,6 +521,9 @@ let prepare_naming_table
         State_loader_lwt.load_arbitrary_naming_table_from_disk
           ~saved_state_type
           ~project_metadata
+          ~threshold:
+            (TypecheckerOptions.ide_naming_table_update_threshold
+               dstate.dcommon.tcopt)
           ~root:param.root
       | Error (load_err, _telemetry) ->
         let err =

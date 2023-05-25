@@ -315,3 +315,6 @@ let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold
 
 let ide_load_naming_table_on_disk t =
   t.GlobalOptions.tco_ide_load_naming_table_on_disk
+
+let ide_naming_table_update_threshold t =
+  t.GlobalOptions.tco_ide_naming_table_update_threshold

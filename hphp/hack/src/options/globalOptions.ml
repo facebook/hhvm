@@ -196,6 +196,7 @@ type t = {
   tco_tast_under_dynamic: bool;
   tco_rust_elab: bool;
   tco_ide_load_naming_table_on_disk: bool;
+  tco_ide_naming_table_update_threshold: int;
 }
 [@@deriving eq, show]
 
@@ -332,6 +333,7 @@ let default =
     tco_tast_under_dynamic = false;
     tco_rust_elab = false;
     tco_ide_load_naming_table_on_disk = false;
+    tco_ide_naming_table_update_threshold = 0;
   }
 
 let set
@@ -466,6 +468,7 @@ let set
     ?tco_tast_under_dynamic
     ?tco_rust_elab
     ?tco_ide_load_naming_table_on_disk
+    ?tco_ide_naming_table_update_threshold
     options =
   let setting setting option =
     match setting with
@@ -820,6 +823,10 @@ let set
       setting
         tco_ide_load_naming_table_on_disk
         options.tco_ide_load_naming_table_on_disk;
+    tco_ide_naming_table_update_threshold =
+      setting
+        tco_ide_naming_table_update_threshold
+        options.tco_ide_naming_table_update_threshold;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

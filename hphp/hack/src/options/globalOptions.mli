@@ -348,6 +348,8 @@ type t = {
   tco_rust_elab: bool;
   tco_ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
+  tco_ide_naming_table_update_threshold: int;
+      (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
 }
 [@@deriving eq, show]
 
@@ -483,6 +485,7 @@ val set :
   ?tco_tast_under_dynamic:bool ->
   ?tco_rust_elab:bool ->
   ?tco_ide_load_naming_table_on_disk:bool ->
+  ?tco_ide_naming_table_update_threshold:int ->
   t ->
   t
 

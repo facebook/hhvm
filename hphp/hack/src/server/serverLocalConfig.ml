@@ -510,6 +510,8 @@ type t = {
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
+  ide_naming_table_update_threshold: int;
+      (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
 }
 
 let default =
@@ -618,6 +620,7 @@ let default =
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = false;
+    ide_naming_table_update_threshold = 0;
   }
 
 let system_config_path =
@@ -1392,6 +1395,12 @@ let load_
       ~current_version
       config
   in
+  let ide_naming_table_update_threshold =
+    int_
+      "ide_naming_table_update_threshold"
+      ~default:default.ide_naming_table_update_threshold
+      config
+  in
   {
     saved_state =
       {
@@ -1514,6 +1523,7 @@ let load_
     use_hh_distc_instead_of_hulk;
     hh_distc_fanout_threshold;
     ide_load_naming_table_on_disk;
+    ide_naming_table_update_threshold;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1563,4 +1573,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       rust_elab = options.rust_elab;
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
+      ide_naming_table_update_threshold =
+        options.ide_naming_table_update_threshold;
     }

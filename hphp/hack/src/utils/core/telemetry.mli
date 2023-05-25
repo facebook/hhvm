@@ -46,6 +46,14 @@ val string_list :
   t ->
   t
 
+val string_list_opt :
+  ?truncate_list:int ->
+  ?truncate_each_string:int ->
+  key:string ->
+  value:string list option ->
+  t ->
+  t
+
 val object_list : key:string -> value:t list -> t -> t
 
 val bool_ : key:string -> value:bool -> t -> t

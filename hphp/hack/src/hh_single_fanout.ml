@@ -259,8 +259,8 @@ let make_naming_table
 let type_check_make_depgraph ctx options (files : Relative_path.t list) : unit =
   List.iter files ~f:(fun file ->
       let full_ast = Ast_provider.get_ast ctx file ~full:true in
-      let (_ : Tast.def list * Errors.t) =
-        Typing_check_utils.type_file ctx file ~full_ast
+      let (_ : Errors.t * Tast.def list) =
+        Typing_check_job.calc_errors_and_tast ctx file ~full_ast
       in
       ());
   if options.debug then Typing_deps.dump_current_edge_buffer_in_memory_mode ();

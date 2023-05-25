@@ -469,7 +469,7 @@
 (library
  (name typing_check_job)
  (wrapped false)
- (modules typing_check_job typing_check_utils)
+ (modules typing_check_job)
  (libraries
   core_kernel
   deferred_decl

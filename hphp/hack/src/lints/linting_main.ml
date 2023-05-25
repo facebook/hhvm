@@ -107,6 +107,8 @@ let lint ctx fn content =
                 tcopt)
             ctx
         in
-        let (tast, _) = Typing_check_utils.type_file ctx fn ~full_ast in
+        let (_, tast) =
+          Typing_check_job.calc_errors_and_tast ctx fn ~full_ast
+        in
         lint_tast ctx tast);
   Typing_deps.trace := orig_trace

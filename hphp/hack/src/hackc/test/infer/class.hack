@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer %s --experimental-self-parent-in-trait | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
 // CHECK: type C$static = .kind="class" .static {
@@ -391,7 +391,7 @@ abstract class AbstractClass {
 
 trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
-  // CHECK: define T0.trait_parent_caller($this: *T0) : *void {
+  // CHECK: define T0.trait_parent_caller($this: *T0, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T0 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -407,7 +407,7 @@ trait T1 {
   require extends C;
 
   // TEST-CHECK-BAL: define T1.trait_parent_caller
-  // CHECK: define T1.trait_parent_caller($this: *T1) : *void {
+  // CHECK: define T1.trait_parent_caller($this: *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *T1 = load &$this
   // CHECK:   n1 = __parent__.test_const(n0)
@@ -416,6 +416,45 @@ trait T1 {
   public function trait_parent_caller(): void {
     parent::test_const();
   }
+}
+
+trait T2 {
+  // TEST-CHECK-BAL: define T2$static.trait_self_caller
+  // CHECK: define T2$static.trait_self_caller($this: *T2$static, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK:   n0: *HackMixed = load &self
+  // CHECK:   n1: *T2$static = load &$this
+  // CHECK:   n2 = __self__$static.f(n1, n0)
+  // CHECK:   ret null
+  // CHECK: }
+  public static function trait_self_caller(): void {
+    self::f();
+  }
+
+  public static function f(): void {}
+}
+
+trait T3 {
+  // TEST-CHECK-BAL: define T3.trait_self_caller
+  // CHECK: define T3.trait_self_caller($this: *T3, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK:   n0: *HackMixed = load &self
+  // CHECK:   n1: *T3 = load &$this
+  // CHECK:   n2 = __self__.f(n1, n0)
+  // CHECK:   n3: *HackMixed = load &self
+  // CHECK:   n4: *T3 = load &$this
+  // CHECK:   n5 = __self__.g(n4, n3)
+  // CHECK:   ret null
+  // CHECK: }
+  public function trait_self_caller(): void {
+    self::f();
+    /* HH_FIXME[4090] This isn't valid Hack but actually occurs in www */
+    self::g();
+  }
+
+  public static function f(): void {}
+
+  public function g(): void {}
 }
 
 // TEST-CHECK-BAL: define $root.dynamic_const

@@ -49,10 +49,15 @@ use crate::func::FuncInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: &FuncInfo<'_>) {
+pub(crate) fn lower_instrs(
+    builder: &mut FuncBuilder<'_>,
+    func_info: &FuncInfo<'_>,
+    experimental_self_parent_in_trait: bool,
+) {
     let mut lowerer = LowerInstrs {
         changed: false,
         func_info,
+        experimental_self_parent_in_trait,
     };
 
     let mut bid = Func::ENTRY_BID;
@@ -72,6 +77,7 @@ pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: &FuncInfo<'
 struct LowerInstrs<'a> {
     changed: bool,
     func_info: &'a FuncInfo<'a>,
+    experimental_self_parent_in_trait: bool,
 }
 
 impl LowerInstrs<'_> {
@@ -641,6 +647,15 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::NewObjS(clsref, loc)) => {
                 let cls = self.emit_special_cls_ref(builder, clsref, loc);
                 Instr::Hhbc(Hhbc::NewObj(cls, loc))
+            }
+            Instr::Hhbc(Hhbc::SelfCls(loc))
+                if self.experimental_self_parent_in_trait && self.func_info.declared_in_trait() =>
+            {
+                // In a trait, turn the `self` keyword into the fresh parameter we add
+                // to the type signatures.
+                let lid = builder.strings.intern_str("self");
+                let lid = LocalId::Named(lid);
+                Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)

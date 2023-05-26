@@ -109,7 +109,13 @@ pub(crate) fn lower_and_write_func(
         func: ir::Func<'_>,
         mut func_info: FuncInfo<'_>,
     ) -> Result {
-        let func = lower::lower_func(func, &mut func_info, Arc::clone(&unit_state.strings));
+        let experimental_self_parent_in_trait = unit_state.experimental_self_parent_in_trait;
+        let func = lower::lower_func(
+            func,
+            &mut func_info,
+            Arc::clone(&unit_state.strings),
+            experimental_self_parent_in_trait,
+        );
         ir::verify::verify_func(&func, &Default::default(), &unit_state.strings);
 
         write_func(txf, unit_state, this_ty, func, Arc::new(func_info))
@@ -814,9 +820,6 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     use ir::instr::CallDetail;
     use ir::FCallArgsFlags;
 
-    // Temporary suppress warning. Will be remove in the next diff
-    let _ = state.experimental_self_parent_in_trait;
-
     let ir::Call {
         ref operands,
         context,
@@ -827,6 +830,8 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         ref readonly,
         loc: _,
     } = *call;
+
+    let in_trait = state.func_info.declared_in_trait();
 
     if !inouts.as_ref().map_or(true, |inouts| inouts.is_empty()) {
         textual_todo! {
@@ -942,7 +947,18 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             SpecialClsRef::SelfCls => {
                 // self::foo() - Static call to the method in the current class.
                 let mi = state.expect_method_info();
-                let target = FunctionName::method(mi.class.name, mi.is_static, method);
+                let is_static = mi.is_static;
+                let (target, args) = if state.experimental_self_parent_in_trait && in_trait {
+                    let base = ClassId::from_str("__self__", &state.strings);
+                    let var = LocalId::Named(state.strings.intern_str("self"));
+                    let self_ = state.load_mixed(textual::Expr::deref(var))?;
+                    args.push(textual::Expr::Sid(self_));
+                    let target = FunctionName::method(base, is_static, method);
+                    (target, args)
+                } else {
+                    let target = FunctionName::method(mi.class.name, is_static, method);
+                    (target, args)
+                };
                 let this = state.load_this()?;
                 state.fb.call_static(&target, this.into(), args)?
             }
@@ -1297,6 +1313,13 @@ impl<'a> FuncInfo<'a> {
             FuncInfo::Method(mi) => &mi.attrs,
         }
     }
+
+    pub(crate) fn declared_in_trait(&self) -> bool {
+        match self {
+            FuncInfo::Function(_) => false,
+            FuncInfo::Method(mi) => mi.declared_in_trait(),
+        }
+    }
 }
 
 // Extra data associated with a (non-class) function that aren't stored on the
@@ -1324,6 +1347,10 @@ impl MethodInfo<'_> {
 
     pub(crate) fn class_ty(&self) -> textual::Ty {
         class::class_ty(self.class.name, self.is_static)
+    }
+
+    pub(crate) fn declared_in_trait(&self) -> bool {
+        self.class.is_trait()
     }
 }
 

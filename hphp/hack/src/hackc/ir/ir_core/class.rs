@@ -69,6 +69,10 @@ impl<'a> Class<'a> {
     pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property<'a>> {
         self.properties.iter().find(|prop| prop.name == pid)
     }
+
+    pub fn is_trait(&self) -> bool {
+        (self.flags & Attr::AttrTrait) == Attr::AttrTrait
+    }
 }
 
 #[derive(Clone, Debug)]

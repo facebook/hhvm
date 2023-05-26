@@ -28,7 +28,11 @@ use crate::class::IsStatic;
 /// This indicates a static property that started life as a class constant.
 pub(crate) const INFER_CONSTANT: &str = "__Infer_Constant__";
 
-pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
+pub(crate) fn lower_class<'a>(
+    mut class: Class<'a>,
+    strings: Arc<StringInterner>,
+    experimental_self_parent_in_trait: bool,
+) -> Class<'a> {
     if !class.ctx_constants.is_empty() {
         textual_todo! {
             trace!("TODO: class.ctx_constants");
@@ -41,6 +45,8 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
         }
     }
 
+    let classish_is_trait = class.is_trait();
+
     for method in &mut class.methods {
         if method.name.is_86pinit(&strings) {
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
@@ -49,6 +55,23 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
         if method.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
             // We want closure bodies to be 'instance' but hackc marks it as 'static'.
             method.attrs -= Attr::AttrStatic;
+        }
+        if experimental_self_parent_in_trait && classish_is_trait {
+            // Let's insert a `self` parameter so infer's analysis can
+            // do its job. We don't use `$` so we are sure we don't clash with
+            // existing Hack user defined variables.
+            //
+            // TODO: do the same for parent
+            let self_param = Param {
+                name: strings.intern_str("self"),
+                is_variadic: false,
+                is_inout: false,
+                is_readonly: false,
+                user_attributes: vec![],
+                ty: TypeInfo::empty(),
+                default_value: None,
+            };
+            method.func.params.insert(0, self_param);
         }
     }
 

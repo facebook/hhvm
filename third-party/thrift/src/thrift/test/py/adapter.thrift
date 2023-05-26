@@ -25,12 +25,7 @@ struct Foo {
   2: optional adapter_bar.Bar (
     py.adapter = 'thrift.test.py.adapter_for_tests.AdapterTestStructToDict',
   ) oStructField;
-  3: map<
-    i32,
-    adapter_bar.Bar (
-      py.adapter = 'thrift.test.py.adapter_for_tests.AdapterTestStructToDict',
-    )
-  > mapField;
+  3: map<i32, Bar_1448> mapField;
 }
 
 struct FooWithoutAdapters {
@@ -38,3 +33,8 @@ struct FooWithoutAdapters {
   2: optional adapter_bar.Bar oStructField;
   3: map<i32, adapter_bar.Bar> mapField;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef adapter_bar.Bar (
+  py.adapter = "thrift.test.py.adapter_for_tests.AdapterTestStructToDict",
+) Bar_1448

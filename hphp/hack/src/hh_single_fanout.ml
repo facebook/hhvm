@@ -259,7 +259,7 @@ let make_naming_table
 let type_check_make_depgraph ctx options (files : Relative_path.t list) : unit =
   List.iter files ~f:(fun file ->
       let full_ast = Ast_provider.get_ast ctx file ~full:true in
-      let (_ : Errors.t * Typing_service_types.tasts_by_name) =
+      let (_ : Errors.t * Tast.by_names) =
         Typing_check_job.calc_errors_and_tast ctx file ~full_ast
       in
       ());

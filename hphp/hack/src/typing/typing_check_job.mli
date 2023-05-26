@@ -34,4 +34,4 @@ val calc_errors_and_tast :
   ?drop_fixmed:bool ->
   Relative_path.t ->
   full_ast:Nast.program ->
-  Errors.t * Typing_service_types.tasts_by_name
+  Errors.t * Tast.by_names

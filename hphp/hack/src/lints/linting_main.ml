@@ -110,5 +110,5 @@ let lint ctx fn content =
         let (_, tast) =
           Typing_check_job.calc_errors_and_tast ctx fn ~full_ast
         in
-        lint_tast ctx (Typing_service_types.tasts_as_list tast));
+        lint_tast ctx (Tast.tasts_as_list tast));
   Typing_deps.trace := orig_trace

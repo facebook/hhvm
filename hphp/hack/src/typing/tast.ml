@@ -139,6 +139,23 @@ type gconst = (ty, saved_env) Aast.gconst
 
 type module_def = (ty, saved_env) Aast.module_def
 
+type by_names = {
+  fun_tasts: def list SMap.t;
+  class_tasts: def SMap.t;
+  typedef_tasts: def SMap.t;
+  gconst_tasts: def SMap.t;
+  module_tasts: def SMap.t;
+}
+
+let tasts_as_list
+    ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
+      by_names) : def list =
+  (SMap.values fun_tasts |> List.concat)
+  @ SMap.values class_tasts
+  @ SMap.values typedef_tasts
+  @ SMap.values gconst_tasts
+  @ SMap.values module_tasts
+
 let empty_saved_env tcopt : saved_env =
   {
     tcopt;

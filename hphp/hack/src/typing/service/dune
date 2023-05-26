@@ -1,18 +1,29 @@
 (library
+ (name tast_hashes)
+ (wrapped false)
+ (modules tast_hashes)
+ (libraries
+  collections
+  relative_path
+  typing_ast)
+ (preprocess (pps ppx_yojson_conv)))
+
+(library
  (name typing_service_types)
  (wrapped false)
- (modules typing_service_types)
+ (modules
+  typing_service_types)
  (libraries
   biglist
   core_kernel
   errors
   hg
   relative_path
+  tast_hashes
   typechecker_options
-  typing_ast
   typing_deps)
  (preprocess
-  (pps ppx_deriving.std ppx_yojson_conv)))
+  (pps ppx_deriving.std)))
 
 (library
  (name typing_service_api)

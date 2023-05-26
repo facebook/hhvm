@@ -88,7 +88,7 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
       Some def)
 
 let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
-    Errors.t * Typing_service_types.tasts_by_name =
+    Errors.t * Tast.by_names =
   let (funs, classes, typedefs, consts, modules) = Nast.get_defs full_ast in
   let calc_tast
       (type def res)
@@ -109,10 +109,4 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       let typedef_tasts = calc_tast check_typedef typedefs in
       let gconst_tasts = calc_tast check_const consts in
       let module_tasts = calc_tast check_module modules in
-      {
-        Typing_service_types.fun_tasts;
-        class_tasts;
-        typedef_tasts;
-        gconst_tasts;
-        module_tasts;
-      })
+      { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts })

@@ -107,7 +107,9 @@ end = struct
     | "typing_env_types::Genv" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     (* And GlobalOptions is used in SavedEnv. *)
-    | "tast::SavedEnv" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    | "tast::SavedEnv"
+    | "tast::ByNames" ->
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "ast_defs::Id" when is_by_ref -> ["Debug"]
     | "errors::Errors" when is_by_ref -> ["Debug"]
     | "typing_defs_core::Ty" when is_by_ref ->

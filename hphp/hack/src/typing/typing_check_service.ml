@@ -129,7 +129,7 @@ let should_enable_deferring (file : check_file_workitem) =
 
 type process_file_results = {
   file_errors: Errors.t;
-  file_tast_hashes: tast_hashes_by_names option;
+  file_tast_hashes: Tast_hashes.by_names option;
   deferred_decls: Deferred_decl.deferment list;
 }
 
@@ -196,7 +196,7 @@ let process_file
              Provider_context.get_tcopt ctx
              |> TypecheckerOptions.dump_tast_hashes
             then
-              Some (hash_tasts tasts)
+              Some (Tast_hashes.hash_tasts tasts)
             else
               None);
         }
@@ -292,7 +292,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 type workitem_accumulator = {
   errors: Errors.t;
-  tast_hashes: TastHashes.t;
+  tast_hashes: Tast_hashes.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
 }
@@ -339,7 +339,7 @@ let process_one_workitem
         process_file ctx file ~decl_cap_mb ~log_errors
       in
       let tast_hashes =
-        TastHashes.add tast_hashes ~key:file.path ~data:file_tast_hashes
+        Tast_hashes.add tast_hashes ~key:file.path ~data:file_tast_hashes
       in
       let mid_stats =
         if type_check_twice then
@@ -1258,7 +1258,7 @@ let write_tast_hashes_to_disk ~root ~(check_info : check_info) tast_hashes =
   | None -> ()
   | Some root ->
     ServerProgress.write "Converting TAST hashes to JSON";
-    let tast_hashes_json = TastHashes.yojson_of_t tast_hashes in
+    let tast_hashes_json = Tast_hashes.yojson_of_t tast_hashes in
     ServerProgress.write "Writing TAST hashes to disk";
     let tast_dir =
       Tmp.make_dir_in_tmp ~description_what_for:"tast_hashes" ~root
@@ -1363,7 +1363,7 @@ let go_with_interrupt
           Some
             ( {
                 errors;
-                tast_hashes = (* TODO *) TastHashes.empty;
+                tast_hashes = (* TODO *) Tast_hashes.empty;
                 dep_edges;
                 profiling_info;
               },
@@ -1377,7 +1377,7 @@ let go_with_interrupt
           Some
             ( {
                 errors = Errors.empty;
-                tast_hashes = TastHashes.empty;
+                tast_hashes = Tast_hashes.empty;
                 dep_edges = Typing_deps.dep_edges_make ();
                 profiling_info;
               },

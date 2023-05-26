@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc35bda8d16e7d483f9dce7613e09f27>>
+// @generated SignedSource<<823360ab8318f2fd1210e093b589b188>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -166,3 +166,22 @@ pub type Typedef = aast::Typedef<Ty, SavedEnv>;
 pub type Gconst = aast::Gconst<Ty, SavedEnv>;
 
 pub type ModuleDef = aast::ModuleDef<Ty, SavedEnv>;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    FromOcamlRep,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct ByNames {
+    pub fun_tasts: s_map::SMap<Vec<Def>>,
+    pub class_tasts: s_map::SMap<Def>,
+    pub typedef_tasts: s_map::SMap<Def>,
+    pub gconst_tasts: s_map::SMap<Def>,
+    pub module_tasts: s_map::SMap<Def>,
+}

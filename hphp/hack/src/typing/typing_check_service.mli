@@ -14,7 +14,7 @@ type seconds_since_epoch = float
 
 type process_file_results = {
   file_errors: Errors.t;
-  file_tast_hashes: Typing_service_types.tast_hashes_by_names option;
+  file_tast_hashes: Tast_hashes.by_names option;
   deferred_decls: Deferred_decl.deferment list;
 }
 

@@ -1,0 +1,19 @@
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+type by_names
+
+type t [@@deriving yojson_of]
+
+val hash_tasts : Tast.by_names -> by_names
+
+val empty : t
+
+val union : t -> t -> t
+
+val add : t -> key:Relative_path.t -> data:by_names option -> t

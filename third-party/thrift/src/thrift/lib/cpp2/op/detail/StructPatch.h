@@ -377,7 +377,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     if (hasValue(data_.assign())) {
       op::get<Id>(*data_.assign()) = std::forward<U>(val);
     } else {
-      Base::template ensure<Id>().assign(std::forward<U>(val));
+      Base::template patch<Id>().assign(std::forward<U>(val));
     }
   }
 

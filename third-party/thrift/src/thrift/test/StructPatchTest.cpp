@@ -1030,7 +1030,7 @@ TEST(StructPatchTest, IncludePatch) {
 
 TEST(StructPatchTest, RequiredFieldPatch) {
   WithRequiredFieldsPatch patch;
-  patch.ensure<ident::required_int>() = 10;
+  patch.patch<ident::required_int>() = 10;
 
   WithRequiredFields data;
   patch.apply(data);

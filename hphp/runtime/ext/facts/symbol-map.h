@@ -36,7 +36,6 @@
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/inheritance-info.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
-#include "hphp/runtime/ext/facts/path-methods-map.h"
 #include "hphp/runtime/ext/facts/path-symbols-map.h"
 #include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
@@ -428,7 +427,6 @@ struct SymbolMap {
     PathToSymbolsMap<SymKind::Function> m_functionPath;
     PathToSymbolsMap<SymKind::Constant> m_constantPath;
     PathToSymbolsMap<SymKind::Module> m_modulePath;
-    PathToMethodsMap m_methodPath;
 
     /**
      * Future chain and queue holding the work that needs to be done before the

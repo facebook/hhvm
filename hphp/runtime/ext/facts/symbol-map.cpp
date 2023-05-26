@@ -1389,7 +1389,6 @@ SymbolMap::Data::Data()
       m_functionPath{m_versions},
       m_constantPath{m_versions},
       m_modulePath{m_versions},
-      m_methodPath{m_versions},
       m_inheritanceInfo{m_versions},
       m_typeAttrs{m_versions},
       m_typeAliasAttrs{m_versions},
@@ -1403,7 +1402,6 @@ void SymbolMap::Data::updatePath(
   m_versions->bumpVersion(path);
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
-  typename PathToMethodsMap::Methods methods;
   for (auto& type : facts.m_types) {
     always_assert(!type.m_name.empty());
     // ':' is a valid character in XHP classnames, but not Hack
@@ -1450,13 +1448,12 @@ void SymbolMap::Data::updatePath(
                 }),
             attributes.end());
       }
-
-      MethodDecl methodDecl{
-          .m_type = {.m_name = typeName, .m_path = path},
-          .m_method = Symbol<SymKind::Function>{method}};
-
-      m_methodAttrs.setAttributes(methodDecl, std::move(attributes));
-      methods.push_back(methodDecl);
+      if (!attributes.empty()) {
+        MethodDecl methodDecl{
+            .m_type = {.m_name = typeName, .m_path = path},
+            .m_method = Symbol<SymKind::Function>{method}};
+        m_methodAttrs.setAttributes(methodDecl, std::move(attributes));
+      }
     }
   }
 
@@ -1484,7 +1481,6 @@ void SymbolMap::Data::updatePath(
   m_typePath.replacePathSymbols(path, std::move(types));
   m_functionPath.replacePathSymbols(path, std::move(functions));
   m_constantPath.replacePathSymbols(path, std::move(constants));
-  m_methodPath.replacePathMethods(path, std::move(methods));
   m_sha1Hashes.insert_or_assign(path, SHA1{facts.m_sha1hex});
 
   m_fileExistsMap.insert_or_assign(path, true);

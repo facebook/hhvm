@@ -1135,7 +1135,7 @@ struct FactsStoreImpl final
         allPaths.size());
 
     std::vector<PathAndOptionalHash> alteredPaths;
-    std::vector<fs::path> deletedPaths;
+    alteredPaths.reserve(result.m_files.size());
     for (auto& pathData : std::move(result.m_files)) {
       assertx(pathData.m_exists);
 
@@ -1174,6 +1174,8 @@ struct FactsStoreImpl final
 
     // All remaining paths are ones which Watchman didn't see. These
     // have been deleted.
+    std::vector<fs::path> deletedPaths;
+    deletedPaths.reserve(allPaths.size());
     for (auto const& [pathStr, _] : allPaths) {
       deletedPaths.emplace_back(std::string{pathStr.slice()});
     }

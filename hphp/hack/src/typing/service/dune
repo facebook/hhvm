@@ -9,6 +9,7 @@
   hg
   relative_path
   typechecker_options
+  typing_ast
   typing_deps)
  (preprocess
   (pps ppx_deriving.std)))

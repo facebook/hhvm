@@ -45,9 +45,9 @@ let typed_linters =
   ]
   @ Linting_service.typed_linters
 
-let lint_tast ctx ast =
-  (Tast_visitor.iter_with typed_linters)#go ctx ast;
-  Linting_service.lint_tast ctx ast
+let lint_tast ctx (tast : Tast.program) =
+  (Tast_visitor.iter_with typed_linters)#go ctx tast;
+  Linting_service.lint_tast ctx tast
 
 (* Most lint rules are easier to write against the named AST. However, some
  * things that we want to lint for are discarded / simplified by the time we
@@ -110,5 +110,5 @@ let lint ctx fn content =
         let (_, tast) =
           Typing_check_job.calc_errors_and_tast ctx fn ~full_ast
         in
-        lint_tast ctx tast);
+        lint_tast ctx (Typing_service_types.tasts_as_list tast));
   Typing_deps.trace := orig_trace

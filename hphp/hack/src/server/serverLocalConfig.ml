@@ -513,6 +513,7 @@ type t = {
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
   ide_naming_table_update_threshold: int;
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
+  dump_tast_hashes: bool;  (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
 }
 
 let default =
@@ -622,6 +623,7 @@ let default =
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = false;
     ide_naming_table_update_threshold = 0;
+    dump_tast_hashes = false;
   }
 
 let system_config_path =
@@ -1402,6 +1404,9 @@ let load_
       ~default:default.ide_naming_table_update_threshold
       config
   in
+  let dump_tast_hashes =
+    bool_ "dump_tast_hashes" ~default:default.dump_tast_hashes config
+  in
   {
     saved_state =
       {
@@ -1525,6 +1530,7 @@ let load_
     hh_distc_fanout_threshold;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
+    dump_tast_hashes;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

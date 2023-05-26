@@ -87,18 +87,32 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
       Tast_check.def ctx def;
       Some def)
 
-let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast =
+let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
+    Errors.t * Typing_service_types.tasts_by_name =
   let (funs, classes, typedefs, consts, modules) = Nast.get_defs full_ast in
-  let calc_tast ~f defs =
-    List.map defs ~f:snd |> List.filter_map ~f:(fun full_ast -> f ctx ~full_ast)
+  let calc_tast
+      (type def res)
+      (typecheck : Provider_context.t -> full_ast:def -> res option)
+      (defs : (FileInfo.id * def) list) : res SMap.t =
+    (* List.map defs ~f:snd |> List.filter_map ~f:(fun full_ast -> f ctx ~full_ast) *)
+    List.fold defs ~init:SMap.empty ~f:(fun acc (id, full_ast) ->
+        typecheck ctx ~full_ast
+        |> Option.fold ~init:acc ~f:(fun acc tast ->
+               SMap.add (FileInfo.id_name id) tast acc))
   in
   Errors.do_with_context ~drop_fixmed fn Errors.Typing (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
          first, classes next, and so on. This is likely irrelevant to end user experience though,
          since user gets sorted errors. *)
-      let fs = calc_tast ~f:type_fun funs |> List.concat in
-      let cs = calc_tast ~f:type_class classes in
-      let ts = calc_tast ~f:check_typedef typedefs in
-      let gcs = calc_tast ~f:check_const consts in
-      let mds = calc_tast ~f:check_module modules in
-      fs @ cs @ ts @ gcs @ mds)
+      let fun_tasts = calc_tast type_fun funs in
+      let class_tasts = calc_tast type_class classes in
+      let typedef_tasts = calc_tast check_typedef typedefs in
+      let gconst_tasts = calc_tast check_const consts in
+      let module_tasts = calc_tast check_module modules in
+      {
+        Typing_service_types.fun_tasts;
+        class_tasts;
+        typedef_tasts;
+        gconst_tasts;
+        module_tasts;
+      })

@@ -152,6 +152,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_rust_elab: false,
     tco_ide_load_naming_table_on_disk: false,
     tco_ide_naming_table_update_threshold: 0,
+    dump_tast_hashes: false,
 };
 
 impl GlobalOptions<'static> {

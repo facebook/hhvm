@@ -318,3 +318,5 @@ let ide_load_naming_table_on_disk t =
 
 let ide_naming_table_update_threshold t =
   t.GlobalOptions.tco_ide_naming_table_update_threshold
+
+let dump_tast_hashes t = t.GlobalOptions.dump_tast_hashes

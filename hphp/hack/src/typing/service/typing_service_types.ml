@@ -108,6 +108,65 @@ end = struct
     go progress init
 end
 
+type tast_hash = Hash.hash_value
+
+type tasts_by_name = {
+  fun_tasts: Tast.def list SMap.t;
+  class_tasts: Tast.def SMap.t;
+  typedef_tasts: Tast.def SMap.t;
+  gconst_tasts: Tast.def SMap.t;
+  module_tasts: Tast.def SMap.t;
+}
+
+let tasts_as_list
+    ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
+      tasts_by_name) : Tast.def list =
+  (SMap.values fun_tasts |> List.concat)
+  @ SMap.values class_tasts
+  @ SMap.values typedef_tasts
+  @ SMap.values gconst_tasts
+  @ SMap.values module_tasts
+
+type tast_hashes_by_names = {
+  fun_tast_hashes: tast_hash SMap.t;
+  class_tast_hashes: tast_hash SMap.t;
+  typedef_tast_hashes: tast_hash SMap.t;
+  gconst_tast_hashes: tast_hash SMap.t;
+  module_tast_hashes: tast_hash SMap.t;
+}
+
+let hash_tasts
+    { fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
+    tast_hashes_by_names =
+  {
+    fun_tast_hashes = SMap.map Tast.hash_def_list fun_tasts;
+    class_tast_hashes = SMap.map Tast.hash_def class_tasts;
+    typedef_tast_hashes = SMap.map Tast.hash_def typedef_tasts;
+    gconst_tast_hashes = SMap.map Tast.hash_def gconst_tasts;
+    module_tast_hashes = SMap.map Tast.hash_def module_tasts;
+  }
+
+module TastHashes : sig
+  type t
+
+  val empty : t
+
+  val union : t -> t -> t
+
+  val add : t -> key:Relative_path.t -> data:tast_hashes_by_names option -> t
+end = struct
+  type t = tast_hashes_by_names Relative_path.Map.t
+
+  let empty = Relative_path.Map.empty
+
+  let union m1 m2 = Relative_path.Map.union m1 m2
+
+  let add m ~key ~data =
+    match data with
+    | None -> m
+    | Some data -> Relative_path.Map.add m ~key ~data
+end
+
 (** This type is used for both input and output of typechecker jobs.
 It is also used to accumulate the results of all typechecker jobs.
 JOB-INPUT: all the fields are empty
@@ -115,6 +174,7 @@ JOB-OUTPUT: process_files will merge what it discovered into the typing_result o
 ACCUMULATE: we start with all fields empty, and then merge in the output of each job as it's done. *)
 type typing_result = {
   errors: Errors.t;
+  tast_hashes: TastHashes.t;
   dep_edges: Typing_deps.dep_edges;
   profiling_info: Telemetry.t;
       (** Instrumentation about how the workers behaved, e.g. how many decls were
@@ -125,6 +185,7 @@ type typing_result = {
 let make_typing_result () =
   {
     errors = Errors.empty;
+    tast_hashes = TastHashes.empty;
     dep_edges = Typing_deps.dep_edges_make ();
     profiling_info = Telemetry.create ();
   }
@@ -134,6 +195,10 @@ let accumulate_job_output
     typing_result =
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
+    tast_hashes =
+      TastHashes.union
+        produced_by_job.tast_hashes
+        accumulated_so_far.tast_hashes;
     dep_edges =
       Typing_deps.merge_dep_edges
         produced_by_job.dep_edges

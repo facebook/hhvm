@@ -129,6 +129,7 @@ let should_enable_deferring (file : check_file_workitem) =
 
 type process_file_results = {
   file_errors: Errors.t;
+  file_tast_hashes: tast_hashes_by_names option;
   deferred_decls: Deferred_decl.deferment list;
 }
 
@@ -153,12 +154,12 @@ let process_file
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
   if not (Errors.is_empty file_errors) then
-    { file_errors; deferred_decls = [] }
+    { file_errors; deferred_decls = []; file_tast_hashes = None }
   else
     let opts = Provider_context.get_tcopt ctx in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     try
-      let result =
+      let (result : (_, unit) result) =
         Deferred_decl.with_deferred_decls
           ~enable:(should_enable_deferring file)
           ~declaration_threshold_opt:
@@ -172,7 +173,7 @@ let process_file
               ~full_ast:ast)
       in
       match result with
-      | Ok (file_errors, _tast) ->
+      | Ok (file_errors, tasts) ->
         if log_errors then
           List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
               let { User_error.claim; code; _ } = error in
@@ -187,7 +188,18 @@ let process_file
                 c2
                 code
                 msg);
-        { file_errors; deferred_decls = [] }
+        {
+          file_errors;
+          deferred_decls = [];
+          file_tast_hashes =
+            (if
+             Provider_context.get_tcopt ctx
+             |> TypecheckerOptions.dump_tast_hashes
+            then
+              Some (hash_tasts tasts)
+            else
+              None);
+        }
       | Error () ->
         let deferred_decls =
           Errors.ignore_ (fun () -> Naming.program ctx ast)
@@ -197,7 +209,7 @@ let process_file
                  Naming_provider.get_class_path ctx class_name >>| fun fn ->
                  (fn, class_name))
         in
-        { file_errors = Errors.empty; deferred_decls }
+        { file_errors = Errors.empty; deferred_decls; file_tast_hashes = None }
     with
     | WorkerCancel.Worker_should_exit as exn ->
       (* Cancellation requests must be re-raised *)
@@ -280,6 +292,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
 type workitem_accumulator = {
   errors: Errors.t;
+  tast_hashes: TastHashes.t;
   tally: ProcessFilesTally.t;
   stats: HackEventLogger.ProfileTypeCheck.stats;
 }
@@ -292,7 +305,7 @@ let process_one_workitem
     ~longlived_workers
     ~error_count_at_start_of_batch
     (fn : workitem)
-    ({ errors; tally; stats } : workitem_accumulator) :
+    ({ errors; tast_hashes; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
@@ -306,7 +319,13 @@ let process_one_workitem
       .HackEventLogger.PerFileProfilingConfig.profile_type_check_twice
   in
 
-  let (file, decl, mid_stats, file_errors, deferred_workitems, tally) =
+  let ( file,
+        decl,
+        mid_stats,
+        file_errors,
+        tast_hashes,
+        deferred_workitems,
+        tally ) =
     match fn with
     | Check file ->
       (* We'll show at least the first five errors in the project. Maybe more,
@@ -316,7 +335,12 @@ let process_one_workitem
         check_info.log_errors
         && error_count_at_start_of_batch + Errors.count errors < 5
       in
-      let result = process_file ctx file ~decl_cap_mb ~log_errors in
+      let { file_errors; file_tast_hashes; deferred_decls } =
+        process_file ctx file ~decl_cap_mb ~log_errors
+      in
+      let tast_hashes =
+        TastHashes.add tast_hashes ~key:file.path ~data:file_tast_hashes
+      in
       let mid_stats =
         if type_check_twice then
           Some (get_stats ~include_slightly_costly_stats:false tally)
@@ -328,15 +352,15 @@ let process_one_workitem
           let _ignored = process_file ctx file ~decl_cap_mb in
           ()
       end;
-      let tally = ProcessFilesTally.incr_checks tally result.deferred_decls in
+      let tally = ProcessFilesTally.incr_checks tally deferred_decls in
       let deferred =
-        if List.is_empty result.deferred_decls then
+        if List.is_empty deferred_decls then
           []
         else
-          List.map result.deferred_decls ~f:(fun fn -> Declare fn)
+          List.map deferred_decls ~f:(fun fn -> Declare fn)
           @ [Check { file with was_already_deferred = true }]
       in
-      (Some file, None, mid_stats, result.file_errors, deferred, tally)
+      (Some file, None, mid_stats, file_errors, tast_hashes, deferred, tally)
     | Declare (_path, class_name) ->
       let (_ : Decl_provider.class_decl option) =
         Decl_provider.get_class ctx class_name
@@ -345,6 +369,7 @@ let process_one_workitem
         Some class_name,
         None,
         Errors.empty,
+        tast_hashes,
         [],
         ProcessFilesTally.incr_decls tally )
     | Prefetch paths ->
@@ -353,6 +378,7 @@ let process_one_workitem
         None,
         None,
         Errors.empty,
+        tast_hashes,
         [],
         ProcessFilesTally.incr_prefetches tally )
   in
@@ -403,11 +429,11 @@ let process_one_workitem
     ~workitem_end_second_stats;
 
   ( { TypingProgress.deferred_workitems; continue = workitem_ends_under_cap },
-    { errors; tally; stats = final_stats } )
+    { errors; tast_hashes; tally; stats = final_stats } )
 
 let process_workitems
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; profiling_info } : typing_result)
+    ({ errors; tast_hashes; dep_edges; profiling_info } : typing_result)
     (progress : TypingProgress.t)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -436,10 +462,11 @@ let process_workitems
   Ast_provider.local_changes_push_sharedmem_stack ();
 
   (* Process as many files as we can, and merge in their errors *)
-  let (progress, { errors; tally = _; stats = _ }) =
+  let (progress, { errors; tast_hashes; tally = _; stats = _ }) =
     let init =
       {
         errors;
+        tast_hashes;
         tally = ProcessFilesTally.empty;
         stats =
           get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty;
@@ -479,7 +506,7 @@ let process_workitems
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; dep_edges; profiling_info }, progress)
+  ({ errors; tast_hashes; dep_edges; profiling_info }, progress)
 
 let load_and_process_workitems
     (ctx : Provider_context.t)
@@ -1314,7 +1341,12 @@ let go_with_interrupt
         match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
         | `Success (errors, dep_edges, env) ->
           Some
-            ( { errors; dep_edges; profiling_info },
+            ( {
+                errors;
+                tast_hashes = (* TODO *) TastHashes.empty;
+                dep_edges;
+                profiling_info;
+              },
               delegate_state,
               telemetry,
               env,
@@ -1325,6 +1357,7 @@ let go_with_interrupt
           Some
             ( {
                 errors = Errors.empty;
+                tast_hashes = TastHashes.empty;
                 dep_edges = Typing_deps.dep_edges_make ();
                 profiling_info;
               },
@@ -1363,7 +1396,14 @@ let go_with_interrupt
         ~check_info
         ~typecheck_info
   in
-  let { errors; dep_edges; profiling_info } = typing_result in
+  let {
+    errors;
+    tast_hashes = (* TODO dump those *) _;
+    dep_edges;
+    profiling_info;
+  } =
+    typing_result
+  in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
   let telemetry =

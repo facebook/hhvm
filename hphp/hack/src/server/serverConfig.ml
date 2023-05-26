@@ -519,6 +519,7 @@ let load ~silent options : t * ServerLocalConfig.t =
           local_config.ide_load_naming_table_on_disk
         ~tco_ide_naming_table_update_threshold:
           local_config.ide_naming_table_update_threshold
+        ~dump_tast_hashes:local_config.dump_tast_hashes
         GlobalOptions.default
     in
     load_config config local_config_opts

@@ -197,6 +197,7 @@ type t = {
   tco_rust_elab: bool;
   tco_ide_load_naming_table_on_disk: bool;
   tco_ide_naming_table_update_threshold: int;
+  dump_tast_hashes: bool;
 }
 [@@deriving eq, show]
 
@@ -334,6 +335,7 @@ let default =
     tco_rust_elab = false;
     tco_ide_load_naming_table_on_disk = false;
     tco_ide_naming_table_update_threshold = 0;
+    dump_tast_hashes = false;
   }
 
 let set
@@ -469,6 +471,7 @@ let set
     ?tco_rust_elab
     ?tco_ide_load_naming_table_on_disk
     ?tco_ide_naming_table_update_threshold
+    ?dump_tast_hashes
     options =
   let setting setting option =
     match setting with
@@ -827,6 +830,7 @@ let set
       setting
         tco_ide_naming_table_update_threshold
         options.tco_ide_naming_table_update_threshold;
+    dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

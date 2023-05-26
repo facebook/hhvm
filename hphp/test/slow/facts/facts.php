@@ -70,24 +70,6 @@ function print_subtypes(
   }
 }
 
-function print_transitive_subtypes(
-  classname<mixed> $type,
-  ?HH\Facts\DeriveFilters $filters = null,
-): void {
-  if ($filters is nonnull) {
-    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes(
-      $type,
-      $filters,
-    ));
-    $filters_json = jsonify_filters($filters);
-    print "Transitive subtypes of $type with filters $filters_json: ".
-      "$subtypes_json\n";
-  } else {
-    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type));
-    print "Transitive subtypes of $type: $subtypes_json\n";
-  }
-}
-
 function print_supertypes(
   classname<mixed> $type,
   ?HH\Facts\DeriveFilters $filters = null,
@@ -250,28 +232,11 @@ function facts(): void {
     IBase::class,
     shape('kind' => keyset[HH\Facts\TypeKind::K_CLASS]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('kind' => keyset[HH\Facts\TypeKind::K_CLASS]),
-  );
   print_subtypes(
     IBase::class,
     shape('kind' => keyset[HH\Facts\TypeKind::K_TRAIT]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('kind' => keyset[HH\Facts\TypeKind::K_TRAIT]),
-  );
   print_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[
-        HH\Facts\TypeKind::K_CLASS,
-        HH\Facts\TypeKind::K_TRAIT,
-      ],
-    ),
-  );
-  print_transitive_subtypes(
     IBase::class,
     shape(
       'kind' => keyset[
@@ -319,15 +284,7 @@ function facts(): void {
     IBase::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
-  );
   print_subtypes(
-    BaseClass::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
-  );
-  print_transitive_subtypes(
     BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
@@ -346,13 +303,6 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
     ),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_INTERFACE],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
-    ),
-  );
   // `require class` trait constraints
   print_supertypes(
     TRequireClassFinalClass::class,
@@ -362,10 +312,6 @@ function facts(): void {
     TRequireClassFinalClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
-  print_transitive_subtypes(
-    TRequireClassFinalClass::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
-  );
   print_supertypes(
     FinalClassUsesTRequireClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
@@ -373,12 +319,6 @@ function facts(): void {
   print_subtypes(
     FinalClassUsesTRequireClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
-  );
-  print_transitive_subtypes(
-    FinalClassUsesTRequireClass::class,
-    shape(
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
-    ),
   );
   print_supertypes(
     TRequireClassFinalClassB::class,
@@ -399,16 +339,8 @@ function facts(): void {
     BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
   print_supertypes(
     TRequireExtendsBaseClassAndRequireImplementsIBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
-  print_transitive_subtypes(
-    BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
   print_supertypes(
@@ -426,21 +358,7 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
     ),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_INTERFACE],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
-    ),
-  );
   print_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_TRAIT],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
-    ),
-  );
-  print_transitive_subtypes(
     IBase::class,
     shape(
       'kind' => keyset[HH\Facts\TypeKind::K_TRAIT],
@@ -456,10 +374,6 @@ function facts(): void {
     TRequireClassFinalClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
-  print_transitive_subtypes(
-    TRequireClassFinalClass::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
   print_supertypes(
     FinalClassUsesTRequireClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
@@ -467,12 +381,6 @@ function facts(): void {
   print_subtypes(
     FinalClassUsesTRequireClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
-  print_transitive_subtypes(
-    FinalClassUsesTRequireClass::class,
-    shape(
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
-    ),
   );
   print_supertypes(
     TRequireClassFinalClassB::class,
@@ -492,13 +400,6 @@ function facts(): void {
       'parameters' => dict[0 => "banana"],
     )]),
   );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => "banana"],
-    )]),
-  );
   print_subtypes(
     BaseClassForAttributeFiltering::class,
     shape('attributes' => vec[shape(
@@ -506,22 +407,8 @@ function facts(): void {
       'parameters' => dict[0 => 'apple'],
     )]),
   );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => 'apple'],
-    )]),
-  );
   print_subtypes(
     BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[1 => 'carrot'],
-    )]),
-  );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
     shape('attributes' => vec[shape(
       'name' => TwoArgAttr::class,
       'parameters' => dict[1 => 'carrot'],

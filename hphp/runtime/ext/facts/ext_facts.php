@@ -176,28 +176,6 @@ function subtypes(
 )[]: vec<string>;
 
 /**
- * Return all types which transitively extend, implement, or use the given
- * base type.
- *
- * The 'kind' and 'derive_kind' filters passed in determine which relationships
- * and types we look at while traversing the inheritance graph. So if you
- * filter traits out, we'll exclude classes which are only related because
- * they `use` a trait which `implements` the interface you passed in.
- *
- * The 'attributes' filters passed in will be applied to the final list of
- * transitive subtypes. So if you look for types with the `<<Oncalls('team')>>`
- * attribute, we'll only filter the final list of subtypes, instead of ignoring
- * all types that don't have the given attribute.
- *
- * Throws InvalidOperationException if Facts is not enabled.
- */
-<<__Native>>
-function transitive_subtypes(
-  /* classname<T> */ string $base_type,
-  /* ?DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<(string, string, TypeKind)> /* vec<(classname<T>, string, TypeKind)> */;
-
-/**
  * Get all types which the given type extends, implements, or uses.
  *
  * Throws InvalidOperationException if Facts is not enabled.

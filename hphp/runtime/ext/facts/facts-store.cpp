@@ -784,17 +784,6 @@ struct FactsStoreImpl final
     });
   }
 
-  Array getTransitiveDerivedTypes(
-      const String& baseType,
-      const Variant& filters) override {
-    return logPerformance(__func__, [&]() {
-      return getTransitiveDerivedTypes(
-          baseType,
-          InheritanceFilterData::createFromShape(
-              filters.isArray() ? filters.getArrayData() : nullptr));
-    });
-  }
-
   Array getTypesWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
       return makeVecOfString(m_map.getTypesWithAttribute(*attr.get()));
@@ -1266,31 +1255,6 @@ struct FactsStoreImpl final
     return makeVecOfString(filterTypesByAttribute(
         filterByKind(std::move(derivedTypes), filters.m_kindFilters),
         filters.m_attrFilters));
-  }
-
-  Array getTransitiveDerivedTypes(
-      const String& baseType,
-      const InheritanceFilterData& filters) {
-    auto derivedTypeInfo = filterTypesByAttribute(
-        m_map.getTransitiveDerivedTypes(
-            *baseType.get(),
-            filters.m_kindFilters.toMask(),
-            filters.m_deriveKindFilters.toMask()),
-        filters.m_attrFilters,
-        [](auto const& tuple) { return std::get<0>(tuple); });
-    VecInit derivedTypeVec{derivedTypeInfo.size()};
-    for (auto const& [type, path, kind, flags] : derivedTypeInfo) {
-      VecInit derivedTypeTuple{4};
-      derivedTypeTuple.append(make_tv<KindOfPersistentString>(type.get()));
-      derivedTypeTuple.append(make_tv<KindOfPersistentString>(path.get()));
-      derivedTypeTuple.append(
-          make_tv<KindOfPersistentString>(typeKindToString(kind).get()));
-
-      derivedTypeTuple.append(
-          (flags & static_cast<TypeFlagMask>(TypeFlag::Abstract)) != 0);
-      derivedTypeVec.append(std::move(derivedTypeTuple).toArray());
-    }
-    return derivedTypeVec.toArray();
   }
 
   std::atomic<std::chrono::steady_clock::time_point> m_lastWatchmanQueryStart{

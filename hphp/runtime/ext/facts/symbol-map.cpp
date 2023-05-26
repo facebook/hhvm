@@ -382,57 +382,6 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
   return getDerivedTypes(Symbol<SymKind::Type>{baseType}, kind);
 }
 
-std::vector<typename SymbolMap::DerivedTypeInfo>
-SymbolMap::getTransitiveDerivedTypes(
-    Symbol<SymKind::Type> baseType,
-    TypeKindMask kinds,
-    DeriveKindMask deriveKinds) {
-  std::vector<typename SymbolMap::DerivedTypeInfo> results;
-
-  hphp_hash_set<Symbol<SymKind::Type>> seen;
-  std::vector<Symbol<SymKind::Type>> stack;
-  stack.push_back(baseType);
-  while (!stack.empty()) {
-    auto type = stack.back();
-    stack.pop_back();
-
-    for (auto deriveKind :
-         {DeriveKind::Extends,
-          DeriveKind::RequireExtends,
-          DeriveKind::RequireImplements,
-          DeriveKind::RequireClass}) {
-      if (deriveKinds & static_cast<int>(deriveKind)) {
-        for (auto subtype : getDerivedTypes(type, deriveKind)) {
-          if (seen.count(subtype) > 0) {
-            continue;
-          }
-          seen.insert(subtype);
-
-          auto subtypePath = getSymbolPath(subtype);
-          auto [subtypeKind, subtypeFlags] =
-              getKindAndFlags(subtype, subtypePath);
-          if (kinds & static_cast<int>(subtypeKind)) {
-            stack.push_back(subtype);
-            results.push_back(
-                {subtype, subtypePath, subtypeKind, subtypeFlags});
-          }
-        }
-      }
-    }
-  }
-
-  return results;
-}
-
-std::vector<typename SymbolMap::DerivedTypeInfo>
-SymbolMap::getTransitiveDerivedTypes(
-    const StringData& baseType,
-    TypeKindMask kinds,
-    DeriveKindMask deriveKinds) {
-  return getTransitiveDerivedTypes(
-      Symbol<SymKind::Type>{baseType}, kinds, deriveKinds);
-}
-
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
     Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);

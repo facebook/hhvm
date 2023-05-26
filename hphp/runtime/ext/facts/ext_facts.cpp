@@ -713,13 +713,6 @@ Array HHVM_FUNCTION(
 }
 
 Array HHVM_FUNCTION(
-    facts_transitive_subtypes,
-    const String& baseType,
-    const Variant& filters) {
-  return Facts::getFactsOrThrow().getTransitiveDerivedTypes(baseType, filters);
-}
-
-Array HHVM_FUNCTION(
     facts_supertypes,
     const String& derivedType,
     const Variant& filters) {
@@ -833,8 +826,6 @@ void FactsExtension::moduleInit() {
   HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));
   HHVM_NAMED_FE(HH\\Facts\\is_final, HHVM_FN(facts_is_final));
   HHVM_NAMED_FE(HH\\Facts\\subtypes, HHVM_FN(facts_subtypes));
-  HHVM_NAMED_FE(
-      HH\\Facts\\transitive_subtypes, HHVM_FN(facts_transitive_subtypes));
   HHVM_NAMED_FE(HH\\Facts\\supertypes, HHVM_FN(facts_supertypes));
   HHVM_NAMED_FE(
       HH\\Facts\\types_with_attribute, HHVM_FN(facts_types_with_attribute));

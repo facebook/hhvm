@@ -177,28 +177,6 @@ struct SymbolMap {
       DeriveKind kind);
 
   /**
-   * Return all types which transitively extend, implement, or use the given
-   * base type.
-   *
-   * `kinds` is a bitmask dictating whether we should follow classes,
-   * interfaces, enums, or traits. If one of these kinds is missing, we don't
-   * include anything of that kind, or any of their subtypes.
-   *
-   * `deriveKinds` is a bitmask dictating whether we should follow `extends` or
-   * `require extends` relationships.
-   */
-  using DerivedTypeInfo =
-      std::tuple<Symbol<SymKind::Type>, Path, TypeKind, TypeFlagMask>;
-  std::vector<DerivedTypeInfo> getTransitiveDerivedTypes(
-      Symbol<SymKind::Type> baseType,
-      TypeKindMask kinds = kTypeKindAll,
-      DeriveKindMask deriveKinds = kDeriveKindAll);
-  std::vector<DerivedTypeInfo> getTransitiveDerivedTypes(
-      const StringData& baseType,
-      TypeKindMask kinds = kTypeKindAll,
-      DeriveKindMask deriveKinds = kDeriveKindAll);
-
-  /**
    * Return the attributes of a type
    */
   std::vector<Symbol<SymKind::Type>> getAttributesOfType(

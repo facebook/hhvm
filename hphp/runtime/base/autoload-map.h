@@ -224,12 +224,6 @@ struct FactsStore : public AutoloadMap {
       const String& baseType, const Variant& filters) = 0;
 
   /**
-   * Return all types in the repo which transitively extend the given type.
-   */
-  virtual Array getTransitiveDerivedTypes(
-    const String& baseType, const Variant& filters) = 0;
-
-  /**
    * Return all types decorated with the given attribute.
    */
   virtual Array getTypesWithAttribute(const String& attr) = 0;

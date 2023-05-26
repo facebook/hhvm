@@ -2147,56 +2147,6 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   testMap(m2);
 }
 
-TEST_F(SymbolMapTest, TransitiveSubtypes) {
-  auto& m1 = make("/var/www");
-
-  FileFacts ff{
-      .m_types = {
-          TypeDetails{.m_name = "C0", .m_kind = TypeKind::Class},
-          TypeDetails{
-              .m_name = "C1", .m_kind = TypeKind::Class, .m_baseTypes = {"C0"}},
-          TypeDetails{
-              .m_name = "C2",
-              .m_kind = TypeKind::Class,
-              .m_baseTypes = {"C1", "T0"}},
-          TypeDetails{
-              .m_name = "I1",
-              .m_kind = TypeKind::Interface,
-              .m_baseTypes = {"C1"}},
-          TypeDetails{
-              .m_name = "C3", .m_kind = TypeKind::Class, .m_baseTypes = {"I1"}},
-          TypeDetails{
-              .m_name = "T0",
-              .m_kind = TypeKind::Trait,
-              .m_requireExtends = {"C0"}},
-          TypeDetails{
-              .m_name = "T1",
-              .m_kind = TypeKind::Trait,
-              .m_requireImplements = {"I1"}}}};
-
-  fs::path p = {"some/path.php"};
-
-  update(m1, "", "1:2:3", {p}, {}, {ff});
-
-  EXPECT_THAT(
-      m1.getTransitiveDerivedTypes("C0"),
-      UnorderedElementsAre("C1", "C2", "C3", "I1", "T0", "T1"));
-
-  EXPECT_THAT(
-      m1.getTransitiveDerivedTypes("C0", static_cast<int>(TypeKind::Class)),
-      UnorderedElementsAre("C1", "C2"));
-
-  EXPECT_THAT(
-      m1.getTransitiveDerivedTypes(
-          "C0", kTypeKindAll, static_cast<int>(DeriveKind::Extends)),
-      UnorderedElementsAre("C1", "C2", "C3", "I1"));
-
-  EXPECT_THAT(
-      m1.getTransitiveDerivedTypes(
-          "C0", kTypeKindAll, static_cast<int>(DeriveKind::RequireExtends)),
-      ElementsAre("T0"));
-}
-
 TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
   auto& dbUpdater = make("/var/www", m_exec);
   auto& map = make("/var/www");

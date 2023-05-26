@@ -160,22 +160,21 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   /// Ensures the given field is set, and return the associated patch object.
   template <typename Id>
-  decltype(auto) ensure() {
-    return (maybeEnsure<Id>(), patchAfter<Id>());
+  void ensure() {
+    maybeEnsure<Id>();
   }
   /// Same as `ensure()` method, except uses the provided default value.
   template <typename Id, typename U = FieldType<Id>>
-  decltype(auto) ensure(U&& defaultVal) {
+  void ensure(U&& defaultVal) {
     if (maybeEnsure<Id>()) {
       getEnsure<Id>(data_) = std::forward<U>(defaultVal);
     }
-    return patchAfter<Id>();
   }
   /// Ensures the given field is initalized, and return the associated patch
   /// object.
   template <typename Id>
   decltype(auto) patch() {
-    return ensure<Id>();
+    return (maybeEnsure<Id>(), patchAfter<Id>());
   }
 
   /// Returns the proper patch object for the given field.

@@ -1179,7 +1179,7 @@ TEST_F(PatchTest, GeneratedUnionEnsurePatch) {
   test::patch::MyUnion original;
 
   test::patch::MyUnionPatch patch;
-  patch.ensure().option1_ref() = "test";
+  patch.ensure<ident::option1>("test");
 
   auto patched = applyGeneratedPatch<type::union_c>(original, patch);
   ASSERT_TRUE(patched.option1_ref().has_value());
@@ -1224,7 +1224,7 @@ TEST_F(PatchTest, GeneratedUnionClearAndAssign) {
 TEST_F(PatchTest, GeneratedUnionPatch) {
   test::patch::MyUnionPatch patch;
   patch.patchIfSet<ident::option1>() = "Hi";
-  patch.ensure().option1_ref() = "Bye";
+  patch.ensure<ident::option1>("Bye");
   patch.patchIfSet<ident::option1>() += " World!";
 
   test::patch::MyUnion hi, bye;

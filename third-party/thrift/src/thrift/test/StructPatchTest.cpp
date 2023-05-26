@@ -689,8 +689,6 @@ TEST(UnionPatchTest, Ensure) {
 
   MyUnion expected;
   expected.option1_ref() = "hi";
-  EXPECT_EQ(
-      patch.toThrift(), decltype(patch)::createEnsure(expected).toThrift());
 
   // Empty -> expected
   MyUnion actual;
@@ -734,7 +732,7 @@ TEST(UnionPatchTest, Patch) {
 TEST(UnionPatchTest, PatchIfSet) {
   MyUnionPatch patch;
   patch.patchIfSet<ident::option1>() = "Hi";
-  patch.ensure().option1_ref() = "Bye";
+  patch.ensure<ident::option1>("Bye");
   patch.patchIfSet<ident::option1>() += " World!";
 
   MyUnion hi, bye;

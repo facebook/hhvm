@@ -398,7 +398,6 @@ template <typename Patch>
 class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using Base = BaseEnsurePatch<Patch, UnionPatch>;
   using T = typename Base::value_type;
-  using P = typename Base::patch_type;
   template <typename Id>
   using F = type::native_type<get_field_tag<T, Id>>;
 
@@ -408,41 +407,11 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using Base::apply;
   using Base::assign;
   using Base::clear;
-  using Base::ensure;
-
-  /// Creates a new patch that ensures the union with a given value.
-  template <typename U = T>
-  FOLLY_NODISCARD static UnionPatch createEnsure(U&& _default) {
-    UnionPatch patch;
-    patch.ensure(std::forward<U>(_default));
-    return patch;
-  }
-  /// Returns the union that's used to ensure.
-  T& ensure() { return *data_.ensure(); }
-  /// Ensures the union with a given value.
-  P& ensure(const T& val) { return *ensureAnd(val).patch(); }
-  /// Ensures the union with a given value.
-  P& ensure(T&& val) { return *ensureAnd(std::move(val)).patch(); }
 
   /// Assigns to the given field, ensuring first if needed.
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
-  }
-
- private:
-  using Base::data_;
-  using Base::ensurePatchable;
-  using Base::resetAnd;
-
-  template <typename U = T>
-  Patch& ensureAnd(U&& _default) {
-    ensurePatchable();
-    assert(!op::isEmpty<>(_default));
-    if (!hasValue(data_.ensure())) {
-      data_.ensure().emplace(std::forward<U>(_default));
-    }
-    return data_;
   }
 };
 

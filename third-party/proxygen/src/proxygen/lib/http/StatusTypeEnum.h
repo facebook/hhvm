@@ -54,7 +54,7 @@ namespace proxygen {
       x(manifest_missing_representation), x(manifest_with_0_bitrate),          \
       x(manifest_with_no_tracks), x(manifest_with_wrong_track),                \
       x(cache_lease_queue_hard_timeout), x(cache_purge), x(cache_error),       \
-      x(proxy_cache_fill_shed), x(ENUM_COUNT)
+      x(proxy_cache_fill_shed), x(ENUM_COUNT), x(takedown_direct_response)
 
 #define STATUS_TYPE_ENUM(statusType) statusType
 

@@ -7,6 +7,7 @@ import collections.abc
 import functools
 import lldb
 import re
+import struct
 import sys
 import typing
 
@@ -420,6 +421,40 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 
 
 #------------------------------------------------------------------------------
+# Intel CRC32
+
+def _bit_reflect(num, nbits):
+    """ Perform bit reflection on the bottom 'nbits' of 'num' """
+
+    out = 0
+    mask = 1 << (nbits - 1)
+    for i in range(nbits):
+        if num & (1 << i):
+            out |= mask
+        mask >>= 1
+    return out
+
+
+def crc32q(crc, quad):
+    """ Intel SSE4 CRC32 implementation """
+
+    crc = _bit_reflect(crc, 32)
+    quad = _bit_reflect(quad, 64)
+
+    msb = 1 << 63
+
+    dividend = quad ^ (crc << 32)
+    divisor = 0x11edc6f41 << 31
+
+    for _ in range(64):
+        if dividend & msb:
+            dividend ^= divisor
+        dividend <<= 1
+
+    return _bit_reflect(dividend, 64)
+
+
+#------------------------------------------------------------------------------
 # String helpers
 
 def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.SBProcess, keep_case: bool = True) -> str:
@@ -449,6 +484,78 @@ def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.
 
     print(f"error while trying to get string: {err}", file=sys.stderr)
     return f"<invalid string with addr 0x{addr:0x} and length {len}>"
+
+
+def _unpack(s):
+    return 0xdfdfdfdfdfdfdfdf & struct.unpack('<Q', bytes(s, encoding='utf-8'))[0]
+
+
+def hash_string(s: str):
+    """ Hash a string as in hphp/util/hash-crc-x64.S """
+
+    size = len(s)
+    tail_sz = size % 8
+    size -= tail_sz
+
+    crc = 0xffffffff
+
+    for i in range(0, size, 8):
+        crc = crc32q(crc, _unpack(s[i : i + 8]))
+
+    if tail_sz == 0:
+        return crc >> 1
+
+    shift = -((tail_sz - 8) << 3) & 0b111111
+    tail = _unpack(s[size:].ljust(8, '\0'))
+
+    crc = crc32q(crc, tail << shift)
+    return crc >> 1
+
+
+def strinfo(s: lldb.SBValue, keep_case: bool = True):
+    """ Return the Python string and HHVM hash for `s`, or None if `s` is not a stringish lldb.Value """
+
+    data = None
+    h = None
+
+    try:
+        t = rawtype(s.type)
+    except Exception as err:
+        print(f"error while trying to get the type of what we believe is a string-like value: {err}", file=sys.stderr)
+        return None
+
+    if (t == Type("char", s.target).GetPointerType()
+          or re.match(r"char \[\d*\]$", t.name) is not None):
+        # Note: 1024 is very arbitrary; the string may
+        # very well be longer than this.
+        data = read_cstring(s.deref.load_addr, 1024, s.process)
+    else:
+        sd = deref(s)
+        ty_name = rawtype(sd.type).name
+        if ty_name in ("HPHP::String", "HPHP::StaticString"):
+            sd = rawptr(get(sd, "m_str"))
+            sd = deref(sd)
+        elif ty_name == "HPHP::StrNR":
+            sd = deref(get(sd, "m_px"))
+
+        if rawtype(sd.type).name != 'HPHP::StringData':
+            return None
+
+        data = string_data_val(sd)
+
+        m_hash = get(sd.children[1], "m_hash").signed
+        if m_hash != 0:
+            h = m_hash & 0x7fffffff
+
+    if data is None:
+        return None
+
+    assert isinstance(data, str)
+    retval = {
+        'data': data if keep_case else data.lower(),
+        'hash': h if h is not None else hash_string(data),
+    }
+    return retval
 
 
 def string_data_val(val: lldb.SBValue, keep_case=True) -> str:

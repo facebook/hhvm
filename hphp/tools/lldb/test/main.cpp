@@ -190,6 +190,18 @@ void buildOtherValues() {
   takeArrayKeyset(keyset);
 }
 
+// Utility tests
+
+void takeHHVMString(String UNUSED v) { return; }
+void takeCharPtr(char const* UNUSED v) { return; }
+
+void buildValuesForUtilityTests() {
+  takeHHVMString(String("Most excellent"));
+  takeCharPtr("Very excellent");
+  takeStaticString(StaticString("cats and dogs"));
+  takeStrNR(StrNR(StaticString("lions and tigers")));
+}
+
 } // namespace lldb_test
 } // namespace HPHP
 
@@ -207,6 +219,8 @@ int main(int argc, char** argv) {
     HPHP::lldb_test::buildTypedValues();
   } else if (!strcmp(argv[1], "other-values")) {
     HPHP::lldb_test::buildOtherValues();
+  } else if (!strcmp(argv[1], "utility")) {
+    HPHP::lldb_test::buildValuesForUtilityTests();
   } else {
     std::cout << "Invalid option (options: \"typed-values\", \"other-values\"" << std::endl;
     return 1;

@@ -116,3 +116,37 @@ class UtilsGivenFrameTestCase(base.TestHHVMBinary):
         self.assertEqual(sp.unsigned, self.frame.sp)
         ip = utils.reg('ip', self.frame)
         self.assertEqual(ip.unsigned, self.frame.pc)
+
+
+class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
+    def setUp(self):
+        super().setUp(test_type = "utility")
+
+    def test_strinfo(self):
+        with self.subTest("HHVMString"):
+            self.run_until_breakpoint("takeHHVMString")
+            s = self.frame.FindVariable("v")
+            info = utils.strinfo(s)
+            self.assertEqual(info["data"], "Most excellent")
+            self.assertEqual(info["hash"], 900261463)
+
+        with self.subTest("char*"):
+            self.run_until_breakpoint("takeCharPtr")
+            s = self.frame.FindVariable("v")
+            info = utils.strinfo(s)
+            self.assertEqual(info["data"], "Very excellent")
+            self.assertEqual(info["hash"], 527044057)
+
+        with self.subTest("StaticString"):
+            self.run_until_breakpoint("takeStaticString")
+            s = self.frame.FindVariable("v")
+            info = utils.strinfo(s)
+            self.assertEqual(info["data"], "cats and dogs")
+            self.assertEqual(info["hash"], 1462514979)
+
+        with self.subTest("StrNR"):
+            self.run_until_breakpoint("takeStrNR")
+            s = self.frame.FindVariable("v")
+            info = utils.strinfo(s)
+            self.assertEqual(info["data"], "lions and tigers")
+            self.assertEqual(info["hash"], 2000936965)

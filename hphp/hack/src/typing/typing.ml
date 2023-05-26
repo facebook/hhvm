@@ -414,7 +414,10 @@ let is_return_disposable_fun_type env ty =
 let annot_map env =
   match Env.next_cont_opt env with
   | Some { Typing_per_cont_env.local_types; _ } ->
-    Some (Local_id.Map.map (fun (ty, pos, _expr_id) -> (pos, ty)) local_types)
+    Some
+      (Local_id.Map.map
+         (fun Typing_local_types.{ ty; pos; eid = _expr_id } -> (pos, ty))
+         local_types)
   | None -> None
 
 (* Similar to annot_map above, but filters the map to only contain
@@ -5775,7 +5778,9 @@ and closure_make
       let locals = Env.get_locals ~quiet:true env idl in
       let like_locals =
         Local_id.Map.map
-          (Tuple.T3.map_fst ~f:(Typing_utils.make_like env))
+          (fun local ->
+            Typing_local_types.
+              { local with ty = Typing_utils.make_like env local.ty })
           locals
       in
       Env.set_locals env like_locals

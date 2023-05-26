@@ -17,7 +17,8 @@ let local_env_size env =
   | None -> 0
   | Some Typing_per_cont_env.{ local_types; _ } ->
     Local_id.Map.fold
-      (fun _ (ty, _, _) size -> size + ty_size env.inference_env ty)
+      (fun _ local size ->
+        size + ty_size env.inference_env local.Typing_local_types.ty)
       local_types
       0
 

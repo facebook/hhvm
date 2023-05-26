@@ -1139,7 +1139,7 @@ let set_local ?(immutable = false) env x new_type pos =
     let expr_id =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | None -> Ident.tmp ()
-      | Some (_, _, y) -> y
+      | Some local -> local.Typing_local_types.eid
     in
     let expr_id =
       if immutable then
@@ -1147,7 +1147,7 @@ let set_local ?(immutable = false) env x new_type pos =
       else
         expr_id
     in
-    let local = (new_type, pos, expr_id) in
+    let local = Typing_local_types.{ ty = new_type; pos; eid = expr_id } in
     set_local_ env x local
 
 let is_using_var env x = LID.Set.mem x env.lenv.local_using_vars
@@ -1185,10 +1185,13 @@ let local_undefined_error ~env p x ctx =
     @@ let* { outer_locals; dsl } = env.in_expr_tree in
        let locals =
          LID.Map.fold
-           (fun k ((_, p, _) as v) acc ->
+           (fun k v acc ->
              (* $this doesn't have a position. In general best to avoid
                 suggestions that lack positions. *)
-             if LID.is_user_denotable k && (not @@ Pos.equal p Pos.none) then
+             if
+               LID.is_user_denotable k
+               && (not @@ Pos.equal v.Typing_local_types.pos Pos.none)
+             then
                (k, v, Some dsl) :: acc
              else
                acc)
@@ -1215,7 +1218,8 @@ let local_undefined_error ~env p x ctx =
       in
       let var_name (k, _, _) = LID.to_string k in
       match most_similar lid all_locals var_name with
-      | Some (k, (_, pos, _), dsl) -> (Some (LID.to_string k, pos), dsl)
+      | Some (k, local, dsl) ->
+        (Some (LID.to_string k, local.Typing_local_types.pos), dsl)
       | None -> (None, None)
     in
     let (most_similar, in_dsl) = suggest_most_similar lid in
@@ -1242,7 +1246,9 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
        have type nothing. *)
-    Some (Typing_make_type.nothing Reason.Rnone, Pos.none, 0)
+    Some
+      Typing_local_types.
+        { ty = Typing_make_type.nothing Reason.Rnone; pos = Pos.none; eid = 0 }
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
     begin
@@ -1257,9 +1263,10 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
     lcl
 
 let get_local_ty_in_ctx env ~undefined_err_fun x ctx_opt =
+  let open Typing_local_types in
   match get_local_in_ctx ~undefined_err_fun x ctx_opt with
   | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
-  | Some (x, pos, _) -> (true, x, pos)
+  | Some { ty = x; pos; eid = _ } -> (true, x, pos)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let undefined_err_fun = local_undefined_error ~env p in
@@ -1309,10 +1316,11 @@ let set_local_expr_id env x new_eid =
   match LEnvC.get_cont_option C.Next per_cont_env with
   | None -> Ok env
   | Some next_cont -> begin
+    let open Typing_local_types in
     match LID.Map.find_opt x next_cont.LEnvC.local_types with
-    | Some (type_, pos, eid)
-      when not (Typing_local_types.equal_expression_id eid new_eid) ->
-      let local = (type_, pos, new_eid) in
+    | Some Typing_local_types.{ ty; pos; eid }
+      when not (equal_expression_id eid new_eid) ->
+      let local = { ty; pos; eid = new_eid } in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
       let env = { env with lenv = { env.lenv with per_cont_env } } in
       if Ident.is_immutable eid then
@@ -1327,7 +1335,7 @@ let get_local_expr_id env x =
   | None -> (* dead code *) None
   | Some next_cont ->
     let lcl = LID.Map.find_opt x next_cont.LEnvC.local_types in
-    Option.map lcl ~f:(fun (_, _, x) -> x)
+    Option.map lcl ~f:(fun x -> x.Typing_local_types.eid)
 
 let set_fake_members env fake_members =
   let per_cont_env =

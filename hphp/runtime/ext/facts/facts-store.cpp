@@ -1081,7 +1081,7 @@ struct FactsStoreImpl final
     }
 
     XLOGF(
-        DBG0,
+        INFO,
         "Facts size: {}. Altered paths size: {}",
         facts.size(),
         alteredPathsAndHashes.size());
@@ -1103,7 +1103,7 @@ struct FactsStoreImpl final
     }
 
     XLOGF(
-        DBG0,
+        INFO,
         "SymbolMap.update(since={}, clock={}, "
         "alteredPathsAndHashes.size()={}, deletedPaths.size()={})",
         lastClock,

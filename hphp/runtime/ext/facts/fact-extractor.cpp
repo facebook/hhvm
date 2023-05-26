@@ -299,7 +299,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
             }));
   }
 
-  XLOG(INFO) << "Done updating.";
+  XLOG(INFO) << "Done spawning facts_from_paths futures.";
   return folly::collectAll(factsFutures).wait().get();
 }
 

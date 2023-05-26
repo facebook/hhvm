@@ -193,4 +193,12 @@ module Make (Ord : Caml.Map.OrderedType) : S with type key = Ord.t = struct
       (hash_fold_tuple hash_fold_ord hash_fold_a)
       hsv
       (bindings map)
+
+  let make_yojson_of_t
+      (show_ord : Ord.t -> string)
+      (yojson_of_a : 'a -> Yojson.Safe.t)
+      (map : 'a t) : Yojson.Safe.t =
+    `Assoc
+      (bindings map
+      |> List.map ~f:(fun (key, value) -> (show_ord key, yojson_of_a value)))
 end

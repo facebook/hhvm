@@ -77,4 +77,7 @@ module type S = sig
     Hash.state ->
     'a t ->
     Hash.state
+
+  val make_yojson_of_t :
+    (key -> string) -> ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t
 end

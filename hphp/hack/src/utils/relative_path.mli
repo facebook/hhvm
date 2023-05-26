@@ -80,6 +80,8 @@ module Map : sig
   val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
 
   val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+
+  val yojson_of_t : ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t
 end
 
 val relativize_set : prefix -> SSet.t -> Set.t

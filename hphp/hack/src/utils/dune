@@ -87,7 +87,13 @@
  (modules relative_path)
  (libraries collections sys_utils)
  (preprocess
-  (pps ppx_hash ppx_sexp_conv lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+  (pps
+    ppx_hash
+    ppx_sexp_conv
+    ppx_yojson_conv
+    lwt_ppx
+    ppx_deriving.std
+    ppx_deriving.enum)))
 
 (library
  (name cli_args)

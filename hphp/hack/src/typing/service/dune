@@ -12,7 +12,7 @@
   typing_ast
   typing_deps)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_yojson_conv)))
 
 (library
  (name typing_service_api)

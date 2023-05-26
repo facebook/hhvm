@@ -1396,15 +1396,15 @@ let go_with_interrupt
         ~check_info
         ~typecheck_info
   in
-  let {
-    errors;
-    tast_hashes = (* TODO dump those *) _;
-    dep_edges;
-    profiling_info;
-  } =
-    typing_result
-  in
+  let { errors; tast_hashes; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
+  if TypecheckerOptions.dump_tast_hashes tcopt then (
+    ServerProgress.write "Converting TAST hashes to JSON";
+    let _tast_hashes_json =
+      TastHashes.yojson_of_t tast_hashes (* TODO: dump _tast_hashes_json *)
+    in
+    ()
+  );
 
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info

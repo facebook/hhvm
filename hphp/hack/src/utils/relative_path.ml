@@ -16,7 +16,7 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-[@@deriving eq, hash, show, enum, ord, sexp_of]
+[@@deriving eq, hash, show, enum, ord, sexp_of, yojson]
 
 let is_hhi = function
   | Hhi -> true
@@ -73,7 +73,7 @@ let set_path_prefix prefix v =
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
   | _ -> path_ref_of_prefix prefix := Some (enforce_trailing_slash v)
 
-type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of]
+type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of, yojson]
 
 type relative_path = t
 
@@ -172,6 +172,8 @@ module Map = struct
   let pp pp_data = make_pp pp pp_data
 
   let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+
+  let yojson_of_t x = make_yojson_of_t suffix x
 end
 
 let create prefix s =

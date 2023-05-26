@@ -110,6 +110,8 @@ end
 
 type tast_hash = Hash.hash_value
 
+let yojson_of_tast_hash = yojson_of_int
+
 type tasts_by_name = {
   fun_tasts: Tast.def list SMap.t;
   class_tasts: Tast.def SMap.t;
@@ -128,12 +130,13 @@ let tasts_as_list
   @ SMap.values module_tasts
 
 type tast_hashes_by_names = {
-  fun_tast_hashes: tast_hash SMap.t;
-  class_tast_hashes: tast_hash SMap.t;
-  typedef_tast_hashes: tast_hash SMap.t;
-  gconst_tast_hashes: tast_hash SMap.t;
-  module_tast_hashes: tast_hash SMap.t;
+  fun_tast_hashes: tast_hash SMap.t; [@yojson_drop_if SMap.is_empty]
+  class_tast_hashes: tast_hash SMap.t; [@yojson_drop_if SMap.is_empty]
+  typedef_tast_hashes: tast_hash SMap.t; [@yojson_drop_if SMap.is_empty]
+  gconst_tast_hashes: tast_hash SMap.t; [@yojson_drop_if SMap.is_empty]
+  module_tast_hashes: tast_hash SMap.t; [@yojson_drop_if SMap.is_empty]
 }
+[@@deriving yojson_of]
 
 let hash_tasts
     { fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
@@ -147,7 +150,7 @@ let hash_tasts
   }
 
 module TastHashes : sig
-  type t
+  type t [@@deriving yojson_of]
 
   val empty : t
 
@@ -155,7 +158,7 @@ module TastHashes : sig
 
   val add : t -> key:Relative_path.t -> data:tast_hashes_by_names option -> t
 end = struct
-  type t = tast_hashes_by_names Relative_path.Map.t
+  type t = tast_hashes_by_names Relative_path.Map.t [@@deriving yojson_of]
 
   let empty = Relative_path.Map.empty
 

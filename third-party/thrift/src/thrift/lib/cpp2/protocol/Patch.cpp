@@ -344,7 +344,7 @@ void ApplyPatch::operator()(const Object& patch, std::set<Value>& value) const {
     const auto* opData = patchOp->if_set();
     if (!opData) {
       throw std::runtime_error(
-          fmt::format("set {} patch should caontain a set", name));
+          fmt::format("set {} patch should contain a set", name));
     }
     return opData;
   };

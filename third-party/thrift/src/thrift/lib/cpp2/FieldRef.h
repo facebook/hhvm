@@ -818,15 +818,17 @@ bool operator!=(std::nullopt_t, const optional_field_ref<T>& a) {
 namespace detail {
 
 template <typename T>
-struct is_boxed_value_ptr : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_ptr_v = false;
 
 template <typename T>
-struct is_boxed_value_ptr<boxed_value_ptr<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_ptr_v<boxed_value_ptr<T>> =
+    true;
 
 template <typename T>
-struct is_boxed_value : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_v = false;
+
 template <typename T>
-struct is_boxed_value<boxed_value<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_v<boxed_value<T>> = true;
 
 template <typename From, typename To>
 using copy_reference_t = std::conditional_t<
@@ -846,7 +848,7 @@ template <typename T>
 class optional_boxed_field_ref {
   static_assert(std::is_reference<T>::value, "not a reference");
   static_assert(
-      detail::is_boxed_value_ptr<folly::remove_cvref_t<T>>::value,
+      detail::is_boxed_value_ptr_v<folly::remove_cvref_t<T>>,
       "not a boxed_value_ptr");
 
   using element_type = typename folly::remove_cvref_t<T>::element_type;
@@ -1147,8 +1149,7 @@ template <typename T>
 class intern_boxed_field_ref {
   static_assert(std::is_reference<T>::value, "not a reference");
   static_assert(
-      detail::is_boxed_value<folly::remove_cvref_t<T>>::value,
-      "not a boxed_value");
+      detail::is_boxed_value_v<folly::remove_cvref_t<T>>, "not a boxed_value");
 
   using element_type = typename folly::remove_cvref_t<T>::element_type;
   using boxed_value_type = std::remove_reference_t<T>;
@@ -1387,8 +1388,7 @@ template <typename T>
 class terse_intern_boxed_field_ref {
   static_assert(std::is_reference<T>::value, "not a reference");
   static_assert(
-      detail::is_boxed_value<folly::remove_cvref_t<T>>::value,
-      "not a boxed_value");
+      detail::is_boxed_value_v<folly::remove_cvref_t<T>>, "not a boxed_value");
 
   using element_type = typename folly::remove_cvref_t<T>::element_type;
   using boxed_value_type = std::remove_reference_t<T>;
@@ -1970,9 +1970,9 @@ class union_field_ref {
   template <typename>
   friend class union_field_ref;
 
-  using is_cpp_ref_or_boxed = folly::Disjunction<
-      detail::is_boxed_value_ptr<folly::remove_cvref_t<T>>,
-      detail::is_shared_or_unique_ptr<folly::remove_cvref_t<T>>>;
+  using is_cpp_ref_or_boxed = folly::bool_constant<
+      detail::is_boxed_value_ptr_v<folly::remove_cvref_t<T>> ||
+      detail::is_shared_or_unique_ptr_v<folly::remove_cvref_t<T>>>;
 
   struct element_type_adapter {
     using element_type = folly::remove_cvref_t<T>;
@@ -2018,7 +2018,7 @@ class union_field_ref {
       std::is_nothrow_constructible<value_type, U>::value&&
           std::is_nothrow_assignable<value_type, U>::value) {
     if (has_value() &&
-        !detail::is_shared_or_unique_ptr<folly::remove_cvref_t<T>>{}) {
+        !detail::is_shared_or_unique_ptr_v<folly::remove_cvref_t<T>>) {
       get_value() = static_cast<U&&>(other);
     } else {
       emplace(static_cast<U&&>(other));

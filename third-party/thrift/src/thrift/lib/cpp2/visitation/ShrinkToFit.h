@@ -70,7 +70,7 @@ class shrink_to_fit_fn {
       using field_ref_type = folly::remove_cvref_t<decltype(field_ref)>;
 
       // If a field is empty, do nothing.
-      if constexpr (detail::is_shared_or_unique_ptr<field_ref_type>::value) {
+      if constexpr (detail::is_shared_or_unique_ptr_v<field_ref_type>) {
         if (field_ref == nullptr) {
           return;
         }

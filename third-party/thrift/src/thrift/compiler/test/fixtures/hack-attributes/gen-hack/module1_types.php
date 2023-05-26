@@ -600,7 +600,15 @@ class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\hack\UnionEnumAttributes' => \facebook\thrift\annotation\hack\UnionEnumAttributes::fromShape(
+          shape(
+            "attributes" => vec[
+              "EnumAttributes",
+            ],
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );

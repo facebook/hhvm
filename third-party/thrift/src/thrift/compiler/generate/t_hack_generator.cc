@@ -760,23 +760,19 @@ class t_hack_generator : public t_concat_generator {
 
   const std::string& find_hack_name(
       const t_named* tnamed, const std::string& default_name) const {
-    if (const std::string* annotation =
-            tnamed->find_annotation_or_null("hack.name")) {
-      return *annotation;
-    }
     if (const auto annotation =
             tnamed->find_structured_annotation_or_null(kHackNameUri)) {
       return annotation->get_value_from_structured_annotation("name")
           .get_string();
     }
+    if (const std::string* annotation =
+            tnamed->find_annotation_or_null("hack.name")) {
+      return *annotation;
+    }
     return default_name;
   }
 
   const std::string find_union_enum_attributes(const t_struct& tstruct) {
-    if (const std::string* annotation =
-            tstruct.find_annotation_or_null("hack.union_enum_attributes")) {
-      return *annotation;
-    }
     if (const auto annotation = tstruct.find_structured_annotation_or_null(
             kHackUnionEnumAttributesUri)) {
       for (const auto& item : annotation->value()->get_map()) {

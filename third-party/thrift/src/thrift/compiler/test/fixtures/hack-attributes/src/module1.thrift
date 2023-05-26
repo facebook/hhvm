@@ -42,10 +42,11 @@ struct MyThirdThriftStruct {
   1: i32 foo;
 }
 
+@hack.UnionEnumAttributes{attributes = ["EnumAttributes"]}
 union UnionTesting {
   1: string foo;
   3: i64 bar;
-} (hack.union_enum_attributes = "EnumAttributes")
+}
 
 @hack.UnionEnumAttributes{attributes = ["EnumAttributes", "EnumAttributes2"]}
 union UnionTestingStructured {

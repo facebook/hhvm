@@ -189,11 +189,11 @@ void HQSession::onStopSending(quic::StreamId id,
 void HQSession::onKnob(uint64_t knobSpace,
                        uint64_t knobId,
                        quic::Buf knobBlob) {
-  LOG(INFO) << __func__ << " sess=" << *this << " knob frame received: "
-            << " KnobSpace: " << std::hex << knobSpace << " KnobId: " << knobId
-            << " KnobBlob: "
-            << std::string(reinterpret_cast<const char*>(knobBlob->data()),
-                           knobBlob->length());
+  VLOG(3) << __func__ << " sess=" << *this << " knob frame received: "
+          << " KnobSpace: " << std::hex << knobSpace << " KnobId: " << knobId
+          << " KnobBlob: "
+          << std::string(reinterpret_cast<const char*>(knobBlob->data()),
+                         knobBlob->length());
 }
 
 bool HQSession::checkNewStream(quic::StreamId id) {

@@ -72,3 +72,9 @@ Invalid constraint on `newtype` (Typing[4332])
   Expected `arraykey`
   File "case_type_wellformed.php", line 14, characters 83-86:
   But got `bool`
+File "case_type_wellformed.php", line 6, characters 11-27:
+The case type `VarianceIsChecked` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+  File "case_type_wellformed.php", line 7, characters 5-30:
+  (function(Tin, Tout): int)
+  File "case_type_wellformed.php", line 8, characters 5-19:
+  dict<Tin, Tout>

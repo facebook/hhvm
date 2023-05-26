@@ -1,0 +1,32 @@
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+The case type `StrData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  StrOpaque
+  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  IntOpaque
+File "case_type_overlapping_variants_enums.php", line 10, characters 11-17:
+The case type `StrData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 11, characters 5-13:
+  StrOpaque
+  File "case_type_overlapping_variants_enums.php", line 12, characters 5-13:
+  IntOpaque
+  File "case_type_overlapping_variants_enums.php", line 13, characters 5-11:
+  StrEnum
+  File "case_type_overlapping_variants_enums.php", line 14, characters 5-10:
+  string
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  StrOpaque
+  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  IntOpaque
+  File "case_type_overlapping_variants_enums.php", line 19, characters 5-11:
+  IntEnum
+  File "case_type_overlapping_variants_enums.php", line 20, characters 5-7:
+  int
+File "case_type_overlapping_variants_enums.php", line 16, characters 11-17:
+The case type `IntData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_overlapping_variants_enums.php", line 17, characters 5-13:
+  StrOpaque
+  File "case_type_overlapping_variants_enums.php", line 18, characters 5-13:
+  IntOpaque

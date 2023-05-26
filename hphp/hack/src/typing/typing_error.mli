@@ -347,6 +347,17 @@ module Primary : sig
     [@@deriving show]
   end
 
+  module CaseType : sig
+    type t =
+      | Overlapping_variant_types of {
+          pos: Pos.t;
+          name: string;
+          tag: string;
+          why: Pos_or_decl.t Message.t list Lazy.t;
+        }
+    [@@deriving show]
+  end
+
   (** Specific error information readily transformable into a user error *)
   type t =
     (* == Factorised errors ================================================= *)
@@ -359,6 +370,7 @@ module Primary : sig
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
+    | CaseType of CaseType.t
     (* == Primary only ====================================================== *)
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
@@ -1898,6 +1910,9 @@ val wellformedness : Primary.Wellformedness.t -> t
 
 (** Lift a `Primary.Xhp.t` error to a `Typing_error.t` *)
 val xhp : Primary.Xhp.t -> t
+
+(** Lift a `Primary.CaseType.t` error to a `Typing_error.t` *)
+val casetype : Primary.CaseType.t -> t
 
 (** Apply a the `Reasons_callback.t` to the supplied `Secondary.t` error, using
     the reasons and error code associated with that error *)

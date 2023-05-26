@@ -1,0 +1,120 @@
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 4, characters 11-25:
+The case type `ArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 4, characters 29-37:
+  ~vec<int>
+  File "case_type_wellformed_good.php.pess", line 4, characters 41-52:
+  ~Vector<int>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>
+File "case_type_wellformed_good.php.pess", line 6, characters 11-30:
+The case type `KeyedArrayCollection` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_wellformed_good.php.pess", line 6, characters 34-62:
+  ~dict<int, supportdyn<mixed>>
+  File "case_type_wellformed_good.php.pess", line 6, characters 66-93:
+  ~Map<int, supportdyn<mixed>>

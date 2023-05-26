@@ -221,6 +221,7 @@
   typing_array_access
   typing_async
   typing_attributes
+  typing_case_types
   typing_debug
   typing_escape
   typing_expand

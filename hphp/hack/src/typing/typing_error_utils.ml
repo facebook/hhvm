@@ -1472,6 +1472,26 @@ module Eval_primary = struct
         missing_xhp_required_attr pos attr ty_reason_msg
   end
 
+  module Eval_casetype = struct
+    let overlapping_variant_types pos name tag why =
+      let claim =
+        lazy
+          ( pos,
+            let name = Utils.strip_ns name in
+            Printf.sprintf
+              "The case type `%s` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `%s`:"
+              name
+              tag )
+      in
+      (Error_code.IllegalCaseTypeVariants, claim, why, [])
+
+    let to_error t ~env:_ =
+      let open Typing_error.Primary.CaseType in
+      match t with
+      | Overlapping_variant_types { pos; name; tag; why } ->
+        overlapping_variant_types pos name tag why
+  end
+
   let unify_error pos msg_opt reasons_opt =
     let claim = lazy (pos, Option.value ~default:"Typing error" msg_opt)
     and reasons = Option.value ~default:(lazy []) reasons_opt in
@@ -4227,6 +4247,7 @@ module Eval_primary = struct
     | Shape err -> Eval_shape.to_error err ~env
     | Wellformedness err -> Eval_wellformedness.to_error err ~env
     | Xhp err -> Eval_xhp.to_error err ~env
+    | CaseType err -> Eval_casetype.to_error err ~env
     | Unify_error { pos; msg_opt; reasons_opt } ->
       unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg

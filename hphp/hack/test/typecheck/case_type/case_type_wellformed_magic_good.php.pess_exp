@@ -1,0 +1,120 @@
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 4, characters 11-24:
+The case type `NoDictToString` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 28-37:
+  ~Stringish
+  File "case_type_wellformed_magic_good.php.pess", line 4, characters 41-69:
+  ~dict<int, supportdyn<mixed>>
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `float`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `int`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `keyset`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `null`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `object`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `resource`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool
+File "case_type_wellformed_magic_good.php.pess", line 6, characters 11-19:
+The case type `NoXHPBool` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `vec`: (Typing[4475])
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 23-31:
+  ~XHPChild
+  File "case_type_wellformed_magic_good.php.pess", line 6, characters 35-39:
+  ~bool

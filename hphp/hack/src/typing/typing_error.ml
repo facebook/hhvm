@@ -348,6 +348,17 @@ module Primary = struct
     [@@deriving show]
   end
 
+  module CaseType = struct
+    type t =
+      | Overlapping_variant_types of {
+          pos: Pos.t;
+          name: string;
+          tag: string;
+          why: Pos_or_decl.t Message.t list Lazy.t;
+        }
+    [@@deriving show]
+  end
+
   type t =
     (* Factorised errors *)
     | Coeffect of Coeffect.t
@@ -359,6 +370,7 @@ module Primary = struct
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
+    | CaseType of CaseType.t
     (* Primary only *)
     | Unresolved_tyvar of Pos.t
     | Unify_error of {
@@ -1304,6 +1316,8 @@ module rec Error : sig
 
   val xhp : Primary.Xhp.t -> t
 
+  val casetype : Primary.CaseType.t -> t
+
   val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
 
   val apply : t -> on_error:Callback.t -> t
@@ -1376,6 +1390,8 @@ end = struct
   let wellformedness err = primary @@ Primary.Wellformedness err
 
   let xhp err = primary @@ Primary.Xhp err
+
+  let casetype err = primary @@ Primary.CaseType err
 
   let apply_reasons t ~on_error = Apply_reasons (on_error, t)
 

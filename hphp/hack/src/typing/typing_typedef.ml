@@ -16,6 +16,7 @@ module Env = Typing_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 module EnvFromDef = Typing_env_from_def
+module DTMap = Typing_case_types.DataType.Map
 
 let get_cnstr_errs env tcstr reverse t_pos ty =
   match tcstr with
@@ -56,6 +57,67 @@ let create_err_from_cycles cycles pos name =
     | head :: tail -> Some (List.fold_left tail ~init:head ~f:Typing_error.both)
   in
   err
+
+let casetype_def env typedef =
+  let {
+    t_annotation = ();
+    t_name = (t_pos, t_name);
+    t_tparams = _;
+    t_as_constraint = _;
+    t_super_constraint = _;
+    t_kind = varaints;
+    t_user_attributes = _;
+    t_vis;
+    t_mode = _;
+    t_namespace = _;
+    t_span = _;
+    t_emit_id = _;
+    t_is_ctx = _;
+    t_file_attributes = _;
+    t_internal = _;
+    t_module = _;
+    t_docs_url = _;
+  } =
+    typedef
+  in
+  match (t_vis, varaints) with
+  | (Aast.CaseType, (_, Hunion hints)) ->
+    let data_type_map = Typing_case_types.mk_data_type_mapping env hints in
+    let errs =
+      DTMap.filter_map
+        begin
+          fun tag hints ->
+            if List.length hints > 1 then
+              let err =
+                Typing_error.Primary.CaseType.Overlapping_variant_types
+                  {
+                    pos = t_pos;
+                    name = t_name;
+                    tag = Typing_case_types.DataType.Tag.name tag;
+                    why =
+                      lazy
+                        begin
+                          List.map hints ~f:(fun (p, h) ->
+                              let h =
+                                Decl_hint.hint
+                                  env.Typing_env_types.decl_env
+                                  (p, h)
+                              in
+                              ( Pos_or_decl.of_raw_pos p,
+                                Typing_print.full_strip_ns_decl env h ))
+                        end;
+                  }
+              in
+              Some (Typing_error.casetype err)
+            else
+              None
+        end
+        data_type_map
+    in
+    let err1 = Typing_error.multiple_opt @@ DTMap.values errs in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
+    env
+  | _ -> env
 
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
@@ -116,6 +178,7 @@ let typedef_def ctx typedef =
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
         let ety_env = Typing_defs.empty_expand_env in
         let ((env, ty_err_opt3), ty) = Phase.localize ~ety_env env ty in
+        let env = casetype_def env typedef in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt3;
 
         let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
@@ -123,6 +186,7 @@ let typedef_def ctx typedef =
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
+
         env
       | None ->
         (* We get here if there's a "Name already bound" error. *)
@@ -135,6 +199,7 @@ let typedef_def ctx typedef =
           ~report_cycle:(t_pos, t_name)
           hint
       in
+      let env = casetype_def env typedef in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 
       let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in

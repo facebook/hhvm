@@ -1,0 +1,3 @@
+Calling function foo outside the active deployment is not allowed @ %s/resolve-1.inc:7
+Calling function foo outside the active deployment is not allowed @ %s/resolve-throw-1.php:15
+Calling function foo outside the active deployment is not allowed @ %s/resolve-1.inc:15

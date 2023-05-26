@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/func.h"
 
 #include <re2/re2.h>
 #include "hphp/util/trace.h"
@@ -199,6 +200,19 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
       if (it == end(packages())) continue;
       if (moduleInPackage(module, it->second)) return true;
     }
+  }
+  return false;
+}
+
+bool will_call_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
+                                                   const Func* callee) {
+  if (!RO::EvalEnforceDeployment) return false;
+  assertx(callee);
+  if (callee->unit()->isSystemLib()) return false;
+  if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
+    auto const calleeModule = callee->moduleName();
+    if (!calleeModule) return true;
+    return !packageInfo.moduleInDeployment(calleeModule, *activeDeployment);
   }
   return false;
 }

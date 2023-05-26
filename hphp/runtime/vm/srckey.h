@@ -142,6 +142,7 @@ struct SrcKey {
   Op op() const;
   PC pc() const;
   int lineNumber() const;
+  const PackageInfo* packageInfo() const;
 
   // Human readable offset of one of the above. Gives a std::string instead of
   // an Offset, as this should be used only for debugging and tracing.
@@ -252,4 +253,3 @@ void sktrace(SrcKey sk, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
 }
 
 #include "hphp/runtime/vm/srckey-inl.h"
-

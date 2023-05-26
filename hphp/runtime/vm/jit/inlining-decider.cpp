@@ -298,6 +298,7 @@ Vcost computeTranslationCostSlow(SrcKey at,
     TransKind::Optimize,
     at,
     &region,
+    at.packageInfo(),
     PrologueID(),
   };
 

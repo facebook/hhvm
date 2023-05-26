@@ -186,3 +186,8 @@ final class CoeffectViolationException extends LogicException {}
  * Exception thrown when a module boundary violation occurs.
  */
 final class ModuleBoundaryViolationException extends LogicException {}
+
+/**
+ * Exception thrown when a deployment boundary violation occurs.
+ */
+final class DeploymentBoundaryViolationException extends LogicException {}

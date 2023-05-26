@@ -586,4 +586,15 @@ void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
+void cgCallViolatesDeploymentBoundary(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(callViolatesDeploymentBoundaryHelper),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0)
+  );
+}
+
 }

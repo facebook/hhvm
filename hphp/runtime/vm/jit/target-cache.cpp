@@ -295,6 +295,15 @@ handleStaticCall(const Class* cls, const StringData* name,
         // If we raised a warning, do not cache/smash the func
         return func;
       }
+      // Call to systemlib functions will never violate deployment boundary.
+      if (!func->unit()->isSystemLib()) {
+        auto const packageInfo = g_context->getPackageInfo();
+        if (RO::EvalEnforceDeployment &&
+            will_call_raise_deployment_boundary_violation(packageInfo, func)) {
+          // If we raised an exception, do not cache/smash the func.
+          return func;
+        }
+      }
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);
       if (mcePrime != 0x1) {

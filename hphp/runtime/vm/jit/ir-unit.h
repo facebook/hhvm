@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
@@ -237,6 +238,10 @@ struct IRUnit {
   /////////////////////////////////////////////////////////////////////////////
   // Annotation data
   std::unique_ptr<AnnotationData> annotationData;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Package info
+  const PackageInfo& packageInfo();
 
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);

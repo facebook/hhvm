@@ -1260,8 +1260,25 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 } // namespace
 
-template <typename T>
-void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
+void emitDeploymentBoundaryCheckForFunc(IRGS& env, SSATmp* callee) {
+  if (!RO::EvalEnforceDeployment) return;
+  auto const caller = curFunc(env);
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto violate =
+        gen(env, CallViolatesDeploymentBoundary, FuncData { caller }, callee);
+      gen(env, JmpZero, skip, violate);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseDeploymentBoundaryViolation, data, callee);
+    }
+  );
+}
+
+void emitModuleBoundaryCheckKnown(IRGS& env, const Class* symbol) {
   auto const caller = curFunc(env);
   if (will_symbol_raise_module_boundary_violation(symbol, caller)) {
       auto const data = OptClassAndFuncData { curClass(env), caller };
@@ -1269,10 +1286,16 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const T* symbol) {
   }
 }
 
-template void emitModuleBoundaryCheckKnown(IRGS&, const Func*);
-template void emitModuleBoundaryCheckKnown(IRGS&, const Class*);
+void emitModuleBoundaryCheckKnown(IRGS& env, const Func* calleeName) {
+  auto const caller = curFunc(env);
+  auto const callee = cns(env, calleeName);
+  if (will_symbol_raise_module_boundary_violation(calleeName, caller)) {
+      auto const data = OptClassAndFuncData { curClass(env), caller };
+      gen(env, RaiseModuleBoundaryViolation, data, callee);
+  }
+  emitDeploymentBoundaryCheckForFunc(env, callee);
+}
 
-template<>
 void emitModuleBoundaryCheckKnown(IRGS& env, const Class::Prop* prop) {
   auto const caller = curFunc(env);
   if (will_symbol_raise_module_boundary_violation(prop, caller)) {
@@ -1281,7 +1304,6 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class::Prop* prop) {
   }
 }
 
-template<>
 void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
   auto const caller = curFunc(env);
   if (will_symbol_raise_module_boundary_violation(prop, caller)) {
@@ -1309,6 +1331,9 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
       gen(env, RaiseModuleBoundaryViolation, data, symbol);
     }
   );
+  if (func) {
+    emitDeploymentBoundaryCheckForFunc(env, symbol);
+  }
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {

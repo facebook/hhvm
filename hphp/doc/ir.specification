@@ -328,7 +328,7 @@ Instruction set
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
-  MulIntO performs integer arithmetic on S0 and S1, but will branch to 
+  MulIntO performs integer arithmetic on S0 and S1, but will branch to
   block B on integer overflow.
 
 | XorBool, D(Bool), S(Bool) S(Bool), NF
@@ -760,6 +760,10 @@ To string conversions:
 
   Set D to true iff function call from caller to S0 violates module boundary.
   Requires that S0 is an internal method.
+
+| CallViolatesDeploymentBoundary<caller>, D(Bool), S(Func), NF
+
+  Set D to true iff function call from caller to S0 violates deployment boundary.
 
 5. Branches
 
@@ -2263,6 +2267,11 @@ To string conversions:
 | RaiseModulePropertyViolation<caller, propCls, propName, is_static>, ND, NA, NF
   Raises a warning to indicate a module boundary violation resulting from caller
   attempting to access a property propName from class propCls.
+
+| RaiseDeploymentBoundaryViolation<ctx, caller>, ND, S(Func), NF
+
+  Raises a warning to indicate a deployment boundary violation resulting from caller
+  attempting to call the the callee in S0 in context `ctx`.
 
 | RaiseImplicitContextStateInvalid<func>, ND, NA, NF
 

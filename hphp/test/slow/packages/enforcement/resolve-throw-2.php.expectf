@@ -1,0 +1,3 @@
+Calling function bar1 outside the active deployment is not allowed @ %s/resolve-throw-2.php:8
+Calling function bar2 outside the active deployment is not allowed @ %s/resolve-throw-2.php:15
+Calling function bar3 outside the active deployment is not allowed @ %s/resolve-throw-2.php:22

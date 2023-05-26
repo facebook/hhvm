@@ -249,6 +249,13 @@ void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
     .imm(data->is_static);
   cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
+
+void cgRaiseDeploymentBoundaryViolation(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(vmain(env), env,
+               CallSpec::direct(raiseDeploymentBoundaryViolation),
+               kVoidDest, SyncOptions::Sync, args);
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)

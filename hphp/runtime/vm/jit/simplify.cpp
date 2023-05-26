@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -342,6 +343,12 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
   return cns(env, will_symbol_raise_module_boundary_violation(callee, caller));
 }
 
+SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,
+                                               const IRInstruction* inst) {
+  if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
+  auto const callee = inst->src(0)->funcVal();
+  return cns(env, will_call_raise_deployment_boundary_violation(env.unit.packageInfo(), callee));
+}
 
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   auto const src0 = canonical(inst->src(0));
@@ -4038,6 +4045,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(ClassHasAttr)
       X(LdFuncRequiredCoeffects)
       X(CallViolatesModuleBoundary)
+      X(CallViolatesDeploymentBoundary)
       X(LookupClsCtxCns)
       X(LdClsCtxCns)
       X(LdObjClass)

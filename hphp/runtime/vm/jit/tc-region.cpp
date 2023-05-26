@@ -702,6 +702,7 @@ void RegionTranslator::gen() {
     kind,
     sk,
     region.get(),
+    sk.packageInfo(),
     PrologueID(),
   };
   unit = irGenRegion(*region, ctx, pconds);

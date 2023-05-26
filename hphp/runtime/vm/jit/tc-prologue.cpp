@@ -131,6 +131,7 @@ void PrologueTranslator::gen() {
     kind,
     sk,
     nullptr,
+    sk.packageInfo(),
     PrologueID(func, nPassed),
   };
   tracing::Block _b{

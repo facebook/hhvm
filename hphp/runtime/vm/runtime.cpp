@@ -509,6 +509,17 @@ void raiseModuleBoundaryViolation(const Class* cls,
   );
 }
 
+
+void raiseDeploymentBoundaryViolation(const Func* callee) {
+  if (!RO::EvalEnforceDeployment) return;
+  assertx(callee);
+  auto const calleeName = folly::sformat("function {}", callee->name());
+  auto const errMsg = folly::sformat(
+    "Calling {} outside the active deployment is not allowed",
+    calleeName);
+  SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+}
+
 void raiseImplicitContextStateInvalid(const Func* func,
                                       ImplicitContext::State state) {
   auto const msg = folly::sformat(

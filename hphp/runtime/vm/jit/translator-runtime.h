@@ -203,6 +203,8 @@ void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
+bool callViolatesDeploymentBoundaryHelper(const Func*);
+
 namespace MInstrHelpers {
 TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);

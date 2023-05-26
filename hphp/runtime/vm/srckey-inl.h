@@ -186,6 +186,13 @@ inline int SrcKey::lineNumber() const {
   return func()->getLineNumber(offset());
 }
 
+inline const PackageInfo* SrcKey::packageInfo() const {
+  if (RO::RepoAuthoritative) return &RepoFile::packageInfo();
+  auto const file = unit()->filepath();
+  assertx(file);
+  return &RepoOptions::forFile(file->data()).packageInfo();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void SrcKey::setOffset(Offset o) {

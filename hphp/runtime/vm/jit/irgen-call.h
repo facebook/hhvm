@@ -51,8 +51,10 @@ Type callOutType(const Func* callee, uint32_t index);
  */
 void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
 
-template <typename T>
-void emitModuleBoundaryCheckKnown(IRGS&, const T* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Class* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Func* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Class::Prop* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Class::SProp* symbol);
 //////////////////////////////////////////////////////////////////////
 
 

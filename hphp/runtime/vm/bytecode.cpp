@@ -47,6 +47,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -935,6 +936,9 @@ void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
   auto const caller = vmfp()->func();
   if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
+  }
+  if (will_call_raise_deployment_boundary_violation(g_context->getPackageInfo(), callee)) {
+    raiseDeploymentBoundaryViolation(callee);
   }
 }
 

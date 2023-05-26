@@ -41,6 +41,11 @@ IRUnit::IRUnit(TransContext context,
   m_startNanos = HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
+const PackageInfo& IRUnit::packageInfo() {
+  assertx(m_context.packageInfo);
+  return *m_context.packageInfo;
+}
+
 void IRUnit::initLogEntry(const Func* func) {
   if (func ? func->shouldSampleJit() :
       StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate)) {

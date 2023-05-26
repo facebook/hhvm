@@ -70,8 +70,14 @@ struct Env {
     , prevBlocks()
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , unit(TransContext{TransIDSet{}, 0 /* optIndex */, kind, sk, nullptr},
-           std::make_unique<AnnotationData>())
+    , unit(TransContext{
+              TransIDSet{}
+            , 0 /* optIndex */
+            , kind
+            , sk
+            , nullptr
+            , sk.packageInfo()}
+          , std::make_unique<AnnotationData>())
     , irgs(unit, nullptr, 0, nullptr)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)

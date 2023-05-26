@@ -267,7 +267,7 @@ struct UnitEmitter {
   Id getEntryPointId() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // EntryPoint.
+  // Package info.
 
   const PackageInfo& getPackageInfo() const;
 

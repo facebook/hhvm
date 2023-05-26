@@ -251,6 +251,10 @@ Object AllocModuleBoundaryViolationExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_ModuleBoundaryViolationExceptionClass, message);
 }
 
+Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_DeploymentBoundaryViolationExceptionClass, message);
+}
+
 void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
@@ -348,6 +352,10 @@ void throwCoeffectViolationExceptionObject(const Variant& message) {
 
 void throwModuleBoundaryViolationExceptionObject(const Variant& message) {
   throw_object(AllocModuleBoundaryViolationExceptionObject(message));
+}
+
+void throwDeploymentBoundaryViolationExceptionObject(const Variant& message) {
+  throw_object(AllocDeploymentBoundaryViolationExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

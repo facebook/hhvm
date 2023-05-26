@@ -1374,6 +1374,10 @@ struct RuntimeOption {
    */                                                                   \
   F(std::string, ActiveDeployment, "")                                  \
   /*                                                                    \
+   * Enforce deployment boundaries.                                     \
+   */                                                                   \
+  F(bool, EnforceDeployment, false)                                     \
+  /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \
    * 0 - Nothing                                                        \

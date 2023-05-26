@@ -681,6 +681,11 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
   throwInvalidArrayKeyException(&key, ad);
 }
 
+bool callViolatesDeploymentBoundaryHelper(const Func* callee) {
+  auto const packageInfo = g_context->getPackageInfo();
+  return will_call_raise_deployment_boundary_violation(packageInfo, callee);
+}
+
 namespace MInstrHelpers {
 
 TypedValue setOpElem(tv_lval base, TypedValue key,

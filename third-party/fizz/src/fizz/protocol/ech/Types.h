@@ -49,16 +49,6 @@ struct HpkeKeyConfig {
     public_key = other.public_key->clone();
     cipher_suites = other.cipher_suites;
   }
-  HpkeKeyConfig(HpkeKeyConfig&& other) = default;
-  HpkeKeyConfig& operator=(const HpkeKeyConfig&& other) {
-    if (this != &other) {
-      config_id = other.config_id;
-      kem_id = other.kem_id;
-      public_key = other.public_key->clone();
-      cipher_suites = other.cipher_suites;
-    }
-    return *this;
-  }
   HpkeKeyConfig& operator=(const HpkeKeyConfig& other) {
     if (this != &other) {
       config_id = other.config_id;
@@ -84,18 +74,6 @@ struct ECHConfigContentDraft {
     extensions = std::vector<Extension>();
     for (const auto& extension : other.extensions)
       extensions.push_back(extension.clone());
-  }
-  ECHConfigContentDraft(ECHConfigContentDraft&& other) = default;
-  ECHConfigContentDraft& operator=(ECHConfigContentDraft&& other) {
-    if (this != &other) {
-      key_config = other.key_config;
-      maximum_name_length = other.maximum_name_length;
-      public_name = std::move(other.public_name);
-      extensions = std::vector<Extension>();
-      for (const auto& extension : other.extensions)
-        extensions.push_back(extension.clone());
-    }
-    return *this;
   }
 
   ECHConfigContentDraft& operator=(const ECHConfigContentDraft& other) {

@@ -10,3 +10,6 @@
 val temp_dir : string -> string -> string
 
 val hh_server_tmp_dir : string
+
+(** Create subdirectory in [hh_server_tmp_dir] as [description_what_for]/zSpathzStozS[root] *)
+val make_dir_in_tmp : description_what_for:string -> root:Path.t -> string

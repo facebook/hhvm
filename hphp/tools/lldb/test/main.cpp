@@ -202,6 +202,24 @@ void buildValuesForUtilityTests() {
   takeStrNR(StrNR(StaticString("lions and tigers")));
 }
 
+// nameof tests
+void takeClass(Class* UNUSED v) { return; }
+void takeLazyClassData(LazyClassData UNUSED v) { return; }
+void takeObjectData(ObjectData* UNUSED v) { return; }
+void takeFunc(const Func* UNUSED v) { return; }
+
+void buildValuesForNameofTests() {
+  TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
+  auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
+  auto func = TestObject->getVMClass()->getCtor();
+
+  takeClass(TestObject->getVMClass());
+  takeLazyClassData(lazy_cls);
+  takeObject(TestObject);
+  takeObjectData(TestObject.get());
+  takeFunc(func);
+}
+
 } // namespace lldb_test
 } // namespace HPHP
 
@@ -219,10 +237,12 @@ int main(int argc, char** argv) {
     HPHP::lldb_test::buildTypedValues();
   } else if (!strcmp(argv[1], "other-values")) {
     HPHP::lldb_test::buildOtherValues();
+  } else if (!strcmp(argv[1], "nameof-values")) {
+    HPHP::lldb_test::buildValuesForNameofTests();
   } else if (!strcmp(argv[1], "utility")) {
     HPHP::lldb_test::buildValuesForUtilityTests();
   } else {
-    std::cout << "Invalid option (options: \"typed-values\", \"other-values\"" << std::endl;
+    std::cout << "Invalid option (options: \"typed-values\", \"other-values\", \"nameof-values\", \"utility\"" << std::endl;
     return 1;
   }
   return 0;

@@ -400,6 +400,12 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 
     sd = None
 
+    def _od_name(od):
+        cls = deref(get(od, "m_cls"))
+        pre_class = deref(get(cls, "m_preClass"))
+        sd = get(pre_class, "m_name")
+        return sd
+
     if t == "HPHP::Func":
         sd = get(val, "m_fullName")
         if rawptr(sd).unsigned == 1:
@@ -410,9 +416,9 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
     elif t == "HPHP::LazyClassData":
         sd = get(val, "className")
     elif t == "HPHP::ObjectData":
-        cls = deref(get(val, "m_cls"))
-        pre_class = deref(get(cls, "m_preClass"))
-        sd = get(pre_class, "m_name")
+        sd = _od_name(val)
+    elif t == "HPHP::Object":
+        sd = _od_name(deref(get(val, "m_obj")))
 
     if sd is None:
        return None

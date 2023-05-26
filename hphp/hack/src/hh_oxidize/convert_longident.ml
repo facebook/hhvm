@@ -8,7 +8,6 @@
 
 open Core
 open Longident
-open Utils
 
 let strip_decl_prefix =
   SSet.of_list
@@ -54,9 +53,9 @@ let to_string for_open id =
     | FLident (ty :: modules) ->
       let ty =
         match (ty, modules) with
-        | _ when for_open -> convert_module_name ty
-        | ("t", m :: _) -> convert_type_name m
-        | _ -> convert_type_name ty
+        | _ when for_open -> Utils.convert_module_name ty
+        | ("t", m :: _) -> Utils.convert_type_name m
+        | _ -> Utils.convert_type_name ty
       in
       (* HACK: The oxidized version of `ty` has no phase. *)
       let ty =
@@ -69,11 +68,11 @@ let to_string for_open id =
         else
           ty
       in
-      let modules = List.map modules ~f:convert_module_name in
+      let modules = List.map modules ~f:Utils.convert_module_name in
       ty :: modules |> List.rev |> String.concat ~sep:"::"
     | FLdot (id, assoc_tys) ->
       let id = to_string id in
-      let assoc_tys = List.map assoc_tys ~f:convert_type_name in
+      let assoc_tys = List.map assoc_tys ~f:Utils.convert_type_name in
       assoc_tys |> List.rev |> List.cons id |> String.concat ~sep:"::"
     | FLapply (ftor :: args) ->
       let ftor = to_string ftor in

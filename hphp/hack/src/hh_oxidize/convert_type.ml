@@ -99,7 +99,7 @@ let owned_builtins =
 
 let is_owned_builtin = SSet.mem owned_builtins
 
-let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
+let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
   let (is_by_box, is_by_ref) =
     match Configuration.mode () with
     | Configuration.ByBox -> (true, false)
@@ -126,6 +126,7 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
   | Ptyp_constr ({ txt = Lident "t_byte_string"; _ }, []) when is_by_ref ->
     rust_ref (lifetime "a") (rust_simple_type "bstr::BStr")
   | Ptyp_constr ({ txt = Ldot (Lident "Path", "t"); _ }, []) ->
+    (* Path.t *)
     if is_by_ref then
       rust_ref (lifetime "a") (rust_simple_type "std::path::Path")
     else
@@ -209,3 +210,7 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
 
 and tuple ?(seen_indirection = false) types =
   List.map ~f:(core_type ~seen_indirection) types |> rust_type "()" []
+
+let core_type = core_type ~seen_indirection:false
+
+let is_primitive ty = is_primitive ty []

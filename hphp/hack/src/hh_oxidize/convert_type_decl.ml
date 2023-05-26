@@ -15,7 +15,6 @@ open Utils
 open Output
 open State
 open Convert_longident
-open Convert_type
 open Rust_type
 
 let is_by_ref () =
@@ -296,7 +295,7 @@ let unbox_field ty =
     || (is_prefix ty ~prefix:"Option<" && is_copy)
     || (is_prefix ty ~prefix:"std::cell::Cell<" && is_copy)
     || (is_prefix ty ~prefix:"std::cell::RefCell<" && is_copy)
-    || Convert_type.is_primitive ty []
+    || Convert_type.is_primitive ty
   | Configuration.ByBox -> false
 
 let add_rcoc = [("aast_defs", "Nsenv"); ("aast", "Nsenv")]
@@ -414,7 +413,7 @@ let ocaml_attr attrs =
            Printf.sprintf "#[rust_to_ocaml(attr = \"%s\")]\n" attr)
   |> String.concat ~sep:""
 
-let type_param (ct, _) = core_type ct
+let type_param (ct, _) = Convert_type.core_type ct
 
 let type_params name params =
   let params = List.map ~f:type_param params in
@@ -442,7 +441,7 @@ let record_label_declaration
   let name =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
-  let ty = core_type ld.pld_type in
+  let ty = Convert_type.core_type ld.pld_type in
   sprintf
     "%s%s%s%s %s: %s,\n"
     doc
@@ -481,12 +480,12 @@ let declare_constructor_arguments ?(box_fields = false) types : Rust_type.t list
     if List.is_empty types then
       []
     else
-      List.map ~f:core_type types
+      List.map ~f:Convert_type.core_type types
   else
     match types with
     | [] -> []
     | [ty] ->
-      let ty = core_type ty in
+      let ty = Convert_type.core_type ty in
       let ty =
         if unbox_field ty then
           ty
@@ -499,9 +498,9 @@ let declare_constructor_arguments ?(box_fields = false) types : Rust_type.t list
     | _ ->
       (match Configuration.mode () with
       | Configuration.ByRef ->
-        let tys = tuple ~seen_indirection:true types in
+        let tys = Convert_type.tuple ~seen_indirection:true types in
         [rust_ref (lifetime "a") tys]
-      | Configuration.ByBox -> [rust_type "Box" [] [tuple types]])
+      | Configuration.ByBox -> [rust_type "Box" [] [Convert_type.tuple types]])
 
 let variant_constructor_value cd =
   (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
@@ -766,7 +765,7 @@ let type_declaration ~mutual_rec name td =
         add_ty_reexport id;
         raise (Skip_type_decl ("it is a re-export of " ^ id))
       ) else
-        let ty = core_type ty in
+        let ty = Convert_type.core_type ty in
         if should_add_rcoc name then
           sprintf
             "%s%spub type %s = ocamlrep::rc::RcOc<%s>;"
@@ -792,7 +791,7 @@ let type_declaration ~mutual_rec name td =
             (deref ty |> rust_type_to_string)
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
-        let ty = core_type ty |> deref |> rust_type_to_string in
+        let ty = Convert_type.core_type ty |> deref |> rust_type_to_string in
         sprintf
           "%s%spub type %s = %s;"
           doc
@@ -805,7 +804,7 @@ let type_declaration ~mutual_rec name td =
           | Ptyp_tuple tys ->
             map_and_concat
               ~f:(fun ty ->
-                core_type ty |> fun t ->
+                Convert_type.core_type ty |> fun t ->
                 sprintf
                   "%s pub %s"
                   (rust_de_field_attr [t])
@@ -813,7 +812,10 @@ let type_declaration ~mutual_rec name td =
               ~sep:","
               tys
             |> sprintf "(%s)"
-          | _ -> core_type ty |> rust_type_to_string |> sprintf "(pub %s)"
+          | _ ->
+            Convert_type.core_type ty
+            |> rust_type_to_string
+            |> sprintf "(pub %s)"
         in
         sprintf
           "%s struct %s %s;%s\n%s"

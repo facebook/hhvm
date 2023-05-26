@@ -328,6 +328,8 @@ class C {
     $x = C::MY_CONSTANT;
   }
 
+  public static function test_static(): void {}
+
   // TEST-CHECK-BAL: define C._86pinit
   // CHECK: define C._86pinit($this: *C) : *HackMixed {
   // CHECK: #b0:
@@ -391,10 +393,11 @@ abstract class AbstractClass {
 
 trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
-  // CHECK: define T0.trait_parent_caller($this: *T0, self: *HackMixed) : *void {
+  // CHECK: define T0.trait_parent_caller($this: *T0, self: *HackMixed, parent: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *T0 = load &$this
-  // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK:   n0: *HackMixed = load &parent
+  // CHECK:   n1: *T0 = load &$this
+  // CHECK:   n2 = __parent__.test_const(n1, n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
@@ -407,20 +410,33 @@ trait T1 {
   require extends C;
 
   // TEST-CHECK-BAL: define T1.trait_parent_caller
-  // CHECK: define T1.trait_parent_caller($this: *T1, self: *HackMixed) : *void {
+  // CHECK: define T1.trait_parent_caller($this: *T1, self: *HackMixed, parent: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *T1 = load &$this
-  // CHECK:   n1 = __parent__.test_const(n0)
+  // CHECK:   n0: *HackMixed = load &parent
+  // CHECK:   n1: *T1 = load &$this
+  // CHECK:   n2 = __parent__.test_const(n1, n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
     parent::test_const();
   }
+
+  // TEST-CHECK-BAL: define T1.trait_parent_static_caller
+  // CHECK: define T1.trait_parent_static_caller($this: *T1, self: *HackMixed, parent: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK:   n0: *HackMixed = load &parent
+  // CHECK:   n1: *T1 = load &$this
+  // CHECK:   n2 = __parent__.test_static(n1, n0)
+  // CHECK:   ret null
+  // CHECK: }
+  public function trait_parent_static_caller(): void {
+    parent::test_static();
+  }
 }
 
 trait T2 {
   // TEST-CHECK-BAL: define T2$static.trait_self_caller
-  // CHECK: define T2$static.trait_self_caller($this: *T2$static, self: *HackMixed) : *void {
+  // CHECK: define T2$static.trait_self_caller($this: *T2$static, self: *HackMixed, parent: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &self
   // CHECK:   n1: *T2$static = load &$this
@@ -436,7 +452,7 @@ trait T2 {
 
 trait T3 {
   // TEST-CHECK-BAL: define T3.trait_self_caller
-  // CHECK: define T3.trait_self_caller($this: *T3, self: *HackMixed) : *void {
+  // CHECK: define T3.trait_self_caller($this: *T3, self: *HackMixed, parent: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &self
   // CHECK:   n1: *T3 = load &$this

@@ -60,8 +60,6 @@ pub(crate) fn lower_class<'a>(
             // Let's insert a `self` parameter so infer's analysis can
             // do its job. We don't use `$` so we are sure we don't clash with
             // existing Hack user defined variables.
-            //
-            // TODO: do the same for parent
             let self_param = Param {
                 name: strings.intern_str("self"),
                 is_variadic: false,
@@ -71,7 +69,19 @@ pub(crate) fn lower_class<'a>(
                 ty: TypeInfo::empty(),
                 default_value: None,
             };
-            method.func.params.insert(0, self_param);
+            let parent_param = Param {
+                name: strings.intern_str("parent"),
+                is_variadic: false,
+                is_inout: false,
+                is_readonly: false,
+                user_attributes: vec![],
+                ty: TypeInfo::empty(),
+                default_value: None,
+            };
+            method
+                .func
+                .params
+                .splice(0..0, [self_param, parent_param].into_iter());
         }
     }
 

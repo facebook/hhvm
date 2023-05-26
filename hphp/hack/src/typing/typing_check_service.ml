@@ -1253,6 +1253,26 @@ type result = {
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 
+let write_tast_hashes_to_disk ~root ~(check_info : check_info) tast_hashes =
+  match root with
+  | None -> ()
+  | Some root ->
+    ServerProgress.write "Converting TAST hashes to JSON";
+    let tast_hashes_json = TastHashes.yojson_of_t tast_hashes in
+    ServerProgress.write "Writing TAST hashes to disk";
+    let tast_dir =
+      Tmp.make_dir_in_tmp ~description_what_for:"tast_hashes" ~root
+    in
+    let tast_hashes_file =
+      Filename.concat
+        tast_dir
+        (Printf.sprintf
+           "initId%s_recheckId%s.json"
+           check_info.init_id
+           (Option.value check_info.recheck_id ~default:"None"))
+    in
+    Yojson.Safe.to_file tast_hashes_file tast_hashes_json
+
 let go_with_interrupt
     ?(diagnostic_pusher : Diagnostic_pusher.t option)
     (ctx : Provider_context.t)
@@ -1398,13 +1418,8 @@ let go_with_interrupt
   in
   let { errors; tast_hashes; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
-  if TypecheckerOptions.dump_tast_hashes tcopt then (
-    ServerProgress.write "Converting TAST hashes to JSON";
-    let _tast_hashes_json =
-      TastHashes.yojson_of_t tast_hashes (* TODO: dump _tast_hashes_json *)
-    in
-    ()
-  );
+  if TypecheckerOptions.dump_tast_hashes tcopt then
+    write_tast_hashes_to_disk ~root ~check_info tast_hashes;
 
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info

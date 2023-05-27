@@ -142,43 +142,40 @@ let get_files_with_stale_errors
     ~(* A subset of files which errors we want to update, or None if we want
       * to update entire error list. *)
      filter
-    ~(* Consider errors only coming from those phases *)
-     phases
     ~(* Current global error list *)
      errors
     ~ctx =
   let fold =
     match filter with
     | None ->
-      fun phase init f ->
+      fun init f ->
         (* Looking at global files *)
         Errors.fold_errors
           errors
-          ~phase
+          ~phase:Errors.Typing
           ~init
           ~f:(fun source _phase error acc -> f source error acc)
     | Some files ->
-      fun phase init f ->
+      fun init f ->
         (* Looking only at subset of files *)
         Relative_path.Set.fold files ~init ~f:(fun file acc ->
             Errors.fold_errors_in
               errors
               ~file
-              ~phase
+              ~phase:Errors.Typing
               ~init:acc
               ~f:(fun error acc -> f file error acc))
   in
-  List.fold phases ~init:Relative_path.Set.empty ~f:(fun acc phase ->
-      fold phase acc (fun source error acc ->
-          if
-            List.exists (User_error.to_list_ error) ~f:(fun e ->
-                Relative_path.Set.mem
-                  reparsed
-                  (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))
-          then
-            Relative_path.Set.add acc source
-          else
-            acc))
+  fold Relative_path.Set.empty (fun source error acc ->
+      if
+        List.exists (User_error.to_list_ error) ~f:(fun e ->
+            Relative_path.Set.mem
+              reparsed
+              (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))
+      then
+        Relative_path.Set.add acc source
+      else
+        acc)
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -344,12 +341,7 @@ module FullCheckKind : CheckKindType = struct
      * reparsed, since positions in those errors can be now stale.
      *)
     let stale_errors =
-      get_files_with_stale_errors
-        ~reparsed
-        ~filter:None
-        ~phases:[Errors.Typing]
-        ~errors:env.errorl
-        ~ctx
+      get_files_with_stale_errors ~reparsed ~filter:None ~errors:env.errorl ~ctx
     in
     let to_recheck = Relative_path.Set.union stale_errors to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
@@ -432,7 +424,6 @@ module LazyCheckKind : CheckKindType = struct
         ~ctx
         ~reparsed
         ~filter:(Some (some_ide_diagnosed_files env))
-        ~phases:[Errors.Typing]
         ~errors:env.errorl
     in
     let to_recheck = Relative_path.Set.union to_recheck stale_errors in

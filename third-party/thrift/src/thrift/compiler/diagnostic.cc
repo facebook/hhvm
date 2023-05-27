@@ -76,6 +76,9 @@ void diagnostics_engine::do_report(
     std::string name,
     diagnostic_level level,
     std::string msg) {
+  if (level == diagnostic_level::error) {
+    has_errors_ = true;
+  }
   if (!params_.should_report(level)) {
     return;
   }

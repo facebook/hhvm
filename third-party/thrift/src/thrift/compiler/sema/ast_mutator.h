@@ -74,13 +74,6 @@ struct ast_mutators {
       diagnostic_context& ctx, t_program_bundle& bundle) {
     mutation_result ret;
 
-    // Best effort try to eagerly resolve types.
-    // NOTE: It is allowed to reference types that haven't been generated yet,
-    // so it is ok if this fails. The call after applying mutators will catch
-    // any real issues.
-    auto best_effort = diagnostic_context::ignore_all(ctx.source_mgr());
-    resolve_all_types(best_effort, bundle);
-
     // XXX: Currently due to the limitation of implementation, annotations can
     // not be new types that's generated in mutators. We have to make sure
     // structured annotations are resolved before mutation.
@@ -117,12 +110,10 @@ struct ast_mutators {
   bool resolve_all_types(diagnostics_engine& diags, t_program_bundle& bundle) {
     bool success = true;
     for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
-      success &= diags.check(
-          td.resolve(),
-          td,
-          "{} `{}` not defined.",
-          td.generated() ? "Expected generated type" : "Type",
-          td.name());
+      if (!td.resolve()) {
+        diags.error(td, "Type `{}` not defined.", td.name());
+        success = false;
+      }
     }
     return success;
   }

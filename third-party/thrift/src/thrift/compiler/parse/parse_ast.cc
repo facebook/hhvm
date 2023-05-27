@@ -713,7 +713,10 @@ class ast_builder : public parser_actions {
 
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, fmt::string_view name) override {
-    return on_structured_annotation(range, on_struct_literal(range, name));
+    auto const_value = std::make_unique<t_const_value>();
+    const_value->set_map();
+    const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
+    return on_structured_annotation(range, std::move(const_value));
   }
 
   std::unique_ptr<t_const> on_structured_annotation(
@@ -1198,6 +1201,15 @@ std::unique_ptr<t_program_bundle> parse_ast(
     builder.parse_file();
   } catch (const parsing_terminator&) {
     return {}; // Return a null program bundle if parsing failed.
+  }
+
+  // Resolve types in the root program.
+  std::string program_prefix = programs->root_program()->name() + ".";
+  for (t_placeholder_typedef& t :
+       programs->root_program()->scope()->placeholder_typedefs()) {
+    if (!t.resolve() && t.name().find(program_prefix) == 0) {
+      diags.error(t, "Type `{}` not defined.", t.name());
+    }
   }
   return programs;
 }

@@ -176,8 +176,11 @@ class diagnostics_engine {
 
   diagnostic_params& params() { return params_; }
   const diagnostic_params& params() const { return params_; }
+
   source_manager& source_mgr() { return *source_mgr_; }
   const source_manager& source_mgr() const { return *source_mgr_; }
+
+  bool has_errors() const { return has_errors_; }
 
   void report(diagnostic diag) {
     if (params_.should_report(diag.level())) {
@@ -251,6 +254,7 @@ class diagnostics_engine {
   source_manager* source_mgr_;
   std::function<void(diagnostic)> report_cb_;
   diagnostic_params params_;
+  bool has_errors_ = false;
 };
 
 } // namespace compiler

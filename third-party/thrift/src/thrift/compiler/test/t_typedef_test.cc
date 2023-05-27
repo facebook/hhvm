@@ -19,6 +19,8 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/test/parser_test_helpers.h>
 
 using namespace apache::thrift::compiler;
@@ -27,12 +29,15 @@ using namespace apache::thrift::compiler;
 // type name (MissingType in the example below)
 TEST(TypedefTest, bad_true_type) {
   auto source_mgr = source_manager();
-  auto program = dedent_and_parse_to_program(source_mgr, R"(
+  source_mgr.add_virtual_file("test.thrift", R"(
     struct MyStruct {
       1: string first;
       2: MissingType second;
     }
   )");
+  auto diags = diagnostics_engine(source_mgr, [](diagnostic) {});
+  auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
+  auto program = programs->root_program();
 
   const std::vector<t_struct*>& structs = program->structs();
 

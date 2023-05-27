@@ -96,9 +96,6 @@ module RemoteTypeCheck = struct
   type t = {
     (* Controls the `defer_class_declaration_threshold` setting on the remote worker *)
     declaration_threshold: int;
-    (* A list of error phases; if, before type checking, errors in these phases
-        are present, then remote type checking will be disabled *)
-    disabled_on_errors: Errors.phase list;
     (* Enables remote type check *)
     enabled: bool;
     (* A non-interactive host is, e.g., a dev host not currently associated with a user,
@@ -120,7 +117,6 @@ module RemoteTypeCheck = struct
       enabled = false;
       enabled_for_noninteractive_hosts = false;
       declaration_threshold = 50;
-      disabled_on_errors = [];
       num_workers = 4;
       remote_worker_sandcastle_tenant = "interactive";
       prefetch_deferred_files = false;
@@ -135,23 +131,6 @@ module RemoteTypeCheck = struct
         "remote_type_check_declaration_threshold"
         ~default:default.declaration_threshold
         config
-    in
-    (* TODO(ljw): now that we're getting rid of phases, the following code can be cleaned up *)
-    let enabled_on_errors =
-      string_list
-        "remote_type_check_enabled_on_errors"
-        ~default:["typing"]
-        config
-      |> List.fold ~init:[] ~f:(fun acc phase ->
-             match Errors.phase_of_string phase with
-             | Some phase -> phase :: acc
-             | None -> acc)
-    in
-    let disabled_on_errors =
-      List.filter [Errors.Typing] ~f:(fun phase ->
-          not
-            (List.exists enabled_on_errors ~f:(fun enabled_phase ->
-                 Errors.equal_phase enabled_phase phase)))
     in
     let num_workers =
       int_ "remote_type_check_num_workers" ~default:default.num_workers config
@@ -211,7 +190,6 @@ module RemoteTypeCheck = struct
     in
     {
       declaration_threshold;
-      disabled_on_errors;
       enabled;
       enabled_for_noninteractive_hosts;
       num_workers;

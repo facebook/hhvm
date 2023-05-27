@@ -719,9 +719,9 @@ class CommonTests(BarebonesTests):
             ],
             [
                 '[{{"name":"g","filename":"{root}foo_2.php",'
-                '"line":3,"char_start":18,"char_end":18}},'
+                '"line":3,"char_start":18,"char_end":19}},'
                 '{{"name":"g","filename":"{root}foo_1.php",'
-                '"line":4,"char_start":20,"char_end":20}}]'
+                '"line":4,"char_start":20,"char_end":21}}]'
             ],
             options=["--ide-find-refs", "{}:3,18".format(path)],
         )
@@ -737,7 +737,7 @@ class CommonTests(BarebonesTests):
             ],
             [
                 '[{{"name":"IFoo","filename":"{root}foo_6.php",'
-                '"line":7,"char_start":7,"char_end":23}}]'
+                '"line":7,"char_start":7,"char_end":24}}]'
             ],
             options=["--ide-go-to-impl", "{}:3,11".format(path)],
         )
@@ -761,10 +761,10 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server()
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["line 1, characters 20-22", "line 1, characters 36-38", "2 total results"],
+            ["line 1, characters 20-23", "line 1, characters 36-39", "2 total results"],
             [
-                '[{{"line":1,"char_start":20,"char_end":22}},'
-                '{{"line":1,"char_start":36,"char_end":38}}]'
+                '[{{"line":1,"char_start":20,"char_end":23}},'
+                '{{"line":1,"char_start":36,"char_end":39}}]'
             ],
             options=["--ide-highlight-refs", "1:20"],
             stdin="<?hh function test(Foo $foo) { new Foo(); }",

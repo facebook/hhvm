@@ -153,7 +153,7 @@ let find_references_response_to_json = function
                 ("filename", Hh_json.JSON_String x.range_filename);
                 ("line", Hh_json.int_ x.file_range.st.line);
                 ("char_start", Hh_json.int_ x.file_range.st.column);
-                ("char_end", Hh_json.int_ (x.file_range.ed.column - 1));
+                ("char_end", Hh_json.int_ x.file_range.ed.column);
               ]))
     in
     Hh_json.JSON_Array entries
@@ -166,7 +166,7 @@ let highlight_references_response_to_json l =
              [
                ("line", Hh_json.int_ x.st.line);
                ("char_start", Hh_json.int_ x.st.column);
-               ("char_end", Hh_json.int_ (x.ed.column - 1));
+               ("char_end", Hh_json.int_ x.ed.column);
              ])))
 
 let print_json json = Hh_json.json_to_string json |> print_endline

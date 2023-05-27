@@ -799,9 +799,9 @@ and merge err' err =
   in
   files_t_merge ~f:append err' err
 
-and incremental_update
-    ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t) (phase : phase) :
-    t =
+and incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
+    : t =
+  let phase = Typing in
   (* Helper to detect coding oversight *)
   let assert_path_is_real (path : Relative_path.t) (phase : phase) : unit =
     if Relative_path.equal path Relative_path.default then

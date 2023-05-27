@@ -298,7 +298,6 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:bar_error_a
       ~rechecked:(Relative_path.Set.singleton a_path)
-      Errors.Typing
   in
   let expected =
     "File \"/bar2\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -314,7 +313,6 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:baz_error_b
       ~rechecked:(Relative_path.Set.singleton b_path)
-      Errors.Typing
   in
   let expected =
     "File \"/foo1\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -332,7 +330,6 @@ let test_incremental_update () =
       ~old:foo_error_a
       ~new_:Errors.empty
       ~rechecked:(Relative_path.Set.singleton a_path)
-      Errors.Typing
   in
   Asserter.Bool_asserter.assert_equals
     true

@@ -24,7 +24,6 @@ val push_new_errors :
   t ->
   rechecked:Relative_path.Set.t ->
   Errors.t ->
-  phase:Errors.phase ->
   t * seconds_since_epoch option
 
 (** If any error remains to be pushed, for example because the previous push failed or

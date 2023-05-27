@@ -563,11 +563,7 @@ let possibly_push_new_errors_to_lsp_client :
       |> Relative_path.Set.of_list
     in
     let (diag, time_errors_pushed) =
-      Diagnostic_pusher.push_new_errors
-        diag
-        ~rechecked
-        new_errors
-        ~phase:Errors.Typing
+      Diagnostic_pusher.push_new_errors diag ~rechecked new_errors
     in
     (Some diag, time_errors_pushed)
 

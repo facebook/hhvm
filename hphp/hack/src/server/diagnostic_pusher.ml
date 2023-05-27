@@ -482,9 +482,9 @@ let push_new_errors :
     t ->
     rechecked:Relative_path.Set.t ->
     Errors.t ->
-    phase:Errors.phase ->
     t * seconds_since_epoch option =
- fun pusher ~rechecked new_errors ~phase ->
+ fun pusher ~rechecked new_errors ->
+  let phase = Errors.Typing in
   let ({ error_tracker; tracked_ide_id }, (client, priority_files)) =
     get_client pusher
   in
@@ -511,11 +511,7 @@ let push_new_errors :
 
 let push_whats_left : t -> t * seconds_since_epoch option =
  fun pusher ->
-  push_new_errors
-    ~rechecked:Relative_path.Set.empty
-    ~phase:Errors.Typing
-    pusher
-    Errors.empty
+  push_new_errors ~rechecked:Relative_path.Set.empty pusher Errors.empty
 
 let get_files_with_diagnostics : t -> Relative_path.t list =
  fun { error_tracker; _ } ->

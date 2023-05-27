@@ -177,10 +177,7 @@ let get_files_with_stale_errors
 (** This pushes all [phase] errors in errors, that aren't in [files],
 to the errors-file. *)
 let push_errors_outside_files_to_errors_file
-    ?(phase : Errors.phase option)
-    (errors : Errors.t)
-    ~(files : Relative_path.Set.t) : unit =
-  let _ = phase in
+    (errors : Errors.t) ~(files : Relative_path.Set.t) : unit =
   let typing_errors_not_in_files_to_check =
     errors
     |> Errors.fold_errors ~drop_fixmed:true ~init:[] ~f:(fun path error acc ->
@@ -731,7 +728,6 @@ functor
           ~old:errors
           ~new_:errorl'
           ~rechecked:files_checked
-          Errors.Typing
       in
       let (env, _future) : ServerEnv.env * string Future.t option =
         ServerRecheckCapture.update_after_recheck
@@ -1097,17 +1093,14 @@ functor
       in
 
       (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
-         will report all errors in [files_to_check] using the [Errors.Typing] phase.
-         But there might be other [Errors.Typing] errors in [env.errorl] from a previous round of typecheck,
+         will report all errors in [files_to_check].
+         But there might be other errors in [env.errorl] from a previous round of typecheck,
          but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
          It remains open for discussion whether the user-experience would be better to have these
          not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
          has finished. We'll report them here for now. *)
       if do_errors_file then begin
-        push_errors_outside_files_to_errors_file
-          errors
-          ~files:files_to_check
-          ~phase:Errors.Typing
+        push_errors_outside_files_to_errors_file errors ~files:files_to_check
       end;
       (* And what about the files in [files_to_check] which we were going to typecheck but then
          the typecheck got interrupted  and they were returned from [do_typechecking] as [needs_recheck]?

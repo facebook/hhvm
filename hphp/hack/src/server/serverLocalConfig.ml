@@ -92,207 +92,6 @@ module Watchman = struct
     }
 end
 
-module RemoteTypeCheck = struct
-  type t = {
-    (* Controls the `defer_class_declaration_threshold` setting on the remote worker *)
-    declaration_threshold: int;
-    (* Enables remote type check *)
-    enabled: bool;
-    (* A non-interactive host is, e.g., a dev host not currently associated with a user,
-        or a host used for non-interactive jobs (e.g., CI) *)
-    enabled_for_noninteractive_hosts: bool;
-    (* Dictates the number of remote type checking workers *)
-    num_workers: int;
-    (* The sandcastle tenant used to spawn remote workers *)
-    remote_worker_sandcastle_tenant: string;
-    prefetch_deferred_files: bool;
-    worker_min_log_level: Hh_logger.Level.t;
-    remote_type_check_recheck_threshold: int;
-    (* Whether the local typechecker steals workloads from remote jobs *)
-    work_stealing_enabled: bool;
-  }
-
-  let default =
-    {
-      enabled = false;
-      enabled_for_noninteractive_hosts = false;
-      declaration_threshold = 50;
-      num_workers = 4;
-      remote_worker_sandcastle_tenant = "interactive";
-      prefetch_deferred_files = false;
-      worker_min_log_level = Hh_logger.Level.Info;
-      remote_type_check_recheck_threshold = 1_000_000;
-      work_stealing_enabled = false;
-    }
-
-  let load ~current_version ~default config =
-    let declaration_threshold =
-      int_
-        "remote_type_check_declaration_threshold"
-        ~default:default.declaration_threshold
-        config
-    in
-    let num_workers =
-      int_ "remote_type_check_num_workers" ~default:default.num_workers config
-    in
-    let remote_worker_sandcastle_tenant =
-      string_
-        "remote_worker_sandcastle_tenant"
-        ~default:default.remote_worker_sandcastle_tenant
-        config
-    in
-    let prefetch_deferred_files =
-      bool_if_min_version
-        "remote_type_check_prefetch_deferred_files"
-        ~default:default.prefetch_deferred_files
-        ~current_version
-        config
-    in
-    let remote_type_check_recheck_threshold =
-      int_
-        "remote_type_check_recheck_threshold"
-        ~default:default.remote_type_check_recheck_threshold
-        config
-    in
-    let enabled =
-      bool_if_min_version
-        "remote_type_check_enabled"
-        ~default:default.enabled
-        ~current_version
-        config
-    in
-    let enabled_for_noninteractive_hosts =
-      bool_if_min_version
-        "remote_type_check_enabled_for_noninteractive_hosts"
-        ~default:default.enabled_for_noninteractive_hosts
-        ~current_version
-        config
-    in
-    let worker_min_log_level =
-      match
-        Hh_logger.Level.of_enum_string
-          (String.lowercase
-             (string_
-                "remote_type_check_worker_min_log_level"
-                ~default:
-                  (Hh_logger.Level.to_enum_string default.worker_min_log_level)
-                config))
-      with
-      | Some level -> level
-      | None -> Hh_logger.Level.Debug
-    in
-    let work_stealing_enabled =
-      bool_if_min_version
-        "remote_type_check_work_stealing_enabled"
-        ~default:default.work_stealing_enabled
-        ~current_version
-        config
-    in
-    {
-      declaration_threshold;
-      enabled;
-      enabled_for_noninteractive_hosts;
-      num_workers;
-      prefetch_deferred_files;
-      remote_type_check_recheck_threshold;
-      worker_min_log_level;
-      remote_worker_sandcastle_tenant;
-      work_stealing_enabled;
-    }
-end
-
-module RecheckCapture = struct
-  type t = {
-    (* Enables recheck environment capture *)
-    enabled: bool;
-    (* If the error theshold is not met, then the recheck environment that
-        doesn't meet the fanout-related thresholds will not be captured. *)
-    error_threshold: int;
-    (* We will automatically capture the recheck environment if
-        the number of files to recheck exceeds this threshold.
-        The number of rechecked files is always less than or equal to
-        the fanout *)
-    fanout_threshold: int;
-    (* We will automatically capture the recheck environment if
-        the number of rechecked files exceeds this threshold *)
-    rechecked_files_threshold: int;
-    (* If set, determines the rate of sampling of rechecks regardless of
-        their fanout size. The error threshold would still apply.
-        NOTE: valid values fall between 0.0 (0%) and 1.0 (100%).
-        Values less than 0.0 will be interpreted as 0.0; values greater than
-        1.0 will be interpreted as 1.0 *)
-    sample_threshold: float;
-  }
-
-  let default =
-    {
-      enabled = false;
-      (* We wouldn't capture small rechecks unless they have at least
-              this many errors. *)
-      error_threshold = 1;
-      (* If capturing is enabled and the recheck fanout (pre-type-check)
-              meets this threshold, then we would snapshot the changed files. *)
-      fanout_threshold = 40_000;
-      (* If the number of files actually rechecked meets this threshold
-              and we already snapshotted the changed files based on fanout
-              size or sampling, we would capture the recheck environment. *)
-      rechecked_files_threshold = 5_000;
-      (* We wouldn't take changed files snapshots of small fanouts
-              unless they are randomly selected with the probability controlled
-              by the sample_threshold setting. By default, we don't snapshot
-              any small fanouts. *)
-      sample_threshold = 0.0;
-    }
-
-  let load ~current_version ~default config =
-    let enabled =
-      bool_if_min_version
-        "recheck_capture_enabled"
-        ~default:default.enabled
-        ~current_version
-        config
-    in
-    let error_threshold =
-      int_
-        "recheck_capture_error_threshold"
-        ~default:default.error_threshold
-        config
-    in
-    let fanout_threshold =
-      int_
-        "recheck_capture_fanout_threshold"
-        ~default:default.fanout_threshold
-        config
-    in
-    let rechecked_files_threshold =
-      int_
-        "recheck_capture_rechecked_files_threshold"
-        ~default:default.rechecked_files_threshold
-        config
-    in
-    let sample_threshold =
-      let sample_threshold =
-        float_
-          "recheck_capture_sample_threshold"
-          ~default:default.sample_threshold
-          config
-      in
-      if Float.(sample_threshold > 1.0) then
-        1.0
-      else if Float.(sample_threshold < 0.0) then
-        0.0
-      else
-        sample_threshold
-    in
-    {
-      enabled;
-      error_threshold;
-      fanout_threshold;
-      rechecked_files_threshold;
-      sample_threshold;
-    }
-end
-
 (** Allows to typecheck only a certain quantile of the workload. *)
 type quantile = {
   count: int;
@@ -379,7 +178,6 @@ type t = {
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
   hg_aware_recheck_restart_threshold: int;
-  force_remote_type_check: bool;  (** forces Hulk *)
   ide_parser_cache: bool;
   store_decls_in_saved_state: bool;
       (** When enabled, save hot class declarations (for now, specified in a special
@@ -408,28 +206,10 @@ type t = {
   defer_class_declaration_threshold: int option;
       (** If set, defers class declarations after N lazy declarations; if not set,
       always lazily declares classes not already in cache. *)
-  prefetch_deferred_files: bool;
-      (** The whether to use the hook that prefetches files on an Eden checkout *)
   produce_streaming_errors: bool;
       (** whether hh_server should write errors to errors.bin file *)
   consume_streaming_errors: bool;
       (** whether hh_client should read errors from errors.bin file *)
-  recheck_capture: RecheckCapture.t;
-      (** Settings controlling how and whether we capture the recheck environment *)
-  remote_nonce: Int64.t;
-      (** The unique identifier of a particular remote typechecking run *)
-  remote_type_check: RemoteTypeCheck.t;
-      (** Remote type check settings that can be changed, e.g., by GK *)
-  remote_worker_key: string option;
-      (** If set, uses the key to fetch type checking jobs *)
-  remote_check_id: string option;
-      (** If set, uses the check ID when logging events in the context of remove init/work *)
-  remote_version_specifier_required: bool;
-      (** Indicates whether the remote version specifier is required for remote type check from non-prod server *)
-  remote_version_specifier: string option;
-      (** The version of the package the remote worker is to install *)
-  remote_worker_saved_state_manifold_path: string option;
-      (** A manifold path to a naming table to be used for Hulk Lite when typechecking. *)
   rust_provider_backend: bool;
       (** Use Provider_backend.Rust_provider_backend as the global provider
        * backend, servicing File_provider, Naming_provider, and Decl_provider
@@ -466,12 +246,6 @@ type t = {
       (**  Remove remote old decl fetching limit *)
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
-  use_shallow_decls_saved_state: bool;
-      (** (only when cache_remote_decls == true) Configure where to fetch and cache remote decls
-          true --> from saved_state hach/shallow_decls
-          false --> from remote old shallow decl service *)
-  shallow_decls_manifold_path: string option;
-      (** A manifold path to a shallow_decls to be used for Hulk Lite when typechecking. *)
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
@@ -504,7 +278,6 @@ let default =
     log_init_proc_stack_also_on_absent_from = false;
     experiments = [];
     experiments_config_meta = "";
-    force_remote_type_check = false;
     use_saved_state = false;
     use_saved_state_when_indexing = false;
     require_saved_state = false;
@@ -555,17 +328,8 @@ let default =
     skip_tast_checks = false;
     num_local_workers = None;
     defer_class_declaration_threshold = None;
-    prefetch_deferred_files = false;
     produce_streaming_errors = true;
     consume_streaming_errors = false;
-    recheck_capture = RecheckCapture.default;
-    remote_nonce = Int64.zero;
-    remote_type_check = RemoteTypeCheck.default;
-    remote_worker_key = None;
-    remote_check_id = None;
-    remote_version_specifier_required = true;
-    remote_version_specifier = None;
-    remote_worker_saved_state_manifold_path = None;
     rust_elab = false;
     rust_provider_backend = false;
     naming_sqlite_path = None;
@@ -588,8 +352,6 @@ let default =
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
     cache_remote_decls = false;
-    use_shallow_decls_saved_state = false;
-    shallow_decls_manifold_path = None;
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
     override_load_state_natively = false;
@@ -797,13 +559,6 @@ let load_
     bool_if_min_version
       "enable_fuzzy_search"
       ~default:default.enable_fuzzy_search
-      ~current_version
-      config
-  in
-  let force_remote_type_check =
-    bool_if_min_version
-      "force_remote_type_check"
-      ~default:default.force_remote_type_check
       ~current_version
       config
   in
@@ -1048,13 +803,6 @@ let load_
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
   in
-  let prefetch_deferred_files =
-    bool_if_min_version
-      "prefetch_deferred_files"
-      ~default:false
-      ~current_version
-      config
-  in
   let produce_streaming_errors =
     bool_
       "produce_streaming_errors"
@@ -1067,33 +815,9 @@ let load_
       ~default:default.consume_streaming_errors
       config
   in
-  let recheck_capture =
-    RecheckCapture.load ~current_version ~default:default.recheck_capture config
-  in
-  let remote_nonce =
-    match string_opt "remote_nonce" config with
-    | Some n -> Int64.of_string n
-    | None -> Int64.zero
-  in
-  let remote_type_check =
-    RemoteTypeCheck.load
-      ~current_version
-      ~default:default.remote_type_check
-      config
-  in
   let watchman =
     Watchman.load ~current_version ~default:default.watchman config
   in
-  let remote_worker_key = string_opt "remote_worker_key" config in
-  let remote_check_id = string_opt "remote_check_id" config in
-  let remote_version_specifier_required =
-    bool_if_min_version
-      "remote_version_specifier_required"
-      ~default:default.remote_version_specifier_required
-      ~current_version
-      config
-  in
-  let remote_version_specifier = string_opt "remote_version_specifier" config in
   let enable_naming_table_fallback =
     bool_if_min_version
       "enable_naming_table_fallback"
@@ -1264,9 +988,6 @@ let load_
     else
       None
   in
-  let remote_worker_saved_state_manifold_path =
-    string_opt "remote_worker_saved_state_manifold_path" config
-  in
   let rust_elab =
     bool_if_min_version
       "rust_elab"
@@ -1303,16 +1024,6 @@ let load_
       ~default:default.cache_remote_decls
       ~current_version
       config
-  in
-  let use_shallow_decls_saved_state =
-    bool_if_min_version
-      "use_shallow_decls_saved_state"
-      ~default:default.use_shallow_decls_saved_state
-      ~current_version
-      config
-  in
-  let shallow_decls_manifold_path =
-    string_opt "shallow_decls_manifold_path" config
   in
   let disable_naming_table_fallback_loading =
     bool_if_min_version
@@ -1455,17 +1166,8 @@ let load_
     skip_tast_checks;
     num_local_workers;
     defer_class_declaration_threshold;
-    prefetch_deferred_files;
     produce_streaming_errors;
     consume_streaming_errors;
-    recheck_capture;
-    remote_nonce;
-    remote_type_check;
-    remote_worker_key;
-    remote_check_id;
-    remote_version_specifier_required;
-    remote_version_specifier;
-    remote_worker_saved_state_manifold_path;
     rust_elab;
     rust_provider_backend;
     naming_sqlite_path;
@@ -1490,14 +1192,11 @@ let load_
     go_to_implementation;
     allow_unstable_features;
     watchman;
-    force_remote_type_check;
     workload_quantile;
     rollout_group;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
     cache_remote_decls;
-    use_shallow_decls_saved_state;
-    shallow_decls_manifold_path;
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
     override_load_state_natively;

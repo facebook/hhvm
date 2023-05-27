@@ -71,15 +71,8 @@ type t = {
   tco_num_local_workers: int option;
   tco_max_typechecker_worker_memory_mb: int option;
   tco_defer_class_declaration_threshold: int option;
-  tco_prefetch_deferred_files: bool;
-  tco_remote_type_check_threshold: int;
-  tco_remote_type_check: bool;
-  tco_remote_worker_key: string option;
-  tco_remote_check_id: string option;
-  tco_num_remote_workers: int;
   tco_locl_cache_capacity: int;
   tco_locl_cache_node_threshold: int;
-  so_remote_version_specifier: string option;
   so_naming_sqlite_path: string option;
   po_auto_namespace_map: (string * string) list;
   po_codegen: bool;
@@ -209,15 +202,8 @@ let default =
     tco_num_local_workers = None;
     tco_max_typechecker_worker_memory_mb = None;
     tco_defer_class_declaration_threshold = None;
-    tco_prefetch_deferred_files = false;
-    tco_remote_type_check_threshold = 1_000_000;
-    tco_remote_type_check = true;
-    tco_remote_worker_key = None;
-    tco_remote_check_id = None;
     tco_locl_cache_capacity = 30;
     tco_locl_cache_node_threshold = 10_000;
-    tco_num_remote_workers = 4;
-    so_remote_version_specifier = None;
     so_naming_sqlite_path = None;
     po_auto_namespace_map = [];
     po_codegen = false;
@@ -349,15 +335,8 @@ let set
     ?tco_num_local_workers
     ?tco_max_typechecker_worker_memory_mb
     ?tco_defer_class_declaration_threshold
-    ?tco_prefetch_deferred_files
-    ?tco_remote_type_check_threshold
-    ?tco_remote_type_check
-    ?tco_remote_worker_key
-    ?tco_remote_check_id
-    ?tco_num_remote_workers
     ?tco_locl_cache_capacity
     ?tco_locl_cache_node_threshold
-    ?so_remote_version_specifier
     ?so_naming_sqlite_path
     ?po_auto_namespace_map
     ?po_codegen
@@ -499,30 +478,12 @@ let set
       setting_opt
         tco_defer_class_declaration_threshold
         options.tco_defer_class_declaration_threshold;
-    tco_prefetch_deferred_files =
-      setting tco_prefetch_deferred_files options.tco_prefetch_deferred_files;
-    tco_remote_type_check_threshold =
-      setting
-        tco_remote_type_check_threshold
-        options.tco_remote_type_check_threshold;
-    tco_remote_type_check =
-      setting tco_remote_type_check options.tco_remote_type_check;
-    tco_remote_worker_key =
-      setting_opt tco_remote_worker_key options.tco_remote_worker_key;
-    tco_remote_check_id =
-      setting_opt tco_remote_check_id options.tco_remote_check_id;
-    tco_num_remote_workers =
-      setting tco_num_remote_workers options.tco_num_remote_workers;
     tco_locl_cache_capacity =
       setting tco_locl_cache_capacity options.tco_locl_cache_capacity;
     tco_locl_cache_node_threshold =
       setting
         tco_locl_cache_node_threshold
         options.tco_locl_cache_node_threshold;
-    so_remote_version_specifier =
-      setting_opt
-        so_remote_version_specifier
-        options.so_remote_version_specifier;
     so_naming_sqlite_path =
       setting_opt so_naming_sqlite_path options.so_naming_sqlite_path;
     po_auto_namespace_map =
@@ -832,8 +793,6 @@ let set
         options.tco_ide_naming_table_update_threshold;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
   }
-
-let so_remote_version_specifier t = t.so_remote_version_specifier
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 

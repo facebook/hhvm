@@ -55,23 +55,10 @@ type t = {
      always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
   (* Whether the Eden prefetch hook should be invoked *)
-  tco_prefetch_deferred_files: bool;
-  (* If set, distributes type checking to remote workers if the number of files to
-     type check exceeds the threshold. If not set, then always checks everything locally. *)
-  tco_remote_type_check_threshold: int;
-  (* Turns on remote type checking *)
-  tco_remote_type_check: bool;
-  (* If set, uses the key to fetch type checking jobs *)
-  tco_remote_worker_key: string option;
-  (* If set, uses the check ID when logging events in the context of remove init/work *)
-  tco_remote_check_id: string option;
-  (* Dictates the number of remote type checking workers *)
-  tco_num_remote_workers: int;
   (* The capacity of the localization cache for large types *)
   tco_locl_cache_capacity: int;
   (* The number of nodes a type has to exceed to enter the localization cache *)
   tco_locl_cache_node_threshold: int;
-  so_remote_version_specifier: string option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
   (* Namespace aliasing map *)
@@ -365,15 +352,8 @@ val set :
   ?tco_num_local_workers:int ->
   ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
-  ?tco_prefetch_deferred_files:bool ->
-  ?tco_remote_type_check_threshold:int ->
-  ?tco_remote_type_check:bool ->
-  ?tco_remote_worker_key:string ->
-  ?tco_remote_check_id:string ->
-  ?tco_num_remote_workers:int ->
   ?tco_locl_cache_capacity:int ->
   ?tco_locl_cache_node_threshold:int ->
-  ?so_remote_version_specifier:string ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
   ?po_codegen:bool ->
@@ -495,8 +475,6 @@ val default : t
 
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
 (* NOTE: set/getters for po_* options moved to ParserOptions *)
-
-val so_remote_version_specifier : t -> string option
 
 val so_naming_sqlite_path : t -> string option
 

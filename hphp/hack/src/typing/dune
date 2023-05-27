@@ -517,10 +517,7 @@
   typing_deps
   typing_pessimisation_deps
   typing_check_job
-  typing_global_inference
-  typing_service_api
-  typing_service_delegate
-  vfs)
+  typing_global_inference)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -604,10 +604,8 @@ functor
     let do_type_checking
         (genv : genv)
         (env : env)
-        (capture_snapshot : ServerRecheckCapture.snapshot)
         ~(errors : Errors.t)
         ~(files_to_check : Relative_path.Set.t)
-        ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
         ~(check_reason : string)
         ~(cgroup_steps : CgroupProfiler.step_group)
@@ -651,7 +649,6 @@ functor
         let ( ( env,
                 {
                   Typing_check_service.errors = errorl;
-                  delegate_state;
                   telemetry;
                   diagnostic_pusher =
                     (diagnostic_pusher, time_first_typing_error);
@@ -662,7 +659,6 @@ functor
             ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher
             ctx
             genv.workers
-            env.typing_service.delegate_state
             telemetry
             (files_to_check |> Relative_path.Set.elements)
             ~root
@@ -683,7 +679,6 @@ functor
             env with
             diagnostic_pusher =
               Option.value diagnostic_pusher ~default:env.diagnostic_pusher;
-            typing_service = { env.typing_service with delegate_state };
           }
         in
         (errorl, telemetry, env, cancelled, time_first_typing_error)
@@ -728,17 +723,6 @@ functor
           ~old:errors
           ~new_:errorl'
           ~rechecked:files_checked
-      in
-      let (env, _future) : ServerEnv.env * string Future.t option =
-        ServerRecheckCapture.update_after_recheck
-          genv
-          env
-          capture_snapshot
-          ~changed_files:files_to_parse
-          ~cancelled_files:(Relative_path.Set.of_list cancelled)
-          ~rechecked_files:files_checked
-          ~recheck_errors:errorl'
-          ~all_errors:errors
       in
       let full_check_done =
         CheckKind.is_full && Relative_path.Set.is_empty needs_recheck
@@ -868,7 +852,6 @@ functor
 
       (* Parse all changed files. This clears the file contents cache prior
           to parsing. *)
-      let parse_t = Unix.gettimeofday () in
       let telemetry =
         Telemetry.duration telemetry ~key:"parse_start" ~start_time
       in
@@ -1067,13 +1050,6 @@ functor
             genv.ServerEnv.local_config
               .ServerLocalConfig.enable_type_check_filter_files
       in
-      let env =
-        ServerRemoteUtils.start_delegate_if_needed
-          env
-          genv
-          (Relative_path.Set.cardinal files_to_check)
-          errors
-      in
 
       ServerProgress.write
         "typechecking %d files"
@@ -1110,14 +1086,6 @@ functor
       let to_recheck_count = Relative_path.Set.cardinal files_to_check in
       (* The intent of capturing the snapshot here is to increase the likelihood
           of the state-on-disk being the same as what the parser saw *)
-      let (env, capture_snapshot) =
-        ServerRecheckCapture.update_before_recheck
-          genv
-          env
-          ~to_recheck_count
-          ~changed_files:files_to_parse
-          ~parse_t
-      in
       Hh_logger.log "Begin typechecking %d files." to_recheck_count;
       if do_errors_file then
         ServerProgress.ErrorsWrite.telemetry
@@ -1147,10 +1115,8 @@ functor
         do_type_checking
           genv
           env
-          capture_snapshot
           ~errors
           ~files_to_check
-          ~files_to_parse
           ~lazy_check_later
           ~check_reason
           ~cgroup_steps
@@ -1322,17 +1288,6 @@ functor
           ~start_time
       in
 
-      let env =
-        {
-          env with
-          typing_service =
-            {
-              delegate_state =
-                Typing_service_delegate.stop env.typing_service.delegate_state;
-              enabled = false;
-            };
-        }
-      in
       let telemetry =
         Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time
       in

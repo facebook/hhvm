@@ -28,11 +28,6 @@ type genv = {
   mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 
-type typing_service = {
-  delegate_state: Typing_service_delegate_types.state; [@opaque]
-  enabled: bool;
-}
-
 module Init_telemetry : sig
   (** These names appear in telemetry, where it's nice to see the word "Init" in them. *)
   type reason =
@@ -227,7 +222,6 @@ end
 type env = {
   naming_table: Naming_table.t;
   deps_mode: Typing_deps_mode.t;
-  typing_service: typing_service;
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
   gleanopt: GleanOptions.t;

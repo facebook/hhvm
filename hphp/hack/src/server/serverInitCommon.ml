@@ -208,7 +208,6 @@ let defer_or_do_type_check
     Hh_logger.log "Begin %s" logstring;
     let {
       Typing_check_service.errors = errorl;
-      delegate_state;
       telemetry = typecheck_telemetry;
       _;
     } =
@@ -230,7 +229,6 @@ let defer_or_do_type_check
       Typing_check_service.go
         ctx
         genv.workers
-        env.typing_service.delegate_state
         (Telemetry.create ())
         files_to_check
         ~root
@@ -245,13 +243,7 @@ let defer_or_do_type_check
              genv
              env)
     in
-    let env =
-      {
-        env with
-        typing_service = { env.typing_service with delegate_state };
-        errorl = Errors.merge errorl env.errorl;
-      }
-    in
+    let env = { env with errorl = Errors.merge errorl env.errorl } in
     log_type_check_end
       env
       genv

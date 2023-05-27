@@ -52,9 +52,6 @@ let init
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let env =
-    ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
-  in
   let init_telemetry =
     ServerEnv.Init_telemetry.make
       ServerEnv.Init_telemetry.Init_eager

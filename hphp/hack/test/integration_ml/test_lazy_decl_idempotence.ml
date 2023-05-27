@@ -66,12 +66,10 @@ let test () =
       memtrace_dir = None;
     }
   in
-  let delegate_state = Typing_service_delegate.default in
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  let { Typing_check_service.errors; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       (Telemetry.create ())
       [bar_path]
       ~root:None
@@ -82,11 +80,10 @@ let test () =
       ~check_info
   in
   Test.assert_errors errors "";
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  let { Typing_check_service.errors; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [bar_path]
       ~root:None
@@ -98,11 +95,10 @@ let test () =
   in
   Test.assert_errors errors "";
 
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  let { Typing_check_service.errors; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [foo_path]
       ~root:None
@@ -117,7 +113,6 @@ let test () =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [foo_path]
       ~root:None

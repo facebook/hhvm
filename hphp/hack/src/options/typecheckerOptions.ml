@@ -19,21 +19,6 @@ let max_typechecker_worker_memory_mb t =
 let defer_class_declaration_threshold t =
   t.GlobalOptions.tco_defer_class_declaration_threshold
 
-let prefetch_deferred_files t = t.GlobalOptions.tco_prefetch_deferred_files
-
-let remote_type_check_threshold t =
-  t.GlobalOptions.tco_remote_type_check_threshold
-
-let remote_type_check t = t.GlobalOptions.tco_remote_type_check
-
-let remote_worker_key t = t.GlobalOptions.tco_remote_worker_key
-
-let remote_check_id t = t.GlobalOptions.tco_remote_check_id
-
-let num_remote_workers t = t.GlobalOptions.tco_num_remote_workers
-
-let remote_version_specifier = GlobalOptions.so_remote_version_specifier
-
 let language_feature_logging t = t.GlobalOptions.tco_language_feature_logging
 
 let experimental_feature_enabled t feature =

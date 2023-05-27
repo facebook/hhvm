@@ -205,9 +205,7 @@
   diagnostic_pusher
   server_client_provider
   server_config
-  server_notifier
-  typing_service_api
-  typing_service_delegate_types)
+  server_notifier)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -391,26 +389,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_api)
- (wrapped false)
- (modules serverApi)
- (libraries
-  direct_decl_service
-  decl_redecl_service
-  fileutils
-  logging
-  remote
-  server_env
-  sys_utils
-  typing
-  typing_check
-  typing_service_api
-  state_loader
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_search)
  (wrapped false)
  (modules serverSearch)
@@ -516,7 +494,6 @@
   serverMethodJumps
   serverMethodJumpsBatch
   serverRage
-  serverRecheckCapture
   serverRename
   serverRewriteLambdaParameters
   serverRewriteTypeParamsType
@@ -545,12 +522,10 @@
   linting_main
   lints_core
   lsp
-  remote
   security_stubs
   shallow_classes_provider
   direct_decl_parser
   direct_decl_utils
-  server_api
   server_codemod_type_printer
   server_code_actions_services
   server_docblock_at
@@ -559,14 +534,12 @@
   server_hover
   server_infer_type
   server_prechecked_files
-  server_remote_utils
   server_revision_tracker
   server_services
   server_symbol_info_service_utils
   sys_utils
   tast_provider
   typing
-  typing_service_api
   typing_check_job
   utils_core
   version
@@ -599,7 +572,6 @@
     serverInitTypes
     serverLazyInit
     serverMain
-    serverRemoteInit
     serverRpc)
   (libraries
     ast
@@ -624,8 +596,6 @@
     server_search
     startup_initializer_stubs
     state_loader
-    typing_service_api
-    vfs
     watchman_client
     write_symbol_info
   (select

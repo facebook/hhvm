@@ -24,23 +24,3 @@
   typing_deps)
  (preprocess
   (pps ppx_deriving.std)))
-
-(library
- (name typing_service_api)
- (wrapped false)
- (modules typing_service_delegate_sig)
- (libraries
-  biglist
-  core_kernel
-  errors
-  hg
-  job_runner
-  relative_path
-  typechecker_options
-  typing_service_delegate_types
-  typing_deps
-  process
-  process_types
-  typing_service_types)
- (preprocess
-  (pps ppx_deriving.std)))

@@ -116,8 +116,6 @@ The paper refers to this approach as "restarting", and further suggests that rec
 the chain of jobs could be used to minimize the number of restarts.
  *)
 
-module Delegate = Typing_service_delegate
-
 type seconds_since_epoch = float
 
 type log_message = string
@@ -224,7 +222,6 @@ module ProcessFilesTally = struct
   (** Counters for the [check_file_workitem] of each sort being processed *)
   type t = {
     decls: int;  (** how many [Declare] items we performed *)
-    prefetches: int;  (** how many [Prefetch] items we performed *)
     checks_done: int;  (** how many [Check] items we typechecked *)
     checks_deferred: int;  (** how many [Check] items we deferred to later *)
     decls_deferred: int;  (** how many [Declare] items we added for later *)
@@ -234,7 +231,6 @@ module ProcessFilesTally = struct
   let empty =
     {
       decls = 0;
-      prefetches = 0;
       checks_done = 0;
       checks_deferred = 0;
       decls_deferred = 0;
@@ -249,8 +245,6 @@ module ProcessFilesTally = struct
     else
       { tally with exceeded_cap_count = tally.exceeded_cap_count + 1 }
 
-  let incr_prefetches tally = { tally with prefetches = tally.prefetches + 1 }
-
   let incr_checks tally deferred_decls =
     if List.is_empty deferred_decls then
       { tally with checks_done = tally.checks_done + 1 }
@@ -261,13 +255,11 @@ module ProcessFilesTally = struct
         decls_deferred = tally.decls_deferred + List.length deferred_decls;
       }
 
-  let count tally =
-    tally.checks_done + tally.checks_deferred + tally.decls + tally.prefetches
+  let count tally = tally.checks_done + tally.checks_deferred + tally.decls
 
   let get_telemetry tally =
     Telemetry.create ()
     |> Telemetry.int_ ~key:"decls" ~value:tally.decls
-    |> Telemetry.int_ ~key:"prefetches" ~value:tally.prefetches
     |> Telemetry.int_ ~key:"checks_done" ~value:tally.checks_done
     |> Telemetry.int_ ~key:"checks_deferred" ~value:tally.checks_deferred
     |> Telemetry.int_ ~key:"decls_deferred" ~value:tally.decls_deferred
@@ -372,15 +364,6 @@ let process_one_workitem
         tast_hashes,
         [],
         ProcessFilesTally.incr_decls tally )
-    | Prefetch paths ->
-      Vfs.prefetch paths;
-      ( None,
-        None,
-        None,
-        Errors.empty,
-        tast_hashes,
-        [],
-        ProcessFilesTally.incr_prefetches tally )
   in
   let errors = Errors.merge file_errors errors in
   let workitem_ends_under_cap = Gc_utils.get_heap_size () <= workitem_cap_mb in
@@ -557,9 +540,7 @@ let possibly_push_new_errors_to_lsp_client :
       TypingProgress.completed progress
       |> List.filter_map ~f:(function
              | Check { path; was_already_deferred = _ } -> Some path
-             | Declare _
-             | Prefetch _ ->
-               None)
+             | Declare _ -> None)
       |> Relative_path.Set.of_list
     in
     let (diag, time_errors_pushed) =
@@ -573,11 +554,9 @@ let possibly_push_new_errors_to_lsp_client :
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
 let merge
-    ~(should_prefetch_deferred_files : bool)
     ~(batch_counts_by_worker_id : int SMap.t ref)
     ~(errors_so_far : int ref)
     ~(check_info : check_info)
-    (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_initial_count : int)
     (workitems_in_progress : workitem Hash_set.t)
@@ -598,22 +577,10 @@ let merge
       in
       batch_counts_by_worker_id :=
         SMap.add worker_id (prev_batch_count + 1) !batch_counts_by_worker_id
-    | DelegateProgress _ -> ()
-    | SimpleDelegateProgress _ -> ()
   end;
 
   (* And error count *)
   errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
-
-  (* Merge in remote-worker results *)
-  begin
-    match progress_kind with
-    | Progress -> ()
-    | SimpleDelegateProgress _ -> ()
-    | DelegateProgress _ ->
-      delegate_state :=
-        Delegate.merge !delegate_state produced_by_job.errors progress
-  end;
 
   workitems_to_process :=
     BigList.append (TypingProgress.remaining progress) !workitems_to_process;
@@ -622,30 +589,11 @@ let merge
   workitems_to_process :=
     BigList.append (TypingProgress.deferred progress) !workitems_to_process;
 
-  (* Prefetch the deferred files, if necessary *)
-  workitems_to_process :=
-    if
-      should_prefetch_deferred_files
-      && List.length (TypingProgress.deferred progress) > 10
-    then
-      let files_to_prefetch =
-        List.fold
-          (TypingProgress.deferred progress)
-          ~init:[]
-          ~f:(fun acc computation ->
-            match computation with
-            | Declare (path, _) -> path :: acc
-            | _ -> acc)
-      in
-      BigList.cons (Prefetch files_to_prefetch) !workitems_to_process
-    else
-      !workitems_to_process;
-
   (* If workers can steal work from each other, then it's possible that
      some of the files that the current worker completed checking have already
      been removed from the in-progress set. Thus, we should keep track of
      how many type check computations we actually remove from the in-progress
-     set. Note that we also skip counting Declare and Prefetch computations,
+     set. Note that we also skip counting Declare computations,
      since they are not relevant for computing how many files we've type
      checked. *)
   let completed_check_count =
@@ -682,7 +630,7 @@ let merge
     ~done_count:!files_checked_count
     ~total_count:workitems_initial_count
     ~unit:"files"
-    ~extra:(Typing_service_delegate.get_progress !delegate_state);
+    ~extra:None;
 
   (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
   if check_info.log_errors then
@@ -709,13 +657,9 @@ let merge
 
 let next
     (workers : MultiWorker.worker list option)
-    (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_in_progress : workitem Hash_set.Poly.t)
-    (workitems_processed_count : int ref)
-    (remote_payloads : remote_computation_payload list ref)
-    (record : Measure.record)
-    (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
+    (record : Measure.record) : unit -> job_progress Bucket.bucket =
   let num_workers =
     match workers with
     | Some w -> List.length w
@@ -731,98 +675,31 @@ let next
   fun () ->
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
-    let controller_started = Delegate.controller_started !delegate_state in
-    let delegate_job =
-      (*
-          This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
-          or in other words the local typechecker is done with its work. We'll try and download all the remote
-          worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
-          remote worker and have the local worker "steal" the work.
-        *)
-      let remote_workitems_to_process_length =
-        List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
-            acc + BigList.length payload.payload)
-      in
-      let ( remaining_local_workitems_to_process,
-            controller,
-            remaining_payloads,
-            job,
-            _telemetry ) =
-        Typing_service_delegate.collect
-          ~telemetry
-          !delegate_state
-          !workitems_to_process
-          workitems_to_process_length
-          !remote_payloads
-      in
-      (* Update the total workitems_processed_count after remote workers
-         have made progress, so we can update the progress bar with the
-         correct number of files typechecked.
-      *)
-      (if List.length !remote_payloads > List.length remaining_payloads then
-        let remaining_remote_workitems_to_process =
-          List.fold ~init:0 remaining_payloads ~f:(fun acc payload ->
-              acc + BigList.length payload.payload)
-        in
-        let local_processed_count =
-          !workitems_processed_count
-          - BigList.length remaining_local_workitems_to_process
-        in
-        let remote_processed_count =
-          remote_workitems_to_process_length
-          - remaining_remote_workitems_to_process
-        in
-        workitems_processed_count :=
-          local_processed_count + remote_processed_count);
 
-      workitems_to_process := remaining_local_workitems_to_process;
-      delegate_state := controller;
-      remote_payloads := remaining_payloads;
-
-      job
-    in
-
-    let (state, delegate_job) = (!delegate_state, delegate_job) in
-    delegate_state := state;
-
-    (* If a delegate job is returned, then that means that it should be done
-       by the next MultiWorker worker (the one for whom we're creating a job
-       in this function). If delegate job is None, then the regular (local
-       type checking) logic applies. *)
-    match delegate_job with
-    | Some { current_bucket; remaining_jobs; job } ->
-      if controller_started then
-        return_bucket_job
-          (SimpleDelegateProgress job)
-          ~current_bucket
-          ~remaining_jobs
-      else
-        return_bucket_job (DelegateProgress job) ~current_bucket ~remaining_jobs
-    | None ->
-      (* WARNING: the following List.length is costly - for a full init, files_to_process starts
-         out as the size of the entire repo, and we're traversing the entire list. *)
-      (match workitems_to_process_length with
-      | 0 when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
-      | 0 -> Bucket.Wait
-      | _ ->
-        let jobs = !workitems_to_process in
-        begin
-          match num_workers with
-          (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
-          | 0 ->
-            return_bucket_job Progress ~current_bucket:[] ~remaining_jobs:jobs
-          | _ ->
-            let bucket_size =
-              Bucket.calculate_bucket_size
-                ~num_jobs:workitems_to_process_length
-                ~num_workers
-                ()
-            in
-            let (current_bucket, remaining_jobs) =
-              BigList.split_n jobs bucket_size
-            in
-            return_bucket_job Progress ~current_bucket ~remaining_jobs
-        end)
+    (* WARNING: the following List.length is costly - for a full init, files_to_process starts
+        out as the size of the entire repo, and we're traversing the entire list. *)
+    match workitems_to_process_length with
+    | 0 when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
+    | 0 -> Bucket.Wait
+    | _ ->
+      let jobs = !workitems_to_process in
+      begin
+        match num_workers with
+        (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)
+        | 0 ->
+          return_bucket_job Progress ~current_bucket:[] ~remaining_jobs:jobs
+        | _ ->
+          let bucket_size =
+            Bucket.calculate_bucket_size
+              ~num_jobs:workitems_to_process_length
+              ~num_workers
+              ()
+          in
+          let (current_bucket, remaining_jobs) =
+            BigList.split_n jobs bucket_size
+          in
+          return_bucket_job Progress ~current_bucket ~remaining_jobs
+      end
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)
@@ -1021,7 +898,6 @@ let process_in_parallel
     ?diagnostic_pusher
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
-    (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (workitems : workitem BigList.t)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
@@ -1030,62 +906,22 @@ let process_in_parallel
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
-    * Delegate.state
     * Telemetry.t
     * _
     * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
     * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let record = Measure.create () in
   (* [record] is used by [next] *)
-  let delegate_state = ref delegate_state in
   let workitems_to_process = ref workitems in
   let workitems_in_progress = Hash_set.Poly.create () in
-  let workitems_processed_count = ref 0 in
   let workitems_initial_count = BigList.length workitems in
-  let remote_payloads = ref [] in
+  let workitems_processed_count = ref 0 in
   let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
   let errors_so_far = ref 0 in
-  let controller_started = Delegate.controller_started !delegate_state in
   let batch_counts_by_worker_id = ref SMap.empty in
 
-  let (telemetry, telemetry_start_t) : Telemetry.t * float option =
-    if controller_started then (
-      Hh_logger.log "Dispatch hulk lite initial payloads";
-      let workitems_to_process_length = BigList.length !workitems_to_process in
-      let ( payloads,
-            workitems,
-            controller,
-            (dispatch_telemetry, hulk_dispatch_start_t) ) =
-        Typing_service_delegate.dispatch
-          !delegate_state
-          !workitems_to_process
-          workitems_to_process_length
-      in
-      remote_payloads := payloads;
-      workitems_to_process := workitems;
-      delegate_state := controller;
-      (dispatch_telemetry, Some hulk_dispatch_start_t)
-    ) else
-      (telemetry, None)
-  in
-
-  let next =
-    next
-      workers
-      delegate_state
-      workitems_to_process
-      workitems_in_progress
-      workitems_processed_count
-      remote_payloads
-      record
-      telemetry
-  in
-  let should_prefetch_deferred_files =
-    Vfs.is_vfs ()
-    && TypecheckerOptions.prefetch_deferred_files
-         (Provider_context.get_tcopt ctx)
-  in
+  let next = next workers workitems_to_process workitems_in_progress record in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
   let job (typing_result : typing_result) (progress : job_progress) :
@@ -1107,11 +943,6 @@ let process_in_parallel
             |> Option.value ~default:0)
           typing_result
           progress.progress
-      | DelegateProgress job
-      | SimpleDelegateProgress job ->
-        let (result, completed) = Delegate.process job in
-        let progress = TypingProgress.of_completed completed in
-        (result, progress)
     in
     (worker_id, typing_result, { progress with progress = computation_progress })
   in
@@ -1122,11 +953,9 @@ let process_in_parallel
       ~neutral:(neutral ())
       ~merge:
         (merge
-           ~should_prefetch_deferred_files
            ~batch_counts_by_worker_id
            ~errors_so_far
            ~check_info
-           delegate_state
            workitems_to_process
            workitems_initial_count
            workitems_in_progress
@@ -1156,24 +985,7 @@ let process_in_parallel
     Option.map cancelled_results ~f:(fun (unfinished, reason) ->
         (paths_of unfinished, reason))
   in
-  let _ =
-    if controller_started then
-      HackEventLogger.hulk_type_check_end
-        telemetry
-        workitems_initial_count
-        ~start_t:
-          (Option.value_exn
-             telemetry_start_t
-             ~message:"Unexpected missing telemetry start time for Hulk Lite")
-    else
-      ()
-  in
-
-  (* We want to ensure controller state is reset for the recheck *)
-  delegate_state := Typing_service_delegate.stop !delegate_state;
-
   ( typing_result,
-    !delegate_state,
     telemetry,
     env,
     cancelled_results,
@@ -1244,7 +1056,6 @@ module Mocking =
 
 type result = {
   errors: Errors.t;
-  delegate_state: Delegate.state;
   telemetry: Telemetry.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
@@ -1273,7 +1084,6 @@ let go_with_interrupt
     ?(diagnostic_pusher : Diagnostic_pusher.t option)
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
-    (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
@@ -1337,7 +1147,6 @@ let go_with_interrupt
   in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let ( typing_result,
-        delegate_state,
         telemetry,
         env,
         cancelled_fnl_and_reason,
@@ -1363,7 +1172,6 @@ let go_with_interrupt
                 dep_edges;
                 profiling_info;
               },
-              delegate_state,
               telemetry,
               env,
               None,
@@ -1377,7 +1185,6 @@ let go_with_interrupt
                 dep_edges = Typing_deps.dep_edges_make ();
                 profiling_info;
               },
-              delegate_state,
               telemetry,
               env,
               Some (original_fnl, reason),
@@ -1403,7 +1210,6 @@ let go_with_interrupt
         ?diagnostic_pusher
         ctx
         workers
-        delegate_state
         telemetry
         fnl
         ~interrupt
@@ -1420,13 +1226,11 @@ let go_with_interrupt
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in
-  ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
-    cancelled_fnl_and_reason )
+  ((env, { errors; telemetry; diagnostic_pusher }), cancelled_fnl_and_reason)
 
 let go
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
-    (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
     ~(root : Path.t option)
@@ -1441,7 +1245,6 @@ let go
       ?diagnostic_pusher:None
       ctx
       workers
-      delegate_state
       telemetry
       fnl
       ~root

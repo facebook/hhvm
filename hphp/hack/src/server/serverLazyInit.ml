@@ -1015,16 +1015,6 @@ let full_init
       ~source:SearchUtils.Init;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let fnl = Relative_path.Map.keys defs_per_file in
-  let env =
-    if is_check_mode then
-      ServerCheckUtils.start_delegate_if_needed
-        env
-        genv
-        (List.length fnl)
-        env.errorl
-    else
-      env
-  in
   ServerInitCommon.defer_or_do_type_check
     genv
     env

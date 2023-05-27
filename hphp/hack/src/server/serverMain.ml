@@ -1226,67 +1226,47 @@ let serve genv env in_fds =
  * 6. Otherwise, load it normally!
  *)
 let resolve_init_approach genv : ServerInit.init_approach * string =
-  let nonce = genv.local_config.ServerLocalConfig.remote_nonce in
-  match
-    ( genv.local_config.ServerLocalConfig.remote_worker_key,
-      genv.local_config.ServerLocalConfig.remote_check_id )
-  with
-  | (Some worker_key, Some check_id) ->
-    let remote_init = ServerInit.{ worker_key; nonce; check_id } in
-    (ServerInit.Remote_init remote_init, "Server_args_remote_worker")
-  | (Some worker_key, None) ->
-    let check_id = Random_id.short_string () in
-    let remote_init = ServerInit.{ worker_key; nonce; check_id } in
-    (ServerInit.Remote_init remote_init, "Server_args_remote_worker")
-  | (None, Some check_id) ->
-    failwith
-      (Printf.sprintf
-         "Remote check ID is specified (%s), but the remote worker ID is not"
-         check_id)
-  | (None, None) ->
-    if
-      Option.is_some (ServerArgs.save_naming_filename genv.options)
-      && Option.is_none (ServerArgs.save_filename genv.options)
-    then
-      (ServerInit.Parse_only_init, "Server_args_saving_naming")
-    else if ServerArgs.no_load genv.options then
-      (ServerInit.Full_init, "Server_args_no_load")
-    else if Option.is_some (ServerArgs.save_filename genv.options) then
-      (ServerInit.Full_init, "Server_args_saving_state")
-    else if
-      (not genv.local_config.ServerLocalConfig.use_saved_state)
-      && Option.is_none (ServerArgs.write_symbol_info genv.options)
-    then
-      (ServerInit.Full_init, "Local_config_saved_state_disabled")
-    else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
-      match
-        ( genv.local_config.ServerLocalConfig.use_saved_state_when_indexing,
-          ServerArgs.with_saved_state genv.options )
-      with
-      | (false, None) ->
-        (ServerInit.Write_symbol_info, "Server_args_writing_symbol_info")
-      | (true, None) ->
-        ( ServerInit.Write_symbol_info_with_state ServerInit.Load_state_natively,
-          "Server_args_writing_symbol_info_load_native" )
-      | (_, Some (ServerArgs.Saved_state_target_info target)) ->
-        ( ServerInit.Write_symbol_info_with_state (ServerInit.Precomputed target),
-          "Server_args_writing_symbol_info_precomputed" )
-    else (
-      match
-        ( genv.local_config.ServerLocalConfig.load_state_natively,
-          ServerArgs.with_saved_state genv.options )
-      with
-      | (_, Some (ServerArgs.Saved_state_target_info target)) ->
-        ( ServerInit.Saved_state_init (ServerInit.Precomputed target),
-          "Precomputed" )
-      | (false, None) ->
-        (ServerInit.Full_init, "No_native_loading_or_precomputed")
-      | (true, None) ->
-        (* Use native loading only if the config specifies a load script,
-         * and the local config prefers native. *)
-        ( ServerInit.Saved_state_init ServerInit.Load_state_natively,
-          "Load_state_natively" )
-    )
+  if
+    Option.is_some (ServerArgs.save_naming_filename genv.options)
+    && Option.is_none (ServerArgs.save_filename genv.options)
+  then
+    (ServerInit.Parse_only_init, "Server_args_saving_naming")
+  else if ServerArgs.no_load genv.options then
+    (ServerInit.Full_init, "Server_args_no_load")
+  else if Option.is_some (ServerArgs.save_filename genv.options) then
+    (ServerInit.Full_init, "Server_args_saving_state")
+  else if
+    (not genv.local_config.ServerLocalConfig.use_saved_state)
+    && Option.is_none (ServerArgs.write_symbol_info genv.options)
+  then
+    (ServerInit.Full_init, "Local_config_saved_state_disabled")
+  else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
+    match
+      ( genv.local_config.ServerLocalConfig.use_saved_state_when_indexing,
+        ServerArgs.with_saved_state genv.options )
+    with
+    | (false, None) ->
+      (ServerInit.Write_symbol_info, "Server_args_writing_symbol_info")
+    | (true, None) ->
+      ( ServerInit.Write_symbol_info_with_state ServerInit.Load_state_natively,
+        "Server_args_writing_symbol_info_load_native" )
+    | (_, Some (ServerArgs.Saved_state_target_info target)) ->
+      ( ServerInit.Write_symbol_info_with_state (ServerInit.Precomputed target),
+        "Server_args_writing_symbol_info_precomputed" )
+  else
+    match
+      ( genv.local_config.ServerLocalConfig.load_state_natively,
+        ServerArgs.with_saved_state genv.options )
+    with
+    | (_, Some (ServerArgs.Saved_state_target_info target)) ->
+      ( ServerInit.Saved_state_init (ServerInit.Precomputed target),
+        "Precomputed" )
+    | (false, None) -> (ServerInit.Full_init, "No_native_loading_or_precomputed")
+    | (true, None) ->
+      (* Use native loading only if the config specifies a load script,
+       * and the local config prefers native. *)
+      ( ServerInit.Saved_state_init ServerInit.Load_state_natively,
+        "Load_state_natively" )
 
 let program_init genv env =
   Hh_logger.log "Init id: %s" env.init_env.init_id;
@@ -1307,7 +1287,6 @@ let program_init genv env =
   let (env, init_type, init_error, init_error_telemetry, saved_state_delta) =
     let (env, init_result) = ServerInit.init ~init_approach genv env in
     match init_approach with
-    | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
     | ServerInit.Write_symbol_info
     | ServerInit.Full_init ->
       (env, "fresh", None, None, None)

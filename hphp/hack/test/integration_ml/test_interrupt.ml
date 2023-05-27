@@ -91,7 +91,6 @@ let test () =
     Typing_check_service.go_with_interrupt
       ctx
       workers
-      Typing_service_delegate.default
       (Telemetry.create ())
       fnl
       ~root:None

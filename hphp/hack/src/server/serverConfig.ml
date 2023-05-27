@@ -478,18 +478,6 @@ let load ~silent options : t * ServerLocalConfig.t =
   let global_opts =
     let local_config_opts =
       GlobalOptions.set
-        ~tco_remote_type_check_threshold:
-          ServerLocalConfig.RemoteTypeCheck.(
-            local_config.remote_type_check.remote_type_check_recheck_threshold)
-        ?tco_remote_type_check:
-          ServerLocalConfig.RemoteTypeCheck.(
-            Some local_config.remote_type_check.enabled)
-        ?tco_remote_worker_key:local_config.remote_worker_key
-        ?tco_remote_check_id:local_config.remote_check_id
-        ?tco_num_remote_workers:
-          ServerLocalConfig.RemoteTypeCheck.(
-            Some local_config.remote_type_check.num_workers)
-        ?so_remote_version_specifier:local_config.remote_version_specifier
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_ide_should_use_hack_64_distc:
           (Some local_config.ide_should_use_hack_64_distc)

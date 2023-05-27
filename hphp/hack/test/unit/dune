@@ -35,7 +35,6 @@
   server_monitor
   telemetry_test_utils
   typing_check
-  typing_service_api
   unit_test))
 
 (rule

@@ -12,17 +12,10 @@ type load_state_approach =
   (* Load a saved state using Ocaml implementation of saved state loader. *)
   | Load_state_natively
 
-type remote_init = {
-  worker_key: string;
-  nonce: Int64.t;
-  check_id: string;
-}
-
 type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
-  | Remote_init of remote_init
   | Write_symbol_info
   | Write_symbol_info_with_state of load_state_approach
 

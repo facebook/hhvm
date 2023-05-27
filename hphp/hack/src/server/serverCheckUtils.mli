@@ -22,9 +22,6 @@ val user_filter_type_check_files :
   is_ide_file:(Relative_path.t -> bool) ->
   Relative_path.Set.t
 
-val start_delegate_if_needed :
-  ServerEnv.env -> ServerEnv.genv -> int -> Errors.t -> ServerEnv.env
-
 val get_naming_table_fallback_path : ServerEnv.genv -> string option
 
 (** [extend_defs_per_file genv defs_per_file naming_table additional_files]

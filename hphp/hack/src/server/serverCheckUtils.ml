@@ -9,7 +9,6 @@
 open Hh_prelude
 open ServerEnv
 open ServerLocalConfig
-include ServerRemoteUtils
 
 let get_naming_table_fallback_path genv : string option =
   match genv.local_config.naming_sqlite_path with

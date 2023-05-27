@@ -62,9 +62,11 @@ module Constants = struct
   let errors12 file : Errors.t =
     Errors.from_file_error_list [(file, error1); (file, error2)]
 
-  let errors_of_list phase list =
+  let errors_of_list list =
     List.map list ~f:(fun (file, errors) ->
-        (file, Errors.PhaseMap.of_list [(phase, errors)]))
+        ( file,
+          Diagnostic_pusher.PhaseMap.of_list
+            [(Diagnostic_pusher.PhaseSingleton, errors)] ))
     |> FileMap.of_list
 end
 
@@ -82,13 +84,11 @@ module ErrorTrackerTest = struct
   let make_no_limit = make ~errors_beyond_limit:FileMap.empty
 
   let test_never_commit _ =
-    let phase = Errors.Typing in
     let tracker = init in
 
     (* Errors are [file1 -> error1] *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files1
         ~new_errors:(errors1 file1)
@@ -97,14 +97,13 @@ module ErrorTrackerTest = struct
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:FileMap.empty
-        ~to_push:(errors_of_list phase [(file1, [error1])])
+        ~to_push:(errors_of_list [(file1, [error1])])
     in
     assert_equal_trackers expected_tracker tracker;
 
     (* Now errors are [file1 -> error2], and we were not able to push to client. *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files1
         ~new_errors:(errors2 file1)
@@ -113,14 +112,13 @@ module ErrorTrackerTest = struct
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:FileMap.empty
-        ~to_push:(errors_of_list phase [(file1, [error2])])
+        ~to_push:(errors_of_list [(file1, [error2])])
     in
     assert_equal_trackers expected_tracker tracker;
 
     (* Now there are no more errors, and we were still unable to push to client. *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files1
         ~new_errors:no_errors
@@ -134,19 +132,17 @@ module ErrorTrackerTest = struct
     ()
 
   let test_push_commit_erase _ =
-    let phase = Errors.Typing in
     let tracker = init in
 
     (* Errors are [file1 -> [error1; error2] *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files12
         ~new_errors:(errors12 file1)
         ~priority_files:None
     in
-    let expected_to_push = errors_of_list phase [(file1, [error1; error2])] in
+    let expected_to_push = errors_of_list [(file1, [error1; error2])] in
     let expected_tracker =
       make_no_limit ~errors_in_ide:FileMap.empty ~to_push:expected_to_push
     in
@@ -163,13 +159,12 @@ module ErrorTrackerTest = struct
     (* Now errors are [file1 -> [error1] *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files12
         ~new_errors:(errors1 file1)
         ~priority_files:None
     in
-    let expected_to_push = errors_of_list phase [(file1, [error1])] in
+    let expected_to_push = errors_of_list [(file1, [error1])] in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:expected_errors_in_ide
@@ -188,13 +183,12 @@ module ErrorTrackerTest = struct
     (* Now errors are empty *)
     let (tracker, _errors) =
       get_errors_to_push
-        ~phase
         tracker
         ~rechecked:files1
         ~new_errors:no_errors
         ~priority_files:None
     in
-    let expected_to_push = errors_of_list phase [(file1, [])] in
+    let expected_to_push = errors_of_list [(file1, [])] in
     let expected_tracker =
       make_no_limit
         ~errors_in_ide:expected_errors_in_ide
@@ -313,9 +307,7 @@ let test_initially_no_client _ =
 let test_disconnects _ =
   let pusher = Diagnostic_pusher.init in
 
-  let errors =
-    Errors.from_file_error_list ~phase:Errors.Typing [(file1, error1)]
-  in
+  let errors = Errors.from_file_error_list [(file1, error1)] in
   let errors1_absolute = errors1_absolute file1_absolute in
   let (pusher, _) =
     Diagnostic_pusher.push_new_errors pusher ~rechecked:files1 errors

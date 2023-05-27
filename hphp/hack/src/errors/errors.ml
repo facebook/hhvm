@@ -15,23 +15,7 @@ type error_code = int
 type phase =
   | Typing
       (** these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file *)
-[@@deriving eq, show, enum]
-
-let _ = max_phase
-
-let phases_up_to_excl : phase -> phase list =
- fun phase ->
-  let range_incl_excl i j =
-    let rec aux n acc =
-      if n < i then
-        acc
-      else
-        aux (n - 1) (n :: acc)
-    in
-    aux (j - 1) []
-  in
-  range_incl_excl min_phase (phase_to_enum phase)
-  |> List.map ~f:(fun enum -> Option.value_exn (phase_of_enum enum))
+[@@deriving eq, show]
 
 type format =
   | Context  (** Underlined references and color *)
@@ -63,8 +47,6 @@ module PhaseMap = struct
   end))
 
   let pp pp_data = make_pp pp_phase pp_data
-
-  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 end
 
 (** Results of single file analysis. *)
@@ -338,15 +320,6 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)
-let phase_to_string (phase : phase) : string =
-  match phase with
-  | Typing -> "Typing"
-
-let phase_of_string (value : string) : phase option =
-  match Caml.String.lowercase_ascii value with
-  | "typing" -> Some Typing
-  | _ -> None
-
 let compare_internal
     (x : ('a, 'b) User_error.t)
     (y : ('a, 'b) User_error.t)
@@ -870,8 +843,9 @@ let get_current_span () = !current_span
 
 and empty = Relative_path.Map.empty
 
-let from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t =
- fun ?(phase = Typing) errors ->
+let from_file_error_list : (Relative_path.t * error) list -> t =
+ fun errors ->
+  let phase = Typing in
   List.fold errors ~init:Relative_path.Map.empty ~f:(fun errors (file, error) ->
       let errors_for_file =
         Relative_path.Map.find_opt errors file

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c978a1d59d9b92fc9e09dc57180256a5>>
+// @generated SignedSource<<ca49e2341a2861d98bf7c22e030ac040>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,7 +44,7 @@ pub type ErrorCode = isize;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, enum)")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum Phase {
     /// these are errors that come from [Typing_check_service.process_workitem], which is what parses and typechecks a file

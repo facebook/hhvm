@@ -8,13 +8,30 @@
 
 open Hh_prelude
 open Option.Monad_infix
+open Reordered_argument_collections
 
 type error = Errors.error [@@deriving show]
 
 type seconds_since_epoch = float
 
+type phase = PhaseSingleton [@@deriving eq, show]
+
+module PhaseMap = struct
+  include Reordered_argument_map (WrappedMap.Make (struct
+    type t = phase
+
+    let rank = function
+      | PhaseSingleton -> 4
+
+    let compare x y = rank x - rank y
+  end))
+
+  let pp pp_data = make_pp pp_phase pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+end
+
 module FileMap = Relative_path.Map
-module PhaseMap = Errors.PhaseMap
 
 (** A 2D map from files to phases to errors, with the usual map helpers. *)
 module ErrorMap = struct
@@ -40,12 +57,7 @@ module ErrorMap = struct
       If the file is not already present in the map, initialize its phase map
       with the phase map for that file from [init_phase_map_from] *)
   let set :
-      t ->
-      Relative_path.t ->
-      Errors.phase ->
-      errors ->
-      init_phase_map_from:t ->
-      t =
+      t -> Relative_path.t -> phase -> errors -> init_phase_map_from:t -> t =
    fun map file phase data ~init_phase_map_from:init_map ->
     FileMap.find_opt map file
     |> Option.value
@@ -79,7 +91,6 @@ module ErrorTracker : sig
     t ->
     rechecked:Relative_path.Set.t ->
     new_errors:Errors.t ->
-    phase:Errors.phase ->
     priority_files:Relative_path.Set.t option ->
     t * ServerCommandTypes.diagnostic_errors
 
@@ -143,7 +154,7 @@ end = struct
       errors_in_ide:ErrorMap.t ->
       rechecked:Relative_path.Set.t ->
       new_errors:error list FileMap.t ->
-      phase:Errors.phase ->
+      phase:phase ->
       ErrorMap.t =
    fun to_push ~errors_in_ide ~rechecked ~new_errors ~phase ->
     let to_push =
@@ -174,7 +185,7 @@ end = struct
   let erase_errors :
       errors_in_ide:ErrorMap.t ->
       rechecked:Relative_path.Set.t ->
-      phase:Errors.phase ->
+      phase:phase ->
       ErrorMap.t ->
       ErrorMap.t =
    fun ~errors_in_ide ~rechecked ~phase to_push ->
@@ -304,20 +315,19 @@ end = struct
           PhaseMap.fold phase_map ~init:[] ~f:(fun _phase -> ( @ ))
           |> List.map ~f:User_error.to_absolute
         in
-        SMap.add path file_errors errors_acc)
+        SMap.add ~key:path ~data:file_errors errors_acc)
 
   let get_errors_to_push :
       t ->
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
-      phase:Errors.phase ->
       priority_files:Relative_path.Set.t option ->
       t * ServerCommandTypes.diagnostic_errors =
    fun { errors_in_ide; to_push; errors_beyond_limit }
        ~rechecked
        ~new_errors
-       ~phase
        ~priority_files ->
+    let phase = PhaseSingleton in
     let new_errors : error list FileMap.t =
       Errors.as_map (Errors.drop_fixmed_errors_in_files new_errors)
     in
@@ -484,7 +494,6 @@ let push_new_errors :
     Errors.t ->
     t * seconds_since_epoch option =
  fun pusher ~rechecked new_errors ->
-  let phase = Errors.Typing in
   let ({ error_tracker; tracked_ide_id }, (client, priority_files)) =
     get_client pusher
   in
@@ -493,7 +502,6 @@ let push_new_errors :
       error_tracker
       ~rechecked
       ~new_errors
-      ~phase
       ~priority_files
   in
   let push_result =

@@ -34,6 +34,17 @@ val push_whats_left : t -> t * seconds_since_epoch option
 
 val get_files_with_diagnostics : t -> Relative_path.t list
 
+(** This is a dummy placeholder *)
+type phase = PhaseSingleton [@@deriving eq]
+
+module PhaseMap : sig
+  include Reordered_argument_collections.Map_S with type key = phase
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
+end
+
 (** Module to export internal functions for unit testing. Do not use in production code. *)
 module TestExporter : sig
   module FileMap : module type of Relative_path.Map
@@ -47,7 +58,6 @@ module TestExporter : sig
       t ->
       rechecked:Relative_path.Set.t ->
       new_errors:Errors.t ->
-      phase:Errors.phase ->
       priority_files:Relative_path.Set.t option ->
       t * Errors.finalized_error list SMap.t
 
@@ -55,9 +65,9 @@ module TestExporter : sig
 
     module TestExporter : sig
       val make :
-        errors_in_ide:Errors.error list Errors.PhaseMap.t FileMap.t ->
-        to_push:Errors.error list Errors.PhaseMap.t FileMap.t ->
-        errors_beyond_limit:Errors.error list Errors.PhaseMap.t FileMap.t ->
+        errors_in_ide:Errors.error list PhaseMap.t FileMap.t ->
+        to_push:Errors.error list PhaseMap.t FileMap.t ->
+        errors_beyond_limit:Errors.error list PhaseMap.t FileMap.t ->
         t
 
       val with_error_limit : int -> (unit -> 'result) -> 'result

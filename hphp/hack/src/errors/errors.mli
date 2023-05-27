@@ -12,17 +12,6 @@ type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, show]
 type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, show]
 
-(* The analysis phase that the error is coming from. *)
-type phase = Typing [@@deriving eq]
-
-module PhaseMap : sig
-  include Reordered_argument_collections.Map_S with type key = phase
-
-  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
-
-  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
-end
-
 type format =
   | Context
   | Raw
@@ -42,13 +31,11 @@ module ErrorSet : Caml.Set.S with type elt := error
 module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
 
 (** [t] is an efficient for use inside hh_server or other places that compute errors,
-which also supports incremental updates based on file/phase.
+which also supports incremental updates based on file.
 But it should not be transferred to other processes such as [hh_client] since they
 for instance won't know the Hhi path that was used, and hence can't print errors.
 They should use [finalized_error list] instead. *)
 val sort_and_finalize : t -> finalized_error list
-
-val phases_up_to_excl : phase -> phase list
 
 module Parsing : Error_category.S
 
@@ -84,10 +71,6 @@ val get_current_span : unit -> Pos.t
 val fixme_present : Pos.t -> int -> bool
 
 val code_agnostic_fixme : bool ref
-
-val phase_to_string : phase -> string
-
-val phase_of_string : string -> phase option
 
 val convert_errors_to_string :
   ?include_filename:bool -> error list -> string list
@@ -177,8 +160,7 @@ val drop_fixmed_errors :
 
 val drop_fixmed_errors_in_files : t -> t
 
-(** Default applied phase is Typing. *)
-val from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t
+val from_file_error_list : (Relative_path.t * error) list -> t
 
 val per_file_error_count : ?drop_fixmed:bool -> per_file_errors -> int
 

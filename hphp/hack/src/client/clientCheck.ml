@@ -355,13 +355,13 @@ let main_internal
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_RENAME_SOUND_DYNAMIC (ref_mode, name) ->
     let conn () = connect args in
-    let%lwt result = ClientRename.go_sound_dynamic conn args ref_mode name in
+    let%lwt result = ClientRename.go_sound_dynamic conn args ref_mode ~name in
     let () = Printf.printf "%s" result in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_RENAME ((ref_mode : rename_mode), before, after) ->
     let conn () = connect args in
     let%lwt () =
-      ClientRename.go conn ~desc:args.desc args ref_mode before after
+      ClientRename.go conn ~desc:args.desc args ref_mode ~before ~after
     in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_RENAME arg ->
@@ -371,7 +371,9 @@ let main_internal
       try
         match tpos with
         | [filename; line; char; new_name] ->
-          let filename = expand_path filename in
+          let filename =
+            expand_path filename |> Relative_path.create_detect_prefix
+          in
           (filename, int_of_string line, int_of_string char, new_name)
         | _ -> raise Exit
       with
@@ -380,7 +382,14 @@ let main_internal
         raise Exit_status.(Exit_with Input_error)
     in
     let%lwt () =
-      ClientRename.go_ide conn ~desc:args.desc args filename line char new_name
+      ClientRename.go_ide
+        conn
+        ~desc:args.desc
+        args
+        ~filename
+        ~line
+        ~char
+        ~new_name
     in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_RENAME_BY_SYMBOL arg ->
@@ -388,6 +397,7 @@ let main_internal
     let (new_name, action, filename, symbol_definition) =
       Rename.string_to_args arg
     in
+    let filename = Relative_path.create_detect_prefix filename in
     let%lwt results =
       rpc_with_retry args
       @@ Rpc.IDE_RENAME_BY_SYMBOL (action, new_name, filename, symbol_definition)

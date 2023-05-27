@@ -318,9 +318,10 @@ let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
     | Ast_defs.Cinterface -> true
     | _ -> false)
 
-(* Produce a "deprecated" version of the old function so that calls to it can be rerouted *)
+(* Produce a "deprecated" version of the old function so that calls to it can be rerouted.
+   If the [filename] or [definition] parameters are None, this is a no-op. *)
 let get_deprecated_wrapper_patch
-    ~(filename : string option)
+    ~(filename : Relative_path.t option)
     ~(definition : string SymbolDefinition.t option)
     ~(ctx : Provider_context.t)
     (new_name : string) : patch option =
@@ -343,9 +344,7 @@ let get_deprecated_wrapper_patch
         let (_, col_start_plus1, _, _) = Pos.destruct_range definition.span in
         let col_start = col_start_plus1 - 1 in
         let (_ctx, entry) =
-          Provider_context.add_entry_if_missing
-            ~ctx
-            ~path:(Relative_path.create_detect_prefix filename)
+          Provider_context.add_entry_if_missing ~ctx ~path:filename
         in
         let cst_node =
           ServerSymbolDefinition.get_definition_cst_node_ctx
@@ -417,11 +416,7 @@ let get_deprecated_wrapper_patch
             ~func_ref
             new_name
         in
-        let filename =
-          find_def_filename
-            (Relative_path.create_detect_prefix filename)
-            definition
-        in
+        let filename = find_def_filename filename definition in
         let deprecated_wrapper_pos =
           get_pos_before_docblock_from_cst_node filename cst_node
         in
@@ -610,9 +605,17 @@ let go ctx action genv env =
          in
          let deprecated_wrapper_patch =
            match action with
-           | FunctionRename { filename; definition; _ } ->
+           | FunctionRename
+               { filename_for_deprecated_wrapper = filename; definition; _ } ->
              get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name
-           | MethodRename { filename; definition; class_name; old_name; _ } ->
+           | MethodRename
+               {
+                 filename_for_deprecated_wrapper = filename;
+                 definition;
+                 class_name;
+                 old_name;
+                 _;
+               } ->
              if
                method_might_support_dynamic
                  ctx
@@ -689,7 +692,6 @@ let go_for_single_file
     in
     let deprecated_wrapper_patch =
       let open ServerCommandTypes.Find_refs in
-      let filename = Relative_path.suffix filename in
       match find_refs_action with
       | Function _ ->
         get_deprecated_wrapper_patch
@@ -781,9 +783,7 @@ let go_ide_with_find_refs_action
 let go_ide ctx (filename, line, column) new_name genv env =
   let open SymbolDefinition in
   let (ctx, entry) =
-    Provider_context.add_entry_if_missing
-      ~ctx
-      ~path:(Relative_path.create_detect_prefix filename)
+    Provider_context.add_entry_if_missing ~ctx ~path:filename
   in
   let file_content = Provider_context.read_file_contents_exn entry in
   let definitions =
@@ -798,7 +798,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       let command =
         ServerRenameTypes.FunctionRename
           {
-            filename = Some filename;
+            filename_for_deprecated_wrapper = Some filename;
             definition = Some definition;
             old_name = function_name;
             new_name;
@@ -823,7 +823,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       let command =
         ServerRenameTypes.MethodRename
           {
-            filename = Some filename;
+            filename_for_deprecated_wrapper = Some filename;
             definition = Some definition;
             class_name;
             old_name = method_name;
@@ -835,7 +835,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       let command =
         ServerRenameTypes.LocalVarRename
           {
-            filename = Relative_path.create_detect_prefix filename;
+            filename;
             file_content;
             line;
             char = column;

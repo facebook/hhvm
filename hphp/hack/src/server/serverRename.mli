@@ -34,7 +34,7 @@ val go_sound_dynamic :
 
 val go_ide :
   Provider_context.t ->
-  string * int * int ->
+  Relative_path.t * int * int ->
   string ->
   ServerEnv.genv ->
   ServerEnv.env ->
@@ -56,7 +56,7 @@ val go_ide_with_find_refs_action :
   Provider_context.t ->
   find_refs_action:ServerCommandTypes.Find_refs.action ->
   new_name:string ->
-  filename:string ->
+  filename:Relative_path.t ->
   symbol_definition:string SymbolDefinition.t ->
   ServerEnv.genv ->
   ServerEnv.env ->

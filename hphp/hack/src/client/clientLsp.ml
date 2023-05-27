@@ -3830,6 +3830,7 @@ let do_documentRename
   let (filename, line, char) =
     lsp_file_position_to_hack (rename_params_to_document_position params)
   in
+  let filename = Relative_path.create_detect_prefix filename in
   let open Rename in
   let new_name = params.newName in
   let command =

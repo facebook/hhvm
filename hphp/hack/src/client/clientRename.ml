@@ -90,15 +90,18 @@ let go_sound_dynamic
     (conn : unit -> ClientConnect.conn Lwt.t)
     (args : client_check_env)
     (mode : rename_mode)
-    (name : string) =
+    ~(name : string) =
   let command =
     match mode with
     | Class -> ServerRenameTypes.ClassRename (name, "")
     | Function ->
-      let filename = None in
-      let definition = None in
       ServerRenameTypes.FunctionRename
-        { filename; definition; old_name = name; new_name = "" }
+        {
+          filename_for_deprecated_wrapper = None;
+          definition = None;
+          old_name = name;
+          new_name = "";
+        }
     | _ -> failwith "Unexpected Mode"
   in
   ClientConnect.rpc_with_retry conn ~desc:args.desc
@@ -108,10 +111,10 @@ let go_ide
     (conn : unit -> ClientConnect.conn Lwt.t)
     ~(desc : string)
     (args : client_check_env)
-    (filename : string)
-    (line : int)
-    (char : int)
-    (new_name : string) : unit Lwt.t =
+    ~(filename : Relative_path.t)
+    ~(line : int)
+    ~(char : int)
+    ~(new_name : string) : unit Lwt.t =
   let%lwt patches =
     ClientConnect.rpc_with_retry conn ~desc
     @@ ServerCommandTypes.IDE_RENAME
@@ -139,20 +142,21 @@ let go
     ~(desc : string)
     (args : client_check_env)
     (mode : rename_mode)
-    (before : string)
-    (after : string) : unit Lwt.t =
+    ~(before : string)
+    ~(after : string) : unit Lwt.t =
   let command =
     match mode with
     | Class -> ServerRenameTypes.ClassRename (before, after)
     | Function ->
-      (*
-        We set these to `None` here because we don't want to add a deprecated
-          wrapper after the rename. Likewise for `MethodRename`
-      *)
-      let filename = None in
-      let definition = None in
+      (* We set [filename_for_deprecated_wrapper] to None because we don't want
+         to add the wrapper. Likewise for [MethodRename]. *)
       ServerRenameTypes.FunctionRename
-        { filename; definition; old_name = before; new_name = after }
+        {
+          filename_for_deprecated_wrapper = None;
+          definition = None;
+          old_name = before;
+          new_name = after;
+        }
     | Method ->
       let befores = Str.split (Str.regexp "::") before in
       if List.length befores <> 2 then
@@ -168,12 +172,10 @@ let go
         Printf.printf "%s %s\n" before_class after_class;
         failwith "Before and After classname must match"
       ) else
-        let filename = None in
-        let definition = None in
         ServerRenameTypes.MethodRename
           {
-            filename;
-            definition;
+            filename_for_deprecated_wrapper = None;
+            definition = None;
             class_name = before_class;
             old_name = before_method;
             new_name = after_method;

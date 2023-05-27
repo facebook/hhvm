@@ -380,7 +380,7 @@ end
 
 module Ide_rename_type = struct
   type t = {
-    filename: string;
+    filename: Relative_path.t;
     line: int;
     char: int;
     new_name: string;
@@ -496,7 +496,7 @@ type _ t =
   | RENAME_CHECK_SD : ServerRenameTypes.action -> string Done_or_retry.t t
   | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
-      Find_refs.action * string * string * string SymbolDefinition.t
+      Find_refs.action * string * Relative_path.t * string SymbolDefinition.t
       -> Rename.ide_result_or_retry t
   | CODEMOD_SDT :
       string

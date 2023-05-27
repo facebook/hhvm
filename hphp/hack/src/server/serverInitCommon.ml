@@ -104,12 +104,10 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
 let validate_no_errors (phase : Errors.phase) (errors : Errors.t) : unit =
+  let _ = phase in
   let witness_opt =
-    Errors.fold_errors
-      ~phase
-      errors
-      ~init:None
-      ~f:(fun path _phase error _acc -> Some (path, error))
+    Errors.fold_errors errors ~init:None ~f:(fun path error _acc ->
+        Some (path, error))
   in
   match witness_opt with
   | None -> ()

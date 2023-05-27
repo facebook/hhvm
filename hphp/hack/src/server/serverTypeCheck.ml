@@ -150,21 +150,14 @@ let get_files_with_stale_errors
     | None ->
       fun init f ->
         (* Looking at global files *)
-        Errors.fold_errors
-          errors
-          ~phase:Errors.Typing
-          ~init
-          ~f:(fun source _phase error acc -> f source error acc)
+        Errors.fold_errors errors ~init ~f:(fun source error acc ->
+            f source error acc)
     | Some files ->
       fun init f ->
         (* Looking only at subset of files *)
         Relative_path.Set.fold files ~init ~f:(fun file acc ->
-            Errors.fold_errors_in
-              errors
-              ~file
-              ~phase:Errors.Typing
-              ~init:acc
-              ~f:(fun error acc -> f file error acc))
+            Errors.fold_errors_in errors ~file ~init:acc ~f:(fun error acc ->
+                f file error acc))
   in
   fold Relative_path.Set.empty (fun source error acc ->
       if
@@ -187,13 +180,10 @@ let push_errors_outside_files_to_errors_file
     ?(phase : Errors.phase option)
     (errors : Errors.t)
     ~(files : Relative_path.Set.t) : unit =
+  let _ = phase in
   let typing_errors_not_in_files_to_check =
     errors
-    |> Errors.fold_errors
-         ~drop_fixmed:true
-         ?phase
-         ~init:[]
-         ~f:(fun path _phase error acc ->
+    |> Errors.fold_errors ~drop_fixmed:true ~init:[] ~f:(fun path error acc ->
            if Relative_path.Set.mem files path then
              acc
            else

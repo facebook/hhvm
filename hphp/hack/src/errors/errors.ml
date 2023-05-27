@@ -918,26 +918,17 @@ let get_file_errors :
 let iter_error_list ?(drop_fixmed = true) f err =
   List.iter ~f (get_sorted_error_list ~drop_fixmed err)
 
-let fold_errors ?(drop_fixmed = true) ?phase err ~init ~f =
+let fold_errors ?(drop_fixmed = true) err ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in
-  match phase with
-  | None ->
-    files_t_fold err ~init ~f:(fun source phase errors acc ->
-        List.fold_right errors ~init:acc ~f:(f source phase))
-  | Some phase ->
-    Relative_path.Map.fold err ~init ~f:(fun source phases acc ->
-        match PhaseMap.find_opt phases phase with
-        | None -> acc
-        | Some errors -> List.fold_right errors ~init:acc ~f:(f source phase))
+  files_t_fold err ~init ~f:(fun source _phase errors acc ->
+      List.fold_right errors ~init:acc ~f:(f source))
 
-let fold_errors_in ?(drop_fixmed = true) ?phase err ~file ~init ~f =
+let fold_errors_in ?(drop_fixmed = true) err ~file ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in
   Relative_path.Map.find_opt err file
   |> Option.value ~default:PhaseMap.empty
-  |> PhaseMap.fold ~init ~f:(fun p errors acc ->
-         match phase with
-         | Some x when not (equal_phase x p) -> acc
-         | _ -> List.fold_right errors ~init:acc ~f)
+  |> PhaseMap.fold ~init ~f:(fun _phase errors acc ->
+         List.fold_right errors ~init:acc ~f)
 
 (* Get paths that have errors which haven't been HH_FIXME'd. *)
 let get_failed_files (err : t) phase =

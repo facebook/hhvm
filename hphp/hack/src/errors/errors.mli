@@ -190,15 +190,13 @@ val iter_error_list : ?drop_fixmed:bool -> (error -> unit) -> t -> unit
 
 val fold_errors :
   ?drop_fixmed:bool ->
-  ?phase:phase ->
   t ->
   init:'a ->
-  f:(Relative_path.t -> phase -> error -> 'a -> 'a) ->
+  f:(Relative_path.t -> error -> 'a -> 'a) ->
   'a
 
 val fold_errors_in :
   ?drop_fixmed:bool ->
-  ?phase:phase ->
   t ->
   file:Relative_path.t ->
   init:'a ->

@@ -31,7 +31,6 @@ pub use manual::lazy;
 pub use manual::local_id;
 pub use manual::local_id_map::LocalIdMap;
 pub use manual::namespace_env_impl;
-pub use manual::phase_map;
 pub use manual::s_map;
 pub use manual::s_set;
 pub use manual::saved_state_rollouts_impl;

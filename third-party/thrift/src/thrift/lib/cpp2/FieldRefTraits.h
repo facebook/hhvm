@@ -31,59 +31,59 @@ template <class T>
 class optional_boxed_field_ref;
 template <class T>
 class union_field_ref;
+template <class T>
+class intern_boxed_field_ref;
+template <class T>
+class terse_intern_boxed_field_ref;
 
 namespace detail {
 template <class T>
-struct is_field_ref : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_field_ref_v = false;
 template <class T>
-struct is_field_ref<field_ref<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_field_ref_v<field_ref<T>> = true;
 template <class T>
-struct is_required_field_ref : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_optional_field_ref_v = false;
 template <class T>
-struct is_required_field_ref<required_field_ref<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool
+    is_optional_field_ref_v<optional_field_ref<T>> = true;
 template <class T>
-struct is_optional_field_ref : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_required_field_ref_v = false;
 template <class T>
-struct is_optional_field_ref<optional_field_ref<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool
+    is_required_field_ref_v<required_field_ref<T>> = true;
 template <class T>
-struct is_optional_boxed_field_ref : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_optional_boxed_field_ref_v = false;
 template <class T>
-struct is_optional_boxed_field_ref<optional_boxed_field_ref<T>>
-    : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool
+    is_optional_boxed_field_ref_v<optional_boxed_field_ref<T>> = true;
 template <class T>
-struct is_union_field_ref : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_union_field_ref_v = false;
 template <class T>
-struct is_union_field_ref<union_field_ref<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_union_field_ref_v<union_field_ref<T>> =
+    true;
 template <class T>
-struct is_unique_ptr : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_intern_boxed_field_ref_v = false;
 template <class T>
-struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool
+    is_intern_boxed_field_ref_v<intern_boxed_field_ref<T>> = true;
 template <class T>
-struct is_shared_ptr : std::false_type {};
+FOLLY_INLINE_VARIABLE constexpr bool is_terse_intern_boxed_field_ref_v = false;
 template <class T>
-struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+FOLLY_INLINE_VARIABLE constexpr bool
+    is_terse_intern_boxed_field_ref_v<terse_intern_boxed_field_ref<T>> = true;
 template <class T>
-struct is_shared_or_unique_ptr
-    : folly::bool_constant<is_unique_ptr<T>::value || is_shared_ptr<T>::value> {
-};
+FOLLY_INLINE_VARIABLE constexpr bool is_unique_ptr_v = false;
+template <class T, class D>
+FOLLY_INLINE_VARIABLE constexpr bool is_unique_ptr_v<std::unique_ptr<T, D>> =
+    true;
+template <class T>
+FOLLY_INLINE_VARIABLE constexpr bool is_shared_ptr_v = false;
+template <class T>
+FOLLY_INLINE_VARIABLE constexpr bool is_shared_ptr_v<std::shared_ptr<T>> = true;
+template <class T>
+FOLLY_INLINE_VARIABLE constexpr bool is_shared_or_unique_ptr_v =
+    is_unique_ptr_v<T> || is_shared_ptr_v<T>;
 
-template <class T>
-constexpr bool is_field_ref_v = is_field_ref<T>::value;
-template <class T>
-constexpr bool is_optional_field_ref_v = is_optional_field_ref<T>::value;
-template <class T>
-constexpr bool is_required_field_ref_v = is_required_field_ref<T>::value;
-template <class T>
-constexpr bool is_optional_boxed_field_ref_v =
-    is_optional_boxed_field_ref<T>::value;
-template <class T>
-constexpr bool is_union_field_ref_v = is_union_field_ref<T>::value;
-template <class T>
-constexpr bool is_unique_ptr_v = is_unique_ptr<T>::value;
-template <class T>
-constexpr bool is_shared_ptr_v = is_shared_ptr<T>::value;
-template <class T>
-constexpr bool is_shared_or_unique_ptr_v = is_shared_or_unique_ptr<T>::value;
 } // namespace detail
 } // namespace thrift
 } // namespace apache

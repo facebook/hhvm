@@ -53,7 +53,7 @@ struct thru_field_ref_fn {
   template <
       typename T,
       typename D = folly::remove_cvref_t<T>,
-      std::enable_if_t<is_shared_or_unique_ptr<D>::value, int> = 0>
+      std::enable_if_t<is_shared_or_unique_ptr_v<D>, int> = 0>
   FOLLY_ERASE constexpr T&& operator()(T&& ref) const noexcept {
     return static_cast<T&&>(ref);
   }

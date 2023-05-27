@@ -30,9 +30,6 @@ namespace Facts {
 
 /**
  * Stripped-down interface to HPHP::StringData.
- *
- * In prod code, this wraps HPHP::StringData. In test code, this wraps
- * std::string.
  */
 struct StringPtr {
   explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {}

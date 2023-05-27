@@ -120,12 +120,11 @@ val run_and_check_for_errors : (unit -> 'a) -> 'a * bool
 val do_ : ?apply_fixmes:bool -> ?drop_fixmed:bool -> (unit -> 'a) -> t * 'a
 
 (** Return the list of errors caused by the function passed as parameter
-    along with its result.
-    The phase parameter determine the phase of the returned errors. *)
+    along with its result. *)
 val do_with_context :
-  ?drop_fixmed:bool -> Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
+  ?drop_fixmed:bool -> Relative_path.t -> (unit -> 'a) -> t * 'a
 
-val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
+val run_in_context : Relative_path.t -> (unit -> 'a) -> 'a
 
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,

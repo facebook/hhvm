@@ -23,7 +23,7 @@ let do_ opts files_info ctx =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
       in
       let check () = Ifc.check opts tast ctx in
-      let (new_errors, _) = Errors.do_with_context path Errors.Typing check in
+      let (new_errors, _) = Errors.do_with_context path check in
       errors @ Errors.get_error_list new_errors
     | _ -> errors
   in

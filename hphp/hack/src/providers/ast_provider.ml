@@ -57,7 +57,7 @@ let parse
       path
   in
   let (err, result) =
-    Errors.do_with_context path Errors.Typing @@ fun () ->
+    Errors.do_with_context path @@ fun () ->
     Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
   in
   let ast = result.Parser_return.ast in
@@ -95,7 +95,7 @@ let get_from_local_cache ~full ctx file_name =
         | Some _ ->
           (* It's up to Parsing_service to add parsing errors. *)
           let (err, result) =
-            Errors.do_with_context file_name Errors.Typing @@ fun () ->
+            Errors.do_with_context file_name @@ fun () ->
             Full_fidelity_ast.defensive_program
               ~quick:(not full)
               popt

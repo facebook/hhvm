@@ -197,7 +197,7 @@ let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
       (* Get parse errors *)
       let _ =
-        Errors.run_in_context fn Errors.Typing (fun () ->
+        Errors.run_in_context fn (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
               Full_fidelity_ast.defensive_program popt fn contents

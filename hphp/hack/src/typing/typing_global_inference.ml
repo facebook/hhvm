@@ -46,7 +46,7 @@ let catch_exc
     pos (on_error : Errors.error -> unit) (r : 'a) ?(verbose = false) f : 'a =
   try
     let (other_errors, v) =
-      Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
+      Errors.do_with_context (Pos.filename pos) (fun () ->
           f @@ Some (convert_on_error on_error pos))
     in
     List.iter (Errors.get_error_list other_errors) ~f:on_error;

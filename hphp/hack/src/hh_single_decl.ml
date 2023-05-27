@@ -288,7 +288,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
     List.map files ~f:(fun (fn, contents) ->
         File_provider.provide_file_for_tests fn contents;
         let (_parse_errors, parsed_file) =
-          Errors.do_with_context fn Errors.Typing (fun () ->
+          Errors.do_with_context fn (fun () ->
               Full_fidelity_ast.defensive_program popt fn contents)
         in
         let ast =

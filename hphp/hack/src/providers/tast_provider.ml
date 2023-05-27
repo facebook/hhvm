@@ -71,10 +71,8 @@ let compute_tast_and_errors_unquarantined_internal
         ~entry
     in
     let (naming_errors, nast) =
-      Errors.do_with_context
-        entry.Provider_context.path
-        Errors.Typing
-        (fun () -> Naming.program ctx ast)
+      Errors.do_with_context entry.Provider_context.path (fun () ->
+          Naming.program ctx ast)
     in
     let (typing_errors, tast) =
       let do_tast_checks =
@@ -86,10 +84,8 @@ let compute_tast_and_errors_unquarantined_internal
          But the way [Naming_provider.find_symbol_in_context] works is it always
          deems names in [entry] to be the winner; therefore, until Naming_provider
          is changed, we will be unable to detect duplicate names in [entry]. *)
-      Errors.do_with_context
-        entry.Provider_context.path
-        Errors.Typing
-        (fun () -> Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
+      Errors.do_with_context entry.Provider_context.path (fun () ->
+          Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in
 
     (* Logging... *)

@@ -100,7 +100,7 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
         |> Option.fold ~init:acc ~f:(fun acc tast ->
                SMap.add (FileInfo.id_name id) tast acc))
   in
-  Errors.do_with_context ~drop_fixmed fn Errors.Typing (fun () ->
+  Errors.do_with_context ~drop_fixmed fn (fun () ->
       (* Some of our tests depend upon the order of [calc_tast] being exactly as follows, i.e. funs
          first, classes next, and so on. This is likely irrelevant to end user experience though,
          since user gets sorted errors. *)

@@ -126,7 +126,7 @@ let test_get_sorted_error_list () =
     Pos.make_from (create_path "C2") |> Pos_or_decl.of_raw_pos
   in
   let (errors, ()) =
-    Errors.do_with_context file_with_errors Errors.Typing (fun () ->
+    Errors.do_with_context file_with_errors (fun () ->
         Errors.add_error
           Nast_check_error.(
             to_user_error
@@ -249,13 +249,13 @@ let test_phases () =
   let a_path = create_path "A" in
   let (errors, ()) =
     Errors.do_ (fun () ->
-        Errors.run_in_context a_path Errors.Typing (fun () ->
+        Errors.run_in_context a_path (fun () ->
             Errors.add_error
               Parsing_error.(
                 to_user_error
                 @@ Parsing_error
                      { pos = Pos.make_from a_path; msg = ""; quickfixes = [] }));
-        Errors.run_in_context a_path Errors.Typing (fun () ->
+        Errors.run_in_context a_path (fun () ->
             Errors.add_error
               Nast_check_error.(
                 to_user_error @@ Entrypoint_arguments (Pos.make_from a_path)));
@@ -276,19 +276,19 @@ let test_incremental_update () =
   let a_path = create_path "A" in
   let b_path = create_path "B" in
   let (foo_error_a, ()) =
-    Errors.do_with_context a_path Errors.Typing (fun () ->
+    Errors.do_with_context a_path (fun () ->
         error_in "foo1";
         error_in "foo2";
         ())
   in
   let (bar_error_a, ()) =
-    Errors.do_with_context a_path Errors.Typing (fun () ->
+    Errors.do_with_context a_path (fun () ->
         error_in "bar1";
         error_in "bar2";
         ())
   in
   let (baz_error_b, ()) =
-    Errors.do_with_context b_path Errors.Typing (fun () ->
+    Errors.do_with_context b_path (fun () ->
         error_in "baz1";
         error_in "baz2";
         ())
@@ -413,8 +413,7 @@ let test_performance () =
     | n ->
       let path = string_of_int n ^ ".php" in
       let (errors, ()) =
-        Errors.(do_with_context (create_path path) Typing) (fun () ->
-            error_in path)
+        Errors.do_with_context (create_path path) (fun () -> error_in path)
       in
       (* note argument order: small first, big second *)
       aux (Errors.merge errors acc) (n - 1)

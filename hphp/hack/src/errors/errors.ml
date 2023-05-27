@@ -305,9 +305,9 @@ let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
   let out_errors = files_t_map ~f:List.rev out_errors in
   (drop_fixmes_if out_errors drop_fixmed, result)
 
-let run_in_context path phase f =
+let run_in_context path f =
   let context_copy = !current_context in
-  current_context := (path, phase);
+  current_context := (path, Typing);
   Utils.try_finally ~f ~finally:(fun () -> current_context := context_copy)
 
 let run_with_span span f =
@@ -498,8 +498,8 @@ let set_current_list file_t_map new_list =
            ~key:current_phase
            ~data:new_list)
 
-let do_with_context ?(drop_fixmed = true) path phase f =
-  run_in_context path phase (fun () -> do_ ~drop_fixmed f)
+let do_with_context ?(drop_fixmed = true) path f =
+  run_in_context path (fun () -> do_ ~drop_fixmed f)
 
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,

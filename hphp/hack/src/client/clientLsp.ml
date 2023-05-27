@@ -2451,6 +2451,7 @@ let kickoff_shell_out_and_maybe_cancel
       "--prefer-stdout";
       "--autostart-server";
       "false";
+      get_root_exn () |> Path.to_string;
     |]
   in
   match state with

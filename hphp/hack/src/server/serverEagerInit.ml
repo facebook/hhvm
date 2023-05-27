@@ -95,7 +95,7 @@ let init
       ~telemetry_label:"eager.init.naming"
       ~cgroup_steps
   in
-  ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
+  ServerInitCommon.validate_no_errors env.errorl;
   let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
   let (env, t) =
     match lazy_level with

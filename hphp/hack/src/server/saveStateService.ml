@@ -34,29 +34,6 @@ let load_contents_unsafe (input_filename : string) : 'a =
   Stdlib.close_in ic;
   contents
 
-(* Gets a set of file paths out of saved state errors *)
-let fold_error_files (errors_in_phases : saved_state_errors) :
-    Relative_path.Set.t =
-  List.fold
-    ~init:Relative_path.Set.empty
-    ~f:(fun acc (_phase, error_files) ->
-      Relative_path.Set.union acc error_files)
-    errors_in_phases
-
-(* Given saved state errors, produces 2 sets of file paths: one for those that
-    occurred in the given list of phases, and another one for all the rest.
-    The 'tf' prefix is in keeping with partition_tf, where it's supposed to
-    remind you which list matches the predicate (not actually a predicate in this case),
-    and which doesn't. *)
-let partition_error_files_tf
-    (errors_in_phases : saved_state_errors) (phases : Errors.phase list) :
-    Relative_path.Set.t * Relative_path.Set.t =
-  let (errors_in_phases_t, errors_in_phases_f) =
-    List.partition_tf errors_in_phases ~f:(fun (phase, _error_files) ->
-        List.mem ~equal:Errors.equal_phase phases phase)
-  in
-  (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
-
 (* Loads the file info and the errors, if any. *)
 let load_saved_state_exn
     ~(naming_table_fallback_path : string option)
@@ -94,7 +71,7 @@ let load_saved_state_exn
   in
   let (old_errors : saved_state_errors) =
     if not (Sys.file_exists errors_path) then
-      []
+      Relative_path.Set.empty
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
@@ -121,7 +98,7 @@ let get_hot_classes (filename : string) : SSet.t =
 
 (** Dumps the naming-table (a saveable form of FileInfo), and errors if any,
 and hot class decls. *)
-let dump_naming_errors_decls
+let dump_naming_and_errors
     (output_filename : string)
     (naming_table : Naming_table.t)
     (errors : Errors.t) : unit =
@@ -145,25 +122,14 @@ let dump_naming_errors_decls
   (if Errors.is_empty errors then
     ()
   else
-    (* TODO(ljw): with only one phase, let's clean this up! *)
-    let errors_in_phases : saved_state_errors =
-      List.map
-        ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-        [Errors.Typing]
-    in
-    save_contents (get_errors_filename output_filename) errors_in_phases);
+    let error_files : saved_state_errors = Errors.get_failed_files errors in
+    save_contents (get_errors_filename output_filename) error_files);
   ()
 
 (** Sorts and dumps the error relative paths in JSON format.
  * An empty JSON list will be dumped if there are no errors.*)
 let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
-  (* TODO(ljw): with only one phase, let's clean this up! *)
-  let errors_in_phases =
-    List.map
-      ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-      [Errors.Typing]
-  in
-  let errors = fold_error_files errors_in_phases in
+  let error_files = Errors.get_failed_files errors in
   let errors_json =
     Hh_json.(
       JSON_Array
@@ -172,7 +138,7 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
               ~init:[]
               ~f:(fun relative_path acc ->
                 JSON_String (Relative_path.suffix relative_path) :: acc)
-              errors)))
+              error_files)))
   in
   let chan = Stdlib.open_out (get_errors_filename_json output_filename) in
   Hh_json.json_to_output chan errors_json;
@@ -248,8 +214,8 @@ let save_state (env : ServerEnv.env) (output_filename : string) :
     let naming_table = env.ServerEnv.naming_table in
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
-    dump_naming_errors_decls output_filename naming_table errors;
-    Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
+    dump_naming_and_errors output_filename naming_table errors;
+    Hh_logger.log_duration "Saving saved-state naming+errors took" t
   in
   match env.ServerEnv.deps_mode with
   | Typing_deps_mode.InMemoryMode _ ->

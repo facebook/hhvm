@@ -122,9 +122,6 @@ val assert_errors : Errors.t -> string -> unit
 
 val assert_env_errors : ServerEnv.env -> string -> unit
 
-val assert_errors_in_phase :
-  ServerEnv.env -> int -> Errors.phase -> ServerEnv.env
-
 val assertSingleError : string -> Errors.error list -> unit
 
 val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit

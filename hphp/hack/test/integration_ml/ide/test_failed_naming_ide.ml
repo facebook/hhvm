@@ -71,7 +71,7 @@ let test () =
   let (env, _) = Test.(run_loop_once env default_loop_input) in
   (* Files with parsing errors are not redeclared during lazy recheck, so
    * failed_naming should remain unchanged *)
-  let failed = Errors.get_failed_files env.ServerEnv.errorl Errors.Typing in
+  let failed = Errors.get_failed_files env.ServerEnv.errorl in
   let found =
     Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo1_name)
     || Relative_path.Set.mem failed (Relative_path.from_root ~suffix:foo2_name)

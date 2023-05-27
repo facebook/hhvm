@@ -931,7 +931,8 @@ let fold_errors_in ?(drop_fixmed = true) err ~file ~init ~f =
          List.fold_right errors ~init:acc ~f)
 
 (* Get paths that have errors which haven't been HH_FIXME'd. *)
-let get_failed_files (err : t) phase =
+let get_failed_files (err : t) =
+  let phase = Typing in
   let err = drop_fixmed_errors_in_files err in
   files_t_fold err ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->
       if not (equal_phase phase p) then

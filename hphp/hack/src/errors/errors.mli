@@ -203,7 +203,7 @@ val fold_errors_in :
   f:(error -> 'a -> 'a) ->
   'a
 
-val get_failed_files : t -> phase -> Relative_path.Set.t
+val get_failed_files : t -> Relative_path.Set.t
 
 val as_telemetry : t -> Telemetry.t
 

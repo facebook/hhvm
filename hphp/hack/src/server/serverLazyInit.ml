@@ -1008,7 +1008,7 @@ let full_init
       env
       cgroup_steps
   in
-  ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
+  ServerInitCommon.validate_no_errors env.errorl;
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
@@ -1107,10 +1107,9 @@ let post_saved_state_initialization
     }
   in
 
-  let files_with_old_errors = SaveStateService.fold_error_files old_errors in
   Hh_logger.log
     "Number of files with errors: %d"
-    (Relative_path.Set.cardinal files_with_old_errors);
+    (Relative_path.Set.cardinal old_errors);
 
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
@@ -1200,7 +1199,7 @@ let post_saved_state_initialization
         ~telemetry_label:"post_ss1.naming"
         ~cgroup_steps
     in
-    ServerInitCommon.validate_no_errors Errors.Typing env.errorl;
+    ServerInitCommon.validate_no_errors env.errorl;
 
     let env =
       {
@@ -1208,8 +1207,7 @@ let post_saved_state_initialization
         clock;
         naming_table = Naming_table.combine old_naming_table env.naming_table;
         disk_needs_parsing = Relative_path.Set.empty;
-        needs_recheck =
-          Relative_path.Set.union env.needs_recheck files_with_old_errors;
+        needs_recheck = Relative_path.Set.union env.needs_recheck old_errors;
       }
     in
 

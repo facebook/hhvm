@@ -215,20 +215,17 @@ class cursor ~client_id ~cursor_state =
              been processed. Stop recursion here. *)
           acc
         | Saved_state { dep_table_errors_saved_state_path; _ } ->
-          let errors : SaveStateServiceTypes.saved_state_errors =
-            if
-              Sys.file_exists (Path.to_string dep_table_errors_saved_state_path)
-            then
+          if Sys.file_exists (Path.to_string dep_table_errors_saved_state_path)
+          then
+            let errors : SaveStateServiceTypes.saved_state_errors =
               In_channel.with_file
                 ~binary:true
                 (Path.to_string dep_table_errors_saved_state_path)
                 ~f:(fun ic -> Marshal.from_channel ic)
-            else
-              []
-          in
-          errors
-          |> List.map ~f:(fun (_phase, path) -> path)
-          |> List.fold ~init:acc ~f:Relative_path.Set.union
+            in
+            errors
+          else
+            Relative_path.Set.empty
         | Saved_state_delta { previous; fanout_result; _ } ->
           let acc =
             Relative_path.Set.union

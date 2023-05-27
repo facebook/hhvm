@@ -270,32 +270,6 @@ let connect_persistent_client env =
     (Ide_info_store.get_client ());
   env
 
-let assert_errors_in_phase
-    (env : ServerEnv.env) (expected_count : int) (phase : Errors.phase) :
-    ServerEnv.env =
-  let all_phases = [Errors.Typing] in
-  let errors_in_phases =
-    List.map
-      ~f:(fun (phase : Errors.phase) ->
-        (phase, Errors.get_failed_files env.ServerEnv.errorl phase))
-      all_phases
-  in
-  let (decl_error_files, other_error_files) =
-    SaveStateService.partition_error_files_tf errors_in_phases [phase]
-  in
-  let count_of_errors = Relative_path.Set.cardinal decl_error_files in
-  if count_of_errors <> expected_count then
-    fail
-      (Printf.sprintf
-         "Expected %d errors in phase %s but got %d"
-         expected_count
-         (Errors.phase_to_string phase)
-         count_of_errors);
-
-  if Relative_path.Set.cardinal other_error_files <> 0 then
-    fail (Printf.sprintf "Expected %d" expected_count);
-  env
-
 let error_strings err_list =
   List.map ~f:(fun x -> Errors.to_string (User_error.to_absolute x)) err_list
 

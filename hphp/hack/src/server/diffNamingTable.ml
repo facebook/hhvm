@@ -80,18 +80,6 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
         | None -> { acc with added_files = path :: acc.added_files }
         | _ -> acc)
   in
-  let errors1 =
-    List.fold
-      ~f:(fun acc (_phase, path_set) -> Relative_path.Set.union path_set acc)
-      ~init:Relative_path.Set.empty
-      errors1
-  in
-  let errors2 =
-    List.fold
-      ~f:(fun acc (_phase, path_set) -> Relative_path.Set.union path_set acc)
-      ~init:Relative_path.Set.empty
-      errors2
-  in
   let removed_errors =
     Relative_path.Set.elements (Relative_path.Set.diff errors1 errors2)
   in

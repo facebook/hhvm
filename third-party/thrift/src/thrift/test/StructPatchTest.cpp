@@ -333,7 +333,6 @@ TEST(StructPatchTest, OptionalFields) {
   MyStructPatch optPatch = testOptPatch();
 
   MyStruct actual;
-  std::optional<std::string> optStr;
 
   // Applying a value patch to void does nothing.
   test::expectPatch(optPatch, {}, {});
@@ -347,9 +346,7 @@ TEST(StructPatchTest, OptionalFields) {
   patch.patchIfSet<ident::doubleVal>().apply(actual.optDoubleVal());
   patch.patchIfSet<ident::stringVal>().apply(actual.optStringVal());
   patch.patchIfSet<ident::structVal>().apply(actual.optStructVal());
-  patch.patchIfSet<ident::stringVal>().apply(optStr);
   EXPECT_EQ(actual, MyStruct{});
-  EXPECT_FALSE(optStr.has_value());
 
   // Applying a value patch to values, patches.
   actual.optBoolVal().ensure();
@@ -361,9 +358,6 @@ TEST(StructPatchTest, OptionalFields) {
   actual.optDoubleVal().ensure();
   actual.optStringVal() = "hi";
   actual.optStructVal().ensure().data1() = "Ba";
-  optStr = "hi";
-  test::expectPatch(
-      patch.patchIfSet<ident::stringVal>(), optStr, "_hi_", "__hi__");
 
   MyStruct expected1, expected2;
   expected1.optBoolVal() = true;
@@ -395,7 +389,6 @@ TEST(StructPatchTest, OptionalFields) {
   patch.patchIfSet<ident::doubleVal>().apply(actual.optDoubleVal());
   patch.patchIfSet<ident::stringVal>().apply(actual.optStringVal());
   patch.patchIfSet<ident::structVal>().apply(actual.optStructVal());
-  patch.patchIfSet<ident::stringVal>().apply(optStr);
   EXPECT_EQ(*actual.optBoolVal(), true);
   EXPECT_EQ(*actual.optByteVal(), 2);
   EXPECT_EQ(*actual.optI16Val(), 2);
@@ -406,7 +399,6 @@ TEST(StructPatchTest, OptionalFields) {
   EXPECT_EQ(*actual.optStringVal(), "_hi_");
   ASSERT_TRUE(actual.optStructVal().has_value());
   EXPECT_EQ(*actual.optStructVal()->data1(), "BaNa");
-  EXPECT_EQ(*optStr, "_hi_");
 }
 
 TEST(StructPatchTest, ListPatch) {

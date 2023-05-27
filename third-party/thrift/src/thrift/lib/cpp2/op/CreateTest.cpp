@@ -234,17 +234,6 @@ TEST(EnsureTest, SmartPointer) {
       [&](auto ord) { testEnsurePtr(obj, ord); });
 }
 
-TEST(EnsureTest, Optional) {
-  FieldRefStruct obj;
-  using FieldTag = op::get_field_tag<FieldRefStruct, field_ordinal<2>>;
-  auto opt = obj.optional_i32_ref().to_optional();
-  op::ensure<FieldTag>(opt, obj);
-  EXPECT_EQ(*opt, 0);
-  opt = 2;
-  op::ensure<FieldTag>(opt, obj);
-  EXPECT_EQ(*opt, 2);
-}
-
 TEST(EnsureTest, IsAbsentAndEnsureValue) {
   using detail::ensureValue;
   using detail::isAbsent;

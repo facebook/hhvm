@@ -642,7 +642,10 @@ let go_for_localvar ctx action new_name =
       >>| List.fold_left
             ~f:(fun acc x ->
               let replacement =
-                { pos = Pos.to_absolute (snd x); text = new_name }
+                {
+                  pos = Pos.to_absolute (snd x);
+                  text = maybe_add_dollar new_name;
+                }
               in
               let patch = Replace replacement in
               patch :: acc)

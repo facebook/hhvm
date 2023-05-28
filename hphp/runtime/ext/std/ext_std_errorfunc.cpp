@@ -115,8 +115,7 @@ bool hphp_debug_caller_info_impl(
   }
   init.set(s_file_idx, s_file,
            Variant(VarNR(const_cast<StringData*>(path))));
-  init.set(s_function_idx, s_function,
-           Variant(VarNR(const_cast<StringData*>(func->name()))));
+  init.set(s_function_idx, s_function, func->nameWithClosureName());
   init.set(s_line_idx, s_line, line);
   result = init.toArray();
   return true;

@@ -421,13 +421,15 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_optional_param_completion(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("optional_param_completion.php"))
-        self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(
                 LspTestSpec("optional_param_completion"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -499,13 +501,15 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_all_optional_params_completion(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("all_optional_params_completion.php"))
-        self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(
                 LspTestSpec("all_optional_params_completion"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -575,11 +579,14 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_completion(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -2503,11 +2510,14 @@ class TestLsp(TestCase[LspTestDriver]):
 
     def test_serverless_ide_completion_batch_processing(self) -> None:
         """This should be virtually identical to `test_serverless_ide_completion` with the only change being the usage of batch processing."""
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4436,7 +4446,9 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_serverless_ide_completion_legacy(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
 
@@ -4444,6 +4456,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("serverless_ide_completion_legacy"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5635,7 +5648,9 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -5643,6 +5658,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("serverless_ide_definition"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5938,7 +5954,9 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_document_symbol(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -5946,6 +5964,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("serverless_ide_document_symbol"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6304,7 +6323,9 @@ class TestLsp(TestCase[LspTestDriver]):
         return spec
 
     def test_serverless_ide_type_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("type_definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -6312,6 +6333,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("serverless_ide_type_definition"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6448,7 +6470,9 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_hover(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
 
@@ -6456,6 +6480,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("serverless_ide_hover"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6794,14 +6819,18 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_file_hover_with_errors(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover_with_errors.php"))
         self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_hover_with_errors"), use_serverless_ide=True
+                LspTestSpec("serverless_ide_file_hover_with_errors"),
+                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8620,53 +8649,17 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_hover_without_file_open(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_hover_without_file_open"),
                 use_serverless_ide=True,
-                supports_status=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
-            .ignore_requests(
-                comment="Ignore 'initializing...' messages since they're racy",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.\nhh_server: stopped.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initializing, before hh_server has even responded",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "message": "hh_client: ready.",
-                    "shortMessage": "Hack: ready",
-                },
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "message": "hh_client: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
             .request(
                 line=line(),
                 comment="hover before file_open will fail",
@@ -9102,7 +9095,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             )
 
     def test_serverless_ide_highlight(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("highlight.php"))
         self.test_driver.stop_hh_server()
 
@@ -9110,6 +9105,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             self.initialize_spec(
                 LspTestSpec("serverless_ide_highlight"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={

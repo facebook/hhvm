@@ -414,11 +414,11 @@ class TestLsp(TestCase[LspTestDriver]):
         }
 
     def test_init_shutdown(self) -> None:
-        self.prepare_server_environment()
-
-        self.load_and_run(
-            "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
         )
+        variables.update({"root_path": self.test_driver.repo_dir})
+        self.load_and_run("initialize_shutdown", variables)
 
     def test_optional_param_completion(self) -> None:
         variables = dict(
@@ -7859,8 +7859,10 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_bad_call(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("bad_call.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("bad_call.php"))
         self.load_and_run("bad_call", variables)
 
     def test_code_action_missing_method(self) -> None:

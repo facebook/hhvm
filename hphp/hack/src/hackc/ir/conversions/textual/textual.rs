@@ -375,9 +375,9 @@ impl<'a> TextualFile<'a> {
                 self.w.write_all(b"&")?;
                 self.write_expr(var)?;
             }
-            Expr::Field(ref base, ref name) => {
+            Expr::Field(ref base, ref ty, ref name) => {
                 self.write_expr(base)?;
-                write!(self.w, ".{name}")?;
+                write!(self.w, ".{}.{name}", ty.display(&self.strings))?;
             }
             Expr::Index(ref base, ref offset) => {
                 self.write_expr(base)?;
@@ -457,7 +457,7 @@ impl fmt::Display for FmtSid {
 
 /// These are special types that could be expressed as Ptr(Box(String)) but are
 /// really common.
-#[derive(Debug, Clone, Hash, Eq, PartialEq, EnumProperty)]
+#[derive(Copy, Debug, Clone, Hash, Eq, PartialEq, EnumProperty)]
 pub(crate) enum SpecialTy {
     #[strum(props(UserType = "HackArraykey"))]
     Arraykey,
@@ -495,6 +495,7 @@ pub(crate) enum Ty {
     Noreturn,
     Ptr(Box<Ty>),
     SpecialPtr(SpecialTy),
+    Special(SpecialTy),
     String,
     Type(TypeName),
     Void,
@@ -510,19 +511,25 @@ impl Ty {
         match self {
             Ty::Ptr(box sub) => sub.clone(),
             Ty::VoidPtr => Ty::Void,
-            Ty::SpecialPtr(special) => Ty::Type(special.user_type()),
+            Ty::SpecialPtr(special) => Ty::Special(*special),
             Ty::Float
             | Ty::Int
             | Ty::Noreturn
             | Ty::String
+            | Ty::Special(_)
             | Ty::Type(_)
             | Ty::Void
             | Ty::Ellipsis => panic!("Unable to deref {self:?}"),
         }
     }
 
-    pub(crate) fn mixed() -> Ty {
+    pub(crate) fn mixed_ptr() -> Ty {
         Ty::SpecialPtr(SpecialTy::Mixed)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn mixed() -> Ty {
+        Ty::Special(SpecialTy::Mixed)
     }
 
     pub(crate) fn named_type_ptr(name: TypeName) -> Ty {
@@ -554,6 +561,7 @@ impl fmt::Display for FmtTy<'_> {
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Ptr(sub) => write!(f, "*{}", sub.display(strings)),
             Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type().display(strings)),
+            Ty::Special(special) => special.user_type().display(strings).fmt(f),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => s.display(strings).fmt(f),
             Ty::Void => f.write_str("void"),
@@ -658,7 +666,8 @@ pub(crate) enum Expr {
     /// *Variable
     Deref(Box<Expr>),
     /// a.b
-    Field(Box<Expr>, String),
+    #[allow(dead_code)]
+    Field(Box<Expr>, Ty, String),
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
     Sid(Sid),
@@ -687,10 +696,10 @@ impl Expr {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn field(base: impl Into<Expr>, name: impl Into<String>) -> Expr {
+    pub(crate) fn field(base: impl Into<Expr>, ty: Ty, name: impl Into<String>) -> Expr {
         let base = base.into();
         let name = name.into();
-        Expr::Field(Box::new(base), name)
+        Expr::Field(Box::new(base), ty, name)
     }
 
     #[allow(dead_code)]
@@ -921,7 +930,13 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn write_expr_stmt(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
         let expr = expr.into();
         match expr {
-            Expr::Alloc(_) | Expr::AllocCurry { .. } | Expr::Const(_) | Expr::Deref(_) => {
+            Expr::Alloc(_)
+            | Expr::AllocCurry { .. }
+            | Expr::Const(_)
+            | Expr::Deref(_)
+            | Expr::Field(..)
+            | Expr::Index(..)
+            | Expr::Var(..) => {
                 let sid = self.alloc_sid();
                 write!(self.txf.w, "{INDENT}{} = ", FmtSid(sid))?;
                 self.txf.write_expr(&expr)?;
@@ -930,9 +945,6 @@ impl FuncBuilder<'_, '_> {
             }
             Expr::Call(target, params) => self.call(&target, params),
             Expr::Sid(sid) => Ok(sid),
-            Expr::Field(_, _) | Expr::Index(_, _) | Expr::Var(_) => {
-                todo!("EXPR: {expr:?}")
-            }
         }
     }
 

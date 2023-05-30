@@ -28,7 +28,7 @@ pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> text
 
     if modifiers.contains(TypeConstraintFlags::TypeConstant) {
         // A type constant is treated as a raw mixed.
-        return textual::Ty::mixed();
+        return textual::Ty::mixed_ptr();
     }
 
     if modifiers != TypeConstraintFlags::NoFlags {
@@ -74,6 +74,6 @@ fn convert_base(ty: &BaseType) -> textual::Ty {
         | BaseType::None
         | BaseType::Nonnull
         | BaseType::This
-        | BaseType::Typename => textual::Ty::mixed(),
+        | BaseType::Typename => textual::Ty::mixed_ptr(),
     }
 }

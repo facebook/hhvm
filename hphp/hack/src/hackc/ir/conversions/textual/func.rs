@@ -249,7 +249,7 @@ fn write_func(
     let base_ty;
     if member_op::func_needs_base_var(&func) {
         let base = member_op::base_var(&strings);
-        base_ty = textual::Ty::mixed();
+        base_ty = textual::Ty::mixed_ptr();
         locals.push((base, &base_ty));
     }
 
@@ -1135,7 +1135,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {
-        self.fb.load(&textual::Ty::mixed(), src)
+        self.fb.load(&textual::Ty::mixed_ptr(), src)
     }
 
     fn load_this(&mut self) -> Result<textual::Sid> {
@@ -1230,7 +1230,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         dst: impl Into<textual::Expr>,
         src: impl Into<textual::Expr>,
     ) -> Result {
-        self.fb.store(dst, src, &textual::Ty::mixed())
+        self.fb.store(dst, src, &textual::Ty::mixed_ptr())
     }
 
     pub(crate) fn update_loc(&mut self, loc: LocId) -> Result {

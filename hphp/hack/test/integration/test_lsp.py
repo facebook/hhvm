@@ -24,13 +24,8 @@ from utils import interpolate_variables, Json, JsonObject
 class LspTestDriver(common_tests.CommonTestDriver):
     def write_load_config(
         self,
-        use_serverless_ide: bool = False,
         use_saved_state: bool = False,
-        use_standalone_ide: bool = False,
     ) -> None:
-        assert (
-            use_serverless_ide or not use_standalone_ide
-        ), "use_standalone_ide requires use_serverless_ide"
         # Will use the .hhconfig already in the repo directory
         # As for hh.conf, we'll write it explicitly each test.
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
@@ -49,13 +44,10 @@ lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
-ide_serverless = {use_serverless_ide}
-ide_standalone = {use_standalone_ide}
-produce_streaming_errors = {use_standalone_ide}
+ide_serverless = true
+ide_standalone = true
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
-                    use_serverless_ide=str(use_serverless_ide).lower(),
-                    use_standalone_ide=str(use_standalone_ide).lower(),
                 )
             )
 
@@ -268,25 +260,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     if failure_message in message:
                         raise unittest.SkipTest(message)
 
-    def prepare_server_environment(self) -> None:
-        self.maxDiff = None
-        self.test_driver.write_load_config(use_serverless_ide=False)
-        self.test_driver.start_hh_server()
-        (output, err, _) = self.test_driver.run_check()
-        if "Error: Ran out of retries" in err:
-            raise unittest.SkipTest("Hack server could not be launched")
-        self.assertEqual(output.strip(), "No errors!")
-
     def prepare_serverless_ide_environment(
         self,
-        use_standalone_ide: bool = False,
     ) -> Mapping[str, str]:
         self.maxDiff = None
-        self.test_driver.write_load_config(
-            use_serverless_ide=True,
-            use_saved_state=False,
-            use_standalone_ide=use_standalone_ide,
-        )
+        self.test_driver.write_load_config(use_saved_state=False)
         naming_table_saved_state_path = (
             self.test_driver.write_naming_table_saved_state()
         )
@@ -414,16 +392,12 @@ class TestLsp(TestCase[LspTestDriver]):
         }
 
     def test_init_shutdown(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update({"root_path": self.test_driver.repo_dir})
         self.load_and_run("initialize_shutdown", variables)
 
     def test_optional_param_completion(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("optional_param_completion.php"))
         spec = (
             self.initialize_spec(
@@ -501,9 +475,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_all_optional_params_completion(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("all_optional_params_completion.php"))
         spec = (
             self.initialize_spec(
@@ -579,9 +551,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_completion(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
         spec = (
@@ -2510,9 +2480,7 @@ class TestLsp(TestCase[LspTestDriver]):
 
     def test_serverless_ide_completion_batch_processing(self) -> None:
         """This should be virtually identical to `test_serverless_ide_completion` with the only change being the usage of batch processing."""
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
         spec = (
@@ -4446,9 +4414,7 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_serverless_ide_completion_legacy(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         self.test_driver.stop_hh_server()
 
@@ -5648,9 +5614,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_definition(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -5868,9 +5832,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_overridden_definition(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("override.php"))
 
         spec = (
@@ -5956,9 +5918,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_document_symbol(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -6325,9 +6285,7 @@ class TestLsp(TestCase[LspTestDriver]):
         return spec
 
     def test_serverless_ide_type_definition(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("type_definition.php"))
         self.test_driver.stop_hh_server()
 
@@ -6472,9 +6430,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_hover(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
 
@@ -6764,9 +6720,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_file_touched_on_disk(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
@@ -6823,9 +6777,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_file_hover_with_errors(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover_with_errors.php"))
         self.test_driver.stop_hh_server()
 
@@ -6930,9 +6882,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_formatting(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
         self.test_driver.stop_hh_server()
@@ -6979,9 +6929,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_rangeformatting(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
 
         self.test_driver.stop_hh_server()
@@ -7029,9 +6977,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("ontypeformatting.php"))
 
         spec = (
@@ -7101,9 +7047,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_did_change(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
             self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=True)
@@ -7168,9 +7112,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_go_to_implementation(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("go_to_implementation.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
@@ -7273,9 +7215,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_signature_help(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("signaturehelp.php"))
         spec = (
             self.initialize_spec(
@@ -7686,9 +7626,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_signature_help_lambda(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("signaturehelp_lambda.php"))
         spec = (
             self.initialize_spec(
@@ -7778,9 +7716,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_rename(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("rename.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
@@ -7789,9 +7725,7 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_rename_in_interface(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("rename_in_interface.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
@@ -7841,9 +7775,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_references(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("references.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
@@ -7852,23 +7784,19 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def test_non_existing_method(self) -> None:
-        self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        self.prepare_serverless_ide_environment()
         variables = self.setup_php_file("nomethod.php")
         self.load_and_run(
             "nomethod", variables, wait_for_server=False, use_serverless_ide=True
         )
 
     def test_bad_call(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("bad_call.php"))
         self.load_and_run("bad_call", variables)
 
     def test_code_action_missing_method(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("code_action_missing_method.php"))
 
         spec = (
@@ -8265,9 +8193,7 @@ function call_method(ClassWithFooBar $mc): void {
         - The client must send `codeAction/resolve`
         - The server then replies with a complete code action
         """
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
 
         spec = (
@@ -8358,9 +8284,7 @@ function call_method(ClassWithFooBar $mc): void {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("incremental_derived.php"))
         changed_php_file_uri = self.repo_file("incremental_base.php")
         variables.update({"changed_php_file_uri": changed_php_file_uri})
@@ -8443,9 +8367,7 @@ class BaseClassIncremental {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
@@ -8534,9 +8456,7 @@ function b_hover(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_decl_two_unsaved_buffers(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("unsaved1.php"))
         variables.update({"unsaved2_file_uri": self.repo_file_uri("unsaved2.php")})
 
@@ -8672,9 +8592,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_hover_without_file_open(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
@@ -8741,9 +8659,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_highlight(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("highlight.php"))
         self.test_driver.stop_hh_server()
 
@@ -8792,9 +8708,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_status_running(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
@@ -8824,9 +8738,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_status_stopped(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
 
         spec = (
@@ -8855,9 +8767,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_standalone_status(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
 
@@ -8910,9 +8820,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_standalone_errors(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         errors_a_uri = self.repo_file_uri("errors_a.php")
         errors_b_uri = self.repo_file_uri("errors_b.php")
@@ -9015,9 +8923,7 @@ function unsaved_bar(): string { return "hello"; }
     def test_live_squiggles(self) -> None:
         """This tests that "live squiggles" (those from clientIdeDaemon) are correctly
         produced by didOpen, didChange, codeAction and publishDiagnostics."""
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         errors_a_uri = self.repo_file_uri("errors_a.php")
         errors_b_uri = self.repo_file_uri("errors_b.php")
@@ -9187,9 +9093,7 @@ function unsaved_bar(): string { return "hello"; }
 
     def test_parsing_squiggles_priority(self) -> None:
         """This tests that parsing squiggles suppress typing squiggles from clientIdeDaemon"""
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         errors_a_uri = self.repo_file_uri("errors_a.php")
         variables.update({"errors_a_uri": errors_a_uri})
@@ -9292,9 +9196,7 @@ function unsaved_bar(): string { return "hello"; }
     def test_serverless_ide_falls_back_to_full_index(self) -> None:
         # Test recovery behavior when we fail to load a naming table, but we're
         # permitted to fall back to the full index naming table build.
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
         variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
@@ -9343,9 +9245,7 @@ function unsaved_bar(): string { return "hello"; }
     def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
         # This test examines the failure behavior when the naming table is
         # non-existent and we are *not* falling back to full index.
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
         variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
@@ -9391,9 +9291,7 @@ function unsaved_bar(): string { return "hello"; }
         )
 
     def test_workspace_symbol(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
             self.initialize_spec(
@@ -9457,9 +9355,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_workspace_symbol_batch_processing(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
             self.initialize_spec(
@@ -9529,9 +9425,7 @@ function unsaved_bar(): string { return "hello"; }
         )
 
     def test_serverless_ide_naming_error1(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         variables.update(
             {
@@ -9705,9 +9599,7 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_naming_error2(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -9772,9 +9664,7 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_naming_error3(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -9839,9 +9729,7 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_requests_before_init(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables["root_path"] = self.test_driver.repo_dir
 
         spec = (
@@ -9954,9 +9842,7 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_workspace_symbol(self) -> None:
-        variables = dict(
-            self.prepare_serverless_ide_environment(use_standalone_ide=True)
-        )
+        variables = dict(self.prepare_serverless_ide_environment())
         variables["root_path"] = self.test_driver.repo_dir
 
         spec = (

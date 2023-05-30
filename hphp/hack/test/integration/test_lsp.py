@@ -9297,7 +9297,9 @@ function unsaved_bar(): string { return "hello"; }
     def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
         # This test examines the failure behavior when the naming table is
         # non-existent and we are *not* falling back to full index.
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
         variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
@@ -9310,40 +9312,9 @@ function unsaved_bar(): string { return "hello"; }
                 supports_init=True,
             )
             .ignore_requests(
-                comment="Ignore initializing since they're kind of racy",
+                comment="Ignore all status requests not explicitly waited for in the test",
                 method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.\nhh_server initializing: processing [<test> seconds]",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.\nhh_server: ready.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing, from before we've even heard the first peep out of hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 1,
-                    "message": "hh_client has failed. See Output›Hack for details.",
-                    "shortMessage": "Hack: failed",
-                },
+                params=None,
             )
             .wait_for_notification(
                 method="window/logMessage",
@@ -9355,8 +9326,8 @@ function unsaved_bar(): string { return "hello"; }
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "hh_client has failed. See Output›Hack for details.\nhh_server: ready.",
-                    "shortMessage": "Hack: failed",
+                    "message": "hh_client has failed. See Output\u203aHack for details.Try running `hh` at the command-line.\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "failed",
                     "type": 1,
                 },
                 result=NoResponse(),
@@ -9368,7 +9339,7 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(
             spec,
             variables,
-            wait_for_server=True,
+            wait_for_server=False,
             use_serverless_ide=True,
             fall_back_to_full_index=False,
         )

@@ -10415,9 +10415,10 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_requests_before_init(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables["root_path"] = self.test_driver.repo_dir
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
@@ -10428,30 +10429,19 @@ function aaa(): string {
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .ignore_requests(
-                comment="Ignore 'initializing...' messages since they're racy",
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "hh_client: initializing.\nhh_server: stopped.",
+                    "message": "Hack IDE support is initializing (loading saved state)\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: initializing",
                 },
             )
             .ignore_requests(
-                comment="another racy initialization, before we've yet heard from hh_server",
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "hh_client: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization, if hh_client is done before hh_server has yet sent status",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "message": "hh_client: ready.",
-                    "shortMessage": "Hack: ready",
+                    "message": "Hack is working on IDE requests\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                 },
             )
             .write_to_disk(
@@ -10510,9 +10500,9 @@ function aaa(): string {
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "hh_client: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
+                    "type": 1,
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                 },
                 result=NoResponse(),
             )

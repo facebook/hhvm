@@ -1951,3 +1951,5 @@ val both : t -> t -> t
 
 (** Modify the code that will be reported when evaluated to a `User_error.t`  *)
 val with_code : t -> code:Error_code.t -> t
+
+val count : t -> int

@@ -1339,6 +1339,8 @@ module rec Error : sig
   val both : t -> t -> t
 
   val with_code : t -> code:Error_code.t -> t
+
+  val count : t -> int
 end = struct
   type t =
     | Primary of Primary.t
@@ -1430,6 +1432,18 @@ end = struct
   let both t1 t2 = Multiple [t1; t2]
 
   let with_code t ~code = With_code (t, code)
+
+  let rec count t =
+    match t with
+    | Primary _ -> 1
+    | Apply (_, t) -> count t
+    | Apply_reasons _ -> 1
+    | Assert_in_current_decl _ -> 1
+    | Multiple ts
+    | Union ts
+    | Intersection ts ->
+      List.fold ~init:0 ~f:(fun acc t -> acc + count t) ts
+    | With_code (t, _) -> count t
 end
 
 and Secondary : sig

@@ -1550,8 +1550,12 @@ let check_argument_type_against_parameter_type
         (match e2opt with
         (* We used dynamic calling to get a successful check *)
         | None -> (env2, None, true)
-        (* We failed on both, report the error that we got with the static check *)
-        | Some _e2 -> (env1, Some e1, false))
+        (* We failed on both, pick the one with fewest errors! (preferring static on a tie) *)
+        | Some e2 ->
+          if Typing_error.count e1 <= Typing_error.count e2 then
+            (env1, Some e1, false)
+          else
+            (env2, Some e2, true))
     else
       (env1, e1opt, false)
   in

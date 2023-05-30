@@ -6,12 +6,6 @@ Too few arguments (required 2 but got 1) (Typing[4104])
   Definition is here
 File "supportdyn_ho_run.bad.php", line 14, characters 10-11:
 Invalid argument (Typing[4110])
-  File "supportdyn_ho_run.bad.php", line 10, characters 34-44:
-  Expected `vec<string>`
-  File "supportdyn_ho_run.bad.php", line 6, characters 3-11:
-  But got `dynamic`
-File "supportdyn_ho_run.bad.php", line 14, characters 10-11:
-Invalid argument (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 10, characters 38-43:
   Expected `string`
   File "supportdyn_ho_run.bad.php", line 6, characters 8-10:

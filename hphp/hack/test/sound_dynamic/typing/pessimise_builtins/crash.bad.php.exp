@@ -4,12 +4,6 @@ Invalid argument (Typing[4110])
   Expected `shape(?'a' => _, ...)`
   File "crash.bad.php", line 13, characters 15-17:
   But got `string`
-File "crash.bad.php", line 20, characters 11-13:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 41, characters 19-24:
-  Expected `shape(?'b' => _, ...)`
-  File "crash.bad.php", line 13, characters 15-17:
-  But got `string`
 File "crash.bad.php", line 12, characters 43-45:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   File "crash.bad.php", line 12, characters 20-21:

@@ -7841,9 +7841,15 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_references(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("references.php")
-        self.load_and_run("references", variables)
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run(
+            "references", variables, wait_for_server=False, use_serverless_ide=False
+        )
 
     def test_non_existing_method(self) -> None:
         self.prepare_serverless_ide_environment(use_standalone_ide=True)

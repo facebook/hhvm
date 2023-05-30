@@ -59,6 +59,7 @@
     }
   },
   {
+    "powered_by": "serverless_ide",
     "jsonrpc": "2.0",
     "id": 11,
     "result": [
@@ -104,6 +105,7 @@
     ]
   },
   {
+    "powered_by": "serverless_ide",
     "jsonrpc": "2.0",
     "id": 12,
     "result": [
@@ -136,6 +138,7 @@
     ]
   },
   {
+    "powered_by": "serverless_ide",
     "jsonrpc": "2.0",
     "id": 13,
     "result": [
@@ -246,6 +249,7 @@
     ]
   },
   {
+    "powered_by": "serverless_ide",
     "jsonrpc": "2.0",
     "id": 14,
     "result": [
@@ -266,12 +270,12 @@
         "uri": "file://${root_path}/references.php",
         "range": {
           "start": {
-            "line": 46,
-            "character": 17
+            "line": 45,
+            "character": 10
           },
           "end": {
-            "line": 46,
-            "character": 28
+            "line": 45,
+            "character": 21
           }
         }
       },
@@ -279,12 +283,12 @@
         "uri": "file://${root_path}/references.php",
         "range": {
           "start": {
-            "line": 45,
-            "character": 10
+            "line": 46,
+            "character": 17
           },
           "end": {
-            "line": 45,
-            "character": 21
+            "line": 46,
+            "character": 28
           }
         }
       }

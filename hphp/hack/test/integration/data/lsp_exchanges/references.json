@@ -4,7 +4,9 @@
     "id": 1,
     "method": "initialize",
     "params": {
-      "initializationOptions": {},
+      "initializationOptions": {
+        "delayUntilDoneInit": true
+      },
       "processId": null,
       "rootPath": "${root_path}",
       "capabilities": {}
@@ -46,6 +48,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 11
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 12,
     "method": "textDocument/references",
     "params": {
@@ -59,6 +68,13 @@
       "context": {
         "includeDeclaration": true
       }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 12
     }
   },
   {
@@ -80,6 +96,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 13
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 14,
     "method": "textDocument/references",
     "params": {
@@ -93,6 +116,13 @@
       "context": {
         "includeDeclaration": true
       }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 14
     }
   },
   {

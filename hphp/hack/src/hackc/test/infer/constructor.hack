@@ -32,7 +32,7 @@ class A {
 // CHECK:   prune $builtins.hack_is_true(n6)
 // CHECK:   n7: *HackMixed = load &$2
 // CHECK:   n8 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-// CHECK:   n9 = n7.HackMixed._86reifiedinit(n8)
+// CHECK:   n9 = n7.?._86reifiedinit(n8)
 // CHECK:   jmp b6
 // CHECK:   .handlers b7
 // CHECK: #b5:
@@ -55,9 +55,9 @@ class A {
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n15 = n12.HackMixed.__construct()
+// CHECK:   n15 = n12.?.__construct()
 // CHECK:   n16 = $builtins.hhbc_lock_obj(n12)
-// CHECK:   n17 = n12.HackMixed.a()
+// CHECK:   n17 = n12.?.a()
 // CHECK:   ret null
 // CHECK: }
 function f1() : void {

@@ -56,7 +56,7 @@ class C {
   // CHECK:   store &$0 <- n1: *HackMixed
   // CHECK:   n2: *C = load &$this
   // CHECK:   n3 = $builtins.hack_get_static_class(n2)
-  // CHECK:   n4 = n3.HackMixed.__factory()
+  // CHECK:   n4 = n3.?.__factory()
   // CHECK:   store &$2 <- n4: *HackMixed
   // CHECK:   n5: *HackMixed = load &$0
   // CHECK:   n6 = $builtins.hhbc_class_has_reified_generics(n5)
@@ -121,14 +121,14 @@ class C {
   // CHECK:   prune $builtins.hack_is_true(n20)
   // CHECK:   n21: *HackMixed = load &$2
   // CHECK:   n22 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n23 = n21.HackMixed._86reifiedinit(n22)
+  // CHECK:   n23 = n21.?._86reifiedinit(n22)
   // CHECK:   jmp b16
   // CHECK:   .handlers b17
   // CHECK: #b15:
   // CHECK:   prune $builtins.hack_is_true(n18)
   // CHECK:   n24: *HackMixed = load &$2
   // CHECK:   n25: *HackMixed = load &$1
-  // CHECK:   n26 = n24.HackMixed._86reifiedinit(n25)
+  // CHECK:   n26 = n24.?._86reifiedinit(n25)
   // CHECK:   jmp b16
   // CHECK:   .handlers b17
   // CHECK: #b16:
@@ -145,7 +145,7 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n30 = n27.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n30 = n27.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
   // CHECK:   n31 = $builtins.hhbc_lock_obj(n27)
   // CHECK:   store &$a <- n27: *HackMixed
   // CHECK:   ret null
@@ -183,7 +183,7 @@ class C {
   // CHECK:   prune $builtins.hack_is_true(n7)
   // CHECK:   n8: *HackMixed = load &$2
   // CHECK:   n9 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n10 = n8.HackMixed._86reifiedinit(n9)
+  // CHECK:   n10 = n8.?._86reifiedinit(n9)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b5:
@@ -206,7 +206,7 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n16 = n13.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n16 = n13.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
   // CHECK:   n17 = $builtins.hhbc_lock_obj(n13)
   // CHECK:   store &$a <- n13: *HackMixed
   // CHECK:   ret null
@@ -244,7 +244,7 @@ class C {
   // CHECK:   prune $builtins.hack_is_true(n7)
   // CHECK:   n8: *HackMixed = load &$2
   // CHECK:   n9 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-  // CHECK:   n10 = n8.HackMixed._86reifiedinit(n9)
+  // CHECK:   n10 = n8.?._86reifiedinit(n9)
   // CHECK:   jmp b6
   // CHECK:   .handlers b7
   // CHECK: #b5:
@@ -267,7 +267,7 @@ class C {
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n16 = n13.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n16 = n13.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
   // CHECK:   n17 = $builtins.hhbc_lock_obj(n13)
   // CHECK:   store &$a <- n13: *HackMixed
   // CHECK:   ret null

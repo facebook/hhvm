@@ -93,6 +93,20 @@ pub(crate) enum Intrinsic {
     StaticInit(ir::ClassId),
 }
 
+impl Intrinsic {
+    pub(crate) fn contains_unknown(&self) -> bool {
+        match self {
+            Intrinsic::AllocCurry
+            | Intrinsic::ConstInit(_)
+            | Intrinsic::Construct(_)
+            | Intrinsic::Factory(_)
+            | Intrinsic::PropInit(_)
+            | Intrinsic::StaticInit(_) => false,
+            Intrinsic::Invoke(name) => *name == TypeName::Unknown,
+        }
+    }
+}
+
 /// Represents a named callable thing.  This includes top-level functions and
 /// methods.
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
@@ -109,6 +123,10 @@ impl FunctionName {
         Self::Method(TypeName::class(class, is_static), method)
     }
 
+    pub(crate) fn untyped_method(method: ir::MethodId) -> Self {
+        Self::Method(TypeName::Unknown, method)
+    }
+
     pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
         FmtFunctionName(strings, self)
     }
@@ -117,6 +135,16 @@ impl FunctionName {
         let a = self.display(strings).to_string();
         let b = other.display(strings).to_string();
         a.cmp(&b)
+    }
+
+    pub(crate) fn contains_unknown(&self) -> bool {
+        match self {
+            FunctionName::Builtin(_) | FunctionName::Function(_) | FunctionName::Unmangled(_) => {
+                false
+            }
+            FunctionName::Intrinsic(intrinsic) => intrinsic.contains_unknown(),
+            FunctionName::Method(name, _) => *name == TypeName::Unknown,
+        }
     }
 }
 
@@ -215,8 +243,8 @@ impl fmt::Display for FmtGlobalName<'_> {
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum TypeName {
     Class(ir::ClassId),
-    HackMixed,
     StaticClass(ir::ClassId),
+    Unknown,
     UnmangledRef(&'static str),
 }
 
@@ -240,7 +268,7 @@ impl fmt::Display for FmtTypeName<'_> {
         let FmtTypeName(strings, name) = *self;
         match name {
             TypeName::Class(cid) => f.write_str(&cid.as_bytes(strings).mangle(strings)),
-            TypeName::HackMixed => f.write_str("HackMixed"),
+            TypeName::Unknown => f.write_str("?"),
             TypeName::StaticClass(cid) => {
                 f.write_str(&cid.as_bytes(strings).mangle(strings))?;
                 f.write_str("$static")

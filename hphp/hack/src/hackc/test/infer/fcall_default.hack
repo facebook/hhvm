@@ -13,7 +13,7 @@ class C {
   // CHECK:   n1: *HackMixed = load &$b
   // CHECK:   n2: *HackMixed = load &$c
   // CHECK:   n3: *HackMixed = load &$this
-  // CHECK:   n4 = n3.HackMixed.myfn2(n0, n1, n2)
+  // CHECK:   n4 = n3.?.myfn2(n0, n1, n2)
   // CHECK:   ret n4
   // CHECK: }
 
@@ -28,7 +28,7 @@ class C {
   // CHECK:   n1: *HackMixed = load &$b
   // CHECK:   n2: *HackMixed = load &$c
   // CHECK:   n3: *HackMixed = load &$this
-  // CHECK:   n4 = n3.HackMixed.myfn2(n0, n1, n2)
+  // CHECK:   n4 = n3.?.myfn2(n0, n1, n2)
   // CHECK:   ret n4
   // CHECK: }
 

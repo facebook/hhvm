@@ -937,8 +937,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
 
             // TODO: figure out better typing. If this is coming from a
             // `classname` parameter we at least have a lower-bound.
-            let ty = ClassId::from_str("HackMixed", &state.strings);
-            let target = FunctionName::method(ty, IsStatic::Static, method);
+            let target = FunctionName::untyped_method(method);
             let obj = state.lookup_vid(detail.class(operands));
             state.fb.call_virtual(&target, obj, args)?
         }
@@ -1001,7 +1000,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             // $foo()
             let target = detail.target(operands);
             let target = state.lookup_vid(target);
-            let name = FunctionName::Intrinsic(Intrinsic::Invoke(TypeName::HackMixed));
+            let name = FunctionName::Intrinsic(Intrinsic::Invoke(TypeName::Unknown));
             state.fb.call_virtual(&name, target, args)?
         }
         CallDetail::FCallFuncD { func } => {
@@ -1019,8 +1018,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             assert!(flavor != ir::ObjMethodOp::NullSafe);
 
             // TODO: need to try to figure out the type.
-            let ty = ClassId::from_str("HackMixed", &state.strings);
-            let target = FunctionName::method(ty, IsStatic::NonStatic, method);
+            let target = FunctionName::untyped_method(method);
             let obj = state.lookup_vid(detail.obj(operands));
             state.fb.call_virtual(&target, obj, args)?
         }

@@ -56,6 +56,12 @@ impl<'a> TextualFile<'a> {
         }
     }
 
+    fn register_called_function(&mut self, target: &FunctionName) {
+        if !target.contains_unknown() && !self.called_functions.contains(target) {
+            self.called_functions.insert(target.clone());
+        }
+    }
+
     pub(crate) fn debug_separator(&mut self) -> Result {
         writeln!(self.w)?;
         Ok(())
@@ -309,9 +315,10 @@ impl<'a> TextualFile<'a> {
     }
 
     fn write_expr(&mut self, expr: &Expr) -> Result {
-        let strings = &self.strings;
         match *expr {
-            Expr::Alloc(ref ty) => write!(self.w, "__sil_allocate(<{}>)", ty.display(strings))?,
+            Expr::Alloc(ref ty) => {
+                write!(self.w, "__sil_allocate(<{}>)", ty.display(&self.strings))?
+            }
             Expr::AllocCurry {
                 ref name,
                 ref this,
@@ -320,20 +327,22 @@ impl<'a> TextualFile<'a> {
                 let target = FunctionName::Intrinsic(Intrinsic::AllocCurry);
                 // TODO: Because textual doesn't actually know about
                 // __sil_allocate_curry we need to register it.
-                self.called_functions.insert(target.clone());
+                self.register_called_function(&target);
                 let mut write_curry =
                     |cls: &dyn std::fmt::Display, meth: &dyn std::fmt::Display| {
                         write!(
                             self.w,
                             "{}(\"<{cls}>\", \"{meth}\", ",
-                            target.display(strings)
+                            target.display(&self.strings)
                         )
                     };
                 match name {
                     FunctionName::Function(fid) => {
+                        let strings = &self.strings;
                         write_curry(&TOP_LEVELS_CLASS, &fid.as_bytes(strings).mangle(strings))?;
                     }
                     FunctionName::Method(cid, mid) => {
+                        let strings = &self.strings;
                         write_curry(
                             &cid.display(strings),
                             &mid.as_bytes(strings).mangle(strings),
@@ -351,10 +360,8 @@ impl<'a> TextualFile<'a> {
                 write!(self.w, ")")?;
             }
             Expr::Call(ref target, ref params) => {
-                if !self.called_functions.contains(target) {
-                    self.called_functions.insert(target.to_owned());
-                }
-                write!(self.w, "{}(", target.display(strings))?;
+                self.register_called_function(target);
+                write!(self.w, "{}(", target.display(&self.strings))?;
                 let mut sep = "";
                 for param in params.iter() {
                     self.w.write_all(sep.as_bytes())?;
@@ -388,7 +395,7 @@ impl<'a> TextualFile<'a> {
                     }
                     Var::Local(_) => {}
                 }
-                write!(self.w, "{}", FmtVar(strings, var))?
+                write!(self.w, "{}", FmtVar(&self.strings, var))?
             }
         }
         Ok(())
@@ -951,9 +958,7 @@ impl FuncBuilder<'_, '_> {
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
-        if !self.txf.called_functions.contains(target) {
-            self.txf.called_functions.insert(target.to_owned());
-        }
+        self.txf.register_called_function(target);
         let dst = self.alloc_sid();
         write!(
             self.txf.w,
@@ -978,9 +983,7 @@ impl FuncBuilder<'_, '_> {
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
-        if !self.txf.called_functions.contains(target) {
-            self.txf.called_functions.insert(target.to_owned());
-        }
+        self.txf.register_called_function(target);
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
         self.txf.write_expr(&this)?;
@@ -997,9 +1000,7 @@ impl FuncBuilder<'_, '_> {
     }
 
     pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
-        if !self.txf.called_functions.contains(target) {
-            self.txf.called_functions.insert(target.to_owned());
-        }
+        self.txf.register_called_function(target);
         let dst = self.alloc_sid();
         write!(
             self.txf.w,

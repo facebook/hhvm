@@ -98,7 +98,7 @@ function fcall_static(): void {
 // CHECK: define $root.fcall_method($this: *void, $a: *C) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
-// CHECK:   n1 = n0.HackMixed.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n1 = n0.?.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   ret null
 // CHECK: }
 function fcall_method(C $a): void {
@@ -116,7 +116,7 @@ function fcall_method(C $a): void {
 // CHECK:   jmp b3(null)
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n1)
-// CHECK:   n2 = n0.HackMixed.g()
+// CHECK:   n2 = n0.?.g()
 // CHECK:   jmp b3(n2)
 // CHECK: #b3(n3: *HackMixed):
 // CHECK:   n4 = $root.f(null, n3)
@@ -138,7 +138,7 @@ function fcall_nullsafe(?C $c): void {
 // CHECK:   n2: *HackMixed = load &$x
 // CHECK:   store &$0 <- n2: *HackMixed
 // CHECK:   n3: *HackMixed = load &$0
-// CHECK:   n4 = n3.HackMixed.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n4 = n3.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
@@ -164,7 +164,7 @@ function fcall_class_meth(): void {
 // CHECK:   n1: *HackMixed = load &$x
 // CHECK:   store &$0 <- n1: *HackMixed
 // CHECK:   n2: *HackMixed = load &$0
-// CHECK:   n3 = n2.HackMixed.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n3 = n2.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n4: *HackMixed):
@@ -207,7 +207,7 @@ function fcall_splat(): void {
 // CHECK:   store &$0 <- n1: *HackMixed
 // CHECK:   n2: *HackMixed = load &$b
 // CHECK:   n3: *HackMixed = load &$0
-// CHECK:   n4 = n3.HackMixed.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n4 = n3.?.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
 // CHECK: #b2(n5: *HackMixed):
@@ -229,7 +229,7 @@ function fcall_meth_caller(C $b): void {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3: *HackMixed = load &$a
-// CHECK:   n4 = n3.HackMixed$static.static_fcall_self()
+// CHECK:   n4 = n3.?.static_fcall_self()
 // CHECK:   ret null
 // CHECK: }
 function fcall_cls_method(classname<D> $a): void {

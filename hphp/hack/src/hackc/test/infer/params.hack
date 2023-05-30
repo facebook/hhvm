@@ -33,7 +33,7 @@ class InternalGeneric<T> {}
 // CHECK:   prune $builtins.hack_is_true(n7)
 // CHECK:   n8: *HackMixed = load &$2
 // CHECK:   n9 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-// CHECK:   n10 = n8.HackMixed._86reifiedinit(n9)
+// CHECK:   n10 = n8.?._86reifiedinit(n9)
 // CHECK:   jmp b6
 // CHECK:   .handlers b7
 // CHECK: #b5:
@@ -56,7 +56,7 @@ class InternalGeneric<T> {}
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n16 = n13.HackMixed.__construct()
+// CHECK:   n16 = n13.?.__construct()
 // CHECK:   n17 = $builtins.hhbc_lock_obj(n13)
 // CHECK:   n18 = $builtins.hhbc_is_type_struct_c(n13, n0, $builtins.hack_int(1))
 // CHECK:   n19 = $builtins.hhbc_verify_type_pred(n13, n18)
@@ -95,7 +95,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK:   prune $builtins.hack_is_true(n7)
 // CHECK:   n8: *HackMixed = load &$2
 // CHECK:   n9 = $builtins.hhbc_cast_vec($builtins.hhbc_new_col_vector())
-// CHECK:   n10 = n8.HackMixed._86reifiedinit(n9)
+// CHECK:   n10 = n8.?._86reifiedinit(n9)
 // CHECK:   jmp b6
 // CHECK:   .handlers b7
 // CHECK: #b5:
@@ -118,7 +118,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$1 <- null: *HackMixed
 // CHECK:   store &$2 <- null: *HackMixed
-// CHECK:   n16 = n13.HackMixed.__construct()
+// CHECK:   n16 = n13.?.__construct()
 // CHECK:   n17 = $builtins.hhbc_lock_obj(n13)
 // CHECK:   n18 = $builtins.hhbc_is_type_struct_c(n13, n0, $builtins.hack_int(1))
 // CHECK:   n19 = $builtins.hhbc_verify_type_pred(n13, n18)

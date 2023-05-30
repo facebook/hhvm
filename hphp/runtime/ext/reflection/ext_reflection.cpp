@@ -1141,7 +1141,7 @@ static void HHVM_METHOD(ReflectionModule, __init, const String& name) {
     );
   }
 
-  const Module* module = Module::load(name.get());
+  const Module* module = Module::load(makeStaticString(name.get()));
   if (!module) {
     Reflection::ThrowReflectionExceptionObject(folly::sformat(
       "Module '{}' does not exist",

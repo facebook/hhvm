@@ -1,0 +1,7 @@
+
+Fatal error: Uncaught exception 'ReflectionException' with message 'Module 'abc' does not exist' in %s/reflection-module-static.php:5
+Stack trace:
+#0 (): ReflectionModule->__init()
+#1 %s/reflection-module-static.php(5): ReflectionModule->__construct()
+#2 (): main()
+#3 {main}

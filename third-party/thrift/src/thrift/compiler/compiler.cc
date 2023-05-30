@@ -444,9 +444,9 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     parsing_params params,
     bool return_nullptr_on_failure) {
   auto programs = parse_ast(sm, ctx, filename, std::move(params));
-  if (!programs || (ctx.has_errors() && return_nullptr_on_failure)) {
+  if (!programs || ctx.has_errors()) {
     // Mutations should be only performed on a valid AST.
-    return {};
+    return !return_nullptr_on_failure ? std::move(programs) : nullptr;
   }
   auto result = standard_mutators()(ctx, *programs);
   if (result.unresolvable_typeref && return_nullptr_on_failure) {

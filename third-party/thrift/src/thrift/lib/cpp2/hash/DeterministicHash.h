@@ -45,15 +45,6 @@ auto deterministic_hash(const Struct& data) {
   return deterministic_hash(data, [] { return Hasher{}; });
 }
 
-// TODO: Migrate away from StdHasherDeprecated
-template <typename Struct>
-auto deterministic_hash(const Struct& value) {
-  auto accumulator =
-      op::makeDeterministicAccumulator<op::StdHasherDeprecated>();
-  op::detail::accumulateHash(type::struct_t<Struct>{}, accumulator, value);
-  return std::move(accumulator.result()).getResult();
-}
-
 /**
  * Utility to compute deterministic hash using custom Hasher implementation.
  * Hashes are guaranteed to be stable and consistent across different languages

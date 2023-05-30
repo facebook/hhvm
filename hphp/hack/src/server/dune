@@ -361,32 +361,6 @@
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
-(library
- (name server_code_actions_services)
- (wrapped false)
- (modules
-  codeActionsService
-  codeActionsServiceExtractVariable
-  codeActionsServiceFlipAroundComma
-  codeActionsServiceInlineVariable
- )
- (libraries
-  annotated_ast
-  ast
-  collections
-  decl_provider
-  errors
-  extract_method
-  full_fidelity
-  lsp
-  pos
-  provider_context
-  tast_env
-  tast_provider
-  typing_skeleton
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name server_search)

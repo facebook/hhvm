@@ -2054,10 +2054,10 @@ let handle_mode
       Lsp.CodeAction.(
         function
         | Action { title; _ } ->
-          (* Here (for simplicity) we are stressing CodeActionsService
+          (* Here (for simplicity) we are stressing Server_code_actions_services
              more than a real client would: if the 'edit' field is provided
              then the client should not request resolution but we always resolve.*)
-          CodeActionsService.resolve
+          Server_code_actions_services.resolve
             ~ctx
             ~entry
             ~path
@@ -2066,7 +2066,8 @@ let handle_mode
         | Command _ as c -> c)
     in
     let commands_or_actions =
-      CodeActionsService.go ~ctx ~entry ~path ~range |> List.map ~f:resolve
+      Server_code_actions_services.go ~ctx ~entry ~path ~range
+      |> List.map ~f:resolve
     in
     let hermeticize_paths =
       Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""

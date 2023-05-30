@@ -1457,7 +1457,7 @@ let handle_request
     in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          CodeActionsService.go ~ctx ~entry ~path ~range)
+          Server_code_actions_services.go ~ctx ~entry ~path ~range)
     in
 
     (* We'll take this opportunity to make sure we've returned the latest errors.
@@ -1502,7 +1502,12 @@ let handle_request
     in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          CodeActionsService.resolve ~ctx ~entry ~path ~range ~resolve_title)
+          Server_code_actions_services.resolve
+            ~ctx
+            ~entry
+            ~path
+            ~range
+            ~resolve_title)
     in
     Lwt.return (Initialized istate, Ok result)
   (* Go to definition *)

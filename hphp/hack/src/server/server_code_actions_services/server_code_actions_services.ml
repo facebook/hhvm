@@ -205,18 +205,15 @@ let find
   let lsp_range = lsp_range_of_ide_range range in
 
   let variable_actions =
-    match
-      CodeActionsServiceInlineVariable.find ~range:lsp_range ~path ~entry ctx
-    with
-    | [] ->
-      CodeActionsServiceExtractVariable.find ~range:lsp_range ~path ~entry ctx
+    match Inline_variable.find ~range:lsp_range ~path ~entry ctx with
+    | [] -> Extract_variable.find ~range:lsp_range ~path ~entry ctx
     | actions -> actions
   in
   actions_for_errors errors path classish_starts ~start_line ~start_col
   @ override_method_commands_or_actions
   @ variable_actions
   @ Extract_method.find ~range:lsp_range ~path ~entry ctx
-  @ CodeActionsServiceFlipAroundComma.find ~range:lsp_range ~path ~entry ctx
+  @ Flip_around_comma.find ~range:lsp_range ~path ~entry ctx
 
 let go
     ~(ctx : Provider_context.t)

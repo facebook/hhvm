@@ -48,7 +48,7 @@ let next_char_is_newline ~source_text pos : bool =
   let ch = Full_fidelity_source_text.get source_text offset in
   Char.(ch = '\n')
 
-module VarInfo : sig
+module Var_info : sig
   type t
 
   val empty : t
@@ -196,27 +196,27 @@ let visitor ~(selection : Pos.t) =
   in
 
   object (self)
-    inherit [VarInfo.t] Tast_visitor.reduce as super
+    inherit [Var_info.t] Tast_visitor.reduce as super
 
-    method zero = VarInfo.empty
+    method zero = Var_info.empty
 
-    method plus = VarInfo.merge
+    method plus = Var_info.merge
 
     method! on_class_ env class_ =
       if Pos.contains class_.Aast.c_span selection then
         super#on_class_ env class_
       else
-        VarInfo.empty
+        Var_info.empty
 
     method! on_fun_ env fun_ =
       if Pos.contains fun_.Aast.f_span selection then
         super#on_fun_ env fun_
       else
-        VarInfo.empty
+        Var_info.empty
 
     method! on_fun_param env param =
       super#on_fun_param env param
-      |> VarInfo.mark_ineligible ~name:param.Aast.param_name
+      |> Var_info.mark_ineligible ~name:param.Aast.param_name
 
     method! on_stmt env stmt =
       let (pos, stmt_) = stmt in
@@ -240,10 +240,10 @@ let visitor ~(selection : Pos.t) =
             def_pos = pos;
             def_rhs_pos = Tuple3.get2 rhs;
             def_needs_grouping;
-            def_deps = VarInfo.referenced rhs_acc;
+            def_deps = Var_info.referenced rhs_acc;
           }
         in
-        let acc = VarInfo.add_def ~name ~def rhs_acc in
+        let acc = Var_info.add_def ~name ~def rhs_acc in
         self#plus acc (with_in_lvalue (fun () -> self#on_expr env lhs))
       | _ -> super#on_stmt env stmt
 
@@ -252,7 +252,7 @@ let visitor ~(selection : Pos.t) =
       match Tuple3.get3 expr with
       | Lvar (use_pos, lid) when not !in_lvalue ->
         let name = Local_id.get_name lid in
-        VarInfo.add_use VarInfo.empty ~name ~use_pos
+        Var_info.add_use Var_info.empty ~name ~use_pos
       | _ -> super#on_expr env expr
   end
 
@@ -326,7 +326,7 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
         range
     in
     (visitor ~selection)#go ctx tast
-    |> VarInfo.to_candidate_opt ~selection
+    |> Var_info.to_candidate_opt ~selection
     |> Option.map ~f:(command_or_action_of_candidate ~path ~source_text)
     |> Option.to_list
   | None -> []

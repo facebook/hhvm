@@ -7101,11 +7101,12 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_did_change(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("didchange.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=False)
-            .wait_for_hh_server_ready()
+            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=True)
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -7116,6 +7117,10 @@ class TestLsp(TestCase[LspTestDriver]):
                         "text": "${php_file}",
                     }
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .notification(
                 method="textDocument/didChange",
@@ -7160,7 +7165,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_go_to_implementation(self) -> None:
         self.prepare_server_environment()

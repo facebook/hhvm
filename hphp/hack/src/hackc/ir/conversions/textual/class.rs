@@ -258,7 +258,11 @@ impl ClassState<'_, '_, '_> {
         let static_ty = static_ty(self.class.name);
         let ty = non_static_ty(self.class.name);
 
-        let params = vec![(special_idents::THIS, &static_ty)];
+        let params = vec![textual::Param {
+            name: special_idents::THIS.into(),
+            attr: None,
+            ty: static_ty.into(),
+        }];
         let attributes = textual::FuncAttributes::default();
 
         self.txf.define_function(

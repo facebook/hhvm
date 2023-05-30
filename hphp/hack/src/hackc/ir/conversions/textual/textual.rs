@@ -32,6 +32,7 @@ use crate::mangle::TypeName;
 use crate::mangle::TOP_LEVELS_CLASS;
 
 pub(crate) const INDENT: &str = "  ";
+pub(crate) const VARIADIC: &str = ".variadic";
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -120,7 +121,7 @@ impl<'a> TextualFile<'a> {
         name: &FunctionName,
         loc: Option<&SrcLoc>,
         attributes: &FuncAttributes,
-        params: &[(&str, &Ty)],
+        params: &[Param<'_>],
         ret_ty: &Ty,
         locals: &[(LocalId, &Ty)],
         body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
@@ -141,8 +142,14 @@ impl<'a> TextualFile<'a> {
 
         write!(self.w, "{}(", name.display(&self.strings))?;
         let mut sep = "";
-        for (name, ty) in params {
-            write!(self.w, "{sep}{name}: {ty}", ty = ty.display(&self.strings))?;
+        for param in params {
+            write!(self.w, "{sep}{name}: ", name = param.name,)?;
+            if let Some(attrs) = param.attr.as_ref() {
+                for attr in attrs.iter() {
+                    write!(self.w, "{attr} ")?;
+                }
+            }
+            write!(self.w, "{ty}", ty = param.ty.display(&self.strings))?;
             sep = ", ";
         }
         writeln!(self.w, ") : {} {{", ret_ty.display(&self.strings))?;
@@ -1200,4 +1207,11 @@ pub(crate) struct Field<'a> {
     pub visibility: Visibility,
     pub attributes: Vec<FieldAttribute>,
     pub comments: Vec<String>,
+}
+
+#[derive(Clone)]
+pub(crate) struct Param<'a> {
+    pub name: Cow<'a, str>,
+    pub attr: Option<Box<[&'a str]>>,
+    pub ty: Cow<'a, Ty>,
 }

@@ -4,11 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::HashSet;
-use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::Error;
-use ascii::AsciiString;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::Hhbc;
@@ -73,26 +71,41 @@ pub(crate) fn write_function(
     lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
 }
 
-pub(crate) fn compute_func_params<'a>(
+pub(crate) fn compute_func_params<'a, 'b>(
     params: &Vec<ir::Param<'_>>,
     unit_state: &'a mut UnitState,
     this_ty: textual::Ty,
-) -> Result<(Vec<AsciiString>, Vec<textual::Ty>, HashSet<LocalId>)> {
+) -> Result<Vec<(textual::Param<'b>, LocalId)>> {
+    let mut result = Vec::new();
+
     // Prepend the 'this' parameter.
-    let this_name = AsciiString::from_str(special_idents::THIS).unwrap();
+    let this_param = textual::Param {
+        name: special_idents::THIS.into(),
+        attr: None,
+        ty: this_ty.into(),
+    };
     let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
-    let mut param_names = vec![this_name];
-    let mut param_tys = vec![this_ty];
-    let mut param_lids: HashSet<LocalId> = [this_lid].into_iter().collect();
+    result.push((this_param, this_lid));
+
     for p in params {
         let name_bytes = unit_state.strings.lookup_bytes(p.name);
-        let name_string = util::escaped_string(&name_bytes);
-        param_names.push(name_string);
-        param_tys.push(convert_ty(&p.ty.enforced, &unit_state.strings));
-        param_lids.insert(LocalId::Named(p.name));
+        let name = util::escaped_string(&name_bytes);
+
+        let mut attr = Vec::new();
+        if p.is_variadic {
+            attr.push(textual::VARIADIC);
+        }
+
+        let param = textual::Param {
+            name: name.to_string().into(),
+            attr: Some(attr.into_boxed_slice()),
+            ty: convert_ty(&p.ty.enforced, &unit_state.strings).into(),
+        };
+        let lid = LocalId::Named(p.name);
+        result.push((param, lid));
     }
 
-    Ok((param_names, param_tys, param_lids))
+    Ok(result)
 }
 
 pub(crate) fn lower_and_write_func(
@@ -222,12 +235,10 @@ fn write_func(
     let strings = Arc::clone(&unit_state.strings);
 
     let params = std::mem::take(&mut func.params);
-    let (param_names, param_tys, param_lids) = compute_func_params(&params, unit_state, this_ty)?;
-    let tx_params = param_names
-        .iter()
-        .map(|s| s.as_str())
-        .zip(param_tys.iter())
-        .collect_vec();
+    let (tx_params, param_lids): (Vec<_>, Vec<_>) =
+        compute_func_params(&params, unit_state, this_ty)?
+            .into_iter()
+            .unzip();
 
     let ret_ty = convert_ty(&func.return_type.enforced, &strings);
 
@@ -335,7 +346,10 @@ pub(crate) fn write_func_decl(
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let params = std::mem::take(&mut func.params);
-    let (_, param_tys, _) = compute_func_params(&params, unit_state, this_ty)?;
+    let param_tys = compute_func_params(&params, unit_state, this_ty)?
+        .into_iter()
+        .map(|(param, _)| textual::Ty::clone(&param.ty))
+        .collect_vec();
 
     let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
 
@@ -370,7 +384,7 @@ fn write_instance_stub(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     method_info: &MethodInfo<'_>,
-    tx_params: &[(&str, &textual::Ty)],
+    tx_params: &[textual::Param<'_>],
     ret_ty: &textual::Ty,
     span: &ir::SrcLoc,
 ) -> Result {
@@ -384,7 +398,7 @@ fn write_instance_stub(
 
     let mut tx_params = tx_params.to_vec();
     let inst_ty = method_info.non_static_ty();
-    tx_params[0].1 = &inst_ty;
+    tx_params[0].ty = (&inst_ty).into();
 
     let locals = Vec::default();
     txf.define_function(
@@ -404,9 +418,9 @@ fn write_instance_stub(
                 FunctionName::method(method_info.class.name, IsStatic::Static, method_info.name);
 
             let params: Vec<Sid> = std::iter::once(Ok(static_this))
-                .chain(tx_params.iter().skip(1).map(|(name, ty)| {
-                    let lid = LocalId::Named(strings.intern_str(*name));
-                    fb.load(ty, textual::Expr::deref(lid))
+                .chain(tx_params.iter().skip(1).map(|param| {
+                    let lid = LocalId::Named(strings.intern_str(param.name.as_ref()));
+                    fb.load(&param.ty, textual::Expr::deref(lid))
                 }))
                 .try_collect()?;
 

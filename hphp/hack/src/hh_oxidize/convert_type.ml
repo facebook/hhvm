@@ -131,6 +131,9 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
       rust_ref (lifetime "a") (rust_simple_type "std::path::Path")
     else
       rust_simple_type "std::path::PathBuf"
+  | Ptyp_constr ({ txt = Ldot (Lident "Hash", "hash_value"); _ }, []) ->
+    (* Hash.hash_value *)
+    rust_type "isize" [] []
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with

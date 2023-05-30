@@ -49,6 +49,7 @@ pub use gen::prim_defs;
 pub use gen::saved_state_rollouts;
 pub use gen::scoured_comments;
 pub use gen::shallow_decl_defs;
+pub use gen::tast_hashes;
 pub use gen::typing_defs;
 pub use gen::typing_defs_core;
 pub use gen::typing_reason;

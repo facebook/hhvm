@@ -10,6 +10,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 use std::sync::Arc;
 
+use bstr::BStr;
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
 use ffi::Slice;
@@ -237,11 +238,11 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         state.to_hhas(self.alloc)
     }
 
-    pub fn is_interceptable(&self) -> bool {
+    pub fn is_interceptable(&self, func: &BStr) -> bool {
         let repo_auth = self.options().hhbc.repo_authoritative;
         match (repo_auth, self.systemlib()) {
             (true, _) => false,
-            (false, true) => self.options().builtin_is_renamable(),
+            (false, true) => self.options().function_is_renamable(func),
             (false, false) => {
                 self.options().hhvm.jit_enable_rename_function != JitEnableRenameFunction::Disable
             }

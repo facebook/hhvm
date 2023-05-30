@@ -209,6 +209,11 @@ CompilerResult hackc_compile(
       native_env.include_roots.emplace_back(hackc::StringMapEntry{k, v});
     }
   }
+  if (RO::EvalJitEnableRenameFunction == 2) {
+    for (auto& f : RO::RenamableFunctions) {
+      native_env.renamable_functions.emplace_back(rust::String{f});
+    }
+  }
 
   auto const fromHackCUnit = [&]() -> CompilerResult {
     rust::Box<hackc::UnitWrapper> unit_wrapped = [&] {

@@ -4,7 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
+use bstr::BStr;
 use bstr::BString;
 pub use oxidized::parser_options::ParserOptions;
 use serde::Deserialize;
@@ -30,6 +32,7 @@ impl Default for CompilerFlags {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
+    pub renamable_functions: BTreeSet<BString>,
     pub parser_options: ParserOptions,
     pub jit_enable_rename_function: JitEnableRenameFunction,
 }
@@ -60,10 +63,13 @@ impl Options {
     pub fn log_extern_compiler_perf(&self) -> bool {
         self.hhbc.log_extern_compiler_perf
     }
-    pub fn builtin_is_renamable(&self) -> bool {
+    pub fn function_is_renamable(&self, func: &BStr) -> bool {
         match self.hhvm.jit_enable_rename_function {
             JitEnableRenameFunction::Enable => true,
-            JitEnableRenameFunction::RestrictedEnable | JitEnableRenameFunction::Disable => false,
+            JitEnableRenameFunction::RestrictedEnable => {
+                self.hhvm.renamable_functions.contains(func)
+            }
+            JitEnableRenameFunction::Disable => false,
         }
     }
 }

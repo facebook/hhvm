@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
+use bstr::ByteSlice;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
 use env::Env;
@@ -53,7 +54,10 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
-    attrs.set(Attr::AttrInterceptable, emitter.is_interceptable());
+    attrs.set(
+        Attr::AttrInterceptable,
+        emitter.is_interceptable(fd.name.1.as_bytes().as_bstr()),
+    );
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
     attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));

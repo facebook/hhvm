@@ -49,6 +49,7 @@ pub mod compile_ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
+        renamable_functions: Vec<String>,
         jit_enable_rename_function: JitEnableRenameFunction,
 
         hhbc_flags: HhbcFlags,
@@ -254,6 +255,11 @@ impl compile_ffi::NativeEnv {
             hhvm: Hhvm {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
+                    .collect(),
+                renamable_functions: self
+                    .renamable_functions
+                    .iter()
+                    .map(|e| e.clone().into())
                     .collect(),
                 jit_enable_rename_function: self.jit_enable_rename_function.into(),
                 parser_options: ParserOptions {

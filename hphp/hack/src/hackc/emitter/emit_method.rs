@@ -7,6 +7,7 @@ use std::borrow::Cow;
 use ast_scope::Lambda;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
+use bstr::ByteSlice;
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
@@ -55,7 +56,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_dyn_callable =
         emitter.systemlib() || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_interceptable = emitter.is_interceptable();
+    let is_interceptable = emitter.is_interceptable(method.name.1.as_bytes().as_bstr());
     let is_native_opcode_impl = hhbc::is_native_opcode_impl(user_attrs);
     let is_no_injection = hhbc::is_no_injection(user_attrs);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);

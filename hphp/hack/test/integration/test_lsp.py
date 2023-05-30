@@ -7830,9 +7830,10 @@ class TestLsp(TestCase[LspTestDriver]):
         self.load_and_run("bad_call", variables)
 
     def test_code_action_missing_method(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("code_action_missing_method.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
@@ -7849,6 +7850,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 },
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 comment="make local, unsaved change to the file",
                 method="textDocument/didChange",
@@ -8227,9 +8229,10 @@ function call_method(ClassWithFooBar $mc): void {
         - The client must send `codeAction/resolve`
         - The server then replies with a complete code action
         """
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
@@ -8246,6 +8249,7 @@ function call_method(ClassWithFooBar $mc): void {
                     }
                 },
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
                 line=line(),
                 comment="get actions",

@@ -260,6 +260,7 @@ let resolve
   |> List.find ~f:(fun command_or_action ->
          let title = Lsp_helpers.title_of_command_or_action command_or_action in
          String.equal title resolve_title)
+  (* TODO(T153638678): better error handling, see also https://github.com/microsoft/language-server-protocol/issues/1738 *)
   |> Option.value_exn
        ~message:
          {|Expected the code action requested with codeAction/resolve to be findable.

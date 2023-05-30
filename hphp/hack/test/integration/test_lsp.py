@@ -9024,14 +9024,14 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "hh_client has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
+                    "message": "Hack IDE support has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "hh_client has failed. See Output\u203aHack for details.Try running `hh` at the command-line.\n\nhh_server is stopped. Try running `hh` at the command-line.",
-                    "shortMessage": "failed",
+                    "message": "Hack IDE support has failed. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: failed",
                     "type": 1,
                 },
                 result=NoResponse(),

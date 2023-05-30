@@ -2204,10 +2204,8 @@ let merge_statuses_standalone
       ((ServerProgress.DReady, false), "Hack", "Hack IDE support is ready")
     | ClientIdeService.Status.Stopped s ->
       ( (ServerProgress.DStopped, false),
-        s.ClientIdeMessage.short_user_message,
-        s.ClientIdeMessage.medium_user_message
-        ^ see_output_hack
-        ^ fix_by_running_hh )
+        "Hack: " ^ s.ClientIdeMessage.short_user_message,
+        s.ClientIdeMessage.medium_user_message ^ see_output_hack )
   in
   let (hh_server_disposition, hh_server_message, hh_server_tooltip) =
     let open ServerProgress in

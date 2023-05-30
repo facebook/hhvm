@@ -7255,13 +7255,15 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_signature_help(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("signaturehelp.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("signaturehelp.php"))
         spec = (
             self.initialize_spec(
-                LspTestSpec("test_signature_help"), use_serverless_ide=False
+                LspTestSpec("test_signature_help"), use_serverless_ide=True
             )
-            .wait_for_hh_server_ready()
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -7283,6 +7285,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 16, "character": 18},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7303,6 +7306,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7314,6 +7318,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 16, "character": 20},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7325,6 +7330,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 17, "character": 20},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7347,6 +7353,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7369,6 +7376,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7391,6 +7399,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7413,6 +7422,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7424,6 +7434,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 17, "character": 25},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7435,6 +7446,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 18, "character": 23},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7457,6 +7469,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7468,6 +7481,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 19, "character": 17},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7490,6 +7504,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7501,6 +7516,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 20, "character": 26},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7512,6 +7528,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 20, "character": 26},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7533,6 +7550,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7554,6 +7572,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7581,6 +7600,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7607,6 +7627,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7639,21 +7660,24 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_signature_help_lambda(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("signaturehelp_lambda.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("signaturehelp_lambda.php"))
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_signature_help_lambda"),
-                use_serverless_ide=False,
+                use_serverless_ide=True,
             )
-            .wait_for_hh_server_ready()
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -7686,6 +7710,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7705,6 +7730,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7715,6 +7741,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 10, "character": 15},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7725,11 +7752,12 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 10, "character": 16},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_rename(self) -> None:
         self.prepare_server_environment()

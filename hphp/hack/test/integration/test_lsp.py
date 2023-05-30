@@ -339,9 +339,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("optional_param_completion.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("optional_param_completion"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("optional_param_completion"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -417,9 +415,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("all_optional_params_completion.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("all_optional_params_completion"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("all_optional_params_completion"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -493,7 +489,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("ide_completion"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -2375,7 +2371,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("ide_completion"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -4260,9 +4256,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_completion_legacy"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_completion_legacy"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -5458,9 +5452,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_definition"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_definition"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -5677,7 +5669,6 @@ class TestLsp(TestCase[LspTestDriver]):
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_overridden_definition"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -5760,9 +5751,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_document_symbol"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_document_symbol"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6007,26 +5996,22 @@ class TestLsp(TestCase[LspTestDriver]):
     def initialize_spec(
         self,
         spec: LspTestSpec,
-        use_serverless_ide: bool,
-        supports_status: bool = False,  # does the caller wish to see all status messages?
-        supports_init: bool = False,  # do we wish to interact with init, rather than waiting for init ok?
+        has_status_capability: bool = False,  # do we tell the server that we have the "status" capability, i.e. want to receive window/showStatus?
+        wait_for_init_done: bool = True,  # do we wish to wait for init to be done before the test starts?
     ) -> LspTestSpec:
-        if use_serverless_ide:
-            initialization_options = {
-                "namingTableSavedStatePath": "${naming_table_saved_state_path}",
-                "namingTableSavedStateTestDelay": 0.0,
-            }
-            if supports_init:
-                # A small delay, since otherwise init completes immediately
-                # This isn't very racy. All we need is a tiny delay so that
-                # other things which are in the queue get processed, rather
-                # than continuing synchronously
-                initialization_options["namingTableSavedStateTestDelay"] = 0.5
-        else:
-            initialization_options = {}
+        initialization_options = {
+            "namingTableSavedStatePath": "${naming_table_saved_state_path}",
+            "namingTableSavedStateTestDelay": 0.0,
+        }
+        if not wait_for_init_done:
+            # A small delay, since otherwise init completes immediately
+            # This isn't very racy. All we need is a tiny delay so that
+            # other things which are in the queue get processed, rather
+            # than continuing synchronously
+            initialization_options["namingTableSavedStateTestDelay"] = 0.5
 
         window_capabilities = {}
-        if supports_status:
+        if has_status_capability:
             window_capabilities["status"] = {"dynamicRegistration": False}
 
         spec = spec.ignore_notifications(method="telemetry/event").request(
@@ -6088,31 +6073,28 @@ class TestLsp(TestCase[LspTestDriver]):
                 }
             },
         )
-        if use_serverless_ide:
-            spec = spec.wait_for_server_request(
-                method="client/registerCapability",
-                params={
-                    "registrations": [
-                        {
-                            "id": "did-change-watched-files",
-                            "method": "workspace/didChangeWatchedFiles",
-                            "registerOptions": {
-                                "watchers": [
-                                    {
-                                        "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
-                                        "kind": 7,
-                                    }
-                                ]
-                            },
-                        }
-                    ]
-                },
-                result=None,
-            )
-        if not supports_status:
-            spec = spec.ignore_status_diagnostics(True)
+        spec = spec.wait_for_server_request(
+            method="client/registerCapability",
+            params={
+                "registrations": [
+                    {
+                        "id": "did-change-watched-files",
+                        "method": "workspace/didChangeWatchedFiles",
+                        "registerOptions": {
+                            "watchers": [
+                                {
+                                    "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
+                                    "kind": 7,
+                                }
+                            ]
+                        },
+                    }
+                ]
+            },
+            result=None,
+        )
 
-        if use_serverless_ide and not supports_init:
+        if wait_for_init_done:
             spec = spec.wait_for_notification(
                 comment="wait for sIDE to finish init",
                 method="telemetry/event",
@@ -6125,9 +6107,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("type_definition.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_type_definition"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_type_definition"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6268,9 +6248,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_hover"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_hover"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6559,7 +6537,6 @@ class TestLsp(TestCase[LspTestDriver]):
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_file_on_disk_change"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -6615,7 +6592,6 @@ class TestLsp(TestCase[LspTestDriver]):
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_file_hover_with_errors"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -6716,7 +6692,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("formatting"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("formatting"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6760,9 +6736,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("range_formatting"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("range_formatting"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6806,9 +6780,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables.update(self.setup_php_file("ontypeformatting.php"))
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("ontypeformatting"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("ontypeformatting"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -6875,7 +6847,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("did_change"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6942,9 +6914,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_go_to_implementation"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("test_go_to_implementation"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .notification(
@@ -7043,9 +7013,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("signaturehelp.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_signature_help"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("test_signature_help"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -7456,7 +7424,6 @@ class TestLsp(TestCase[LspTestDriver]):
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_signature_help_lambda"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -7554,9 +7521,7 @@ class TestLsp(TestCase[LspTestDriver]):
         self.test_driver.run_check()
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("rename_in_interface"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("rename_in_interface"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .notification(
@@ -7619,9 +7584,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables.update(self.setup_php_file("code_action_missing_method.php"))
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("code_action_missing_method"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("code_action_missing_method"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8016,9 +7979,7 @@ function call_method(ClassWithFooBar $mc): void {
         variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("code_action_flip_around_comma"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("code_action_flip_around_comma"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8111,7 +8072,6 @@ function call_method(ClassWithFooBar $mc): void {
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_hierarchy_file_change_on_disk"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -8192,7 +8152,6 @@ class BaseClassIncremental {
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_decl_in_unsaved_buffer_changed"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -8282,7 +8241,6 @@ function b_hover(): string {
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_decl_two_unsaved_buffers"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
@@ -8417,7 +8375,6 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_hover_without_file_open"),
-                use_serverless_ide=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
@@ -8481,9 +8438,7 @@ function unsaved_bar(): string { return "hello"; }
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("highlight.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_highlight"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_highlight"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
@@ -8531,8 +8486,7 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("status_running"),
-                use_serverless_ide=True,
-                supports_status=True,
+                has_status_capability=True,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -8561,8 +8515,7 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_status_stopped"),
-                use_serverless_ide=True,
-                supports_status=True,
+                has_status_capability=True,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -8589,8 +8542,7 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_standalone_status"),
-                use_serverless_ide=True,
-                supports_status=True,
+                has_status_capability=True,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -8644,8 +8596,7 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_standalone_errors"),
-                use_serverless_ide=True,
-                supports_status=True,
+                has_status_capability=True,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -8747,8 +8698,6 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_live_squiggles"),
-                use_serverless_ide=True,
-                supports_status=False,
             )
             .write_to_disk(
                 comment="create file errors_a.php",
@@ -8916,8 +8865,6 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_parsing_squiggles_priority"),
-                use_serverless_ide=True,
-                supports_status=False,
             )
             .write_to_disk(
                 comment="create file errors_a.php",
@@ -9019,9 +8966,8 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_falls_back_to_full_index"),
-                use_serverless_ide=True,
-                supports_status=True,
-                supports_init=True,
+                has_status_capability=True,
+                wait_for_init_done=False,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -9065,9 +9011,8 @@ function unsaved_bar(): string { return "hello"; }
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_status_failed_to_load_saved_state"),
-                use_serverless_ide=True,
-                supports_status=True,
-                supports_init=True,
+                has_status_capability=True,
+                wait_for_init_done=False,
             )
             .ignore_requests(
                 comment="Ignore all status requests not explicitly waited for in the test",
@@ -9104,9 +9049,7 @@ function unsaved_bar(): string { return "hello"; }
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_workspace_symbol"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("test_workspace_symbol"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
                 line=line(),
@@ -9168,9 +9111,7 @@ function unsaved_bar(): string { return "hello"; }
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_workspace_symbol"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("test_workspace_symbol"))
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
                 line=line(),
@@ -9249,9 +9190,7 @@ function main(): int {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error1"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error1"))
             .write_to_disk(
                 uri="${main_file}", contents="${main_file_contents}", notify=True
             )
@@ -9417,9 +9356,7 @@ function aaa(): string {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error2"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error2"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -9482,9 +9419,7 @@ function aaa(): string {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error3"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error3"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -9543,9 +9478,8 @@ function aaa(): string {
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_requests_before_init"),
-                use_serverless_ide=True,
-                supports_status=True,
-                supports_init=True,
+                has_status_capability=True,
+                wait_for_init_done=False,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .ignore_requests(
@@ -9654,9 +9588,7 @@ function aaa(): string {
         variables["root_path"] = self.test_driver.repo_dir
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_workspace_symbol"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_workspace_symbol"))
             .request(
                 line=line(),
                 comment="workspace symbol call, global, powered by sqlite (generated during serverless-ide-init)",

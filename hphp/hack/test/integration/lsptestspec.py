@@ -94,7 +94,6 @@ class LspTestSpec:
         self._ignored_notification_methods: AbstractSet[str] = set()
         # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         self._ignored_requests: Sequence[Tuple[str, Optional[Json]]] = []
-        self._ignore_status_diagnostics: bool = False
 
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
         """For example .ignore_notifications(method="textDocument/publishDiagnostics") --
@@ -103,13 +102,6 @@ class LspTestSpec:
         ignored_notification_methods = set(self._ignored_notification_methods)
         ignored_notification_methods.add(method)
         return self._update(ignored_notification_methods=ignored_notification_methods)
-
-    def ignore_status_diagnostics(self, value: bool) -> "LspTestSpec":
-        """For example .ignore_status_diagnostics(True) --
-        normally an unexpected publishDiagnostic from the LSP server would result in test failure,
-        but this directive means that unexpected publishDiagnostics with isStatusFB=true will not.
-        (This is what's used by clientLsp to represent the current progress of hh_server during In_init state.)"""
-        return self._update(ignore_status_diagnostics=value)
 
     def ignore_requests(
         self, *, method: str, params: Optional[Json], comment: Optional[str] = None
@@ -325,7 +317,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         messages: Optional[Sequence["_MessageSpec"]] = None,
         ignored_notification_methods: Optional[AbstractSet[str]] = None,
         ignored_requests: Optional[Sequence[Tuple[str, Json]]] = None,
-        ignore_status_diagnostics: Optional[bool] = None,
     ) -> "LspTestSpec":
         spec = copy.copy(self)
         if messages is not None:
@@ -334,8 +325,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             spec._ignored_notification_methods = ignored_notification_methods
         if ignored_requests is not None:
             spec._ignored_requests = ignored_requests
-        if ignore_status_diagnostics:
-            spec._ignore_status_diagnostics = ignore_status_diagnostics
         return spec
 
     def _get_json_commands(
@@ -697,15 +686,6 @@ make it match:
                 entry.received is not None
                 and "id" not in entry.received
                 and entry.received.get("method") in self._ignored_notification_methods
-            ):
-                yield transcript_id
-
-            if (
-                entry.received is not None
-                and "id" not in entry.received
-                and self._ignore_status_diagnostics
-                and entry.received["method"] == "textDocument/publishDiagnostics"
-                and entry.received["params"].get("isStatusFB")
             ):
                 yield transcript_id
 

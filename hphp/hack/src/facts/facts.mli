@@ -52,6 +52,4 @@ type facts = {
 
 val empty : facts
 
-val facts_to_json : sha1:string -> facts -> Hh_json.json
-
 val facts_from_json : Hh_json.json -> facts option

@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-module J = Hh_json
 
 module InvStringKey = struct
   type t = string
@@ -73,16 +72,6 @@ let is_tk_trait = function
   | TKMixed ->
     false
 
-let type_kind_to_string = function
-  | TKClass -> "class"
-  | TKRecord -> "record"
-  | TKInterface -> "interface"
-  | TKEnum -> "enum"
-  | TKTrait -> "trait"
-  | TKTypeAlias -> "typeAlias"
-  | TKUnknown -> "unknown"
-  | TKMixed -> "mixed"
-
 let type_kind_from_string s =
   if String.equal s "class" then
     TKClass
@@ -140,93 +129,6 @@ let empty =
     constants = [];
     modules = InvSMap.empty;
   }
-
-(* Facts to JSON *)
-
-let add_set_member ~include_empty name values members =
-  if InvSSet.is_empty values && not include_empty then
-    members
-  else
-    let elements =
-      InvSSet.fold (fun el acc -> J.JSON_String el :: acc) values []
-    in
-    (name, J.JSON_Array elements) :: members
-
-let list_to_json_array l =
-  let elements =
-    List.fold_left l ~init:[] ~f:(fun acc el -> J.JSON_String el :: acc)
-  in
-  J.JSON_Array elements
-
-let map_to_json_object m =
-  let foo =
-    InvSMap.fold (fun name v acc -> (name, list_to_json_array v) :: acc) m []
-  in
-  J.JSON_Object foo
-
-let add_map_member name values members =
-  if InvSMap.is_empty values then
-    members
-  else
-    let elements = map_to_json_object values in
-    (name, elements) :: members
-
-let module_facts_to_json name _mf =
-  let members = [("name", J.JSON_String name)] in
-  J.JSON_Object members
-
-let type_facts_to_json name tf =
-  let members =
-    add_set_member
-      ~include_empty:(is_tk_interface tf.kind || is_tk_trait tf.kind)
-      "requireExtends"
-      tf.require_extends
-      []
-    |> add_set_member
-         ~include_empty:(is_tk_trait tf.kind)
-         "requireImplements"
-         tf.require_implements
-    |> add_set_member
-         ~include_empty:(is_tk_trait tf.kind)
-         "requireClass"
-         tf.require_class
-    |> add_map_member "attributes" tf.attributes
-    |> add_set_member ~include_empty:true "baseTypes" tf.base_types
-  in
-  let members =
-    ("name", J.JSON_String name)
-    :: ("kindOf", J.JSON_String (type_kind_to_string tf.kind))
-    :: ("flags", J.JSON_Number (string_of_int tf.flags))
-    :: members
-  in
-  J.JSON_Object members
-
-let facts_to_json ~sha1 facts =
-  let sha1sum = ("sha1sum", J.JSON_String sha1) in
-  let type_facts_json =
-    let elements =
-      InvSMap.fold
-        (fun name v acc -> type_facts_to_json name v :: acc)
-        facts.types
-        []
-    in
-    ("types", J.JSON_Array elements)
-  in
-  let module_facts_json =
-    let elements =
-      InvSMap.fold
-        (fun name v acc -> module_facts_to_json name v :: acc)
-        facts.modules
-        []
-    in
-    ("modules", J.JSON_Array elements)
-  in
-  let functions_json = ("functions", list_to_json_array facts.functions) in
-  let constants_json = ("constants", list_to_json_array facts.constants) in
-  J.JSON_Object
-    [
-      sha1sum; type_facts_json; functions_json; constants_json; module_facts_json;
-    ]
 
 (* Facts from JSON *)
 

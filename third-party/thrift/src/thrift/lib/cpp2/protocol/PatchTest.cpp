@@ -517,7 +517,7 @@ TEST_F(PatchTest, List) {
     EXPECT_EQ(
         *value.listValue_ref(),
         *applyContainerPatch(patchObj, value).listValue_ref())
-        << "Shuold insert nothing";
+        << "Should insert nothing";
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -644,7 +644,7 @@ TEST_F(PatchTest, Set) {
     EXPECT_EQ(
         *value.setValue_ref(),
         *applyContainerPatch(patchObj, value).setValue_ref())
-        << "Shuold insert nothing";
+        << "Should insert nothing";
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
   }
   {
@@ -798,7 +798,7 @@ TEST_F(PatchTest, Map) {
     EXPECT_EQ(
         *value.mapValue_ref(),
         *applyContainerPatch(patchObj, value).mapValue_ref())
-        << "Shuold insert nothing";
+        << "Should insert nothing";
     checkMapMask(patchObj, {"key"});
   }
   {
@@ -1257,7 +1257,7 @@ TEST_F(PatchTest, GeneratedUnionPatchInner) {
   EXPECT_EQ(applyGeneratedPatch<type::union_c>(a, patch), b);
 }
 
-TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
+TEST_F(PatchTest, Union) { // Should mostly behave like a struct
   test::testset::union_with<type::i32_t> valueObject;
   test::testset::union_with<type::i32_t> patchObject;
 

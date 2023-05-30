@@ -259,25 +259,25 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
       return &unitInfosBounds[it.second];
     };
 
-    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+    m_data->hashMapIndex<Blob::Bounds, false>(
       RepoFileIndexes::AUTOLOAD_TYPES, autoloadMap.getTypes(),
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+    m_data->hashMapIndex<Blob::Bounds, false>(
       RepoFileIndexes::AUTOLOAD_FUNCS, autoloadMap.getFuncs(),
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+    m_data->hashMapIndex<Blob::Bounds, true>(
       RepoFileIndexes::AUTOLOAD_CONSTANTS, autoloadMap.getConstants(),
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+    m_data->hashMapIndex<Blob::Bounds, false>(
       RepoFileIndexes::AUTOLOAD_TYPEALIASES, autoloadMap.getTypeAliases(),
       key_lambda, value_lambda);
-    m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+    m_data->hashMapIndex<Blob::Bounds, true>(
       RepoFileIndexes::AUTOLOAD_MODULES, autoloadMap.getModules(),
       key_lambda, value_lambda);
   }
 
   // Path to Blob::Bounds for the UnitInfo
-  m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+  m_data->hashMapIndex<Blob::Bounds, true>(
     RepoFileIndexes::PATH_TO_UNIT_INFO, m_data->unitEmittersIndex,
     [](auto const& unit) { return unit.path->toCppString(); },
     [&](auto const& unit) { return &unitInfosBounds[unit.sn]; });
@@ -379,9 +379,9 @@ RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData& data,
   return symbols;
 }
 
-template <typename Compare>
+template <bool CaseSensitive>
 const RepoUnitInfo* findUnitInfoFromKey(
-    const RepoFileData& data, const Blob::HashMapIndex<Compare>& map,
+    const RepoFileData& data, const Blob::HashMapIndex<CaseSensitive>& map,
     const StringData* key) {
   auto bounds = data.getFromIndex<Blob::Bounds>(map, key->toCppString());
   if (!bounds) {
@@ -459,20 +459,18 @@ void RepoFile::loadGlobalTables(bool loadAutoloadMap) {
   data.unitSymbolsIndex = data.listIndex(RepoFileIndexes::UNIT_SYMBOLS);
   data.unitInfosIndex = data.listIndex(RepoFileIndexes::UNIT_INFOS);
 
-  data.pathToUnitInfoBoundsIndex = data.hashMapIndex<stringHashCompare>(
+  data.pathToUnitInfoBoundsIndex = data.hashMapIndex<true>(
     RepoFileIndexes::PATH_TO_UNIT_INFO);
 
   // Repo autoload map
   if (loadAutoloadMap) {
     AutoloadHandler::setRepoAutoloadMap(
       std::make_unique<RepoAutoloadMap>(
-        data.hashMapIndex<stringiHashCompare>(RepoFileIndexes::AUTOLOAD_TYPES),
-        data.hashMapIndex<stringiHashCompare>(RepoFileIndexes::AUTOLOAD_FUNCS),
-        data.hashMapIndex<stringHashCompare>(
-          RepoFileIndexes::AUTOLOAD_CONSTANTS),
-        data.hashMapIndex<stringiHashCompare>(
-          RepoFileIndexes::AUTOLOAD_TYPEALIASES),
-        data.hashMapIndex<stringHashCompare>(RepoFileIndexes::AUTOLOAD_MODULES)
+        data.hashMapIndex<false>(RepoFileIndexes::AUTOLOAD_TYPES),
+        data.hashMapIndex<false>(RepoFileIndexes::AUTOLOAD_FUNCS),
+        data.hashMapIndex<true>(RepoFileIndexes::AUTOLOAD_CONSTANTS),
+        data.hashMapIndex<false>(RepoFileIndexes::AUTOLOAD_TYPEALIASES),
+        data.hashMapIndex<true>(RepoFileIndexes::AUTOLOAD_MODULES)
       )
     );
   }
@@ -568,9 +566,9 @@ const StringData* RepoFile::findUnitPath(const SHA1& sha1) {
   return findUnitPath(sha1.q[4]);
 }
 
-template <typename Compare>
+template <bool CaseSensitive>
 const RepoUnitInfo* RepoFile::findUnitInfo(
-    const Blob::HashMapIndex<Compare>& map, const StringData* key) {
+    const Blob::HashMapIndex<CaseSensitive>& map, const StringData* key) {
   // We need to check here because sometime people call this before RepoFileData
   // has been inited
   if (map.size == 0) {

@@ -256,6 +256,11 @@ strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
 
 #endif
 
+// These functions implement hashing in software. And will return the same thing
+// between different hardware
+strhash_t hash_string_cs_software(const char*, uint32_t);
+strhash_t hash_string_i_software(const char*, uint32_t);
+
 // This function returns true and sets the res parameter if arKey
 // is a non-empty string that matches one of the following conditions:
 //   1) The string is "0".

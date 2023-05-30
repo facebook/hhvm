@@ -233,9 +233,9 @@ struct RepoFile {
 
   // Get the RepoUnitInfo for a specific key in a specific map.
   // The map must point to RepoBounds containing the bounds for RepoUnitInfo
-  template <typename Compare>
-  static const RepoUnitInfo* findUnitInfo(const Blob::HashMapIndex<Compare>& map,
-                                          const StringData* key);
+  template <bool CaseSensitive>
+  static const RepoUnitInfo* findUnitInfo(
+    const Blob::HashMapIndex<CaseSensitive>& map, const StringData* key);
 
   // Get all the symbols for a specific path
   static const RepoUnitSymbols* findUnitSymbols(const StringData* path);

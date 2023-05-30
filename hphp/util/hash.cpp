@@ -45,9 +45,7 @@ strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
     return hash_string_cs_unaligned_crc(arKey, nKeyLength);
   }
 #endif
-  uint64_t h[2];
-  MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
-  return strhash_t(h[0] & STRHASH_MASK);
+  return hash_string_cs_software(arKey, nKeyLength);
 }
 
 NEVER_INLINE
@@ -57,12 +55,22 @@ strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
     return hash_string_i_unaligned_crc(arKey, nKeyLength);
   }
 #endif
+  return hash_string_i_software(arKey, nKeyLength);
+}
+
+#endif
+
+strhash_t hash_string_cs_software(const char *arKey, uint32_t nKeyLength) {
+  uint64_t h[2];
+  MurmurHash3::hash128<true>(arKey, nKeyLength, 0, h);
+  return strhash_t(h[0] & STRHASH_MASK);
+}
+
+strhash_t hash_string_i_software(const char *arKey, uint32_t nKeyLength) {
   uint64_t h[2];
   MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
   return strhash_t(h[0] & STRHASH_MASK);
 }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

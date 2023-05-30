@@ -21,9 +21,6 @@
 
 namespace HPHP {
 
-struct stringHashCompare;
-struct stringiHashCompare;
-
 namespace Blob {
 
 struct Bounds {
@@ -35,7 +32,7 @@ struct Bounds {
   }
 };
 
-template <typename Compare>
+template <bool CaseSensitive>
 struct HashMapIndex {
   using Bucket = uint32_t;
   constexpr static size_t BucketSize = sizeof(Bucket);
@@ -48,15 +45,16 @@ struct HashMapIndex {
       size = (indexBounds.size / BucketSize) - 1;
     }
   }
-  HashMapIndex(): HashMapIndex<Compare>(Bounds { 0, 0 }, Bounds { 0, 0 }) {}
+  HashMapIndex(): HashMapIndex<CaseSensitive>(Bounds { 0, 0 }, Bounds { 0, 0 })
+    {}
 
   size_t size;
   Bounds indexBounds;
   Bounds dataBounds;
 };
 
-using CaseSensitiveHashMapIndex = HashMapIndex<stringHashCompare>;
-using CaseInsensitiveHashMapIndex = HashMapIndex<stringiHashCompare>;
+using CaseSensitiveHashMapIndex = HashMapIndex<true>;
+using CaseInsensitiveHashMapIndex = HashMapIndex<false>;
 
 struct ListIndex {
   using Bucket = uint32_t;

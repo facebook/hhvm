@@ -181,7 +181,7 @@ void VirtualFileSystemWriter::finish() {
     assertx(ret.second);
   }
 
-  m_data->hashMapIndex<VirtualFileSystem::Entry, stringHashCompare>(
+  m_data->hashMapIndex<VirtualFileSystem::Entry, true>(
     Indexes::PATH_TO_ENTRY, entries, [](auto const& it) { return it.first; },
     [](auto const& it) { return &it.second; });
 
@@ -287,7 +287,7 @@ VirtualFileSystem::VirtualFileSystem(const std::string& path,
   }
 
   data.pathToEntryIndex =
-    data.hashMapIndex<stringHashCompare>(Indexes::PATH_TO_ENTRY);
+    data.hashMapIndex<true>(Indexes::PATH_TO_ENTRY);
 }
 
 VirtualFileSystem::~VirtualFileSystem() {}

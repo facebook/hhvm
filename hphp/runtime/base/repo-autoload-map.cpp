@@ -67,9 +67,9 @@ RepoAutoloadMap::RepoAutoloadMap(
           m_modules.dataBounds.size);
 }
 
-template <typename Compare>
+template <bool CaseSensitive>
 static Optional<AutoloadMap::FileResult> getPathFromSymbol(
-    const Blob::HashMapIndex<Compare>& map,
+    const Blob::HashMapIndex<CaseSensitive>& map,
     const String& name) {
   auto info = RepoFile::findUnitInfo(map, name.get());
   if (!info) {
@@ -82,9 +82,9 @@ static Optional<AutoloadMap::FileResult> getPathFromSymbol(
   return {AutoloadMap::FileResult(StrNR(path), info)};
 }
 
-template <typename Compare>
+template <bool CaseSensitive>
 static Optional<fs::path> getPathFromSymbol(
-    const Blob::HashMapIndex<Compare>& map,
+    const Blob::HashMapIndex<CaseSensitive>& map,
     std::string_view name) {
   auto fileRes = getPathFromSymbol(map, StrNR(makeStaticString(name)));
   if (!fileRes) return {};

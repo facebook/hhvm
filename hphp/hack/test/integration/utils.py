@@ -94,7 +94,7 @@ def fixup_hhi_json(payload: Json) -> Json:
     def interpolate(json: JsonScalar) -> JsonScalar:
         if isinstance(json, str):
             json = re.sub(
-                "/tmp[\\d\\w_]*/hhi_[\\dabcdef]*/", "/cleansed_hhi_path/", json
+                "/[a-zA-Z0-9/_]*/hhi_[0-9a-f]*/", "/tmp/cleansed_hhi_path/", json
             )
         return json
 

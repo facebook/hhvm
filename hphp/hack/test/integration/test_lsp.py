@@ -184,29 +184,8 @@ class TestLsp(TestCase[LspTestDriver]):
         test_name: str,
         test: Json,
         expected: Json,
-        wait_for_server: bool,
-        use_serverless_ide: bool,
         lsp_args: List[str],
     ) -> None:
-        if wait_for_server:
-            assert not use_serverless_ide, (
-                "Warning: both `wait_for_server` and `use_serverless_ide` "
-                + "were set to `True` for testing in "
-                + self.run_lsp_test.__name__
-                + ". "
-                + "While this is a possible test case, it hasn't been written yet, "
-                + "so it's more likely that this is a mistake "
-                + "and you're accidentally relying on hh_server to fulfill "
-                + "serverless IDE requests."
-                + "(If you're writing that test, "
-                + "then it's time to remove this assertion.)"
-            )
-
-            # wait until hh_server is ready before starting lsp
-            self.test_driver.run_check()
-        elif use_serverless_ide:
-            self.test_driver.stop_hh_server()
-
         with LspCommandProcessor.create(
             self.test_driver.test_env, lsp_args, self.test_driver.repo_dir
         ) as lsp:
@@ -219,12 +198,11 @@ class TestLsp(TestCase[LspTestDriver]):
             list(self.get_important_received_items(observed_transcript))
         )
 
-        if not use_serverless_ide:
-            # If the server's busy, maybe the machine's just under too much
-            # pressure to give results in a timely fashion. Doing a retry would
-            # only defer the question of what to do in that case, so instead
-            # we'll just skip.
-            self.throw_on_skip(observed_transcript)
+        # If the server's busy, maybe the machine's just under too much
+        # pressure to give results in a timely fashion. Doing a retry would
+        # only defer the question of what to do in that case, so instead
+        # we'll just skip.
+        self.throw_skip_if_transcript_includes_server_busy(observed_transcript)
 
         # validation checks that the number of items matches and that
         # the responses are exactly identical to what we expect.
@@ -248,7 +226,9 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             raise AssertionError(msg)
 
-    def throw_on_skip(self, transcript: Transcript) -> None:
+    def throw_skip_if_transcript_includes_server_busy(
+        self, transcript: Transcript
+    ) -> None:
         failure_messages = ["Server busy", "timed out"]
         for entry in transcript.values():
             received = entry.received
@@ -274,22 +254,6 @@ class TestLsp(TestCase[LspTestDriver]):
         self,
         test_name: str,
         variables: Mapping[str, str],
-        wait_for_server: bool = True,
-        use_serverless_ide: bool = False,
-    ) -> None:
-        self.load_and_run_lsp_with_config(
-            test_name=test_name,
-            variables=variables,
-            wait_for_server=wait_for_server,
-            use_serverless_ide=use_serverless_ide,
-        )
-
-    def load_and_run_lsp_with_config(
-        self,
-        test_name: str,
-        variables: Mapping[str, str],
-        wait_for_server: bool = True,
-        use_serverless_ide: bool = False,
         lsp_args: Optional[List[str]] = None,
     ) -> None:
         test, expected = self.load_test_data(test_name, variables)
@@ -299,8 +263,6 @@ class TestLsp(TestCase[LspTestDriver]):
             test_name=test_name,
             test=test,
             expected=expected,
-            wait_for_server=wait_for_server,
-            use_serverless_ide=use_serverless_ide,
             lsp_args=lsp_args,
         )
 
@@ -308,17 +270,9 @@ class TestLsp(TestCase[LspTestDriver]):
         self,
         spec: LspTestSpec,
         variables: Mapping[str, str],
-        wait_for_server: bool,
-        use_serverless_ide: bool,
         fall_back_to_full_index: bool = True,
         batch_process_changes: bool = False,
     ) -> None:
-        if wait_for_server:
-            # wait until hh_server is ready before starting lsp
-            self.test_driver.run_check()
-        elif use_serverless_ide:
-            self.test_driver.stop_hh_server()
-
         lsp_config_args = [
             "--config",
             f"ide_fall_back_to_full_index={str(fall_back_to_full_index).lower()}",
@@ -356,12 +310,11 @@ class TestLsp(TestCase[LspTestDriver]):
         with open(file, "w") as f:
             f.write(text)
 
-        if not use_serverless_ide:
-            # If the server's busy, maybe the machine's just under too much
-            # pressure to give results in a timely fashion. Doing a retry would
-            # only defer the question of what to do in that case, so instead
-            # we'll just skip.
-            self.throw_on_skip(observed_transcript)
+        # If the server's busy, maybe the machine's just under too much
+        # pressure to give results in a timely fashion. Doing a retry would
+        # only defer the question of what to do in that case, so instead
+        # we'll just skip.
+        self.throw_skip_if_transcript_includes_server_busy(observed_transcript)
 
         if error_details is not None:
             logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
@@ -371,21 +324,7 @@ class TestLsp(TestCase[LspTestDriver]):
             raise AssertionError(error_details)
 
     def setup_php_file(self, test_php: str) -> Mapping[str, str]:
-        # We want the path to the builtins directory. This is best we can do.
-        (output, err, retcode) = self.test_driver.run_check(
-            options=["--identify-function", "2:21", "--json"],
-            stdin="<?hh\nfunction f():void {PHP_EOL;}\n",
-        )
-        if retcode == 7:
-            self.skipTest(
-                "Could not discover builtins directory -- "
-                + "got exit code 7 (either Out_of_time or Out_of_retries). "
-                + "The test machine is likely under too much load."
-            )
-        self.assertEqual(retcode, 0)
-        constants_path = json.loads(output)[0]["definition_pos"]["filename"]
         return {
-            "hhi_path": re.sub("/constants.hhi$", "", constants_path),
             "root_path": self.test_driver.repo_dir,
             "php_file_uri": self.repo_file_uri(test_php),
             "php_file": self.read_repo_file(test_php),
@@ -472,7 +411,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_all_optional_params_completion(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -548,12 +487,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_completion(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
-        self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
             .ignore_notifications(method="textDocument/publishDiagnostics")
@@ -1694,7 +1632,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 51,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1715,7 +1653,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 34,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1736,7 +1674,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 43,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1757,7 +1695,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 58,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1778,7 +1716,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 72,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1799,7 +1737,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assert",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 65,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1824,52 +1762,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
-            )
-            .request(
-                line=line(),
-                comment="docblock resolve after 'switch (Elsa::Alonso) { case Elsa::'",
-                method="completionItem/resolve",
-                params={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 51,
-                        "char": 34,
-                    },
-                },
-                result={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "documentation": {
-                        "kind": "markdown",
-                        "value": "Returns whether or not the value is defined as a constant.",
-                    },
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 51,
-                        "char": 34,
-                    },
-                },
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -2476,13 +2368,12 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_completion_batch_processing(self) -> None:
         """This should be virtually identical to `test_serverless_ide_completion` with the only change being the usage of batch processing."""
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
-        self.test_driver.stop_hh_server()
         spec = (
             self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
             .ignore_notifications(method="textDocument/publishDiagnostics")
@@ -3623,7 +3514,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 51,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3644,7 +3535,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 34,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3665,7 +3556,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 43,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3686,7 +3577,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 58,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3707,7 +3598,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 72,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3728,7 +3619,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assert",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 65,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -3753,52 +3644,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
-            )
-            .request(
-                line=line(),
-                comment="docblock resolve after 'switch (Elsa::Alonso) { case Elsa::'",
-                method="completionItem/resolve",
-                params={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 51,
-                        "char": 34,
-                    },
-                },
-                result={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "documentation": {
-                        "kind": "markdown",
-                        "value": "Returns whether or not the value is defined as a constant.",
-                    },
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 51,
-                        "char": 34,
-                    },
-                },
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -4408,16 +4253,12 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(
             spec,
             variables,
-            wait_for_server=False,
-            use_serverless_ide=True,
             batch_process_changes=True,
         )
 
     def test_serverless_ide_completion_legacy(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_completion_legacy"), use_serverless_ide=True
@@ -5330,7 +5171,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 51,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5351,7 +5192,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 34,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5372,7 +5213,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 43,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5393,7 +5234,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 58,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5414,7 +5255,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 72,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5435,7 +5276,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assert",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
+                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
                                 "line": 65,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -5611,13 +5452,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_definition(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_definition"), use_serverless_ide=True
@@ -5829,7 +5668,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_overridden_definition(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -5915,13 +5754,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_document_symbol(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_document_symbol"), use_serverless_ide=True
@@ -6165,7 +6002,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def initialize_spec(
         self,
@@ -6287,8 +6124,6 @@ class TestLsp(TestCase[LspTestDriver]):
     def test_serverless_ide_type_definition(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("type_definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_type_definition"), use_serverless_ide=True
@@ -6427,13 +6262,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_hover(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_hover"), use_serverless_ide=True
@@ -6717,7 +6550,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_file_touched_on_disk(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -6774,13 +6607,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_file_hover_with_errors(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover_with_errors.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_file_hover_with_errors"),
@@ -6879,14 +6710,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_formatting(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
-
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(LspTestSpec("formatting"), use_serverless_ide=True)
             .ignore_notifications(method="textDocument/publishDiagnostics")
@@ -6926,14 +6754,11 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_rangeformatting(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("messy.php"))
-
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("range_formatting"), use_serverless_ide=True
@@ -6974,7 +6799,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7044,7 +6869,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_did_change(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7109,7 +6934,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_go_to_implementation(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7212,7 +7037,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
+        self.run_spec(spec, variables)
 
     def test_signature_help(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7623,7 +7448,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_signature_help_lambda(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7713,16 +7538,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_rename(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("rename.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
-        self.load_and_run(
-            "rename", variables, wait_for_server=False, use_serverless_ide=False
-        )
+        self.load_and_run("rename", variables)
 
     def test_rename_in_interface(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -7772,23 +7595,19 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
+        self.run_spec(spec, variables)
 
     def test_references(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("references.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
-        self.load_and_run(
-            "references", variables, wait_for_server=False, use_serverless_ide=False
-        )
+        self.load_and_run("references", variables)
 
     def test_non_existing_method(self) -> None:
         self.prepare_serverless_ide_environment()
         variables = self.setup_php_file("nomethod.php")
-        self.load_and_run(
-            "nomethod", variables, wait_for_server=False, use_serverless_ide=True
-        )
+        self.load_and_run("nomethod", variables)
 
     def test_bad_call(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8185,7 +8004,7 @@ function call_method(ClassWithFooBar $mc): void {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_code_action_flip_around_comma(self) -> None:
         """This test is mainly for testing lazy code action resolution:
@@ -8281,7 +8100,7 @@ function call_method(ClassWithFooBar $mc): void {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8364,7 +8183,7 @@ class BaseClassIncremental {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8453,7 +8272,7 @@ function b_hover(): string {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_decl_two_unsaved_buffers(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8589,7 +8408,7 @@ function unsaved_bar(): string { return "hello"; }
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_hover_without_file_open(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8656,13 +8475,11 @@ function unsaved_bar(): string { return "hello"; }
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_highlight(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("highlight.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_highlight"), use_serverless_ide=True
@@ -8705,7 +8522,7 @@ function unsaved_bar(): string { return "hello"; }
                 result=None,
             )
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_status_running(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8735,7 +8552,7 @@ function unsaved_bar(): string { return "hello"; }
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_status_stopped(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8764,13 +8581,11 @@ function unsaved_bar(): string { return "hello"; }
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_standalone_status(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_standalone_status"),
@@ -8817,7 +8632,7 @@ function unsaved_bar(): string { return "hello"; }
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_standalone_errors(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -8918,7 +8733,7 @@ function unsaved_bar(): string { return "hello"; }
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_live_squiggles(self) -> None:
         """This tests that "live squiggles" (those from clientIdeDaemon) are correctly
@@ -9089,7 +8904,7 @@ function unsaved_bar(): string { return "hello"; }
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_parsing_squiggles_priority(self) -> None:
         """This tests that parsing squiggles suppress typing squiggles from clientIdeDaemon"""
@@ -9191,7 +9006,7 @@ function unsaved_bar(): string { return "hello"; }
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_falls_back_to_full_index(self) -> None:
         # Test recovery behavior when we fail to load a naming table, but we're
@@ -9237,9 +9052,6 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(
             spec,
             variables,
-            # We don't need hh_server here
-            wait_for_server=False,
-            use_serverless_ide=True,
         )
 
     def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
@@ -9285,8 +9097,6 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(
             spec,
             variables,
-            wait_for_server=False,
-            use_serverless_ide=True,
             fall_back_to_full_index=False,
         )
 
@@ -9352,7 +9162,7 @@ function unsaved_bar(): string { return "hello"; }
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_workspace_symbol_batch_processing(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -9419,8 +9229,6 @@ function unsaved_bar(): string { return "hello"; }
         self.run_spec(
             spec,
             variables,
-            wait_for_server=False,
-            use_serverless_ide=True,
             batch_process_changes=True,
         )
 
@@ -9596,7 +9404,7 @@ function aaa(): string {
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_naming_error2(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -9661,7 +9469,7 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_naming_error3(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -9726,7 +9534,7 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_requests_before_init(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -9839,7 +9647,7 @@ function aaa(): string {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_workspace_symbol(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
@@ -9892,4 +9700,4 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)

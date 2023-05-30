@@ -34,6 +34,18 @@ let hash_tasts
     module_tast_hashes = SMap.map Tast.hash_def module_tasts;
   }
 
+let error_while_hashing
+    { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
+    by_names =
+  let minus_one _ = -1 in
+  {
+    fun_tast_hashes = SMap.map minus_one fun_tasts;
+    class_tast_hashes = SMap.map minus_one class_tasts;
+    typedef_tast_hashes = SMap.map minus_one typedef_tasts;
+    gconst_tast_hashes = SMap.map minus_one gconst_tasts;
+    module_tast_hashes = SMap.map minus_one module_tasts;
+  }
+
 let empty = Relative_path.Map.empty
 
 let union m1 m2 = Relative_path.Map.union m1 m2

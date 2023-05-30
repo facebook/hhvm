@@ -12,6 +12,9 @@ type t [@@deriving yojson_of]
 
 val hash_tasts : Tast.by_names -> by_names
 
+(** Return a by_names structure with all hash values equal to -1 *)
+val error_while_hashing : Tast.by_names -> by_names
+
 val empty : t
 
 val union : t -> t -> t

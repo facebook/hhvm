@@ -732,6 +732,11 @@ let rec drain_events (done_count, total_count, handle, check_info) =
   | Ok None -> Ok (done_count, total_count)
   | Error error -> Error error
 
+type 'env distc_outcome =
+  | Success of Errors.t * Tast_hashes.t * Typing_deps.dep_edges * 'env
+  | DistCError of log_message
+  | Cancel of 'env * MultiThreadedCall.cancel_reason
+
 (**
   This is the event loop that powers hh_distc. It keeps looping and calling
   select on a series of fds including ones from watchman, hh_distc, hh_client, etc.
@@ -752,11 +757,7 @@ let rec event_loop
     ~(fd_distc : Unix.file_descr)
     ~(handle : Hh_distc_ffi.handle)
     ~(check_info : check_info)
-    ~(hhdg_path : string) :
-    [> `Success of Errors.t * Typing_deps.dep_edges * 'env
-    | `Error of log_message
-    | `Cancel of 'env * MultiThreadedCall.cancel_reason
-    ] =
+    ~(hhdg_path : string) : _ distc_outcome =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
   let (ready_fds, _, _) =
@@ -767,14 +768,15 @@ let rec event_loop
     | None ->
       ServerProgress.write "hh_distc done";
       (match Hh_distc_ffi.join handle with
-      | Ok errors ->
+      | Ok (errors, tast_hashes) ->
         (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
         Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
-        `Success
+        Success
           ( errors,
+            tast_hashes,
             Typing_deps.dep_edges_make (),
             interrupt.MultiThreadedCall.env )
-      | Error error -> `Error error)
+      | Error error -> DistCError error)
     | Some _ ->
       (match drain_events (done_count, total_count, handle, check_info) with
       | Ok (done_count, total_count) ->
@@ -793,7 +795,7 @@ let rec event_loop
           ~handle
           ~check_info
           ~hhdg_path
-      | Error error -> `Error error)
+      | Error error -> DistCError error)
   else
     let (env, decision, handlers) =
       List.fold
@@ -822,7 +824,7 @@ let rec event_loop
     match decision with
     | MultiThreadedCall.Cancel reason ->
       let () = Hh_distc_ffi.cancel handle in
-      `Cancel (interrupt.MultiThreadedCall.env, reason)
+      Cancel (interrupt.MultiThreadedCall.env, reason)
     | MultiThreadedCall.Continue ->
       event_loop
         ~done_count
@@ -853,11 +855,7 @@ let process_with_hh_distc
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(check_info : check_info)
-    ~(tcopt : TypecheckerOptions.t) :
-    [> `Success of Errors.t * Typing_deps.dep_edges * 'env
-    | `Error of log_message
-    | `Cancel of 'env * MultiThreadedCall.cancel_reason
-    ] =
+    ~(tcopt : TypecheckerOptions.t) : _ distc_outcome =
   (* TODO: Plumb extra --config name=value args through to spawn() *)
   (* We don't want to use with_tempdir because we need to keep the folder around
      for subseqent typechecks that will read the dep graph in the folder *)
@@ -1164,19 +1162,14 @@ let go_with_interrupt
         (* distc doesn't yet give any profiling_info about how its workers fared *)
         let profiling_info = Telemetry.create () in
         match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
-        | `Success (errors, dep_edges, env) ->
+        | Success (errors, tast_hashes, dep_edges, env) ->
           Some
-            ( {
-                errors;
-                tast_hashes = (* TODO *) Tast_hashes.empty;
-                dep_edges;
-                profiling_info;
-              },
+            ( { errors; tast_hashes; dep_edges; profiling_info },
               telemetry,
               env,
               None,
               (None, None) )
-        | `Cancel (env, reason) ->
+        | Cancel (env, reason) ->
           (* Typecheck is cancelled due to interrupt *)
           Some
             ( {
@@ -1189,7 +1182,7 @@ let go_with_interrupt
               env,
               Some (original_fnl, reason),
               (None, None) )
-        | `Error msg ->
+        | DistCError msg ->
           Hh_logger.log "Error with hh_distc: %s" msg;
           HackEventLogger.invariant_violation_bug
             "Unexpected hh_distc error"

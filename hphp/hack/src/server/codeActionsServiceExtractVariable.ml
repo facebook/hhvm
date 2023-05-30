@@ -169,15 +169,19 @@ let command_or_action_of_candidate
         newText = Printf.sprintf "%s = %s;\n%s" placeholder exp_string indent;
       }
   in
-  let changes =
-    SMap.singleton path [change_add_assignment; change_expression]
+  let edit =
+    lazy
+      (let changes =
+         SMap.singleton path [change_add_assignment; change_expression]
+       in
+       Lsp.WorkspaceEdit.{ changes })
   in
   let code_action =
     {
       Lsp.CodeAction.title = "Extract into variable";
       kind = Lsp.CodeActionKind.refactor;
       diagnostics = [];
-      action = Lsp.CodeAction.EditOnly Lsp.WorkspaceEdit.{ changes };
+      action = Lsp.CodeAction.UnresolvedEdit edit;
     }
   in
   Lsp.CodeAction.Action code_action

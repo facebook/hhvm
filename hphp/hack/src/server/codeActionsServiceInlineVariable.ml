@@ -256,7 +256,8 @@ let visitor ~(selection : Pos.t) =
       | _ -> super#on_expr env expr
   end
 
-let command_or_action_of_candidate ~path ~source_text { name; def; use_pos } =
+let edit_of_candidate ~path ~source_text { def; use_pos; _ } :
+    Lsp.WorkspaceEdit.t =
   let change_replace_def =
     let pos = remove_leading_whitespace ~source_text def.def_pos in
     let range =
@@ -287,13 +288,19 @@ let command_or_action_of_candidate ~path ~source_text { name; def; use_pos } =
         newText = text;
       }
   in
+
   let changes = SMap.singleton path [change_replace_def; change_replace_use] in
+  Lsp.WorkspaceEdit.{ changes }
+
+let command_or_action_of_candidate ~path ~source_text candidate =
   let code_action =
     {
-      Lsp.CodeAction.title = Printf.sprintf "Inline variable %s" name;
+      Lsp.CodeAction.title = Printf.sprintf "Inline variable %s" candidate.name;
       kind = Lsp.CodeActionKind.refactor;
       diagnostics = [];
-      action = Lsp.CodeAction.EditOnly Lsp.WorkspaceEdit.{ changes };
+      action =
+        Lsp.CodeAction.UnresolvedEdit
+          (lazy (edit_of_candidate ~path ~source_text candidate));
     }
   in
   Lsp.CodeAction.Action code_action

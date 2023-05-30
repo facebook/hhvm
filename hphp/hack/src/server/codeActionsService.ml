@@ -98,7 +98,13 @@ let fix_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.CodeAction.resolvable_command_or_action =
   let open Lsp in
-  let changes = SMap.singleton path (text_edits classish_starts quickfix) in
+  let edit =
+    lazy
+      (let changes =
+         SMap.singleton path (text_edits classish_starts quickfix)
+       in
+       WorkspaceEdit.{ changes })
+  in
   CodeAction.Action
     {
       CodeAction.title = Quickfix.get_title quickfix;
@@ -107,14 +113,20 @@ let fix_action
          recompute the diagnostic from the error and there's no clear
          benefit. *)
       diagnostics = [];
-      action = CodeAction.EditOnly WorkspaceEdit.{ changes };
+      action = CodeAction.UnresolvedEdit edit;
     }
 
 let refactor_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.CodeAction.resolvable_command_or_action =
   let open Lsp in
-  let changes = SMap.singleton path (text_edits classish_starts quickfix) in
+  let edit =
+    lazy
+      (let changes =
+         SMap.singleton path (text_edits classish_starts quickfix)
+       in
+       WorkspaceEdit.{ changes })
+  in
   CodeAction.Action
     {
       CodeAction.title = Quickfix.get_title quickfix;
@@ -123,7 +135,7 @@ let refactor_action
          recompute the diagnostic from the error and there's no clear
          benefit. *)
       diagnostics = [];
-      action = CodeAction.EditOnly WorkspaceEdit.{ changes };
+      action = CodeAction.UnresolvedEdit edit;
     }
 
 let actions_for_errors

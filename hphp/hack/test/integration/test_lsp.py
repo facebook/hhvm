@@ -7879,43 +7879,252 @@ function call_method(ClassWithFooBar $mc): void {
                         "title": "Change to ->foobar",
                         "kind": "quickfix",
                         "diagnostics": [],
-                        "edit": {
-                            "changes": {
-                                "${root_path}/code_action_missing_method.php": [
+                        "data": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 7, "character": 7},
+                                "end": {"line": 7, "character": 13},
+                            },
+                            "context": {
+                                "diagnostics": [
                                     {
                                         "range": {
                                             "start": {"line": 7, "character": 7},
                                             "end": {"line": 7, "character": 13},
                                         },
-                                        "newText": "foobar",
+                                        "severity": 1,
+                                        "code": 4053,
+                                        "source": "Hack",
+                                        "message": "No instance method foobaz in ClassWithFooBar",
+                                        "relatedInformation": [
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 3,
+                                                            "character": 18,
+                                                        },
+                                                        "end": {
+                                                            "line": 3,
+                                                            "character": 24,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Did you mean foobar instead?",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 6,
+                                                            "character": 21,
+                                                        },
+                                                        "end": {
+                                                            "line": 6,
+                                                            "character": 36,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "This is why I think it is an object of type ClassWithFooBar",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 2,
+                                                            "character": 6,
+                                                        },
+                                                        "end": {
+                                                            "line": 2,
+                                                            "character": 21,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Declaration of ClassWithFooBar is here",
+                                            },
+                                        ],
+                                        "relatedLocations": [
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 3,
+                                                            "character": 18,
+                                                        },
+                                                        "end": {
+                                                            "line": 3,
+                                                            "character": 24,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Did you mean foobar instead?",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 6,
+                                                            "character": 21,
+                                                        },
+                                                        "end": {
+                                                            "line": 6,
+                                                            "character": 36,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "This is why I think it is an object of type ClassWithFooBar",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 2,
+                                                            "character": 6,
+                                                        },
+                                                        "end": {
+                                                            "line": 2,
+                                                            "character": 21,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Declaration of ClassWithFooBar is here",
+                                            },
+                                        ],
                                     }
                                 ]
-                            }
+                            },
                         },
                     },
                     {
                         "title": "Extract into variable",
                         "kind": "refactor",
                         "diagnostics": [],
-                        "edit": {
-                            "changes": {
-                                "${root_path}/code_action_missing_method.php": [
-                                    {
-                                        "range": {
-                                            "start": {"line": 7, "character": 2},
-                                            "end": {"line": 7, "character": 2},
-                                        },
-                                        "newText": "$placeholder0 = foobaz;\n  ",
-                                    },
+                        "data": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 7, "character": 7},
+                                "end": {"line": 7, "character": 13},
+                            },
+                            "context": {
+                                "diagnostics": [
                                     {
                                         "range": {
                                             "start": {"line": 7, "character": 7},
                                             "end": {"line": 7, "character": 13},
                                         },
-                                        "newText": "$placeholder0",
-                                    },
+                                        "severity": 1,
+                                        "code": 4053,
+                                        "source": "Hack",
+                                        "message": "No instance method foobaz in ClassWithFooBar",
+                                        "relatedInformation": [
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 3,
+                                                            "character": 18,
+                                                        },
+                                                        "end": {
+                                                            "line": 3,
+                                                            "character": 24,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Did you mean foobar instead?",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 6,
+                                                            "character": 21,
+                                                        },
+                                                        "end": {
+                                                            "line": 6,
+                                                            "character": 36,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "This is why I think it is an object of type ClassWithFooBar",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 2,
+                                                            "character": 6,
+                                                        },
+                                                        "end": {
+                                                            "line": 2,
+                                                            "character": 21,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Declaration of ClassWithFooBar is here",
+                                            },
+                                        ],
+                                        "relatedLocations": [
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 3,
+                                                            "character": 18,
+                                                        },
+                                                        "end": {
+                                                            "line": 3,
+                                                            "character": 24,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Did you mean foobar instead?",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 6,
+                                                            "character": 21,
+                                                        },
+                                                        "end": {
+                                                            "line": 6,
+                                                            "character": 36,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "This is why I think it is an object of type ClassWithFooBar",
+                                            },
+                                            {
+                                                "location": {
+                                                    "uri": "${php_file_uri}",
+                                                    "range": {
+                                                        "start": {
+                                                            "line": 2,
+                                                            "character": 6,
+                                                        },
+                                                        "end": {
+                                                            "line": 2,
+                                                            "character": 21,
+                                                        },
+                                                    },
+                                                },
+                                                "message": "Declaration of ClassWithFooBar is here",
+                                            },
+                                        ],
+                                    }
                                 ]
-                            }
+                            },
                         },
                     },
                 ],

@@ -6897,13 +6897,16 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_formatting(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("messy.php"))
 
         self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(LspTestSpec("formatting"), use_serverless_ide=True)
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6943,7 +6946,9 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_rangeformatting(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("messy.php"))
 
         self.test_driver.stop_hh_server()
@@ -6952,6 +6957,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.initialize_spec(
                 LspTestSpec("range_formatting"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6990,13 +6996,16 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("ontypeformatting.php"))
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("ontypeformatting"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={

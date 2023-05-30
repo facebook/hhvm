@@ -7778,9 +7778,15 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_rename(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("rename.php")
-        self.load_and_run("rename", variables)
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("rename.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run(
+            "rename", variables, wait_for_server=False, use_serverless_ide=False
+        )
 
     def test_rename_in_interface(self) -> None:
         variables = dict(

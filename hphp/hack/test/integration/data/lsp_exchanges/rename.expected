@@ -80,12 +80,12 @@
           {
             "range": {
               "start": {
-                "line": 52,
-                "character": 22
+                "line": 9,
+                "character": 38
               },
               "end": {
-                "line": 52,
-                "character": 30
+                "line": 9,
+                "character": 46
               }
             },
             "newText": "NEW_CONSTANT"
@@ -93,12 +93,12 @@
           {
             "range": {
               "start": {
-                "line": 9,
-                "character": 38
+                "line": 52,
+                "character": 22
               },
               "end": {
-                "line": 9,
-                "character": 46
+                "line": 52,
+                "character": 30
               }
             },
             "newText": "NEW_CONSTANT"
@@ -122,32 +122,6 @@
               "end": {
                 "line": 2,
                 "character": 15
-             }
-           },
-           "newText": "HistoryClass"
-         },
-         {
-           "range": {
-             "start": {
-               "line": 88,
-               "character": 8
-             },
-             "end": {
-               "line": 88,
-               "character": 17
-             }
-           },
-           "newText": "HistoryClass"
-         },
-         {
-           "range": {
-             "start": {
-               "line": 84,
-               "character": 8
-             },
-             "end": {
-               "line": 84,
-               "character": 17
               }
             },
             "newText": "HistoryClass"
@@ -155,12 +129,12 @@
           {
             "range": {
               "start": {
-                "line": 54,
-                "character": 19
+                "line": 9,
+                "character": 27
               },
               "end": {
-                "line": 54,
-                "character": 28
+                "line": 9,
+                "character": 36
               }
             },
             "newText": "HistoryClass"
@@ -168,12 +142,12 @@
           {
             "range": {
               "start": {
-                "line": 53,
-                "character": 15
+                "line": 49,
+                "character": 20
               },
               "end": {
-                "line": 53,
-                "character": 24
+                "line": 49,
+                "character": 29
               }
             },
             "newText": "HistoryClass"
@@ -194,12 +168,12 @@
           {
             "range": {
               "start": {
-                "line": 49,
-                "character": 20
+                "line": 53,
+                "character": 15
               },
               "end": {
-                "line": 49,
-                "character": 29
+                "line": 53,
+                "character": 24
               }
             },
             "newText": "HistoryClass"
@@ -207,12 +181,38 @@
           {
             "range": {
               "start": {
-                "line": 9,
-                "character": 27
+                "line": 54,
+                "character": 19
               },
               "end": {
-                "line": 9,
-                "character": 36
+                "line": 54,
+                "character": 28
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 84,
+                "character": 8
+              },
+              "end": {
+                "line": 84,
+                "character": 17
+              }
+            },
+            "newText": "HistoryClass"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 88,
+                "character": 8
+              },
+              "end": {
+                "line": 88,
+                "character": 17
               }
             },
             "newText": "HistoryClass"
@@ -230,25 +230,25 @@
           {
             "range": {
               "start": {
+                "line": 11,
+                "character": 0
+              },
+              "end": {
+                "line": 11,
+                "character": 0
+              }
+            },
+            "newText": "\n  <<__Deprecated(\"Use `some_other_method` instead\")>>\n  public function test_method(): int {\n    return $this->some_other_method();\n  }\n"
+          },
+          {
+            "range": {
+              "start": {
                 "line": 12,
                 "character": 18
               },
               "end": {
                 "line": 12,
                 "character": 29
-              }
-            },
-            "newText": "some_other_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 51,
-                "character": 43
-              },
-              "end": {
-                "line": 51,
-                "character": 54
               }
             },
             "newText": "some_other_method"
@@ -269,15 +269,15 @@
           {
             "range": {
               "start": {
-                "line": 11,
-                "character": 0
+                "line": 51,
+                "character": 43
               },
               "end": {
-                "line": 11,
-                "character": 0
+                "line": 51,
+                "character": 54
               }
             },
-            "newText": "\n  <<__Deprecated(\"Use `some_other_method` instead\")>>\n  public function test_method(): int {\n    return $this->some_other_method();\n  }\n"
+            "newText": "some_other_method"
           }
         ]
       }
@@ -305,38 +305,38 @@
           {
             "range": {
               "start": {
-               "line": 88,
-               "character": 19
-             },
-             "end": {
-               "line": 88,
-               "character": 31
-             }
-           },
-           "newText": "ANOTHER_STR_CONSTANT"
-         },
-         {
-           "range": {
-             "start": {
-               "line": 84,
-               "character": 19
-             },
-             "end": {
-               "line": 84,
-               "character": 31
-             }
-           },
-           "newText": "ANOTHER_STR_CONSTANT"
-         },
-         {
-           "range": {
-             "start": {
                 "line": 53,
                 "character": 26
               },
               "end": {
                 "line": 53,
                 "character": 38
+              }
+            },
+            "newText": "ANOTHER_STR_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 84,
+                "character": 19
+              },
+              "end": {
+                "line": 84,
+                "character": 31
+              }
+            },
+            "newText": "ANOTHER_STR_CONSTANT"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 88,
+                "character": 19
+              },
+              "end": {
+                "line": 88,
+                "character": 31
               }
             },
             "newText": "ANOTHER_STR_CONSTANT"
@@ -504,6 +504,19 @@
           {
             "range": {
               "start": {
+                "line": 15,
+                "character": 0
+              },
+              "end": {
+                "line": 15,
+                "character": 0
+              }
+            },
+            "newText": "\n  <<__Deprecated(\"Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, mixed ...$_): int {\n    return $this->new_and_improved($x, $y, $v, ...$_);\n  }\n"
+          },
+          {
+            "range": {
+              "start": {
                 "line": 21,
                 "character": 18
               },
@@ -526,19 +539,6 @@
               }
             },
             "newText": "new_and_improved"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 15,
-                "character": 0
-              },
-              "end": {
-                "line": 15,
-                "character": 0
-              }
-            },
-            "newText": "\n  <<__Deprecated(\"Use `new_and_improved` instead\")>>\n  public function deprecated_method(int $x, string $y, int $v, mixed ...$_): int {\n    return $this->new_and_improved($x, $y, $v, ...$_);\n  }\n"
           }
         ]
       }
@@ -553,19 +553,6 @@
           {
             "range": {
               "start": {
-                "line": 26,
-                "character": 25
-              },
-              "end": {
-                "line": 26,
-                "character": 36
-              }
-            },
-            "newText": "new_static_method"
-          },
-          {
-            "range": {
-              "start": {
                 "line": 24,
                 "character": 0
               },
@@ -575,6 +562,19 @@
               }
             },
             "newText": "\n  <<__Deprecated(\"Use `new_static_method` instead\")>>\n  public static function depr_static(int $x, string $y, int $v, mixed ...$_): int {\n    return self::new_static_method($x, $y, $v, ...$_);\n  }\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 26,
+                "character": 25
+              },
+              "end": {
+                "line": 26,
+                "character": 36
+              }
+            },
+            "newText": "new_static_method"
           }
         ]
       }
@@ -589,19 +589,6 @@
           {
             "range": {
               "start": {
-                "line": 31,
-                "character": 24
-              },
-              "end": {
-                "line": 31,
-                "character": 34
-              }
-            },
-            "newText": "new_async_method"
-          },
-          {
-            "range": {
-              "start": {
                 "line": 29,
                 "character": 0
               },
@@ -611,6 +598,19 @@
               }
             },
             "newText": "\n  <<__Deprecated(\"Use `new_async_method` instead\")>>\n  public async function depr_async(int $x, int $v, mixed ...$_): Awaitable<int> {\n    return await $this->new_async_method($x, $v, ...$_);\n  }\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 31,
+                "character": 24
+              },
+              "end": {
+                "line": 31,
+                "character": 34
+              }
+            },
+            "newText": "new_async_method"
           }
         ]
       }
@@ -625,19 +625,6 @@
           {
             "range": {
               "start": {
-                "line": 36,
-                "character": 31
-              },
-              "end": {
-                "line": 36,
-                "character": 48
-              }
-            },
-            "newText": "new_static_async_method"
-          },
-          {
-            "range": {
-              "start": {
                 "line": 34,
                 "character": 0
               },
@@ -647,6 +634,19 @@
               }
             },
             "newText": "\n  <<__Deprecated(\"Use `new_static_async_method` instead\")>>\n  public static async function depr_static_async(int $x): Awaitable<\n    void,\n  > {\n    await self::new_static_async_method($x);\n  }\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 36,
+                "character": 31
+              },
+              "end": {
+                "line": 36,
+                "character": 48
+              }
+            },
+            "newText": "new_static_async_method"
           }
         ]
       }
@@ -658,6 +658,19 @@
     "result": {
       "changes": {
         "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 47,
+                "character": 0
+              },
+              "end": {
+                "line": 47,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  new_test_rename_method();\n}\n"
+          },
           {
             "range": {
               "start": {
@@ -683,19 +696,6 @@
               }
             },
             "newText": "new_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 47,
-                "character": 0
-              },
-              "end": {
-                "line": 47,
-                "character": 0
-              }
-            },
-            "newText": "\n<<__Deprecated(\"Use `new_test_rename_method` instead\")>>\nfunction test_rename(): void {\n  new_test_rename_method();\n}\n"
           }
         ]
       }
@@ -710,32 +710,6 @@
           {
             "range": {
               "start": {
-                "line": 60,
-                "character": 15
-              },
-              "end": {
-                "line": 60,
-                "character": 32
-              }
-            },
-            "newText": "new_async_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
-                "line": 66,
-                "character": 15
-              },
-              "end": {
-                "line": 66,
-                "character": 32
-              }
-            },
-            "newText": "new_async_test_rename_method"
-          },
-          {
-            "range": {
-              "start": {
                 "line": 59,
                 "character": 0
               },
@@ -745,6 +719,32 @@
               }
             },
             "newText": "\n<<__Deprecated(\"Use `new_async_test_rename_method` instead\")>>\nasync function async_test_rename(): Awaitable<int> {\n  return await new_async_test_rename_method();\n}\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 60,
+                "character": 15
+              },
+              "end": {
+                "line": 60,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 66,
+                "character": 15
+              },
+              "end": {
+                "line": 66,
+                "character": 32
+              }
+            },
+            "newText": "new_async_test_rename_method"
           }
         ]
       }
@@ -772,38 +772,38 @@
           {
             "range": {
               "start": {
-               "line": 87,
-               "character": 8
-             },
-             "end": {
-               "line": 87,
-               "character": 22
-             }
-           },
-           "newText": "TSHIRT_SIZES"
-         },
-         {
-           "range": {
-             "start": {
-               "line": 81,
-               "character": 8
-             },
-             "end": {
-               "line": 81,
-               "character": 22
-             }
-           },
-           "newText": "TSHIRT_SIZES"
-         },
-         {
-           "range": {
-             "start": {
                 "line": 57,
                 "character": 10
               },
               "end": {
                 "line": 57,
                 "character": 24
+              }
+            },
+            "newText": "TSHIRT_SIZES"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 81,
+                "character": 8
+              },
+              "end": {
+                "line": 81,
+                "character": 22
+              }
+            },
+            "newText": "TSHIRT_SIZES"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 87,
+                "character": 8
+              },
+              "end": {
+                "line": 87,
+                "character": 22
               }
             },
             "newText": "TSHIRT_SIZES"

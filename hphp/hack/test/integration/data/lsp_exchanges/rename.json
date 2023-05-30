@@ -4,7 +4,9 @@
     "id": 990,
     "method": "initialize",
     "params": {
-      "initializationOptions": {},
+      "initializationOptions": {
+        "delayUntilDoneInit": true
+      },
       "processId": null,
       "rootPath": "${root_path}",
       "capabilities": {}
@@ -44,6 +46,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 1
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 2,
     "method": "textDocument/rename",
     "params": {
@@ -55,6 +64,13 @@
         "character": 11
       },
       "newName": "HistoryClass"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 2
     }
   },
   {
@@ -74,6 +90,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 3
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 4,
     "method": "textDocument/rename",
     "params": {
@@ -85,6 +108,13 @@
         "character": 34
       },
       "newName": "ANOTHER_STR_CONSTANT"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 4
     }
   },
   {
@@ -104,6 +134,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 5
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 6,
     "method": "textDocument/rename",
     "params": {
@@ -115,6 +152,13 @@
         "character": 26
       },
       "newName": "kittens_and_rainbows"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 6
     }
   },
   {
@@ -134,47 +178,75 @@
   },
   {
     "jsonrpc": "2.0",
-     "id": 8,
-     "method": "textDocument/rename",
-     "params": {
-       "textDocument": {
-         "uri": "${php_file_uri}"
-       },
-       "position": {
-         "line": 26,
-         "character": 33
-       },
-       "newName": "new_static_method"
-     }
-   },
-   {
-     "jsonrpc": "2.0",
-     "id": 9,
-     "method": "textDocument/rename",
-     "params": {
-       "textDocument": {
-         "uri": "${php_file_uri}"
-       },
-       "position": {
-         "line": 31,
-         "character": 33
-       },
-       "newName": "new_async_method"
-     }
-   },
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 7
+    }
+  },
   {
     "jsonrpc": "2.0",
-     "id": 10,
-     "method": "textDocument/rename",
-     "params": {
-       "textDocument": {
-         "uri": "${php_file_uri}"
-       },
-       "position": {
-         "line": 36,
-         "character": 42
-       },
-       "newName": "new_static_async_method"
+    "id": 8,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 26,
+        "character": 33
+      },
+      "newName": "new_static_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 8
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 9,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 31,
+        "character": 33
+      },
+      "newName": "new_async_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 9
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 10,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 36,
+        "character": 42
+      },
+      "newName": "new_static_async_method"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 10
     }
   },
   {
@@ -194,6 +266,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 11
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 12,
     "method": "textDocument/rename",
     "params": {
@@ -209,6 +288,13 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 12
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 13,
     "method": "textDocument/rename",
     "params": {
@@ -220,6 +306,13 @@
         "character": 13
       },
       "newName": "TSHIRT_SIZES"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 13
     }
   },
   {

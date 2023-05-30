@@ -585,9 +585,7 @@ TEST_F(PatchTest, Set) {
   {
     Object patchObj =
         makePatch(op::PatchOp::Clear, asValueStruct<type::bool_t>(true));
-    EXPECT_EQ(
-        std::set<Value>{},
-        *applyContainerPatch(patchObj, value).setValue_ref());
+    EXPECT_TRUE(applyContainerPatch(patchObj, value).setValue_ref()->empty());
     EXPECT_TRUE(isMaskWriteOperation(patchObj));
   }
   {
@@ -615,9 +613,7 @@ TEST_F(PatchTest, Set) {
     Object patchObj = makePatch(
         op::PatchOp::Remove,
         asValueStruct<type::set<type::binary_t>>({"test"}));
-    EXPECT_EQ(
-        std::set<Value>{},
-        *applyContainerPatch(patchObj, value).setValue_ref());
+    EXPECT_TRUE(applyContainerPatch(patchObj, value).setValue_ref()->empty());
     // It is a map mask as Remove can't distinguish between list, set, and
     {
       auto masks = extractMaskViewFromPatch(patchObj);

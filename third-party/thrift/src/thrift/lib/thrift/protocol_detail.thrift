@@ -22,6 +22,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
 cpp_include "thrift/lib/thrift/detail/protocol.h"
 cpp_include "folly/container/F14Map.h"
+cpp_include "folly/container/F14Set.h"
 
 @thrift.v1alpha
 package "facebook.com/thrift/protocol/detail"
@@ -85,6 +86,8 @@ union Value {
 
   // Containers of values.
   14: list<Value> listValue;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "::folly::F14FastSet"}
   @hack.SkipCodegen{
     reason = "Set can only have integer/string/binary/enum values",
   }

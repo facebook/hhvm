@@ -209,7 +209,8 @@ class ObjectWriter : public BaseObjectAdapter {
   uint32_t writeSetEnd() {
     // insert elements from buffer into setValue
     std::vector<Value> setValues = getBufferFromStack();
-    std::set<Value>& setVal = cur().setValue_ref().ensure();
+    auto& setVal = cur().setValue_ref().ensure();
+    setVal.reserve(setValues.size());
     for (size_t i = 0; i < setValues.size(); i++) {
       setVal.emplace(std::move(setValues[i]));
     }
@@ -431,6 +432,7 @@ Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true) {
       uint32_t size;
       auto& setValue = result.setValue_ref().ensure();
       prot.readSetBegin(elemType, size);
+      setValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
         setValue.insert(parseValue(prot, elemType, string_to_binary));
       }

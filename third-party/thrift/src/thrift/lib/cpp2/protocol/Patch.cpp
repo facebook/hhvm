@@ -321,7 +321,8 @@ void ApplyPatch::operator()(
   }
 }
 
-void ApplyPatch::operator()(const Object& patch, std::set<Value>& value) const {
+void ApplyPatch::operator()(
+    const Object& patch, folly::F14FastSet<Value>& value) const {
   checkOps(
       patch,
       Value::Type::setValue,

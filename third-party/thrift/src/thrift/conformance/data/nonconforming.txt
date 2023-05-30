@@ -243,6 +243,18 @@ cpp2/PatchTest/list<float>/append.NaN.Binary
 cpp2/PatchTest/set<double>/append.NaN.Compact
 cpp2/PatchTest/set<float>/append.NaN.Binary
 cpp2/PatchTest/list<double>/append.NaN.Binary
+# Thrift Patch stores elements to remove in a set.
+# After changing protocol::Value::setValue to a hash set,
+# we can no longer find NaN inside a hash set. Therefore,
+# we can no longer remove NaN element in list and set.
+cpp2/PatchTest/list<float>/remove.NaN.Binary
+cpp2/PatchTest/list<float>/remove.NaN.Compact
+cpp2/PatchTest/list<double>/remove.NaN.Binary
+cpp2/PatchTest/list<double>/remove.NaN.Compact
+cpp2/PatchTest/set<float>/remove.NaN.Binary
+cpp2/PatchTest/set<float>/remove.NaN.Compact
+cpp2/PatchTest/set<double>/remove.NaN.Binary
+cpp2/PatchTest/set<double>/remove.NaN.Compact
 #
 #
 # Python: NaN

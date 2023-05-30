@@ -7752,9 +7752,11 @@ class TestLsp(TestCase[LspTestDriver]):
         self.load_and_run("references", variables)
 
     def test_non_existing_method(self) -> None:
-        self.prepare_server_environment()
+        self.prepare_serverless_ide_environment(use_standalone_ide=True)
         variables = self.setup_php_file("nomethod.php")
-        self.load_and_run("nomethod", variables)
+        self.load_and_run(
+            "nomethod", variables, wait_for_server=False, use_serverless_ide=True
+        )
 
     def test_bad_call(self) -> None:
         self.prepare_server_environment()

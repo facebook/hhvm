@@ -7168,12 +7168,17 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_go_to_implementation(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("go_to_implementation.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("go_to_implementation.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
         spec = (
             self.initialize_spec(
-                LspTestSpec("test_go_to_implementation"), use_serverless_ide=False
+                LspTestSpec("test_go_to_implementation"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .notification(
                 method="textDocument/didOpen",
@@ -7188,7 +7193,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: abstract class",
+                comment="go to implementation: abstract class",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -7203,6 +7208,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7221,6 +7227,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7239,6 +7246,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -7257,11 +7265,12 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_signature_help(self) -> None:
         variables = dict(
@@ -7774,14 +7783,18 @@ class TestLsp(TestCase[LspTestDriver]):
         self.load_and_run("rename", variables)
 
     def test_rename_in_interface(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("rename_in_interface.php")
-        self.test_driver.stop_hh_server()
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("rename_in_interface.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("rename_in_interface"), use_serverless_ide=False
+                LspTestSpec("rename_in_interface"), use_serverless_ide=True
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .notification(
                 method="textDocument/didOpen",
@@ -7819,7 +7832,7 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
     def test_references(self) -> None:
         self.prepare_server_environment()

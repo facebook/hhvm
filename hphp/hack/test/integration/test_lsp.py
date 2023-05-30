@@ -9817,13 +9817,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
 
     def test_workspace_symbol(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("didchange.php"))
         spec = (
             self.initialize_spec(
-                LspTestSpec("test_workspace_symbol"), use_serverless_ide=False
+                LspTestSpec("test_workspace_symbol"), use_serverless_ide=True
             )
-            .wait_for_hh_server_ready()
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
                 line=line(),
                 comment="Look up symbols",
@@ -9842,6 +9844,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -9872,20 +9875,23 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     },
                 ],
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_workspace_symbol_batch_processing(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("didchange.php"))
         spec = (
             self.initialize_spec(
-                LspTestSpec("test_workspace_symbol"), use_serverless_ide=False
+                LspTestSpec("test_workspace_symbol"), use_serverless_ide=True
             )
-            .wait_for_hh_server_ready()
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .request(
                 line=line(),
                 comment="Look up symbols",
@@ -9904,6 +9910,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -9934,6 +9941,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     },
                 ],
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
@@ -9941,8 +9949,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(
             spec,
             variables,
-            wait_for_server=True,
-            use_serverless_ide=False,
+            wait_for_server=False,
+            use_serverless_ide=True,
             batch_process_changes=True,
         )
 
@@ -10507,9 +10515,10 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_workspace_symbol(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables["root_path"] = self.test_driver.repo_dir
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(

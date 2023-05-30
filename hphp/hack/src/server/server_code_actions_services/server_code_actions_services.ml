@@ -8,35 +8,64 @@
 
 open Hh_prelude
 
+(**
+  For LSP "textDocument/codeAction" response, we do not compute the edit for the action.
+  For LSP "codeAction/resolve" response, we compute the edit.
+  We never use commands on the server side of the code action flow: afaict that's a legacy technique
+  from before "codeAction/resolve" was introduced.
+
+  See [CodeAction.edit_or_command] in lsp.ml for more on the code action flow.
+*)
+type resolvable_command_or_action =
+  Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_
+
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(path : Relative_path.t)
-    ~(range : Ide_api_types.range) :
-    Lsp.CodeAction.resolvable_command_or_action list =
-  let quickfixes = Quickfixes.find ~ctx ~entry ~path ~range in
-  let refactors = Refactors.find ~ctx ~entry ~path ~range in
+    ~(range : Ide_api_types.range) : resolvable_command_or_action list =
+  let to_action ~title ~edit ~kind =
+    Lsp.CodeAction.Action
+      {
+        Lsp.CodeAction.title;
+        kind;
+        diagnostics = [];
+        action = Lsp.CodeAction.UnresolvedEdit edit;
+      }
+  in
+  let quickfixes =
+    Quickfixes.find ~ctx ~entry ~path ~range
+    |> List.map ~f:(fun Code_action_types.Quickfix.{ title; edit } ->
+           to_action ~title ~edit ~kind:Lsp.CodeActionKind.quickfix)
+  in
+  let refactors =
+    Refactors.find ~ctx ~entry ~path ~range
+    |> List.map ~f:(fun Code_action_types.Refactor.{ title; edit } ->
+           to_action ~title ~edit ~kind:Lsp.CodeActionKind.refactor)
+  in
   quickfixes @ refactors
+
+let update_edit ~f =
+  Lsp.CodeAction.(
+    function
+    | Command _ as c -> c
+    | Action ({ action; _ } as a) ->
+      let action =
+        match action with
+        (* Currently only [UnresolvedEdit] is used, since all code actions involve lazy edits *)
+        | UnresolvedEdit lazy_edit -> f lazy_edit
+        | EditOnly e -> EditOnly e
+        | CommandOnly c -> CommandOnly c
+        | BothEditThenCommand ca -> BothEditThenCommand ca
+      in
+      Action { a with action })
 
 let go
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(path : Relative_path.t)
     ~(range : Ide_api_types.range) : Lsp.CodeAction.command_or_action list =
-  let open Lsp.CodeAction in
-  let strip : resolvable_command_or_action -> command_or_action = function
-    | Command _ as c -> c
-    | Action ({ action; _ } as a) ->
-      let action =
-        match action with
-        | UnresolvedEdit _ -> UnresolvedEdit ()
-        | EditOnly e -> EditOnly e
-        | CommandOnly c -> CommandOnly c
-        | BothEditThenCommand ca -> BothEditThenCommand ca
-      in
-      Action { a with action }
-  in
-
+  let strip = update_edit ~f:(fun _ -> Lsp.CodeAction.UnresolvedEdit ()) in
   find ~ctx ~entry ~path ~range |> List.map ~f:strip
 
 let resolve
@@ -45,19 +74,9 @@ let resolve
     ~(path : Relative_path.t)
     ~(range : Ide_api_types.range)
     ~(resolve_title : string) : Lsp.CodeAction.resolved_command_or_action =
-  let open Lsp.CodeAction in
-  let resolve_command_or_action :
-      resolvable_command_or_action -> resolved_command_or_action = function
-    | Command _ as c -> c
-    | Action ({ action; _ } as a) ->
-      let action =
-        match action with
-        | UnresolvedEdit lazy_edit -> EditOnly (Lazy.force lazy_edit)
-        | EditOnly e -> EditOnly e
-        | CommandOnly c -> CommandOnly c
-        | BothEditThenCommand ca -> BothEditThenCommand ca
-      in
-      Action { a with action }
+  let resolve_command_or_action =
+    update_edit ~f:(fun lazy_edit ->
+        Lsp.CodeAction.EditOnly (Lazy.force lazy_edit))
   in
 
   find ~ctx ~entry ~path ~range

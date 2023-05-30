@@ -4,6 +4,7 @@
  (libraries
   annotated_ast
   ast
+  code_action_types
   collections
   decl_provider
   errors

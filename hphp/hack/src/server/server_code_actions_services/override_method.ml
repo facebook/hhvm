@@ -95,8 +95,7 @@ let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
 
 let refactor_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.CodeAction.resolvable_command_or_action =
-  let open Lsp in
+    Code_action_types.Refactor.t =
   let edit =
     lazy
       (let changes =
@@ -104,20 +103,11 @@ let refactor_action
            (Relative_path.to_absolute path)
            (text_edits classish_starts quickfix)
        in
-       WorkspaceEdit.{ changes })
+       Lsp.WorkspaceEdit.{ changes })
   in
-  CodeAction.Action
-    {
-      CodeAction.title = Quickfix.get_title quickfix;
-      kind = CodeActionKind.refactor;
-      (* We can tell LSP which error this fixed, but we'd have to
-         recompute the diagnostic from the error and there's no clear
-         benefit. *)
-      diagnostics = [];
-      action = CodeAction.UnresolvedEdit edit;
-    }
+  Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edit }
 
-let find ~(range : Lsp.range) ~path ~entry ctx =
+let find ~entry ~path ~(range : Lsp.range) ctx =
   let Lsp.{ start = { line = start_line; character = start_col }; _ } = range in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in

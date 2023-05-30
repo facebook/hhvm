@@ -296,20 +296,12 @@ let edit_of_candidate ~path ~source_text { def; use_pos; _ } :
   in
   Lsp.WorkspaceEdit.{ changes }
 
-let command_or_action_of_candidate ~path ~source_text candidate =
-  let code_action =
-    {
-      Lsp.CodeAction.title = Printf.sprintf "Inline variable %s" candidate.name;
-      kind = Lsp.CodeActionKind.refactor;
-      diagnostics = [];
-      action =
-        Lsp.CodeAction.UnresolvedEdit
-          (lazy (edit_of_candidate ~path ~source_text candidate));
-    }
-  in
-  Lsp.CodeAction.Action code_action
+let refactor_of_candidate ~path ~source_text candidate =
+  let edit = lazy (edit_of_candidate ~path ~source_text candidate) in
+  Code_action_types.Refactor.
+    { title = Printf.sprintf "Inline variable %s" candidate.name; edit }
 
-let find ~(range : Lsp.range) ~path ~entry ctx =
+let find ~entry ~path ~(range : Lsp.range) ctx =
   match entry.Provider_context.source_text with
   | Some source_text ->
     let line_to_offset line =
@@ -327,6 +319,6 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
     in
     (visitor ~selection)#go ctx tast
     |> Var_info.to_candidate_opt ~selection
-    |> Option.map ~f:(command_or_action_of_candidate ~path ~source_text)
+    |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
     |> Option.to_list
   | None -> []

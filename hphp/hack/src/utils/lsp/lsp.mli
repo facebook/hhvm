@@ -730,12 +730,11 @@ module CodeAction : sig
   3. If the code action is unresolved, the client sends "codeAction/resolve"
 
   Our implementation flow:
-    - create a resolvable code action, which includes a lazy value
-      - if the request is "textDocument/codeAction" replace the lazy value with `()`
+    - create a representation of a code action which includes a lazily-computed edit
+      - if the request is "textDocument/codeAction", we do not compute an edit
       - if the request is "codeAction/resolve", we have access to the original
       request params via the `data` field (see [t] comments above) and perform
-      the same calculation as for "textDocument/codeAction" but instead of
-      stripping out the lazy value we Lazy.force it to produce a resolved code action.
+      the same calculation as for "textDocument/codeAction" and then compute the edit.
   *)
   and 'resolution_phase edit_and_or_command =
     | EditOnly of WorkspaceEdit.t
@@ -750,8 +749,6 @@ module CodeAction : sig
   type resolved_marker = |
 
   type resolved_command_or_action = resolved_marker command_or_action_
-
-  type resolvable_command_or_action = WorkspaceEdit.t Lazy.t command_or_action_
 
   type command_or_action = unit command_or_action_
 

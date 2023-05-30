@@ -1,0 +1,6 @@
+(library
+ (name code_action_types)
+ (libraries
+  lsp
+  provider_context
+  ))

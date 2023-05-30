@@ -20,8 +20,7 @@ let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(path : Relative_path.t)
-    ~(range : Ide_api_types.range) :
-    Lsp.CodeAction.resolvable_command_or_action list =
+    ~(range : Ide_api_types.range) : Code_action_types.Refactor.t list =
   let lsp_range = lsp_range_of_ide_range range in
   let variable_actions =
     match Inline_variable.find ~range:lsp_range ~path ~entry ctx with

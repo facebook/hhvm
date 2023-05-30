@@ -7,7 +7,7 @@
  *)
 open Hh_prelude
 
-let find ~(range : Lsp.range) ~path ~entry ctx =
+let find ~entry ~path ~(range : Lsp.range) ctx =
   if Lsp_helpers.lsp_range_is_selection range then
     match entry.Provider_context.source_text with
     | Some source_text ->
@@ -23,10 +23,10 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
       let candidate_opt =
         Extract_method_traverse.find_candidate ~selection ~entry ctx
       in
-      let to_lsp =
-        Extract_method_to_lsp.command_or_action_of_candidate ~source_text ~path
+      let to_refactor =
+        Extract_method_to_refactor.of_candidate ~source_text ~path
       in
-      Option.(candidate_opt >>| to_lsp |> to_list)
+      Option.(candidate_opt >>| to_refactor |> to_list)
     | None -> []
   else
     []

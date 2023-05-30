@@ -8,6 +8,7 @@
   lsp
   pos
   provider_context
+  code_action_types
   tast_env
   tast_provider
   utils_core))

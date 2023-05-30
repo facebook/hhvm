@@ -23,7 +23,7 @@ let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
 
 let fix_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.CodeAction.resolvable_command_or_action =
+    Code_action_types.Quickfix.t =
   let open Lsp in
   let edit =
     lazy
@@ -34,23 +34,14 @@ let fix_action
        in
        WorkspaceEdit.{ changes })
   in
-  CodeAction.Action
-    {
-      CodeAction.title = Quickfix.get_title quickfix;
-      kind = CodeActionKind.quickfix;
-      (* We can tell LSP which error this fixed, but we'd have to
-         recompute the diagnostic from the error and there's no clear
-         benefit. *)
-      diagnostics = [];
-      action = CodeAction.UnresolvedEdit edit;
-    }
+  Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edit }
 
 let actions_for_errors
     (errors : Errors.t)
     (path : Relative_path.t)
     (classish_starts : Pos.t SMap.t)
     ~(start_line : int)
-    ~(start_col : int) : Lsp.CodeAction.resolvable_command_or_action list =
+    ~(start_col : int) : Code_action_types.Quickfix.t list =
   let errors = Errors.get_error_list ~drop_fixmed:false errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
@@ -66,8 +57,7 @@ let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(path : Relative_path.t)
-    ~(range : Ide_api_types.range) :
-    Lsp.CodeAction.resolvable_command_or_action list =
+    ~(range : Ide_api_types.range) : Code_action_types.Quickfix.t list =
   let open Ide_api_types in
   let start_line = range.st.line in
   let start_col = range.st.column in

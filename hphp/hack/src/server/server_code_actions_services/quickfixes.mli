@@ -10,4 +10,4 @@ val find :
   entry:Provider_context.entry ->
   path:Relative_path.t ->
   range:Ide_api_types.range ->
-  Lsp.CodeAction.resolvable_command_or_action list
+  Code_action_types.Quickfix.t list

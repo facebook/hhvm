@@ -568,8 +568,6 @@ module CodeAction = struct
 
   type resolved_command_or_action = resolved_marker command_or_action_
 
-  type resolvable_command_or_action = WorkspaceEdit.t Lazy.t command_or_action_
-
   type command_or_action = unit command_or_action_
 
   type result = command_or_action list

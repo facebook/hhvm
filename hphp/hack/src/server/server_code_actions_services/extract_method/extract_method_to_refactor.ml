@@ -292,16 +292,6 @@ let edit_of_candidate
   in
   Lsp.WorkspaceEdit.{ changes }
 
-let command_or_action_of_candidate ~source_text ~path candidate =
-  let action =
-    Lsp.CodeAction.UnresolvedEdit
-      (lazy (edit_of_candidate ~source_text ~path candidate))
-  in
-  Lsp.CodeAction.Action
-    Lsp.CodeAction.
-      {
-        title = "Extract into method";
-        kind = Lsp.CodeActionKind.refactor;
-        diagnostics = [];
-        action;
-      }
+let of_candidate ~source_text ~path candidate =
+  let edit = lazy (edit_of_candidate ~source_text ~path candidate) in
+  Code_action_types.Refactor.{ title = "Extract into method"; edit }

@@ -6,8 +6,8 @@
  *
  *)
 
-val command_or_action_of_candidate :
+val of_candidate :
   source_text:Full_fidelity_source_text.t ->
   path:Relative_path.t ->
   Extract_method_types.candidate ->
-  Lsp.CodeAction.resolvable_command_or_action
+  Code_action_types.Refactor.t

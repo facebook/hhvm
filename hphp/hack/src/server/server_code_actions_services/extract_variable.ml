@@ -146,8 +146,7 @@ let top_visitor (selection : Pos.t) ~source_text =
         None
   end
 
-let command_or_action_of_candidate
-    ~source_text ~path { stmt_pos; pos; placeholder_n } =
+let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
   let placeholder = Format.sprintf "%s%d" placeholder_base placeholder_n in
   let exp_string = Full_fidelity_source_text.sub_of_pos source_text pos in
   let change_expression =
@@ -178,17 +177,9 @@ let command_or_action_of_candidate
        in
        Lsp.WorkspaceEdit.{ changes })
   in
-  let code_action =
-    {
-      Lsp.CodeAction.title = "Extract into variable";
-      kind = Lsp.CodeActionKind.refactor;
-      diagnostics = [];
-      action = Lsp.CodeAction.UnresolvedEdit edit;
-    }
-  in
-  Lsp.CodeAction.Action code_action
+  Code_action_types.Refactor.{ title = "Extract into variable"; edit }
 
-let find ~(range : Lsp.range) ~path ~entry ctx =
+let find ~entry ~path ~(range : Lsp.range) ctx =
   match entry.Provider_context.source_text with
   | Some source_text when Lsp_helpers.lsp_range_is_selection range ->
     let line_to_offset line =
@@ -205,6 +196,6 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
         .Tast_provider.Compute_tast_and_errors.tast
     in
     (top_visitor selection ~source_text)#go ctx tast
-    |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)
+    |> Option.map ~f:(refactor_of_candidate ~source_text ~path)
     |> Option.to_list
   | _ -> []

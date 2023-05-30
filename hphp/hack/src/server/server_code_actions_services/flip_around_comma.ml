@@ -204,22 +204,11 @@ let edit_of_candidate
   let changes = SMap.singleton (Relative_path.to_absolute path) [change] in
   Lsp.WorkspaceEdit.{ changes }
 
-let command_or_action_of_candidate ~path ~source_text candidate =
-  let action =
-    Lsp.CodeAction.UnresolvedEdit
-      (lazy (edit_of_candidate ~path ~source_text candidate))
-  in
-  let code_action =
-    {
-      Lsp.CodeAction.title = "Flip around comma";
-      kind = Lsp.CodeActionKind.refactor;
-      diagnostics = [];
-      action;
-    }
-  in
-  Lsp.CodeAction.Action code_action
+let refactor_of_candidate ~path ~source_text candidate =
+  let edit = lazy (edit_of_candidate ~path ~source_text candidate) in
+  Code_action_types.Refactor.{ title = "Flip around comma"; edit }
 
-let find ~(range : Lsp.range) ~path ~entry ctx =
+let find ~entry ~path ~(range : Lsp.range) ctx =
   if not (Lsp_helpers.lsp_range_is_selection range) then
     match entry.Provider_context.source_text with
     | Some source_text ->
@@ -237,7 +226,7 @@ let find ~(range : Lsp.range) ~path ~entry ctx =
           range
       in
       (visitor ~cursor)#go ctx tast
-      |> Option.map ~f:(command_or_action_of_candidate ~path ~source_text)
+      |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
       |> Option.to_list
     | _ -> []
   else

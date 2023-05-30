@@ -136,7 +136,7 @@ impl HhConfig {
                 version,
                 current_rolled_out_flag_idx,
                 deactivate_saved_state_rollout,
-                hh_conf,
+                &hh_conf,
             )?,
             ..Self::default()
         };
@@ -146,6 +146,10 @@ impl HhConfig {
         go.tco_saved_state = c.local_config.saved_state.clone();
         go.po_allow_unstable_features = c.local_config.allow_unstable_features;
         go.tco_rust_elab = c.local_config.rust_elab;
+        go.dump_tast_hashes = match hh_conf.get_str("dump_tast_hashes") {
+            Some("true") => true,
+            _ => false,
+        };
 
         for (key, mut value) in hhconfig {
             match key.as_str() {

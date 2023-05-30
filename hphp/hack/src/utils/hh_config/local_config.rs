@@ -31,7 +31,7 @@ impl LocalConfig {
         current_version: Option<&str>,
         current_rolled_out_flag_idx: isize,
         deactivate_saved_state_rollout: bool,
-        config: ConfigFile,
+        config: &ConfigFile,
     ) -> Result<Self> {
         let mut lc = Self::default();
         lc.saved_state.rollouts = SavedStateRollouts::make(

@@ -8887,64 +8887,43 @@ function unsaved_bar(): string { return "hello"; }
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_status_stopped(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("hover.php")
-        self.test_driver.stop_hh_server()
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("status_stopped"),
-                use_serverless_ide=False,
-                supports_status=True,
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "shortMessage": "Hack: stopped",
-                    "message": "hh_server: stopped.",
-                    "type": 1,
-                },
-                result=NoResponse(),
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
-
     def test_status_running(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("hover.php")
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("status_running"),
-                use_serverless_ide=False,
+                use_serverless_ide=True,
                 supports_status=True,
             )
             .ignore_requests(
-                comment="Ignore initializing... requests since they're racy",
+                comment="Ignore all status requests not explicitly waited for in the test",
                 method="window/showStatus",
-                params={
-                    "type": 2,
-                    "shortMessage": "Hack: initializing",
-                    "message": "hh_server initializing: processing [<test> seconds]",
-                },
+                params=None,
             )
+            .start_hh_server("starting")
             .wait_for_server_request(
                 method="window/showStatus",
-                params={"message": "hh_server: ready.", "type": 3},
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is ready",
+                    "shortMessage": "Hack",
+                    "type": 3,
+                },
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_status_stopped(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
@@ -8953,38 +8932,16 @@ function unsaved_bar(): string { return "hello"; }
                 supports_status=True,
             )
             .ignore_requests(
-                comment="ignore initializing... messages since they're kind of racy",
+                comment="Ignore all status requests not explicitly waited for in the test",
                 method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.\nhh_server: stopped.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, before hh_server has even reported its status",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "message": "hh_client: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "message": "hh_client: ready.",
-                    "shortMessage": "Hack: ready",
-                },
+                params=None,
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "hh_client: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
+                    "type": 1,
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                 },
                 result=NoResponse(),
             )

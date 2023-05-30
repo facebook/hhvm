@@ -16,6 +16,8 @@
 
 namespace cpp2 testutil.testservice
 
+include "thrift/annotation/cpp.thrift"
+
 struct Message {
   1: string message;
   2: i64 timestamp;
@@ -77,7 +79,7 @@ service StreamService {
     1: i32 whichEx,
   ) throws (1: SecondEx e);
 
-  stream<i32> requestWithBlob(1: binary (cpp2.type = "folly::IOBuf") val);
+  stream<i32> requestWithBlob(1: binary_9305 val);
 
   stream<i32> leakCallback() (thread = "eb");
 
@@ -126,3 +128,7 @@ service TransportUpgrade {
   i32 add(1: i32 x);
   oneway void noResponse(1: string param);
 }
+
+// The following were automatically generated and may benefit from renaming.
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary binary_9305

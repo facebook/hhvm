@@ -16,11 +16,18 @@
 
 cpp_include "<deque>"
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
-typedef list<i32> (cpp2.template = "std::deque") deque
-typedef map<i32, i64> (cpp2.template = "std::unordered_map") unordered_map
-typedef set<i32> (cpp2.template = "std::unordered_set") unordered_set
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
+@cpp.Type{template = "std::deque"}
+typedef list<i32> deque
+@cpp.Type{template = "std::unordered_map"}
+typedef map<i32, i64> unordered_map
+@cpp.Type{template = "std::unordered_set"}
+typedef set<i32> unordered_set
 
 struct Struct {
   1: i32 x;

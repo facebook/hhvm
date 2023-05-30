@@ -22,6 +22,8 @@ cpp_include "<unordered_map>"
 cpp_include "folly/container/F14Map.h"
 cpp_include "folly/container/F14Set.h"
 
+include "thrift/annotation/cpp.thrift"
+
 struct StructWithEmptyMap {
   1: map<string, i64> myMap;
 }
@@ -83,15 +85,16 @@ struct OneOfEach3 {
 }
 
 struct DebugHashedAssociative {
-  1: map<i64, set<i64>> (
-    cpp.type = "std::map<int64_t, std::set<int64_t>>",
-  ) value;
+  @cpp.Type{name = "std::map<int64_t, std::set<int64_t>>"}
+  1: map<i64, set<i64>> value;
 }
 
-typedef set<i64> (cpp.template = "folly::F14FastSet") F14SetI64
+@cpp.Type{template = "folly::F14FastSet"}
+typedef set<i64> F14SetI64
 
 struct DebugSortedAssociative {
-  1: map<i64, F14SetI64> (cpp.template = "folly::F14FastMap") value;
+  @cpp.Type{template = "folly::F14FastMap"}
+  1: map<i64, F14SetI64> value;
 }
 
 struct DebugList {
@@ -99,8 +102,10 @@ struct DebugList {
 }
 
 struct StructWithF14VectorContainers {
-  1: map<i32, i32> (cpp.template = 'folly::F14VectorMap') m;
-  2: set<i32> (cpp.template = 'folly::F14VectorSet') s;
+  @cpp.Type{template = "folly::F14VectorMap"}
+  1: map<i32, i32> m;
+  @cpp.Type{template = "folly::F14VectorSet"}
+  2: set<i32> s;
 }
 
 struct OrderedFields {
@@ -110,17 +115,16 @@ struct OrderedFields {
 }
 
 struct UnorderedFields {
-  2: set<string> (cpp.template = "std::unordered_set") f2 = ["a", "b", "c"];
-  1: map<string, i64> (cpp.template = "std::unordered_map") f1 = {
-    "a": 1,
-    "b": 2,
-    "c": 3,
-  };
+  @cpp.Type{template = "std::unordered_set"}
+  2: set<string> f2 = ["a", "b", "c"];
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<string, i64> f1 = {"a": 1, "b": 2, "c": 3};
   3: string f3 = "d";
 }
 
 struct CppTemplateListField {
-  1: list<string> (cpp.template = "std::deque") f1 = ["1", "2", "3"];
+  @cpp.Type{template = "std::deque"}
+  1: list<string> f1 = ["1", "2", "3"];
 }
 
 struct OptionalFields {

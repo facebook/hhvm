@@ -17,6 +17,7 @@
 namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 cpp_include "<deque>"
 cpp_include "<list>"
@@ -59,11 +60,13 @@ struct StructWithListFieldVector {
 }
 
 struct StructWithListFieldList {
-  1: list<StructWithListField> (cpp.template = "std::list") field;
+  @cpp.Type{template = "std::list"}
+  1: list<StructWithListField> field;
 }
 
 struct StructWithListFieldDeque {
-  1: list<StructWithListField> (cpp.template = "std::deque") field;
+  @cpp.Type{template = "std::deque"}
+  1: list<StructWithListField> field;
 }
 
 struct StructWithListFieldSet {
@@ -71,19 +74,23 @@ struct StructWithListFieldSet {
 }
 
 struct StructWithListFieldUnorderedSet {
-  1: set<StructWithListField> (cpp.template = "std::unordered_set") field;
+  @cpp.Type{template = "std::unordered_set"}
+  1: set<StructWithListField> field;
 }
 
 struct StructWithListFieldF14FastSet {
-  1: set<StructWithListField> (cpp.template = "folly::F14FastSet") field;
+  @cpp.Type{template = "folly::F14FastSet"}
+  1: set<StructWithListField> field;
 }
 
 struct StructWithListFieldF14VectorSet {
-  1: set<StructWithListField> (cpp.template = "folly::F14VectorSet") field;
+  @cpp.Type{template = "folly::F14VectorSet"}
+  1: set<StructWithListField> field;
 }
 
 struct StructWithListFieldSortedVectorSet {
-  1: set<StructWithListField> (cpp.template = "folly::sorted_vector_set") field;
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  1: set<StructWithListField> field;
 }
 
 struct StructWithListFieldMap {
@@ -91,21 +98,23 @@ struct StructWithListFieldMap {
 }
 
 struct StructWithListFieldUnorderedMap {
-  1: map<i32, StructWithListField> (cpp.template = "std::unordered_map") field;
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i32, StructWithListField> field;
 }
 
 struct StructWithListFieldF14FastMap {
-  1: map<i32, StructWithListField> (cpp.template = "folly::F14FastMap") field;
+  @cpp.Type{template = "folly::F14FastMap"}
+  1: map<i32, StructWithListField> field;
 }
 
 struct StructWithListFieldF14VectorMap {
-  1: map<i32, StructWithListField> (cpp.template = "folly::F14VectorMap") field;
+  @cpp.Type{template = "folly::F14VectorMap"}
+  1: map<i32, StructWithListField> field;
 }
 
 struct StructWithListFieldSortedVectorMap {
-  1: map<i32, StructWithListField> (
-    cpp.template = "folly::sorted_vector_map",
-  ) field;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, StructWithListField> field;
 }
 
 struct DoubleStructWithListFieldMap {
@@ -113,19 +122,16 @@ struct DoubleStructWithListFieldMap {
 }
 
 struct DoubleStructWithListFieldUnorderedMap {
-  1: map<StructWithListField, StructWithListField> (
-    cpp.template = "std::unordered_map",
-  ) field;
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<StructWithListField, StructWithListField> field;
 }
 
 struct DoubleStructWithListFieldF14FastMap {
-  1: map<StructWithListField, StructWithListField> (
-    cpp.template = "folly::F14FastMap",
-  ) field;
+  @cpp.Type{template = "folly::F14FastMap"}
+  1: map<StructWithListField, StructWithListField> field;
 }
 
 struct DoubleStructWithListFieldF14VectorMap {
-  1: map<StructWithListField, StructWithListField> (
-    cpp.template = "folly::F14VectorMap",
-  ) field;
+  @cpp.Type{template = "folly::F14VectorMap"}
+  1: map<StructWithListField, StructWithListField> field;
 }

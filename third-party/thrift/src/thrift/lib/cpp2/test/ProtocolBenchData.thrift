@@ -18,6 +18,8 @@ namespace cpp2 thrift.benchmark
 
 cpp_include "folly/sorted_vector_types.h"
 
+include "thrift/annotation/cpp.thrift"
+
 struct Empty {}
 
 struct SmallInt {
@@ -36,7 +38,8 @@ struct BigString {
   1: string str;
 }
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBuf
 
 struct BigBinary {
   1: IOBuf bin;
@@ -101,34 +104,44 @@ struct NestedMap {
   1: map<i32, NestedMap4> m;
 }
 
-typedef map<i32, i32> (cpp.template = "folly::sorted_vector_map") Map1
-typedef map<i32, Map1> (cpp.template = "folly::sorted_vector_map") Map2
-typedef map<i32, Map2> (cpp.template = "folly::sorted_vector_map") Map3
-typedef map<i32, Map3> (cpp.template = "folly::sorted_vector_map") Map4
-typedef map<i32, Map4> (cpp.template = "folly::sorted_vector_map") Map5
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, i32> Map1
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, Map1> Map2
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, Map2> Map3
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, Map3> Map4
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, Map4> Map5
 
 struct SortedVecNestedMapRaw {
   1: Map5 m;
 }
 
 struct SortedVecNestedMap1 {
-  1: map<i32, i32> (cpp.template = "folly::sorted_vector_map") m;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, i32> m;
 }
 
 struct SortedVecNestedMap2 {
-  1: map<i32, NestedMap1> (cpp.template = "folly::sorted_vector_map") m;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, NestedMap1> m;
 }
 
 struct SortedVecNestedMap3 {
-  1: map<i32, NestedMap2> (cpp.template = "folly::sorted_vector_map") m;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, NestedMap2> m;
 }
 
 struct SortedVecNestedMap4 {
-  1: map<i32, NestedMap3> (cpp.template = "folly::sorted_vector_map") m;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, NestedMap3> m;
 }
 
 struct SortedVecNestedMap {
-  1: map<i32, NestedMap4> (cpp.template = "folly::sorted_vector_map") m;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, NestedMap4> m;
 }
 
 struct LargeMixed {

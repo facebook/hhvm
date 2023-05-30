@@ -16,7 +16,10 @@
 
 namespace cpp2 apache.thrift.test
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 service DebugTestService {
   string echo(1: string s) (cpp.coroutine);

@@ -16,13 +16,17 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct TestStruct {
   1: string s;
   2: i32 i;
 }
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 struct TestStructIOBuf {
   1: IOBuf buf;
@@ -34,10 +38,14 @@ struct TestStructRecursive {
   99: optional TestStructRecursive cdr (cpp.ref = 'true');
 }
 
-typedef byte (cpp2.type = "uint8_t") UInt8
-typedef i16 (cpp2.type = "uint16_t") UInt16
-typedef i32 (cpp2.type = "uint32_t") UInt32
-typedef i64 (cpp2.type = "uint64_t") UInt64
+@cpp.Type{name = "uint8_t"}
+typedef byte UInt8
+@cpp.Type{name = "uint16_t"}
+typedef i16 UInt16
+@cpp.Type{name = "uint32_t"}
+typedef i32 UInt32
+@cpp.Type{name = "uint64_t"}
+typedef i64 UInt64
 
 struct TestUnsignedIntStruct {
   1: UInt8 u8;

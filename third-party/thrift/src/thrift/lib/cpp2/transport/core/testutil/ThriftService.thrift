@@ -16,6 +16,8 @@
 
 namespace cpp2 testutil.testservice
 
+include "thrift/annotation/cpp.thrift"
+
 exception TestServiceException {
   1: string message;
 }
@@ -45,7 +47,11 @@ service TestService {
 
   void checkPort(1: i32 port);
 
-  string echo(1: binary (cpp2.type = "folly::IOBuf") val);
+  string echo(1: binary_9737 val);
 
-  oneway void onewayLogBlob(1: binary (cpp2.type = "folly::IOBuf") val);
+  oneway void onewayLogBlob(1: binary_9737 val);
 }
+
+// The following were automatically generated and may benefit from renaming.
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary binary_9737

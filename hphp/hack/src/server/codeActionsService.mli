@@ -9,14 +9,14 @@
 val go :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  path:string ->
+  path:Relative_path.t ->
   range:Ide_api_types.range ->
   Lsp.CodeAction.result
 
 val resolve :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  path:string ->
+  path:Relative_path.t ->
   range:Ide_api_types.range ->
   resolve_title:string ->
   Lsp.CodeActionResolve.result

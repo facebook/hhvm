@@ -434,10 +434,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, results)
   | CODE_ACTION { path; range } ->
     let (ctx, entry) = single_ctx_path env path in
+    let path = Relative_path.create_detect_prefix path in
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
     (env, actions)
   | CODE_ACTION_RESOLVE { path; range; resolve_title } ->
     let (ctx, entry) = single_ctx_path env path in
+    let path = Relative_path.create_detect_prefix path in
     let action =
       CodeActionsService.resolve ~ctx ~entry ~path ~range ~resolve_title
     in

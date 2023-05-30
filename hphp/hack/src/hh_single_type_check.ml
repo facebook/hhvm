@@ -2045,7 +2045,6 @@ let handle_mode
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range src in
-    let path = Relative_path.to_absolute path in
     let resolve =
       (* Simulate the resolution flow:
          If server replies to textDocument/codeAction with neither 'edit' nor 'command',

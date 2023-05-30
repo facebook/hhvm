@@ -289,7 +289,11 @@ let edit_of_candidate ~path ~source_text { def; use_pos; _ } :
       }
   in
 
-  let changes = SMap.singleton path [change_replace_def; change_replace_use] in
+  let changes =
+    SMap.singleton
+      (Relative_path.to_absolute path)
+      [change_replace_def; change_replace_use]
+  in
   Lsp.WorkspaceEdit.{ changes }
 
 let command_or_action_of_candidate ~path ~source_text candidate =

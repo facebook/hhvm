@@ -101,7 +101,9 @@ let fix_action
   let edit =
     lazy
       (let changes =
-         SMap.singleton path (text_edits classish_starts quickfix)
+         SMap.singleton
+           (Relative_path.to_absolute path)
+           (text_edits classish_starts quickfix)
        in
        WorkspaceEdit.{ changes })
   in
@@ -123,7 +125,9 @@ let refactor_action
   let edit =
     lazy
       (let changes =
-         SMap.singleton path (text_edits classish_starts quickfix)
+         SMap.singleton
+           (Relative_path.to_absolute path)
+           (text_edits classish_starts quickfix)
        in
        WorkspaceEdit.{ changes })
   in
@@ -140,7 +144,7 @@ let refactor_action
 
 let actions_for_errors
     (errors : Errors.t)
-    (path : string)
+    (path : Relative_path.t)
     (classish_starts : Pos.t SMap.t)
     ~(start_line : int)
     ~(start_col : int) : Lsp.CodeAction.resolvable_command_or_action list =
@@ -169,7 +173,7 @@ let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : string)
+    ~(path : Relative_path.t)
     ~(range : Ide_api_types.range) :
     Lsp.CodeAction.resolvable_command_or_action list =
   let open Ide_api_types in
@@ -217,7 +221,7 @@ let find
 let go
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : string)
+    ~(path : Relative_path.t)
     ~(range : Ide_api_types.range) : Lsp.CodeAction.command_or_action list =
   let open Lsp.CodeAction in
   let strip : resolvable_command_or_action -> command_or_action = function
@@ -238,7 +242,7 @@ let go
 let resolve
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : string)
+    ~(path : Relative_path.t)
     ~(range : Ide_api_types.range)
     ~(resolve_title : string) : Lsp.CodeAction.resolved_command_or_action =
   let open Lsp.CodeAction in

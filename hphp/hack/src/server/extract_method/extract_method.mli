@@ -7,7 +7,7 @@
  *)
 val find :
   range:Lsp.range ->
-  path:string ->
+  path:Relative_path.t ->
   entry:Provider_context.entry ->
   Provider_context.t ->
   Lsp.CodeAction.resolvable_command_or_action list

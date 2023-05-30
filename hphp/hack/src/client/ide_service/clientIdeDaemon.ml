@@ -1452,7 +1452,9 @@ let handle_request
       update_file_ctx istate document
     in
 
-    let path = Path.to_string document.file_path in
+    let path =
+      Relative_path.create_detect_prefix (Path.to_string document.file_path)
+    in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.go ~ctx ~entry ~path ~range)
@@ -1495,7 +1497,9 @@ let handle_request
     ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
 
-    let path = Path.to_string document.file_path in
+    let path =
+      Relative_path.create_detect_prefix (Path.to_string document.file_path)
+    in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.resolve ~ctx ~entry ~path ~range ~resolve_title)

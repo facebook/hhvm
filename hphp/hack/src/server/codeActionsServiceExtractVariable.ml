@@ -172,7 +172,9 @@ let command_or_action_of_candidate
   let edit =
     lazy
       (let changes =
-         SMap.singleton path [change_add_assignment; change_expression]
+         SMap.singleton
+           (Relative_path.to_absolute path)
+           [change_add_assignment; change_expression]
        in
        Lsp.WorkspaceEdit.{ changes })
   in

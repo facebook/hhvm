@@ -8,6 +8,6 @@
 
 val command_or_action_of_candidate :
   source_text:Full_fidelity_source_text.t ->
-  path:string ->
+  path:Relative_path.t ->
   Extract_method_types.candidate ->
   Lsp.CodeAction.resolvable_command_or_action

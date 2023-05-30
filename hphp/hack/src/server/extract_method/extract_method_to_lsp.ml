@@ -285,7 +285,11 @@ let edit_of_candidate
         newText = method_string;
       }
   in
-  let changes = SMap.singleton path [change_add_method; change_add_call] in
+  let changes =
+    SMap.singleton
+      (Relative_path.to_absolute path)
+      [change_add_method; change_add_call]
+  in
   Lsp.WorkspaceEdit.{ changes }
 
 let command_or_action_of_candidate ~source_text ~path candidate =

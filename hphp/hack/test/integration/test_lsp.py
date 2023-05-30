@@ -10105,7 +10105,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
     def test_serverless_ide_naming_error1(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("didchange.php"))
         variables.update(
             {
@@ -10136,6 +10138,38 @@ function main(): int {
                         "version": 1,
                         "text": "${main_file_contents}",
                     }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "file://${main_file}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 11},
+                                "end": {"line": 2, "character": 14},
+                            },
+                            "severity": 1,
+                            "code": 2049,
+                            "source": "Hack",
+                            "message": "Unbound name: aaa (a global function)",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 11},
+                                "end": {"line": 2, "character": 14},
+                            },
+                            "severity": 1,
+                            "code": 4107,
+                            "source": "Hack",
+                            "message": "Unbound name (typing): aaa",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                    ],
                 },
             )
             .request(
@@ -10238,13 +10272,18 @@ function aaa(): string {
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "file://${main_file}", "diagnostics": []},
+            )
             .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_naming_error2(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        self.test_driver.stop_hh_server()
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -10267,6 +10306,10 @@ function aaa(): string {
                         "text": "${php_file}",
                     }
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .write_to_disk(
                 comment="create copy",
@@ -10305,8 +10348,9 @@ function aaa(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_naming_error3(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        self.test_driver.stop_hh_server()
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -10329,6 +10373,10 @@ function aaa(): string {
                         "text": "${php_file}",
                     }
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .write_to_disk(
                 comment="create copy",

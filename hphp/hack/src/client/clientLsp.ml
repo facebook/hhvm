@@ -6093,28 +6093,22 @@ let handle_client_message
       (* transitioned away from this state.                                     *)
       assert (not lenv.p.trigger_on_lsp);
 
-      (* We deny all other requests. This is the only response that won't       *)
-      (* produce logs/warnings on most clients...                               *)
-      let message_str =
+      let (message_str, code) =
         match lenv.p.new_hh_server_state with
-        | None -> "[Not implemented for ide_standalone]"
-        | Some hh_server_state -> hh_server_state_to_string hh_server_state
+        | None ->
+          (* This is where ide_standalone ends up if it can't handle the request*)
+          ( "not implemented: " ^ Lsp_fmt.message_name_to_string message,
+            Error.MethodNotFound )
+        | Some hh_server_state ->
+          (* This branch handles the case where we would have handled the request
+             were we in Main_env, but we're not, so the reason we can't handle
+             it is because we're in the wrong state.
+             We want to just decline the request quietly.
+             RequestCancelled is the only code that won't produce logs/warnings on most clients... *)
+          (hh_server_state_to_string hh_server_state, Error.RequestCancelled)
       in
       raise
-        (Error.LspException
-           {
-             Error.code = Error.RequestCancelled;
-             message = message_str;
-             data =
-               Some
-                 (Hh_json.JSON_Object
-                    [
-                      ("state", !state |> state_to_string |> Hh_json.string_);
-                      ( "message",
-                        Hh_json.string_
-                          (Lsp_fmt.denorm_message_to_string message) );
-                    ]);
-           })
+        (Error.LspException { Error.code; message = message_str; data = None })
   in
   Lwt.return result_telemetry_opt
 

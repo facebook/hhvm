@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff9f9949cce9bb0397807cd2baaa0a12>>
+// @generated SignedSource<<69acb0af6349e214d58c0e0855c6d84f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -235,6 +235,10 @@ pub enum Stmt_<Ex, En> {
     ///     while (true) ;
     ///     if ($foo) {} // the else is Noop here
     Noop,
+    /// Declare a local variable with the given type and initial value
+    #[rust_to_ocaml(name = "Declare_local")]
+    #[rust_to_ocaml(inline_tuple)]
+    DeclareLocal(Box<(Lid, Hint, Expr<Ex, En>)>),
     /// Block, a list of statements in curly braces.
     ///
     ///     { $foo = 42; }

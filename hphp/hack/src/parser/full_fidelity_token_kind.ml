@@ -200,6 +200,7 @@ type t =
   | Readonly
   | Internal
   | Package
+  | Let
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -411,6 +412,7 @@ let from_string keyword ~only_reserved =
   | "readonly" -> Some Readonly
   | "internal" when not only_reserved -> Some Internal
   | "package" -> Some Package
+  | "let" when not only_reserved -> Some Let
   | _ -> None
 
 let to_string kind =
@@ -597,6 +599,7 @@ let to_string kind =
   | Readonly -> "readonly"
   | Internal -> "internal"
   | Package -> "package"
+  | Let -> "let"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

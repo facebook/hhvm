@@ -2945,6 +2945,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
         ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c, node),
         MarkupSection(_) => p_markup(node, env),
+        DeclareLocalStatement(c) => p_declare_local_stmt(env, pos, c),
         _ => {
             raise_missing_syntax("statement", node, env);
             Ok(new(env.mk_none_pos(), S_::Noop))
@@ -3465,6 +3466,19 @@ fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         }
         _ => missing_syntax("XHP markup node", node, env),
     }
+}
+
+fn p_declare_local_stmt<'a>(
+    env: &mut Env<'a>,
+    pos: Pos,
+    c: &'a DeclareLocalStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
+) -> Result<ast::Stmt> {
+    use ast::Stmt;
+    use ast::Stmt_ as S_;
+    let var = lid_from_pos_name(pos.clone(), &c.variable, env)?;
+    let hint = p_hint(&c.type_, env)?;
+    let expr = p_expr(&c.init, env)?;
+    Ok(Stmt::new(pos, S_::mk_declare_local(var, hint, expr)))
 }
 
 fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(

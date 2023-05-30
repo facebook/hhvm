@@ -833,6 +833,24 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "DeclareLocalStatement";
+      type_name = "declare_local_statement";
+      func_name = "declare_local_statement";
+      description = "declare_local_statement";
+      prefix = "declare_local";
+      aggregates = [TopLevelDeclaration; Statement];
+      fields =
+        [
+          ("keyword", Token);
+          ("variable", Aggregate Expression);
+          ("colon", Token);
+          ("type", Aggregate Specifier);
+          ("equal", Token);
+          ("init", Aggregate Expression);
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "UsingStatementBlockScoped";
       type_name = "using_statement_block_scoped";
       func_name = "using_statement_block_scoped";

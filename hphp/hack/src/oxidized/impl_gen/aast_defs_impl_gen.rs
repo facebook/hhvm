@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a0eba69ca0a41135203f35b09eeaf4f5>>
+// @generated SignedSource<<fccc6e6efca16dbfadc1288ea3e1ad40>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -71,6 +71,9 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn mk_noop() -> Self {
         Stmt_::Noop
+    }
+    pub fn mk_declare_local(p0: Lid, p1: Hint, p2: Expr<Ex, En>) -> Self {
+        Stmt_::DeclareLocal(Box::new((p0, p1, p2)))
     }
     pub fn mk_block(p0: Block<Ex, En>) -> Self {
         Stmt_::Block(p0)
@@ -183,6 +186,12 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => false,
         }
     }
+    pub fn is_declare_local(&self) -> bool {
+        match self {
+            Stmt_::DeclareLocal(..) => true,
+            _ => false,
+        }
+    }
     pub fn is_block(&self) -> bool {
         match self {
             Stmt_::Block(..) => true,
@@ -283,6 +292,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn as_try(&self) -> Option<(&Block<Ex, En>, &Vec<Catch<Ex, En>>, &FinallyBlock<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_declare_local(&self) -> Option<(&Lid, &Hint, &Expr<Ex, En>)> {
+        match self {
+            Stmt_::DeclareLocal(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -401,6 +416,12 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_declare_local_mut(&mut self) -> Option<(&mut Lid, &mut Hint, &mut Expr<Ex, En>)> {
+        match self {
+            Stmt_::DeclareLocal(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            _ => None,
+        }
+    }
     pub fn as_block_mut(&mut self) -> Option<&mut Block<Ex, En>> {
         match self {
             Stmt_::Block(p0) => Some(p0),
@@ -497,6 +518,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn as_try_into(self) -> Option<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)> {
         match self {
             Stmt_::Try(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            _ => None,
+        }
+    }
+    pub fn as_declare_local_into(self) -> Option<(Lid, Hint, Expr<Ex, En>)> {
+        match self {
+            Stmt_::DeclareLocal(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }

@@ -701,6 +701,10 @@ impl<'decl> Infer<'decl> {
                 (Try(box_tup!(stmts, catches_out, finally)), ctx)
             }
             Noop => (Noop, ctx),
+            DeclareLocal(box (id, h, expr)) => {
+                let (new_expr, _expr_ty, ctx) = self.infer_expr(expr, ctx, next_where);
+                (DeclareLocal(box_tup!(id.clone(), h.clone(), new_expr)), ctx)
+            }
             Block(stmts) => {
                 let (stmts, ctx) = self.infer_stmts_block(stmts, ctx, next_where);
                 (Block(stmts), ctx)

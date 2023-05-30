@@ -77,6 +77,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_markup_section(ctx: &C, markup_hashbang: Self, markup_suffix: Self) -> Self;
     fn make_markup_suffix(ctx: &C, markup_suffix_less_than_question: Self, markup_suffix_name: Self) -> Self;
     fn make_unset_statement(ctx: &C, unset_keyword: Self, unset_left_paren: Self, unset_variables: Self, unset_right_paren: Self, unset_semicolon: Self) -> Self;
+    fn make_declare_local_statement(ctx: &C, declare_local_keyword: Self, declare_local_variable: Self, declare_local_colon: Self, declare_local_type: Self, declare_local_equal: Self, declare_local_init: Self, declare_local_semicolon: Self) -> Self;
     fn make_using_statement_block_scoped(ctx: &C, using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self;
     fn make_using_statement_function_scoped(ctx: &C, using_function_await_keyword: Self, using_function_using_keyword: Self, using_function_expression: Self, using_function_semicolon: Self) -> Self;
     fn make_while_statement(ctx: &C, while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self;

@@ -131,6 +131,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty()),
         a::Stmt_::AssertEnv(_) => Ok(instr::empty()),
+        a::Stmt_::DeclareLocal(x) => emit_declare_local(e, env, pos, &x.0, &x.2),
     }
 }
 
@@ -1658,4 +1659,23 @@ fn emit_if<'a, 'arena, 'decl>(
             instr::label(done_label),
         ]))
     }
+}
+
+// Treat the declaration of a local as a binop assignment.
+// TODO: clone less
+// TODO: Enforce the type hint from the declaration?
+fn emit_declare_local<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    pos: &Pos,
+    id: &ast::Lid,
+    e_: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let bop = ast::Binop {
+        bop: ast_defs::Bop::Eq(None),
+        lhs: ast::Expr::new((), pos.clone(), ast::Expr_::mk_lvar(id.clone())),
+        rhs: e_.clone(),
+    };
+    let e2 = ast::Expr::new((), pos.clone(), ast::Expr_::mk_binop(bop.clone()));
+    emit_binop(e, env, &e2, pos, &bop)
 }

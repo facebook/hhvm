@@ -2657,7 +2657,32 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.PackageExpression
         { package_expression_keyword = pkg_kw; package_expression_name = name }
       ->
-      Concat [t env pkg_kw; Space; t env name])
+      Concat [t env pkg_kw; Space; t env name]
+    | Syntax.DeclareLocalStatement
+        {
+          declare_local_keyword;
+          declare_local_variable;
+          declare_local_colon;
+          declare_local_type;
+          declare_local_equal;
+          declare_local_init;
+          declare_local_semicolon;
+        } ->
+      Concat
+        [
+          t env declare_local_keyword;
+          Space;
+          t env declare_local_variable;
+          Space;
+          t env declare_local_colon;
+          Space;
+          t env declare_local_type;
+          Space;
+          t env declare_local_equal;
+          Space;
+          t env declare_local_init;
+          t env declare_local_semicolon;
+        ])
 
 and when_present node f =
   match Syntax.syntax node with

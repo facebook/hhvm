@@ -364,6 +364,15 @@ module type Syntax_S = sig
         unset_right_paren: t;
         unset_semicolon: t;
       }
+    | DeclareLocalStatement of {
+        declare_local_keyword: t;
+        declare_local_variable: t;
+        declare_local_colon: t;
+        declare_local_type: t;
+        declare_local_equal: t;
+        declare_local_init: t;
+        declare_local_semicolon: t;
+      }
     | UsingStatementBlockScoped of {
         using_block_await_keyword: t;
         using_block_using_keyword: t;
@@ -1232,6 +1241,8 @@ module type Syntax_S = sig
 
   val make_unset_statement : t -> t -> t -> t -> t -> t
 
+  val make_declare_local_statement : t -> t -> t -> t -> t -> t -> t -> t
+
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
 
   val make_using_statement_function_scoped : t -> t -> t -> t -> t
@@ -1594,6 +1605,8 @@ module type Syntax_S = sig
   val is_markup_suffix : t -> bool
 
   val is_unset_statement : t -> bool
+
+  val is_declare_local_statement : t -> bool
 
   val is_using_statement_block_scoped : t -> bool
 

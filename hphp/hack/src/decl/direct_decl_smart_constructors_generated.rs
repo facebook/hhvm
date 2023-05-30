@@ -294,6 +294,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_unset_statement(self, keyword, left_paren, variables, right_paren, semicolon)
     }
 
+    fn make_declare_local_statement(&mut self, keyword: Self::Output, variable: Self::Output, colon: Self::Output, type_: Self::Output, equal: Self::Output, init: Self::Output, semicolon: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_declare_local_statement(self, keyword, variable, colon, type_, equal, init, semicolon)
+    }
+
     fn make_using_statement_block_scoped(&mut self, await_keyword: Self::Output, using_keyword: Self::Output, left_paren: Self::Output, expressions: Self::Output, right_paren: Self::Output, body: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_using_statement_block_scoped(self, await_keyword, using_keyword, left_paren, expressions, right_paren, body)
     }

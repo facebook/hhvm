@@ -1479,20 +1479,17 @@
           "object_creation_object":{
             "kind":"constructor_call",
             "constructor_call_type":{
-              "kind":"simple_type_specifier",
-              "simple_type_specifier":{
-                "kind":"token",
-                "token":{
-                  "kind":"name",
-                  "text":"let",
-                  "offset":339,
-                  "leading_width":0,
-                  "width":3,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":25
-                }
+              "kind":"token",
+              "token":{
+                "kind":"name",
+                "text":"let",
+                "offset":339,
+                "leading_width":0,
+                "width":3,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":25
               }
             },
             "constructor_call_left_paren":{

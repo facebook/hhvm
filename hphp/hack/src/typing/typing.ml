@@ -2988,6 +2988,10 @@ and stmt_ env pos st =
   | Break ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
     (env, Aast.Break)
+  | Declare_local (lvar, hint, exp) ->
+    let (env, te, _ty) = expr env exp in
+    Errors.internal_error pos "typed local variables not implemented";
+    (env, Aast.Declare_local (lvar, hint, te))
   | Block _
   | Markup _ ->
     failwith

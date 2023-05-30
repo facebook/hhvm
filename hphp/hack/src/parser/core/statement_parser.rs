@@ -222,6 +222,7 @@ where
             TokenKind::Echo => self.parse_echo_statement(),
             TokenKind::Concurrent => self.parse_concurrent_statement(),
             TokenKind::Unset => self.parse_unset_statement(),
+            TokenKind::Let => self.parse_declare_local_statement(),
             TokenKind::Case => {
                 let result = self.parse_case_label();
                 // TODO: This puts the error in the wrong place. We should highlight
@@ -913,6 +914,26 @@ where
         let semi_token = self.require_semicolon();
         self.sc_mut()
             .make_yield_break_statement(yield_token, break_token, semi_token)
+    }
+
+    fn parse_declare_local_statement(&mut self) -> S::Output {
+        let let_token = self.assert_token(TokenKind::Let);
+        let variable = self.parse_expression();
+        let colon_token = self.assert_token(TokenKind::Colon);
+        let hint =
+            self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_specifier(true, true));
+        let eq_token = self.assert_token(TokenKind::Equal);
+        let expr = self.parse_expression();
+        let semi_token = self.require_semicolon();
+        self.sc_mut().make_declare_local_statement(
+            let_token,
+            variable,
+            colon_token,
+            hint,
+            eq_token,
+            expr,
+            semi_token,
+        )
     }
 
     fn parse_default_label(&mut self) -> S::Output {

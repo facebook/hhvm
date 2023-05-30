@@ -83,6 +83,7 @@ pub enum SyntaxVariant<'a, T, V> {
     MarkupSection(&'a MarkupSectionChildren<'a, T, V>),
     MarkupSuffix(&'a MarkupSuffixChildren<'a, T, V>),
     UnsetStatement(&'a UnsetStatementChildren<'a, T, V>),
+    DeclareLocalStatement(&'a DeclareLocalStatementChildren<'a, T, V>),
     UsingStatementBlockScoped(&'a UsingStatementBlockScopedChildren<'a, T, V>),
     UsingStatementFunctionScoped(&'a UsingStatementFunctionScopedChildren<'a, T, V>),
     WhileStatement(&'a WhileStatementChildren<'a, T, V>),
@@ -661,6 +662,17 @@ pub struct UnsetStatementChildren<'a, T, V> {
     pub left_paren: Syntax<'a, T, V>,
     pub variables: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct DeclareLocalStatementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub variable: Syntax<'a, T, V>,
+    pub colon: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub init: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

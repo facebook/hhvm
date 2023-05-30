@@ -188,6 +188,7 @@ let rec check_stmt env (stmt : ETast.stmt) (gamma : gamma) : delta =
   | Using _
   | Awaitall _ ->
     raise Not_implemented
+  | Declare_local _
   | Block _
   | Markup _
   | AssertEnv _ ->

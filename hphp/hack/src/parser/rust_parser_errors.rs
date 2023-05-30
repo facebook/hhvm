@@ -105,6 +105,7 @@ enum UnstableFeatures {
     Package,
     CaseTypes,
     ModuleLevelTraits,
+    TypedLocalVariables,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -133,6 +134,7 @@ impl UnstableFeatures {
             UnstableFeatures::Package => Unstable,
             UnstableFeatures::CaseTypes => Unstable,
             UnstableFeatures::ModuleLevelTraits => Unstable,
+            UnstableFeatures::TypedLocalVariables => Unstable,
         }
     }
 }
@@ -5445,6 +5447,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
+            }
+            DeclareLocalStatement(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::TypedLocalVariables)
             }
             ClassishDeclaration(x) => match &x.where_clause.children {
                 WhereClause(_) => {

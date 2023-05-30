@@ -335,6 +335,11 @@ where
         Self::Output::make_unset_statement(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_declare_local_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6]);
+        Self::Output::make_declare_local_statement(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+    }
+
     fn make_using_statement_block_scoped(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
         Self::Output::make_using_statement_block_scoped(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)

@@ -24,6 +24,8 @@ class AllLogs(NamedTuple):
     client_log: str
     current_server_log: str
     current_monitor_log: str
+    lsp_log: str
+    ide_log: str
 
 
 class CommonTestDriver(TestDriver):
@@ -194,6 +196,12 @@ class CommonTestDriver(TestDriver):
         client_file = cls.proc_call(
             [hh_client, "--client-logname", repo_dir], log=False
         )[0].strip()
+        lsp_file = cls.proc_call([hh_client, "--lsp-logname", repo_dir], log=False)[
+            0
+        ].strip()
+        ide_file = cls.proc_call([hh_client, "--ide-logname", repo_dir], log=False)[
+            0
+        ].strip()
         # Server log
         try:
             with open(server_file) as f:
@@ -249,6 +257,18 @@ class CommonTestDriver(TestDriver):
                 client_log = "%s\n%s\n" % (old_client_log, client_log)
         except Exception:
             pass
+        # Lsp log
+        try:
+            with open(lsp_file) as f:
+                lsp_log = f.read()
+        except Exception as err:
+            lsp_log = lsp_file + " - " + format(err)
+        # Ide log
+        try:
+            with open(ide_file) as f:
+                ide_log = f.read()
+        except Exception as err:
+            ide_log = ide_file + " - " + format(err)
         # All together...
         return AllLogs(
             all_server_logs=all_server_logs,
@@ -256,6 +276,8 @@ class CommonTestDriver(TestDriver):
             client_log=client_log,
             current_server_log=current_server_log,
             current_monitor_log=current_monitor_log,
+            lsp_log=lsp_log,
+            ide_log=ide_log,
         )
 
     def run_check(

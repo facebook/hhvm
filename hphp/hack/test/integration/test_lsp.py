@@ -8,6 +8,7 @@ import enum
 import json
 import os
 import re
+import sys
 import unittest
 import urllib.parse
 from typing import Iterable, List, Mapping, Optional, Tuple
@@ -173,6 +174,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 "window/actionRequired",
                 "window/showStatus",
                 "telemetry/event",
+                "textDocument/publishDiagnostics",
+                "client/registerCapability",
             ]:
                 continue
             yield received
@@ -232,15 +235,26 @@ class TestLsp(TestCase[LspTestDriver]):
             self.throw_on_skip(observed_transcript)
 
         # validation checks that the number of items matches and that
-        # the responses are exactly identical to what we expect
-        self.assertEqual(
-            len(expected_items),
-            len(observed_items),
-            "Wrong count. Observed this:\n"
-            + json.dumps(observed_transcript, indent=2, separators=(",", ": ")),
-        )
-        for i in range(len(expected_items)):
-            self.assertEqual(expected_items[i], observed_items[i])
+        # the responses are exactly identical to what we expect.
+        # Python equality on lists requires identical lengths,
+        # identical order, and does == on each element...
+        if expected_items != observed_items:
+            msg = "Observed this:\n" + json.dumps(
+                observed_transcript, indent=2, separators=(",", ": "), sort_keys=True
+            )
+            while (
+                expected_items
+                and observed_items
+                and expected_items[0] == observed_items[0]
+            ):
+                expected_items.pop(0)
+                observed_items.pop(0)
+            msg += (
+                f"\n\nIt first went wrong here...\n"
+                f"Expected:\n{expected_items[0] if expected_items else '[none]'}\n\n"
+                f"Observed:\n{observed_items[0] if observed_items else '[none]'}\n"
+            )
+            raise AssertionError(msg)
 
     def throw_on_skip(self, transcript: Transcript) -> None:
         failure_messages = ["Server busy", "timed out"]
@@ -372,6 +386,10 @@ class TestLsp(TestCase[LspTestDriver]):
             self.throw_on_skip(observed_transcript)
 
         if error_details is not None:
+            logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
+            print("CLIENT_LOG:\n%s\n\n" % logs.client_log, file=sys.stderr)
+            print("IDE_LOG:\n%s\n\n" % logs.ide_log, file=sys.stderr)
+            print("LSP_LOG:\n%s\n\n" % logs.lsp_log, file=sys.stderr)
             raise AssertionError(error_details)
 
     def setup_php_file(self, test_php: str) -> Mapping[str, str]:

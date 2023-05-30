@@ -5868,15 +5868,17 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_overridden_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("override.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_overridden_definition"),
                 use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6762,15 +6764,17 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_file_touched_on_disk(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_file_on_disk_change"),
                 use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8322,17 +8326,19 @@ function call_method(ClassWithFooBar $mc): void {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("incremental_derived.php"))
         changed_php_file_uri = self.repo_file("incremental_base.php")
         variables.update({"changed_php_file_uri": changed_php_file_uri})
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_hierarchy_file_change_on_disk"),
                 use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8405,15 +8411,17 @@ class BaseClassIncremental {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_decl_in_unsaved_buffer_changed"),
                 use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -8494,16 +8502,18 @@ function b_hover(): string {
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_decl_two_unsaved_buffers(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
         variables.update(self.setup_php_file("unsaved1.php"))
         variables.update({"unsaved2_file_uri": self.repo_file_uri("unsaved2.php")})
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_decl_two_unsaved_buffers"),
                 use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 comment="open 'unsaved1.php', since we'll be hovering in it",
                 method="textDocument/didOpen",

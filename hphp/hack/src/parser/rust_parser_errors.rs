@@ -755,7 +755,7 @@ fn cant_be_reserved_type_name(name: &str) -> bool {
         "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
         | "nothing" | "null" | "num" | "resource" | "string" | "this" | "void" | "_" => true,
         // misc
-        "darray" | "false" | "true" | "varray" => true,
+        "darray" | "false" | "static" | "true" | "varray" => true,
         _ => false,
     }
 }

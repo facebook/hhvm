@@ -7,6 +7,6 @@ async function recurse(): Awaitable<void> {
 
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
-  ini_set('memory_limit', '50M');
+  ini_set('memory_limit', '25M');
   await recurse();
 }

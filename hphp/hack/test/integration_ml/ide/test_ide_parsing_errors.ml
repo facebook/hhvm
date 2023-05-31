@@ -78,5 +78,6 @@ let test () =
   let env = Test.wait env in
   let (env, _) = Test.(run_loop_once env default_loop_input) in
   (* Check that Foo definiton is still available for querying *)
-  let (_, loop_output) = Test.autocomplete env autocomplete_contents in
-  Test.assert_autocomplete_does_not_contain loop_output ["bar"]
+  let env = Test.open_file env "test.php" ~contents:autocomplete_contents in
+  let (_, loop_output) = Test.ide_autocomplete env ("test.php", 4, 9) in
+  Test.assert_ide_autocomplete_does_not_contain loop_output ["bar"]

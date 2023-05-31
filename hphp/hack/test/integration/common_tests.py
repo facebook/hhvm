@@ -840,31 +840,6 @@ class CommonTests(BarebonesTests):
             options=["--search", "aaaaaaaaaaa"],
         )
 
-    def test_auto_complete(self) -> None:
-        """
-        Test hh_client --auto-complete
-        """
-
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            ["some_long_function_name (function(): void)"],
-            [
-                # test the --json output because the non-json one doesn't contain
-                # the filename, and we are especially interested in testing file
-                # paths
-                # the doubled curly braces are because this string gets passed
-                # through format()
-                '[{{"name":"some_long_function_name",'
-                '"type":"(function(): void)",'
-                '"pos":{{"filename":"{root}foo_3.php",'
-                '"line":9,"char_start":18,"char_end":40}},'
-                '"expected_ty":false}}]'
-            ],
-            options=["--auto-complete"],
-            stdin="<?hh function f() { some_AUTO332\n",
-        )
-
     def test_list_files(self) -> None:
         """
         Test hh_client --list-files

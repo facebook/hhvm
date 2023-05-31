@@ -208,9 +208,6 @@ let parse_check_args cmd ~from_default =
     [
       (* Please keep these sorted in the alphabetical order *)
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
-      ( "--auto-complete",
-        Arg.Unit (fun () -> set_mode MODE_AUTO_COMPLETE),
-        " (mode) auto-completes the text on stdin" );
       ( "--autostart-server",
         Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)" );

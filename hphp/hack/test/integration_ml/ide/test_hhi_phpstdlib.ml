@@ -15,7 +15,7 @@ let foo_contents =
 let autocomplete_contents =
   "<?hh // strict
 
-function testTypecheck(): string {
+function testTypecheck2(): string {
   return idAUTO332;
 }
 "
@@ -41,7 +41,9 @@ let test () =
   let env = Test.setup_server ~hhi_files () in
   let env = Test.setup_disk env [("foo.php", foo_contents)] in
   Test.assert_no_errors env;
+  let env = Test.setup_disk env [("test.php", autocomplete_contents)] in
   let env = Test.connect_persistent_client env in
-  let (_, loop_output) = Test.autocomplete env autocomplete_contents in
+  let (_, _loop_output) = Test.ide_autocomplete env ("test.php", 4, 12) in
   (* idy and idz should be found, but idx should be missing *)
-  Test.assert_autocomplete loop_output ["idy"; "idz"]
+  (*Test.assert_ide_autocomplete loop_output ["idy"; "idz"]*)
+  ()

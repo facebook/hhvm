@@ -467,7 +467,6 @@ type _ t =
       (string * SearchUtils.si_kind)
       -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (string * int * int) -> Lsp.SignatureHelp.result t
-  | COMMANDLINE_AUTOCOMPLETE : string -> AutocompleteTypes.result t
   | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
       string * file_input * int * int

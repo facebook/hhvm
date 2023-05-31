@@ -14,7 +14,6 @@ type rename_mode =
   | Unspecified
 
 type client_mode =
-  | MODE_AUTO_COMPLETE
   | MODE_CODEMOD_SDT of {
       csdt_path_to_jsonl: string;
       csdt_strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];

@@ -83,11 +83,6 @@ val close_file :
 
 val wait : ServerEnv.env -> ServerEnv.env
 
-val autocomplete :
-  ServerEnv.env ->
-  string ->
-  ServerEnv.env * ('a, AutocompleteTypes.result) loop_outputs
-
 val ide_autocomplete :
   ServerEnv.env ->
   string * int * int ->
@@ -139,11 +134,8 @@ val assert_diagnostics_in :
 val get_diagnostics :
   ('a, 'b) loop_outputs -> Errors.finalized_error list SMap.t
 
-val assert_autocomplete :
-  ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit
-
-val assert_autocomplete_does_not_contain :
-  ('a, AutocompleteTypes.result) loop_outputs -> string list -> unit
+val assert_ide_autocomplete_does_not_contain :
+  ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit
 
 val assert_ide_autocomplete :
   ('a, AutocompleteTypes.ide_result) loop_outputs -> string list -> unit

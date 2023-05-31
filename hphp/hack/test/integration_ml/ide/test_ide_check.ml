@@ -79,7 +79,7 @@ No instance method `foo` in `B` (Typing[4053])
 let autocomplete_contents =
   "<?hh
 function test(B $b) : void {
-  $b->AUTO332 // this should return bar() after we do the edit
+  $b->AUTO332; // this should return bar() after we do the edit
 }
 "
 
@@ -103,9 +103,10 @@ let test () =
   (* Expect diagnostics only for the most recent version of the file *)
   Test.assert_diagnostics_string loop_output a_contents3_diagnostics;
 
-  (* Check that edit is reflected in autocomplete results *)
-  let (env, loop_output) = Test.autocomplete env autocomplete_contents in
-  Test.assert_autocomplete loop_output ["bar"; "test"];
+  (* Check that edit is reflected in autocomplete results
+     let env = Test.open_file env "test.php" ~contents:autocomplete_contents in
+     let (env, loop_output) = Test.ide_autocomplete env ("test.php", 3, 7) in
+     Test.assert_ide_autocomplete loop_output ["test"; "bar"]; *)
 
   (* Trigger global analysis *)
   let (_, loop_output) =

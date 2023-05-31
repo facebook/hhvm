@@ -10,7 +10,6 @@
 open Hh_prelude
 open ServerEnv
 open ServerCommandTypes
-open Utils
 
 let remove_dead_warning name =
   "hh_server was started without '--no-load', which is required when removing dead "
@@ -127,72 +126,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | IDE_SIGNATURE_HELP (path, line, column) ->
     let (ctx, entry) = single_ctx_path env path in
     (env, ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
-  | COMMANDLINE_AUTOCOMPLETE contents ->
-    (* For command line autocomplete, we assume the AUTO332 text has
-       already been inserted, and we fake the rest of this information. *)
-    let autocomplete_context =
-      {
-        AutocompleteTypes.is_manually_invoked = false;
-        is_after_single_colon = false;
-        is_after_double_right_angle_bracket = false;
-        is_after_open_square_bracket = false;
-        is_after_quote = false;
-        is_before_apostrophe = false;
-        is_open_curly_without_equals = false;
-        char_at_pos = ' ';
-      }
-    in
-    (* Since this is being executed from the command line,
-     * let's turn on the flags that increase accuracy but slow it down *)
-    let sienv =
-      {
-        env.ServerEnv.local_symbol_table with
-        SearchUtils.sie_resolve_signatures = true;
-        SearchUtils.sie_resolve_positions = true;
-        SearchUtils.sie_resolve_local_decl = true;
-      }
-    in
-    (* feature not implemented here; it only works for LSP *)
-    let (ctx, entry) =
-      Provider_context.add_or_overwrite_entry_contents
-        ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path:(Relative_path.create_detect_prefix "")
-        ~contents
-    in
-    (* Update the symbol index from this file *)
-    let facts_opt =
-      Facts_parser.from_text
-        ~php5_compat_mode:false
-        ~hhvm_compat_mode:true
-        ~disable_legacy_soft_typehints:false
-        ~allow_new_attribute_syntax:false
-        ~disable_legacy_attribute_syntax:false
-        ~enable_xhp_class_modifier:false
-        ~disable_xhp_element_mangling:false
-        ~mangle_xhp_mode:false
-        ~auto_namespace_map:
-          env.ServerEnv.popt.GlobalOptions.po_auto_namespace_map
-        ~filename:Relative_path.default
-        ~text:contents
-    in
-    let sienv =
-      match facts_opt with
-      | None -> sienv
-      | Some facts ->
-        SymbolIndexCore.update_from_facts
-          ~sienv
-          ~path:Relative_path.default
-          ~facts
-    in
-    let result =
-      ServerAutoComplete.go_at_auto332_ctx
-        ~ctx
-        ~entry
-        ~sienv
-        ~autocomplete_context
-        ~naming_table:env.naming_table
-    in
-    (env, result.With_complete_flag.value)
   | IDENTIFY_SYMBOL arg ->
     let module SO = SymbolOccurrence in
     let ctx = Provider_utils.ctx_from_server_env env in

@@ -126,10 +126,6 @@ let test () =
          ]
   in
   let env = Test.connect_persistent_client env in
-  let test_legacy env contents expected =
-    let (_, loop_output) = Test.autocomplete env contents in
-    Test.assert_autocomplete loop_output expected
-  in
   let test_ide env contents i expected =
     let path = "test" ^ string_of_int i ^ ".php" in
     let offset =
@@ -144,15 +140,6 @@ let test () =
   (* Note that autocomplete now hides namespaces when you've already typed them!
    * This means that all tests will simply return "foo" as long as you're in
    * the correct namespace when autocomplete is triggered. *)
-  test_legacy env autocomplete_contents0 ["foo"];
-  test_legacy env autocomplete_contents1 [""];
-  test_legacy env autocomplete_contents2 ["foo"];
-  test_legacy env autocomplete_contents3 ["foo"];
-  test_legacy env autocomplete_contents4 [""];
-  test_legacy env autocomplete_contents5 ["foo"];
-  test_legacy env autocomplete_contents6 ["foo"];
-  test_legacy env autocomplete_contents7 [""];
-
   test_ide env autocomplete_contents0 0 ["foo"];
   test_ide env autocomplete_contents1 1 [];
   test_ide env autocomplete_contents2 2 ["foo"];

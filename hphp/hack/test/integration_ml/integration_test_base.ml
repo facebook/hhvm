@@ -362,15 +362,6 @@ let wait env =
    * counters. *)
   ServerEnv.{ env with last_command_time = env.last_command_time -. 60.0 }
 
-let autocomplete env contents =
-  run_loop_once
-    env
-    {
-      default_loop_input with
-      persistent_client_request =
-        Some (Request (COMMANDLINE_AUTOCOMPLETE contents));
-    }
-
 let ide_autocomplete env (path, line, column) =
   let is_manually_invoked = false in
   run_loop_once
@@ -750,33 +741,17 @@ let list_to_string l =
   List.iter l ~f:(Printf.bprintf buf "%s ");
   Buffer.contents buf
 
-let assert_autocomplete loop_output expected =
+let assert_ide_autocomplete_does_not_contain loop_output not_expected =
   let results =
     match loop_output.persistent_client_response with
     | Some res -> res
     | _ -> fail "Expected autocomplete response"
   in
   let results =
-    results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_label)
+    List.map results.AutocompleteTypes.completions ~f:(fun x ->
+        x.AutocompleteTypes.res_label)
   in
-  (* The autocomplete results out of hack are unsorted *)
-  let results_as_string =
-    results |> List.sort ~compare:String.compare |> list_to_string
-  in
-  let expected_as_string =
-    expected |> List.sort ~compare:String.compare |> list_to_string
-  in
-  assertEqual expected_as_string results_as_string
-
-let assert_autocomplete_does_not_contain loop_output not_expected =
-  let results =
-    match loop_output.persistent_client_response with
-    | Some res -> res
-    | _ -> fail "Expected autocomplete response"
-  in
-  let results =
-    List.map results ~f:(fun x -> x.AutocompleteTypes.res_label) |> SSet.of_list
-  in
+  let results = SSet.of_list results in
   let not_expected = SSet.of_list not_expected in
   let occured = SSet.inter results not_expected in
   if SSet.is_empty occured |> not then

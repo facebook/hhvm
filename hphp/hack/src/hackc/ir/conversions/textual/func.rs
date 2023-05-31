@@ -18,6 +18,7 @@ use ir::BlockId;
 use ir::ClassId;
 use ir::Constant;
 use ir::Func;
+use ir::FunctionFlags;
 use ir::FunctionId;
 use ir::IncDecOp;
 use ir::Instr;
@@ -66,6 +67,7 @@ pub(crate) fn write_function(
     let func_info = FuncInfo::Function(FunctionInfo {
         name: function.name,
         attrs: function.attrs,
+        flags: function.flags,
     });
 
     lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
@@ -281,8 +283,10 @@ fn write_func(
     };
 
     let span = func.loc(func.loc_id).clone();
+
     let attributes = textual::FuncAttributes {
         is_final: func_info.attrs().is_final(),
+        is_async: func_info.is_async(),
     };
 
     txf.define_function(
@@ -372,7 +376,12 @@ pub(crate) fn write_func_decl(
         FuncInfo::Function(ref fi) => FunctionName::Function(fi.name),
     };
 
-    txf.declare_function(&name, &param_tys, &ret_ty)?;
+    let attributes = textual::FuncAttributes {
+        is_final: func_info.attrs().is_final(),
+        is_async: func_info.is_async(),
+    };
+
+    txf.declare_function(&name, &attributes, &param_tys, &ret_ty)?;
 
     Ok(())
 }
@@ -1342,6 +1351,13 @@ impl<'a> FuncInfo<'a> {
             FuncInfo::Method(mi) => mi.declared_in_trait(),
         }
     }
+
+    pub(crate) fn is_async(&self) -> bool {
+        match self {
+            FuncInfo::Function(fi) => fi.flags.contains(FunctionFlags::ASYNC),
+            FuncInfo::Method(mi) => mi.flags.contains(MethodFlags::IS_ASYNC),
+        }
+    }
 }
 
 // Extra data associated with a (non-class) function that aren't stored on the
@@ -1350,6 +1366,7 @@ impl<'a> FuncInfo<'a> {
 pub(crate) struct FunctionInfo {
     pub(crate) name: FunctionId,
     pub(crate) attrs: ir::Attr,
+    pub(crate) flags: FunctionFlags,
 }
 
 // Extra data associated with class methods that aren't stored on the Func.

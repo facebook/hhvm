@@ -93,7 +93,7 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
                         let decl = quote! {
                             if subset.contains(&#name::#variant_name) {
-                                txf.declare_function(&#fn_name, &[#(#params),*], &#ret)?;
+                                txf.declare_function(&#fn_name, &textual::FuncAttributes::default(), &[#(#params),*], &#ret)?;
                             }
                         };
                         decls.push(decl);

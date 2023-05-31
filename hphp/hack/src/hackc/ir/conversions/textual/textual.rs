@@ -71,10 +71,21 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn declare_function(
         &mut self,
         name: &FunctionName,
+        attributes: &FuncAttributes,
         tys: &[Ty],
         ret_ty: &Ty,
     ) -> Result {
-        write!(self.w, "declare {}(", name.display(&self.strings))?;
+        write!(self.w, "declare ")?;
+
+        if attributes.is_final {
+            write!(self.w, ".final ")?;
+        }
+
+        if attributes.is_async {
+            write!(self.w, ".async ")?;
+        }
+
+        write!(self.w, "{}(", name.display(&self.strings))?;
 
         // TODO: For now textual can't handle a mix of types with a trailing
         // ellipsis.
@@ -140,7 +151,12 @@ impl<'a> TextualFile<'a> {
             write!(self.w, ".final ")?;
         }
 
+        if attributes.is_async {
+            write!(self.w, ".async ")?;
+        }
+
         write!(self.w, "{}(", name.display(&self.strings))?;
+
         let mut sep = "";
         for param in params {
             write!(self.w, "{sep}{name}: ", name = param.name,)?;
@@ -425,6 +441,7 @@ impl<'a> TextualFile<'a> {
 #[derive(Debug, Default)]
 pub(crate) struct FuncAttributes {
     pub is_final: bool,
+    pub is_async: bool,
 }
 
 newtype_int!(Sid, u32, SidMap, SidSet);

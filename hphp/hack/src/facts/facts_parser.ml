@@ -10,8 +10,6 @@
 open Hh_prelude
 open Facts
 
-let mangle_xhp_mode = ref true
-
 let flags_abstract = 1
 
 let flags_final = 2
@@ -24,6 +22,7 @@ let extract_as_json_string
     ~(disable_legacy_attribute_syntax : bool)
     ~(enable_xhp_class_modifier : bool)
     ~(disable_xhp_element_mangling : bool)
+    ~(mangle_xhp_mode : bool)
     ~(auto_namespace_map : (string * string) list)
     ~(filename : Relative_path.t)
     ~(text : string) =
@@ -45,7 +44,7 @@ let extract_as_json_string
     auto_namespace_map
     filename
     text
-    !mangle_xhp_mode
+    mangle_xhp_mode
   |> Option.map ~f:(fun unnormalized ->
          (* make it compact (same line breaks and whitespace) via Hh_json *)
          (* to avoid differences in output (because many tests rely on it!) *)
@@ -59,6 +58,7 @@ let from_text
     ~(disable_legacy_attribute_syntax : bool)
     ~(enable_xhp_class_modifier : bool)
     ~(disable_xhp_element_mangling : bool)
+    ~(mangle_xhp_mode : bool)
     ~(auto_namespace_map : (string * string) list)
     ~(filename : Relative_path.t)
     ~(text : string) =
@@ -71,6 +71,7 @@ let from_text
     ~disable_legacy_attribute_syntax
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
+    ~mangle_xhp_mode
     ~auto_namespace_map
     ~filename
     ~text

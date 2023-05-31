@@ -92,7 +92,6 @@ let parse_one_file
   let filename = Relative_path.to_absolute path in
   let text = In_channel.read_all filename in
   (* Just the facts ma'am *)
-  Facts_parser.mangle_xhp_mode := false;
   let fact_opt =
     Facts_parser.from_text
       ~php5_compat_mode:false
@@ -102,6 +101,7 @@ let parse_one_file
       ~disable_legacy_attribute_syntax:false
       ~enable_xhp_class_modifier:false
       ~disable_xhp_element_mangling:false
+      ~mangle_xhp_mode:false
       ~auto_namespace_map:namespace_map
       ~filename:path
       ~text

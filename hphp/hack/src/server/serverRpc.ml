@@ -160,7 +160,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~contents
     in
     (* Update the symbol index from this file *)
-    Facts_parser.mangle_xhp_mode := false;
     let facts_opt =
       Facts_parser.from_text
         ~php5_compat_mode:false
@@ -170,6 +169,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~disable_legacy_attribute_syntax:false
         ~enable_xhp_class_modifier:false
         ~disable_xhp_element_mangling:false
+        ~mangle_xhp_mode:false
         ~auto_namespace_map:
           env.ServerEnv.popt.GlobalOptions.po_auto_namespace_map
         ~filename:Relative_path.default

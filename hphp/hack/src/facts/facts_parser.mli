@@ -6,8 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val mangle_xhp_mode : bool ref
-
 val flags_abstract : int
 
 val flags_final : int
@@ -20,6 +18,7 @@ val from_text :
   disable_legacy_attribute_syntax:bool ->
   enable_xhp_class_modifier:bool ->
   disable_xhp_element_mangling:bool ->
+  mangle_xhp_mode:bool ->
   auto_namespace_map:(string * string) list ->
   filename:Relative_path.t ->
   text:string ->

@@ -1,5 +1,5 @@
 // Defined in namespace C
-function any<T as mixed>(
+function any<T>(
   Traversable<int> $traversable,
   ?(function(int): ~bool) $predicate = _
 )[ctx $predicate]: bool

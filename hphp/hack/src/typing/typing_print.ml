@@ -227,6 +227,18 @@ module Full = struct
     in
     (desugared_tparams, other_tparams)
 
+  let rec is_supportdyn_mixed env t =
+    match get_node t with
+    | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv env) ->
+      is_supportdyn_mixed env ty
+    | Toption t ->
+      (match get_node t with
+      | Tnonnull -> true
+      | _ -> false)
+    | _ -> false
+
   let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
     let (fuel, params) =
@@ -333,6 +345,13 @@ module Full = struct
       st
       env
       { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } =
+    let cstrl =
+      List.filter cstrl ~f:(fun cstr ->
+          match cstr with
+          | (Ast_defs.Constraint_as, ty) when is_supportdyn_mixed env ty ->
+            false
+          | _ -> true)
+    in
     let (fuel, tparam_constraints_doc) =
       list_sep
         ~fuel

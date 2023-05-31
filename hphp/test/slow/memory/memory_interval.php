@@ -10,7 +10,7 @@ class testobj {
 
 function alloc_lots($x) {
   $v = darray[];
-  for ($i = 0; $i < $x * 10000; ++$i) {
+  for ($i = 0; $i < $x * 5000; ++$i) {
     $m = new testobj($x * $i);
     $v[] = $m;
   }

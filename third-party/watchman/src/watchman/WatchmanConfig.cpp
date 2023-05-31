@@ -89,7 +89,8 @@ std::optional<std::pair<json_ref, w_string>> loadSystemConfig() {
 }
 
 std::optional<json_ref> loadUserConfig() {
-  const char* home = getenv("HOME");
+  // TODO(xavierd): We should follow XDG and Windows AppData folder instead
+  const char* home = getenv(folly::kIsWindows ? "USERPROFILE" : "HOME");
   if (!home) {
     return std::nullopt;
   }

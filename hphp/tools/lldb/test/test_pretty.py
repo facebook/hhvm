@@ -97,7 +97,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
         breakpoints_to_outputs = {
             "PersistentString": r'\(HPHP::TypedValue\) \{ PersistentString, "Hello, world!" \}',
             "String": r'\(HPHP::TypedValue\) \{ String, "Hello, world!" \}',
-            "Object": r'\(HPHP::TypedValue\) \{ Object, \(HPHP::ObjectData \*\) pobj = 0x.* \("InvalidArgumentException"\) \}',
+            "Object": r'\(HPHP::TypedValue\) \{ Object, \(HPHP::ObjectData \*\) pobj = 0x.* "InvalidArgumentException" \}',
             "Resource": r'\(HPHP::TypedValue\) \{ Resource, \(hdr = 0x.*, data = 0x.*\) *\}',
             "RFunc": r'\(HPHP::TypedValue\) \{ RFunc, \(HPHP::RFuncData \*\) prfunc = 0x.* \("Exception::__construct"\) \}',
             "RClsMeth": r'\(HPHP::TypedValue\) \{ RClsMeth, \(HPHP::RClsMethData \*\) prclsmeth = 0x.* \("InvalidArgumentException::Exception::__construct"\) \}',
@@ -105,9 +105,9 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "Boolean": r'\(HPHP::TypedValue\) \{ Boolean, True \}',
             "Int64": r'\(HPHP::TypedValue\) \{ Int64, 42 \}',
             "Double": r'\(HPHP::TypedValue\) \{ Double, 3.1415 \}',
-            "Func": r'\(HPHP::TypedValue\) \{ Func, \(const HPHP::Func \*\) pfunc = 0x.* \("Exception::__construct"\) \}',
-            "Class": r'\(HPHP::TypedValue\) \{ Class, \(HPHP::Class \*\) pclass = 0x.* \("InvalidArgumentException"\) \}',
-            "LazyClass": r'\(HPHP::TypedValue\) \{ LazyClass, \(HPHP::LazyClassData\) plazyclass = (?s).* \("SpecialLazyClass"\) \}',
+            "Func": r'\(HPHP::TypedValue\) \{ Func, \(const HPHP::Func \*\) pfunc = 0x.* "Exception::__construct" \}',
+            "Class": r'\(HPHP::TypedValue\) \{ Class, \(HPHP::Class \*\) pclass = 0x.* "InvalidArgumentException" \}',
+            "LazyClass": r'\(HPHP::TypedValue\) \{ LazyClass, \(HPHP::LazyClassData\) plazyclass = "SpecialLazyClass" \}',
             "Uninit": r'\(HPHP::TypedValue\) \{ Uninit \}',
             "Null": r'\(HPHP::TypedValue\) \{ Null \}',
         }
@@ -210,7 +210,7 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("Object"):
             self.run_until_breakpoint("takeObject")
             _, output = self.run_commands(["p v"])
-            expected_output = r'\(HPHP::Object\) InvalidArgumentException'
+            expected_output = r'\(HPHP::Object\) "InvalidArgumentException"'
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("req::ptr"):
@@ -309,3 +309,46 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             ]
             actual_lines = [line.strip() for line in output.split("\n") if line]
             self.assertEqual(actual_lines, expected_lines)
+
+        with self.subTest("HPHP::Func"):
+            self.run_until_breakpoint("takeFunc")
+            _, output = self.run_commands(["p v"])
+            expected_output = r'\(const HPHP::Func \*\) 0x.* "Exception::__construct"'
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("HPHP::Class"):
+            self.run_until_breakpoint("takeClass")
+            _, output = self.run_commands(["p v"])
+            expected_output = r'\(HPHP::Class \*\) 0x.* "InvalidArgumentException"'
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("HPHP::LazyClassData"):
+            self.run_until_breakpoint("takeLazyClassData")
+            _, output = self.run_commands(["p v"])
+            expected_output = '(HPHP::LazyClassData) "SpecialLazyClass"'
+            self.assertEqual(output.strip(), expected_output)
+
+        with self.subTest("HPHP::ObjectData"):
+            self.run_until_breakpoint("takeObjectData")
+            _, output = self.run_commands(["p v"])
+            expected_output = r'\(HPHP::ObjectData \*\) 0x.* "InvalidArgumentException"'
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("HPHP::Op"):
+            for op in ["Nop", "Int", "CGetL", "NewObjD", "QueryM"]:
+                self.run_until_breakpoint("takeHhbcOp")
+                _, output = self.run_commands(["p v"])
+                self.assertEqual(output.strip(), f"(HPHP::Op) {op}")
+
+        with self.subTest("HPHP::HHBBC::Bytecode"):
+            self.run_until_breakpoint("takeHhbbcBytecode")
+            _, output = self.run_commands(["p v"])
+            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) bc::Nop { Nop = {} }")
+
+            self.run_until_breakpoint("takeHhbbcBytecode")
+            _, output = self.run_commands(["p v"])
+            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) bc::Int { Int = (arg1 = 42) }")
+
+            self.run_until_breakpoint("takeHhbbcBytecode")
+            _, output = self.run_commands(["p v"])
+            self.assertEqual(output.strip(), "(HPHP::HHBBC::Bytecode) bc::CGetL { CGetL = {\n  nloc1 = (name = 1, id = 2)\n} }")

@@ -641,6 +641,9 @@ _Current_key = None
 def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     """ Get the pretty string representation of a TypedValue (or its subclasses)
 
+    Note that calling str(val) on an SBValue will automatically use the
+    pretty printer for that value, if present.
+
     Arguments:
         typ: A HPHP::DataType wrapped by an lldb.SBValue
         data: A HPHP::Value wrapped by an lldb.SBValue
@@ -677,19 +680,15 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
         val = deref(get(data, "parr"))
     elif typ.unsigned == DT("Object"):
         val = get(data, "pobj")
-        name = nameof(val)
     elif typ.unsigned == DT("Resource"):
         val = deref(get(data, "pres"))
         val = pretty_resource_header(val)
     elif typ.unsigned == DT("Class"):
         val = get(data, "pclass")
-        name = nameof(val)
     elif typ.unsigned == DT("LazyClass"):
         val = get(data, "plazyclass")
-        name = nameof(val)
     elif typ.unsigned == DT("Func"):
         val = get(data, "pfunc")
-        name = nameof(val)
     elif typ.unsigned == DT("ClsMeth"):
         # For non-lowptr, m_data is a pointer, so try and dereference first
         val = referenced_value(get(data, "pclsmeth", "m_data"))

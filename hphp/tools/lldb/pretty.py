@@ -3,6 +3,7 @@
 """ Pretty printers for HPHP types """
 
 import lldb
+import re
 import sys
 import typing
 
@@ -253,19 +254,24 @@ class pp_Array(pp_ArrayData):
 
 
 #------------------------------------------------------------------------------
-# Objects
+# Classes, Functions, and Objects
+
+@format("^HPHP::(Class|LazyClassData|Func|ObjectData)$", regex=True)
+def pp_NamedValue(val_obj: lldb.SBValue, _internal_dict) -> str:
+    return '"' + utils.nameof(val_obj) + '"'
+
 
 @format("^HPHP::Object$", regex=True)
-def pp_Object(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_Object(val_obj: lldb.SBValue, _internal_dict) -> str:
     val = utils.get(val_obj, "m_obj")
-    return utils.nameof(val)
+    return '"' + utils.nameof(val) + '"'
 
 
 #------------------------------------------------------------------------------
 # Extensions
 
 @format("^HPHP::Extension$", regex=True)
-def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> str:
     val = utils.deref(val_obj)
     def cstr(v):
         return utils.read_cstring(v, 256, val.process)
@@ -273,6 +279,17 @@ def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     version = cstr(utils.deref(utils.get(val, "m_version")))
     oncall = cstr(utils.deref(utils.get(val, "m_oncall")))
     return f"{name} (version: {version}, oncall: {oncall})"
+
+
+#------------------------------------------------------------------------------
+# HHBBC Bytecode
+
+@format("^HPHP::HHBBC::Bytecode$", regex=True)
+def pp_HhbbcBytecode(val_obj: lldb.SBValue, _internal_dict) -> str:
+    op = utils.get(val_obj, "op").value
+    val = str(utils.get(val_obj, op))
+    val = re.sub(r"\(HPHP::HHBBC::bc::.*\) ", "", val)
+    return 'bc::%s { %s }' % (op, val)
 
 
 def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict, top_module=""):

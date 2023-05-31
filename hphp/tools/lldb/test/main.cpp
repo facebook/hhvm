@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/hhbbc/bc.h"
 
 namespace HPHP {
 
@@ -174,6 +175,13 @@ void takeArrayData(ArrayData UNUSED *v) { return; }
 void takeArrayVec(Array UNUSED v) { return; }
 void takeArrayDict(Array UNUSED v) { return; }
 void takeArrayKeyset(Array UNUSED v) { return; }
+void takeFunc(const Func UNUSED *v) { return; }
+void takeClass(Class UNUSED *v) { return; }
+void takeLazyClassData(LazyClassData UNUSED v) { return; }
+void takeObjectData(ObjectData* UNUSED v) { return; }
+
+void takeHhbcOp(Op UNUSED v) { return; }
+void takeHhbbcBytecode(HHBBC::Bytecode UNUSED v) { return; }
 
 void buildOtherValues() {
   TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
@@ -183,6 +191,9 @@ void buildOtherValues() {
   auto sd = StringData::MakeStatic("hello");
   auto s = String("hello");
   auto rsc = Resource(req::make<DummyResource>());
+  auto cls = TestObject->getVMClass();
+  auto func = cls->getCtor();
+  auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
 
   takeStringData(sd);
   takeConstPtrToStringData(sd);
@@ -204,6 +215,21 @@ void buildOtherValues() {
   takeArrayVec(vec);
   takeArrayDict(dict);
   takeArrayKeyset(keyset);
+  takeFunc(func);
+  takeClass(cls);
+  takeLazyClassData(lazy_cls);
+  takeObjectData(TestObject.get());
+
+  takeHhbcOp(Op::Nop);
+  takeHhbcOp(Op::Int);
+  takeHhbcOp(Op::CGetL);
+  takeHhbcOp(Op::NewObjD);
+  takeHhbcOp(Op::QueryM);
+
+  takeHhbbcBytecode(HHBBC::bc::Nop {});
+  takeHhbbcBytecode(HHBBC::bc::Int { 42 });
+  auto nl = NamedLocal { 1, 2 };
+  takeHhbbcBytecode(HHBBC::bc::CGetL { nl });
 }
 
 // Utility tests
@@ -219,10 +245,6 @@ void buildValuesForUtilityTests() {
 }
 
 // nameof tests
-void takeClass(Class* UNUSED v) { return; }
-void takeLazyClassData(LazyClassData UNUSED v) { return; }
-void takeObjectData(ObjectData* UNUSED v) { return; }
-void takeFunc(const Func* UNUSED v) { return; }
 
 void buildValuesForNameofTests() {
   TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");

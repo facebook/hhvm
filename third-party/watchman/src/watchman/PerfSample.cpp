@@ -239,9 +239,9 @@ void PerfLogThread::loop() noexcept {
             opts.environment().set(
                 {{"WATCHMAN_STATE_DIR", stateDir},
                  {"WATCHMAN_SOCK", get_sock_name_legacy()}});
-            opts.open(STDIN_FILENO, "/dev/null", O_RDONLY, 0666);
-            opts.open(STDOUT_FILENO, "/dev/null", O_WRONLY, 0666);
-            opts.open(STDERR_FILENO, "/dev/null", O_WRONLY, 0666);
+            opts.nullStdin();
+            opts.nullStdout();
+            opts.nullStderr();
 
             try {
               ChildProcess proc(cmd, std::move(opts));
@@ -256,8 +256,8 @@ void PerfLogThread::loop() noexcept {
                 {{"WATCHMAN_STATE_DIR", stateDir},
                  {"WATCHMAN_SOCK", get_sock_name_legacy()}});
             opts.pipeStdin();
-            opts.open(STDOUT_FILENO, "/dev/null", O_WRONLY, 0666);
-            opts.open(STDERR_FILENO, "/dev/null", O_WRONLY, 0666);
+            opts.nullStdout();
+            opts.nullStderr();
 
             try {
               ChildProcess proc({perf_cmd}, std::move(opts));

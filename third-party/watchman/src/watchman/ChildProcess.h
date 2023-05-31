@@ -94,6 +94,12 @@ class ChildProcess {
     // Set up stdin with a null device
     void nullStdin();
 
+    // Set up stdout with a null device
+    void nullStdout();
+
+    // Set up stderr with a null device
+    void nullStderr();
+
     // Arrange to open(2) a file for the child process and make
     // it available as targetFd
     void open(int targetFd, const char* path, int flags, int mode);
@@ -102,6 +108,8 @@ class ChildProcess {
     void chdir(w_string_piece path);
 
    private:
+    void nullFd(int fd, int flags);
+
     struct Inner {
       // There is no defined way to copy or move either of
       // these things, so we separate them out into a container

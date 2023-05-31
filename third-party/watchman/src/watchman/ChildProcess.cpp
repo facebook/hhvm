@@ -238,12 +238,24 @@ void ChildProcess::Options::pipeStderr() {
   pipe(STDERR_FILENO, false);
 }
 
-void ChildProcess::Options::nullStdin() {
+void ChildProcess::Options::nullFd(int fd, int flags) {
 #ifdef _WIN32
-  open(STDIN_FILENO, "NUL", O_RDONLY, 0);
+  open(fd, "NUL", flags, 0);
 #else
-  open(STDIN_FILENO, "/dev/null", O_RDONLY, 0);
+  open(fd, "/dev/null", flags, 0666);
 #endif
+}
+
+void ChildProcess::Options::nullStdin() {
+  nullFd(STDIN_FILENO, O_RDONLY);
+}
+
+void ChildProcess::Options::nullStdout() {
+  nullFd(STDOUT_FILENO, O_WRONLY);
+}
+
+void ChildProcess::Options::nullStderr() {
+  nullFd(STDERR_FILENO, O_WRONLY);
 }
 
 void ChildProcess::Options::chdir(w_string_piece path) {

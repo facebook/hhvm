@@ -58,7 +58,26 @@ class McrouterManager {
         }
       }
     }
-    return dynamic_cast<CarbonRouterInstance<RouterInfo>*>(mcrouterBase.get());
+    auto ret =
+        dynamic_cast<CarbonRouterInstance<RouterInfo>*>(mcrouterBase.get());
+    if (!mcrouterBase) {
+      MC_LOG_FAILURE(
+          options,
+          failure::Category::kBrokenLogic,
+          folly::sformat(
+              "mcrouterGetCreate failed to create mcrouter instance with router info {} for persistentId {}",
+              RouterInfo::name,
+              persistenceId));
+    } else if (ret == nullptr) {
+      MC_LOG_FAILURE(
+          options,
+          failure::Category::kBrokenLogic,
+          folly::sformat(
+              "mcrouterGetCreate failed to cast mcrouter instance to router info {} for persistentId {}",
+              RouterInfo::name,
+              persistenceId));
+    }
+    return ret;
   }
 
   template <class RouterInfo>

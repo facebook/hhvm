@@ -54,7 +54,7 @@ struct AutoloadDB {
   /**
    * Function which returns a reference to an AutoloadDB.
    */
-  using Handle = folly::Function<std::shared_ptr<AutoloadDB>() const>;
+  using Opener = folly::Function<std::shared_ptr<AutoloadDB>() const>;
 
   struct KindAndFlags {
     TypeKind m_kind;

@@ -227,10 +227,10 @@ inline strhash_t hash_string_view_cs(std::string_view s) {
 }
 
 /**
- * List of options making a WatchmanAutoloadMap unique
+ * List of options making a SqliteAutoloadMap unique
  */
-struct WatchmanAutoloadMapKey {
-  static WatchmanAutoloadMapKey get(const RepoOptions& repoOptions) {
+struct SqliteAutoloadMapKey {
+  static SqliteAutoloadMapKey get(const RepoOptions& repoOptions) {
     auto root = getRepoRoot(repoOptions);
 
     auto queryExpr = [&]() -> folly::dynamic {
@@ -250,14 +250,14 @@ struct WatchmanAutoloadMapKey {
 
     auto dbKey = getDBKey(root, repoOptions);
 
-    return WatchmanAutoloadMapKey{
+    return SqliteAutoloadMapKey{
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
         .m_indexedMethodAttrs = repoOptions.flags().indexedMethodAttributes(),
         .m_dbKey = std::move(dbKey)};
   }
 
-  bool operator==(const WatchmanAutoloadMapKey& rhs) const noexcept {
+  bool operator==(const SqliteAutoloadMapKey& rhs) const noexcept {
     return m_root == rhs.m_root && m_queryExpr == rhs.m_queryExpr &&
         m_indexedMethodAttrs == rhs.m_indexedMethodAttrs &&
         m_dbKey == rhs.m_dbKey;
@@ -274,7 +274,7 @@ struct WatchmanAutoloadMapKey {
     indexedMethodAttrString += '}';
 
     return folly::sformat(
-        "WatchmanAutoloadMapKey({}, {}, {}, {})",
+        "SqliteAutoloadMapKey({}, {}, {}, {})",
         m_root.native(),
         folly::toJson(m_queryExpr),
         indexedMethodAttrString,
@@ -302,8 +302,8 @@ struct WatchmanAutoloadMapKey {
 
 namespace std {
 template <>
-struct hash<HPHP::Facts::WatchmanAutoloadMapKey> {
-  size_t operator()(const HPHP::Facts::WatchmanAutoloadMapKey& k) const {
+struct hash<HPHP::Facts::SqliteAutoloadMapKey> {
+  size_t operator()(const HPHP::Facts::SqliteAutoloadMapKey& k) const {
     return static_cast<size_t>(k.hash());
   }
 };
@@ -315,16 +315,15 @@ namespace {
 
 /**
  * Sent to AutoloadHandler so AutoloadHandler can create
- * WatchmanAutoloadMaps across the open-source / FB-only boundary.
+ * SqliteAutoloadMaps across the open-source / FB-only boundary.
  */
-struct WatchmanAutoloadMapFactory final : public FactsFactory {
-  WatchmanAutoloadMapFactory() = default;
-  WatchmanAutoloadMapFactory(const WatchmanAutoloadMapFactory&) = delete;
-  WatchmanAutoloadMapFactory(WatchmanAutoloadMapFactory&&) = delete;
-  WatchmanAutoloadMapFactory& operator=(const WatchmanAutoloadMapFactory&) =
-      delete;
-  WatchmanAutoloadMapFactory& operator=(WatchmanAutoloadMapFactory&&) = delete;
-  ~WatchmanAutoloadMapFactory() override = default;
+struct SqliteAutoloadMapFactory final : public FactsFactory {
+  SqliteAutoloadMapFactory() = default;
+  SqliteAutoloadMapFactory(const SqliteAutoloadMapFactory&) = delete;
+  SqliteAutoloadMapFactory(SqliteAutoloadMapFactory&&) = delete;
+  SqliteAutoloadMapFactory& operator=(const SqliteAutoloadMapFactory&) = delete;
+  SqliteAutoloadMapFactory& operator=(SqliteAutoloadMapFactory&&) = delete;
+  ~SqliteAutoloadMapFactory() override = default;
 
   FactsStore* getForOptions(const RepoOptions& options) override;
 
@@ -340,13 +339,13 @@ struct WatchmanAutoloadMapFactory final : public FactsFactory {
   /**
    * Map from root to AutoloadMap
    */
-  hphp_hash_map<WatchmanAutoloadMapKey, std::shared_ptr<FactsStore>> m_maps;
+  hphp_hash_map<SqliteAutoloadMapKey, std::shared_ptr<FactsStore>> m_maps;
 
   /**
    * Map from root to time we last accessed the AutoloadMap
    */
   hphp_hash_map<
-      WatchmanAutoloadMapKey,
+      SqliteAutoloadMapKey,
       std::chrono::time_point<std::chrono::steady_clock>>
       m_lastUsed;
 };
@@ -409,13 +408,13 @@ struct FactsExtension final : Extension {
   // your new member is destroyed at the right time.
   struct FactsData {
     std::chrono::seconds m_idleSec{kDefaultIdleSec};
-    std::unique_ptr<WatchmanAutoloadMapFactory> m_mapFactory;
+    std::unique_ptr<SqliteAutoloadMapFactory> m_mapFactory;
     WatchmanWatcherOpts m_watchmanWatcherOpts;
   };
   Optional<FactsData> m_data;
 } s_ext;
 
-std::shared_ptr<Watcher> make_watcher(const WatchmanAutoloadMapKey& mapKey) {
+std::shared_ptr<Watcher> make_watcher(const SqliteAutoloadMapKey& mapKey) {
   if (mapKey.m_queryExpr.isObject()) {
     // Pass the query expression to Watchman to watch the directory
     return make_watchman_watcher(
@@ -444,11 +443,11 @@ std::shared_ptr<Watcher> make_watcher(const WatchmanAutoloadMapKey& mapKey) {
   }
 }
 
-FactsStore* WatchmanAutoloadMapFactory::getForOptions(
+FactsStore* SqliteAutoloadMapFactory::getForOptions(
     const RepoOptions& options) {
-  auto mapKey = [&]() -> Optional<WatchmanAutoloadMapKey> {
+  auto mapKey = [&]() -> Optional<SqliteAutoloadMapKey> {
     try {
-      auto mk = WatchmanAutoloadMapKey::get(options);
+      auto mk = SqliteAutoloadMapKey::get(options);
       return {std::move(mk)};
     } catch (const RepoOptionsParseExc& e) {
       XLOG(ERR) << e.what();
@@ -465,7 +464,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
   // Mark the fact that we've accessed the map
   m_lastUsed.insert_or_assign(*mapKey, std::chrono::steady_clock::now());
 
-  // Try to return a corresponding WatchmanAutoloadMap
+  // Try to return a corresponding SqliteAutoloadMap
   auto const it = m_maps.find(*mapKey);
   if (it != m_maps.end()) {
     return it->second.get();
@@ -476,12 +475,12 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
-  AutoloadDB::Handle dbHandle =
+  AutoloadDB::Opener dbOpener =
       [dbKey = mapKey->m_dbKey]() -> std::shared_ptr<AutoloadDB> {
     return SQLiteAutoloadDB::get(dbKey);
   };
 
-  if (mapKey->m_dbKey.m_writable == SQLite::OpenMode::ReadOnly) {
+  if (mapKey->m_dbKey.m_mode == SQLite::OpenMode::ReadOnly) {
     XLOGF(
         DBG0,
         "Loading {} from trusted Autoload DB at {}",
@@ -492,7 +491,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
             {*mapKey,
              make_trusted_facts(
                  mapKey->m_root,
-                 std::move(dbHandle),
+                 std::move(dbOpener),
                  mapKey->m_indexedMethodAttrs)})
         .first->second.get();
   }
@@ -507,7 +506,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
           {*mapKey,
            make_watcher_facts(
                mapKey->m_root,
-               std::move(dbHandle),
+               std::move(dbOpener),
                make_watcher(*mapKey),
                RuntimeOption::ServerExecutionMode(),
                std::move(updateSuppressionPath),
@@ -515,7 +514,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
       .first->second.get();
 }
 
-void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
+void SqliteAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     std::chrono::seconds idleSec) {
   auto mapsToRemove = [&]() -> std::vector<std::shared_ptr<FactsStore>> {
     std::unique_lock g{m_mutex};
@@ -523,7 +522,7 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     // If a map was last used before this time, remove it
     auto deadline = std::chrono::steady_clock::now() - idleSec;
 
-    std::vector<WatchmanAutoloadMapKey> keysToRemove;
+    std::vector<SqliteAutoloadMapKey> keysToRemove;
     for (auto const& [mapKey, _] : m_maps) {
       auto lastUsedIt = m_lastUsed.find(mapKey);
       if (lastUsedIt == m_lastUsed.end() || lastUsedIt->second < deadline) {
@@ -534,7 +533,7 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     std::vector<std::shared_ptr<FactsStore>> maps;
     maps.reserve(keysToRemove.size());
     for (auto const& mapKey : keysToRemove) {
-      XLOG(INFO) << "Evicting WatchmanAutoloadMap: " << mapKey.toString();
+      XLOG(INFO) << "Evicting SqliteAutoloadMap: " << mapKey.toString();
       auto it = m_maps.find(mapKey);
       if (it != m_maps.end()) {
         maps.push_back(std::move(it->second));
@@ -602,8 +601,8 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   auto const& repoOptions = RepoOptions::forFile(optionPath.native().c_str());
 
   try {
-    return Variant{Facts::WatchmanAutoloadMapKey::get(repoOptions)
-                       .m_dbKey.m_path.native()};
+    return Variant{
+        Facts::SqliteAutoloadMapKey::get(repoOptions).m_dbKey.m_path.native()};
   } catch (const Facts::RepoOptionsParseExc& e) {
     throw_invalid_operation_exception(makeStaticString(e.what()));
   }
@@ -875,7 +874,7 @@ void FactsExtension::moduleInit() {
     XLOG(INFO) << "watchman.socket.root was not provided.";
   }
 
-  m_data->m_mapFactory = std::make_unique<WatchmanAutoloadMapFactory>();
+  m_data->m_mapFactory = std::make_unique<SqliteAutoloadMapFactory>();
   FactsFactory::setInstance(m_data->m_mapFactory.get());
 }
 

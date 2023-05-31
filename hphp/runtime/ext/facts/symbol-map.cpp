@@ -96,8 +96,8 @@ typename std::
 
 } // namespace
 
-AutoloadDBVault::AutoloadDBVault(AutoloadDB::Handle dbHandle)
-    : m_dbHandle{std::move(dbHandle)} {}
+AutoloadDBVault::AutoloadDBVault(AutoloadDB::Opener dbOpener)
+    : m_dbOpener{std::move(dbOpener)} {}
 
 std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
   return m_dbs.withULockPtr([this](auto ulock) {
@@ -106,20 +106,20 @@ std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
       return it->second;
     }
     auto wlock = ulock.moveFromUpgradeToWrite();
-    return wlock->insert({std::this_thread::get_id(), m_dbHandle()})
+    return wlock->insert({std::this_thread::get_id(), m_dbOpener()})
         .first->second;
   });
 }
 
 SymbolMap::SymbolMap(
     fs::path root,
-    AutoloadDB::Handle dbHandle,
+    AutoloadDB::Opener dbOpener,
     hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1,
           std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
       m_root{std::move(root)},
-      m_dbVault{std::move(dbHandle)},
+      m_dbVault{std::move(dbOpener)},
       m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }

@@ -26,19 +26,7 @@
 namespace HPHP {
 namespace Facts {
 
-class SQLiteAutoloadDB : public AutoloadDB {
- public:
-  /**
-   * Return a SQLiteAutoloadDB that can only be read
-   */
-  static std::shared_ptr<SQLiteAutoloadDB> readOnly(std::filesystem::path path);
-
-  /**
-   * Return a SQLiteAutoloadDB that you can write to
-   */
-  static std::shared_ptr<SQLiteAutoloadDB>
-  readWrite(std::filesystem::path path, ::gid_t gid, ::mode_t perms);
-
+struct SQLiteAutoloadDB : AutoloadDB {
   static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData);
 };
 

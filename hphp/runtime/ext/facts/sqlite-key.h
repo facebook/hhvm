@@ -49,7 +49,7 @@ struct SQLiteKey {
   size_t hash() const;
 
   std::filesystem::path m_path;
-  SQLite::OpenMode m_writable;
+  SQLite::OpenMode m_mode;
   ::gid_t m_gid;
   ::mode_t m_perms;
 
@@ -57,7 +57,7 @@ struct SQLiteKey {
   SQLiteKey() = delete;
   SQLiteKey(
       std::filesystem::path path,
-      SQLite::OpenMode writable,
+      SQLite::OpenMode mode,
       ::gid_t gid,
       ::mode_t perms);
 };

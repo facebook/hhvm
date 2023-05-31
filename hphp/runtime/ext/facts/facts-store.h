@@ -32,23 +32,23 @@ namespace Facts {
 
 /**
  * Create a FactsStore that learns about changed files from its Watcher and
- * accordingly updates the DB that `dbHandle` returns.
+ * accordingly updates the DB that `dbOpener` returns.
  */
 std::shared_ptr<FactsStore> make_watcher_facts(
     std::filesystem::path root,
-    AutoloadDB::Handle dbHandle,
+    AutoloadDB::Opener dbOpener,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
     std::vector<std::string> indexedMethodAttributes);
 
 /**
- * Create a FactsStore that trusts the DB that `dbHandle` returns, and never
+ * Create a FactsStore that trusts the DB that `dbOpener` returns, and never
  * modifies it.
  */
 std::shared_ptr<FactsStore> make_trusted_facts(
     std::filesystem::path root,
-    AutoloadDB::Handle dbHandle,
+    AutoloadDB::Opener dbOpener,
     std::vector<std::string> indexedMethodAttributes);
 
 } // namespace Facts

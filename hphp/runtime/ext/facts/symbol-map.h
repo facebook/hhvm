@@ -64,7 +64,7 @@ struct UpdateDBWorkItem {
  * Stores a map from thread to AutoloadDB.
  */
 struct AutoloadDBVault {
-  AutoloadDBVault(AutoloadDB::Handle handle);
+  explicit AutoloadDBVault(AutoloadDB::Opener);
 
   /**
    * Get the AutoloadDB associated with the thread that calls this method.
@@ -74,7 +74,7 @@ struct AutoloadDBVault {
   std::shared_ptr<AutoloadDB> get() const;
 
  private:
-  AutoloadDB::Handle m_dbHandle;
+  AutoloadDB::Opener m_dbOpener;
   // Holds one AutoloadDB per thread. Creates an AutoloadDB on the first access.
   mutable folly::Synchronized<
       hphp_hash_map<std::thread::id, std::shared_ptr<AutoloadDB>>>
@@ -94,7 +94,7 @@ struct AutoloadDBVault {
 struct SymbolMap {
   explicit SymbolMap(
       std::filesystem::path root,
-      AutoloadDB::Handle dbHandle,
+      AutoloadDB::Opener dbOpener,
       hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;

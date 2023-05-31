@@ -62,8 +62,8 @@ SQLiteKey::readWriteCreate(fs::path path, ::gid_t gid, ::mode_t perms) {
 }
 
 bool SQLiteKey::operator==(const SQLiteKey& rhs) const noexcept {
-  return m_path == rhs.m_path && m_writable == rhs.m_writable &&
-      m_gid == rhs.m_gid && m_perms == rhs.m_perms;
+  return m_path == rhs.m_path && m_mode == rhs.m_mode && m_gid == rhs.m_gid &&
+      m_perms == rhs.m_perms;
 }
 
 namespace {
@@ -195,7 +195,7 @@ std::string SQLiteKey::toDebugString() const {
       m_path.native(),
       formatGidForDebug(m_gid),
       m_perms,
-      SQLite::openModeName(m_writable),
+      SQLite::openModeName(m_mode),
       getDirectoryTreeInformation(m_path));
 }
 
@@ -208,13 +208,10 @@ size_t SQLiteKey::hash() const {
 
 SQLiteKey::SQLiteKey(
     fs::path path,
-    SQLite::OpenMode writable,
+    SQLite::OpenMode mode,
     ::gid_t gid,
     ::mode_t perms)
-    : m_path{std::move(path)},
-      m_writable{writable},
-      m_gid{gid},
-      m_perms{perms} {
+    : m_path{std::move(path)}, m_mode{mode}, m_gid{gid}, m_perms{perms} {
   always_assert(m_path.is_absolute());
 
   // Coerce DB permissions into unix owner/group/other bits

@@ -426,7 +426,7 @@ struct FactsStoreImpl final
       public std::enable_shared_from_this<FactsStoreImpl> {
   FactsStoreImpl(
       fs::path root,
-      AutoloadDB::Handle dbHandle,
+      AutoloadDB::Opener dbOpener,
       std::shared_ptr<Watcher> watcher,
       Optional<std::filesystem::path> suppressionFilePath,
       hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
@@ -434,16 +434,16 @@ struct FactsStoreImpl final
             1,
             make_thread_factory("Autoload update"))},
         m_root{std::move(root)},
-        m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)},
+        m_map{m_root, std::move(dbOpener), std::move(indexedMethodAttributes)},
         m_watcher{std::move(watcher)},
         m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
   FactsStoreImpl(
       fs::path root,
-      AutoloadDB::Handle dbHandle,
+      AutoloadDB::Opener dbOpener,
       hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_root{std::move(root)},
-        m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)} {
+        m_map{m_root, std::move(dbOpener), std::move(indexedMethodAttributes)} {
   }
 
   ~FactsStoreImpl() override {
@@ -1268,7 +1268,7 @@ struct FactsStoreImpl final
 
 std::shared_ptr<FactsStore> make_watcher_facts(
     fs::path root,
-    AutoloadDB::Handle dbHandle,
+    AutoloadDB::Opener dbOpener,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
@@ -1280,7 +1280,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
   }
   auto map = std::make_shared<FactsStoreImpl>(
       std::move(root),
-      std::move(dbHandle),
+      std::move(dbOpener),
       std::move(watcher),
       std::move(suppressionFilePath),
       std::move(indexedMethodAttrs));
@@ -1292,7 +1292,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 
 std::shared_ptr<FactsStore> make_trusted_facts(
     fs::path root,
-    AutoloadDB::Handle dbHandle,
+    AutoloadDB::Opener dbOpener,
     std::vector<std::string> indexedMethodAttrsVec) {
   hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
@@ -1300,7 +1300,7 @@ std::shared_ptr<FactsStore> make_trusted_facts(
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
   return std::make_shared<FactsStoreImpl>(
-      std::move(root), std::move(dbHandle), std::move(indexedMethodAttrs));
+      std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
 }
 
 } // namespace Facts

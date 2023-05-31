@@ -648,9 +648,9 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
-        return SQLite::connect(dbData.m_path.native(), dbData.m_writable);
+        return SQLite::connect(dbData.m_path.native(), dbData.m_mode);
       } catch (SQLiteExc& e) {
-        auto mode = (dbData.m_writable == SQLite::OpenMode::ReadWriteCreate)
+        auto mode = (dbData.m_mode == SQLite::OpenMode::ReadWriteCreate)
             ? "open or create"
             : "open";
 
@@ -668,7 +668,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       }
     }();
 
-    switch (dbData.m_writable) {
+    switch (dbData.m_mode) {
       case SQLite::OpenMode::ReadOnly:
       case SQLite::OpenMode::ReadWrite:
         break;

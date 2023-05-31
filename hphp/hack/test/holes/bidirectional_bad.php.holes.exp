@@ -87,7 +87,7 @@
                         (New (((C), [12:9-10], (CI ([12:9-10], "\\C"))), 
                            [],
                            [((dict<nothing, nothing>), [12:11-19],
-                             (Call ((((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict"))),
+                             (Call ((((function<Tk as arraykey, Tv as mixed>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict"))),
                                 [((nothing), ([12:11-15], (Happly (([Pos.none], "_"), [])))); ((nothing), ([12:11-15], (Happly (([Pos.none], "_"), []))))],
                                 [(Pnormal,
                                   ((AnyArray<arraykey, mixed>), [12:16-18],
@@ -145,7 +145,7 @@
                            { bop = (Eq None); lhs = ((dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y)));
                              rhs =
                              ((dict<arraykey, mixed>), [19:10-18],
-                              (Call ((((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict"))),
+                              (Call ((((function<Tk as arraykey, Tv as mixed>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict"))),
                                  [((arraykey), ([19:10-14], (Happly (([Pos.none], "_"), [])))); ((mixed), ([19:10-14], (Happly (([Pos.none], "_"), []))))],
                                  [(Pnormal, ((AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))], None)))
                              }))));

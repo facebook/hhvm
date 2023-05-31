@@ -285,8 +285,9 @@ fn write_func(
     let span = func.loc(func.loc_id).clone();
 
     let attributes = textual::FuncAttributes {
-        is_final: func_info.attrs().is_final(),
         is_async: func_info.is_async(),
+        is_curry: false,
+        is_final: func_info.attrs().is_final(),
     };
 
     txf.define_function(
@@ -377,8 +378,9 @@ pub(crate) fn write_func_decl(
     };
 
     let attributes = textual::FuncAttributes {
-        is_final: func_info.attrs().is_final(),
         is_async: func_info.is_async(),
+        is_final: func_info.attrs().is_final(),
+        is_curry: false,
     };
 
     txf.declare_function(&name, &attributes, &param_tys, &ret_ty)?;
@@ -575,15 +577,12 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Instr::Hhbc(Hhbc::ResolveClsMethodD(cid, method, _)) => {
             let that = state.load_static_class(cid)?;
             let name = FunctionName::Method(TypeName::StaticClass(cid), method);
-            let curry = textual::Expr::alloc_curry(name, that, ());
-            let expr = state.fb.write_expr_stmt(curry)?;
+            let expr = state.fb.write_alloc_curry(name, Some(that.into()), ())?;
             state.set_iid(iid, expr);
         }
         Instr::Hhbc(Hhbc::ResolveFunc(func_id, _)) => {
             let name = FunctionName::Function(func_id);
-            let that = textual::Expr::null();
-            let curry = textual::Expr::alloc_curry(name, that, ());
-            let expr = state.fb.write_expr_stmt(curry)?;
+            let expr = state.fb.write_alloc_curry(name, None, ())?;
             state.set_iid(iid, expr);
         }
         Instr::Hhbc(Hhbc::ResolveMethCaller(func_id, _)) => {
@@ -591,8 +590,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // calls the method.
             let name = FunctionName::Function(func_id);
             let that = textual::Expr::null();
-            let curry = textual::Expr::alloc_curry(name, that, ());
-            let expr = state.fb.write_expr_stmt(curry)?;
+            let expr = state.fb.write_alloc_curry(name, None, [that])?;
             state.set_iid(iid, expr);
         }
         Instr::Hhbc(Hhbc::SelfCls(_)) => {

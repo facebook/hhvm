@@ -84,7 +84,6 @@ impl Mangle for ir::PropId {
 
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub(crate) enum Intrinsic {
-    AllocCurry,
     ConstInit(ir::ClassId),
     Construct(ir::ClassId),
     Factory(ir::ClassId),
@@ -96,8 +95,7 @@ pub(crate) enum Intrinsic {
 impl Intrinsic {
     pub(crate) fn contains_unknown(&self) -> bool {
         match self {
-            Intrinsic::AllocCurry
-            | Intrinsic::ConstInit(_)
+            Intrinsic::ConstInit(_)
             | Intrinsic::Construct(_)
             | Intrinsic::Factory(_)
             | Intrinsic::PropInit(_)
@@ -163,7 +161,6 @@ impl fmt::Display for FmtFunctionName<'_> {
             FunctionName::Intrinsic(intrinsic) => {
                 let tn;
                 let (ty, name) = match intrinsic {
-                    Intrinsic::AllocCurry => (None, "__sil_allocate_curry"),
                     Intrinsic::ConstInit(cid) => {
                         tn = TypeName::StaticClass(*cid);
                         (Some(&tn), "_86cinit")
@@ -243,6 +240,7 @@ impl fmt::Display for FmtGlobalName<'_> {
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum TypeName {
     Class(ir::ClassId),
+    Curry(Box<FunctionName>),
     StaticClass(ir::ClassId),
     Unknown,
     UnmangledRef(&'static str),
@@ -268,6 +266,18 @@ impl fmt::Display for FmtTypeName<'_> {
         let FmtTypeName(strings, name) = *self;
         match name {
             TypeName::Class(cid) => f.write_str(&cid.as_bytes(strings).mangle(strings)),
+            TypeName::Curry(box FunctionName::Function(fid)) => {
+                write!(f, "{}$curry", fid.as_bytes(strings).mangle(strings))
+            }
+            TypeName::Curry(box FunctionName::Method(ty, mid)) => {
+                write!(
+                    f,
+                    "{}_{}$curry",
+                    ty.display(strings),
+                    mid.as_bytes(strings).mangle(strings)
+                )
+            }
+            TypeName::Curry(_) => panic!("Unable to name curry type {name:?}"),
             TypeName::Unknown => f.write_str("?"),
             TypeName::StaticClass(cid) => {
                 f.write_str(&cid.as_bytes(strings).mangle(strings))?;

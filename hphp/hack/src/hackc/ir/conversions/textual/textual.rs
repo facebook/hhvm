@@ -27,9 +27,7 @@ use strum_macros::EnumProperty;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
-use crate::mangle::Mangle;
 use crate::mangle::TypeName;
-use crate::mangle::TOP_LEVELS_CLASS;
 
 pub(crate) const INDENT: &str = "  ";
 pub(crate) const VARIADIC: &str = ".variadic";
@@ -43,6 +41,7 @@ pub(crate) struct TextualFile<'a> {
     pub(crate) called_functions: HashSet<FunctionName>,
     pub(crate) internal_globals: HashMap<GlobalName, Ty>,
     pub(crate) referenced_globals: HashSet<GlobalName>,
+    pub(crate) curry_tys: HashSet<CurryTy>,
 }
 
 impl<'a> TextualFile<'a> {
@@ -54,6 +53,7 @@ impl<'a> TextualFile<'a> {
             called_functions: Default::default(),
             internal_globals: Default::default(),
             referenced_globals: Default::default(),
+            curry_tys: Default::default(),
         }
     }
 
@@ -153,6 +153,10 @@ impl<'a> TextualFile<'a> {
 
         if attributes.is_async {
             write!(self.w, ".async ")?;
+        }
+
+        if attributes.is_curry {
+            write!(self.w, ".curry ")?;
         }
 
         write!(self.w, "{}(", name.display(&self.strings))?;
@@ -311,6 +315,17 @@ impl<'a> TextualFile<'a> {
             self.debug_separator()?;
         }
 
+        if !self.curry_tys.is_empty() {
+            self.write_comment("----- CURRIES -----")?;
+
+            let curry_tys = std::mem::take(&mut self.curry_tys);
+            for curry in curry_tys.into_iter() {
+                self.write_curry_definition(curry)?;
+            }
+
+            self.debug_separator()?;
+        }
+
         let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<FunctionName>) =
             (&self.called_functions - &self.internal_functions)
                 .into_iter()
@@ -337,50 +352,115 @@ impl<'a> TextualFile<'a> {
         Ok(builtins)
     }
 
+    fn write_curry_definition(&mut self, curry: CurryTy) -> Result {
+        let curry_ty = curry.ty_name();
+        let mut fields = Vec::new();
+        if curry.virtual_call {
+            let FunctionName::Method(captured_this_ty, _) = &curry.name else { unreachable!(); };
+            fields.push(Field {
+                name: "this".into(),
+                ty: Ty::named_type_ptr(captured_this_ty.clone()).into(),
+                visibility: Visibility::Private,
+                attributes: Default::default(),
+                comments: Default::default(),
+            });
+        }
+
+        for (idx, ty) in curry.arg_tys.iter().enumerate() {
+            fields.push(Field {
+                name: format!("arg{idx}").into(),
+                ty: ty.into(),
+                visibility: Visibility::Private,
+                attributes: Default::default(),
+                comments: Default::default(),
+            });
+        }
+
+        let metadata_class: Expr = "class".into();
+        let metadata_false: Expr = false.into();
+        let metadata_true: Expr = true.into();
+        let metadata = vec![
+            ("kind", &metadata_class),
+            ("static", &metadata_false),
+            ("final", &metadata_true),
+        ];
+
+        self.define_type(
+            &curry_ty,
+            None,
+            std::iter::empty(),
+            fields.into_iter(),
+            metadata.into_iter(),
+        )?;
+
+        const THIS_NAME: &str = "this";
+        const VARARGS_NAME: &str = "args";
+        let this_ty = Ty::Type(curry_ty.clone());
+        let this_ty_ptr = Ty::named_type_ptr(curry_ty.clone());
+        let args_ty = Ty::SpecialPtr(SpecialTy::Vec);
+        let params = vec![
+            // ignored 'this' parameter
+            Param {
+                name: THIS_NAME.into(),
+                attr: None,
+                ty: (&this_ty_ptr).into(),
+            },
+            Param {
+                name: VARARGS_NAME.into(),
+                attr: Some(vec![VARIADIC].into_boxed_slice()),
+                ty: (&args_ty).into(),
+            },
+        ];
+        let ret_ty = Ty::mixed_ptr();
+        let method = FunctionName::Intrinsic(Intrinsic::Invoke(curry_ty));
+        let attrs = FuncAttributes {
+            is_async: false,
+            is_curry: true,
+            is_final: true,
+        };
+        self.define_function(&method, None, &attrs, &params, &ret_ty, &[], |fb| {
+            let this_id = fb.txf.strings.intern_str(THIS_NAME);
+            let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
+
+            let mut args = Vec::new();
+
+            for (idx, ty) in curry.arg_tys.iter().enumerate() {
+                let arg = fb.load(ty, Expr::field(this, this_ty.clone(), format!("arg{idx}")))?;
+                args.push(arg);
+            }
+
+            use crate::hack;
+            let varargs_id = fb.txf.strings.intern_str(VARARGS_NAME);
+            let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
+            args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
+
+            let result = if curry.virtual_call {
+                let captured_this_ty = match &curry.name {
+                    FunctionName::Method(captured_this_ty, _) => captured_this_ty,
+                    _ => {
+                        unreachable!();
+                    }
+                };
+                let captured_this = fb.load(
+                    &Ty::named_type_ptr(captured_this_ty.clone()),
+                    Expr::field(this, this_ty.clone(), "this"),
+                )?;
+                fb.call_virtual(&curry.name, captured_this.into(), args)?
+            } else {
+                fb.call_static(&curry.name, Expr::null(), args)?
+            };
+
+            fb.ret(result)?;
+            Ok(())
+        })?;
+
+        Ok(())
+    }
+
     fn write_expr(&mut self, expr: &Expr) -> Result {
         match *expr {
             Expr::Alloc(ref ty) => {
                 write!(self.w, "__sil_allocate(<{}>)", ty.display(&self.strings))?
-            }
-            Expr::AllocCurry {
-                ref name,
-                ref this,
-                ref args,
-            } => {
-                let target = FunctionName::Intrinsic(Intrinsic::AllocCurry);
-                // TODO: Because textual doesn't actually know about
-                // __sil_allocate_curry we need to register it.
-                self.register_called_function(&target);
-                let mut write_curry =
-                    |cls: &dyn std::fmt::Display, meth: &dyn std::fmt::Display| {
-                        write!(
-                            self.w,
-                            "{}(\"<{cls}>\", \"{meth}\", ",
-                            target.display(&self.strings)
-                        )
-                    };
-                match name {
-                    FunctionName::Function(fid) => {
-                        let strings = &self.strings;
-                        write_curry(&TOP_LEVELS_CLASS, &fid.as_bytes(strings).mangle(strings))?;
-                    }
-                    FunctionName::Method(cid, mid) => {
-                        let strings = &self.strings;
-                        write_curry(
-                            &cid.display(strings),
-                            &mid.as_bytes(strings).mangle(strings),
-                        )?;
-                    }
-                    FunctionName::Builtin(..)
-                    | FunctionName::Intrinsic(..)
-                    | FunctionName::Unmangled(..) => panic!("Cannot AllocCurry on {name:?}"),
-                }
-                self.write_expr(this)?;
-                for arg in args.iter() {
-                    write!(self.w, ", ")?;
-                    self.write_expr(arg)?;
-                }
-                write!(self.w, ")")?;
             }
             Expr::Call(ref target, ref params) => {
                 self.register_called_function(target);
@@ -440,8 +520,26 @@ impl<'a> TextualFile<'a> {
 
 #[derive(Debug, Default)]
 pub(crate) struct FuncAttributes {
-    pub is_final: bool,
     pub is_async: bool,
+    pub is_curry: bool,
+    pub is_final: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq)]
+pub(crate) struct CurryTy {
+    name: FunctionName,
+    virtual_call: bool,
+    arg_tys: Box<[Ty]>,
+}
+
+impl CurryTy {
+    fn ty_name(&self) -> TypeName {
+        TypeName::Curry(Box::new(self.name.clone()))
+    }
+
+    fn ty(&self) -> Ty {
+        Ty::Type(self.ty_name())
+    }
 }
 
 newtype_int!(Sid, u32, SidMap, SidSet);
@@ -657,32 +755,6 @@ impl fmt::Display for FmtConst<'_> {
 pub(crate) enum Expr {
     /// __sil_allocate(\<ty\>)
     Alloc(Ty),
-    /// A curry boxes up some parameters and returns an invokable.  This has to
-    /// be an intrinsic so we don't end up a ton of little duplicate classes.
-    ///
-    /// It's usually used for function pointers or meth_callers:
-    ///
-    ///   `foo<>` turns into `AllocCurry("<$root>", "foo", null, [])`.
-    ///   `C::foo<>` turns into `AllocCurry("<C$static>", "foo", static_this, [])`.
-    ///   `$x->foo<>` turns into `AllocCurry("<C>", "foo", $x, [])`.
-    ///
-    /// Note that it's important that when the curry is invoked it replaces the
-    /// callee's `this` with its own stored `this`.
-    ///
-    /// Curry can also be used for partial apply:
-    ///
-    ///   x = AllocCurry("<$root>", "foo", null, [1, 2])
-    ///   x(3, 4)
-    ///
-    /// would be the same as:
-    ///
-    ///   foo(1, 2, 3, 4)
-    ///
-    AllocCurry {
-        name: FunctionName,
-        this: Box<Expr>,
-        args: Box<[Expr]>,
-    },
     /// foo(1, 2, 3)
     Call(FunctionName, Box<[Expr]>),
     /// 0, null, etc
@@ -699,18 +771,6 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
-    pub(crate) fn alloc_curry(
-        name: FunctionName,
-        this: impl Into<Expr>,
-        args: impl VarArgs,
-    ) -> Expr {
-        Expr::AllocCurry {
-            name,
-            this: Box::new(this.into()),
-            args: args.into_exprs().into_boxed_slice(),
-        }
-    }
-
     pub(crate) fn call(target: FunctionName, params: impl VarArgs) -> Expr {
         Expr::Call(target, params.into_exprs().into_boxed_slice())
     }
@@ -735,6 +795,14 @@ impl Expr {
 
     pub(crate) fn null() -> Expr {
         Expr::Const(Const::Null)
+    }
+
+    pub(crate) fn ty(&self) -> Ty {
+        match self {
+            Expr::Sid(_) => Ty::mixed_ptr(),
+            Expr::Const(Const::Null) => Ty::VoidPtr,
+            _ => todo!("EXPR: {self:?}"),
+        }
     }
 }
 
@@ -955,7 +1023,6 @@ impl FuncBuilder<'_, '_> {
         let expr = expr.into();
         match expr {
             Expr::Alloc(_)
-            | Expr::AllocCurry { .. }
             | Expr::Const(_)
             | Expr::Deref(_)
             | Expr::Field(..)
@@ -985,6 +1052,68 @@ impl FuncBuilder<'_, '_> {
             writeln!(self.txf.w, "):")?;
         }
         Ok(())
+    }
+
+    /// A curry boxes up some parameters and returns an invokable.  This has to
+    /// be an intrinsic so we don't end up a ton of little duplicate classes.
+    ///
+    /// It's usually used for function pointers or meth_callers:
+    ///
+    ///   `foo<>` turns into `AllocCurry("<$root>", "foo", null, [])`.
+    ///   `C::foo<>` turns into `AllocCurry("<C$static>", "foo", static_this, [])`.
+    ///   `$x->foo<>` turns into `AllocCurry("<C>", "foo", $x, [])`.
+    ///
+    /// Note that it's important that when the curry is invoked it replaces the
+    /// callee's `this` with its own stored `this`.
+    ///
+    /// Curry can also be used for partial apply:
+    ///
+    ///   x = AllocCurry("<$root>", "foo", null, [1, 2])
+    ///   x(3, 4)
+    ///
+    /// would be the same as:
+    ///
+    ///   foo(1, 2, 3, 4)
+    ///
+    /// If `this` is Some(_) then the curry will be a virtual call.
+    ///
+    pub(crate) fn write_alloc_curry(
+        &mut self,
+        name: FunctionName,
+        this: Option<Expr>,
+        args: impl VarArgs,
+    ) -> Result<Sid> {
+        let args = args.into_exprs();
+
+        let curry_ty = CurryTy {
+            name: name.clone(),
+            virtual_call: this.is_some(),
+            arg_tys: args.iter().map(|expr| expr.ty()).collect(),
+        };
+        let ty = curry_ty.ty();
+        self.txf.curry_tys.insert(curry_ty);
+
+        let obj = self.write_expr_stmt(Expr::Alloc(ty.clone()))?;
+
+        if let Some(this) = this {
+            let FunctionName::Method(captured_this_ty, _) = &name else { unreachable!(); };
+            self.store(
+                Expr::Field(Box::new(obj.into()), ty.clone(), "this".to_string()),
+                this,
+                &Ty::named_type_ptr(captured_this_ty.clone()),
+            )?;
+        }
+
+        for (idx, arg) in args.into_iter().enumerate() {
+            let field_ty = arg.ty();
+            self.store(
+                Expr::field(obj, ty.clone(), format!("arg{idx}")),
+                arg,
+                &field_ty,
+            )?;
+        }
+
+        Ok(obj)
     }
 
     /// Call the target as a static call (without virtual dispatch).

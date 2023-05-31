@@ -131,7 +131,8 @@ function fcall_nullsafe(?C $c): void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
 // CHECK:   n0 = __sil_lazy_class_initialize(<C>)
-// CHECK:   n1 = __sil_allocate_curry("<C$static>", "sb", n0)
+// CHECK:   n1 = __sil_allocate(<C$static_sb$curry>)
+// CHECK:   store n1.C$static_sb$curry.this <- n0: *C$static
 // CHECK:   store &$x <- n1: *HackMixed
 // CHECK:   jmp b1
 // CHECK: #b1:
@@ -157,7 +158,7 @@ function fcall_class_meth(): void {
 // CHECK: define $root.fcall_func_invoke($this: *void) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
-// CHECK:   n0 = __sil_allocate_curry("<$root>", "f", null)
+// CHECK:   n0 = __sil_allocate(<f$curry>)
 // CHECK:   store &$x <- n0: *HackMixed
 // CHECK:   jmp b1
 // CHECK: #b1:
@@ -199,7 +200,8 @@ function fcall_splat(): void {
 // CHECK: define $root.fcall_meth_caller($this: *void, $b: *C) : *void {
 // CHECK: local $x: *void, $0: *void
 // CHECK: #b0:
-// CHECK:   n0 = __sil_allocate_curry("<$root>", "MethCaller$C$b", null)
+// CHECK:   n0 = __sil_allocate(<MethCaller$C$b$curry>)
+// CHECK:   store n0.MethCaller$C$b$curry.arg0 <- null: *void
 // CHECK:   store &$x <- n0: *HackMixed
 // CHECK:   jmp b1
 // CHECK: #b1:
@@ -236,8 +238,51 @@ function fcall_cls_method(classname<D> $a): void {
   $a::static_fcall_self();
 }
 
+// TEST-CHECK-BAL: type C$static_sb$curry
+// CHECK: type C$static_sb$curry = .kind="class" .final {
+// CHECK:   this: .private *C$static
+// CHECK: }
+
+// TEST-CHECK-BAL: define .final .curry C$static_sb$curry.__invoke
+// CHECK: define .final .curry C$static_sb$curry.__invoke(this: *C$static_sb$curry, args: .variadic *HackVec) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *C$static_sb$curry = load &this
+// CHECK:   n1: *HackVec = load &args
+// CHECK:   n2 = $builtins.__sil_splat(n1)
+// CHECK:   n3: *C$static = load n0.C$static_sb$curry.this
+// CHECK:   n4 = n3.C$static.sb(n2)
+// CHECK:   ret n4
+// CHECK: }
+
+// TEST-CHECK-BAL: type f$curry
+// CHECK: type f$curry = .kind="class" .final {
+// CHECK: }
+
+// TEST-CHECK-BAL: define .final .curry f$curry.__invoke
+// CHECK: define .final .curry f$curry.__invoke(this: *f$curry, args: .variadic *HackVec) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *f$curry = load &this
+// CHECK:   n1: *HackVec = load &args
+// CHECK:   n2 = $builtins.__sil_splat(n1)
+// CHECK:   n3 = $root.f(null, n2)
+// CHECK:   ret n3
+// CHECK: }
+
+// TEST-CHECK-BAL: type MethCaller$C$b$curry
+// CHECK: type MethCaller$C$b$curry = .kind="class" .final {
+// CHECK:   arg0: .private *void
+// CHECK: }
+
+// TEST-CHECK-BAL: define .final .curry MethCaller$C$b$curry.__invoke
+// CHECK: define .final .curry MethCaller$C$b$curry.__invoke(this: *MethCaller$C$b$curry, args: .variadic *HackVec) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *MethCaller$C$b$curry = load &this
+// CHECK:   n1: *void = load n0.MethCaller$C$b$curry.arg0
+// CHECK:   n2: *HackVec = load &args
+// CHECK:   n3 = $builtins.__sil_splat(n2)
+// CHECK:   n4 = $root.MethCaller$C$b(null, n1, n3)
+// CHECK:   ret n4
+// CHECK: }
+
 // TEST-CHECK-1: declare C$static.f
 // CHECK: declare C$static.f(...): *HackMixed
-
-// TEST-CHECK-1: declare __sil_allocate_curry
-// CHECK: declare __sil_allocate_curry(...): *HackMixed

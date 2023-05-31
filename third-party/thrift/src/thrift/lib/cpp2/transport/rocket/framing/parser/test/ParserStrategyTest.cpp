@@ -35,8 +35,6 @@ class FakeOwner {
   }
   void decMemoryUsage(uint32_t n) { memoryCounter_ -= n; }
 
-  std::unique_ptr<folly::IOBuf> customAlloc(size_t) { return nullptr; }
-
   std::vector<std::unique_ptr<folly::IOBuf>> frames_{};
 
   uint32_t memoryCounter_ = 0;

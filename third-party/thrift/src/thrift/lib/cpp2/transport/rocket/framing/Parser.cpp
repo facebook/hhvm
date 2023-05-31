@@ -30,3 +30,6 @@ THRIFT_FLAG_DEFINE_bool(rocket_parser_dont_hold_buffer_enabled, false);
 // alignment is requested, a dedicated buffer is allocated and ownership is
 // passed to the application.
 THRIFT_FLAG_DEFINE_bool(rocket_parser_hybrid_buffer_enabled, false);
+
+// Add a flag to enable strategy based parser. Default strategy right now uses.
+THRIFT_FLAG_DEFINE_bool(rocket_strategy_parser, false);

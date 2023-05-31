@@ -74,6 +74,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   ~RocketClient() override;
 
+  void handleFrame(std::unique_ptr<folly::IOBuf> frame);
+
   std::unique_ptr<folly::IOBuf> customAlloc(size_t size);
   using Ptr =
       std::unique_ptr<RocketClient, folly::DelayedDestruction::Destructor>;
@@ -526,7 +528,6 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   void freeStream(StreamId streamId);
 
-  void handleFrame(std::unique_ptr<folly::IOBuf> frame);
   void handleRequestResponseFrame(
       RequestContext& ctx,
       FrameType frameType,

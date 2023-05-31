@@ -318,6 +318,14 @@ bunser_object(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     return NULL;
   }
 
+  if (2 * nitems > end - buf) {
+    // Each key-value pair in the input will be at least two bytes long. This
+    // check ensures we only pre-allocate an amount of memory for the key and
+    // value tuples proportional to the length of the input.
+    PyErr_Format(PyExc_ValueError, "document too short for object's size");
+    return NULL;
+  }
+
   if (mutable) {
     res = PyDict_New();
   } else {

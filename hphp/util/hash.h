@@ -21,7 +21,7 @@
 
 #include "hphp/util/portability.h"
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 #  include "hphp/util/hphp-config.h"
 #endif
 

@@ -24,7 +24,7 @@
 #include "hphp/util/trace.h"
 
 //TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
 #endif
 
@@ -42,7 +42,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   DeploymentMap deployments;
 
 //TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   std::string packages_toml{
     std::istreambuf_iterator<char>(file),
     std::istreambuf_iterator<char>()

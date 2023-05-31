@@ -136,7 +136,7 @@
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 // Needed on libevent2
 #include <event2/thread.h>
 #endif
@@ -842,7 +842,7 @@ hugifyText(char* from, char* to) {
   }
   size_t sz = to - from;
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   if (RuntimeOption::EvalNewTHPHotText) {
     auto const hasKernelSupport = [] () -> bool {
       KernelVersion version;
@@ -1681,7 +1681,7 @@ static int execute_program_impl(int argc, char** argv) {
   // we need to to initialize these very early
   pcre_init();
   // this is needed for libevent2 to be thread-safe, which backs Hack ASIO.
-  #ifndef FACEBOOK
+  #ifndef HHVM_FACEBOOK
   // FB uses a custom libevent 1
   evthread_use_pthreads();
   #endif

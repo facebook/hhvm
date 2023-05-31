@@ -55,7 +55,7 @@ constexpr bool use_tsan =
   ;
 
 constexpr bool facebook =
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   true
 #else
   false
@@ -65,4 +65,3 @@ constexpr bool facebook =
 //////////////////////////////////////////////////////////////////////
 
 }
-

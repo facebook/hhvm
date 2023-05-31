@@ -38,7 +38,7 @@ struct mysqlExtension final : Extension {
   virtual void debuggerInfo(InfoVec &info) override;
 
   static bool ReadOnly;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   static bool Localize;
 #endif
   static int ConnectTimeout;

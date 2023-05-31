@@ -1585,7 +1585,7 @@ public:
   // SimpleXML options
   static bool SimpleXMLEmptyNamespaceMatchesAll;
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   // fb303 server
   static bool EnableFb303Server;
   static int Fb303ServerPort;
@@ -1626,7 +1626,7 @@ inline bool unitPrefetchingEnabled() {
 }
 
 inline StringToIntMap coeffectEnforcementLevelsDefaults() {
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   return {{"zoned", 2}};
 #else
   return {};

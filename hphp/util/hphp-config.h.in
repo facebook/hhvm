@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 # define HPHP_OSS 1
 #endif
 

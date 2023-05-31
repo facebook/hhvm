@@ -842,7 +842,7 @@ void mysqlExtension::moduleInit() {
 mysqlExtension s_mysql_extension;
 
 bool mysqlExtension::ReadOnly = false;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 bool mysqlExtension::Localize = false;
 #endif
 int mysqlExtension::ConnectTimeout = 1000;
@@ -870,7 +870,7 @@ void mysqlExtension::debuggerInfo(InfoVec &info) {
 
 void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ReadOnly, ini, config, "MySQL.ReadOnly", false);
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   Config::Bind(Localize, ini, config, "MySQL.Localize", false);
 #endif
   Config::Bind(ConnectTimeout, ini, config, "MySQL.ConnectTimeout", 1000);

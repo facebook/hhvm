@@ -33,7 +33,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash-map.h"
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include <folly/experimental/symbolizer/Symbolizer.h>
 #endif
 

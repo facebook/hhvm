@@ -73,10 +73,10 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #define FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE 0x0004
 #define FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED        0x0005
 
-#ifdef FACEBOOK
-# define HHVM_FACEBOOK true
+#ifdef HHVM_FACEBOOK
+# define HHVM_FACEBOOK_FLAG true
 #else
-# define HHVM_FACEBOOK false
+# define HHVM_FACEBOOK_FLAG false
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1392,7 +1392,7 @@ struct FBExtension : Extension {
   FBExtension(): Extension("fb", "1.0.0", NO_ONCALL_YET) {}
 
   void moduleInit() override {
-    HHVM_RC_BOOL_SAME(HHVM_FACEBOOK);
+    HHVM_RC_BOOL(HHVM_FACEBOOK, HHVM_FACEBOOK_FLAG);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);

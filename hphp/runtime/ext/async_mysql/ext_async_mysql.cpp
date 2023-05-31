@@ -505,9 +505,9 @@ HHVM_METHOD(AsyncMysqlConnectionOptions,
             const String& serverCertExtNames /* = "" */,
             const String& extensionValues /* = "" */) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
-  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+  // #ifdef HHVM_FACEBOOK until Open Source squangle pin is updated - needed as of
   // Squangle 2020-10-21
-  #ifdef FACEBOOK
+  #ifdef HHVM_FACEBOOK
   data->m_conn_opts.setCertValidationCallback(
       generateCertValidationCallback(
           std::string(serverCertExtNames), std::string(extensionValues)),

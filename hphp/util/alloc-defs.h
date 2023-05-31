@@ -34,7 +34,7 @@
 #if (JEMALLOC_VERSION_MAJOR < 5)
 #  error "jemalloc 5 is required"
 #endif
-#if defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS) && defined(FACEBOOK)
+#if defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS) && defined(HHVM_FACEBOOK)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
 #endif
 #endif

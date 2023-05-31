@@ -26,7 +26,7 @@
 
 #include "folly/Random.h"
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include "common/base/BuildInfo.h"
 #include "common/fbwhoami/FbWhoAmI.h"
 #endif
@@ -108,7 +108,7 @@ std::tuple<bool, size_t, size_t, size_t> shouldRun(folly::StringPiece url) {
 void setCommonFields(StructuredLogEntry& entry) {
   static auto const values = [&] {
     hphp_fast_string_map<std::string> v;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
     v["build_compiler"] = BuildInfo_kCompiler;
     v["build_mode"] = BuildInfo_kBuildMode;
     v["server_type"] = facebook::FbWhoAmI::getServerTypeArch();

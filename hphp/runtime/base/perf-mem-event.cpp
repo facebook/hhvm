@@ -46,7 +46,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/ScopeGuard.h>
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include <folly/Demangle.h>
 #include <folly/experimental/symbolizer/Symbolizer.h>
 #endif
@@ -272,7 +272,7 @@ bool record_low_mem_event(const void* addr, StructuredLogEntry& record) {
   }
 
   // Try to symbolize `addr' if possible.
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   using namespace folly::symbolizer;
   Symbolizer symbolizer;
   SymbolizedFrame frame;

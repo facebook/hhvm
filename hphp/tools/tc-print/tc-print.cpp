@@ -47,7 +47,7 @@
 #include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/tools/tc-print/std-logger.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include "hphp/facebook/extensions/scribe/ext_scribe.h"
 #include "hphp/tools/tc-print/facebook/db-logger.h"
 #endif
@@ -81,7 +81,7 @@ std::string     selectedFuncName;
 TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 bool            printToDB       = false;
 std::string     hiveTable;
 #endif
@@ -171,7 +171,7 @@ void usage() {
     "    -j              : outputs tc-dump in JSON format (not compatible with "
     "some other flags).\n"
     // TODO(T52857399) - investigate compatibility with other flags
-    #ifdef FACEBOOK
+    #ifdef HHVM_FACEBOOK
     "    -H <HIVE_TABLE> : used with -j, write the JSON output to Hive in the "
     "table <HIVE_TABLE>\n"
     "    -x              : log translations to database\n"
@@ -343,7 +343,7 @@ void parseOptions(int argc, char *argv[]) {
       case 'j':
         useJSON = true;
         break;
-      #ifdef FACEBOOK
+      #ifdef HHVM_FACEBOOK
       case 'x':
         printToDB = true;
         break;
@@ -1146,7 +1146,7 @@ int main(int argc, char *argv[]) {
 
   parseOptions(argc, argv);
 
-  #ifdef FACEBOOK
+  #ifdef HHVM_FACEBOOK
   Optional<DBLogger> dblogger = std::nullopt;
   if (printToDB) {
     dblogger = DBLogger{};
@@ -1211,7 +1211,7 @@ int main(int argc, char *argv[]) {
     auto const jsonStr = folly::toJson(tcObj);
     std::cout << jsonStr << std::endl;
 
-    #ifdef FACEBOOK
+    #ifdef HHVM_FACEBOOK
     if (!hiveTable.empty()) {
       auto const uuid = boost::uuids::random_generator()();
       auto const uuidStr = boost::uuids::to_string(uuid);

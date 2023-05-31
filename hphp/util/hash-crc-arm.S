@@ -1,6 +1,6 @@
 #include "hphp/util/etch-helpers.h"
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 #  include "hphp/util/hphp-config.h"
 #endif
 

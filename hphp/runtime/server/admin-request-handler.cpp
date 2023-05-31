@@ -85,7 +85,7 @@
 #include <sstream>
 #include <iomanip>
 
-#if defined(FACEBOOK) || defined(HAVE_LIBSODIUM)
+#if defined(HHVM_FACEBOOK) || defined(HAVE_LIBSODIUM)
 #include <sodium.h>
 #ifdef crypto_pwhash_STRBYTES
 #define HAVE_CRYPTO_PWHASH_STR

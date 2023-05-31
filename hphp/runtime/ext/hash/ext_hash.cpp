@@ -76,7 +76,7 @@ struct HashEngineMapInitializer {
     HashEngines["ripemd256"]  = HashEnginePtr(new hash_ripemd256());
     HashEngines["ripemd320"]  = HashEnginePtr(new hash_ripemd320());
     HashEngines["whirlpool"]  = HashEnginePtr(new hash_whirlpool());
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
     // The original version of tiger got the endianness backwards
     // This fb-specific version remains for backward compatibility
     HashEngines["tiger128,3-fb"]
@@ -92,7 +92,7 @@ struct HashEngineMapInitializer {
     HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
     HashEngines["gost"]       = HashEnginePtr(new hash_gost());
     HashEngines["joaat"]      = HashEnginePtr(new hash_joaat());
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
     HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
 #endif
     HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(false));

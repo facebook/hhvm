@@ -101,7 +101,7 @@ RepoOptions RepoOptions::s_defaults;
 
 namespace {
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 const static bool s_PHP7_default = false;
 #else
 const static bool s_PHP7_default = true;
@@ -1233,7 +1233,7 @@ int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 bool RuntimeOption::EnableFb303Server = false;
 int RuntimeOption::Fb303ServerPort = 0;
 std::string RuntimeOption::Fb303ServerIP;
@@ -2153,7 +2153,7 @@ void RuntimeOption::Load(
     Config::Bind(ServerIP, ini, config, "Server.IP");
     Config::Bind(ServerFileSocket, ini, config, "Server.FileSocket");
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
     //Do not cause slowness on startup -- except for Facebook
     if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
       throw std::runtime_error("Unable to resolve the server's "
@@ -2771,7 +2771,7 @@ void RuntimeOption::Load(
     Config::Bind(SimpleXMLEmptyNamespaceMatchesAll, ini, config,
                  "SimpleXML.EmptyNamespaceMatchesAll", false);
   }
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   {
     // Fb303Server
     Config::Bind(EnableFb303Server, ini, config, "Fb303Server.Enable",

@@ -16,7 +16,7 @@
 
 #include "hphp/util/perf-event.h"
 
-#if defined(__linux__) && defined(__x86_64__) && defined(FACEBOOK)
+#if defined(__linux__) && defined(__x86_64__) && defined(HHVM_FACEBOOK)
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/logger.h"

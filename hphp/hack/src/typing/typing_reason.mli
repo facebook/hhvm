@@ -246,3 +246,5 @@ val string_of_ureason : ureason -> string
 val none : 'phase t_
 
 val compare : 'phase t_ -> 'phase t_ -> int
+
+val force_lazy_values : 'phase t_ -> 'phase t_

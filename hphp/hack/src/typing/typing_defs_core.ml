@@ -1154,3 +1154,6 @@ let string_of_visibility : ce_visibility -> string = function
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
   | Vinternal _ -> "internal"
+
+let force_lazy_values (type ph) ((r, ty) : ph ty) : ph ty =
+  (Reason.force_lazy_values r, ty)

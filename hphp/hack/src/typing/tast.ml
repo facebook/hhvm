@@ -81,7 +81,7 @@ type saved_env = {
 
 type program = (ty, saved_env) Aast.program [@@deriving show]
 
-type def = (ty, (saved_env[@hash.ignore])) Aast.def [@@deriving hash]
+type def = (ty, (saved_env[@hash.ignore])) Aast.def [@@deriving hash, show]
 
 type def_list = def list [@@deriving hash]
 
@@ -146,6 +146,7 @@ type by_names = {
   gconst_tasts: def SMap.t;
   module_tasts: def SMap.t;
 }
+[@@deriving show]
 
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
@@ -165,6 +166,45 @@ let empty_saved_env tcopt : saved_env =
     fun_tast_info = None;
     checked = COnce;
   }
+
+let empty_by_names : by_names =
+  {
+    fun_tasts = SMap.empty;
+    class_tasts = SMap.empty;
+    typedef_tasts = SMap.empty;
+    gconst_tasts = SMap.empty;
+    module_tasts = SMap.empty;
+  }
+
+let program_by_names (program : program) : by_names =
+  List.fold program ~init:empty_by_names ~f:(fun acc def ->
+      match def with
+      | Fun f ->
+        { acc with fun_tasts = SMap.add (snd f.fd_name) [def] acc.fun_tasts }
+      | Class c ->
+        { acc with class_tasts = SMap.add (snd c.c_name) def acc.class_tasts }
+      | Typedef td ->
+        {
+          acc with
+          typedef_tasts = SMap.add (snd td.t_name) def acc.typedef_tasts;
+        }
+      | Constant c ->
+        {
+          acc with
+          gconst_tasts = SMap.add (snd c.cst_name) def acc.gconst_tasts;
+        }
+      | Module m ->
+        {
+          acc with
+          module_tasts = SMap.add (snd m.Aast.md_name) def acc.module_tasts;
+        }
+      | Stmt _
+      | Namespace _
+      | NamespaceUse _
+      | SetNamespaceEnv _
+      | FileAttributes _
+      | SetModule _ ->
+        acc)
 
 (* Used when an env is needed in codegen.
  * TODO: (arkumar,wilfred,thomasjiang) T42509373 Fix when when needed
@@ -226,3 +266,17 @@ let to_nast p = nast_converter#on_program () p
 let to_nast_expr (tast : expr) : Nast.expr = nast_converter#on_expr () tast
 
 let to_nast_class_id_ cid = nast_converter#on_class_id_ () cid
+
+(** Force any lazy value in the TAST. This is useful to serialize the TAST,
+  for example prior to returning over RPC or storing in the shared heap. *)
+let force_lazy_values (program : program) : program =
+  let visitor =
+    object
+      inherit [_] Aast.endo
+
+      method on_'ex _env ty = Typing_defs_core.force_lazy_values ty
+
+      method on_'en _env saved_env = saved_env
+    end
+  in
+  visitor#on_program () program

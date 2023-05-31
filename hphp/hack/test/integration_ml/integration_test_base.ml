@@ -131,7 +131,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
     ServerEnv.local_symbol_table = sienv;
   }
 
-let default_loop_input =
+let default_loop_input : (_, _) loop_inputs =
   { disk_changes = []; new_client = None; persistent_client_request = None }
 
 let run_loop_once :

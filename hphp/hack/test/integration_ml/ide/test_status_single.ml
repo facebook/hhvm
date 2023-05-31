@@ -65,7 +65,7 @@ let status_single_request_foo =
 
 let check_status_single_response_foo = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some ([], _) -> ()
+  | Some (([], _), _tasts) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
 let status_single_request_bar_and_baz =

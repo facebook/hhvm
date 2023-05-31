@@ -235,9 +235,9 @@ template <typename SerDe> void Module::serde(SerDe& sd) {
 template <typename SerDe> void TypeAlias::serde(SerDe& sd) {
   sd(srcInfo)
     (name)
-    (value)
+    (values)
     (attrs)
-    (type)
+    (types)
     (userAttrs)
     (typeStructure)
     (resolvedTypeStructure);

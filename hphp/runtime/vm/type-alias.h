@@ -37,10 +37,15 @@ struct Unit;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * This is the runtime representation of a type alias.  Type aliases are only
- * allowed when HipHop extensions are enabled.
+ * This is the runtime representation of a type alias.
  *
- * The `type' field is Object whenever the type alias is basically just a
+ * `types` and `values` fields are vectors because case types are comprised of
+ * union of multiple types.
+ *
+ * When `case_type` field is not set, these vectors are guarenteed to be of
+ * size 1;
+ *
+ * The `types[0]' field is Object whenever the type alias is basically just a
  * name. At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
  *
@@ -49,9 +54,9 @@ struct Unit;
 struct PreTypeAlias {
   Unit* unit;
   LowStringPtr name;
-  LowStringPtr value;
+  std::vector<LowStringPtr> values;
   Attr attrs;
-  AnnotType type;
+  std::vector<AnnotType> types;
   int line0;
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases

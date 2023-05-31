@@ -102,7 +102,7 @@ pub(crate) fn convert_typedef<'a>(
     let hhbc::Typedef {
         name,
         attributes,
-        type_info,
+        type_infos,
         type_structure,
         span,
         attrs,
@@ -115,13 +115,16 @@ pub(crate) fn convert_typedef<'a>(
         .iter()
         .map(|a| convert::convert_attribute(a, strings))
         .collect_vec();
-    let type_info = types::convert_type(type_info, strings);
+    let type_infos = type_infos
+        .iter()
+        .map(|ti| types::convert_type(ti, strings))
+        .collect_vec();
     let type_structure = convert::convert_typed_value(type_structure, strings);
 
     ir::Typedef {
         name,
         attributes,
-        type_info,
+        type_infos,
         type_structure,
         loc,
         attrs: *attrs,

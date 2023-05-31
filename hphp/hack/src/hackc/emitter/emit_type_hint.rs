@@ -462,6 +462,42 @@ pub fn hint_to_type_info<'arena>(
     )
 }
 
+// Used from emit_typedef for potential case types
+pub fn hint_to_type_infos<'arena>(
+    alloc: &'arena bumpalo::Bump,
+    kind: &Kind,
+    skipawaitable: bool,
+    nullable: bool,
+    tparams: &[&str],
+    hint: &Hint,
+) -> Result<ffi::Slice<'arena, TypeInfo<'arena>>> {
+    let Hint(_, h) = hint;
+    let mut result = vec![];
+    match &**h {
+        Hunion(hints) => {
+            for hint in hints {
+                result.push(hint_to_type_info(
+                    alloc,
+                    kind,
+                    skipawaitable,
+                    nullable,
+                    tparams,
+                    hint,
+                )?)
+            }
+        }
+        _ => result.push(hint_to_type_info(
+            alloc,
+            kind,
+            skipawaitable,
+            nullable,
+            tparams,
+            hint,
+        )?),
+    }
+    Ok(ffi::Slice::from_vec(alloc, result))
+}
+
 pub fn hint_to_class<'arena>(alloc: &'arena bumpalo::Bump, hint: &Hint) -> hhbc::ClassName<'arena> {
     let Hint(_, h) = hint;
     if let Happly(Id(_, name), _) = &**h {

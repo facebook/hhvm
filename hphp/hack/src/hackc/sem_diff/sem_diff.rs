@@ -693,7 +693,7 @@ fn sem_diff_typedef<'arena>(
     let Typedef {
         name: a_name,
         attributes: a_attributes,
-        type_info: a_type_info,
+        type_infos: a_type_infos,
         type_structure: a_type_structure,
         span: a_span,
         attrs: a_attrs,
@@ -702,7 +702,7 @@ fn sem_diff_typedef<'arena>(
     let Typedef {
         name: b_name,
         attributes: b_attributes,
-        type_info: b_type_info,
+        type_infos: b_type_infos,
         type_structure: b_type_structure,
         span: b_span,
         attrs: b_attrs,
@@ -711,7 +711,7 @@ fn sem_diff_typedef<'arena>(
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
-    sem_diff_eq(&path.qualified("type_info"), a_type_info, b_type_info)?;
+    sem_diff_eq(&path.qualified("type_info"), a_type_infos, b_type_infos)?;
     sem_diff_eq(
         &path.qualified("type_structure"),
         a_type_structure,

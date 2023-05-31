@@ -1084,9 +1084,9 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     php::SrcInfo { te.getLocation() },
     te.name(),
-    te.value(),
+    te.values(),
     te.attrs() | AttrUnique | AttrPersistent,
-    te.type(),
+    te.types(),
     te.nullable(),
     te.case_type(),
     te.userAttributes(),

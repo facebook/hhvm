@@ -303,7 +303,7 @@ fn assemble_typedef<'arena>(
            <attrs:assemble_special_and_user_attrs(alloc)>
            <name:assemble_class_name(alloc)>
            "="
-           <type_info:assemble_type_info(alloc, TypeInfoKind::TypeDef)>
+           <type_infos:assemble_type_infos(alloc)>
            <span:assemble_span>
            <type_structure:assemble_triple_quoted_typed_value(alloc)>
            ";");
@@ -311,7 +311,7 @@ fn assemble_typedef<'arena>(
     Ok(hhbc::Typedef {
         name,
         attributes,
-        type_info,
+        type_infos,
         type_structure,
         span,
         attrs,
@@ -1338,6 +1338,14 @@ fn assemble_type_info<'arena>(
     } else {
         Err(anyhow!("TypeInfo expected at end"))
     }
+}
+
+fn assemble_type_infos<'arena>(
+    token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
+) -> Result<Slice<'arena, hhbc::TypeInfo<'arena>>> {
+    parse!(token_iter, <tis:assemble_type_info(alloc, TypeInfoKind::TypeDef),*>);
+    Ok(Slice::from_vec(alloc, tis))
 }
 
 /// Ex: <"HH\\void" N >

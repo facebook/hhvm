@@ -60,8 +60,10 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-  if (thisType->type != AnnotType::Object &&
-      thisType->type != AnnotType::Unresolved) {
+
+  //TODO(T151885113): Support case types in runtime
+  if (thisType->types[0] != AnnotType::Object &&
+      thisType->types[0] != AnnotType::Unresolved) {
     return TypeAlias::From(thisType);
   }
 
@@ -79,7 +81,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * do our due diligence here.
    */
 
-  const StringData* typeName = thisType->value;
+  const StringData* typeName = thisType->values[0];
   auto targetNE = NamedType::get(typeName);
 
   if (auto klass = Class::lookup(targetNE)) {
@@ -87,7 +89,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    assertx(thisType->type != AnnotType::Object);
+    assertx(thisType->types[0] != AnnotType::Object);
     return TypeAlias::From(*targetTd, thisType);
   }
 
@@ -99,7 +101,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      assertx(thisType->type != AnnotType::Object);
+      assertx(thisType->types[0] != AnnotType::Object);
       return TypeAlias::From(*targetTd, thisType);
     }
   }
@@ -112,11 +114,12 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
-  auto const preType = alias.type == AnnotType::Unresolved
-    ? AnnotType::Object : alias.type;
-  return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
+  //TODO(T151885113): Support case types in runtime
+  auto const preType = alias.types[0] == AnnotType::Unresolved
+    ? AnnotType::Object : alias.types[0];
+  return (alias.types[0] == AnnotType::Mixed && type == AnnotType::Mixed) ||
          (preType == type && alias.nullable == nullable &&
-          Class::lookup(alias.value) == klass);
+          Class::lookup(alias.values[0]) == klass);
 }
 
 size_t TypeAlias::stableHash() const {
@@ -168,7 +171,8 @@ const TypeAlias* TypeAlias::load(const StringData* name,
 
 const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) {
   auto nameList = NamedType::get(thisType->name);
-  const StringData* typeName = thisType->value;
+  //TODO(T151885113): Support case types in runtime
+  const StringData* typeName = thisType->values[0];
 
   /*
    * Check if this name already was defined as a type alias, and if so

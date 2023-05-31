@@ -1777,7 +1777,7 @@ fn cmp_typedef(
     let Typedef {
         name: a_name,
         attributes: a_attributes,
-        type_info: a_type_info,
+        type_infos: a_type_infos,
         type_structure: a_type_structure,
         loc: a_loc,
         attrs: a_attrs,
@@ -1786,7 +1786,7 @@ fn cmp_typedef(
     let Typedef {
         name: b_name,
         attributes: b_attributes,
-        type_info: b_type_info,
+        type_infos: b_type_infos,
         type_structure: b_type_structure,
         loc: b_loc,
         attrs: b_attrs,
@@ -1794,7 +1794,11 @@ fn cmp_typedef(
     } = b;
     cmp_id(a_name.id, b_name.id).qualified("name")?;
     cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
-    cmp_type_info((a_type_info, a_strings), (b_type_info, b_strings)).qualified("type_info")?;
+    cmp_slice(
+        a_type_infos.iter().map(|i| (i, a_strings)),
+        b_type_infos.iter().map(|i| (i, b_strings)),
+        cmp_type_info,
+    )?;
     cmp_typed_value((a_type_structure, a_strings), (b_type_structure, b_strings))
         .qualified("type_structure")?;
     cmp_src_loc((a_loc, a_strings), (b_loc, b_strings)).qualified("loc")?;

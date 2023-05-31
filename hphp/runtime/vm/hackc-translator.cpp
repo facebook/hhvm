@@ -345,9 +345,24 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   if (!SystemLib::s_inited) attrs |= AttrPersistent;
   auto const name = toStaticString(t.name._0);
 
-  auto const ty = translateTypeInfo(t.type_info).second;
-  auto tname = ty.typeName();
-  if (!tname) tname = staticEmptyString();
+  auto const tis = range(t.type_infos);
+  assertx(!tis.empty());
+
+  std::vector<LowStringPtr> tnames;
+  std::vector<AnnotType> annots;
+  bool nullable = false;
+  for (auto const& ti : tis) {
+    auto const ty = translateTypeInfo(ti).second;
+    nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
+    auto const tname = ty.typeName();
+    if (tname && !tname->empty()) {
+      tnames.push_back(tname);
+      annots.push_back(ty.type());
+    } else {
+      tnames.push_back(staticEmptyString());
+      annots.push_back(AnnotType::Mixed);
+    }
+  }
 
   auto tys = toTypedValue(t.type_structure);
   assertx(isArrayLikeType(tys.m_type));
@@ -358,9 +373,9 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     t.span.line_begin,
     t.span.line_end,
     attrs,
-    tname,
-    tname->empty() ? AnnotType::Mixed : ty.type(),
-    (ty.flags() & TypeConstraintFlags::Nullable) != 0,
+    tnames,
+    annots,
+    nullable,
     t.case_type,
     ArrNR{tys.m_data.parr},
     Array{}

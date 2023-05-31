@@ -671,9 +671,9 @@ struct Module {
 struct TypeAlias {
   SrcInfo srcInfo;
   LSString name;
-  LSString value;
+  std::vector<LSString> values;
   Attr attrs;
-  AnnotType type;
+  std::vector<AnnotType> types;
   bool nullable : 1;  // null is allowed; for ?Foo aliases
   bool caseType : 1;
   UserAttributeMap userAttrs;

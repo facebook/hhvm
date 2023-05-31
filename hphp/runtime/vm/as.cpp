@@ -2144,6 +2144,17 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
+std::vector<TypeConstraint> parse_type_constraints(AsmState& as) {
+  std::vector<TypeConstraint> tcs = {parse_type_constraint(as)};
+  while (true) {
+    as.in.skipWhitespace();
+    if (as.in.peek() != ',') break;
+    as.in.getc();
+    tcs.push_back(parse_type_constraint(as));
+  }
+  return tcs;
+}
+
 TParamNameVec parse_shadowed_tparams(AsmState& as) {
   TParamNameVec ret;
   as.in.skipWhitespace();
@@ -3114,7 +3125,12 @@ void parse_alias(AsmState& as, bool case_type) {
   }
   as.in.expectWs('=');
 
-  TypeConstraint ty = parse_type_constraint(as);
+  // Merge to ensure namedentity creation, according to
+  // emitTypedef in emitter.cpp
+  as.ue->mergeLitstr(makeStaticString(name));
+
+  auto const tis = parse_type_constraints(as);
+  assertx(!tis.empty());
 
   int line0;
   int line1;
@@ -3125,22 +3141,30 @@ void parse_alias(AsmState& as, bool case_type) {
     as.error(".alias must have a valid array type structure");
   }
 
-  const StringData* typeName = ty.typeName();
-  if (!typeName) typeName = staticEmptyString();
-  const StringData* sname = makeStaticString(name);
-  // Merge to ensure namedentity creation, according to
-  // emitTypedef in emitter.cpp
-  as.ue->mergeLitstr(sname);
-  as.ue->mergeLitstr(typeName);
+  std::vector<LowStringPtr> tnames;
+  std::vector<AnnotType> annots;
+  bool nullable = false;
+  for (auto const& ty : tis) {
+    nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
+    auto const tname = ty.typeName();
+    if (tname && !tname->empty()) {
+      as.ue->mergeLitstr(tname);
+      tnames.push_back(tname);
+      annots.push_back(ty.type());
+    } else {
+      tnames.push_back(staticEmptyString());
+      annots.push_back(AnnotType::Mixed);
+    }
+  }
 
   auto te = as.ue->newTypeAliasEmitter(name);
   te->init(
     line0,
     line1,
     attrs,
-    typeName,
-    typeName->empty() ? AnnotType::Mixed : ty.type(),
-    (ty.flags() & TypeConstraintFlags::Nullable) != 0,
+    tnames,
+    annots,
+    nullable,
     case_type,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}

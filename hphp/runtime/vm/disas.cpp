@@ -852,13 +852,20 @@ void print_cls(Output& out, const PreClass* cls) {
 void print_alias(Output& out, const PreTypeAlias& alias) {
   auto flags = TypeConstraintFlags::NoFlags;
   if (alias.nullable) flags |= TypeConstraintFlags::Nullable;
-  TypeConstraint constraint(alias.value, flags);
+  std::string type_constraints;
+  for (auto const& tc : alias.values) {
+    if (!type_constraints.empty()) type_constraints.append(",");
+    type_constraints.append(folly::to<std::string>(
+      "<",
+      type_constraint(TypeConstraint(tc, flags)),
+      ">"));
+  }
 
-  out.fmtln(".{}{} {} = <{}> ({}, {}) {};",
+  out.fmtln(".{}{} {} = {} ({}, {}) {};",
             alias.case_type ? "case_type" : "alias",
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
-            type_constraint(constraint),
+            type_constraints,
             alias.line0,
             alias.line1,
             escaped_long(alias.typeStructure.get()));

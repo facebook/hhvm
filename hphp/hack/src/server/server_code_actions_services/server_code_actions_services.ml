@@ -19,11 +19,21 @@ open Hh_prelude
 type resolvable_command_or_action =
   Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_
 
+let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
+  let module I = Ide_api_types in
+  let lsp_pos_of_ide_pos ide_pos =
+    Lsp.{ line = ide_pos.I.line; character = ide_pos.I.column }
+  in
+  Lsp.
+    {
+      start = lsp_pos_of_ide_pos ide_range.I.st;
+      end_ = lsp_pos_of_ide_pos ide_range.I.ed;
+    }
+
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : Relative_path.t)
-    ~(range : Ide_api_types.range) : resolvable_command_or_action list =
+    ~(range : Lsp.range) : resolvable_command_or_action list =
   let to_action ~title ~edit ~kind =
     Lsp.CodeAction.Action
       {
@@ -34,12 +44,12 @@ let find
       }
   in
   let quickfixes =
-    Quickfixes.find ~ctx ~entry ~path ~range
+    Quickfixes.find ~ctx ~entry ~range
     |> List.map ~f:(fun Code_action_types.Quickfix.{ title; edit } ->
            to_action ~title ~edit ~kind:Lsp.CodeActionKind.quickfix)
   in
   let refactors =
-    Refactors.find ~ctx ~entry ~path ~range
+    Refactors.find ~entry ~range ctx
     |> List.map ~f:(fun Code_action_types.Refactor.{ title; edit } ->
            to_action ~title ~edit ~kind:Lsp.CodeActionKind.refactor)
   in
@@ -63,23 +73,20 @@ let update_edit ~f =
 let go
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : Relative_path.t)
     ~(range : Ide_api_types.range) : Lsp.CodeAction.command_or_action list =
   let strip = update_edit ~f:(fun _ -> Lsp.CodeAction.UnresolvedEdit ()) in
-  find ~ctx ~entry ~path ~range |> List.map ~f:strip
+  find ~ctx ~entry ~range:(lsp_range_of_ide_range range) |> List.map ~f:strip
 
 let resolve
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(path : Relative_path.t)
     ~(range : Ide_api_types.range)
     ~(resolve_title : string) : Lsp.CodeAction.resolved_command_or_action =
   let resolve_command_or_action =
     update_edit ~f:(fun lazy_edit ->
         Lsp.CodeAction.EditOnly (Lazy.force lazy_edit))
   in
-
-  find ~ctx ~entry ~path ~range
+  find ~ctx ~entry ~range:(lsp_range_of_ide_range range)
   |> List.find ~f:(fun command_or_action ->
          let title = Lsp_helpers.title_of_command_or_action command_or_action in
          String.equal title resolve_title)

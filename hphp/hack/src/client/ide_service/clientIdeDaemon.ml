@@ -1452,12 +1452,9 @@ let handle_request
       update_file_ctx istate document
     in
 
-    let path =
-      Relative_path.create_detect_prefix (Path.to_string document.file_path)
-    in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Server_code_actions_services.go ~ctx ~entry ~path ~range)
+          Server_code_actions_services.go ~ctx ~entry ~range)
     in
 
     (* We'll take this opportunity to make sure we've returned the latest errors.
@@ -1497,17 +1494,9 @@ let handle_request
     ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
 
-    let path =
-      Relative_path.create_detect_prefix (Path.to_string document.file_path)
-    in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Server_code_actions_services.resolve
-            ~ctx
-            ~entry
-            ~path
-            ~range
-            ~resolve_title)
+          Server_code_actions_services.resolve ~ctx ~entry ~range ~resolve_title)
     in
     Lwt.return (Initialized istate, Ok result)
   (* Go to definition *)

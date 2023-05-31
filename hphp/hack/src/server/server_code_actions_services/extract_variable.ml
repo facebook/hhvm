@@ -179,18 +179,14 @@ let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
   in
   Code_action_types.Refactor.{ title = "Extract into variable"; edit }
 
-let find ~entry ~path ~(range : Lsp.range) ctx =
+let find ~entry ~(range : Lsp.range) ctx =
+  let path = entry.Provider_context.path in
   match entry.Provider_context.source_text with
   | Some source_text when Lsp_helpers.lsp_range_is_selection range ->
     let line_to_offset line =
       Full_fidelity_source_text.position_to_offset source_text (line, 0)
     in
-    let selection =
-      Lsp_helpers.lsp_range_to_pos
-        ~line_to_offset
-        entry.Provider_context.path
-        range
-    in
+    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
     let tast =
       (Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry)
         .Tast_provider.Compute_tast_and_errors.tast

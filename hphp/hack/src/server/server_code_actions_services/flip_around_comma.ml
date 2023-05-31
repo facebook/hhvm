@@ -208,7 +208,7 @@ let refactor_of_candidate ~path ~source_text candidate =
   let edit = lazy (edit_of_candidate ~path ~source_text candidate) in
   Code_action_types.Refactor.{ title = "Flip around comma"; edit }
 
-let find ~entry ~path ~(range : Lsp.range) ctx =
+let find ~entry ~(range : Lsp.range) ctx =
   if not (Lsp_helpers.lsp_range_is_selection range) then
     match entry.Provider_context.source_text with
     | Some source_text ->
@@ -219,12 +219,8 @@ let find ~entry ~path ~(range : Lsp.range) ctx =
         (Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry)
           .Tast_provider.Compute_tast_and_errors.tast
       in
-      let cursor =
-        Lsp_helpers.lsp_range_to_pos
-          ~line_to_offset
-          entry.Provider_context.path
-          range
-      in
+      let path = entry.Provider_context.path in
+      let cursor = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
       (visitor ~cursor)#go ctx tast
       |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
       |> Option.to_list

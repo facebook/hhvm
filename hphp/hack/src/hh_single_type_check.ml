@@ -2060,14 +2060,12 @@ let handle_mode
           Server_code_actions_services.resolve
             ~ctx
             ~entry
-            ~path
             ~range
             ~resolve_title:title
         | Command _ as c -> c)
     in
     let commands_or_actions =
-      Server_code_actions_services.go ~ctx ~entry ~path ~range
-      |> List.map ~f:resolve
+      Server_code_actions_services.go ~ctx ~entry ~range |> List.map ~f:resolve
     in
     let hermeticize_paths =
       Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""

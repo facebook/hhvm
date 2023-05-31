@@ -7,18 +7,16 @@
  *)
 open Hh_prelude
 
-let find ~entry ~path ~(range : Lsp.range) ctx =
+let find ~entry ~(range : Lsp.range) ctx =
   if Lsp_helpers.lsp_range_is_selection range then
     match entry.Provider_context.source_text with
     | Some source_text ->
+      let path = entry.Provider_context.path in
       let selection =
         let line_to_offset line =
           Full_fidelity_source_text.position_to_offset source_text (line, 0)
         in
-        Lsp_helpers.lsp_range_to_pos
-          ~line_to_offset
-          entry.Provider_context.path
-          range
+        Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
       in
       let candidate_opt =
         Extract_method_traverse.find_candidate ~selection ~entry ctx

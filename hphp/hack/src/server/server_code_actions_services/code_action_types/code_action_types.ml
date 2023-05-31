@@ -13,7 +13,6 @@ module Refactor = struct
 
   type find =
     entry:Provider_context.entry ->
-    path:Relative_path.t ->
     range:Lsp.range ->
     Provider_context.t ->
     t list

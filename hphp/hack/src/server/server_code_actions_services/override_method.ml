@@ -107,15 +107,15 @@ let refactor_action
   in
   Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edit }
 
-let find ~entry ~path ~(range : Lsp.range) ctx =
+let find ~entry ~(range : Lsp.range) ctx =
   let Lsp.{ start = { line = start_line; character = start_col }; _ } = range in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
+  let path = entry.Provider_context.path in
 
   let classish_starts =
     match entry.Provider_context.source_text with
-    | Some source_text ->
-      Quickfix_ffp.classish_starts tree source_text entry.Provider_context.path
+    | Some source_text -> Quickfix_ffp.classish_starts tree source_text path
     | None -> SMap.empty
   in
 

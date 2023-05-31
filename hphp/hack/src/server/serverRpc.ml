@@ -434,19 +434,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, results)
   | CODE_ACTION { path; range } ->
     let (ctx, entry) = single_ctx_path env path in
-    let path = Relative_path.create_detect_prefix path in
-    let actions = Server_code_actions_services.go ~ctx ~entry ~path ~range in
+    let actions = Server_code_actions_services.go ~ctx ~entry ~range in
     (env, actions)
   | CODE_ACTION_RESOLVE { path; range; resolve_title } ->
     let (ctx, entry) = single_ctx_path env path in
-    let path = Relative_path.create_detect_prefix path in
     let action =
-      Server_code_actions_services.resolve
-        ~ctx
-        ~entry
-        ~path
-        ~range
-        ~resolve_title
+      Server_code_actions_services.resolve ~ctx ~entry ~range ~resolve_title
     in
     (env, action)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())

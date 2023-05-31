@@ -5,9 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val find :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  path:Relative_path.t ->
-  range:Ide_api_types.range ->
-  Code_action_types.Refactor.t list
+val find : Code_action_types.Refactor.find

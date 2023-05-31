@@ -53,14 +53,8 @@ let actions_for_errors
   in
   List.map quickfixes ~f:(fun qf -> fix_action path classish_starts qf)
 
-let find
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(path : Relative_path.t)
-    ~(range : Ide_api_types.range) : Code_action_types.Quickfix.t list =
-  let open Ide_api_types in
-  let start_line = range.st.line in
-  let start_col = range.st.column in
+let find ~ctx ~entry ~(range : Lsp.range) : Code_action_types.Quickfix.t list =
+  let Lsp.{ start = { line = start_line; character = start_col }; _ } = range in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
 
@@ -74,5 +68,5 @@ let find
   let { Tast_provider.Compute_tast_and_errors.errors; _ } =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
   in
-
+  let path = entry.Provider_context.path in
   actions_for_errors errors path classish_starts ~start_line ~start_col

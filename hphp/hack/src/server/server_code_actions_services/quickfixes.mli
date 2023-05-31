@@ -8,6 +8,5 @@
 val find :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  path:Relative_path.t ->
-  range:Ide_api_types.range ->
+  range:Lsp.range ->
   Code_action_types.Quickfix.t list

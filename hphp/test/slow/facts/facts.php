@@ -391,30 +391,6 @@ function facts(): void {
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
 
-  print "\nFiltering by attribute\n";
-
-  print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => "banana"],
-    )]),
-  );
-  print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => 'apple'],
-    )]),
-  );
-  print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[1 => 'carrot'],
-    )]),
-  );
-
   print "\nGetting attributes\n";
 
   print_type_attrs(AppleThenBanana::class);

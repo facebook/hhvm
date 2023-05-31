@@ -95,11 +95,8 @@ struct TimeoutSuspender {
 
 constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
-constexpr std::string_view kAttributeFilterKey{"attributes"};
 constexpr std::string_view kExtendsFilterKey{"extends"};
 constexpr std::string_view kRequiresFilterKey{"require extends"};
-constexpr std::string_view kAttributeNameKey{"name"};
-constexpr std::string_view kAttributeParamsKey{"parameters"};
 
 struct KindFilterData {
   bool m_removeClasses = false;
@@ -172,85 +169,6 @@ struct KindFilterData {
   }
 };
 
-struct AttributeFilterData {
-  /**
-   * Map from 0-indexed argument position to argument value
-   */
-  using ArgMap = hphp_hash_map<size_t, folly::dynamic>;
-
-  hphp_hash_map<Symbol<SymKind::Type>, ArgMap> m_attrs;
-
-  static AttributeFilterData createFromShapes(const ArrayData* attrFilters) {
-    assertx(attrFilters);
-    AttributeFilterData filters;
-    IterateV(attrFilters, [&](TypedValue v) {
-      if (!tvIsArrayLike(v)) {
-        return;
-      }
-      filters.m_attrs.insert(createAttrFilterFromShape(v.m_data.parr));
-    });
-    return filters;
-  }
-
- private:
-  static std::pair<StringPtr, ArgMap> createAttrFilterFromShape(
-      const ArrayData* attrShape) {
-    assertx(attrShape);
-    StringPtr name{nullptr};
-    hphp_hash_map<size_t, folly::dynamic> args;
-    IterateKV(attrShape, [&](TypedValue k, TypedValue v) {
-      if (!tvIsString(k)) {
-        return;
-      }
-      auto const kStr = StringPtr{k.m_data.pstr};
-      if (kStr == kAttributeNameKey) {
-        if (tvIsString(v)) {
-          name = StringPtr{v.m_data.pstr};
-        } else if (tvIsLazyClass(v)) {
-          name = StringPtr{v.m_data.plazyclass.name()};
-        } else if (tvIsClass(v)) {
-          name = StringPtr{v.m_data.pclass->name()};
-        } else {
-          return;
-        }
-      } else if (kStr == kAttributeParamsKey) {
-        if (!tvIsArrayLike(v)) {
-          return;
-        }
-        IterateKV(v.m_data.parr, [&](TypedValue k, TypedValue v) {
-          if (!tvIsInt(k)) {
-            return;
-          }
-          args.insert({tvAssertInt(k), createDynamicFromTv(v)});
-        });
-      }
-    });
-    return {name, std::move(args)};
-  }
-
-  static folly::dynamic createDynamicFromTv(TypedValue v) {
-    folly::dynamic result{nullptr};
-    if (tvIsBool(v)) {
-      result = static_cast<bool>(v.m_data.num);
-    } else if (tvIsInt(v)) {
-      result = v.m_data.num;
-    } else if (tvIsDouble(v)) {
-      result = v.m_data.dbl;
-    } else if (tvIsString(v)) {
-      result = v.m_data.pstr->slice();
-    } else if (tvIsVec(v)) {
-      IterateV(v.m_data.parr, [&result](TypedValue v) {
-        result.push_back(createDynamicFromTv(v));
-      });
-    } else if (tvIsArrayLike(v)) {
-      IterateKV(v.m_data.parr, [&result](TypedValue k, TypedValue v) {
-        result[createDynamicFromTv(k)] = createDynamicFromTv(v);
-      });
-    }
-    return result;
-  }
-};
-
 struct DeriveKindFilterData {
   static constexpr DeriveKindFilterData includeEverything() noexcept {
     return {.m_removeExtends = false, .m_removeRequires = false};
@@ -297,7 +215,6 @@ struct DeriveKindFilterData {
 struct InheritanceFilterData {
   KindFilterData m_kindFilters;
   DeriveKindFilterData m_deriveKindFilters;
-  AttributeFilterData m_attrFilters;
 
   static InheritanceFilterData includeEverything() noexcept {
     return {
@@ -334,11 +251,6 @@ struct InheritanceFilterData {
         if (tvIsArrayLike(v)) {
           inheritanceFilters.m_deriveKindFilters =
               DeriveKindFilterData::createFromKeyset(v.m_data.parr);
-        }
-      } else if (key == kAttributeFilterKey) {
-        if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_attrFilters =
-              AttributeFilterData::createFromShapes(v.m_data.parr);
         }
       }
     });
@@ -1225,9 +1137,8 @@ struct FactsStoreImpl final
       addBaseTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterTypesByAttribute(
-        filterByKind(std::move(baseTypes), filters.m_kindFilters),
-        filters.m_attrFilters));
+    return makeVecOfString(
+        filterByKind(std::move(baseTypes), filters.m_kindFilters));
   }
 
   Array getDerivedTypes(
@@ -1254,9 +1165,8 @@ struct FactsStoreImpl final
       addDerivedTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterTypesByAttribute(
-        filterByKind(std::move(derivedTypes), filters.m_kindFilters),
-        filters.m_attrFilters));
+    return makeVecOfString(
+        filterByKind(std::move(derivedTypes), filters.m_kindFilters));
   }
 
   std::atomic<std::chrono::steady_clock::time_point> m_lastWatchmanQueryStart{
@@ -1348,77 +1258,6 @@ struct FactsStoreImpl final
                 default:
                   return false;
               }
-            }),
-        types.end());
-    return types;
-  }
-
-  /**
-   * Filter the given `types` down to only those with the given attributes.
-   */
-  template <typename T>
-  std::vector<T> filterTypesByAttribute(
-      std::vector<T> types,
-      const AttributeFilterData& filter) {
-    return filterTypesByAttribute(
-        std::move(types), filter, [](T type) -> Symbol<SymKind::Type> {
-          return type;
-        });
-  }
-
-  template <typename T, typename TypeGetFn>
-  std::vector<T> filterTypesByAttribute(
-      std::vector<T> types,
-      const AttributeFilterData& filter,
-      TypeGetFn typeGetFn) {
-    // Bail out if we aren't filtering on attributes
-    if (filter.m_attrs.empty()) {
-      return types;
-    }
-
-    // True iff the given attribute satisfies one of our AttributeFilterData
-    // constraints.
-    auto attrMatchesFilter = [&](Symbol<SymKind::Type> type,
-                                 Symbol<SymKind::Type> attr) {
-      // The given attribute isn't one of our constraints.
-      auto it = filter.m_attrs.find(attr);
-      if (it == filter.m_attrs.end()) {
-        return false;
-      }
-
-      // The attribute is one of our constraints, and we don't care about
-      // arguments.
-      auto argFilters = it->second;
-      if (argFilters.empty()) {
-        return true;
-      }
-
-      // Check that each of our argument constraints is satisfied by the
-      // attribute's argument.
-      auto args = m_map.getTypeAttributeArgs(type, attr);
-      for (auto const& [i, argFilter] : argFilters) {
-        if (i >= args.size() || args[i] != argFilter) {
-          return false;
-        }
-      }
-
-      // This attribute satisfies all argument constraints.
-      return true;
-    };
-
-    types.erase(
-        std::remove_if(
-            types.begin(),
-            types.end(),
-            [&](const T& typeInfo) {
-              auto const& type = typeGetFn(typeInfo);
-              size_t numAttrMatches = 0;
-              for (auto attr : m_map.getAttributesOfType(type)) {
-                if (attrMatchesFilter(type, attr)) {
-                  ++numAttrMatches;
-                }
-              }
-              return numAttrMatches < filter.m_attrs.size();
             }),
         types.end());
     return types;

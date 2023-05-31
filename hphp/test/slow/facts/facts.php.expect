@@ -50,11 +50,6 @@ Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require ex
 Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
-Filtering by attribute
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: ["AppleThenBanana","AppleThenCarrot"]
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: ["AppleThenCarrot"]
-
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}
 Attributes of BananaThenApple: {"TwoArgAttr":["banana","apple"]}
@@ -146,11 +141,6 @@ Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require 
 Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClass"]
 Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
 Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
-
-Filtering by attribute
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"apple"}}]}: ["AppleThenBanana","AppleThenCarrot"]
-Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"1":"carrot"}}]}: ["AppleThenCarrot"]
 
 Getting attributes
 Attributes of AppleThenBanana: {"TwoArgAttr":["apple","banana"]}

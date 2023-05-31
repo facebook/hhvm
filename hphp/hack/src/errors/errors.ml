@@ -732,7 +732,7 @@ and incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
     files_t_merge new_ old ~f:(fun path new_ old ->
         assert_path_is_real path;
         match new_ with
-        | Some new_ -> Some (List.rev new_)
+        | Some new_ -> Some new_
         | None -> old)
   in
   (* For files that were rechecked, but had no errors - remove them from maps *)

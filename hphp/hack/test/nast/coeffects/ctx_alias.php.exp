@@ -7,27 +7,27 @@
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-           ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          }
         ];
       t_mode = Mstrict; t_vis = Opaque;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       t_span = [4:1-29]; t_emit_id = None; t_is_ctx = true; t_internal = false; 
       t_module = None; t_docs_url = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-60], (String "context_alias_declaration"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        fd_mode = Mstrict; fd_name = ([6:10-14], "\\test");

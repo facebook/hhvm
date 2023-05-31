@@ -31,7 +31,7 @@ Errors:
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
       c_module = None });
@@ -48,7 +48,7 @@ Errors:
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [11:1-65]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = None; t_docs_url = None });
   (Typedef
@@ -64,7 +64,7 @@ Errors:
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [13:1-57]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = None; t_docs_url = None });
   (Typedef
@@ -77,7 +77,7 @@ Errors:
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [15:1-48]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = None; t_docs_url = None });
   (Typedef
@@ -90,7 +90,7 @@ Errors:
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [18:1-38]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = None; t_docs_url = None })
   ]

@@ -562,7 +562,6 @@ impl<'a> NamespaceBuilder<'a> {
                 fun_uses: SMap::empty(),
                 const_uses: SMap::empty(),
                 name: None,
-                auto_ns_map,
                 is_codegen: false,
                 disable_xhp_element_mangling,
             }],

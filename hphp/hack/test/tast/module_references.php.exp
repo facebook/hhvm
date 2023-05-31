@@ -5,13 +5,13 @@
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-           ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
          };
         { fa_user_attributes = [{ ua_name = ([4:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [4:33-52], (String "module_references"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
         ];
       md_span = [6:1-7:2]; md_mode = Mstrict; md_doc_comment = None; 
@@ -23,13 +23,13 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           };
          { fa_user_attributes = [{ ua_name = ([4:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [4:33-52], (String "module_references"))] }];
            fa_namespace =
            { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
              ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
            }
          ];
        md_span = [9:1-10:2]; md_mode = Mstrict; md_doc_comment = None; 
@@ -41,13 +41,13 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           };
          { fa_user_attributes = [{ ua_name = ([4:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [4:33-52], (String "module_references"))] }];
            fa_namespace =
            { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
              ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
            }
          ];
        md_span = [12:1-13:2]; md_mode = Mstrict; md_doc_comment = None; 
@@ -59,13 +59,13 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           };
          { fa_user_attributes = [{ ua_name = ([4:8-32], "__EnableUnstableFeatures"); ua_params = [((string), [4:33-52], (String "module_references"))] }];
            fa_namespace =
            { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
              ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+             ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
            }
          ];
        md_span = [15:1-24:2]; md_mode = Mstrict; md_doc_comment = None; 

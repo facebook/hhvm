@@ -29,7 +29,7 @@
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:12-40], "__EnumClass"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None;
       c_enum = (Some { e_base = ([3:43-48], (Hlike ([3:43-48], (Happly (([3:43-48], "\\HH\\supportdyn"), [([3:43-48], Hmixed)]))))); e_constraint = None; e_includes = [] }); 
@@ -60,7 +60,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([8:12-25], "__EnumClass"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([8:28-36], (Hlike ([8:28-36], (Hprim Tarraykey)))); e_constraint = None; e_includes = [] }); 
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
@@ -84,7 +84,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([13:11-19], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
        c_emit_id = None; c_internal = false; c_module = None });
@@ -116,7 +116,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([17:21-40], "__EnumClass"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([17:42-50], (Hlike ([17:42-50], (Happly (([17:42-50], "\\IHasName"), []))))); e_constraint = None; e_includes = [] });
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
@@ -134,7 +134,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
        c_enum = (Some { e_base = ([22:24-30], (Hprim Tstring)); e_constraint = None; e_includes = [] }); 
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
@@ -152,7 +152,7 @@
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_docs_url = None;
        c_enum = (Some { e_base = ([27:29-37], (Hprim Tarraykey)); e_constraint = (Some ([27:41-49], (Hprim Tarraykey))); e_includes = [] }); 
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None })

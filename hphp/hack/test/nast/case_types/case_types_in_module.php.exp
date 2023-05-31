@@ -8,14 +8,14 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [6:1-30]; t_emit_id = None; t_is_ctx = false; t_internal = true; 
        t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None });
   (Typedef
@@ -27,14 +27,14 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [8:1-28]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None });
   (Typedef
@@ -46,14 +46,14 @@
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [10:1-11:21]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
        t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None })
   ]

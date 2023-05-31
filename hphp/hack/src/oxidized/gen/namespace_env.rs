@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dacd5b2314fff23fd52f0a1ce0114e50>>
+// @generated SignedSource<<7eaa338ed3e31bf3b77b0e82f09c5c03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,7 +44,6 @@ pub struct Env {
     #[rust_to_ocaml(attr = "opaque")]
     pub const_uses: s_map::SMap<String>,
     pub name: Option<String>,
-    pub auto_ns_map: Vec<(String, String)>,
     pub is_codegen: bool,
     pub disable_xhp_element_mangling: bool,
 }

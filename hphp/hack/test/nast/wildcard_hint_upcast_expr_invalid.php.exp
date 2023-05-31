@@ -11,14 +11,14 @@ Errors:
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([1:8-32], "__EnableUnstableFeatures"); ua_params = [((), [1:33-52], (String "upcast_expression"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
@@ -34,14 +34,14 @@ Errors:
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([1:8-32], "__EnableUnstableFeatures"); ua_params = [((), [1:33-52], (String "upcast_expression"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
@@ -50,13 +50,13 @@ Errors:
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([1:8-32], "__EnableUnstableFeatures"); ua_params = [((), [1:33-52], (String "upcast_expression"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
        fd_mode = Mstrict; fd_name = ([7:10-35], "\\wildcard_hint_upcast_expr");

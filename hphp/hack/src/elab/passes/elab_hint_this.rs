@@ -319,7 +319,6 @@ mod tests {
                 fun_uses: SMap::default(),
                 const_uses: SMap::default(),
                 name: None,
-                auto_ns_map: vec![],
                 is_codegen: false,
                 disable_xhp_element_mangling: false,
             }),

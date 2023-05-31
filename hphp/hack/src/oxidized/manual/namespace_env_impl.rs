@@ -6,7 +6,6 @@
 use hh_autoimport_rust as hh_autoimport;
 
 use crate::gen::namespace_env::Env;
-use crate::parser_options::ParserOptions;
 
 impl Env {
     pub fn empty(
@@ -24,17 +23,8 @@ impl Env {
             fun_uses: hh_autoimport::FUNCS_MAP.clone(),
             const_uses: hh_autoimport::CONSTS_MAP.clone(),
             name: None,
-            auto_ns_map,
             is_codegen,
             disable_xhp_element_mangling,
         }
-    }
-
-    pub fn empty_from_popt(opts: &ParserOptions) -> Self {
-        Self::empty(
-            opts.po_auto_namespace_map.clone(),
-            opts.po_codegen,
-            opts.po_disable_xhp_element_mangling,
-        )
     }
 }

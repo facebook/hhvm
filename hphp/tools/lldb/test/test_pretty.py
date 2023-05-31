@@ -118,19 +118,29 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
                 _, output = self.run_commands(["p tv"])
                 self.assertRegex(output.strip(), expected_output)
 
-        with self.subTest("TypedValues (reference)"):
+        with self.subTest("TypedValue (reference)"):
             self.run_until_breakpoint("takeTypedValueRef")
             _, output = self.run_commands(["p tv"])
+            # LLDB pretty prints it, and then for some strange reason proceeds to
+            # print out the raw structure contents, hence the extra .*
             expected_output = r"\(HPHP::TypedValue &\) 0x.* \{ Int64, 42 \}.*"
             self.assertRegex(output.strip(), expected_output)
 
-        with self.subTest("TypedValues (subclasses -- Variant)"):
+        with self.subTest("TypedValue (pointer)"):
+            # Testing that LLDB prints the address of the pointer before
+            # automatically pretty printing the dereferenced value
+            self.run_until_breakpoint("takeTypedValuePtr")
+            _, output = self.run_commands(["p tv"])
+            expected_output = r"\(HPHP::TypedValue \*\) 0x.* \{ Int64, 42 \}"
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("TypedValue (subclasses -- Variant)"):
             self.run_until_breakpoint("takeVariant")
             _, output = self.run_commands(["p v"])
             expected_output = r'\(HPHP::Variant\) \{ Int64, 42 \}'
             self.assertRegex(output.strip(), expected_output)
 
-        with self.subTest("TypedValues (subclasses -- VarNR)"):
+        with self.subTest("TypedValue (subclasses -- VarNR)"):
             self.run_until_breakpoint("takeVarNR")
             _, output = self.run_commands(["p v"])
             expected_output = r'\(HPHP::VarNR\) \{ Double, 2.718 \}'
@@ -149,10 +159,28 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_output = r"\(HPHP::StringData\) hello"
             self.assertRegex(output.strip(), expected_output)
 
+        with self.subTest("StringData * const"):
+            self.run_until_breakpoint("takeConstPtrToStringData")
+            _, output = self.run_commands(["p v"])
+            expected_output = r"\(HPHP::StringData \*const\) 0x.* hello"
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("const StringData *"):
+            self.run_until_breakpoint("takePtrToConstStringData")
+            _, output = self.run_commands(["p v"])
+            expected_output = r"\(const HPHP::StringData \*\) 0x.* hello"
+            self.assertRegex(output.strip(), expected_output)
+
         with self.subTest("String"):
             self.run_until_breakpoint("takeString")
             _, output = self.run_commands(["p v"])
             expected_output = r"\(HPHP::String\) hello"
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("String *"):
+            self.run_until_breakpoint("takePtrToString")
+            _, output = self.run_commands(["p v"])
+            expected_output = r"\(HPHP::String \*\) 0x.* hello"
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("StaticString"):
@@ -171,6 +199,12 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             self.run_until_breakpoint("takeResource")
             _, output = self.run_commands(["p v"])
             expected_output = r"\(HPHP::Resource\) \(hdr = 0x.*, data = 0x.*\)"
+            self.assertRegex(output.strip(), expected_output)
+
+        with self.subTest("Resource *"):
+            self.run_until_breakpoint("takePtrToResource")
+            _, output = self.run_commands(["p v"])
+            expected_output = r"\(HPHP::Resource \*\) 0x.* \(hdr = 0x.*, data = 0x.*\)"
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("Object"):

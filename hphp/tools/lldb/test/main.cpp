@@ -125,6 +125,7 @@ DATATYPES
 #undef DT
 
 void takeTypedValueRef(TypedValue& UNUSED tv) { return; }
+void takeTypedValuePtr(TypedValue* UNUSED tv) { return; }
 
 // TypedValue subtypes
 void takeVariant(Variant UNUSED v) { return; }
@@ -144,6 +145,10 @@ void buildTypedValues() {
     auto tv = createTestTypedValue<DataType::Int64>();
     takeTypedValueRef(tv);
   }
+  {
+    auto tv = createTestTypedValue<DataType::Int64>();
+    takeTypedValuePtr(&tv);
+  }
   takeVariant(Variant(42));
   takeVarNR(VarNR(2.718));
 }
@@ -151,10 +156,14 @@ void buildTypedValues() {
 // Other values
 
 void takeStringData(StringData* UNUSED v) { return; }
+void takeConstPtrToStringData(StringData* UNUSED const v) { return; }
+void takePtrToConstStringData(const StringData* UNUSED v) { return; }
 void takeString(String UNUSED v) { return; }
+void takePtrToString(String* UNUSED v) { return; }
 void takeStaticString(StaticString UNUSED v) { return; }
 void takeStrNR(StrNR UNUSED v) { return; }
 void takeResource(Resource UNUSED v) { return; }
+void takePtrToResource(Resource* UNUSED v) { return; }
 void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
 void takeOptional(Optional<String> UNUSED v) { return; }
@@ -171,12 +180,19 @@ void buildOtherValues() {
   Array vec = make_vec_array(1, 2, 3, 4);
   Array dict = make_dict_array(0x0123cafe, true, 302, "Salutations, earth!", 2, 3.14, "key4", 2.718, "key5", "Hello, world!");
   Array keyset = make_keyset_array(1, "cats", 2, 3, "cats", 2, 3, "dogs", 42);
+  auto sd = StringData::MakeStatic("hello");
+  auto s = String("hello");
+  auto rsc = Resource(req::make<DummyResource>());
 
-  takeStringData(StringData::MakeStatic("hello"));
-  takeString(String("hello"));
+  takeStringData(sd);
+  takeConstPtrToStringData(sd);
+  takePtrToConstStringData(sd);
+  takeString(s);
+  takePtrToString(&s);
   takeStaticString(StaticString("hello"));
   takeStrNR(StrNR(StringData::MakeStatic("hello")));
-  takeResource(Resource(req::make<DummyResource>()));
+  takeResource(rsc);
+  takePtrToResource(&rsc);
   takeObject(TestObject);
   takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to get its sole private member m_obj
   takeOptional(Optional<String>("hello"));

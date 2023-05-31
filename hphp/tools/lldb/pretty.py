@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 Formatters = []
 
 
-def format(datatype: str, regex: bool = False, synthetic_children: bool = False):
+def format(datatype: str, regex: bool = False, skip_pointers = False, skip_references = False, synthetic_children: bool = False):
     """ Wrapper for pretty printer functions.
 
     Add the command needed to register the pretty printer with the LLDB debugger
@@ -32,21 +32,30 @@ def format(datatype: str, regex: bool = False, synthetic_children: bool = False)
         The original function.
     """
     def inner(func_or_class):
+        extra_options = []
+        if regex:
+            extra_options.append("-x")
+        if skip_pointers:
+            extra_options.append("-p")
+        if skip_references:
+            extra_options.append("-r")
+        extra_options = " ".join(extra_options)
+
         if synthetic_children:
             assert isinstance(func_or_class, type), "Can only use synthetic_children=True in @format decorator on classes"
             Formatters.append(lambda top_module:
-                f'type synthetic add {"-x" if regex else ""} '
+                f'type synthetic add {extra_options} '
                 f'--python-class {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
             )
             # Modify the top-level summary of this type
             if hasattr(func_or_class, "summary"):
                 Formatters.append(lambda top_module:
-                    f'type summary add --expand {"-x" if regex else ""} '
+                    f'type summary add --expand {extra_options} '
                     f'--summary-string "{func_or_class.summary()}" "{datatype}"'
                 )
         else:
             Formatters.append(lambda top_module:
-                f'type summary add {"-x" if regex else ""} '
+                f'type summary add {extra_options} '
                 f'--python-function {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
             )
         return func_or_class
@@ -71,9 +80,6 @@ def format(datatype: str, regex: bool = False, synthetic_children: bool = False)
 
 @format("^HPHP::((Unaligned)?TypedValue|Variant|VarNR)$", regex=True)
 def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
-
     m_type = utils.get(val_obj, "m_type")
     m_data = utils.get(val_obj, "m_data")
     return utils.pretty_tv(m_type, m_data)
@@ -109,8 +115,6 @@ def pp_LowPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 
 @format("^HPHP::Resource$", regex=True)
 def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
     val = utils.rawptr(utils.get(val_obj, "m_res"))
     return utils.pretty_resource_header(val)
 
@@ -120,23 +124,20 @@ def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 
 @format("^HPHP::StringData$", regex=True)
 def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
+    # Note: string_data_val() will dereference a pointer value, if given
     return utils.string_data_val(val_obj)
 
 
 @format("^HPHP::(Static)?String$", regex=True)
 def pp_String(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
+    # Note: SBValue.GetChildMemberWithName(), used by utils.get(),
+    # will get the members of both pointers and the pointed-to values themselves
     val = utils.rawptr(utils.get(val_obj, "m_str"))
     return utils.string_data_val(val)
 
 
 @format("^HPHP::StrNR$", regex=True)
 def pp_StrNR(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    if val_obj.type.IsPointerType():
-        return ''
     val = utils.get(val_obj, "m_px")
     return utils.string_data_val(val)
 

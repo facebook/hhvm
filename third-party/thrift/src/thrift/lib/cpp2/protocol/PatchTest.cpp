@@ -478,37 +478,6 @@ TEST_F(PatchTest, List) {
     expectNoop(patchObj);
   }
 
-  // Remove
-  {
-    Object patchObj = makePatch(
-        op::PatchOp::Remove,
-        asValueStruct<type::set<type::binary_t>>(std::set{"test"}));
-    EXPECT_EQ(
-        std::vector<Value>{},
-        *applyContainerPatch(patchObj, value).listValue_ref());
-    // It is a map mask as Remove can't distinguish between list, set, and map.
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      isBinaryEqual(*((Value*)mask.begin()->first), "test");
-      EXPECT_EQ(mask.begin()->second, allMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_string_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      EXPECT_EQ(mask.begin()->first, "test");
-      EXPECT_EQ(mask.begin()->second, allMask());
-    }
-  }
-  {
-    Object patchObj = makePatch(op::PatchOp::Remove, emptySet);
-    expectNoop(patchObj);
-  }
-
   // Add
   {
     Object patchObj = makePatch(

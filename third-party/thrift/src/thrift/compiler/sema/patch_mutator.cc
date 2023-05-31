@@ -583,9 +583,6 @@ t_struct& patch_generator::gen_patch(
     if (const auto* p = program_.scope()->find_type("patch.ListPatchIndex")) {
       gen.patchList(inst_map(t_type_ref::from_ptr(p), elem_patch_type));
     }
-    // TODO(afuller): Support sets for all types in all languages, and switch
-    // this to a set instead of a list.
-    gen.remove(inst_list(list->elem_type()));
     gen.prepend(type);
     gen.append(type);
     gen.set_adapter("ListPatchAdapter");

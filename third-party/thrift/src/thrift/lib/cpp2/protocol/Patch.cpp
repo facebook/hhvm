@@ -240,8 +240,7 @@ void ApplyPatch::operator()(
        PatchOp::Clear,
        PatchOp::PatchPrior,
        PatchOp::Add,
-       PatchOp::Put,
-       PatchOp::Remove});
+       PatchOp::Put});
   if (applyAssign<type::list_c>(patch, value)) {
     return; // Ignore all other ops.
   }
@@ -270,29 +269,6 @@ void ApplyPatch::operator()(
         applyPatch(*elPatch.objectValue_ref(), value[index]);
       }
     }
-  }
-
-  if (auto* remove = findOp(patch, PatchOp::Remove)) {
-    if (!remove->is_set() && !remove->is_list()) {
-      throw std::runtime_error(
-          "list remove patch should contain a set or a list");
-    }
-
-    auto make_element_filter = [&]() -> std::function<bool(const Value&)> {
-      if (const auto* to_remove = remove->if_set()) {
-        return [to_remove](const auto& element) {
-          return to_remove->find(element) != to_remove->end();
-        };
-      }
-      const auto* to_remove = remove->if_list();
-      return [to_remove](const auto& element) {
-        return std::find(to_remove->begin(), to_remove->end(), element) !=
-            to_remove->end();
-      };
-    };
-    value.erase(
-        std::remove_if(value.begin(), value.end(), make_element_filter()),
-        value.end());
   }
 
   if (auto* add = findOp(patch, PatchOp::Add)) {

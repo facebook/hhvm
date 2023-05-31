@@ -259,9 +259,8 @@ struct ForEachField<::test::fixtures::patch::MyStructField26PatchStruct> {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).patch_ref()...);
-    f(3, static_cast<T&&>(t).remove_ref()...);
-    f(4, static_cast<T&&>(t).prepend_ref()...);
-    f(5, static_cast<T&&>(t).append_ref()...);
+    f(3, static_cast<T&&>(t).prepend_ref()...);
+    f(4, static_cast<T&&>(t).append_ref()...);
   }
 };
 
@@ -297,9 +296,8 @@ struct ForEachField<::test::fixtures::patch::MyStructField29PatchStruct> {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).patch_ref()...);
-    f(3, static_cast<T&&>(t).remove_ref()...);
-    f(4, static_cast<T&&>(t).prepend_ref()...);
-    f(5, static_cast<T&&>(t).append_ref()...);
+    f(3, static_cast<T&&>(t).prepend_ref()...);
+    f(4, static_cast<T&&>(t).append_ref()...);
   }
 };
 

@@ -513,11 +513,13 @@ Test createListSetPatchTest(
       clearCase.test().emplace().objectPatch_ref() =
           makeClearTC<ContainerTag>(registry, protocol, value.value);
 
-      auto& removeCase = test.testCases()->emplace_back();
-      removeCase.name() = makeTestName(value, "remove");
-      removeCase.test().emplace().objectPatch_ref() =
-          makeContainerRemoveTC<ContainerTag, TT>(
-              registry, protocol, value.value, value.value);
+      if constexpr (std::is_same_v<CC, type::set_c>) {
+        auto& removeCase = test.testCases()->emplace_back();
+        removeCase.name() = makeTestName(value, "remove");
+        removeCase.test().emplace().objectPatch_ref() =
+            makeContainerRemoveTC<ContainerTag, TT>(
+                registry, protocol, value.value, value.value);
+      }
 
       auto& prependCase = test.testCases()->emplace_back();
       prependCase.name() = makeTestName(value, "prepend");

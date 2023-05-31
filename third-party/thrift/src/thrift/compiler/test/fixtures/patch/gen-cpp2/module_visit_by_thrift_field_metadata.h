@@ -436,12 +436,10 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField26PatchStruct> {
       return f(1, static_cast<T&&>(t).clear_ref());
     case 3:
       return f(2, static_cast<T&&>(t).patch_ref());
-    case 7:
-      return f(3, static_cast<T&&>(t).remove_ref());
     case 8:
-      return f(4, static_cast<T&&>(t).prepend_ref());
+      return f(3, static_cast<T&&>(t).prepend_ref());
     case 9:
-      return f(5, static_cast<T&&>(t).append_ref());
+      return f(4, static_cast<T&&>(t).append_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructField26PatchStruct");
     }
@@ -503,12 +501,10 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructField29PatchStruct> {
       return f(1, static_cast<T&&>(t).clear_ref());
     case 3:
       return f(2, static_cast<T&&>(t).patch_ref());
-    case 7:
-      return f(3, static_cast<T&&>(t).remove_ref());
     case 8:
-      return f(4, static_cast<T&&>(t).prepend_ref());
+      return f(3, static_cast<T&&>(t).prepend_ref());
     case 9:
-      return f(5, static_cast<T&&>(t).append_ref());
+      return f(4, static_cast<T&&>(t).append_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructField29PatchStruct");
     }

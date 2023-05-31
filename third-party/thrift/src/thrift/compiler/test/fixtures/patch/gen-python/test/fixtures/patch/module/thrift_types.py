@@ -1428,14 +1428,6 @@ class MyStructField26Patch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
-            7,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "remove",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "prepend",  # name
@@ -1656,14 +1648,6 @@ class MyStructField29Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(MyStructField29Patch1)),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            7,  # id
-            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
-            "remove",  # name
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

@@ -2267,31 +2267,31 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         case MAPMAP:
           if (__field.type == TType.MAP) {
             {
-              TMap _map242 = iprot.readMapBegin();
-              this.mapMap = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map242.size));
-              for (int _i243 = 0; 
-                   (_map242.size < 0) ? iprot.peekMap() : (_i243 < _map242.size); 
-                   ++_i243)
+              TMap _map229 = iprot.readMapBegin();
+              this.mapMap = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map229.size));
+              for (int _i230 = 0; 
+                   (_map229.size < 0) ? iprot.peekMap() : (_i230 < _map229.size); 
+                   ++_i230)
               {
-                String _key244;
-                Map<String,Integer> _val245;
-                _key244 = iprot.readString();
+                String _key231;
+                Map<String,Integer> _val232;
+                _key231 = iprot.readString();
                 {
-                  TMap _map246 = iprot.readMapBegin();
-                  _val245 = new HashMap<String,Integer>(Math.max(0, 2*_map246.size));
-                  for (int _i247 = 0; 
-                       (_map246.size < 0) ? iprot.peekMap() : (_i247 < _map246.size); 
-                       ++_i247)
+                  TMap _map233 = iprot.readMapBegin();
+                  _val232 = new HashMap<String,Integer>(Math.max(0, 2*_map233.size));
+                  for (int _i234 = 0; 
+                       (_map233.size < 0) ? iprot.peekMap() : (_i234 < _map233.size); 
+                       ++_i234)
                   {
-                    String _key248;
-                    int _val249;
-                    _key248 = iprot.readString();
-                    _val249 = iprot.readI32();
-                    _val245.put(_key248, _val249);
+                    String _key235;
+                    int _val236;
+                    _key235 = iprot.readString();
+                    _val236 = iprot.readI32();
+                    _val232.put(_key235, _val236);
                   }
                   iprot.readMapEnd();
                 }
-                this.mapMap.put(_key244, _val245);
+                this.mapMap.put(_key231, _val232);
               }
               iprot.readMapEnd();
             }
@@ -2302,29 +2302,29 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         case LISTMAP:
           if (__field.type == TType.LIST) {
             {
-              TList _list250 = iprot.readListBegin();
-              this.listMap = new ArrayList<Map<String,Integer>>(Math.max(0, _list250.size));
-              for (int _i251 = 0; 
-                   (_list250.size < 0) ? iprot.peekList() : (_i251 < _list250.size); 
-                   ++_i251)
+              TList _list237 = iprot.readListBegin();
+              this.listMap = new ArrayList<Map<String,Integer>>(Math.max(0, _list237.size));
+              for (int _i238 = 0; 
+                   (_list237.size < 0) ? iprot.peekList() : (_i238 < _list237.size); 
+                   ++_i238)
               {
-                Map<String,Integer> _elem252;
+                Map<String,Integer> _elem239;
                 {
-                  TMap _map253 = iprot.readMapBegin();
-                  _elem252 = new HashMap<String,Integer>(Math.max(0, 2*_map253.size));
-                  for (int _i254 = 0; 
-                       (_map253.size < 0) ? iprot.peekMap() : (_i254 < _map253.size); 
-                       ++_i254)
+                  TMap _map240 = iprot.readMapBegin();
+                  _elem239 = new HashMap<String,Integer>(Math.max(0, 2*_map240.size));
+                  for (int _i241 = 0; 
+                       (_map240.size < 0) ? iprot.peekMap() : (_i241 < _map240.size); 
+                       ++_i241)
                   {
-                    String _key255;
-                    int _val256;
-                    _key255 = iprot.readString();
-                    _val256 = iprot.readI32();
-                    _elem252.put(_key255, _val256);
+                    String _key242;
+                    int _val243;
+                    _key242 = iprot.readString();
+                    _val243 = iprot.readI32();
+                    _elem239.put(_key242, _val243);
                   }
                   iprot.readMapEnd();
                 }
-                this.listMap.add(_elem252);
+                this.listMap.add(_elem239);
               }
               iprot.readListEnd();
             }
@@ -2335,17 +2335,17 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         case OPTMAPVAL:
           if (__field.type == TType.MAP) {
             {
-              TMap _map257 = iprot.readMapBegin();
-              this.optMapVal = new HashMap<String,String>(Math.max(0, 2*_map257.size));
-              for (int _i258 = 0; 
-                   (_map257.size < 0) ? iprot.peekMap() : (_i258 < _map257.size); 
-                   ++_i258)
+              TMap _map244 = iprot.readMapBegin();
+              this.optMapVal = new HashMap<String,String>(Math.max(0, 2*_map244.size));
+              for (int _i245 = 0; 
+                   (_map244.size < 0) ? iprot.peekMap() : (_i245 < _map244.size); 
+                   ++_i245)
               {
-                String _key259;
-                String _val260;
-                _key259 = iprot.readString();
-                _val260 = iprot.readString();
-                this.optMapVal.put(_key259, _val260);
+                String _key246;
+                String _val247;
+                _key246 = iprot.readString();
+                _val247 = iprot.readString();
+                this.optMapVal.put(_key246, _val247);
               }
               iprot.readMapEnd();
             }
@@ -2356,15 +2356,15 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         case OPTSETVAL:
           if (__field.type == TType.SET) {
             {
-              TSet _set261 = iprot.readSetBegin();
-              this.optSetVal = new HashSet<String>(Math.max(0, 2*_set261.size));
-              for (int _i262 = 0; 
-                   (_set261.size < 0) ? iprot.peekSet() : (_i262 < _set261.size); 
-                   ++_i262)
+              TSet _set248 = iprot.readSetBegin();
+              this.optSetVal = new HashSet<String>(Math.max(0, 2*_set248.size));
+              for (int _i249 = 0; 
+                   (_set248.size < 0) ? iprot.peekSet() : (_i249 < _set248.size); 
+                   ++_i249)
               {
-                String _elem263;
-                _elem263 = iprot.readString();
-                this.optSetVal.add(_elem263);
+                String _elem250;
+                _elem250 = iprot.readString();
+                this.optSetVal.add(_elem250);
               }
               iprot.readSetEnd();
             }
@@ -2375,15 +2375,15 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         case OPTLISTVAL:
           if (__field.type == TType.LIST) {
             {
-              TList _list264 = iprot.readListBegin();
-              this.optListVal = new ArrayList<Short>(Math.max(0, _list264.size));
-              for (int _i265 = 0; 
-                   (_list264.size < 0) ? iprot.peekList() : (_i265 < _list264.size); 
-                   ++_i265)
+              TList _list251 = iprot.readListBegin();
+              this.optListVal = new ArrayList<Short>(Math.max(0, _list251.size));
+              for (int _i252 = 0; 
+                   (_list251.size < 0) ? iprot.peekList() : (_i252 < _list251.size); 
+                   ++_i252)
               {
-                short _elem266;
-                _elem266 = iprot.readI16();
-                this.optListVal.add(_elem266);
+                short _elem253;
+                _elem253 = iprot.readI16();
+                this.optListVal.add(_elem253);
               }
               iprot.readListEnd();
             }
@@ -2627,13 +2627,13 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, this.mapMap.size()));
-          for (Map.Entry<String, Map<String,Integer>> _iter267 : this.mapMap.entrySet())          {
-            oprot.writeString(_iter267.getKey());
+          for (Map.Entry<String, Map<String,Integer>> _iter254 : this.mapMap.entrySet())          {
+            oprot.writeString(_iter254.getKey());
             {
-              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter267.getValue().size()));
-              for (Map.Entry<String, Integer> _iter268 : _iter267.getValue().entrySet())              {
-                oprot.writeString(_iter268.getKey());
-                oprot.writeI32(_iter268.getValue());
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter254.getValue().size()));
+              for (Map.Entry<String, Integer> _iter255 : _iter254.getValue().entrySet())              {
+                oprot.writeString(_iter255.getKey());
+                oprot.writeI32(_iter255.getValue());
               }
               oprot.writeMapEnd();
             }
@@ -2648,12 +2648,12 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(LIST_MAP_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.MAP, this.listMap.size()));
-          for (Map<String,Integer> _iter269 : this.listMap)          {
+          for (Map<String,Integer> _iter256 : this.listMap)          {
             {
-              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter269.size()));
-              for (Map.Entry<String, Integer> _iter270 : _iter269.entrySet())              {
-                oprot.writeString(_iter270.getKey());
-                oprot.writeI32(_iter270.getValue());
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter256.size()));
+              for (Map.Entry<String, Integer> _iter257 : _iter256.entrySet())              {
+                oprot.writeString(_iter257.getKey());
+                oprot.writeI32(_iter257.getValue());
               }
               oprot.writeMapEnd();
             }
@@ -2668,9 +2668,9 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(OPT_MAP_VAL_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, this.optMapVal.size()));
-          for (Map.Entry<String, String> _iter271 : this.optMapVal.entrySet())          {
-            oprot.writeString(_iter271.getKey());
-            oprot.writeString(_iter271.getValue());
+          for (Map.Entry<String, String> _iter258 : this.optMapVal.entrySet())          {
+            oprot.writeString(_iter258.getKey());
+            oprot.writeString(_iter258.getValue());
           }
           oprot.writeMapEnd();
         }
@@ -2682,8 +2682,8 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.optSetVal.size()));
-          for (String _iter272 : this.optSetVal)          {
-            oprot.writeString(_iter272);
+          for (String _iter259 : this.optSetVal)          {
+            oprot.writeString(_iter259);
           }
           oprot.writeSetEnd();
         }
@@ -2695,8 +2695,8 @@ public class MyStructEnsureStruct implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I16, this.optListVal.size()));
-          for (short _iter273 : this.optListVal)          {
-            oprot.writeI16(_iter273);
+          for (short _iter260 : this.optListVal)          {
+            oprot.writeI16(_iter260);
           }
           oprot.writeListEnd();
         }

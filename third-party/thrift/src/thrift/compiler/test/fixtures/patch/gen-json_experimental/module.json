@@ -1267,16 +1267,6 @@
 }
 }
                   },
-          "remove" : {
-            "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies third.\n",
-            "key" : 7,
-            "lineno" : 23,
-            "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
-                  },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepends to the front of a given list.\n",
@@ -1503,20 +1493,6 @@
   "value_type" : {
   "type" : "struct",
   "name" : "MyStructField29Patch1"
-}
-}
-                  },
-          "remove" : {
-            "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies third.\n",
-            "key" : 7,
-            "lineno" : 23,
-            "type" : {
-  "type" : "list",
-  "inner_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
 }
 }
                   },

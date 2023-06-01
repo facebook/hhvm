@@ -148,7 +148,7 @@ func NewMyStruct() *MyStruct {
         SetOnewayNonCompat(false).
         SetReadonlyNonCompat(false).
         SetIdempotentNonCompat(false).
-        SetFloatSetNonCompat(make([]float32, 0)).
+        SetFloatSetNonCompat(nil).
         SetNoHackCodegenFieldNonCompat("")
 }
 
@@ -218,7 +218,7 @@ func (x *MyStruct) GetFloatSetNonCompat() []float32 {
 
 func (x *MyStruct) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return make([]float32, 0)
+        return nil
     }
 
     return x.FloatSet
@@ -941,7 +941,7 @@ func (x *MyUnion) GetFloatSetNonCompat() []float32 {
 
 func (x *MyUnion) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
-        return make([]float32, 0)
+        return nil
     }
 
     return x.FloatSet

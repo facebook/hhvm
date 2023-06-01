@@ -97,7 +97,7 @@ if err != nil {
 type MyMapIdentifier = map[string]string
 
 func NewMyMapIdentifier() MyMapIdentifier {
-  return make(map[string]string)
+  return nil
 }
 
 func WriteMyMapIdentifier(item MyMapIdentifier, p thrift.Protocol) error {
@@ -1175,7 +1175,7 @@ func NewStruct2() *Struct2 {
         SetANonCompat(0).
         SetBNonCompat("").
         SetCNonCompat(*NewStruct1()).
-        SetDNonCompat(make([]int32, 0))
+        SetDNonCompat(nil)
 }
 
 func (x *Struct2) GetANonCompat() int32 {
@@ -1212,7 +1212,7 @@ func (x *Struct2) GetDNonCompat() []int32 {
 
 func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.D

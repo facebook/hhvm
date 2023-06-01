@@ -3284,7 +3284,7 @@ var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{}).
-        SetValueNonCompat(make([]float32, 0))
+        SetValueNonCompat(nil)
 }
 
 func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
@@ -3293,7 +3293,7 @@ func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
 
 func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
     if !x.IsSetValue() {
-        return make([]float32, 0)
+        return nil
     }
 
     return x.Value

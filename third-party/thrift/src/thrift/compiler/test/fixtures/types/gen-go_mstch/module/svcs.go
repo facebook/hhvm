@@ -474,7 +474,7 @@ type SomeServiceBinaryKeyedMapArgs = reqSomeServiceBinaryKeyedMap
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{}).
-        SetRNonCompat(make([]int64, 0))
+        SetRNonCompat(nil)
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
@@ -483,7 +483,7 @@ func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
 
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
     if !x.IsSetR() {
-        return make([]int64, 0)
+        return nil
     }
 
     return x.R
@@ -656,7 +656,7 @@ var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{}).
-        SetValueNonCompat(make(map[*TBinary]int64))
+        SetValueNonCompat(nil)
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[*TBinary]int64 {
@@ -665,7 +665,7 @@ func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[*TBinary]int64 {
 
 func (x *respSomeServiceBinaryKeyedMap) GetValue() map[*TBinary]int64 {
     if !x.IsSetValue() {
-        return make(map[*TBinary]int64)
+        return nil
     }
 
     return x.Value

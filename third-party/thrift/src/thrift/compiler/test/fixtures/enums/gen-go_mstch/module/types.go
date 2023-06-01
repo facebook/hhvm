@@ -531,7 +531,7 @@ func (x *SomeStruct) GetTagsNonCompat() []int32 {
 
 func (x *SomeStruct) GetTags() []int32 {
     if !x.IsSetTags() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.Tags

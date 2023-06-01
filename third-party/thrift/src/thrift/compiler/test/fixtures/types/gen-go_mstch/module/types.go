@@ -514,13 +514,13 @@ var _ thrift.Struct = &ContainerStruct{}
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{}).
-        SetFieldANonCompat(make([]int32, 0)).
-        SetFieldBNonCompat(make([]int32, 0)).
-        SetFieldCNonCompat(make([]int32, 0)).
-        SetFieldDNonCompat(make([]int32, 0)).
-        SetFieldENonCompat(make([]int32, 0)).
-        SetFieldFNonCompat(make([]int32, 0)).
-        SetFieldGNonCompat(make(map[int32]string)).
+        SetFieldANonCompat(nil).
+        SetFieldBNonCompat(nil).
+        SetFieldCNonCompat(nil).
+        SetFieldDNonCompat(nil).
+        SetFieldENonCompat(nil).
+        SetFieldFNonCompat(nil).
+        SetFieldGNonCompat(nil).
         SetFieldHNonCompat(included.NewSomeMap())
 }
 
@@ -530,7 +530,7 @@ func (x *ContainerStruct) GetFieldANonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldA
@@ -542,7 +542,7 @@ func (x *ContainerStruct) GetFieldBNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldB() []int32 {
     if !x.IsSetFieldB() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldB
@@ -554,7 +554,7 @@ func (x *ContainerStruct) GetFieldCNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldC() []int32 {
     if !x.IsSetFieldC() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldC
@@ -566,7 +566,7 @@ func (x *ContainerStruct) GetFieldDNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldD() []int32 {
     if !x.IsSetFieldD() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldD
@@ -578,7 +578,7 @@ func (x *ContainerStruct) GetFieldENonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldE() []int32 {
     if !x.IsSetFieldE() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldE
@@ -590,7 +590,7 @@ func (x *ContainerStruct) GetFieldFNonCompat() []int32 {
 
 func (x *ContainerStruct) GetFieldF() []int32 {
     if !x.IsSetFieldF() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldF
@@ -602,7 +602,7 @@ func (x *ContainerStruct) GetFieldGNonCompat() map[int32]string {
 
 func (x *ContainerStruct) GetFieldG() map[int32]string {
     if !x.IsSetFieldG() {
-        return make(map[int32]string)
+        return nil
     }
 
     return x.FieldG
@@ -1378,7 +1378,7 @@ var _ thrift.Struct = &CppTypeStruct{}
 
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{}).
-        SetFieldANonCompat(make([]int32, 0))
+        SetFieldANonCompat(nil)
 }
 
 func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
@@ -1387,7 +1387,7 @@ func (x *CppTypeStruct) GetFieldANonCompat() []int32 {
 
 func (x *CppTypeStruct) GetFieldA() []int32 {
     if !x.IsSetFieldA() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.FieldA
@@ -2337,7 +2337,7 @@ var _ thrift.Struct = &ComplexString{}
 func NewComplexString() *ComplexString {
     return (&ComplexString{}).
         SetANonCompat("").
-        SetBNonCompat(make(map[string]int32))
+        SetBNonCompat(nil)
 }
 
 func (x *ComplexString) GetANonCompat() string {
@@ -2354,7 +2354,7 @@ func (x *ComplexString) GetBNonCompat() map[string]int32 {
 
 func (x *ComplexString) GetB() map[string]int32 {
     if !x.IsSetB() {
-        return make(map[string]int32)
+        return nil
     }
 
     return x.B
@@ -4956,7 +4956,7 @@ func (x *IncompleteMap) GetFieldNonCompat() map[int32]*IncompleteMapDep {
 
 func (x *IncompleteMap) GetField() map[int32]*IncompleteMapDep {
     if !x.IsSetField() {
-        return make(map[int32]*IncompleteMapDep)
+        return nil
     }
 
     return x.Field
@@ -5237,7 +5237,7 @@ func (x *CompleteMap) GetFieldNonCompat() map[int32]*CompleteMapDep {
 
 func (x *CompleteMap) GetField() map[int32]*CompleteMapDep {
     if !x.IsSetField() {
-        return make(map[int32]*CompleteMapDep)
+        return nil
     }
 
     return x.Field
@@ -5518,7 +5518,7 @@ func (x *IncompleteList) GetFieldNonCompat() []*IncompleteListDep {
 
 func (x *IncompleteList) GetField() []*IncompleteListDep {
     if !x.IsSetField() {
-        return make([]*IncompleteListDep, 0)
+        return nil
     }
 
     return x.Field
@@ -5782,7 +5782,7 @@ func (x *CompleteList) GetFieldNonCompat() []*CompleteListDep {
 
 func (x *CompleteList) GetField() []*CompleteListDep {
     if !x.IsSetField() {
-        return make([]*CompleteListDep, 0)
+        return nil
     }
 
     return x.Field
@@ -6046,7 +6046,7 @@ func (x *AdaptedList) GetFieldNonCompat() []*AdaptedListDep {
 
 func (x *AdaptedList) GetField() []*AdaptedListDep {
     if !x.IsSetField() {
-        return make([]*AdaptedListDep, 0)
+        return nil
     }
 
     return x.Field
@@ -6393,7 +6393,7 @@ func (x *DependentAdaptedList) GetFieldNonCompat() []*DependentAdaptedListDep {
 
 func (x *DependentAdaptedList) GetField() []*DependentAdaptedListDep {
     if !x.IsSetField() {
-        return make([]*DependentAdaptedListDep, 0)
+        return nil
     }
 
     return x.Field
@@ -6728,9 +6728,9 @@ var _ thrift.Struct = &AllocatorAware{}
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{}).
-        SetAaListNonCompat(make([]int32, 0)).
-        SetAaSetNonCompat(make([]int32, 0)).
-        SetAaMapNonCompat(make(map[int32]int32)).
+        SetAaListNonCompat(nil).
+        SetAaSetNonCompat(nil).
+        SetAaMapNonCompat(nil).
         SetAaStringNonCompat("").
         SetNotAContainerNonCompat(0).
         SetAaUniqueNonCompat(0).
@@ -6743,7 +6743,7 @@ func (x *AllocatorAware) GetAaListNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaList() []int32 {
     if !x.IsSetAaList() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.AaList
@@ -6755,7 +6755,7 @@ func (x *AllocatorAware) GetAaSetNonCompat() []int32 {
 
 func (x *AllocatorAware) GetAaSet() []int32 {
     if !x.IsSetAaSet() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.AaSet
@@ -6767,7 +6767,7 @@ func (x *AllocatorAware) GetAaMapNonCompat() map[int32]int32 {
 
 func (x *AllocatorAware) GetAaMap() map[int32]int32 {
     if !x.IsSetAaMap() {
-        return make(map[int32]int32)
+        return nil
     }
 
     return x.AaMap

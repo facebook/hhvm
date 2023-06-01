@@ -2613,7 +2613,7 @@ var _ thrift.WritableResult = &respGetEntityGetMap{}
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{}).
-        SetValueNonCompat(make(map[string]string))
+        SetValueNonCompat(nil)
 }
 
 func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
@@ -2622,7 +2622,7 @@ func (x *respGetEntityGetMap) GetValueNonCompat() map[string]string {
 
 func (x *respGetEntityGetMap) GetValue() map[string]string {
     if !x.IsSetValue() {
-        return make(map[string]string)
+        return nil
     }
 
     return x.Value
@@ -2899,7 +2899,7 @@ var _ thrift.WritableResult = &respGetEntityGetSet{}
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{}).
-        SetValueNonCompat(make([]string, 0))
+        SetValueNonCompat(nil)
 }
 
 func (x *respGetEntityGetSet) GetValueNonCompat() []string {
@@ -2908,7 +2908,7 @@ func (x *respGetEntityGetSet) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetSet) GetValue() []string {
     if !x.IsSetValue() {
-        return make([]string, 0)
+        return nil
     }
 
     return x.Value
@@ -3168,7 +3168,7 @@ var _ thrift.WritableResult = &respGetEntityGetList{}
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{}).
-        SetValueNonCompat(make([]string, 0))
+        SetValueNonCompat(nil)
 }
 
 func (x *respGetEntityGetList) GetValueNonCompat() []string {
@@ -3177,7 +3177,7 @@ func (x *respGetEntityGetList) GetValueNonCompat() []string {
 
 func (x *respGetEntityGetList) GetValue() []string {
     if !x.IsSetValue() {
-        return make([]string, 0)
+        return nil
     }
 
     return x.Value

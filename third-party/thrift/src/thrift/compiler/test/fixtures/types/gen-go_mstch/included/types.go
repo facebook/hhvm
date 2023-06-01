@@ -18,7 +18,7 @@ var _ = thrift.ZERO
 type SomeMap = map[int32]string
 
 func NewSomeMap() SomeMap {
-  return make(map[int32]string)
+  return nil
 }
 
 func WriteSomeMap(item SomeMap, p thrift.Protocol) error {
@@ -90,7 +90,7 @@ result := mapResult
 type SomeListOfTypeMap = []SomeMap
 
 func NewSomeListOfTypeMap() SomeListOfTypeMap {
-  return make([]SomeMap, 0)
+  return nil
 }
 
 func WriteSomeListOfTypeMap(item SomeListOfTypeMap, p thrift.Protocol) error {

@@ -164,7 +164,7 @@ var _ thrift.Struct = &Derive{}
 
 func NewDerive() *Derive {
     return (&Derive{}).
-        SetDerivesNonCompat(make([]string, 0))
+        SetDerivesNonCompat(nil)
 }
 
 func (x *Derive) GetDerivesNonCompat() []string {
@@ -173,7 +173,7 @@ func (x *Derive) GetDerivesNonCompat() []string {
 
 func (x *Derive) GetDerives() []string {
     if !x.IsSetDerives() {
-        return make([]string, 0)
+        return nil
     }
 
     return x.Derives

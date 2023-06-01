@@ -18,7 +18,7 @@ var _ = thrift.ZERO
 type SetWithAdapter = []string
 
 func NewSetWithAdapter() SetWithAdapter {
-  return make([]string, 0)
+  return nil
 }
 
 func WriteSetWithAdapter(item SetWithAdapter, p thrift.Protocol) error {
@@ -99,7 +99,7 @@ if err != nil {
 type ListWithElemAdapter = []StringWithAdapter
 
 func NewListWithElemAdapter() ListWithElemAdapter {
-  return make([]StringWithAdapter, 0)
+  return nil
 }
 
 func WriteListWithElemAdapter(item ListWithElemAdapter, p thrift.Protocol) error {
@@ -1132,7 +1132,7 @@ func NewFoo() *Foo {
         SetIntFieldNonCompat(0).
         SetIntFieldWithDefaultNonCompat(13).
         SetSetFieldNonCompat(NewSetWithAdapter()).
-        SetMapFieldNonCompat(make(map[string]ListWithElemAdapterWithAdapter)).
+        SetMapFieldNonCompat(nil).
         SetBinaryFieldNonCompat([]byte("")).
         SetLongFieldNonCompat(NewMyI64()).
         SetAdaptedLongFieldNonCompat(NewMyI64()).
@@ -1197,7 +1197,7 @@ func (x *Foo) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter {
 
 func (x *Foo) GetMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter)
+        return nil
     }
 
     return x.MapField
@@ -1209,7 +1209,7 @@ func (x *Foo) GetOptionalMapFieldNonCompat() map[string]ListWithElemAdapterWithA
 
 func (x *Foo) GetOptionalMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetOptionalMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter)
+        return nil
     }
 
     return x.OptionalMapField
@@ -2057,7 +2057,7 @@ func (x *Baz) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter {
 
 func (x *Baz) GetMapField() map[string]ListWithElemAdapterWithAdapter {
     if !x.IsSetMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter)
+        return nil
     }
 
     return x.MapField
@@ -2542,7 +2542,7 @@ var _ thrift.Struct = &Bar{}
 func NewBar() *Bar {
     return (&Bar{}).
         SetStructFieldNonCompat(*NewFoo()).
-        SetStructListFieldNonCompat(make([]*FooWithAdapter, 0)).
+        SetStructListFieldNonCompat(nil).
         SetUnionFieldNonCompat(*NewBaz()).
         SetAdaptedStructFieldNonCompat(*NewDirectlyAdapted())
 }
@@ -2577,7 +2577,7 @@ func (x *Bar) GetStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetStructListField() []*FooWithAdapter {
     if !x.IsSetStructListField() {
-        return make([]*FooWithAdapter, 0)
+        return nil
     }
 
     return x.StructListField
@@ -2589,7 +2589,7 @@ func (x *Bar) GetOptionalStructListFieldNonCompat() []*FooWithAdapter {
 
 func (x *Bar) GetOptionalStructListField() []*FooWithAdapter {
     if !x.IsSetOptionalStructListField() {
-        return make([]*FooWithAdapter, 0)
+        return nil
     }
 
     return x.OptionalStructListField
@@ -3863,7 +3863,7 @@ func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{}).
         SetIntFieldNonCompat(0).
         SetStringFieldNonCompat("").
-        SetSetFieldNonCompat(make([]int32, 0))
+        SetSetFieldNonCompat(nil)
 }
 
 func (x *TerseAdaptedFields) GetIntFieldNonCompat() int32 {
@@ -3888,7 +3888,7 @@ func (x *TerseAdaptedFields) GetSetFieldNonCompat() []int32 {
 
 func (x *TerseAdaptedFields) GetSetField() []int32 {
     if !x.IsSetSetField() {
-        return make([]int32, 0)
+        return nil
     }
 
     return x.SetField
@@ -5489,9 +5489,9 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
         SetAdaptedLongNonCompat(NewAdaptedLong()).
         SetAdaptedDoubleNonCompat(NewAdaptedDouble()).
         SetAdaptedStringNonCompat(NewAdaptedString()).
-        SetAdaptedListNonCompat(make([]int64, 0)).
-        SetAdaptedSetNonCompat(make([]int64, 0)).
-        SetAdaptedMapNonCompat(make(map[int64]int64)).
+        SetAdaptedListNonCompat(nil).
+        SetAdaptedSetNonCompat(nil).
+        SetAdaptedMapNonCompat(nil).
         SetAdaptedBoolDefaultNonCompat(true).
         SetAdaptedByteDefaultNonCompat(1).
         SetAdaptedShortDefaultNonCompat(2).
@@ -5582,7 +5582,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedList() []int64 {
     if !x.IsSetAdaptedList() {
-        return make([]int64, 0)
+        return nil
     }
 
     return x.AdaptedList
@@ -5594,7 +5594,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSet() []int64 {
     if !x.IsSetAdaptedSet() {
-        return make([]int64, 0)
+        return nil
     }
 
     return x.AdaptedSet
@@ -5606,7 +5606,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapNonCompat() map[int64]int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMap() map[int64]int64 {
     if !x.IsSetAdaptedMap() {
-        return make(map[int64]int64)
+        return nil
     }
 
     return x.AdaptedMap
@@ -5682,7 +5682,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
-        return make([]int64, 0)
+        return nil
     }
 
     return x.AdaptedListDefault
@@ -5694,7 +5694,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
-        return make([]int64, 0)
+        return nil
     }
 
     return x.AdaptedSetDefault
@@ -5706,7 +5706,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefaultNonCompat() map[int64]int
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
-        return make(map[int64]int64)
+        return nil
     }
 
     return x.AdaptedMapDefault

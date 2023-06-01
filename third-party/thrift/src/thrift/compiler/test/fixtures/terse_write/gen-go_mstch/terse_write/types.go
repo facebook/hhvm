@@ -327,7 +327,7 @@ func (x *MyUnion) GetListFieldNonCompat() []int16 {
 
 func (x *MyUnion) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.ListField
@@ -339,7 +339,7 @@ func (x *MyUnion) GetSetFieldNonCompat() []int16 {
 
 func (x *MyUnion) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.SetField
@@ -351,7 +351,7 @@ func (x *MyUnion) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *MyUnion) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return make(map[int16]int16)
+        return nil
     }
 
     return x.MapField
@@ -1612,9 +1612,9 @@ func NewStructLevelTerseStruct() *StructLevelTerseStruct {
         SetStringFieldNonCompat("").
         SetBinaryFieldNonCompat([]byte("")).
         SetEnumFieldNonCompat(0).
-        SetListFieldNonCompat(make([]int16, 0)).
-        SetSetFieldNonCompat(make([]int16, 0)).
-        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetListFieldNonCompat(nil).
+        SetSetFieldNonCompat(nil).
+        SetMapFieldNonCompat(nil).
         SetStructFieldNonCompat(*NewMyStruct()).
         SetUnionFieldNonCompat(*NewMyUnion())
 }
@@ -1709,7 +1709,7 @@ func (x *StructLevelTerseStruct) GetListFieldNonCompat() []int16 {
 
 func (x *StructLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.ListField
@@ -1721,7 +1721,7 @@ func (x *StructLevelTerseStruct) GetSetFieldNonCompat() []int16 {
 
 func (x *StructLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.SetField
@@ -1733,7 +1733,7 @@ func (x *StructLevelTerseStruct) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *StructLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return make(map[int16]int16)
+        return nil
     }
 
     return x.MapField
@@ -2796,9 +2796,9 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetTerseStringFieldNonCompat("").
         SetTerseBinaryFieldNonCompat([]byte("")).
         SetTerseEnumFieldNonCompat(0).
-        SetTerseListFieldNonCompat(make([]int16, 0)).
-        SetTerseSetFieldNonCompat(make([]int16, 0)).
-        SetTerseMapFieldNonCompat(make(map[int16]int16)).
+        SetTerseListFieldNonCompat(nil).
+        SetTerseSetFieldNonCompat(nil).
+        SetTerseMapFieldNonCompat(nil).
         SetTerseStructFieldNonCompat(*NewMyStruct()).
         SetTerseUnionFieldNonCompat(*NewMyUnion()).
         SetBoolFieldNonCompat(false).
@@ -2811,9 +2811,9 @@ func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
         SetStringFieldNonCompat("").
         SetBinaryFieldNonCompat([]byte("")).
         SetEnumFieldNonCompat(0).
-        SetListFieldNonCompat(make([]int16, 0)).
-        SetSetFieldNonCompat(make([]int16, 0)).
-        SetMapFieldNonCompat(make(map[int16]int16)).
+        SetListFieldNonCompat(nil).
+        SetSetFieldNonCompat(nil).
+        SetMapFieldNonCompat(nil).
         SetStructFieldNonCompat(*NewMyStruct()).
         SetUnionFieldNonCompat(*NewMyUnion())
 }
@@ -2908,7 +2908,7 @@ func (x *FieldLevelTerseStruct) GetTerseListFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
     if !x.IsSetTerseListField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.TerseListField
@@ -2920,7 +2920,7 @@ func (x *FieldLevelTerseStruct) GetTerseSetFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
     if !x.IsSetTerseSetField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.TerseSetField
@@ -2932,7 +2932,7 @@ func (x *FieldLevelTerseStruct) GetTerseMapFieldNonCompat() map[int16]int16 {
 
 func (x *FieldLevelTerseStruct) GetTerseMapField() map[int16]int16 {
     if !x.IsSetTerseMapField() {
-        return make(map[int16]int16)
+        return nil
     }
 
     return x.TerseMapField
@@ -3052,7 +3052,7 @@ func (x *FieldLevelTerseStruct) GetListFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.ListField
@@ -3064,7 +3064,7 @@ func (x *FieldLevelTerseStruct) GetSetFieldNonCompat() []int16 {
 
 func (x *FieldLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.SetField
@@ -3076,7 +3076,7 @@ func (x *FieldLevelTerseStruct) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *FieldLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return make(map[int16]int16)
+        return nil
     }
 
     return x.MapField
@@ -5146,7 +5146,7 @@ func (x *TerseStructWithCustomDefault) GetListFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetListField() []int16 {
     if !x.IsSetListField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.ListField
@@ -5158,7 +5158,7 @@ func (x *TerseStructWithCustomDefault) GetSetFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return make([]int16, 0)
+        return nil
     }
 
     return x.SetField
@@ -5170,7 +5170,7 @@ func (x *TerseStructWithCustomDefault) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *TerseStructWithCustomDefault) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return make(map[int16]int16)
+        return nil
     }
 
     return x.MapField

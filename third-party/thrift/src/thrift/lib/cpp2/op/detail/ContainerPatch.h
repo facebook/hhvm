@@ -421,11 +421,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Inserts entries. Ignore entries that already exists.
   template <typename C = T>
   void add(C&& entries) {
-    auto& field = assignOr(*data_.add());
-    for (auto&& entry : entries) {
-      auto key = std::forward<decltype(entry)>(entry).first;
-      field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
-    }
+    assignOr(*data_.add()).insert(entries.begin(), entries.end());
   }
 
   /// Removes keys.

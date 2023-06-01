@@ -487,6 +487,10 @@ TEST(StructPatchTest, MapPatch) {
   test::expectPatch(
       addPatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}, {"c", "3"}});
 
+  // "a" is already added. It's no-op to add it again into the Patch.
+  addPatch.add({{"a", "3"}});
+  test::expectPatch(addPatch, {}, {{"a", "1"}, {"b", "2"}});
+
   MapPatch putPatch;
   putPatch.put({{"a", "1"}, {"b", "2"}});
   test::expectPatch(putPatch, {}, {{"a", "1"}, {"b", "2"}});

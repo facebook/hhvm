@@ -307,7 +307,9 @@ func (x *reqServiceFunc) DefaultGetArg3() *Foo {
 }
 
 func (x *reqServiceFunc) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqServiceFuncAlias reqServiceFunc
+    valueAlias := (*reqServiceFuncAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -473,7 +475,9 @@ if err != nil {
 }
 
 func (x *respServiceFunc) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respServiceFuncAlias respServiceFunc
+    valueAlias := (*respServiceFuncAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -799,7 +803,9 @@ func newReqAdapterServiceCount() *reqAdapterServiceCount {
 }
 
 func (x *reqAdapterServiceCount) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqAdapterServiceCountAlias reqAdapterServiceCount
+    valueAlias := (*reqAdapterServiceCountAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -949,7 +955,9 @@ func (x *respAdapterServiceCount) DefaultGetValue() *CountingStruct {
 }
 
 func (x *respAdapterServiceCount) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respAdapterServiceCountAlias respAdapterServiceCount
+    valueAlias := (*respAdapterServiceCountAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1117,7 +1125,9 @@ func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
 }
 
 func (x *reqAdapterServiceAdaptedTypes) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqAdapterServiceAdaptedTypesAlias reqAdapterServiceAdaptedTypes
+    valueAlias := (*reqAdapterServiceAdaptedTypesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1280,7 +1290,9 @@ func (x *respAdapterServiceAdaptedTypes) DefaultGetValue() *HeapAllocated {
 }
 
 func (x *respAdapterServiceAdaptedTypes) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respAdapterServiceAdaptedTypesAlias respAdapterServiceAdaptedTypes
+    valueAlias := (*respAdapterServiceAdaptedTypesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

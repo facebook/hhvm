@@ -229,7 +229,9 @@ if err != nil {
 }
 
 func (x *reqFinderByPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqFinderByPlateAlias reqFinderByPlate
+    valueAlias := (*reqFinderByPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -392,7 +394,9 @@ func (x *respFinderByPlate) DefaultGetValue() *Automobile {
 }
 
 func (x *respFinderByPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respFinderByPlateAlias respFinderByPlate
+    valueAlias := (*respFinderByPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -537,7 +541,9 @@ if err != nil {
 }
 
 func (x *reqFinderAliasByPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqFinderAliasByPlateAlias reqFinderAliasByPlate
+    valueAlias := (*reqFinderAliasByPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -700,7 +706,9 @@ func (x *respFinderAliasByPlate) DefaultGetValue() *Car {
 }
 
 func (x *respFinderAliasByPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respFinderAliasByPlateAlias respFinderAliasByPlate
+    valueAlias := (*respFinderAliasByPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -845,7 +853,9 @@ if err != nil {
 }
 
 func (x *reqFinderPreviousPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqFinderPreviousPlateAlias reqFinderPreviousPlate
+    valueAlias := (*reqFinderPreviousPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -985,7 +995,9 @@ if err != nil {
 }
 
 func (x *respFinderPreviousPlate) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respFinderPreviousPlateAlias respFinderPreviousPlate
+    valueAlias := (*respFinderPreviousPlateAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

@@ -148,7 +148,9 @@ func NewGeneratePatch() *GeneratePatch {
 }
 
 func (x *GeneratePatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type GeneratePatchAlias GeneratePatch
+    valueAlias := (*GeneratePatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -228,7 +230,9 @@ func NewAssignOnlyPatch() *AssignOnlyPatch {
 }
 
 func (x *AssignOnlyPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AssignOnlyPatchAlias AssignOnlyPatch
+    valueAlias := (*AssignOnlyPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -460,7 +464,9 @@ if err != nil {
 var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
 
 func (x *BoolPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BoolPatchAlias BoolPatch
+    valueAlias := (*BoolPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -733,7 +739,9 @@ if err != nil {
 var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
 func (x *BytePatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BytePatchAlias BytePatch
+    valueAlias := (*BytePatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1004,7 +1012,9 @@ if err != nil {
 var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
 
 func (x *I16Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type I16PatchAlias I16Patch
+    valueAlias := (*I16PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1275,7 +1285,9 @@ if err != nil {
 var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
 
 func (x *I32Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type I32PatchAlias I32Patch
+    valueAlias := (*I32PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1546,7 +1558,9 @@ if err != nil {
 var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
 
 func (x *I64Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type I64PatchAlias I64Patch
+    valueAlias := (*I64PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1817,7 +1831,9 @@ if err != nil {
 var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
 
 func (x *FloatPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FloatPatchAlias FloatPatch
+    valueAlias := (*FloatPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2088,7 +2104,9 @@ if err != nil {
 var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
 
 func (x *DoublePatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DoublePatchAlias DoublePatch
+    valueAlias := (*DoublePatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2405,7 +2423,9 @@ if err != nil {
 var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 func (x *StringPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StringPatchAlias StringPatch
+    valueAlias := (*StringPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2759,7 +2779,9 @@ if err != nil {
 }
 
 func (x *BinaryPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BinaryPatchAlias BinaryPatch
+    valueAlias := (*BinaryPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

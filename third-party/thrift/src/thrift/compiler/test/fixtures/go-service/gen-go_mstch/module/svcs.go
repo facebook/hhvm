@@ -431,7 +431,9 @@ func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
 }
 
 func (x *reqGetEntityGetEntity) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetEntityAlias reqGetEntityGetEntity
+    valueAlias := (*reqGetEntityGetEntityAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -594,7 +596,9 @@ func (x *respGetEntityGetEntity) DefaultGetValue() *GetEntityResponse {
 }
 
 func (x *respGetEntityGetEntity) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetEntityAlias respGetEntityGetEntity
+    valueAlias := (*respGetEntityGetEntityAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -692,7 +696,9 @@ func newReqGetEntityGetBool() *reqGetEntityGetBool {
 }
 
 func (x *reqGetEntityGetBool) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetBoolAlias reqGetEntityGetBool
+    valueAlias := (*reqGetEntityGetBoolAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -818,7 +824,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetBool) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetBoolAlias respGetEntityGetBool
+    valueAlias := (*respGetEntityGetBoolAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -916,7 +924,9 @@ func newReqGetEntityGetByte() *reqGetEntityGetByte {
 }
 
 func (x *reqGetEntityGetByte) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetByteAlias reqGetEntityGetByte
+    valueAlias := (*reqGetEntityGetByteAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1043,7 +1053,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetByte) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetByteAlias respGetEntityGetByte
+    valueAlias := (*respGetEntityGetByteAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1141,7 +1153,9 @@ func newReqGetEntityGetI16() *reqGetEntityGetI16 {
 }
 
 func (x *reqGetEntityGetI16) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetI16Alias reqGetEntityGetI16
+    valueAlias := (*reqGetEntityGetI16Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1267,7 +1281,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI16) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetI16Alias respGetEntityGetI16
+    valueAlias := (*respGetEntityGetI16Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1365,7 +1381,9 @@ func newReqGetEntityGetI32() *reqGetEntityGetI32 {
 }
 
 func (x *reqGetEntityGetI32) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetI32Alias reqGetEntityGetI32
+    valueAlias := (*reqGetEntityGetI32Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1491,7 +1509,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI32) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetI32Alias respGetEntityGetI32
+    valueAlias := (*respGetEntityGetI32Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1589,7 +1609,9 @@ func newReqGetEntityGetI64() *reqGetEntityGetI64 {
 }
 
 func (x *reqGetEntityGetI64) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetI64Alias reqGetEntityGetI64
+    valueAlias := (*reqGetEntityGetI64Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1715,7 +1737,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI64) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetI64Alias respGetEntityGetI64
+    valueAlias := (*respGetEntityGetI64Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1813,7 +1837,9 @@ func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
 }
 
 func (x *reqGetEntityGetDouble) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetDoubleAlias reqGetEntityGetDouble
+    valueAlias := (*reqGetEntityGetDoubleAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1939,7 +1965,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetDouble) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetDoubleAlias respGetEntityGetDouble
+    valueAlias := (*respGetEntityGetDoubleAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2037,7 +2065,9 @@ func newReqGetEntityGetString() *reqGetEntityGetString {
 }
 
 func (x *reqGetEntityGetString) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetStringAlias reqGetEntityGetString
+    valueAlias := (*reqGetEntityGetStringAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2163,7 +2193,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetString) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetStringAlias respGetEntityGetString
+    valueAlias := (*respGetEntityGetStringAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2261,7 +2293,9 @@ func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
 }
 
 func (x *reqGetEntityGetBinary) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetBinaryAlias reqGetEntityGetBinary
+    valueAlias := (*reqGetEntityGetBinaryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2399,7 +2433,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetBinary) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetBinaryAlias respGetEntityGetBinary
+    valueAlias := (*respGetEntityGetBinaryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2497,7 +2533,9 @@ func newReqGetEntityGetMap() *reqGetEntityGetMap {
 }
 
 func (x *reqGetEntityGetMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetMapAlias reqGetEntityGetMap
+    valueAlias := (*reqGetEntityGetMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2681,7 +2719,9 @@ result := mapResult
 }
 
 func (x *respGetEntityGetMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetMapAlias respGetEntityGetMap
+    valueAlias := (*respGetEntityGetMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2779,7 +2819,9 @@ func newReqGetEntityGetSet() *reqGetEntityGetSet {
 }
 
 func (x *reqGetEntityGetSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetSetAlias reqGetEntityGetSet
+    valueAlias := (*reqGetEntityGetSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2946,7 +2988,9 @@ result := setResult
 }
 
 func (x *respGetEntityGetSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetSetAlias respGetEntityGetSet
+    valueAlias := (*respGetEntityGetSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3044,7 +3088,9 @@ func newReqGetEntityGetList() *reqGetEntityGetList {
 }
 
 func (x *reqGetEntityGetList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetListAlias reqGetEntityGetList
+    valueAlias := (*reqGetEntityGetListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3211,7 +3257,9 @@ result := listResult
 }
 
 func (x *respGetEntityGetList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetListAlias respGetEntityGetList
+    valueAlias := (*respGetEntityGetListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3447,7 +3495,9 @@ if err != nil {
 }
 
 func (x *reqGetEntityGetLegacyStuff) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqGetEntityGetLegacyStuffAlias reqGetEntityGetLegacyStuff
+    valueAlias := (*reqGetEntityGetLegacyStuffAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3612,7 +3662,9 @@ if err != nil {
 }
 
 func (x *respGetEntityGetLegacyStuff) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respGetEntityGetLegacyStuffAlias respGetEntityGetLegacyStuff
+    valueAlias := (*respGetEntityGetLegacyStuffAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

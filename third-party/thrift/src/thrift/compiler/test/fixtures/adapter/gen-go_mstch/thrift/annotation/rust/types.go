@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *Adapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdapterAlias Adapter
+    valueAlias := (*AdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -251,7 +253,9 @@ result := listResult
 }
 
 func (x *Derive) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DeriveAlias Derive
+    valueAlias := (*DeriveAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -390,7 +394,9 @@ if err != nil {
 }
 
 func (x *ServiceExn) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ServiceExnAlias ServiceExn
+    valueAlias := (*ServiceExnAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

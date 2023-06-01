@@ -252,7 +252,9 @@ func newReqMyServicePing() *reqMyServicePing {
 }
 
 func (x *reqMyServicePing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePingAlias reqMyServicePing
+    valueAlias := (*reqMyServicePingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -401,7 +403,9 @@ func (x *respMyServicePing) DefaultGetMyExcept() *MyException {
 }
 
 func (x *respMyServicePing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePingAlias respMyServicePing
+    valueAlias := (*respMyServicePingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -502,7 +506,9 @@ func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
 }
 
 func (x *reqMyServiceGetRandomData) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceGetRandomDataAlias reqMyServiceGetRandomData
+    valueAlias := (*reqMyServiceGetRandomDataAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -628,7 +634,9 @@ if err != nil {
 }
 
 func (x *respMyServiceGetRandomData) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceGetRandomDataAlias respMyServiceGetRandomData
+    valueAlias := (*respMyServiceGetRandomDataAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -772,7 +780,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceHasDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceHasDataByIdAlias reqMyServiceHasDataById
+    valueAlias := (*reqMyServiceHasDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -911,7 +921,9 @@ if err != nil {
 }
 
 func (x *respMyServiceHasDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceHasDataByIdAlias respMyServiceHasDataById
+    valueAlias := (*respMyServiceHasDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1055,7 +1067,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceGetDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceGetDataByIdAlias reqMyServiceGetDataById
+    valueAlias := (*reqMyServiceGetDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1194,7 +1208,9 @@ if err != nil {
 }
 
 func (x *respMyServiceGetDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceGetDataByIdAlias respMyServiceGetDataById
+    valueAlias := (*respMyServiceGetDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1384,7 +1400,9 @@ if err != nil {
 }
 
 func (x *reqMyServicePutDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePutDataByIdAlias reqMyServicePutDataById
+    valueAlias := (*reqMyServicePutDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1490,7 +1508,9 @@ func newRespMyServicePutDataById() *respMyServicePutDataById {
 }
 
 func (x *respMyServicePutDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePutDataByIdAlias respMyServicePutDataById
+    valueAlias := (*respMyServicePutDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1667,7 +1687,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceLobDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceLobDataByIdAlias reqMyServiceLobDataById
+    valueAlias := (*reqMyServiceLobDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1773,7 +1795,9 @@ func newRespMyServiceLobDataById() *respMyServiceLobDataById {
 }
 
 func (x *respMyServiceLobDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceLobDataByIdAlias respMyServiceLobDataById
+    valueAlias := (*respMyServiceLobDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1858,7 +1882,9 @@ func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
 }
 
 func (x *reqMyServiceGoDoNothing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceGoDoNothingAlias reqMyServiceGoDoNothing
+    valueAlias := (*reqMyServiceGoDoNothingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1938,7 +1964,9 @@ func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
 }
 
 func (x *respMyServiceGoDoNothing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceGoDoNothingAlias respMyServiceGoDoNothing
+    valueAlias := (*respMyServiceGoDoNothingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2575,7 +2603,9 @@ func newReqMyServicePrioParentPing() *reqMyServicePrioParentPing {
 }
 
 func (x *reqMyServicePrioParentPing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePrioParentPingAlias reqMyServicePrioParentPing
+    valueAlias := (*reqMyServicePrioParentPingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2655,7 +2685,9 @@ func newRespMyServicePrioParentPing() *respMyServicePrioParentPing {
 }
 
 func (x *respMyServicePrioParentPing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePrioParentPingAlias respMyServicePrioParentPing
+    valueAlias := (*respMyServicePrioParentPingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2740,7 +2772,9 @@ func newReqMyServicePrioParentPong() *reqMyServicePrioParentPong {
 }
 
 func (x *reqMyServicePrioParentPong) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePrioParentPongAlias reqMyServicePrioParentPong
+    valueAlias := (*reqMyServicePrioParentPongAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2820,7 +2854,9 @@ func newRespMyServicePrioParentPong() *respMyServicePrioParentPong {
 }
 
 func (x *respMyServicePrioParentPong) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePrioParentPongAlias respMyServicePrioParentPong
+    valueAlias := (*respMyServicePrioParentPongAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3173,7 +3209,9 @@ func newReqMyServicePrioChildPang() *reqMyServicePrioChildPang {
 }
 
 func (x *reqMyServicePrioChildPang) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePrioChildPangAlias reqMyServicePrioChildPang
+    valueAlias := (*reqMyServicePrioChildPangAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3253,7 +3291,9 @@ func newRespMyServicePrioChildPang() *respMyServicePrioChildPang {
 }
 
 func (x *respMyServicePrioChildPang) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePrioChildPangAlias respMyServicePrioChildPang
+    valueAlias := (*respMyServicePrioChildPangAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3520,7 +3560,9 @@ func newReqBadServiceBar() *reqBadServiceBar {
 }
 
 func (x *reqBadServiceBar) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqBadServiceBarAlias reqBadServiceBar
+    valueAlias := (*reqBadServiceBarAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3646,7 +3688,9 @@ if err != nil {
 }
 
 func (x *respBadServiceBar) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respBadServiceBarAlias respBadServiceBar
+    valueAlias := (*respBadServiceBarAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

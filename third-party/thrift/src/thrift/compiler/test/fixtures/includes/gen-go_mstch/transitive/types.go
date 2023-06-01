@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *Foo) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FooAlias Foo
+    valueAlias := (*FooAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

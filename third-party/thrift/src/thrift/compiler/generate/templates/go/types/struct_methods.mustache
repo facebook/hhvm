@@ -69,9 +69,15 @@
 
   String method.
 
+  Note: 'fmt' package calls String() method when formatting objects which
+  implement error interface. This will result in infinite recursion and
+  stack overflow unless type aliasing is used (as done below).
+
 }}
 func (x *{{struct:go_name}}) String() string {
-    return fmt.Sprintf("%+v", x)
+    type {{struct:go_name}}Alias {{struct:go_name}}
+    valueAlias := (*{{struct:go_name}}Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 {{!

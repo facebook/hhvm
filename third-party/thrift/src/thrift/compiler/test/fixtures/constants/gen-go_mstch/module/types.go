@@ -624,7 +624,9 @@ var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
 var Internship_School_DEFAULT = NewInternship().GetSchool()
 
 func (x *Internship) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InternshipAlias Internship
+    valueAlias := (*InternshipAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -861,7 +863,9 @@ if err != nil {
 }
 
 func (x *Range) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RangeAlias Range
+    valueAlias := (*RangeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1059,7 +1063,9 @@ if err != nil {
 }
 
 func (x *Struct1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Struct1Alias Struct1
+    valueAlias := (*Struct1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1414,7 +1420,9 @@ func (x *Struct2) DefaultGetC() *Struct1 {
 }
 
 func (x *Struct2) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Struct2Alias Struct2
+    valueAlias := (*Struct2Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1708,7 +1716,9 @@ func (x *Struct3) DefaultGetC() *Struct2 {
 }
 
 func (x *Struct3) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Struct3Alias Struct3
+    valueAlias := (*Struct3Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1994,7 +2004,9 @@ var Struct4_B_DEFAULT = NewStruct4().GetB()
 var Struct4_C_DEFAULT = NewStruct4().GetC()
 
 func (x *Struct4) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Struct4Alias Struct4
+    valueAlias := (*Struct4Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2233,7 +2245,9 @@ var Union1_I_DEFAULT = NewUnion1().GetI()
 var Union1_D_DEFAULT = NewUnion1().GetD()
 
 func (x *Union1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Union1Alias Union1
+    valueAlias := (*Union1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Union1) countSetFields() int {
@@ -2615,7 +2629,9 @@ func (x *Union2) DefaultGetU() *Union1 {
 }
 
 func (x *Union2) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Union2Alias Union2
+    valueAlias := (*Union2Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Union2) countSetFields() int {

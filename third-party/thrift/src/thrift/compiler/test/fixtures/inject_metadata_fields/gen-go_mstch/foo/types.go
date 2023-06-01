@@ -191,7 +191,9 @@ var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedSt
 var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
 
 func (x *Fields) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieldsAlias Fields
+    valueAlias := (*FieldsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

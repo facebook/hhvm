@@ -164,7 +164,9 @@ func newReqCF() *reqCF {
 }
 
 func (x *reqCF) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqCFAlias reqCF
+    valueAlias := (*reqCFAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -244,7 +246,9 @@ func newRespCF() *respCF {
 }
 
 func (x *respCF) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respCFAlias respCF
+    valueAlias := (*respCFAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -508,7 +512,9 @@ result := setResult
 }
 
 func (x *reqCThing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqCThingAlias reqCThing
+    valueAlias := (*reqCThingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -742,7 +748,9 @@ func (x *respCThing) DefaultGetBang() *Bang {
 }
 
 func (x *respCThing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respCThingAlias respCThing
+    valueAlias := (*respCThingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

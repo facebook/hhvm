@@ -198,7 +198,9 @@ func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
 }
 
 func (x *Included) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IncludedAlias Included
+    valueAlias := (*IncludedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

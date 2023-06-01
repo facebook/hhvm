@@ -207,7 +207,9 @@ func newReqRaiserDoBland() *reqRaiserDoBland {
 }
 
 func (x *reqRaiserDoBland) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqRaiserDoBlandAlias reqRaiserDoBland
+    valueAlias := (*reqRaiserDoBlandAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -287,7 +289,9 @@ func newRespRaiserDoBland() *respRaiserDoBland {
 }
 
 func (x *respRaiserDoBland) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respRaiserDoBlandAlias respRaiserDoBland
+    valueAlias := (*respRaiserDoBlandAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -372,7 +376,9 @@ func newReqRaiserDoRaise() *reqRaiserDoRaise {
 }
 
 func (x *reqRaiserDoRaise) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqRaiserDoRaiseAlias reqRaiserDoRaise
+    valueAlias := (*reqRaiserDoRaiseAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -659,7 +665,9 @@ func (x *respRaiserDoRaise) DefaultGetS() *Serious {
 }
 
 func (x *respRaiserDoRaise) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respRaiserDoRaiseAlias respRaiserDoRaise
+    valueAlias := (*respRaiserDoRaiseAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -792,7 +800,9 @@ func newReqRaiserGet200() *reqRaiserGet200 {
 }
 
 func (x *reqRaiserGet200) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqRaiserGet200Alias reqRaiserGet200
+    valueAlias := (*reqRaiserGet200Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -918,7 +928,9 @@ if err != nil {
 }
 
 func (x *respRaiserGet200) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respRaiserGet200Alias respRaiserGet200
+    valueAlias := (*respRaiserGet200Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1016,7 +1028,9 @@ func newReqRaiserGet500() *reqRaiserGet500 {
 }
 
 func (x *reqRaiserGet500) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqRaiserGet500Alias reqRaiserGet500
+    valueAlias := (*reqRaiserGet500Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1349,7 +1363,9 @@ func (x *respRaiserGet500) DefaultGetS() *Serious {
 }
 
 func (x *respRaiserGet500) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respRaiserGet500Alias respRaiserGet500
+    valueAlias := (*respRaiserGet500Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

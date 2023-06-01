@@ -157,7 +157,9 @@ if err != nil {
 }
 
 func (x *MyStructNestedAnnotation) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructNestedAnnotationAlias MyStructNestedAnnotation
+    valueAlias := (*MyStructNestedAnnotationAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -250,7 +252,9 @@ func NewMyUnion() *MyUnion {
 }
 
 func (x *MyUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionAlias MyUnion
+    valueAlias := (*MyUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -342,7 +346,9 @@ func NewMyException() *MyException {
 }
 
 func (x *MyException) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyExceptionAlias MyException
+    valueAlias := (*MyExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyException) Error() string {
@@ -955,7 +961,9 @@ func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1257,7 +1265,9 @@ if err != nil {
 }
 
 func (x *SecretStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SecretStructAlias SecretStruct
+    valueAlias := (*SecretStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

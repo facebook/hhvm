@@ -117,7 +117,9 @@ if err != nil {
 }
 
 func (x *Accessory) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AccessoryAlias Accessory
+    valueAlias := (*AccessoryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -315,7 +317,9 @@ if err != nil {
 }
 
 func (x *PartName) String() string {
-    return fmt.Sprintf("%+v", x)
+    type PartNameAlias PartName
+    valueAlias := (*PartNameAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

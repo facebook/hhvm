@@ -351,7 +351,9 @@ result := mapResult
 }
 
 func (x *reqNestedContainersMapList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqNestedContainersMapListAlias reqNestedContainersMapList
+    valueAlias := (*reqNestedContainersMapListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -444,7 +446,9 @@ func newRespNestedContainersMapList() *respNestedContainersMapList {
 }
 
 func (x *respNestedContainersMapList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respNestedContainersMapListAlias respNestedContainersMapList
+    valueAlias := (*respNestedContainersMapListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -662,7 +666,9 @@ result := mapResult
 }
 
 func (x *reqNestedContainersMapSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqNestedContainersMapSetAlias reqNestedContainersMapSet
+    valueAlias := (*reqNestedContainersMapSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -755,7 +761,9 @@ func newRespNestedContainersMapSet() *respNestedContainersMapSet {
 }
 
 func (x *respNestedContainersMapSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respNestedContainersMapSetAlias respNestedContainersMapSet
+    valueAlias := (*respNestedContainersMapSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -973,7 +981,9 @@ result := listResult
 }
 
 func (x *reqNestedContainersListMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqNestedContainersListMapAlias reqNestedContainersListMap
+    valueAlias := (*reqNestedContainersListMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1066,7 +1076,9 @@ func newRespNestedContainersListMap() *respNestedContainersListMap {
 }
 
 func (x *respNestedContainersListMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respNestedContainersListMapAlias respNestedContainersListMap
+    valueAlias := (*respNestedContainersListMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1267,7 +1279,9 @@ result := listResult
 }
 
 func (x *reqNestedContainersListSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqNestedContainersListSetAlias reqNestedContainersListSet
+    valueAlias := (*reqNestedContainersListSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1360,7 +1374,9 @@ func newRespNestedContainersListSet() *respNestedContainersListSet {
 }
 
 func (x *respNestedContainersListSet) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respNestedContainersListSetAlias respNestedContainersListSet
+    valueAlias := (*respNestedContainersListSetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1682,7 +1698,9 @@ result := listResult
 }
 
 func (x *reqNestedContainersTurtles) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqNestedContainersTurtlesAlias reqNestedContainersTurtles
+    valueAlias := (*reqNestedContainersTurtlesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1775,7 +1793,9 @@ func newRespNestedContainersTurtles() *respNestedContainersTurtles {
 }
 
 func (x *respNestedContainersTurtles) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respNestedContainersTurtlesAlias respNestedContainersTurtles
+    valueAlias := (*respNestedContainersTurtlesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

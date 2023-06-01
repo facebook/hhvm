@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *GetEntityRequest) String() string {
-    return fmt.Sprintf("%+v", x)
+    type GetEntityRequestAlias GetEntityRequest
+    valueAlias := (*GetEntityRequestAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -210,7 +212,9 @@ if err != nil {
 }
 
 func (x *GetEntityResponse) String() string {
-    return fmt.Sprintf("%+v", x)
+    type GetEntityResponseAlias GetEntityResponse
+    valueAlias := (*GetEntityResponseAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

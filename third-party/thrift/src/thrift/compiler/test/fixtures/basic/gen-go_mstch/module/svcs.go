@@ -141,7 +141,9 @@ func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
 }
 
 func (x *reqFooServiceSimpleRPC) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqFooServiceSimpleRPCAlias reqFooServiceSimpleRPC
+    valueAlias := (*reqFooServiceSimpleRPCAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -221,7 +223,9 @@ func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
 }
 
 func (x *respFooServiceSimpleRPC) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respFooServiceSimpleRPCAlias respFooServiceSimpleRPC
+    valueAlias := (*respFooServiceSimpleRPCAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -560,7 +564,9 @@ if err != nil {
 }
 
 func (x *reqFB303ServiceSimpleRPC) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqFB303ServiceSimpleRPCAlias reqFB303ServiceSimpleRPC
+    valueAlias := (*reqFB303ServiceSimpleRPCAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -723,7 +729,9 @@ func (x *respFB303ServiceSimpleRPC) DefaultGetValue() *ReservedKeyword {
 }
 
 func (x *respFB303ServiceSimpleRPC) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respFB303ServiceSimpleRPCAlias respFB303ServiceSimpleRPC
+    valueAlias := (*respFB303ServiceSimpleRPCAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1195,7 +1203,9 @@ func newReqMyServicePing() *reqMyServicePing {
 }
 
 func (x *reqMyServicePing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePingAlias reqMyServicePing
+    valueAlias := (*reqMyServicePingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1275,7 +1285,9 @@ func newRespMyServicePing() *respMyServicePing {
 }
 
 func (x *respMyServicePing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePingAlias respMyServicePing
+    valueAlias := (*respMyServicePingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1360,7 +1372,9 @@ func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
 }
 
 func (x *reqMyServiceGetRandomData) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceGetRandomDataAlias reqMyServiceGetRandomData
+    valueAlias := (*reqMyServiceGetRandomDataAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1486,7 +1500,9 @@ if err != nil {
 }
 
 func (x *respMyServiceGetRandomData) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceGetRandomDataAlias respMyServiceGetRandomData
+    valueAlias := (*respMyServiceGetRandomDataAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1630,7 +1646,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceSink) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceSinkAlias reqMyServiceSink
+    valueAlias := (*reqMyServiceSinkAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1723,7 +1741,9 @@ func newRespMyServiceSink() *respMyServiceSink {
 }
 
 func (x *respMyServiceSink) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceSinkAlias respMyServiceSink
+    valueAlias := (*respMyServiceSinkAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1900,7 +1920,9 @@ if err != nil {
 }
 
 func (x *reqMyServicePutDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServicePutDataByIdAlias reqMyServicePutDataById
+    valueAlias := (*reqMyServicePutDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2006,7 +2028,9 @@ func newRespMyServicePutDataById() *respMyServicePutDataById {
 }
 
 func (x *respMyServicePutDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServicePutDataByIdAlias respMyServicePutDataById
+    valueAlias := (*respMyServicePutDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2137,7 +2161,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceHasDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceHasDataByIdAlias reqMyServiceHasDataById
+    valueAlias := (*reqMyServiceHasDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2276,7 +2302,9 @@ if err != nil {
 }
 
 func (x *respMyServiceHasDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceHasDataByIdAlias respMyServiceHasDataById
+    valueAlias := (*respMyServiceHasDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2420,7 +2448,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceGetDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceGetDataByIdAlias reqMyServiceGetDataById
+    valueAlias := (*reqMyServiceGetDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2559,7 +2589,9 @@ if err != nil {
 }
 
 func (x *respMyServiceGetDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceGetDataByIdAlias respMyServiceGetDataById
+    valueAlias := (*respMyServiceGetDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2703,7 +2735,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceDeleteDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceDeleteDataByIdAlias reqMyServiceDeleteDataById
+    valueAlias := (*reqMyServiceDeleteDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2796,7 +2830,9 @@ func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
 }
 
 func (x *respMyServiceDeleteDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceDeleteDataByIdAlias respMyServiceDeleteDataById
+    valueAlias := (*respMyServiceDeleteDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2973,7 +3009,9 @@ if err != nil {
 }
 
 func (x *reqMyServiceLobDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceLobDataByIdAlias reqMyServiceLobDataById
+    valueAlias := (*reqMyServiceLobDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3079,7 +3117,9 @@ func newRespMyServiceLobDataById() *respMyServiceLobDataById {
 }
 
 func (x *respMyServiceLobDataById) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceLobDataByIdAlias respMyServiceLobDataById
+    valueAlias := (*respMyServiceLobDataByIdAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3164,7 +3204,9 @@ func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
 }
 
 func (x *reqMyServiceInvalidReturnForHack) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceInvalidReturnForHackAlias reqMyServiceInvalidReturnForHack
+    valueAlias := (*reqMyServiceInvalidReturnForHackAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3331,7 +3373,9 @@ result := setResult
 }
 
 func (x *respMyServiceInvalidReturnForHack) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceInvalidReturnForHackAlias respMyServiceInvalidReturnForHack
+    valueAlias := (*respMyServiceInvalidReturnForHackAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3429,7 +3473,9 @@ func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
 }
 
 func (x *reqMyServiceRpcSkippedCodegen) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceRpcSkippedCodegenAlias reqMyServiceRpcSkippedCodegen
+    valueAlias := (*reqMyServiceRpcSkippedCodegenAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3509,7 +3555,9 @@ func newRespMyServiceRpcSkippedCodegen() *respMyServiceRpcSkippedCodegen {
 }
 
 func (x *respMyServiceRpcSkippedCodegen) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceRpcSkippedCodegenAlias respMyServiceRpcSkippedCodegen
+    valueAlias := (*respMyServiceRpcSkippedCodegenAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4344,7 +4392,9 @@ if err != nil {
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqDbMixedStackArgumentsGetDataByKey0Alias reqDbMixedStackArgumentsGetDataByKey0
+    valueAlias := (*reqDbMixedStackArgumentsGetDataByKey0Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4495,7 +4545,9 @@ if err != nil {
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respDbMixedStackArgumentsGetDataByKey0Alias respDbMixedStackArgumentsGetDataByKey0
+    valueAlias := (*respDbMixedStackArgumentsGetDataByKey0Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4639,7 +4691,9 @@ if err != nil {
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqDbMixedStackArgumentsGetDataByKey1Alias reqDbMixedStackArgumentsGetDataByKey1
+    valueAlias := (*reqDbMixedStackArgumentsGetDataByKey1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4790,7 +4844,9 @@ if err != nil {
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respDbMixedStackArgumentsGetDataByKey1Alias respDbMixedStackArgumentsGetDataByKey1
+    valueAlias := (*respDbMixedStackArgumentsGetDataByKey1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

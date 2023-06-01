@@ -222,7 +222,9 @@ if err != nil {
 }
 
 func (x *reqSomeServiceBounceMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqSomeServiceBounceMapAlias reqSomeServiceBounceMap
+    valueAlias := (*reqSomeServiceBounceMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -374,7 +376,9 @@ if err != nil {
 }
 
 func (x *respSomeServiceBounceMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respSomeServiceBounceMapAlias respSomeServiceBounceMap
+    valueAlias := (*respSomeServiceBounceMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -559,7 +563,9 @@ result := listResult
 }
 
 func (x *reqSomeServiceBinaryKeyedMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqSomeServiceBinaryKeyedMapAlias reqSomeServiceBinaryKeyedMap
+    valueAlias := (*reqSomeServiceBinaryKeyedMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -757,7 +763,9 @@ result := mapResult
 }
 
 func (x *respSomeServiceBinaryKeyedMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respSomeServiceBinaryKeyedMapAlias respSomeServiceBinaryKeyedMap
+    valueAlias := (*respSomeServiceBinaryKeyedMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

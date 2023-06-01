@@ -25,7 +25,9 @@ func NewAlso() *Also {
 }
 
 func (x *Also) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AlsoAlias Also
+    valueAlias := (*AlsoAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

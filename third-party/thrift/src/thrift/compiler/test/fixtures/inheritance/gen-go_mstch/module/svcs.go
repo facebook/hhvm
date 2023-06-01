@@ -141,7 +141,9 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
 }
 
 func (x *reqMyRootDoRoot) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyRootDoRootAlias reqMyRootDoRoot
+    valueAlias := (*reqMyRootDoRootAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -221,7 +223,9 @@ func newRespMyRootDoRoot() *respMyRootDoRoot {
 }
 
 func (x *respMyRootDoRoot) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyRootDoRootAlias respMyRootDoRoot
+    valueAlias := (*respMyRootDoRootAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -522,7 +526,9 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
 }
 
 func (x *reqMyNodeDoMid) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyNodeDoMidAlias reqMyNodeDoMid
+    valueAlias := (*reqMyNodeDoMidAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -602,7 +608,9 @@ func newRespMyNodeDoMid() *respMyNodeDoMid {
 }
 
 func (x *respMyNodeDoMid) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyNodeDoMidAlias respMyNodeDoMid
+    valueAlias := (*respMyNodeDoMidAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -878,7 +886,9 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
 }
 
 func (x *reqMyLeafDoLeaf) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyLeafDoLeafAlias reqMyLeafDoLeaf
+    valueAlias := (*reqMyLeafDoLeafAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -958,7 +968,9 @@ func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
 }
 
 func (x *respMyLeafDoLeaf) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyLeafDoLeafAlias respMyLeafDoLeaf
+    valueAlias := (*respMyLeafDoLeafAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

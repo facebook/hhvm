@@ -286,7 +286,9 @@ func NewEmptyStruct() *EmptyStruct {
 }
 
 func (x *EmptyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type EmptyStructAlias EmptyStruct
+    valueAlias := (*EmptyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -412,7 +414,9 @@ if err != nil {
 }
 
 func (x *DecoratedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DecoratedStructAlias DecoratedStruct
+    valueAlias := (*DecoratedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1190,7 +1194,9 @@ if err != nil {
 }
 
 func (x *ContainerStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ContainerStructAlias ContainerStruct
+    valueAlias := (*ContainerStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1461,7 +1467,9 @@ result := listResult
 }
 
 func (x *CppTypeStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CppTypeStructAlias CppTypeStruct
+    valueAlias := (*CppTypeStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1600,7 +1608,9 @@ if err != nil {
 }
 
 func (x *VirtualStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type VirtualStructAlias VirtualStruct
+    valueAlias := (*VirtualStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1791,7 +1801,9 @@ result := MyForwardRefEnum(enumResult)
 }
 
 func (x *MyStructWithForwardRefEnum) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructWithForwardRefEnumAlias MyStructWithForwardRefEnum
+    valueAlias := (*MyStructWithForwardRefEnumAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1989,7 +2001,9 @@ if err != nil {
 }
 
 func (x *TrivialNumeric) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TrivialNumericAlias TrivialNumeric
+    valueAlias := (*TrivialNumericAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2215,7 +2229,9 @@ func (x *TrivialNestedWithDefault) DefaultGetN() *TrivialNumeric {
 }
 
 func (x *TrivialNestedWithDefault) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TrivialNestedWithDefaultAlias TrivialNestedWithDefault
+    valueAlias := (*TrivialNestedWithDefaultAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2471,7 +2487,9 @@ result := mapResult
 }
 
 func (x *ComplexString) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ComplexStringAlias ComplexString
+    valueAlias := (*ComplexStringAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2701,7 +2719,9 @@ func (x *ComplexNestedWithDefault) DefaultGetN() *ComplexString {
 }
 
 func (x *ComplexNestedWithDefault) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ComplexNestedWithDefaultAlias ComplexNestedWithDefault
+    valueAlias := (*ComplexNestedWithDefaultAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3039,7 +3059,9 @@ if err != nil {
 }
 
 func (x *MinPadding) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MinPaddingAlias MinPadding
+    valueAlias := (*MinPaddingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3416,7 +3438,9 @@ if err != nil {
 }
 
 func (x *MinPaddingWithCustomType) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MinPaddingWithCustomTypeAlias MinPaddingWithCustomType
+    valueAlias := (*MinPaddingWithCustomTypeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3769,7 +3793,9 @@ func (x *MyStruct) DefaultGetData() *MyDataItem {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3901,7 +3927,9 @@ func NewMyDataItem() *MyDataItem {
 }
 
 func (x *MyDataItem) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataItemAlias MyDataItem
+    valueAlias := (*MyDataItemAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4027,7 +4055,9 @@ if err != nil {
 }
 
 func (x *Renaming) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RenamingAlias Renaming
+    valueAlias := (*RenamingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4238,7 +4268,9 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AnnotatedTypesAlias AnnotatedTypes
+    valueAlias := (*AnnotatedTypesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4482,7 +4514,9 @@ func (x *ForwardUsageRoot) DefaultGetForwardUsageByRef() *ForwardUsageByRef {
 }
 
 func (x *ForwardUsageRoot) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ForwardUsageRootAlias ForwardUsageRoot
+    valueAlias := (*ForwardUsageRootAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4657,7 +4691,9 @@ func (x *ForwardUsageStruct) DefaultGetFoo() *ForwardUsageRoot {
 }
 
 func (x *ForwardUsageStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ForwardUsageStructAlias ForwardUsageStruct
+    valueAlias := (*ForwardUsageStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4819,7 +4855,9 @@ func (x *ForwardUsageByRef) DefaultGetFoo() *ForwardUsageRoot {
 }
 
 func (x *ForwardUsageByRef) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ForwardUsageByRefAlias ForwardUsageByRef
+    valueAlias := (*ForwardUsageByRefAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5016,7 +5054,9 @@ result := mapResult
 }
 
 func (x *IncompleteMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IncompleteMapAlias IncompleteMap
+    valueAlias := (*IncompleteMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5109,7 +5149,9 @@ func NewIncompleteMapDep() *IncompleteMapDep {
 }
 
 func (x *IncompleteMapDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IncompleteMapDepAlias IncompleteMapDep
+    valueAlias := (*IncompleteMapDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5293,7 +5335,9 @@ result := mapResult
 }
 
 func (x *CompleteMap) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CompleteMapAlias CompleteMap
+    valueAlias := (*CompleteMapAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5386,7 +5430,9 @@ func NewCompleteMapDep() *CompleteMapDep {
 }
 
 func (x *CompleteMapDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CompleteMapDepAlias CompleteMapDep
+    valueAlias := (*CompleteMapDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5553,7 +5599,9 @@ result := listResult
 }
 
 func (x *IncompleteList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IncompleteListAlias IncompleteList
+    valueAlias := (*IncompleteListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5646,7 +5694,9 @@ func NewIncompleteListDep() *IncompleteListDep {
 }
 
 func (x *IncompleteListDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IncompleteListDepAlias IncompleteListDep
+    valueAlias := (*IncompleteListDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5813,7 +5863,9 @@ result := listResult
 }
 
 func (x *CompleteList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CompleteListAlias CompleteList
+    valueAlias := (*CompleteListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5906,7 +5958,9 @@ func NewCompleteListDep() *CompleteListDep {
 }
 
 func (x *CompleteListDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CompleteListDepAlias CompleteListDep
+    valueAlias := (*CompleteListDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6073,7 +6127,9 @@ result := listResult
 }
 
 func (x *AdaptedList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptedListAlias AdaptedList
+    valueAlias := (*AdaptedListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6236,7 +6292,9 @@ func (x *AdaptedListDep) DefaultGetField() *AdaptedList {
 }
 
 func (x *AdaptedListDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptedListDepAlias AdaptedListDep
+    valueAlias := (*AdaptedListDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6416,7 +6474,9 @@ result := listResult
 }
 
 func (x *DependentAdaptedList) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DependentAdaptedListAlias DependentAdaptedList
+    valueAlias := (*DependentAdaptedListAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6569,7 +6629,9 @@ if err != nil {
 var DependentAdaptedListDep_Field_DEFAULT = NewDependentAdaptedListDep().GetField()
 
 func (x *DependentAdaptedListDep) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DependentAdaptedListDepAlias DependentAdaptedListDep
+    valueAlias := (*DependentAdaptedListDepAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7124,7 +7186,9 @@ if err != nil {
 }
 
 func (x *AllocatorAware) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AllocatorAwareAlias AllocatorAware
+    valueAlias := (*AllocatorAwareAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7401,7 +7465,9 @@ if err != nil {
 var AllocatorAware2_BoxField_DEFAULT = NewAllocatorAware2().GetBoxField()
 
 func (x *AllocatorAware2) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AllocatorAware2Alias AllocatorAware2
+    valueAlias := (*AllocatorAware2Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7647,7 +7713,9 @@ if err != nil {
 }
 
 func (x *TypedefStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TypedefStructAlias TypedefStruct
+    valueAlias := (*TypedefStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7812,7 +7880,9 @@ if err != nil {
 }
 
 func (x *StructWithDoubleUnderscores) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructWithDoubleUnderscoresAlias StructWithDoubleUnderscores
+    valueAlias := (*StructWithDoubleUnderscoresAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

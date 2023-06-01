@@ -172,7 +172,9 @@ if err != nil {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -408,7 +410,9 @@ func (x *MyUnion) DefaultGetMyDataItem() *MyStruct {
 }
 
 func (x *MyUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionAlias MyUnion
+    valueAlias := (*MyUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {

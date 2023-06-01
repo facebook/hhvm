@@ -722,7 +722,9 @@ result := setResult
 }
 
 func (x *SomeStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SomeStructAlias SomeStruct
+    valueAlias := (*SomeStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1050,7 +1052,9 @@ result := MyEnum1(enumResult)
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

@@ -307,7 +307,9 @@ func (x *reqMyServiceQuery) DefaultGetI() *includes.Included {
 }
 
 func (x *reqMyServiceQuery) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceQueryAlias reqMyServiceQuery
+    valueAlias := (*reqMyServiceQueryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -413,7 +415,9 @@ func newRespMyServiceQuery() *respMyServiceQuery {
 }
 
 func (x *respMyServiceQuery) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceQueryAlias respMyServiceQuery
+    valueAlias := (*respMyServiceQueryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -638,7 +642,9 @@ func (x *reqMyServiceHasArgDocs) DefaultGetI() *includes.Included {
 }
 
 func (x *reqMyServiceHasArgDocs) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceHasArgDocsAlias reqMyServiceHasArgDocs
+    valueAlias := (*reqMyServiceHasArgDocsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -744,7 +750,9 @@ func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
 }
 
 func (x *respMyServiceHasArgDocs) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceHasArgDocsAlias respMyServiceHasArgDocs
+    valueAlias := (*respMyServiceHasArgDocsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

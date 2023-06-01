@@ -1013,7 +1013,9 @@ result := Color(enumResult)
 }
 
 func (x *MyAnnotation) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyAnnotationAlias MyAnnotation
+    valueAlias := (*MyAnnotationAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1796,7 +1798,9 @@ if err != nil {
 var Foo_OptionalIntField_DEFAULT = NewFoo().GetOptionalIntField()
 
 func (x *Foo) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FooAlias Foo
+    valueAlias := (*FooAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2359,7 +2363,9 @@ var Baz_IntField_DEFAULT = NewBaz().GetIntField()
 var Baz_LongField_DEFAULT = NewBaz().GetLongField()
 
 func (x *Baz) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BazAlias Baz
+    valueAlias := (*BazAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Baz) countSetFields() int {
@@ -3054,7 +3060,9 @@ func (x *Bar) DefaultGetAdaptedStructField() *DirectlyAdapted {
 }
 
 func (x *Bar) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BarAlias Bar
+    valueAlias := (*BarAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3271,7 +3279,9 @@ if err != nil {
 }
 
 func (x *DirectlyAdapted) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DirectlyAdaptedAlias DirectlyAdapted
+    valueAlias := (*DirectlyAdaptedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3410,7 +3420,9 @@ if err != nil {
 }
 
 func (x *IndependentDirectlyAdapted) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IndependentDirectlyAdaptedAlias IndependentDirectlyAdapted
+    valueAlias := (*IndependentDirectlyAdaptedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3715,7 +3727,9 @@ var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().
 var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().GetOptBoxedField()
 
 func (x *StructWithFieldAdapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructWithFieldAdapterAlias StructWithFieldAdapter
+    valueAlias := (*StructWithFieldAdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4026,7 +4040,9 @@ result := setResult
 }
 
 func (x *TerseAdaptedFields) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TerseAdaptedFieldsAlias TerseAdaptedFields
+    valueAlias := (*TerseAdaptedFieldsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4215,7 +4231,9 @@ func (x *B) DefaultGetA() *AdaptedA {
 }
 
 func (x *B) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BAlias B
+    valueAlias := (*BAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4308,7 +4326,9 @@ func NewA() *A {
 }
 
 func (x *A) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AAlias A
+    valueAlias := (*AAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4434,7 +4454,9 @@ if err != nil {
 }
 
 func (x *Config) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ConfigAlias Config
+    valueAlias := (*ConfigAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4632,7 +4654,9 @@ if err != nil {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5227,7 +5251,9 @@ if err != nil {
 }
 
 func (x *AdaptTestStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptTestStructAlias AdaptTestStruct
+    valueAlias := (*AdaptTestStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6759,7 +6785,9 @@ if err != nil {
 }
 
 func (x *AdaptTemplatedTestStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptTemplatedTestStructAlias AdaptTemplatedTestStruct
+    valueAlias := (*AdaptTemplatedTestStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7195,7 +7223,9 @@ func (x *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplat
 }
 
 func (x *AdaptTemplatedNestedTestStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptTemplatedNestedTestStructAlias AdaptTemplatedNestedTestStruct
+    valueAlias := (*AdaptTemplatedNestedTestStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7407,7 +7437,9 @@ if err != nil {
 var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().GetDelay()
 
 func (x *AdaptTestUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptTestUnionAlias AdaptTestUnion
+    valueAlias := (*AdaptTestUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *AdaptTestUnion) countSetFields() int {
@@ -7577,7 +7609,9 @@ if err != nil {
 }
 
 func (x *AdaptedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptedStructAlias AdaptedStruct
+    valueAlias := (*AdaptedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7716,7 +7750,9 @@ if err != nil {
 }
 
 func (x *DirectlyAdaptedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DirectlyAdaptedStructAlias DirectlyAdaptedStruct
+    valueAlias := (*DirectlyAdaptedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8089,7 +8125,9 @@ func (x *StructFieldAdaptedStruct) DefaultGetTypedefOfAdapted() *TypedefOfDirect
 }
 
 func (x *StructFieldAdaptedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructFieldAdaptedStructAlias StructFieldAdaptedStruct
+    valueAlias := (*StructFieldAdaptedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8291,7 +8329,9 @@ func (x *CircularAdaptee) DefaultGetField() *CircularStruct {
 }
 
 func (x *CircularAdaptee) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CircularAdapteeAlias CircularAdaptee
+    valueAlias := (*CircularAdapteeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8453,7 +8493,9 @@ func (x *CircularStruct) DefaultGetField() *AdaptedCircularAdaptee {
 }
 
 func (x *CircularStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CircularStructAlias CircularStruct
+    valueAlias := (*CircularStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8616,7 +8658,9 @@ func (x *ReorderedStruct) DefaultGetReorderedDependentAdapted() *DeclaredAfterSt
 }
 
 func (x *ReorderedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ReorderedStructAlias ReorderedStruct
+    valueAlias := (*ReorderedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8709,7 +8753,9 @@ func NewDeclaredAfterStruct() *DeclaredAfterStruct {
 }
 
 func (x *DeclaredAfterStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DeclaredAfterStructAlias DeclaredAfterStruct
+    valueAlias := (*DeclaredAfterStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8835,7 +8881,9 @@ if err != nil {
 }
 
 func (x *RenamedStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RenamedStructAlias RenamedStruct
+    valueAlias := (*RenamedStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8974,7 +9022,9 @@ if err != nil {
 }
 
 func (x *SameNamespaceStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SameNamespaceStructAlias SameNamespaceStruct
+    valueAlias := (*SameNamespaceStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9067,7 +9117,9 @@ func NewHeapAllocated() *HeapAllocated {
 }
 
 func (x *HeapAllocated) String() string {
-    return fmt.Sprintf("%+v", x)
+    type HeapAllocatedAlias HeapAllocated
+    valueAlias := (*HeapAllocatedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9217,7 +9269,9 @@ func (x *MoveOnly) DefaultGetPtr() *HeapAllocated {
 }
 
 func (x *MoveOnly) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MoveOnlyAlias MoveOnly
+    valueAlias := (*MoveOnlyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9356,7 +9410,9 @@ if err != nil {
 }
 
 func (x *AlsoMoveOnly) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AlsoMoveOnlyAlias AlsoMoveOnly
+    valueAlias := (*AlsoMoveOnlyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9449,7 +9505,9 @@ func NewApplyAdapter() *ApplyAdapter {
 }
 
 func (x *ApplyAdapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ApplyAdapterAlias ApplyAdapter
+    valueAlias := (*ApplyAdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9529,7 +9587,9 @@ func NewTransitiveAdapted() *TransitiveAdapted {
 }
 
 func (x *TransitiveAdapted) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TransitiveAdaptedAlias TransitiveAdapted
+    valueAlias := (*TransitiveAdaptedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9790,7 +9850,9 @@ var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().GetCountingInt()
 var CountingStruct_RegularString_DEFAULT = NewCountingStruct().GetRegularString()
 
 func (x *CountingStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CountingStructAlias CountingStruct
+    valueAlias := (*CountingStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9955,7 +10017,9 @@ if err != nil {
 }
 
 func (x *Person) String() string {
-    return fmt.Sprintf("%+v", x)
+    type PersonAlias Person
+    valueAlias := (*PersonAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -10094,7 +10158,9 @@ if err != nil {
 }
 
 func (x *Person2) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Person2Alias Person2
+    valueAlias := (*Person2Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

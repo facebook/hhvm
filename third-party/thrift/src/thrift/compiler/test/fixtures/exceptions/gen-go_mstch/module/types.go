@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *Fiery) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieryAlias Fiery
+    valueAlias := (*FieryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Fiery) Error() string {
@@ -230,7 +232,9 @@ if err != nil {
 var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
 
 func (x *Serious) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SeriousAlias Serious
+    valueAlias := (*SeriousAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Serious) Error() string {
@@ -421,7 +425,9 @@ if err != nil {
 }
 
 func (x *ComplexFieldNames) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ComplexFieldNamesAlias ComplexFieldNames
+    valueAlias := (*ComplexFieldNamesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ComplexFieldNames) Error() string {
@@ -625,7 +631,9 @@ if err != nil {
 }
 
 func (x *CustomFieldNames) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CustomFieldNamesAlias CustomFieldNames
+    valueAlias := (*CustomFieldNamesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *CustomFieldNames) Error() string {
@@ -829,7 +837,9 @@ if err != nil {
 }
 
 func (x *ExceptionWithPrimitiveField) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ExceptionWithPrimitiveFieldAlias ExceptionWithPrimitiveField
+    valueAlias := (*ExceptionWithPrimitiveFieldAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ExceptionWithPrimitiveField) Error() string {
@@ -1033,7 +1043,9 @@ if err != nil {
 }
 
 func (x *ExceptionWithStructuredAnnotation) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ExceptionWithStructuredAnnotationAlias ExceptionWithStructuredAnnotation
+    valueAlias := (*ExceptionWithStructuredAnnotationAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ExceptionWithStructuredAnnotation) Error() string {
@@ -1145,7 +1157,9 @@ func NewBanal() *Banal {
 }
 
 func (x *Banal) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BanalAlias Banal
+    valueAlias := (*BanalAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Banal) Error() string {

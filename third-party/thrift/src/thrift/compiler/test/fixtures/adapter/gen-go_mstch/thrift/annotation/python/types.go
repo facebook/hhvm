@@ -25,7 +25,9 @@ func NewHidden() *Hidden {
 }
 
 func (x *Hidden) String() string {
-    return fmt.Sprintf("%+v", x)
+    type HiddenAlias Hidden
+    valueAlias := (*HiddenAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -105,7 +107,9 @@ func NewFlags() *Flags {
 }
 
 func (x *Flags) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FlagsAlias Flags
+    valueAlias := (*FlagsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -231,7 +235,9 @@ if err != nil {
 }
 
 func (x *Name) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NameAlias Name
+    valueAlias := (*NameAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -324,7 +330,9 @@ func NewIOBuf() *IOBuf {
 }
 
 func (x *IOBuf) String() string {
-    return fmt.Sprintf("%+v", x)
+    type IOBufAlias IOBuf
+    valueAlias := (*IOBufAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -496,7 +504,9 @@ if err != nil {
 }
 
 func (x *Adapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdapterAlias Adapter
+    valueAlias := (*AdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

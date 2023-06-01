@@ -615,7 +615,9 @@ func (x *MyStruct) DefaultGetMyDataField() *MyDataItem {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -812,7 +814,9 @@ func NewMyDataItem() *MyDataItem {
 }
 
 func (x *MyDataItem) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataItemAlias MyDataItem
+    valueAlias := (*MyDataItemAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1177,7 +1181,9 @@ func (x *MyUnion) DefaultGetMyDataItem() *MyDataItem {
 }
 
 func (x *MyUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionAlias MyUnion
+    valueAlias := (*MyUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -1379,7 +1385,9 @@ if err != nil {
 }
 
 func (x *ReservedKeyword) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ReservedKeywordAlias ReservedKeyword
+    valueAlias := (*ReservedKeywordAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1532,7 +1540,9 @@ if err != nil {
 var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().GetReservedField()
 
 func (x *UnionToBeRenamed) String() string {
-    return fmt.Sprintf("%+v", x)
+    type UnionToBeRenamedAlias UnionToBeRenamed
+    valueAlias := (*UnionToBeRenamedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *UnionToBeRenamed) countSetFields() int {

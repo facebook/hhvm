@@ -188,7 +188,9 @@ if err != nil {
 }
 
 func (x *reqTestServiceInit) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqTestServiceInitAlias reqTestServiceInit
+    valueAlias := (*reqTestServiceInitAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -327,7 +329,9 @@ if err != nil {
 }
 
 func (x *respTestServiceInit) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respTestServiceInitAlias respTestServiceInit
+    valueAlias := (*respTestServiceInitAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

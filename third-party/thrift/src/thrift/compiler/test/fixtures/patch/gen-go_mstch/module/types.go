@@ -171,7 +171,9 @@ if err != nil {
 }
 
 func (x *MyData) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataAlias MyData
+    valueAlias := (*MyDataAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -369,7 +371,9 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefault) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataWithCustomDefaultAlias MyDataWithCustomDefault
+    valueAlias := (*MyDataWithCustomDefaultAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -532,7 +536,9 @@ if err != nil {
 }
 
 func (x *InnerUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InnerUnionAlias InnerUnion
+    valueAlias := (*InnerUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *InnerUnion) countSetFields() int {
@@ -829,7 +835,9 @@ func (x *MyUnion) DefaultGetOption3() *InnerUnion {
 }
 
 func (x *MyUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionAlias MyUnion
+    valueAlias := (*MyUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -3138,7 +3146,9 @@ func (x *MyStruct) DefaultGetStructWithFieldCustomDefault() *MyData {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3647,7 +3657,9 @@ func NewLateDefStruct() *LateDefStruct {
 }
 
 func (x *LateDefStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LateDefStructAlias LateDefStruct
+    valueAlias := (*LateDefStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3832,7 +3844,9 @@ result := mapResult
 }
 
 func (x *Recursive) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RecursiveAlias Recursive
+    valueAlias := (*RecursiveAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -3995,7 +4009,9 @@ func (x *Bar) DefaultGetLoop() *Loop {
 }
 
 func (x *Bar) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BarAlias Bar
+    valueAlias := (*BarAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4158,7 +4174,9 @@ func (x *Loop) DefaultGetBar() *Bar {
 }
 
 func (x *Loop) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LoopAlias Loop
+    valueAlias := (*LoopAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4576,7 +4594,9 @@ func (x *MyDataPatch) DefaultGetPatch() *MyDataFieldPatch {
 }
 
 func (x *MyDataPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataPatchAlias MyDataPatch
+    valueAlias := (*MyDataPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4861,7 +4881,9 @@ func (x *MyDataFieldPatch) DefaultGetData2() *patch.I32Patch {
 }
 
 func (x *MyDataFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataFieldPatchAlias MyDataFieldPatch
+    valueAlias := (*MyDataFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5087,7 +5109,9 @@ var MyDataEnsureStruct_Data1_DEFAULT = NewMyDataEnsureStruct().GetData1()
 var MyDataEnsureStruct_Data2_DEFAULT = NewMyDataEnsureStruct().GetData2()
 
 func (x *MyDataEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataEnsureStructAlias MyDataEnsureStruct
+    valueAlias := (*MyDataEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5518,7 +5542,9 @@ func (x *MyDataWithCustomDefaultPatch) DefaultGetPatch() *MyDataWithCustomDefaul
 }
 
 func (x *MyDataWithCustomDefaultPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataWithCustomDefaultPatchAlias MyDataWithCustomDefaultPatch
+    valueAlias := (*MyDataWithCustomDefaultPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5803,7 +5829,9 @@ func (x *MyDataWithCustomDefaultFieldPatch) DefaultGetData2() *patch.I32Patch {
 }
 
 func (x *MyDataWithCustomDefaultFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataWithCustomDefaultFieldPatchAlias MyDataWithCustomDefaultFieldPatch
+    valueAlias := (*MyDataWithCustomDefaultFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6029,7 +6057,9 @@ var MyDataWithCustomDefaultEnsureStruct_Data1_DEFAULT = NewMyDataWithCustomDefau
 var MyDataWithCustomDefaultEnsureStruct_Data2_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().GetData2()
 
 func (x *MyDataWithCustomDefaultEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyDataWithCustomDefaultEnsureStructAlias MyDataWithCustomDefaultEnsureStruct
+    valueAlias := (*MyDataWithCustomDefaultEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6460,7 +6490,9 @@ func (x *InnerUnionPatch) DefaultGetPatch() *InnerUnionFieldPatch {
 }
 
 func (x *InnerUnionPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InnerUnionPatchAlias InnerUnionPatch
+    valueAlias := (*InnerUnionPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6675,7 +6707,9 @@ func (x *InnerUnionFieldPatch) DefaultGetInnerOption() *patch.BinaryPatch {
 }
 
 func (x *InnerUnionFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InnerUnionFieldPatchAlias InnerUnionFieldPatch
+    valueAlias := (*InnerUnionFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7093,7 +7127,9 @@ func (x *MyUnionPatch) DefaultGetPatch() *MyUnionFieldPatch {
 }
 
 func (x *MyUnionPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionPatchAlias MyUnionPatch
+    valueAlias := (*MyUnionPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7448,7 +7484,9 @@ func (x *MyUnionFieldPatch) DefaultGetOption3() *InnerUnionPatch {
 }
 
 func (x *MyUnionFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionFieldPatchAlias MyUnionFieldPatch
+    valueAlias := (*MyUnionFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -7892,7 +7930,9 @@ func (x *MyStructPatch) DefaultGetPatch() *MyStructFieldPatch {
 }
 
 func (x *MyStructPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructPatchAlias MyStructPatch
+    valueAlias := (*MyStructPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8144,7 +8184,9 @@ if err != nil {
 var MyStructField10Patch_Assign_DEFAULT = NewMyStructField10Patch().GetAssign()
 
 func (x *MyStructField10Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField10PatchAlias MyStructField10Patch
+    valueAlias := (*MyStructField10PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8357,7 +8399,9 @@ if err != nil {
 var MyStructField23Patch_Assign_DEFAULT = NewMyStructField23Patch().GetAssign()
 
 func (x *MyStructField23Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField23PatchAlias MyStructField23Patch
+    valueAlias := (*MyStructField23PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -8875,7 +8919,9 @@ result := listResult
 }
 
 func (x *MyStructField26Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField26PatchAlias MyStructField26Patch
+    valueAlias := (*MyStructField26PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -9326,7 +9372,9 @@ result := setResult
 }
 
 func (x *MyStructField27Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField27PatchAlias MyStructField27Patch
+    valueAlias := (*MyStructField27PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -10112,7 +10160,9 @@ result := mapResult
 }
 
 func (x *MyStructField28Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField28PatchAlias MyStructField28Patch
+    valueAlias := (*MyStructField28PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -10833,7 +10883,9 @@ result := listResult
 }
 
 func (x *MyStructField29Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField29PatchAlias MyStructField29Patch
+    valueAlias := (*MyStructField29PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -11632,7 +11684,9 @@ result := mapResult
 }
 
 func (x *MyStructField29Patch1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField29Patch1Alias MyStructField29Patch1
+    valueAlias := (*MyStructField29Patch1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -12595,7 +12649,9 @@ result := mapResult
 }
 
 func (x *MyStructField30Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField30PatchAlias MyStructField30Patch
+    valueAlias := (*MyStructField30PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -13420,7 +13476,9 @@ result := mapResult
 }
 
 func (x *MyStructField30Patch1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructField30Patch1Alias MyStructField30Patch1
+    valueAlias := (*MyStructField30Patch1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -15901,7 +15959,9 @@ func (x *MyStructFieldPatch) DefaultGetStructWithFieldCustomDefault() *MyDataPat
 }
 
 func (x *MyStructFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructFieldPatchAlias MyStructFieldPatch
+    valueAlias := (*MyStructFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -18707,7 +18767,9 @@ func (x *MyStructEnsureStruct) DefaultGetStructWithFieldCustomDefault() *MyData 
 }
 
 func (x *MyStructEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructEnsureStructAlias MyStructEnsureStruct
+    valueAlias := (*MyStructEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19541,7 +19603,9 @@ func (x *LateDefStructPatch) DefaultGetPatch() *LateDefStructFieldPatch {
 }
 
 func (x *LateDefStructPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LateDefStructPatchAlias LateDefStructPatch
+    valueAlias := (*LateDefStructPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19686,7 +19750,9 @@ func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
 }
 
 func (x *LateDefStructFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LateDefStructFieldPatchAlias LateDefStructFieldPatch
+    valueAlias := (*LateDefStructFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -19766,7 +19832,9 @@ func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
 }
 
 func (x *LateDefStructEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LateDefStructEnsureStructAlias LateDefStructEnsureStruct
+    valueAlias := (*LateDefStructEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20171,7 +20239,9 @@ func (x *RecursivePatch) DefaultGetPatch() *RecursiveFieldPatch {
 }
 
 func (x *RecursivePatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RecursivePatchAlias RecursivePatch
+    valueAlias := (*RecursivePatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20466,7 +20536,9 @@ if err != nil {
 }
 
 func (x *RecursiveField1Patch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RecursiveField1PatchAlias RecursiveField1Patch
+    valueAlias := (*RecursiveField1PatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20642,7 +20714,9 @@ func (x *RecursiveFieldPatch) DefaultGetNodes() *RecursiveField1Patch {
 }
 
 func (x *RecursiveFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RecursiveFieldPatchAlias RecursiveFieldPatch
+    valueAlias := (*RecursiveFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -20839,7 +20913,9 @@ result := mapResult
 }
 
 func (x *RecursiveEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RecursiveEnsureStructAlias RecursiveEnsureStruct
+    valueAlias := (*RecursiveEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21257,7 +21333,9 @@ func (x *BarPatch) DefaultGetPatch() *BarFieldPatch {
 }
 
 func (x *BarPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BarPatchAlias BarPatch
+    valueAlias := (*BarPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21472,7 +21550,9 @@ func (x *BarFieldPatch) DefaultGetLoop() *LoopPatch {
 }
 
 func (x *BarFieldPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BarFieldPatchAlias BarFieldPatch
+    valueAlias := (*BarFieldPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21634,7 +21714,9 @@ func (x *BarEnsureStruct) DefaultGetLoop() *Loop {
 }
 
 func (x *BarEnsureStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BarEnsureStructAlias BarEnsureStruct
+    valueAlias := (*BarEnsureStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -21842,7 +21924,9 @@ func (x *LoopPatch) DefaultGetAssign() *Loop {
 }
 
 func (x *LoopPatch) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LoopPatchAlias LoopPatch
+    valueAlias := (*LoopPatchAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

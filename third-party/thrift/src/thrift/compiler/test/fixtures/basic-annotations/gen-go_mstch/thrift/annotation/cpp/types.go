@@ -247,7 +247,9 @@ if err != nil {
 }
 
 func (x *Type) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TypeAlias Type
+    valueAlias := (*TypeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -400,7 +402,9 @@ result := RefType(enumResult)
 }
 
 func (x *Ref) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RefAlias Ref
+    valueAlias := (*RefAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -539,7 +543,9 @@ if err != nil {
 }
 
 func (x *Lazy) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LazyAlias Lazy
+    valueAlias := (*LazyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -632,7 +638,9 @@ func NewDisableLazyChecksum() *DisableLazyChecksum {
 }
 
 func (x *DisableLazyChecksum) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DisableLazyChecksumAlias DisableLazyChecksum
+    valueAlias := (*DisableLazyChecksumAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -942,7 +950,9 @@ if err != nil {
 }
 
 func (x *Adapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdapterAlias Adapter
+    valueAlias := (*AdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1133,7 +1143,9 @@ if err != nil {
 }
 
 func (x *PackIsset) String() string {
-    return fmt.Sprintf("%+v", x)
+    type PackIssetAlias PackIsset
+    valueAlias := (*PackIssetAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1226,7 +1238,9 @@ func NewMinimizePadding() *MinimizePadding {
 }
 
 func (x *MinimizePadding) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MinimizePaddingAlias MinimizePadding
+    valueAlias := (*MinimizePaddingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1306,7 +1320,9 @@ func NewTriviallyRelocatable() *TriviallyRelocatable {
 }
 
 func (x *TriviallyRelocatable) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TriviallyRelocatableAlias TriviallyRelocatable
+    valueAlias := (*TriviallyRelocatableAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1386,7 +1402,9 @@ func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
 }
 
 func (x *ScopedEnumAsUnionType) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ScopedEnumAsUnionTypeAlias ScopedEnumAsUnionType
+    valueAlias := (*ScopedEnumAsUnionTypeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1466,7 +1484,9 @@ func NewStrongType() *StrongType {
 }
 
 func (x *StrongType) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StrongTypeAlias StrongType
+    valueAlias := (*StrongTypeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1638,7 +1658,9 @@ if err != nil {
 }
 
 func (x *FieldInterceptor) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieldInterceptorAlias FieldInterceptor
+    valueAlias := (*FieldInterceptorAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1744,7 +1766,9 @@ func NewUseOpEncode() *UseOpEncode {
 }
 
 func (x *UseOpEncode) String() string {
-    return fmt.Sprintf("%+v", x)
+    type UseOpEncodeAlias UseOpEncode
+    valueAlias := (*UseOpEncodeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1871,7 +1895,9 @@ result := EnumUnderlyingType(enumResult)
 }
 
 func (x *EnumType) String() string {
-    return fmt.Sprintf("%+v", x)
+    type EnumTypeAlias EnumType
+    valueAlias := (*EnumTypeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1964,7 +1990,9 @@ func NewFrozen2Exclude() *Frozen2Exclude {
 }
 
 func (x *Frozen2Exclude) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Frozen2ExcludeAlias Frozen2Exclude
+    valueAlias := (*Frozen2ExcludeAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2044,7 +2072,9 @@ func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContain
 }
 
 func (x *Frozen2RequiresCompleteContainerParams) String() string {
-    return fmt.Sprintf("%+v", x)
+    type Frozen2RequiresCompleteContainerParamsAlias Frozen2RequiresCompleteContainerParams
+    valueAlias := (*Frozen2RequiresCompleteContainerParamsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

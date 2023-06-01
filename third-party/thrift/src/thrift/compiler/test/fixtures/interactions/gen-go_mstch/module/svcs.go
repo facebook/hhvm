@@ -141,7 +141,9 @@ func newReqMyServiceFoo() *reqMyServiceFoo {
 }
 
 func (x *reqMyServiceFoo) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceFooAlias reqMyServiceFoo
+    valueAlias := (*reqMyServiceFooAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -221,7 +223,9 @@ func newRespMyServiceFoo() *respMyServiceFoo {
 }
 
 func (x *respMyServiceFoo) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceFooAlias respMyServiceFoo
+    valueAlias := (*respMyServiceFooAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

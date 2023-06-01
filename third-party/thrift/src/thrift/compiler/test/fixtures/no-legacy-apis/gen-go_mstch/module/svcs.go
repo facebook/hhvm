@@ -212,7 +212,9 @@ func (x *reqMyServiceQuery) DefaultGetU() *MyUnion {
 }
 
 func (x *reqMyServiceQuery) String() string {
-    return fmt.Sprintf("%+v", x)
+    type reqMyServiceQueryAlias reqMyServiceQuery
+    valueAlias := (*reqMyServiceQueryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -375,7 +377,9 @@ func (x *respMyServiceQuery) DefaultGetValue() *MyStruct {
 }
 
 func (x *respMyServiceQuery) String() string {
-    return fmt.Sprintf("%+v", x)
+    type respMyServiceQueryAlias respMyServiceQuery
+    valueAlias := (*respMyServiceQueryAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

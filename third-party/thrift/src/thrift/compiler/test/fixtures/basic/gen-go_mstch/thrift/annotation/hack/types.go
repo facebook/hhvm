@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *FieldWrapper) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieldWrapperAlias FieldWrapper
+    valueAlias := (*FieldWrapperAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -302,7 +304,9 @@ if err != nil {
 }
 
 func (x *Wrapper) String() string {
-    return fmt.Sprintf("%+v", x)
+    type WrapperAlias Wrapper
+    valueAlias := (*WrapperAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -467,7 +471,9 @@ if err != nil {
 }
 
 func (x *Adapter) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdapterAlias Adapter
+    valueAlias := (*AdapterAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -606,7 +612,9 @@ if err != nil {
 }
 
 func (x *SkipCodegen) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SkipCodegenAlias SkipCodegen
+    valueAlias := (*SkipCodegenAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -791,7 +799,9 @@ if err != nil {
 }
 
 func (x *Name) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NameAlias Name
+    valueAlias := (*NameAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -984,7 +994,9 @@ result := listResult
 }
 
 func (x *UnionEnumAttributes) String() string {
-    return fmt.Sprintf("%+v", x)
+    type UnionEnumAttributesAlias UnionEnumAttributes
+    valueAlias := (*UnionEnumAttributesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1123,7 +1135,9 @@ if err != nil {
 }
 
 func (x *StructTrait) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructTraitAlias StructTrait
+    valueAlias := (*StructTraitAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1303,7 +1317,9 @@ result := listResult
 }
 
 func (x *Attributes) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AttributesAlias Attributes
+    valueAlias := (*AttributesAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1396,7 +1412,9 @@ func NewStructAsTrait() *StructAsTrait {
 }
 
 func (x *StructAsTrait) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructAsTraitAlias StructAsTrait
+    valueAlias := (*StructAsTraitAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1476,7 +1494,9 @@ func NewModuleInternal() *ModuleInternal {
 }
 
 func (x *ModuleInternal) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ModuleInternalAlias ModuleInternal
+    valueAlias := (*ModuleInternalAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

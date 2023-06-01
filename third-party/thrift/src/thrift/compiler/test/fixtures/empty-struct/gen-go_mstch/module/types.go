@@ -25,7 +25,9 @@ func NewEmpty() *Empty {
 }
 
 func (x *Empty) String() string {
-    return fmt.Sprintf("%+v", x)
+    type EmptyAlias Empty
+    valueAlias := (*EmptyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -105,7 +107,9 @@ func NewNada() *Nada {
 }
 
 func (x *Nada) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NadaAlias Nada
+    valueAlias := (*NadaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *Nada) countSetFields() int {

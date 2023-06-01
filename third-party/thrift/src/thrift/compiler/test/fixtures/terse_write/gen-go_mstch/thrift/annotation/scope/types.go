@@ -25,7 +25,9 @@ func NewTransitive() *Transitive {
 }
 
 func (x *Transitive) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TransitiveAlias Transitive
+    valueAlias := (*TransitiveAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -105,7 +107,9 @@ func NewSchema() *Schema {
 }
 
 func (x *Schema) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SchemaAlias Schema
+    valueAlias := (*SchemaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -185,7 +189,9 @@ func NewProgram() *Program {
 }
 
 func (x *Program) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ProgramAlias Program
+    valueAlias := (*ProgramAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -265,7 +271,9 @@ func NewStruct() *Struct {
 }
 
 func (x *Struct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructAlias Struct
+    valueAlias := (*StructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -345,7 +353,9 @@ func NewUnion() *Union {
 }
 
 func (x *Union) String() string {
-    return fmt.Sprintf("%+v", x)
+    type UnionAlias Union
+    valueAlias := (*UnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -425,7 +435,9 @@ func NewException() *Exception {
 }
 
 func (x *Exception) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ExceptionAlias Exception
+    valueAlias := (*ExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -505,7 +517,9 @@ func NewField() *Field {
 }
 
 func (x *Field) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieldAlias Field
+    valueAlias := (*FieldAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -585,7 +599,9 @@ func NewTypedef() *Typedef {
 }
 
 func (x *Typedef) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TypedefAlias Typedef
+    valueAlias := (*TypedefAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -665,7 +681,9 @@ func NewService() *Service {
 }
 
 func (x *Service) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ServiceAlias Service
+    valueAlias := (*ServiceAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -745,7 +763,9 @@ func NewInteraction() *Interaction {
 }
 
 func (x *Interaction) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InteractionAlias Interaction
+    valueAlias := (*InteractionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -825,7 +845,9 @@ func NewFunction() *Function {
 }
 
 func (x *Function) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FunctionAlias Function
+    valueAlias := (*FunctionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -905,7 +927,9 @@ func NewEnumValue() *EnumValue {
 }
 
 func (x *EnumValue) String() string {
-    return fmt.Sprintf("%+v", x)
+    type EnumValueAlias EnumValue
+    valueAlias := (*EnumValueAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -985,7 +1009,9 @@ func NewConst() *Const {
 }
 
 func (x *Const) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ConstAlias Const
+    valueAlias := (*ConstAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1065,7 +1091,9 @@ func NewEnum() *Enum {
 }
 
 func (x *Enum) String() string {
-    return fmt.Sprintf("%+v", x)
+    type EnumAlias Enum
+    valueAlias := (*EnumAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1145,7 +1173,9 @@ func NewStructured() *Structured {
 }
 
 func (x *Structured) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructuredAlias Structured
+    valueAlias := (*StructuredAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1225,7 +1255,9 @@ func NewInterface() *Interface {
 }
 
 func (x *Interface) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InterfaceAlias Interface
+    valueAlias := (*InterfaceAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1305,7 +1337,9 @@ func NewRootDefinition() *RootDefinition {
 }
 
 func (x *RootDefinition) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RootDefinitionAlias RootDefinition
+    valueAlias := (*RootDefinitionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1385,7 +1419,9 @@ func NewDefinition() *Definition {
 }
 
 func (x *Definition) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DefinitionAlias Definition
+    valueAlias := (*DefinitionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

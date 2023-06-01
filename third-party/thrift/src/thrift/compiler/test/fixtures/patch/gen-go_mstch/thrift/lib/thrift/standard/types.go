@@ -342,7 +342,9 @@ if err != nil {
 var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
 
 func (x *TypeUri) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TypeUriAlias TypeUri
+    valueAlias := (*TypeUriAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *TypeUri) countSetFields() int {
@@ -1543,7 +1545,9 @@ var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
 var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
 
 func (x *TypeName) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TypeNameAlias TypeName
+    valueAlias := (*TypeNameAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *TypeName) countSetFields() int {

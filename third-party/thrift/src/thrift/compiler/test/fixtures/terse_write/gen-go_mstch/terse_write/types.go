@@ -106,7 +106,9 @@ func NewMyStruct() *MyStruct {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1129,7 +1131,9 @@ func (x *MyUnion) DefaultGetStructField() *MyStruct {
 }
 
 func (x *MyUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyUnionAlias MyUnion
+    valueAlias := (*MyUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *MyUnion) countSetFields() int {
@@ -1491,7 +1495,9 @@ if err != nil {
 }
 
 func (x *MyStructWithCustomDefault) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructWithCustomDefaultAlias MyStructWithCustomDefault
+    valueAlias := (*MyStructWithCustomDefaultAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2476,7 +2482,9 @@ func (x *StructLevelTerseStruct) DefaultGetUnionField() *MyUnion {
 }
 
 func (x *StructLevelTerseStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type StructLevelTerseStructAlias StructLevelTerseStruct
+    valueAlias := (*StructLevelTerseStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -4535,7 +4543,9 @@ func (x *FieldLevelTerseStruct) DefaultGetUnionField() *MyUnion {
 }
 
 func (x *FieldLevelTerseStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type FieldLevelTerseStructAlias FieldLevelTerseStruct
+    valueAlias := (*FieldLevelTerseStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -5841,7 +5851,9 @@ func (x *TerseStructWithCustomDefault) DefaultGetStructField() *MyStructWithCust
 }
 
 func (x *TerseStructWithCustomDefault) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TerseStructWithCustomDefaultAlias TerseStructWithCustomDefault
+    valueAlias := (*TerseStructWithCustomDefaultAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6243,7 +6255,9 @@ if err != nil {
 }
 
 func (x *AdaptedFields) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AdaptedFieldsAlias AdaptedFields
+    valueAlias := (*AdaptedFieldsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6408,7 +6422,9 @@ if err != nil {
 }
 
 func (x *WrappedFields) String() string {
-    return fmt.Sprintf("%+v", x)
+    type WrappedFieldsAlias WrappedFields
+    valueAlias := (*WrappedFieldsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -6547,7 +6563,9 @@ if err != nil {
 }
 
 func (x *TerseException) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TerseExceptionAlias TerseException
+    valueAlias := (*TerseExceptionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *TerseException) Error() string {

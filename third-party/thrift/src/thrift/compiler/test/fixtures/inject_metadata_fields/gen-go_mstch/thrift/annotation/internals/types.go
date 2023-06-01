@@ -71,7 +71,9 @@ if err != nil {
 }
 
 func (x *InjectMetadataFields) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InjectMetadataFieldsAlias InjectMetadataFields
+    valueAlias := (*InjectMetadataFieldsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

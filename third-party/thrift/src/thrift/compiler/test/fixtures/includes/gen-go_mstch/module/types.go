@@ -216,7 +216,9 @@ func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
 }
 
 func (x *MyStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MyStructAlias MyStruct
+    valueAlias := (*MyStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

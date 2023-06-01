@@ -25,7 +25,9 @@ func NewBeta() *Beta {
 }
 
 func (x *Beta) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BetaAlias Beta
+    valueAlias := (*BetaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -105,7 +107,9 @@ func NewExperimental() *Experimental {
 }
 
 func (x *Experimental) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ExperimentalAlias Experimental
+    valueAlias := (*ExperimentalAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -185,7 +189,9 @@ func NewTesting() *Testing {
 }
 
 func (x *Testing) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TestingAlias Testing
+    valueAlias := (*TestingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -311,7 +317,9 @@ if err != nil {
 }
 
 func (x *Deprecated) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DeprecatedAlias Deprecated
+    valueAlias := (*DeprecatedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -595,7 +603,9 @@ result := mapResult
 }
 
 func (x *ReserveIds) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ReserveIdsAlias ReserveIds
+    valueAlias := (*ReserveIdsAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -747,7 +757,9 @@ if err != nil {
 }
 
 func (x *Legacy) String() string {
-    return fmt.Sprintf("%+v", x)
+    type LegacyAlias Legacy
+    valueAlias := (*LegacyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -886,7 +898,9 @@ if err != nil {
 }
 
 func (x *RequiresBackwardCompatibility) String() string {
-    return fmt.Sprintf("%+v", x)
+    type RequiresBackwardCompatibilityAlias RequiresBackwardCompatibility
+    valueAlias := (*RequiresBackwardCompatibilityAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -979,7 +993,9 @@ func NewNoTesting() *NoTesting {
 }
 
 func (x *NoTesting) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NoTestingAlias NoTesting
+    valueAlias := (*NoTestingAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1059,7 +1075,9 @@ func NewNoExperimental() *NoExperimental {
 }
 
 func (x *NoExperimental) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NoExperimentalAlias NoExperimental
+    valueAlias := (*NoExperimentalAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1139,7 +1157,9 @@ func NewNoBeta() *NoBeta {
 }
 
 func (x *NoBeta) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NoBetaAlias NoBeta
+    valueAlias := (*NoBetaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1219,7 +1239,9 @@ func NewReleased() *Released {
 }
 
 func (x *Released) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ReleasedAlias Released
+    valueAlias := (*ReleasedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1299,7 +1321,9 @@ func NewNoLegacy() *NoLegacy {
 }
 
 func (x *NoLegacy) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NoLegacyAlias NoLegacy
+    valueAlias := (*NoLegacyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1379,7 +1403,9 @@ func NewNoDeprecated() *NoDeprecated {
 }
 
 func (x *NoDeprecated) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NoDeprecatedAlias NoDeprecated
+    valueAlias := (*NoDeprecatedAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1459,7 +1485,9 @@ func NewTerseWrite() *TerseWrite {
 }
 
 func (x *TerseWrite) String() string {
-    return fmt.Sprintf("%+v", x)
+    type TerseWriteAlias TerseWrite
+    valueAlias := (*TerseWriteAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1539,7 +1567,9 @@ func NewBox() *Box {
 }
 
 func (x *Box) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BoxAlias Box
+    valueAlias := (*BoxAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1619,7 +1649,9 @@ func NewMixin() *Mixin {
 }
 
 func (x *Mixin) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MixinAlias Mixin
+    valueAlias := (*MixinAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1699,7 +1731,9 @@ func NewBit() *Bit {
 }
 
 func (x *Bit) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BitAlias Bit
+    valueAlias := (*BitAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1779,7 +1813,9 @@ func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
 }
 
 func (x *SerializeInFieldIdOrder) String() string {
-    return fmt.Sprintf("%+v", x)
+    type SerializeInFieldIdOrderAlias SerializeInFieldIdOrder
+    valueAlias := (*SerializeInFieldIdOrderAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1859,7 +1895,9 @@ func NewBitmaskEnum() *BitmaskEnum {
 }
 
 func (x *BitmaskEnum) String() string {
-    return fmt.Sprintf("%+v", x)
+    type BitmaskEnumAlias BitmaskEnum
+    valueAlias := (*BitmaskEnumAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1939,7 +1977,9 @@ func NewV1() *V1 {
 }
 
 func (x *V1) String() string {
-    return fmt.Sprintf("%+v", x)
+    type V1Alias V1
+    valueAlias := (*V1Alias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2019,7 +2059,9 @@ func NewV1beta() *V1beta {
 }
 
 func (x *V1beta) String() string {
-    return fmt.Sprintf("%+v", x)
+    type V1betaAlias V1beta
+    valueAlias := (*V1betaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2099,7 +2141,9 @@ func NewV1alpha() *V1alpha {
 }
 
 func (x *V1alpha) String() string {
-    return fmt.Sprintf("%+v", x)
+    type V1alphaAlias V1alpha
+    valueAlias := (*V1alphaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2179,7 +2223,9 @@ func NewV1test() *V1test {
 }
 
 func (x *V1test) String() string {
-    return fmt.Sprintf("%+v", x)
+    type V1testAlias V1test
+    valueAlias := (*V1testAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2305,7 +2351,9 @@ if err != nil {
 }
 
 func (x *ExceptionMessage) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ExceptionMessageAlias ExceptionMessage
+    valueAlias := (*ExceptionMessageAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2444,7 +2492,9 @@ if err != nil {
 }
 
 func (x *GenerateRuntimeSchema) String() string {
-    return fmt.Sprintf("%+v", x)
+    type GenerateRuntimeSchemaAlias GenerateRuntimeSchema
+    valueAlias := (*GenerateRuntimeSchemaAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2537,7 +2587,9 @@ func NewInternBox() *InternBox {
 }
 
 func (x *InternBox) String() string {
-    return fmt.Sprintf("%+v", x)
+    type InternBoxAlias InternBox
+    valueAlias := (*InternBoxAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

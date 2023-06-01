@@ -507,7 +507,9 @@ var ComplexUnion_StringValue_DEFAULT = NewComplexUnion().GetStringValue()
 var ComplexUnion_StringRef_DEFAULT = NewComplexUnion().GetStringRef()
 
 func (x *ComplexUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ComplexUnionAlias ComplexUnion
+    valueAlias := (*ComplexUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ComplexUnion) countSetFields() int {
@@ -867,7 +869,9 @@ result := listResult
 }
 
 func (x *ListUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ListUnionAlias ListUnion
+    valueAlias := (*ListUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ListUnion) countSetFields() int {
@@ -1108,7 +1112,9 @@ if err != nil {
 var DataUnion_StringData_DEFAULT = NewDataUnion().GetStringData()
 
 func (x *DataUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type DataUnionAlias DataUnion
+    valueAlias := (*DataUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *DataUnion) countSetFields() int {
@@ -1383,7 +1389,9 @@ if err != nil {
 }
 
 func (x *Val) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ValAlias Val
+    valueAlias := (*ValAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1640,7 +1648,9 @@ func (x *ValUnion) DefaultGetV2() *Val {
 }
 
 func (x *ValUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ValUnionAlias ValUnion
+    valueAlias := (*ValUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *ValUnion) countSetFields() int {
@@ -1884,7 +1894,9 @@ var VirtualComplexUnion_ThingOne_DEFAULT = NewVirtualComplexUnion().GetThingOne(
 var VirtualComplexUnion_ThingTwo_DEFAULT = NewVirtualComplexUnion().GetThingTwo()
 
 func (x *VirtualComplexUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type VirtualComplexUnionAlias VirtualComplexUnion
+    valueAlias := (*VirtualComplexUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *VirtualComplexUnion) countSetFields() int {
@@ -2054,7 +2066,9 @@ if err != nil {
 }
 
 func (x *NonCopyableStruct) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NonCopyableStructAlias NonCopyableStruct
+    valueAlias := (*NonCopyableStructAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -2216,7 +2230,9 @@ func (x *NonCopyableUnion) DefaultGetS() *NonCopyableStruct {
 }
 
 func (x *NonCopyableUnion) String() string {
-    return fmt.Sprintf("%+v", x)
+    type NonCopyableUnionAlias NonCopyableUnion
+    valueAlias := (*NonCopyableUnionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 func (x *NonCopyableUnion) countSetFields() int {

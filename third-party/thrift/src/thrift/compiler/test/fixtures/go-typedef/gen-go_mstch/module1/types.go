@@ -710,7 +710,9 @@ var Automobile_PreviousPlate_DEFAULT = NewAutomobile().GetPreviousPlate()
 var Automobile_FirstPlate_DEFAULT = NewAutomobile().GetFirstPlate()
 
 func (x *Automobile) String() string {
-    return fmt.Sprintf("%+v", x)
+    type AutomobileAlias Automobile
+    valueAlias := (*AutomobileAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -973,7 +975,9 @@ if err != nil {
 }
 
 func (x *MapKey) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MapKeyAlias MapKey
+    valueAlias := (*MapKeyAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1184,7 +1188,9 @@ result := mapResult
 }
 
 func (x *MapContainer) String() string {
-    return fmt.Sprintf("%+v", x)
+    type MapContainerAlias MapContainer
+    valueAlias := (*MapContainerAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1417,7 +1423,9 @@ func (x *Pair) DefaultGetCar() *Car {
 }
 
 func (x *Pair) String() string {
-    return fmt.Sprintf("%+v", x)
+    type PairAlias Pair
+    valueAlias := (*PairAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1699,7 +1707,9 @@ result := listResult
 }
 
 func (x *Collection) String() string {
-    return fmt.Sprintf("%+v", x)
+    type CollectionAlias Collection
+    valueAlias := (*CollectionAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

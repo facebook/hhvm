@@ -295,7 +295,9 @@ if err != nil {
 }
 
 func (x *Color) String() string {
-    return fmt.Sprintf("%+v", x)
+    type ColorAlias Color
+    valueAlias := (*ColorAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -738,7 +740,9 @@ var Vehicle_Name_DEFAULT = NewVehicle().GetName()
 var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
 
 func (x *Vehicle) String() string {
-    return fmt.Sprintf("%+v", x)
+    type VehicleAlias Vehicle
+    valueAlias := (*VehicleAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 
@@ -1565,7 +1569,9 @@ var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
 var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 func (x *Person) String() string {
-    return fmt.Sprintf("%+v", x)
+    type PersonAlias Person
+    valueAlias := (*PersonAlias)(x)
+    return fmt.Sprintf("%+v", valueAlias)
 }
 
 

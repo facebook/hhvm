@@ -1585,6 +1585,9 @@ final class Status {
   public static dict<string, int> $skip_reasons = dict[];
   public static int $failed = 0;
 
+  public static keyset<int> $children = keyset[];
+  public static int $printer_pid = -1;
+
   const int MODE_NORMAL = 0;
   const int MODE_VERBOSE = 1;
   const int MODE_TESTPILOT = 3;
@@ -1749,6 +1752,19 @@ final class Status {
       if (self::$queue is nonnull) {
         self::$queue->destroy();
         self::$queue = null;
+      }
+      // Kill any pending children (including the printer if it's still
+      // running). The most common case of this is if `error()` is called from
+      // the main loop.
+      $children = self::$children;
+      if (self::$printer_pid > 0) {
+        $children[] = self::$printer_pid;
+      }
+      foreach (self::$children as $child) {
+        if ($child > 1) {
+          // No reason to think that SIGKILL is necessary.
+          posix_kill($child, SIGINT);
+        }
       }
       switch (self::$temp_dir_remove) {
         case TempDirRemove::NEVER:
@@ -4285,23 +4301,19 @@ function main(vec<string> $argv): int {
     $queue = Status::getQueue();
 
     // Fork a "printer" child to process status messages.
-    $printer_pid = pcntl_fork();
-    if ($printer_pid === -1) {
+    Status::$printer_pid = pcntl_fork();
+    if (Status::$printer_pid === -1) {
       error("failed to fork");
-    } else if ($printer_pid === 0) {
+    } else if (Status::$printer_pid === 0) {
       msg_loop(count($tests), $queue);
       return 0;
     }
-  } else {
-    // Satisfy the type-checker.
-    $printer_pid = -1;
   }
 
   // Unblock the Queue (if needed).
   Status::started();
 
   // Fork "worker" children (if needed).
-  $children = dict[];
   // We write results as json in each child and collate them at the end
   $json_results_files = vec[];
   if (Status::$nofork) {
@@ -4317,7 +4329,7 @@ function main(vec<string> $argv): int {
       if ($pid === -1) {
         error('could not fork');
       } else if ($pid) {
-        $children[$pid] = $pid;
+        Status::$children[] = $pid;
       } else {
         $serial = ($i === 0) ? $serial_tests : vec[];
         exit(child_main($options, $serial, $json_results_file));
@@ -4330,7 +4342,7 @@ function main(vec<string> $argv): int {
 
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
-    while (count($children) && $printer_pid !== 0) {
+    while (count(Status::$children) && Status::$printer_pid !== 0) {
       $status = null;
       $pid = pcntl_wait(inout $status);
       if (pcntl_wifexited($status as nonnull)) {
@@ -4341,9 +4353,9 @@ function main(vec<string> $argv): int {
         error("Unexpected exit status from child");
       }
 
-      if ($pid === $printer_pid) {
+      if ($pid === Status::$printer_pid) {
         // We should be finishing up soon.
-        $printer_pid = 0;
+        Status::$printer_pid = 0;
         if ($bad_end) {
           // Don't consider the run successful if the printer worker died
           $return_value = 1;
@@ -4364,14 +4376,19 @@ function main(vec<string> $argv): int {
         unset($servers->pids[$pid]);
         $pid = $server->pid;
         $servers->pids[$pid] = $server;
-      } else if (isset($children[$pid])) {
-        unset($children[$pid]);
+      } else if (isset(Status::$children[$pid])) {
+        unset(Status::$children[$pid]);
         if ($bad_end) {
           // If any worker process dies we should fail the test run
           $return_value = 1;
         }
       } else {
-        error("Got status for child that we didn't know we had with pid $pid");
+        // We definitely see messages about defunct processes that were started
+        // on our behalf - and it's too late to ask about their name. Don't
+        // error out because of that.
+        //
+        // A common example is: [scribe_cat] <defunct>.
+        fprintf(STDERR, "WARNING: Got status for child that we didn't know we had with pid $pid\n");
       }
     }
   }
@@ -4379,10 +4396,11 @@ function main(vec<string> $argv): int {
   Status::finished($return_value);
 
   // Wait for the printer child to exit, if needed.
-  if (!Status::$nofork && $printer_pid !== 0) {
+  if (!Status::$nofork && Status::$printer_pid !== 0) {
     $status = 0;
-    $pid = pcntl_waitpid($printer_pid, inout $status);
+    $pid = pcntl_waitpid(Status::$printer_pid, inout $status);
     $status = $status as int;
+    Status::$printer_pid = 0;
     if (pcntl_wifexited($status)) {
       if (pcntl_wexitstatus($status) !== 0) {
         // Don't consider the run successful if the printer worker died

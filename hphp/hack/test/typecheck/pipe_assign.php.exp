@@ -6,3 +6,15 @@ File "pipe_assign.php", line 5, characters 3-4:
 Variable `$$` is undefined, or not always defined. (Naming[2050])
 File "pipe_assign.php", line 6, characters 3-4:
 Variable `$$` is undefined, or not always defined. (Naming[2050])
+File "pipe_assign.php", line 5, characters 3-8:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `nothing`
+  File "pipe_assign.php", line 5, characters 8-8:
+  But got `int`
+File "pipe_assign.php", line 6, characters 3-8:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `nothing`
+  File "pipe_assign.php", line 6, characters 8-8:
+  But got `int`

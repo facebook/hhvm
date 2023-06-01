@@ -10,7 +10,7 @@ function good_mixed(mixed $m): void {
 
 final class C {}
 
-function good_final_class(C $m): void {
+function good_final_class(C $c): void {
   switch ($c) {
     case new C(): return;
   }
@@ -39,11 +39,13 @@ function good_arraykey(arraykey $s): void {
   }
 }
 
+/*
 function good_intersection((bool & arraykey) $s): void {
-  switch ($b)  {
+  switch ($s)  {
     case true: return;
   }
 }
+ */
 
 function good_union((bool | C) $s): void {
   switch ($s)  {

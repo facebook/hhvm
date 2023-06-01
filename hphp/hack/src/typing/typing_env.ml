@@ -1262,16 +1262,16 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
     end;
     lcl
 
-let get_local_ty_in_ctx env ~undefined_err_fun x ctx_opt =
+let get_local_ty_in_ctx ~undefined_err_fun x ctx_opt =
   let open Typing_local_types in
   match get_local_in_ctx ~undefined_err_fun x ctx_opt with
-  | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
+  | None -> (false, Typing_make_type.nothing Reason.Rnone, Pos.none)
   | Some { ty = x; pos; eid = _ } -> (true, x, pos)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let undefined_err_fun = local_undefined_error ~env p in
   let next_cont = next_cont_opt env in
-  get_local_ty_in_ctx env ~undefined_err_fun x next_cont
+  get_local_ty_in_ctx ~undefined_err_fun x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
   let (mut, ty, _) =

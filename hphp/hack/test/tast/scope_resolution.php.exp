@@ -469,7 +469,7 @@ Errors:
                   (Call (
                      ((nothing), [153:3-156:4],
                       (Class_get (((Foo), [153:3-6], (CI ([153:3-6], "\\Foo"))),
-                         (CGexpr ((string), [153:9-155:4], (String2 [((_), [154:1-6], (Lvar ([154:1-6], $much))); ((string), [154:6-11], (String " doge"))]))), Is_method))),
+                         (CGexpr ((string), [153:9-155:4], (String2 [((nothing), [154:1-6], (Lvar ([154:1-6], $much))); ((string), [154:6-11], (String " doge"))]))), Is_method))),
                      [], [], None)))))
              ]
            };

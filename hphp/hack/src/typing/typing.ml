@@ -2226,9 +2226,16 @@ module EnumClassLabelOps = struct
     | None -> (env, ClassNotFound)
 end
 
+type valkind =
+  | Lvalue
+  | Lvalue_subexpr
+  | Other
+
 let is_lvalue = function
-  | `lvalue -> true
-  | _ -> false
+  | Lvalue -> true
+  | Lvalue_subexpr
+  | Other ->
+    false
 
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
@@ -3211,7 +3218,7 @@ and expr
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(valkind = `other)
+    ?(valkind = Other)
     ?(check_defined = true)
     ?in_await
     ~allow_awaitable
@@ -3268,7 +3275,7 @@ and raw_expr
     ?(is_using_clause = false)
     ?(expected : ExpectedTy.t option)
     ?lhs_of_null_coalesce
-    ?(valkind = `other)
+    ?(valkind = Other)
     ?(check_defined = true)
     ?in_await
     ~allow_awaitable
@@ -3289,8 +3296,7 @@ and raw_expr
     e
 
 and lvalue env e =
-  let valkind = `lvalue in
-  expr_ ~valkind ~check_defined:false env e ~allow_awaitable:(*?*) false
+  expr_ ~valkind:Lvalue ~check_defined:false env e ~allow_awaitable:(*?*) false
 
 and lvalues env el =
   match el with
@@ -3332,7 +3338,7 @@ and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
 and exprs
     ?(accept_using_var = false)
     ?(expected : ExpectedTy.t option)
-    ?(valkind = `other)
+    ?(valkind = Other)
     ?(check_defined = true)
     ~allow_awaitable
     env
@@ -3419,7 +3425,7 @@ and expr_
     ?lhs_of_null_coalesce
     ?in_await
     ~allow_awaitable
-    ~(valkind : [> `lvalue | `lvalue_subexpr | `other ])
+    ~(valkind : valkind)
     ~check_defined
     env
     ((_, p, e) as outer) =
@@ -3726,10 +3732,10 @@ and expr_
      *)
     let ty =
       match valkind with
-      | `lvalue
-      | `lvalue_subexpr ->
+      | Lvalue
+      | Lvalue_subexpr ->
         MakeType.mixed (Reason.Rwitness p)
-      | `other -> MakeType.nothing (Reason.Rwitness p)
+      | Other -> MakeType.nothing (Reason.Rwitness p)
     in
     make_result env p Aast.Omitted ty
   | Varray (th, el)
@@ -4206,10 +4212,10 @@ and expr_
   | List el ->
     let (env, tel, tyl) =
       match valkind with
-      | `lvalue
-      | `lvalue_subexpr ->
+      | Lvalue
+      | Lvalue_subexpr ->
         lvalues env el
-      | `other ->
+      | Other ->
         let (env, expected) =
           expand_expected_and_get_node ~pessimisable_builtin:true env expected
         in
@@ -6782,7 +6788,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       (env, te1, ty2, ty_mismatch)
     | (_, pos, Array_get (e1, None)) ->
       let parent_lenv = env.lenv in
-      let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
+      let (env, te1, ty1) = update_array_type pos env e1 Lvalue in
       let (_, p1, _) = e1 in
       let (env, (ty1', arr_ty_mismatch_opt, val_ty_mismatch_opt)) =
         Typing_array_access.assign_array_append
@@ -6818,7 +6824,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     | (_, pos, Array_get (e1, Some e)) ->
       let (env, te, ty) = expr env e ~allow_awaitable in
       let parent_lenv = env.lenv in
-      let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
+      let (env, te1, ty1) = update_array_type pos env e1 Lvalue in
       let env = might_throw env in
       let (_, p1, _) = e1 in
       let ( env,
@@ -10084,26 +10090,30 @@ and overload_function
 
 and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
   match valkind with
-  | `lvalue
-  | `lvalue_subexpr ->
+  | Lvalue
+  | Lvalue_subexpr -> begin
     let (env, te1, ty1) =
       raw_expr
-        ~valkind:`lvalue_subexpr
+        ~valkind:Lvalue_subexpr
         ~check_defined:true
         env
         e1
         ~allow_awaitable:(*?*) false
     in
-    begin
-      match e1 with
-      | (_, _, Lvar (_, x)) ->
-        (* type_mapper has updated the type in ty1 typevars, but we
-             need to update the local variable type too *)
-        let env = set_local env (p, x) ty1 in
-        (env, te1, ty1)
-      | _ -> (env, te1, ty1)
-    end
-  | _ -> raw_expr ?lhs_of_null_coalesce env e1 ~allow_awaitable:(*?*) false
+    match e1 with
+    | (_, _, Lvar (_, x)) ->
+      let env =
+        if not (Env.is_local_defined env x) then
+          (* If the Lvar wasn't in the environment, add it in to avoid reporting
+             subsequent errors *)
+          set_local env (p, x) ty1
+        else
+          env
+      in
+      (env, te1, ty1)
+    | _ -> (env, te1, ty1)
+  end
+  | Other -> raw_expr ?lhs_of_null_coalesce env e1 ~allow_awaitable:(*?*) false
 
 (* External API *)
 let expr ?expected env e =

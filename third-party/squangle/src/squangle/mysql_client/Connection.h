@@ -473,6 +473,14 @@ class Connection {
     return "";
   }
 
+  void setPersistentQueryAttributes(QueryAttributes attrs) {
+    persistentQueryAttributes_ = std::move(attrs);
+  }
+
+  QueryAttributes getPersistentQueryAttributes() const {
+    return persistentQueryAttributes_;
+  }
+
  protected:
   // Methods primarily invoked by Operations and AsyncMysqlClient.
   friend class AsyncMysqlClient;
@@ -545,6 +553,8 @@ class Connection {
     connection_context_ = std::move(e);
   }
 
+  void mergePersistentQueryAttributes(QueryAttributes& attrs) const;
+
   std::unique_ptr<MysqlConnectionHolder> mysql_connection_;
 
   const ConnectionKey conn_key_;
@@ -565,6 +575,8 @@ class Connection {
   Operation::Callbacks callbacks_;
 
   bool initialized_;
+
+  QueryAttributes persistentQueryAttributes_;
 
   // Used for signing that the connection is being used in a synchronous call,
   // eg. `query`. MySQL doesn't allow more than one query being made through

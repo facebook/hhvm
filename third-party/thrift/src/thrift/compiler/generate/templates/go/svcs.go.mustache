@@ -21,6 +21,7 @@
 import (
     "context"
     "fmt"
+    "sync"
 
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
@@ -35,6 +36,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 {{#program:services}}{{!
 

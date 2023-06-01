@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -81,6 +83,7 @@ func (c *GetEntityChannelClient) Open() error {
 // Deprecated: Use GetEntityChannelClient instead.
 type GetEntityClient struct {
     chClient *GetEntityChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ GetEntityClientInterface = &GetEntityClient{}

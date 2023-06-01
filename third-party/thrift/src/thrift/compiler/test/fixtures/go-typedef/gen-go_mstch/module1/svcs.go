@@ -7,6 +7,7 @@ package module1 // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
     module0 "module0"
 
@@ -19,6 +20,7 @@ var _ = module0.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -63,6 +65,7 @@ func (c *FinderChannelClient) Open() error {
 // Deprecated: Use FinderChannelClient instead.
 type FinderClient struct {
     chClient *FinderChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FinderClientInterface = &FinderClient{}

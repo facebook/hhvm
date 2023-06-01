@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -57,6 +59,7 @@ func (c *MyRootChannelClient) Open() error {
 // Deprecated: Use MyRootChannelClient instead.
 type MyRootClient struct {
     chClient *MyRootChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyRootClientInterface = &MyRootClient{}
@@ -441,6 +444,7 @@ type MyNodeClient struct {
     // Inherited/extended service
     *MyRootClient
     chClient *MyNodeChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyNodeClientInterface = &MyNodeClient{}
@@ -801,6 +805,7 @@ type MyLeafClient struct {
     // Inherited/extended service
     *MyNodeClient
     chClient *MyLeafChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = &MyLeafClient{}

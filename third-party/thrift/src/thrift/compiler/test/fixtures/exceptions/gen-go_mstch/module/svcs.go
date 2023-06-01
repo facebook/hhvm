@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -63,6 +65,7 @@ func (c *RaiserChannelClient) Open() error {
 // Deprecated: Use RaiserChannelClient instead.
 type RaiserClient struct {
     chClient *RaiserChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ RaiserClientInterface = &RaiserClient{}

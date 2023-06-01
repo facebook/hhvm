@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -65,6 +67,7 @@ func (c *NestedContainersChannelClient) Open() error {
 // Deprecated: Use NestedContainersChannelClient instead.
 type NestedContainersClient struct {
     chClient *NestedContainersChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ NestedContainersClientInterface = &NestedContainersClient{}

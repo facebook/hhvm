@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
     included "included"
 
@@ -19,6 +20,7 @@ var _ = included.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -61,6 +63,7 @@ func (c *SomeServiceChannelClient) Open() error {
 // Deprecated: Use SomeServiceChannelClient instead.
 type SomeServiceClient struct {
     chClient *SomeServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = &SomeServiceClient{}

@@ -64,6 +64,7 @@ type {{service:go_name}}Client struct {
     {{/service:extends}}
     {{/service:extends?}}
     chClient *{{service:go_name}}ChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ {{service:go_name}}ClientInterface = &{{service:go_name}}Client{}

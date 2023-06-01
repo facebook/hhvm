@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -69,6 +71,7 @@ func (c *MyServiceChannelClient) Open() error {
 // Deprecated: Use MyServiceChannelClient instead.
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
@@ -2503,6 +2506,7 @@ func (c *MyServicePrioParentChannelClient) Open() error {
 // Deprecated: Use MyServicePrioParentChannelClient instead.
 type MyServicePrioParentClient struct {
     chClient *MyServicePrioParentChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = &MyServicePrioParentClient{}
@@ -3124,6 +3128,7 @@ type MyServicePrioChildClient struct {
     // Inherited/extended service
     *MyServicePrioParentClient
     chClient *MyServicePrioChildChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = &MyServicePrioChildClient{}
@@ -3476,6 +3481,7 @@ func (c *BadServiceChannelClient) Open() error {
 // Deprecated: Use BadServiceChannelClient instead.
 type BadServiceClient struct {
     chClient *BadServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ BadServiceClientInterface = &BadServiceClient{}

@@ -7,6 +7,7 @@ package module // [[[ program thrift source path ]]]
 import (
     "context"
     "fmt"
+    "sync"
 
 
     "thrift/lib/go/thrift"
@@ -17,6 +18,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = thrift.ZERO
+var _ = sync.Mutex{}
 
 
 
@@ -57,6 +59,7 @@ func (c *FooServiceChannelClient) Open() error {
 // Deprecated: Use FooServiceChannelClient instead.
 type FooServiceClient struct {
     chClient *FooServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FooServiceClientInterface = &FooServiceClient{}
@@ -433,6 +436,7 @@ func (c *FB303ServiceChannelClient) Open() error {
 // Deprecated: Use FB303ServiceChannelClient instead.
 type FB303ServiceClient struct {
     chClient *FB303ServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = &FB303ServiceClient{}
@@ -972,6 +976,7 @@ func (c *MyServiceChannelClient) Open() error {
 // Deprecated: Use MyServiceChannelClient instead.
 type MyServiceClient struct {
     chClient *MyServiceChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = &MyServiceClient{}
@@ -4244,6 +4249,7 @@ func (c *DbMixedStackArgumentsChannelClient) Open() error {
 // Deprecated: Use DbMixedStackArgumentsChannelClient instead.
 type DbMixedStackArgumentsClient struct {
     chClient *DbMixedStackArgumentsChannelClient
+    Mu       sync.Mutex
 }
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = &DbMixedStackArgumentsClient{}

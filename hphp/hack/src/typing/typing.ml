@@ -6861,6 +6861,11 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
             ) ),
         ty2,
         val_ty_mismatch_opt )
+    | (_, pos, ReadonlyExpr e) ->
+      let (env, te1, ty, err) =
+        assign_with_subtype_err_ pos ur env e pos2 ty2
+      in
+      (env, (ty, pos, Aast.ReadonlyExpr te1), ty, err)
     | _ -> assign_simple p ur env e1 ty2)
 
 and assign_simple pos ur env e1 ty2 =

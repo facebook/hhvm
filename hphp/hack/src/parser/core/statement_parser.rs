@@ -919,10 +919,10 @@ where
     fn parse_declare_local_statement(&mut self) -> S::Output {
         let let_token = self.assert_token(TokenKind::Let);
         let variable = self.parse_expression();
-        let colon_token = self.assert_token(TokenKind::Colon);
+        let colon_token = self.require_colon();
         let hint =
             self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_specifier(true, true));
-        let eq_token = self.assert_token(TokenKind::Equal);
+        let eq_token = self.require_equal();
         let expr = self.parse_expression();
         let semi_token = self.require_semicolon();
         self.sc_mut().make_declare_local_statement(

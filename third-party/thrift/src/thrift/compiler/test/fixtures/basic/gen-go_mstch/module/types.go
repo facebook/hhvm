@@ -174,7 +174,7 @@ func (x *MyStruct) GetMyDataFieldNonCompat() *MyDataItem {
 
 func (x *MyStruct) GetMyDataField() *MyDataItem {
     if !x.IsSetMyDataField() {
-        return NewMyDataItem()
+        return nil
     }
 
     return x.MyDataField
@@ -917,7 +917,7 @@ func (x *MyUnion) GetMyStructNonCompat() *MyStruct {
 
 func (x *MyUnion) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.MyStruct
@@ -929,7 +929,7 @@ func (x *MyUnion) GetMyDataItemNonCompat() *MyDataItem {
 
 func (x *MyUnion) GetMyDataItem() *MyDataItem {
     if !x.IsSetMyDataItem() {
-        return NewMyDataItem()
+        return nil
     }
 
     return x.MyDataItem

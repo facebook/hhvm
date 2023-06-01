@@ -40,7 +40,7 @@ func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
 
 func (x *MyStruct) GetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
-        return includes.NewIncluded()
+        return NewMyStruct().MyIncludedField
     }
 
     return x.MyIncludedField
@@ -52,7 +52,7 @@ func (x *MyStruct) GetMyOtherIncludedFieldNonCompat() *includes.Included {
 
 func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
     if !x.IsSetMyOtherIncludedField() {
-        return includes.NewIncluded()
+        return nil
     }
 
     return x.MyOtherIncludedField

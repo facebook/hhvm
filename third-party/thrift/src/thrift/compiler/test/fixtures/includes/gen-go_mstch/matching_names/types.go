@@ -34,7 +34,7 @@ func (x *IncludesAlso) GetAlsoNonCompat() *includesAlso.Also {
 
 func (x *IncludesAlso) GetAlso() *includesAlso.Also {
     if !x.IsSetAlso() {
-        return includesAlso.NewAlso()
+        return nil
     }
 
     return x.Also

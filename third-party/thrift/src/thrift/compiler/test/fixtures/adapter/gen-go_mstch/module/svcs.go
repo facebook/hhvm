@@ -174,7 +174,7 @@ func (x *reqServiceFunc) GetArg3NonCompat() *Foo {
 
 func (x *reqServiceFunc) GetArg3() *Foo {
     if !x.IsSetArg3() {
-        return NewFoo()
+        return nil
     }
 
     return x.Arg3
@@ -896,7 +896,7 @@ func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
 
 func (x *respAdapterServiceCount) GetValue() *CountingStruct {
     if !x.IsSetValue() {
-        return NewCountingStruct()
+        return nil
     }
 
     return x.Value
@@ -1066,7 +1066,7 @@ func (x *reqAdapterServiceAdaptedTypes) GetArgNonCompat() *HeapAllocated {
 
 func (x *reqAdapterServiceAdaptedTypes) GetArg() *HeapAllocated {
     if !x.IsSetArg() {
-        return NewHeapAllocated()
+        return nil
     }
 
     return x.Arg
@@ -1231,7 +1231,7 @@ func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
 
 func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
     if !x.IsSetValue() {
-        return NewHeapAllocated()
+        return nil
     }
 
     return x.Value

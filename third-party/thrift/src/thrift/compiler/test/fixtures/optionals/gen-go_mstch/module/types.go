@@ -441,7 +441,7 @@ func (x *Vehicle) GetColorNonCompat() *Color {
 
 func (x *Vehicle) GetColor() *Color {
     if !x.IsSetColor() {
-        return NewColor()
+        return nil
     }
 
     return x.Color
@@ -489,7 +489,7 @@ func (x *Vehicle) GetHasACNonCompat() *bool {
 
 func (x *Vehicle) GetHasAC() bool {
     if !x.IsSetHasAC() {
-        return false
+        return *NewVehicle().HasAC
     }
 
     return *x.HasAC
@@ -944,7 +944,7 @@ func (x *Person) GetFavoriteColorNonCompat() *Color {
 
 func (x *Person) GetFavoriteColor() *Color {
     if !x.IsSetFavoriteColor() {
-        return NewColor()
+        return nil
     }
 
     return x.FavoriteColor

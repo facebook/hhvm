@@ -343,7 +343,7 @@ func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
 
 func (x *respMyServicePing) GetMyExcept() *MyException {
     if !x.IsSetMyExcept() {
-        return NewMyException()
+        return nil
     }
 
     return x.MyExcept

@@ -1200,7 +1200,7 @@ func (x *Struct2) GetCNonCompat() *Struct1 {
 
 func (x *Struct2) GetC() *Struct1 {
     if !x.IsSetC() {
-        return NewStruct1()
+        return nil
     }
 
     return x.C
@@ -1581,7 +1581,7 @@ func (x *Struct3) GetCNonCompat() *Struct2 {
 
 func (x *Struct3) GetC() *Struct2 {
     if !x.IsSetC() {
-        return NewStruct2()
+        return nil
     }
 
     return x.C
@@ -2404,7 +2404,7 @@ func (x *Union2) GetSNonCompat() *Struct1 {
 
 func (x *Union2) GetS() *Struct1 {
     if !x.IsSetS() {
-        return NewStruct1()
+        return nil
     }
 
     return x.S
@@ -2416,7 +2416,7 @@ func (x *Union2) GetUNonCompat() *Union1 {
 
 func (x *Union2) GetU() *Union1 {
     if !x.IsSetU() {
-        return NewUnion1()
+        return nil
     }
 
     return x.U

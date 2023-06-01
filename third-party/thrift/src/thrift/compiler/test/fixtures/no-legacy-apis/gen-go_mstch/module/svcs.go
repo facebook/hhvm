@@ -152,7 +152,7 @@ func (x *reqMyServiceQuery) GetUNonCompat() *MyUnion {
 
 func (x *reqMyServiceQuery) GetU() *MyUnion {
     if !x.IsSetU() {
-        return NewMyUnion()
+        return nil
     }
 
     return x.U
@@ -317,7 +317,7 @@ func (x *respMyServiceQuery) GetValueNonCompat() *MyStruct {
 
 func (x *respMyServiceQuery) GetValue() *MyStruct {
     if !x.IsSetValue() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.Value

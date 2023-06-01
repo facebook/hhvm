@@ -334,7 +334,7 @@ func (x *respFinderByPlate) GetValueNonCompat() *Automobile {
 
 func (x *respFinderByPlate) GetValue() *Automobile {
     if !x.IsSetValue() {
-        return NewAutomobile()
+        return nil
     }
 
     return x.Value
@@ -646,7 +646,7 @@ func (x *respFinderAliasByPlate) GetValueNonCompat() *Car {
 
 func (x *respFinderAliasByPlate) GetValue() *Car {
     if !x.IsSetValue() {
-        return NewCar()
+        return nil
     }
 
     return x.Value

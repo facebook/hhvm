@@ -670,7 +670,7 @@ func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
 
 func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
     if !x.IsSetValue() {
-        return NewReservedKeyword()
+        return nil
     }
 
     return x.Value

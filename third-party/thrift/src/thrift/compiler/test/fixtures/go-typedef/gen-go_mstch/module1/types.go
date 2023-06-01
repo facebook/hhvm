@@ -279,7 +279,7 @@ func (x *Automobile) GetFirstPlateNonCompat() *Plate {
 
 func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
-        return NewPlate()
+        return *NewAutomobile().FirstPlate
     }
 
     return *x.FirstPlate
@@ -1292,7 +1292,7 @@ func (x *Pair) GetAutomobileNonCompat() *Automobile {
 
 func (x *Pair) GetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
-        return NewAutomobile()
+        return nil
     }
 
     return x.Automobile
@@ -1304,7 +1304,7 @@ func (x *Pair) GetCarNonCompat() *Car {
 
 func (x *Pair) GetCar() *Car {
     if !x.IsSetCar() {
-        return NewCar()
+        return nil
     }
 
     return x.Car

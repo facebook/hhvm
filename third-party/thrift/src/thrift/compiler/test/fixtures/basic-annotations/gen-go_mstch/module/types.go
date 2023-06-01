@@ -527,7 +527,7 @@ func (x *MyStruct) GetMyUnionNonCompat() *MyUnion {
 
 func (x *MyStruct) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
-        return NewMyUnion()
+        return nil
     }
 
     return x.MyUnion

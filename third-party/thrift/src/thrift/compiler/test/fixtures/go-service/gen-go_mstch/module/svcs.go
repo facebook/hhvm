@@ -371,7 +371,7 @@ func (x *reqGetEntityGetEntity) GetRNonCompat() *GetEntityRequest {
 
 func (x *reqGetEntityGetEntity) GetR() *GetEntityRequest {
     if !x.IsSetR() {
-        return NewGetEntityRequest()
+        return nil
     }
 
     return x.R
@@ -536,7 +536,7 @@ func (x *respGetEntityGetEntity) GetValueNonCompat() *GetEntityResponse {
 
 func (x *respGetEntityGetEntity) GetValue() *GetEntityResponse {
     if !x.IsSetValue() {
-        return NewGetEntityResponse()
+        return nil
     }
 
     return x.Value

@@ -652,7 +652,7 @@ func (x *respCThing) GetBangNonCompat() *Bang {
 
 func (x *respCThing) GetBang() *Bang {
     if !x.IsSetBang() {
-        return NewBang()
+        return nil
     }
 
     return x.Bang

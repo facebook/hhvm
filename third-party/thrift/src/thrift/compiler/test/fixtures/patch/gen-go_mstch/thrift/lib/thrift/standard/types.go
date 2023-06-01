@@ -598,7 +598,7 @@ func (x *TypeName) GetEnumTypeNonCompat() *TypeUri {
 
 func (x *TypeName) GetEnumType() *TypeUri {
     if !x.IsSetEnumType() {
-        return NewTypeUri()
+        return nil
     }
 
     return x.EnumType
@@ -610,7 +610,7 @@ func (x *TypeName) GetTypedefTypeNonCompat() *TypeUri {
 
 func (x *TypeName) GetTypedefType() *TypeUri {
     if !x.IsSetTypedefType() {
-        return NewTypeUri()
+        return nil
     }
 
     return x.TypedefType
@@ -622,7 +622,7 @@ func (x *TypeName) GetStructTypeNonCompat() *TypeUri {
 
 func (x *TypeName) GetStructType() *TypeUri {
     if !x.IsSetStructType() {
-        return NewTypeUri()
+        return nil
     }
 
     return x.StructType
@@ -634,7 +634,7 @@ func (x *TypeName) GetUnionTypeNonCompat() *TypeUri {
 
 func (x *TypeName) GetUnionType() *TypeUri {
     if !x.IsSetUnionType() {
-        return NewTypeUri()
+        return nil
     }
 
     return x.UnionType
@@ -646,7 +646,7 @@ func (x *TypeName) GetExceptionTypeNonCompat() *TypeUri {
 
 func (x *TypeName) GetExceptionType() *TypeUri {
     if !x.IsSetExceptionType() {
-        return NewTypeUri()
+        return nil
     }
 
     return x.ExceptionType

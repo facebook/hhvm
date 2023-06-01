@@ -1517,7 +1517,7 @@ func (x *ValUnion) GetV1NonCompat() *Val {
 
 func (x *ValUnion) GetV1() *Val {
     if !x.IsSetV1() {
-        return NewVal()
+        return nil
     }
 
     return x.V1
@@ -1529,7 +1529,7 @@ func (x *ValUnion) GetV2NonCompat() *Val {
 
 func (x *ValUnion) GetV2() *Val {
     if !x.IsSetV2() {
-        return NewVal()
+        return nil
     }
 
     return x.V2
@@ -2167,7 +2167,7 @@ func (x *NonCopyableUnion) GetSNonCompat() *NonCopyableStruct {
 
 func (x *NonCopyableUnion) GetS() *NonCopyableStruct {
     if !x.IsSetS() {
-        return NewNonCopyableStruct()
+        return nil
     }
 
     return x.S

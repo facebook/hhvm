@@ -2130,7 +2130,7 @@ func (x *TrivialNestedWithDefault) GetNNonCompat() *TrivialNumeric {
 
 func (x *TrivialNestedWithDefault) GetN() *TrivialNumeric {
     if !x.IsSetN() {
-        return NewTrivialNumeric()
+        return NewTrivialNestedWithDefault().N
     }
 
     return x.N
@@ -2620,7 +2620,7 @@ func (x *ComplexNestedWithDefault) GetNNonCompat() *ComplexString {
 
 func (x *ComplexNestedWithDefault) GetN() *ComplexString {
     if !x.IsSetN() {
-        return NewComplexString()
+        return NewComplexNestedWithDefault().N
     }
 
     return x.N
@@ -3622,7 +3622,7 @@ func (x *MyStruct) GetDataNonCompat() *MyDataItem {
 
 func (x *MyStruct) GetData() *MyDataItem {
     if !x.IsSetData() {
-        return NewMyDataItem()
+        return nil
     }
 
     return x.Data
@@ -4383,7 +4383,7 @@ func (x *ForwardUsageRoot) GetForwardUsageStructNonCompat() *ForwardUsageStruct 
 
 func (x *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
     if !x.IsSetForwardUsageStruct() {
-        return NewForwardUsageStruct()
+        return nil
     }
 
     return x.ForwardUsageStruct
@@ -4395,7 +4395,7 @@ func (x *ForwardUsageRoot) GetForwardUsageByRefNonCompat() *ForwardUsageByRef {
 
 func (x *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
     if !x.IsSetForwardUsageByRef() {
-        return NewForwardUsageByRef()
+        return nil
     }
 
     return x.ForwardUsageByRef
@@ -4628,7 +4628,7 @@ func (x *ForwardUsageStruct) GetFooNonCompat() *ForwardUsageRoot {
 
 func (x *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
-        return NewForwardUsageRoot()
+        return nil
     }
 
     return x.Foo
@@ -4792,7 +4792,7 @@ func (x *ForwardUsageByRef) GetFooNonCompat() *ForwardUsageRoot {
 
 func (x *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
     if !x.IsSetFoo() {
-        return NewForwardUsageRoot()
+        return nil
     }
 
     return x.Foo
@@ -6229,7 +6229,7 @@ func (x *AdaptedListDep) GetFieldNonCompat() *AdaptedList {
 
 func (x *AdaptedListDep) GetField() *AdaptedList {
     if !x.IsSetField() {
-        return NewAdaptedList()
+        return nil
     }
 
     return x.Field

@@ -299,7 +299,7 @@ func (x *MyUnion) GetMyDataItemNonCompat() *MyStruct {
 
 func (x *MyUnion) GetMyDataItem() *MyStruct {
     if !x.IsSetMyDataItem() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.MyDataItem

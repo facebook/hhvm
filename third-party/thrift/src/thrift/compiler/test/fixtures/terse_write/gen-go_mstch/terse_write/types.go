@@ -363,7 +363,7 @@ func (x *MyUnion) GetStructFieldNonCompat() *MyStruct {
 
 func (x *MyUnion) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.StructField
@@ -1745,7 +1745,7 @@ func (x *StructLevelTerseStruct) GetStructFieldNonCompat() *MyStruct {
 
 func (x *StructLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.StructField
@@ -1757,7 +1757,7 @@ func (x *StructLevelTerseStruct) GetUnionFieldNonCompat() *MyUnion {
 
 func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
-        return NewMyUnion()
+        return nil
     }
 
     return x.UnionField
@@ -2944,7 +2944,7 @@ func (x *FieldLevelTerseStruct) GetTerseStructFieldNonCompat() *MyStruct {
 
 func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
     if !x.IsSetTerseStructField() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.TerseStructField
@@ -2956,7 +2956,7 @@ func (x *FieldLevelTerseStruct) GetTerseUnionFieldNonCompat() *MyUnion {
 
 func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
     if !x.IsSetTerseUnionField() {
-        return NewMyUnion()
+        return nil
     }
 
     return x.TerseUnionField
@@ -3088,7 +3088,7 @@ func (x *FieldLevelTerseStruct) GetStructFieldNonCompat() *MyStruct {
 
 func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
-        return NewMyStruct()
+        return nil
     }
 
     return x.StructField
@@ -3100,7 +3100,7 @@ func (x *FieldLevelTerseStruct) GetUnionFieldNonCompat() *MyUnion {
 
 func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
-        return NewMyUnion()
+        return nil
     }
 
     return x.UnionField
@@ -5126,7 +5126,7 @@ func (x *TerseStructWithCustomDefault) GetBinaryFieldNonCompat() []byte {
 
 func (x *TerseStructWithCustomDefault) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
-        return []byte("")
+        return NewTerseStructWithCustomDefault().BinaryField
     }
 
     return x.BinaryField
@@ -5146,7 +5146,7 @@ func (x *TerseStructWithCustomDefault) GetListFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetListField() []int16 {
     if !x.IsSetListField() {
-        return nil
+        return NewTerseStructWithCustomDefault().ListField
     }
 
     return x.ListField
@@ -5158,7 +5158,7 @@ func (x *TerseStructWithCustomDefault) GetSetFieldNonCompat() []int16 {
 
 func (x *TerseStructWithCustomDefault) GetSetField() []int16 {
     if !x.IsSetSetField() {
-        return nil
+        return NewTerseStructWithCustomDefault().SetField
     }
 
     return x.SetField
@@ -5170,7 +5170,7 @@ func (x *TerseStructWithCustomDefault) GetMapFieldNonCompat() map[int16]int16 {
 
 func (x *TerseStructWithCustomDefault) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
-        return nil
+        return NewTerseStructWithCustomDefault().MapField
     }
 
     return x.MapField
@@ -5182,7 +5182,7 @@ func (x *TerseStructWithCustomDefault) GetStructFieldNonCompat() *MyStructWithCu
 
 func (x *TerseStructWithCustomDefault) GetStructField() *MyStructWithCustomDefault {
     if !x.IsSetStructField() {
-        return NewMyStructWithCustomDefault()
+        return nil
     }
 
     return x.StructField

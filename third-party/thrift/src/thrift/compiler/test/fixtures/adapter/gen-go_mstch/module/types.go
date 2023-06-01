@@ -2553,7 +2553,7 @@ func (x *Bar) GetStructFieldNonCompat() *Foo {
 
 func (x *Bar) GetStructField() *Foo {
     if !x.IsSetStructField() {
-        return NewFoo()
+        return nil
     }
 
     return x.StructField
@@ -2565,7 +2565,7 @@ func (x *Bar) GetOptionalStructFieldNonCompat() *Foo {
 
 func (x *Bar) GetOptionalStructField() *Foo {
     if !x.IsSetOptionalStructField() {
-        return NewFoo()
+        return nil
     }
 
     return x.OptionalStructField
@@ -2601,7 +2601,7 @@ func (x *Bar) GetUnionFieldNonCompat() *Baz {
 
 func (x *Bar) GetUnionField() *Baz {
     if !x.IsSetUnionField() {
-        return NewBaz()
+        return nil
     }
 
     return x.UnionField
@@ -2613,7 +2613,7 @@ func (x *Bar) GetOptionalUnionFieldNonCompat() *Baz {
 
 func (x *Bar) GetOptionalUnionField() *Baz {
     if !x.IsSetOptionalUnionField() {
-        return NewBaz()
+        return nil
     }
 
     return x.OptionalUnionField
@@ -2625,7 +2625,7 @@ func (x *Bar) GetAdaptedStructFieldNonCompat() *DirectlyAdapted {
 
 func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     if !x.IsSetAdaptedStructField() {
-        return NewDirectlyAdapted()
+        return nil
     }
 
     return x.AdaptedStructField
@@ -4168,7 +4168,7 @@ func (x *B) GetANonCompat() *AdaptedA {
 
 func (x *B) GetA() *AdaptedA {
     if !x.IsSetA() {
-        return NewAdaptedA()
+        return nil
     }
 
     return x.A
@@ -5682,7 +5682,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedListDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedListDefault() []int64 {
     if !x.IsSetAdaptedListDefault() {
-        return nil
+        return NewAdaptTemplatedTestStruct().AdaptedListDefault
     }
 
     return x.AdaptedListDefault
@@ -5694,7 +5694,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefaultNonCompat() []int64 {
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedSetDefault() []int64 {
     if !x.IsSetAdaptedSetDefault() {
-        return nil
+        return NewAdaptTemplatedTestStruct().AdaptedSetDefault
     }
 
     return x.AdaptedSetDefault
@@ -5706,7 +5706,7 @@ func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefaultNonCompat() map[int64]int
 
 func (x *AdaptTemplatedTestStruct) GetAdaptedMapDefault() map[int64]int64 {
     if !x.IsSetAdaptedMapDefault() {
-        return nil
+        return NewAdaptTemplatedTestStruct().AdaptedMapDefault
     }
 
     return x.AdaptedMapDefault
@@ -7160,7 +7160,7 @@ func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStructNonCompat() *AdaptTempl
 
 func (x *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestStruct {
     if !x.IsSetAdaptedStruct() {
-        return NewAdaptTemplatedTestStruct()
+        return nil
     }
 
     return x.AdaptedStruct
@@ -7858,7 +7858,7 @@ func (x *StructFieldAdaptedStruct) GetAdaptedStructNonCompat() *AdaptedStruct {
 
 func (x *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
     if !x.IsSetAdaptedStruct() {
-        return NewAdaptedStruct()
+        return nil
     }
 
     return x.AdaptedStruct
@@ -7870,7 +7870,7 @@ func (x *StructFieldAdaptedStruct) GetAdaptedTypedefNonCompat() *AdaptedTypedef 
 
 func (x *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
     if !x.IsSetAdaptedTypedef() {
-        return NewAdaptedTypedef()
+        return nil
     }
 
     return x.AdaptedTypedef
@@ -7882,7 +7882,7 @@ func (x *StructFieldAdaptedStruct) GetDirectlyAdaptedNonCompat() *DirectlyAdapte
 
 func (x *StructFieldAdaptedStruct) GetDirectlyAdapted() *DirectlyAdaptedStruct {
     if !x.IsSetDirectlyAdapted() {
-        return NewDirectlyAdaptedStruct()
+        return nil
     }
 
     return x.DirectlyAdapted
@@ -7894,7 +7894,7 @@ func (x *StructFieldAdaptedStruct) GetTypedefOfAdaptedNonCompat() *TypedefOfDire
 
 func (x *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
     if !x.IsSetTypedefOfAdapted() {
-        return NewTypedefOfDirect()
+        return nil
     }
 
     return x.TypedefOfAdapted
@@ -8266,7 +8266,7 @@ func (x *CircularAdaptee) GetFieldNonCompat() *CircularStruct {
 
 func (x *CircularAdaptee) GetField() *CircularStruct {
     if !x.IsSetField() {
-        return NewCircularStruct()
+        return nil
     }
 
     return x.Field
@@ -8430,7 +8430,7 @@ func (x *CircularStruct) GetFieldNonCompat() *AdaptedCircularAdaptee {
 
 func (x *CircularStruct) GetField() *AdaptedCircularAdaptee {
     if !x.IsSetField() {
-        return NewAdaptedCircularAdaptee()
+        return nil
     }
 
     return x.Field
@@ -8595,7 +8595,7 @@ func (x *ReorderedStruct) GetReorderedDependentAdaptedNonCompat() *DeclaredAfter
 
 func (x *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
     if !x.IsSetReorderedDependentAdapted() {
-        return NewDeclaredAfterStruct()
+        return nil
     }
 
     return x.ReorderedDependentAdapted
@@ -9206,7 +9206,7 @@ func (x *MoveOnly) GetPtrNonCompat() *HeapAllocated {
 
 func (x *MoveOnly) GetPtr() *HeapAllocated {
     if !x.IsSetPtr() {
-        return NewHeapAllocated()
+        return nil
     }
 
     return x.Ptr

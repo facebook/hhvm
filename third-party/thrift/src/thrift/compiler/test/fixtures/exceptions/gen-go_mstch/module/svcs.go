@@ -469,7 +469,7 @@ func (x *respRaiserDoRaise) GetBNonCompat() *Banal {
 
 func (x *respRaiserDoRaise) GetB() *Banal {
     if !x.IsSetB() {
-        return NewBanal()
+        return nil
     }
 
     return x.B
@@ -481,7 +481,7 @@ func (x *respRaiserDoRaise) GetFNonCompat() *Fiery {
 
 func (x *respRaiserDoRaise) GetF() *Fiery {
     if !x.IsSetF() {
-        return NewFiery()
+        return nil
     }
 
     return x.F
@@ -493,7 +493,7 @@ func (x *respRaiserDoRaise) GetSNonCompat() *Serious {
 
 func (x *respRaiserDoRaise) GetS() *Serious {
     if !x.IsSetS() {
-        return NewSerious()
+        return nil
     }
 
     return x.S
@@ -1131,7 +1131,7 @@ func (x *respRaiserGet500) GetFNonCompat() *Fiery {
 
 func (x *respRaiserGet500) GetF() *Fiery {
     if !x.IsSetF() {
-        return NewFiery()
+        return nil
     }
 
     return x.F
@@ -1143,7 +1143,7 @@ func (x *respRaiserGet500) GetBNonCompat() *Banal {
 
 func (x *respRaiserGet500) GetB() *Banal {
     if !x.IsSetB() {
-        return NewBanal()
+        return nil
     }
 
     return x.B
@@ -1155,7 +1155,7 @@ func (x *respRaiserGet500) GetSNonCompat() *Serious {
 
 func (x *respRaiserGet500) GetS() *Serious {
     if !x.IsSetS() {
-        return NewSerious()
+        return nil
     }
 
     return x.S

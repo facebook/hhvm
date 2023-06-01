@@ -150,7 +150,7 @@ jit::vector<SSATmp*> tokenize(
   }
 
   size_t argIdx = 0;
-  for (auto const token : tokens) {
+  for (auto const* token : tokens) {
     if (!token) {
       auto index = env.unit.cns(argIdx++);
       auto elem = gen(env, LdVecElem, args, index);

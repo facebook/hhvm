@@ -33,6 +33,7 @@ import com.facebook.thrift.util.RpcClientUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
+import io.netty.util.ReferenceCountUtil;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.RSocketErrorException;
@@ -56,6 +57,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public final class RSocketRpcClient implements RpcClient {
+
   private static final TStruct PARAMETERS_STRUCT = new TStruct();
 
   private final RSocket rsocket;
@@ -100,12 +102,14 @@ public final class RSocketRpcClient implements RpcClient {
   @Override
   public <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
+    Payload rsocketPayload = null;
     try {
       final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
       final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
+      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
       return rsocket
-          .requestResponse(clientRequestPayloadToRSocketPayload(payload, protocolType, options))
+          .requestResponse(rsocketPayload)
           .map(response -> rsocketPayloadToClientResponsePayload(payload, response, protocolType))
           .onErrorResume(
               t -> {
@@ -120,6 +124,8 @@ public final class RSocketRpcClient implements RpcClient {
                         protocolType));
               });
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(rsocketPayload);
+
       return Mono.error(t);
     }
   }
@@ -150,8 +156,8 @@ public final class RSocketRpcClient implements RpcClient {
    * rocket protocol. Payload will be compact protocol serialized ResponseRpcError struct.
    *
    * @param t Throwable contains rsocket error code
-   * @return ClientResponsePayload
    * @param <T>
+   * @return ClientResponsePayload
    */
   private <T> ClientResponsePayload<T> getErrorFrame(Throwable t) {
     byte[] bytes = t.getMessage().getBytes();
@@ -165,13 +171,16 @@ public final class RSocketRpcClient implements RpcClient {
   @Override
   public <T> Mono<Void> singleRequestNoResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
+    Payload rsocketPayload = null;
     try {
       final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
       final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
-      return rsocket.fireAndForget(
-          clientRequestPayloadToRSocketPayload(payload, protocolType, options));
+      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
+      return rsocket.fireAndForget(rsocketPayload);
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(rsocketPayload);
+
       return Mono.error(t);
     }
   }
@@ -179,12 +188,14 @@ public final class RSocketRpcClient implements RpcClient {
   @Override
   public <T, K> Flux<ClientResponsePayload<K>> singleRequestStreamingResponse(
       ClientRequestPayload<T> payload, RpcOptions options) {
+    Payload rsocketPayload = null;
     try {
       final ProtocolId protocol = payload.getRequestRpcMetadata().getProtocol();
       final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
+      rsocketPayload = clientRequestPayloadToRSocketPayload(payload, protocolType, options);
       return rsocket
-          .requestStream(clientRequestPayloadToRSocketPayload(payload, protocolType, options))
+          .requestStream(rsocketPayload)
           .onErrorResume(
               t ->
                   Flux.just(
@@ -192,6 +203,8 @@ public final class RSocketRpcClient implements RpcClient {
                           getExceptionString(t, payload.getRequestRpcMetadata().getName()))))
           .map(new StreamingResponseHandler<>(payload));
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(rsocketPayload);
+
       return Flux.error(t);
     }
   }
@@ -239,6 +252,7 @@ public final class RSocketRpcClient implements RpcClient {
       Payload payload = ByteBufPayload.create(alloc.buffer(), metadata);
       return rsocket.metadataPush(payload);
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(metadata);
       return Mono.error(t);
     }
   }

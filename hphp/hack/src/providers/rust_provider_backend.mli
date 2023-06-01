@@ -18,8 +18,7 @@ val push_local_changes : t -> unit
 
 val pop_local_changes : t -> unit
 
-type find_symbol_fn =
-  string -> (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option
+type find_symbol_fn = string -> (FileInfo.pos * FileInfo.name_type) option
 
 type ctx_proxy = {
   get_entry_contents: Relative_path.t -> string option;

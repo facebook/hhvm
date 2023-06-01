@@ -42,8 +42,7 @@ let name_type_to_kind (name_type : FileInfo.name_type) :
 let find_symbol_in_context
     ~(ctx : Provider_context.t)
     ~(get_entry_symbols : FileInfo.t -> (FileInfo.id * FileInfo.name_type) list)
-    ~(is_symbol : string -> bool) :
-    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+    ~(is_symbol : string -> bool) : (FileInfo.pos * FileInfo.name_type) option =
   Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun _path entry ->
          (* CARE! This obtains names from the AST. They're usually similar to what we get from direct-decl-parser
@@ -64,9 +63,10 @@ let find_symbol_in_context
              else
                None))
   |> Relative_path.Map.choose_opt
+  |> Option.map ~f:snd
 
 let find_const_in_context (ctx : Provider_context.t) (name : string) :
-    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+    (FileInfo.pos * FileInfo.name_type) option =
   find_symbol_in_context
     ~ctx
     ~get_entry_symbols:(fun { FileInfo.consts; _ } ->
@@ -74,7 +74,7 @@ let find_const_in_context (ctx : Provider_context.t) (name : string) :
     ~is_symbol:(String.equal name)
 
 let find_fun_in_context (ctx : Provider_context.t) (name : string) :
-    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+    (FileInfo.pos * FileInfo.name_type) option =
   find_symbol_in_context
     ~ctx
     ~get_entry_symbols:(fun { FileInfo.funs; _ } ->
@@ -98,7 +98,8 @@ let find_fun_canon_name_in_context (ctx : Provider_context.t) (name : string) :
         String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
   match symbol_opt with
-  | Some (path, _pos) -> compute_fun_canon_name ctx path name
+  | Some (pos, _name_type) ->
+    compute_fun_canon_name ctx (FileInfo.get_pos_filename pos) name
   | None -> None
 
 let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
@@ -107,7 +108,7 @@ let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
   List.concat [classes; typedefs]
 
 let find_type_in_context (ctx : Provider_context.t) (name : string) :
-    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+    (FileInfo.pos * FileInfo.name_type) option =
   find_symbol_in_context
     ~ctx
     ~get_entry_symbols:get_entry_symbols_for_type
@@ -134,12 +135,16 @@ let find_type_canon_name_in_context (ctx : Provider_context.t) (name : string) :
         String.equal (Naming_sqlite.to_canon_name_key symbol_name) name)
   in
   match symbol_opt with
-  | Some (path, (_pos, name_type)) ->
-    compute_type_canon_name ctx path (name_type_to_kind name_type) name
+  | Some (pos, name_type) ->
+    compute_type_canon_name
+      ctx
+      (FileInfo.get_pos_filename pos)
+      (name_type_to_kind name_type)
+      name
   | None -> None
 
 let find_module_in_context (ctx : Provider_context.t) (name : string) :
-    (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
+    (FileInfo.pos * FileInfo.name_type) option =
   find_symbol_in_context
     ~ctx
     ~get_entry_symbols:(fun { FileInfo.modules; _ } ->
@@ -184,11 +189,11 @@ let find_symbol_in_context_with_suppression
     ~(find_symbol_in_context :
        Provider_context.t ->
        string ->
-       (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option)
+       (FileInfo.pos * FileInfo.name_type) option)
     ~(fallback : unit -> (FileInfo.pos * FileInfo.name_type) option)
     (name : string) : (FileInfo.pos * FileInfo.name_type) option =
   match find_symbol_in_context ctx name with
-  | Some (_path, pos) -> Some pos
+  | Some pos -> Some pos
   | None ->
     (match fallback () with
     | Some (pos, name_type) ->

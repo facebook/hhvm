@@ -599,9 +599,9 @@ impl NamingTableWithContext {
     fn find_symbol_in_context_with_suppression(
         &self,
         find_symbol_callback_name: &'static str,
-        fallback: impl Fn() -> Result<Option<(RelativePath, (naming_table::Pos, file_info::NameType))>>,
+        fallback: impl Fn() -> Result<Option<(naming_table::Pos, file_info::NameType)>>,
         name: pos::Symbol,
-    ) -> Result<Option<(RelativePath, (naming_table::Pos, file_info::NameType))>> {
+    ) -> Result<Option<(naming_table::Pos, file_info::NameType)>> {
         if self.ctx_is_empty() {
             fallback()
         } else {
@@ -610,13 +610,13 @@ impl NamingTableWithContext {
                 pos_opt @ Some(_) => Ok(pos_opt),
                 None => match fallback()? {
                     None => Ok(None),
-                    Some((path, (pos, name_type))) => {
+                    Some((pos, name_type)) => {
                         // If fallback said it thought the symbol was in ctx, but we definitively
                         // know that it isn't, then the answer is None.
                         if unsafe { call_ocaml("hh_rust_provider_backend_is_pos_in_ctx", &pos) } {
                             Ok(None)
                         } else {
-                            Ok(Some((path, (pos, name_type))))
+                            Ok(Some((pos, name_type)))
                         }
                     }
                 },
@@ -633,11 +633,11 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_type_in_context",
                 || {
                     let pos_opt = self.fallback.get_type_pos(name)?;
-                    Ok(pos_opt.map(|(pos, kind)| (pos.path(), (pos, kind.into()))))
+                    Ok(pos_opt.map(|(pos, kind)| (pos, kind.into())))
                 },
                 name.as_symbol(),
             )?
-            .map(|(_, (pos, name_type))| (pos, name_type.try_into().unwrap())))
+            .map(|(pos, name_type)| (pos, name_type.try_into().unwrap())))
     }
 
     pub fn get_fun_pos(&self, name: pos::FunName) -> Result<Option<naming_table::Pos>> {
@@ -646,11 +646,11 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_fun_in_context",
                 || {
                     let pos_opt = self.fallback.get_fun_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Fun))))
+                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Fun)))
                 },
                 name.as_symbol(),
             )?
-            .map(|(_, (pos, _))| pos))
+            .map(|(pos, _)| pos))
     }
 
     pub fn get_const_pos(&self, name: pos::ConstName) -> Result<Option<naming_table::Pos>> {
@@ -659,11 +659,11 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_const_in_context",
                 || {
                     let pos_opt = self.fallback.get_const_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Const))))
+                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Const)))
                 },
                 name.as_symbol(),
             )?
-            .map(|(_, (pos, _))| pos))
+            .map(|(pos, _)| pos))
     }
 
     pub fn get_module_pos(&self, name: pos::ModuleName) -> Result<Option<naming_table::Pos>> {
@@ -672,11 +672,11 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_module_in_context",
                 || {
                     let pos_opt = self.fallback.get_module_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos.path(), (pos, file_info::NameType::Module))))
+                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Module)))
                 },
                 name.as_symbol(),
             )?
-            .map(|(_, (pos, _))| pos))
+            .map(|(pos, _)| pos))
     }
 }
 

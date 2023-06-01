@@ -29,8 +29,7 @@ external set_ctx_empty : t -> bool -> unit
   = "hh_rust_provider_backend_set_ctx_empty"
   [@@noalloc]
 
-type find_symbol_fn =
-  string -> (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option
+type find_symbol_fn = string -> (FileInfo.pos * FileInfo.name_type) option
 
 type ctx_proxy = {
   get_entry_contents: Relative_path.t -> string option;

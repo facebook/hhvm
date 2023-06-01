@@ -164,7 +164,8 @@ class CompilerTest(unittest.TestCase):
 
             # Fix cpp args
             if "cpp" in lang:
-                path = os.path.join("thrift/compiler/test/fixtures", name)
+                # Don't use os.path.join to avoid system-specific path separators.
+                path = "thrift/compiler/test/fixtures/" + name
                 extra = "include_prefix=" + path
                 join = "," if ":" in args[0] else ":"
                 args[0] = args[0] + join + extra

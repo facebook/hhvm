@@ -10,6 +10,7 @@
 #include <ctype.h>
 
 #include <folly/Range.h>
+#include <folly/String.h>
 
 #include "mcrouter/lib/mc/msg.h"
 #include "mcrouter/lib/mc/protocol.h"
@@ -36,11 +37,8 @@ mc_req_err_t isKeyValid(folly::StringPiece key) {
   }
 
   if (DoSpaceAndCtrlCheck) {
-    for (auto c : key) {
-      // iscntrl(c) || isspace(c)
-      if ((unsigned)c <= 0x20 || (unsigned)c == 0x7F) {
-        return mc_req_err_space_or_ctrl;
-      }
+    if (folly::hasSpaceOrCntrlSymbols(key)) {
+      return mc_req_err_space_or_ctrl;
     }
   }
 

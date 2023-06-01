@@ -1,0 +1,25 @@
+(library
+ (name custom_error_types)
+ (wrapped false)
+ (preprocess
+  (pps ppx_deriving.std ppx_yojson_conv))
+ (modules
+ custom_error
+   error_message
+   patt_error
+   patt_locl_ty
+   patt_name
+   patt_string
+   patt_var
+   )
+ (libraries
+  core_kernel
+  ))
+
+(library
+ (name custom_error_eval)
+ (wrapped false)
+ (preprocess
+  (pps ppx_compare ppx_sexp_conv))
+ (modules custom_error_eval)
+ (libraries core_kernel custom_error_types typing_defs_core typing_error))

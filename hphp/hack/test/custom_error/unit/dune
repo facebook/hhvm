@@ -1,0 +1,14 @@
+(library
+ (name custom_error_unit_test)
+ (modules test)
+ (libraries
+   custom_error_types
+   custom_error_eval
+   errors
+   typing_defs_core
+   typing_error
+   heap_libc
+   test_injector_config)
+ (inline_tests)
+ (preprocess
+  (pps ppx_assert ppx_expect ppx_inline_test)))

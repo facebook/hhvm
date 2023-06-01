@@ -13,7 +13,7 @@ module Printexc = Stdlib.Printexc
 (** Callstack is simply a typed way to indicate that a string is a callstack *)
 type callstack = Callstack of string [@@deriving show]
 
-let () = Random.self_init ()
+let () = Random.self_init ~allow_in_tests:true ()
 
 module Map = struct end
 

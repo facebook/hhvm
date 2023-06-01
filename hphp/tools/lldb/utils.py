@@ -286,8 +286,7 @@ def nullptr(target: lldb.SBTarget):
 
 
 def is_nullptr(ptr: lldb.SBValue):
-    assert ptr.type.IsPointerType()
-    return ptr.unsigned == 0
+    return ptr.TypeIsPointerType() and ptr.unsigned == 0
 
 
 def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
@@ -580,7 +579,7 @@ def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
     assert val.type.name == "HPHP::StringData"
 
     addr = val.load_addr
-    assert addr != lldb.LLDB_INVALID_ADDRESS, f"invalid string address {val.load_addr}"
+    assert addr != lldb.LLDB_INVALID_ADDRESS, f"invalid string address 0x{val.load_addr:x}"
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
     return read_cstring(addr, m_len + 1, val.process)

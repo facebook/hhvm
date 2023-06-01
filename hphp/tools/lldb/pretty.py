@@ -25,12 +25,16 @@ def format(datatype: str, regex: bool = False, skip_pointers = False, skip_refer
     Add the command needed to register the pretty printer with the LLDB debugger
     session once started, to the global Formatters list.
 
+    Will wrap the function to skip trying to print null pointers,
+    and will revert to using the default (unformatted) version if pretty printers
+    fail for some reason.
+
     Arguments:
         datatype: the name of the data type being formatted
         regex: whether the datatype in string is a regex
 
     Returns:
-        The original function.
+        The original function
     """
     def inner(func_or_class):
         extra_options = []
@@ -54,12 +58,27 @@ def format(datatype: str, regex: bool = False, skip_pointers = False, skip_refer
                     f'type summary add --expand {extra_options} '
                     f'--summary-string "{func_or_class.summary()}" "{datatype}"'
                 )
+            return func_or_class
         else:
             Formatters.append(lambda top_module:
                 f'type summary add {extra_options} '
                 f'--python-function {top_module + "." if top_module else ""}pretty.{func_or_class.__name__} "{datatype}"'
             )
-        return func_or_class
+            def wrapper(val_obj, internal_dict):
+                # When given a nullptr, just print the address, rather than try and probably fail
+                # to get its contents in whatever pretty printers would normally be called.
+                if utils.is_nullptr(val_obj):
+                    return '0x0'
+                return func_or_class(val_obj, internal_dict)
+
+                # When the pretty printer for this value fails for some reason,
+                # just show the unformatted version.
+                try:
+                    return func_or_class(val_obj, internal_dict)
+                except Exception as e:
+                    utils.debug_print(f"Failed to pretty print '{val_obj.name}' in {func_or_class.__name__}() with error: {str(e)}")
+                    return val_obj.value
+            return wrapper
     return inner
 
 

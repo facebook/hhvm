@@ -290,7 +290,7 @@ impl From<BaseType> for TypeInfo {
 pub struct Typedef {
     pub name: ClassId,
     pub attributes: Vec<Attribute>,
-    pub type_infos: Vec<TypeInfo>,
+    pub type_info_union: Vec<TypeInfo>,
     pub type_structure: TypedValue,
     pub loc: SrcLoc,
     pub attrs: Attr,

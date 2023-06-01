@@ -2144,7 +2144,7 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         attrs,
         loc,
         name,
-        type_infos,
+        type_info_union,
         type_structure,
         case_type,
     } = typedef;
@@ -2156,7 +2156,8 @@ fn print_typedef(w: &mut dyn Write, typedef: &Typedef, strings: &StringInterner)
         "typedef {vis} {name}: {ty} = {attributes}{ts} {attrs}",
         vis = if *case_type { "case_type" } else { "alias" },
         name = FmtIdentifierId(name.id, strings),
-        ty = FmtSep::comma(type_infos.iter(), |w, ti| FmtTypeInfo(ti, strings).fmt(w)),
+        ty = FmtSep::comma(type_info_union.iter(), |w, ti| FmtTypeInfo(ti, strings)
+            .fmt(w)),
         attributes = FmtSep::new("<", ",", "> ", attributes, |w, attribute| FmtAttribute(
             attribute, strings
         )

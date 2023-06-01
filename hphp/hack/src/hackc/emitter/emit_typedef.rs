@@ -38,7 +38,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
     let name = ClassName::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
-    let type_infos_res = emit_type_hint::hint_to_type_infos(
+    let type_info_union_res = emit_type_hint::hint_to_type_info_union(
         emitter.alloc,
         &emit_type_hint::Kind::TypeDef,
         false,
@@ -58,14 +58,14 @@ fn emit_typedef<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrPersistent, emitter.systemlib());
 
     attributes_res.and_then(|attributes| {
-        type_infos_res.and_then(|type_infos| {
+        type_info_union_res.and_then(|type_info_union| {
             type_structure_res.map(|type_structure| Typedef {
                 name,
                 attributes: emitter
                     .alloc
                     .alloc_slice_fill_iter(attributes.into_iter())
                     .into(),
-                type_infos,
+                type_info_union,
                 type_structure,
                 span,
                 attrs,

@@ -18,7 +18,7 @@ use crate::TypedValue;
 pub struct Typedef<'arena> {
     pub name: ClassName<'arena>,
     pub attributes: Slice<'arena, Attribute<'arena>>,
-    pub type_infos: Slice<'arena, TypeInfo<'arena>>,
+    pub type_info_union: Slice<'arena, TypeInfo<'arena>>,
     pub type_structure: TypedValue<'arena>,
     pub span: Span,
     pub attrs: Attr,

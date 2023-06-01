@@ -463,7 +463,7 @@ pub fn hint_to_type_info<'arena>(
 }
 
 // Used from emit_typedef for potential case types
-pub fn hint_to_type_infos<'arena>(
+pub fn hint_to_type_info_union<'arena>(
     alloc: &'arena bumpalo::Bump,
     kind: &Kind,
     skipawaitable: bool,

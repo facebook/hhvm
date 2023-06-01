@@ -724,9 +724,9 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
         TypeMapping{
           typeAlias->name,
           //TODO(T151885113): Support multiple constraints for case types
-          typeAlias->values[0],
+          typeAlias->value_union[0],
           nullptr,
-          typeAlias->types[0],
+          typeAlias->type_union[0],
           typeAlias->nullable,
         }
       );

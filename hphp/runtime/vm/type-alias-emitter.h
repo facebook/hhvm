@@ -48,10 +48,10 @@ struct TypeAliasEmitter {
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
-  const std::vector<LowStringPtr>& values() const { return m_values; }
+  const std::vector<LowStringPtr>& value_union() const { return m_value_union; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
-  const std::vector<AnnotType>& types() const { return m_types; }
+  const std::vector<AnnotType>& type_union() const { return m_type_union; }
   bool nullable() const { return m_nullable; }
   bool case_type() const { return m_case_type; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
@@ -74,9 +74,9 @@ struct TypeAliasEmitter {
 private:
   UnitEmitter& m_ue;
   LowStringPtr m_name;
-  std::vector<LowStringPtr> m_values;
+  std::vector<LowStringPtr> m_value_union;
   Attr m_attrs;
-  std::vector<AnnotType> m_types;
+  std::vector<AnnotType> m_type_union;
   int m_line0;
   int m_line1;
   bool m_nullable;  // null is allowed; for ?Foo aliases

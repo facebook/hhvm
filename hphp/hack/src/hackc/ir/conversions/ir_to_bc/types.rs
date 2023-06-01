@@ -109,7 +109,7 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
     let ir::Typedef {
         name,
         attributes,
-        type_infos,
+        type_info_union,
         type_structure,
         loc,
         attrs,
@@ -122,13 +122,13 @@ pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) ->
         line_end: loc.line_end,
     };
     let attributes = crate::convert::convert_attributes(attributes, strings);
-    let type_infos = convert_types(type_infos.as_ref(), strings);
+    let type_info_union = convert_types(type_info_union.as_ref(), strings);
     let type_structure = crate::convert::convert_typed_value(&type_structure, strings);
 
     hhbc::Typedef {
         name,
         attributes,
-        type_infos,
+        type_info_union,
         type_structure,
         span,
         attrs,

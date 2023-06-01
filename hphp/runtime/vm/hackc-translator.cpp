@@ -345,7 +345,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   if (!SystemLib::s_inited) attrs |= AttrPersistent;
   auto const name = toStaticString(t.name._0);
 
-  auto const tis = range(t.type_infos);
+  auto const tis = range(t.type_info_union);
   assertx(!tis.empty());
 
   std::vector<LowStringPtr> tnames;

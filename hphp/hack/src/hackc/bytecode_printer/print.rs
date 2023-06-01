@@ -267,7 +267,7 @@ fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef<'_>) -> Resu
     )?;
     w.write_all(td.name.as_bstr())?;
     w.write_all(b" = ")?;
-    print_typedef_infos(w, td.type_infos.as_ref())?;
+    print_typedef_info_union(w, td.type_info_union.as_ref())?;
     w.write_all(b" ")?;
     print_span(w, &td.span)?;
     w.write_all(b" ")?;
@@ -1182,7 +1182,7 @@ fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo<'_>) -> Result<()> {
     })
 }
 
-fn print_typedef_infos(w: &mut dyn Write, tis: &[TypeInfo<'_>]) -> Result<()> {
+fn print_typedef_info_union(w: &mut dyn Write, tis: &[TypeInfo<'_>]) -> Result<()> {
     concat_by(w, ",", tis, print_typedef_info)
 }
 

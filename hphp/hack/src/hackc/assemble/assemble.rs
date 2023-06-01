@@ -303,7 +303,7 @@ fn assemble_typedef<'arena>(
            <attrs:assemble_special_and_user_attrs(alloc)>
            <name:assemble_class_name(alloc)>
            "="
-           <type_infos:assemble_type_infos(alloc)>
+           <type_info_union:assemble_type_info_union(alloc)>
            <span:assemble_span>
            <type_structure:assemble_triple_quoted_typed_value(alloc)>
            ";");
@@ -311,7 +311,7 @@ fn assemble_typedef<'arena>(
     Ok(hhbc::Typedef {
         name,
         attributes,
-        type_infos,
+        type_info_union,
         type_structure,
         span,
         attrs,
@@ -1340,7 +1340,7 @@ fn assemble_type_info<'arena>(
     }
 }
 
-fn assemble_type_infos<'arena>(
+fn assemble_type_info_union<'arena>(
     token_iter: &mut Lexer<'_>,
     alloc: &'arena Bump,
 ) -> Result<Slice<'arena, hhbc::TypeInfo<'arena>>> {

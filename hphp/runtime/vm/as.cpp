@@ -2144,7 +2144,7 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
-std::vector<TypeConstraint> parse_type_constraints(AsmState& as) {
+std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
   std::vector<TypeConstraint> tcs = {parse_type_constraint(as)};
   while (true) {
     as.in.skipWhitespace();
@@ -3129,7 +3129,7 @@ void parse_alias(AsmState& as, bool case_type) {
   // emitTypedef in emitter.cpp
   as.ue->mergeLitstr(makeStaticString(name));
 
-  auto const tis = parse_type_constraints(as);
+  auto const tis = parse_type_constraint_union(as);
   assertx(!tis.empty());
 
   int line0;

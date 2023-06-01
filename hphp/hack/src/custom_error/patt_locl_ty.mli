@@ -30,6 +30,7 @@ type t =
       patt: t;
     }
       (** Match the provided pattern and bind the result to the supplied variable name *)
+  | Invalid of Validation_err.t list * t  (** Mark invalid patterns  *)
 
 (** Defines pattern matches over list of Hack types appearing as type parameters *)
 and params =
@@ -86,4 +87,6 @@ and shape_label =
       cls_nm: string;
       cnst_nm: string;
     }
-[@@deriving show, yojson]
+[@@deriving compare, sexp, show, yojson]
+
+include Can_validate.S with type t := t

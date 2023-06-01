@@ -6,4 +6,4 @@
  *
  *)
 
-type t = string [@@deriving show, yojson]
+type t = string [@@deriving compare, eq, sexp, show, yojson]

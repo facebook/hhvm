@@ -6,9 +6,12 @@
  *
  *)
 
-type t =
+type elem =
   | Lit of string
   | Ty_var of Patt_var.t
   | Name_var of Patt_var.t
-  | Append of t * t
 [@@deriving show, yojson]
+
+type t = { message: elem list } [@@deriving show, yojson]
+
+include Can_validate.S with type t := t

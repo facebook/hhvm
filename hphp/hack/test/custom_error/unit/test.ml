@@ -7,9 +7,9 @@
  *)
 [@@@warning "-40"]
 
-open! Core
 module Eval = Custom_error_eval
 module Ty = Typing_defs_core
+module V = Validated
 
 let mk_ty ty_ = Ty.mk (Typing_reason.Rnone, ty_)
 
@@ -40,12 +40,13 @@ let%test_unit "patt string exactly" =
       ( Any_reasons_callback,
         Violated_constraint (Name (Patt_string.Exactly name), Any, Any) )
   in
-  let error_message = Error_message.Lit "Ok" in
+  let error_message = Error_message.{ message = [Lit "Ok"] } in
   let custom_err = Custom_error.{ name; patt; error_message } in
-
-  [%test_eq: (string, Eval.Value.t) Either.t list option]
-    (Eval.eval custom_err ~err)
-    (Some [Either.First "Ok"])
+  let custom_config = Custom_error_config.Config [custom_err] in
+  let open Core in
+  [%test_eq: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval custom_config ~err)
+    [[Either.First "Ok"]]
 
 (* Pattern match over a `Violated_constraint` error matching exactly the tparam
    name for which the constraint is violated and binding that name to a variable
@@ -75,11 +76,13 @@ let%test_unit "patt string exactly bound" =
         Violated_constraint
           (As { lbl = "x"; patt = Patt_string.Exactly name }, Any, Any) )
   in
-  let error_message = Error_message.(Append (Lit "Ok:", Name_var "x")) in
+  let error_message = Error_message.{ message = [Lit "Ok:"; Name_var "x"] } in
   let custom_err = Custom_error.{ name; patt; error_message } in
-  [%test_eq: (string, Eval.Value.t) Either.t list option]
-    (Eval.eval custom_err ~err)
-    (Some Either.[First "Ok:"; Second (Eval.Value.Name (pod_none, name))])
+  let custom_config = Custom_error_config.Config [custom_err] in
+  let open Core in
+  [%test_eq: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval custom_config ~err)
+    [Either.[First "Ok:"; Second (Eval.Value.Name (pod_none, name))]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
    the type match requires an exact match on the class name and for it to
@@ -154,11 +157,13 @@ let%test_unit "patt tysub" =
       ( Any_reasons_callback,
         Violated_constraint (Patt_name.Wildcard, patt_ty_sub, Any) )
   in
-  let error_message = Error_message.(Append (Lit "Ok:", Ty_var "x")) in
+  let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
-  [%test_eq: (string, Eval.Value.t) Either.t list option]
-    (Eval.eval custom_err ~err)
-    (Some Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))])
+  let custom_config = Custom_error_config.Config [custom_err] in
+  let open Core in
+  [%test_eq: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval custom_config ~err)
+    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
    the type match requires an exact match on the class name and for it to
@@ -239,8 +244,80 @@ let%test_unit "patt tysub or pattern" =
       ( Any_reasons_callback,
         Violated_constraint (Patt_name.Wildcard, patt_ty_sub, Any) )
   in
-  let error_message = Error_message.(Append (Lit "Ok:", Ty_var "x")) in
+  let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
-  [%test_eq: (string, Eval.Value.t) Either.t list option]
-    (Eval.eval custom_err ~err)
-    (Some Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))])
+  let custom_config = Custom_error_config.Config [custom_err] in
+  let open Core in
+  [%test_eq: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval custom_config ~err)
+    [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
+
+let%test_unit "validate ty, unbound right" =
+  let patt_fst = Patt_locl_ty.(As { lbl = "x"; patt = Dynamic }) in
+  let patt_snd = Patt_locl_ty.Nonnull in
+  let patt_snd_invalid =
+    Patt_locl_ty.(Invalid ([Validation_err.Unbound "x"], patt_snd))
+  in
+  let patt = Patt_locl_ty.Or { patt_fst; patt_snd } in
+  let patt_invalid =
+    Patt_locl_ty.Or { patt_fst; patt_snd = patt_snd_invalid }
+  in
+  let open Core in
+  [%test_eq: Patt_locl_ty.t V.t]
+    (fst @@ Patt_locl_ty.validate patt)
+    (V.Invalid patt_invalid)
+
+let%test_unit "validate ty, unbound left" =
+  let patt_snd = Patt_locl_ty.(As { lbl = "x"; patt = Dynamic }) in
+  let patt_fst = Patt_locl_ty.Nonnull in
+  let patt_fst_invalid =
+    Patt_locl_ty.(Invalid ([Validation_err.Unbound "x"], patt_fst))
+  in
+  let patt = Patt_locl_ty.Or { patt_fst; patt_snd } in
+  let patt_invalid =
+    Patt_locl_ty.Or { patt_fst = patt_fst_invalid; patt_snd }
+  in
+  let open Core in
+  [%test_eq: Patt_locl_ty.t V.t]
+    (fst @@ Patt_locl_ty.validate patt)
+    (V.Invalid patt_invalid)
+
+let%test_unit "validate ty, shadow" =
+  let patt_name = Patt_name.As { lbl = "x"; patt = Exactly "Classy" } in
+  let patt_hd = Patt_locl_ty.As { lbl = "x"; patt = Dynamic } in
+  let patt_hd_invalid =
+    Patt_locl_ty.Invalid ([Validation_err.Shadowed "x"], patt_hd)
+  in
+  let patt_tl = Patt_locl_ty.Nil in
+  let patt =
+    Patt_locl_ty.(Apply { patt_name; patt_params = Cons { patt_hd; patt_tl } })
+  in
+  let patt_invalid =
+    Patt_locl_ty.(
+      Apply
+        { patt_name; patt_params = Cons { patt_hd = patt_hd_invalid; patt_tl } })
+  in
+  let open Core in
+  [%test_eq: Patt_locl_ty.t V.t]
+    (fst @@ Patt_locl_ty.validate patt)
+    (V.Invalid patt_invalid)
+
+let%test_unit "validate ty, mismatch" =
+  let patt_name = Patt_name.As { lbl = "x"; patt = Exactly "Classy" } in
+  let patt_hd = Patt_locl_ty.Dynamic in
+  let patt_tl = Patt_locl_ty.Nil in
+  let patt_fst =
+    Patt_locl_ty.(Apply { patt_name; patt_params = Cons { patt_hd; patt_tl } })
+  in
+  let patt_snd = Patt_locl_ty.As { lbl = "x"; patt = Dynamic } in
+  let patt_snd_invalid =
+    Patt_locl_ty.(Invalid ([Validation_err.Mismatch (Name, Ty)], patt_snd))
+  in
+  let patt = Patt_locl_ty.Or { patt_fst; patt_snd } in
+  let patt_invalid =
+    Patt_locl_ty.Or { patt_fst; patt_snd = patt_snd_invalid }
+  in
+  let open Core in
+  [%test_eq: Patt_locl_ty.t V.t]
+    (fst @@ Patt_locl_ty.validate patt)
+    (V.Invalid patt_invalid)

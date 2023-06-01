@@ -5,6 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
+[@@@warning "-66"]
 
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+module type S = sig
+  type t
+
+  val validate : ?env:Validation_env.t -> t -> t Validated.t * Validation_env.t
+end

@@ -5,6 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
 
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+type t = Config of Custom_error.t list
+[@@ocaml.unboxed] [@@deriving show, yojson]
+
+val empty : t
+
+val initialize : string -> (t * string list, string) result

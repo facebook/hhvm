@@ -5,6 +5,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
-
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+type t =
+  | Mismatch of Patt_binding_ty.t * Patt_binding_ty.t
+  | Shadowed of Patt_var.t
+  | Unbound of Patt_var.t
+[@@deriving compare, eq, sexp, show, yojson]

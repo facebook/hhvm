@@ -2,15 +2,21 @@
  (name custom_error_types)
  (wrapped false)
  (preprocess
-  (pps ppx_deriving.std ppx_yojson_conv))
+  (pps ppx_deriving.std ppx_yojson_conv ppx_compare ppx_sexp_conv))
  (modules
- custom_error
+   can_validate
+   custom_error
+   custom_error_config
    error_message
+   patt_binding_ty
    patt_error
    patt_locl_ty
    patt_name
    patt_string
    patt_var
+   validated
+   validation_env
+   validation_err
    )
  (libraries
   core_kernel

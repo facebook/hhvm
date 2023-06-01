@@ -7,6 +7,9 @@
  *)
 [@@@warning "-66"]
 
+module V = Validated
+open Core
+
 type t =
   | As of {
       lbl: Patt_var.t;
@@ -14,4 +17,13 @@ type t =
     }
   | Name of Patt_string.t
   | Wildcard
-[@@deriving show, yojson]
+  | Invalid of Validation_err.t list * t
+[@@deriving compare, sexp, show, yojson]
+
+let validate ?(env = Validation_env.empty) t =
+  match t with
+  | As { lbl; _ } ->
+    (match Validation_env.add ~key:lbl ~data:Patt_binding_ty.Name env with
+    | Error env -> (V.invalid (Invalid ([Validation_err.Shadowed lbl], t)), env)
+    | Ok env -> (V.valid t, env))
+  | _ -> (V.valid t, env)

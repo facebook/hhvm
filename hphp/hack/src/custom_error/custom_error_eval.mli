@@ -6,7 +6,7 @@
  *
  *)
 
-exception Already_bound of Patt_var.t * string
+exception Invalid_pattern of string * Validation_err.t list
 
 module Value : sig
   type t =
@@ -16,6 +16,6 @@ module Value : sig
 end
 
 val eval :
-  Custom_error.t ->
+  Custom_error_config.t ->
   err:Typing_error.t ->
-  (string, Value.t) Core.Either.t list option
+  (string, Value.t) Base.Either.t list list

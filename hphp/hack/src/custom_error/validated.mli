@@ -5,6 +5,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
+type 'a t =
+  | Valid of 'a
+  | Invalid of 'a
+[@@deriving compare, sexp]
 
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+val valid : 'a -> 'a t
+
+val invalid : 'a -> 'a t
+
+include Core.Applicative.S with type 'a t := 'a t

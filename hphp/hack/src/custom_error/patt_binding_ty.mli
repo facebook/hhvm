@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
-
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+type t =
+  | Name
+  | Ty
+[@@deriving compare, eq, sexp, show, yojson]

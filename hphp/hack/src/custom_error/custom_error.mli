@@ -12,3 +12,5 @@ type t = {
   error_message: Error_message.t;
 }
 [@@deriving show, yojson]
+
+include Can_validate.S with type t := t

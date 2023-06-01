@@ -9,7 +9,7 @@
 open Core
 module Ty = Typing_defs_core
 
-exception Already_bound of Patt_var.t * string
+exception Invalid_pattern of string * Validation_err.t list
 
 module Value = struct
   type t =
@@ -59,19 +59,12 @@ module Match = struct
   include Core.Monad.Make2 (X)
 end
 
-module Err = struct
-  type t = Already_bound of Patt_var.t
-end
-
 module Env = struct
   type t = Env of Value.t String.Map.t
 
   let empty = Env String.Map.empty
 
-  let add (Env t) ~lbl ~data =
-    match Map.add t ~key:lbl ~data with
-    | `Duplicate -> Match.match_err (Err.Already_bound lbl)
-    | `Ok t -> Match.matched (Env t)
+  let add (Env t) ~lbl ~data = Env (Map.add_exn t ~key:lbl ~data)
 
   let add_name t ~lbl ~name = add t ~lbl ~data:(Value.Name name)
 
@@ -130,7 +123,8 @@ let matches_name ?(env = Env.empty) t ~scrut =
     Match.(
       matches_string patt ~scrut:(snd scrut) ~env
       |> map_err ~f:(fun _ -> assert false)
-      >>= Env.add_name ~lbl ~name:scrut)
+      |> map ~f:(Env.add_name ~lbl ~name:scrut))
+  | Invalid (errs, _) -> Match.match_err errs
 
 (* -- Types ----------------------------------------------------------------- *)
 
@@ -186,7 +180,8 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | (Nonnull, Ty.Tnonnull) ->
       Match.matched env
     (* -- Variable binding -------------------------------------------------- *)
-    | (As { lbl; patt }, _) -> Match.(aux patt ty ~env >>= Env.add_ty ~lbl ~ty)
+    | (As { lbl; patt }, _) ->
+      Match.(aux patt ty ~env |> map ~f:(Env.add_ty ~lbl ~ty))
     (* -- Or patterns ------------------------------------------------------- *)
     | (Or { patt_fst; patt_snd }, _) ->
       (match aux patt_fst ty ~env with
@@ -202,6 +197,7 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
     | ((Apply _ | Option _ | Tuple _ | Prim _ | Dynamic | Nonnull | Shape _), _)
       ->
       Match.no_match
+    | (Invalid (errs, _), _) -> Match.match_err errs
   and aux_shape t (str_flds, cconst_flds, int_flds) ~env =
     match t with
     | Fld { patt_fld; patt_rest } ->
@@ -319,6 +315,7 @@ let matches_error ?(env = Env.empty) t ~scrut =
     | (Apply _, _)
     | (Apply_reasons _, _) ->
       Match.no_match
+    | (Invalid (errs, _), _) -> Match.match_err errs
   (* -- Primary errors ------------------------------------------------------ *)
   and aux_primary t err_prim ~env =
     match (t, err_prim) with
@@ -366,20 +363,21 @@ let matches_error ?(env = Env.empty) t ~scrut =
   in
   aux t scrut ~env
 
-let eval_error_message t ~env =
+let eval_error_message Error_message.{ message } ~env =
   let open Error_message in
-  let rec aux t ~k ~acc =
+  let f t =
     match t with
-    | Lit str -> k (Either.First str :: acc)
+    | Lit str -> Either.First str
     | Ty_var var
     | Name_var var ->
-      k (Either.Second (Env.get env var) :: acc)
-    | Append (l, r) -> aux r ~acc ~k:(fun acc -> aux l ~acc ~k)
+      Either.Second (Env.get env var)
   in
-  aux t ~k:Fn.id ~acc:[]
+  List.map ~f message
 
-let eval Custom_error.{ name; patt; error_message } ~err =
+let eval_custom_error Custom_error.{ patt; error_message; _ } ~err =
   match matches_error patt ~scrut:err with
   | Match.Matched env -> Some (eval_error_message error_message ~env)
-  | Match.No_match -> None
-  | Match.Match_err (Err.Already_bound var) -> raise (Already_bound (var, name))
+  | _ -> None
+
+let eval Custom_error_config.(Config cs) ~err =
+  List.filter_map ~f:(eval_custom_error ~err) cs

@@ -12,4 +12,7 @@ type t =
     }
   | Name of Patt_string.t
   | Wildcard
-[@@deriving show, yojson]
+  | Invalid of Validation_err.t list * t
+[@@deriving compare, sexp, show, yojson]
+
+include Can_validate.S with type t := t

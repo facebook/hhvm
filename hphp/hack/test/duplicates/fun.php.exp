@@ -29,8 +29,7 @@ name=\g, name_type=Fun, pos=File "fun.php--a.php", line 3, characters 10-10:
 
 name=\g, name_type=Fun, pos=File "fun.php--b.php", line 3, characters 10-10:
    Naming_provider.fun_exists(name): true
-   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "fun.php--a.php", line 3, characters 10-10:)  [hh_server / typing_check_service]
-   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "fun.php--b.php", line 3, characters 10-10:)  [Provider_context.entry]
+   Naming_provider.get_fun_pos(name): (FileInfo.Full: File "fun.php--a.php", line 3, characters 10-10:)
    Naming_provider.get_fun_canon_name(name): \g
    Decl_provider.get_fun(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "fun.php--a.php", line 3, characters 10-10:

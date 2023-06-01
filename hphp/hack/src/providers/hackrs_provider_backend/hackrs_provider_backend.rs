@@ -606,20 +606,34 @@ impl NamingTableWithContext {
             fallback()
         } else {
             // SAFETY: We must have no unrooted values.
-            match unsafe { call_ocaml(find_symbol_callback_name, &name) } {
-                pos_opt @ Some(_) => Ok(pos_opt),
-                None => match fallback()? {
-                    None => Ok(None),
-                    Some((pos, name_type)) => {
+            let ctx_pos_opt = unsafe { call_ocaml(find_symbol_callback_name, &name) };
+            let fallback_pos_opt = fallback()?;
+            match (ctx_pos_opt, fallback_pos_opt) {
+                (None, None) => Ok(None),
+                (Some(ctx_pos), None) => Ok(Some(ctx_pos)),
+                (None, Some((pos, name_type))) => {
+                    if unsafe { call_ocaml("hh_rust_provider_backend_is_pos_in_ctx", &pos) } {
                         // If fallback said it thought the symbol was in ctx, but we definitively
                         // know that it isn't, then the answer is None.
-                        if unsafe { call_ocaml("hh_rust_provider_backend_is_pos_in_ctx", &pos) } {
-                            Ok(None)
-                        } else {
-                            Ok(Some((pos, name_type)))
-                        }
+                        Ok(None)
+                    } else {
+                        Ok(Some((pos, name_type)))
                     }
-                },
+                }
+                (Some((ctx_pos, ctx_name_type)), Some((fallback_pos, fallback_name_type))) => {
+                    // The alphabetically first filename wins
+                    let ctx_fn = ctx_pos.path();
+                    let fallback_fn = fallback_pos.path();
+                    if ctx_fn <= fallback_fn {
+                        // symbol is either (1) a duplicate in both context and fallback, and context is the winner,
+                        // or (2) not a duplicate, and both context and fallback claim it to be defined
+                        // in a file that's part of the context, in which case context wins.
+                        Ok(Some((ctx_pos, ctx_name_type)))
+                    } else {
+                        // symbol is a duplicate in both context and fallback, and fallback is the winner
+                        Ok(Some((fallback_pos, fallback_name_type)))
+                    }
+                }
             }
         }
     }

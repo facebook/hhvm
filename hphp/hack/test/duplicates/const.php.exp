@@ -54,8 +54,7 @@ name=\g, name_type=Const, pos=File "const.php--a.php", line 3, characters 11-11:
 
 name=\g, name_type=Const, pos=File "const.php--b.php", line 3, characters 1-20:
    Naming_provider.const_exists(name): true
-   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--a.php", line 3, characters 1-16:)  [hh_server / typing_check_service]
-   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--b.php", line 3, characters 14-14:)  [Provider_context.entry]
+   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--a.php", line 3, characters 1-16:)
    Naming_provider.get_const_canon_name(name): [undefined]
    Decl_provider.get_const(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "const.php--a.php", line 3, characters 1-16:
@@ -63,8 +62,7 @@ name=\g, name_type=Const, pos=File "const.php--b.php", line 3, characters 1-20:
 
 name=\g, name_type=Const, pos=File "const.php--b.php", line 3, characters 14-14:
    Naming_provider.const_exists(name): true
-   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--a.php", line 3, characters 1-16:)  [hh_server / typing_check_service]
-   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--b.php", line 3, characters 14-14:)  [Provider_context.entry]
+   Naming_provider.get_const_pos(name): (FileInfo.Full: File "const.php--a.php", line 3, characters 1-16:)
    Naming_provider.get_const_canon_name(name): [undefined]
    Decl_provider.get_const(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "const.php--a.php", line 3, characters 1-16:

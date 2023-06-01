@@ -24,8 +24,7 @@ name=g, name_type=Module, pos=File "module.php--a.php", line 3, characters 12-12
 
 name=g, name_type=Module, pos=File "module.php--b.php", line 3, characters 12-12:
    Naming_provider.module_exists(name): true
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)  [hh_server / typing_check_service]
-   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--b.php", line 3, characters 12-12:)  [Provider_context.entry]
+   Naming_provider.get_module_pos(name): (FileInfo.Full: File "module.php--a.php", line 3, characters 12-12:)
    Naming_provider.get_module_canon_name(name): [undefined]
    Decl_provider.get_module(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "module.php--a.php", line 3, characters 12-12:

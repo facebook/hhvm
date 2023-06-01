@@ -90,8 +90,7 @@ name=\mcc, name_type=Class, pos=File "type.php--a.php", line 3, characters 7-9:
 
 name=\mcc, name_type=Class, pos=File "type.php--b.php", line 3, characters 7-9:
    Naming_provider.class_exists(name): true
-   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 3, characters 7-9:)  [hh_server / typing_check_service]
-   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 3, characters 7-9:)  [Provider_context.entry]
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 3, characters 7-9:)
    Naming_provider.get_class_canon_name(name): \mcc
    Decl_provider.get_class(name) |> Option.is_some: true
    Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--a.php", line 3, characters 7-9:
@@ -127,16 +126,12 @@ name=\mct, name_type=Class, pos=File "type.php--a.php", line 5, characters 7-9:
    Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
 
 name=\mct, name_type=Typedef, pos=File "type.php--b.php", line 5, characters 6-8:
-   Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
-   Naming_provider.typedef_exists(name): true  [Provider_context.entry]
-   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 5, characters 7-9:)  [hh_server / typing_check_service]
-   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 5, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.typedef_exists(name): false
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 5, characters 7-9:)
    Naming_provider.get_typedef_canon_name(name): \mct
-   Decl_provider.get_typedef(name) |> Option.is_some: true
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]  [hh_server / typing_check_service]
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--b.php", line 5, characters 6-8:  [Provider_context.entry]
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 5, characters 7-9:  [hh_server / typing_check_service]
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner  [Provider_context.entry]
+   Decl_provider.get_typedef(name) |> Option.is_some: false
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 5, characters 7-9:
 
 name=\MCTI, name_type=Typedef, pos=File "type.php--b.php", line 4, characters 6-9:
    Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]
@@ -160,16 +155,12 @@ name=\mcti, name_type=Class, pos=File "type.php--a.php", line 4, characters 7-10
    Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
 
 name=\mtc, name_type=Class, pos=File "type.php--b.php", line 9, characters 7-9:
-   Naming_provider.class_exists(name): false  [hh_server / typing_check_service]
-   Naming_provider.class_exists(name): true  [Provider_context.entry]
-   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 9, characters 6-8:)  [hh_server / typing_check_service]
-   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--b.php", line 9, characters 7-9:)  [Provider_context.entry]
+   Naming_provider.class_exists(name): false
+   Naming_provider.get_class_pos(name): (FileInfo.Full: File "type.php--a.php", line 9, characters 6-8:)
    Naming_provider.get_class_canon_name(name): \mtc
-   Decl_provider.get_class(name) |> Option.is_some: true
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]  [hh_server / typing_check_service]
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--b.php", line 9, characters 7-9:  [Provider_context.entry]
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 9, characters 6-8:  [hh_server / typing_check_service]
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner  [Provider_context.entry]
+   Decl_provider.get_class(name) |> Option.is_some: false
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): [none]
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 9, characters 6-8:
 
 name=\mtc, name_type=Typedef, pos=File "type.php--a.php", line 9, characters 6-8:
    Naming_provider.typedef_exists(name): true
@@ -205,17 +196,16 @@ name=\mtt, name_type=Typedef, pos=File "type.php--a.php", line 7, characters 6-8
    Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 7, characters 6-8:)
    Naming_provider.get_typedef_canon_name(name): \mtt
    Decl_provider.get_typedef(name) |> Option.is_some: true
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--b.php", line 7, characters 6-8:
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--b.php", line 7, characters 6-8:
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--a.php", line 7, characters 6-8:
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
 
 name=\mtt, name_type=Typedef, pos=File "type.php--b.php", line 7, characters 6-8:
    Naming_provider.typedef_exists(name): true
-   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 7, characters 6-8:)  [hh_server / typing_check_service]
-   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--b.php", line 7, characters 6-8:)  [Provider_context.entry]
+   Naming_provider.get_typedef_pos(name): (FileInfo.Full: File "type.php--a.php", line 7, characters 6-8:)
    Naming_provider.get_typedef_canon_name(name): \mtt
    Decl_provider.get_typedef(name) |> Option.is_some: true
-   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--b.php", line 7, characters 6-8:
-   Decl_provider.is_this_def_the_winner(name_type,name,pos): winner
+   Decl_provider.get_pos_from_decl_of_winner(name_type,name): File "type.php--a.php", line 7, characters 6-8:
+   Decl_provider.is_this_def_the_winner(name_type,name,pos): Loser_to File "type.php--a.php", line 7, characters 6-8:
 
 name=\MTTI, name_type=Typedef, pos=File "type.php--b.php", line 6, characters 6-9:
    Naming_provider.typedef_exists(name): false  [hh_server / typing_check_service]

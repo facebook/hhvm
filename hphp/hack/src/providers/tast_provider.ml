@@ -80,10 +80,6 @@ let compute_tast_and_errors_unquarantined_internal
         | Compute_tast_only -> false
         | Compute_tast_and_errors -> true
       in
-      (* Note: duplicate name errors are normally caught during [nast_to_tast].
-         But the way [Naming_provider.find_symbol_in_context] works is it always
-         deems names in [entry] to be the winner; therefore, until Naming_provider
-         is changed, we will be unable to detect duplicate names in [entry]. *)
       Errors.do_with_context entry.Provider_context.path (fun () ->
           Typing_toplevel.nast_to_tast ~do_tast_checks ctx nast)
     in

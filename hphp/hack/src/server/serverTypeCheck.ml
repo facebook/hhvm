@@ -493,18 +493,25 @@ functor
       telemetry: Telemetry.t;
     }
 
-    (** Update the naming_table, which is a map from filename to the names of
+    (** Updates the naming_table, which is a map from filename to the names of
         toplevel symbols declared in that file: at any given point in time, we want
-        to know what each file defines. The datastructure that maintains this information
-        is called file_info. This code updates the file information.
-        Also, update Typing_deps' table,
-        which is a map from toplevel symbol hash (Dep.t) to filename.
-        Also run Naming_global, updating the reverse naming table (which maps the names
-        of toplevel symbols to the files in which they were declared) in shared
-        memory. Does not run Naming itself (which converts an AST to a NAST by
-        assigning unique identifiers to locals, among other things). The Naming
-        module is something of a historical artifact and is slated for removal,
-        but for now, it is run immediately before typechecking. *)
+        to know what each file defines. The updated naming table is returned
+        in the return value.
+        Also runs [Naming_global.ndecl_file_and_get_conflict_files] which updates
+        the global reverse naming table.
+
+        The "winner" in case of duplicate definitions? All filenames involved in any
+        duplicate definition were stored by the caller in [env.failed_parsing], and
+        the caller includes then in [defs_per_file_parsed]. We iterate over them
+        in alphabetical order. Thus, the winner definition will be the one from the
+        alphabetically first file. (Within a file, classes win over types, and
+        after that the lexically first definition wins).
+
+        Note that on the first typecheck after a duplicate definition has been introduced,
+        then [env.failed_parsing] doesn't yet contain all filenames involved, so the
+        winner in this first typecheck is non-determnistic -- it's simply previous
+        definition. We only get the alphabetically first filename as winner on subsequent
+        typechecks. Yuck. *)
     let do_naming
         (env : env)
         (ctx : Provider_context.t)

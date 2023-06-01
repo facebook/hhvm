@@ -192,18 +192,34 @@ let find_symbol_in_context_with_suppression
        (FileInfo.pos * FileInfo.name_type) option)
     ~(fallback : unit -> (FileInfo.pos * FileInfo.name_type) option)
     (name : string) : (FileInfo.pos * FileInfo.name_type) option =
-  match find_symbol_in_context ctx name with
-  | Some pos -> Some pos
-  | None ->
-    (match fallback () with
-    | Some (pos, name_type) ->
-      (* If fallback said it thought the symbol was in ctx, but we definitively
-         know that it isn't, then the answer is None. *)
-      if is_pos_in_ctx ~ctx pos then
-        None
-      else
-        Some (pos, name_type)
-    | None -> None)
+  let from_context = find_symbol_in_context ctx name in
+  let from_fallback = fallback () in
+  match (from_context, from_fallback) with
+  | (None, None) -> None
+  | (Some (context_pos, context_name_type), None) ->
+    Some (context_pos, context_name_type)
+  | (None, Some (fallback_pos, fallback_name_type)) ->
+    (* If fallback said it thought the symbol was in ctx, but we definitively
+       know that it isn't, then the answer is None. *)
+    if is_pos_in_ctx ~ctx fallback_pos then
+      None
+    else
+      Some (fallback_pos, fallback_name_type)
+  | ( Some (context_pos, context_name_type),
+      Some (fallback_pos, fallback_name_type) ) ->
+    (* The alphabetically first filename wins *)
+    let context_fn = FileInfo.get_pos_filename context_pos in
+    let fallback_fn = FileInfo.get_pos_filename fallback_pos in
+    if Relative_path.compare context_fn fallback_fn <= 0 then
+      (* symbol is either (1) a duplicate in both context and fallback, and context is the winner,
+         or (2) not a duplicate, and both context and fallback claim it to be defined
+         in a file that's part of the context, in which case context wins.
+         This is consistent with the winnor algorithm used by hh_server --
+         see the comment for [ServerTypeCheck.do_naming]. *)
+      Some (context_pos, context_name_type)
+    else
+      (* symbol is a duplicate in both context and fallback, and fallback is the winner *)
+      Some (fallback_pos, fallback_name_type)
 
 let get_and_cache
     ~(ctx : Provider_context.t)

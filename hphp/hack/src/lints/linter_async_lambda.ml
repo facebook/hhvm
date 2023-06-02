@@ -28,10 +28,16 @@ let is_awaitable env ty =
   | T.Tclass ((_, id), _, _) -> String.equal id SN.Classes.cAwaitable
   | _ -> false
 
+let strip_dynamic env ty =
+  let tenv = Tast_env.tast_env_as_typing_env env in
+  Typing_utils.strip_dynamic tenv ty
+
 let is_awaitable_awaitable env ty =
+  let ty = strip_dynamic env ty in
   let (env, ty) = Tast_env.expand_type env ty in
   match T.get_node ty with
   | T.Tclass ((_, id), _, [ty]) when String.equal id SN.Classes.cAwaitable ->
+    let ty = strip_dynamic env ty in
     let (_env, ty) = Tast_env.expand_type env ty in
     begin
       match T.get_node ty with

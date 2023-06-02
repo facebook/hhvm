@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/user-attributes.h"
 
+#include "hphp/util/tiny-vector.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +37,8 @@ struct StringData;
 struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+using TypeAndValueUnion = TinyVector<std::pair<AnnotType, LowStringPtr>>;
 
 /*
  * This is the runtime representation of a type alias.
@@ -54,9 +58,8 @@ struct Unit;
 struct PreTypeAlias {
   Unit* unit;
   LowStringPtr name;
-  std::vector<LowStringPtr> values;
   Attr attrs;
-  std::vector<AnnotType> types;
+  TypeAndValueUnion type_and_value_union;
   int line0;
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases

@@ -135,6 +135,7 @@ struct TinyVector {
   using Allocator = typename OrigAllocator::template rebind<uint8_t>::other;
   using AT = alloc_traits<Allocator>;
   using AllocPtr = typename AT::pointer;
+  using value_type = T;
 
   struct iterator;
   struct const_iterator;

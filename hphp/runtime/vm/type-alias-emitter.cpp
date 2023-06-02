@@ -36,8 +36,7 @@ TypeAliasEmitter::TypeAliasEmitter(UnitEmitter& ue,
   , m_id(id) {}
 
 void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
-                            std::vector<LowStringPtr> values,
-                            std::vector<AnnotType> types,
+                            TypeAndValueUnion type_and_value_union,
                             bool nullable,
                             bool case_type,
                             Array typeStructure,
@@ -49,14 +48,12 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
           (resolvedTypeStructure.isDict() &&
            !resolvedTypeStructure.empty() &&
            resolvedTypeStructure->isStatic()));
-  assertx(!values.empty());
-  assertx(values.size() == types.size());
-  assertx(IMPLIES(!case_type, values.size() == 1));
+  assertx(!type_and_value_union.empty());
+  assertx(IMPLIES(!case_type, type_and_value_union.size() == 1));
   m_line0 = line0;
   m_line1 = line1;
   m_attrs = attrs;
-  m_value_union = values;
-  m_type_union = types;
+  m_type_and_value_union = std::move(type_and_value_union);
   m_nullable = nullable;
   m_case_type = case_type;
   m_typeStructure = std::move(typeStructure);
@@ -65,7 +62,7 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
-    &unit, m_name, m_value_union, m_attrs, m_type_union, m_line0, m_line1,
+    &unit, m_name, m_attrs, m_type_and_value_union, m_line0, m_line1,
     m_nullable, m_case_type, m_userAttributes,
     m_typeStructure, m_resolvedTypeStructure
   };
@@ -76,8 +73,7 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
   sd(m_line0)
     (m_line1)
     (m_attrs)
-    (m_value_union)
-    (m_type_union)
+    (m_type_and_value_union)
     (m_nullable)
     (m_case_type)
     (m_userAttributes)

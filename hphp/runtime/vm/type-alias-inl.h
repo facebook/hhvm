@@ -35,18 +35,18 @@ inline TypeAlias TypeAlias::Invalid(const PreTypeAlias* alias) {
 
 inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
   //TODO(T151885113): Support case types in runtime
-  assertx(alias->types[0] != AnnotType::Object);
-  assertx(alias->types[0] != AnnotType::Unresolved);
+  assertx(alias->type_and_value_union[0].first != AnnotType::Object);
+  assertx(alias->type_and_value_union[0].first != AnnotType::Unresolved);
 
   TypeAlias req(alias);
-  req.type = alias->types[0];
+  req.type = alias->type_and_value_union[0].first;
   req.nullable = alias->nullable;
   return req;
 }
 
 inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
   //TODO(T151885113): Support case types in runtime
-  assertx(alias->types[0] == AnnotType::Unresolved);
+  assertx(alias->type_and_value_union[0].first == AnnotType::Unresolved);
 
   req.m_preTypeAlias = alias;
   if (req.invalid) {

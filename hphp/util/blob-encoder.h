@@ -20,6 +20,7 @@
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/insertion-ordered-map.h"
 #include "hphp/util/optional.h"
+#include "hphp/util/tiny-vector.h"
 
 #include <folly/sorted_vector_types.h>
 #include <folly/Varint.h>
@@ -237,6 +238,11 @@ struct BlobEncoder {
 
   template<typename T, typename A, typename... Extra>
   void encode(const CompactVector<T, A>& vec, const Extra&... extra) {
+    encodeOrderedContainer(vec, extra...);
+  }
+
+  template<typename T, size_t S, size_t M, typename A, typename... Extra>
+  void encode(const TinyVector<T, S, M, A>& vec, const Extra&... extra) {
     encodeOrderedContainer(vec, extra...);
   }
 
@@ -682,6 +688,11 @@ struct BlobDecoder {
   void decode(CompactVector<T, A>& vec, Extra... extra) {
     decodeVecContainer(vec, extra...);
     vec.shrink_to_fit();
+  }
+
+  template<typename T, size_t S, size_t M, typename A, typename... Extra>
+  void decode(TinyVector<T, S, M, A>& vec, Extra... extra) {
+    decodeVecContainer(vec, extra...);
   }
 
   template<typename K, typename C, typename A>

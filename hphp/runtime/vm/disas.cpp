@@ -853,11 +853,11 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
   auto flags = TypeConstraintFlags::NoFlags;
   if (alias.nullable) flags |= TypeConstraintFlags::Nullable;
   std::string type_constraints;
-  for (auto const& tc : alias.values) {
+  for (auto const& tv : alias.type_and_value_union) {
     if (!type_constraints.empty()) type_constraints.append(",");
     type_constraints.append(folly::to<std::string>(
       "<",
-      type_constraint(TypeConstraint(tc, flags)),
+      type_constraint(TypeConstraint(tv.second, flags)),
       ">"));
   }
 

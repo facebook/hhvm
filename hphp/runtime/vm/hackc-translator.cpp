@@ -348,19 +348,16 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   auto const tis = range(t.type_info_union);
   assertx(!tis.empty());
 
-  std::vector<LowStringPtr> tnames;
-  std::vector<AnnotType> annots;
+  TypeAndValueUnion type_and_value_union;
   bool nullable = false;
   for (auto const& ti : tis) {
     auto const ty = translateTypeInfo(ti).second;
     nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
     auto const tname = ty.typeName();
     if (tname && !tname->empty()) {
-      tnames.push_back(tname);
-      annots.push_back(ty.type());
+      type_and_value_union.emplace_back(ty.type(), tname);
     } else {
-      tnames.push_back(staticEmptyString());
-      annots.push_back(AnnotType::Mixed);
+      type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
     }
   }
 
@@ -373,8 +370,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     t.span.line_begin,
     t.span.line_end,
     attrs,
-    tnames,
-    annots,
+    type_and_value_union,
     nullable,
     t.case_type,
     ArrNR{tys.m_data.parr},

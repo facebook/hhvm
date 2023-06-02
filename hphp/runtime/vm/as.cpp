@@ -3141,19 +3141,16 @@ void parse_alias(AsmState& as, bool case_type) {
     as.error(".alias must have a valid array type structure");
   }
 
-  std::vector<LowStringPtr> tnames;
-  std::vector<AnnotType> annots;
+  TypeAndValueUnion type_and_value_union;
   bool nullable = false;
   for (auto const& ty : tis) {
     nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
     auto const tname = ty.typeName();
     if (tname && !tname->empty()) {
       as.ue->mergeLitstr(tname);
-      tnames.push_back(tname);
-      annots.push_back(ty.type());
+      type_and_value_union.emplace_back(ty.type(), tname);
     } else {
-      tnames.push_back(staticEmptyString());
-      annots.push_back(AnnotType::Mixed);
+      type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
     }
   }
 
@@ -3162,8 +3159,7 @@ void parse_alias(AsmState& as, bool case_type) {
     line0,
     line1,
     attrs,
-    tnames,
-    annots,
+    type_and_value_union,
     nullable,
     case_type,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},

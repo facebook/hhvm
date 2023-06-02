@@ -83,7 +83,7 @@ def cp_dir(source_dir, dest_dir):
         shutil.copy2(source_full_path, dest_full_path)
 
 
-class CompilerTest(unittest.TestCase):
+class FixtureTest(unittest.TestCase):
 
     MSG = " ".join(
         [
@@ -221,7 +221,7 @@ def add_fixture(klazz, name):
 
 fixtureNames = read_directory_filenames(fixtures_root_dir)
 for name in fixtureNames:
-    add_fixture(CompilerTest, name)
+    add_fixture(FixtureTest, name)
 
 if __name__ == "__main__":
     unittest.main()

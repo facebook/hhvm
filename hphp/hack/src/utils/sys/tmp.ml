@@ -32,8 +32,11 @@ let ( // ) = Filename.concat
 let make_dir_in_tmp ~description_what_for ~root =
   let tmp = hh_server_tmp_dir in
   assert (String.length description_what_for > 0);
+  let dir = tmp // description_what_for in
   let dir =
-    tmp // description_what_for // Path.slash_escaped_string_of_path root
+    match root with
+    | None -> dir
+    | Some root -> dir // Path.slash_escaped_string_of_path root
   in
   Sys_utils.mkdir_p dir;
   dir

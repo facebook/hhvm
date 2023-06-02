@@ -214,8 +214,14 @@ static char* build_command_line(char* const argv[]) {
     for (j = 0; arg[j]; j++) {
       switch (arg[j]) {
         case '"':
-          strcpy(cur, "\"\"\"");
-          cur += 3;
+          if (arg[j + 1] != '"') {
+            strcpy(cur, "\"\"\"");
+            cur += 3;
+          } else {
+            strcpy(cur, "\"\"\"\"");
+            cur += 4;
+            j++;
+          }
           break;
         default:
           *cur = arg[j];

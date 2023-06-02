@@ -37,8 +37,16 @@ let%test_unit "patt string exactly" =
      [Violated_constraint] secondary error with contrained tparam `Tviolated` *)
   let patt =
     Apply_reasons
-      ( Any_reasons_callback,
-        Violated_constraint (Name (Patt_string.Exactly name), Any, Any) )
+      {
+        patt_rsns_cb = Any_reasons_callback;
+        patt_secondary =
+          Violated_constraint
+            {
+              patt_cstr = Patt_string.Exactly name;
+              patt_ty_sub = Any;
+              patt_ty_sup = Any;
+            };
+      }
   in
   let error_message = Error_message.{ message = [Lit "Ok"] } in
   let custom_err = Custom_error.{ name; patt; error_message } in
@@ -47,42 +55,6 @@ let%test_unit "patt string exactly" =
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)
     [[Either.First "Ok"]]
-
-(* Pattern match over a `Violated_constraint` error matching exactly the tparam
-   name for which the constraint is violated and binding that name to a variable
-   for use in the error message *)
-let%test_unit "patt string exactly bound" =
-  let open Patt_error in
-  let open Patt_locl_ty in
-  let name = "Tviolated" in
-  let pod_none = Pos_or_decl.none in
-  let snd_err =
-    Typing_error.Secondary.Violated_constraint
-      {
-        is_coeffect = false;
-        cstrs = [(pod_none, (pod_none, name))];
-        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
-        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
-      }
-  in
-  let err =
-    Typing_error.(
-      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
-  in
-  (* As above but bind the tparam name to `x` *)
-  let patt =
-    Apply_reasons
-      ( Any_reasons_callback,
-        Violated_constraint
-          (As { lbl = "x"; patt = Patt_string.Exactly name }, Any, Any) )
-  in
-  let error_message = Error_message.{ message = [Lit "Ok:"; Name_var "x"] } in
-  let custom_err = Custom_error.{ name; patt; error_message } in
-  let custom_config = Custom_error_config.Config [custom_err] in
-  let open Core in
-  [%test_eq: (string, Eval.Value.t) Either.t list list]
-    (Eval.eval custom_config ~err)
-    [Either.[First "Ok:"; Second (Eval.Value.Name (pod_none, name))]]
 
 (* Pattern match over the [tysub] contained in a `Violated_constraint` error;
    the type match requires an exact match on the class name and for it to
@@ -110,7 +82,7 @@ let%test_unit "patt tysub" =
             ] ))
   in
   let ty_locl_sub =
-    Ty.Tclass ((pod_none, class_name), Ty.nonexact, [mk_ty shp])
+    Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
   in
   let snd_err =
     Typing_error.Secondary.Violated_constraint
@@ -131,7 +103,12 @@ let%test_unit "patt tysub" =
   let patt_ty_sub =
     Patt_locl_ty.Apply
       {
-        patt_name = Patt_name.Name (Patt_string.Exactly class_name);
+        patt_name =
+          Patt_name.Name
+            {
+              patt_namespace = Root;
+              patt_name = Patt_string.Exactly class_name;
+            };
         patt_params =
           Cons
             {
@@ -154,8 +131,16 @@ let%test_unit "patt tysub" =
   (* Match the subtype in our error message *)
   let patt =
     Apply_reasons
-      ( Any_reasons_callback,
-        Violated_constraint (Patt_name.Wildcard, patt_ty_sub, Any) )
+      {
+        patt_rsns_cb = Any_reasons_callback;
+        patt_secondary =
+          Violated_constraint
+            {
+              patt_cstr = Patt_string.Exactly param_name;
+              patt_ty_sub;
+              patt_ty_sup = Any;
+            };
+      }
   in
   let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
@@ -192,7 +177,7 @@ let%test_unit "patt tysub or pattern" =
             ] ))
   in
   let ty_locl_sub =
-    Ty.Tclass ((pod_none, class_name), Ty.nonexact, [mk_ty shp])
+    Ty.Tclass ((pod_none, "\\" ^ class_name), Ty.nonexact, [mk_ty shp])
   in
   let snd_err =
     Typing_error.Secondary.Violated_constraint
@@ -213,7 +198,12 @@ let%test_unit "patt tysub or pattern" =
   let patt_ty_sub =
     Patt_locl_ty.Apply
       {
-        patt_name = Patt_name.Name (Patt_string.Exactly class_name);
+        patt_name =
+          Patt_name.Name
+            {
+              patt_namespace = Root;
+              patt_name = Patt_string.Exactly class_name;
+            };
         patt_params =
           Cons
             {
@@ -241,8 +231,16 @@ let%test_unit "patt tysub or pattern" =
   (* Match the subtype in our error message *)
   let patt =
     Apply_reasons
-      ( Any_reasons_callback,
-        Violated_constraint (Patt_name.Wildcard, patt_ty_sub, Any) )
+      {
+        patt_rsns_cb = Any_reasons_callback;
+        patt_secondary =
+          Violated_constraint
+            {
+              patt_cstr = Patt_string.Exactly param_name;
+              patt_ty_sub;
+              patt_ty_sup = Any;
+            };
+      }
   in
   let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
@@ -251,6 +249,64 @@ let%test_unit "patt tysub or pattern" =
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)
     [Either.[First "Ok:"; Second (Eval.Value.Ty (mk_ty Ty.Tdynamic))]]
+
+let%test_unit "test namespace" =
+  let pod_none = Pos_or_decl.none in
+  let param_name = "T" in
+  let class_name = "Classy" in
+  let ns = ["This"; "Is"; "The"; "Namespace"] in
+  let rendered_name = String.concat "\\" @@ ns @ [class_name] in
+  let ty = Ty.Tclass ((pod_none, rendered_name), Ty.nonexact, []) in
+  let patt_namespace =
+    Core.List.fold_left
+      ~f:(fun prefix str ->
+        Patt_name.Slash { prefix; elt = Patt_string.Exactly str })
+      ~init:Patt_name.Root
+      ns
+  in
+  let patt_ty_sub =
+    Patt_locl_ty.(
+      Apply
+        {
+          patt_name =
+            Patt_name.Name { patt_namespace; patt_name = Exactly class_name };
+          patt_params = Nil;
+        })
+  in
+  let patt =
+    Patt_error.(
+      Apply_reasons
+        {
+          patt_rsns_cb = Any_reasons_callback;
+          patt_secondary =
+            Violated_constraint
+              {
+                patt_cstr = Patt_string.Exactly param_name;
+                patt_ty_sub;
+                patt_ty_sup = Any;
+              };
+        })
+  in
+  let snd_err =
+    Typing_error.Secondary.Violated_constraint
+      {
+        is_coeffect = false;
+        cstrs = [(pod_none, (pod_none, param_name))];
+        ty_sub = LoclType (Ty.mk (Typing_reason.Rnone, ty));
+        ty_sup = LoclType (Ty.mk (Typing_reason.Rnone, Ty.Tdynamic));
+      }
+  in
+  let err =
+    Typing_error.(
+      apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
+  in
+  let error_message = Error_message.{ message = [Lit "Ok"] } in
+  let custom_err = Custom_error.{ name = "namespaced"; patt; error_message } in
+  let custom_config = Custom_error_config.Config [custom_err] in
+  let open Core in
+  [%test_eq: (string, Eval.Value.t) Either.t list list]
+    (Eval.eval custom_config ~err)
+    [Either.[First "Ok"]]
 
 let%test_unit "validate ty, unbound right" =
   let patt_fst = Patt_locl_ty.(As { lbl = "x"; patt = Dynamic }) in
@@ -283,7 +339,13 @@ let%test_unit "validate ty, unbound left" =
     (V.Invalid patt_invalid)
 
 let%test_unit "validate ty, shadow" =
-  let patt_name = Patt_name.As { lbl = "x"; patt = Exactly "Classy" } in
+  let patt_name =
+    Patt_name.As
+      {
+        lbl = "x";
+        patt = Name { patt_namespace = Root; patt_name = Exactly "Classy" };
+      }
+  in
   let patt_hd = Patt_locl_ty.As { lbl = "x"; patt = Dynamic } in
   let patt_hd_invalid =
     Patt_locl_ty.Invalid ([Validation_err.Shadowed "x"], patt_hd)
@@ -303,7 +365,13 @@ let%test_unit "validate ty, shadow" =
     (V.Invalid patt_invalid)
 
 let%test_unit "validate ty, mismatch" =
-  let patt_name = Patt_name.As { lbl = "x"; patt = Exactly "Classy" } in
+  let patt_name =
+    Patt_name.As
+      {
+        lbl = "x";
+        patt = Name { patt_namespace = Root; patt_name = Exactly "Classy" };
+      }
+  in
   let patt_hd = Patt_locl_ty.Dynamic in
   let patt_tl = Patt_locl_ty.Nil in
   let patt_fst =

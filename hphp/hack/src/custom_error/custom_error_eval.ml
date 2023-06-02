@@ -11,6 +11,8 @@ module Ty = Typing_defs_core
 
 exception Invalid_pattern of string * Validation_err.t list
 
+exception Illegal_name of string
+
 module Value = struct
   type t =
     | Ty of (Typing_defs_core.locl_ty[@compare.ignore] [@sexp.opaque])
@@ -110,21 +112,43 @@ let matches_string ?(env = Env.empty) t ~scrut =
 
 (* -- Names ----------------------------------------------------------------- *)
 
-let matches_name ?(env = Env.empty) t ~scrut =
+let split_namespace (_pos, name) =
+  let ls =
+    List.rev
+    @@ List.filter ~f:(fun s -> not @@ String.is_empty s)
+    @@ String.split ~on:'\\' name
+  in
+  match ls with
+  | name :: namespace -> Some (name, namespace)
+  | _ -> None
+
+let rec matches_name ?(env = Env.empty) t ~scrut =
   let open Patt_name in
   match t with
   | Wildcard -> Match.matched env
-  | Name patt_string ->
-    Match.(
-      matches_string patt_string ~scrut:(snd scrut) ~env
-      |> map ~f:(Fn.const env)
-      |> map_err ~f:(fun _ -> assert false))
+  | Name { patt_namespace; patt_name } ->
+    (match split_namespace scrut with
+    | Some (name, namespace) ->
+      Match.(
+        matches_string patt_name ~scrut:name ~env >>= fun _ ->
+        matches_namespace patt_namespace ~scrut:namespace ~env)
+    | _ -> raise (Illegal_name (snd scrut)))
   | As { lbl; patt } ->
     Match.(
-      matches_string patt ~scrut:(snd scrut) ~env
+      matches_name patt ~scrut ~env
       |> map_err ~f:(fun _ -> assert false)
       |> map ~f:(Env.add_name ~lbl ~name:scrut))
-  | Invalid (errs, _) -> Match.match_err errs
+  | Invalid { errs; _ } -> Match.match_err errs
+
+and matches_namespace patt_namespace ~scrut ~env =
+  let open Patt_name in
+  match (patt_namespace, scrut) with
+  | (Root, []) -> Match.return env
+  | (Slash { prefix; elt }, next :: rest) ->
+    Match.(
+      matches_string elt ~scrut:next ~env >>= fun _ ->
+      matches_namespace prefix ~scrut:rest ~env)
+  | _ -> Match.no_match
 
 (* -- Types ----------------------------------------------------------------- *)
 
@@ -294,28 +318,25 @@ let matches_error ?(env = Env.empty) t ~scrut =
     | (Primary patt_prim, Typing_error.Error.Primary err_prim) ->
       aux_primary patt_prim err_prim ~env
     (* -- Callback application ---------------------------------------------- *)
-    | (Apply (patt_callback, patt), Typing_error.Error.Apply (err_callback, err))
-      ->
-      Match.(
-        aux_callback patt_callback err_callback ~env >>= fun env ->
-        aux patt err ~env)
+    | (Apply { patt_cb; patt_err }, Typing_error.Error.Apply (cb, err)) ->
+      Match.(aux_callback patt_cb cb ~env >>= fun env -> aux patt_err err ~env)
     (* -- Reasons callback application -------------------------------------- *)
-    | ( Apply_reasons (patt_reasons_callback, patt_secondary),
-        Typing_error.Error.Apply_reasons (err_reasons_callback, err_snd) ) ->
+    | ( Apply_reasons { patt_rsns_cb; patt_secondary },
+        Typing_error.Error.Apply_reasons (err_rsns_cb, err_secondary) ) ->
       Match.(
-        aux_reasons_callback patt_reasons_callback err_reasons_callback ~env
-        >>= fun env -> aux_secondary patt_secondary err_snd ~env)
+        aux_reasons_callback patt_rsns_cb err_rsns_cb ~env >>= fun env ->
+        aux_secondary patt_secondary err_secondary ~env)
     (* -- Or patterns ------------------------------------------------------- *)
-    | (Or (t1, t2), _) ->
-      (match aux t1 err ~env with
+    | (Or { patt_fst; patt_snd }, _) ->
+      (match aux patt_fst err ~env with
       | Match.Matched _ as m -> m
-      | _ -> aux t2 err ~env)
+      | _ -> aux patt_snd err ~env)
     (* -- Mismatches -------------------------------------------------------- *)
     | (Primary _, _)
     | (Apply _, _)
     | (Apply_reasons _, _) ->
       Match.no_match
-    | (Invalid (errs, _), _) -> Match.match_err errs
+    | (Invalid { errs; _ }, _) -> Match.match_err errs
   (* -- Primary errors ------------------------------------------------------ *)
   and aux_primary t err_prim ~env =
     match (t, err_prim) with
@@ -327,16 +348,16 @@ let matches_error ?(env = Env.empty) t ~scrut =
       aux patt_err err ~env
     | (Of_error _, _) -> Match.no_match
     (* We don't expose our internal `constraint_ty` so we handle this here *)
-    | ( Violated_constraint (patt_name, patt_ty_sub, patt_ty_sup),
+    | ( Violated_constraint { patt_cstr; patt_ty_sub; patt_ty_sup },
         Typing_error.Secondary.Violated_constraint { cstrs; ty_sub; ty_sup; _ }
       ) ->
       Match.(
-        match_exists patt_name ~matches:aux_param ~scruts:cstrs ~env
+        match_exists patt_cstr ~matches:aux_param ~scruts:cstrs ~env
         >>= fun env ->
         aux_internal_ty patt_ty_sub ty_sub ~env >>= fun env ->
         aux_internal_ty patt_ty_sup ty_sup ~env)
     | (Violated_constraint _, _) -> Match.no_match
-    | ( Subtyping_error (patt_ty_sub, patt_ty_sup),
+    | ( Subtyping_error { patt_ty_sub; patt_ty_sup },
         Typing_error.Secondary.Subtyping_error { ty_sub; ty_sup; _ } ) ->
       Match.(
         aux_internal_ty patt_ty_sub ty_sub ~env >>= fun env ->
@@ -358,8 +379,8 @@ let matches_error ?(env = Env.empty) t ~scrut =
       matches_locl_ty patt_locl_ty ~scrut ~env
     | _ -> Match.no_match
   (* -- Type parameters ----------------------------------------------------- *)
-  and aux_param patt_name (_, scrut) ~env =
-    matches_name patt_name ~scrut ~env
+  and aux_param patt_name (_, (_, scrut)) ~env =
+    matches_string patt_name ~scrut ~env
   in
   aux t scrut ~env
 

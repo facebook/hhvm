@@ -13,17 +13,32 @@ open Core
 type t =
   | As of {
       lbl: Patt_var.t;
-      patt: Patt_string.t;
+      patt: t;
     }
-  | Name of Patt_string.t
+  | Name of {
+      patt_namespace: namespace;
+      patt_name: Patt_string.t;
+    }
   | Wildcard
-  | Invalid of Validation_err.t list * t
+  | Invalid of {
+      errs: Validation_err.t list;
+      patt: t;
+    }
+
+and namespace =
+  | Root
+  | Slash of {
+      prefix: namespace;
+      elt: Patt_string.t;
+    }
 [@@deriving compare, sexp, show, yojson]
 
 let validate ?(env = Validation_env.empty) t =
   match t with
   | As { lbl; _ } ->
     (match Validation_env.add ~key:lbl ~data:Patt_binding_ty.Name env with
-    | Error env -> (V.invalid (Invalid ([Validation_err.Shadowed lbl], t)), env)
+    | Error env ->
+      ( V.invalid (Invalid { errs = [Validation_err.Shadowed lbl]; patt = t }),
+        env )
     | Ok env -> (V.valid t, env))
   | _ -> (V.valid t, env)

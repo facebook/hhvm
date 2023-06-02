@@ -8,11 +8,24 @@
 type t =
   | As of {
       lbl: Patt_var.t;
-      patt: Patt_string.t;
+      patt: t;
     }
-  | Name of Patt_string.t
+  | Name of {
+      patt_namespace: namespace;
+      patt_name: Patt_string.t;
+    }
   | Wildcard
-  | Invalid of Validation_err.t list * t
+  | Invalid of {
+      errs: Validation_err.t list;
+      patt: t;
+    }
+
+and namespace =
+  | Root
+  | Slash of {
+      prefix: namespace;
+      elt: Patt_string.t;
+    }
 [@@deriving compare, sexp, show, yojson]
 
 include Can_validate.S with type t := t

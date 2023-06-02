@@ -7,17 +7,36 @@
  *)
 type t =
   | Primary of primary
-  | Apply of callback * t
-  | Apply_reasons of reasons_callback * secondary
-  | Or of t * t
-  | Invalid of Validation_err.t list * t
+  | Apply of {
+      patt_cb: callback;
+      patt_err: t;
+    }
+  | Apply_reasons of {
+      patt_rsns_cb: reasons_callback;
+      patt_secondary: secondary;
+    }
+  | Or of {
+      patt_fst: t;
+      patt_snd: t;
+    }
+  | Invalid of {
+      errs: Validation_err.t list;
+      patt: t;
+    }
 
 and primary = Any_prim
 
 and secondary =
   | Of_error of t
-  | Violated_constraint of Patt_name.t * Patt_locl_ty.t * Patt_locl_ty.t
-  | Subtyping_error of Patt_locl_ty.t * Patt_locl_ty.t
+  | Violated_constraint of {
+      patt_cstr: Patt_string.t;
+      patt_ty_sub: Patt_locl_ty.t;
+      patt_ty_sup: Patt_locl_ty.t;
+    }
+  | Subtyping_error of {
+      patt_ty_sub: Patt_locl_ty.t;
+      patt_ty_sup: Patt_locl_ty.t;
+    }
   | Any_snd
 
 and callback = Any_callback

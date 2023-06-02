@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fe0ec48658188a512a9ac733204fb0d4>>
+// @generated SignedSource<<62a4b4361a1bf89fdd0a6b50f296c41b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,14 +38,19 @@ pub type Hash = isize;
 #[rust_to_ocaml(attr = "deriving yojson_of")]
 #[repr(C)]
 pub struct ByNames {
+    #[serde(default)]
     #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
     pub fun_tast_hashes: s_map::SMap<Hash>,
+    #[serde(default)]
     #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
     pub class_tast_hashes: s_map::SMap<Hash>,
+    #[serde(default)]
     #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
     pub typedef_tast_hashes: s_map::SMap<Hash>,
+    #[serde(default)]
     #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
     pub gconst_tast_hashes: s_map::SMap<Hash>,
+    #[serde(default)]
     #[rust_to_ocaml(attr = "yojson_drop_if SMap.is_empty")]
     pub module_tast_hashes: s_map::SMap<Hash>,
 }

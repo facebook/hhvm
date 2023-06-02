@@ -22,32 +22,71 @@ let is_by_ref () =
   | Configuration.ByRef -> true
   | Configuration.ByBox -> false
 
-let rust_de_field_attr (tys : Rust_type.t list) : string =
-  let contains_ref = List.exists ~f:Rust_type.contains_ref tys in
-  (* deserialize a type contains any Cell causes a compilation error, see T90211775 *)
-  let contains_cell =
-    List.exists
-      ~f:(fun t ->
-        Rust_type.type_name_and_params t
-        |> fst
-        |> String.is_suffix ~suffix:"::Cell")
-      tys
+let stringify_attribute { attr_name; attr_payload; _ } =
+  match (attr_name, attr_payload) with
+  | ({ txt = "ocaml.doc" | "value"; _ }, _) -> None
+  | ({ txt; _ }, PStr []) -> Some txt
+  | ({ txt; _ }, PStr [structure_item]) ->
+    let item =
+      structure_item
+      |> Format.asprintf "%a" Pprintast.structure_item
+      |> String.strip ~drop:(function
+             | ' '
+             | '\t'
+             | ';' ->
+               true
+             | _ -> false)
+    in
+    Some (txt ^ " " ^ item)
+  | _ -> None
+
+let add_default_attr_if_ocaml_yojson_drop_if attributes acc_attr_list =
+  let contains_yojson_drop_if attr =
+    match stringify_attribute attr with
+    | None -> false
+    | Some attr -> String.is_prefix attr ~prefix:"yojson_drop_if"
   in
-  if contains_ref || (is_by_ref () && List.exists ~f:Rust_type.is_var tys) then
-    if contains_cell then
-      "#[serde(skip)]"
-    else
-      let borrow =
-        if contains_ref then
-          ", borrow"
-        else
-          ""
-      in
-      sprintf
-        "#[serde(deserialize_with = \"arena_deserializer::arena\" %s)]"
-        borrow
+  if List.exists attributes ~f:contains_yojson_drop_if then
+    "default" :: acc_attr_list
   else
+    acc_attr_list
+
+let add_deserialize_with_arena tys acc_attr_list =
+  let contains_ref = List.exists ~f:Rust_type.contains_ref tys in
+  if contains_ref || (is_by_ref () && List.exists ~f:Rust_type.is_var tys) then
+    (* deserialize a type contains any Cell causes a compilation error, see T90211775 *)
+    let contains_cell =
+      List.exists
+        ~f:(fun t ->
+          Rust_type.type_name_and_params t
+          |> fst
+          |> String.is_suffix ~suffix:"::Cell")
+        tys
+    in
+    if contains_cell then
+      "skip" :: acc_attr_list
+    else
+      let acc_attr_list =
+        if contains_ref then
+          "borrow" :: acc_attr_list
+        else
+          acc_attr_list
+      in
+      "deserialize_with = \"arena_deserializer::arena\"" :: acc_attr_list
+  else
+    acc_attr_list
+
+let rust_de_field_attr (tys : Rust_type.t list) (attributes : attributes) :
+    string =
+  let serde_attr_list =
+    []
+    |> add_default_attr_if_ocaml_yojson_drop_if attributes
+    |> add_deserialize_with_arena tys
+  in
+  if List.is_empty serde_attr_list then
     ""
+  else
+    sprintf "#[serde(%s)]" @@ String.concat ~sep:", " serde_attr_list
 
 let default_implements () =
   match Configuration.mode () with
@@ -385,24 +424,6 @@ let doc_comment_of_attribute_list attrs =
   |> Option.map ~f:convert_doc_comment
   |> Option.value ~default:""
 
-let stringify_attribute { attr_name; attr_payload; _ } =
-  match (attr_name, attr_payload) with
-  | ({ txt = "ocaml.doc" | "value"; _ }, _) -> None
-  | ({ txt; _ }, PStr []) -> Some txt
-  | ({ txt; _ }, PStr [structure_item]) ->
-    let item =
-      structure_item
-      |> Format.asprintf "%a" Pprintast.structure_item
-      |> String.strip ~drop:(function
-             | ' '
-             | '\t'
-             | ';' ->
-               true
-             | _ -> false)
-    in
-    Some (txt ^ " " ^ item)
-  | _ -> None
-
 let ocaml_attr attrs =
   attrs
   |> List.filter_map ~f:stringify_attribute
@@ -445,7 +466,7 @@ let record_label_declaration
   sprintf
     "%s%s%s%s %s: %s,\n"
     doc
-    (rust_de_field_attr [ty])
+    (rust_de_field_attr [ty] ld.pld_attributes)
     attr
     pub
     name
@@ -546,7 +567,7 @@ let variant_constructor_declaration ?(box_fields = false) cd =
     sprintf
       "%s%s%s%s%s%s%s%s,\n"
       doc
-      (rust_de_field_attr tys)
+      (rust_de_field_attr tys cd.pcd_attributes)
       attr
       name_attr
       (if box_fields && List.length types > 1 then
@@ -778,7 +799,7 @@ let type_declaration ~mutual_rec name td =
             "%s struct %s (%s pub %s);%s\n%s"
             (attrs_and_vis Not_an_enum ~force_derive_copy:false)
             (rust_type name lifetime tparams |> rust_type_to_string)
-            (rust_de_field_attr [ty])
+            (rust_de_field_attr [ty] td.ptype_attributes)
             (rust_type_to_string ty)
             (implements ~force_derive_copy:false)
             (deserialize_in_arena_macro ~force_derive_copy:false)
@@ -807,7 +828,7 @@ let type_declaration ~mutual_rec name td =
                 Convert_type.core_type ty |> fun t ->
                 sprintf
                   "%s pub %s"
-                  (rust_de_field_attr [t])
+                  (rust_de_field_attr [t] td.ptype_attributes)
                   (rust_type_to_string t))
               ~sep:","
               tys

@@ -1,3 +1,5 @@
+File "msg_null_check.php", line 12, characters 10-17:
+`takesInt` breaks naming conventions: Functions must be named using lower_case_with_underscores. (Lint[5520])
 File "msg_null_check.php", line 18, characters 8-15:
 This is a sketchy null check.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.

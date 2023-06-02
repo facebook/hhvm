@@ -9,14 +9,14 @@
  *
  */
 
-function takes_int(int $x): void {}
+function takesInt(int $x): void {}
 
 class X {
   private ?int $x = null;
 
   public function test(): void {
     if($this->x) {
-      takes_int($this->x);
+      takesInt($this->x);
     }
   }
 }

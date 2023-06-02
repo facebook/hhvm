@@ -20,15 +20,14 @@ def lookup_func(func_id: lldb.SBValue) -> lldb.SBValue:
         func: A HPHP::Func* wrapped in an lldb.SBValue
     """
     target = func_id.target
-    assert func_id.type == utils.Type("HPHP::FuncId", target), f"invalid func_id, type given is {func_id.type.name}"
+    assert func_id.type.name == "HPHP::FuncId", f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
     func_vec = target.FindFirstGlobalVariable("HPHP::Func::s_funcVec")
     if func_vec.IsValid():
-        # Not LowPtr
+        # Non-LowPtr
         func_id_val = utils.get(func_id, "m_id").unsigned
         result = idx.atomic_low_ptr_vector_at(func_vec, func_id_val)
         assert result.IsValid(), "returned invalid HPHP::Func"
     else:
-        # TODO test this code path
         # LowPtr
         result = utils.rawptr(utils.get(func_id, 'm_id'))
 

@@ -339,7 +339,8 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     elif name == "HPHP::TokenOrPtr":
         compact = get(val, "m_compact")  # HPHP::CompactTaggedPtr
         data = val.CreateValueFromExpression("(tmp)", str(compact.unsigned >> 2))
-        ptr = rawptr(unsigned_cast(data, compact.type.GetPointerType()))  # Stop the recursion by turning into pointer
+        compact_type = Type("uintptr_t", val.target).GetPointerType()
+        ptr = rawptr(unsigned_cast(data, compact_type))
 
     if ptr is not None:
         return rawptr(ptr)
@@ -769,7 +770,7 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
             'cross_jit_save': ['rbx', 'r12', 'r13', 'r14', 'r15'],
         }
 
-def reg(name: str, frame: lldb.SBFrame) -> typing.Optional[lldb.SBValue]:
+def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     """ Get the value of a register given its common name (e.g. "fp", "sp", etc.)
 
     Arguments:
@@ -777,7 +778,8 @@ def reg(name: str, frame: lldb.SBFrame) -> typing.Optional[lldb.SBValue]:
         frame: Current frame
 
     Returns:
-        The value of the register, wrapped in a lldb.SBValue, or None if unrecognized
+        The value of the register, wrapped in a lldb.SBValue. If unrecognized,
+        the returned SBValue will be invalid (check with .isValid()).
     """
     name = arch_regs(frame.thread.process.target)[name]
     return frame.register[name]

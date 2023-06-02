@@ -140,6 +140,9 @@ def create_php(
     shared = utils.rawptr(utils.get(func, "m_shared"))  # lldb.SBValue[HPHP::SharedData]
     flags = utils.get(shared, "m_allFlags")  # lldb.SBValue[HPHP::Func::SharedData::Flags]
 
+    shared_type = utils.rawtype(shared.type).GetPointeeType()
+    assert shared_type.name == "HPHP::Func::SharedData", f"create_php: Expected m_shared to point to HPHP::Func::SharedData, it points to {shared_type.name}"
+
     # Pull the function name.
     if utils.get(flags, "m_isClosureBody").unsigned == 0:
         func_name = utils.nameof(func)
@@ -167,8 +170,9 @@ def create_php(
 
     # Pull the PC from Func::base() and ar->m_callOff if necessary.
     if pc is None:
-        bc = utils.rawptr(utils.get(shared, "m_bc")).unsigned
-        pc = bc + (utils.get(ar, "m_callOffAndFlags").unsigned >> 2)
+        m_bc = utils.get(shared, "m_bc")
+        bc = utils.rawptr(m_bc)
+        pc = bc.unsigned + (utils.get(ar, "m_callOffAndFlags").unsigned >> 2)
 
     frame.file = php_filename(func, ar.target)
     frame.line = php_line_number(func, pc)

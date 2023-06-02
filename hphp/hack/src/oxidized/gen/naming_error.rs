@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1c6d7e2ddfab536cf0a211758e7c460>>
+// @generated SignedSource<<0b8a0eee5ca714c32defc31ae42e77ea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -400,4 +400,6 @@ pub enum NamingError {
     },
     #[rust_to_ocaml(name = "Tparam_non_shadowing_reuse")]
     TparamNonShadowingReuse { pos: pos::Pos, tparam_name: String },
+    #[rust_to_ocaml(name = "Dynamic_hint_disallowed")]
+    DynamicHintDisallowed(pos::Pos),
 }

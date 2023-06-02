@@ -287,6 +287,7 @@ type t =
       pos: Pos.t;
       tparam_name: string;
     }
+  | Dynamic_hint_disallowed of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -406,6 +407,12 @@ let wildcard_hint_disallowed pos =
   User_error.make
     Error_code.(to_enum WildcardHintDisallowed)
     (pos, "Wildcard typehints are not allowed in this position")
+    []
+
+let dynamic_hint_disallowed pos =
+  User_error.make
+    Error_code.(to_enum DynamicHintDisallowed)
+    (pos, "dynamic typehints are not allowed in this position")
     []
 
 let wildcard_param_disallowed pos =
@@ -1380,3 +1387,4 @@ let to_user_error = function
     tparam_non_shadowing_reuse pos tparam_name
   | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
     undefined_in_expr_tree pos var_name dsl did_you_mean
+  | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos

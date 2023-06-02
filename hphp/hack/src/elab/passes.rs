@@ -41,6 +41,7 @@ pub mod validate_class_var_user_attribute_const;
 pub mod validate_class_var_user_attribute_lsb;
 pub mod validate_control_context;
 pub mod validate_coroutine;
+pub mod validate_dynamic_hint;
 pub mod validate_expr_array_get;
 pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;

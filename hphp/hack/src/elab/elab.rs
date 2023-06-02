@@ -309,6 +309,9 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // Validate hints used in `Cast` expressions
         passes::validate_expr_cast::ValidateExprCastPass::default(),
 
+        // Validate where `dynamic` can be used in a hint
+        passes::validate_dynamic_hint::ValidateDynamicHintPass::default(),
+
         // Check for duplicate function parameter names
         passes::validate_fun_params::ValidateFunParamsPass::default(),
 

@@ -1,2 +1,2 @@
-File "dynamic.php", line 4, characters 13-19:
+File "is_dynamic_disallowed.php", line 4, characters 13-19:
 dynamic typehints are not allowed in this position (Naming[2125])

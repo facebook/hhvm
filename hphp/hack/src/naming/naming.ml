@@ -139,6 +139,8 @@ let passes =
     Naming_elab_as_expr.pass on_error;
     (* Validate hints used in `Cast` expressions *)
     Naming_validate_cast_expr.pass on_error;
+    (* Validate where `dynamic` can be used in a hint *)
+    Naming_validate_dynamic_hint.pass on_error;
     (* Check for duplicate function parameter names *)
     Naming_validate_fun_params.pass on_error;
     (* Validate use of `require implements`, `require extends` and

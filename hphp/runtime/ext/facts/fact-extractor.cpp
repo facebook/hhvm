@@ -174,9 +174,9 @@ folly::dynamic parse_json(const std::string& json) {
   }
 }
 
-ExtractorFactory s_extractorFactory = nullptr;
+ExtractorFactory* s_extractorFactory = nullptr;
 
-struct SimpleExtractor final : public Extractor {
+struct SimpleExtractor final : Extractor {
   explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {}
 
   ~SimpleExtractor() override = default;
@@ -204,8 +204,19 @@ std::string facts_json_from_path(const PathAndOptionalHash& path) {
       });
 }
 
-void setExtractorFactory(ExtractorFactory factory) {
+void setExtractorFactory(ExtractorFactory* factory) {
   s_extractorFactory = factory;
+}
+
+std::unique_ptr<Extractor> makeExtractor(folly::Executor& exec) {
+  // If we defined an external Extractor in closed-source code, use that.
+  // Otherwise use the SimpleExtractor.
+  if (s_extractorFactory && RuntimeOption::AutoloadEnableExternFactExtractor) {
+    XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
+    return s_extractorFactory->make(exec);
+  }
+  XLOG(INFO) << "Creating an internal HPHP::Facts::SimpleExtractor.";
+  return std::make_unique<SimpleExtractor>(exec);
 }
 
 std::vector<folly::Try<FileFacts>> facts_from_paths(
@@ -219,16 +230,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
 
   // If we defined an external Extractor in closed-source code, use that.
   // Otherwise use the SimpleExtractor.
-  auto extractor = [&]() -> std::unique_ptr<Extractor> {
-    if (s_extractorFactory &&
-        RuntimeOption::AutoloadEnableExternFactExtractor) {
-      XLOG(INFO) << "Creating a external HPHP::Facts::Extractor.";
-      return s_extractorFactory(exec);
-    } else {
-      XLOG(INFO) << "Creating an internal HPHP::Facts::SimpleExtractor.";
-      return std::make_unique<SimpleExtractor>(exec);
-    }
-  }();
+  auto extractor = makeExtractor(exec);
 
   std::atomic<int> completed_tasks = 0;
   std::vector<folly::SemiFuture<FileFacts>> factsFutures;
@@ -301,6 +303,13 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
 
   XLOG(INFO) << "Done spawning facts_from_paths futures.";
   return folly::collectAll(factsFutures).wait().get();
+}
+
+void prefetchDb(const std::filesystem::path& root, const SQLiteKey& dbKey) {
+  XLOG(INFO) << "::prefetchDb " << root << " " << dbKey.toString();
+  if (s_extractorFactory && RuntimeOption::AutoloadEnableExternFactExtractor) {
+    s_extractorFactory->prefetchDb(root, dbKey);
+  }
 }
 
 } // namespace Facts

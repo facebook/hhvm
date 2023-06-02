@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
+#include "hphp/runtime/ext/facts/sqlite-key.h"
 
 namespace HPHP {
 namespace Facts {
@@ -50,10 +51,18 @@ struct Extractor {
   folly::Executor& m_exec;
 };
 
-// Call within closed-source code to define a proprietary Extractor. Facebook
-// uses memcache to store and fetch Facts across our network.
-using ExtractorFactory = std::unique_ptr<Extractor> (*)(folly::Executor&);
-void setExtractorFactory(ExtractorFactory factory);
+struct ExtractorFactory {
+  virtual ~ExtractorFactory() = default;
+
+  virtual std::unique_ptr<Extractor> make(folly::Executor&) = 0;
+
+  virtual void prefetchDb(
+      const std::filesystem::path& root,
+      const SQLiteKey&) = 0;
+};
+
+// Call within closed-source code to define a proprietary Extractor.
+void setExtractorFactory(ExtractorFactory* factory);
 
 /**
  * Synchronously extract Facts, as JSON, from the given absolute path.
@@ -70,6 +79,12 @@ std::string facts_json_from_path(const PathAndOptionalHash& path);
 std::vector<folly::Try<FileFacts>> facts_from_paths(
     const std::filesystem::path& root,
     const std::vector<PathAndOptionalHash>& paths);
+
+/**
+ * Called by AutoloadMapFactory::getForOptions() to optionally
+ * prefetch an autoload db.
+ */
+void prefetchDb(const std::filesystem::path& root, const SQLiteKey&);
 
 } // namespace Facts
 } // namespace HPHP

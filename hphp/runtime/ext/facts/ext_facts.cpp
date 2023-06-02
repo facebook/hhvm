@@ -351,7 +351,7 @@ struct SqliteAutoloadMapFactory final : public FactsFactory {
 };
 
 struct FactsExtension final : Extension {
-  FactsExtension() : Extension("facts", "1.0", NO_ONCALL_YET) {}
+  FactsExtension() : Extension("facts", "1.0", "hphp_hphpi") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     if (!RuntimeOption::AutoloadEnabled) {
@@ -501,6 +501,10 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
     updateSuppressionPath = {
         std::filesystem::path{RuntimeOption::AutoloadUpdateSuppressionPath}};
   }
+
+  // Prefetch a FactsDB if we don't have one, while guarded by m_mutex
+  prefetchDb(mapKey->m_root, mapKey->m_dbKey);
+
   return m_maps
       .insert(
           {*mapKey,

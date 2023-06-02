@@ -161,6 +161,10 @@ class ServicesTests(unittest.TestCase):
         server.set_allow_plaintext_on_loopback(True)
         self.assertTrue(server.is_plaintext_allowed_on_loopback())
 
+        self.assertFalse(server.get_quick_exit_on_shutdown_timeout())
+        server.set_quick_exit_on_shutdown_timeout(True)
+        self.assertTrue(server.get_quick_exit_on_shutdown_timeout())
+
     def test_server_get_stats(self) -> None:
         # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         server = ThriftServer(Handler(), port=0)

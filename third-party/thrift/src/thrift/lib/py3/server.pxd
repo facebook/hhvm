@@ -135,6 +135,8 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         cbool getStopWorkersOnStopListening()
         void setAllowCheckUnimplementedExtraInterfaces(cbool allow)
         void setIdleServerTimeout(milliseconds idleServerTimeout)
+        cbool getQuickExitOnShutdownTimeout()
+        void setQuickExitOnShutdownTimeout(cbool quickExitOnShutdownTimeout)
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":

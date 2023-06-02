@@ -301,6 +301,11 @@ cdef class ThriftServer:
     def set_idle_server_timeout(self, seconds):
         self.server.get().setIdleServerTimeout(milliseconds(<int64_t>(seconds * 1000)))
 
+    def get_quick_exit_on_shutdown_timeout(self):
+        return self.server.get().getQuickExitOnShutdownTimeout()
+
+    def set_quick_exit_on_shutdown_timeout(self, cbool quick_exit_on_shutdown_timeout):
+        self.server.get().setQuickExitOnShutdownTimeout(quick_exit_on_shutdown_timeout)
 
 cdef class ClientMetadata:
     @staticmethod

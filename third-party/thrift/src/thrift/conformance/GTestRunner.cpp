@@ -33,7 +33,9 @@ createClient<Client<ConformanceService>>(std::string_view serviceName) {
 namespace {
 // Register the tests with gtest.
 THRIFT_CONFORMANCE_TEST(
-    getSuites(), getServers<Client<ConformanceService>>(), getNonconforming());
+    getSuites(),
+    getServers<Client<ConformanceService>>(ChannelType::Header),
+    getNonconforming());
 
 } // namespace
 } // namespace apache::thrift::conformance

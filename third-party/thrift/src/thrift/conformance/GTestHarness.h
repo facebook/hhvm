@@ -69,20 +69,19 @@ enum class ChannelType {
 
 // Creates a client for the localhost.
 template <typename Client>
-std::unique_ptr<Client> createClient(
-    int port, ChannelType type = ChannelType::Header) {
+std::unique_ptr<Client> createClient(int port, ChannelType channelType) {
   return std::make_unique<Client>(PooledRequestChannel::newChannel(
       [=](folly::EventBase& eb) -> PooledRequestChannel::ImplPtr {
         folly::AsyncTransport::UniquePtr socket(
             new folly::AsyncSocket(&eb, folly::SocketAddress("::1", port)));
-        switch (type) {
+        switch (channelType) {
           case ChannelType::Header:
             return HeaderClientChannel::newChannel(std::move(socket));
           case ChannelType::Rocket:
             return RocketClientChannel::newChannel(std::move(socket));
           default:
             throw std::invalid_argument(
-                "Unknown channel type: " + std::to_string(int(type)));
+                "Unknown channel type: " + std::to_string(int(channelType)));
         }
       }));
 }
@@ -97,12 +96,11 @@ std::unique_ptr<Client> createClient(std::string_view) {
 template <typename Client>
 class ClientAndServer {
  public:
-  explicit ClientAndServer(
-      std::string cmd, ChannelType type = ChannelType::Header)
+  explicit ClientAndServer(std::string cmd, ChannelType channelType)
       : server_(
             std::vector<std::string>{std::move(cmd)},
             folly::Subprocess::Options().pipeStdout()),
-        channelType_(type) {
+        channelType_(channelType) {
     LOG(INFO) << "Starting binary: " << cmd;
     std::string port;
     server_.communicate(
@@ -133,20 +131,37 @@ class ClientAndServer {
 // Creates a map from name to client provider, using lazily initalized
 // ClientAndServers.
 template <typename Client>
-client_fn_map<Client> getServers(ChannelType type = ChannelType::Header) {
+client_fn_map<Client> getServers(ChannelType channelType) {
   auto cmds = parseCmds(getEnvOrThrow("THRIFT_CONFORMANCE_SERVER_BINARIES"));
+  auto channelTypeOverrides =
+      parseCmds(getEnvOr("THRIFT_CONFORMANCE_CHANNEL_TYPE_OVERRIDES", ""));
   client_fn_map<Client> result;
   for (const auto& entry : cmds) {
     result.emplace(
         entry.first,
         [name = std::string(entry.first),
          cmd = std::string(entry.second),
-         type]() -> Client& {
+         channelType,
+         channelTypeOverrides]() -> Client& {
           static folly::Synchronized<std::map<
               std::string_view,
               std::unique_ptr<ClientAndServer<Client>>>>
               clients;
           auto lockedClients = clients.wlock();
+
+          // Override the channel type if specified.
+          auto actualChannelType = channelType;
+          auto cht_itr = channelTypeOverrides.find(name);
+          if (cht_itr != channelTypeOverrides.end()) {
+            if (cht_itr->second == "Header") {
+              actualChannelType = ChannelType::Header;
+            } else if (cht_itr->second == "Rocket") {
+              actualChannelType = ChannelType::Rocket;
+            } else {
+              throw std::invalid_argument(
+                  "Unknown channel type: " + std::string(cht_itr->second));
+            }
+          }
 
           // Get or create ClientAndServer in the static map.
           auto itr = lockedClients->find(name);
@@ -154,7 +169,8 @@ client_fn_map<Client> getServers(ChannelType type = ChannelType::Header) {
             itr = lockedClients->emplace_hint(
                 itr,
                 name,
-                std::make_unique<ClientAndServer<Client>>(cmd, type));
+                std::make_unique<ClientAndServer<Client>>(
+                    cmd, actualChannelType));
           }
           return itr->second->getClient();
         });

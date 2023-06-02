@@ -35,7 +35,7 @@ void clientKeyShareGenerationBench(uint64_t n, NamedGroup namedGroup) {
  * Test shared secret generation speed for EDCH and cipher generation speed for
  * KEM. This simulates the only server operation.
  */
-void serverKeyShareGenerationBench(uint64_t n, NamedGroup namedGroup) {
+void serverSharedSecretDerivationBench(uint64_t n, NamedGroup namedGroup) {
   std::unique_ptr<KeyExchange> kex;
   std::vector<std::unique_ptr<folly::IOBuf>> clientKeyShareIOBuf;
   std::vector<folly::ByteRange> clientKeyShare;
@@ -94,65 +94,24 @@ BENCHMARK_NAMED_PARAM(
     NamedGroup::x25519);
 BENCHMARK_NAMED_PARAM(
     clientKeyShareGenerationBench,
-    kyber512,
-    NamedGroup::kyber512);
-BENCHMARK_NAMED_PARAM(
-    clientKeyShareGenerationBench,
     x25519_kyber512,
     NamedGroup::x25519_kyber512);
-BENCHMARK_NAMED_PARAM(
-    clientKeyShareGenerationBench,
-    secp256r1,
-    NamedGroup::secp256r1);
-BENCHMARK_NAMED_PARAM(
-    clientKeyShareGenerationBench,
-    secp256r1_kyber512,
-    NamedGroup::secp256r1_kyber512);
-BENCHMARK_NAMED_PARAM(
-    clientKeyShareGenerationBench,
-    cecpq2,
-    NamedGroup::cecpq2);
 BENCHMARK_NAMED_PARAM(
     clientKeyShareGenerationBench,
     x25519_kyber768,
     NamedGroup::x25519_kyber768);
 BENCHMARK_NAMED_PARAM(
-    clientKeyShareGenerationBench,
-    secp384r1_kyber768,
-    NamedGroup::secp384r1_kyber768);
-
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
+    serverSharedSecretDerivationBench,
     x25519,
     NamedGroup::x25519);
 BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
-    kyber512,
-    NamedGroup::kyber512);
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
+    serverSharedSecretDerivationBench,
     x25519_kyber512,
     NamedGroup::x25519_kyber512);
 BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
-    secp256r1,
-    NamedGroup::secp256r1);
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
-    secp256r1_kyber512,
-    NamedGroup::secp256r1_kyber512);
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
-    cecpq2,
-    NamedGroup::cecpq2);
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
+    serverSharedSecretDerivationBench,
     x25519_kyber768,
     NamedGroup::x25519_kyber768);
-BENCHMARK_NAMED_PARAM(
-    serverKeyShareGenerationBench,
-    secp384r1_kyber768,
-    NamedGroup::secp384r1_kyber768);
 
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
@@ -160,32 +119,12 @@ BENCHMARK_NAMED_PARAM(
     NamedGroup::x25519);
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
-    kyber512,
-    NamedGroup::kyber512);
-BENCHMARK_NAMED_PARAM(
-    clientSharedSecretDerivationBench,
     x25519_kyber512,
     NamedGroup::x25519_kyber512);
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
-    secp256r1,
-    NamedGroup::secp256r1);
-BENCHMARK_NAMED_PARAM(
-    clientSharedSecretDerivationBench,
-    secp256r1_kyber512,
-    NamedGroup::secp256r1_kyber512);
-BENCHMARK_NAMED_PARAM(
-    clientSharedSecretDerivationBench,
-    cecpq2,
-    NamedGroup::cecpq2);
-BENCHMARK_NAMED_PARAM(
-    clientSharedSecretDerivationBench,
     x25519_kyber768,
     NamedGroup::x25519_kyber768);
-BENCHMARK_NAMED_PARAM(
-    clientSharedSecretDerivationBench,
-    secp384r1_kyber768,
-    NamedGroup::secp384r1_kyber768);
 
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);

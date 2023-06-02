@@ -1076,7 +1076,8 @@ let write_tast_hashes_to_disk ~root ~(check_info : check_info) tast_hashes =
            check_info.init_id
            (Option.value check_info.recheck_id ~default:"None"))
     in
-    Yojson.Safe.to_file tast_hashes_file tast_hashes_json
+    Out_channel.with_file tast_hashes_file ~f:(fun out ->
+        Yojson.Safe.pretty_to_channel out tast_hashes_json)
 
 let go_with_interrupt
     ?(diagnostic_pusher : Diagnostic_pusher.t option)

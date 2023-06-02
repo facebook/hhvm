@@ -528,6 +528,47 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
       TL.IsSubtype (coerce, ty1, LoclType ty2)
     | _ -> TL.IsSubtype (coerce, ty1, ty2) )
 
+(* This is a duplicate of logic in Typing_error_utils, due to conversion of primary errors to secondary errors
+   on some code paths for Typing_object_get, which throws out quickfix information (unsafe for secondary errors). *)
+let add_obj_get_quickfixes
+    ty_err (on_error : Typing_error.Reasons_callback.t option) :
+    Typing_error.Reasons_callback.t option =
+  match ty_err with
+  | Typing_error.(Error.Primary (Primary.Null_member { pos; obj_pos_opt; _ }))
+    ->
+    let quickfixes =
+      match obj_pos_opt with
+      | Some obj_pos ->
+        let (obj_pos_start_line, _) = Pos.line_column obj_pos in
+        (* let (obj_pos_end_line, obj_pos_end_column) = Pos.end_line_column obj_pos in *)
+        let (rhs_pos_start_line, rhs_pos_start_column) = Pos.line_column pos in
+        (*
+        heuristic: if the lhs and rhs of the Objget are on the same line, then we assume they are
+        separated by two characters (`->`). So we do not generate a quickfix for chained Objgets:
+        ```
+        obj
+        ->rhs
+        ```
+      *)
+        if obj_pos_start_line = rhs_pos_start_line then
+          let width = 2 (* length of "->" *) in
+          let quickfix_pos =
+            pos
+            |> Pos.set_col_start (rhs_pos_start_column - width)
+            |> Pos.set_col_end rhs_pos_start_column
+          in
+          [
+            Quickfix.make ~title:"Add null-safe get" ~new_text:"?->" quickfix_pos;
+          ]
+        else
+          []
+      | None -> []
+    in
+    Option.map
+      ~f:(fun cb -> Typing_error.Reasons_callback.add_quickfixes cb quickfixes)
+      on_error
+  | _ -> on_error
+
 (** Given types ty_sub and ty_super, attempt to
  *  reduce the subtyping proposition ty_sub <: ty_super to
  *  a logical proposition whose primitive assertions are of the form v <: t or t <: v
@@ -3572,6 +3613,7 @@ and simplify_subtype_has_member
                  @@ Primary.Null_member
                       {
                         pos = name_pos;
+                        obj_pos_opt = None;
                         member_name = name_;
                         reason =
                           lazy (Reason.to_string "This can be null" r_null);
@@ -3629,6 +3671,7 @@ and simplify_subtype_has_member
                    @@ Primary.Null_member
                         {
                           pos = name_pos;
+                          obj_pos_opt = None;
                           member_name = name_;
                           reason =
                             lazy (Reason.to_string "This can be null" r_option);
@@ -3756,6 +3799,7 @@ and simplify_subtype_has_member
       let (res, (obj_get_ty, _tal)) =
         Typing_object_get.obj_get
           ~obj_pos:name_pos
+            (* `~obj_pos:name_pos` is a lie: `name_pos` is the rhs of `->` or `?->` *)
           ~is_method
           ~inst_meth:false
           ~meth_caller:false
@@ -3772,11 +3816,12 @@ and simplify_subtype_has_member
         match res with
         | (env, None) -> valid env
         | (env, Some ty_err) ->
+          let on_error = add_obj_get_quickfixes ty_err subtype_env.on_error in
           (* TODO - this needs to somehow(?) account for the fact that the old
              code considered FIXMEs in this position *)
           let fail =
             Option.map
-              subtype_env.on_error
+              on_error
               ~f:
                 Typing_error.(
                   fun on_error ->

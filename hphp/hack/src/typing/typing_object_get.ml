@@ -1066,6 +1066,7 @@ and nullable_obj_get
         @@ Primary.Null_member
              {
                pos = id_pos;
+               obj_pos_opt = Some args.obj_pos;
                member_name = id_str;
                reason = lazy (Reason.to_string "This can be null" r);
                kind =
@@ -1127,6 +1128,7 @@ and nullable_obj_get
             @@ Primary.Null_member
                  {
                    pos = id_pos;
+                   obj_pos_opt = Some args.obj_pos;
                    member_name = id_str;
                    reason = lazy (Reason.to_string "This can be null" r);
                    kind =

@@ -1982,7 +1982,7 @@ module Eval_primary = struct
 
     (error_code, claim, lazy [], [])
 
-  let null_member pos ctxt kind member_name reason =
+  let null_member pos ~obj_pos_opt ctxt kind member_name reason =
     let claim =
       lazy
         ( pos,
@@ -1998,7 +1998,35 @@ module Eval_primary = struct
       | `read -> Error_code.NullMemberRead
       | `write -> Error_code.NullMemberWrite
     in
-    (error_code, claim, reason, [])
+    let quickfixes =
+      match obj_pos_opt with
+      | Some obj_pos ->
+        let (obj_pos_start_line, _) = Pos.line_column obj_pos in
+        (* let (obj_pos_end_line, obj_pos_end_column) = Pos.end_line_column obj_pos in *)
+        let (rhs_pos_start_line, rhs_pos_start_column) = Pos.line_column pos in
+        (*
+        heuristic: if the lhs and rhs of the Objget are on the same line, then we assume they are
+        separated by two characters (`->`). So we do not generate a quickfix for chained Objgets:
+        ```
+        obj
+        ->rhs
+        ```
+      *)
+        if obj_pos_start_line = rhs_pos_start_line then
+          let width = 2 (* length of "->" *) in
+          let quickfix_pos =
+            pos
+            |> Pos.set_col_start (rhs_pos_start_column - width)
+            |> Pos.set_col_end rhs_pos_start_column
+          in
+          [
+            Quickfix.make ~title:"Add null-safe get" ~new_text:"?->" quickfix_pos;
+          ]
+        else
+          []
+      | None -> []
+    in
+    (error_code, claim, reason, quickfixes)
 
   let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
@@ -4352,8 +4380,8 @@ module Eval_primary = struct
       unset_nonidx_in_strict pos reason
     | Nullable_cast { pos; ty_pos; ty_name } -> nullable_cast pos ty_pos ty_name
     | Hh_expect { pos; equivalent } -> hh_expect pos equivalent
-    | Null_member { pos; ctxt; kind; member_name; reason } ->
-      null_member pos ctxt kind member_name reason
+    | Null_member { pos; obj_pos_opt; ctxt; kind; member_name; reason } ->
+      null_member pos ~obj_pos_opt ctxt kind member_name reason
     | Typing_too_many_args { pos; decl_pos; actual; expected } ->
       typing_too_many_args pos decl_pos actual expected
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->
@@ -5758,7 +5786,9 @@ end = struct
     let open Typing_error.Secondary in
     match t with
     | Of_error err ->
-      Eval_result.map ~f:(fun (code, claim, reasons, _) ->
+      Eval_result.map ~f:(fun (code, claim, reasons, _quickfixes) ->
+          (* We discard quickfixes here because a secondary error
+             can be in a decl and it doesn't make sense to quickfix a decl *)
           let reasons =
             Lazy.(
               claim >>= fun x ->

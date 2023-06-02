@@ -537,6 +537,7 @@ module Primary = struct
       }
     | Null_member of {
         pos: Pos.t;
+        obj_pos_opt: Pos.t option;
         ctxt: [ `read | `write ];
         kind: [ `method_ | `property ];
         member_name: string;

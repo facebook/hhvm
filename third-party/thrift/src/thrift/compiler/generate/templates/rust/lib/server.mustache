@@ -315,24 +315,33 @@
                                     let item = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(res);
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="{{service:name}}.{{function:name}}", "Failed to serialize success response");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        },
                                     }
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::Success(_))) => {
                                     panic!("{} attempted to return success via error", "{{function:rust_name}}");
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="{{service:name}}.{{function:name}}", "Streaming ApplicationException");
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
                                 {{#function:stream_exceptions?}}
                                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                                    tracing::debug!(?exn, method="{{service:name}}.{{function:name}}", "Streaming declared exception");
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(exn) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::DeclaredException(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="{{service:name}}.{{function:name}}", "Failed to serialize declared exception return");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        }
                                     }
                                 }
                                 {{/function:stream_exceptions?}}
                                 ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="{{service:name}}.{{function:name}}", "Streaming unwind");
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", exn);
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }

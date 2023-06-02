@@ -4913,16 +4913,21 @@ pub mod server {
                                     let item = crate::services::my_interaction::TruthifyStreamExn::Success(res);
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="MyInteraction.truthify", "Failed to serialize success response");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        },
                                     }
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::Success(_))) => {
                                     panic!("{} attempted to return success via error", "truthify");
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteraction.truthify", "Streaming ApplicationException");
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
                                 ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteraction.truthify", "Streaming unwind");
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
@@ -5619,16 +5624,21 @@ pub mod server {
                                     let item = crate::services::my_interaction_fast::TruthifyStreamExn::Success(res);
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="MyInteractionFast.truthify", "Failed to serialize success response");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        },
                                     }
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::Success(_))) => {
                                     panic!("{} attempted to return success via error", "truthify");
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyInteractionFast.truthify", "Streaming ApplicationException");
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
                                 ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyInteractionFast.truthify", "Streaming unwind");
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
@@ -6783,16 +6793,21 @@ pub mod server {
                                     let item = crate::services::my_service::SerializeStreamExn::Success(res);
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="MyService.serialize", "Failed to serialize success response");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        },
                                     }
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::SerializeStreamExn::Success(_))) => {
                                     panic!("{} attempted to return success via error", "serialize");
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::SerializeStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="MyService.serialize", "Streaming ApplicationException");
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
                                 ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="MyService.serialize", "Streaming unwind");
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.serialize", exn);
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }

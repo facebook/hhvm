@@ -1529,16 +1529,21 @@ pub mod server {
                                     let item = crate::services::c::NumbersStreamExn::Success(res);
                                     match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
                                         Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
-                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                        Err(err) => {
+                                            tracing::error!(?err, method="C.numbers", "Failed to serialize success response");
+                                            ::fbthrift::SerializedStreamElement::SerializationError(err)
+                                        },
                                     }
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::Success(_))) => {
                                     panic!("{} attempted to return success via error", "numbers");
                                 }
                                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersStreamExn::ApplicationException(aexn))) => {
+                                    tracing::info!(?aexn, method="C.numbers", "Streaming ApplicationException");
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }
                                 ::std::result::Result::Err(exn) => {
+                                    tracing::error!(?exn, method="C.numbers", "Streaming unwind");
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("C.numbers", exn);
                                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                                 }

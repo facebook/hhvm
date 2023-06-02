@@ -380,13 +380,13 @@ The name introduced by definitions can be used anywhere in the Thrift file (eith
 
 ### Structs
 
-A struct declaration introduces a named struct type into your program and has the following form:
+A struct definition introduces a named struct type into your program and has the following form:
 
 ```grammar
 struct ::=
   [annotations]
   "struct" identifier "{"
-    (field delimiter)*
+    (field [";"])*
   "}"
 
 field ::=
@@ -411,7 +411,7 @@ struct PersonMetadata {
 
 Every field has a type and a name (an identifier) that can be used to denote the field. In addition every field also has an integer id that can be used to denote the field. Field ids and field names must be unique within a struct. While the Thrift language does not impose restrictions on how the id and name are used, the *primary usage* has the id denoting the field in the serialized data and the name denoting the field in the generated code. This primary usage is key to the value provided by Thrift in terms of versioning support and compact serialized data size.
 
-The *primary usage* described above can be assumed for the large majority of Thrift usage. The exception to this is that Thrift does offer a JSON serialization strategy where the name is used to denote the field in the serialized data and the id is not used. This strategy is used to define config schemas (e.g. in [Configerator](https://sigops.org/s/conferences/sosp/2015/current/2015-Monterey/printable/008-tang.pdf) and should not be mixed with other usage where the id is used instead.
+The *primary usage* described above can be assumed for the large majority of Thrift usage. The exception to this is that Thrift does offer a JSON serialization strategy where the name is used to denote the field in the serialized data and the id is not used. This strategy is used to define config schemas (e.g. in [Configerator](https://sigops.org/s/conferences/sosp/2015/current/2015-Monterey/printable/008-tang.pdf)) and should not be mixed with other usage where the id is used instead.
 
 The field ids should be in the range of 1 through 32767, and they do not have to appear in order. They normally start with 1 although this is not required.
 
@@ -447,16 +447,18 @@ struct PersonMetadata3 {
 ```
 
 :::caution
-Do not reuse ids. If a field is removed, it's a good practice to comment it out as a reminder to not to reuse it.
+Do not reuse ids. If a field is removed, it's a good practice to comment it out as a reminder not to reuse it.
 :::
 
 ### Unions
+
+A union definition introduces a named union type into your program and has the following form:
 
 ```grammar
 union ::=
   [annotations]
   "union" identifier "{"
-    (field delimiter)*
+    (field [";"])*
   "}"
 ```
 
@@ -478,11 +480,13 @@ It is possible for none of the fields to be present in a union.
 
 ### Exceptions
 
+An exception definition introduces a named exception type into your program and has the following form:
+
 ```grammar
 exception ::=
   [annotations] [error_safety] [error_kind] [error_blame]
   "exception" identifier "{"
-    (field delimiter)*
+    (field [";"])*
   "}"
 
 error_safety ::=  "safe"
@@ -502,7 +506,7 @@ It is possible to serialize from an exception and deserialize into a compatible 
 
 ### Enums
 
-A enum declaration introduces a named enumeration type into your program and has the following form:
+An enum definition introduces a named enumeration type into your program and has the following form:
 
 ```grammar
 enum ::=
@@ -539,11 +543,13 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 
 ### Typedefs
 
+A typedef introduces a named alias of a type and has the following form:
+
 ```grammar
 typedef ::=  [annotations] "typedef" type identifier [";"]
 ```
 
-A typedef introduces a name that denotes the type. It can be used to provide a simpler way to access complex types.
+It can be used to provide a simpler way to access complex types, for example:
 
 ```thrift
 typedef map<string, string> StringMap
@@ -555,7 +561,7 @@ typedef map<string, string> StringMap
 service ::=
   [annotations]
   "service" identifier ["extends" maybe_qualified_id] "{"
-    function*
+    (function | performs)*
   "}"
 
 function ::=
@@ -568,6 +574,9 @@ function ::=
 ResultType ::= "void" | "oneway void" | ["stream"] type
 
 ParameterSpecification ::= field_id ":" type identifier [default_value]
+
+performs         ::=  "performs" interaction_name ";"
+interaction_name ::=  maybe_qualified_id
 ```
 
 An interface for RPC is defined in a Thrift file as a service.

@@ -494,7 +494,6 @@ type _ t =
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
-  | RENAME_CHECK_SD : ServerRenameTypes.action -> string Done_or_retry.t t
   | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
       Find_refs.action * string * Relative_path.t * string SymbolDefinition.t

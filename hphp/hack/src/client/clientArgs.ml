@@ -601,18 +601,6 @@ let parse_check_args cmd ~from_default =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
-      ( "--refactor-sound-dynamic",
-        (let rename_mode = ref Unspecified in
-         Arg.Tuple
-           [
-             Arg.Symbol
-               ( ["Class"; "Function"],
-                 (fun x -> rename_mode := string_to_rename_mode x) );
-             Arg.String
-               (fun x ->
-                 set_mode @@ MODE_RENAME_SOUND_DYNAMIC (!rename_mode, x));
-           ]),
-        "" );
       ( "--refactor",
         (let rename_mode = ref Unspecified in
          Arg.Tuple

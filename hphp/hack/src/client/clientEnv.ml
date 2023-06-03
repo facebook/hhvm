@@ -57,7 +57,6 @@ type client_mode =
   | MODE_OUTLINE2
   | MODE_PAUSE of bool
   | MODE_RENAME of rename_mode * string * string
-  | MODE_RENAME_SOUND_DYNAMIC of rename_mode * string
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REMOVE_DEAD_UNSAFE_CASTS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list

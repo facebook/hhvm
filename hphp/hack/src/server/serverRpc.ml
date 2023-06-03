@@ -251,9 +251,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         ServerRename.go ctx rename_action genv env)
-  | RENAME_CHECK_SD rename_action ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    ServerRename.go_sound_dynamic ctx rename_action genv env
   | IDE_RENAME
       { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in

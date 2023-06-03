@@ -25,7 +25,6 @@ let debug_describe_t : type a. a t -> string = function
   | IDE_GO_TO_IMPL _ -> "IDE_GO_TO_IMPL"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | RENAME _ -> "RENAME"
-  | RENAME_CHECK_SD _ -> "RENAME_CHECK_SD"
   | IDE_RENAME _ -> "IDE_RENAME"
   | IDE_RENAME_BY_SYMBOL _ -> "IDE_RENAME_BY_SYMBOL"
   | DUMP_SYMBOL_INFO _ -> "DUMP_SYMBOL_INFO"

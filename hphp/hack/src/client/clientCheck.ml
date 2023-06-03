@@ -353,11 +353,6 @@ let main_internal
     let%lwt conn = connect args in
     let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_RENAME_SOUND_DYNAMIC (ref_mode, name) ->
-    let conn () = connect args in
-    let%lwt result = ClientRename.go_sound_dynamic conn args ref_mode ~name in
-    let () = Printf.printf "%s" result in
-    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_RENAME ((ref_mode : rename_mode), before, after) ->
     let conn () = connect args in
     let%lwt () =

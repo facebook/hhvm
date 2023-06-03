@@ -38,7 +38,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | SAVE_STATE _ -> true
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true
-  | RENAME_CHECK_SD _ -> true
   | IDE_RENAME _ -> true
   | IDE_RENAME_BY_SYMBOL _ -> true
   (* Same case as Ai commands *)

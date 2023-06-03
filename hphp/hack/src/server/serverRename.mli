@@ -25,13 +25,6 @@ val go :
   ServerEnv.env
   * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t
 
-val go_sound_dynamic :
-  Provider_context.t ->
-  ServerRenameTypes.action ->
-  ServerEnv.genv ->
-  ServerEnv.env ->
-  ServerEnv.env * string ServerCommandTypes.Done_or_retry.t
-
 val go_ide :
   Provider_context.t ->
   Relative_path.t * int * int ->

@@ -138,7 +138,7 @@ class parser_actions {
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual std::unique_ptr<t_function> on_performs(
-      source_range range, t_type_ref type) = 0;
+      source_range range, const identifier& interaction_name) = 0;
 
   virtual std::unique_ptr<t_throws> on_throws(t_field_list exceptions) = 0;
 

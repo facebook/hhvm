@@ -333,10 +333,10 @@ class parser {
 
   // service:
   //   attributes
-  //   "service" identifier extends? "{" function_or_performs* "}"
+  //   "service" identifier ["extends" identifier] "{"
+  //     (function | performs)*
+  //   "}"
   //   [deprecated_annotations]
-  //
-  // extends: "extends" identifier
   void parse_service(source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_service);
@@ -345,7 +345,7 @@ class parser {
     if (try_consume_token(tok::kw_extends)) {
       base = parse_identifier();
     }
-    auto functions = parse_braced_function_list();
+    auto functions = parse_interface_body();
     try_parse_deprecated_annotations(attrs);
     actions_.on_service(
         range, std::move(attrs), name, base, std::move(functions));
@@ -353,23 +353,23 @@ class parser {
 
   // interaction:
   //   attributes
-  //   "interaction" identifier "{" function_or_performs* "}"
+  //   "interaction" identifier "{" (function | performs)* "}"
   //   [deprecated_annotations]
   void parse_interaction(
       source_location loc, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_interaction);
     auto name = parse_identifier();
-    auto functions = parse_braced_function_list();
+    auto functions = parse_interface_body();
     try_parse_deprecated_annotations(attrs);
     actions_.on_interaction(
         range, std::move(attrs), name, std::move(functions));
   }
 
-  // function_or_performs:
-  //     function comma_or_semicolon?
-  //   | "performs" type comma_or_semicolon
-  t_function_list parse_braced_function_list() {
+  // interface_body: "{" (function | performs)* "}
+  // function: function comma_or_semicolon?
+  // performs: "performs" identifier ";"
+  t_function_list parse_interface_body() {
     expect_and_consume('{');
     auto functions = t_function_list();
     while (token_.kind != '}') {
@@ -381,11 +381,9 @@ class parser {
       // Parse performs.
       auto range = track_range();
       consume_token();
-      auto type = parse_type();
-      if (!try_parse_comma_or_semicolon()) {
-        report_expected("`,` or `;`");
-      }
-      functions.emplace_back(actions_.on_performs(range, type));
+      auto interaction_name = parse_identifier();
+      expect_and_consume(';');
+      functions.emplace_back(actions_.on_performs(range, interaction_name));
     }
     expect_and_consume('}');
     return functions;

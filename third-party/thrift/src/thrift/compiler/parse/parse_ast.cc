@@ -839,9 +839,11 @@ class ast_builder : public parser_actions {
   }
 
   std::unique_ptr<t_function> on_performs(
-      source_range range, t_type_ref type) override {
-    std::string name = type.get_type() ? "create" + type.get_type()->get_name()
-                                       : "<interaction placeholder>";
+      source_range range, const identifier& interaction_name) override {
+    auto type = on_type(range, interaction_name.str, {});
+    std::string name = type.get_type()
+        ? "create" + fmt::to_string(interaction_name.str)
+        : "<interaction placeholder>";
     auto function = std::make_unique<t_function>(
         program_, std::move(type), std::move(name));
     function->set_src_range(range);

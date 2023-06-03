@@ -97,7 +97,7 @@ type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
 module Fixme_store = struct
   type t = fixme_map Relative_path.Map.t ref
 
-  let empty = ref Relative_path.Map.empty
+  let empty () = ref Relative_path.Map.empty
 
   let get t filename = Relative_path.Map.find_opt !t filename
 
@@ -143,9 +143,9 @@ end
 let empty_fixmes =
   Fixmes.
     {
-      hh_fixmes = Fixme_store.empty;
-      decl_hh_fixmes = Fixme_store.empty;
-      disallowed_fixmes = Fixme_store.empty;
+      hh_fixmes = Fixme_store.empty ();
+      decl_hh_fixmes = Fixme_store.empty ();
+      disallowed_fixmes = Fixme_store.empty ();
     }
 
 module Reverse_naming_table_delta = struct

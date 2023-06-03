@@ -92,9 +92,10 @@ module Folded_class_cache : module type of Cache (Folded_class_cache_entry)
 type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
 
 module Fixme_store : sig
+  (** a mutable store *)
   type t
 
-  val empty : t
+  val empty : unit -> t
 
   val get : t -> Relative_path.t -> fixme_map option
 

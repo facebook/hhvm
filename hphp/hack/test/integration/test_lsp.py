@@ -6909,6 +6909,211 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables)
 
+    def test_fixme(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("fixme.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("fixme"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 2},
+                                "end": {"line": 3, "character": 22},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error 4110 in declarations",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Invalid return type",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .notification(
+                comment="disable the first fixme by turning 'HH_FIXME' into 'NO_FIXME'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 5},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "NO",
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="restore the first fixme by turning 'NO_FIXME' back 'HH_FIXME'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 5},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "HH",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 2},
+                                "end": {"line": 3, "character": 22},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error 4110 in declarations",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Invalid return type",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
     def test_go_to_implementation(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("go_to_implementation.php"))

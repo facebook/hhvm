@@ -1250,7 +1250,7 @@ dependencies = [
  "hashbrown 0.12.3",
  "lock_api",
  "once_cell",
- "parking_lot_core 0.9.7",
+ "parking_lot_core",
  "rayon",
  "serde",
 ]
@@ -1262,7 +1262,7 @@ dependencies = [
  "anyhow",
  "dashmap",
  "hash",
- "parking_lot 0.11.2",
+ "parking_lot",
 ]
 
 [[package]]
@@ -1410,7 +1410,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
  "once_cell",
- "parking_lot 0.11.2",
+ "parking_lot",
  "rpds",
 ]
 
@@ -2214,7 +2214,7 @@ dependencies = [
  "options",
  "oxidized",
  "panic-message",
- "parking_lot 0.11.2",
+ "parking_lot",
  "parser_core_types",
  "pos",
  "positioned_by_ref_parser",
@@ -2260,7 +2260,7 @@ dependencies = [
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
- "parking_lot 0.11.2",
+ "parking_lot",
  "pos",
  "rpds",
  "rust_provider_backend_api",
@@ -2505,7 +2505,7 @@ dependencies = [
  "log",
  "memmap2",
  "newtype",
- "parking_lot 0.11.2",
+ "parking_lot",
  "rayon",
  "smallvec",
 ]
@@ -2787,7 +2787,7 @@ dependencies = [
  "hashbrown 0.12.3",
  "indexmap",
  "once_cell",
- "parking_lot 0.11.2",
+ "parking_lot",
  "rand 0.8.5",
  "serde",
  "serde_bytes",
@@ -2833,7 +2833,7 @@ dependencies = [
  "macros",
  "naming_special_names_rust",
  "newtype",
- "parking_lot 0.11.2",
+ "parking_lot",
  "smallvec",
  "static_assertions",
  "strum_macros",
@@ -3215,7 +3215,7 @@ dependencies = [
  "hash",
  "ocamlrep",
  "once_cell",
- "parking_lot 0.11.2",
+ "parking_lot",
 ]
 
 [[package]]
@@ -3283,7 +3283,7 @@ dependencies = [
  "futures-util",
  "num_cpus",
  "once_cell",
- "parking_lot 0.12.1",
+ "parking_lot",
  "quanta",
  "rustc_version 0.4.0",
  "scheduled-thread-pool",
@@ -3348,7 +3348,7 @@ dependencies = [
  "hh24_types",
  "names",
  "oxidized",
- "parking_lot 0.11.2",
+ "parking_lot",
  "pos",
 ]
 
@@ -3802,37 +3802,12 @@ checksum = "427c3892f9e783d91cc128285287e70a59e206ca452770ece88a76f7a3eddd72"
 
 [[package]]
 name = "parking_lot"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
-dependencies = [
- "instant",
- "lock_api",
- "parking_lot_core 0.8.5",
-]
-
-[[package]]
-name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
- "parking_lot_core 0.9.7",
-]
-
-[[package]]
-name = "parking_lot_core"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d76e8e1493bcac0d2766c42737f34458f1c8c50c0d23bcb24ea953affb273216"
-dependencies = [
- "cfg-if 1.0.0",
- "instant",
- "libc",
- "redox_syscall 0.2.10",
- "smallvec",
- "winapi",
+ "parking_lot_core",
 ]
 
 [[package]]
@@ -4692,7 +4667,7 @@ version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "977a7519bff143a44f842fd07e80ad1329295bd71686457f18e496736f4bf9bf"
 dependencies = [
- "parking_lot 0.12.1",
+ "parking_lot",
 ]
 
 [[package]]
@@ -4863,7 +4838,7 @@ dependencies = [
  "ocaml_blob",
  "ocamlrep",
  "ocamlrep_marshal",
- "parking_lot 0.11.2",
+ "parking_lot",
  "pos",
  "serde",
  "shmffi",

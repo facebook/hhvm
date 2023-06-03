@@ -48,7 +48,7 @@ once_cell = "1.12"
 options = { version = "0.0.0", path = "compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 panic-message = "0.3"
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
+parking_lot = { version = "0.12.1", features = ["send_guard"] }
 parser_core_types = { version = "0.0.0", path = "../parser/cargo/core_types" }
 pos = { version = "0.0.0", path = "../hackrs/pos/cargo/pos" }
 positioned_by_ref_parser = { version = "0.0.0", path = "../parser/api/cargo/positioned_by_ref_parser" }

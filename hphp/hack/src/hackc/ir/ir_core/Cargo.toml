@@ -18,7 +18,7 @@ indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 macros = { version = "0.0.0", path = "../macros" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
+parking_lot = { version = "0.12.1", features = ["send_guard"] }
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 strum_macros = "0.21"
 

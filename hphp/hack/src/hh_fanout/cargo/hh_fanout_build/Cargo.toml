@@ -22,6 +22,6 @@ libc = "0.2.139"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 memmap2 = "0.5.10"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
+parking_lot = { version = "0.12.1", features = ["send_guard"] }
 rayon = "1.2"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }

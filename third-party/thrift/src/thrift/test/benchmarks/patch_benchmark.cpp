@@ -53,89 +53,95 @@ auto randLongStr() {
 }
 
 template <class PatchGenerator>
-void benchmarkApply(PatchGenerator gen) {
-  folly::BenchmarkSuspender susp;
+static inline const auto patches = std::invoke([] {
   rng.seed(0);
-  auto patch = gen();
-  typename decltype(patch)::value_type value;
+  using Patch = std::invoke_result_t<PatchGenerator>;
+  std::array<Patch, N> ret;
+  std::generate_n(ret.begin(), N, PatchGenerator{});
+  return ret;
+});
+
+template <class PatchGenerator>
+void benchmarkApply() {
+  typename std::invoke_result_t<PatchGenerator>::value_type value;
   for (auto i = 0; i < N; i++) {
-    susp.dismiss();
-    std::move(patch).apply(value);
-    susp.rehire();
-    patch = gen();
+    patches<PatchGenerator>[i].apply(value);
   }
 }
 
 template <class PatchGenerator>
-void benchmarkMerge(PatchGenerator gen) {
-  folly::BenchmarkSuspender susp;
-  rng.seed(0);
-  auto patch = gen(), next = gen();
+void benchmarkMerge() {
+  std::invoke_result_t<PatchGenerator> patch;
   for (auto i = 0; i < N; i++) {
-    susp.dismiss();
-    patch.merge(std::move(next));
-    susp.rehire();
-    next = gen();
+    patch.merge(patches<PatchGenerator>[i]);
   }
 }
 
-ListPatch genListPatch() {
-  ListPatch p;
-  p.push_front(randInt());
-  p.push_back(randInt());
-  p.patchAt(randInt()) += randInt();
-  return p;
-}
+struct GenListPatch {
+  ListPatch operator()() {
+    ListPatch p;
+    p.push_front(randInt());
+    p.push_back(randInt());
+    p.patchAt(randInt()) += randInt();
+    return p;
+  }
+};
 
 BENCHMARK(ApplyListPatch) {
-  benchmarkApply(genListPatch);
+  benchmarkApply<GenListPatch>();
 }
 BENCHMARK(MergeListPatch) {
-  benchmarkMerge(genListPatch);
+  benchmarkMerge<GenListPatch>();
 }
 
-ListDequePatch genListDequePatch() {
-  ListDequePatch p;
-  p.push_front(randInt());
-  p.push_back(randInt());
-  p.patchAt(randInt()) += randInt();
-  return p;
-}
+struct GenListDequePatch {
+  ListDequePatch operator()() {
+    ListDequePatch p;
+    p.push_front(randInt());
+    p.push_back(randInt());
+    p.patchAt(randInt()) += randInt();
+    return p;
+  }
+};
 
 BENCHMARK(ApplyListDequePatch) {
-  benchmarkApply(genListDequePatch);
+  benchmarkApply<GenListDequePatch>();
 }
 BENCHMARK(MergeListDequePatch) {
-  benchmarkMerge(genListDequePatch);
+  benchmarkMerge<GenListDequePatch>();
 }
 
-SetPatch genSetPatch() {
-  SetPatch p;
-  p.insert(randStr());
-  p.erase(randStr());
-  return p;
-}
+struct GenSetPatch {
+  SetPatch operator()() {
+    SetPatch p;
+    p.insert(randStr());
+    p.erase(randStr());
+    return p;
+  }
+};
 
 BENCHMARK(ApplySetPatch) {
-  benchmarkApply(genSetPatch);
+  benchmarkApply<GenSetPatch>();
 }
 BENCHMARK(MergeSetPatch) {
-  benchmarkMerge(genSetPatch);
+  benchmarkMerge<GenSetPatch>();
 }
 
-MapPatch genMapPatch() {
-  MapPatch p;
-  p.erase(randStr());
-  p.patchByKey(randStr()) += randStr();
-  p.ensureAndPatchByKey(randStr()) += randStr();
-  return p;
-}
+struct GenMapPatch {
+  MapPatch operator()() {
+    MapPatch p;
+    p.erase(randStr());
+    p.patchByKey(randStr()) += randStr();
+    p.ensureAndPatchByKey(randStr()) += randStr();
+    return p;
+  }
+};
 
 BENCHMARK(ApplyMapPatch) {
-  benchmarkApply(genMapPatch);
+  benchmarkApply<GenMapPatch>();
 }
 BENCHMARK(MergeMapPatch) {
-  benchmarkMerge(genMapPatch);
+  benchmarkMerge<GenMapPatch>();
 }
 
 void patchIfSetNonOptionalFields(MyStructPatch& result) {
@@ -151,7 +157,7 @@ void patchIfSetNonOptionalFields(MyStructPatch& result) {
   result.patchIfSet<ident::enumVal>() = MyEnum::MyValue9;
   result.patchIfSet<ident::structVal>().patchIfSet<ident::data1>().append("X");
   result.patchIfSet<ident::unionVal>().patchIfSet<ident::option1>().append("Y");
-  result.patchIfSet<ident::longList>() = genListDequePatch();
+  result.patchIfSet<ident::longList>() = GenListDequePatch{}();
 }
 
 void patchIfSetOptionalFields(MyStructPatch& result) {
@@ -167,9 +173,9 @@ void patchIfSetOptionalFields(MyStructPatch& result) {
   result.patchIfSet<ident::optEnumVal>() = MyEnum::MyValue9;
   result.patchIfSet<ident::optStructVal>().patchIfSet<ident::data1>().append(
       "X");
-  result.patchIfSet<ident::optListVal>() = genListPatch();
-  result.patchIfSet<ident::optSetVal>() = genSetPatch();
-  result.patchIfSet<ident::optMapVal>() = genMapPatch();
+  result.patchIfSet<ident::optListVal>() = GenListPatch{}();
+  result.patchIfSet<ident::optSetVal>() = GenSetPatch{}();
+  result.patchIfSet<ident::optMapVal>() = GenMapPatch{}();
 }
 
 void ensureNonOptionalFields(MyStructPatch& result) {
@@ -217,39 +223,43 @@ void ensureOptionalFields(MyStructPatch& result) {
   result.ensure<ident::optMapVal>({{"10", "1"}, {"20", "2"}});
 }
 
-MyStructPatch genComplexPatch() {
-  MyStructPatch patch;
-  patchIfSetNonOptionalFields(patch);
-  patchIfSetOptionalFields(patch);
-  ensureNonOptionalFields(patch);
-  ensureOptionalFields(patch);
-  patchIfSetNonOptionalFields(patch);
-  patchIfSetOptionalFields(patch);
-  return patch;
-}
+struct GenComplexPatch {
+  MyStructPatch operator()() {
+    MyStructPatch patch;
+    patchIfSetNonOptionalFields(patch);
+    patchIfSetOptionalFields(patch);
+    ensureNonOptionalFields(patch);
+    ensureOptionalFields(patch);
+    patchIfSetNonOptionalFields(patch);
+    patchIfSetOptionalFields(patch);
+    return patch;
+  }
+};
 
 BENCHMARK(ApplyComplexPatch) {
-  benchmarkApply(genComplexPatch);
+  benchmarkApply<GenComplexPatch>();
 }
 
 BENCHMARK(MergeComplexPatch) {
-  benchmarkMerge(genComplexPatch);
+  benchmarkMerge<GenComplexPatch>();
 }
 
-ListStringPatch genListLongStringPatch() {
-  ListStringPatch p;
-  p.push_front(randLongStr());
-  p.push_back(randLongStr());
-  p.patchAt(randInt()) += randLongStr();
-  return p;
-}
+struct GenListLongStringPatch {
+  ListStringPatch operator()() {
+    ListStringPatch p;
+    p.push_front(randLongStr());
+    p.push_back(randLongStr());
+    p.patchAt(randInt()) += randLongStr();
+    return p;
+  }
+};
 
 BENCHMARK(ApplyListLongStringPatch) {
-  benchmarkApply(genListLongStringPatch);
+  benchmarkApply<GenListLongStringPatch>();
 }
 
 BENCHMARK(MergeListLongStringPatch) {
-  benchmarkApply(genListLongStringPatch);
+  benchmarkApply<GenListLongStringPatch>();
 }
 
 } // namespace apache::thrift::test::patch

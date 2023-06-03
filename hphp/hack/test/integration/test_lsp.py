@@ -6945,6 +6945,68 @@ class TestLsp(TestCase[LspTestDriver]):
                     ],
                 },
             )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Invalid return type",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                        }
+                    ],
+                },
+            )
             .notification(
                 comment="restore the first fixme by turning 'NO_FIXME' back 'HH_FIXME'",
                 method="textDocument/didChange",
@@ -6960,6 +7022,10 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})

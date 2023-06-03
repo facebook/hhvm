@@ -926,7 +926,10 @@ let update_file
       (* we can just re-use the existing entry; contents haven't changed *)
       (entry, published_errors)
     | Some _ ->
-      (* we'll create a new entry; existing entry caches, if present, will be dropped. *)
+      (* We'll create a new entry; existing entry caches, if present, will be dropped
+         But first, need to clear the Fixme cache. This is a global cache
+         which is updated as a side-effect of the Ast_provider. *)
+      Fixme_provider.remove_batch (Relative_path.Set.singleton path);
       ( Provider_context.make_entry
           ~path
           ~contents:(Provider_context.Provided_contents contents),

@@ -12,7 +12,6 @@ javafoundations/scripts/create-idea-project \
 //thrift/lib/java/guice:guice-test \
 //thrift/lib/java/runtime:runtime \
 //thrift/lib/java/runtime:runtime-test \
-//thrift/lib/java/facebook/experimental:pool \
 //thrift/lib/java/example/ping:ping-lib \
 //thrift/lib/java/example/ping:ping-server \
 //thrift/lib/java/example/ping:ping-client \

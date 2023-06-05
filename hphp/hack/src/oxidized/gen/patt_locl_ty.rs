@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38d77fbb2e6a2bed126ffe357c51974b>>
+// @generated SignedSource<<0469f8ebec2130798215afea9dad10df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,7 +43,7 @@ pub enum PattLoclTy {
     #[rust_to_ocaml(prefix = "patt_")]
     Apply {
         name: patt_name::PattName,
-        params: Params,
+        params: Box<Params>,
     },
     Prim(Prim),
     Shape(ShapeFields),
@@ -86,10 +86,10 @@ pub enum Params {
     Wildcard,
     #[rust_to_ocaml(prefix = "patt_")]
     Cons {
-        hd: Box<Params>,
+        hd: PattLoclTy,
         tl: Box<Params>,
     },
-    Exists(Box<Params>),
+    Exists(PattLoclTy),
 }
 
 #[derive(
@@ -173,7 +173,7 @@ pub enum ShapeFields {
 pub struct ShapeField {
     pub lbl: ShapeLabel,
     pub optional: bool,
-    pub patt: Box<ShapeField>,
+    pub patt: Box<PattLoclTy>,
 }
 
 #[derive(

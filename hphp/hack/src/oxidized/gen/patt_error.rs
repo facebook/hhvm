@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab2566ea8098fe5bb7481103852d4968>>
+// @generated SignedSource<<82deed33a2357cc3cc7ba5befb91a1fd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,7 +47,7 @@ pub enum PattError {
     #[rust_to_ocaml(name = "Apply_reasons")]
     ApplyReasons {
         rsns_cb: ReasonsCallback,
-        secondary: Secondary,
+        secondary: Box<Secondary>,
     },
     #[rust_to_ocaml(prefix = "patt_")]
     Or {
@@ -105,7 +105,7 @@ arena_deserializer::impl_deserialize_in_arena!(Primary);
 #[repr(C, u8)]
 pub enum Secondary {
     #[rust_to_ocaml(name = "Of_error")]
-    OfError(Box<Secondary>),
+    OfError(PattError),
     #[rust_to_ocaml(prefix = "patt_")]
     #[rust_to_ocaml(name = "Violated_constraint")]
     ViolatedConstraint {

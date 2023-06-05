@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4af93727b4e4065c203ae3e6c85e2198>>
+// @generated SignedSource<<4b18928ca01435a3778c0b8049278ff4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,7 +45,7 @@ pub enum PattLoclTy<'a> {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         name: patt_name::PattName<'a>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-        params: Params<'a>,
+        params: &'a Params<'a>,
     },
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Prim(&'a oxidized::patt_locl_ty::Prim),
@@ -102,12 +102,12 @@ pub enum Params<'a> {
     #[rust_to_ocaml(prefix = "patt_")]
     Cons {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-        hd: &'a Params<'a>,
+        hd: PattLoclTy<'a>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         tl: &'a Params<'a>,
     },
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Exists(&'a Params<'a>),
+    Exists(&'a PattLoclTy<'a>),
 }
 impl<'a> TrivialDrop for Params<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Params<'arena>);
@@ -169,7 +169,7 @@ pub struct ShapeField<'a> {
     pub lbl: ShapeLabel<'a>,
     pub optional: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub patt: &'a ShapeField<'a>,
+    pub patt: &'a PattLoclTy<'a>,
 }
 impl<'a> TrivialDrop for ShapeField<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeField<'arena>);

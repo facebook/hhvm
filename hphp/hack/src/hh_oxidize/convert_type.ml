@@ -43,6 +43,10 @@ let add_indirection_between () =
   [
     ("typing_defs_core", "ConstraintType", "ConstraintType_");
     ("aast_defs", "Hint", "Hint_");
+    ("patt_locl_ty", "PattLoclTy", "Shape");
+    ("patt_locl_ty", "PattLoclTy", "Params");
+    ("patt_locl_ty", "ShapeField", "PattLoclTy");
+    ("patt_error", "PattError", "Secondary");
   ]
   @
   match Configuration.mode () with
@@ -153,7 +157,7 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
     in
     let id =
       if String.equal id "T" then
-        self ()
+        convert_type_name @@ curr_module_name ()
       else
         id
     in

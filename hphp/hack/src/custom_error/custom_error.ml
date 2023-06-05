@@ -11,7 +11,7 @@ type t = {
   patt: Patt_error.t;
   error_message: Error_message.t;
 }
-[@@deriving show, yojson]
+[@@deriving eq, show, yojson]
 
 let validate ?(env = Validation_env.empty) t =
   let (patt, env) = Patt_error.validate t.patt ~env in

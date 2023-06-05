@@ -43,7 +43,7 @@ and secondary =
 
 and callback = Any_callback
 
-and reasons_callback = Any_reasons_callback [@@deriving show, yojson]
+and reasons_callback = Any_reasons_callback [@@deriving eq, show, yojson]
 
 let mark_invalid t errs =
   match (t, errs) with

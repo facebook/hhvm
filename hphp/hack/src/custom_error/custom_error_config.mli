@@ -6,8 +6,7 @@
  *
  *)
 
-type t = Config of Custom_error.t list
-[@@ocaml.unboxed] [@@deriving show, yojson]
+type t = { custom_errors: Custom_error.t list } [@@deriving eq, show, yojson]
 
 val empty : t
 

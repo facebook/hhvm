@@ -72,7 +72,7 @@ and shape_label =
       cls_nm: string;
       cnst_nm: string;
     }
-[@@deriving compare, sexp, show, yojson]
+[@@deriving compare, eq, sexp, show, yojson]
 
 let mark_invalid t errs =
   match (t, errs) with

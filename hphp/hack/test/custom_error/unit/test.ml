@@ -50,7 +50,7 @@ let%test_unit "patt string exactly" =
   in
   let error_message = Error_message.{ message = [Lit "Ok"] } in
   let custom_err = Custom_error.{ name; patt; error_message } in
-  let custom_config = Custom_error_config.Config [custom_err] in
+  let custom_config = Custom_error_config.{ custom_errors = [custom_err] } in
   let open Core in
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)
@@ -144,7 +144,7 @@ let%test_unit "patt tysub" =
   in
   let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
-  let custom_config = Custom_error_config.Config [custom_err] in
+  let custom_config = Custom_error_config.{ custom_errors = [custom_err] } in
   let open Core in
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)
@@ -244,7 +244,7 @@ let%test_unit "patt tysub or pattern" =
   in
   let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
-  let custom_config = Custom_error_config.Config [custom_err] in
+  let custom_config = Custom_error_config.{ custom_errors = [custom_err] } in
   let open Core in
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)
@@ -302,7 +302,7 @@ let%test_unit "test namespace" =
   in
   let error_message = Error_message.{ message = [Lit "Ok"] } in
   let custom_err = Custom_error.{ name = "namespaced"; patt; error_message } in
-  let custom_config = Custom_error_config.Config [custom_err] in
+  let custom_config = Custom_error_config.{ custom_errors = [custom_err] } in
   let open Core in
   [%test_eq: (string, Eval.Value.t) Either.t list list]
     (Eval.eval custom_config ~err)

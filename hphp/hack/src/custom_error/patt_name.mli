@@ -26,6 +26,6 @@ and namespace =
       prefix: namespace;
       elt: Patt_string.t;
     }
-[@@deriving compare, sexp, show, yojson]
+[@@deriving compare, eq, sexp, show, yojson]
 
 include Can_validate.S with type t := t

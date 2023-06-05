@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::custom_error_config::CustomErrorConfig;
 use crate::gen::global_options::GlobalOptions;
 use crate::gen::global_options::SavedState;
 use crate::gen::global_options::SavedStateLoading;
@@ -27,6 +28,14 @@ impl Default for SavedState {
             loading: SavedStateLoading::default(),
             rollouts: SavedStateRollouts::default(),
             project_metadata_w_flags: true,
+        }
+    }
+}
+
+impl Default for CustomErrorConfig {
+    fn default() -> Self {
+        Self {
+            custom_errors: vec![],
         }
     }
 }
@@ -74,6 +83,7 @@ impl Default for GlobalOptions {
             tco_check_xhp_attribute: false,
             tco_check_redundant_generics: false,
             tco_disallow_unresolved_type_variables: false,
+            tco_custom_error_config: CustomErrorConfig::default(),
             po_enable_class_level_where_clauses: false,
             po_disable_legacy_soft_typehints: true,
             po_allowed_decl_fixme_codes: i_set::ISet::new(),

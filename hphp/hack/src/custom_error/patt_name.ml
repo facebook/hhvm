@@ -31,7 +31,7 @@ and namespace =
       prefix: namespace;
       elt: Patt_string.t;
     }
-[@@deriving compare, sexp, show, yojson]
+[@@deriving compare, eq, sexp, show, yojson]
 
 let validate ?(env = Validation_env.empty) t =
   match t with

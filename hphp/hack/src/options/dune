@@ -4,6 +4,7 @@
  (modules globalOptions)
  (libraries
   collections
+  custom_error_types
   saved_state_rollouts
   utils_find)
  (preprocess

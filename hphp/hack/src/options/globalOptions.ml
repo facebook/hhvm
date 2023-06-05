@@ -105,6 +105,7 @@ type t = {
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
+  tco_custom_error_config: Custom_error_config.t;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   po_allowed_decl_fixme_codes: ISet.t;
@@ -236,6 +237,7 @@ let default =
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
+    tco_custom_error_config = Custom_error_config.empty;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
     po_allowed_decl_fixme_codes = ISet.empty;
@@ -364,6 +366,7 @@ let set
     ?tco_check_xhp_attribute
     ?tco_check_redundant_generics
     ?tco_disallow_unresolved_type_variables
+    ?tco_custom_error_config
     ?po_enable_class_level_where_clauses
     ?po_disable_legacy_soft_typehints
     ?po_allowed_decl_fixme_codes
@@ -561,6 +564,8 @@ let set
       setting
         tco_disallow_unresolved_type_variables
         options.tco_disallow_unresolved_type_variables;
+    tco_custom_error_config =
+      setting tco_custom_error_config options.tco_custom_error_config;
     po_enable_class_level_where_clauses =
       setting
         po_enable_class_level_where_clauses

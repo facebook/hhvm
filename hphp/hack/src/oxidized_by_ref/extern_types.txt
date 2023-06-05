@@ -103,3 +103,8 @@ oxidized::typing_reason::BlameSource
 oxidized::user_error::Severity
 oxidized::xhp_attribute::Tag
 oxidized::xhp_attribute::XhpAttribute
+oxidized::patt_binding_ty::PattBindingTy
+oxidized::patt_error::Primary
+oxidized::patt_error::Callback
+oxidized::patt_error::ReasonsCallback
+oxidized::patt_locl_ty::Prim

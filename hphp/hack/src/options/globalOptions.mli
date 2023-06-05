@@ -144,6 +144,10 @@ type t = {
    * Flag to produce an error whenever the TAST contains unresolved type variables
    *)
   tco_disallow_unresolved_type_variables: bool;
+  (*
+   * Allows additional error messages to be added to typing errors via config
+   *)
+  tco_custom_error_config: Custom_error_config.t;
   (* Enable class-level where clauses, i.e.
      class base<T> where T = int {} *)
   po_enable_class_level_where_clauses: bool;
@@ -381,6 +385,7 @@ val set :
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
+  ?tco_custom_error_config:Custom_error_config.t ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
   ?po_allowed_decl_fixme_codes:ISet.t ->

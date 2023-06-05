@@ -400,5 +400,5 @@ let eval_custom_error Custom_error.{ patt; error_message; _ } ~err =
   | Match.Matched env -> Some (eval_error_message error_message ~env)
   | _ -> None
 
-let eval Custom_error_config.(Config cs) ~err =
-  List.filter_map ~f:(eval_custom_error ~err) cs
+let eval Custom_error_config.{ custom_errors } ~err =
+  List.filter_map ~f:(eval_custom_error ~err) custom_errors

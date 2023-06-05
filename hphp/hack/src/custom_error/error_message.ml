@@ -9,9 +9,9 @@ type elem =
   | Lit of string
   | Ty_var of Patt_var.t
   | Name_var of Patt_var.t
-[@@deriving show, yojson]
+[@@deriving eq, show, yojson]
 
-type t = { message: elem list } [@@deriving show, yojson]
+type t = { message: elem list } [@@deriving eq, show, yojson]
 
 let validate_elem elem ~env =
   match elem with

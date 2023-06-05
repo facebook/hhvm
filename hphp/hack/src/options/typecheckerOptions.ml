@@ -149,6 +149,8 @@ let check_redundant_generics t = t.GlobalOptions.tco_check_redundant_generics
 let disallow_unresolved_type_variables t =
   t.GlobalOptions.tco_disallow_unresolved_type_variables
 
+let custom_error_config t = t.GlobalOptions.tco_custom_error_config
+
 let const_static_props t = t.GlobalOptions.tco_const_static_props
 
 let global_inference t = t.GlobalOptions.tco_global_inference

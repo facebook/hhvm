@@ -74,6 +74,11 @@ naming_error::Visibility
 naming_error::ReturnOnlyHint
 naming_error::UnsupportedFeature
 name_context::NameContext
+patt_binding_ty::PattBindingTy
+patt_locl_ty::Prim
+patt_error::Primary
+patt_error::Callback
+patt_error::ReasonsCallback
 file_info::Mode
 file_info::NameType
 naming_types::KindOfType

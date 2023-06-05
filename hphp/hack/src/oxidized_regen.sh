@@ -43,6 +43,17 @@ summary "Write oxidized/gen/"
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
+  hphp/hack/src/custom_error/custom_error.ml                                  \
+  hphp/hack/src/custom_error/custom_error_config.ml                           \
+  hphp/hack/src/custom_error/error_message.ml                                 \
+  hphp/hack/src/custom_error/patt_binding_ty.ml                               \
+  hphp/hack/src/custom_error/patt_error.ml                                    \
+  hphp/hack/src/custom_error/patt_locl_ty.ml                                  \
+  hphp/hack/src/custom_error/patt_name.ml                                     \
+  hphp/hack/src/custom_error/patt_string.ml                                   \
+  hphp/hack/src/custom_error/patt_var.ml                                      \
+  hphp/hack/src/custom_error/validated.ml                                     \
+  hphp/hack/src/custom_error/validation_err.ml                                \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/errors/user_error.ml                                          \
@@ -139,6 +150,17 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
+  hphp/hack/src/custom_error/custom_error.ml                                  \
+  hphp/hack/src/custom_error/custom_error_config.ml                           \
+  hphp/hack/src/custom_error/error_message.ml                                 \
+  hphp/hack/src/custom_error/patt_binding_ty.ml                               \
+  hphp/hack/src/custom_error/patt_error.ml                                    \
+  hphp/hack/src/custom_error/patt_locl_ty.ml                                  \
+  hphp/hack/src/custom_error/patt_name.ml                                     \
+  hphp/hack/src/custom_error/patt_string.ml                                   \
+  hphp/hack/src/custom_error/patt_var.ml                                      \
+  hphp/hack/src/custom_error/validated.ml                                     \
+  hphp/hack/src/custom_error/validation_err.ml                                \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \

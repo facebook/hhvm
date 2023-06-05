@@ -14,4 +14,4 @@ type t =
   | One_of of t list
   | And of t list
   | Is_not of t
-[@@deriving compare, sexp, show, yojson]
+[@@deriving compare, eq, sexp, show, yojson]

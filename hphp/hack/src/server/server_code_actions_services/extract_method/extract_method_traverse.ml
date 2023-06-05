@@ -362,8 +362,7 @@ let top_visitor ~(selection : Pos.t) =
   end
 
 let find_candidate ~selection ~entry ctx =
-  let tast =
-    (Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry)
-      .Tast_provider.Compute_tast_and_errors.tast
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   (top_visitor ~selection)#go ctx tast

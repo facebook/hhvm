@@ -119,8 +119,8 @@ let find ~entry ~(range : Lsp.range) ctx =
     | None -> SMap.empty
   in
 
-  let { Tast_provider.Compute_tast_and_errors.tast; _ } =
-    Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
 
   let override_method_refactorings =

@@ -2780,6 +2780,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   Socket::clearLastError();
   RI().onSessionInit();
   tl_heap->resetExternalStats();
+  unitCacheClearSync();
 
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(session_kind);

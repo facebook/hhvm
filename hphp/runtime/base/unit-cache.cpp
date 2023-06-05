@@ -226,6 +226,7 @@ struct CachedFile {
              const struct stat& statInfo,
              const RepoOptions& options)
     : cu(src)
+    , dirty(false)
     , repoOptionsHash(options.flags().cacheKeySha1())
   {
     mtime      = statInfo.st_mtim;
@@ -239,6 +240,7 @@ struct CachedFile {
   // but with a new stat info.
   CachedFile(const CachedFile& o, const struct stat& statInfo)
     : cu{o.cu}
+    , dirty(false)
     , repoOptionsHash(o.repoOptionsHash)
   {
     mtime      = statInfo.st_mtim;
@@ -271,6 +273,12 @@ struct CachedFile {
   mutable struct timespec ctime;
   mutable ino_t ino;
   mutable dev_t devId;
+
+  // We set the dirty flag for files that are eagerly invalidated via a call
+  // to unitCacheSyncRepo() to indicate they may require recompilation. We
+  // don't remove them from the cache entirely as we may find that they have
+  // not meaningfully changed and can be reused.
+  mutable std::atomic<bool> dirty;
 
   SHA1 repoOptionsHash;
 };
@@ -314,6 +322,8 @@ using UnitByHashCache = RankedCHM<
   RankUnitHashCache
 >;
 UnitByHashCache s_unitByHashCache;
+
+RDS_LOCAL(bool, rl_trustAutoloadedUnits);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -556,25 +566,34 @@ UnitChange changeReason(
   const CachedFilePtr& cachedUnit,
   const struct stat& s,
   const RepoOptions& options,
-  Stream::Wrapper* wrapper
+  Stream::Wrapper* wrapper,
+  bool forAutoloadHit
 ) {
+  auto const checkStat = [&] {
+    if (forAutoloadHit) {
+      return cachedUnit->dirty.load(std::memory_order_acquire);
+    }
+    return
+      timespecCompare(cachedUnit->mtime, s.st_mtim) < 0 ||
+      timespecCompare(cachedUnit->ctime, s.st_ctim) < 0 ||
+      cachedUnit->ino != s.st_ino ||
+      cachedUnit->devId != s.st_dev;
+  };
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
-  if (cachedUnit.isNull() || cachedUnit->cu.unit == nullptr)
+  if (cachedUnit.isNull() || cachedUnit->cu.unit == nullptr) {
     return UnitChange::EMPTY_UNIT;
-  if (timespecCompare(cachedUnit->mtime, s.st_mtim) < 0 ||
-      timespecCompare(cachedUnit->ctime, s.st_ctim) < 0 ||
-      cachedUnit->ino != s.st_ino ||
-      cachedUnit->devId != s.st_dev)
+  } else if (checkStat()) {
     return UnitChange::STAT;
-  if (anyDepsChanged(cachedUnit->cu.unit, options, wrapper))
-      return UnitChange::DEPS;
-  if (UNLIKELY(cachedUnit->repoOptionsHash != options.flags().cacheKeySha1()))
+  } else if (anyDepsChanged(cachedUnit->cu.unit, options, wrapper)) {
+    return UnitChange::DEPS;
+  } else if (cachedUnit->repoOptionsHash != options.flags().cacheKeySha1()) {
     return UnitChange::REPO_OPTION_DIFF;
-  if (UNLIKELY(stressUnitCache()))
+  } else if (stressUnitCache()) {
     return UnitChange::STRESS_TEST;
+  }
   return UnitChange::NONE;
 }
 
@@ -1177,7 +1196,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
   auto changeRes = UnitChange::NONE;
 
   if (auto const tmp = cachedUnit.copy()) {
-    changeRes = changeReason(tmp, statInfo, options, wrapper);
+    changeRes = changeReason(tmp, statInfo, options, wrapper, false);
     if (changeRes == UnitChange::NONE) {
       if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
         lock->release();
@@ -1244,12 +1263,13 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
 }
 
 CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
-                                 const struct stat& statInfo,
+                                 struct stat& statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs,
                                  FileLoadFlags& flags,
                                  bool alreadyRealpath,
-                                 bool forPrefetch) {
+                                 bool forPrefetch,
+                                 bool forAutoload) {
   tracing::BlockNoTrace _{"lookup-unit-non-repo-auth"};
 
   // Shouldn't be getting systemlib units here
@@ -1280,15 +1300,31 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
       NonRepoUnitCache::const_accessor acc;
       if (cache->find(acc, rpath)) {
         auto const cachedUnit = acc->second.cachedUnit.copy();
-        if (changeReason(cachedUnit, statInfo, options, wrapper) ==
+        if (changeReason(cachedUnit, statInfo, options, wrapper, forAutoload) ==
             UnitChange::NONE) {
           if (forPrefetch || canBeBoundToPath(cachedUnit, rpath)) {
             if (ent) ent->setStr("type", "cache_hit_readlock");
             flags = FileLoadFlags::kHitMem;
             logTearing(cachedUnit);
+
+            // When we store the unit in ExecutionContext we will want to know
+            // its mtime which we haven't gotten from stat() yet.
+            if (forAutoload) {
+              statInfo.st_mtim = cachedUnit->mtime;
+            }
             return cachedUnit->cu;
           }
         }
+      }
+    }
+
+    // If we missed in the cache it may be because the unit was marked dirty,
+    // we need to recheck it, and repopulate the cache with the most current
+    // hash and stat() data.
+    if (forAutoload) {
+      if (statSyscall(rpath->data(), &statInfo) == -1 ||
+          S_ISDIR(statInfo.st_mode)) {
+        return CachedUnit{};
       }
     }
 
@@ -1577,15 +1613,15 @@ String resolveVmInclude(const StringData* path,
 
 Unit* lookupUnit(const StringData* path, const char* currentDir,
                  bool* initial_opt, const Native::FuncTable& nativeFuncs,
-                 bool alreadyRealpath, bool forPrefetch) {
+                 bool alreadyRealpath, bool forPrefetch, bool forAutoload) {
   return lookupUnit(path, nullptr, currentDir, initial_opt, nativeFuncs,
-                    alreadyRealpath, forPrefetch);
+                    alreadyRealpath, forPrefetch, forAutoload);
 }
 
 Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
                  const char* currentDir, bool* initial_opt,
                  const Native::FuncTable& nativeFuncs, bool alreadyRealpath,
-                 bool forPrefetch) {
+                 bool forPrefetch, bool forAutoload) {
   bool init;
   bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
@@ -1604,6 +1640,10 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
 
   LogTimer lookupTimer("lookup_ms", ent);
 
+  // We can only trust hits without stat() if we know that the autoloader was
+  // able to successfully sync this request.
+  forAutoload &= *rl_trustAutoloadedUnits;
+
   /*
    * NB: the m_evaledFiles map is only for the debugger, and could be omitted
    * in RepoAuthoritative mode, but currently isn't.
@@ -1616,6 +1656,8 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
     assertx(path->data()[0] == '/');
     assertx(path->isStatic());
     spath = StrNR(path);
+  } else if (forAutoload) {
+    spath = makeStaticString(path);
   } else {
     spath = resolveVmInclude(path, currentDir, &s, nativeFuncs);
     if (spath.isNull()) return nullptr;
@@ -1634,6 +1676,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
       // In RepoAuthoritative mode we assume that the files are unchanged.
       initial = false;
       if (RuntimeOption::RepoAuthoritative ||
+          forAutoload ||
           (it->second.ts_sec > s.st_mtime) ||
           ((it->second.ts_sec == s.st_mtime) &&
            (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
@@ -1649,7 +1692,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
     ? lookupUnitRepoAuth(spath.get(), info, nativeFuncs)
     : lookupUnitNonRepoAuth(spath.get(), s, ent,
                             nativeFuncs, flags,
-                            alreadyRealpath, forPrefetch);
+                            alreadyRealpath, forPrefetch, forAutoload);
 
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
@@ -1883,7 +1926,7 @@ void prefetchUnit(StringData* requestedPath,
       // Unit was created. If not, there's nothing to do.
       auto changeRes = UnitChange::NONE;
       if (auto const tmp = cachedUnit.copy()) {
-        changeRes = changeReason(tmp, *fileStat, options, w);
+        changeRes = changeReason(tmp, *fileStat, options, w, false);
         if (changeRes == UnitChange::NONE) return;
       }
 
@@ -1923,6 +1966,170 @@ void prefetchUnit(StringData* requestedPath,
       }
 
       s_unitsPrefetched->increment();
+    },
+    // Use high priority for prefetch requests. Medium priority is
+    // used for drain blocks. Low priority is used internally by the
+    // executor to drain the queue during shutdown.
+    folly::Executor::HI_PRI
+  );
+}
+
+void unitCacheSetSync() {
+  *rl_trustAutoloadedUnits = true;
+}
+
+void unitCacheClearSync() {
+  *rl_trustAutoloadedUnits = false;
+}
+
+namespace {
+bool dirtyUnit(StringData* path) {
+  always_assert(!RuntimeOption::RepoAuthoritative);
+  assertx(path->isStatic());
+
+  NonRepoUnitCache::const_accessor acc;
+  if (s_nonRepoUnitCache.find(acc, path)) {
+    if (auto const cu = acc->second.cachedUnit.copy()) {
+      cu->dirty.store(true, std::memory_order_release);
+      return true;
+    }
+  }
+  return false;
+}
+}
+
+void unitCacheSyncRepo(AutoloadMap* map,
+                       std::filesystem::path& root,
+                       std::vector<Facts::PathAndOptionalHash>& changed,
+                       std::vector<std::filesystem::path>& deleted) {
+  size_t removed = 0;
+  std::vector<StringData*> updated;
+
+  for (auto& path : deleted) {
+    if (dirtyUnit(makeStaticString((root / path).native()))) removed++;
+  }
+
+  for (auto& info : changed) {
+    auto const absPath = makeStaticString((root / info.m_path).native());
+    if (dirtyUnit(absPath)) updated.emplace_back(absPath);
+  }
+
+  if (RO::ServerExecutionMode() &&
+      (!deleted.empty() || !changed.empty() || !updated.empty())) {
+    Logger::FInfo(
+      "Synced {}: {} deleted; {} modified; {} evicted; {} to prefetch",
+      root.native(),
+      deleted.size(),
+      changed.size(),
+      updated.size() + removed,
+      updated.size()
+    );
+  }
+
+  if (updated.empty() ||
+      !RO::EvalAutoloadEagerReloadUnitCache ||
+      !unitPrefetchingEnabled()) {
+    return;
+  }
+
+  getPrefetchExecutor().addWithPriority(
+    // NB: This lambda is executed at some later point in another
+    // thread, so you need to be careful about the lifetime of what
+    // you capture here.
+    [updated = std::move(updated), map = map->getNativeHolder()] () mutable {
+      // We cannot delete Units at all points in the loading path (due
+      // to potential lock rank violations). If necessary, we defer
+      // the deletion until when we exit this function.
+      std::vector<Unit*> releaseUnits;
+      std::vector<CachedFilePtr> oldUnits;
+      size_t count = 0;
+      SCOPE_EXIT {
+        for (auto u : releaseUnits) delete u;
+
+        // We don't need to do anything explicitly; the copy_ptr
+        // destructor will take care of it.
+        Treadmill::enqueue([v = std::move(oldUnits)] {});
+
+        if (RO::ServerExecutionMode()) {
+          Logger::FInfo("Prefetched {} modified units", count);
+        }
+      };
+
+      const RepoOptions* options = nullptr;
+      for (auto rpath : updated) {
+        struct stat fileStat;
+        if (statSyscall(rpath->data(), &fileStat) == -1) continue;
+        if (S_ISDIR(fileStat.st_mode)) continue;
+        if (!options) options = &RepoOptions::forFile(rpath->data());
+
+        NonRepoUnitCache::const_accessor rpathAcc;
+
+        s_nonRepoUnitCache.insert(rpathAcc, rpath);
+        auto& cachedUnit = rpathAcc->second.cachedUnit;
+
+        // NB: It might be tempting to check if the file has changed
+        // before acquiring the lock. This opens up a race where the
+        // Unit can be deleted out from under us. Once we acquire the
+        // lock, no other thread can delete the Unit (until we release
+        // it). This isn't an issue for the request threads because
+        // the Unit is freed by the treadmill (so cannot go away
+        // during the request). This thread is *not* a request thread
+        // and therefore the treadmill can't save us.
+
+        // Try to acquire the update lock for this unit. Don't
+        // block. If we fail to acquire the lock, its because another
+        // prefetcher thread, or a request thread is currently loading
+        // the unit. In either case, we don't want to do anything with
+        // it, and just move onto another request.
+        auto lock = cachedUnit.try_lock_for_update();
+        if (!lock) continue;
+
+        // Now that we have the lock, check if the path has a Unit
+        // already, and if so, has the file has changed since that
+        // Unit was created. If not, there's nothing to do.
+        auto changeRes = UnitChange::NONE;
+        if (auto const tmp = cachedUnit.copy()) {
+          changeRes = changeReason(tmp, fileStat, *options, nullptr, false);
+          if (changeRes == UnitChange::NONE) continue;
+        }
+
+        // The Unit doesn't already exist, or the file has
+        // changed. Either way, we need to create a new Unit.
+        Unit* releaseUnit = nullptr;
+        auto ptr = [&] {
+          auto orig = RuntimeOption::EvalCheckUnitSHA1
+            ? cachedUnit.copy()
+            : CachedFilePtr{};
+          FileLoadFlags flags;
+          OptLog optLog;
+          return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
+                                    Native::s_noNativeFuncs,
+                                    map.get(),
+                                    *options, flags, fileStat, std::move(orig),
+                                    true, changeRes);
+        }();
+
+        if (releaseUnit) releaseUnits.emplace_back(releaseUnit);
+
+        // We don't want to prefetch ICE units (they can be
+        // transient), so if we encounter one, just drop it and leave
+        // the cached entry as is.
+        if (!ptr || !ptr->cu.unit || ptr->cu.unit->isICE()) continue;
+
+        // The new Unit is good. Atomically update the cache entry
+        // with it while releasing the lock.
+
+        assertx(cachedUnit.copy() != ptr);
+        ++count;
+
+        // Otherwise update the entry. Defer the destruction of the
+        // old copy_ptr using the Treadmill. Other threads may be
+        // reading the entry simultaneously so the ref-count cannot
+        // drop to zero here.
+        if (auto old = lock->update(std::move(ptr))) {
+          oldUnits.emplace_back(std::move(old));
+        }
+      }
     },
     // Use high priority for prefetch requests. Medium priority is
     // used for drain blocks. Low priority is used internally by the

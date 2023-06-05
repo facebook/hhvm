@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
@@ -500,6 +501,9 @@ struct FactsStoreImpl final
     if (res.hasException()) {
       res.throwUnlessValue();
     }
+    if (RO::EvalAutoloadEagerSyncUnitCache && m_watcher) {
+      unitCacheSetSync();
+    }
   }
 
   Variant getTypeName(const String& type) override {
@@ -938,6 +942,10 @@ struct FactsStoreImpl final
     auto [alteredPathsAndHashes, deletedPaths] = isFresh
         ? getFreshDelta(std::move(results))
         : getIncrementalDelta(std::move(results));
+
+    if (RO::EvalAutoloadEagerSyncUnitCache) {
+      unitCacheSyncRepo(this, m_root, alteredPathsAndHashes, deletedPaths);
+    }
 
     // We need to update the DB if Watchman has restarted or if
     // something's changed on the filesystem. Otherwise, there's no

@@ -1497,6 +1497,8 @@ struct RuntimeOption {
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
   F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
   F(bool, ModuleLevelTraits, false)                                     \
+  F(bool, AutoloadEagerSyncUnitCache, true)                             \
+  F(bool, AutoloadEagerReloadUnitCache, true)                           \
   /* */
 
 private:

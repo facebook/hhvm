@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 
+#include "hphp/runtime/ext/facts/path-and-hash.h"
 #include "hphp/util/sha1.h"
 
 #include <filesystem>
@@ -37,6 +38,7 @@ struct String;
 struct StringData;
 struct RepoOptions;
 struct RepoUnitInfo;
+struct AutoloadMap;
 
 namespace Native {
 struct FuncTable;
@@ -71,12 +73,13 @@ struct FuncTable;
  */
 Unit* lookupUnit(const StringData* path, const char* currentDir,
                  bool* initial_opt, const Native::FuncTable&,
-                 bool alreadyRealpath, bool forPrefetch = false);
+                 bool alreadyRealpath, bool forPrefetch = false,
+                 bool forAutoload = false);
 
 Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
                  const char* currentDir, bool* initial_opt,
                  const Native::FuncTable&, bool alreadyRealpath,
-                 bool forPrefetch = false);
+                 bool forPrefetch = false, bool forAutoload = false);
 
 /*
  * As above, but for system units. Only appropriate in
@@ -224,6 +227,25 @@ Unit* getLoadedUnit(StringData* path);
 void prefetchUnit(StringData* path,
                   std::shared_ptr<folly::atomic_uint_fast_wait_t> gate,
                   const Unit* loadingUnit);
+
+/*
+ * As an optimization requests may specify a list of changed files via
+ * unitCacheSyncRepo() to be marked as dirty. When this is done these files
+ * will be reloaded in requests that set unitCacheSetSync().
+ *
+ * Requests should use unitCacheSetSync() to indicate that files loaded via
+ * the autoloader can be trusted without resolving their paths or checking for
+ * modifications via stat so long as their dirty bits are not set.
+ *
+ * The unitCacheClearSync() must be called to clear the thread local trust bit
+ * set in the unit cache.
+ */
+void unitCacheSetSync();
+void unitCacheClearSync();
+void unitCacheSyncRepo(AutoloadMap* map,
+                       std::filesystem::path& root,
+                       std::vector<Facts::PathAndOptionalHash>& changed,
+                       std::vector<std::filesystem::path>& deleted);
 
 /*
  * Block until all outstanding Unit prefetch attempts finish. Note

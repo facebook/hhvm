@@ -227,9 +227,12 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   try {
     VMRegAnchor _;
     bool initial;
+    auto const eagerSync = RO::EvalAutoloadEagerSyncUnitCache && m_map;
     auto const unit = lookupUnit(fileRes->path.get(), fileRes->info, "",
                                  &initial, Native::s_noNativeFuncs,
-                                 RuntimeOption::TrustAutoloaderPath);
+                                 RuntimeOption::TrustAutoloaderPath,
+                                 false /* forPrefetch */,
+                                 eagerSync /* forAutoload */);
     if (unit) {
       if (initial) unit->merge();
       ok = true;

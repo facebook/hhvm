@@ -23,7 +23,6 @@ use relative_path::RelativePath;
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying
 ///   identifiers into the arena (when possible).
-/// - Excludes user attributes which are irrelevant to typechecking.
 ///
 /// WARNING
 /// This function (1) doesn't respect po_deregister_php_stdlib which filters+adjusts certain
@@ -42,7 +41,6 @@ pub fn parse_decls_for_typechecking<'a>(
         text,
         arena,
         NoSourceTextAllocator,
-        false, // retain_or_omit_user_attributes_for_facts
         false, // elaborate_xhp_namespaces_for_facts
     )
 }
@@ -50,8 +48,6 @@ pub fn parse_decls_for_typechecking<'a>(
 /// The same as 'parse_decls_for_typechecking' except
 /// - Returns decls without reference to the source text to avoid the need to
 ///   keep the source text in memory when caching decls.
-/// - As in parse_decls_for_typechecking, it excludes user attributes which
-///   are irrelevant to typechecking.
 ///
 /// WARNING
 /// This function (1) doesn't respect po_deregister_php_stdlib which filters+adjusts certain
@@ -70,7 +66,6 @@ pub fn parse_decls_for_typechecking_without_reference_text<'a, 'text>(
         text,
         arena,
         ArenaSourceTextAllocator(arena),
-        false, // retain_or_omit_user_attributes_for_facts
         false, // elaborate_xhp_namespaces_for_facts
     )
 }
@@ -78,21 +73,25 @@ pub fn parse_decls_for_typechecking_without_reference_text<'a, 'text>(
 /// Parse decls for bytecode compilation.
 /// - Returns decls without reference to the source text to avoid the need to
 ///   keep the source text in memory when caching decls.
-/// - Preserves user attributes in decls necessary for producing facts.
-///   (This means that you'll get decl_hash answers that differ from parse_decls).
+/// - Expects the keep_user_attributes option to be set as it is necessary for
+///   producing facts. (This means that you'll get decl_hash answers that differ
+///   from parse_decls).
 pub fn parse_decls_for_bytecode<'a, 'text>(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
 ) -> ParsedFile<'a> {
+    assert!(
+        opts.keep_user_attributes,
+        "bytecode generation needs user attributes"
+    );
     parse_script_with_text_allocator(
         opts,
         filename,
         text,
         arena,
         ArenaSourceTextAllocator(arena),
-        true, // retain_or_omit_user_attributes_for_facts
         true, // elaborate_xhp_namespaces_for_facts
     )
 }
@@ -116,7 +115,6 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
     text: &'t [u8],
     arena: &'a Bump,
     source_text_allocator: S,
-    retain_or_omit_user_attributes_for_facts: bool,
     elaborate_xhp_namespaces_for_facts: bool,
 ) -> ParsedFile<'a> {
     let source = SourceText::make(RcOc::new(filename), text);
@@ -130,7 +128,6 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
         mode,
         arena,
         source_text_allocator,
-        retain_or_omit_user_attributes_for_facts,
         elaborate_xhp_namespaces_for_facts,
     );
     let mut parser = Parser::new(&source, env, sc);

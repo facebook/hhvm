@@ -17,6 +17,7 @@ type t = {
   gi_reinfer_types: string list;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
+  keep_user_attributes: bool;
 }
 [@@deriving show]
 

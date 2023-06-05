@@ -17,6 +17,7 @@ type t = {
   gi_reinfer_types: string list;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
+  keep_user_attributes: bool;
 }
 [@@deriving show]
 
@@ -34,6 +35,7 @@ let from_parser_options popt =
     gi_reinfer_types = popt.tco_gi_reinfer_types;
     php5_compat_mode = false;
     hhvm_compat_mode = false;
+    keep_user_attributes = false;
   }
 
 let default = from_parser_options ParserOptions.default

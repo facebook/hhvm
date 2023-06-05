@@ -106,7 +106,6 @@ impl NativeEnv {
 
     pub fn to_decl_parser_options(&self) -> DeclParserOptions {
         let auto_namespace_map = self.hhvm.aliased_namespaces_cloned().collect();
-        // Keep in sync with getDeclFlags in runtime-option.cpp
         let lang_flags = &self.hhvm.parser_options;
         DeclParserOptions {
             auto_namespace_map,
@@ -116,6 +115,7 @@ impl NativeEnv {
             enable_xhp_class_modifier: lang_flags.po_enable_xhp_class_modifier,
             php5_compat_mode: true,
             hhvm_compat_mode: true,
+            keep_user_attributes: true,
             ..Default::default()
         }
     }

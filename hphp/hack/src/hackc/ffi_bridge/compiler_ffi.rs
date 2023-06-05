@@ -384,6 +384,7 @@ pub fn direct_decl_parse_and_serialize(
         enable_xhp_class_modifier: config.enable_xhp_class_modifier,
         php5_compat_mode: config.php5_compat_mode,
         hhvm_compat_mode: config.hhvm_compat_mode,
+        keep_user_attributes: true,
         ..Default::default()
     };
     let text = text.as_bytes();

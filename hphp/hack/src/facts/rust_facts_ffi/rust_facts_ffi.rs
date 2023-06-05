@@ -57,6 +57,7 @@ fn extract_facts_as_json_ffi(
         allow_new_attribute_syntax,
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
+        keep_user_attributes: true,
         ..Default::default()
     };
 

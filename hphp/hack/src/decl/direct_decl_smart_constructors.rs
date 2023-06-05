@@ -129,7 +129,6 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<SSet<'a>>>,
-    retain_or_omit_user_attributes_for_facts: bool,
     under_no_auto_dynamic: bool,
     inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
@@ -143,7 +142,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
-        retain_or_omit_user_attributes_for_facts: bool,
         elaborate_xhp_namespaces_for_facts: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
@@ -170,7 +168,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 classish_name_builder: ClassishNameBuilder::new(),
                 type_parameters: Rc::new(Vec::new()),
                 source_text_allocator,
-                retain_or_omit_user_attributes_for_facts,
                 under_no_auto_dynamic: false,
                 inside_no_auto_dynamic_class: false,
                 module: None,
@@ -2852,7 +2849,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if !self.retain_or_omit_user_attributes_for_facts => {
+                Ok(text) if !self.opts.keep_user_attributes => {
                     Node::StringLiteral(self.alloc((text, token_pos(self))))
                 }
                 _ => Node::Ignored(SK::Token(kind)),
@@ -2861,7 +2858,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if !self.retain_or_omit_user_attributes_for_facts => {
+                Ok(text) if !self.opts.keep_user_attributes => {
                     Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
                 }
                 _ => Node::Ignored(SK::Token(kind)),
@@ -3221,7 +3218,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         expr: Self::Output,
         _rparen: Self::Output,
     ) -> Self::Output {
-        if self.retain_or_omit_user_attributes_for_facts {
+        if self.opts.keep_user_attributes {
             Node::Ignored(SK::ParenthesizedExpression)
         } else {
             expr
@@ -3354,8 +3351,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
         let user_attributes = self.slice(attributes.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
-                {
+                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -3451,7 +3447,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
-        let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
+        let user_attributes = if self.opts.keep_user_attributes {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
                     Some(self.user_attribute_to_decl(attr))
@@ -3539,8 +3535,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
         let user_attributes = self.slice(attribute_spec.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
-                {
+                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -4838,8 +4833,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
         let user_attributes = self.slice(attrs.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
-                {
+                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -5385,7 +5379,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(id) => {
                 if matches!(class_name, Node::XhpName(..))
                     && self.opts.disable_xhp_element_mangling
-                    && self.retain_or_omit_user_attributes_for_facts
+                    && self.opts.keep_user_attributes
                 {
                     // for facts, allow xhp class consts to be mangled later
                     // on even when xhp_element_mangling is disabled
@@ -5547,7 +5541,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             )) => {
                 let name = if class_name.starts_with(':')
                     && self.opts.disable_xhp_element_mangling
-                    && self.retain_or_omit_user_attributes_for_facts
+                    && self.opts.keep_user_attributes
                 {
                     // for facts, allow xhp class consts to be mangled later on
                     // even when xhp_element_mangling is disabled
@@ -5561,15 +5555,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 };
                 Some(ClassNameParam { name, full_pos })
             }
-            Node::StringLiteral((name, full_pos))
-                if self.retain_or_omit_user_attributes_for_facts =>
-            {
+            Node::StringLiteral((name, full_pos)) if self.opts.keep_user_attributes => {
                 Some(ClassNameParam {
                     name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(name)),
                     full_pos,
                 })
             }
-            Node::IntLiteral((name, full_pos)) if self.retain_or_omit_user_attributes_for_facts => {
+            Node::IntLiteral((name, full_pos)) if self.opts.keep_user_attributes => {
                 Some(ClassNameParam {
                     name: Id(NO_POS, name),
                     full_pos,
@@ -6094,7 +6086,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let this = Rc::make_mut(&mut self.state);
             this.under_no_auto_dynamic = true;
         }
-        if self.retain_or_omit_user_attributes_for_facts {
+        if self.opts.keep_user_attributes {
             attributes
         } else {
             Node::Ignored(SK::AttributeSpecification)
@@ -6102,7 +6094,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     }
 
     fn make_attribute(&mut self, _at: Self::Output, attribute: Self::Output) -> Self::Output {
-        if self.retain_or_omit_user_attributes_for_facts {
+        if self.opts.keep_user_attributes {
             attribute
         } else {
             Node::Ignored(SK::Attribute)
@@ -6210,7 +6202,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         attributes: Self::Output,
         _right_double_angle: Self::Output,
     ) -> Self::Output {
-        if self.retain_or_omit_user_attributes_for_facts {
+        if self.opts.keep_user_attributes {
             let this = Rc::make_mut(&mut self.state);
             this.file_attributes = List::empty();
             for attr in attributes.iter() {

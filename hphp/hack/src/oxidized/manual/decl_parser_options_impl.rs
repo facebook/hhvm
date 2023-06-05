@@ -27,6 +27,7 @@ impl DeclParserOptions {
             global_inference: opts.tco_global_inference,
             php5_compat_mode: false,
             hhvm_compat_mode: false,
+            keep_user_attributes: false,
         }
     }
 }

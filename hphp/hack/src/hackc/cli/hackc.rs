@@ -213,6 +213,7 @@ impl Opts {
             enable_xhp_class_modifier: false,
             php5_compat_mode: true,
             hhvm_compat_mode: true,
+            keep_user_attributes: true,
             ..Default::default()
         }
     }

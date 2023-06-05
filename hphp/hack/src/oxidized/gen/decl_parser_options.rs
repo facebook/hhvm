@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<085d80b09feaf4c7b2a223b5b027464a>>
+// @generated SignedSource<<9ebfd62ffa0c164ee16fec8308ba0381>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -46,4 +46,5 @@ pub struct DeclParserOptions {
     pub gi_reinfer_types: Vec<String>,
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
+    pub keep_user_attributes: bool,
 }

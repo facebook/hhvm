@@ -30,8 +30,9 @@ namespace py thrift.annotation.thrift
 struct Beta {}
 
 /**
- * Indicates a definition/feature should only be used with permission, may only
- * work in specific contexts, and may change in incompatible ways without notice.
+ * Indicates a definition/feature should only be used with permission, may
+ * only work in specific contexts, and may change in incompatible ways without
+ * notice.
  */
 @scope.Program
 @scope.Definition
@@ -60,7 +61,8 @@ struct Deprecated {
 }
 
 /**
- * Annotate a thrift structured or enum to indicate if ids or values should not be used.
+ * Annotate a thrift structured or enum to indicate if ids or values should not
+ * be used.
  *
  * For example, you may want to mark ids as deprecated, or these ids
  * might be reserved for other use cases or annotations.
@@ -85,23 +87,11 @@ struct ReserveIds {
    * Represents ranges of ids that cannot be used.
    *
    * Each (key: value) pair represents the half-open range `[key, value)`,
-   * where `key` is included and `value` is not. For example the map
-   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   * where `key` is included and `value` is not. For example, the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and
+   * `[20, 30)`.
    */
   2: map<i32, i32> id_ranges;
-}
-
-/**
- * Indicates  a definition/feature will be removed in the next release.
- *
- * Pleased migrate off of all @Legacy as soon as possible.
- */
-// TODO(afuller): Add a linter to produce errors when annotated definitions
-// are used.
-@Deprecated // Legacy implies deprecated.
-@scope.Transitive
-struct Legacy {
-  1: string message;
 }
 
 /**
@@ -140,7 +130,7 @@ struct NoBeta {}
 struct Released {}
 
 /**
- * Disables @Legacy features.
+ * Disables legacy features.
  */
 // TODO(ytj): Everyone should be able to test without legacy features. Fix
 // compatibility with legacy reflection and move to @Beta.
@@ -153,8 +143,8 @@ struct NoLegacy {}
  * Disables @Deprecated features.
  *
  * Should only be enabled in `test` versions, as deprecated implies removing
- * the feature will break current usage (otherwise it would be @Legacy or
- * deleted)
+ * the feature will break current usage (otherwise it would be legacy or
+ * deleted).
  */
 @NoLegacy // Implies NoLegacy
 @Beta // Everyone should be able to test without deprecated features.
@@ -194,23 +184,6 @@ struct Box {}
 @scope.Field
 @Beta
 struct Mixin {}
-
-/**
- * Indicates that a boolean type **may** be 'packed' in memory.
- *
- * This allows an implementation to not allocate a full native 'bool' type, and
- * instead use a single 'isset' bit to store the value.
- *
- * All fields that use such a type **must** be 'terse'.
- */
-// TODO(afuller): Instead of using custom validators consider:
-// - Updating scope annotations to restrict to specific types (in this case bool)
-// - Updating field scope annotations to restrict to specific field types (in this case terse)
-// and/or allow @thrift.TerseWrites to be added to typedefs, and add it transitively to this annotation.
-@scope.Field // TODO(afuller): Validate field is terse and has a boolean type.
-@scope.Typedef // TODO(afuller): Validate the type is boolean.
-@Experimental // TODO(afuller): Pack and/or remove direct access to bool for such fields in all languages.
-struct Bit {}
 
 /**
  * Option to serialize thrift struct in ascending field id order.

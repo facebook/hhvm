@@ -25,8 +25,8 @@ import com.facebook.thrift.protocol.*;
  * Disables @Deprecated features.
  * 
  * Should only be enabled in `test` versions, as deprecated implies removing
- * the feature will break current usage (otherwise it would be @Legacy or
- * deleted)
+ * the feature will break current usage (otherwise it would be legacy or
+ * deleted).
  */
 @SuppressWarnings({ "unused", "serial" })
 public class NoDeprecated implements TBase, java.io.Serializable, Cloneable {

@@ -87,8 +87,9 @@ func (p *Beta) String() string {
   return fmt.Sprintf("Beta({})")
 }
 
-// Indicates a definition/feature should only be used with permission, may only
-// work in specific contexts, and may change in incompatible ways without notice.
+// Indicates a definition/feature should only be used with permission, may
+// only work in specific contexts, and may change in incompatible ways without
+// notice.
 type Experimental struct {
 }
 
@@ -338,7 +339,8 @@ func (p *Deprecated) String() string {
   return fmt.Sprintf("Deprecated({Message:%s})", messageVal)
 }
 
-// Annotate a thrift structured or enum to indicate if ids or values should not be used.
+// Annotate a thrift structured or enum to indicate if ids or values should not
+// be used.
 // 
 // For example, you may want to mark ids as deprecated, or these ids
 // might be reserved for other use cases or annotations.
@@ -358,8 +360,9 @@ func (p *Deprecated) String() string {
 //  - IdRanges: Represents ranges of ids that cannot be used.
 // 
 // Each (key: value) pair represents the half-open range `[key, value)`,
-// where `key` is included and `value` is not. For example the map
-// `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+// where `key` is included and `value` is not. For example, the map
+// `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and
+// `[20, 30)`.
 type ReserveIds struct {
   Ids []int32 `thrift:"ids,1" db:"ids" json:"ids"`
   IdRanges map[int32]int32 `thrift:"id_ranges,2" db:"id_ranges" json:"id_ranges"`
@@ -558,121 +561,6 @@ func (p *ReserveIds) String() string {
   idsVal := fmt.Sprintf("%v", p.Ids)
   idRangesVal := fmt.Sprintf("%v", p.IdRanges)
   return fmt.Sprintf("ReserveIds({Ids:%s IdRanges:%s})", idsVal, idRangesVal)
-}
-
-// Indicates  a definition/feature will be removed in the next release.
-// 
-// Pleased migrate off of all @Legacy as soon as possible.
-// 
-// Attributes:
-//  - Message
-type Legacy struct {
-  Message string `thrift:"message,1" db:"message" json:"message"`
-}
-
-func NewLegacy() *Legacy {
-  return &Legacy{}
-}
-
-
-func (p *Legacy) GetMessage() string {
-  return p.Message
-}
-type LegacyBuilder struct {
-  obj *Legacy
-}
-
-func NewLegacyBuilder() *LegacyBuilder{
-  return &LegacyBuilder{
-    obj: NewLegacy(),
-  }
-}
-
-func (p LegacyBuilder) Emit() *Legacy{
-  return &Legacy{
-    Message: p.obj.Message,
-  }
-}
-
-func (l *LegacyBuilder) Message(message string) *LegacyBuilder {
-  l.obj.Message = message
-  return l
-}
-
-func (l *Legacy) SetMessage(message string) *Legacy {
-  l.Message = message
-  return l
-}
-
-func (p *Legacy) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if err := p.ReadField1(iprot); err != nil {
-        return err
-      }
-    default:
-      if err := iprot.Skip(fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *Legacy)  ReadField1(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadString(); err != nil {
-    return thrift.PrependError("error reading field 1: ", err)
-  } else {
-    p.Message = v
-  }
-  return nil
-}
-
-func (p *Legacy) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("Legacy"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := p.writeField1(oprot); err != nil { return err }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *Legacy) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("message", thrift.STRING, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:message: ", p), err) }
-  if err := oprot.WriteString(string(p.Message)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.message (1) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:message: ", p), err) }
-  return err
-}
-
-func (p *Legacy) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  messageVal := fmt.Sprintf("%v", p.Message)
-  return fmt.Sprintf("Legacy({Message:%s})", messageVal)
 }
 
 // Indicates additional backward compatibility restrictions, beyond the
@@ -1054,7 +942,7 @@ func (p *Released) String() string {
   return fmt.Sprintf("Released({})")
 }
 
-// Disables @Legacy features.
+// Disables legacy features.
 type NoLegacy struct {
 }
 
@@ -1123,8 +1011,8 @@ func (p *NoLegacy) String() string {
 // Disables @Deprecated features.
 // 
 // Should only be enabled in `test` versions, as deprecated implies removing
-// the feature will break current usage (otherwise it would be @Legacy or
-// deleted)
+// the feature will break current usage (otherwise it would be legacy or
+// deleted).
 type NoDeprecated struct {
 }
 
@@ -1395,77 +1283,6 @@ func (p *Mixin) String() string {
   }
 
   return fmt.Sprintf("Mixin({})")
-}
-
-// Indicates that a boolean type **may** be 'packed' in memory.
-// 
-// This allows an implementation to not allocate a full native 'bool' type, and
-// instead use a single 'isset' bit to store the value.
-// 
-// All fields that use such a type **must** be 'terse'.
-type Bit struct {
-}
-
-func NewBit() *Bit {
-  return &Bit{}
-}
-
-type BitBuilder struct {
-  obj *Bit
-}
-
-func NewBitBuilder() *BitBuilder{
-  return &BitBuilder{
-    obj: NewBit(),
-  }
-}
-
-func (p BitBuilder) Emit() *Bit{
-  return &Bit{
-  }
-}
-
-func (p *Bit) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    if err := iprot.Skip(fieldTypeId); err != nil {
-      return err
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *Bit) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("Bit"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *Bit) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  return fmt.Sprintf("Bit({})")
 }
 
 // Option to serialize thrift struct in ascending field id order.

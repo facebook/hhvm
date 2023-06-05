@@ -24,7 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Annotate a thrift structured or enum to indicate if ids or values should not be used.
+ * Annotate a thrift structured or enum to indicate if ids or values should not
+ * be used.
  * 
  * For example, you may want to mark ids as deprecated, or these ids
  * might be reserved for other use cases or annotations.
@@ -53,8 +54,9 @@ public class ReserveIds implements TBase, java.io.Serializable, Cloneable, Compa
    * Represents ranges of ids that cannot be used.
    * 
    * Each (key: value) pair represents the half-open range `[key, value)`,
-   * where `key` is included and `value` is not. For example the map
-   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   * where `key` is included and `value` is not. For example, the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and
+   * `[20, 30)`.
    */
   public Map<Integer,Integer> id_ranges;
   public static final int IDS = 1;
@@ -170,8 +172,9 @@ public class ReserveIds implements TBase, java.io.Serializable, Cloneable, Compa
    * Represents ranges of ids that cannot be used.
    * 
    * Each (key: value) pair represents the half-open range `[key, value)`,
-   * where `key` is included and `value` is not. For example the map
-   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   * where `key` is included and `value` is not. For example, the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and
+   * `[20, 30)`.
    */
   public Map<Integer,Integer> getId_ranges() {
     return this.id_ranges;
@@ -181,8 +184,9 @@ public class ReserveIds implements TBase, java.io.Serializable, Cloneable, Compa
    * Represents ranges of ids that cannot be used.
    * 
    * Each (key: value) pair represents the half-open range `[key, value)`,
-   * where `key` is included and `value` is not. For example the map
-   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   * where `key` is included and `value` is not. For example, the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and
+   * `[20, 30)`.
    */
   public ReserveIds setId_ranges(Map<Integer,Integer> id_ranges) {
     this.id_ranges = id_ranges;

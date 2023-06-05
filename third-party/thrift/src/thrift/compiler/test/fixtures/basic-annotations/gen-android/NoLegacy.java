@@ -22,7 +22,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Disables @Legacy features.
+ * Disables legacy features.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class NoLegacy implements TBase, java.io.Serializable, Cloneable {

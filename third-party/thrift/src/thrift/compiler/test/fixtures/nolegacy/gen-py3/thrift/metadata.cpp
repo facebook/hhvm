@@ -18,7 +18,6 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Testing>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Deprecated>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReserveIds>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Legacy>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RequiresBackwardCompatibility>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoTesting>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoExperimental>::gen(metadata);
@@ -29,7 +28,6 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<TerseWrite>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Box>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Mixin>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Bit>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<SerializeInFieldIdOrder>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BitmaskEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<v1>::gen(metadata);

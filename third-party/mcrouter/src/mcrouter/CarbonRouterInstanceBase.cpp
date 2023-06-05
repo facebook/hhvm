@@ -130,16 +130,11 @@ void CarbonRouterInstanceBase::setStartupOpts(
 
 std::unordered_map<std::string, std::string>
 CarbonRouterInstanceBase::getStartupOpts() const {
-  constexpr size_t kMaxOptionValueLength = 256;
-
   auto result = opts_.toDict();
   if (startupOptsInitialized_.load(std::memory_order_acquire)) {
     result.insert(additionalStartupOpts_.begin(), additionalStartupOpts_.end());
   }
   result.emplace("version", MCROUTER_PACKAGE_STRING);
-  for (auto& it : result) {
-    it.second = shorten(it.second, kMaxOptionValueLength);
-  }
   return result;
 }
 

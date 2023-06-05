@@ -1236,15 +1236,15 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     (* TODO: IFC should consider spliced values too *)
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
-  | A.Call (e, _type_args, args, _extra_args) ->
-    let fty = Tast.get_type e in
+  | A.(Call { func; args; _ }) ->
+    let fty = Tast.get_type func in
     let (env, args_pty) = funargs env args in
     let ret_pty = Lift.ty ~prefix:"ret" renv ety in
     let call env call_type this_pty =
       call ~pos renv env call_type this_pty args_pty ret_pty
     in
     begin
-      match e with
+      match func with
       (* Generally a function call *)
       | (_, _, A.Id (_, name)) ->
         let call_id = Decl.make_callable_name ~is_static:false None name in
@@ -1292,7 +1292,7 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
         in
         call env (Cglobal (call_id, fty)) this_pty
       | _ ->
-        let (env, func_ty) = expr env e in
+        let (env, func_ty) = expr env func in
         let ifc_fty =
           match func_ty with
           | Tfun fty -> fty

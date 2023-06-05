@@ -343,7 +343,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_rhs) = expr_ env e2 in
     let env = assign pos __LINE__ env e1 entity_rhs ty_rhs in
     (env, None)
-  | A.Call ((_, _, A.Id (_, idx)), _targs, args, _unpacked)
+  | A.(Call { func = (_, _, Id (_, idx)); args; _ })
     when String.equal idx SN.FB.idx -> begin
     (* Currently treating idx expressions with and without default value in the same way.
        Essentially following the case for A.Array_get after extracting the right data. *)
@@ -372,14 +372,14 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       in
       (env, None)
   end
-  | A.New (class_id, targs, args, unpacked, _instantiation) ->
+  | A.New (class_id, targs, args, unpacked_arg, _instantiation) ->
     (* What is new object creation but a call to a static method call to a
        class constructor? *)
-    let base = (ty, pos, A.Class_const (class_id, (pos, "__construct"))) in
+    let func = (ty, pos, A.Class_const (class_id, (pos, "__construct"))) in
     let args = List.map ~f:(fun arg -> (Ast_defs.Pnormal, arg)) args in
-    let call_expr = (ty, pos, A.Call (base, targs, args, unpacked)) in
+    let call_expr = (ty, pos, A.(Call { func; targs; args; unpacked_arg })) in
     expr_ env call_expr
-  | A.Call (((base_ty, _, lhs) as base), _targs, args, unpacked) ->
+  | A.(Call { func = (base_ty, _, lhs) as base; args; unpacked_arg; _ }) ->
     let lhs_is_obj_get =
       match lhs with
       | A.Obj_get _ -> true
@@ -477,7 +477,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         ~f:(fun exp ->
           let idx = List.length args + 1 in
           handle_arg idx env (Ast_defs.Pnormal, exp))
-        unpacked
+        unpacked_arg
     in
     (* Handle the return. *)
     let return_entity = Env.fresh_var () in

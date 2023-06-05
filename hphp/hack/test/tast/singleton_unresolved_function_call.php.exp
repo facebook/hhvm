@@ -29,7 +29,11 @@
         f_body =
         { fb_ast =
           [([4:3-13], (If (((bool), [4:7-9], (Lvar ([4:7-9], $b))), [], [([Pos.none], Noop)])));
-            ([5:3-16], (Return (Some ((int), [5:10-15], (Call ((((function(int): int)), [5:10-12], (Lvar ([5:10-12], $f))), [], [(Pnormal, ((int), [5:13-14], (Int "1")))], None))))))]
+            ([5:3-16],
+             (Return
+                (Some ((int), [5:10-15],
+                       (Call { func = (((function(int): int)), [5:10-12], (Lvar ([5:10-12], $f))); targs = []; args = [(Pnormal, ((int), [5:13-14], (Int "1")))]; unpacked_arg = None })))))
+            ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };

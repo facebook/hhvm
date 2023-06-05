@@ -788,8 +788,8 @@ module Visitor_DEPRECATED = struct
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e, _) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
-        | Call (e, _, el, unpacked_element) ->
-          this#on_call acc e el unpacked_element
+        | Call { func = e; args = el; unpacked_arg; _ } ->
+          this#on_call acc e el unpacked_arg
         | FunctionPointer (fpid, targs) ->
           this#on_function_pointer acc fpid targs
         | String2 el -> this#on_string2 acc el

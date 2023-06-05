@@ -29,7 +29,13 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([6:3-25], (Expr ((void), [6:3-24], (Call ((((function(string $s): void)), [6:3-15], (Id ([6:3-15], "\\takes_string"))), [], [(Pnormal, ((string), [6:16-23], (String "hello")))], None)))))
+           [([6:3-25],
+             (Expr
+                ((void), [6:3-24],
+                 (Call
+                    { func = (((function(string $s): void)), [6:3-15], (Id ([6:3-15], "\\takes_string"))); 
+                      targs = []; args = [(Pnormal, ((string), [6:16-23], (String "hello")))]; 
+                      unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

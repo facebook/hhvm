@@ -20,23 +20,17 @@ end
 let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
   let (res, errs) =
     match expr_ with
-    | Aast.(
-        Call
-          ( ((_, _, Id (_, fn_name)) as fn_expr),
-            targs,
-            fn_param_exprs,
-            fn_unpacked_expr_opt ))
+    | Aast.(Call { func = (_, _, Id (_, fn_name)); unpacked_arg; _ } as call)
       when String.equal fn_name SN.SpecialFunctions.echo ->
       let errs =
         Option.to_list
         @@ Option.map
              ~f:(fun (_, pos, _) ->
                Naming_phase_error.naming @@ Naming_error.Too_few_arguments pos)
-             fn_unpacked_expr_opt
+             unpacked_arg
       in
-      ( Ok (Aast.Call (fn_expr, targs, fn_param_exprs, fn_unpacked_expr_opt)),
-        errs )
-    | Aast.(Call ((_, fn_expr_pos, Id (_, fn_name)), targs, fn_param_exprs, _))
+      (Ok call, errs)
+    | Aast.(Call { func = (_, fn_expr_pos, Id (_, fn_name)); targs; args; _ })
       when String.equal fn_name SN.StdlibFunctions.call_user_func ->
       let errs =
         [
@@ -45,7 +39,7 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
         ]
       in
       begin
-        match fn_param_exprs with
+        match args with
         | [] ->
           let args_err =
             Naming_phase_error.naming
@@ -54,7 +48,16 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
           (Error fn_expr_pos, args_err :: errs)
         | (Ast_defs.Pnormal, fn_expr) :: fn_param_exprs ->
           (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-          (Ok (Aast.Call (fn_expr, targs, fn_param_exprs, None)), errs)
+          ( Ok
+              Aast.(
+                Call
+                  {
+                    func = fn_expr;
+                    targs;
+                    args = fn_param_exprs;
+                    unpacked_arg = None;
+                  }),
+            errs )
         | (Ast_defs.Pinout pk_pos, fn_expr) :: fn_param_exprs ->
           let (_, fn_expr_pos, _) = fn_expr in
           let pos = Pos.merge pk_pos fn_expr_pos in
@@ -64,15 +67,19 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
                  { pos; fn_name = "call_user_func" }
           in
           (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-          ( Ok (Aast.Call (fn_expr, targs, fn_param_exprs, None)),
+          ( Ok
+              Aast.(
+                Call
+                  {
+                    func = fn_expr;
+                    targs;
+                    args = fn_param_exprs;
+                    unpacked_arg = None;
+                  }),
             inout_err :: errs )
       end
     | Aast.(
-        Call
-          ( (_, fn_expr_pos, Id (_, fn_name)),
-            _targs,
-            fn_param_exprs,
-            fn_unpacked_expr_opt ))
+        Call { func = (_, fn_expr_pos, Id (_, fn_name)); args; unpacked_arg; _ })
       when String.equal fn_name SN.AutoimportedFunctions.meth_caller ->
       (* TODO[mjt] targs is ignored entirely here - shouldn't we generate
          and error to say they are invalid for this function? *)
@@ -81,10 +88,10 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
         @@ Option.map
              ~f:(fun (_, pos, _) ->
                Naming_phase_error.naming @@ Naming_error.Too_few_arguments pos)
-             fn_unpacked_expr_opt
+             unpacked_arg
       in
       begin
-        match fn_param_exprs with
+        match args with
         | []
         | [_] ->
           let args_err =

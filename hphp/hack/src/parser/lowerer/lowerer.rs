@@ -1851,7 +1851,12 @@ fn p_function_call_expr<'a>(
     let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
     let (args, varargs) = split_args_vararg(args, env)?;
 
-    Ok(Expr_::mk_call(recv, targs, args, varargs))
+    Ok(Expr_::mk_call(ast::CallExpr {
+        func: recv,
+        targs,
+        args,
+        unpacked_arg: varargs,
+    }))
 }
 
 fn p_function_pointer_expr<'a>(
@@ -1971,16 +1976,16 @@ fn p_pre_post_unary_decorated_expr<'a>(
             Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
             Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
             Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
-            Some(TK::Print) => Ok(Expr_::mk_call(
-                Expr::new(
+            Some(TK::Print) => Ok(Expr_::mk_call(ast::CallExpr {
+                func: Expr::new(
                     (),
                     pos.clone(),
                     Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                 ),
-                vec![],
-                vec![(ast::ParamKind::Pnormal, expr)],
-                None,
-            )),
+                targs: vec![],
+                args: vec![(ast::ParamKind::Pnormal, expr)],
+                unpacked_arg: None,
+            })),
             Some(TK::Dollar) => {
                 raise_parsing_error(op, env, &syntax_error::invalid_variable_name);
                 Ok(Expr_::Omitted)
@@ -2176,7 +2181,12 @@ fn p_prefixed_code_expr<'a>(
         let recv = ast::Expr::new((), pos.clone(), Expr_::mk_lfun(fun, vec![]));
 
         // Immediately invoke the lambda by wrapping in a call expression node
-        let expr = Expr_::mk_call(recv, vec![], vec![], None);
+        let expr = Expr_::mk_call(ast::CallExpr {
+            func: recv,
+            targs: vec![],
+            args: vec![],
+            unpacked_arg: None,
+        });
         ast::Expr::new((), pos, expr)
     };
 
@@ -2403,12 +2413,12 @@ fn p_awaitable_creation_expr<'a>(
         external,
         doc_comment: None,
     };
-    Ok(Expr_::mk_call(
-        Expr::new((), pos, Expr_::mk_lfun(body, vec![])),
-        vec![],
-        vec![],
-        None,
-    ))
+    Ok(Expr_::mk_call(ast::CallExpr {
+        func: Expr::new((), pos, Expr_::mk_lfun(body, vec![])),
+        targs: vec![],
+        args: vec![],
+        unpacked_arg: None,
+    }))
 }
 
 fn p_xhp_expr<'a>(
@@ -2498,7 +2508,12 @@ fn p_special_call<'a>(recv: S<'a>, args: S<'a>, e: &mut Env<'a>) -> Result<Expr_
     // PropOrMethod field in ObjGet and ClassGet
     let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
     let (args, varargs) = split_args_vararg(args, e)?;
-    Ok(Expr_::mk_call(recv, vec![], args, varargs))
+    Ok(Expr_::mk_call(ast::CallExpr {
+        func: recv,
+        targs: vec![],
+        args,
+        unpacked_arg: varargs,
+    }))
 }
 
 fn p_obj_get<'a>(
@@ -3129,7 +3144,12 @@ fn p_unset_stmt<'a>(
             S_::mk_expr(ast::Expr::new(
                 (),
                 pos,
-                Expr_::mk_call(unset, vec![], args, None),
+                Expr_::mk_call(ast::CallExpr {
+                    func: unset,
+                    targs: vec![],
+                    args,
+                    unpacked_arg: None,
+                }),
             )),
         ))
     };
@@ -3160,7 +3180,12 @@ fn p_echo_stmt<'a>(
             S_::mk_expr(ast::Expr::new(
                 (),
                 pos,
-                Expr_::mk_call(echo, vec![], args, None),
+                Expr_::mk_call(ast::CallExpr {
+                    func: echo,
+                    targs: vec![],
+                    args,
+                    unpacked_arg: None,
+                }),
             )),
         ))
     };

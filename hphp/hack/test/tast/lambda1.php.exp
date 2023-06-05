@@ -57,8 +57,10 @@
                     { bop = (Eq None); lhs = ((string), [5:3-5], (Lvar ([5:3-5], $x)));
                       rhs =
                       ((string), [5:8-13],
-                       (Call ((((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))), 
-                          [], [(Pnormal, ((int), [5:11-12], (Int "4")))], None)))
+                       (Call
+                          { func = (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
+                            targs = []; args = [(Pnormal, ((int), [5:11-12], (Int "4")))]; 
+                            unpacked_arg = None }))
                       }))));
             ([6:3-18],
              (Expr
@@ -67,8 +69,10 @@
                     { bop = (Eq None); lhs = ((string), [6:3-5], (Lvar ([6:3-5], $y)));
                       rhs =
                       ((string), [6:8-17],
-                       (Call ((((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))), 
-                          [], [(Pnormal, ((string), [6:11-16], (String "bar")))], None)))
+                       (Call
+                          { func = (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
+                            targs = []; args = [(Pnormal, ((string), [6:11-16], (String "bar")))]; 
+                            unpacked_arg = None }))
                       }))))
             ]
           };

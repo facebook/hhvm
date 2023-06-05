@@ -8,7 +8,8 @@ Errors:
       c_implements = []; c_where_constraints = [];
       c_consts =
       [{ cc_user_attributes = []; cc_type = (Some ([6:9-12], (Hprim Tint))); 
-         cc_id = ([6:13-14], "X"); cc_kind = (CCConcrete ((), [6:17-22], (Invalid (Some ((), [6:17-22], (Call (((), [6:17-20], (Id ([6:17-20], "\\baz"))), [], [], None))))))); 
+         cc_id = ([6:13-14], "X");
+         cc_kind = (CCConcrete ((), [6:17-22], (Invalid (Some ((), [6:17-22], (Call { func = ((), [6:17-20], (Id ([6:17-20], "\\baz"))); targs = []; args = []; unpacked_arg = None }))))));
          cc_span = [6:3-23]; cc_doc_comment = None }
         ];
       c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 

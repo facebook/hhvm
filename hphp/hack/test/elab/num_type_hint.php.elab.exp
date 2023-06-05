@@ -1036,8 +1036,8 @@ Program(
                                                 (),
                                                 |num_type_hint.php(40:9-20),
                                                 Call(
-                                                    (
-                                                        Expr(
+                                                    CallExpr {
+                                                        func: Expr(
                                                             (),
                                                             |num_type_hint.php(40:9-10),
                                                             Id(
@@ -1047,8 +1047,8 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                        [],
-                                                        [
+                                                        targs: [],
+                                                        args: [
                                                             (
                                                                 Pnormal,
                                                                 Expr(
@@ -1082,8 +1082,8 @@ Program(
                                                                 ),
                                                             ),
                                                         ],
-                                                        None,
-                                                    ),
+                                                        unpacked_arg: None,
+                                                    },
                                                 ),
                                             ),
                                         ),
@@ -1249,8 +1249,8 @@ Program(
                                             (),
                                             |num_type_hint.php(44:2-9),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(44:2-3),
                                                         Id(
@@ -1260,8 +1260,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1283,8 +1283,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1296,8 +1296,8 @@ Program(
                                             (),
                                             |num_type_hint.php(45:2-13),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(45:2-3),
                                                         Id(
@@ -1307,8 +1307,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1330,8 +1330,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1343,8 +1343,8 @@ Program(
                                             (),
                                             |num_type_hint.php(46:2-11),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(46:2-3),
                                                         Id(
@@ -1354,8 +1354,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1377,8 +1377,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1390,8 +1390,8 @@ Program(
                                             (),
                                             |num_type_hint.php(47:2-11),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(47:2-3),
                                                         Id(
@@ -1401,8 +1401,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1424,8 +1424,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1437,8 +1437,8 @@ Program(
                                             (),
                                             |num_type_hint.php(49:2-13),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(49:2-7),
                                                         Id(
@@ -1448,8 +1448,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1471,8 +1471,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1484,8 +1484,8 @@ Program(
                                             (),
                                             |num_type_hint.php(50:2-17),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(50:2-7),
                                                         Id(
@@ -1495,8 +1495,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1518,8 +1518,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1531,8 +1531,8 @@ Program(
                                             (),
                                             |num_type_hint.php(51:2-15),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(51:2-7),
                                                         Id(
@@ -1542,8 +1542,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1565,8 +1565,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1578,8 +1578,8 @@ Program(
                                             (),
                                             |num_type_hint.php(52:2-15),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(52:2-7),
                                                         Id(
@@ -1589,8 +1589,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1612,8 +1612,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1625,8 +1625,8 @@ Program(
                                             (),
                                             |num_type_hint.php(53:2-16),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(53:2-7),
                                                         Id(
@@ -1636,8 +1636,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1657,8 +1657,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1936,8 +1936,8 @@ Program(
                                             (),
                                             |num_type_hint.php(58:2-13),
                                             Call(
-                                                (
-                                                    Expr(
+                                                CallExpr {
+                                                    func: Expr(
                                                         (),
                                                         |num_type_hint.php(58:2-9),
                                                         Id(
@@ -1947,8 +1947,8 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    [],
-                                                    [
+                                                    targs: [],
+                                                    args: [
                                                         (
                                                             Pnormal,
                                                             Expr(
@@ -1966,8 +1966,8 @@ Program(
                                                             ),
                                                         ),
                                                     ],
-                                                    None,
-                                                ),
+                                                    unpacked_arg: None,
+                                                },
                                             ),
                                         ),
                                     ),
@@ -2115,8 +2115,8 @@ Program(
                                                                         (),
                                                                         |num_type_hint.php(66:6-17),
                                                                         Call(
-                                                                            (
-                                                                                Expr(
+                                                                            CallExpr {
+                                                                                func: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(66:6-13),
                                                                                     Id(
@@ -2126,8 +2126,8 @@ Program(
                                                                                         ),
                                                                                     ),
                                                                                 ),
-                                                                                [],
-                                                                                [
+                                                                                targs: [],
+                                                                                args: [
                                                                                     (
                                                                                         Pnormal,
                                                                                         Expr(
@@ -2145,8 +2145,8 @@ Program(
                                                                                         ),
                                                                                     ),
                                                                                 ],
-                                                                                None,
-                                                                            ),
+                                                                                unpacked_arg: None,
+                                                                            },
                                                                         ),
                                                                     ),
                                                                 ),

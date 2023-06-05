@@ -44,9 +44,12 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
              Nast.Expr
                ( _,
                  _,
-                 Nast.Call
-                   ((_, _, Nast.Id (_, "\\HH\\invariant_violation")), _, _, _)
-               ) );
+                 Nast.(
+                   Call
+                     {
+                       func = (_, _, Nast.Id (_, "\\HH\\invariant_violation"));
+                       _;
+                     }) ) );
           ] ->
             true
           | _ -> false

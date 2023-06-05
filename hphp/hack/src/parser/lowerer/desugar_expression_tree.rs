@@ -189,8 +189,8 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
         Expr::new(
             (),
             et_literal_pos.clone(),
-            Expr_::Call(Box::new((
-                Expr::new(
+            Expr_::Call(Box::new(ast::CallExpr {
+                func: Expr::new(
                     (),
                     et_literal_pos.clone(),
                     Expr_::mk_efun(aast::Efun {
@@ -199,10 +199,10 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
                         closure_class_name: None,
                     }),
                 ),
-                vec![],
-                vec![],
-                None,
-            ))),
+                targs: vec![],
+                args: vec![],
+                unpacked_arg: None,
+            })),
         )
     };
 
@@ -493,8 +493,8 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
     );
 
-    let c = Expr_::Call(Box::new((
-        Expr::new(
+    let c = Expr_::Call(Box::new(ast::CallExpr {
+        func: Expr::new(
             (),
             pos.clone(),
             Expr_::ObjGet(Box::new((
@@ -504,10 +504,10 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
                 ast::PropOrMethod::IsMethod,
             ))),
         ),
-        vec![],
-        build_args(args),
-        None,
-    )));
+        targs: vec![],
+        args: build_args(args),
+        unpacked_arg: None,
+    }));
     Expr::new((), pos.clone(), c)
 }
 
@@ -518,8 +518,8 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
         Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
     );
 
-    let c = Expr_::Call(Box::new((
-        Expr::new(
+    let c = Expr_::Call(Box::new(ast::CallExpr {
+        func: Expr::new(
             (),
             pos.clone(),
             Expr_::ObjGet(Box::new((
@@ -529,10 +529,10 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
                 ast::PropOrMethod::IsMethod,
             ))),
         ),
-        vec![],
-        build_args(args),
-        None,
-    )));
+        targs: vec![],
+        args: build_args(args),
+        unpacked_arg: None,
+    }));
     Expr::new((), pos.clone(), c)
 }
 
@@ -557,7 +557,12 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new((callee, vec![], build_args(args), None))),
+        Expr_::Call(Box::new(ast::CallExpr {
+            func: callee,
+            targs: vec![],
+            args: build_args(args),
+            unpacked_arg: None,
+        })),
     )
 }
 
@@ -1047,7 +1052,12 @@ fn rewrite_expr(
         // Virtualized: (...->__unwrap())()
         // Desugared: $0v->visitCall(new ExprPos(...), ..., vec[])
         Call(call) => {
-            let (recv, targs, args, variadic) = *call;
+            let ast::CallExpr {
+                func: recv,
+                targs,
+                args,
+                unpacked_arg: variadic,
+            } = *call;
 
             if variadic.is_some() {
                 errors.push((
@@ -1064,7 +1074,16 @@ fn rewrite_expr(
             match &recv.2 {
                 // Don't transform calls to `hh_show`.
                 Id(sid) if is_typechecker_fun_name(&sid.1) => {
-                    let call_e = Expr::new((), pos, Call(Box::new((recv, targs, args, variadic))));
+                    let call_e = Expr::new(
+                        (),
+                        pos,
+                        Call(Box::new(ast::CallExpr {
+                            func: recv,
+                            targs,
+                            args,
+                            unpacked_arg: variadic,
+                        })),
+                    );
                     return RewriteResult {
                         desugar_expr: call_e.clone(),
                         virtual_expr: call_e,
@@ -1117,8 +1136,8 @@ fn rewrite_expr(
                     let virtual_expr = Expr(
                         (),
                         pos.clone(),
-                        Call(Box::new((
-                            _virtualize_call(
+                        Call(Box::new(ast::CallExpr {
+                            func: _virtualize_call(
                                 static_meth_call(
                                     visitor_name,
                                     et::SYMBOL_TYPE,
@@ -1128,10 +1147,10 @@ fn rewrite_expr(
                                 &pos,
                                 should_virtualize_functions,
                             ),
-                            vec![],
-                            build_args(virtual_args),
-                            None,
-                        ))),
+                            targs: vec![],
+                            args: build_args(virtual_args),
+                            unpacked_arg: None,
+                        })),
                     );
                     RewriteResult {
                         virtual_expr,
@@ -1184,8 +1203,8 @@ fn rewrite_expr(
                     let virtual_expr = Expr(
                         (),
                         pos.clone(),
-                        Call(Box::new((
-                            _virtualize_call(
+                        Call(Box::new(ast::CallExpr {
+                            func: _virtualize_call(
                                 static_meth_call(
                                     visitor_name,
                                     et::SYMBOL_TYPE,
@@ -1195,10 +1214,10 @@ fn rewrite_expr(
                                 &pos,
                                 should_virtualize_functions,
                             ),
-                            vec![],
-                            build_args(virtual_args),
-                            None,
-                        ))),
+                            targs: vec![],
+                            args: build_args(virtual_args),
+                            unpacked_arg: None,
+                        })),
                     );
                     RewriteResult {
                         virtual_expr,
@@ -1236,16 +1255,16 @@ fn rewrite_expr(
                     let virtual_expr = Expr(
                         (),
                         pos.clone(),
-                        Call(Box::new((
-                            _virtualize_call(
+                        Call(Box::new(ast::CallExpr {
+                            func: _virtualize_call(
                                 rewritten_recv.virtual_expr,
                                 &pos,
                                 should_virtualize_functions,
                             ),
-                            vec![],
-                            build_args(virtual_args),
-                            None,
-                        ))),
+                            targs: vec![],
+                            args: build_args(virtual_args),
+                            unpacked_arg: None,
+                        })),
                     );
                     RewriteResult {
                         virtual_expr,
@@ -1884,7 +1903,12 @@ fn immediately_invoked_lambda(
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new((lambda_expr, vec![], call_args, None))),
+        Expr_::Call(Box::new(ast::CallExpr {
+            func: lambda_expr,
+            targs: vec![],
+            args: call_args,
+            unpacked_arg: None,
+        })),
     )
 }
 

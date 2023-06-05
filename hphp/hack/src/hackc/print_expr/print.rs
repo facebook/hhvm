@@ -396,25 +396,30 @@ fn print_expr(
             print_expr(ctx, w, env, rhs)
         }
         Expr_::Call(c) => {
-            let (e, _, es, unpacked_element) = &**c;
-            match e.as_id() {
+            let ast::CallExpr {
+                func,
+                args,
+                unpacked_arg,
+                ..
+            } = &**c;
+            match func.as_id() {
                 Some(ast_defs::Id(_, call_id)) => {
                     w.write_all(lstrip(adjust_id(env, call_id).as_ref(), "\\").as_bytes())?
                 }
                 None => {
-                    let buf = print_expr_to_string(ctx, env, e)?;
+                    let buf = print_expr_to_string(ctx, env, func)?;
                     w.write_all(lstrip_bslice(&buf, br"\"))?
                 }
             };
             write::paren(w, |w| {
-                write::concat_by(w, ", ", es, |w, (pk, e)| match pk {
+                write::concat_by(w, ", ", args, |w, (pk, e)| match pk {
                     ParamKind::Pnormal => print_expr(ctx, w, env, e),
                     ParamKind::Pinout(_) => Err(Error::fail("illegal default value").into()),
                 })?;
-                match unpacked_element {
+                match unpacked_arg {
                     None => Ok(()),
                     Some(e) => {
-                        if !es.is_empty() {
+                        if !args.is_empty() {
                             w.write_all(b", ")?;
                         }
                         // TODO: Should probably have ... also

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use nast::Block;
+use nast::CallExpr;
 use nast::Expr;
 use nast::Expr_;
 use nast::Id;
@@ -36,15 +37,15 @@ impl Pass for ElabExprCallHhInvariantPass {
                 if let Stmt_::Expr(box Expr(
                     annot,
                     expr_pos,
-                    Expr_::Call(box (
-                        Expr(fn_expr_annot, fn_expr_pos, Expr_::Id(box Id(fn_name_pos, _))),
+                    Expr_::Call(box CallExpr {
+                        func: Expr(fn_expr_annot, fn_expr_pos, Expr_::Id(box Id(fn_name_pos, _))),
                         targs,
-                        mut exprs,
-                        unpacked_element,
-                    )),
+                        mut args,
+                        unpacked_arg,
+                    }),
                 )) = old_stmt_
                 {
-                    let (pk, expr) = exprs.remove(0);
+                    let (pk, arg) = args.remove(0);
                     // Raise error if this is an inout param
                     if let ParamKind::Pinout(ref pk_pos) = pk {
                         env.emit_error(NamingPhaseError::NastCheck(
@@ -64,13 +65,18 @@ impl Pass for ElabExprCallHhInvariantPass {
                     let violation_expr = Expr(
                         annot,
                         expr_pos.clone(),
-                        Expr_::Call(Box::new((fn_expr, targs, exprs, unpacked_element))),
+                        Expr_::Call(Box::new(CallExpr {
+                            func: fn_expr,
+                            targs,
+                            args,
+                            unpacked_arg,
+                        })),
                     );
                     // See if we have a bool constant as our condition; use the
                     // call to `invariant_violation` directly if we do and put
                     // into an `If` statement otherwise. Note that we put it
                     // on the true branch so the condition is negated.
-                    match expr {
+                    match arg {
                         Expr(_, _, Expr_::False) => *elem = Stmt_::Expr(Box::new(violation_expr)),
                         Expr(cond_annot, cond_pos, cond_expr) => {
                             let true_block =
@@ -106,8 +112,12 @@ fn check_call(env: &Env, stmt: &Stmt_) -> Check {
         Stmt_::Expr(box Expr(
             _,
             _,
-            Expr_::Call(box (Expr(_, fn_expr_pos, Expr_::Id(box Id(_, fn_name))), _, exprs, _)),
-        )) if fn_name == sn::autoimported_functions::INVARIANT => match exprs.get(0..1) {
+            Expr_::Call(box CallExpr {
+                func: Expr(_, fn_expr_pos, Expr_::Id(box Id(_, fn_name))),
+                args,
+                ..
+            }),
+        )) if fn_name == sn::autoimported_functions::INVARIANT => match args.get(0..1) {
             None | Some(&[]) => {
                 env.emit_error(NamingPhaseError::Naming(NamingError::TooFewArguments(
                     fn_expr_pos.clone(),
@@ -143,8 +153,8 @@ mod tests {
         let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
-            Expr_::Call(Box::new((
-                Expr(
+            Expr_::Call(Box::new(CallExpr {
+                func: Expr(
                     (),
                     elab_utils::pos::null(),
                     Expr_::Id(Box::new(Id(
@@ -152,10 +162,10 @@ mod tests {
                         sn::autoimported_functions::INVARIANT.to_string(),
                     ))),
                 ),
-                vec![],
-                vec![(ParamKind::Pnormal, elab_utils::expr::null())],
-                None,
-            ))),
+                targs: vec![],
+                args: vec![(ParamKind::Pnormal, elab_utils::expr::null())],
+                unpacked_arg: None,
+            })),
         )));
         elem.transform(&env, &mut pass);
 
@@ -174,18 +184,17 @@ mod tests {
                             Stmt_::Expr(box Expr(
                                 _,
                                 _,
-                                Expr_::Call(box (
-                                    Expr(_, _, Expr_::Id(box Id(_, fn_name))),
-                                    _,
-                                    exprs,
-                                    _,
-                                )),
+                                Expr_::Call(box CallExpr {
+                                    func: Expr(_, _, Expr_::Id(box Id(_, fn_name))),
+                                    args,
+                                    ..
+                                }),
                             )),
                         ),
                         Stmt(_, Stmt_::Noop),
                     )) => {
                         fn_name == sn::autoimported_functions::INVARIANT_VIOLATION
-                            && exprs.is_empty()
+                            && args.is_empty()
                     }
 
                     _ => false,
@@ -203,8 +212,8 @@ mod tests {
         let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
-            Expr_::Call(Box::new((
-                Expr(
+            Expr_::Call(Box::new(CallExpr {
+                func: Expr(
                     (),
                     elab_utils::pos::null(),
                     Expr_::Id(Box::new(Id(
@@ -212,13 +221,13 @@ mod tests {
                         sn::autoimported_functions::INVARIANT.to_string(),
                     ))),
                 ),
-                vec![],
-                vec![(
+                targs: vec![],
+                args: vec![(
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::False),
                 )],
-                None,
-            ))),
+                unpacked_arg: None,
+            })),
         )));
         elem.transform(&env, &mut pass);
 
@@ -228,8 +237,12 @@ mod tests {
             Stmt_::Expr(box Expr(
                 _,
                 _,
-                Expr_::Call(box (Expr(_, _, Expr_::Id(box Id(_, fn_name))), _, exprs, _)),
-            )) => fn_name == sn::autoimported_functions::INVARIANT_VIOLATION && exprs.is_empty(),
+                Expr_::Call(box CallExpr {
+                    func: Expr(_, _, Expr_::Id(box Id(_, fn_name))),
+                    args,
+                    ..
+                }),
+            )) => fn_name == sn::autoimported_functions::INVARIANT_VIOLATION && args.is_empty(),
             _ => false,
         })
     }
@@ -242,8 +255,8 @@ mod tests {
         let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
-            Expr_::Call(Box::new((
-                Expr(
+            Expr_::Call(Box::new(CallExpr {
+                func: Expr(
                     (),
                     elab_utils::pos::null(),
                     Expr_::Id(Box::new(Id(
@@ -251,10 +264,10 @@ mod tests {
                         sn::autoimported_functions::INVARIANT.to_string(),
                     ))),
                 ),
-                vec![],
-                vec![],
-                None,
-            ))),
+                targs: vec![],
+                args: vec![],
+                unpacked_arg: None,
+            })),
         )));
         elem.transform(&env, &mut pass);
 

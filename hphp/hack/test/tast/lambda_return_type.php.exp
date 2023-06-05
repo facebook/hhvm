@@ -49,17 +49,19 @@
                 ((int), [10:3-12:4],
                  (Await
                     ((Awaitable<int>), [10:9-12:4],
-                     (Call (
-                        (((function(): Awaitable<int>)), [10:9-12:4],
-                         (Lfun (
-                            { f_span = [10:9-12:4]; f_readonly_this = None; 
-                              f_annotation = (); f_readonly_ret = None; 
-                              f_ret = ((Awaitable<int>), None); f_params = []; 
-                              f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([11:5-15], (Return (Some ((int), [11:12-14], (Int "42")))))] }; 
-                              f_fun_kind = FAsync; f_user_attributes = []; 
-                              f_external = false; f_doc_comment = None },
-                            []))),
-                        [], [], None)))))))
+                     (Call
+                        { func =
+                          (((function(): Awaitable<int>)), [10:9-12:4],
+                           (Lfun (
+                              { f_span = [10:9-12:4]; f_readonly_this = None; 
+                                f_annotation = (); f_readonly_ret = None; 
+                                f_ret = ((Awaitable<int>), None); f_params = []; 
+                                f_ctxs = None; f_unsafe_ctxs = None; 
+                                f_body = { fb_ast = [([11:5-15], (Return (Some ((int), [11:12-14], (Int "42")))))] }; 
+                                f_fun_kind = FAsync; f_user_attributes = []; 
+                                f_external = false; f_doc_comment = None },
+                              [])));
+                          targs = []; args = []; unpacked_arg = None }))))))
              ]
            };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 

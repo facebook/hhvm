@@ -18,12 +18,13 @@ let on_stmt on_error stmt ~ctx =
             ( annot,
               expr_pos,
               Call
-                ( (fn_annot, fn_expr_pos, Id (fn_name_pos, fn_name)),
-                  targs,
-                  exprs,
-                  unpacked_element ) )) )
+                ({
+                   func = (fn_annot, fn_expr_pos, Id (fn_name_pos, fn_name));
+                   args;
+                   _;
+                 } as call_expr) )) )
       when String.equal fn_name SN.AutoimportedFunctions.invariant ->
-      (match exprs with
+      (match args with
       | [] ->
         let err = Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos in
         let expr = (annot, fn_expr_pos, Err.invalid_expr_ None) in
@@ -47,7 +48,9 @@ let on_stmt on_error stmt ~ctx =
         in
         let fn_expr = (fn_annot, fn_expr_pos, id_expr) in
         let violation =
-          (annot, expr_pos, Aast.Call (fn_expr, targs, exprs, unpacked_element))
+          ( annot,
+            expr_pos,
+            Aast.(Call { call_expr with func = fn_expr; args = exprs }) )
         in
         (match cond with
         | Aast.False ->

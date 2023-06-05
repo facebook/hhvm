@@ -50,8 +50,10 @@
             [([8:5-29],
               (Expr
                  ((void), [8:5-28],
-                  (Call ((((function(num $x): void)), [8:5-24], (Class_const (((B), [8:5-11], CIparent), ([8:13-24], "__construct")))), 
-                     [], [(Pnormal, ((int), [8:25-27], (Lvar ([8:25-27], $x))))], None)))))
+                  (Call
+                     { func = (((function(num $x): void)), [8:5-24], (Class_const (((B), [8:5-11], CIparent), ([8:13-24], "__construct")))); 
+                       targs = []; args = [(Pnormal, ((int), [8:25-27], (Lvar ([8:25-27], $x))))]; 
+                       unpacked_arg = None }))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

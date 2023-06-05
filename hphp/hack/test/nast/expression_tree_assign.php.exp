@@ -18,128 +18,148 @@
                      et_splices = []; et_function_pointers = [];
                      et_virtualized_expr =
                      ((), [4:14-32],
-                      (Call (
-                         ((), [4:14-32],
-                          (Efun
-                             { ef_fun =
-                               { f_span = [4:14-32]; f_readonly_this = None; 
-                                 f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_params = []; f_ctxs = None; 
-                                 f_unsafe_ctxs = None;
-                                 f_body =
-                                 { fb_ast =
-                                   [([4:14-32],
-                                     (Return
-                                        (Some ((), [4:14-32],
-                                               (Lfun (
-                                                  { f_span = [4:14-32]; 
-                                                    f_readonly_this = None; 
-                                                    f_annotation = (); 
-                                                    f_readonly_ret = None; 
-                                                    f_ret = ((), None); 
-                                                    f_params = []; f_ctxs = None; 
-                                                    f_unsafe_ctxs = None;
-                                                    f_body =
-                                                    { fb_ast =
-                                                      [([4:23-30],
-                                                        (Expr
-                                                           ((), [4:23-29],
-                                                            (Binop
-                                                               { bop = (Eq None); 
-                                                                 lhs = ((), [4:23-25], (Lvar ([4:23-25], $x)));
-                                                                 rhs =
-                                                                 ((), [4:28-29],
-                                                                  (Call (((), [4:28-29], (Class_const (((), [4:28-29], (CI ([4:28-29], "\\ExampleDsl"))), ([4:28-29], "intType")))), [], [], None)))
-                                                                 }))));
-                                                        ([4:14-32],
-                                                         (Return
-                                                            (Some ((), [4:14-32],
-                                                                   (Call (((), [4:14-32], (Class_const (((), [4:14-32], (CI ([4:14-32], "\\ExampleDsl"))), ([4:14-32], "voidType")))), [], [], None))))))
-                                                        ]
-                                                      };
-                                                    f_fun_kind = FSync; 
-                                                    f_user_attributes = []; 
-                                                    f_external = false; 
-                                                    f_doc_comment = None },
-                                                  []))))))
-                                     ]
-                                   };
-                                 f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None };
-                               ef_use = []; ef_closure_class_name = None })),
-                         [], [], None)));
+                      (Call
+                         { func =
+                           ((), [4:14-32],
+                            (Efun
+                               { ef_fun =
+                                 { f_span = [4:14-32]; f_readonly_this = None; 
+                                   f_annotation = (); f_readonly_ret = None; 
+                                   f_ret = ((), None); f_params = []; 
+                                   f_ctxs = None; f_unsafe_ctxs = None;
+                                   f_body =
+                                   { fb_ast =
+                                     [([4:14-32],
+                                       (Return
+                                          (Some ((), [4:14-32],
+                                                 (Lfun (
+                                                    { f_span = [4:14-32]; 
+                                                      f_readonly_this = None; 
+                                                      f_annotation = (); 
+                                                      f_readonly_ret = None; 
+                                                      f_ret = ((), None); 
+                                                      f_params = []; 
+                                                      f_ctxs = None; 
+                                                      f_unsafe_ctxs = None;
+                                                      f_body =
+                                                      { fb_ast =
+                                                        [([4:23-30],
+                                                          (Expr
+                                                             ((), [4:23-29],
+                                                              (Binop
+                                                                 { bop = (Eq None); 
+                                                                   lhs = ((), [4:23-25], (Lvar ([4:23-25], $x)));
+                                                                   rhs =
+                                                                   ((), [4:28-29],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [4:28-29], (Class_const (((), [4:28-29], (CI ([4:28-29], "\\ExampleDsl"))), ([4:28-29], "intType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None }))
+                                                                   }))));
+                                                          ([4:14-32],
+                                                           (Return
+                                                              (Some (
+                                                              (), [4:14-32],
+                                                              (Call
+                                                                 { func = ((), [4:14-32], (Class_const (((), [4:14-32], (CI ([4:14-32], "\\ExampleDsl"))), ([4:14-32], "voidType")))); 
+                                                                   targs = []; 
+                                                                   args = []; 
+                                                                   unpacked_arg = None })))))
+                                                          ]
+                                                        };
+                                                      f_fun_kind = FSync; 
+                                                      f_user_attributes = []; 
+                                                      f_external = false; 
+                                                      f_doc_comment = None },
+                                                    []))))))
+                                       ]
+                                     };
+                                   f_fun_kind = FSync; f_user_attributes = []; 
+                                   f_external = false; f_doc_comment = None };
+                                 ef_use = []; ef_closure_class_name = None }));
+                           targs = []; args = []; unpacked_arg = None }));
                      et_runtime_expr =
                      ((), [4:3-13],
-                      (Call (((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))), 
-                         [],
-                         [(Pnormal,
-                           ((), [4:14-32],
-                            (Shape
-                               [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__")))); (
-                                 (SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))); (
-                                 (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))); (
-                                 (SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))); (
-                                 (SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
-                           (Pnormal,
-                            ((), [4:3-13],
-                             (Shape
-                                [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
-                                  ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
-                                  ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))))])));
-                           (Pnormal,
-                            ((), [4:14-32],
-                             (Lfun (
-                                { f_span = [4:14-32]; f_readonly_this = None; 
-                                  f_annotation = (); f_readonly_ret = None; 
-                                  f_ret = ((), None);
-                                  f_params =
-                                  [{ param_annotation = (); param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
-                                     param_is_variadic = false; param_pos = [4:3-13]; 
-                                     param_name = "$0v"; param_expr = None; 
-                                     param_readonly = None; param_callconv = Pnormal; 
-                                     param_user_attributes = []; param_visibility = None }
-                                    ];
-                                  f_ctxs = None; f_unsafe_ctxs = None;
-                                  f_body =
-                                  { fb_ast =
-                                    [([4:14-32],
-                                      (Return
-                                         (Some ((), [4:14-32],
-                                                (Call (
-                                                   ((), [4:14-32], (Obj_get (((), [4:14-32], (Lvar ([4:14-32], $0v))), ((), [4:14-32], (Id ([4:14-32], "visitLambda"))), OG_nullthrows, Is_method))),
-                                                   [],
-                                                   [(Pnormal,
-                                                     ((), [4:14-32],
-                                                      (Shape
-                                                         [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__"))));
-                                                           ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))); (
-                                                           (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))); (
-                                                           (SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))); (
-                                                           (SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
-                                                     (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))));
-                                                     (Pnormal,
-                                                      ((), [4:23-29],
-                                                       (ValCollection ((
-                                                          [4:23-29], Vec), None,
-                                                          [((), [4:23-29],
-                                                            (Call (
-                                                               ((), [4:23-29],
-                                                                (Obj_get (((), [4:23-29], (Lvar ([4:23-29], $0v))), ((), [4:23-29], (Id ([4:23-29], "visitAssign"))), OG_nullthrows, Is_method))),
-                                                               [],
-                                                               [(Pnormal,
-                                                                 ((), [4:23-29],
-                                                                  (Shape
+                      (Call
+                         { func = ((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))); 
+                           targs = [];
+                           args =
+                           [(Pnormal,
+                             ((), [4:14-32],
+                              (Shape
+                                 [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__")))); (
+                                   (SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))); (
+                                   (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4"))); (
+                                   (SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13"))); (
+                                   (SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
+                             (Pnormal,
+                              ((), [4:3-13],
+                               (Shape
+                                  [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (([4:3-13], Dict), None, []))));
+                                    ((SFlit_str ([4:3-13], "functions")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))));
+                                    ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (([4:3-13], Vec), None, []))))])));
+                             (Pnormal,
+                              ((), [4:14-32],
+                               (Lfun (
+                                  { f_span = [4:14-32]; f_readonly_this = None; 
+                                    f_annotation = (); f_readonly_ret = None; 
+                                    f_ret = ((), None);
+                                    f_params =
+                                    [{ param_annotation = (); param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
+                                       param_is_variadic = false; param_pos = [4:3-13]; 
+                                       param_name = "$0v"; param_expr = None; 
+                                       param_readonly = None; param_callconv = Pnormal; 
+                                       param_user_attributes = []; param_visibility = None }
+                                      ];
+                                    f_ctxs = None; f_unsafe_ctxs = None;
+                                    f_body =
+                                    { fb_ast =
+                                      [([4:14-32],
+                                        (Return
+                                           (Some ((), [4:14-32],
+                                                  (Call
+                                                     { func =
+                                                       ((), [4:14-32], (Obj_get (((), [4:14-32], (Lvar ([4:14-32], $0v))), ((), [4:14-32], (Id ([4:14-32], "visitLambda"))), OG_nullthrows, Is_method)));
+                                                       targs = [];
+                                                       args =
+                                                       [(Pnormal,
+                                                         ((), [4:14-32],
+                                                          (Shape
+                                                             [((SFlit_str ([4:14-32], "path")), ((), [4:14-32], (Id ([4:14-32], "\\__FILE__"))));
+                                                               ((SFlit_str ([4:14-32], "start_line")), ((), [4:14-32], (Int "4"))); (
+                                                               (SFlit_str ([4:14-32], "end_line")), ((), [4:14-32], (Int "4")));
+                                                               ((SFlit_str ([4:14-32], "start_column")), ((), [4:14-32], (Int "13")));
+                                                               ((SFlit_str ([4:14-32], "end_column")), ((), [4:14-32], (Int "31")))])));
+                                                         (Pnormal, ((), [Pos.none], (ValCollection (([Pos.none], Vec), None, []))));
+                                                         (Pnormal,
+                                                          ((), [4:23-29],
+                                                           (ValCollection ((
+                                                              [4:23-29], Vec), None,
+                                                              [((), [4:23-29],
+                                                                (Call
+                                                                   { func =
+                                                                    ((), [4:23-29],
+                                                                    (Obj_get (((), [4:23-29], (Lvar ([4:23-29], $0v))), ((), [4:23-29], (Id ([4:23-29], "visitAssign"))), OG_nullthrows, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Pnormal,
+                                                                    ((), [4:23-29],
+                                                                    (Shape
                                                                     [((SFlit_str ([4:23-29], "path")), ((), [4:23-29], (Id ([4:23-29], "\\__FILE__"))));
                                                                     ((SFlit_str ([4:23-29], "start_line")), ((), [4:23-29], (Int "4")));
                                                                     ((SFlit_str ([4:23-29], "end_line")), ((), [4:23-29], (Int "4")));
                                                                     ((SFlit_str ([4:23-29], "start_column")), ((), [4:23-29], (Int "22")));
                                                                     ((SFlit_str ([4:23-29], "end_column")), ((), [4:23-29], (Int "28")))])));
-                                                                 (Pnormal,
-                                                                  ((), [4:23-25],
-                                                                   (Call (
+                                                                    (Pnormal,
                                                                     ((), [4:23-25],
-                                                                    (Obj_get (((), [4:23-25], (Lvar ([4:23-25], $0v))), ((), [4:23-25], (Id ([4:23-25], "visitLocal"))), OG_nullthrows, Is_method))),
-                                                                    [],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [4:23-25],
+                                                                    (Obj_get (((), [4:23-25], (Lvar ([4:23-25], $0v))), ((), [4:23-25], (Id ([4:23-25], "visitLocal"))), OG_nullthrows, Is_method)));
+                                                                    targs = [];
+                                                                    args =
                                                                     [(Pnormal,
                                                                     ((), [4:23-25],
                                                                     (Shape
@@ -148,13 +168,16 @@
                                                                     ((SFlit_str ([4:23-25], "end_line")), ((), [4:23-25], (Int "4")));
                                                                     ((SFlit_str ([4:23-25], "start_column")), ((), [4:23-25], (Int "22")));
                                                                     ((SFlit_str ([4:23-25], "end_column")), ((), [4:23-25], (Int "24")))]))); (
-                                                                    Pnormal, ((), [4:23-25], (String "$x")))], None))));
-                                                                 (Pnormal,
-                                                                  ((), [4:28-29],
-                                                                   (Call (
+                                                                    Pnormal, ((), [4:23-25], (String "$x")))]; 
+                                                                    unpacked_arg = None })));
+                                                                    (Pnormal,
                                                                     ((), [4:28-29],
-                                                                    (Obj_get (((), [4:28-29], (Lvar ([4:28-29], $0v))), ((), [4:28-29], (Id ([4:28-29], "visitInt"))), OG_nullthrows, Is_method))), 
-                                                                    [],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [4:28-29],
+                                                                    (Obj_get (((), [4:28-29], (Lvar ([4:28-29], $0v))), ((), [4:28-29], (Id ([4:28-29], "visitInt"))), OG_nullthrows, Is_method)));
+                                                                    targs = [];
+                                                                    args =
                                                                     [(Pnormal,
                                                                     ((), [4:28-29],
                                                                     (Shape
@@ -163,20 +186,20 @@
                                                                     ((SFlit_str ([4:28-29], "end_line")), ((), [4:28-29], (Int "4")));
                                                                     ((SFlit_str ([4:28-29], "start_column")), ((), [4:28-29], (Int "27")));
                                                                     ((SFlit_str ([4:28-29], "end_column")), ((), [4:28-29], (Int "28")))]))); (
-                                                                    Pnormal, ((), [4:28-29], (Int "1")))], None))))
-                                                                 ],
-                                                               None)))
-                                                            ]
-                                                          ))))
-                                                     ],
-                                                   None))))))
-                                      ]
-                                    };
-                                  f_fun_kind = FSync; f_user_attributes = []; 
-                                  f_external = false; f_doc_comment = None },
-                                []))))
-                           ],
-                         None)));
+                                                                    Pnormal, ((), [4:28-29], (Int "1")))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))
+                                                                ]
+                                                              ))))
+                                                         ];
+                                                       unpacked_arg = None })))))
+                                        ]
+                                      };
+                                    f_fun_kind = FSync; f_user_attributes = []; 
+                                    f_external = false; f_doc_comment = None },
+                                  []))))
+                             ];
+                           unpacked_arg = None }));
                      et_dollardollar_pos = None }))))
             ]
           };

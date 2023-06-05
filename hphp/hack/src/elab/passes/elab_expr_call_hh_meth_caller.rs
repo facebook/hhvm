@@ -9,6 +9,7 @@
 
 use std::mem::take;
 
+use nast::CallExpr;
 use nast::ClassId;
 use nast::ClassId_;
 use nast::Expr;
@@ -31,12 +32,12 @@ impl Pass for ElabExprCallHhMethCallerPass {
         };
 
         match elem {
-            Expr_::Call(box (
-                Expr(_, fn_expr_pos, Expr_::Id(box id)),
-                _,
-                fn_param_exprs,
-                fn_variadic_param_opt,
-            )) if id.name() == sn::autoimported_functions::METH_CALLER => {
+            Expr_::Call(box CallExpr {
+                func: Expr(_, fn_expr_pos, Expr_::Id(box id)),
+                args: fn_param_exprs,
+                unpacked_arg: fn_variadic_param_opt,
+                ..
+            }) if id.name() == sn::autoimported_functions::METH_CALLER => {
                 // Raise an error if we have a variadic arg
                 if let Some(Expr(_, pos, _)) = fn_variadic_param_opt {
                     env.emit_error(NamingError::TooFewArguments(pos.clone()))
@@ -106,8 +107,8 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -115,8 +116,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
@@ -126,8 +127,8 @@ mod tests {
                     Expr((), elab_utils::pos::null(), Expr_::String(meth_name.into())),
                 ),
             ],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         // Expect no errors
@@ -150,8 +151,8 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -159,8 +160,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr(
@@ -181,8 +182,8 @@ mod tests {
                     Expr((), elab_utils::pos::null(), Expr_::String(meth_name.into())),
                 ),
             ],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         // Expect no errors
@@ -205,8 +206,8 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -214,8 +215,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
@@ -225,8 +226,8 @@ mod tests {
                     Expr((), elab_utils::pos::null(), Expr_::String(meth_name.into())),
                 ),
             ],
-            Some(elab_utils::expr::null()),
-        )));
+            unpacked_arg: Some(elab_utils::expr::null()),
+        }));
         elem.transform(&env, &mut pass);
 
         // Expect `TooFewArgs` error from variadic param
@@ -253,8 +254,8 @@ mod tests {
 
         let mut pass = ElabExprCallHhMethCallerPass;
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -262,8 +263,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::Null),
@@ -273,8 +274,8 @@ mod tests {
                     Expr((), elab_utils::pos::null(), Expr_::String(meth_name.into())),
                 ),
             ],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         let illegal_err_opt = env.into_errors().pop();
@@ -287,7 +288,11 @@ mod tests {
         assert!(match elem {
             Expr_::Invalid(expr) => {
                 if let Some(Expr(_, _, Expr_::Call(cc))) = *expr {
-                    if let (Expr(_, _, Expr_::Id(id)), _, _, _) = *cc {
+                    if let CallExpr {
+                        func: Expr(_, _, Expr_::Id(id)),
+                        ..
+                    } = *cc
+                    {
                         let Id(_, nm) = *id;
                         nm == sn::autoimported_functions::METH_CALLER
                     } else {
@@ -308,8 +313,8 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -317,8 +322,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
@@ -328,8 +333,8 @@ mod tests {
                     Expr((), elab_utils::pos::null(), Expr_::String(meth_name.into())),
                 ),
             ],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         let illegal_err_opt = env.into_errors().pop();
@@ -342,7 +347,11 @@ mod tests {
         assert!(match elem {
             Expr_::Invalid(expr) => {
                 if let Some(Expr(_, _, Expr_::Call(cc))) = *expr {
-                    if let (Expr(_, _, Expr_::Id(id)), _, _, _) = *cc {
+                    if let CallExpr {
+                        func: Expr(_, _, Expr_::Id(id)),
+                        ..
+                    } = *cc
+                    {
                         let Id(_, nm) = *id;
                         nm == sn::autoimported_functions::METH_CALLER
                     } else {
@@ -362,8 +371,8 @@ mod tests {
 
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -371,13 +380,13 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![(
+            targs: vec![],
+            args: vec![(
                 ParamKind::Pnormal,
                 Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
             )],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         let too_few_args_err_opt = env.into_errors().pop();
@@ -390,7 +399,11 @@ mod tests {
         assert!(match elem {
             Expr_::Invalid(expr) => {
                 if let Some(Expr(_, _, Expr_::Call(cc))) = *expr {
-                    if let (Expr(_, _, Expr_::Id(id)), _, _, _) = *cc {
+                    if let CallExpr {
+                        func: Expr(_, _, Expr_::Id(id)),
+                        ..
+                    } = *cc
+                    {
                         let Id(_, nm) = *id;
                         nm == sn::autoimported_functions::METH_CALLER
                     } else {
@@ -411,8 +424,8 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -420,8 +433,8 @@ mod tests {
                     sn::autoimported_functions::METH_CALLER.to_string(),
                 ))),
             ),
-            vec![],
-            vec![
+            targs: vec![],
+            args: vec![
                 (
                     ParamKind::Pnormal,
                     Expr((), elab_utils::pos::null(), Expr_::String(rcvr_name.into())),
@@ -432,8 +445,8 @@ mod tests {
                 ),
                 (ParamKind::Pnormal, elab_utils::expr::null()),
             ],
-            None,
-        )));
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         let too_many_args_err_opt = env.into_errors().pop();
@@ -446,7 +459,11 @@ mod tests {
         assert!(match elem {
             Expr_::Invalid(expr) => {
                 if let Some(Expr(_, _, Expr_::Call(cc))) = *expr {
-                    if let (Expr(_, _, Expr_::Id(id)), _, _, _) = *cc {
+                    if let CallExpr {
+                        func: Expr(_, _, Expr_::Id(id)),
+                        ..
+                    } = *cc
+                    {
                         let Id(_, nm) = *id;
                         nm == sn::autoimported_functions::METH_CALLER
                     } else {

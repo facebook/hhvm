@@ -52,8 +52,10 @@
                                          ((string), [7:12-34],
                                           (Await
                                              ((Awaitable<string>), [7:18-34],
-                                              (Call ((((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), 
-                                                 [], [(Pnormal, ((string), [7:28-33], (String "foo")))], None)))))
+                                              (Call
+                                                 { func = (((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))); 
+                                                   targs = []; args = [(Pnormal, ((string), [7:28-33], (String "foo")))]; 
+                                                   unpacked_arg = None }))))
                                          }))))
                                 ]
                               };
@@ -91,8 +93,10 @@
                                           ((string), [10:12-31],
                                            (Await
                                               ((Awaitable<string>), [10:18-31],
-                                               (Call ((((function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))), 
-                                                  [], [(Pnormal, ((string), [10:28-30], (Lvar ([10:28-30], $x))))], None)))))
+                                               (Call
+                                                  { func = (((function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))); 
+                                                    targs = []; args = [(Pnormal, ((string), [10:28-30], (Lvar ([10:28-30], $x))))]; 
+                                                    unpacked_arg = None }))))
                                           }))))
                                  ]
                                };

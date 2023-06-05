@@ -68,7 +68,10 @@ Errors:
                       (((int, int, int)), [12:3-19], (List [((int), [12:8-10], (Lvar ([12:8-10], $u))); ((int), [12:12-14], (Lvar ([12:12-14], $v))); ((int), [12:16-18], (Lvar ([12:16-18], $w)))]));
                       rhs =
                       (((int, int, int)), [12:22-42],
-                       (Call ((((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), [], [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))], None)))
+                       (Call
+                          { func = (((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))); 
+                            targs = []; args = [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))]; 
+                            unpacked_arg = None }))
                       }))))
              ]
            };
@@ -105,7 +108,10 @@ Errors:
                       (((int, int)), [17:22-42],
                        (Hole (
                           (((int, int)), [17:22-42],
-                           (Call ((((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), [], [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))], None))),
+                           (Call
+                              { func = (((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))); 
+                                targs = []; args = [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))]; 
+                                unpacked_arg = None })),
                           ((int, int)), ({suggest:nothing}), Typing)))
                       }))))
              ]

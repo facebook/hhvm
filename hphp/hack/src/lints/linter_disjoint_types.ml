@@ -44,7 +44,8 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Call ((_, _, Id (_, name)), (_ :: _ as tal), _, _)) -> begin
+      | (_, p, Call { func = (_, _, Id (_, name)); targs = _ :: _ as tal; _ })
+        -> begin
         match Decl_provider.get_fun (Tast_env.get_ctx env) name with
         | Some { fe_type; _ } -> begin
           match get_node fe_type with

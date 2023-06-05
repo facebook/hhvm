@@ -575,7 +575,7 @@ let expr tenv ((), _p, e) =
   | Cast (h, _) ->
     hint tenv h
   | New (_, hl, _, _, _)
-  | Call (_, hl, _, _) ->
+  | Call { targs = hl; _ } ->
     List.concat_map hl ~f:(fun (_, h) -> hint tenv h)
   | Lfun (f, _)
   | Efun { ef_fun = f; _ } ->

@@ -68,8 +68,11 @@
            [([13:3-9],
              (Expr
                 ((void), [13:3-8],
-                 (Call ((((function(Traversable<int> $i): void)), [13:3-4], (Id ([13:3-4], "\\i"))), 
-                    [], [(Pnormal, ((Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(Traversable<int> $i): void)), [13:3-4], (Id ([13:3-4], "\\i"))); 
+                      targs = [];
+                      args = [(Pnormal, ((Traversable<float>), [13:5-7], (Hole (((Traversable<float>), [13:5-7], (Lvar ([13:5-7], $i))), (Traversable<float>), (Traversable<int>), Typing))))];
+                      unpacked_arg = None }))));
              ([15:3-32],
               (Expr
                  ((TestTraversable), [15:3-31],
@@ -79,11 +82,13 @@
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
-                  (Call (
-                     (((function(Traversable<int> $i): void)), [18:3-10],
-                      (Obj_get (((TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Traversable<float>), [18:11-13], (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (Traversable<float>), (Traversable<int>), Typing))))], None
-                     )))))
+                  (Call
+                     { func =
+                       (((function(Traversable<int> $i): void)), [18:3-10],
+                        (Obj_get (((TestTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Traversable<int> $i): void)), [18:9-10], (Id ([18:9-10], "i"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((Traversable<float>), [18:11-13], (Hole (((Traversable<float>), [18:11-13], (Lvar ([18:11-13], $i))), (Traversable<float>), (Traversable<int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -110,17 +115,19 @@
            [([25:3-69],
              (Expr
                 ((void), [25:3-68],
-                 (Call ((((function(Traversable<int> $i): void)), [25:3-4], (Id ([25:3-4], "\\i"))), 
-                    [],
-                    [(Pnormal,
-                      ((Traversable<int>), [25:5-67],
-                       (Hole (((Traversable<float>), [25:64-66], (Lvar ([25:64-66], $i))), (Traversable<float>), (Traversable<int>),
-                          (UnsafeCast
-                             [([25:27-45], (Happly (([25:27-38], "\\HH\\Traversable"), [([25:39-44], (Hprim Tfloat))])));
-                               ([25:46-62], (Happly (([25:46-57], "\\HH\\Traversable"), [([25:58-61], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(Traversable<int> $i): void)), [25:3-4], (Id ([25:3-4], "\\i"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((Traversable<int>), [25:5-67],
+                         (Hole (((Traversable<float>), [25:64-66], (Lvar ([25:64-66], $i))), (Traversable<float>), (Traversable<int>),
+                            (UnsafeCast
+                               [([25:27-45], (Happly (([25:27-38], "\\HH\\Traversable"), [([25:39-44], (Hprim Tfloat))])));
+                                 ([25:46-62], (Happly (([25:46-57], "\\HH\\Traversable"), [([25:58-61], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([27:3-32],
               (Expr
                  ((TestTraversable), [27:3-31],
@@ -130,19 +137,21 @@
              ([30:3-75],
               (Expr
                  ((void), [30:3-74],
-                  (Call (
-                     (((function(Traversable<int> $i): void)), [30:3-10],
-                      (Obj_get (((TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Traversable<int>), [30:11-73],
-                        (Hole (((Traversable<float>), [30:70-72], (Lvar ([30:70-72], $i))), (Traversable<float>), (Traversable<int>),
-                           (UnsafeCast
-                              [([30:33-51], (Happly (([30:33-44], "\\HH\\Traversable"), [([30:45-50], (Hprim Tfloat))])));
-                                ([30:52-68], (Happly (([30:52-63], "\\HH\\Traversable"), [([30:64-67], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(Traversable<int> $i): void)), [30:3-10],
+                        (Obj_get (((TestTraversable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Traversable<int> $i): void)), [30:9-10], (Id ([30:9-10], "i"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Traversable<int>), [30:11-73],
+                          (Hole (((Traversable<float>), [30:70-72], (Lvar ([30:70-72], $i))), (Traversable<float>), (Traversable<int>),
+                             (UnsafeCast
+                                [([30:33-51], (Happly (([30:33-44], "\\HH\\Traversable"), [([30:45-50], (Hprim Tfloat))])));
+                                  ([30:52-68], (Happly (([30:52-63], "\\HH\\Traversable"), [([30:64-67], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

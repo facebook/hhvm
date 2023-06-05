@@ -97,14 +97,14 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
         | _ -> seen
     in
     ignore (check_const_cty Typing_set.empty cty)
-  | Call ((_, _, Id (_, f)), _, el, None)
+  | Call { func = (_, _, Id (_, f)); args; unpacked_arg = None; _ }
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with
       | (_, _, Array_get (e, Some _)) -> check_unset_exp e
       | _ -> check_expr (Env.set_val_kind env Typing_defs.Lval) e
     in
-    List.iter el ~f:(fun (_, e) -> check_unset_exp e)
+    List.iter args ~f:(fun (_, e) -> check_unset_exp e)
   | _ -> ()
 
 let handler =

@@ -139,6 +139,8 @@ type gconst = (ty, saved_env) Aast.gconst
 
 type module_def = (ty, saved_env) Aast.module_def
 
+type call_expr = (ty, saved_env) Aast.call_expr
+
 type by_names = {
   fun_tasts: def list SMap.t;
   class_tasts: def SMap.t;
@@ -248,8 +250,9 @@ let nast_converter =
         let targs =
           List.map ~f:(fun hint -> ((), super#on_hint () hint)) hints
         in
-        let id = ((), pos, Aast.Id (pos, name)) in
-        Aast.Call (id, targs, [(Ast_defs.Pnormal, ex)], None)
+        let func = ((), pos, Aast.Id (pos, name)) in
+        let args = [(Ast_defs.Pnormal, ex)] in
+        Aast.Call { func; targs; args; unpacked_arg = None }
       in
       match src with
       | Aast.UnsafeCast hints ->

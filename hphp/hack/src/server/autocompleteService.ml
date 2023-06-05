@@ -1699,9 +1699,10 @@ let visitor
       self#complete_id env id;
       super#on_Id env id
 
-    method! on_Call env f targs args unpack_arg =
-      autocomplete_enum_class_label_call env f args;
-      super#on_Call env f targs args unpack_arg
+    method! on_Call env call =
+      let Aast.{ func; args; _ } = call in
+      autocomplete_enum_class_label_call env func args;
+      super#on_Call env call
 
     method! on_New env ((_, _, cid_) as cid) el unpacked_element =
       (match cid_ with
@@ -1789,7 +1790,7 @@ let visitor
             | _ -> ())
           | _ -> ()
         end
-      | (_, _, Aast.Call ((recv_ty, _, _), _, args, _)) ->
+      | (_, _, Aast.(Call { func = (recv_ty, _, _); args; _ })) ->
         (match deref recv_ty with
         | (_r, Tfun ft) ->
           autocomplete_shape_literal_in_call env ft args;

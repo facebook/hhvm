@@ -34,9 +34,11 @@ Errors:
                     { bop = (Eq None); lhs = ((shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y)));
                       rhs =
                       ((shape(0 => string)), [7:8-19],
-                       (Call ((((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye"))),
-                          [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))], 
-                          [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))], None)))
+                       (Call
+                          { func = (((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye")));
+                            targs = [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))];
+                            args = [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))]; 
+                            unpacked_arg = None }))
                       }))));
             ([12:3-16],
              (Expr

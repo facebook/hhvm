@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use nast::CallExpr;
 use nast::Expr;
 use nast::Expr_;
 use nast::Id;
@@ -17,12 +18,11 @@ pub struct ElabExprCallCallUserFuncPass;
 impl Pass for ElabExprCallCallUserFuncPass {
     fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
-            Expr_::Call(box (
-                Expr(_, fn_expr_pos, Expr_::Id(box Id(_, fn_name))),
-                _,
-                fn_param_exprs,
-                _,
-            )) if fn_name == sn::std_lib_functions::CALL_USER_FUNC && fn_param_exprs.is_empty() => {
+            Expr_::Call(box CallExpr {
+                func: Expr(_, fn_expr_pos, Expr_::Id(box Id(_, fn_name))),
+                args: fn_param_exprs,
+                ..
+            }) if fn_name == sn::std_lib_functions::CALL_USER_FUNC && fn_param_exprs.is_empty() => {
                 // We're cloning here since we need to preserve the entire expression
                 env.emit_error(NamingError::DeprecatedUse {
                     pos: fn_expr_pos.clone(),
@@ -35,11 +35,14 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 Break(())
             }
 
-            Expr_::Call(box (fn_expr, _, fn_param_exprs, fn_variadic_param_opt))
-                if is_expr_call_user_func(env, fn_expr) && !fn_param_exprs.is_empty() =>
-            {
-                // remove the first element of `fn_param_exprs`
-                let (param_kind, head_expr) = fn_param_exprs.remove(0);
+            Expr_::Call(box CallExpr {
+                func,
+                args,
+                unpacked_arg,
+                ..
+            }) if is_expr_call_user_func(env, func) && !args.is_empty() => {
+                // remove the first element of `args`
+                let (param_kind, head_expr) = args.remove(0);
                 // raise an error if this is an inout param
                 if let ParamKind::Pinout(pk_pos) = &param_kind {
                     let pos = Pos::merge(pk_pos, &head_expr.1).unwrap();
@@ -50,9 +53,9 @@ impl Pass for ElabExprCallCallUserFuncPass {
                     })
                 }
                 // use the first argument as the function expression
-                *fn_expr = head_expr;
+                *func = head_expr;
                 // TODO[mjt] why are we dropping the unpacked variadic arg here?
-                *fn_variadic_param_opt = None;
+                *unpacked_arg = None;
                 Continue(())
             }
             _ => Continue(()),
@@ -83,8 +86,8 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprCallCallUserFuncPass;
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -92,10 +95,10 @@ mod tests {
                     sn::std_lib_functions::CALL_USER_FUNC.to_string(),
                 ))),
             ),
-            vec![],
-            vec![(ParamKind::Pnormal, elab_utils::expr::null())],
-            None,
-        )));
+            targs: vec![],
+            args: vec![(ParamKind::Pnormal, elab_utils::expr::null())],
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
 
         // Expect one deprecation error in the valid case
@@ -108,7 +111,11 @@ mod tests {
         // be empty
         assert!(match elem {
             Expr_::Call(cc) => {
-                let (Expr(_, _, expr_), _, args, _) = *cc;
+                let CallExpr {
+                    func: Expr(_, _, expr_),
+                    args,
+                    ..
+                } = *cc;
                 matches!(expr_, Expr_::Null) && args.is_empty()
             }
             _ => false,
@@ -120,8 +127,8 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprCallCallUserFuncPass;
-        let mut elem = Expr_::Call(Box::new((
-            Expr(
+        let mut elem = Expr_::Call(Box::new(CallExpr {
+            func: Expr(
                 (),
                 elab_utils::pos::null(),
                 Expr_::Id(Box::new(Id(
@@ -129,10 +136,10 @@ mod tests {
                     sn::std_lib_functions::CALL_USER_FUNC.to_string(),
                 ))),
             ),
-            vec![],
-            vec![],
-            None,
-        )));
+            targs: vec![],
+            args: vec![],
+            unpacked_arg: None,
+        }));
         elem.transform(&env, &mut pass);
         let mut errs = env.into_errors();
 
@@ -152,8 +159,14 @@ mod tests {
         // Expect our original expression to be wrapped in `Invalid`
         assert!(match elem {
             Expr_::Invalid(expr) => {
-                if let Some(Expr(_, _, Expr_::Call(box (Expr(_, _, Expr_::Id(id)), _, _, _)))) =
-                    *expr
+                if let Some(Expr(
+                    _,
+                    _,
+                    Expr_::Call(box CallExpr {
+                        func: Expr(_, _, Expr_::Id(id)),
+                        ..
+                    }),
+                )) = *expr
                 {
                     id.name() == sn::std_lib_functions::CALL_USER_FUNC
                 } else {

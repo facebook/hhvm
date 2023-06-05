@@ -65,11 +65,11 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, _, Call (_, _, te, _)) ->
+      | (_, _, Call { args; _ }) ->
         List.iter
           ~f:(function
             | (Ast_defs.Pnormal, _) -> ()
             | (Ast_defs.Pinout _, e) -> check_types env e)
-          te
+          args
       | _ -> ()
   end

@@ -105,10 +105,15 @@ let handler =
       | (_, p, Binop { bop = (Diff | Diff2 | Eqeqeq | Eqeq) as bop; lhs; rhs })
         ->
         ensure_valid_equality_check env p bop lhs rhs
-      | (_, p, Call ((_, _, Id (_, id)), [(tv1, _); (tv2, _)], _, _))
+      | ( _,
+          p,
+          Call { func = (_, _, Id (_, id)); targs = [(tv1, _); (tv2, _)]; _ } )
         when String.equal id SN.HH.contains ->
         ensure_valid_contains_check env p tv1 tv2
-      | (_, p, Call ((_, _, Id (_, id)), [(tk1, _); (tk2, _); _], _, _))
+      | ( _,
+          p,
+          Call { func = (_, _, Id (_, id)); targs = [(tk1, _); (tk2, _); _]; _ }
+        )
         when String.equal id SN.HH.contains_key ->
         ensure_valid_contains_key_check env p tk1 tk2
       | _ -> ()

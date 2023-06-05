@@ -30,36 +30,42 @@ let check_expr (expr_ : Tast.expr_) (is_fun_or_method : is_fun_or_method) =
   match is_fun_or_method with
   | Is_fun f_prop ->
     (match expr_ with
-    | Aast.Call ((_, _, Aast.Id (_, name)), _, _, _) ->
+    | Aast.Call { func = (_, _, Aast.Id (_, name)); _ } ->
       same_name_ignoring_ns name f_prop.fun_name
     | _ -> false)
   | Is_method m_prop ->
     (match expr_ with
     | Aast.Call
-        ( ( _,
-            _,
-            Aast.Obj_get
-              ((_, _, Aast.This), (_, _, Aast.Id (_, name)), _, Aast.Is_method)
-          ),
-          _,
-          _,
-          _ ) ->
+        {
+          func =
+            ( _,
+              _,
+              Aast.Obj_get
+                ((_, _, Aast.This), (_, _, Aast.Id (_, name)), _, Aast.Is_method)
+            );
+          _;
+        } ->
       same_name_ignoring_ns name m_prop.method_name
     | Aast.Call
-        ( ( _,
-            _,
-            Aast.Class_const ((_, _, Aast.CI (_, name_of_class)), (_, name)) ),
-          _,
-          _,
-          _ )
+        {
+          func =
+            ( _,
+              _,
+              Aast.Class_const ((_, _, Aast.CI (_, name_of_class)), (_, name))
+            );
+          _;
+        }
       when same_name_ignoring_ns name_of_class m_prop.class_name ->
       same_name_ignoring_ns name m_prop.method_name
     | Aast.Call
-        ((_, _, Aast.Class_const ((_, _, Aast.CIstatic), (_, name))), _, _, _)
-      ->
+        {
+          func = (_, _, Aast.Class_const ((_, _, Aast.CIstatic), (_, name)));
+          _;
+        } ->
       same_name_ignoring_ns name m_prop.method_name
     | Aast.Call
-        ((_, _, Aast.Class_const ((_, _, Aast.CIself), (_, name))), _, _, _) ->
+        { func = (_, _, Aast.Class_const ((_, _, Aast.CIself), (_, name))); _ }
+      ->
       same_name_ignoring_ns name m_prop.method_name
     | _ -> false)
 

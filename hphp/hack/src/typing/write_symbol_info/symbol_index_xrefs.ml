@@ -19,7 +19,8 @@ let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
   object (_self)
     inherit Tast_visitor.handler_base
 
-    method! at_Call _env (_, callee_pos, callee_exp) _targs args _unpack_arg =
+    method! at_Call _env call =
+      let Aast.{ func = (_, callee_pos, callee_exp); args; _ } = call in
       let f (_, (_, arg_pos, exp)) =
         let exp_json =
           match exp with

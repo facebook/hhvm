@@ -496,13 +496,7 @@ class type handler =
 
     method at_fun_ : Env.t -> Tast.fun_ -> unit
 
-    method at_Call :
-      Env.t ->
-      Tast.expr ->
-      Tast.targ list ->
-      (Ast_defs.param_kind * Tast.expr) list ->
-      Tast.expr option ->
-      unit
+    method at_Call : Env.t -> Tast.call_expr -> unit
 
     method at_hint : Env.t -> Aast.hint -> unit
 
@@ -535,7 +529,7 @@ class virtual handler_base : handler =
 
     method at_fun_ _ _ = ()
 
-    method at_Call _ _ _ _ _ = ()
+    method at_Call _ _ = ()
 
     method at_hint _ _ = ()
 
@@ -586,9 +580,9 @@ let iter_with (handlers : handler list) : iter =
       List.iter handlers ~f:(fun v -> v#at_fun_ env x);
       super#on_fun_ env x
 
-    method! on_Call env e tal el unpacked_element =
-      List.iter handlers ~f:(fun v -> v#at_Call env e tal el unpacked_element);
-      super#on_Call env e tal el unpacked_element
+    method! on_Call env call_expr =
+      List.iter handlers ~f:(fun v -> v#at_Call env call_expr);
+      super#on_Call env call_expr
 
     method! on_hint env h =
       List.iter handlers ~f:(fun v -> v#at_hint env h);

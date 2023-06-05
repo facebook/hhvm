@@ -199,7 +199,7 @@ let handler =
           verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
         | None -> ()
       end
-      | (_, pos, Call ((fun_ty, _, _), targs, _, _)) ->
+      | (_, pos, Call { func = (fun_ty, _, _); targs; _ }) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
         (match get_ft_tparams efun_ty with
         | Some (ft_tparams, ty) when not @@ get_ft_is_function_pointer ty ->

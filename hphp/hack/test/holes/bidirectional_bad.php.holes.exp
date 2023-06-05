@@ -72,14 +72,19 @@
                     { bop = (Eq None); lhs = ((mixed), [9:3-5], (Lvar ([9:3-5], $x)));
                       rhs =
                       ((mixed), [9:8-28],
-                       (Call ((((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx"))),
-                          [((string), ([9:8-11], (Happly (([Pos.none], "_"), [])))); ((mixed), ([9:8-11], (Happly (([Pos.none], "_"), []))))],
-                          [(Pnormal, ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Pnormal, ((string), [9:17-27], (String "whatever")))], None)))
+                       (Call
+                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
+                            targs = [((string), ([9:8-11], (Happly (([Pos.none], "_"), [])))); ((mixed), ([9:8-11], (Happly (([Pos.none], "_"), []))))];
+                            args = [(Pnormal, ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Pnormal, ((string), [9:17-27], (String "whatever")))]; 
+                            unpacked_arg = None }))
                       }))));
              ([10:3-13:4],
               (If (
                  ((bool), [10:7-26],
-                  (Call ((((function(readonly mixed $arg)[]: bool)), [10:7-22], (Id ([10:7-22], "\\HH\\is_any_array"))), [], [(Pnormal, ((mixed), [10:23-25], (Lvar ([10:23-25], $x))))], None))),
+                  (Call
+                     { func = (((function(readonly mixed $arg)[]: bool)), [10:7-22], (Id ([10:7-22], "\\HH\\is_any_array"))); 
+                       targs = []; args = [(Pnormal, ((mixed), [10:23-25], (Lvar ([10:23-25], $x))))]; 
+                       unpacked_arg = None })),
                  [([10:3-13:4], (AssertEnv (Refinement, {$x})));
                    ([12:5-21],
                     (Expr
@@ -87,13 +92,15 @@
                         (New (((C), [12:9-10], (CI ([12:9-10], "\\C"))), 
                            [],
                            [((dict<nothing, nothing>), [12:11-19],
-                             (Call ((((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict"))),
-                                [((nothing), ([12:11-15], (Happly (([Pos.none], "_"), [])))); ((nothing), ([12:11-15], (Happly (([Pos.none], "_"), []))))],
-                                [(Pnormal,
-                                  ((AnyArray<arraykey, mixed>), [12:16-18],
-                                   (Hole (((AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
-                                  ],
-                                None)))
+                             (Call
+                                { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
+                                  targs = [((nothing), ([12:11-15], (Happly (([Pos.none], "_"), [])))); ((nothing), ([12:11-15], (Happly (([Pos.none], "_"), []))))];
+                                  args =
+                                  [(Pnormal,
+                                    ((AnyArray<arraykey, mixed>), [12:16-18],
+                                     (Hole (((AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
+                                    ];
+                                  unpacked_arg = None }))
                              ],
                            None, ((function(dict<string, mixed> $spec): void)))))))
                    ],
@@ -129,14 +136,19 @@
                     { bop = (Eq None); lhs = ((mixed), [17:3-5], (Lvar ([17:3-5], $x)));
                       rhs =
                       ((mixed), [17:8-28],
-                       (Call ((((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx"))),
-                          [((string), ([17:8-11], (Happly (([Pos.none], "_"), [])))); ((mixed), ([17:8-11], (Happly (([Pos.none], "_"), []))))],
-                          [(Pnormal, ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Pnormal, ((string), [17:17-27], (String "whatever")))], None)))
+                       (Call
+                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
+                            targs = [((string), ([17:8-11], (Happly (([Pos.none], "_"), [])))); ((mixed), ([17:8-11], (Happly (([Pos.none], "_"), []))))];
+                            args = [(Pnormal, ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Pnormal, ((string), [17:17-27], (String "whatever")))]; 
+                            unpacked_arg = None }))
                       }))));
              ([18:3-22:4],
               (If (
                  ((bool), [18:7-26],
-                  (Call ((((function(readonly mixed $arg)[]: bool)), [18:7-22], (Id ([18:7-22], "\\HH\\is_any_array"))), [], [(Pnormal, ((mixed), [18:23-25], (Lvar ([18:23-25], $x))))], None))),
+                  (Call
+                     { func = (((function(readonly mixed $arg)[]: bool)), [18:7-22], (Id ([18:7-22], "\\HH\\is_any_array"))); 
+                       targs = []; args = [(Pnormal, ((mixed), [18:23-25], (Lvar ([18:23-25], $x))))]; 
+                       unpacked_arg = None })),
                  [([18:3-22:4], (AssertEnv (Refinement, {$x})));
                    ([19:5-19],
                     (Expr
@@ -145,9 +157,11 @@
                            { bop = (Eq None); lhs = ((dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y)));
                              rhs =
                              ((dict<arraykey, mixed>), [19:10-18],
-                              (Call ((((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict"))),
-                                 [((arraykey), ([19:10-14], (Happly (([Pos.none], "_"), [])))); ((mixed), ([19:10-14], (Happly (([Pos.none], "_"), []))))],
-                                 [(Pnormal, ((AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))], None)))
+                              (Call
+                                 { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict")));
+                                   targs = [((arraykey), ([19:10-14], (Happly (([Pos.none], "_"), [])))); ((mixed), ([19:10-14], (Happly (([Pos.none], "_"), []))))];
+                                   args = [(Pnormal, ((AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
+                                   unpacked_arg = None }))
                              }))));
                    ([21:5-15],
                     (Expr

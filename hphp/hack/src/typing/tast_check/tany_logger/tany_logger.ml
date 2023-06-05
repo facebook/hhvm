@@ -98,7 +98,7 @@ let mk_expr_info_internal ~context_id pos ty exp =
   in
   let exp_info =
     match exp with
-    | Aast.Call ((_, _, receiver), _, _, _) ->
+    | Aast.(Call { func = (_, _, receiver); _ }) ->
       let producer =
         match producer_id receiver with
         | Some id -> Some id

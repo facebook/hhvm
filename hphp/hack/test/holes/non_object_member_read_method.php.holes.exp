@@ -19,11 +19,12 @@
           [([5:3-12],
             (Expr
                ((nothing), [5:3-11],
-                (Call (
-                   ((nothing), [5:3-9],
-                    (Obj_get (((nonnull), [5:3-6], (Hole (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (nothing), Typing))), (
-                       (nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method))),
-                   [], [], None)))))
+                (Call
+                   { func =
+                     ((nothing), [5:3-9],
+                      (Obj_get (((nonnull), [5:3-6], (Hole (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (nothing), Typing))), (
+                         (nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method)));
+                     targs = []; args = []; unpacked_arg = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

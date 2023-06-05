@@ -68,8 +68,10 @@
            [([13:3-9],
              (Expr
                 ((void), [13:3-8],
-                 (Call ((((function(Vector<int> $g): void)), [13:3-4], (Id ([13:3-4], "\\g"))), 
-                    [], [(Pnormal, ((Vector<float>), [13:5-7], (Hole (((Vector<float>), [13:5-7], (Lvar ([13:5-7], $g))), (Vector<float>), (Vector<int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(Vector<int> $g): void)), [13:3-4], (Id ([13:3-4], "\\g"))); 
+                      targs = []; args = [(Pnormal, ((Vector<float>), [13:5-7], (Hole (((Vector<float>), [13:5-7], (Lvar ([13:5-7], $g))), (Vector<float>), (Vector<int>), Typing))))];
+                      unpacked_arg = None }))));
              ([15:3-27],
               (Expr
                  ((TestVector), [15:3-26],
@@ -79,10 +81,12 @@
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
-                  (Call (
-                     (((function(Vector<int> $g): void)), [18:3-10],
-                      (Obj_get (((TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Vector<float>), [18:11-13], (Hole (((Vector<float>), [18:11-13], (Lvar ([18:11-13], $g))), (Vector<float>), (Vector<int>), Typing))))], None)))))
+                  (Call
+                     { func =
+                       (((function(Vector<int> $g): void)), [18:3-10],
+                        (Obj_get (((TestVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Vector<int> $g): void)), [18:9-10], (Id ([18:9-10], "g"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((Vector<float>), [18:11-13], (Hole (((Vector<float>), [18:11-13], (Lvar ([18:11-13], $g))), (Vector<float>), (Vector<int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -109,17 +113,19 @@
            [([25:3-59],
              (Expr
                 ((void), [25:3-58],
-                 (Call ((((function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))), 
-                    [],
-                    [(Pnormal,
-                      ((Vector<int>), [25:5-57],
-                       (Hole (((Vector<float>), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>),
-                          (UnsafeCast
-                             [([25:27-40], (Happly (([25:27-33], "\\HH\\Vector"), [([25:34-39], (Hprim Tfloat))])));
-                               ([25:41-52], (Happly (([25:41-47], "\\HH\\Vector"), [([25:48-51], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(Vector<int> $g): void)), [25:3-4], (Id ([25:3-4], "\\g"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((Vector<int>), [25:5-57],
+                         (Hole (((Vector<float>), [25:54-56], (Lvar ([25:54-56], $g))), (Vector<float>), (Vector<int>),
+                            (UnsafeCast
+                               [([25:27-40], (Happly (([25:27-33], "\\HH\\Vector"), [([25:34-39], (Hprim Tfloat))])));
+                                 ([25:41-52], (Happly (([25:41-47], "\\HH\\Vector"), [([25:48-51], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([27:3-27],
               (Expr
                  ((TestVector), [27:3-26],
@@ -129,19 +135,21 @@
              ([30:3-65],
               (Expr
                  ((void), [30:3-64],
-                  (Call (
-                     (((function(Vector<int> $g): void)), [30:3-10],
-                      (Obj_get (((TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Vector<int>), [30:11-63],
-                        (Hole (((Vector<float>), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>),
-                           (UnsafeCast
-                              [([30:33-46], (Happly (([30:33-39], "\\HH\\Vector"), [([30:40-45], (Hprim Tfloat))])));
-                                ([30:47-58], (Happly (([30:47-53], "\\HH\\Vector"), [([30:54-57], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(Vector<int> $g): void)), [30:3-10],
+                        (Obj_get (((TestVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Vector<int> $g): void)), [30:9-10], (Id ([30:9-10], "g"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Vector<int>), [30:11-63],
+                          (Hole (((Vector<float>), [30:60-62], (Lvar ([30:60-62], $g))), (Vector<float>), (Vector<int>),
+                             (UnsafeCast
+                                [([30:33-46], (Happly (([30:33-39], "\\HH\\Vector"), [([30:40-45], (Hprim Tfloat))])));
+                                  ([30:47-58], (Happly (([30:47-53], "\\HH\\Vector"), [([30:54-57], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

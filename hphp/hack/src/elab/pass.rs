@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34283fead908923496826da156da450f>>
+// @generated SignedSource<<6e054c19409a6e35979c9d88bda21a5a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -413,6 +413,22 @@ pub trait Pass {
     }
     #[inline(always)]
     fn on_ty_targ_bottom_up(&mut self, env: &Env, elem: &mut Targ<Ex>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_call_expr_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut CallExpr<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_call_expr_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut CallExpr<Ex, En>,
+    ) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -1592,6 +1608,24 @@ where
     fn on_ty_targ_bottom_up(&mut self, env: &Env, elem: &mut Targ<Ex>) -> ControlFlow<()> {
         self.fst.on_ty_targ_bottom_up(env, elem)?;
         self.snd.on_ty_targ_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_call_expr_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut CallExpr<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_call_expr_top_down(env, elem)?;
+        self.snd.on_ty_call_expr_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_call_expr_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut CallExpr<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_ty_call_expr_bottom_up(env, elem)?;
+        self.snd.on_ty_call_expr_bottom_up(env, elem)
     }
     #[inline(always)]
     fn on_ty_user_attribute_top_down(

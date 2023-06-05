@@ -83,14 +83,15 @@ let extend_tparams env tparaml =
 let handle_meth_caller env call =
   match call with
   | Call
-      ( ((_, _, Id (_, cn)) as id),
-        targs,
-        [(pk, (ty, p1, String cl)); meth],
-        unpacked_element )
+      ({
+         func = (_, _, Id (_, cn));
+         args = [(pk, (ty, p1, String cl)); meth];
+         _;
+       } as call_expr)
     when String.equal cn SN.AutoimportedFunctions.meth_caller
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
-    Call (id, targs, [(pk, (ty, p1, String cl)); meth], unpacked_element)
+    Call { call_expr with args = [(pk, (ty, p1, String cl)); meth] }
   | _ -> call
 
 let contexts_ns =
@@ -280,21 +281,25 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           super#on_option super#on_collection_targ env c_targ_opt
         in
         Collection (id, c_targ_opt, flds)
-      | Call ((ty, p, Id (p2, cn)), targs, el, uarg)
+      | Call { func = (ty, p, Id (p2, cn)); targs; args; unpacked_arg }
         when SN.SpecialFunctions.is_special_function cn ->
         Call
-          ( (ty, p, Id (p2, cn)),
-            List.map targs ~f:(self#on_targ env),
-            List.map el ~f:(map_arg env),
-            Option.map uarg ~f:(self#on_expr env) )
-      | Call ((ty, p, Aast.Id id), tal, el, unpacked_element) ->
+          {
+            func = (ty, p, Id (p2, cn));
+            targs = List.map targs ~f:(self#on_targ env);
+            args = List.map args ~f:(map_arg env);
+            unpacked_arg = Option.map unpacked_arg ~f:(self#on_expr env);
+          }
+      | Call { func = (ty, p, Aast.Id id); targs; args; unpacked_arg } ->
         let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
-            ( (ty, p, Id new_id),
-              List.map tal ~f:(self#on_targ env),
-              List.map el ~f:(map_arg env),
-              Option.map unpacked_element ~f:(self#on_expr env) )
+            {
+              func = (ty, p, Id new_id);
+              targs = List.map targs ~f:(self#on_targ env);
+              args = List.map args ~f:(map_arg env);
+              unpacked_arg = Option.map unpacked_arg ~f:(self#on_expr env);
+            }
         in
         handle_meth_caller env renamed_call
       | FunctionPointer (FP_id fn, targs) ->

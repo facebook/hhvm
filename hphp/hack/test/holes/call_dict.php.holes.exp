@@ -76,13 +76,18 @@
            [([14:3-10],
              (Expr
                 ((void), [14:3-9],
-                 (Call ((((function(dict<int, int> $n): void)), [14:3-4], (Id ([14:3-4], "\\n"))), 
-                    [], [(Pnormal, ((dict<string, int>), [14:5-8], (Hole (((dict<string, int>), [14:5-8], (Lvar ([14:5-8], $n1))), (dict<string, int>), (dict<int, int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(dict<int, int> $n): void)), [14:3-4], (Id ([14:3-4], "\\n"))); 
+                      targs = []; args = [(Pnormal, ((dict<string, int>), [14:5-8], (Hole (((dict<string, int>), [14:5-8], (Lvar ([14:5-8], $n1))), (dict<string, int>), (dict<int, int>), Typing))))];
+                      unpacked_arg = None }))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
-                  (Call ((((function(dict<int, int> $n): void)), [16:3-4], (Id ([16:3-4], "\\n"))), 
-                     [], [(Pnormal, ((dict<int, string>), [16:5-8], (Hole (((dict<int, string>), [16:5-8], (Lvar ([16:5-8], $n2))), (dict<int, string>), (dict<int, int>), Typing))))], None)))));
+                  (Call
+                     { func = (((function(dict<int, int> $n): void)), [16:3-4], (Id ([16:3-4], "\\n"))); 
+                       targs = [];
+                       args = [(Pnormal, ((dict<int, string>), [16:5-8], (Hole (((dict<int, string>), [16:5-8], (Lvar ([16:5-8], $n2))), (dict<int, string>), (dict<int, int>), Typing))))];
+                       unpacked_arg = None }))));
              ([18:3-25],
               (Expr
                  ((TestDict), [18:3-24],
@@ -92,17 +97,23 @@
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
-                  (Call (
-                     (((function(dict<int, int> $n): void)), [21:3-10],
-                      (Obj_get (((TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((dict<string, int>), [21:11-14], (Hole (((dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing))))], None)))));
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [21:3-10],
+                        (Obj_get (((TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((dict<string, int>), [21:11-14], (Hole (((dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing))))];
+                       unpacked_arg = None }))));
              ([23:3-16],
               (Expr
                  ((void), [23:3-15],
-                  (Call (
-                     (((function(dict<int, int> $n): void)), [23:3-10],
-                      (Obj_get (((TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((dict<int, string>), [23:11-14], (Hole (((dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing))))], None)))))
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [23:3-10],
+                        (Obj_get (((TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((dict<int, string>), [23:11-14], (Hole (((dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -135,31 +146,35 @@
            [([31:3-65],
              (Expr
                 ((void), [31:3-64],
-                 (Call ((((function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))), 
-                    [],
-                    [(Pnormal,
-                      ((dict<int, int>), [31:5-63],
-                       (Hole (((dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
-                          (UnsafeCast
-                             [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
-                               ([31:44-57], (Happly (([31:44-48], "\\HH\\dict"), [([31:49-52], (Hprim Tint)); ([31:53-56], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(dict<int, int> $n): void)), [31:3-4], (Id ([31:3-4], "\\n"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((dict<int, int>), [31:5-63],
+                         (Hole (((dict<string, int>), [31:59-62], (Lvar ([31:59-62], $n1))), (dict<string, int>), (dict<int, int>),
+                            (UnsafeCast
+                               [([31:27-43], (Happly (([31:27-31], "\\HH\\dict"), [([31:32-38], (Hprim Tstring)); ([31:39-42], (Hprim Tint))])));
+                                 ([31:44-57], (Happly (([31:44-48], "\\HH\\dict"), [([31:49-52], (Hprim Tint)); ([31:53-56], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([33:3-65],
               (Expr
                  ((void), [33:3-64],
-                  (Call ((((function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))), 
-                     [],
-                     [(Pnormal,
-                       ((dict<int, int>), [33:5-63],
-                        (Hole (((dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
-                           (UnsafeCast
-                              [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
-                                ([33:44-57], (Happly (([33:44-48], "\\HH\\dict"), [([33:49-52], (Hprim Tint)); ([33:53-56], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func = (((function(dict<int, int> $n): void)), [33:3-4], (Id ([33:3-4], "\\n"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((dict<int, int>), [33:5-63],
+                          (Hole (((dict<int, string>), [33:59-62], (Lvar ([33:59-62], $n2))), (dict<int, string>), (dict<int, int>),
+                             (UnsafeCast
+                                [([33:27-43], (Happly (([33:27-31], "\\HH\\dict"), [([33:32-35], (Hprim Tint)); ([33:36-42], (Hprim Tstring))])));
+                                  ([33:44-57], (Happly (([33:44-48], "\\HH\\dict"), [([33:49-52], (Hprim Tint)); ([33:53-56], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([35:3-25],
               (Expr
                  ((TestDict), [35:3-24],
@@ -169,35 +184,39 @@
              ([38:3-71],
               (Expr
                  ((void), [38:3-70],
-                  (Call (
-                     (((function(dict<int, int> $n): void)), [38:3-10],
-                      (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((dict<int, int>), [38:11-69],
-                        (Hole (((dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
-                           (UnsafeCast
-                              [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
-                                ([38:50-63], (Happly (([38:50-54], "\\HH\\dict"), [([38:55-58], (Hprim Tint)); ([38:59-62], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [38:3-10],
+                        (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((dict<int, int>), [38:11-69],
+                          (Hole (((dict<string, int>), [38:65-68], (Lvar ([38:65-68], $n1))), (dict<string, int>), (dict<int, int>),
+                             (UnsafeCast
+                                [([38:33-49], (Happly (([38:33-37], "\\HH\\dict"), [([38:38-44], (Hprim Tstring)); ([38:45-48], (Hprim Tint))])));
+                                  ([38:50-63], (Happly (([38:50-54], "\\HH\\dict"), [([38:55-58], (Hprim Tint)); ([38:59-62], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([40:3-71],
               (Expr
                  ((void), [40:3-70],
-                  (Call (
-                     (((function(dict<int, int> $n): void)), [40:3-10],
-                      (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((dict<int, int>), [40:11-69],
-                        (Hole (((dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
-                           (UnsafeCast
-                              [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
-                                ([40:50-63], (Happly (([40:50-54], "\\HH\\dict"), [([40:55-58], (Hprim Tint)); ([40:59-62], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(dict<int, int> $n): void)), [40:3-10],
+                        (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((dict<int, int>), [40:11-69],
+                          (Hole (((dict<int, string>), [40:65-68], (Lvar ([40:65-68], $n2))), (dict<int, string>), (dict<int, int>),
+                             (UnsafeCast
+                                [([40:33-49], (Happly (([40:33-37], "\\HH\\dict"), [([40:38-41], (Hprim Tint)); ([40:42-48], (Hprim Tstring))])));
+                                  ([40:50-63], (Happly (([40:50-54], "\\HH\\dict"), [([40:55-58], (Hprim Tint)); ([40:59-62], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

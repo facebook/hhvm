@@ -110,7 +110,8 @@ class visitor =
       let ( + ) = self#plus in
       special_fun_acc + acc + super#on_expr env expr
 
-    method! on_Call env ((_, _, expr_) as e) hl el unpacked_element =
+    method! on_Call env call =
+      let Aast.{ func = (_, _, expr_); _ } = call in
       let acc =
         match expr_ with
         | Aast.Id (pos, name) -> self#fun_call env Function name pos
@@ -127,7 +128,7 @@ class visitor =
           |> List.fold ~init:self#zero ~f:self#plus
         | _ -> self#zero
       in
-      self#plus acc (super#on_Call env e hl el unpacked_element)
+      self#plus acc (super#on_Call env call)
   end
 
 let find_fun_calls ctx tasts =

@@ -595,8 +595,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::ObjGet(Box::new((
@@ -612,9 +612,9 @@ mod tests {
                                 PropOrMethod::IsMethod,
                             ))),
                         ),
-                        vec![],
-                        vec![],
-                        Some({
+                        targs: vec![],
+                        args: vec![],
+                        unpacked_arg: Some({
                             let tmp: LocalId = args_var;
                             Expr(
                                 (),
@@ -622,7 +622,7 @@ mod tests {
                                 Expr_::Lvar(Box::new(Lid(pos().clone(), tmp))),
                             )
                         }),
-                    ))),
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -649,8 +649,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::Id(Box::new(Id(
@@ -658,8 +658,8 @@ mod tests {
                                 "\\__SystemLib\\dynamic_meth_caller".to_owned(),
                             ))),
                         ),
-                        vec![],
-                        vec![
+                        targs: vec![],
+                        args: vec![
                             (ParamKind::Pnormal, {
                                 let tmp: Expr = cexpr.clone();
                                 tmp
@@ -677,8 +677,8 @@ mod tests {
                                 tmp
                             }),
                         ],
-                        None,
-                    ))),
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -699,8 +699,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::Id(Box::new(Id(
@@ -708,13 +708,13 @@ mod tests {
                                 "\\__SystemLib\\meth_caller".to_owned(),
                             ))),
                         ),
-                        vec![],
-                        vec![(ParamKind::Pnormal, {
+                        targs: vec![],
+                        args: vec![(ParamKind::Pnormal, {
                             let tmp: String = mangle_name.to_owned();
                             Expr((), pos().clone(), Expr_::String(tmp.into()))
                         })],
-                        None,
-                    ))),
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -739,8 +739,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::Id(Box::new(Id(
@@ -748,15 +748,15 @@ mod tests {
                                 "\\HH\\invariant".to_owned(),
                             ))),
                         ),
-                        vec![],
-                        vec![
+                        targs: vec![],
+                        args: vec![
                             (
                                 ParamKind::Pnormal,
                                 Expr(
                                     (),
                                     __hygienic_pos.clone(),
-                                    Expr_::Call(Box::new((
-                                        Expr(
+                                    Expr_::Call(Box::new(CallExpr {
+                                        func: Expr(
                                             (),
                                             __hygienic_pos.clone(),
                                             Expr_::Id(Box::new(Id(
@@ -764,8 +764,8 @@ mod tests {
                                                 "\\is_a".to_owned(),
                                             ))),
                                         ),
-                                        vec![],
-                                        vec![
+                                        targs: vec![],
+                                        args: vec![
                                             (ParamKind::Pnormal, {
                                                 let tmp: Expr = obj_lvar.clone();
                                                 tmp
@@ -775,8 +775,8 @@ mod tests {
                                                 Expr((), pc.clone(), Expr_::String(tmp.into()))
                                             }),
                                         ],
-                                        None,
-                                    ))),
+                                        unpacked_arg: None,
+                                    })),
                                 ),
                             ),
                             (ParamKind::Pnormal, {
@@ -784,8 +784,8 @@ mod tests {
                                 Expr((), pos().clone(), Expr_::String(tmp.into()))
                             }),
                         ],
-                        None,
-                    ))),
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -806,8 +806,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::ObjGet(Box::new((
@@ -823,9 +823,9 @@ mod tests {
                                 PropOrMethod::IsMethod,
                             ))),
                         ),
-                        vec![],
-                        vec![],
-                        Some({
+                        targs: vec![],
+                        args: vec![],
+                        unpacked_arg: Some({
                             let tmp: LocalId = args_var;
                             Expr(
                                 (),
@@ -833,7 +833,7 @@ mod tests {
                                 Expr_::Lvar(Box::new(Lid(pos().clone(), tmp))),
                             )
                         }),
-                    ))),
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -851,19 +851,19 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "echo".to_owned()))),
                         ),
-                        vec![],
-                        vec![(ParamKind::Pnormal, {
+                        targs: vec![],
+                        args: vec![(ParamKind::Pnormal, {
                             let tmp: String = tail;
                             Expr((), Pos::NONE.clone(), Expr_::String(tmp.into()))
                         })],
-                        None,
-                    ))),
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -881,8 +881,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::ClassConst(Box::new((
@@ -904,10 +904,10 @@ mod tests {
                                 ),
                             ))),
                         ),
-                        vec![],
-                        vec![],
-                        None,
-                    ))),
+                        targs: vec![],
+                        args: vec![],
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -925,8 +925,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::ClassConst(Box::new((
@@ -948,10 +948,10 @@ mod tests {
                                 ),
                             ))),
                         ),
-                        vec![],
-                        vec![],
-                        None,
-                    ))),
+                        targs: vec![],
+                        args: vec![],
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),
@@ -997,8 +997,8 @@ mod tests {
                             Stmt_::Expr(Box::new(Expr(
                                 (),
                                 __hygienic_pos.clone(),
-                                Expr_::Call(Box::new((
-                                    Expr(
+                                Expr_::Call(Box::new(CallExpr {
+                                    func: Expr(
                                         (),
                                         __hygienic_pos.clone(),
                                         Expr_::Id(Box::new(Id(
@@ -1006,8 +1006,8 @@ mod tests {
                                             "unset".to_owned(),
                                         ))),
                                     ),
-                                    vec![],
-                                    vec![(ParamKind::Pnormal, {
+                                    targs: vec![],
+                                    args: vec![(ParamKind::Pnormal, {
                                         let tmp: LocalId = name;
                                         Expr(
                                             (),
@@ -1015,8 +1015,8 @@ mod tests {
                                             Expr_::Lvar(Box::new(Lid(Pos::NONE.clone(), tmp))),
                                         )
                                     })],
-                                    None,
-                                ))),
+                                    unpacked_arg: None,
+                                })),
                             ))),
                         )]),
                         Block(vec![Stmt(__hygienic_pos.clone(), Stmt_::Noop)]),
@@ -1047,8 +1047,8 @@ mod tests {
                         Expr(
                             (),
                             __hygienic_pos.clone(),
-                            Expr_::Call(Box::new((
-                                Expr(
+                            Expr_::Call(Box::new(CallExpr {
+                                func: Expr(
                                     (),
                                     __hygienic_pos.clone(),
                                     Expr_::Id(Box::new(Id(
@@ -1056,8 +1056,8 @@ mod tests {
                                         "\\__SystemLib\\__debugger_is_uninit".to_owned(),
                                     ))),
                                 ),
-                                vec![],
-                                vec![(ParamKind::Pnormal, {
+                                targs: vec![],
+                                args: vec![(ParamKind::Pnormal, {
                                     let tmp: LocalId = name.clone();
                                     Expr(
                                         (),
@@ -1065,8 +1065,8 @@ mod tests {
                                         Expr_::Lvar(Box::new(Lid(p().clone(), tmp))),
                                     )
                                 })],
-                                None,
-                            ))),
+                                unpacked_arg: None,
+                            })),
                         ),
                         Block(vec![Stmt(
                             __hygienic_pos.clone(),
@@ -1272,8 +1272,8 @@ mod tests {
                                         rhs: Expr(
                                             (),
                                             __hygienic_pos.clone(),
-                                            Expr_::Call(Box::new((
-                                                Expr(
+                                            Expr_::Call(Box::new(CallExpr {
+                                                func: Expr(
                                                     (),
                                                     __hygienic_pos.clone(),
                                                     Expr_::Id(Box::new(Id(
@@ -1282,12 +1282,12 @@ mod tests {
                                                             .to_owned()
                                                     )))
                                                 ),
-                                                vec![],
-                                                std::iter::empty()
+                                                targs: vec![],
+                                                args: std::iter::empty()
                                                     .chain(args.into_iter())
                                                     .collect::<Vec<_>>(),
-                                                None
-                                            )))
+                                                unpacked_arg: None
+                                            }))
                                         )
                                     }))
                                 )))
@@ -1504,8 +1504,8 @@ mod tests {
                 let __hygienic_tmp = Expr(
                     (),
                     __hygienic_pos.clone(),
-                    Expr_::Call(Box::new((
-                        Expr(
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
                             (),
                             __hygienic_pos.clone(),
                             Expr_::Lfun(Box::new((
@@ -1580,10 +1580,10 @@ mod tests {
                                 vec![],
                             ))),
                         ),
-                        vec![],
-                        vec![],
-                        None,
-                    ))),
+                        targs: vec![],
+                        args: vec![],
+                        unpacked_arg: None,
+                    })),
                 );
                 __hygienic_tmp
             }),

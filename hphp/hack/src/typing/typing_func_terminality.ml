@@ -64,9 +64,9 @@ let typed_expression_exits (ty, _, _e) = is_type_no_return (get_node ty)
 
 let expression_exits env (_, _, e) =
   match e with
-  | Call ((_, _, Id (_, fun_name)), _, _, _) ->
+  | Call { func = (_, _, Id (_, fun_name)); _ } ->
     funopt_is_noreturn @@ get_fun (Typing_env.get_ctx env) fun_name
-  | Call ((_, _, Class_const ((_, _, ci), meth_id)), _, _, _) ->
+  | Call { func = (_, _, Class_const ((_, _, ci), meth_id)); _ } ->
     static_meth_is_noreturn env ci meth_id
   | _ -> false
 

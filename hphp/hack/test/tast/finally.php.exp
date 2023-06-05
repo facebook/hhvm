@@ -42,16 +42,20 @@ Errors:
                          { bop = (Eq None); lhs = ((shape()), [13:5-7], (Lvar ([13:5-7], $s)));
                            rhs =
                            ((shape()), [13:10-33],
-                            (Await ((Awaitable<shape()>), [13:16-33], (Call ((((function(): Awaitable<shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))), [], [], None)))))
+                            (Await
+                               ((Awaitable<shape()>), [13:16-33],
+                                (Call { func = (((function(): Awaitable<shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))); targs = []; args = []; unpacked_arg = None }))))
                            }))));
                   ([14:5-28],
                    (Expr
                       ((null), [14:5-27],
-                       (Call (
-                          (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],
-                           (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx")))),
-                          [((nothing), ([14:13-16], (Happly (([Pos.none], "_"), []))))],
-                          [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))], None)))))
+                       (Call
+                          { func =
+                            (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],
+                             (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx"))));
+                            targs = [((nothing), ([14:13-16], (Happly (([Pos.none], "_"), []))))];
+                            args = [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))]; 
+                            unpacked_arg = None }))))
                   ]
                 )))
              ]

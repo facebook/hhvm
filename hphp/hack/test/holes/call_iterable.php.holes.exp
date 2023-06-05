@@ -68,8 +68,10 @@
            [([13:3-9],
              (Expr
                 ((void), [13:3-8],
-                 (Call ((((function(Iterable<int> $m): void)), [13:3-4], (Id ([13:3-4], "\\m"))), 
-                    [], [(Pnormal, ((Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (Iterable<float>), (Iterable<int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(Iterable<int> $m): void)), [13:3-4], (Id ([13:3-4], "\\m"))); 
+                      targs = []; args = [(Pnormal, ((Iterable<float>), [13:5-7], (Hole (((Iterable<float>), [13:5-7], (Lvar ([13:5-7], $m))), (Iterable<float>), (Iterable<int>), Typing))))];
+                      unpacked_arg = None }))));
              ([15:3-29],
               (Expr
                  ((TestIterable), [15:3-28],
@@ -79,10 +81,12 @@
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
-                  (Call (
-                     (((function(Iterable<int> $m): void)), [18:3-10],
-                      (Obj_get (((TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (Iterable<float>), (Iterable<int>), Typing))))], None)))))
+                  (Call
+                     { func =
+                       (((function(Iterable<int> $m): void)), [18:3-10],
+                        (Obj_get (((TestIterable), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Iterable<int> $m): void)), [18:9-10], (Id ([18:9-10], "m"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((Iterable<float>), [18:11-13], (Hole (((Iterable<float>), [18:11-13], (Lvar ([18:11-13], $m))), (Iterable<float>), (Iterable<int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -109,17 +113,19 @@
            [([25:3-63],
              (Expr
                 ((void), [25:3-62],
-                 (Call ((((function(Iterable<int> $m): void)), [25:3-4], (Id ([25:3-4], "\\m"))), 
-                    [],
-                    [(Pnormal,
-                      ((Iterable<int>), [25:5-61],
-                       (Hole (((Iterable<float>), [25:58-60], (Lvar ([25:58-60], $m))), (Iterable<float>), (Iterable<int>),
-                          (UnsafeCast
-                             [([25:27-42], (Happly (([25:27-35], "\\HH\\Iterable"), [([25:36-41], (Hprim Tfloat))])));
-                               ([25:43-56], (Happly (([25:43-51], "\\HH\\Iterable"), [([25:52-55], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(Iterable<int> $m): void)), [25:3-4], (Id ([25:3-4], "\\m"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((Iterable<int>), [25:5-61],
+                         (Hole (((Iterable<float>), [25:58-60], (Lvar ([25:58-60], $m))), (Iterable<float>), (Iterable<int>),
+                            (UnsafeCast
+                               [([25:27-42], (Happly (([25:27-35], "\\HH\\Iterable"), [([25:36-41], (Hprim Tfloat))])));
+                                 ([25:43-56], (Happly (([25:43-51], "\\HH\\Iterable"), [([25:52-55], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([27:3-29],
               (Expr
                  ((TestIterable), [27:3-28],
@@ -129,19 +135,21 @@
              ([30:3-69],
               (Expr
                  ((void), [30:3-68],
-                  (Call (
-                     (((function(Iterable<int> $m): void)), [30:3-10],
-                      (Obj_get (((TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Iterable<int>), [30:11-67],
-                        (Hole (((Iterable<float>), [30:64-66], (Lvar ([30:64-66], $m))), (Iterable<float>), (Iterable<int>),
-                           (UnsafeCast
-                              [([30:33-48], (Happly (([30:33-41], "\\HH\\Iterable"), [([30:42-47], (Hprim Tfloat))])));
-                                ([30:49-62], (Happly (([30:49-57], "\\HH\\Iterable"), [([30:58-61], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(Iterable<int> $m): void)), [30:3-10],
+                        (Obj_get (((TestIterable), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Iterable<int> $m): void)), [30:9-10], (Id ([30:9-10], "m"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Iterable<int>), [30:11-67],
+                          (Hole (((Iterable<float>), [30:64-66], (Lvar ([30:64-66], $m))), (Iterable<float>), (Iterable<int>),
+                             (UnsafeCast
+                                [([30:33-48], (Happly (([30:33-41], "\\HH\\Iterable"), [([30:42-47], (Hprim Tfloat))])));
+                                  ([30:49-62], (Happly (([30:49-57], "\\HH\\Iterable"), [([30:58-61], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -61,10 +61,11 @@
            [([11:3-23],
              (Return
                 (Some ((T::TX), [11:10-22],
-                       (Call (
-                          (((function(): T::TX)), [11:10-20],
-                           (Obj_get (((T), [11:10-15], (Lvar ([11:10-15], $left))), (((function(): T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, Is_method))),
-                          [], [], None))))))
+                       (Call
+                          { func =
+                            (((function(): T::TX)), [11:10-20],
+                             (Obj_get (((T), [11:10-15], (Lvar ([11:10-15], $left))), (((function(): T::TX)), [11:17-20], (Id ([11:17-20], "gen"))), OG_nullthrows, Is_method)));
+                            targs = []; args = []; unpacked_arg = None })))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -122,10 +123,13 @@
                               [([17:23-37],
                                 (Return
                                    (Some ((void), [17:23-37],
-                                          (Call (
-                                             (((function(T::TX $x): void)), [17:23-33],
-                                              (Obj_get (((T), [17:23-28], (Lvar ([17:23-28], $left))), (((function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, Is_method))),
-                                             [], [(Pnormal, ((TR), [17:34-36], (Lvar ([17:34-36], $x))))], None))))))
+                                          (Call
+                                             { func =
+                                               (((function(T::TX $x): void)), [17:23-33],
+                                                (Obj_get (((T), [17:23-28], (Lvar ([17:23-28], $left))), (
+                                                   ((function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, Is_method)));
+                                               targs = []; args = [(Pnormal, ((TR), [17:34-36], (Lvar ([17:34-36], $x))))]; 
+                                               unpacked_arg = None })))))
                                 ]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
@@ -171,9 +175,11 @@
                     { bop = (Eq None); lhs = ((<expr#1>::TX), [21:3-7], (Lvar ([21:3-7], $gen)));
                       rhs =
                       ((<expr#1>::TX), [21:10-20],
-                       (Call ((((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
-                          [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
-                          [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))], None)))
+                       (Call
+                          { func = (((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen")));
+                            targs = [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))];
+                            args = [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))]; 
+                            unpacked_arg = None }))
                       }))));
              ([22:3-21],
               (Expr
@@ -182,15 +188,19 @@
                      { bop = (Eq None); lhs = (((function(<expr#2>::TX): void)), [22:3-7], (Lvar ([22:3-7], $log)));
                        rhs =
                        (((function(<expr#2>::TX): void)), [22:10-20],
-                        (Call ((((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
-                           [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
-                           [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))], None)))
+                        (Call
+                           { func = (((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log")));
+                             targs = [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))];
+                             args = [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))]; 
+                             unpacked_arg = None }))
                        }))));
              ([26:3-14],
               (Expr
                  ((void), [26:3-13],
-                  (Call ((((function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))), 
-                     [], [(Pnormal, ((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing))))], None)))))
+                  (Call
+                     { func = (((function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))); 
+                       targs = []; args = [(Pnormal, ((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

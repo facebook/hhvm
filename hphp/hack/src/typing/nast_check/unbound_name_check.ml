@@ -264,7 +264,7 @@ let handler ctx =
     method! at_expr env (_, _, e) =
       match e with
       | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
-      | Aast.Call ((_, _, Aast.Id ((p, name) as id)), _, _, _) ->
+      | Aast.(Call { func = (_, _, Aast.Id ((p, name) as id)); _ }) ->
         let () = check_fun_name env id in
         { env with seen_names = SMap.add name p env.seen_names }
       | Aast.Id ((p, name) as id) ->

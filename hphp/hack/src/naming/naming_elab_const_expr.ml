@@ -114,7 +114,7 @@ let on_expr_top_down
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);
         (ctx, Error (Err.invalid_expr expr))
     end
-    | Aast.(Call ((_, _, call_expr_), _, _, _)) -> begin
+    | Aast.(Call { func = (_, _, call_expr_); _ }) -> begin
       match call_expr_ with
       | Aast.(Id (_, nm))
         when String.(

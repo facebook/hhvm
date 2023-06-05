@@ -247,8 +247,10 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
           Aast.Expr
             ( call_ty,
               call_pos,
-              Aast.Call
-                ((recv_ty, recv_pos, Aast.Id (name_pos, name)), _, args, _) ) );
+              Aast.(
+                Call
+                  { func = (recv_ty, recv_pos, Id (name_pos, name)); args; _ })
+            ) );
       ] )
     when String.equal name SN.AutoimportedFunctions.invariant_violation
          && has_same_start stmt_pos call_pos ->
@@ -271,11 +273,15 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
     Some
       ( call_ty,
         call_pos,
-        Aast.Call
-          ( ( recv_ty_invariant,
-              recv_pos,
-              Aast.Id (name_pos, SN.AutoimportedFunctions.invariant) ),
-            [],
-            (Ast_defs.Pnormal, invariant_cond) :: args,
-            None ) )
+        Aast.(
+          Call
+            {
+              func =
+                ( recv_ty_invariant,
+                  recv_pos,
+                  Id (name_pos, SN.AutoimportedFunctions.invariant) );
+              targs = [];
+              args = (Ast_defs.Pnormal, invariant_cond) :: args;
+              unpacked_arg = None;
+            }) )
   | _ -> None

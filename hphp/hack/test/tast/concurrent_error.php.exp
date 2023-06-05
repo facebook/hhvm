@@ -34,13 +34,16 @@ Errors:
          f_body =
          { fb_ast =
            [([8:3-13],
-             (Awaitall ([((Some ([9:17-26], __tmp$1)), ((Awaitable<int>), [9:17-26], (Call ((((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))), [], [], None))))],
+             (Awaitall (
+                [((Some ([9:17-26], __tmp$1)),
+                  ((Awaitable<int>), [9:17-26], (Call { func = (((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))); targs = []; args = []; unpacked_arg = None })))],
                 [([10:5-21],
                   (Expr
                      ((Awaitable<int>), [10:5-20],
                       (Binop
                          { bop = (Eq None); lhs = ((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2)));
-                           rhs = ((Awaitable<int>), [10:11-20], (Call ((((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))), [], [], None))) }))));
+                           rhs =
+                           ((Awaitable<int>), [10:11-20], (Call { func = (((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))); targs = []; args = []; unpacked_arg = None })) }))));
                   ([9:5-27], (Expr ((int), [9:5-26], (Binop { bop = (Eq None); lhs = ((int), [9:5-8], (Lvar ([9:5-8], $v1))); rhs = ((int), [9:11-26], (Lvar ([9:11-26], __tmp$1))) }))))]
                 )));
              ([12:3-20],

@@ -42,14 +42,17 @@
            [([7:3-12:5],
              (Expr
                 ((void), [7:3-12:4],
-                 (Call ((((function(mixed $_): void)), [7:3-15], (Id ([7:3-15], "\\expect_mixed"))), 
-                    [],
-                    [(Pnormal,
-                      ((dict<arraykey, mixed>), [8:5-11:6],
-                       (KeyValCollection (([8:5-9], Dict), None,
-                          [(((string), [9:7-10], (String "a")), ((int), [9:14-16], (Lvar ([9:14-16], $a)))); (((string), [10:7-10], (String "b")), ((string), [10:14-16], (Lvar ([10:14-16], $b))))]))))
-                      ],
-                    None)))))
+                 (Call
+                    { func = (((function(mixed $_): void)), [7:3-15], (Id ([7:3-15], "\\expect_mixed"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((dict<arraykey, mixed>), [8:5-11:6],
+                         (KeyValCollection (([8:5-9], Dict), None,
+                            [(((string), [9:7-10], (String "a")), ((int), [9:14-16], (Lvar ([9:14-16], $a)))); (((string), [10:7-10], (String "b")), ((string), [10:14-16], (Lvar ([10:14-16], $b))))]
+                            ))))
+                        ];
+                      unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

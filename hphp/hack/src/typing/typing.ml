@@ -1635,10 +1635,11 @@ let rec condition_nullity ~nonnull (env : env) te =
   | ( _,
       _,
       Aast.Call
-        ( (_, _, Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx))),
-          _,
-          [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)],
-          _ ) )
+        {
+          func = (_, _, Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx)));
+          args = [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)];
+          _;
+        } )
     when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
     ->
     let field = Tast.to_nast_expr field in
@@ -2077,12 +2078,13 @@ let rec rewrite_expr_tree_maketree env expr f =
   let (env, expr_) =
     match expr_ with
     | Call
-        ( ( fun_pos,
-            p,
-            (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) ),
-          targs,
-          args,
-          variadic ) ->
+        ({
+           func =
+             ( fun_pos,
+               p,
+               (Lfun (fun_, idl) | Efun { ef_fun = fun_; ef_use = idl; _ }) );
+           _;
+         } as call_expr) ->
       (* Express tree literals containing splices use an anonymous
          function that returns the makeTree call.
 
@@ -2102,7 +2104,7 @@ let rec rewrite_expr_tree_maketree env expr f =
       let (env, body_ast) = List.map_env env fun_.f_body.fb_ast ~f:map_stmt in
       let fun_ = { fun_ with f_body = { fb_ast = body_ast } } in
 
-      (env, Call ((fun_pos, p, Lfun (fun_, idl)), targs, args, variadic))
+      (env, Call { call_expr with func = (fun_pos, p, Lfun (fun_, idl)) })
     | Call _ ->
       (* The desugarer might give us a simple call to makeTree, so we
          can process it immediately. *)
@@ -2135,8 +2137,7 @@ let maketree_with_type_param env p expr expected_ty =
   let (hint_virtual, env) = synthesize_type_param env p "TInfer" expected_ty in
   let rewrite_expr env expr =
     match expr with
-    | Call (e, _, el, unpacked_element) ->
-      (env, Call (e, [((), hint_virtual)], el, unpacked_element))
+    | Call e -> (env, Call { e with targs = [((), hint_virtual)] })
     | e -> (env, e)
   in
 
@@ -2691,7 +2692,7 @@ and stmt_ env pos st =
             List.fold ~init:env b1 ~f:(fun env (_, tst) ->
                 match (te, tst) with
                 | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
-                    Aast.Expr (_, _, Call ((_, _, Id (_, s)), _, _, _)) )
+                    Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ }) )
                   when String.equal
                          s
                          SN.AutoimportedFunctions.invariant_violation ->
@@ -3431,7 +3432,13 @@ and expr_
     ((_, p, e) as outer) =
   let (e, outer) =
     match e with
-    | Call ((_, _, Id (_, s)), [_targ_from; (_, targ_to)], (_, arg) :: _, _)
+    | Call
+        {
+          func = (_, _, Id (_, s));
+          targs = [_targ_from; (_, targ_to)];
+          args = (_, arg) :: _;
+          _;
+        }
       when String.equal s SN.PseudoFunctions.unsafe_cast
            && TypecheckerOptions.everything_sdt (Env.get_tcopt env) ->
       (* Under implicit pessimisation, treat UNSAFE case as an upcast to a like type *)
@@ -4313,17 +4320,18 @@ and expr_
            Some (hole_on_ty_mismatch ~ty_mismatch_opt:key_ty_mismatch_opt te2)
          ))
       ty
-  | Call (((_, pos_id, Id (_, s)) as e), explicit_targs, el, None)
+  | Call
+      { func = (_, pos_id, Id (_, s)) as e; targs; args; unpacked_arg = None }
     when Hash_set.mem typing_env_pseudofunctions s ->
     let (env, _tel, tys) =
-      argument_list_exprs (expr ~accept_using_var:true) env el
+      argument_list_exprs (expr ~accept_using_var:true) env args
     in
     let env =
       if String.equal s SN.PseudoFunctions.hh_expect then
-        do_hh_expect ~equivalent:false env pos_id explicit_targs p tys
+        do_hh_expect ~equivalent:false env pos_id targs p tys
       else if String.equal s SN.PseudoFunctions.hh_expect_equivalent then
-        do_hh_expect ~equivalent:true env pos_id explicit_targs p tys
-      else if not (List.is_empty explicit_targs) then (
+        do_hh_expect ~equivalent:true env pos_id targs p tys
+      else if not (List.is_empty targs) then (
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(
@@ -4338,7 +4346,7 @@ and expr_
         Typing_log.hh_show_env p env;
         env
       ) else if String.equal s SN.PseudoFunctions.hh_log_level then
-        match el with
+        match args with
         | [
          (Ast_defs.Pnormal, (_, _, String key_str));
          (Ast_defs.Pnormal, (_, _, Int level_str));
@@ -4353,7 +4361,7 @@ and expr_
         let _ = loop_forever env in
         env
       else if String.equal s SN.PseudoFunctions.hh_time then begin
-        do_hh_time el;
+        do_hh_time args;
         env
       end else
         env
@@ -4371,12 +4379,12 @@ and expr_
         p
         env
         e
-        explicit_targs
-        el
+        targs
+        args
         None
     in
     (env, te, ty)
-  | Call (e, explicit_targs, el, unpacked_element) ->
+  | Call { func; targs; args; unpacked_arg } ->
     let env = might_throw env in
     let ((env, te, ty), should_forget_fakes) =
       dispatch_call
@@ -4386,10 +4394,10 @@ and expr_
         ?in_await
         p
         env
-        e
-        explicit_targs
-        el
-        unpacked_element
+        func
+        targs
+        args
+        unpacked_arg
     in
     let env =
       if should_forget_fakes then
@@ -4807,9 +4815,9 @@ and expr_
   | Await e ->
     begin
       match e with
-      | (_, p, Aast.Call ((_, _, Aast.Id (_, func)), _, _, _))
-        when String.equal func SN.PseudoFunctions.unsafe_cast
-             || String.equal func SN.PseudoFunctions.unsafe_nonnull_cast ->
+      | (_, p, Aast.Call { func = (_, _, Aast.Id (_, f)); _ })
+        when String.equal f SN.PseudoFunctions.unsafe_cast
+             || String.equal f SN.PseudoFunctions.unsafe_nonnull_cast ->
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(primary @@ Primary.Unsafe_cast_await p)
@@ -7090,8 +7098,8 @@ and dispatch_call
     el
     unpacked_element =
   let expr = expr ~allow_awaitable:(*?*) false in
-  let make_call env te tal tel typed_unpack_element ty =
-    make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
+  let make_call env func targs args unpacked_arg ty =
+    make_result env p (Aast.Call { func; targs; args; unpacked_arg }) ty
   in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
@@ -7557,17 +7565,17 @@ and dispatch_call
         unpacked_element
     in
     (match expr with
-    | (ty, _, Call (caller, tal, tel, c)) ->
-      let (caller_ty, caller_pos, _) = caller in
+    | (ty, _, Call { func; targs; args; unpacked_arg }) ->
+      let (caller_ty, caller_pos, _) = func in
       (* Rewrap the caller in the readonly expression after we're done *)
       let (env, wrapped_caller) =
         Typing_utils.make_simplify_typed_expr
           env
           caller_pos
           caller_ty
-          (Aast.ReadonlyExpr caller)
+          (Aast.ReadonlyExpr func)
       in
-      let result = make_call env wrapped_caller tal tel c ty in
+      let result = make_call env wrapped_caller targs args unpacked_arg ty in
       (result, s)
     | _ -> ((env, expr, ty), s))
   (* Call instance method *)
@@ -9817,8 +9825,14 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     (LEnv.drop_cont env C.Next, { lset = Local_id.Set.empty; pkgs = SSet.empty })
   | Aast.False when tparamet ->
     (LEnv.drop_cont env C.Next, { lset = Local_id.Set.empty; pkgs = SSet.empty })
-  | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, te)], None)
-    when String.equal SN.StdlibFunctions.is_null func ->
+  | Aast.Call
+      {
+        func = (_, _, Aast.Id (_, f));
+        args = [(_, te)];
+        unpacked_arg = None;
+        _;
+      }
+    when String.equal SN.StdlibFunctions.is_null f ->
     let (env, lset) = condition_nullity ~nonnull:(not tparamet) env te in
     (env, { lset; pkgs = SSet.empty })
   | Aast.Binop
@@ -9916,15 +9930,33 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
           condition env tparamet e2)
     in
     (env, { lset = Local_id.Set.union lset1 lset2; pkgs = SSet.empty })
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
+  | Aast.Call
+      {
+        func = (_, p, Aast.Id (_, f));
+        args = [(_, lv)];
+        unpacked_arg = None;
+        _;
+      }
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
     let (env, lset) = safely_refine_is_array env HackDictOrDArray p f lv in
     (env, { lset; pkgs = SSet.empty })
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
+  | Aast.Call
+      {
+        func = (_, p, Aast.Id (_, f));
+        args = [(_, lv)];
+        unpacked_arg = None;
+        _;
+      }
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
     let (env, lset) = safely_refine_is_array env HackVecOrVArray p f lv in
     (env, { lset; pkgs = SSet.empty })
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
+  | Aast.Call
+      {
+        func = (_, p, Aast.Id (_, f));
+        args = [(_, lv)];
+        unpacked_arg = None;
+        _;
+      }
     when String.equal f SN.StdlibFunctions.is_any_array ->
     let (env, lset) =
       refine_for_is
@@ -9940,13 +9972,16 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     in
     (env, { lset; pkgs = SSet.empty })
   | Aast.Call
-      ( ( _,
-          _,
-          Aast.Class_const ((_, _, Aast.CI (_, class_name)), (_, method_name))
-        ),
-        _,
-        [(_, shape); (_, field)],
-        None )
+      {
+        func =
+          ( _,
+            _,
+            Aast.Class_const ((_, _, Aast.CI (_, class_name)), (_, method_name))
+          );
+        args = [(_, shape); (_, field)];
+        unpacked_arg = None;
+        _;
+      }
     when tparamet
          && String.equal class_name SN.Shapes.cShapes
          && String.equal method_name SN.Shapes.keyExists ->

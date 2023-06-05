@@ -30,6 +30,7 @@ use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast::Abstraction;
 use oxidized::ast::Block;
+use oxidized::ast::CallExpr;
 use oxidized::ast::CaptureLid;
 use oxidized::ast::ClassGetExpr;
 use oxidized::ast::ClassHint;
@@ -61,7 +62,6 @@ use oxidized::ast::ReifyKind;
 use oxidized::ast::Sid;
 use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
-use oxidized::ast::Targ;
 use oxidized::ast::Tparam;
 use oxidized::ast::TypeHint;
 use oxidized::ast::UserAttribute;
@@ -1062,12 +1062,12 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                 }
                 Expr_::Call(x) if is_meth_caller(&x) => self.visit_meth_caller(scope, x)?,
                 Expr_::Call(x)
-                    if (x.0)
+                    if (x.func)
                         .as_class_get()
                         .and_then(|(id, _, _)| id.as_ciexpr())
                         .and_then(|x| x.as_id())
                         .map_or(false, string_utils::is_parent)
-                        || (x.0)
+                        || (x.func)
                             .as_class_const()
                             .and_then(|(id, _)| id.as_ciexpr())
                             .and_then(|x| x.as_id())
@@ -1167,15 +1167,15 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     fn visit_dyn_meth_caller(
         &mut self,
         scope: &mut Scope<'b, 'arena>,
-        mut x: CallExpr,
+        mut x: Box<CallExpr>,
         pos: &Pos,
     ) -> Result<Expr_> {
-        let force = if let Expr_::Id(ref id) = (x.0).2 {
+        let force = if let Expr_::Id(ref id) = x.func.2 {
             strip_id(id).eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
         } else {
             false
         };
-        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
+        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.args {
             error::ensure_normal_paramkind(pk_c)?;
             error::ensure_normal_paramkind(pk_f)?;
             let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
@@ -1192,10 +1192,10 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     fn visit_meth_caller_funcptr(
         &mut self,
         scope: &mut Scope<'b, 'arena>,
-        mut x: CallExpr,
+        mut x: Box<CallExpr>,
         pos: &Pos,
     ) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.args {
             error::ensure_normal_paramkind(pk_cls)?;
             error::ensure_normal_paramkind(pk_f)?;
             match (&cls, func.as_string()) {
@@ -1228,7 +1228,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                                 unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                             ))
                         }
-                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
+                        _ => Err(Error::fatal_parse(&pc, "Invalid class")),
                     }
                 }
                 (Expr_::String(cls_name), Some(fname)) => Ok(self.convert_meth_caller_to_func_ptr(
@@ -1263,9 +1263,9 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     fn visit_meth_caller(
         &mut self,
         scope: &mut Scope<'b, 'arena>,
-        mut x: CallExpr,
+        mut x: Box<CallExpr>,
     ) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.args {
             error::ensure_normal_paramkind(pk_cls)?;
             error::ensure_normal_paramkind(pk_f)?;
             match (&cls, func.as_string()) {
@@ -1628,10 +1628,10 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
         match e_owned {
             // Must have at least one argument
             Expr_::Call(mut x)
-                if !x.2.is_empty() && {
+                if !x.args.is_empty() && {
                     // Function name should be HH\FIXME\UNSAFE_CAST
                     // or HH\FIXME\UNSAFE_NONNULL_CAST
-                    if let Expr_::Id(ref id) = (x.0).2 {
+                    if let Expr_::Id(ref id) = (x.func).2 {
                         id.1 == pseudo_functions::UNSAFE_CAST
                             || id.1 == pseudo_functions::UNSAFE_NONNULL_CAST
                     } else {
@@ -1640,7 +1640,7 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
                 } =>
             {
                 // Select first argument
-                let Expr(_, _, e) = x.2.swap_remove(0).1;
+                let Expr(_, _, e) = x.args.swap_remove(0).1;
                 e_owned = e;
             }
             _ => break e_owned,
@@ -1648,10 +1648,8 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
     }
 }
 
-type CallExpr = Box<(Expr, Vec<Targ>, Vec<(ParamKind, Expr)>, Option<Expr>)>;
-
 fn is_dyn_meth_caller(x: &CallExpr) -> bool {
-    if let Expr_::Id(ref id) = (x.0).2 {
+    if let Expr_::Id(ref id) = (x.func).2 {
         let name = strip_id(id);
         name.eq_ignore_ascii_case("hh\\dynamic_meth_caller")
             || name.eq_ignore_ascii_case("hh\\dynamic_meth_caller_force")
@@ -1661,7 +1659,7 @@ fn is_dyn_meth_caller(x: &CallExpr) -> bool {
 }
 
 fn is_meth_caller(x: &CallExpr) -> bool {
-    if let Expr_::Id(ref id) = (x.0).2 {
+    if let Expr_::Id(ref id) = x.func.2 {
         let name = strip_id(id);
         name.eq_ignore_ascii_case("hh\\meth_caller") || name.eq_ignore_ascii_case("meth_caller")
     } else {

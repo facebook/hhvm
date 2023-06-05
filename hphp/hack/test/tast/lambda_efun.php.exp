@@ -46,7 +46,10 @@ Errors:
                 ((int), [16:3-13],
                  (Binop
                     { bop = (Eq None); lhs = ((int), [16:3-5], (Lvar ([16:3-5], $l)));
-                      rhs = ((int), [16:8-13], (Call ((((function(int $z): int)), [16:8-10], (Lvar ([16:8-10], $x))), [], [(Pnormal, ((int), [16:11-12], (Int "2")))], None))) }))));
+                      rhs =
+                      ((int), [16:8-13],
+                       (Call { func = (((function(int $z): int)), [16:8-10], (Lvar ([16:8-10], $x))); targs = []; args = [(Pnormal, ((int), [16:11-12], (Int "2")))]; unpacked_arg = None }))
+                      }))));
             ([18:3-20:4],
              (Expr
                 (((function(int $z): int)), [18:3-20:4],
@@ -81,7 +84,10 @@ Errors:
                 ((int), [21:3-13],
                  (Binop
                     { bop = (Eq None); lhs = ((int), [21:3-5], (Lvar ([21:3-5], $l)));
-                      rhs = ((int), [21:8-13], (Call ((((function(int $z): int)), [21:8-10], (Lvar ([21:8-10], $x))), [], [(Pnormal, ((int), [21:11-12], (Int "2")))], None))) }))));
+                      rhs =
+                      ((int), [21:8-13],
+                       (Call { func = (((function(int $z): int)), [21:8-10], (Lvar ([21:8-10], $x))); targs = []; args = [(Pnormal, ((int), [21:11-12], (Int "2")))]; unpacked_arg = None }))
+                      }))));
             ([23:3-29],
              (Expr
                 (((function(int $a, int $b): int)), [23:3-28],
@@ -122,8 +128,10 @@ Errors:
                     { bop = (Eq None); lhs = ((int), [24:3-5], (Lvar ([24:3-5], $l)));
                       rhs =
                       ((int), [24:8-17],
-                       (Call ((((function(int $a, int $b): int)), [24:8-10], (Lvar ([24:8-10], $x))), 
-                          [], [(Pnormal, ((int), [24:11-12], (Int "2"))); (Pnormal, ((int), [24:14-16], (Lvar ([24:14-16], $y))))], None)))
+                       (Call
+                          { func = (((function(int $a, int $b): int)), [24:8-10], (Lvar ([24:8-10], $x))); 
+                            targs = []; args = [(Pnormal, ((int), [24:11-12], (Int "2"))); (Pnormal, ((int), [24:14-16], (Lvar ([24:14-16], $y))))]; 
+                            unpacked_arg = None }))
                       }))))
             ]
           };

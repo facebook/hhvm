@@ -6,6 +6,7 @@
 use bitflags::bitflags;
 use nast::Binop;
 use nast::Bop;
+use nast::CallExpr;
 use nast::ClassConstKind;
 use nast::ClassId;
 use nast::ClassId_;
@@ -150,7 +151,10 @@ impl Pass for ElabConstExprPass {
                         invalid(expr_)
                     }
                 },
-                Expr_::Call(box (Expr(_, _, call_expr_), _, _, _)) => match call_expr_ {
+                Expr_::Call(box CallExpr {
+                    func: Expr(_, _, call_expr_),
+                    ..
+                }) => match call_expr_ {
                     Expr_::Id(box id)
                         if id.name() == sn::std_lib_functions::ARRAY_MARK_LEGACY
                             || id.name() == sn::pseudo_functions::UNSAFE_CAST

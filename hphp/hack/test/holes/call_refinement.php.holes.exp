@@ -86,13 +86,15 @@
                 ((dynamic), [13:3-15],
                  (Binop
                     { bop = (Eq None); lhs = ((dynamic), [13:3-7], (Lvar ([13:3-7], $arr)));
-                      rhs = ((dynamic), [13:10-15], (Call ((((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))), [], [], None))) }))));
+                      rhs = ((dynamic), [13:10-15], (Call { func = (((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))); targs = []; args = []; unpacked_arg = None })) }))));
              ([15:3-17:4],
               (If (
                  ((dynamic), [15:7-22],
-                  (Call ((((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo"))),
-                     [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))],
-                     [((Pinout [15:11-16]), ((dynamic), [15:17-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))], None))),
+                  (Call
+                     { func = (((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo")));
+                       targs = [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))];
+                       args = [((Pinout [15:11-16]), ((dynamic), [15:17-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))]; 
+                       unpacked_arg = None })),
                  [([16:5-12], (Return None))], [([Pos.none], Noop)])));
              ([18:3-25],
               (Expr
@@ -101,9 +103,11 @@
                      { bop = (Eq None); lhs = ((nothing), [18:3-12], (Lvar ([18:3-12], $whatever)));
                        rhs =
                        ((nothing), [18:15-24],
-                        (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
-                           [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
-                           [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))], None)))
+                        (Call
+                           { func = (((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux")));
+                             targs = [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))];
+                             args = [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))]; 
+                             unpacked_arg = None }))
                        }))))
              ]
            };

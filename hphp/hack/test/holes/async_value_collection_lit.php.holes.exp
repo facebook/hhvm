@@ -47,16 +47,22 @@
                 ((?int), [10:3-32],
                  (Binop
                     { bop = (Eq None); lhs = ((?int), [10:3-5], (Lvar ([10:3-5], $x)));
-                      rhs = ((?int), [10:8-32], (Await ((Awaitable<?int>), [10:14-32], (Call ((((function(): Awaitable<?int>)), [10:14-30], (Id ([10:14-30], "\\async_get_an_int"))), [], [], None)))))
+                      rhs =
+                      ((?int), [10:8-32],
+                       (Await
+                          ((Awaitable<?int>), [10:14-32],
+                           (Call { func = (((function(): Awaitable<?int>)), [10:14-30], (Id ([10:14-30], "\\async_get_an_int"))); targs = []; args = []; unpacked_arg = None }))))
                       }))));
              ([12:3-24],
               (Expr
                  ((void), [12:3-23],
-                  (Call ((((function(Set<int> $x): void)), [12:3-13], (Id ([12:3-13], "\\take_a_set"))), 
-                     [],
-                     [(Pnormal,
-                       ((Set<int>), [12:14-22], (ValCollection (([12:14-17], Set), None, [((?int), [12:19-21], (Hole (((?int), [12:19-21], (Lvar ([12:19-21], $x))), (?int), (int), Typing)))]))))],
-                     None)))))
+                  (Call
+                     { func = (((function(Set<int> $x): void)), [12:3-13], (Id ([12:3-13], "\\take_a_set"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Set<int>), [12:14-22], (ValCollection (([12:14-17], Set), None, [((?int), [12:19-21], (Hole (((?int), [12:19-21], (Lvar ([12:19-21], $x))), (?int), (int), Typing)))]))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 

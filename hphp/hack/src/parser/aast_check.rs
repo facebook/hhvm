@@ -188,6 +188,7 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
+        use aast::CallExpr;
         use aast::ClassId;
         use aast::ClassId_::*;
         use aast::Expr;
@@ -198,7 +199,12 @@ impl<'ast> Visitor<'ast> for Checker {
             if !c.in_methodish {
                 self.add_error(&p.1, syntax_error::toplevel_await_use);
             }
-        } else if let Some((Expr(_, _, f), _targs, args, _)) = p.2.as_call() {
+        } else if let Some(CallExpr {
+            func: Expr(_, _, f),
+            args,
+            ..
+        }) = p.2.as_call()
+        {
             if let Some((ClassId(_, _, CIexpr(Expr(_, pos, Id(id)))), ..)) = f.as_class_const() {
                 if Self::name_eq_this_and_in_static_method(c, &id.1) {
                     self.add_error(pos, syntax_error::this_in_static);

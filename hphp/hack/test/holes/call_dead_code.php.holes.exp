@@ -36,12 +36,19 @@
                    ([10:5-13],
                     (Expr
                        ((void), [10:5-12],
-                        (Call ((((function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))), 
-                           [], [(Pnormal, ((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing))))], None)))))
+                        (Call
+                           { func = (((function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))); 
+                             targs = []; args = [(Pnormal, ((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing))))]; 
+                             unpacked_arg = None }))))
                    ],
                  [([12:5-19], (Expr ((string), [12:5-18], (Binop { bop = (Eq None); lhs = ((string), [12:5-7], (Lvar ([12:5-7], $x))); rhs = ((string), [12:10-18], (String "string")) }))));
                    ([13:5-13],
-                    (Expr ((void), [13:5-12], (Call ((((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [(Pnormal, ((nothing), [13:9-11], (Lvar ([13:9-11], $x))))], None)))))
+                    (Expr
+                       ((void), [13:5-12],
+                        (Call
+                           { func = (((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))); 
+                             targs = []; args = [(Pnormal, ((nothing), [13:9-11], (Lvar ([13:9-11], $x))))]; 
+                             unpacked_arg = None }))))
                    ]
                  )))
              ]
@@ -68,15 +75,23 @@
                    ([22:5-48],
                     (Expr
                        ((void), [22:5-47],
-                        (Call ((((function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))), 
-                           [],
-                           [(Pnormal,
-                             ((int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))],
-                           None)))))
+                        (Call
+                           { func = (((function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))); 
+                             targs = [];
+                             args =
+                             [(Pnormal,
+                               ((int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))
+                               ];
+                             unpacked_arg = None }))))
                    ],
                  [([24:5-19], (Expr ((string), [24:5-18], (Binop { bop = (Eq None); lhs = ((string), [24:5-7], (Lvar ([24:5-7], $x))); rhs = ((string), [24:10-18], (String "string")) }))));
                    ([25:5-13],
-                    (Expr ((void), [25:5-12], (Call ((((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [(Pnormal, ((nothing), [25:9-11], (Lvar ([25:9-11], $x))))], None)))))
+                    (Expr
+                       ((void), [25:5-12],
+                        (Call
+                           { func = (((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))); 
+                             targs = []; args = [(Pnormal, ((nothing), [25:9-11], (Lvar ([25:9-11], $x))))]; 
+                             unpacked_arg = None }))))
                    ]
                  )))
              ]

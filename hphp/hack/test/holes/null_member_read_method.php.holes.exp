@@ -19,10 +19,11 @@
           [([5:3-12],
             (Expr
                ((nothing), [5:3-11],
-                (Call (
-                   ((nothing), [5:3-9],
-                    (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method))),
-                   [], [], None)))))
+                (Call
+                   { func =
+                     ((nothing), [5:3-9],
+                      (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method)));
+                     targs = []; args = []; unpacked_arg = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -49,11 +50,12 @@
            [([10:3-12],
              (Expr
                 ((nothing), [10:3-11],
-                 (Call (
-                    ((nothing), [10:3-9],
-                     (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), (
-                        (nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_method))),
-                    [], [], None)))))
+                 (Call
+                    { func =
+                      ((nothing), [10:3-9],
+                       (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), (
+                          (nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_method)));
+                      targs = []; args = []; unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -80,11 +82,12 @@
            [([15:3-12],
              (Expr
                 ((nothing), [15:3-11],
-                 (Call (
-                    ((nothing), [15:3-9],
-                     (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), (
-                        (nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_method))),
-                    [], [], None)))))
+                 (Call
+                    { func =
+                      ((nothing), [15:3-9],
+                       (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), (
+                          (nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_method)));
+                      targs = []; args = []; unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

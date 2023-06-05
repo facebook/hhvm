@@ -416,22 +416,20 @@ let visitor =
       let (_, _, virtualized_expr_) = et_virtualized_expr in
       let e =
         match virtualized_expr_ with
-        | Aast.Call
-            ( ( _,
-                _,
-                Aast.Efun
-                  {
-                    Aast.ef_fun =
+        | Aast.(
+            Call
+              {
+                func =
+                  ( _,
+                    _,
+                    Efun
                       {
-                        Aast.f_body =
-                          { Aast.fb_ast = [(_, Aast.Return (Some e))]; _ };
+                        ef_fun =
+                          { f_body = { fb_ast = [(_, Return (Some e))]; _ }; _ };
                         _;
-                      };
-                    _;
-                  } ),
-              _,
-              _,
-              _ ) ->
+                      } );
+                _;
+              }) ->
           (* The virtualized expression is wrapped in an invoked
              lambda to help check unbound variables, which leads to
              unwanted closure info in hovers. Use the inner
@@ -465,7 +463,10 @@ let visitor =
       | Some e -> self#on_expr env e
       | None -> super#on_If env cond then_block else_block
 
-    method! on_Call env ((_, _, expr_) as e) tal el unpacked_element =
+    method! on_Call
+        env
+        Aast.{ func = (_, _, expr_) as e; targs = tal; args = el; unpacked_arg }
+        =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a
        * property, class const, or global const access instead of a method call.
@@ -484,8 +485,13 @@ let visitor =
              show the inferred type, and don't show
              MyVisitor::stringType() information. *)
           match expr_ with
-          | Aast.Call
-              ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
+          | Aast.(
+              Call
+                {
+                  func = (_, _, Class_const (_, (_, methName)));
+                  args = [(_, arg)];
+                  _;
+                })
             when String.equal methName SN.ExpressionTrees.symbolType ->
             (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
             self#on_expr env arg
@@ -521,7 +527,7 @@ let visitor =
         Option.value_map
           ~default:Result_set.empty
           ~f:(self#on_expr env)
-          unpacked_element
+          unpacked_arg
       in
       ea + tala + ela + arg_names + uea
 

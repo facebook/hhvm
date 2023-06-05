@@ -40,27 +40,29 @@
            [([6:3-24],
              (Expr
                 ((void), [6:3-23],
-                 (Call ((((function((function(int): num) $f): void)), [6:3-12], (Id ([6:3-12], "\\takes_fun"))), 
-                    [],
-                    [(Pnormal,
-                      (((function(int $x): num)), [6:13-22],
-                       (Lfun (
-                          { f_span = [6:13-22]; f_readonly_this = None; 
-                            f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((num), None);
-                            f_params =
-                            [{ param_annotation = (int); param_type_hint = ((int), None); 
-                               param_is_variadic = false; param_pos = [6:13-15]; 
-                               param_name = "$x"; param_expr = None; 
-                               param_readonly = None; param_callconv = Pnormal; 
-                               param_user_attributes = []; param_visibility = None }
-                              ];
-                            f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some ((int), [6:20-22], (Lvar ([6:20-22], $x))))))] }; 
-                            f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None },
-                          []))))
-                      ],
-                    None)))))
+                 (Call
+                    { func = (((function((function(int): num) $f): void)), [6:3-12], (Id ([6:3-12], "\\takes_fun"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        (((function(int $x): num)), [6:13-22],
+                         (Lfun (
+                            { f_span = [6:13-22]; f_readonly_this = None; 
+                              f_annotation = (); f_readonly_ret = None; 
+                              f_ret = ((num), None);
+                              f_params =
+                              [{ param_annotation = (int); param_type_hint = ((int), None); 
+                                 param_is_variadic = false; param_pos = [6:13-15]; 
+                                 param_name = "$x"; param_expr = None; 
+                                 param_readonly = None; param_callconv = Pnormal; 
+                                 param_user_attributes = []; param_visibility = None }
+                                ];
+                              f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some ((int), [6:20-22], (Lvar ([6:20-22], $x))))))] }; 
+                              f_fun_kind = FSync; f_user_attributes = []; 
+                              f_external = false; f_doc_comment = None },
+                            []))))
+                        ];
+                      unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

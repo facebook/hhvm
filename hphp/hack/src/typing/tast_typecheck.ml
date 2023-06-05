@@ -48,13 +48,15 @@ let refine (cond_ty, _, cond_expr) _cond_is_true gamma =
     | _ -> false
   in
   match cond_expr with
-  | Call ((_, _, Id (_, id)), [], _, None) when is_refinement_fun id ->
+  | Call { func = (_, _, Id (_, id)); targs = []; unpacked_arg = None; _ }
+    when is_refinement_fun id ->
     raise Not_implemented
   | Call
-      ( (_, _, Class_const ((_, _, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
-        _,
-        _,
-        _ ) ->
+      {
+        func =
+          (_, _, Class_const ((_, _, CI (_, "\\HH\\Shapes")), (_, "keyExists")));
+        _;
+      } ->
     raise Not_implemented
   | Is _
   | As _

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8e66942a9732d299b357b0250a618a3>>
+// @generated SignedSource<<a867c0ec8581e905777652532a915839>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -916,15 +916,7 @@ pub enum Expr_<'a, Ex, En> {
     ///     // lowered to:
     ///     (async () ==> { return 1; })()
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Call(
-        &'a (
-            &'a Expr<'a, Ex, En>,
-            &'a [&'a Targ<'a, Ex>],
-            &'a [(ast_defs::ParamKind<'a>, &'a Expr<'a, Ex, En>)],
-            Option<&'a Expr<'a, Ex, En>>,
-        ),
-    ),
+    Call(&'a CallExpr<'a, Ex, En>),
     /// A reference to a function or method.
     ///
     ///     foo_fun<>
@@ -1813,6 +1805,42 @@ arena_deserializer::impl_deserialize_in_arena!(Targ<'arena, Ex>);
 
 #[rust_to_ocaml(and)]
 pub type TypeHint_<'a> = Option<&'a Hint<'a>>;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct CallExpr<'a, Ex, En> {
+    /// function
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub func: &'a Expr<'a, Ex, En>,
+    /// explicit type annotations
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub targs: &'a [&'a Targ<'a, Ex>],
+    /// positional args, plus their calling convention
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub args: &'a [(ast_defs::ParamKind<'a>, &'a Expr<'a, Ex, En>)],
+    /// unpacked arg
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub unpacked_arg: Option<&'a Expr<'a, Ex, En>>,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for CallExpr<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(CallExpr<'arena, Ex, En>);
 
 #[derive(
     Clone,

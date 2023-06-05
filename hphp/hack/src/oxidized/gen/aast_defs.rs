@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<69acb0af6349e214d58c0e0855c6d84f>>
+// @generated SignedSource<<9f9648879b7e3edd13be2970d8d70804>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -737,15 +737,7 @@ pub enum Expr_<Ex, En> {
     ///     async { return 1; }
     ///     // lowered to:
     ///     (async () ==> { return 1; })()
-    #[rust_to_ocaml(inline_tuple)]
-    Call(
-        Box<(
-            Expr<Ex, En>,
-            Vec<Targ<Ex>>,
-            Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
-            Option<Expr<Ex, En>>,
-        )>,
-    ),
+    Call(Box<CallExpr<Ex, En>>),
     /// A reference to a function or method.
     ///
     ///     foo_fun<>
@@ -1429,6 +1421,33 @@ pub struct Targ<Ex>(pub Ex, pub Hint);
 
 #[rust_to_ocaml(and)]
 pub type TypeHint_ = Option<Hint>;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct CallExpr<Ex, En> {
+    /// function
+    pub func: Expr<Ex, En>,
+    /// explicit type annotations
+    pub targs: Vec<Targ<Ex>>,
+    /// positional args, plus their calling convention
+    pub args: Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
+    /// unpacked arg
+    pub unpacked_arg: Option<Expr<Ex, En>>,
+}
 
 #[derive(
     Clone,

@@ -52,7 +52,7 @@
                        ((?A), [12:5-21],
                         (Binop
                            { bop = (Eq None); lhs = ((?A), [12:5-7], (Lvar ([12:5-7], $x)));
-                             rhs = ((?A), [12:10-21], (Call ((((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))), [], [], None))) }))))
+                             rhs = ((?A), [12:10-21], (Call { func = (((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))))
                    ]
                  )));
              ([11:3-13:4], (AssertEnv (Refinement, {$x})))]
@@ -83,7 +83,7 @@
                 [((?A), [17:26-42],
                   (Binop
                      { bop = (Eq None); lhs = ((?A), [17:26-28], (Lvar ([17:26-28], $x)));
-                       rhs = ((?A), [17:31-42], (Call ((((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))), [], [], None))) }))
+                       rhs = ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))
                   ],
                 [([17:3-18:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); ([17:3-18:4], (AssertEnv (Refinement, {$x})))])));
              ([17:3-18:4], (AssertEnv (Refinement, {$x})))]

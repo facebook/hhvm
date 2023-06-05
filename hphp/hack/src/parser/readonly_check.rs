@@ -258,7 +258,12 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             rty_expr(context, expr)
         }
         Call(c) => {
-            if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {
+            if let aast::CallExpr {
+                func: aast::Expr(_, _, Id(i)),
+                args,
+                ..
+            } = &**c
+            {
                 if is_special_builtin(&i.1) && !args.is_empty() {
                     // Take first argument
                     let (_, expr) = &args[0];
@@ -684,13 +689,13 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
             }
             aast::Expr_::Call(x) => {
-                let (caller, _targs, params, _variadic) = &mut **x;
+                let aast::CallExpr { func, args, .. } = &mut **x;
 
-                match rty_expr(context, caller) {
-                    Rty::Readonly => explicit_readonly(caller),
+                match rty_expr(context, func) {
+                    Rty::Readonly => explicit_readonly(func),
                     Rty::Mutable => {}
                 };
-                for (callconv, param) in params.iter_mut() {
+                for (callconv, param) in args.iter_mut() {
                     match (callconv, rty_expr(context, param)) {
                         (ast_defs::ParamKind::Pinout(_), Rty::Readonly) => {
                             self.add_error(param.pos(), syntax_error::inout_readonly_argument)

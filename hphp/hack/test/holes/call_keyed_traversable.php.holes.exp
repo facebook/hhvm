@@ -76,23 +76,27 @@
            [([14:3-10],
              (Expr
                 ((void), [14:3-9],
-                 (Call ((((function(KeyedTraversable<int, int> $o): void)), [14:3-4], (Id ([14:3-4], "\\o"))), 
-                    [],
-                    [(Pnormal,
-                      ((KeyedTraversable<string, int>), [14:5-8],
-                       (Hole (((KeyedTraversable<string, int>), [14:5-8], (Lvar ([14:5-8], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(KeyedTraversable<int, int> $o): void)), [14:3-4], (Id ([14:3-4], "\\o"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((KeyedTraversable<string, int>), [14:5-8],
+                         (Hole (((KeyedTraversable<string, int>), [14:5-8], (Lvar ([14:5-8], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
+                        ];
+                      unpacked_arg = None }))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
-                  (Call ((((function(KeyedTraversable<int, int> $o): void)), [16:3-4], (Id ([16:3-4], "\\o"))), 
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<int, string>), [16:5-8],
-                        (Hole (((KeyedTraversable<int, string>), [16:5-8], (Lvar ([16:5-8], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
-                       ],
-                     None)))));
+                  (Call
+                     { func = (((function(KeyedTraversable<int, int> $o): void)), [16:3-4], (Id ([16:3-4], "\\o"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<int, string>), [16:5-8],
+                          (Hole (((KeyedTraversable<int, string>), [16:5-8], (Lvar ([16:5-8], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
+                         ];
+                       unpacked_arg = None }))));
              ([18:3-37],
               (Expr
                  ((TestKeyedTraversable), [18:3-36],
@@ -102,29 +106,33 @@
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
-                  (Call (
-                     (((function(KeyedTraversable<int, int> $o): void)), [21:3-10],
-                      (Obj_get (((TestKeyedTraversable), [21:3-7], (Lvar ([21:3-7], $foo))), (
-                         ((function(KeyedTraversable<int, int> $o): void)), [21:9-10], (Id ([21:9-10], "o"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<string, int>), [21:11-14],
-                        (Hole (((KeyedTraversable<string, int>), [21:11-14], (Lvar ([21:11-14], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
-                       ],
-                     None)))));
+                  (Call
+                     { func =
+                       (((function(KeyedTraversable<int, int> $o): void)), [21:3-10],
+                        (Obj_get (((TestKeyedTraversable), [21:3-7], (Lvar ([21:3-7], $foo))), (
+                           ((function(KeyedTraversable<int, int> $o): void)), [21:9-10], (Id ([21:9-10], "o"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<string, int>), [21:11-14],
+                          (Hole (((KeyedTraversable<string, int>), [21:11-14], (Lvar ([21:11-14], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>), Typing))))
+                         ];
+                       unpacked_arg = None }))));
              ([23:3-16],
               (Expr
                  ((void), [23:3-15],
-                  (Call (
-                     (((function(KeyedTraversable<int, int> $o): void)), [23:3-10],
-                      (Obj_get (((TestKeyedTraversable), [23:3-7], (Lvar ([23:3-7], $foo))), (
-                         ((function(KeyedTraversable<int, int> $o): void)), [23:9-10], (Id ([23:9-10], "o"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<int, string>), [23:11-14],
-                        (Hole (((KeyedTraversable<int, string>), [23:11-14], (Lvar ([23:11-14], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(KeyedTraversable<int, int> $o): void)), [23:3-10],
+                        (Obj_get (((TestKeyedTraversable), [23:3-7], (Lvar ([23:3-7], $foo))), (
+                           ((function(KeyedTraversable<int, int> $o): void)), [23:9-10], (Id ([23:9-10], "o"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<int, string>), [23:11-14],
+                          (Hole (((KeyedTraversable<int, string>), [23:11-14], (Lvar ([23:11-14], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>), Typing))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -157,31 +165,35 @@
            [([31:3-89],
              (Expr
                 ((void), [31:3-88],
-                 (Call ((((function(KeyedTraversable<int, int> $o): void)), [31:3-4], (Id ([31:3-4], "\\o"))), 
-                    [],
-                    [(Pnormal,
-                      ((KeyedTraversable<int, int>), [31:5-87],
-                       (Hole (((KeyedTraversable<string, int>), [31:83-86], (Lvar ([31:83-86], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
-                          (UnsafeCast
-                             [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Hprim Tstring)); ([31:51-54], (Hprim Tint))])));
-                               ([31:56-81], (Happly (([31:56-72], "\\HH\\KeyedTraversable"), [([31:73-76], (Hprim Tint)); ([31:77-80], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(KeyedTraversable<int, int> $o): void)), [31:3-4], (Id ([31:3-4], "\\o"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((KeyedTraversable<int, int>), [31:5-87],
+                         (Hole (((KeyedTraversable<string, int>), [31:83-86], (Lvar ([31:83-86], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
+                            (UnsafeCast
+                               [([31:27-55], (Happly (([31:27-43], "\\HH\\KeyedTraversable"), [([31:44-50], (Hprim Tstring)); ([31:51-54], (Hprim Tint))])));
+                                 ([31:56-81], (Happly (([31:56-72], "\\HH\\KeyedTraversable"), [([31:73-76], (Hprim Tint)); ([31:77-80], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([33:3-89],
               (Expr
                  ((void), [33:3-88],
-                  (Call ((((function(KeyedTraversable<int, int> $o): void)), [33:3-4], (Id ([33:3-4], "\\o"))), 
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<int, int>), [33:5-87],
-                        (Hole (((KeyedTraversable<int, string>), [33:83-86], (Lvar ([33:83-86], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
-                           (UnsafeCast
-                              [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Hprim Tstring))])));
-                                ([33:56-81], (Happly (([33:56-72], "\\HH\\KeyedTraversable"), [([33:73-76], (Hprim Tint)); ([33:77-80], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func = (((function(KeyedTraversable<int, int> $o): void)), [33:3-4], (Id ([33:3-4], "\\o"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<int, int>), [33:5-87],
+                          (Hole (((KeyedTraversable<int, string>), [33:83-86], (Lvar ([33:83-86], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
+                             (UnsafeCast
+                                [([33:27-55], (Happly (([33:27-43], "\\HH\\KeyedTraversable"), [([33:44-47], (Hprim Tint)); ([33:48-54], (Hprim Tstring))])));
+                                  ([33:56-81], (Happly (([33:56-72], "\\HH\\KeyedTraversable"), [([33:73-76], (Hprim Tint)); ([33:77-80], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([35:3-37],
               (Expr
                  ((TestKeyedTraversable), [35:3-36],
@@ -191,37 +203,41 @@
              ([38:3-95],
               (Expr
                  ((void), [38:3-94],
-                  (Call (
-                     (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
-                      (Obj_get (((TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
-                         ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<int, int>), [38:11-93],
-                        (Hole (((KeyedTraversable<string, int>), [38:89-92], (Lvar ([38:89-92], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
-                           (UnsafeCast
-                              [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Hprim Tstring)); ([38:57-60], (Hprim Tint))])));
-                                ([38:62-87], (Happly (([38:62-78], "\\HH\\KeyedTraversable"), [([38:79-82], (Hprim Tint)); ([38:83-86], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func =
+                       (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
+                        (Obj_get (((TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
+                           ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<int, int>), [38:11-93],
+                          (Hole (((KeyedTraversable<string, int>), [38:89-92], (Lvar ([38:89-92], $o1))), (KeyedTraversable<string, int>), (KeyedTraversable<int, int>),
+                             (UnsafeCast
+                                [([38:33-61], (Happly (([38:33-49], "\\HH\\KeyedTraversable"), [([38:50-56], (Hprim Tstring)); ([38:57-60], (Hprim Tint))])));
+                                  ([38:62-87], (Happly (([38:62-78], "\\HH\\KeyedTraversable"), [([38:79-82], (Hprim Tint)); ([38:83-86], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([40:3-95],
               (Expr
                  ((void), [40:3-94],
-                  (Call (
-                     (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
-                      (Obj_get (((TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
-                         ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((KeyedTraversable<int, int>), [40:11-93],
-                        (Hole (((KeyedTraversable<int, string>), [40:89-92], (Lvar ([40:89-92], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
-                           (UnsafeCast
-                              [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Hprim Tstring))])));
-                                ([40:62-87], (Happly (([40:62-78], "\\HH\\KeyedTraversable"), [([40:79-82], (Hprim Tint)); ([40:83-86], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
+                        (Obj_get (((TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
+                           ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((KeyedTraversable<int, int>), [40:11-93],
+                          (Hole (((KeyedTraversable<int, string>), [40:89-92], (Lvar ([40:89-92], $o2))), (KeyedTraversable<int, string>), (KeyedTraversable<int, int>),
+                             (UnsafeCast
+                                [([40:33-61], (Happly (([40:33-49], "\\HH\\KeyedTraversable"), [([40:50-53], (Hprim Tint)); ([40:54-60], (Hprim Tstring))])));
+                                  ([40:62-87], (Happly (([40:62-78], "\\HH\\KeyedTraversable"), [([40:79-82], (Hprim Tint)); ([40:83-86], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust::pseudo_functions;
+use nast::CallExpr;
 use nast::Expr;
 use nast::Expr_;
 use nast::Id;
@@ -19,19 +20,19 @@ impl Pass for ElabExprPackagePass {
         let Expr(_, pos, expr) = elem;
         match expr {
             Expr_::Package(box pkg) => {
-                *expr = Expr_::Call(Box::new((
-                    Expr::new(
+                *expr = Expr_::Call(Box::new(CallExpr {
+                    func: Expr::new(
                         (),
                         pos.clone(),
                         Expr_::mk_id(Id(pos.clone(), pseudo_functions::PACKAGE_EXISTS.into())),
                     ),
-                    vec![],
-                    vec![(
+                    targs: vec![],
+                    args: vec![(
                         ParamKind::Pnormal,
                         Expr::new((), pkg.pos().clone(), Expr_::mk_string(pkg.name().into())),
                     )],
-                    None,
-                )));
+                    unpacked_arg: None,
+                }));
                 Break(())
             }
             _ => Continue(()),
@@ -61,11 +62,12 @@ mod tests {
 
         let Expr(_, _, expr) = elem;
         assert!(match expr {
-            Expr_::Call(box (Expr(_, _, Expr_::Id(box Id(_, fn_name))), _, fn_param_exprs, _))
-                if fn_name == pseudo_functions::PACKAGE_EXISTS =>
-            {
-                if let [(ParamKind::Pnormal, Expr(_, _, Expr_::String(fn_param_name)))] =
-                    &fn_param_exprs[..]
+            Expr_::Call(box CallExpr {
+                func: Expr(_, _, Expr_::Id(box Id(_, fn_name))),
+                args,
+                ..
+            }) if fn_name == pseudo_functions::PACKAGE_EXISTS => {
+                if let [(ParamKind::Pnormal, Expr(_, _, Expr_::String(fn_param_name)))] = &args[..]
                 {
                     fn_param_name == "foo"
                 } else {

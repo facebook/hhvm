@@ -76,13 +76,17 @@
            [([14:3-10],
              (Expr
                 ((void), [14:3-9],
-                 (Call ((((function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))), 
-                    [], [(Pnormal, ((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))); 
+                      targs = []; args = [(Pnormal, ((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))];
+                      unpacked_arg = None }))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
-                  (Call ((((function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))), 
-                     [], [(Pnormal, ((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))], None)))));
+                  (Call
+                     { func = (((function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))); 
+                       targs = []; args = [(Pnormal, ((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))];
+                       unpacked_arg = None }))));
              ([18:3-25],
               (Expr
                  ((TestPair), [18:3-24],
@@ -92,17 +96,23 @@
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
-                  (Call (
-                     (((function(Pair<int, int> $b): void)), [21:3-10],
-                      (Obj_get (((TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))], None)))));
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [21:3-10],
+                        (Obj_get (((TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))];
+                       unpacked_arg = None }))));
              ([23:3-16],
               (Expr
                  ((void), [23:3-15],
-                  (Call (
-                     (((function(Pair<int, int> $b): void)), [23:3-10],
-                      (Obj_get (((TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))], None)))))
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [23:3-10],
+                        (Obj_get (((TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -135,31 +145,35 @@
            [([31:3-63],
              (Expr
                 ((void), [31:3-62],
-                 (Call ((((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))), 
-                    [],
-                    [(Pnormal,
-                      ((Pair<int, int>), [31:5-61],
-                       (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
-                          (UnsafeCast
-                             [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
-                               ([31:42-55], (Happly (([31:42-46], "\\HH\\Pair"), [([31:47-50], (Hprim Tint)); ([31:51-54], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((Pair<int, int>), [31:5-61],
+                         (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                            (UnsafeCast
+                               [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
+                                 ([31:42-55], (Happly (([31:42-46], "\\HH\\Pair"), [([31:47-50], (Hprim Tint)); ([31:51-54], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([33:3-63],
               (Expr
                  ((void), [33:3-62],
-                  (Call ((((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))), 
-                     [],
-                     [(Pnormal,
-                       ((Pair<int, int>), [33:5-61],
-                        (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
-                           (UnsafeCast
-                              [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
-                                ([33:42-55], (Happly (([33:42-46], "\\HH\\Pair"), [([33:47-50], (Hprim Tint)); ([33:51-54], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func = (((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Pair<int, int>), [33:5-61],
+                          (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
+                                  ([33:42-55], (Happly (([33:42-46], "\\HH\\Pair"), [([33:47-50], (Hprim Tint)); ([33:51-54], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([35:3-25],
               (Expr
                  ((TestPair), [35:3-24],
@@ -169,35 +183,39 @@
              ([38:3-69],
               (Expr
                  ((void), [38:3-68],
-                  (Call (
-                     (((function(Pair<int, int> $b): void)), [38:3-10],
-                      (Obj_get (((TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Pair<int, int>), [38:11-67],
-                        (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
-                           (UnsafeCast
-                              [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
-                                ([38:48-61], (Happly (([38:48-52], "\\HH\\Pair"), [([38:53-56], (Hprim Tint)); ([38:57-60], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))));
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [38:3-10],
+                        (Obj_get (((TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Pair<int, int>), [38:11-67],
+                          (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
+                                  ([38:48-61], (Happly (([38:48-52], "\\HH\\Pair"), [([38:53-56], (Hprim Tint)); ([38:57-60], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))));
              ([40:3-69],
               (Expr
                  ((void), [40:3-68],
-                  (Call (
-                     (((function(Pair<int, int> $b): void)), [40:3-10],
-                      (Obj_get (((TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Pair<int, int>), [40:11-67],
-                        (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
-                           (UnsafeCast
-                              [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
-                                ([40:48-61], (Happly (([40:48-52], "\\HH\\Pair"), [([40:53-56], (Hprim Tint)); ([40:57-60], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(Pair<int, int> $b): void)), [40:3-10],
+                        (Obj_get (((TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Pair<int, int>), [40:11-67],
+                          (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                             (UnsafeCast
+                                [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
+                                  ([40:48-61], (Happly (([40:48-52], "\\HH\\Pair"), [([40:53-56], (Hprim Tint)); ([40:57-60], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

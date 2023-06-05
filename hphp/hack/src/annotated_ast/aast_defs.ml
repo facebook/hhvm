@@ -491,15 +491,7 @@ and ('ex, 'en) expr_ =
        *     parent::someStaticMeth()
        *     parent::someInstanceMeth()
        *)
-  | Call of
-      (* function *)
-      ('ex, 'en) expr
-      * (* explicit type annotations *)
-      'ex targ list
-      * (* positional args, plus their calling convention *)
-      ((Ast_defs.param_kind[@transform.opaque]) * ('ex, 'en) expr) list
-      * (* unpacked arg *)
-      ('ex, 'en) expr option
+  | Call of ('ex, 'en) call_expr
       (** Function or method call.
        *
        *     foo()
@@ -865,6 +857,17 @@ and 'ex type_hint = 'ex * type_hint_
 and 'ex targ = 'ex * hint
 
 and type_hint_ = hint option
+
+and ('ex, 'en) call_expr = {
+  func: ('ex, 'en) expr;
+      (** function *)
+  targs: 'ex targ list;
+      (** explicit type annotations *)
+  args: ((Ast_defs.param_kind[@transform.opaque]) * ('ex, 'en) expr) list;
+      (** positional args, plus their calling convention *)
+  unpacked_arg: ('ex, 'en) expr option;
+      (** unpacked arg *)
+}
 
 and ('ex, 'en) user_attribute = {
   ua_name: sid;

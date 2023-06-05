@@ -156,8 +156,8 @@ let visitor ~(cursor : Pos.t) =
     method! on_expr_ env expr =
       option_or_thunk (super#on_expr_ env expr) ~f:(fun () ->
           match expr with
-          | Aast_defs.Call (_, _, params, _) ->
-            params
+          | Aast_defs.(Call { args; _ }) ->
+            args
             |> List.map
                  ~f:
                    Ast_defs.(

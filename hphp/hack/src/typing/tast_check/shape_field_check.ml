@@ -126,10 +126,15 @@ let handler =
       | ( _,
           p,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name))],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [(_, shape); (_, (_, pos, String field_name))];
+              unpacked_arg = None;
+              _;
+            } )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
         trivial_shapes_key_exists_check
@@ -140,17 +145,27 @@ let handler =
       | ( _,
           _,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name)); _],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [(_, shape); (_, (_, pos, String field_name)); _];
+              unpacked_arg = None;
+              _;
+            } )
       | ( _,
           _,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name))],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [(_, shape); (_, (_, pos, String field_name))];
+              unpacked_arg = None;
+              _;
+            } )
         when String.equal class_name SN.Shapes.cShapes
              && (String.equal method_name SN.Shapes.idx
                 || String.equal method_name SN.Shapes.at) ->

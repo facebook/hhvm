@@ -353,9 +353,12 @@ and stmt env acc st =
   let default_case = default_case env in
   match snd st with
   | Expr (* only in top level!*)
-      (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
+      ( _,
+        _,
+        Call { func = (_, _, Class_const ((_, _, CIparent), (_, m))); args; _ }
+      )
     when String.equal m SN.Members.__construct ->
-    let acc = argument_list env acc el in
+    let acc = argument_list env acc args in
     assign env acc DICheck.parent_init_prop
   | Expr e ->
     if Typing_func_terminality.expression_exits env.tenv e then
@@ -509,10 +512,12 @@ and expr_ env acc p e =
   | Class_get _ ->
     acc
   | Call
-      ( (_, p, Obj_get ((_, _, This), (_, _, Id (_, f)), _, Is_method)),
-        _,
-        el,
-        unpacked_element ) ->
+      {
+        func = (_, p, Obj_get ((_, _, This), (_, _, Id (_, f)), _, Is_method));
+        args;
+        unpacked_arg;
+        _;
+      } ->
     let method_ = Env.get_method env f in
     (match method_ with
     | None ->
@@ -525,24 +530,22 @@ and expr_ env acc p e =
         (* First time we encounter this private method. Let's check its
          * arguments first, and then recurse into the method body.
          *)
-        let acc = argument_list env acc el in
-        let acc =
-          Option.value_map ~f:(expr acc) ~default:acc unpacked_element
-        in
+        let acc = argument_list env acc args in
+        let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_arg in
         method_ := Done;
         toplevel env acc b.fb_ast))
-  | Call (e, _, el, unpacked_element) ->
-    let el =
-      match e with
+  | Call { func; args; unpacked_arg; _ } ->
+    let args =
+      match func with
       | (_, _, Id (_, fun_name)) when is_whitelisted fun_name ->
-        List.filter el ~f:(function
+        List.filter args ~f:(function
             | (_, (_, _, This)) -> false
             | _ -> true)
-      | _ -> el
+      | _ -> args
     in
-    let acc = argument_list env acc el in
-    let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
-    expr acc e
+    let acc = argument_list env acc args in
+    let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_arg in
+    expr acc func
   | True
   | False
   | Int _

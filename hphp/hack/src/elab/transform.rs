@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32066f35e9a3b320503a78d01011a997>>
+// @generated SignedSource<<83f2ad607710bf0763a37d55b36a1833>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -975,6 +975,37 @@ impl Transform for Targ {
                     __binding_0.transform(env, pass)
                 }
                 { __binding_1.transform(env, pass) }
+            }
+        }
+    }
+}
+impl Transform for CallExpr {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_call_expr_top_down(env, self) {
+            return;
+        }
+        self.traverse(env, pass);
+        in_pass.on_ty_call_expr_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            CallExpr {
+                func: ref mut __binding_0,
+                targs: ref mut __binding_1,
+                args: ref mut __binding_2,
+                unpacked_arg: ref mut __binding_3,
+            } => {
+                {
+                    __binding_0.transform(env, pass)
+                }
+                {
+                    __binding_1.transform(env, pass)
+                }
+                {
+                    __binding_2.transform(env, pass)
+                }
+                { __binding_3.transform(env, pass) }
             }
         }
     }

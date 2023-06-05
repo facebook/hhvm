@@ -35,8 +35,9 @@
              ([9:3-31],
               (Expr
                  ((dynamic), [9:3-30],
-                  (Obj_get (((dynamic), [9:3-5], (Lvar ([9:3-5], $c))), (
-                     (dynamic), [9:8-29], (Call ((((function(): string)), [9:8-27], (Id ([9:8-27], "\\returnsTheStringFoo"))), [], [], None))), OG_nullthrows, Is_prop)))))
+                  (Obj_get (((dynamic), [9:3-5], (Lvar ([9:3-5], $c))),
+                     ((dynamic), [9:8-29], (Call { func = (((function(): string)), [9:8-27], (Id ([9:8-27], "\\returnsTheStringFoo"))); targs = []; args = []; unpacked_arg = None })), OG_nullthrows,
+                     Is_prop)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

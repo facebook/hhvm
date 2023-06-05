@@ -30,7 +30,7 @@
              ([15:3-28:4],
               (Try (
                  [([16:5-14], (Expr ((int), [16:5-13], (Binop { bop = (Eq None); lhs = ((int), [16:5-7], (Lvar ([16:5-7], $a))); rhs = ((int), [16:10-13], (Int "456")) }))));
-                   ([17:5-19], (Expr ((void), [17:5-18], (Call ((((function(): void)), [17:5-16], (Id ([17:5-16], "\\might_throw"))), [], [], None)))))],
+                   ([17:5-19], (Expr ((void), [17:5-18], (Call { func = (((function(): void)), [17:5-16], (Id ([17:5-16], "\\might_throw"))); targs = []; args = []; unpacked_arg = None }))))],
                  [(([18:12-25], "\\YourException"), ([18:26-28], $e), [([19:5-15], (Return (Some ((int), [19:12-14], (Lvar ([19:12-14], $a))))))]);
                    (([20:12-23], "\\MyException"), ([20:24-26], $e),
                     [([22:5-17], (Expr ((string), [22:5-16], (Binop { bop = (Eq None); lhs = ((string), [22:5-7], (Lvar ([22:5-7], $a))); rhs = ((string), [22:10-16], (String "duck")) }))));

@@ -508,42 +508,45 @@ let check =
       | (_, _, Binop { bop = Ast_defs.Eq _; lhs; rhs }) ->
         assign env lhs rhs;
         self#on_expr env rhs
-      | (_, _, ReadonlyExpr (_, _, Call (caller, targs, args, unpacked_arg))) ->
+      | ( _,
+          _,
+          ReadonlyExpr
+            (_, _, Call ({ func; args; unpacked_arg; _ } as call_expr)) ) ->
         let default () =
           (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
-          self#on_Call env caller targs args unpacked_arg
+          self#on_Call env call_expr
         in
-        if caller_is_special_builtin caller then
+        if caller_is_special_builtin func then
           default ()
         else
           call
             ~is_readonly:true
-            ~method_call:(is_method_caller caller)
+            ~method_call:(is_method_caller func)
             env
-            (Tast.get_position caller)
-            (Tast.get_type caller)
-            (ty_expr env caller)
+            (Tast.get_position func)
+            (Tast.get_type func)
+            (ty_expr env func)
             args
             unpacked_arg;
-        check_special_function env caller args;
-        method_call env caller;
+        check_special_function env func args;
+        method_call env func;
         default ()
       (* Non readonly calls *)
-      | (_, _, Call (caller, _, args, unpacked_arg)) ->
-        if caller_is_special_builtin caller then
+      | (_, _, Call { func; args; unpacked_arg; _ }) ->
+        if caller_is_special_builtin func then
           super#on_expr env e
         else
           call
             env
             ~is_readonly:false
-            ~method_call:(is_method_caller caller)
-            (Tast.get_position caller)
-            (Tast.get_type caller)
-            (ty_expr env caller)
+            ~method_call:(is_method_caller func)
+            (Tast.get_position func)
+            (Tast.get_type func)
+            (ty_expr env func)
             args
             unpacked_arg;
-        check_special_function env caller args;
-        method_call env caller;
+        check_special_function env func args;
+        method_call env func;
         super#on_expr env e
       | (_, _, ReadonlyExpr (_, _, Obj_get (obj, get, nullable, is_prop_call)))
         ->
@@ -657,14 +660,14 @@ let handler =
         The following error checks are ones that need to run even if
         readonly analysis is not enabled by the file attribute.
       *)
-    method! at_Call env caller _tal _el _unpacked_element =
+    method! at_Call env { func; _ } =
       (* this check is already handled by the readonly analysis,
          which handles cases when there's a readonly keyword *)
       if !fun_has_readonly then
         ()
       else
-        let caller_pos = Tast.get_position caller in
-        let caller_ty = Tast.get_type caller in
+        let caller_pos = Tast.get_position func in
+        let caller_ty = Tast.get_type func in
         let (_, caller_ty) = Tast_env.expand_type env caller_ty in
         check_readonly_return_call env caller_pos caller_ty false
 

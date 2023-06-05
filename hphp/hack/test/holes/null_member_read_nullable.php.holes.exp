@@ -88,11 +88,12 @@
              ([13:3-13],
               (Expr
                  ((void), [13:3-12],
-                  (Call (
-                     (((function(): void)), [13:3-10],
-                      (Obj_get (((?MyVeryOwnC), [13:3-5], (Hole (((?MyVeryOwnC), [13:3-5], (Lvar ([13:3-5], $c))), (?MyVeryOwnC), (MyVeryOwnC), Typing))),
-                         (((function(): void)), [13:7-10], (Id ([13:7-10], "bar"))), OG_nullthrows, Is_method))),
-                     [], [], None)))))
+                  (Call
+                     { func =
+                       (((function(): void)), [13:3-10],
+                        (Obj_get (((?MyVeryOwnC), [13:3-5], (Hole (((?MyVeryOwnC), [13:3-5], (Lvar ([13:3-5], $c))), (?MyVeryOwnC), (MyVeryOwnC), Typing))),
+                           (((function(): void)), [13:7-10], (Id ([13:7-10], "bar"))), OG_nullthrows, Is_method)));
+                       targs = []; args = []; unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -62,7 +62,7 @@ Errors:
                  (Binop
                     { bop = (Eq None); lhs = ((string), [13:3-11], (Array_get (((Vector<int>), [13:3-9], (Lvar ([13:3-9], $items))), None)));
                       rhs = ((string), [13:14-16], (Hole (((string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (int), Typing))) }))));
-            ([14:3-15], (Return (Some ((int), [14:10-14], (Call ((((function(): int)), [14:10-12], (Lvar ([14:10-12], $f))), [], [], None))))))]
+            ([14:3-15], (Return (Some ((int), [14:10-14], (Call { func = (((function(): int)), [14:10-12], (Lvar ([14:10-12], $f))); targs = []; args = []; unpacked_arg = None })))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };

@@ -29,7 +29,6 @@ use naming_special_names_rust::superglobals;
 use oxidized::aast as a;
 use oxidized::ast;
 use oxidized::ast_defs;
-use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use oxidized::pos::Pos;
 use regex::Regex;
@@ -264,28 +263,28 @@ fn emit_call<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     e_: &ast::Expr,
     _pos: &Pos,
-    c: &(
-        ast::Expr,
-        Vec<ast::Targ>,
-        Vec<(ParamKind, ast::Expr)>,
-        Option<ast::Expr>,
-    ),
+    c: &ast::CallExpr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c {
+    if let a::CallExpr {
+        func: a::Expr(_, _, a::Expr_::Id(sid)),
+        args,
+        unpacked_arg: None,
+        ..
+    } = c
+    {
         let ft = hhbc::FunctionName::from_ast_name(alloc, &sid.1);
         let fname = ft.unsafe_as_str();
         if fname.eq_ignore_ascii_case("unset") {
             Ok(InstrSeq::gather(
-                exprs
-                    .iter()
+                args.iter()
                     .map(|ex| {
                         emit_expr::emit_unset_expr(e, env, error::expect_normal_paramkind(ex)?)
                     })
                     .collect::<Result<Vec<_>, _>>()?,
             ))
         } else if let Some(kind) = set_bytes_kind(fname) {
-            emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
+            emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, args)
         } else {
             emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
         }

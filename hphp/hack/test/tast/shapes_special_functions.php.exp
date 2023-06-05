@@ -38,37 +38,48 @@
            [([6:3-24],
              (Expr
                 ((?int), [6:3-23],
-                 (Call (
-                    (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index)[]: ?int)), [6:3-14], (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))),
-                    [((int), ([6:11-14], (Happly (([Pos.none], "_"), []))))],
-                    [(Pnormal, ((shape('x' => int, ?'y' => int)), [6:15-17], (Lvar ([6:15-17], $p)))); (Pnormal, ((string), [6:19-22], (String "x")))], None)))));
+                 (Call
+                    { func =
+                      (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index)[]: ?int)), [6:3-14], (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx"))));
+                      targs = [((int), ([6:11-14], (Happly (([Pos.none], "_"), []))))];
+                      args = [(Pnormal, ((shape('x' => int, ?'y' => int)), [6:15-17], (Lvar ([6:15-17], $p)))); (Pnormal, ((string), [6:19-22], (String "x")))]; 
+                      unpacked_arg = None }))));
              ([7:3-27],
               (Expr
                  ((int), [7:3-26],
-                  (Call (
-                     (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default = _)[]: int)), [7:3-14],
-                      (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))),
-                     [((int), ([7:11-14], (Happly (([Pos.none], "_"), []))))],
-                     [(Pnormal, ((shape('x' => int, ?'y' => int)), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))], None
-                     )))));
+                  (Call
+                     { func =
+                       (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default = _)[]: int)), [7:3-14],
+                        (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx"))));
+                       targs = [((int), ([7:11-14], (Happly (([Pos.none], "_"), []))))];
+                       args =
+                       [(Pnormal, ((shape('x' => int, ?'y' => int)), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))];
+                       unpacked_arg = None }))));
              ([8:3-30],
               (Expr
                  ((bool), [8:3-29],
-                  (Call ((((function(readonly shape(...) $shape, arraykey $index)[]: bool)), [8:3-20], (Class_const (((Shapes), [8:3-9], (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))),
-                     [], [(Pnormal, ((shape('x' => int, ?'y' => int)), [8:21-23], (Lvar ([8:21-23], $p)))); (Pnormal, ((string), [8:25-28], (String "y")))], None)))));
+                  (Call
+                     { func =
+                       (((function(readonly shape(...) $shape, arraykey $index)[]: bool)), [8:3-20], (Class_const (((Shapes), [8:3-9], (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists"))));
+                       targs = []; args = [(Pnormal, ((shape('x' => int, ?'y' => int)), [8:21-23], (Lvar ([8:21-23], $p)))); (Pnormal, ((string), [8:25-28], (String "y")))]; 
+                       unpacked_arg = None }))));
              ([9:3-36],
               (Expr
                  ((void), [9:3-35],
-                  (Call (
-                     (((function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index)[]: void)), [9:3-20],
-                      (Class_const (((Shapes), [9:3-9], (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey")))),
-                     [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))],
-                     [((Pinout [9:21-26]), ((shape('x' => int, ?'y' => int)), [9:27-29], (Lvar ([9:27-29], $p)))); (Pnormal, ((string), [9:31-34], (String "y")))], None)))));
+                  (Call
+                     { func =
+                       (((function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index)[]: void)), [9:3-20],
+                        (Class_const (((Shapes), [9:3-9], (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey"))));
+                       targs = [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))];
+                       args = [((Pinout [9:21-26]), ((shape('x' => int, ?'y' => int)), [9:27-29], (Lvar ([9:27-29], $p)))); (Pnormal, ((string), [9:31-34], (String "y")))]; 
+                       unpacked_arg = None }))));
              ([10:3-23],
               (Expr
                  ((dict<string, int>), [10:3-22],
-                  (Call ((((function(shape(...) $shape)[]: dict<string, int>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray")))), 
-                     [], [(Pnormal, ((shape('x' => int)), [10:19-21], (Lvar ([10:19-21], $p))))], None)))))
+                  (Call
+                     { func = (((function(shape(...) $shape)[]: dict<string, int>)), [10:3-18], (Class_const (((Shapes), [10:3-9], (CI ([10:3-9], "\\HH\\Shapes"))), ([10:11-18], "toArray"))));
+                       targs = []; args = [(Pnormal, ((shape('x' => int)), [10:19-21], (Lvar ([10:19-21], $p))))]; 
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

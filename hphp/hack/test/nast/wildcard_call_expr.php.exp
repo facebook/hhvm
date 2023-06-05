@@ -31,7 +31,16 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-16], (Expr ((), [8:3-15], (Call (((), [8:3-8], (Id ([8:3-8], "\\my_id"))), [((), ([8:9-10], (Happly (([8:9-10], "_"), []))))], [(Pnormal, ((), [8:12-14], (Int "42")))], None)))))] };
+           [([8:3-16],
+             (Expr
+                ((), [8:3-15],
+                 (Call
+                    { func = ((), [8:3-8], (Id ([8:3-8], "\\my_id"))); 
+                      targs = [((), ([8:9-10], (Happly (([8:9-10], "_"), []))))]; 
+                      args = [(Pnormal, ((), [8:12-14], (Int "42")))]; 
+                      unpacked_arg = None }))))
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

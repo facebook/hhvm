@@ -76,7 +76,12 @@ impl Env {
     }
 
     fn handle_special_calls(&self, call: &mut Expr_) {
-        if let Expr_::Call(box (Expr(_, _, Expr_::Id(id)), _, args, _)) = call {
+        if let Expr_::Call(box CallExpr {
+            func: Expr(_, _, Expr_::Id(id)),
+            args,
+            ..
+        }) = call
+        {
             if !self.in_codegen()
                 && args.len() == 2
                 && id.1 == sn::autoimported_functions::METH_CALLER
@@ -344,11 +349,16 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 c_targ_opt.accept(env, self.object())?;
                 flds.accept(env, self.object())?;
             }
-            Expr_::Call(box (func, targs, args, uargs)) => {
+            Expr_::Call(box CallExpr {
+                func,
+                targs,
+                args,
+                unpacked_arg,
+            }) => {
                 // Recurse first due to borrow order
                 targs.accept(env, self.object())?;
                 args.accept(env, self.object())?;
-                uargs.accept(env, self.object())?;
+                unpacked_arg.accept(env, self.object())?;
 
                 if let Some(sid) = func.2.as_id_mut() {
                     if !sn::special_functions::is_special_function(&sid.1) {

@@ -43,7 +43,11 @@ Errors:
                 [([6:3-8:4], (AssertEnv (Join, {$#capability $#local_capability $args})));
                   ([7:5-24],
                    (Expr
-                      ((void), [7:5-23], (Call ((((function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))), [], [(Pnormal, ((string), [7:18-22], (Lvar ([7:18-22], $arg))))], None)))))
+                      ((void), [7:5-23],
+                       (Call
+                          { func = (((function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))); 
+                            targs = []; args = [(Pnormal, ((string), [7:18-22], (Lvar ([7:18-22], $arg))))]; 
+                            unpacked_arg = None }))))
                   ]
                 )))
              ]

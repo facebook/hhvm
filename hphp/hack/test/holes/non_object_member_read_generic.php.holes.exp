@@ -22,10 +22,11 @@
            [([6:5-15],
              (Expr
                 ((nothing), [6:5-14],
-                 (Call (
-                    ((nothing), [6:5-12],
-                     (Obj_get (((T), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (T), (nothing), Typing))), ((nothing), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method))),
-                    [], [], None)))))
+                 (Call
+                    { func =
+                      ((nothing), [6:5-12],
+                       (Obj_get (((T), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (T), (nothing), Typing))), ((nothing), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method)));
+                      targs = []; args = []; unpacked_arg = None }))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

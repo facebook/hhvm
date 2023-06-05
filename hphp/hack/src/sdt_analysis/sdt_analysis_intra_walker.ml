@@ -102,7 +102,7 @@ let collect_sdts_body enclosing_def_id ret_ty =
             WalkResult.singleton (H.Id.ClassLike sid) constraint_
           | _ -> WalkResult.empty
         end
-        | A.Call ((base_ty, _, base_exp), _tel, el, _unpacked_el) ->
+        | A.(Call { func = (base_ty, _, base_exp); args; _ }) ->
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
@@ -113,9 +113,9 @@ let collect_sdts_body enclosing_def_id ret_ty =
               let param_arg_pairs =
                 let open List.Or_unequal_lengths in
                 let curtailed_params =
-                  List.take ft.T.ft_params (List.length el)
+                  List.take ft.T.ft_params (List.length args)
                 in
-                match List.zip curtailed_params el with
+                match List.zip curtailed_params args with
                 | Ok pairs -> pairs
                 | Unequal_lengths -> []
               in

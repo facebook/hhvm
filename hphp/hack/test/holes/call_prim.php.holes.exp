@@ -42,13 +42,17 @@
            [([7:5-14],
              (Expr
                 ((void), [7:5-13],
-                 (Call ((((function(int $i): void)), [7:5-9], (Id ([7:5-9], "\\prim"))), 
-                    [], [(Pnormal, ((float), [7:10-12], (Hole (((float), [7:10-12], (Lvar ([7:10-12], $f))), (float), (int), Typing))))], None)))));
+                 (Call
+                    { func = (((function(int $i): void)), [7:5-9], (Id ([7:5-9], "\\prim"))); 
+                      targs = []; args = [(Pnormal, ((float), [7:10-12], (Hole (((float), [7:10-12], (Lvar ([7:10-12], $f))), (float), (int), Typing))))]; 
+                      unpacked_arg = None }))));
              ([10:5-14],
               (Expr
                  ((void), [10:5-13],
-                  (Call ((((function(int $i): void)), [10:5-9], (Id ([10:5-9], "\\prim"))), 
-                     [], [(Pnormal, ((?int), [10:10-12], (Hole (((?int), [10:10-12], (Lvar ([10:10-12], $x))), (?int), (int), Typing))))], None)))))
+                  (Call
+                     { func = (((function(int $i): void)), [10:5-9], (Id ([10:5-9], "\\prim"))); 
+                       targs = []; args = [(Pnormal, ((?int), [10:10-12], (Hole (((?int), [10:10-12], (Lvar ([10:10-12], $x))), (?int), (int), Typing))))]; 
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -79,20 +83,25 @@
            [([15:5-48],
              (Expr
                 ((void), [15:5-47],
-                 (Call ((((function(int $i): void)), [15:5-9], (Id ([15:5-9], "\\prim"))), 
-                    [],
-                    [(Pnormal, ((int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), (UnsafeCast [([15:32-37], (Hprim Tfloat)); ([15:38-41], (Hprim Tint))])))))],
-                    None)))));
+                 (Call
+                    { func = (((function(int $i): void)), [15:5-9], (Id ([15:5-9], "\\prim"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal, ((int), [15:10-46], (Hole (((float), [15:43-45], (Lvar ([15:43-45], $f))), (float), (int), (UnsafeCast [([15:32-37], (Hprim Tfloat)); ([15:38-41], (Hprim Tint))])))))
+                        ];
+                      unpacked_arg = None }))));
              ([18:5-47],
               (Expr
                  ((void), [18:5-46],
-                  (Call ((((function(int $i): void)), [18:5-9], (Id ([18:5-9], "\\prim"))), 
-                     [],
-                     [(Pnormal,
-                       ((int), [18:10-45],
-                        (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), (UnsafeCast [([18:32-36], (Hoption ([18:33-36], (Hprim Tint)))); ([18:37-40], (Hprim Tint))])))))
-                       ],
-                     None)))))
+                  (Call
+                     { func = (((function(int $i): void)), [18:5-9], (Id ([18:5-9], "\\prim"))); 
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((int), [18:10-45],
+                          (Hole (((?int), [18:42-44], (Lvar ([18:42-44], $x))), (?int), (int), (UnsafeCast [([18:32-36], (Hoption ([18:33-36], (Hprim Tint)))); ([18:37-40], (Hprim Tint))])))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

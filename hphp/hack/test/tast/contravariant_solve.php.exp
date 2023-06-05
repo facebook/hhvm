@@ -109,20 +109,26 @@
                     { bop = (Eq None); lhs = ((void), [17:3-5], (Lplaceholder [17:3-5]));
                       rhs =
                       ((I<int>), [17:8-21],
-                       (Call ((((function<T>(I<int> $_, I<int> $_): I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))), 
-                          [((int), ([17:8-9], (Happly (([Pos.none], "_"), []))))],
-                          [(Pnormal,
-                            ((E<int>), [17:10-14],
-                             (Call ((((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))), 
-                                [((int), ([17:10-11], (Happly (([Pos.none], "_"), []))))], 
-                                [(Pnormal, ((int), [17:12-13], (Int "1")))], None))));
-                            (Pnormal,
-                             ((E<int>), [17:16-20],
-                              (Call ((((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))), 
-                                 [((int), ([17:16-17], (Happly (([Pos.none], "_"), []))))], 
-                                 [(Pnormal, ((int), [17:18-19], (Int "2")))], None))))
-                            ],
-                          None)))
+                       (Call
+                          { func = (((function<T>(I<int> $_, I<int> $_): I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
+                            targs = [((int), ([17:8-9], (Happly (([Pos.none], "_"), []))))];
+                            args =
+                            [(Pnormal,
+                              ((E<int>), [17:10-14],
+                               (Call
+                                  { func = (((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
+                                    targs = [((int), ([17:10-11], (Happly (([Pos.none], "_"), []))))]; 
+                                    args = [(Pnormal, ((int), [17:12-13], (Int "1")))]; 
+                                    unpacked_arg = None })));
+                              (Pnormal,
+                               ((E<int>), [17:16-20],
+                                (Call
+                                   { func = (((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
+                                     targs = [((int), ([17:16-17], (Happly (([Pos.none], "_"), []))))]; 
+                                     args = [(Pnormal, ((int), [17:18-19], (Int "2")))]; 
+                                     unpacked_arg = None })))
+                              ];
+                            unpacked_arg = None }))
                       }))))
              ]
            };

@@ -76,8 +76,7 @@ class virtual iter =
 
     method! on_expr env e =
       match e with
-      | (_, _, Call (e1, ta, el, unpacked_element)) ->
-        self#on_Call env e1 ta el unpacked_element
+      | (_, _, Call call_expr) -> self#on_Call env call_expr
       | (_, _, Binop ({ bop = Ast_defs.Eq None; _ } as binop)) ->
         self#on_Binop env binop
       | _ -> super#on_expr env e

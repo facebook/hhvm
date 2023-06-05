@@ -68,8 +68,11 @@
            [([13:3-9],
              (Expr
                 ((void), [13:3-8],
-                 (Call ((((function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))), 
-                    [], [(Pnormal, ((Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (Collection<string>), (Collection<int>), Typing))))], None)))));
+                 (Call
+                    { func = (((function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))); 
+                      targs = [];
+                      args = [(Pnormal, ((Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                      unpacked_arg = None }))));
              ([15:3-31],
               (Expr
                  ((TestCollection), [15:3-30],
@@ -79,10 +82,13 @@
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
-                  (Call (
-                     (((function(Collection<int> $l): void)), [18:3-10],
-                      (Obj_get (((TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method))),
-                     [], [(Pnormal, ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))], None)))))
+                  (Call
+                     { func =
+                       (((function(Collection<int> $l): void)), [18:3-10],
+                        (Obj_get (((TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args = [(Pnormal, ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -109,17 +115,19 @@
            [([25:3-68],
              (Expr
                 ((void), [25:3-67],
-                 (Call ((((function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))), 
-                    [],
-                    [(Pnormal,
-                      ((Collection<int>), [25:5-66],
-                       (Hole (((Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
-                          (UnsafeCast
-                             [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
-                               ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
-                          ))))
-                      ],
-                    None)))));
+                 (Call
+                    { func = (((function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))); 
+                      targs = [];
+                      args =
+                      [(Pnormal,
+                        ((Collection<int>), [25:5-66],
+                         (Hole (((Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
+                            (UnsafeCast
+                               [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
+                                 ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
+                            ))))
+                        ];
+                      unpacked_arg = None }))));
              ([27:3-31],
               (Expr
                  ((TestCollection), [27:3-30],
@@ -129,19 +137,21 @@
              ([30:3-74],
               (Expr
                  ((void), [30:3-73],
-                  (Call (
-                     (((function(Collection<int> $l): void)), [30:3-10],
-                      (Obj_get (((TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method))),
-                     [],
-                     [(Pnormal,
-                       ((Collection<int>), [30:11-72],
-                        (Hole (((Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
-                           (UnsafeCast
-                              [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
-                                ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
-                           ))))
-                       ],
-                     None)))))
+                  (Call
+                     { func =
+                       (((function(Collection<int> $l): void)), [30:3-10],
+                        (Obj_get (((TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
+                       targs = [];
+                       args =
+                       [(Pnormal,
+                         ((Collection<int>), [30:11-72],
+                          (Hole (((Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
+                             (UnsafeCast
+                                [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
+                                  ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
+                             ))))
+                         ];
+                       unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

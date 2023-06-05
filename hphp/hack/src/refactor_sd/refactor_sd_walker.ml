@@ -176,9 +176,9 @@ let rec expr_
       | None -> env
     in
     (env, entity)
-  | A.Call (e, _targs, args, _unpacked) ->
+  | A.(Call { func; args; _ }) ->
     (* Until interprocedural analaysis has been implemented, this is all incomplete. *)
-    let (env, entity) = expr_ upcasted_info env e in
+    let (env, entity) = expr_ upcasted_info env func in
     let handle_args env (_, arg) =
       let (env, _) = expr_ upcasted_info env arg in
       env

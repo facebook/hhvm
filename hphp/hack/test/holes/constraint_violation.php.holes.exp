@@ -26,11 +26,12 @@ Errors:
           [([4:3-16],
             (Expr
                ((Set<?string>), [4:3-15],
-                (Call (
-                   (((function()[]: Set<?string>)), [4:3-13],
-                    (Obj_get (((Vector<?string>), [4:3-6], (Hole (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (Vector<?string>), (nothing), Typing))),
-                       (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method))),
-                   [], [], None)))))
+                (Call
+                   { func =
+                     (((function()[]: Set<?string>)), [4:3-13],
+                      (Obj_get (((Vector<?string>), [4:3-6], (Hole (((Vector<?string>), [4:3-6], (Lvar ([4:3-6], $xs))), (Vector<?string>), (nothing), Typing))),
+                         (((function()[]: Set<?string>)), [4:8-13], (Id ([4:8-13], "toSet"))), OG_nullthrows, Is_method)));
+                     targs = []; args = []; unpacked_arg = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

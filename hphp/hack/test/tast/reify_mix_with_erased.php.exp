@@ -41,9 +41,11 @@ Errors:
            [([8:3-22],
              (Expr
                 ((string), [8:3-21],
-                 (Call ((((function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))), 
-                    [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                    [(Pnormal, ((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing))))], None)))))
+                 (Call
+                    { func = (((function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))); 
+                      targs = [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))];
+                      args = [(Pnormal, ((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing))))]; 
+                      unpacked_arg = None }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

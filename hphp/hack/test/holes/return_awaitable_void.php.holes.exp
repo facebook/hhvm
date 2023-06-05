@@ -51,7 +51,11 @@
            [([7:3-9:4],
              (If (((bool), [7:7-18], (Binop { bop = Eqeqeq; lhs = ((?string), [7:7-9], (Lvar ([7:7-9], $x))); rhs = ((null), [7:14-18], Null) })),
                 [([7:3-9:4], (AssertEnv (Refinement, {$x})));
-                  ([8:5-22], (Return (Some ((int), [8:12-21], (Await ((Awaitable<int>), [8:18-21], (Call ((((function(): Awaitable<int>)), [8:18-19], (Id ([8:18-19], "\\f"))), [], [], None))))))))],
+                  ([8:5-22],
+                   (Return
+                      (Some ((int), [8:12-21],
+                             (Await ((Awaitable<int>), [8:18-21], (Call { func = (((function(): Awaitable<int>)), [8:18-19], (Id ([8:18-19], "\\f"))); targs = []; args = []; unpacked_arg = None })))))))
+                  ],
                 [([7:3-9:4], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
              ([11:3-24],
               (Return
@@ -60,7 +64,10 @@
                            ((void), [11:10-23],
                             (Await
                                ((Awaitable<void>), [11:16-23],
-                                (Call ((((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))), [], [(Pnormal, ((string), [11:20-22], (Lvar ([11:20-22], $x))))], None))))),
+                                (Call
+                                   { func = (((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))); 
+                                     targs = []; args = [(Pnormal, ((string), [11:20-22], (Lvar ([11:20-22], $x))))]; 
+                                     unpacked_arg = None })))),
                            (void), (int), Typing))))))
              ]
            };

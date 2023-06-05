@@ -82,10 +82,11 @@
              ([18:3-20],
               (Return
                  (Some (((int | string)), [18:10-19],
-                        (Call (
-                           (((function(): (int | string))), [18:10-17],
-                            (Obj_get ((((C1 | C2)), [18:10-12], (Lvar ([18:10-12], $x))), (((function(): (int | string))), [18:14-17], (Id ([18:14-17], "foo"))), OG_nullthrows, Is_method))),
-                           [], [], None))))))
+                        (Call
+                           { func =
+                             (((function(): (int | string))), [18:10-17],
+                              (Obj_get ((((C1 | C2)), [18:10-12], (Lvar ([18:10-12], $x))), (((function(): (int | string))), [18:14-17], (Id ([18:14-17], "foo"))), OG_nullthrows, Is_method)));
+                             targs = []; args = []; unpacked_arg = None })))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

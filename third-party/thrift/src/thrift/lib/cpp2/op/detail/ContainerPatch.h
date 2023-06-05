@@ -94,22 +94,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
-  /// Creates a new patch with appended list.
-  template <typename C = T>
-  static ListPatch createAppend(C&& values) {
-    ListPatch result;
-    *result.data_.append() = std::forward<C>(values);
-    return result;
-  }
-
-  /// Creates a new patch with prepended list.
-  template <typename C = T>
-  static ListPatch createPrepend(C&& values) {
-    ListPatch result;
-    *result.data_.prepend() = std::forward<C>(values);
-    return result;
-  }
-
   /// Appends a list.
   template <typename C = T>
   void append(C&& rhs) {
@@ -251,22 +235,6 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
-  /// Creates a new patch that adds keys.
-  template <typename C = T>
-  static SetPatch createAdd(C&& keys) {
-    SetPatch result;
-    *result.data_.add() = std::forward<C>(keys);
-    return result;
-  }
-
-  /// Creates a new patch that removes keys.
-  template <typename C = T>
-  static SetPatch createRemove(C&& keys) {
-    SetPatch result;
-    *result.data_.remove() = std::forward<C>(keys);
-    return result;
-  }
-
   /// Adds keys.
   template <typename C = T>
   void add(C&& keys) {
@@ -387,14 +355,6 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
-
-  /// Creates a patch that inserts entries. Override entries if exists.
-  template <typename C = T>
-  static MapPatch createPut(C&& entries) {
-    MapPatch result;
-    *result.data_.put() = std::forward<C>(entries);
-    return result;
-  }
 
   /// Inserts entries. Override entries if exists.
   template <typename C = T>

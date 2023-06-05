@@ -95,9 +95,6 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
-  /// Creates a new patch that invert the bool.
-  static BoolPatch createInvert() { return !BoolPatch{}; }
-
   /// Inverts the bool.
   void invert() {
     auto& val = assignOr(*data_.invert());
@@ -171,21 +168,6 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
-
-  /// Creates a new patch that increases the value.
-  template <typename U>
-  static NumberPatch createAdd(U&& val) {
-    NumberPatch patch;
-    patch.add(std::forward<U>(val));
-    return patch;
-  }
-  /// Creates a new patch that decreases the value.
-  template <typename U>
-  static NumberPatch createSubtract(U&& val) {
-    NumberPatch patch;
-    patch.subtract(std::forward<U>(val));
-    return patch;
-  }
 
   /// Increases the value.
   template <typename U>
@@ -295,22 +277,6 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
  public:
   using Base::Base;
   using Base::operator=;
-
-  /// Creates a patch that prepends a string.
-  template <typename U>
-  static Derived createPrepend(U&& val) {
-    Derived patch;
-    patch.prepend(std::forward<U>(val));
-    return patch;
-  }
-
-  /// Creates a patch that appends a string.
-  template <typename... Args>
-  static Derived createAppend(Args&&... args) {
-    Derived patch;
-    patch.append(std::forward<Args>(args)...);
-    return patch;
-  }
 
   /// Appends a string.
   template <typename U>

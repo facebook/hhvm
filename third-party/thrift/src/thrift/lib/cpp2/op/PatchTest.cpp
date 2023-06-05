@@ -31,7 +31,7 @@ TEST(PatchTest, BoolPatch) {
   test::expectPatch(patch, true, true);
 
   // Inverting patch inverts.
-  patch = BoolPatch::createInvert();
+  patch.invert();
   test::expectPatch(patch, false, true, false);
   test::expectPatch(patch, true, false, true);
 
@@ -57,9 +57,12 @@ void testNumberPatch() {
   test::expectPatch(patch, {7}, 7);
 
   // Incrementing patch increments.
-  patch = 1 + NPatch::createAdd(1);
+  patch += 1;
+  patch = 1 + patch;
   test::expectPatch(patch, {7}, 9, 11);
-  patch.merge(NPatch::createSubtract(2));
+  NPatch subtractPatch;
+  subtractPatch -= 2;
+  patch.merge(subtractPatch);
   test::expectPatch(patch, {7}, 7);
 
   // Assigning patch assigns.
@@ -85,11 +88,13 @@ TEST(PatchTest, StringPatch) {
   test::expectPatch(patch, {"hi"}, "hi");
 
   // Relative patch patches.
-  patch = StringPatch::createPrepend("_");
+  patch.prepend("_");
   patch += "_";
   test::expectPatch(patch, {"hi"}, "_hi_", "__hi__");
   patch.prepend("$");
-  patch.merge(StringPatch::createAppend("^"));
+  StringPatch appendString;
+  appendString.append("^");
+  patch.merge(appendString);
   test::expectPatch(patch, {"hi"}, "$_hi_^", "$_$_hi_^_^");
 
   // Assign patch assigns.
@@ -112,12 +117,14 @@ TEST(PatchTest, BinaryPatch) {
   test::expectPatch(patch, {makeIOBuf("hi")}, makeIOBuf("hi"));
 
   // Relative patch patches.
-  patch = BinaryPatch::createPrepend(makeIOBuf("_"));
+  patch.prepend(makeIOBuf("_"));
   patch += makeIOBuf("_");
   test::expectPatch(
       patch, {makeIOBuf("hi")}, makeIOBuf("_hi_"), makeIOBuf("__hi__"));
   patch.prepend(makeIOBuf("$"));
-  patch.merge(BinaryPatch::createAppend(makeIOBuf("^")));
+  BinaryPatch appendPatch;
+  appendPatch.append(makeIOBuf("^"));
+  patch.merge(appendPatch);
   test::expectPatch(
       patch, {makeIOBuf("hi")}, makeIOBuf("$_hi_^"), makeIOBuf("$_$_hi_^_^"));
 

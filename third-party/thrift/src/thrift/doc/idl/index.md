@@ -557,23 +557,27 @@ typedef map<string, string> StringMap
 
 ### Services
 
-```
+A service definition introduces a named service into your program and has the following form:
+
+```grammar
 service ::=
   [annotations]
-  "service" identifier ["extends" maybe_qualified_id] "{"
+  "service" identifier ["extends" base_service_name] "{"
     (function | performs)*
   "}"
 
+base_service_name ::=  maybe_qualified_id
+
 function ::=
-  ResultType identifier
-  "("
-  ( ParameterSpecification )*
-  ")"
-  [ "throws" "(" field+ ")" ]
+  [annotations]
+  [function_qualifier] return_type identifier
+    "(" (parameter [","])* ")" throws [";"]
 
-ResultType ::= "void" | "oneway void" | ["stream"] type
-
-ParameterSpecification ::= field_id ":" type identifier [default_value]
+function_qualifier ::=  "oneway" | "idempotent" | "readonly"
+return_type        ::=  "void" | type | stream_return_type
+stream_return_type ::=  [("void" | type) ","] "stream" "<" type [throws] ">"
+parameter          ::=  field_id ":" type identifier [default_value]
+throws             ::=  ["throws" "(" field+ ")"]
 
 performs         ::=  "performs" interaction_name ";"
 interaction_name ::=  maybe_qualified_id
@@ -625,8 +629,6 @@ service Bar {
 ```
 
 WARNING: New arguments could be added to a method, but it is better to define an input struct and add members to it instead. The server cannot distinguish between missing arguments and default values, so a request object is better.
-
-*TBD: Need to discuss versioning of services*
 
 #### Exception and RPC Keywords
 

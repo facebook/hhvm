@@ -172,7 +172,7 @@ CollectedInfo::CollectedInfo(const Index& index,
 //////////////////////////////////////////////////////////////////////
 
 State with_throwable_only(const Index& index, const State& src) {
-  auto throwable = subObj(index.builtin_class(s_Throwable.get()));
+  auto throwable = subObj(builtin_class(index, s_Throwable.get()));
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisType      = src.thisType;

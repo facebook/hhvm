@@ -350,14 +350,6 @@ bool thisAvailable(ISS& env) {
     !env.state.thisType.is(BBottom);
 }
 
-// Returns the type $this would have if it's not null.  Generally
-// you have to check thisAvailable() before assuming it can't be
-// null.
-Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
-  if (auto rcls = index.selfCls(ctx)) return setctx(subObj(*rcls));
-  return std::nullopt;
-}
-
 Type thisType(ISS& env) {
   return env.state.thisType;
 }
@@ -368,24 +360,21 @@ Type thisTypeNonNull(ISS& env) {
   return env.state.thisType;
 }
 
-Optional<Type> selfCls(ISS& env) {
-  if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
-  return std::nullopt;
+//////////////////////////////////////////////////////////////////////
+// self
+
+inline Optional<Type> selfCls(ISS& env) {
+  return selfCls(env.index, env.ctx);
+}
+inline Optional<Type> selfClsExact(ISS& env) {
+  return selfClsExact(env.index, env.ctx);
 }
 
-Optional<Type> selfClsExact(ISS& env) {
-  if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
-  return std::nullopt;
+inline Optional<Type> parentCls(ISS& env) {
+  return parentCls(env.index, env.ctx);
 }
-
-Optional<Type> parentCls(ISS& env) {
-  if (auto rcls = env.index.parentCls(env.ctx)) return subCls(*rcls);
-  return std::nullopt;
-}
-
-Optional<Type> parentClsExact(ISS& env) {
-  if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
-  return std::nullopt;
+inline Optional<Type> parentClsExact(ISS& env) {
+  return parentClsExact(env.index, env.ctx);
 }
 
 // Like selfClsExact, but if the func is non-static, use an object
@@ -410,12 +399,12 @@ inline ClsConstLookupResult lookupClsConstant(const Index& index,
   // Check if the constant's class is definitely the current context.
   auto const isClsCtx = [&] {
     if (!collect || !collect->clsCns) return false;
-    auto const rcls = index.selfCls(ctx);
-    if (!rcls) return false;
     if (!is_specialized_cls(cls)) return false;
     auto const& dcls = dcls_of(cls);
     if (!dcls.isExact()) return false;
-    return dcls.cls().same(*rcls);
+    auto const self = selfClsExact(index, ctx);
+    if (!self || !is_specialized_cls(*self)) return false;
+    return dcls.cls().same(dcls_of(*self).cls());
   }();
 
   if (isClsCtx && is_specialized_string(name)) {
@@ -493,9 +482,18 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (func->attrs & AttrPrivate) {
     if (env.ctx.cls != func->cls) return false;
   } else if (func->attrs & AttrProtected) {
-    if (!env.ctx.cls) return false;
-    if (!env.index.must_be_derived_from(env.ctx.cls, func->cls) &&
-        !env.index.must_be_derived_from(func->cls, env.ctx.cls)) return false;
+    assertx(func->cls);
+    if (env.ctx.cls != func->cls) {
+      if (!env.ctx.cls) return false;
+      auto const rcls1 = env.index.resolve_class(env.ctx.cls->name);
+      auto const rcls2 = env.index.resolve_class(func->cls->name);
+      if (!rcls1 || !rcls2) return false;
+      if (!rcls1->resolved() || !rcls2->resolved()) return false;
+      if (!rcls1->exactSubtypeOf(*rcls2, true, true) &&
+          !rcls2->exactSubtypeOf(*rcls1, true, true)) {
+        return false;
+      }
+    }
   }
 
   // Foldable builtins are always worth trying
@@ -508,14 +506,16 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
 
   if (func->params.size()) return true;
 
+  auto const rfunc = env.index.resolve_func_or_method(*func);
+
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  if (env.index.is_effect_free(env.ctx, func) &&
+  if (env.index.is_effect_free(env.ctx, rfunc) &&
       is_scalar(
         env.index.lookup_return_type(
           env.ctx,
           &env.collect.methods,
-          func,
+          rfunc,
           Dep::InlineDepthLimit
         )
       )
@@ -526,7 +526,17 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (!(func->attrs & AttrStatic) && func->cls) {
     // May be worth trying to fold if the method returns a scalar,
     // assuming its only "effect" is checking for existence of $this.
-    if (is_scalar(env.index.lookup_return_type_raw(func).first)) return true;
+    if (is_scalar(
+          env.index.lookup_return_type(
+            env.ctx,
+            &env.collect.methods,
+            rfunc,
+            Dep::InlineDepthLimit
+          )
+        )
+       ) {
+      return true;
+    }
 
     // The method may be foldable if we know more about $this.
     if (is_specialized_obj(context)) {

@@ -84,14 +84,6 @@ using namespace extern_worker;
 
 //////////////////////////////////////////////////////////////////////
 
-// This lets us create res::Class from anywhere within this file
-// without having to explicitly friend all of the the internals.
-struct UnresolvedClassMaker {
-  static res::Class make(SString name) { return res::Class { name }; }
-};
-
-//////////////////////////////////////////////////////////////////////
-
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -3730,8 +3722,8 @@ PrepKind Func::lookupParamPrep(uint32_t paramId) const {
 TriBool Func::lookupReturnReadonly() const {
   return match<TriBool>(
     val,
-    [&] (FuncName s)   { return TriBool::Maybe; },
-    [&] (MethodName s) { return TriBool::Maybe; },
+    [&] (FuncName)     { return TriBool::Maybe; },
+    [&] (MethodName)   { return TriBool::Maybe; },
     [&] (Fun f)        { return yesOrNo(f.finfo->func->isReadonlyReturn); },
     [&] (Fun2 f)       { return yesOrNo(f.finfo->func->isReadonlyReturn); },
     [&] (Method m)     { return yesOrNo(m.finfo->func->isReadonlyReturn); },
@@ -5106,13 +5098,13 @@ void check_local_invariants(const IndexData& data) {
 
 Type adjust_closure_context(const Index& index, const CallContext& ctx) {
   if (ctx.callee->cls && ctx.callee->cls->closureContextCls) {
-    auto withClosureContext = Context {
+    auto const withClosureContext = Context {
       index.lookup_func_unit(*ctx.callee),
       ctx.callee,
       index.lookup_closure_context(*ctx.callee->cls)
     };
-    if (auto const rcls = index.selfCls(withClosureContext)) {
-      return setctx(subObj(*rcls));
+    if (auto const s = selfCls(index, withClosureContext)) {
+      return setctx(toobj(*s));
     }
     return TObj;
   }
@@ -8358,24 +8350,24 @@ private:
       if (f.isGenerator) {
         if (f.isAsync) {
           // Async generators always return AsyncGenerator object.
-          return objExact(UnresolvedClassMaker::make(s_AsyncGenerator.get()));
+          return objExact(res::Class::makeUnresolved(s_AsyncGenerator.get()));
         }
         // Non-async generators always return Generator object.
-        return objExact(UnresolvedClassMaker::make(s_Generator.get()));
+        return objExact(res::Class::makeUnresolved(s_Generator.get()));
       }
 
       auto const make_type = [&] (const TypeConstraint& tc) {
         auto lookup = type_from_constraint(
           tc,
           TInitCell,
-          [] (SString name) { return UnresolvedClassMaker::make(name); },
-          [&] () -> Optional<res::Class> {
+          [] (SString name) { return res::Class::makeUnresolved(name); },
+          [&] () -> Optional<Type> {
             if (!f.cls) return std::nullopt;
             auto const& cls = f.cls->closureContextCls
               ? index.cls(f.cls->closureContextCls)
               : *f.cls;
             if (cls.attrs & AttrTrait) return std::nullopt;
-            return UnresolvedClassMaker::make(cls.name);
+            return subCls(res::Class::makeUnresolved(cls.name));
           }
         );
         if (lookup.coerceClassToString == TriBool::Yes) {
@@ -14082,19 +14074,6 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-Optional<res::Class> Index::resolve_class(const php::Class* cls) const {
-  auto const it = m_data->classInfo.find(cls->name);
-  if (it == end(m_data->classInfo)) return std::nullopt;
-  auto const cinfo = it->second;
-
-  assertx(cinfo->cls == cls);
-  if (is_closure_base(*cinfo->cls)) {
-    // Force Closure to be unresolved
-    return res::Class { cls->name.get() };
-  }
-  return res::Class { cinfo };
-}
-
 Optional<res::Class> Index::resolve_class(SString clsName) const {
   clsName = normalizeNS(clsName);
 
@@ -14109,73 +14088,16 @@ Optional<res::Class> Index::resolve_class(SString clsName) const {
   return res::Class { cinfo };
 }
 
-res::Class Index::resolve_class_name_only(SString clsName) const {
-  clsName = normalizeNS(clsName);
-  return res::Class { clsName };
-}
-
-Optional<res::Class> Index::selfCls(const Context& ctx) const {
-  if (!ctx.cls || is_used_trait(*ctx.cls)) return std::nullopt;
-  return resolve_class(ctx.cls);
-}
-
-Optional<res::Class> Index::parentCls(const Context& ctx) const {
-  if (!ctx.cls || !ctx.cls->parentName) return std::nullopt;
-  if (auto const rcls = resolve_class(ctx.cls)) {
-    if (auto const parent = rcls->parent()) return parent;
-  }
-  return resolve_class(ctx.cls->parentName);
-}
-
 const php::TypeAlias* Index::lookup_type_alias(SString name) const {
   auto const it = m_data->typeAliases.find(name);
   if (it == m_data->typeAliases.end()) return nullptr;
   return it->second;
 }
 
-std::pair<res::Class, const php::Class*>
-Index::resolve_closure_class(Context ctx, SString name) const {
-  auto const it = m_data->classes.find(name);
-  always_assert_flog(
-    it != m_data->classes.end(),
-    "Unknown closure class `{}`",
-    name
-  );
-  auto const cls = it->second;
-  assertx(cls->unit == ctx.unit->filename);
-  assertx(is_closure(*cls));
-  auto const rcls = resolve_class(cls);
-
-  // Closure classes must be unique and defined in the unit that uses
-  // the CreateCl opcode, so resolution must succeed.
-  always_assert_flog(
-    rcls && rcls->resolved(),
-    "A closure class ({}) failed to resolve",
-    cls->name
-  );
-
-  return { *rcls, cls };
-}
-
-res::Class Index::builtin_class(SString name) const {
-  auto const rcls = resolve_class(name);
-  // Builtin classes should always be resolved, except for Closure,
-  // which are force to be unresolved.
-  always_assert_flog(
-    rcls.has_value() &&
-    (name->isame(s_Closure.get()) ||
-     (rcls->val.right() &&
-      (rcls->val.right()->cls->attrs & AttrBuiltin))),
-    "A builtin class ({}) failed to resolve",
-    name->data()
-  );
-  return *rcls;
-}
-
 res::Class Index::wait_handle_class() const {
   return m_data->lazyWaitHandleCls.get(
     [&] {
-      auto const awaitable = builtin_class(s_Awaitable.get());
+      auto const awaitable = builtin_class(*this, s_Awaitable.get());
       auto const without = awaitable.withoutNonRegular();
       assertx(without.has_value());
       return *without;
@@ -14682,30 +14604,12 @@ res::Func Index::resolve_func(SString name) const {
   return res::Func { res::Func::Fun { func_info(*m_data, func) } };
 }
 
-bool Index::could_have_reified_type(Context ctx,
-                                    const TypeConstraint& tc) const {
-  if (ctx.func->isClosureBody) {
-    for (auto i = ctx.func->params.size();
-         i < ctx.func->locals.size();
-         ++i) {
-      auto const name = ctx.func->locals[i].name;
-      if (!name) return false; // named locals do not appear after unnamed local
-      if (isMangledReifiedGenericInClosure(name)) return true;
-    }
-    return false;
-  }
-  if (!tc.isObject()) return false;
-  auto const cls = resolve_class(tc.clsName());
-  assertx(cls.has_value());
-  return cls->couldHaveReifiedGenerics();
+res::Func Index::resolve_func_or_method(const php::Func& f) const {
+  if (!f.cls) return res::Func { res::Func::Fun { func_info(*m_data, &f) } };
+  return res::Func { res::Func::Method { func_info(*m_data, &f) } };
 }
 
 bool Index::is_effect_free_raw(const php::Func* func) const {
-  return func_info(*m_data, func)->effectFree;
-}
-
-bool Index::is_effect_free(Context ctx, const php::Func* func) const {
-  add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
   return func_info(*m_data, func)->effectFree;
 }
 
@@ -14750,6 +14654,11 @@ bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
     [&] (res::Func::MethodOrMissing2) -> bool { always_assert(false); },
     [&] (res::Func::Isect2&)          -> bool { always_assert(false); }
   );
+}
+
+bool Index::func_depends_on_arg(const php::Func* func, size_t arg) const {
+  auto const& finfo = *func_info(*m_data, func);
+  return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
 }
 
 // Helper function: Given a DCls, visit every subclass it represents,
@@ -15074,11 +14983,6 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
 }
 
-bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
-  auto const& finfo = *func_info(*m_data, func);
-  return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
-}
-
 Type Index::lookup_foldable_return_type(Context ctx,
                                         const CallContext& calleeCtx) const {
   auto const func = calleeCtx.callee;
@@ -15168,24 +15072,6 @@ Type Index::lookup_foldable_return_type(Context ctx,
     assertx(acc->second == contextType);
   }
   return contextType;
-}
-
-Type Index::lookup_return_type(Context ctx,
-                               MethodsInfo* methods,
-                               const php::Func* f,
-                               Dep dep) const {
-  if (methods) {
-    if (auto ret = methods->lookupReturnType(*f)) {
-      return unctx(std::move(*ret));
-    }
-  }
-  auto it = func_info(*m_data, f);
-  if (it->func) {
-    assertx(it->func == f);
-    add_dependency(*m_data, f, ctx, dep);
-    return it->returnTy;
-  }
-  return TInitCell;
 }
 
 Type Index::lookup_return_type(Context ctx,
@@ -15330,6 +15216,15 @@ Type Index::lookup_return_type(Context caller,
   );
 }
 
+std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const {
+  auto it = func_info(*m_data, f);
+  if (it->func) {
+    assertx(it->func == f);
+    return { it->returnTy, it->returnRefinements };
+  }
+  return { TInitCell, 0 };
+}
+
 CompactVector<Type>
 Index::lookup_closure_use_vars(const php::Func* func,
                                bool move) const {
@@ -15343,15 +15238,6 @@ Index::lookup_closure_use_vars(const php::Func* func,
   }
   if (move) return std::move(it->second);
   return it->second;
-}
-
-std::pair<Type, size_t> Index::lookup_return_type_raw(const php::Func* f) const {
-  auto it = func_info(*m_data, f);
-  if (it->func) {
-    assertx(it->func == f);
-    return { it->returnTy, it->returnRefinements };
-  }
-  return { TInitCell, 0 };
 }
 
 PropState
@@ -15471,7 +15357,7 @@ PropLookupResult Index::lookup_static(Context ctx,
     // I don't think this can ever fail (we should always be able to
     // resolve the class since we're currently processing it). If it
     // does, be conservative.
-    auto const rCtx = resolve_class(ctx.cls);
+    auto const rCtx = resolve_class(ctx.cls->name);
     if (!rCtx || rCtx->val.left()) return conservative();
     ctxCls = rCtx->val.right();
   }
@@ -15635,7 +15521,7 @@ PropMergeResult Index::merge_static_type(
 
   const ClassInfo* ctxCls = nullptr;
   if (ctx.cls) {
-    auto const rCtx = resolve_class(ctx.cls);
+    auto const rCtx = resolve_class(ctx.cls->name);
     // We should only be not able to resolve our own context if the
     // class is not instantiable. In that case, the merge can't
     // happen.
@@ -15825,23 +15711,6 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
   assertx(it != cs.end() && "Did not find constant");
   (*it)->val = val.value();
   find_deps(*m_data, func, Dep::ConstVal, deps);
-}
-
-void Index::fixup_return_type(const php::Func* func,
-                              Type& retTy) const {
-  if (func->isGenerator) {
-    if (func->isAsync) {
-      // Async generators always return AsyncGenerator object.
-      retTy = objExact(builtin_class(s_AsyncGenerator.get()));
-    } else {
-      // Non-async generators always return Generator object.
-      retTy = objExact(builtin_class(s_Generator.get()));
-    }
-  } else if (func->isAsync) {
-    // Async functions always return WaitH<T>, where T is the type returned
-    // internally.
-    retTy = wait_handle(*this, std::move(retTy));
-  }
 }
 
 void Index::refine_return_info(const FuncAnalysisResult& fa,
@@ -16320,21 +16189,6 @@ void Index::cleanup_post_emit() {
 
 void Index::thaw() {
   m_data->frozen = false;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Return true if we know for sure that one php::Class must derive
-// from another at runtime, in all possible instantiations.
-bool Index::must_be_derived_from(const php::Class* cls,
-                                 const php::Class* parent) const {
-  if (cls == parent) return true;
-  auto const clsIt = m_data->classInfo.find(cls->name);
-  auto const parentIt = m_data->classInfo.find(parent->name);
-  if (clsIt == end(m_data->classInfo) || parentIt == end(m_data->classInfo)) {
-    return false;
-  }
-  return clsIt->second->derivedFrom(*parentIt->second);
 }
 
 //////////////////////////////////////////////////////////////////////

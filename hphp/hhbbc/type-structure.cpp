@@ -364,7 +364,7 @@ struct Cache {
 // Map a name into an appropriate TCls specialization.
 Type name_to_cls_type(ResolveCtx& ctx, SString name) {
   auto const resolveCls = [&] (const php::Class* cls) {
-    auto const rcls = ctx.index->resolve_class(cls);
+    auto const rcls = ctx.index->resolve_class(cls->name);
     if (!rcls) return TBottom;
     return clsExact(*rcls);
   };
@@ -377,7 +377,7 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
   if (ctx.selfCls) {
     if (name->isame(s_hh_this.get())) {
       if (ctx.thisCls) return resolveCls(ctx.thisCls);
-      auto const rcls = ctx.index->resolve_class(ctx.selfCls);
+      auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
       if (!rcls) return TBottom;
       return subCls(*rcls);
     }
@@ -701,7 +701,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
         return resolvedCls(ctx.selfCls, true);
       }
 
-      auto const rcls = ctx.index->resolve_class(ctx.selfCls);
+      auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
       if (!rcls) return Resolution{ TBottom, true };
       if (!rcls->resolved()) return Resolution{ TDictN, true };
 

@@ -270,12 +270,12 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
 
   case Op::This:
   case Op::BareThis:
-    if (auto tt = thisType(interp.index, interp.ctx)) {
+    if (auto const s = selfCls(interp.index, interp.ctx)) {
       auto t = interp.state.stack.back().type;
       if (t.couldBe(BInitNull) && !t.subtypeOf(BInitNull)) {
         t = unopt(std::move(t));
       }
-      return !t.strictSubtypeOf(*tt);
+      return !t.strictSubtypeOf(setctx(toobj(*s)));
     }
     return true;
 

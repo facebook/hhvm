@@ -274,7 +274,6 @@ struct ClsConstInfo {
 struct ClassInfo;
 struct FuncInfo2;
 struct FuncFamily2;
-struct UnresolvedClassMaker;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -545,6 +544,12 @@ struct Class {
   size_t hash() const { return val.toOpaque(); }
 
   /*
+   * Make an unresolved Class representing the given name. Mainly
+   * meant for tests.
+   */
+  static Class makeUnresolved(SString n) { return Class { n }; };
+
+  /*
    * NB: Serd-ing a Class only encodes the name. Deserializing it
    * always produces a name-only unresolved class, regardless of the
    * original. If necessary, the Class must be manually resolved
@@ -573,7 +578,6 @@ private:
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
   friend struct ::HPHP::HHBBC::ClassInfo;
-  friend struct ::HPHP::HHBBC::UnresolvedClassMaker;
   Either<SString,ClassInfo*> val;
 };
 
@@ -956,14 +960,6 @@ struct Index {
     lookup_extra_methods(const php::Class*) const;
 
   /*
-   * Find a res::Class for a given php::Class.
-   *
-   * Returns std::nullopt if the given php::Class is not actually
-   * definable.
-   */
-  Optional<res::Class> resolve_class(const php::Class*) const;
-
-  /*
    * Resolve the given class name to a res::Class.
    *
    * Returns std::nullopt if no such class with that name exists, or
@@ -972,44 +968,20 @@ struct Index {
   Optional<res::Class> resolve_class(SString name) const;
 
   /*
-   * Resolve the given class name to a name-only res::Class. This is
-   * meant for use in tests.
-   */
-  res::Class resolve_class_name_only(SString name) const;
-
-  /*
    * Find a type-alias with the given name. If a nullptr is returned,
    * then no type-alias exists with that name.
    */
   const php::TypeAlias* lookup_type_alias(SString name) const;
 
   /*
-   * Try to resolve self/parent types for the given context
+   * Resolve the given php::Func, which can be a function or
+   * method. resolved() is guaranteed to be true for the returned
+   * res::Func.
    */
-  Optional<res::Class> selfCls(const Context& ctx) const;
-  Optional<res::Class> parentCls(const Context& ctx) const;
-
-  /*
-   * Resolve a closure class.
-   *
-   * Returns both a resolved Class, and the actual php::Class for the
-   * closure.
-   */
-  std::pair<res::Class, const php::Class*>
-    resolve_closure_class(Context ctx, SString name) const;
-
-  /*
-   * Return a resolved class for a builtin class.
-   *
-   * Pre: `name' must be the name of a class defined in a systemlib.
-   */
-  res::Class builtin_class(SString name) const;
+  res::Func resolve_func_or_method(const php::Func&) const;
 
   /*
    * Try to resolve a function named `name'.
-   *
-   * Returns std::nullopt if no such function with that name is known
-   * to exist.
    */
   res::Func resolve_func(SString name) const;
 
@@ -1038,15 +1010,10 @@ struct Index {
 
   /*
    * Return a resolved class representing the base class of a wait
-   * handle (this will be a sub-class of Awaitable).
+   * handle (this will be a sub-class of Awaitable). This is stored in
+   * the Index as it is typically cached.
    */
   res::Class wait_handle_class() const;
-
-  /*
-   * Returns true if the type constraint can contain a reified type
-   * Currently, only classes and interfaces are supported
-   */
-  bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
    * Lookup metadata about the constant access `cls'::`name', in the
@@ -1102,7 +1069,7 @@ struct Index {
   /*
    * Return true if the return value of the function might depend on arg.
    */
-  bool func_depends_on_arg(const php::Func* func, int arg) const;
+  bool func_depends_on_arg(const php::Func* func, size_t arg) const;
 
   /*
    * If func is effect-free when called with args, and it returns a constant,
@@ -1116,8 +1083,6 @@ struct Index {
    * context insensitive way.  Returns TInitCell at worst.
    */
   Type lookup_return_type(Context, MethodsInfo*, res::Func,
-                          Dep dep = Dep::ReturnTy) const;
-  Type lookup_return_type(Context, MethodsInfo*, const php::Func*,
                           Dep dep = Dep::ReturnTy) const;
 
   /*
@@ -1140,7 +1105,7 @@ struct Index {
    * refinements done to that type.
    *
    * This function does not register a dependency on the return type
-   * information.
+   * information, so should not be used during analysis.
    *
    * Nothing may be writing to the index when this function is used,
    * but concurrent readers are allowed.
@@ -1420,23 +1385,12 @@ struct Index {
    * Return true if the function is effect free.
    */
   bool is_effect_free(Context, res::Func rfunc) const;
-  bool is_effect_free(Context, const php::Func* func) const;
+
+  /*
+   * Like is_effect_free, but does not register a dependency, so not
+   * appropriate during analysis.
+   */
   bool is_effect_free_raw(const php::Func* func) const;
-
-  /*
-   * Do any necessary fixups to a return type.
-   *
-   * Note that eg for an async function it will map Type to
-   * WaitH<Type>.
-   */
-  void fixup_return_type(const php::Func*, Type&) const;
-
-  /*
-   * Return true if we know for sure that one php::Class must derive
-   * from another at runtime, in all possible instantiations.
-   */
-  bool must_be_derived_from(const php::Class*,
-                            const php::Class*) const;
 
   struct IndexData;
 private:

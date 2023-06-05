@@ -873,14 +873,14 @@ void in(ISS& env, const bc::AddNewElemC&) {
 void in(ISS& env, const bc::NewCol& op) {
   auto const type = static_cast<CollectionType>(op.subop1);
   auto const name = collections::typeToString(type);
-  push(env, objExact(env.index.builtin_class(name)));
+  push(env, objExact(builtin_class(env.index, name)));
   effect_free(env);
 }
 
 void in(ISS& env, const bc::NewPair& /*op*/) {
   popC(env); popC(env);
   auto const name = collections::typeToString(CollectionType::Pair);
-  push(env, objExact(env.index.builtin_class(name)));
+  push(env, objExact(builtin_class(env.index, name)));
   effect_free(env);
 }
 
@@ -898,7 +898,7 @@ void in(ISS& env, const bc::ColFromArray& op) {
     if (src.subtypeOf(TDict)) effect_free(env);
   }
   auto const name = collections::typeToString(type);
-  push(env, objExact(env.index.builtin_class(name)));
+  push(env, objExact(builtin_class(env.index, name)));
 }
 
 void in(ISS& env, const bc::CnsE& op) {
@@ -2406,7 +2406,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   always_assert(func->isMemoizeWrapper);
 
   auto const tyIMemoizeParam =
-    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
+    subObj(builtin_class(env.index, s_IMemoizeParam.get()));
 
   auto const inTy = locAsCell(env, op.nloc1.id);
 
@@ -2672,10 +2672,10 @@ void isTypeObj(ISS& env, const Type& ty) {
   if (!ty.couldBe(BObj)) return push(env, TFalse);
   if (ty.subtypeOf(BObj)) {
     auto const incompl = objExact(
-      env.index.builtin_class(s_PHP_Incomplete_Class.get()));
+      builtin_class(env.index, s_PHP_Incomplete_Class.get()));
     if (RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
       auto const c =
-        objExact(env.index.builtin_class(s_MethCallerHelper.get()));
+        objExact(builtin_class(env.index, s_MethCallerHelper.get()));
       if (ty.couldBe(c)) return push(env, TBool);
     }
     if (!ty.couldBe(incompl))  return push(env, TTrue);
@@ -4651,7 +4651,7 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
   auto const isCtx = [&] {
     if (!env.ctx.cls) return false;
     if (rcls->couldBeOverriddenByRegular()) return false;
-    auto const r = env.index.resolve_class(env.ctx.cls);
+    auto const r = env.index.resolve_class(env.ctx.cls->name);
     if (!r) return false;
     return obj == objExact(*r);
   }();
@@ -5036,6 +5036,7 @@ void in(ISS& env, const bc::OODeclExists& op) {
 }
 
 namespace {
+
 bool couldBeMocked(const Type& t) {
   auto const dcls = [&] () -> const DCls* {
     if (is_specialized_cls(t)) {
@@ -5054,6 +5055,24 @@ bool couldBeMocked(const Type& t) {
   }
   return true;
 }
+
+bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
+  if (env.ctx.func->isClosureBody) {
+    for (auto i = env.ctx.func->params.size();
+         i < env.ctx.func->locals.size();
+         ++i) {
+      auto const name = env.ctx.func->locals[i].name;
+      if (!name) return false; // named locals do not appear after unnamed local
+      if (isMangledReifiedGenericInClosure(name)) return true;
+    }
+    return false;
+  }
+  if (!tc.isObject()) return false;
+  auto const cls = env.index.resolve_class(tc.clsName());
+  assertx(cls.has_value());
+  return cls->couldHaveReifiedGenerics();
+}
+
 }
 
 using TCVec = std::vector<const TypeConstraint*>;
@@ -5089,7 +5108,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !env.index.could_have_reified_type(env.ctx, constraint)) {
+      !couldHaveReifiedType(env, constraint)) {
     return reduce(env, bc::PopC {});
   }
 
@@ -5247,7 +5266,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !env.index.could_have_reified_type(env.ctx, constraint)) {
+      !couldHaveReifiedType(env, constraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
   }
   if (auto const inputTS = tv(a)) {
@@ -5320,7 +5339,16 @@ void in(ISS& env, const bc::ParentCls&) {
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
-  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
+
+  auto const rcls = env.index.resolve_class(op.str2);
+  always_assert_flog(
+    rcls.has_value() && rcls->resolved(),
+    "A closure class ({}) failed to resolve",
+    op.str2
+  );
+  auto const cls = rcls->cls();
+  assertx(cls->unit == env.ctx.unit->filename);
+  assertx(is_closure(*cls));
 
   /*
    * Every closure should have a unique allocation site, but we may see it
@@ -5336,7 +5364,7 @@ void in(ISS& env, const bc::CreateCl& op) {
     }
     merge_closure_use_vars_into(
       env.collect.closureUseTypes,
-      *clsPair.second,
+      *cls,
       std::move(usedVars)
     );
   }
@@ -5348,10 +5376,10 @@ void in(ISS& env, const bc::CreateCl& op) {
     // rescoped potentially multiple times at runtime.
     push(
       env,
-      subObj(env.index.builtin_class(s_Closure.get()))
+      subObj(builtin_class(env.index, s_Closure.get()))
     );
   } else {
-    push(env, objExact(clsPair.first));
+    push(env, objExact(*rcls));
   }
 }
 
@@ -5609,7 +5637,7 @@ void in(ISS& env, const bc::InitProp& op) {
   auto const t = topC(env);
   switch (op.subop2) {
     case InitPropOp::Static: {
-      auto const rcls = env.index.resolve_class(env.ctx.cls);
+      auto const rcls = env.index.resolve_class(env.ctx.cls->name);
       // If class isn't instantiable, this bytecode isn't reachable
       // anyways.
       if (!rcls) break;
@@ -6229,10 +6257,6 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   } else if (env.state.unreachable) {
     env.collect.mInstrState.clear();
   }
-}
-
-Optional<Type> thisType(const Index& index, Context ctx) {
-  return thisTypeFromContext(index, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////

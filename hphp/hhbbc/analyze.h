@@ -444,7 +444,27 @@ ConstraintType
 type_from_constraint(const TypeConstraint& tc,
                      const Type& candidate,
                      const std::function<res::Class(SString)>& resolve,
-                     const std::function<Optional<res::Class>()>& self);
+                     const std::function<Optional<Type>()>& self);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Try to resolve self/parent types in the given context.
+ */
+Optional<Type> selfCls(const Index&, const Context&);
+Optional<Type> selfClsExact(const Index&, const Context&);
+
+Optional<Type> parentCls(const Index&, const Context&);
+Optional<Type> parentClsExact(const Index&, const Context&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Resolve a builtin class with the given name. This just calls
+ * index.resolve_class(), but has some additional sanity checks that
+ * the resultant class is a builtin.
+ */
+res::Class builtin_class(const Index&, SString);
 
 //////////////////////////////////////////////////////////////////////
 

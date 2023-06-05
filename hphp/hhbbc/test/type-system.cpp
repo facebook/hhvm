@@ -987,9 +987,9 @@ std::vector<Type> withData(const Index& index) {
   auto const clsX21 = index.resolve_class(s_X21.get());
   if (!clsX21 || !clsX21->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
-  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  auto const clsFoo2 = res::Class::makeUnresolved(s_Foo2.get());
   if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
@@ -1531,7 +1531,7 @@ std::vector<Type> specializedClasses(const Index& index) {
   }
 #define Y(name)                                                         \
   {                                                                     \
-    auto const cls = index.resolve_class_name_only(s_##name.get());     \
+    auto const cls = res::Class::makeUnresolved(s_##name.get());        \
     if (cls.resolved()) ADD_FAILURE();                                  \
     addExactSub(cls);                                                   \
   }
@@ -2815,9 +2815,9 @@ TEST(Type, ObjToCls) {
   auto const clsCanon10 = index.resolve_class(s_Canon10.get());
   if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = index.resolve_class_name_only(s_Foo1.get());
+  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
-  auto const clsFoo2 = index.resolve_class_name_only(s_Foo2.get());
+  auto const clsFoo2 = res::Class::makeUnresolved(s_Foo2.get());
   if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const awaitable = index.wait_handle_class();
@@ -4987,7 +4987,7 @@ TEST(Type, Canonicalization) {
   auto const clsCanon14 = idx.resolve_class(s_Canon14.get());
   if (!clsCanon14) ADD_FAILURE();
 
-  auto const clsFoo1 = idx.resolve_class_name_only(s_Foo1.get());
+  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
@@ -7609,7 +7609,7 @@ TEST(Type, ResolveClasses) {
   hphp_fast_set<std::pair<Type, Type>, Hasher> types;
 
 #define MAKE(name) {                                                    \
-    auto const u = index.resolve_class_name_only(s_##name.get());       \
+    auto const u = res::Class::makeUnresolved(s_##name.get());          \
     if (u.resolved()) ADD_FAILURE();                                    \
     auto const r = index.resolve_class(s_##name.get());                 \
     auto const t1 = r ? subObj(*r) : TBottom;                           \
@@ -7668,7 +7668,7 @@ TEST(Type, ResolveClasses) {
   EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)})),
             make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)}));
 
-  auto const u1 = index.resolve_class_name_only(s_Base.get());
+  auto const u1 = res::Class::makeUnresolved(s_Base.get());
   if (u1.resolved()) ADD_FAILURE();
   auto const r1 = index.resolve_class(s_Base.get());
   if (!r1 || !r1->resolved()) ADD_FAILURE();
@@ -7688,7 +7688,7 @@ TEST(Type, ResolveClasses) {
   EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u1)),
             make_specialized_sub_object(BObj|BBool, *r1));
 
-  auto const u2 = index.resolve_class_name_only(s_Foo1.get());
+  auto const u2 = res::Class::makeUnresolved(s_Foo1.get());
   if (u2.resolved()) ADD_FAILURE();
   auto const uobj2 = subObj(u2);
 

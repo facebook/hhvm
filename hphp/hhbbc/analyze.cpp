@@ -54,6 +54,8 @@ struct KnownArgs {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Closure("Closure");
+const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
+const StaticString s_Generator("Generator");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -83,8 +85,8 @@ Optional<State> entry_state(const Index& index, CollectedInfo& collect,
         return setctx(toobj(knownArgs->context));
       }
     }
-    auto const maybeThisType = thisType(index, ctx);
-    auto thisType = maybeThisType ? *maybeThisType : TObj;
+    auto const maybeSelfType = selfCls(index, ctx);
+    auto thisType = maybeSelfType ? setctx(toobj(*maybeSelfType)) : TObj;
     if (ctx.func->cls &&
         !(ctx.func->cls->attrs & AttrTrait) &&
         !(ctx.func->attrs & AttrStatic)) {
@@ -284,6 +286,24 @@ AnalysisContext adjust_closure_context(const Index& index,
   return ctx;
 }
 
+Type fixup_return_type(const Index& index, const php::Func& func, Type ty) {
+  if (func.isGenerator) {
+    if (func.isAsync) {
+      // Async generators always return AsyncGenerator object.
+      return objExact(builtin_class(index, s_AsyncGenerator.get()));
+    } else {
+      // Non-async generators always return Generator object.
+      return objExact(builtin_class(index, s_Generator.get()));
+    }
+  } else if (func.isAsync) {
+    // Async functions always return WaitH<T>, where T is the type returned
+    // internally.
+    return wait_handle(index, std::move(ty));
+  } else {
+    return ty;
+  }
+}
+
 FuncAnalysis do_analyze_collect(const Index& index,
                                 const AnalysisContext& ctx,
                                 CollectedInfo& collect,
@@ -445,7 +465,8 @@ FuncAnalysis do_analyze_collect(const Index& index,
   for (auto& elm : blockUpdates) {
     ai.blockUpdates.emplace_back(elm.first, std::move(elm.second));
   }
-  index.fixup_return_type(ctx.func, ai.inferredReturn);
+  ai.inferredReturn =
+    fixup_return_type(index, *ctx.func, std::move(ai.inferredReturn));
 
   /*
    * If inferredReturn is TBottom, the callee didn't execute a return
@@ -1413,9 +1434,11 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
         return C{ TBottom, TBottom };
       case AnnotMetaType::This:
         if (auto const s = self()) {
-          auto obj = subObj(*s);
-          if (!s->couldBeMocked()) return exact(setctx(obj));
-          return C{ setctx(obj), obj };
+          auto const obj = toobj(*s);
+          if (!is_specialized_cls(*s) || dcls_of(*s).cls().couldBeMocked()) {
+            return C { setctx(obj), obj };
+          }
+          return exact(setctx(obj));
         }
         return C{ TBottom, TObj };
       case AnnotMetaType::Callable:
@@ -1463,7 +1486,7 @@ ConstraintType type_from_constraint(
   const TypeConstraint& tc,
   const Type& candidate,
   const std::function<res::Class(SString)>& resolve,
-  const std::function<Optional<res::Class>()>& self)
+  const std::function<Optional<Type>()>& self)
 {
   return type_from_constraint_impl(tc, candidate, resolve, self);
 }
@@ -1482,7 +1505,7 @@ lookup_constraint(const Index& index,
       assertx(cls.has_value());
       return *cls;
     },
-    [&] { return index.selfCls(ctx); }
+    [&] { return selfCls(index, ctx); }
   );
 }
 
@@ -1566,6 +1589,64 @@ Type adjust_type_for_prop(const Index& index,
     if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
   }
   return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Optional<Type> selfCls(const Index& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls)) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->name)) {
+    return subCls(*c);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> selfClsExact(const Index& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls)) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->name)) {
+    return clsExact(*c);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> parentCls(const Index& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->parentName)) {
+    return subCls(*c);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> parentClsExact(const Index& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->parentName)) {
+    return clsExact(*c);
+  }
+  return std::nullopt;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+res::Class builtin_class(const Index& index, SString name) {
+  auto const rcls = index.resolve_class(name);
+  // Builtin classes should always be resolved, except for Closure,
+  // which are force to be unresolved.
+  always_assert_flog(
+    rcls.has_value() &&
+    (name->isame(s_Closure.get()) ||
+     (rcls->resolved() && (rcls->cls()->attrs & AttrBuiltin))),
+    "A builtin class ({}) failed to resolve",
+    name->data()
+  );
+  return *rcls;
 }
 
 //////////////////////////////////////////////////////////////////////

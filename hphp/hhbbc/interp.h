@@ -212,8 +212,6 @@ Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
            const php::Func& phpFunc, bool variadicsPacked);
 
-Optional<Type> thisType(const Index& index, Context ctx);
-
 /*
  * Extracts name from the type either by using a reified name specialization or
  * by looking at the typed value

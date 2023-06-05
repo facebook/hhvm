@@ -25,8 +25,34 @@
 
 namespace HPHP {
 
-constexpr bool shouldRecordReplay(std::string_view) {
-  return false; // TODO Enable once split dwarf is complete
+constexpr bool shouldRecordReplay(std::string_view name) {
+  return !(
+    // Native functions for async which are handled separately
+    name == "HH\\Asio\\join" ||
+    name == "HH\\RescheduleWaitHandle::create" ||
+
+    // Native functions that call back to user code
+    name == "array_map" ||
+    name == "call_user_func" ||
+    name == "call_user_func_array" ||
+    name == "fb_intercept2" ||
+    name == "fb_setprofile" ||
+    name == "hphp_invoke" ||
+    name == "hphp_invoke_method" ||
+    name == "preg_replace_callback" ||
+    name == "set_error_handler" ||
+    name == "set_exception_handler" ||
+
+    // Native functions that affect interpreter state
+    name == "error_reporting" ||
+    name == "fb_rename_function" ||
+
+    // Native functions that output directly to stdout/stderr
+    name == "printf" ||
+    name == "sprintf" ||
+    name == "vprintf" ||
+    name == "vsprintf"
+  );
 }
 
 template<auto m>

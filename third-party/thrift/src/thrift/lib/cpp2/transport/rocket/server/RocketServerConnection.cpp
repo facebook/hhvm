@@ -463,6 +463,7 @@ void RocketServerConnection::handleUntrackedFrame(
               return transportMetadata;
             });
           }
+          break;
         }
         default:
           break;

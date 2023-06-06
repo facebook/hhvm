@@ -98,8 +98,8 @@ BENCHMARK_NAMED_PARAM(
     NamedGroup::x25519_kyber512);
 BENCHMARK_NAMED_PARAM(
     clientKeyShareGenerationBench,
-    x25519_kyber768,
-    NamedGroup::x25519_kyber768);
+    x25519_kyber768_draft00,
+    NamedGroup::x25519_kyber768_draft00);
 BENCHMARK_NAMED_PARAM(
     serverSharedSecretDerivationBench,
     x25519,
@@ -110,8 +110,8 @@ BENCHMARK_NAMED_PARAM(
     NamedGroup::x25519_kyber512);
 BENCHMARK_NAMED_PARAM(
     serverSharedSecretDerivationBench,
-    x25519_kyber768,
-    NamedGroup::x25519_kyber768);
+    x25519_kyber768_draft00,
+    NamedGroup::x25519_kyber768_draft00);
 
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
@@ -123,8 +123,8 @@ BENCHMARK_NAMED_PARAM(
     NamedGroup::x25519_kyber512);
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
-    x25519_kyber768,
-    NamedGroup::x25519_kyber768);
+    x25519_kyber768_draft00,
+    NamedGroup::x25519_kyber768_draft00);
 
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);

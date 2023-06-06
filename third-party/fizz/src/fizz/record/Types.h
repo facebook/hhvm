@@ -346,6 +346,13 @@ enum class NamedGroup : uint16_t {
   secp521r1 = 25,
   x25519 = 29,
 
+  /**
+   * x25519 and secp256r1 hybrids with NIST Round 3 version of Kyber, see
+   * https://datatracker.ietf.org/doc/draft-tls-westerbaan-xyber768d00/02/
+   */
+  x25519_kyber768_draft00 = 25497,
+  secp256r1_kyber768_draft00 = 25498,
+
   // experimental
   /**
    * Hybrid of secp521r1 and x25519. TLS Supported Group 510 is reserved for
@@ -392,12 +399,6 @@ enum class NamedGroup : uint16_t {
    * cause security flaws.
    */
   kyber512 = 511,
-
-  /**
-   * Experimental ID. Private use, see
-   * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
-   */
-  x25519_kyber768 = 65024,
 
   /**
    * Experimental ID, see

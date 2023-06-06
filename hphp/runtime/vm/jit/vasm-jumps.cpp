@@ -246,21 +246,21 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
           moves.emplace_back(cmovb{cc, sf, r1, r2, d}, irctx);
           break;
         }
-        // fallthrough
+        [[fallthrough]];
       case Width::Word:
       case Width::WordN:
         if (trustWidths) {
           moves.emplace_back(cmovw{cc, sf, r1, r2, d}, irctx);
           break;
         }
-        // fallthrough
+        [[fallthrough]];
       case Width::Long:
       case Width::LongN:
         if (trustWidths) {
           moves.emplace_back(cmovl{cc, sf, r1, r2, d}, irctx);
           break;
         }
-        // fallthrough
+        [[fallthrough]];
       case Width::Quad:
       case Width::QuadN:
         moves.emplace_back(cmovq{cc, sf, r1, r2, d}, irctx);

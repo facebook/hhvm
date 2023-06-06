@@ -68,7 +68,8 @@ bool ConnectionPoolBase::tryAddOpeningConn(
     std::shared_ptr<db::ConnectionContextBase> context,
     size_t enqueued_pool_ops,
     uint32_t client_total_conns,
-    uint64_t client_conn_limit) {
+    uint64_t client_conn_limit,
+    ThrottlingCallback throttlingCallback) {
   auto canOpen = counters_.withWLock([&](auto& locked) {
     if (canCreateMoreConnections(
             pool_key,
@@ -85,7 +86,8 @@ bool ConnectionPoolBase::tryAddOpeningConn(
   });
 
   if (canOpen && shouldThrottleCallback_) {
-    canOpen = !shouldThrottleCallback_(pool_key, context);
+    canOpen = !shouldThrottleCallback_(
+        pool_key, context, std::move(throttlingCallback));
     if (!canOpen) {
       // TODO(jkedgar): signal that we are getting throttled so we can start
       // returning errors to the caller.  Right now throttling will just cause

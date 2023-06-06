@@ -68,7 +68,7 @@ let on_expr_ expr_ ~ctx =
   let ctx =
     match expr_ with
     | Aast.(Is _ | As _) -> Env.set_in_is_as ctx ~in_is_as:true
-    | _ -> ctx
+    | _ -> Env.set_in_is_as ctx ~in_is_as:false
   in
   (ctx, Ok expr_)
 

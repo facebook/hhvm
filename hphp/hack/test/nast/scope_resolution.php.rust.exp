@@ -1,4 +1,5 @@
 Errors:
+  [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
   [165:9-14] Cannot use dynamic class or method name in strict mode
   [166:10-21] Cannot use dynamic class or method name in strict mode
   [167:10-31] Cannot use dynamic class or method name in strict mode

@@ -47,7 +47,7 @@ let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
 let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
-  if String.is_empty name then
+  if String.is_empty name || String.equal name "\\" then
     (* In case of some parse errors, the AST contains definitions with empty names.
        There's no useful duplicate-name-check we can do here.
        Return [false] because there's no such thing as the winner for the empty name. *)

@@ -42,12 +42,11 @@ struct ExternalDeclProviderResult {
     return ExternalDeclProviderResult{Tag::Missing, {}};
   }
 
-  // Construct Decls from DeclsAndBlob decls
-  static ExternalDeclProviderResult from_decls(
-      const DeclsAndBlob& decl_result) {
+  // Construct Decls from decls in a DeclsHolder
+  static ExternalDeclProviderResult from_decls(const DeclsHolder& holder) {
     ExternalDeclProviderResult r;
     r.tag = Tag::Decls;
-    r.decls._0 = &(*decl_result.decls);
+    r.decls._0 = &holder;
     return r;
   }
 

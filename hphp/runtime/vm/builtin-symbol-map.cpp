@@ -102,7 +102,7 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   auto const maybeGetDecls = [symbol](auto const& map) {
     auto const res = map.find(symbol);
     return res != map.end() ?
-      HPHP::make_optional(hackc::ExternalDeclProviderResult::from_decls(*res->second))
+      HPHP::make_optional(hackc::ExternalDeclProviderResult::from_decls(*res->second->decls))
     : std::nullopt;
   };
   // We should only ever call this if `EnableDecl` is set, and asserting on

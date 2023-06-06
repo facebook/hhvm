@@ -101,7 +101,7 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return hackc::ExternalDeclProviderResult::from_decls(result->second);
+      return hackc::ExternalDeclProviderResult::from_decls(*result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -110,19 +110,25 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
     };
 
-    auto decl_result = hackc::direct_decl_parse_and_serialize(m_config, filename, text);
-    ITRACE(3, "DP parsed {} in {}\n", sym, filename);
+    try {
+      auto holder = hackc::parse_decls(m_config, filename, text);
+      ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
-    auto const norm_filename =
-      std::filesystem::relative(*filename_opt, m_repo);
+      auto const norm_filename =
+        std::filesystem::relative(*filename_opt, m_repo);
 
-    auto const hash = SHA1{string_sha1(text)};
-    m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});
+      auto const hash = SHA1{string_sha1(text)};
+      m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});
 
-    // Insert decl_result into the cache, return DeclsAndBlob::decls,
-    // a pointer to rust decls in m_cache.
-    auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return hackc::ExternalDeclProviderResult::from_decls(it->second);
+      // Insert decl_result into the cache, return DeclsAndBlob::decls,
+      // a pointer to rust decls in m_cache.
+      auto [it, _] = m_cache.insert({filename, std::move(holder)});
+      return hackc::ExternalDeclProviderResult::from_decls(*it->second);
+    } catch (const std::exception& ex) {
+      // Decl parser error - don't cache anything, and don't fall through.
+      ITRACE(4, "DP {}: decl parse error: {}", ex.what());
+      return hackc::ExternalDeclProviderResult::missing();
+    }
   }
 
   ITRACE(4, "DP {}: getFile() returned None\n", sym);

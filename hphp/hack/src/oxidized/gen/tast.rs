@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<474e38cb6f79df57e505371aab45bedf>>
+// @generated SignedSource<<a677ac9f560f5396bc3380935fc83242>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -107,7 +107,7 @@ pub struct SavedEnv {
 #[rust_to_ocaml(attr = "deriving show")]
 pub type Program = aast::Program<Ty, SavedEnv>;
 
-#[rust_to_ocaml(attr = "deriving (hash, show)")]
+#[rust_to_ocaml(attr = "deriving hash")]
 pub type Def = aast::Def<Ty, SavedEnv>;
 
 #[rust_to_ocaml(attr = "deriving hash")]
@@ -179,7 +179,6 @@ pub type CallExpr = aast::CallExpr<Ty, SavedEnv>;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ByNames {
     pub fun_tasts: s_map::SMap<Vec<Def>>,

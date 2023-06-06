@@ -69,11 +69,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       } )
   | STATUS_SINGLE { file_names; max_errors } ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let (errors, tasts) = ServerStatusSingle.go file_names ctx in
-    let errors = take_max_errors errors max_errors in
-    (* Unforced lazy values are closures which make serialization over RPC fail. *)
-    let tasts = Relative_path.Map.map tasts ~f:Tast.force_lazy_values in
-    (env, (errors, tasts))
+    (env, take_max_errors (ServerStatusSingle.go file_names ctx) max_errors)
   | INFER_TYPE (file_input, line, column) ->
     let path =
       match file_input with

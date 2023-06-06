@@ -20,5 +20,3 @@ val empty : t
 val union : t -> t -> t
 
 val add : t -> key:Relative_path.t -> data:by_names option -> t
-
-val hash_tasts_by_file : Tast.by_names Relative_path.Map.t -> t

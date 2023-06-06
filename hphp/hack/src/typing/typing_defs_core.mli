@@ -660,5 +660,3 @@ val get_reason_i : internal_type -> Reason.t
 
 (** Hack keyword for this visibility *)
 val string_of_visibility : ce_visibility -> string
-
-val force_lazy_values : 'phase ty -> 'phase ty

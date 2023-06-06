@@ -5,7 +5,7 @@
  * pre-intercept function.
  */
 
-function foo() {
+function foo($i = 10) {
   var_dump(__METHOD__);
 }
 

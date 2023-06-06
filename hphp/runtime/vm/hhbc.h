@@ -546,11 +546,15 @@ constexpr bool instrIsControlFlow(Op opcode) {
 }
 
 constexpr bool isUnconditionalJmp(Op opcode) {
-  return opcode == Op::Enter || opcode == Op::Jmp;
+  return opcode == Op::Jmp;
 }
 
 constexpr bool isConditionalJmp(Op opcode) {
   return opcode == Op::JmpZ || opcode == Op::JmpNZ;
+}
+
+constexpr bool isInterceptableJmp(Op opcode) {
+  return opcode == Op::Enter;
 }
 
 constexpr bool isJmp(Op opcode) {

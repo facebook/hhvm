@@ -1,21 +1,61 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"    private static async function method0(int $x): AsyncKeyedIterator<_, _, _> {\n    foreach (async_keyed_it() await as $k => $v) {\n              $x++\n            }\n            await gen_void();\n    }\n\n",
-            "range":{"end":{"character":0,"line":10},"start":{"character":0,"line":10}}
-          },
-          {
-            "newText":"foreach (self::method0($x) await as $key__ => $value__) {\n            \n        }",
-            "range":{"end":{"character":25,"line":16},"start":{"character":8,"line":13}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into method"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"    private static async function method0(int $x): AsyncKeyedIterator<_, _, _> {\n    foreach (async_keyed_it() await as $k => $v) {\n              $x++\n            }\n            await gen_void();\n    }\n\n",
+          "range":{"end":{"character":0,"line":10},"start":{"character":0,"line":10}}
+        },
+        {
+          "newText":"foreach (self::method0($x) await as $key__ => $value__) {\n            \n        }",
+          "range":{"end":{"character":25,"line":16},"start":{"character":8,"line":13}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_void(): Awaitable<void> {}
+
+async function async_keyed_it(): AsyncKeyedIterator<string, int> {
+  yield "key1" => 1;
+  yield "key2" => 2;
+}
+
+class Klass {
+    private static async function method0(int $x): AsyncKeyedIterator<_, _, _> {
+    foreach (async_keyed_it() await as $k => $v) {
+              $x++
+            }
+            await gen_void();
+    }
+
+    public static async function m(int $x): Awaitable<void> {
+        $x = 0;
+        /*range-start*/
+        foreach (self::method0($x) await as $key__ => $value__) {
+            
+        }
+        /*range-end*/
+        $y = $x;
+    }
+}
+
+<<__EntryPoint>>
+function main(): void {
+   \HH\Asio\join(Klass::m(1));
+}
+

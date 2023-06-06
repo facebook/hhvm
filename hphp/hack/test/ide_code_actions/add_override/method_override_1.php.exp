@@ -1,0 +1,36 @@
+Code actions available:
+------------------------------------------
+Add override for TheParent::foo (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function foo(): void {}\n\n",
+          "range":{"end":{"character":55,"line":6},"start":{"character":55,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for TheParent::foo"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class TheParent {
+  public function foo(): void {}
+}
+
+class B extends /*range-start*/TheParent/*range-end*/ {
+  <<__Override>>
+  public function foo(): void {}
+
+}
+

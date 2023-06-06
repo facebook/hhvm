@@ -1,21 +1,43 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"",
-            "range":{"end":{"character":10,"line":11},"start":{"character":0,"line":11}}
-          },
-          {
-            "newText":"5",
-            "range":{"end":{"character":20,"line":12},"start":{"character":18,"line":12}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Inline variable $x"
-  }
-]
+Code actions available:
+------------------------------------------
+Inline variable $x (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":10,"line":11},"start":{"character":0,"line":11}}
+        },
+        {
+          "newText":"5",
+          "range":{"end":{"character":20,"line":12},"start":{"character":18,"line":12}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline variable $x"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class Klass {
+  public int $value = 3;
+}
+
+<<__EntryPoint>>
+function main(): void {
+   $y = 1;
+   $x = $y + 3;
+   $y = 2;
+ // OK to inline this definition
+   /*range-start*/5/*range-end*/;
+}
+

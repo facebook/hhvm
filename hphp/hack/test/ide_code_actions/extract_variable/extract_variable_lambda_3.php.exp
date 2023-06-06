@@ -1,21 +1,37 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder0 = 3 + 3;\n    ",
-            "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
-          },
-          {
-            "newText":"$placeholder0",
-            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder0 = 3 + 3;\n    ",
+          "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
+        },
+        {
+          "newText":"$placeholder0",
+          "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function main(): void {
+  (() ==> {
+    $placeholder0 = 3 + 3;
+    $x = /*range-start*/$placeholder0/*range-end*/;
+  })();
+}
+

@@ -1,21 +1,44 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder0 = 300\n      //\n      +\n      2;\n    ",
-            "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
-          },
-          {
-            "newText":"$placeholder0",
-            "range":{"end":{"character":7,"line":11},"start":{"character":26,"line":8}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder0 = 300\n      //\n      +\n      2;\n    ",
+          "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
+        },
+        {
+          "newText":"$placeholder0",
+          "range":{"end":{"character":7,"line":11},"start":{"character":26,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  $z = 100 +
+    () ==>{
+    $x = 3;
+    // expect variable extracted to here
+    $placeholder0 = 300
+      //
+      +
+      2;
+    return /*range-start*/$placeholder0/*range-end*/;
+}
+}
+

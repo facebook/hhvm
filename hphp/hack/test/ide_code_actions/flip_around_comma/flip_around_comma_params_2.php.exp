@@ -1,17 +1,28 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"int $b, int $a, int $c",
-            "range":{"end":{"character":64,"line":2},"start":{"character":13,"line":2}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Flip around comma"
-  }
-]
+Code actions available:
+------------------------------------------
+Flip around comma (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"int $b, int $a, int $c",
+          "range":{"end":{"character":64,"line":2},"start":{"character":13,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Flip around comma"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo(int $b, int $a, int $c): void {}
+

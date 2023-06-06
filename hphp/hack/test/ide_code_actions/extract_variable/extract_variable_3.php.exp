@@ -1,21 +1,37 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder2 = 1 * 2;\n  ",
-            "range":{"end":{"character":2,"line":5},"start":{"character":2,"line":5}}
-          },
-          {
-            "newText":"$placeholder2",
-            "range":{"end":{"character":27,"line":5},"start":{"character":22,"line":5}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder2 = 1 * 2;\n  ",
+          "range":{"end":{"character":2,"line":5},"start":{"character":2,"line":5}}
+        },
+        {
+          "newText":"$placeholder2",
+          "range":{"end":{"character":27,"line":5},"start":{"character":22,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function main(): void {
+  $placeholder1 = "";
+  // expecting `$placeholder2` defined here
+  $placeholder2 = 1 * 2;
+  $x = /*range-start*/$placeholder2/*range-end*/ + 3;
+}
+

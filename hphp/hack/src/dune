@@ -17,6 +17,7 @@
   client_find_refs_print
   client_get_definition
   client_highlight_refs
+  code_actions_cli_lib
   count_imprecise_types
   decl_parser_options
   default_injector_config

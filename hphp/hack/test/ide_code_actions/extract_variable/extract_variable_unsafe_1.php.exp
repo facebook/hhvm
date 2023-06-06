@@ -1,21 +1,53 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder0 = $a->toggle_mut_and_ret_false();\n  ",
-            "range":{"end":{"character":2,"line":13},"start":{"character":2,"line":13}}
-          },
-          {
-            "newText":"$placeholder0",
-            "range":{"end":{"character":61,"line":13},"start":{"character":31,"line":13}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder0 = $a->toggle_mut_and_ret_false();\n  ",
+          "range":{"end":{"character":2,"line":13},"start":{"character":2,"line":13}}
+        },
+        {
+          "newText":"$placeholder0",
+          "range":{"end":{"character":61,"line":13},"start":{"character":31,"line":13}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {
+  public function __construct(public bool $b) {}
+  public function toggle_mut_and_ret_false(): bool {
+    $this->b = !$this->b;
+    return false;
   }
-]
+}
+
+<<__EntryPoint>>
+function main(): void {
+  $a = new A(false);
+  $placeholder0 = $a->toggle_mut_and_ret_false();
+  $x = $a->b || /*range-start*/$placeholder0/*range-end*/;
+  var_dump($x); // false
+
+  // The refactor can change the meaning of the code in a way that is hard to detect.
+  // IntelliJ Kotlin has the same unsafety:  https://pl.kotl.in/isarlHogA
+  // $a = new A(false);
+  // $placeholder_ = $a->toggle_mut_and_ret_false();
+  // $x = $a->b || $placeholder_;
+  // var_dump($x); // true
+}
+

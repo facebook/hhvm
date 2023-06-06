@@ -14,7 +14,7 @@
    --program
    %{exe:../../../src/hh_single_type_check.exe}
    --flags
-   --ide-code-actions)))
+   --ide-code-actions "Inline variable")))
 
 (alias
  (name runtest)

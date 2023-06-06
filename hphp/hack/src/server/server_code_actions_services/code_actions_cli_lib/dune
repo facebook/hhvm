@@ -1,0 +1,11 @@
+(library
+ (name code_actions_cli_lib)
+ (wrapped true)
+ (libraries
+  full_fidelity
+  lsp
+  pos
+  server_code_actions_services
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

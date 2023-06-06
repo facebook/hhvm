@@ -1,17 +1,31 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$b, $a",
-            "range":{"end":{"character":41,"line":4},"start":{"character":7,"line":4}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Flip around comma"
-  }
-]
+Code actions available:
+------------------------------------------
+Flip around comma (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$b, $a",
+          "range":{"end":{"character":41,"line":4},"start":{"character":7,"line":4}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Flip around comma"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo(): void {
+  $v = $vec["a", "b"];
+  list($b, $a) = $v;
+}
+

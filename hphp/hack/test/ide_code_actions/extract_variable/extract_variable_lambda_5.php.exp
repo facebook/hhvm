@@ -1,21 +1,42 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder0 = $item + 1;\n    ",
-            "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
-          },
-          {
-            "newText":"$placeholder0",
-            "range":{"end":{"character":33,"line":8},"start":{"character":24,"line":8}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder0 = $item + 1;\n    ",
+          "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
+        },
+        {
+          "newText":"$placeholder0",
+          "range":{"end":{"character":33,"line":8},"start":{"character":24,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function map<T>(vec<T> $v, (function(T): T) $f): vec<T> {
+  return vec[];
+}
+
+function main(): void {
+  () ==> map(vec[], function($item) {
+    $placeholder0 = $item + 1;
+    $y = /*range-start*/$placeholder0/*range-end*/;
+    return $y;
+  });
+}
+

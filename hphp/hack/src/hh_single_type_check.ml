@@ -48,7 +48,7 @@ type mode =
   | Dump_dep_hashes
   | Get_some_file_deps of int
   | Identify_symbol of int * int
-  | Ide_code_actions
+  | Ide_code_actions of string
   | Find_local of int * int
   | Get_member of string
   | Outline
@@ -417,8 +417,9 @@ let parse_options () =
         " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
       );
       ( "--ide-code-actions",
-        Arg.Unit (set_mode Ide_code_actions),
-        " Apply a code action to the given file, where the code action is indicated with position markers (see tests)"
+        Arg.String
+          (fun title_prefix -> set_mode (Ide_code_actions title_prefix) ()),
+        "<title_prefix> Apply a code action with the given title prefix to the given file, where the selection is indicated with markers in comments (see tests)"
       );
       ( "--identify-symbol",
         (let line = ref 0 in
@@ -2040,45 +2041,12 @@ let handle_mode
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
-  | Ide_code_actions ->
+  | Ide_code_actions title_prefix ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range src in
-    let resolve =
-      (* Simulate the resolution flow:
-         If server replies to textDocument/codeAction with neither 'edit' nor 'command',
-         and the user selects the code action
-         then the client sends codeAction/resolve to resolve the code action
-      *)
-      Lsp.CodeAction.(
-        function
-        | Action { title; _ } ->
-          (* Here (for simplicity) we are stressing Server_code_actions_services
-             more than a real client would: if the 'edit' field is provided
-             then the client should not request resolution but we always resolve.*)
-          Server_code_actions_services.resolve
-            ~ctx
-            ~entry
-            ~range
-            ~resolve_title:title
-        | Command _ as c -> c)
-    in
-    let commands_or_actions =
-      Server_code_actions_services.go ~ctx ~entry ~range |> List.map ~f:resolve
-    in
-    let hermeticize_paths =
-      Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""
-    in
-    if List.is_empty commands_or_actions then
-      Format.printf "No commands or actions found\n"
-    else
-      commands_or_actions
-      |> List.map ~f:Lsp_fmt.print_codeActionResolveResult
-      |> Hh_json.array_ Fn.id
-      |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
-      |> hermeticize_paths
-      |> Format.printf "%s\n"
+    Code_actions_cli_lib.run ctx entry range ~title_prefix
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

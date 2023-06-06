@@ -1,21 +1,46 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"  private function method0(): void {\n    $x = 1;\n  }\n\n",
-            "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
-          },
-          {
-            "newText":"$this->method0();",
-            "range":{"end":{"character":29,"line":6},"start":{"character":22,"line":6}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into method"
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function method0(): void {\n    $x = 1;\n  }\n\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$this->method0();",
+          "range":{"end":{"character":29,"line":6},"start":{"character":22,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class Klass {
+  private function method0(): void {
+    $x = 1;
   }
-]
+
+  public function foo(): void {
+    if (1 < 2) {
+      // extracting a method here should not change what is printed
+      /*range-start*/ $this->method0(); /*range-end*/
+    } else {
+      $x = 4;
+    }
+    echo $x;
+  }
+}
+

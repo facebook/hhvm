@@ -1,21 +1,41 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"$placeholder0 = 3 * 2\n  * 7;\n  ",
-            "range":{"end":{"character":2,"line":5},"start":{"character":2,"line":5}}
-          },
-          {
-            "newText":"$placeholder0",
-            "range":{"end":{"character":5,"line":9},"start":{"character":18,"line":8}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Extract into variable"
-  }
-]
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$placeholder0 = 3 * 2\n  * 7;\n  ",
+          "range":{"end":{"character":2,"line":5},"start":{"character":2,"line":5}}
+        },
+        {
+          "newText":"$placeholder0",
+          "range":{"end":{"character":5,"line":9},"start":{"character":18,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  // expect variable extracted to here
+  $placeholder0 = 3 * 2
+  * 7;
+  $z = 100 +
+  /* */
+  3 *
+  (/*range-start*/$placeholder0/*range-end*/);
+}
+

@@ -1,21 +1,35 @@
-[
-  {
-    "diagnostics":[],
-    "edit":{
-      "changes":{
-        "FILE.php":[
-          {
-            "newText":"",
-            "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":4}}
-          },
-          {
-            "newText":"$y",
-            "range":{"end":{"character":31,"line":5},"start":{"character":29,"line":5}}
-          }
-        ]
-      }
-    },
-    "kind":"refactor",
-    "title":"Inline variable $x"
-  }
-]
+Code actions available:
+------------------------------------------
+Inline variable $x (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":4}}
+        },
+        {
+          "newText":"$y",
+          "range":{"end":{"character":31,"line":5},"start":{"character":29,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline variable $x"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo(): void {
+     $y = 3;
+     var_dump(/*range-start*/$y/*range-end*/);
+}
+

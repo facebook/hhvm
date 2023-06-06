@@ -61,12 +61,15 @@ void ConnectionPoolBase::removeOpenConnection(const PoolKey& pool_key) {
 // it's a waste to create a new connection to avoid start opening a new
 // connection when we already have enough being open for the demand in
 // queue.  If we have enough space we increment the counts.
+// Also, if the user supplied a permissions callback check it as well to make
+// sure we have permission to create a new connection
 bool ConnectionPoolBase::tryAddOpeningConn(
     const PoolKey& pool_key,
+    std::shared_ptr<db::ConnectionContextBase> context,
     size_t enqueued_pool_ops,
     uint32_t client_total_conns,
     uint64_t client_conn_limit) {
-  return counters_.withWLock([&](auto& locked) {
+  auto canOpen = counters_.withWLock([&](auto& locked) {
     if (canCreateMoreConnections(
             pool_key,
             enqueued_pool_ops,
@@ -80,6 +83,25 @@ bool ConnectionPoolBase::tryAddOpeningConn(
 
     return false;
   });
+
+  if (canOpen && shouldThrottleCallback_) {
+    canOpen = !shouldThrottleCallback_(pool_key, context);
+    if (!canOpen) {
+      // TODO(jkedgar): signal that we are getting throttled so we can start
+      // returning errors to the caller.  Right now throttling will just cause
+      // timeout errors but we want the client to know that they are throttled
+      // ideally.
+
+      // If the we didn't get permission from the callback to add more
+      // connections, decrement the counts that got incremented above.
+      counters_.withWLock([&](auto& locked) {
+        --locked.pending_connections[pool_key];
+        --locked.num_pending_connections;
+      });
+    }
+  }
+
+  return canOpen;
 }
 
 void ConnectionPoolBase::removeOpeningConn(const PoolKey& pool_key) {

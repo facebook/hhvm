@@ -210,6 +210,9 @@ class ConnectionPoolBase {
 
   virtual ~ConnectionPoolBase() {}
 
+  using ShouldThrottleCallback = std::function<
+      bool(const PoolKey&, std::shared_ptr<db::ConnectionContextBase> context)>;
+
   db::PoolStats* stats() noexcept {
     return &pool_stats_;
   }
@@ -250,6 +253,7 @@ class ConnectionPoolBase {
   void addOpenConnection(const PoolKey& conn_key);
   bool tryAddOpeningConn(
       const PoolKey& conn_key,
+      std::shared_ptr<db::ConnectionContextBase> context,
       size_t enqueued_pool_ops,
       uint32_t client_total_conns,
       uint64_t client_conn_limit);
@@ -272,6 +276,10 @@ class ConnectionPoolBase {
 
   static constexpr bool implementsPooling() {
     return true;
+  }
+
+  void setShouldThrottleCallback(ShouldThrottleCallback cb) {
+    shouldThrottleCallback_ = std::move(cb);
   }
 
  protected:
@@ -318,6 +326,8 @@ class ConnectionPoolBase {
   PoolOptions pool_options_;
 
   folly::Synchronized<Counters> counters_;
+
+  ShouldThrottleCallback shouldThrottleCallback_;
 
   // Counters for connections created, cache hits and misses, etc.
   db::PoolStats pool_stats_;
@@ -416,9 +426,12 @@ class ConnectionPool
         mysql_client_->getPoolsConnectionLimit());
   }
 
-  bool tryAddOpeningConn(const PoolKey& conn_key) {
+  bool tryAddOpeningConn(
+      const PoolKey& conn_key,
+      std::shared_ptr<db::ConnectionContextBase> context) {
     return ConnectionPoolBase::tryAddOpeningConn(
         conn_key,
+        context,
         numQueuedOperations(conn_key),
         mysql_client_->numStartedAndOpenConnections(),
         mysql_client_->getPoolsConnectionLimit());
@@ -483,7 +496,7 @@ class ConnectionPool
     }
 
     // Checking if limits allow creating more connections
-    if (!tryAddOpeningConn(pool_key)) {
+    if (!tryAddOpeningConn(pool_key, context)) {
       return;
     }
 

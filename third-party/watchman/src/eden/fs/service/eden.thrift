@@ -249,6 +249,11 @@ union SHA1Result {
   2: EdenError error;
 }
 
+union Blake3Result {
+  1: BinaryHash blake3;
+  2: EdenError error;
+}
+
 /**
  * Effectively a `struct timespec`
  */
@@ -1634,6 +1639,24 @@ service EdenService extends fb303_core.BaseService {
    * these for more details.
    */
   list<SHA1Result> getSHA1(
+    1: PathString mountPoint,
+    2: list<PathString> paths,
+    3: SyncBehavior sync,
+  ) throws (1: EdenError ex);
+
+  /**
+   * For each path, returns an EdenError instead of the BLAKE3 if any of the
+   * following occur:
+   * - path is the empty string.
+   * - path identifies a non-existent file.
+   * - path identifies something that is not an ordinary file (e.g., symlink
+   *   or directory).
+   *
+   * Note: may return stale data if synchronizeWorkingCopy isn't called, and if
+   * the SyncBehavior specify a 0 timeout. see the documentation for both of
+   * these for more details.
+   */
+  list<Blake3Result> getBlake3(
     1: PathString mountPoint,
     2: list<PathString> paths,
     3: SyncBehavior sync,

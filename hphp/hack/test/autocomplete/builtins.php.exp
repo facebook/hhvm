@@ -15,10 +15,10 @@ next
   function(): void
 key
   INSERT key()
-  function(): Tk
+  function(): ~Tk
 getOrigFuncName
   INSERT getOrigFuncName()
   function(): string
 current
   INSERT current()
-  function(): Tv
+  function(): ~Tv

@@ -1,6 +1,6 @@
 style
   INSERT style
-  ?string
+  ~?string
 number
   INSERT number
-  int
+  ~int

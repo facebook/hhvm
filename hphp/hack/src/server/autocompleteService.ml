@@ -60,6 +60,37 @@ let strip_suffix s =
     ~pos:0
     ~len:(String.length s - AutocompleteTypes.autocomplete_token_length)
 
+let strip_supportdyn_decl ty =
+  match Typing_defs.get_node ty with
+  | Tapply ((_, n), [ty])
+    when String.equal n Naming_special_names.Classes.cSupportDyn ->
+    ty
+  | _ -> ty
+
+let strip_like_decl ty =
+  match get_node ty with
+  | Tlike ty -> ty
+  | _ -> ty
+
+(* We strip off ~ from types before matching on the underlying structure of the type.
+ * Note that we only do this for matching, not pretty-printing of types, as we
+ * want to retain ~ when showing types in suggestions
+ *)
+let expand_and_strip_dynamic env ty =
+  let (_, ty) = Tast_env.expand_type env ty in
+  let ty =
+    Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
+  in
+  let (_, ty) = Tast_env.expand_type env ty in
+  ty
+
+let expand_and_strip_supportdyn env ty =
+  let (_, ty) = Tast_env.expand_type env ty in
+  let (_, _, ty) =
+    Typing_utils.strip_supportdyn (Tast_env.tast_env_as_typing_env env) ty
+  in
+  ty
+
 let matches_auto_complete_suffix x =
   String.length x >= AutocompleteTypes.autocomplete_token_length
   &&
@@ -250,6 +281,8 @@ let insert_text_for_ty
     | DeclTy decl_ty ->
       Tast_env.localize_no_subst env ~ignore_errors:true decl_ty
   in
+  (* Functions that support dynamic will be wrapped by supportdyn<_> *)
+  let ty = expand_and_strip_supportdyn env ty in
   match Typing_defs.get_node ty with
   | Tfun ft -> insert_text_for_fun_call env autocomplete_context label ft
   | _ -> InsertLiterally label
@@ -324,6 +357,8 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
     in
 
     let add kind (name, ty) =
+      (* Functions that support dynamic will be wrapped by supportdyn<_> *)
+      let ty = strip_supportdyn_decl ty in
       let res_detail =
         match Typing_defs.get_node ty with
         | Tfun _ ->
@@ -468,9 +503,10 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
         | Tprim Tbool -> true
         | _ -> false
       in
+      let ty = expand_and_strip_dynamic env ty in
       let (_, ty_) = Typing_defs_core.deref ty in
       match ty_ with
-      | Toption ty -> is_bool (get_node ty)
+      | Toption ty -> is_bool (get_node (expand_and_strip_dynamic env ty))
       | _ -> is_bool ty_
     in
 
@@ -567,16 +603,19 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
 *)
 let autocomplete_xhp_enum_class_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
-    let get_class_name ty : string option =
-      let get_name : type phase. phase Typing_defs.ty_ -> _ = function
-        | Tnewtype (name, _, _) -> Some name
-        | Tapply ((_, name), _) -> Some name
-        | _ -> None
-      in
-      let (_, ty_) = Typing_defs_core.deref ty in
-      match ty_ with
-      | Toption ty -> get_name (get_node ty)
-      | _ -> get_name ty_
+    let rec get_class_name_decl ty : string option =
+      let ty = strip_like_decl ty in
+      match get_node ty with
+      | Toption ty -> get_class_name_decl ty
+      | Tapply ((_, name), _) -> Some name
+      | _ -> None
+    in
+    let rec get_class_name ty : string option =
+      let ty = expand_and_strip_dynamic env ty in
+      match get_node ty with
+      | Toption ty -> get_class_name ty
+      | Tnewtype (name, _, _) -> Some name
+      | _ -> None
     in
 
     let get_enum_constants (class_decl : Decl_provider.class_decl) :
@@ -588,7 +627,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
       in
       all_consts
       |> List.filter ~f:(fun (_, class_const) ->
-             is_correct_class (get_class_name class_const.cc_type))
+             is_correct_class (get_class_name_decl class_const.cc_type))
     in
 
     let attr_type_name = get_class_name attr_ty in
@@ -682,7 +721,9 @@ let fresh_expand_env
 (** Does Hack function [f] accept [arg_ty] as its first argument? *)
 let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
     : bool =
-  match Typing_defs.get_node f.fe_type with
+  (* Functions that support dynamic will be wrapped by supportdyn<_> *)
+  let ty = strip_supportdyn_decl f.fe_type in
+  match Typing_defs.get_node ty with
   | Tfun ft ->
     let params = ft.ft_params in
     (match List.hd params with
@@ -697,7 +738,10 @@ let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
            we've probably violated a where constraint and shouldn't consider
            this function to be compatible. *)
         false
-      | _ -> Tast_env.can_subtype env arg_ty first_param)
+      | _ ->
+        let arg_ty = expand_and_strip_dynamic env arg_ty in
+        let first_param = expand_and_strip_dynamic env first_param in
+        Tast_env.can_subtype env arg_ty first_param)
     | _ -> false)
   | _ -> false
 
@@ -712,7 +756,8 @@ let compatible_fun_decls
       | _ -> None)
 
 (** Is [ty] a value type where we want to allow -> to complete to a HSL function? *)
-let is_fake_arrow_ty (ty : locl_ty) : bool =
+let is_fake_arrow_ty (env : Tast_env.env) (ty : locl_ty) : bool =
+  let ty = expand_and_strip_dynamic env ty in
   let (_, ty_) = Typing_defs_core.deref ty in
   match ty_ with
   | Tclass ((_, name), _, _) ->
@@ -740,7 +785,7 @@ let autocomplete_hack_fake_arrow
   in
 
   let (recv_ty, recv_pos, _) = recv in
-  if is_fake_arrow_ty recv_ty && is_auto_complete (snd prop_name) then
+  if is_fake_arrow_ty env recv_ty && is_auto_complete (snd prop_name) then
     let recv_start_pos = Pos.shrink_to_start recv_pos in
 
     let fake_arrow_funs =
@@ -843,7 +888,11 @@ let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
           Tast_env.localize_no_subst env ~ignore_errors:true cc.cc_type
         in
         match expected_ty with
-        | Some expected_ty -> Tast_env.is_sub_type env cc_ty expected_ty
+        | Some expected_ty ->
+          Tast_env.is_sub_type
+            env
+            cc_ty
+            (Typing_make_type.locl_like Reason.Rnone expected_ty)
         | None -> true)
   in
 
@@ -862,8 +911,8 @@ let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
    MemberOf<SomeEnum, X> -> X
    Y -> Y *)
 let unwrap_enum_memberof (ty : Typing_defs.decl_ty) : Typing_defs.decl_ty =
-  let (_, ty_) = Typing_defs_core.deref ty in
-  match ty_ with
+  let ty = strip_like_decl ty in
+  match get_node ty with
   | Tapply ((_, name), [_; arg])
     when String.equal name Naming_special_names.Classes.cMemberOf ->
     arg
@@ -913,6 +962,7 @@ let rec zip_truncate (xs : 'a list) (ys : 'b list) : ('a * 'b) list =
  *)
 let autocomplete_enum_class_label_call env f args =
   let suggest_members_from_ty env ty pos_labelname expected_ty =
+    let ty = expand_and_strip_dynamic env ty in
     match get_node ty with
     | Tclass ((p, enum_name), _, _) when Tast_env.is_enum_class env enum_name ->
       autocomplete_enum_class_label
@@ -926,12 +976,16 @@ let autocomplete_enum_class_label_call env f args =
     String.equal Naming_special_names.Classes.cEnumClassLabel name
   in
   let (fty, _, _) = f in
+  (* Functions that support dynamic will be wrapped by supportdyn<_> *)
+  let fty = expand_and_strip_supportdyn env fty in
   match get_node fty with
   | Tfun { ft_params; _ } ->
     let ty_args = zip_truncate args ft_params in
     List.iter
       ~f:(fun (arg, arg_ty) ->
-        match (arg, get_node arg_ty.fp_type.et_type) with
+        match
+          (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type.et_type))
+        with
         | ( (_, (_, p, Aast.EnumClassLabel (None, n))),
             Typing_defs.Tnewtype (ty_name, [enum_ty; member_ty], _) )
           when is_enum_class_label_ty_name ty_name && is_auto_complete n ->
@@ -949,6 +1003,7 @@ let typeconst_class_name (typeconst : typeconst_type) : string option =
   in
   match decl_ty with
   | Some decl_ty ->
+    let decl_ty = strip_like_decl decl_ty in
     let (_, ty_) = Typing_defs_core.deref decl_ty in
     (match ty_ with
     | Tapply ((_, name), _) -> Some name
@@ -1264,7 +1319,7 @@ let autocomplete_enum_case env (expr : Tast.expr) (cases : Tast.case list) =
       match e with
       | (_, _, Aast.Id (pos, id)) when is_auto_complete id ->
         let (recv_ty, _, _) = expr in
-        let (_, ty) = Tast_env.expand_type env recv_ty in
+        let ty = expand_and_strip_dynamic env recv_ty in
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
         (match ty_ with
@@ -1296,7 +1351,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
     ~f:(fun (arg, expected_ty) ->
       match arg with
       | (_, _, Aast.Id (pos, id)) when matches_auto_complete_suffix id ->
-        let (_, ty) = Tast_env.expand_type env expected_ty.fp_type.et_type in
+        let ty = expand_and_strip_dynamic env expected_ty.fp_type.et_type in
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
 
@@ -1312,7 +1367,7 @@ let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
         | _ -> ())
       | (_, _, Aast.Class_const ((_, _, Aast.CI _name), (pos, id)))
         when matches_auto_complete_suffix id ->
-        let (_, ty) = Tast_env.expand_type env expected_ty.fp_type.et_type in
+        let ty = expand_and_strip_dynamic env expected_ty.fp_type.et_type in
         let (_, ty_) = Typing_defs_core.deref ty in
         let replace_pos = replace_pos_of_id (pos, id) in
 
@@ -1751,7 +1806,7 @@ let visitor
       (match expr with
       | (_, _, Aast.Array_get (arr, Some (_, pos, key))) ->
         let ty = get_type arr in
-        let (_, ty) = Tast_env.expand_type env ty in
+        let ty = expand_and_strip_dynamic env ty in
         begin
           match get_node ty with
           | Tshape (_, _, fields) ->
@@ -1791,6 +1846,8 @@ let visitor
           | _ -> ()
         end
       | (_, _, Aast.(Call { func = (recv_ty, _, _); args; _ })) ->
+        (* Functions that support dynamic will be wrapped by supportdyn<_> *)
+        let recv_ty = expand_and_strip_supportdyn env recv_ty in
         (match deref recv_ty with
         | (_r, Tfun ft) ->
           autocomplete_shape_literal_in_call env ft args;

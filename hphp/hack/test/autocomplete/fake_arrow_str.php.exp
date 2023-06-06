@@ -1,3 +1,19 @@
+C\pop_back
+  INSERT C\pop_back(
+  INSERT )
+  (function(inout ~T $container): ~?Tv)
+C\pop_backx
+  INSERT C\pop_backx(
+  INSERT )
+  (function(inout ~T $container): ~Tv)
+C\pop_front
+  INSERT C\pop_front(
+  INSERT )
+  (function(inout ~T $container): ~?Tv)
+C\pop_frontx
+  INSERT C\pop_frontx(
+  INSERT )
+  (function(inout ~T $container): ~Tv)
 Str\capitalize
   INSERT Str\capitalize(
   INSERT )
@@ -9,7 +25,7 @@ Str\capitalize_words
 Str\chunk
   INSERT Str\chunk(
   INSERT )
-  (function(string $string, int $chunk_size = _): vec<string>)
+  (function(string $string, int $chunk_size = _): ~vec<string>)
 Str\compare
   INSERT Str\compare(
   INSERT , ${1:\$string2})
@@ -109,7 +125,7 @@ Str\splice
 Str\split
   INSERT Str\split(
   INSERT , ${1:\$delimiter})
-  (function(string $string, string $delimiter, ?int $limit = _): vec<string>)
+  (function(string $string, string $delimiter, ?int $limit = _): ~vec<string>)
 Str\starts_with
   INSERT Str\starts_with(
   INSERT , ${1:\$prefix})

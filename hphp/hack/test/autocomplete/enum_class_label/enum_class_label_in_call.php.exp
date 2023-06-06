@@ -1,6 +1,6 @@
 other_bool
   INSERT other_bool
-  MyBox<bool>
+  ~MyBox<bool>
 a_bool
   INSERT a_bool
-  MyBox<bool>
+  ~MyBox<bool>

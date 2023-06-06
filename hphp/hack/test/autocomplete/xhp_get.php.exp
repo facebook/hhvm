@@ -1,9 +1,9 @@
 :name
   INSERT :name
-  ?string
+  ~?string
 :color
   INSERT :color
-  ?string
+  ~?string
 genRender
   INSERT genRender()
   function(): _

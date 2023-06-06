@@ -1,6 +1,6 @@
 number
   INSERT number
-  ?string
+  ~?string
 nomenclature
   INSERT nomenclature
-  ?string
+  ~?string

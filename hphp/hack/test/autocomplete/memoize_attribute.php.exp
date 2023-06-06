@@ -1,12 +1,12 @@
 Uncategorized
   INSERT Uncategorized
-  string
+  ~string
 SoftMakeICInaccessible
   INSERT SoftMakeICInaccessible
-  string
+  ~string
 MakeICInaccessible
   INSERT MakeICInaccessible
-  string
+  ~string
 KeyedByIC
   INSERT KeyedByIC
-  string
+  ~string

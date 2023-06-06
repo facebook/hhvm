@@ -1,6 +1,6 @@
 name
   INSERT name
-  ?string
+  ~?string
 color
   INSERT color
-  ?string
+  ~?string

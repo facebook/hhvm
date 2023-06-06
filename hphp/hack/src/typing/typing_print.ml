@@ -640,6 +640,10 @@ module Full = struct
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
       k ~fuel ty
+    | Tapply ((_, n), [ty])
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv penv) ->
+      k ~fuel ty
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)

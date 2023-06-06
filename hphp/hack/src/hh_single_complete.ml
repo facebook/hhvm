@@ -138,6 +138,8 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
+      ~tco_everything_sdt:true
+      ~tco_enable_sound_dynamic:true
       GlobalOptions.default
   in
   (* Configure symbol index settings *)

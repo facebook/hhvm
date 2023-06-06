@@ -291,12 +291,12 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       return c1.m_data.pfunc == c2.m_data.pfunc;
     case KindOfClass:
       if (tvIsClass(c2)) return c1.m_data.pclass == c2.m_data.pclass;
-      // FALLTHROUGH
+      [[fallthrough]];
     case KindOfLazyClass: {
       const auto warn_on_conv = tvIsString(c2);
       return convStringishToStringData(c1, warn_on_conv)
               ->same(convStringishToStringData(c2, warn_on_conv));
-    }
+    } break;
     case KindOfPersistentVec:
     case KindOfVec:
       return vecSameHelper(c1.m_data.parr, c2.m_data.parr);

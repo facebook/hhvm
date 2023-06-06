@@ -60,7 +60,7 @@ ProtocolStruct Protocol::asStruct() const noexcept {
       break;
     case StandardProtocol::Custom:
       result.set_custom(custom_);
-      // fall through
+      [[fallthrough]];
     default:
       result.standard() = standard_;
       break;

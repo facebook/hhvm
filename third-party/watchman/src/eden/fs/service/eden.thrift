@@ -359,6 +359,11 @@ union Sha1OrError {
   2: EdenError error;
 }
 
+union Blake3OrError {
+  1: BinaryHash blake3;
+  2: EdenError error;
+}
+
 union SizeOrError {
   1: i64 size;
   2: EdenError error;
@@ -391,6 +396,7 @@ struct FileAttributeDataV2 {
   2: optional SizeOrError size;
   3: optional SourceControlTypeOrError sourceControlType;
   4: optional ObjectIdOrError objectId;
+  5: optional Blake3OrError blake3;
 }
 
 /**

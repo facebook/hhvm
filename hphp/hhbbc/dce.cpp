@@ -2298,7 +2298,7 @@ void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
           setloc(srcLoc, b->hhbcs.begin() + id.idx, numToPop);
           break;
         }
-        // Fall through
+        [[fallthrough]];
       case DceAction::Kill:
         if (b->hhbcs.size() == 1) {
           // we don't allow empty blocks

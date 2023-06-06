@@ -497,6 +497,57 @@ AUTOLOADFLAGS()
   m_flags.m_sha1 = SHA1{string_sha1(raw)};
 }
 
+namespace {
+std::string getCacheBreakerSchemaHash(std::string_view root,
+                                      const RepoOptionsFlags& flags) {
+  std::string optsHash = RO::EvalIncludeReopOptionsInFactsCacheBreaker
+      ? flags.cacheKeySha1().toString()
+      : flags.getFactsCacheBreaker();
+
+  if (RO::ServerExecutionMode()) {
+    Logger::FInfo("Native Facts DB cache breaker:\n"
+                  " Version: {}\n"
+                  " Root: {}\n"
+                  " RepoOpts hash: {}",
+                  Facts::kSchemaVersion,
+                  root,
+                  optsHash);
+  }
+  std::string rootHash = string_sha1(root);
+  optsHash.resize(10);
+  rootHash.resize(10);
+  return folly::to<std::string>(Facts::kSchemaVersion, '_', optsHash, '_',
+                                rootHash);
+}
+}
+
+constexpr std::string_view kEUIDPlaceholder = "%{euid}";
+constexpr std::string_view kSchemaPlaceholder = "%{schema}";
+void RepoOptions::calcAutoloadDB() {
+  namespace fs = std::filesystem;
+
+  if (RO::AutoloadDBPath.empty()) return;
+  std::string pathTemplate{RuntimeOption::AutoloadDBPath};
+
+  auto const euidIdx = pathTemplate.find(kEUIDPlaceholder);
+  if (euidIdx != std::string::npos) {
+    pathTemplate.replace(
+        euidIdx, kEUIDPlaceholder.size(), folly::to<std::string>(geteuid()));
+  }
+
+  auto const schemaIdx = pathTemplate.find(kSchemaPlaceholder);
+  if (schemaIdx != std::string::npos) {
+    pathTemplate.replace(
+        schemaIdx,
+        kSchemaPlaceholder.size(),
+        getCacheBreakerSchemaHash(m_repo.native(), m_flags));
+  }
+
+  fs::path dbPath = pathTemplate;
+  if (dbPath.is_relative()) dbPath = m_repo / dbPath;
+  m_autoloadDB = fs::absolute(dbPath);
+}
+
 const RepoOptions& RepoOptions::defaults() {
   always_assert(s_init);
   return s_defaults;
@@ -555,6 +606,7 @@ AUTOLOADFLAGS();
   if (!m_path.empty()) m_repo = std::filesystem::canonical(m_path.parent_path());
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
   calcCacheKey();
+  calcAutoloadDB();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {

@@ -77,15 +77,6 @@ namespace HPHP {
 namespace Facts {
 namespace {
 
-// SQLFacts version number representing the DB's schema.  This number is
-// determined randomly, but should match the number in the SQL Facts
-// implementation.  We use this when we make a change that invalidates
-// the cache, such as adding a new table which would otherwise be
-// unpopulated without a cache rebuild.
-constexpr size_t kSchemaVersion = 1916337637;
-
-constexpr std::string_view kEUIDPlaceholder = "%{euid}";
-constexpr std::string_view kSchemaPlaceholder = "%{schema}";
 constexpr std::chrono::seconds kDefaultIdleSec{30 * 60};
 constexpr int32_t kDefaultWatchmanRetries = 0;
 
@@ -100,53 +91,6 @@ struct RepoOptionsParseExc : public std::runtime_error {
  */
 fs::path getRepoRoot(const RepoOptions& options) {
   return options.dir();
-}
-
-std::string getCacheBreakerSchemaHash(
-    std::string_view root,
-    const RepoOptions& opts) {
-  std::string optsHash = RO::EvalIncludeReopOptionsInFactsCacheBreaker
-      ? opts.flags().cacheKeySha1().toString()
-      : opts.flags().getFactsCacheBreaker();
-  XLOG(INFO) << "Native Facts DB cache breaker:"
-             << "\n Version: " << kSchemaVersion << "\n Root: " << root
-             << "\n RepoOpts hash: " << optsHash;
-  std::string rootHash = string_sha1(root);
-  optsHash.resize(10);
-  rootHash.resize(10);
-  return folly::to<std::string>(kSchemaVersion, '_', optsHash, '_', rootHash);
-}
-
-fs::path getDBPath(const RepoOptions& repoOptions) {
-  always_assert(!RuntimeOption::AutoloadDBPath.empty());
-  std::string pathTemplate{RuntimeOption::AutoloadDBPath};
-
-  {
-    size_t idx = pathTemplate.find(kEUIDPlaceholder);
-    if (idx != std::string::npos) {
-      pathTemplate.replace(
-          idx, kEUIDPlaceholder.size(), folly::to<std::string>(geteuid()));
-    }
-  }
-
-  auto root = getRepoRoot(repoOptions);
-
-  {
-    size_t idx = pathTemplate.find(kSchemaPlaceholder);
-    if (idx != std::string::npos) {
-      pathTemplate.replace(
-          idx,
-          kSchemaPlaceholder.size(),
-          getCacheBreakerSchemaHash(root.native(), repoOptions));
-    }
-  }
-
-  fs::path dbPath = pathTemplate;
-  if (dbPath.is_relative()) {
-    dbPath = root / dbPath;
-  }
-
-  return fs::absolute(dbPath);
 }
 
 ::gid_t getGroup() {
@@ -211,14 +155,15 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   if (!trustedDBPath.empty()) {
     return SQLiteKey::readOnly(std::move(trustedDBPath));
   }
+  auto const dbPath = repoOptions.autoloadDB();
+  always_assert(!dbPath.empty());
   // Create a DB with the given permissions if none exists
   if (RuntimeOption::AutoloadDBCanCreate) {
     ::gid_t gid = getGroup();
-    return SQLiteKey::readWriteCreate(
-        getDBPath(repoOptions), gid, getDBPerms());
+    return SQLiteKey::readWriteCreate(dbPath, gid, getDBPerms());
   }
   // Use an existing DB and throw if it doesn't exist
-  return SQLiteKey::readWrite(getDBPath(repoOptions));
+  return SQLiteKey::readWrite(dbPath);
 }
 
 // Convenience wrapper for std::string_view

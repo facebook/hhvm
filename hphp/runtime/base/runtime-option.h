@@ -85,6 +85,15 @@ namespace hackc {
   struct DeclParserConfig;
 }
 
+namespace Facts {
+// SQLFacts version number representing the DB's schema.  This number is
+// determined randomly, but should match the number in the SQL Facts
+// implementation.  We use this when we make a change that invalidates
+// the cache, such as adding a new table which would otherwise be
+// unpopulated without a cache rebuild.
+constexpr size_t kSchemaVersion = 1916337637;
+}
+
 /*
  * The bare RepoOptions information that the parser cares about.
  */
@@ -224,6 +233,7 @@ struct RepoOptions {
   const RepoOptionStats& stat() const { return m_stat; }
 
   const std::filesystem::path& dir() const { return m_repo; }
+  const std::filesystem::path& autoloadDB() const { return m_autoloadDB; }
 
   bool operator==(const RepoOptions& o) const {
     // If we have hash collisions of unequal RepoOptions, we have
@@ -244,6 +254,7 @@ private:
   void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
   void calcCacheKey();
   void calcDynamic();
+  void calcAutoloadDB();
 
   RepoOptionsFlags m_flags;
 
@@ -253,6 +264,9 @@ private:
 
   // Canonical path of repo root directory that contains .hhvmconfig.hdf
   std::filesystem::path m_repo;
+
+  // The autoload DB specified by these repo options
+  std::filesystem::path m_autoloadDB;
 
   static bool s_init;
   static RepoOptions s_defaults;

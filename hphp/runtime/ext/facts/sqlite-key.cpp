@@ -215,16 +215,8 @@ SQLiteKey::SQLiteKey(
   always_assert(m_path.is_absolute());
 
   // Coerce DB permissions into unix owner/group/other bits
-  auto previous = m_perms;
   m_perms |= 0600;
   m_perms &= 0666;
-
-  XLOGF_IF(
-      INFO,
-      previous != m_perms,
-      "Coercing DB permission bits {:04o} to {:04o}",
-      previous,
-      m_perms);
 }
 
 } // namespace Facts

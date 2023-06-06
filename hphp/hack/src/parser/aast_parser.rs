@@ -311,7 +311,6 @@ impl<'src> AastParser {
                 ScourComment {
                     phantom: std::marker::PhantomData,
                     indexed_source_text,
-                    collect_fixmes: true,
                     include_line_comments: env.include_line_comments,
                     disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
                     allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,

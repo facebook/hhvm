@@ -29,7 +29,6 @@ use rescan_trivia::RescanTrivia;
  */
 pub struct ScourComment<'a, T, V> {
     pub indexed_source_text: &'a IndexedSourceText<'a>,
-    pub collect_fixmes: bool,
     pub include_line_comments: bool,
     pub allowed_decl_fixme_codes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
@@ -56,10 +55,9 @@ where
                     if t.has_trivia_kind(TriviaKind::DelimitedComment)
                         || (self.include_line_comments
                             && t.has_trivia_kind(TriviaKind::SingleLineComment))
-                        || (self.collect_fixmes
-                            && (t.has_trivia_kind(TriviaKind::FixMe)
-                                || (t.has_trivia_kind(TriviaKind::IgnoreError)
-                                    && self.disable_hh_ignore_error <= 1)))
+                        || (t.has_trivia_kind(TriviaKind::FixMe)
+                            || (t.has_trivia_kind(TriviaKind::IgnoreError)
+                                && self.disable_hh_ignore_error <= 1))
                     {
                         let leading = t.scan_leading(self.source_text());
                         let trailing = t.scan_trailing(self.source_text());
@@ -117,35 +115,30 @@ where
                         Regex::new(r#"HH_(?:FIXME|IGNORE_ERROR)[ \t\n]*\[([0-9]+)\]"#).unwrap();
                 }
 
-                if self.collect_fixmes {
-                    let text = t.text_raw(self.source_text());
-                    let pos = self.p_pos(node);
-                    let line = pos.line() as isize;
-                    let p = self.pos_of_offset(t.start_offset(), t.end_offset() + 1);
-                    match IGNORE_ERROR
-                        .captures(text)
-                        .and_then(|c| c.get(1))
-                        .map(|m| m.as_bytes())
-                    {
-                        Some(code) => {
-                            let code = std::str::from_utf8(code).unwrap();
-                            let code: isize = std::str::FromStr::from_str(code).unwrap();
-                            let in_hhi = pos.filename().prefix() == Prefix::Hhi;
-                            if !(in_block
-                                || in_hhi
-                                || self.allowed_decl_fixme_codes.contains(&code))
-                            {
-                                acc.add_to_misuses(line, code, p);
-                            } else if self.disable_hh_ignore_error == 1 && t.kind() == IgnoreError {
-                                acc.add_disallowed_ignore(p);
-                            } else {
-                                acc.add_to_fixmes(line, code, p);
-                            }
+                let text = t.text_raw(self.source_text());
+                let pos = self.p_pos(node);
+                let line = pos.line() as isize;
+                let p = self.pos_of_offset(t.start_offset(), t.end_offset() + 1);
+                match IGNORE_ERROR
+                    .captures(text)
+                    .and_then(|c| c.get(1))
+                    .map(|m| m.as_bytes())
+                {
+                    Some(code) => {
+                        let code = std::str::from_utf8(code).unwrap();
+                        let code: isize = std::str::FromStr::from_str(code).unwrap();
+                        let in_hhi = pos.filename().prefix() == Prefix::Hhi;
+                        if !(in_block || in_hhi || self.allowed_decl_fixme_codes.contains(&code)) {
+                            acc.add_to_misuses(line, code, p);
+                        } else if self.disable_hh_ignore_error == 1 && t.kind() == IgnoreError {
+                            acc.add_disallowed_ignore(p);
+                        } else {
+                            acc.add_to_fixmes(line, code, p);
                         }
-                        None => {
-                            // Errors.fixme_format pos;
-                            acc.add_format_error(pos);
-                        }
+                    }
+                    None => {
+                        // Errors.fixme_format pos;
+                        acc.add_format_error(pos);
                     }
                 }
             }

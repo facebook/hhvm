@@ -873,6 +873,7 @@ dependencies = [
  "parser_core_types",
  "relative_path",
  "sha1",
+ "thiserror",
 ]
 
 [[package]]

@@ -363,15 +363,10 @@ ParseFactsResult extract_facts(
       }
     }
     try {
-      hackc::DeclParserConfig decl_config;
-      options.initDeclConfig(decl_config);
-      auto const decls = hackc::direct_decl_parse_and_serialize(
-        decl_config, filename, source_text
-      );
-      if (decls.has_errors) {
-        return FactsJSONString { "" };
-      }
-      rust::String json = hackc::decls_to_facts_json(*decls.decls, actual_sha1);
+      hackc::DeclParserConfig config;
+      options.initDeclConfig(config);
+      auto const decls = hackc::parse_decls(config, filename, source_text);
+      rust::String json = hackc::decls_to_facts_json(*decls, actual_sha1);
       return FactsJSONString { std::string(json) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC

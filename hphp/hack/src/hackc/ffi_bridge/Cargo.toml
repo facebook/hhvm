@@ -27,6 +27,7 @@ options = { version = "0.0.0", path = "../compile/cargo/options" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 sha1 = "0.10.5"
+thiserror = "1.0.36"
 
 [build-dependencies]
 cxx-build = "1.0.94"

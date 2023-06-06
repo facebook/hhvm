@@ -22,7 +22,7 @@ use crate::typing_defs;
 /// duplicates. It's often a good idea to use ParsedFileWithHashes instead (or rather, one of
 /// its wrappers).
 /// NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
-#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[derive(Deserialize, FromOcamlRepIn, NoPosHash, Serialize, ToOcamlRep)]
 pub struct ParsedFile<'a> {
     /// Was the file Hack or HHI?

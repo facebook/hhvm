@@ -206,6 +206,15 @@ pub mod compile_ffi {
             text: &CxxString,
         ) -> DeclsAndBlob;
 
+        /// Invoke the hackc direct decl parser and return every shallow decl in the file.
+        /// Return Err(_) if there were decl parsing errors, which will translate to
+        /// throwing an exception to the C++ caller.
+        fn parse_decls(
+            config: &DeclParserConfig,
+            filename: &CxxString,
+            text: &CxxString,
+        ) -> Result<Box<DeclsHolder>>;
+
         fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
         /// Return true if this type (class or alias) is in the given Decls.
@@ -223,6 +232,7 @@ pub mod compile_ffi {
 }
 
 // Opaque to C++, so we don't need repr(C).
+#[derive(Debug)]
 pub struct DeclsHolder {
     _arena: bumpalo::Bump,
     parsed_file: ParsedFile<'static>,
@@ -374,6 +384,20 @@ pub fn direct_decl_parse_and_serialize(
     filename: &CxxString,
     text: &CxxString,
 ) -> compile_ffi::DeclsAndBlob {
+    match parse_decls(config, filename, text) {
+        Ok(decls) | Err(DeclsError(decls, _)) => compile_ffi::DeclsAndBlob {
+            serialized: decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap(),
+            has_errors: decls.parsed_file.has_first_pass_parse_errors,
+            decls,
+        },
+    }
+}
+
+pub fn parse_decls(
+    config: &compile_ffi::DeclParserConfig,
+    filename: &CxxString,
+    text: &CxxString,
+) -> Result<Box<DeclsHolder>, DeclsError> {
     let decl_opts = DeclParserOptions {
         auto_namespace_map: (config.aliased_namespaces.iter())
             .map(|e| (e.key.clone(), e.value.clone()))
@@ -389,22 +413,28 @@ pub fn direct_decl_parse_and_serialize(
     };
     let text = text.as_bytes();
     let path = PathBuf::from(OsStr::from_bytes(filename.as_bytes()));
-    let filename = RelativePath::make(Prefix::Root, path);
+    let relpath = RelativePath::make(Prefix::Root, path);
     let arena = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
     let parsed_file: ParsedFile<'static> =
-        direct_decl_parser::parse_decls_for_bytecode(&decl_opts, filename, text, alloc);
-
-    compile_ffi::DeclsAndBlob {
-        serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
-        decls: Box::new(DeclsHolder {
-            parsed_file,
-            _arena: arena,
-        }),
-        has_errors: parsed_file.has_first_pass_parse_errors,
+        direct_decl_parser::parse_decls_for_bytecode(&decl_opts, relpath, text, alloc);
+    let holder = Box::new(DeclsHolder {
+        parsed_file,
+        _arena: arena,
+    });
+    match holder.parsed_file.has_first_pass_parse_errors {
+        false => Ok(holder),
+        true => Err(DeclsError(
+            holder,
+            PathBuf::from(OsStr::from_bytes(filename.as_bytes())),
+        )),
     }
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("{}: File contained first-pass parse errors", .1.display())]
+pub struct DeclsError(Box<DeclsHolder>, PathBuf);
 
 fn verify_deserialization(result: &compile_ffi::DeclsAndBlob) -> bool {
     let arena = bumpalo::Bump::new();

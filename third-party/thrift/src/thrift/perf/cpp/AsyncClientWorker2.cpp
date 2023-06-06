@@ -458,7 +458,6 @@ void AsyncRunner2::genericCob(
         break;
       }
       case apache::thrift::test::ClientLoadConfig::NUM_OPS:
-        // fall through
         break;
         // no default case, so gcc will warn us if a new op is added
         // and this switch statement is not updated

@@ -685,7 +685,7 @@ Variant HHVM_FUNCTION(file_put_contents,
         raise_warning("Not a valid stream resource");
         return false;
       }
-      // fallthrough
+      [[fallthrough]];
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:

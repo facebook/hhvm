@@ -2593,7 +2593,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       always_assert_flog(
         mcodeIsElem(mk.mcode), "QueryM InOut is only compatible with Elem"
       );
-      // fallthrough
+      [[fallthrough]];
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
       dimDispatch(getQueryMOpMode(op), mk);

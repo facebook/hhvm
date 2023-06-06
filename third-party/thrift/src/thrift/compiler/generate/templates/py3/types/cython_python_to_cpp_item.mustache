@@ -32,7 +32,7 @@ key, include the parallel CythonPythonToCppKey file instead.
   }}(<_fbthrift_iobuf.IOBuf?>item).c_clone(){{!
 }}{{/type:iobufRef?}}{{!
 }}{{#type:flexibleBinary?}}{{!
-  }}{{> types/cython_cpp_type}}(move(<string>item)){{!
+  }}{{> types/cython_cpp_type}}(cmove(<string>item)){{!
 }}{{/type:flexibleBinary?}}{{!
 }}{{^type:hasCustomTypeBehavior?}}{{!
 }}{{#type:bool?}}item{{/type:bool?}}{{!

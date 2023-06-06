@@ -106,6 +106,7 @@ impl NativeEnv {
 
     pub fn to_decl_parser_options(&self) -> DeclParserOptions {
         let auto_namespace_map = self.hhvm.aliased_namespaces_cloned().collect();
+        // Keep in sync with RepoOptionsFlags::initDeclConfig() in runtime-option.cpp
         let lang_flags = &self.hhvm.parser_options;
         DeclParserOptions {
             auto_namespace_map,

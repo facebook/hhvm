@@ -245,7 +245,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
       if (dests.size() == 2) {
         switch (arch()) {
-          case Arch::X64: // fall through
+          case Arch::X64:
             v << copyargs{
               v.makeTuple({rret(0), rret(1)}),
               v.makeTuple({dests[0], dests[1]})
@@ -356,7 +356,7 @@ void lower(VLS& env, defvmretdata& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
       break;
     case Arch::ARM:
@@ -372,7 +372,7 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copyargs{
         env.unit.makeTuple({inst.data, inst.type}),
         env.unit.makeTuple({rret_data(), rret_type()})
@@ -393,7 +393,7 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, syncvmrettype& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copy{inst.type, rret_type()};
       break;
     case Arch::ARM:

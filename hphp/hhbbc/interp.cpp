@@ -5347,7 +5347,7 @@ void in(ISS& env, const bc::CreateCl& op) {
     op.str2
   );
   auto const cls = rcls->cls();
-  assertx(cls->unit == env.ctx.unit->filename);
+  assertx(cls->unit == env.ctx.unit);
   assertx(is_closure(*cls));
 
   /*

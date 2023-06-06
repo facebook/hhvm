@@ -5099,7 +5099,7 @@ void check_local_invariants(const IndexData& data) {
 Type adjust_closure_context(const Index& index, const CallContext& ctx) {
   if (ctx.callee->cls && ctx.callee->cls->closureContextCls) {
     auto const withClosureContext = Context {
-      index.lookup_func_unit(*ctx.callee),
+      ctx.callee->unit,
       ctx.callee,
       index.lookup_closure_context(*ctx.callee->cls)
     };
@@ -5127,7 +5127,7 @@ Type context_sensitive_return_type(IndexData& data,
         !constraint.isTypeVar() &&
         !constraint.isTypeConstant()) {
       auto const ctx = Context {
-        data.units.at(finfo->func->unit),
+        finfo->func->unit,
         finfo->func,
         finfo->func->cls
       };
@@ -5182,7 +5182,7 @@ Type context_sensitive_return_type(IndexData& data,
     auto const func = finfo->func;
     auto const wf = php::WideFunc::cns(func);
     auto const calleeCtx = AnalysisContext {
-      data.units.at(func->unit),
+      func->unit,
       wf,
       func->cls
     };
@@ -15053,7 +15053,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
     auto const wf = php::WideFunc::cns(func);
     auto const fa = analyze_func_inline(
       *this,
-      AnalysisContext { m_data->units.at(func->unit), wf, func->cls },
+      AnalysisContext { func->unit, wf, func->cls },
       ctxType,
       calleeCtx.args,
       nullptr,
@@ -15701,7 +15701,7 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
   auto const cns_name = Constant::nameFromFuncName(func->name);
   if (!cns_name) return;
 
-  auto& cs = fa.ctx.unit->constants;
+  auto& cs = m_data->units.at(fa.ctx.unit)->constants;
   auto it = std::find_if(
     cs.begin(),
     cs.end(),

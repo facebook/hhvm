@@ -790,7 +790,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   {
     Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-      is_systemlib_part(*ctx.unit)};
+      is_systemlib_part(ctx.unit)};
     FTRACE(2, "{:#^70}\n", "Class");
   }
 
@@ -943,7 +943,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
   auto const startPrivateStatics = clsAnalysis.privateStatics;
 
   struct FuncMeta {
-    const php::Unit* unit;
+    SString unit;
     const php::Class* cls;
     CompactVector<FuncAnalysisResult>* output;
     size_t startReturnRefinements;
@@ -996,7 +996,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       assertx(inserted);
       funcMeta.emplace(
         m,
-        FuncMeta{index.lookup_func_unit(*m), ctx.cls, nullptr, 0, 0}
+        FuncMeta{m->unit, ctx.cls, nullptr, 0, 0}
       );
     }
   }
@@ -1186,7 +1186,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
   }
 
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
+    is_systemlib_part(ctx.unit)};
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {

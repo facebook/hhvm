@@ -40,7 +40,7 @@ struct Index;
  * need a "context", to allow recording dependencies.
  */
 struct Context {
-  const php::Unit* unit;
+  SString unit;
   const php::Func* func;
   const php::Class* cls;
 
@@ -110,7 +110,7 @@ struct CallContextHashCompare {
  * must ensure that the provided WideFunc lives longer than the context.
  */
 struct AnalysisContext {
-  const php::Unit* unit;
+  SString unit;
   const php::WideFunc& func;
   const php::Class* cls;
 

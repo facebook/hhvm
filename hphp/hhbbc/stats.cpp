@@ -375,7 +375,7 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!options.extendedStats) return;
 
   auto const ctx =
-    AnalysisContext { index.lookup_func_unit(func), cf, func.cls };
+    AnalysisContext { func.unit, cf, func.cls };
   auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};

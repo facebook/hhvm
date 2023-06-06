@@ -147,13 +147,13 @@ std::vector<Context> all_unit_contexts(const Index& index,
     u,
     [&] (const php::Class& c) {
       for (auto const& m : c.methods) {
-        ret.emplace_back(Context { &u, m.get(), &c });
+        ret.emplace_back(Context { u.filename, m.get(), &c });
       }
     }
   );
   index.for_each_unit_func(
     u,
-    [&] (const php::Func& f) { ret.emplace_back(Context { &u, &f }); }
+    [&] (const php::Func& f) { ret.emplace_back(Context { u.filename, &f }); }
   );
   return ret;
 }
@@ -172,7 +172,7 @@ std::vector<Context> const_pass_contexts(const Index& index) {
       if (is_86init_func(*m)) {
         ret.emplace_back(
           Context {
-            index.lookup_class_unit(*c),
+            c->unit,
             m.get(),
             c.get()
           }
@@ -204,25 +204,24 @@ std::vector<WorkItem> initial_work(const Index& index,
       // with a class context are analyzed as part of that context.
       continue;
     }
-    auto const unit = index.lookup_class_unit(*c);
     if (is_used_trait(*c)) {
       for (auto const& f : c->methods) {
         ret.emplace_back(
           WorkType::Func,
-          Context { unit, f.get(), f->cls }
+          Context { c->unit, f.get(), f->cls }
         );
       }
     } else {
       ret.emplace_back(
         WorkType::Class,
-        Context { unit, nullptr, c.get() }
+        Context { c->unit, nullptr, c.get() }
       );
     }
   }
   for (auto const& f : program.funcs) {
     ret.emplace_back(
       WorkType::Func,
-      Context { index.lookup_func_unit(*f), f.get() }
+      Context { f->unit, f.get() }
     );
   }
   return ret;
@@ -238,7 +237,7 @@ WorkItem work_item_for(const DependencyContext& d,
               !is_used_trait(*cls));
       return WorkItem {
         WorkType::Class,
-        Context { index.lookup_class_unit(*cls), nullptr, cls }
+        Context { cls->unit, nullptr, cls }
       };
     }
     case DependencyContextType::Func: {
@@ -251,7 +250,7 @@ WorkItem work_item_for(const DependencyContext& d,
               is_used_trait(*cls));
       return WorkItem {
         WorkType::Func,
-        Context { index.lookup_func_unit(*func), func, cls }
+        Context { func->unit, func, cls }
       };
     }
     case DependencyContextType::Prop:
@@ -367,7 +366,7 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
             cls->name
           );
           auto const ctx =
-            Context { index.lookup_func_unit(*func), func, cls };
+            Context { func->unit, func, cls };
           deps.insert(index.dependency_context(ctx));
         }
       }

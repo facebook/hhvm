@@ -3489,7 +3489,7 @@ bool coeffectRulesMatch(ISS& env,
     }
     case CoeffectRule::Type::CCParam:
       if (caller.m_name != callee.m_name) return false;
-      // fallthrough
+      [[fallthrough]];
     case CoeffectRule::Type::FunParam: {
       if (fca.hasUnpack()) return false;
       if (fca.numArgs() <= callee.m_index) return false;

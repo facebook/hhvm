@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import unittest.mock as mock
 from asyncio import iscoroutinefunction
 from typing import Type
@@ -43,7 +44,11 @@ def mock_client(client_klass: Type[Client]) -> mock.AsyncMock:
             pass
         return iscoroutinefunction(thing)
 
-    with mock.patch("asyncio.iscoroutinefunction", magic):
+    if sys.version_info >= (3, 9):
+        patch_loc = "unittest.mock.iscoroutinefunction"
+    else:
+        patch_loc = "asyncio.iscoroutinefunction"
+    with mock.patch(patch_loc, magic):
         client_mock = mock.AsyncMock(client_klass)
         client_mock.__aenter__.return_value = client_mock
         # When running with Cinder, __aexit__ is not auto patched.

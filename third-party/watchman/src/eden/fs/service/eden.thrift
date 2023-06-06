@@ -319,6 +319,12 @@ enum FileAttributes {
    * Do not attempt to parse this identifier. It is subject to change at any moment.
    */
   OBJECT_ID = 8,
+
+  /**
+   * Returns the BLAKE3 hash of a file. Returns an error for symlinks and directories,
+   * and non-regular files.
+   */
+  BLAKE3_HASH = 16,
 /* NEXT_ATTR = 2^x */
 } (cpp2.enum_type = 'uint64_t')
 

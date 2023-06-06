@@ -256,7 +256,7 @@ void raiseIncDecInvalidType(tv_lval cell) {
     case 2:
       raise_error("Unsupported operand type (%s) for IncDec",
                   describe_actual_type(cell).c_str());
-      // fallthrough
+      [[fallthrough]];
     default:
       always_assert(false);
   }

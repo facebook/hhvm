@@ -1271,7 +1271,7 @@ void DebuggerClient::console() {
       switch (m_prevCmd[0]) {
         case 'l': // list
           m_args.clear(); // as if just "list"
-          // fall through
+          [[fallthrough]];
         case 'c': // continue
         case 's': // step
         case 'n': // next
@@ -1822,7 +1822,7 @@ void DebuggerClient::parseCommand(const char *line) {
           token += next;
           break;
         }
-        // fall through
+        [[fallthrough]];
       default:
         token += ch;
         break;

@@ -801,7 +801,7 @@ void VariableSerializer::writeOverflow(tv_rval tv) {
       m_buf->append("s:12:\"...(omitted)\";", 20);
       break;
     }
-    // fall through
+    [[fallthrough]];
   case Type::Serialize:
   case Type::Internal:
   case Type::APCSerialize:
@@ -1451,7 +1451,7 @@ bool VariableSerializer::incNestedLevel(tv_rval tv) {
     if (m_maxLevelDebugger > 0 && ++m_levelDebugger > m_maxLevelDebugger) {
       return true;
     }
-    // fall through
+    [[fallthrough]];
   case Type::Serialize:
   case Type::Internal:
   case Type::APCSerialize:

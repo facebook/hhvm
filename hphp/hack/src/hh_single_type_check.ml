@@ -55,7 +55,6 @@ type mode =
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
-  | Check_tast
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -444,7 +443,6 @@ let parse_options () =
       ("--outline", Arg.Unit (set_mode Outline), " Print file outline");
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
-      ("--tast-check", Arg.Unit (set_mode Check_tast), " Typecheck the tast");
       ( "--stripped-tast",
         Arg.Unit (set_mode Dump_stripped_tast),
         " Print out the typed AST, stripped of type information."
@@ -1527,14 +1525,6 @@ let print_tasts ~should_print_position tasts ctx =
       else
         Typing_ast_print.print_tast_without_position ctx tast)
 
-let typecheck_tasts tasts tcopt (filename : Relative_path.t) =
-  let env = Typing_env_types.empty tcopt filename ~droot:None in
-  let tasts = Relative_path.Map.values tasts in
-  let typecheck_tast tast =
-    Errors.get_sorted_error_list (Tast_typecheck.check env tast)
-  in
-  List.concat_map tasts ~f:typecheck_tast
-
 let pp_debug_deps fmt entries =
   Format.fprintf fmt "@[<v>";
   ignore
@@ -2076,24 +2066,6 @@ let handle_mode
     in
     print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
     print_tasts ~should_print_position tasts ctx
-  | Check_tast ->
-    iter_over_files (fun filename ->
-        let files_contents =
-          Relative_path.Map.filter files_contents ~f:(fun k _v ->
-              Relative_path.equal k filename)
-        in
-        let (errors, tasts) =
-          compute_tasts_expand_types ctx files_info files_contents
-        in
-        print_tasts ~should_print_position tasts ctx;
-        if not @@ Errors.is_empty errors then (
-          print_errors error_format errors max_errors;
-          Printf.printf "Did not typecheck the TAST as there are typing errors.";
-          exit 2
-        ) else
-          let tast_check_errors = typecheck_tasts tasts ctx filename in
-          print_error_list error_format tast_check_errors max_errors;
-          if not (List.is_empty tast_check_errors) then exit 2)
   | Dump_stripped_tast ->
     iter_over_files (fun filename ->
         let files_contents =

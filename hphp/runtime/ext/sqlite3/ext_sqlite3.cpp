@@ -668,7 +668,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
     }
   case SQLITE_ERROR:
     sqlite3_reset(data->m_raw_stmt);
-    // fall through
+    [[fallthrough]];
   default:
     raise_warning("Unable to execute statement: %s",
                   sqlite3_errmsg(sqlite3_db_handle(data->m_raw_stmt)));

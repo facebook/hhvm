@@ -58,13 +58,13 @@ void MethProfile::reportMeth(const Class* cls, const Func* meth,
       }
       if (checkModule(meth)) return;
       setMeth(curMeth, Tag::UniqueMeth);
-      // fall through
+      [[fallthrough]];
     case Tag::UniqueMeth:
       if (curMeth == meth) return;
       if (checkModule(meth)) return;
       curMeth = curMeth->baseCls()->getMethod(curMeth->methodSlot());
       setMeth(curMeth, Tag::BaseMeth);
-      // fall through
+      [[fallthrough]];
     case Tag::BaseMeth: {
       assertx(curMeth->baseCls() == curMeth->cls());
       if (curMeth->baseCls() == meth->baseCls()) return;

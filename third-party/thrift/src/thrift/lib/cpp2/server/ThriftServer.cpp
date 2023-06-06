@@ -90,7 +90,7 @@ THRIFT_FLAG_DEFINE_bool(enable_on_stop_serving, true);
 
 THRIFT_FLAG_DEFINE_bool(enable_io_queue_lag_detection, true);
 
-THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, true);
+THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(

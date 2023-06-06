@@ -7,11 +7,10 @@ import collections.abc
 import functools
 import lldb
 import re
+import shlex
 import struct
 import sys
 import typing
-
-_Debug = False
 
 class Command(abc.ABC):
 
@@ -787,6 +786,58 @@ def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
 
 #------------------------------------------------------------------------------
 # Debugging
+
+_Debug = False
+
+class DebugCommand(Command):
+    command = "debug"
+    description = "Enable/disable printing information to aid in debugging LLDB scripts"
+
+    @classmethod
+    def create_parser(cls):
+        parser = cls.default_parser()
+        subparsers = parser.add_subparsers(dest='cmd')
+        subparsers.add_parser('on', help='Enable LLDB script debugging information')
+        subparsers.add_parser('off', help='Disable LLDB script debugging information')
+        return parser
+
+    def __init__(self, debugger, internal_dict):
+        super().__init__(debugger, internal_dict)
+
+    def __call__(self, debugger, command, exe_ctx, result):
+        command_args = shlex.split(command)
+        try:
+            options = self.parser.parse_args(command_args)
+        except SystemExit:
+            result.SetError("option parsing failed")
+            return
+
+        global _Debug
+        if options.cmd == 'on':
+            _Debug = True
+        elif options.cmd == 'off':
+            _Debug = False
+        else:
+            result.SetError(f"Unexpected command {options.cmd}")
+
+
 def debug_print(message: str, file=sys.stderr) -> None:
     if _Debug:
         print(message)
+
+
+def __lldb_init_module(debugger, _internal_dict, top_module=""):
+    """ Register the commands in this file with the LLDB debugger.
+
+    Defining this in this module (in addition to the main hhvm module) allows
+    this script to be imported into LLDB separately; LLDB looks for a function with
+    this name at module load time.
+
+    Arguments:
+        debugger: Current debugger object
+        _internal_dict: Dict for current script session. For internal use by LLDB only.
+
+    Returns:
+        None
+    """
+    DebugCommand.register_lldb_command(debugger, __name__, top_module)

@@ -1065,7 +1065,7 @@ Variant HHVM_METHOD(Memcached, getOption, int64_t option) {
       raise_warning("no servers defined");
       return init_null();
     }
-    // fall through
+    [[fallthrough]];
 
   default:
     // Assume that it's a libmemcached behavior option

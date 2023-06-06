@@ -1927,7 +1927,7 @@ static void domnode_prefix_write(const Object& obj, const Variant& value) {
   switch (nodep->type) {
   case XML_ELEMENT_NODE:
     nsnode = nodep;
-    // fall through
+    [[fallthrough]];
   case XML_ATTRIBUTE_NODE:
     if (nsnode == nullptr) {
       nsnode = nodep->parent;

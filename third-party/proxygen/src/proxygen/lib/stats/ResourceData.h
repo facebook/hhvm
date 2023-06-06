@@ -159,7 +159,12 @@ struct ResourceData : public PeriodicStatsDataBase {
     return ((double)usedMemBytesAll_) / totalMemBytes_ * 100;
   }
 
-  // Gets the used memory (0-1.0) of the system as a ratio
+  // Gets the used total memory (0-1.0) of the system as a ratio
+  double getUsedMemAllRatio() const {
+    return ((double)usedMemBytesAll_) / totalMemBytes_;
+  }
+
+  // Gets the used anonymous memory (0-1.0) of the system as a ratio
   double getUsedMemRatio() const {
     return ((double)usedMemBytes_) / totalMemBytes_;
   }

@@ -227,9 +227,14 @@ module Full = struct
     in
     (desugared_tparams, other_tparams)
 
-  let rec is_supportdyn_mixed env t =
+  let rec is_supportdyn_mixed : type a. penv -> a ty -> bool =
+   fun env t ->
     match get_node t with
     | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv env) ->
+      is_supportdyn_mixed env ty
+    | Tapply ((_, n), [ty])
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv env) ->
       is_supportdyn_mixed env ty
@@ -598,6 +603,18 @@ module Full = struct
     let doc = Concat [prefix; doc] in
     (fuel, doc)
 
+  let rec is_open_mixed_decl penv t =
+    match get_node t with
+    | Tapply ((_, n), [ty])
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv penv) ->
+      is_open_mixed_decl penv ty
+    | Toption t ->
+      (match get_node t with
+      | Tnonnull -> true
+      | _ -> false)
+    | _ -> false
+
   (* Prints a decl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
   let rec decl_ty ~fuel : _ -> _ -> _ -> decl_ty -> Fuel.t * Doc.t =
@@ -662,7 +679,13 @@ module Full = struct
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
     | Tshape (_, shape_kind, fdm) ->
-      tshape ~fuel ~open_mixed:false k to_doc shape_kind fdm
+      tshape
+        ~fuel
+        ~open_mixed:(is_open_mixed_decl penv shape_kind)
+        k
+        to_doc
+        shape_kind
+        fdm
 
   (* TODO (T86471586): Display capabilities that are decls for functions *)
   and fun_decl_implicit_params ~fuel _to_doc _st _penv _tparams _implicit_param

@@ -613,7 +613,7 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
         advance(die->context->addrSize);
         break;
       }
-      // fallthrough
+      [[fallthrough]];
     case DW_FORM_line_strp: // fallthrough
     case DW_FORM_sec_offset: // fallthrough
     case DW_FORM_strp: // fallthrough

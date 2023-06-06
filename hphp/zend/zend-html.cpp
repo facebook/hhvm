@@ -750,8 +750,7 @@ char *string_html_encode(const char *input, int &len,
         p++;
         break;
       }
-
-      // fallthrough
+      [[fallthrough]];
     default: {
       if (LIKELY(c < 0x80)) {
         *q++ = c;

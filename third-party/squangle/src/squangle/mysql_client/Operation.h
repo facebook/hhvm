@@ -379,7 +379,7 @@ class ConnectionOptions {
       CertValidatorCallback callback,
       const void* context,
       bool opPtrAsContext) {
-    certValidationCallback_ = callback;
+    certValidationCallback_ = std::move(callback);
     opPtrAsCertValidationContext_ = opPtrAsContext;
     certValidationContext_ = opPtrAsCertValidationContext_ ? nullptr : context;
     return *this;
@@ -865,7 +865,7 @@ class ConnectOperation : public Operation {
   ~ConnectOperation() override;
 
   void setCallback(ConnectCallback cb) {
-    connect_callback_ = cb;
+    connect_callback_ = std::move(cb);
   }
 
   const std::string& database() const {
@@ -1341,7 +1341,7 @@ class MultiQueryStreamOperation : public FetchOperation {
 
   template <typename C>
   void setCallback(C cb) {
-    stream_callback_ = cb;
+    stream_callback_ = std::move(cb);
   }
 
  private:
@@ -1388,7 +1388,7 @@ class QueryOperation : public FetchOperation {
   ~QueryOperation() override = default;
 
   void setCallback(QueryCallback cb) {
-    buffered_query_callback_ = cb;
+    buffered_query_callback_ = std::move(cb);
   }
 
   // Steal all rows.  Only valid if there is no callback.  Inefficient
@@ -1484,7 +1484,7 @@ class MultiQueryOperation : public FetchOperation {
   // every RowBatch and once, with nullptr for the RowBatch,
   // indicating the query is complete.
   void setCallback(MultiQueryCallback cb) {
-    buffered_query_callback_ = cb;
+    buffered_query_callback_ = std::move(cb);
   }
 
   // Steal all rows. Only valid if there is no callback. Inefficient
@@ -1568,7 +1568,7 @@ class SpecialOperation : public Operation {
   explicit SpecialOperation(ConnectionProxy&& conn)
       : Operation(std::move(conn)) {}
   void setCallback(SpecialOperationCallback callback) {
-    callback_ = callback;
+    callback_ = std::move(callback);
   }
 
  protected:

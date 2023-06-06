@@ -345,13 +345,14 @@ void Operation::setObserverCallback(ObserverCallback obs_cb) {
   CHECK_THROW(state_ == OperationState::Unstarted, db::OperationStateException);
   // allow more callbacks to be set
   if (observer_callback_) {
-    auto old_obs_cb = observer_callback_;
-    observer_callback_ = [obs = obs_cb, old_obs = old_obs_cb](Operation& op) {
+    auto old_dbs_cb = std::move(observer_callback_);
+    observer_callback_ = [obs = std::move(obs_cb),
+                          old_obs = std::move(old_dbs_cb)](Operation& op) {
       obs(op);
       old_obs(op);
     };
   } else {
-    observer_callback_ = obs_cb;
+    observer_callback_ = std::move(obs_cb);
   }
 }
 
@@ -518,7 +519,8 @@ ConnectOperation* ConnectOperation::setCertValidationCallback(
     bool opPtrAsContext) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
-  conn_options_.setCertValidationCallback(callback, context, opPtrAsContext);
+  conn_options_.setCertValidationCallback(
+      std::move(callback), context, opPtrAsContext);
   return this;
 }
 

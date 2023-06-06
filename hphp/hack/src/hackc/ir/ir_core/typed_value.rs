@@ -44,6 +44,27 @@ impl TypedValue {
             TypedValue::Vec(_) => BaseType::Vec.into(),
         }
     }
+
+    pub fn get_dict(&self) -> Option<&DictValue> {
+        match self {
+            TypedValue::Dict(dv) => Some(dv),
+            _ => None,
+        }
+    }
+
+    pub fn get_int(&self) -> Option<i64> {
+        match self {
+            TypedValue::Int(num) => Some(*num),
+            _ => None,
+        }
+    }
+
+    pub fn get_string(&self) -> Option<UnitBytesId> {
+        match self {
+            TypedValue::String(str) => Some(*str),
+            _ => None,
+        }
+    }
 }
 
 impl<'a> From<TypedValue> for Constant<'a> {

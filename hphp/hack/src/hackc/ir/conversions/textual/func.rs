@@ -1417,7 +1417,10 @@ pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Re
     }
 }
 
-pub(crate) fn lookup_constant_string(func: &Func<'_>, mut vid: ValueId) -> Option<ir::UnitBytesId> {
+pub(crate) fn lookup_constant<'a, 'b>(
+    func: &'a Func<'b>,
+    mut vid: ValueId,
+) -> Option<&'a ir::Constant<'b>> {
     use ir::FullInstrId;
     loop {
         match vid.full() {
@@ -1429,19 +1432,27 @@ pub(crate) fn lookup_constant_string(func: &Func<'_>, mut vid: ValueId) -> Optio
                     Instr::Special(Special::Copy(copy)) => {
                         vid = *copy;
                     }
+                    // SetL's output is just its input, updating the local is a
+                    // side-effect. Follow the input and try again.
+                    Instr::Hhbc(Hhbc::SetL(input_vid, _, _)) => {
+                        vid = *input_vid;
+                    }
                     _ => return None,
                 }
             }
             FullInstrId::Constant(cid) => {
-                let constant = func.constant(cid);
-                match constant {
-                    Constant::String(id) => return Some(*id),
-                    _ => return None,
-                }
+                return Some(func.constant(cid));
             }
             FullInstrId::None => {
                 return None;
             }
         }
+    }
+}
+
+pub(crate) fn lookup_constant_string(func: &Func<'_>, vid: ValueId) -> Option<ir::UnitBytesId> {
+    match lookup_constant(func, vid) {
+        Some(Constant::String(id)) => Some(*id),
+        _ => None,
     }
 }

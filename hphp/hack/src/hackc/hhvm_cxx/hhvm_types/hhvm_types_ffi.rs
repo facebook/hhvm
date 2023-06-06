@@ -157,6 +157,7 @@ pub mod ffi {
 use ffi::type_flags_to_string_ffi;
 pub use ffi::Attr;
 pub use ffi::TypeConstraintFlags;
+pub use ffi::TypeStructureKind;
 
 impl Default for TypeConstraintFlags {
     fn default() -> Self {
@@ -226,6 +227,12 @@ impl SubAssign for TypeConstraintFlags {
 impl From<&TypeConstraintFlags> for u16 {
     fn from(r: &TypeConstraintFlags) -> Self {
         r.repr
+    }
+}
+
+impl From<TypeStructureKind> for i64 {
+    fn from(r: TypeStructureKind) -> Self {
+        r.repr as i64
     }
 }
 

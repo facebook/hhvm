@@ -10,13 +10,16 @@ use crate::TypedValue;
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum TypeStruct {
     Unresolved(ClassId),
+    Null,
+    Nonnull,
 }
 
 impl TypeStruct {
     pub fn into_typed_value(self, strings: &StringInterner) -> TypedValue {
+        let kind_key = ArrayKey::String(strings.intern_str("kind"));
+
         match self {
             TypeStruct::Unresolved(cid) => {
-                let kind_key = ArrayKey::String(strings.intern_str("kind"));
                 let kind = TypedValue::Int(TypeStructureKind::T_unresolved.repr as i64);
                 let classname_key = ArrayKey::String(strings.intern_str("classname"));
                 let name = TypedValue::String(cid.id);
@@ -26,6 +29,69 @@ impl TypeStruct {
                         .collect(),
                 )
             }
+            TypeStruct::Null => {
+                let kind = TypedValue::Int(TypeStructureKind::T_null.repr as i64);
+                TypedValue::Dict([(kind_key, kind)].into_iter().collect())
+            }
+            TypeStruct::Nonnull => {
+                let kind = TypedValue::Int(TypeStructureKind::T_nonnull.repr as i64);
+                TypedValue::Dict([(kind_key, kind)].into_iter().collect())
+            }
         }
+    }
+
+    pub fn try_from_typed_value(tv: &TypedValue, strings: &StringInterner) -> Option<TypeStruct> {
+        let dv = tv.get_dict()?;
+        let kind_key = ArrayKey::String(strings.intern_str("kind"));
+        let kind = dv.get(&kind_key)?.get_int()?;
+        if kind == TypeStructureKind::T_null.into() {
+            Some(TypeStruct::Null)
+        } else if kind == TypeStructureKind::T_nonnull.into() {
+            Some(TypeStruct::Nonnull)
+        } else if kind == TypeStructureKind::T_unresolved.into() {
+            let classname_key = ArrayKey::String(strings.intern_str("classname"));
+            let classname = dv.get(&classname_key)?.get_string()?;
+            let classname = strings.lookup_bytes_or_none(classname)?;
+            let cid = ClassId::from_bytes(&classname, strings);
+            Some(TypeStruct::Unresolved(cid))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::StringInterner;
+
+    #[test]
+    fn test1() {
+        let strings = StringInterner::default();
+        assert_eq!(
+            TypeStruct::try_from_typed_value(
+                &TypeStruct::Null.into_typed_value(&strings),
+                &strings
+            ),
+            Some(TypeStruct::Null)
+        );
+
+        assert_eq!(
+            TypeStruct::try_from_typed_value(
+                &TypeStruct::Nonnull.into_typed_value(&strings),
+                &strings
+            ),
+            Some(TypeStruct::Nonnull)
+        );
+
+        let classname = strings.intern_str("ExampleClass");
+        let class_ts = TypeStruct::Unresolved(ClassId::new(classname));
+        assert_eq!(
+            TypeStruct::try_from_typed_value(
+                &class_ts.clone().into_typed_value(&strings),
+                &strings
+            ),
+            Some(class_ts)
+        );
     }
 }

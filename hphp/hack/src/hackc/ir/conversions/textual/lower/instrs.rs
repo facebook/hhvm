@@ -17,6 +17,7 @@ use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
+use ir::type_struct::TypeStruct;
 use ir::BareThisOp;
 use ir::Call;
 use ir::Constant;
@@ -44,6 +45,7 @@ use itertools::Itertools;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
+use crate::func::lookup_constant;
 use crate::func::lookup_constant_string;
 use crate::func::FuncInfo;
 use crate::hack;
@@ -588,8 +590,13 @@ impl TransformInstr for LowerInstrs<'_> {
                     TypeStructResolveOp::Resolve => 1,
                     _ => unreachable!(),
                 };
-                let op = builder.emit_constant(Constant::Int(op));
-                builder.hhbc_builtin(builtin, &[obj, ts, op], loc)
+                match rewrite_null_type_check(builder, obj, ts, loc) {
+                    Some(null_check) => null_check,
+                    None => {
+                        let op = builder.emit_constant(Constant::Int(op));
+                        builder.hhbc_builtin(builtin, &[obj, ts, op], loc)
+                    }
+                }
             }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => match *self.func_info {
                 FuncInfo::Method(ref mi) => match mi.is_static {
@@ -837,4 +844,27 @@ fn rewrite_nullsafe_call(
 fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
     let name = strings.intern_str(format!("iter{}", id.idx));
     LocalId::Named(name)
+}
+
+/// Hack's `is null`, `is nonnull` are encoded as full is_type_struct_c type-checks. This
+/// transformation detects if is_type_struct_c is a null-check and rewrites it accordingly.
+fn rewrite_null_type_check(
+    builder: &mut FuncBuilder<'_>,
+    obj: ValueId,
+    typestruct: ValueId,
+    loc: LocId,
+) -> Option<Instr> {
+    let typestruct = lookup_constant(&builder.func, typestruct)?;
+    let typestruct = match typestruct {
+        Constant::Array(tv) => TypeStruct::try_from_typed_value(tv, &builder.strings)?,
+        _ => return None,
+    };
+    match typestruct {
+        TypeStruct::Null => Some(builder.hhbc_builtin(hack::Hhbc::IsTypeNull, &[obj], loc)),
+        TypeStruct::Nonnull => {
+            let is_null = builder.emit_hhbc_builtin(hack::Hhbc::IsTypeNull, &[obj], loc);
+            Some(builder.hhbc_builtin(hack::Hhbc::Not, &[is_null], loc))
+        }
+        _ => None,
+    }
 }

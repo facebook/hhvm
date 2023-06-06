@@ -14,15 +14,6 @@ namespace {
 
   const int FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS;
 
-  const int XHPROF_FLAGS_NO_BUILTINS;
-  const int XHPROF_FLAGS_CPU;
-  const int XHPROF_FLAGS_MEMORY;
-  const int XHPROF_FLAGS_VTSC;
-  const int XHPROF_FLAGS_TRACE;
-  const int XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
-  const int XHPROF_FLAGS_MALLOC;
-  const int XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY;
-
   const int SETPROFILE_FLAGS_ENTERS;
   const int SETPROFILE_FLAGS_EXITS;
   const int SETPROFILE_FLAGS_DEFAULT;
@@ -86,25 +77,6 @@ namespace {
   function fb_enable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_disable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_enable(
-    int $flags = 0,
-    HH\FIXME\MISSING_PARAM_TYPE $args = null,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_network_enable(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_sample_enable(): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
-  function xhprof_sample_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_output_compression(
     bool $new_value,

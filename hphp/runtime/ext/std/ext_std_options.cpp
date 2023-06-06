@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <time.h>
 #include <algorithm>
 #include <vector>
 
@@ -1176,6 +1177,19 @@ void StandardExtension::initOptions() {
   HHVM_FE(set_pre_timeout_handler);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
+
+#ifdef CLOCK_REALTIME
+  HHVM_RC_INT_SAME(CLOCK_REALTIME);
+#endif
+#ifdef CLOCK_MONOTONIC
+  HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
+#endif
+#ifdef CLOCK_PROCESS_CPUTIME_ID
+  HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
+#endif
 
   loadSystemlib("std_options");
 }

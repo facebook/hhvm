@@ -53,11 +53,6 @@ testing and some alternative PHP implementation.
 - fb_disable_code_coverage
 - HH\disable_code_coverage_with_frequency
 
-- xhprof_enable
-- xhprof_disable
-- xhprof_sample_enable
-- xhprof_sample_disable
-
 <h2>New Server Variables</h2>
 
 $_SERVER['THREAD_TYPE'] can be:

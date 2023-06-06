@@ -58,13 +58,13 @@ struct CLISession {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
-    execute_command_line_begin(1, argv, 0);
+    execute_command_line_begin(1, argv);
   }
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
     DebuggerHook::detach();
-    execute_command_line_end(0, false, nullptr);
+    execute_command_line_end(false, nullptr);
   }
 
   CLISession(const CLISession&) = delete;

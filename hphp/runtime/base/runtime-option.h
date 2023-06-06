@@ -673,7 +673,6 @@ struct RuntimeOption {
   static uint32_t StatsSlotDuration;
   static uint32_t StatsMaxSlot;
 
-  static bool EnableHotProfiler;
   static int32_t ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;
   static int32_t ProfilerMaxTraceBuffer;

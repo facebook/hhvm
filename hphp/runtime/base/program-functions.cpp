@@ -62,7 +62,6 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
-#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
@@ -209,7 +208,6 @@ struct ProgramOptions {
   std::vector<std::string> args;
   std::string buildId;
   std::string instanceId;
-  int xhprofFlags;
   std::string show;
   std::string parse;
   int vsDebugPort;
@@ -687,7 +685,6 @@ void init_command_line_session(int argc, char** argv) {
 void
 init_command_line_globals(
   int argc, char** argv, char** envp,
-  int xhprof,
   const std::map<std::string, std::string>& serverVariables,
   const std::map<std::string, std::string>& envVariables
 ) {
@@ -758,10 +755,6 @@ init_command_line_globals(
     php_global_set(s__SERVER, std::move(serverArr));
   }
 
-  if (xhprof) {
-    HHVM_FN(xhprof_enable)(xhprof, null_array);
-  }
-
   if (RuntimeOption::RequestTimeoutSeconds) {
     RID().setTimeout(RuntimeOption::RequestTimeoutSeconds);
   }
@@ -774,23 +767,15 @@ init_command_line_globals(
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
 
-void execute_command_line_begin(int argc, char **argv, int xhprof) {
+void execute_command_line_begin(int argc, char **argv) {
   init_command_line_session(argc, argv);
-  init_command_line_globals(argc, argv, environ, xhprof,
+  init_command_line_globals(argc, argv, environ,
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
 }
 
-void execute_command_line_end(int xhprof, bool coverage, const char *program,
+void execute_command_line_end(bool coverage, const char *program,
                               bool runCleanup) {
-  if (xhprof) {
-    Variant profileData = HHVM_FN(xhprof_disable)();
-    if (!profileData.isNull()) {
-      HHVM_FN(var_dump)(Variant::attach(
-        HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)())
-      ));
-    }
-  }
   auto& ti = RI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
@@ -1056,7 +1041,7 @@ static void init_repo_file() {
   RepoFile::init(RO::RepoPath);
 }
 
-static int start_server(const std::string &username, int xhprof) {
+static int start_server(const std::string &username) {
   if (!registrationComplete) {
     folly::SingletonVault::singleton()->registrationComplete();
     registrationComplete = true;
@@ -1134,10 +1119,6 @@ static int start_server(const std::string &username, int xhprof) {
   // Create the HttpServer before any warmup requests to properly
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
-
-  if (xhprof) {
-    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
-  }
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     BootStats::Block timer("concurrentWaitForEnd", true);
@@ -1498,8 +1479,6 @@ static int execute_program_impl(int argc, char** argv) {
      "unique identifier of compiled server code")
     ("instance-id", value<std::string>(&po.instanceId),
      "unique identifier of server instance")
-    ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
-     "Set XHProf flags")
     ("vsDebugPort", value<int>(&po.vsDebugPort)->default_value(-1),
       "Debugger TCP port to listen on for the VS Code debugger extension")
     ("vsDebugDomainSocketPath",
@@ -2154,7 +2133,7 @@ static int execute_program_impl(int argc, char** argv) {
       while (true) {
         try {
           assertx(po.debugger_options.fileName == file);
-          execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+          execute_command_line_begin(new_argc, new_argv);
           // Set the proxy for this thread to be the localProxy we just
           // created. If we're script debugging, this will be the proxy that
           // does all of our work. If we're remote debugging, this proxy will
@@ -2168,9 +2147,9 @@ static int execute_program_impl(int argc, char** argv) {
           }
           Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
-          execute_command_line_end(po.xhprofFlags, true, file.c_str());
+          execute_command_line_end(true, file.c_str());
         } catch (const Eval::DebuggerRestartException& e) {
-          execute_command_line_end(0, false, nullptr);
+          execute_command_line_end(false, nullptr);
 
           if (!e.m_args->empty()) {
             file = e.m_args->at(0);
@@ -2181,7 +2160,7 @@ static int execute_program_impl(int argc, char** argv) {
           }
           restart = true;
         } catch (const Eval::DebuggerClientExitException& e) {
-          execute_command_line_end(0, false, nullptr);
+          execute_command_line_end(false, nullptr);
           break; // end user quitting debugger
         }
       }
@@ -2205,7 +2184,7 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
 
       for (int i = 0; i < po.count; i++) {
-        execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+        execute_command_line_begin(new_argc, new_argv);
         ret = 1;
         if (po.mode == "eval") {
           String code{"<?hh " + file};
@@ -2219,7 +2198,7 @@ static int execute_program_impl(int argc, char** argv) {
           jit::mcgen::joinWorkerThreads();
           jit::tc::dump();
         }
-        execute_command_line_end(po.xhprofFlags, true, file.c_str());
+        execute_command_line_end(true, file.c_str());
 
         if (i < po.count-1) {
           // If we're running an unit test with multiple runs, provide
@@ -2240,7 +2219,7 @@ static int execute_program_impl(int argc, char** argv) {
 
   if (po.mode == "daemon" || po.mode == "server") {
     if (!po.user.empty()) RuntimeOption::ServerUser = po.user;
-    return start_server(RuntimeOption::ServerUser, po.xhprofFlags);
+    return start_server(RuntimeOption::ServerUser);
   }
 
   if (po.mode == "replay" && !po.args.empty()) {

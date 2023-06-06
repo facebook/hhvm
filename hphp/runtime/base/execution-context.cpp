@@ -45,7 +45,6 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/apc-stats.h"
@@ -804,10 +803,6 @@ void ExecutionContext::handleError(const std::string& msg,
 
     if (!handled) {
       recordLastError(ee, errnum);
-    }
-
-    if (g_system_profiler) {
-      g_system_profiler->errorCallBack(ee, errnum, msg);
     }
   }
 

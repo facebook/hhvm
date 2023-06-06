@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
-#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
@@ -69,13 +68,6 @@ const StaticString
   s_reified_generics_var("0ReifiedGenerics");
 
 RDS_LOCAL_NO_CHECK(uint64_t, rl_func_sequence_id){0};
-
-// implemented in runtime/ext/ext_hotprofiler.cpp
-extern void begin_profiler_frame(Profiler *p,
-                                 const char *symbol);
-extern void end_profiler_frame(Profiler *p,
-                               const TypedValue *retval,
-                               const char *symbol);
 
 void EventHook::Enable() {
   setSurpriseFlag(EventHookFlag);
@@ -596,27 +588,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   return true;
 }
 
-const char* EventHook::GetFunctionNameForProfiler(const Func* func,
-                                                  int funcType) {
-  const char* name;
-  switch (funcType) {
-    case EventHook::NormalFunc:
-      name = func->fullName()->data();
-      if (name[0] == '\0') {
-        // We're evaling some code for internal purposes, most
-        // likely getting the default value for a function parameter
-        name = "{internal}";
-      }
-      break;
-    case EventHook::Eval:
-      name = "_";
-      break;
-    default:
-      not_reached();
-  }
-  return name;
-}
-
 static bool shouldLog(const Func* /*func*/) {
   return RID().logFunctionCalls();
 }
@@ -653,12 +624,6 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
       sample.setInt("func_type", funcType);
       sample.setInt("is_resume", isResume);
       logCommon(sample, ar, flags);
-    }
-    auto profiler = RequestInfo::s_requestInfo->m_profiler;
-    if (profiler != nullptr &&
-        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
-      begin_profiler_frame(profiler,
-                           GetFunctionNameForProfiler(ar->func(), funcType));
     }
   }
 
@@ -718,17 +683,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // User profiler
   if (flags & EventHookFlag) {
-    auto profiler = RequestInfo::s_requestInfo->m_profiler;
-    if (profiler != nullptr &&
-        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
-      // NB: we don't have a function type flag to match what we got in
-      // onFunctionEnter. That's okay, though... we tolerate this in
-      // TraceProfiler.
-      end_profiler_frame(profiler,
-                         retval,
-                         GetFunctionNameForProfiler(ar->func(), NormalFunc));
-    }
-
     if (shouldRunUserProfiler(ar->func())) {
       if (RequestInfo::s_requestInfo->m_pendingException != nullptr) {
         // Avoid running PHP code when exception from destructor is pending.

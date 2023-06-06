@@ -100,7 +100,6 @@ const StaticString
   s_HHVM_JIT("HHVM_JIT"),
   s_HHVM_ARCH("HHVM_ARCH"),
   s_HPHP_SERVER("HPHP_SERVER"),
-  s_HPHP_HOTPROFILER("HPHP_HOTPROFILER"),
   s_HTTP_HOST("HTTP_HOST"),
   s_CONTENT_TYPE("CONTENT_TYPE"),
   s_CONTENT_LENGTH("CONTENT_LENGTH"),
@@ -172,7 +171,6 @@ static void PrepareEnv(Array& env, Transport *transport) {
 
   if (!is_any_cli_mode()) {
     env.set(s_HPHP_SERVER, 1);
-    env.set(s_HPHP_HOTPROFILER, 1);
   }
 
   // Do this last so it can overwrite all the previous settings

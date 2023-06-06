@@ -1280,7 +1280,6 @@ bool RuntimeOption::EnablePregErrorLog = true;
 
 bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
-bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
 int RuntimeOption::ProfilerMaxTraceBuffer = 0;
@@ -2766,8 +2765,6 @@ void RuntimeOption::Load(
                  12 * 6); // 12 hours
     StatsSlotDuration = std::max(1u, StatsSlotDuration);
     StatsMaxSlot = std::max(2u, StatsMaxSlot);
-    Config::Bind(EnableHotProfiler, ini, config, "Stats.EnableHotProfiler",
-                 true);
     Config::Bind(ProfilerTraceBuffer, ini, config, "Stats.ProfilerTraceBuffer",
                  2000000);
     Config::Bind(ProfilerTraceExpansion, ini, config,

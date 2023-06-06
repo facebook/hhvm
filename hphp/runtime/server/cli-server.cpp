@@ -781,8 +781,7 @@ const StaticString
   s_serverVariablesIni("hhvm.server_variables"),
   s_envVariablesIni("hhvm.env_variables");
 
-Array init_cli_globals(int argc, char** argv, int xhprof, Array& ini,
-                       char** envp) {
+Array init_cli_globals(int argc, char** argv, Array& ini, char** envp) {
   auto make_map = [] (const Variant& v) {
     std::map<std::string,std::string> ret;
     if (!v.isArray()) return ret;
@@ -823,8 +822,7 @@ Array init_cli_globals(int argc, char** argv, int xhprof, Array& ini,
     }
   }
 
-  init_command_line_globals(argc, argv, envp, xhprof, envVariables,
-                            serverVariables);
+  init_command_line_globals(argc, argv, envp, envVariables, serverVariables);
 
   return retEnv;
 }
@@ -942,12 +940,10 @@ void CLIWorker::doJob(int client) {
     RemoteFile cli_err(client, "stderr", "w");
     RemoteFile cli_afdt(client, "afdt", "rw");
 
-    int xhprofFlags;
     std::vector<std::string> args;
     std::vector<std::string> env;
-    cli_read(client, xhprofFlags, args, env);
+    cli_read(client, args, env);
 
-    FTRACE(2, "CLIWorker::doJob({}): xhprofFlags = {}\n", client, xhprofFlags);
     FTRACE(2, "CLIWorker::doJob({}): args = \n", client);
 
     auto buf = std::make_unique<char*[]>(args.size());
@@ -995,7 +991,7 @@ void CLIWorker::doJob(int client) {
 
     {
       SCOPE_EXIT {
-        execute_command_line_end(xhprofFlags, true, args[0].c_str(), false);
+        execute_command_line_end(true, args[0].c_str(), false);
         envArr.detach();
         tl_env = nullptr;
         LightProcess::setThreadLocalAfdtOverride(nullptr);
@@ -1045,7 +1041,7 @@ void CLIWorker::doJob(int client) {
         cli_write(client, "version_ok");
       }
 
-      envArr = init_cli_globals(args.size(), buf.get(), xhprofFlags, ini,
+      envArr = init_cli_globals(args.size(), buf.get(), ini,
                                 envp.get());
       tl_env = &envArr;
 
@@ -1758,7 +1754,7 @@ Optional<int> run_client(const char* sock_path,
     cli_write_fd(fd, delegate);
 
     FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
-    cli_write(fd, 0, args, env_vec);
+    cli_write(fd, args, env_vec);
     return cli_process_command_loop(fd, ignore_bg);
   } catch (const Exception& ex) {
     Logger::Error(

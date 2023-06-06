@@ -121,9 +121,6 @@ struct RequestInfo {
 
   RequestInjectionData m_reqInjectionData;
 
-  /* This pointer is set by ProfilerFactory. */
-  Profiler* m_profiler{nullptr};
-
   CodeCoverage m_coverage;
 
   /* Set by DebuggerHook::attach(). */

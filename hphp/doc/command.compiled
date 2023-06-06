@@ -88,7 +88,3 @@ Extra texts to add to front of each line of logging.
 
 Specifies a version number or an arbitrary string that admin server's build-id
 can return. Used for version tracking.
-
-= --xhprof-level
-
-Sets the XHProf run flags.

@@ -41,11 +41,11 @@ inline void evalCodeForCppExt(const String& code_str) {
 
 #define DECLARE_TEST_FUNCTIONS(s)                                       \
   char *argv[] = { const_cast<char*>(which.c_str()), nullptr };         \
-  execute_command_line_begin(1, argv, false);                           \
+  execute_command_line_begin(1, argv);                                  \
   evalCodeForCppExt(s);                                                 \
                                                                         \
   SCOPE_EXIT {                                                          \
-    execute_command_line_end(0, false, which.c_str());                  \
+    execute_command_line_end(false, which.c_str());                     \
   }
 
 ///////////////////////////////////////////////////////////////////////////////

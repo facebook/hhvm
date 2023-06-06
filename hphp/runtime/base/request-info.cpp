@@ -176,8 +176,6 @@ void RequestInfo::onSessionExit() {
 //////////////////////////////////////////////////////////////////////
 
 void raise_infinite_recursion_error() {
-  // Reset profiler otherwise it might recurse further causing segfault.
-  RI().m_profiler = nullptr;
   raise_error("infinite recursion detected");
 }
 

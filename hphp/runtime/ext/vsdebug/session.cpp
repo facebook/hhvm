@@ -195,7 +195,7 @@ void DebuggerSession::runDummy() {
 
   bool hookAttached = false;
   hphp_session_init(Treadmill::SessionKind::Vsdebug);
-  init_command_line_globals(0, nullptr, environ, 0,
+  init_command_line_globals(0, nullptr, environ,
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
   SCOPE_EXIT {

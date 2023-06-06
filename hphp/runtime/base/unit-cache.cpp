@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -1712,9 +1711,6 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
         eContext->m_evaledFiles[cunit.unit->filepath()] =
           {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec),
            FileLoadFlags::kDup};
-      }
-      if (g_system_profiler) {
-        g_system_profiler->fileLoadCallBack(path->toCppString());
       }
       DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
     }

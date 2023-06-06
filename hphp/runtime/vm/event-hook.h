@@ -186,8 +186,6 @@ private:
                              EventHook::Source);
 
   static bool RunInterceptHandler(ActRec* ar);
-  static const char* GetFunctionNameForProfiler(const Func* func,
-                                                int funcType);
 
   static inline void ringbufferEnter(const ActRec* ar) {
     if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {

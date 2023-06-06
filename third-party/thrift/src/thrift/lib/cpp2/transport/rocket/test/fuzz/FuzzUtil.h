@@ -120,7 +120,7 @@ void testServerOneInput(const uint8_t* Data, size_t Size) {
   auto* const sockPtr = sock.get();
   apache::thrift::ThriftServer server;
   server.setInterface(std::make_shared<FakeProcessorFactory>());
-  auto worker = apache::thrift::Cpp2Worker::create(&server, nullptr, &evb);
+  auto worker = apache::thrift::Cpp2Worker::create(&server, &evb);
   std::vector<std::unique_ptr<apache::thrift::rocket::SetupFrameHandler>> v;
   folly::SocketAddress address;
   MemoryTracker memoryTracker;

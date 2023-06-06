@@ -170,11 +170,10 @@ void HTTP2RoutingHandler::handleConnection(
     Cpp2ConnContext connContext(
         peerAddress,
         sock.get(),
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        worker.get());
+        nullptr /* manager */,
+        nullptr /* peerCert */,
+        nullptr /* clientIdentityHook */,
+        worker.get() /* worker */);
     connContext.setTransportType(Cpp2ConnContext::TransportType::HTTP2);
     logSetupConnectionEventsOnce(logConnectionOnce, connContext);
   }

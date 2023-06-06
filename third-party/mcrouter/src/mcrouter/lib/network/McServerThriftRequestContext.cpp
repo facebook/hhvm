@@ -33,7 +33,6 @@ McServerThriftRequestContext::McServerThriftRequestContext(
           &peerAddress_,
           transport,
           nullptr /* manager */,
-          nullptr /* duplexChannel */,
           nullptr /* peerCert */,
           McSSLUtil::getClientIdentityHook(),
           &gDummyCpp2Worker),

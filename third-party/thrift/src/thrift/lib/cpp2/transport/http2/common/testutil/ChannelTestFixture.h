@@ -65,7 +65,7 @@ class ChannelTestFixture : public testing::Test {
       std::make_unique<folly::EventBase>()};
   apache::thrift::ThriftServer server_;
   std::shared_ptr<apache::thrift::Cpp2Worker> worker_{
-      apache::thrift::Cpp2Worker::create(&server_, nullptr, eventBase_.get())};
+      apache::thrift::Cpp2Worker::create(&server_, eventBase_.get())};
   std::unique_ptr<FakeResponseHandler> responseHandler_;
 
   std::string toString(folly::IOBuf* buf);

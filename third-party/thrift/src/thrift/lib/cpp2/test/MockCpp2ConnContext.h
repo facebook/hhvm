@@ -29,7 +29,7 @@ class MockCpp2ConnContext : public apache::thrift::Cpp2ConnContext {
       const std::shared_ptr<X509> peerCert = nullptr,
       apache::thrift::ClientIdentityHook clientIdentityHook = nullptr)
       : apache::thrift::Cpp2ConnContext(
-            address, nullptr, nullptr, nullptr, peerCert, clientIdentityHook) {
+            address, nullptr, nullptr, peerCert, clientIdentityHook) {
     transport_ = std::make_unique<folly::test::MockAsyncTransport>();
     EXPECT_CALL(*this, getTransport())
         .WillRepeatedly(testing::Return(transport_.get()));

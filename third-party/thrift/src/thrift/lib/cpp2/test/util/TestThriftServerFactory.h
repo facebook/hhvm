@@ -48,10 +48,6 @@ struct TestThriftServerFactory : public TestServerFactory {
       server->setIdleTimeout(std::chrono::milliseconds(idleTimeoutMs_));
     }
 
-    if (duplex_) {
-      server->setDuplex(true);
-    }
-
     if (serverEventHandler_) {
       server->setServerEventHandler(serverEventHandler_);
     }
@@ -76,16 +72,10 @@ struct TestThriftServerFactory : public TestServerFactory {
     return *this;
   }
 
-  TestThriftServerFactory& duplex(bool duplex) {
-    duplex_ = duplex;
-    return *this;
-  }
-
  private:
   bool useSimpleThreadManager_{true};
   std::function<void(BaseThriftServer&)> setupFunction_;
   uint32_t idleTimeoutMs_{0};
-  bool duplex_{false};
 };
 
 } // namespace thrift

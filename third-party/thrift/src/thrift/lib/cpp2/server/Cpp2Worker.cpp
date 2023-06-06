@@ -129,12 +129,8 @@ void Cpp2Worker::onNewConnection(
           }
         }
       }
-      if (!getServer()->isDuplex()) {
-        new TransportPeekingManager(
-            shared_from_this(), *addr, tinfo, server_, std::move(sock));
-      } else {
-        handleHeader(std::move(sock), addr, tinfo);
-      }
+      new TransportPeekingManager(
+          shared_from_this(), *addr, tinfo, server_, std::move(sock));
       break;
     default:
       LOG(ERROR) << "Unsupported Secure Transport Type";
@@ -153,7 +149,7 @@ void Cpp2Worker::handleHeader(
 
   auto thriftTransport = createThriftTransport(std::move(sock));
   auto connection = std::make_shared<Cpp2Connection>(
-      std::move(thriftTransport), addr, shared_from_this(), nullptr);
+      std::move(thriftTransport), addr, shared_from_this());
   Acceptor::addConnection(connection.get());
   connection->addConnection(connection, tinfo);
   connection->start();
@@ -208,31 +204,6 @@ folly::AsyncSocket::UniquePtr Cpp2Worker::makeNewAsyncSocket(
         base, folly::NetworkSocket::fromFd(fd), peerAddress));
   }
   return Acceptor::makeNewAsyncSocket(base, fd, peerAddress);
-}
-
-void Cpp2Worker::useExistingChannel(
-    const std::shared_ptr<HeaderServerChannel>& serverChannel) {
-  folly::SocketAddress address;
-
-  auto conn = std::make_shared<Cpp2Connection>(
-      nullptr, &address, shared_from_this(), serverChannel);
-  Acceptor::getConnectionManager()->addConnection(conn.get(), false);
-  conn->addConnection(conn);
-
-  conn->start();
-}
-
-void Cpp2Worker::stopDuplex(std::shared_ptr<ThriftServer> myServer) {
-  // They better have given us the correct ThriftServer
-  DCHECK(server_ == myServer.get());
-
-  // This does not really fully drain everything but at least
-  // prevents the connections from accepting new requests
-  wangle::Acceptor::drainAllConnections();
-
-  // Capture a shared_ptr to our ThriftServer making sure it will outlive us
-  // Otherwise our raw pointer to it (server_) will be jeopardized.
-  duplexServer_ = myServer;
 }
 
 void Cpp2Worker::updateSSLStats(

@@ -42,7 +42,7 @@ CoreTestFixture::~CoreTestFixture() {
 
 std::unique_ptr<Cpp2ConnContext> CoreTestFixture::newCpp2ConnContext() {
   return std::make_unique<Cpp2ConnContext>(
-      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, worker_.get());
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker_.get());
 }
 
 void CoreTestFixture::runInEventBaseThread(folly::Function<void()> test) {

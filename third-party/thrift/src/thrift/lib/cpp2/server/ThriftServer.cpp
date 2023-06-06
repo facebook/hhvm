@@ -236,14 +236,6 @@ ThriftServer::ThriftServer(const ThriftServerInitialConfig& initialConfig)
   initializeDefaults();
 }
 
-ThriftServer::ThriftServer(
-    const std::shared_ptr<HeaderServerChannel>& serverChannel)
-    : ThriftServer() {
-  serverChannel_ = serverChannel;
-  setNumIOWorkerThreads(1);
-  setIdleTimeout(std::chrono::milliseconds(0));
-}
-
 void ThriftServer::initializeDefaults() {
   if (FLAGS_thrift_ssl_policy == "required") {
     sslPolicy_ = SSLPolicy::REQUIRED;
@@ -299,15 +291,6 @@ void ThriftServer::initializeDefaults() {
 
 ThriftServer::~ThriftServer() {
   tracker_.reset();
-  if (duplexWorker_) {
-    // usually ServerBootstrap::stop drains the workers, but ServerBootstrap
-    // doesn't know about duplexWorker_
-    duplexWorker_->drainAllConnections();
-
-    LOG_IF(ERROR, !duplexWorker_.unique())
-        << getActiveRequests() << " active Requests while in destructing"
-        << " duplex ThriftServer. Consider using startDuplex & stopDuplex";
-  }
 
   SCOPE_EXIT { stopController_.join(); };
 
@@ -504,89 +487,85 @@ void ThriftServer::setup() {
 
     setupThreadManager();
 
-    if (!serverChannel_) {
-      ServerBootstrap::socketConfig.acceptBacklog = getListenBacklog();
-      ServerBootstrap::socketConfig.maxNumPendingConnectionsPerWorker =
-          getMaxNumPendingConnectionsPerWorker();
-      if (reusePort_.value_or(false)) {
-        ServerBootstrap::setReusePort(true);
-      }
-      if (enableTFO_) {
-        ServerBootstrap::socketConfig.enableTCPFastOpen = *enableTFO_;
-        ServerBootstrap::socketConfig.fastOpenQueueSize = fastOpenQueueSize_;
-      }
+    ServerBootstrap::socketConfig.acceptBacklog = getListenBacklog();
+    ServerBootstrap::socketConfig.maxNumPendingConnectionsPerWorker =
+        getMaxNumPendingConnectionsPerWorker();
+    if (reusePort_.value_or(false)) {
+      ServerBootstrap::setReusePort(true);
+    }
+    if (enableTFO_) {
+      ServerBootstrap::socketConfig.enableTCPFastOpen = *enableTFO_;
+      ServerBootstrap::socketConfig.fastOpenQueueSize = fastOpenQueueSize_;
+    }
 
-      ioThreadPool_->addObserver(
-          folly::IOThreadPoolDeadlockDetectorObserver::create(
-              ioThreadPool_->getName()));
-      ioObserverFactories.withRLock([this](auto& factories) {
-        for (auto& f : factories) {
-          ioThreadPool_->addObserver(f(
-              ioThreadPool_->getName(), ioThreadPool_->getThreadIdCollector()));
+    ioThreadPool_->addObserver(
+        folly::IOThreadPoolDeadlockDetectorObserver::create(
+            ioThreadPool_->getName()));
+    ioObserverFactories.withRLock([this](auto& factories) {
+      for (auto& f : factories) {
+        ioThreadPool_->addObserver(
+            f(ioThreadPool_->getName(), ioThreadPool_->getThreadIdCollector()));
+      }
+    });
+
+    // Resize the IO pool
+    ioThreadPool_->setNumThreads(nWorkers);
+    if (!acceptPool_) {
+      acceptPool_ = std::make_shared<folly::IOThreadPoolExecutor>(
+          nAcceptors_,
+          std::make_shared<folly::NamedThreadFactory>("Acceptor Thread"));
+    }
+
+    auto acceptorFactory = acceptorFactory_
+        ? acceptorFactory_
+        : std::make_shared<DefaultThriftAcceptorFactory>(this);
+    if (auto factory = dynamic_cast<wangle::AcceptorFactorySharedSSLContext*>(
+            acceptorFactory.get())) {
+      sharedSSLContextManager_ = factory->initSharedSSLContextManager();
+    }
+    ServerBootstrap::childHandler(std::move(acceptorFactory));
+
+    {
+      std::lock_guard<std::mutex> lock(ioGroupMutex_);
+      ServerBootstrap::group(acceptPool_, ioThreadPool_);
+    }
+    if (socket_) {
+      ServerBootstrap::bind(std::move(socket_));
+    } else if (!getAddress().isInitialized()) {
+      ServerBootstrap::bind(port_.value_or(0));
+    } else {
+      for (auto& address : addresses_) {
+        ServerBootstrap::bind(address);
+      }
+    }
+    // Update address_ with the address that we are actually bound to.
+    // (This is needed if we were supplied a pre-bound socket, or if
+    // address_'s port was set to 0, so an ephemeral port was chosen by
+    // the kernel.)
+    ServerBootstrap::getSockets()[0]->getAddress(&addresses_.at(0));
+
+    // we enable zerocopy for the server socket if the
+    // zeroCopyEnableFunc_ is valid
+    bool useZeroCopy = !!zeroCopyEnableFunc_;
+    for (auto& socket : getSockets()) {
+      auto* evb = socket->getEventBase();
+      evb->runImmediatelyOrRunInEventBaseThreadAndWait([&] {
+        socket->setShutdownSocketSet(wShutdownSocketSet_);
+        socket->setAcceptRateAdjustSpeed(acceptRateAdjustSpeed_);
+        socket->setZeroCopy(useZeroCopy);
+        socket->setQueueTimeout(getSocketQueueTimeout());
+        if (callbackAssignFunc_) {
+          socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
+        }
+
+        try {
+          socket->setTosReflect(tosReflect_);
+          socket->setListenerTos(listenerTos_);
+        } catch (std::exception const& ex) {
+          LOG(ERROR) << "Got exception setting up TOS settings: "
+                     << folly::exceptionStr(ex);
         }
       });
-
-      // Resize the IO pool
-      ioThreadPool_->setNumThreads(nWorkers);
-      if (!acceptPool_) {
-        acceptPool_ = std::make_shared<folly::IOThreadPoolExecutor>(
-            nAcceptors_,
-            std::make_shared<folly::NamedThreadFactory>("Acceptor Thread"));
-      }
-
-      auto acceptorFactory = acceptorFactory_
-          ? acceptorFactory_
-          : std::make_shared<DefaultThriftAcceptorFactory>(this);
-      if (auto factory = dynamic_cast<wangle::AcceptorFactorySharedSSLContext*>(
-              acceptorFactory.get())) {
-        sharedSSLContextManager_ = factory->initSharedSSLContextManager();
-      }
-      ServerBootstrap::childHandler(std::move(acceptorFactory));
-
-      {
-        std::lock_guard<std::mutex> lock(ioGroupMutex_);
-        ServerBootstrap::group(acceptPool_, ioThreadPool_);
-      }
-      if (socket_) {
-        ServerBootstrap::bind(std::move(socket_));
-      } else if (!getAddress().isInitialized()) {
-        ServerBootstrap::bind(port_.value_or(0));
-      } else {
-        for (auto& address : addresses_) {
-          ServerBootstrap::bind(address);
-        }
-      }
-      // Update address_ with the address that we are actually bound to.
-      // (This is needed if we were supplied a pre-bound socket, or if
-      // address_'s port was set to 0, so an ephemeral port was chosen by
-      // the kernel.)
-      ServerBootstrap::getSockets()[0]->getAddress(&addresses_.at(0));
-
-      // we enable zerocopy for the server socket if the
-      // zeroCopyEnableFunc_ is valid
-      bool useZeroCopy = !!zeroCopyEnableFunc_;
-      for (auto& socket : getSockets()) {
-        auto* evb = socket->getEventBase();
-        evb->runImmediatelyOrRunInEventBaseThreadAndWait([&] {
-          socket->setShutdownSocketSet(wShutdownSocketSet_);
-          socket->setAcceptRateAdjustSpeed(acceptRateAdjustSpeed_);
-          socket->setZeroCopy(useZeroCopy);
-          socket->setQueueTimeout(getSocketQueueTimeout());
-          if (callbackAssignFunc_) {
-            socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
-          }
-
-          try {
-            socket->setTosReflect(tosReflect_);
-            socket->setListenerTos(listenerTos_);
-          } catch (std::exception const& ex) {
-            LOG(ERROR) << "Got exception setting up TOS settings: "
-                       << folly::exceptionStr(ex);
-          }
-        });
-      }
-    } else {
-      startDuplex();
     }
 
 #if FOLLY_HAS_COROUTINES
@@ -1277,48 +1256,10 @@ void ThriftServer::ensureResourcePools() {
 }
 
 /**
- * Preferably use this method in order to start ThriftServer created for
- * DuplexChannel instead of the serve() method.
- */
-void ThriftServer::startDuplex() {
-  CHECK(configMutable());
-  ensureDecoratedProcessorFactoryInitialized();
-  duplexWorker_ = Cpp2Worker::create(this, serverChannel_);
-  // we don't control the EventBase for the duplexWorker, so when we shut
-  // it down, we need to ensure there's no delay
-  duplexWorker_->setGracefulShutdownTimeout(std::chrono::milliseconds(0));
-}
-
-/**
- * This method should be used to cleanly stop a ThriftServer created for
- * DuplexChannel before disposing the ThriftServer. The caller should pass
- * in a shared_ptr to this ThriftServer since the ThriftServer does not
- * have a way of getting that (does not inherit from
- * enable_shared_from_this)
- */
-void ThriftServer::stopDuplex(std::shared_ptr<ThriftServer> thisServer) {
-  DCHECK(this == thisServer.get());
-  DCHECK(duplexWorker_ != nullptr);
-
-  // Try to stop our Worker but this cannot stop in flight requests
-  // Instead, it will capture a shared_ptr back to us, keeping us alive
-  // until it really goes away (when in-flight requests are gone)
-  duplexWorker_->stopDuplex(thisServer);
-
-  // Get rid of our reference to the worker to avoid forming a cycle
-  duplexWorker_ = nullptr;
-}
-
-/**
  * Loop and accept incoming connections.
  */
 void ThriftServer::serve() {
   setup();
-  if (serverChannel_ != nullptr) {
-    // A duplex server (the one running on a client) doesn't uses its own
-    // EB since it reuses the client's EB
-    return;
-  }
   SCOPE_EXIT { this->cleanUp(); };
 
   auto sslContextConfigCallbackHandle = sslContextObserver_
@@ -1329,8 +1270,6 @@ void ThriftServer::serve() {
 }
 
 void ThriftServer::cleanUp() {
-  DCHECK(!serverChannel_);
-
   // tlsCredWatcher_ uses a background thread that needs to be joined
   // prior to any further writes to ThriftServer members.
   tlsCredWatcher_.withWLock([](auto& credWatcher) { credWatcher.reset(); });
@@ -1428,10 +1367,6 @@ void ThriftServer::stopListening() {
 }
 
 void ThriftServer::stopWorkers() {
-  if (serverChannel_) {
-    return;
-  }
-  DCHECK(!duplexWorker_);
   ServerBootstrap::stop();
   ServerBootstrap::join();
   thriftConfig_.unfreeze();
@@ -1536,14 +1471,9 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
     }
   });
 
-  // Clear the decorated processor factory so that it's re-created if the
-  // server is restarted. Note that duplex servers drain connections in the
-  // destructor so we need to keep the AsyncProcessorFactory alive until then.
-  // Duplex servers also don't support restarting the server so extending its
-  // lifetime should not cause issues.
-  if (!isDuplex()) {
-    decoratedProcessorFactory_.reset();
-  }
+  // Clear the decorated processor factory so that it's re-created if the server
+  // is restarted.
+  decoratedProcessorFactory_.reset();
 
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }

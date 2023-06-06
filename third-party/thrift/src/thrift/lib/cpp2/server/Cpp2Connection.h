@@ -27,7 +27,6 @@
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
-#include <thrift/lib/cpp2/async/DuplexChannel.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
@@ -58,14 +57,11 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
    * @param asyncSocket shared pointer to the async socket
    * @param address the peer address of this connection
    * @param worker the worker instance that is handling this connection
-   * @param serverChannel server channel to use in duplex mode,
-   *        should be nullptr in normal mode
    */
   Cpp2Connection(
       const std::shared_ptr<folly::AsyncTransport>& transport,
       const folly::SocketAddress* address,
-      std::shared_ptr<Cpp2Worker> worker,
-      const std::shared_ptr<HeaderServerChannel>& serverChannel = nullptr);
+      std::shared_ptr<Cpp2Worker> worker);
 
   /// Destructor -- close down the connection.
   ~Cpp2Connection() override;
@@ -133,7 +129,6 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   apache::thrift::AsyncProcessorFactory& processorFactory_;
   Cpp2Worker::PerServiceMetadata& serviceMetadata_;
   std::unique_ptr<apache::thrift::AsyncProcessor> processor_;
-  std::unique_ptr<DuplexChannel> duplexChannel_;
   std::shared_ptr<apache::thrift::HeaderServerChannel> channel_;
 
   std::shared_ptr<Cpp2Worker> worker_;

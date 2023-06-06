@@ -2540,10 +2540,9 @@ std::shared_ptr<folly::SSLContext> makeClientSslContext() {
   return ctx;
 }
 
-void doBadRequestHeaderTest(bool duplex, bool secure) {
+void doBadRequestHeaderTest(bool secure) {
   auto server = std::static_pointer_cast<ThriftServer>(
       TestThriftServerFactory<TestInterface>().create());
-  server->setDuplex(duplex);
   if (secure) {
     setupServerSSL(*server);
   }
@@ -2626,20 +2625,12 @@ void doBadRequestHeaderTest(bool duplex, bool secure) {
 }
 } // namespace
 
-TEST(ThriftServer, BadRequestHeaderNoDuplexNoSsl) {
-  doBadRequestHeaderTest(false /* duplex */, false /* secure */);
+TEST(ThriftServer, BadRequestHeaderNoSsl) {
+  doBadRequestHeaderTest(false /* secure */);
 }
 
-TEST(ThriftServer, BadRequestHeaderDuplexNoSsl) {
-  doBadRequestHeaderTest(true /* duplex */, false /* secure */);
-}
-
-TEST(ThriftServer, BadRequestHeaderNoDuplexSsl) {
-  doBadRequestHeaderTest(false /* duplex */, true /* secure */);
-}
-
-TEST(ThriftServer, BadRequestHeaderDuplexSsl) {
-  doBadRequestHeaderTest(true /* duplex */, true /* secure */);
+TEST(ThriftServer, BadRequestHeaderSsl) {
+  doBadRequestHeaderTest(true /* secure */);
 }
 
 TEST(ThriftServer, SSLRequiredRejectsPlaintext) {
@@ -3227,11 +3218,11 @@ TEST(ThriftServer, RocketOverSSLNoALPNWithTLS13) {
   EXPECT_EQ(response, "test64");
 }
 
-TEST(ThriftServer, HeaderToRocketUpgradeWithDuplexOverTLS13) {
+TEST(ThriftServer, HeaderToRocketUpgradeOverTLS13) {
   THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
 
   auto server = std::static_pointer_cast<ThriftServer>(
-      TestThriftServerFactory<TestInterface>().duplex(true).create());
+      TestThriftServerFactory<TestInterface>().create());
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();

@@ -125,8 +125,7 @@ getProcessorFactoryOverride(folly::AsyncTransport& transport) {
 Cpp2Connection::Cpp2Connection(
     const std::shared_ptr<folly::AsyncTransport>& transport,
     const folly::SocketAddress* address,
-    std::shared_ptr<Cpp2Worker> worker,
-    const std::shared_ptr<HeaderServerChannel>& serverChannel)
+    std::shared_ptr<Cpp2Worker> worker)
     : processorFactoryOverride_(
           transport ? getProcessorFactoryOverride(*transport) : nullptr),
       processorFactory_(
@@ -136,24 +135,12 @@ Cpp2Connection::Cpp2Connection(
       serviceMetadata_(worker->getMetadataForService(
           processorFactory_, processorFactoryOverride_)),
       processor_(processorFactory_.getProcessor()),
-      duplexChannel_(
-          worker->getServer()->isDuplex()
-              ? std::make_unique<DuplexChannel>(
-                    DuplexChannel::Who::SERVER, transport)
-              : nullptr),
-      channel_(
-          serverChannel ? serverChannel : // used by client
-              duplexChannel_ ? duplexChannel_->getServerChannel()
-                             : // server
-              std::shared_ptr<HeaderServerChannel>(
-                  new HeaderServerChannel(transport),
-                  folly::DelayedDestruction::Destructor())),
+      channel_(HeaderServerChannel::newChannel(transport)),
       worker_(std::move(worker)),
       context_(
           address,
           transport.get(),
           worker_->getServer()->getEventBaseManager(),
-          duplexChannel_ ? duplexChannel_->getClientChannel() : nullptr,
           nullptr,
           worker_->getServer()->getClientIdentityHook(),
           worker_.get()),
@@ -450,9 +437,8 @@ void Cpp2Connection::requestReceived(
     }
   }
 
-  if (!worker_->getServer()->isDuplex() &&
-      (worker_->getServer()->isHeaderDisabled() ||
-       THRIFT_FLAG(server_header_reject_all))) {
+  if (worker_->getServer()->isHeaderDisabled() ||
+      THRIFT_FLAG(server_header_reject_all)) {
     THRIFT_CONNECTION_EVENT(connection_rejected.header).log(context_);
 
     disconnect("Rejecting Header connection");

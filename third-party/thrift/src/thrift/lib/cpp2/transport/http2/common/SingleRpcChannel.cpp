@@ -387,7 +387,6 @@ void SingleRpcChannel::onThriftRequest() noexcept {
       nullptr,
       nullptr,
       nullptr,
-      nullptr,
       worker_.get());
   processor_->onThriftRequest(
       std::move(metadata),

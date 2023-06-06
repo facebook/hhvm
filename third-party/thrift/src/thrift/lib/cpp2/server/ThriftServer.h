@@ -250,13 +250,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   int nAcceptors_ = 1;
   uint16_t socketMaxReadsPerEvent_{16};
 
-  // HeaderServerChannel and Cpp2Worker to use for a duplex server
-  // (used by client). Both are nullptr for a regular server.
-  std::shared_ptr<HeaderServerChannel> serverChannel_;
-  std::shared_ptr<Cpp2Worker> duplexWorker_;
-
-  bool isDuplex_ = false; // is server in duplex mode? (used by server)
-
   mutable std::mutex ioGroupMutex_;
 
   std::shared_ptr<folly::IOThreadPoolExecutor> getIOGroupSafe() const {
@@ -441,14 +434,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   ThriftServer();
 
   explicit ThriftServer(const ThriftServerInitialConfig& initialConfig);
-
-  // NOTE: Don't use this constructor to create a regular Thrift server. This
-  // constructor is used by the client to create a duplex server on an existing
-  // connection.
-  // Don't create a listening server. Instead use the channel to run incoming
-  // requests.
-  explicit ThriftServer(
-      const std::shared_ptr<HeaderServerChannel>& serverChannel);
 
  private:
   // method to encapsulate the default setup needed for the construction of
@@ -925,20 +910,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   void cleanUp();
 
-  /**
-   * Preferably use this method in order to start ThriftServer created for
-   * DuplexChannel instead of the serve() method.
-   */
-  void startDuplex();
-
-  /**
-   * This method should be used to cleanly stop a ThriftServer created for
-   * DuplexChannel before disposing the ThriftServer. The caller should pass in
-   * a shared_ptr to this ThriftServer since the ThriftServer does not have a
-   * way of getting that (does not inherit from enable_shared_from_this)
-   */
-  void stopDuplex(std::shared_ptr<ThriftServer> thisServer);
-
   void setQueueTimeout(std::chrono::milliseconds timeout) override final {
     THRIFT_SERVER_EVENT(call.setQueueTimeout).log(*this, [timeout]() {
       return folly::dynamic::object("timeout_ms", timeout.count());
@@ -1001,14 +972,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   void stopListening() override;
 
-  // client side duplex
-  std::shared_ptr<HeaderServerChannel> getDuplexServerChannel() {
-    return serverChannel_;
-  }
-
-  // server side duplex
-  bool isDuplex() { return isDuplex_; }
-
   const std::vector<std::unique_ptr<TransportRoutingHandler>>*
   getRoutingHandlers() const {
     return &routingHandlers_;
@@ -1020,14 +983,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
   void clearRoutingHandlers() { routingHandlers_.clear(); }
-
-  void setDuplex(bool duplex) {
-    // setDuplex may only be called on the server side.
-    // serverChannel_ must be nullptr in this case
-    CHECK(serverChannel_ == nullptr);
-    CHECK(configMutable());
-    isDuplex_ = duplex;
-  }
 
   /**
    * Returns a reference to the processor that is used by custom transports
@@ -1315,11 +1270,10 @@ class ThriftAcceptorFactory : public wangle::AcceptorFactorySharedSSLContext {
 
   std::shared_ptr<wangle::Acceptor> newAcceptor(folly::EventBase* eventBase) {
     if (!sharedSSLContextManager_) {
-      return AcceptorClass::create(server_, nullptr, eventBase);
+      return AcceptorClass::create(server_, eventBase);
     }
     auto acceptor = AcceptorClass::create(
         server_,
-        nullptr,
         eventBase,
         sharedSSLContextManager_->getCertManager(),
         sharedSSLContextManager_->getContextManager(),

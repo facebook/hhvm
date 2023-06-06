@@ -34,7 +34,7 @@ TEST(Cpp2ConnContextTest, pid_and_uid_start_uninitialized) {
   folly::EventBase evb;
   auto worker = Cpp2Worker::createDummy(&evb);
   Cpp2ConnContext ctx(
-      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, worker.get());
+      nullptr, nullptr, nullptr, nullptr, nullptr, worker.get());
   EXPECT_EQ(folly::none, ctx.getPeerEffectiveCreds());
 }
 
@@ -47,7 +47,7 @@ TEST(Cpp2ConnContextTest, getPeerCredentials) {
       folly::AsyncSocket::newSocket(&evb, folly::NetworkSocket{sockets.second});
   auto worker = Cpp2Worker::createDummy(&evb);
   Cpp2ConnContext ctx(
-      nullptr, socket1.get(), nullptr, nullptr, nullptr, nullptr, worker.get());
+      nullptr, socket1.get(), nullptr, nullptr, nullptr, worker.get());
   auto creds = ctx.getPeerEffectiveCreds().value();
   EXPECT_EQ(getpid(), creds.pid);
   EXPECT_EQ(geteuid(), creds.uid);

@@ -99,14 +99,12 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       const folly::SocketAddress* address,
       const folly::AsyncTransport* transport,
       folly::EventBaseManager* manager,
-      const std::shared_ptr<RequestChannel>& duplexChannel,
       std::shared_ptr<X509> peerCert,
       apache::thrift::ClientIdentityHook clientIdentityHook,
       const Cpp2Worker* worker,
       const IOWorkerContext* workerContext)
       : transport_(transport),
         manager_(manager),
-        duplexChannel_(duplexChannel),
         worker_(worker),
         workerContext_(workerContext),
         internalFields_(detail::createPerConnectionInternalFields()) {
@@ -153,14 +151,12 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       const folly::SocketAddress* address = nullptr,
       const folly::AsyncTransport* transport = nullptr,
       folly::EventBaseManager* manager = nullptr,
-      const std::shared_ptr<RequestChannel>& duplexChannel = nullptr,
       std::shared_ptr<X509> peerCert = nullptr /*overridden from socket*/,
       apache::thrift::ClientIdentityHook clientIdentityHook = nullptr)
       : Cpp2ConnContext(
             address,
             transport,
             manager,
-            duplexChannel,
             std::move(peerCert),
             std::move(clientIdentityHook),
             nullptr,
@@ -171,7 +167,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       const folly::SocketAddress* address,
       const folly::AsyncTransport* transport,
       folly::EventBaseManager* manager,
-      const std::shared_ptr<RequestChannel>& duplexChannel,
       std::shared_ptr<X509> peerCert /*overridden from socket*/,
       apache::thrift::ClientIdentityHook clientIdentityHook,
       const WorkerT* worker)
@@ -179,7 +174,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
             address,
             transport,
             manager,
-            duplexChannel,
             std::move(peerCert),
             std::move(clientIdentityHook),
             worker,
@@ -223,17 +217,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       return "";
     }
     return folly::ssl::OpenSSLUtils::getCommonName(osslCert->getX509().get());
-  }
-
-  template <typename Client>
-  std::shared_ptr<Client> getDuplexClient() {
-    DCHECK(duplexChannel_);
-    auto client = std::dynamic_pointer_cast<Client>(duplexClient_);
-    if (!client) {
-      duplexClient_.reset(new Client(duplexChannel_));
-      client = std::dynamic_pointer_cast<Client>(duplexClient_);
-    }
-    return client;
   }
 
   virtual const std::string& getSecurityProtocol() const {
@@ -517,8 +500,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   const folly::AsyncTransport* transport_;
 
   folly::EventBaseManager* manager_;
-  std::shared_ptr<RequestChannel> duplexChannel_;
-  std::shared_ptr<TClientBase> duplexClient_;
   PeerCred peerCred_;
   // A CancellationSource that will be signaled when the connection is closed.
   folly::CancellationSource cancellationSource_;

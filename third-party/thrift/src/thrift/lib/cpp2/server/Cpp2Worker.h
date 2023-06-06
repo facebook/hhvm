@@ -70,11 +70,9 @@ class Cpp2Worker : public IOWorkerContext,
    * CPU core is recommended).
    *
    * @param server the ThriftServer which created us.
-   * @param serverChannel existing server channel to use, only for duplex server
    */
   static std::shared_ptr<Cpp2Worker> create(
       ThriftServer* server,
-      const std::shared_ptr<HeaderServerChannel>& serverChannel = nullptr,
       folly::EventBase* eventBase = nullptr,
       std::shared_ptr<fizz::server::CertManager> certManager = nullptr,
       std::shared_ptr<wangle::SSLContextManager> ctxManager = nullptr,
@@ -83,7 +81,7 @@ class Cpp2Worker : public IOWorkerContext,
     std::shared_ptr<Cpp2Worker> worker(new Cpp2Worker(server, {}));
     worker->setFizzCertManager(certManager);
     worker->setSSLContextManager(ctxManager);
-    worker->construct(server, serverChannel, eventBase, fizzContext);
+    worker->construct(server, eventBase, fizzContext);
     return worker;
   }
 
@@ -107,12 +105,6 @@ class Cpp2Worker : public IOWorkerContext,
     Acceptor::init(serverSocket, eventBase, stats, fizzContext);
     IOWorkerContext::init(*eventBase);
   }
-
-  /*
-   * This is called from ThriftServer::stopDuplex
-   * Necessary for keeping the ThriftServer alive until this Worker dies
-   */
-  void stopDuplex(std::shared_ptr<ThriftServer> ts);
 
   /**
    * Get underlying server.
@@ -294,14 +286,11 @@ class Cpp2Worker : public IOWorkerContext,
 
   void construct(
       ThriftServer* server,
-      const std::shared_ptr<HeaderServerChannel>& serverChannel,
       folly::EventBase* eventBase,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext) {
     auto observer = std::dynamic_pointer_cast<folly::EventBaseObserver>(
         server_->getObserverShared());
-    if (serverChannel) {
-      eventBase = serverChannel->getEventBase();
-    } else if (!eventBase) {
+    if (!eventBase) {
       eventBase = folly::EventBaseManager::get()->getEventBase();
     }
     if (server) {
@@ -309,11 +298,6 @@ class Cpp2Worker : public IOWorkerContext,
     }
     init(nullptr, eventBase, nullptr, fizzContext);
     initRequestsRegistry();
-
-    if (serverChannel) {
-      // duplex
-      useExistingChannel(serverChannel);
-    }
 
     if (observer) {
       eventBase->add([eventBase, observer = std::move(observer)] {
@@ -380,11 +364,6 @@ class Cpp2Worker : public IOWorkerContext,
 
   FizzPeeker fizzPeeker_;
 
-  // For DuplexChannel case, set only during shutdown so that we can extend the
-  // lifetime of the ThriftServer if the Worker is kept alive by some
-  // Connections which are kept alive by in-flight requests
-  std::shared_ptr<ThriftServer> duplexServer_;
-
   // We expect to have one processor factory per InterfaceKind. Using F14NodeMap
   // guarantees reference stability.
   mutable folly::F14NodeMap<AsyncProcessorFactory*, PerServiceMetadata>
@@ -409,12 +388,6 @@ class Cpp2Worker : public IOWorkerContext,
             true /* defer the security negotiation until sslAccept. */,
             peerAddress));
   }
-
-  /**
-   * For a duplex Thrift server, use an existing channel
-   */
-  void useExistingChannel(
-      const std::shared_ptr<HeaderServerChannel>& serverChannel);
 
   void cancelQueuedRequests();
 

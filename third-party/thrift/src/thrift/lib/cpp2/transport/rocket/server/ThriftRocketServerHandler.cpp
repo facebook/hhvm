@@ -82,7 +82,6 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
           &clientAddress,
           transport,
           nullptr, /* eventBaseManager */
-          nullptr, /* duplexChannel */
           nullptr, /* x509PeerCert */
           worker_->getServer()->getClientIdentityHook(),
           worker_.get()),

@@ -4327,11 +4327,33 @@ TEST_F(ServerProtocolTest, TestClientHelloFallback) {
   EXPECT_EQ(state_.state(), StateEnum::Error);
 
   auto fallback = expectAction<AttemptVersionFallback>(actions);
-  std::string expected(
+  std::string expectedChlo(
       "\x16\x03\x01\x00\x13"
       "clienthelloencoding",
       24);
-  EXPECT_EQ(fallback.clientHello->moveToFbString().toStdString(), expected);
+  EXPECT_EQ(fallback.clientHello->moveToFbString().toStdString(), expectedChlo);
+  EXPECT_EQ(fallback.sni.value(), "www.hostname.com");
+}
+
+TEST_F(ServerProtocolTest, TestClientHelloFallbackNoSNI) {
+  context_->setVersionFallbackEnabled(true);
+  setUpExpectingClientHello();
+  auto clientHello = TestMessages::clientHello();
+  TestMessages::removeExtension(clientHello, ExtensionType::supported_versions);
+  TestMessages::removeExtension(clientHello, ExtensionType::server_name);
+  auto actions =
+      getActions(detail::processEvent(state_, std::move(clientHello)));
+  expectActions<MutateState, AttemptVersionFallback>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::Error);
+
+  auto fallback = expectAction<AttemptVersionFallback>(actions);
+  std::string expectedChlo(
+      "\x16\x03\x01\x00\x13"
+      "clienthelloencoding",
+      24);
+  EXPECT_EQ(fallback.clientHello->moveToFbString().toStdString(), expectedChlo);
+  EXPECT_FALSE(fallback.sni.has_value());
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloNoSupportedVersions) {

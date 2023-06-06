@@ -12,6 +12,7 @@
 
 #include <fizz/protocol/Actions.h>
 #include <fizz/util/Variant.h>
+#include <folly/Optional.h>
 #include <folly/futures/Future.h>
 #include <folly/small_vector.h>
 
@@ -27,6 +28,7 @@ using MutateState = folly::Function<void(State&)>;
 
 struct AttemptVersionFallback {
   std::unique_ptr<folly::IOBuf> clientHello;
+  folly::Optional<std::string> sni;
 };
 
 /**

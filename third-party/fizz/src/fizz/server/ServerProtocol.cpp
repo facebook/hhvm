@@ -1200,6 +1200,14 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
           PlaintextWriteRecordLayer()
               .writeInitialClientHello(std::move(*chlo.originalEncoding))
               .data;
+      // Save SNI extension value to help decide server SSL context.
+      auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+      if (serverNameList && !serverNameList->server_name_list.empty()) {
+        fallback.sni = serverNameList->server_name_list.front()
+                           .hostname->moveToFbString()
+                           .toStdString();
+      }
+
       return actions(
           MutateState(&Transition<StateEnum::Error>), std::move(fallback));
     } else {

@@ -571,6 +571,7 @@ class ClientMetadataTestingServiceHandler(ClientMetadataTestingServiceInterface)
 class ClientMetadataTestingServiceTests(unittest.TestCase):
     def test_client_metadata(self) -> None:
         loop = asyncio.get_event_loop()
+        hostname: str = socket.gethostname()
 
         async def inner_test() -> None:
             async with TestServer(
@@ -583,8 +584,7 @@ class ClientMetadataTestingServiceTests(unittest.TestCase):
                 ) as client:
                     agent = await client.getAgent()
                     self.assertEqual(agent, "HeaderClientChannel.cpp")
-                    hostname = await client.getHostname()
-                    self.assertTrue(hostname.endswith("facebook.com"))
+                    self.assertEqual(await client.getHostname(), hostname)
                     # Test env returns empty metadata fields dict
                     cluster = await client.getMetadaField("tw_cluster")
                     self.assertEqual(cluster, "")

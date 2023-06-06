@@ -109,6 +109,7 @@ InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount,
   : JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
                                              0, false, nullptr)
   , m_noDuplicate(dedup) {
+  start();
 }
 
 InternalWarmupRequestPlayer::~InternalWarmupRequestPlayer() {
@@ -123,7 +124,6 @@ runAfterDelay(const std::vector<std::string>& files,
     /* sleep override */
     sleep(delaySeconds);
   }
-  start();
   hphp_fast_string_map<unsigned> seen;
   hphp_fast_string_set deduped;
   do {
@@ -163,6 +163,29 @@ runAfterDelay(const std::vector<std::string>& files,
       StructuredLog::log("hhvm_replay", cols);
     }
   }
+}
+
+namespace {
+InternalWarmupRequestPlayer* GetReplayer() {
+  if (!RO::ServerExtendedWarmupThreadCount) return nullptr;
+  static InternalWarmupRequestPlayer* instance =
+    new InternalWarmupRequestPlayer(RO::ServerExtendedWarmupThreadCount);
+  return instance;
+}
+
+static InitFiniNode _([] { delete GetReplayer(); },
+                      InitFiniNode::When::ServerExit);
+}
+
+void replayExtendedWarmupRequests() {
+  if (!RO::ServerExecutionMode()) return;
+  auto const threadCount = RO::ServerExtendedWarmupThreadCount;
+  if (threadCount <= 0) return;
+  if (RO::ServerExtendedWarmupRequests.empty()) return;
+  auto const delay = RO::ServerExtendedWarmupDelaySeconds;
+  auto const nTimes = RO::ServerExtendedWarmupRepeat;
+  GetReplayer()->runAfterDelay(RO::ServerExtendedWarmupRequests,
+                            nTimes, delay);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

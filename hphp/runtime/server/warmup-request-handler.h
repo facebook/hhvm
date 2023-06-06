@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/util/job-queue.h"
@@ -82,11 +83,6 @@ struct InternalWarmupWorker : JobQueueWorker<WarmupJob> {
 };
 
 struct InternalWarmupRequestPlayer : JobQueueDispatcher<InternalWarmupWorker> {
-  // Don't inline into header file without testing performance on MacOS:
-  // https://github.com/facebook/hhvm/issues/8515
-  // Problem tested on 2019-06-11 on MacOS High Sierra and Mojave
-  // Apple LLVM version 10.0.1 (clang-1001.0.46.4)
-  // Target: x86_64-apple-darwin18.5.0
   explicit InternalWarmupRequestPlayer(int threadCount, bool dedup = false);
   ~InternalWarmupRequestPlayer();
 
@@ -101,6 +97,8 @@ private:
   bool m_noDuplicate;
 };
 
+// Can run multiple times, e.g., upon code changes.
+void replayExtendedWarmupRequests();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
-

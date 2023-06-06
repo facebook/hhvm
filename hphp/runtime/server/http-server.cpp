@@ -428,16 +428,10 @@ void HttpServer::runOrExitProcess() {
       BootStats::done();
     } // else we log after retranslateAll finishes
 
-    // Play extended warmup requests after server starts running.
-    if (isJitSerializing() &&
-        RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&
-        !RuntimeOption::ServerExtendedWarmupRequests.empty()) {
-      auto const threadCount = RuntimeOption::ServerExtendedWarmupThreadCount;
-      auto const delay = RuntimeOption::ServerExtendedWarmupDelaySeconds;
-      auto const nTimes = RuntimeOption::ServerExtendedWarmupRepeat;
-      InternalWarmupRequestPlayer{threadCount}.
-        runAfterDelay(RuntimeOption::ServerExtendedWarmupRequests,
-                      nTimes, delay);
+    // Play extended warmup requests after server starts running. This works on
+    // jumpstart seeders, and on sandboxes.
+    if (isJitSerializing() || !RO::RepoAuthoritative) {
+      replayExtendedWarmupRequests();
     }
     // continously running until /stop is received on admin server, or
     // takeover is requested.

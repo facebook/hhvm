@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include <folly/Range.h>
 #include <folly/Utility.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/Adapter.h>
@@ -31,6 +32,12 @@ namespace apache {
 namespace thrift {
 namespace op {
 namespace detail {
+
+// Replace with `std::views::single` in C++20
+template <class T>
+auto single(T&& t) {
+  return folly::Range{&t, 1};
+}
 
 class ListPatchIndex
     : public type::detail::EqWrap<ListPatchIndex, std::int32_t> {
@@ -244,24 +251,12 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   /// Emplaces the set.
   template <typename... Args>
   void emplace(Args&&... args) {
-    if (data_.assign().has_value()) {
-      data_.assign()->emplace(std::forward<Args>(args)...);
-      return;
-    }
-    auto result = data_.add()->emplace(std::forward<Args>(args)...);
-    if (result.second) {
-      data_.remove()->erase(*result.first);
-    }
+    insert({std::forward<Args>(args)...});
   }
   /// Adds a key.
   template <typename U = typename T::value_type>
   void insert(U&& val) {
-    if (data_.assign().has_value()) {
-      data_.assign()->insert(std::forward<U>(val));
-      return;
-    }
-    data_.remove()->erase(val);
-    data_.add()->insert(std::forward<U>(val));
+    add(single(std::forward<U>(val)));
   }
 
   /// Removes keys.
@@ -372,10 +367,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {
-    assignOr(*data_.put()).insert_or_assign(key, std::forward<V>(value));
-    data_.add()->erase(key);
-    data_.remove()->erase(key);
-    data_.patchPrior()->erase(key);
+    put(single(std::pair<K&&, V&&>(key, value)));
   }
 
   /// Inserts entries. Ignore entries that already exists.
@@ -401,10 +393,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Removes a key.
   template <typename K = typename T::key_type>
   void erase(K&& key) {
-    assignOr(*data_.add()).erase(key);
-    data_.remove()->insert(key);
-    data_.patchPrior()->erase(key);
-    data_.patch()->erase(key);
+    remove(single(std::forward<K>(key)));
   }
 
   /// Returns the patch that for the entry.

@@ -546,21 +546,18 @@ void RocketServerConnection::handleSinkFrame(
     folly::io::Cursor cursor,
     RocketSinkClientCallback& clientCallback) {
   if (!clientCallback.serverCallbackReady()) {
-    switch (frameType) {
-      case FrameType::ERROR: {
-        ErrorFrame errorFrame{std::move(frame)};
-        if (errorFrame.errorCode() == ErrorCode::CANCELED) {
-          return clientCallback.earlyCancelled();
-        }
+    if (frameType == FrameType::ERROR) {
+      ErrorFrame errorFrame{std::move(frame)};
+      if (errorFrame.errorCode() == ErrorCode::CANCELED) {
+        return clientCallback.earlyCancelled();
       }
-      default:
-        return close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unexpected early frame, stream id ({}) type ({})",
-                static_cast<uint32_t>(streamId),
-                static_cast<uint8_t>(frameType))));
     }
+    return close(folly::make_exception_wrapper<RocketException>(
+        ErrorCode::INVALID,
+        fmt::format(
+            "Received unexpected early frame, stream id ({}) type ({})",
+            static_cast<uint32_t>(streamId),
+            static_cast<uint8_t>(frameType))));
   }
 
   auto handleSinkPayload = [&](PayloadFrame&& payloadFrame) {
@@ -653,6 +650,7 @@ void RocketServerConnection::handleSinkFrame(
         break;
       }
     }
+      FOLLY_FALLTHROUGH;
 
     default:
       close(folly::make_exception_wrapper<RocketException>(

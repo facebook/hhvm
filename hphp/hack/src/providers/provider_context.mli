@@ -73,7 +73,7 @@ type entry = {
       (** Derived from [contents]; contains additional preprocessing. *)
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
-      under ~full:true ~keep_errors:true *)
+      under ~full:true *)
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: entry_tast;

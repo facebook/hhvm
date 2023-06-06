@@ -507,7 +507,6 @@ let outline popt content =
               Parser.make_env
                 ~parser_options:popt
                 ~include_line_comments:true
-                ~keep_errors:true
                 Relative_path.default
             in
             Parser.from_text_with_legacy env content)

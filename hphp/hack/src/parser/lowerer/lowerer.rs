@@ -182,10 +182,9 @@ const EXP_RECURSION_LIMIT: usize = 30_000;
 #[derive(Clone)]
 pub struct Env<'a> {
     pub codegen: bool,
-    pub keep_errors: bool,
     quick_mode: bool,
-    /// Show errors even in quick mode. Does not override keep_errors. Hotfix
-    /// until we can properly set up saved states to surface parse errors during
+    /// Show errors even in quick mode.
+    /// Hotfix until we can properly set up saved states to surface parse errors during
     /// typechecking properly.
     pub show_all_errors: bool,
     file_mode: file_info::Mode,
@@ -212,7 +211,6 @@ impl<'a> Env<'a> {
     pub fn make(
         codegen: bool,
         quick_mode: bool,
-        keep_errors: bool,
         show_all_errors: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
@@ -223,7 +221,6 @@ impl<'a> Env<'a> {
     ) -> Self {
         Env {
             codegen,
-            keep_errors,
             quick_mode,
             show_all_errors,
             file_mode: mode,
@@ -258,7 +255,7 @@ impl<'a> Env<'a> {
     }
 
     fn should_surface_error(&self) -> bool {
-        (!self.quick_mode || self.show_all_errors) && self.keep_errors
+        !self.quick_mode || self.show_all_errors
     }
 
     fn is_typechecker(&self) -> bool {
@@ -6332,7 +6329,7 @@ fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast
                 _ => {
                     use file_info::Mode::*;
                     let mode = env.file_mode();
-                    env.keep_errors && env.is_typechecker() && (mode == Mstrict)
+                    env.is_typechecker() && (mode == Mstrict)
                 }
             };
             if raise_error {

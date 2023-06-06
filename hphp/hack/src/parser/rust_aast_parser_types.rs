@@ -23,7 +23,6 @@ pub struct Env {
     pub php5_compat_mode: bool,
     pub elaborate_namespaces: bool,
     pub include_line_comments: bool,
-    pub keep_errors: bool,
     pub quick_mode: bool,
     pub show_all_errors: bool,
     pub is_systemlib: bool,

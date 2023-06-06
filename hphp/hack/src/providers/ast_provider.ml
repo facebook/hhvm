@@ -50,11 +50,7 @@ let parse
     ~(source_text : Full_fidelity_source_text.t) : Errors.t * Parser_return.t =
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
-    Full_fidelity_ast.make_env
-      ~quick_mode:(not full)
-      ~keep_errors:true
-      ~parser_options:popt
-      path
+    Full_fidelity_ast.make_env ~quick_mode:(not full) ~parser_options:popt path
   in
   let (err, result) =
     Errors.do_with_context path @@ fun () ->

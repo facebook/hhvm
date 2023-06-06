@@ -28,7 +28,6 @@ type t = {
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
   include_line_comments: bool;
-  keep_errors: bool;
   quick_mode: bool;
   (* Defining the input *)
   files: string list;
@@ -69,7 +68,6 @@ let make
     php5_compat_mode
     elaborate_namespaces
     include_line_comments
-    keep_errors
     quick_mode
     show_file_name
     files
@@ -108,7 +106,6 @@ let make
     php5_compat_mode;
     elaborate_namespaces;
     include_line_comments;
-    keep_errors;
     quick_mode;
     show_file_name;
     files;
@@ -165,7 +162,6 @@ let parse_args () =
   let php5_compat_mode = ref false in
   let elaborate_namespaces = ref true in
   let include_line_comments = ref false in
-  let keep_errors = ref true in
   let quick_mode = ref false in
   let enable_hh_syntax = ref false in
   let show_file_name = ref false in
@@ -260,12 +256,6 @@ No errors are filtered out."
       ( "--no-include-line-comments",
         Arg.Clear include_line_comments,
         "Unset the include_line_comments option for the parser." );
-      ( "--keep-errors",
-        Arg.Set keep_errors,
-        "Set the keep_errors option for the parser." );
-      ( "--no-keep-errors",
-        Arg.Clear keep_errors,
-        "Unset the keep_errors option for the parser." );
       ( "--quick-mode",
         Arg.Set quick_mode,
         "Set the quick_mode option for the parser." );
@@ -374,7 +364,6 @@ No errors are filtered out."
     !php5_compat_mode
     !elaborate_namespaces
     !include_line_comments
-    !keep_errors
     !quick_mode
     !show_file_name
     (List.rev !files)

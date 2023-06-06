@@ -18,7 +18,6 @@ val make_env (* Optional parts *) :
   ?php5_compat_mode:bool ->
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->
-  ?keep_errors:bool ->
   ?quick_mode:bool ->
   ?show_all_errors:bool ->
   ?parser_options:ParserOptions.t (* Required parts *) ->

@@ -120,7 +120,6 @@ let handle_existing_file args filename =
             ~php5_compat_mode:args.php5_compat_mode
             ~elaborate_namespaces:args.elaborate_namespaces
             ~include_line_comments:args.include_line_comments
-            ~keep_errors:(args.keep_errors || print_errors)
             ~quick_mode:args.quick_mode
             ~parser_options:popt
             file

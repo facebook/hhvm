@@ -447,7 +447,6 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
         codegen: true,
         elaborate_namespaces: false,
         include_line_comments: false,
-        keep_errors: true,
         parser_options,
         php5_compat_mode: false,
         quick_mode: false,

@@ -144,7 +144,6 @@ impl<'src> AastParser {
         let mut lowerer_env = lowerer::Env::make(
             env.codegen,
             env.quick_mode,
-            env.keep_errors,
             env.show_all_errors,
             mode,
             indexed_source_text,
@@ -230,7 +229,7 @@ impl<'src> AastParser {
         };
         if env.codegen {
             find_errors(false /* hhi_mode */)
-        } else if env.keep_errors {
+        } else {
             let first_error = tree.errors().into_iter().next();
             match first_error {
                 None if !env.quick_mode && !env.parser_options.po_parser_errors_only => {
@@ -243,8 +242,6 @@ impl<'src> AastParser {
                 None => vec![],
                 Some(e) => vec![e.clone()],
             }
-        } else {
-            vec![]
         }
     }
 
@@ -314,7 +311,7 @@ impl<'src> AastParser {
                 ScourComment {
                     phantom: std::marker::PhantomData,
                     indexed_source_text,
-                    collect_fixmes: env.keep_errors,
+                    collect_fixmes: true,
                     include_line_comments: env.include_line_comments,
                     disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
                     allowed_decl_fixme_codes: &env.parser_options.po_allowed_decl_fixme_codes,

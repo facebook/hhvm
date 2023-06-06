@@ -12,10 +12,9 @@ type env = {
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
   include_line_comments: bool;
-  keep_errors: bool;
   quick_mode: bool;
-  (* Show errors even in quick mode. Does not override keep_errors. Hotfix
-   * until we can properly set up saved states to surface parse errors during
+  (* Show errors even in quick mode.
+   * Hotfix until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
   is_systemlib: bool;

@@ -48,7 +48,7 @@ bool doPass(IRUnit& unit, PassFN fn, DCE dce) {
   auto result = ArrayData::call_helper(fn, unit);
   switch (dce) {
   case DCE::Minimal:  mandatoryDCE(unit); break;
-  case DCE::Full:     fullDCE(unit); // fallthrough
+  case DCE::Full:     fullDCE(unit); [[fallthrough]];
   case DCE::None:     assertx(checkEverything(unit)); break;
   }
   return result;

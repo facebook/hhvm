@@ -653,7 +653,7 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   switch (type.tag()) {
     case A::Tag::Tuple:
       if (arr->size() != type.size()) return false;
-      // fall through
+      [[fallthrough]];
     case A::Tag::Packed: {
       int64_t k = 0;
       auto const tuple = type.tag() == A::Tag::Tuple;

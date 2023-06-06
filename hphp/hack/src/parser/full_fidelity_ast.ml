@@ -26,7 +26,6 @@ type env = {
   show_all_errors: bool;
   parser_options: ParserOptions.t;
   file: Relative_path.t;
-  disable_global_state_mutation: bool;
   is_systemlib: bool;
 }
 [@@deriving show]
@@ -40,7 +39,6 @@ let make_env
     ?(quick_mode = false)
     ?(show_all_errors = false)
     ?(parser_options = ParserOptions.default)
-    ?(disable_global_state_mutation = false)
     ?(is_systemlib = false)
     (file : Relative_path.t) : env =
   let parser_options = ParserOptions.with_codegen parser_options codegen in
@@ -54,7 +52,6 @@ let make_env
     show_all_errors;
     parser_options;
     file;
-    disable_global_state_mutation;
     is_systemlib;
   }
 
@@ -86,7 +83,7 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
       Errors.add_error Parsing_error.(to_user_error @@ Fixme_format pos));
   List.iter sc.sc_bad_ignore_pos ~f:(fun pos ->
       Errors.add_error Parsing_error.(to_user_error @@ Hh_ignore_comment pos));
-  if (not env.disable_global_state_mutation) && env.keep_errors then (
+  if env.keep_errors then (
     Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
     if env.quick_mode then
       Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes

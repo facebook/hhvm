@@ -22,7 +22,6 @@ val make_env (* Optional parts *) :
   ?quick_mode:bool ->
   ?show_all_errors:bool ->
   ?parser_options:ParserOptions.t (* Required parts *) ->
-  ?disable_global_state_mutation:bool ->
   ?is_systemlib:bool ->
   Relative_path.t ->
   env

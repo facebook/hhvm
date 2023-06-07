@@ -370,10 +370,18 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     put(single(std::pair<K&&, V&&>(key, value)));
   }
 
-  /// Inserts entries. Ignore entries that already exists.
+  /// Inserts entries. Ignore entries that already exist.
   template <typename C = T>
   void add(C&& entries) {
     assignOr(*data_.add()).insert(entries.begin(), entries.end());
+    for (const auto& entry : entries) {
+      if (data_.remove()->erase(entry.first)) {
+        // If it was already removed, we should re-assign the entity.
+        auto& added = (*data_.add())[entry.first];
+        (*data_.patch())[entry.first] = std::move(added);
+        added = {};
+      }
+    }
   }
 
   /// Removes keys.

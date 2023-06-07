@@ -538,12 +538,23 @@ TEST(StructPatchTest, MapPatch) {
   ensuredElementPatch.ensureAndPatchByKey("k") += "1";
   ensuredElementPatch.add({{"w", "2"}});
   ensuredElementPatch.ensureAndPatchByKey("w") += "1";
+  ensuredElementPatch.erase("b");
+  ensuredElementPatch.ensureAndPatchByKey("b") += "2";
 
   test::expectPatch(
       ensuredElementPatch,
       {{"a", "0"}},
-      {{"a", "0"}, {"k", "1"}, {"w", "21"}},
-      {{"a", "0"}, {"k", "11"}, {"w", "211"}});
+      {{"a", "0"}, {"b", "2"}, {"k", "1"}, {"w", "21"}},
+      {{"a", "0"}, {"b", "2"}, {"k", "11"}, {"w", "211"}});
+}
+
+TEST(StructPatchTest, MapPatchMerge) {
+  std::vector<MapPatch::value_type> vec;
+  vec.push_back({});
+  vec.push_back({});
+  for (char c = 'a'; c <= 'z'; ++c) {
+    vec.back().insert({{c}, {c}});
+  }
 
   MapPatch patchMerging1, patchMerging2;
   patchMerging2.patchByKey("d") += "2";

@@ -420,7 +420,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Ensures that key exists and patches the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key) {
-    return (data_.add().value()[key], data_.patch()->operator[](key));
+    add({{key, {}}});
+    return patchByKey(key);
   }
 
   /// @copybrief AssignPatch::customVisit

@@ -33,6 +33,10 @@ DEFINE_string(path,
               "/",
               "(HQClient) url-path to send the request to, "
               "or a comma separated list of paths to fetch in parallel");
+DEFINE_string(connect_to_address,
+              "",
+              "(HQClient) Override IP address to connect to instead of "
+              "resolving the host field");
 DEFINE_int32(connect_timeout, 2000, "(HQClient) connect timeout in ms");
 DEFINE_string(httpversion, "1.1", "HTTP version string");
 DEFINE_string(protocol, "", "HQ protocol version e.g. h3-29 or hq-fb-05");
@@ -172,8 +176,13 @@ void initializeCommonSettings(HQToolParams& hqParams) {
     auto& clientParams = boost::get<HQToolClientParams>(hqParams.params);
     clientParams.host = FLAGS_host;
     clientParams.port = FLAGS_port;
-    clientParams.remoteAddress =
-        folly::SocketAddress(clientParams.host, clientParams.port, true);
+    if (FLAGS_connect_to_address.empty()) {
+      clientParams.remoteAddress =
+          folly::SocketAddress(clientParams.host, clientParams.port, true);
+    } else {
+      clientParams.remoteAddress = folly::SocketAddress(
+          FLAGS_connect_to_address, clientParams.port, false);
+    }
     if (!FLAGS_local_address.empty()) {
       clientParams.localAddress = folly::SocketAddress();
       clientParams.localAddress->setFromLocalIpPort(FLAGS_local_address);

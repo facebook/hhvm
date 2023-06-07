@@ -25,6 +25,7 @@ struct FuncTable {
   void insert(const StringData* name, const NativeFunctionInfo&);
   NativeFunctionInfo get(const StringData* name) const;
   void dump() const;
+  bool empty() const { return m_infos.empty(); }
  private:
   // This is intentionally case sensitive despite classes and
   // functions being case insensitive. Binding native impls to HNI

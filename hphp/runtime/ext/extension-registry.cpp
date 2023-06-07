@@ -240,6 +240,7 @@ void moduleInit() {
 
   assertx(s_sorted);
   for (auto& ext : s_ordered) {
+    assertx(ext->nativeFuncs().empty());
     ext->moduleInit();
   }
   s_initialized = true;

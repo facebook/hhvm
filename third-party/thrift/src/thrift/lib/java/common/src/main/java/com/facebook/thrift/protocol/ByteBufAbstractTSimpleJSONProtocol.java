@@ -747,13 +747,19 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
   @Override
   public TMessage readMessageBegin() throws TException {
     readJSONArrayStart();
+    ByteBuf buf = null;
     try {
-      String name = readJSONString().toString(StandardCharsets.UTF_8);
+      buf = readJSONString();
+      String name = buf.toString(StandardCharsets.UTF_8);
       byte type = (byte) readJSONInteger();
       int seqid = (int) readJSONInteger();
       return new TMessage(name, type, seqid);
     } catch (Exception e) {
       throw new TException();
+    } finally {
+      if (buf != null) {
+        ReferenceCountUtil.safeRelease(buf);
+      }
     }
   }
 
@@ -798,8 +804,10 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
       }
 
       context_.read();
+      ByteBuf buf = null;
       try {
-        final String fieldName = readJSONString().toString(StandardCharsets.UTF_8);
+        buf = readJSONString();
+        final String fieldName = buf.toString(StandardCharsets.UTF_8);
         Integer fieldId = currentReadContext.namesToIds.get(fieldName);
         if (fieldId == null) {
           // backward compatibility
@@ -811,6 +819,10 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
         return currentReadContext.fieldMetadata.get(fieldId);
       } catch (Exception e) {
         throw new TException(e);
+      } finally {
+        if (buf != null) {
+          ReferenceCountUtil.safeRelease(buf);
+        }
       }
     }
   }
@@ -917,10 +929,16 @@ public abstract class ByteBufAbstractTSimpleJSONProtocol extends ByteBufTProtoco
 
   public String readString() throws TException {
     context_.read();
+    ByteBuf buf = null;
     try {
-      return readJSONString().toString(StandardCharsets.UTF_8);
+      buf = readJSONString();
+      return buf.toString(StandardCharsets.UTF_8);
     } catch (Exception e) {
       throw new TException(e);
+    } finally {
+      if (buf != null) {
+        ReferenceCountUtil.safeRelease(buf);
+      }
     }
   }
 

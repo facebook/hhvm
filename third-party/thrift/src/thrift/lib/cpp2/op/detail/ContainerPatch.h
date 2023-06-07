@@ -354,20 +354,14 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Inserts entries. Override entries if exists.
   template <typename C = T>
   void put(C&& entries) {
-    auto& field = assignOr(*data_.put());
-    auto& patchPrior = *data_.patchPrior();
     for (auto&& entry : entries) {
-      auto key = std::forward<decltype(entry)>(entry).first;
-      field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
-      data_.add()->erase(key);
-      data_.remove()->erase(key);
-      patchPrior.erase(key);
+      ensureAndPatchByKey(entry.first) = entry.second;
     }
   }
   /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {
-    put(single(std::pair<K&&, V&&>(key, value)));
+    ensureAndPatchByKey(key) = value;
   }
 
   /// Inserts entries. Ignore entries that already exist.

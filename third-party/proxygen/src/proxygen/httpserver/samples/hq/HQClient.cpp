@@ -122,6 +122,7 @@ HQClient::sendRequest(const proxygen::URL& requestUrl) {
   if (!txn) {
     return nullptr;
   }
+
   if (!params_.outdir.empty()) {
     bool canWrite = false;
     // default output file name
@@ -169,14 +170,27 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   // callback on the first EOM to try to make one more request. That callback
   // will keep scheduling itself until there are no more requests.
   if (params_.sendRequestsSequentially && !httpPaths_.empty()) {
-    auto sendOneMoreRequest = [&]() {
-      uint64_t numOpenable = quicClient_->getNumOpenableBidirectionalStreams();
-      if (numOpenable > 0) {
-        sendRequests(true, numOpenable);
-      };
+    auto callSendRequestsAfterADelay = [&]() {
+      if (params_.gapBetweenRequests.count() > 0) {
+        evb_.runAfterDelay(
+            [&]() {
+              uint64_t numOpenable =
+                  quicClient_->getNumOpenableBidirectionalStreams();
+              if (numOpenable > 0) {
+                sendRequests(true, numOpenable);
+              };
+            },
+            params_.gapBetweenRequests.count());
+      } else {
+        uint64_t numOpenable =
+            quicClient_->getNumOpenableBidirectionalStreams();
+        if (numOpenable > 0) {
+          sendRequests(true, numOpenable);
+        };
+      }
     };
     CHECK(!curls_.empty());
-    curls_.back()->setEOMFunc(sendOneMoreRequest);
+    curls_.back()->setEOMFunc(callSendRequestsAfterADelay);
   }
 }
 static std::function<void()> selfSchedulingRequestRunner;

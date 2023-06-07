@@ -32,6 +32,7 @@ struct HQToolClientParams : public HQBaseParams {
   std::vector<folly::StringPiece> httpPaths;
   bool migrateClient{false};
   bool sendRequestsSequentially;
+  std::chrono::milliseconds gapBetweenRequests;
 };
 
 struct HQToolServerParams : public HQServerParams {

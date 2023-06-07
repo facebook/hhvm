@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/optional.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
 
@@ -77,6 +76,16 @@ std::string format_watchman_socket(
   return watchmanSocket;
 }
 
+using WatchmanCache = folly::ConcurrentHashMap<
+  std::string,
+  std::shared_ptr<Watchman>
+>;
+
+folly::Singleton<WatchmanCache> s_watchmanClients;
+
+////////////////////////////////////////////////////////////////////////////////
+}
+
 /**
  * Discover who owns the given repo and return the Watchman socket
  * corresponding to that user.
@@ -128,16 +137,6 @@ Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot) {
 
   auto sock = Config::GetString(ini, config, "watchman.socket.default");
   return sock.empty() ? def(user) : sock;
-}
-
-using WatchmanCache = folly::ConcurrentHashMap<
-  std::string,
-  std::shared_ptr<Watchman>
->;
-
-folly::Singleton<WatchmanCache> s_watchmanClients;
-
-////////////////////////////////////////////////////////////////////////////////
 }
 
 std::shared_ptr<Watchman>

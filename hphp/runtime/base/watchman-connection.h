@@ -20,9 +20,19 @@
 #include <memory>
 
 #include "hphp/runtime/base/watchman.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 
+/**
+ * Discover who owns the given repo and return the Watchman socket
+ * corresponding to that user.
+ */
+Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot);
+
+/**
+ * Get the shared watchman connection for a given repo
+ */
 std::shared_ptr<Watchman> get_watchman_client(const std::filesystem::path&);
 
 }

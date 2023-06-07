@@ -82,7 +82,6 @@ struct GenListPatch {
     ListPatch p;
     p.push_front(randInt());
     p.push_back(randInt());
-    p.patchAt(randInt()) += randInt();
     return p;
   }
 };
@@ -99,7 +98,6 @@ struct GenListDequePatch {
     ListDequePatch p;
     p.push_front(randInt());
     p.push_back(randInt());
-    p.patchAt(randInt()) += randInt();
     return p;
   }
 };
@@ -249,7 +247,6 @@ struct GenListLongStringPatch {
     ListStringPatch p;
     p.push_front(randLongStr());
     p.push_back(randLongStr());
-    p.patchAt(randInt()) += randLongStr();
     return p;
   }
 };

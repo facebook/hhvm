@@ -139,15 +139,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     prepend.insert(prepend.begin(), std::forward<U>(val));
   }
 
-  /// Returns the patch that for the element in a given position.
-  FOLLY_NODISCARD VP& patchAt(size_t pos) {
-    if (*data_.clear()) {
-      folly::throw_exception<bad_patch_access>();
-    }
-
-    return data_.patch()->operator[](ListPatchIndex(pos));
-  }
-
   /// @copybrief AssignPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
@@ -157,19 +148,17 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   ///       void clear();
   ///       void prepend(const List&);
   ///       void append(const List&);
-  ///       void patchIfSet(const std::unordered_map<ListPatchIndex,
-  ///                                                ElementPatch>&);
   ///     }
   ///
   /// For example:
   ///
   ///     ListPatch<ListI32Patch> patch;
-  ///     patch.patchAt(10).add(20);
+  ///     patch.clear();
   ///     patch.push_front(30);
   ///
   /// `patch.customVisit(v)` will invoke the following methods
   ///
-  ///     v.patchIfSet({{10, I32Patch::createAdd(20)}});
+  ///     v.clear();
   ///     v.prepend({30});
   template <class Visitor>
   void customVisit(Visitor&& v) const {
@@ -177,7 +166,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       // Test whether the required methods exist in Visitor
       v.assign(T{});
       v.clear();
-      v.patchIfSet(std::unordered_map<ListPatchIndex, VP>{});
       v.prepend(T{});
       v.append(T{});
     }
@@ -186,7 +174,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       return;
     }
 
-    v.patchIfSet(*data_.patch());
     v.prepend(*data_.prepend());
     v.append(*data_.append());
   }
@@ -196,14 +183,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       T& v;
       void assign(const T& t) { v = t; }
       void clear() { v.clear(); }
-      void patchIfSet(const VPMap& patches) {
-        for (const auto& ep : patches) {
-          auto idx = ep.first.position();
-          if (idx < v.size()) {
-            ep.second.apply(v[idx]);
-          }
-        }
-      }
       void prepend(const T& t) { v.insert(v.begin(), t.begin(), t.end()); }
       void append(const T& t) { v.insert(v.end(), t.begin(), t.end()); }
     };
@@ -215,13 +194,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::assignOr;
   using Base::data_;
   using Base::hasAssign;
-
-  // Needed for merge(...). We can consider making this a public API.
-  void patchIfSet(const VPMap& patches) {
-    for (const auto& ep : patches) {
-      patchAt(ep.first.position()).merge(ep.second);
-    }
-  }
 };
 
 /// Patch for a Thrift set.

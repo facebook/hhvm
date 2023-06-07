@@ -251,10 +251,27 @@ void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgRaiseDeploymentBoundaryViolation(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst).ssa(0);
-  cgCallHelper(vmain(env), env,
-               CallSpec::direct(raiseDeploymentBoundaryViolation),
-               kVoidDest, SyncOptions::Sync, args);
+  auto const target = [&]() -> CallSpec {
+    if (inst->src(0)->isA(TFunc)) {
+      using Fn = void(*)(const Func*);
+      return CallSpec::direct(
+        static_cast<Fn>(raiseDeploymentBoundaryViolation)
+      );
+    };
+    assertx(inst->src(0)->isA(TCls));
+    using Fn = void(*)(const Class*);
+    return CallSpec::direct(
+        static_cast<Fn>(raiseDeploymentBoundaryViolation)
+      );
+  }();
+  cgCallHelper(
+    vmain(env),
+    env,
+    target,
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0)
+  );
 }
 ///////////////////////////////////////////////////////////////////////////////
 

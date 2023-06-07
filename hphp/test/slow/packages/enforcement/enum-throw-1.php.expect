@@ -1,0 +1,8 @@
+Accessing enum EnumFoo outside the active deployment is not allowed
+Accessing enum class EnumClsFoo outside the active deployment is not allowed
+Dynamic>>
+
+Accessing enum EnumFoo outside the active deployment is not allowed
+Accessing enum EnumFoo outside the active deployment is not allowed
+Accessing enum class EnumClsFoo outside the active deployment is not allowed
+Accessing enum class EnumClsFoo outside the active deployment is not allowed

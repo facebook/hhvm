@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/object-data.h"
@@ -117,6 +118,15 @@ const Func* lookupMethodCtx(const Class* cls,
       will_symbol_raise_module_boundary_violation(method, &callCtx)) {
     if (!shouldRaise(raise)) return nullptr;
     raiseModuleBoundaryViolation(cls, method, callCtx.moduleName());
+  }
+
+  // Check deployment boundary
+  if (RO::EvalEnforceDeployment &&
+      raise != MethodLookupErrorOptions::NoErrorOnModule &&
+      !method->unit()->isSystemLib() &&
+      will_symbol_raise_deployment_boundary_violation(g_context->getPackageInfo(), cls)) {
+    if (!shouldRaise(raise)) return nullptr;
+    raiseDeploymentBoundaryViolation(cls);
   }
 
   // If we found a protected or private method, we need to do some

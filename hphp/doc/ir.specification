@@ -761,7 +761,7 @@ To string conversions:
   Set D to true iff function call from caller to S0 violates module boundary.
   Requires that S0 is an internal method.
 
-| CallViolatesDeploymentBoundary<caller>, D(Bool), S(Func), NF
+| CallViolatesDeploymentBoundary<caller>, D(Bool), S(Func,Cls), NF
 
   Set D to true iff function call from caller to S0 violates deployment boundary.
 
@@ -2268,7 +2268,7 @@ To string conversions:
   Raises a warning to indicate a module boundary violation resulting from caller
   attempting to access a property propName from class propCls.
 
-| RaiseDeploymentBoundaryViolation<ctx, caller>, ND, S(Func), NF
+| RaiseDeploymentBoundaryViolation<ctx, caller>, ND, S(Func,Cls), NF
 
   Raises a warning to indicate a deployment boundary violation resulting from caller
   attempting to call the the callee in S0 in context `ctx`.

@@ -345,9 +345,18 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
 
 SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,
                                                const IRInstruction* inst) {
-  if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
-  auto const callee = inst->src(0)->funcVal();
-  return cns(env, will_call_raise_deployment_boundary_violation(env.unit.packageInfo(), callee));
+  auto const packageInfo = env.unit.packageInfo();
+  if (inst->src(0)->hasConstVal(TFunc)) {
+    auto const symbol = inst->src(0)->funcVal();
+    return cns(env,
+               will_symbol_raise_deployment_boundary_violation(packageInfo, symbol));
+  }
+  if (inst->src(0)->hasConstVal(TCls)) {
+    auto const symbol = inst->src(0)->clsVal();
+    return cns(env,
+               will_symbol_raise_deployment_boundary_violation(packageInfo, symbol));
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {

@@ -26,6 +26,7 @@
 
 namespace HPHP {
 
+struct Class;
 struct Func;
 struct StringData;
 
@@ -97,9 +98,14 @@ struct PackageInfo {
   DeploymentMap m_deployments;
 };
 
-bool will_call_raise_deployment_boundary_violation(
+bool will_symbol_raise_deployment_boundary_violation(
   const PackageInfo& packageInfo,
   const Func* callee
+);
+
+bool will_symbol_raise_deployment_boundary_violation(
+  const PackageInfo& packageInfo,
+  const Class* callee
 );
 
 } // namespace HPHP

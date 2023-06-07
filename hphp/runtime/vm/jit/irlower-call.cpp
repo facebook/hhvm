@@ -587,10 +587,23 @@ void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCallViolatesDeploymentBoundary(IRLS& env, const IRInstruction* inst) {
+  auto const target = [&]() -> CallSpec {
+    if (inst->src(0)->isA(TFunc)) {
+      using Fn = bool(*)(const Func*);
+      return CallSpec::direct(
+        static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
+      );
+    };
+    assertx(inst->src(0)->isA(TCls));
+    using Fn = bool(*)(const Class*);
+    return CallSpec::direct(
+        static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
+      );
+  }();
   cgCallHelper(
     vmain(env),
     env,
-    CallSpec::direct(callViolatesDeploymentBoundaryHelper),
+    target,
     callDest(env, inst),
     SyncOptions::None,
     argGroup(env, inst).ssa(0)

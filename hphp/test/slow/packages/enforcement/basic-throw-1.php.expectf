@@ -1,0 +1,10 @@
+Calling function foo outside the active deployment is not allowed @ %s/basic-throw-1.php:8
+Calling function foo outside the active deployment is not allowed @ %s/basic-throw-1.php:14
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:20
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:27
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:33
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:39
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:45
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:51
+Accessing class Foo outside the active deployment is not allowed @ %s/basic-throw-1.php:57
+in Foo constructor

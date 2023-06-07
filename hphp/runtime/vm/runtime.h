@@ -97,6 +97,7 @@ void raiseModulePropertyViolation(const Class* cls,
                                   bool is_static);
 
 void raiseDeploymentBoundaryViolation(const Func* callee);
+void raiseDeploymentBoundaryViolation(const Class* cls);
 
 void raiseImplicitContextStateInvalidDispatch(const Func*);
 

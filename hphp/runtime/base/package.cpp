@@ -204,17 +204,31 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
   return false;
 }
 
-bool will_call_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
-                                                   const Func* callee) {
+namespace {
+
+bool is_module_outside_active_deployment(const PackageInfo& packageInfo,
+                                         const StringData* module) {
   if (!RO::EvalEnforceDeployment) return false;
-  assertx(callee);
-  if (callee->unit()->isSystemLib()) return false;
   if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
-    auto const calleeModule = callee->moduleName();
-    if (!calleeModule) return true;
-    return !packageInfo.moduleInDeployment(calleeModule, *activeDeployment);
+    if (!module) return true;
+    return !packageInfo.moduleInDeployment(module, *activeDeployment);
   }
   return false;
+}
+
+} // namespace
+
+bool will_symbol_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
+                                                     const Func* callee) {
+  assertx(callee);
+  if (callee->unit()->isSystemLib()) return false;
+  return is_module_outside_active_deployment(packageInfo, callee->moduleName());
+}
+
+bool will_symbol_raise_deployment_boundary_violation(const PackageInfo& packageInfo,
+                                                     const Class* cls) {
+  assertx(cls);
+  return is_module_outside_active_deployment(packageInfo, cls->moduleName());
 }
 
 } // namespace HPHP

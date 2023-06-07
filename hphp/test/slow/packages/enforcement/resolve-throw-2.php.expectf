@@ -1,3 +1,8 @@
 Calling function bar1 outside the active deployment is not allowed @ %s/resolve-throw-2.php:8
 Calling function bar2 outside the active deployment is not allowed @ %s/resolve-throw-2.php:15
 Calling function bar3 outside the active deployment is not allowed @ %s/resolve-throw-2.php:22
+Calling function bar4 outside the active deployment is not allowed @ %s/resolve-throw-2.php:29
+Calling function bar5 outside the active deployment is not allowed @ %s/resolve-throw-2.php:35
+Calling function cbar1 outside the active deployment is not allowed @ %s/resolve-throw-2.php:42
+Calling function cbar2 outside the active deployment is not allowed @ %s/resolve-throw-2.php:49
+Calling function cbar3 outside the active deployment is not allowed @ %s/resolve-throw-2.php:56

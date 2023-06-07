@@ -24,4 +24,37 @@ function main_resolve_throw_2() {
   } catch (Exception $e) {
     echo pp_exn($e);
   }
+
+  try {
+    bar4();
+  } catch (Exception $e) {
+    echo pp_exn($e);
+  }
+
+  try {
+    $f = bar5();
+    $f();
+  } catch (Exception $e) {
+    echo pp_exn($e);
+  }
+
+  try {
+    $c = cbar1();
+    new $c;
+  } catch (Exception $e) {
+    echo pp_exn($e);
+  }
+
+  try {
+    $c = cbar2();
+    $f();
+  } catch (Exception $e) {
+    echo pp_exn($e);
+  }
+
+  try {
+    cbar3();
+  } catch (Exception $e) {
+    echo pp_exn($e);
+  }
 }

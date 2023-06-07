@@ -204,6 +204,7 @@ void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 bool callViolatesDeploymentBoundaryHelper(const Func*);
+bool callViolatesDeploymentBoundaryHelper(const Class*);
 
 namespace MInstrHelpers {
 TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);

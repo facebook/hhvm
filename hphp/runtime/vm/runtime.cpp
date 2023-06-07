@@ -512,11 +512,24 @@ void raiseModuleBoundaryViolation(const Class* cls,
 
 void raiseDeploymentBoundaryViolation(const Func* callee) {
   if (!RO::EvalEnforceDeployment) return;
-  assertx(callee);
+  assertx(callee && !callee->isMethod());
   auto const calleeName = folly::sformat("function {}", callee->name());
   auto const errMsg = folly::sformat(
     "Calling {} outside the active deployment is not allowed",
     calleeName);
+  SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+}
+
+void raiseDeploymentBoundaryViolation(const Class* cls) {
+  if (!RO::EvalEnforceDeployment) return;
+  assertx(cls);
+  auto const symbolType =
+    isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");
+  auto const clsName = folly::sformat("{}", cls->name());
+  auto const errMsg = folly::sformat(
+    "Accessing {} {} outside the active deployment is not allowed",
+    symbolType,
+    clsName);
   SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
 }
 

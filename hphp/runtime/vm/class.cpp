@@ -5025,6 +5025,12 @@ void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
   if (will_symbol_raise_module_boundary_violation(cls, caller)) {
     raiseModuleBoundaryViolation(cls, caller->moduleName());
   }
+  if (RO::EvalEnforceDeployment) {
+    auto const& packageInfo = g_context->getPackageInfo();
+    if (will_symbol_raise_deployment_boundary_violation(packageInfo, cls)) {
+      raiseDeploymentBoundaryViolation(cls);
+    }
+  }
 }
 } // namespace
 

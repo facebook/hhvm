@@ -132,6 +132,12 @@ else:
         disable_weaker_versions=True,
     ):
         ctx = ssl.SSLContext(ssl_version)
+
+        if ssl.HAS_ALPN:
+            # Provide an ALPN value for the legacy Header transport so that the
+            # Thrift server doesn't have to peek at any bytes.
+            ctx.set_alpn_protocols(["thrift"])
+
         # Some protocol versions, like PROTOCOL_TLS_CLIENT, automatically enable
         # SSLContext.check_hostname. Disable it here, we don't want to perform
         # hostname verification at this layer.

@@ -218,8 +218,10 @@ TEST_F(ConnectionManagerTest, testDropEstablishedFilterDropAll) {
 
   // We want to drop 100% of the connections and filter returns true all the
   // time as a result we should drop all the requests
-  cm_->dropEstablishedConnections(
-      1, [](ManagedConnection* /*mangedConn*/) { return true; });
+  cm_->dropEstablishedConnections(1, [](ManagedConnection* managedConn) {
+    (void)managedConn->getPeerAddress();
+    return true;
+  });
 }
 
 TEST_F(ConnectionManagerTest, testDropEstablishedVerifyOrder) {
@@ -234,8 +236,10 @@ TEST_F(ConnectionManagerTest, testDropEstablishedVerifyOrder) {
 
   // We want to drop 100% of the connections and filter returns true all the
   // time as a result we should drop all the requests
-  cm_->dropEstablishedConnections(
-      1, [](ManagedConnection* /*mangedConn*/) { return true; });
+  cm_->dropEstablishedConnections(1, [](ManagedConnection* managedConn) {
+    (void)managedConn->getPeerAddress();
+    return true;
+  });
 
   // Initially connection will be added in decreasing order highest to lowest,
   // it will be N, N - 1, N - 2, ..., 1, 0, thats because we loop from (0, N)
@@ -255,8 +259,10 @@ TEST_F(ConnectionManagerTest, testDropFilterDropNone) {
 
   // We want to drop 100% of the connections but filter returns false all the
   // time as a result we should see zero dropped connection
-  cm_->dropEstablishedConnections(
-      1, [](ManagedConnection* /*mangedConn*/) { return false; });
+  cm_->dropEstablishedConnections(1, [](ManagedConnection* managedConn) {
+    (void)managedConn->getPeerAddress();
+    return false;
+  });
 }
 
 TEST_F(ConnectionManagerTest, testDropFilterDropHalfOnly) {
@@ -275,6 +281,7 @@ TEST_F(ConnectionManagerTest, testDropFilterDropHalfOnly) {
   }
 
   auto filter = [&containsIdentifier](ManagedConnection* managedConn) -> bool {
+    (void)managedConn->getPeerAddress();
     MockConnection* mockConn = dynamic_cast<MockConnection*>(managedConn);
     if (containsIdentifier(mockConn->identifier_)) {
       return true;
@@ -307,7 +314,10 @@ TEST_F(ConnectionManagerTest, testDropFilterTraverseTillIdleIterator) {
     }
   }
 
-  auto filter = [](ManagedConnection* managedConn) -> bool { return true; };
+  auto filter = [](ManagedConnection* managedConn) -> bool {
+    (void)managedConn->getPeerAddress();
+    return true;
+  };
   cm_->dropEstablishedConnections(1, filter);
 }
 

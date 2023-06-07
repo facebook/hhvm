@@ -348,10 +348,17 @@ class python_mstch_program : public mstch_program {
   }
 
   void visit_type_with_typedef(const t_type* orig_type, TypeDef is_typedef) {
-    auto true_type = orig_type->get_true_type();
-    if (!seen_types_.insert(true_type).second) {
+    if (!seen_types_.insert(orig_type).second) {
       return;
     }
+    if (auto annotation = find_structured_adapter_annotation(*orig_type)) {
+      extract_module_and_insert_to(
+          get_annotation_property(annotation, "name"), adapter_modules_);
+      extract_module_and_insert_to(
+          get_annotation_property(annotation, "typeHint"),
+          adapter_type_hint_modules_);
+    }
+    auto true_type = orig_type->get_true_type();
     is_typedef = is_typedef == TypeDef::HasTypedef || orig_type->is_typedef()
         ? TypeDef::HasTypedef
         : TypeDef::NoTypedef;

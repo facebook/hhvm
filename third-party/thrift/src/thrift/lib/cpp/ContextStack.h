@@ -81,6 +81,8 @@ class ContextStack {
 
   void postRead(apache::thrift::transport::THeader* header, uint32_t bytes);
 
+  void onInteractionTerminate(int64_t id);
+
   void handlerErrorWrapped(const folly::exception_wrapper& ew);
   void userExceptionWrapped(bool declared, const folly::exception_wrapper& ew);
 

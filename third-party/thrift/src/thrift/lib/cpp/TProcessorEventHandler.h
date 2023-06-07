@@ -124,6 +124,11 @@ class TProcessorEventHandler {
       void* /*ctx*/, const char* /*fn_name*/, uint32_t /*bytes*/) {}
 
   /**
+   * Called when an interaction is terminated.
+   */
+  virtual void onInteractionTerminate(void* /*ctx*/, int64_t /*id*/) {}
+
+  /**
    * Called if the handler throws an undeclared exception.
    */
   virtual void handlerError(void* /*ctx*/, const char* /*fn_name*/) {}

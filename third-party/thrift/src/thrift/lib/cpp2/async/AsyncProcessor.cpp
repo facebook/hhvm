@@ -175,6 +175,11 @@ void GeneratedAsyncProcessorBase::terminateInteraction(
 
   if (auto tile = conn.removeTile(id)) {
     Tile::__fbthrift_onTermination(std::move(tile), eb);
+    auto ctxStack =
+        getContextStack(getServiceName(), "#terminateInteraction", &conn);
+    if (ctxStack) {
+      ctxStack->onInteractionTerminate(id);
+    }
   }
 }
 

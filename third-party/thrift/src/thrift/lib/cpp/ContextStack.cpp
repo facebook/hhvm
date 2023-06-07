@@ -202,6 +202,15 @@ void ContextStack::postRead(
   }
 }
 
+void ContextStack::onInteractionTerminate(int64_t id) {
+  FOLLY_SDT(
+      thrift, thrift_context_stack_on_interaction_terminate, serviceName_, id);
+
+  for (size_t i = 0; i < handlers_->size(); i++) {
+    (*handlers_)[i]->onInteractionTerminate(contextAt(i), id);
+  }
+}
+
 void ContextStack::handlerErrorWrapped(const folly::exception_wrapper& ew) {
   FOLLY_SDT(
       thrift,

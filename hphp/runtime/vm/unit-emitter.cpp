@@ -749,7 +749,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   }
 
   if (RuntimeOption::EvalDumpHhas > 1 ||
-    (SystemLib::s_inited && RuntimeOption::EvalDumpHhas == 1)) {
+    (!isASystemLib() && RuntimeOption::EvalDumpHhas == 1)) {
     auto const& hhaspath = RuntimeOption::EvalDumpHhasToFile;
     if (!hhaspath.empty()) {
       static std::atomic<bool> first_unit{true};
@@ -763,7 +763,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
       std::printf("%s", disassemble(u.get()).c_str());
       std::fflush(stdout);
     }
-    if (SystemLib::s_inited) {
+    if (!isASystemLib()) {
       _Exit(0);
     }
   }

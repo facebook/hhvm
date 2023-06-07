@@ -75,8 +75,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
                                   RepoOptions::defaults());
     addUnit(phpUnit);
   }
-
-  SystemLib::s_inited = true;
 }
 
 RepoWrapper::~RepoWrapper() {

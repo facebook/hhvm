@@ -192,7 +192,7 @@ void FuncEmitter::init(int l1, int l2, Attr attrs_,
   attrs = fix_attrs(attrs_);
   docComment = docComment_;
 
-  if (!SystemLib::s_inited) assertx(attrs & AttrBuiltin);
+  assertx(!ue().isASystemLib() || attrs & AttrBuiltin);
 }
 
 void FuncEmitter::finish() {
@@ -223,7 +223,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (attrs & (AttrPersistent | AttrUnique) && !preClass) {
     if ((RuntimeOption::EvalJitEnableRenameFunction ||
          attrs & AttrInterceptable ||
-         (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
+         (!RuntimeOption::RepoAuthoritative && !ue().isASystemLib()))) {
       if (attrs & AttrBuiltin) {
         SystemLib::s_anyNonPersistentBuiltins = true;
       }

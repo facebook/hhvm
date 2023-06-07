@@ -793,7 +793,7 @@ void Func::def(Func* func) {
     f = ne->getCachedFunc();
     if (f == nullptr) {
       auto const persistent = func->isPersistent();
-      assertx(!persistent || (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
+      assertx(!persistent || (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
 
       if (!ne->m_cachedFunc.bound()) {
         ne->m_cachedFunc.bind(

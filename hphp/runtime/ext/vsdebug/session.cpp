@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/vsdebug/session.h"
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -161,19 +162,16 @@ void DebuggerSession::runDummy() {
   // it be listed in any user-visible thread list.
   m_debugger->setDummyThreadId((int64_t)Process::GetThreadId());
 
-  // While the main thread is starting up and preparing the system lib,
-  // the code emitter tags all newly compiled functions as "built in".
-  // If we pull in the startup document while this is happening, all functions
-  // in the startup doc get erroneously tagged as builtin, which breaks
-  // our stack traces later if any breakpoint is hit in a routine pulled in
-  // by the startup document (especially true of dummy evals with bps in them).
+  // While the main thread is starting up and preparing the system lib and
+  // extensions we want to make sure that finished before we pull in the startup
+  // document and execute that.
   //
   // Unfortunately there is no signal when this is complete, so we're going to
   // have to poll here. Wait for a maximum time and then proceed anyway.
   int pollCount = 0;
   constexpr int pollTimePerIterUs = 100 * 1000;
   constexpr int pollMaxTimeUs = 3 * 1000 * 1000;
-  while (!SystemLib::s_inited &&
+  while (!ExtensionRegistry::modulesInitialised() &&
          pollCount * pollTimePerIterUs < pollMaxTimeUs) {
 
     pollCount++;
@@ -187,10 +185,10 @@ void DebuggerSession::runDummy() {
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
-    "Polled %d times waiting for SystemLib::s_inited to be true. "
-      "(SystemLib::s_inited = %s)",
+    "Polled %d times waiting for ExtensionRegistry::modulesInitialised() to be "
+      "true. (ExtensionRegistry::modulesInitialised() = %s)",
     pollCount,
-    SystemLib::s_inited ? "TRUE" : "FALSE"
+    ExtensionRegistry::modulesInitialised() ? "TRUE" : "FALSE"
   );
 
   bool hookAttached = false;

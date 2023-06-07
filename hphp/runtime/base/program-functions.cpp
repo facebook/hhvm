@@ -1806,10 +1806,6 @@ static int execute_program_impl(int argc, char** argv) {
 
     if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
     else if (po.mode != "dumpcoverage") RuntimeOption::EvalVerifyOnly = true;
-    SystemLib::s_inited = true;
-
-    // Ensure write to SystemLib::s_inited is visible by other threads.
-    std::atomic_thread_fence(std::memory_order_release);
 
     auto const& defaults = RepoOptions::defaults();
     LazyUnitContentsLoader loader{
@@ -1995,11 +1991,6 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
-
-    SystemLib::s_inited = true;
-
-    // Ensure write to SystemLib::s_inited is visible by other threads.
-    std::atomic_thread_fence(std::memory_order_release);
 
     try {
       auto const file = [&] {

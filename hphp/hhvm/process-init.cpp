@@ -173,7 +173,6 @@ void ProcessInit() {
 #undef INIT_SYSTEMLIB_HH_CLASS_FIELD
 
   Stack::ValidateStackSize();
-  SystemLib::s_inited = true;
 
   RuntimeOption::AlwaysUseRelativePath = rp;
   RuntimeOption::SafeFileAccess = sf;

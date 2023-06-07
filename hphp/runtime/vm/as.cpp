@@ -1811,7 +1811,7 @@ void parse_coeffects_closure_parent_scope(AsmState& as) {
  * directive-coeffects_generator_this ';'
  */
 void parse_coeffects_generator_this(AsmState& as) {
-  assertx(!SystemLib::s_inited);
+  assertx(as.ue->isASystemLib());
   as.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
   as.in.expectWs(';');
 }
@@ -2393,7 +2393,7 @@ void check_native(AsmState& as) {
     if (as.fe->isNative) {
       auto info = as.fe->getNativeInfo();
       if (!info) {
-        if (SystemLib::s_inited) {
+        if (!as.ue->isASystemLib()) {
           // non-builtin native functions must have a valid binding
           as.error("No NativeFunctionInfo for function {}",
                    as.fe->nativeFullname());
@@ -2403,7 +2403,7 @@ void check_native(AsmState& as) {
         }
       }
     }
-    if (!SystemLib::s_inited) as.fe->attrs |= AttrBuiltin;
+    if (as.ue->isASystemLib()) as.fe->attrs |= AttrBuiltin;
   }
 }
 
@@ -2421,7 +2421,7 @@ void parse_function(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  if (!SystemLib::s_inited) {
+  if (as.ue->isASystemLib()) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
 
@@ -2480,7 +2480,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  if (!SystemLib::s_inited) attrs |= AttrBuiltin;
+  if (as.ue->isASystemLib()) attrs |= AttrBuiltin;
 
   int line0;
   int line1;
@@ -2876,7 +2876,7 @@ void parse_class(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
-  if (!SystemLib::s_inited) {
+  if (as.ue->isASystemLib()) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
 
@@ -3116,7 +3116,7 @@ void parse_alias(AsmState& as, bool case_type) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Alias, &userAttrs);
-  if (!SystemLib::s_inited) {
+  if (as.ue->isASystemLib()) {
     attrs |= AttrPersistent;
   }
   std::string name;
@@ -3174,7 +3174,7 @@ void parse_constant(AsmState& as) {
   as.in.skipWhitespace();
 
   Constant constant;
-  Attr attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
+  Attr attrs = as.ue->isASystemLib() ? AttrPersistent : AttrNone;
 
   std::string name;
   if (!as.in.readword(name)) {

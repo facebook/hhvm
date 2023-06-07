@@ -396,7 +396,7 @@ void Unit::merge() {
   if (UNLIKELY((m_mergeState.load(std::memory_order_relaxed) == MergeState::Unmerged))) {
     SimpleLock lock(unitInitLock);
     initialMerge();
-  } else if (!RuntimeOption::RepoAuthoritative && !SystemLib::s_inited && RuntimeOption::EvalJitEnableRenameFunction) {
+  } else if (!RuntimeOption::RepoAuthoritative && isSystemLib() && RuntimeOption::EvalJitEnableRenameFunction) {
     mergeTypes = MergeTypes::Function;
   }
 
@@ -420,7 +420,7 @@ void Unit::merge() {
     }
   }
 
-  if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
+  if (RuntimeOption::RepoAuthoritative || (isSystemLib() && !RuntimeOption::EvalJitEnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
   }
 }

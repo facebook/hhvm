@@ -221,14 +221,11 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 }
 
 void moduleInit() {
-  bool wasInited = SystemLib::s_inited;
   auto const wasDB = RuntimeOption::EvalDumpBytecode;
   RuntimeOption::EvalDumpBytecode &= ~1;
   SCOPE_EXIT {
-    SystemLib::s_inited = wasInited;
     RuntimeOption::EvalDumpBytecode = wasDB;
   };
-  SystemLib::s_inited = false;
   assertx(s_sorted);
   for (auto& ext : s_ordered) {
     ext->moduleInit();

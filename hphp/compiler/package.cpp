@@ -314,10 +314,6 @@ void Package::parseInit(const Config& config, FileMetaVec meta) {
   // extern-worker to do that for us.
   g_unit_emitter_cache_hook = nullptr;
 
-  // This is a lie, but a lot of stuff breaks if you don't set it to
-  // true (when false, everything assumes you're parsing systemlib).
-  SystemLib::s_inited = true;
-
   s_fileMetas = std::move(meta);
   s_fileMetasIdx = 0;
 }

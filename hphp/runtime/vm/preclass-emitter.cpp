@@ -80,7 +80,7 @@ void PreClassEmitter::init(int line1, int line2, Attr attrs,
   m_attrs = attrs;
   m_parent = parent;
   m_docComment = docComment;
-  if (!SystemLib::s_inited) {
+  if (ue().isASystemLib()) {
     m_attrs = m_attrs | AttrBuiltin;
   }
 }
@@ -220,7 +220,7 @@ const StaticString
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
-      !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
+      !RuntimeOption::RepoAuthoritative && !ue().isASystemLib()) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
@@ -256,7 +256,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs |= AttrInternalSoft;
   }
 
-  assertx(attrs & AttrPersistent || SystemLib::s_inited);
+  assertx(attrs & AttrPersistent || !ue().isASystemLib());
 
   auto pc = std::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_name,

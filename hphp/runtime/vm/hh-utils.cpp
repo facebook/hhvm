@@ -78,7 +78,7 @@ static RDS_LOCAL_NO_CHECK(bool, tl_doneAutoTypecheck)(true);
  *
  * More subtle is that we need to block auto-typechecking until the VM is fully
  * initalized, and systemlib is fully merged. In most cases, systemlib is
- * persistent, and we could check SystemLib::s_inited. However, if
+ * persistent, and we could check if the unit is part of systemlib. However, if
  * JitEnableRenameFunction is enabled, then systemlib has to actually be merged
  * every request -- and since much of systemlib is written in Hack, that would
  * trigger auto-typecheck. So we overload the meaning of tl_doneAutoTypecheck to

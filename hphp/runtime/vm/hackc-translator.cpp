@@ -40,6 +40,9 @@ using namespace HPHP::hackc::hhbc;
 
 
 struct TranslationState {
+
+  explicit TranslationState(bool isSystemLib): isSystemLib(isSystemLib) {}
+
   void enterCatch() {
     handler.push(fe->bcPos());
   }
@@ -119,6 +122,7 @@ struct TranslationState {
   uint32_t maxUnnamed{0};
   Location::Range srcLoc{-1,-1,-1,-1};
   std::vector<std::pair<hhbc::Label, Offset>> labelJumps;
+  bool isSystemLib{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -342,7 +346,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   UserAttributeMap userAttrs;
   translateUserAttributes(t.attributes, userAttrs);
   auto attrs = t.attrs;
-  if (!SystemLib::s_inited) attrs |= AttrPersistent;
+  if (ts.isSystemLib) attrs |= AttrPersistent;
   auto const name = toStaticString(t.name._0);
 
   auto const tis = range(t.type_info_union);
@@ -1175,7 +1179,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   translateUserAttributes(f.attributes, userAttrs);
 
   Attr attrs = f.attrs;
-  if (!SystemLib::s_inited) {
+  if (ts.isSystemLib) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
 
@@ -1219,7 +1223,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   translateShadowedTParams(shadowedTParams, m.body.shadowed_tparams);
 
   Attr attrs = m.attrs;
-  if (!SystemLib::s_inited) attrs |= AttrBuiltin;
+  if (ts.isSystemLib) attrs |= AttrBuiltin;
 
   auto const name = toStaticString(m.name._0);
   ts.fe = ts.ue->newMethodEmitter(name, ts.pce);
@@ -1266,7 +1270,7 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   ITRACE(2, "Translating attribute list {}\n", c.attributes.len);
   translateUserAttributes(c.attributes, userAttrs);
   auto attrs = c.flags;
-  if (!SystemLib::s_inited) attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+  if (ts.isSystemLib) attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
 
   auto const parentName = maybeOrElse(c.base,
     [&](ClassName& s) { return toStaticString(s._0); },
@@ -1322,7 +1326,7 @@ void translateAdata(TranslationState& ts, const hhbc::Adata& ad) {
 void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
   HPHP::Constant constant;
   constant.name = toStaticString(c.name._0);
-  constant.attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
+  constant.attrs = ts.isSystemLib ? AttrPersistent : AttrNone;
 
   constant.val = maybeOrElse(c.value,
     [&](hhbc::TypedValue& tv) {return toTypedValue(tv);},
@@ -1532,9 +1536,10 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  bool isSystemLib = FileUtil::isSystemName(sd->slice());
 
   try {
-    TranslationState ts{};
+    auto ts = TranslationState(isSystemLib);
     ts.ue = ue.get();
     translate(ts, unit);
     ue->finish();

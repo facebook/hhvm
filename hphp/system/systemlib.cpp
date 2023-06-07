@@ -94,7 +94,6 @@ Object createAndConstructThrowable(Class* cls, const Variant& message) {
 
 }
 
-bool s_inited = false;
 bool s_anyNonPersistentBuiltins = false;
 std::string s_source;
 Unit* s_unit = nullptr;

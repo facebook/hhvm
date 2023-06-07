@@ -246,7 +246,6 @@ const StaticString s_ChildClosure3("Closure$ChildClosure3");
 // A test program so we can actually test things involving object or
 // class types.
 Index make_index() {
-  assertx(SystemLib::s_inited);
   std::string const hhas = R"(
     # Technically this should be provided by systemlib, but it's the
     # only one we have to make sure the type system can see for unit

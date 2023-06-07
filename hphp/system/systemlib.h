@@ -79,7 +79,6 @@ namespace HPHP::SystemLib {
   x(Iterator)                   \
 /* */
 
-extern bool s_inited;
 extern bool s_anyNonPersistentBuiltins;
 extern std::string s_source;
 extern Unit* s_unit;

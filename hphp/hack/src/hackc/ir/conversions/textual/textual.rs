@@ -488,6 +488,11 @@ impl<'a> TextualFile<'a> {
                 self.write_expr(offset)?;
                 self.w.write_all(b"]")?;
             }
+            Expr::InstanceOf(ref expr, ref ty) => {
+                write!(self.w, "__sil_instanceof(")?;
+                self.write_expr(expr)?;
+                write!(self.w, ", <{}>)", ty.display(&self.strings))?;
+            }
             Expr::Sid(sid) => write!(self.w, "{}", FmtSid(sid))?,
             Expr::Var(ref var) => {
                 match var {
@@ -766,6 +771,8 @@ pub(crate) enum Expr {
     Field(Box<Expr>, Ty, String),
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
+    /// __sil_instanceof(expr, \<ty\>)
+    InstanceOf(Box<Expr>, Ty),
     Sid(Sid),
     Var(Var),
 }
@@ -1023,6 +1030,7 @@ impl FuncBuilder<'_, '_> {
         let expr = expr.into();
         match expr {
             Expr::Alloc(_)
+            | Expr::InstanceOf(..)
             | Expr::Const(_)
             | Expr::Deref(_)
             | Expr::Field(..)

@@ -139,12 +139,11 @@ function check_param_types(int $a, float $b, string $c): void {
 // TEST-CHECK-BAL: define $root.check_is_class
 // CHECK: define $root.check_is_class($this: *void, $a: *HackMixed) : *HackBool {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("C"))
-// CHECK:   n1: *HackMixed = load &$a
-// CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1))
-// CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
-// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-// CHECK:   ret n2
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   n1 = $builtins.hack_bool(__sil_instanceof(n0, <C>))
+// CHECK:   n2 = $builtins.hhbc_is_type_bool(n1)
+// CHECK:   n3 = $builtins.hhbc_verify_type_pred(n1, n2)
+// CHECK:   ret n1
 // CHECK: }
 function check_is_class(mixed $a): bool {
   return $a is C;

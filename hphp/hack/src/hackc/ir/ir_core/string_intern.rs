@@ -32,6 +32,10 @@ impl UnitBytesId {
         }
         D(self, strings)
     }
+
+    pub fn is_empty(self, strings: &StringInterner) -> bool {
+        strings.eq_str(self, "")
+    }
 }
 
 /// A string interner for associating IDs with unique string values.  If two

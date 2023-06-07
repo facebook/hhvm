@@ -12,7 +12,7 @@
 // CHECK:   jmp b5
 // CHECK:   .handlers b2
 // CHECK: #b2(n2: *HackMixed):
-// CHECK:   n3 = $builtins.hack_is_type(n2, $builtins.hack_string("Exception"))
+// CHECK:   n3 = $builtins.hack_bool(__sil_instanceof(n2, <Exception>))
 // CHECK:   jmp b3, b4
 // CHECK: #b3:
 // CHECK:   prune ! $builtins.hack_is_true(n3)

@@ -579,10 +579,6 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::InitProp(vid, pid, op, loc)) => {
                 self.init_prop(builder, vid, pid, op, loc)
             }
-            Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
-                let cid = builder.emit_constant(Constant::String(cid.id));
-                builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)
-            }
             Instr::Hhbc(Hhbc::IsTypeStructC([obj, ts], op, loc)) => {
                 let builtin = hack::Hhbc::IsTypeStructC;
                 let op = match op {
@@ -590,7 +586,7 @@ impl TransformInstr for LowerInstrs<'_> {
                     TypeStructResolveOp::Resolve => 1,
                     _ => unreachable!(),
                 };
-                match rewrite_null_type_check(builder, obj, ts, loc) {
+                match rewrite_constant_type_check(builder, obj, ts, loc) {
                     Some(null_check) => null_check,
                     None => {
                         let op = builder.emit_constant(Constant::Int(op));
@@ -846,9 +842,10 @@ fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
     LocalId::Named(name)
 }
 
-/// Hack's `is null`, `is nonnull` are encoded as full is_type_struct_c type-checks. This
-/// transformation detects if is_type_struct_c is a null-check and rewrites it accordingly.
-fn rewrite_null_type_check(
+/// `is_type_struct_c` is used to type-check (among other things) against _unresolved_ but known
+/// class name and for `is null`/`is nonnull` checks. This transformation detects such _constant_
+/// type-checks and rewrites them using a simpler form.
+fn rewrite_constant_type_check(
     builder: &mut FuncBuilder<'_>,
     obj: ValueId,
     typestruct: ValueId,
@@ -865,6 +862,16 @@ fn rewrite_null_type_check(
             let is_null = builder.emit_hhbc_builtin(hack::Hhbc::IsTypeNull, &[obj], loc);
             Some(builder.hhbc_builtin(hack::Hhbc::Not, &[is_null], loc))
         }
-        _ => None,
+        TypeStruct::Unresolved(clsid) => {
+            // TODO(arr): sometimes the class name here can be empty. This looks
+            // like a bug in VerifyRetTypeC handling which I plan to address
+            // separately.
+            if !clsid.id.is_empty(&builder.strings) {
+                let instr = Instr::Hhbc(Hhbc::InstanceOfD(obj, clsid, loc));
+                Some(instr)
+            } else {
+                None
+            }
+        }
     }
 }

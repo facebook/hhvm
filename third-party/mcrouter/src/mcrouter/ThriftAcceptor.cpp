@@ -43,7 +43,7 @@ std::shared_ptr<wangle::Acceptor> ThriftAcceptorFactory::newAcceptor(
         apache::thrift::ThriftServer& server,
         folly::EventBase* evb) {
       auto self = std::make_shared<ThriftAcceptor>(server);
-      self->construct(&server, nullptr, evb, nullptr);
+      self->construct(&server, evb, nullptr);
       return self;
     }
 

@@ -49,8 +49,8 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/util/check-size.h"
 #include "hphp/util/logger.h"

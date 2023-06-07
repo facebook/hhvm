@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 namespace HPHP {
 

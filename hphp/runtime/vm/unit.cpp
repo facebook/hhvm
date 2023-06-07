@@ -90,7 +90,7 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"

@@ -36,8 +36,8 @@
 #include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/extension-registry.h"

@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/vm-worker.h"
 
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"

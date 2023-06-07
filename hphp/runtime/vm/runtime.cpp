@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/conv-10.h"

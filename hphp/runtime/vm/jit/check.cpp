@@ -31,7 +31,7 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include <folly/Format.h>
 

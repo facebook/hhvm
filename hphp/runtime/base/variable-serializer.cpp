@@ -35,9 +35,9 @@
 #include "hphp/runtime/base/zend-string.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-data.h"

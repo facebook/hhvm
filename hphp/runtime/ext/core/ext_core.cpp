@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/core/ext_core.h"
+
 #include "hphp/runtime/ext/extension.h"
 
 #include "hphp/runtime/base/directory.h"
@@ -95,55 +97,56 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
   return getDir<ArrayDirectory>(ObjNR(this_).asObject())->size();
 }
 
-static struct CoreExtension final : Extension {
-  CoreExtension() : Extension("core", "1.0", "hhvm") { }
-  void moduleInit() override {
-    HHVM_ME(DirectoryIterator, hh_readdir);
-    HHVM_ME(GlobIterator, count);
+void CoreExtension::moduleInit() {
+  initClosure();
 
-    loadSystemlib();
+  HHVM_ME(DirectoryIterator, hh_readdir);
+  HHVM_ME(GlobIterator, count);
 
-    SystemLib::s_nullFunc =
-      Func::lookup(makeStaticString("__SystemLib\\__86null"));
+  loadSystemlib();
+
+  SystemLib::s_nullFunc =
+    Func::lookup(makeStaticString("__SystemLib\\__86null"));
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                   \
-    {                                                                     \
-      Class *cls = NamedType::get(s_##cls.get())->clsList();              \
-      assert(cls);                                                        \
-      SystemLib::s_##cls##Class = cls;                                    \
-    }
+  {                                                                     \
+    Class *cls = NamedType::get(s_##cls.get())->clsList();              \
+    assert(cls);                                                        \
+    SystemLib::s_##cls##Class = cls;                                    \
+  }
 
-    INIT_SYSTEMLIB_CLASS_FIELD(Throwable)
-    INIT_SYSTEMLIB_CLASS_FIELD(BaseException)
-    INIT_SYSTEMLIB_CLASS_FIELD(Error)
-    INIT_SYSTEMLIB_CLASS_FIELD(ArithmeticError)
-    INIT_SYSTEMLIB_CLASS_FIELD(ArgumentCountError)
-    INIT_SYSTEMLIB_CLASS_FIELD(AssertionError)
-    INIT_SYSTEMLIB_CLASS_FIELD(DivisionByZeroError)
-    INIT_SYSTEMLIB_CLASS_FIELD(DivisionByZeroException)
-    INIT_SYSTEMLIB_CLASS_FIELD(ParseError)
-    INIT_SYSTEMLIB_CLASS_FIELD(TypeError)
-    INIT_SYSTEMLIB_CLASS_FIELD(MethCallerHelper)
-    INIT_SYSTEMLIB_CLASS_FIELD(DynMethCallerHelper)
+  INIT_SYSTEMLIB_CLASS_FIELD(Throwable)
+  INIT_SYSTEMLIB_CLASS_FIELD(BaseException)
+  INIT_SYSTEMLIB_CLASS_FIELD(Error)
+  INIT_SYSTEMLIB_CLASS_FIELD(ArithmeticError)
+  INIT_SYSTEMLIB_CLASS_FIELD(ArgumentCountError)
+  INIT_SYSTEMLIB_CLASS_FIELD(AssertionError)
+  INIT_SYSTEMLIB_CLASS_FIELD(DivisionByZeroError)
+  INIT_SYSTEMLIB_CLASS_FIELD(DivisionByZeroException)
+  INIT_SYSTEMLIB_CLASS_FIELD(ParseError)
+  INIT_SYSTEMLIB_CLASS_FIELD(TypeError)
+  INIT_SYSTEMLIB_CLASS_FIELD(MethCallerHelper)
+  INIT_SYSTEMLIB_CLASS_FIELD(DynMethCallerHelper)
 
-    // Stash a pointer to the VM Classes for stdClass, Exception,
-    // pinitSentinel and resource
-    SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
+  // Stash a pointer to the VM Classes for stdClass, Exception,
+  // pinitSentinel and resource
+  SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
 
 #define INIT_SYSTEMLIB_HH_CLASS_FIELD(cls)                                \
-    {                                                                     \
-      Class *cls = NamedType::get(s_HH_##cls.get())->clsList();           \
-      assert(cls);                                                        \
-      SystemLib::s_HH_##cls##Class = cls;                                 \
-    }
+  {                                                                     \
+    Class *cls = NamedType::get(s_HH_##cls.get())->clsList();           \
+    assert(cls);                                                        \
+    SystemLib::s_HH_##cls##Class = cls;                                 \
+  }
 
-    // Stash a pointer to the VM Classes for various HH namespace classes
-    SYSTEMLIB_HH_CLASSES(INIT_SYSTEMLIB_HH_CLASS_FIELD)
+  // Stash a pointer to the VM Classes for various HH namespace classes
+  SYSTEMLIB_HH_CLASSES(INIT_SYSTEMLIB_HH_CLASS_FIELD)
 
 #undef INIT_SYSTEMLIB_HH_CLASS_FIELD
-  }
-} s_core_extension;
+}
+
+CoreExtension s_core_extension;
 
 }

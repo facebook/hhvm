@@ -15,14 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/runtime/ext/std/ext_std.h"
+#include "hphp/runtime/ext/core/ext_core.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
@@ -250,7 +250,7 @@ ObjectData* c_Closure::clone() {
   return ret;
 }
 
-void StandardExtension::loadClosure() {
+void CoreExtension::initClosure() {
   Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
 }
 

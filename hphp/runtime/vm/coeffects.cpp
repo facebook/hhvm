@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 #include "hphp/util/blob-encoder.h"

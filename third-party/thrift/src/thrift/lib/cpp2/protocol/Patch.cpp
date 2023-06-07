@@ -236,11 +236,7 @@ void ApplyPatch::operator()(
   checkOps(
       patch,
       Value::Type::listValue,
-      {PatchOp::Assign,
-       PatchOp::Clear,
-       PatchOp::PatchPrior,
-       PatchOp::Add,
-       PatchOp::Put});
+      {PatchOp::Assign, PatchOp::Clear, PatchOp::Add, PatchOp::Put});
   if (applyAssign<type::list_c>(patch, value)) {
     return; // Ignore all other ops.
   }
@@ -248,26 +244,6 @@ void ApplyPatch::operator()(
   if (auto* clear = findOp(patch, PatchOp::Clear)) {
     if (argAs<type::bool_t>(*clear)) {
       value.clear();
-    }
-  }
-
-  if (auto* elementPatches = findOp(patch, PatchOp::PatchPrior)) {
-    const auto* indexPatches = elementPatches->if_map();
-    if (!indexPatches) {
-      throw std::runtime_error("list patch should contain a map");
-    }
-
-    for (const auto& [idx, elPatch] : *indexPatches) {
-      const auto* indexPtr = idx.if_i32();
-      if (!indexPtr) {
-        throw std::runtime_error("expected index as i32");
-      }
-
-      auto index = type::toPosition(
-          type::Ordinal(apache::thrift::util::zigzagToI32(*indexPtr)));
-      if (index >= 0 && static_cast<size_t>(index) < value.size()) {
-        applyPatch(*elPatch.objectValue_ref(), value[index]);
-      }
     }
   }
 

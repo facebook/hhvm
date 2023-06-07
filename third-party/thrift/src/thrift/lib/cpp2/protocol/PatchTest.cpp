@@ -406,46 +406,6 @@ TEST_F(PatchTest, List) {
     expectNoop(patchObj);
   }
 
-  // PatchPrior
-  {
-    auto elementPatchValue = asValueStruct<type::binary_t>("best");
-    Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() =
-        makePatch(op::PatchOp::Put, elementPatchValue);
-    Value listElementPatch;
-    int32_t zigZag = apache::thrift::util::i32ToZigzag(
-        static_cast<int32_t>(type::toOrdinal(0)));
-    listElementPatch.mapValue_ref()
-        .ensure()[asValueStruct<type::i32_t>(zigZag)] = fieldPatchValue;
-    auto patchObj = makePatch(op::PatchOp::PatchPrior, listElementPatch);
-    auto patched = *applyContainerPatch(patchObj, value).listValue_ref();
-    EXPECT_EQ(
-        std::vector<Value>{asValueStruct<type::binary_t>("testbest")}, patched);
-    // It is a map mask as Patch can't distinguish between list and map.
-    {
-      auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      EXPECT_EQ(((Value*)mask.begin()->first)->as_i32(), zigZag);
-      EXPECT_EQ(mask.begin()->second, allMask());
-    }
-    {
-      auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      EXPECT_EQ(mask.begin()->first, zigZag);
-      EXPECT_EQ(mask.begin()->second, allMask());
-    }
-  }
-  {
-    auto emptyMapValue =
-        asValueStruct<type::map<type::i32_t, type::binary_t>>({});
-    Object patchObj = makePatch(op::PatchOp::PatchPrior, emptyMapValue);
-    expectNoop(patchObj);
-  }
-
   // Prepend
   {
     auto expected = *patchValue.listValue_ref();

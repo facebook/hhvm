@@ -37,6 +37,10 @@ cdef extern from "thrift/compiler/diagnostic.h" namespace "apache::thrift::compi
     cdef cppclass diagnostic_results:
         vector[diagnostic] diagnostics()
 
+cdef extern from "thrift/compiler/source_location.h" namespace "apache::thrift::compiler":
+    cdef cppclass source_manager:
+        source_manager() except +
+
 cdef extern from "thrift/compiler/compiler.h" namespace "apache::thrift::compiler":
     cpdef enum class CompileRetcode "apache::thrift::compiler::compile_retcode":
         success
@@ -46,7 +50,8 @@ cdef extern from "thrift/compiler/compiler.h" namespace "apache::thrift::compile
         CompileRetcode retcode
         diagnostic_results detail
 
-    cdef compile_result compile(vector[string]) except +
+    cdef compile_result compile(vector[string], source_manager) except +
+
 
 DiagnosticMessage = namedtuple(
     'DiagnosticMessage',
@@ -54,7 +59,8 @@ DiagnosticMessage = namedtuple(
 )
 
 def thrift_compile(vector[string] args):
-    result = compile(args)
+    s_mgr = source_manager()
+    result = compile(args, s_mgr)
 
     py_messages = []
     it = result.detail.diagnostics().const_begin()

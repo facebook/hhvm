@@ -81,7 +81,8 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
 /**
  * Runs the Thrift compiler with the specified (command-line) arguments.
  */
-compile_result compile(const std::vector<std::string>& arguments);
+compile_result compile(
+    const std::vector<std::string>& arguments, source_manager& sm);
 
 } // namespace compiler
 } // namespace thrift

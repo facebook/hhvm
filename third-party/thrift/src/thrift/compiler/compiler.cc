@@ -503,7 +503,8 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
   return parse_ast(sm, ctx, filename, std::move(pparams));
 }
 
-compile_result compile(const std::vector<std::string>& arguments) {
+compile_result compile(
+    const std::vector<std::string>& arguments, source_manager& source_mgr) {
   compile_result result;
 
   // Parse arguments.
@@ -514,7 +515,6 @@ compile_result compile(const std::vector<std::string>& arguments) {
   if (input_filename.empty()) {
     return result;
   }
-  source_manager source_mgr;
   diagnostic_context ctx(source_mgr, result.detail, std::move(dparams));
 
   // Parse it!

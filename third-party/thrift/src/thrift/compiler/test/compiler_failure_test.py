@@ -113,34 +113,6 @@ class CompilerFailureTest(unittest.TestCase):
         )
         self.assertEqual(ret, 1)
 
-    def test_zero_as_field_id(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                struct Foo {
-                    0: i32 field;
-                    1: list<i32> other;
-                }
-                """
-            ),
-        )
-        ret, out, err = self.run_thrift("foo.thrift")
-        self.assertEqual(
-            err,
-            "[WARNING:foo.thrift:2] Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.\n"
-            "[WARNING:foo.thrift:2] No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!\n",
-        )
-        self.assertEqual(ret, 0)
-
-        ret, out, err = self.run_thrift("--allow-neg-keys", "foo.thrift")
-        self.assertEqual(
-            err,
-            "[WARNING:foo.thrift:2] Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).\n"
-            "[ERROR:foo.thrift:2] Zero value (0) not allowed as a field id for `field`\n",
-        )
-        self.assertEqual(ret, 1)
-
     def test_zero_as_field_id_allowed(self):
         write_file(
             "foo.thrift",

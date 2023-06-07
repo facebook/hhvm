@@ -16,7 +16,7 @@
 
 #include <thrift/compiler/test/compiler.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::compiler::test::check_compile;
 
@@ -43,4 +43,26 @@ TEST(CompilerTest, missing_type_definition) {
         2: myStruct ms; # expected-error: Type `test.myStruct` not defined.
       }
 )");
+}
+
+TEST(CompilerTest, zero_as_field_id) {
+  check_compile(R"(
+    struct Foo {
+        0: i32 field; #expected-warning: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
+                      #expected-warning@3:  No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
+        1: list<i32> other;
+    }
+)");
+}
+
+TEST(CompilerTest, zero_as_field_id_neg_keys) {
+  check_compile(
+      R"(
+    struct Foo {
+        0: i32 field; #expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).
+                      #expected-error@-1: Zero value (0) not allowed as a field id for `field`
+        1: list<i32> other;
+    }
+)",
+      {"--allow-neg-keys"});
 }

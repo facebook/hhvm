@@ -17,9 +17,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace apache::thrift::compiler::test {
 
 void check_compile(const std::string& source);
+void check_compile(const std::string& source, std::vector<std::string> args);
 
 } // namespace apache::thrift::compiler::test

@@ -16,11 +16,13 @@
 
 #include <thrift/compiler/test/compiler.h>
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <re2/re2.h>
 
-#include <folly/portability/GTest.h>
+#include <boost/filesystem.hpp>
+#include <gtest/gtest.h>
 
 #include <thrift/compiler/compiler.h>
 #include <thrift/compiler/diagnostic.h>
@@ -28,12 +30,18 @@
 
 namespace apache::thrift::compiler::test {
 
-using apache::thrift::compiler::diagnostic;
-using apache::thrift::compiler::diagnostic_level;
-using apache::thrift::compiler::diagnostic_results;
-using apache::thrift::compiler::parse_and_mutate_program;
-using apache::thrift::compiler::source_manager;
-using apache::thrift::compiler::t_program_bundle;
+struct temp_dir {
+  boost::filesystem::path dir;
+
+  temp_dir() {
+    dir = boost::filesystem::temp_directory_path() /
+        boost::filesystem::unique_path();
+    boost::filesystem::create_directory(dir);
+  }
+
+  ~temp_dir() { boost::filesystem::remove_all(dir); }
+  std::string string() const { return dir.string(); }
+};
 
 std::vector<diagnostic> extract_expected_diagnostics(
     const std::string_view& source, const std::string& file_name) {
@@ -42,18 +50,29 @@ std::vector<diagnostic> extract_expected_diagnostics(
   for (auto it = source.begin(); it != source.end();) {
     auto line_end = std::find(it, source.end(), '\n');
 
-    re2::StringPiece input(&*it, line_end - it);
-    re2::StringPiece type_match, message_match;
+    re2::StringPiece line(&*it, line_end - it);
+    re2::StringPiece type_match, message_match, line_num_match;
     re2::RE2 diagnostic_pattern(
-        "#\\s*expected-(?P<type>error|warning):\\s*(?P<message>.*)$");
+        "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?:\\s*(?P<message>.*)$");
 
     if (re2::RE2::PartialMatch(
-            input, diagnostic_pattern, &type_match, &message_match)) {
+            line,
+            diagnostic_pattern,
+            &type_match,
+            &line_num_match,
+            &message_match)) {
       diagnostic_level level = type_match.as_string() == "error"
           ? diagnostic_level::error
           : diagnostic_level::warning;
+      auto ln_no_str = line_num_match.as_string();
+      int line_num = line_number;
+      if (!ln_no_str.empty()) {
+        line_num = (ln_no_str.at(0) == '+' || ln_no_str.at(0) == '-')
+            ? line_num + std::stoi(ln_no_str)
+            : std::stoi(ln_no_str);
+      }
       result.emplace_back(
-          level, message_match.as_string(), file_name, line_number);
+          level, message_match.as_string(), file_name, line_num);
     }
 
     if (line_end == source.end()) {
@@ -65,24 +84,45 @@ std::vector<diagnostic> extract_expected_diagnostics(
   return result;
 }
 
-void check_compile(const std::string& source) {
+void check_compile(const std::string& source, std::vector<std::string> args) {
   const std::string TEST_FILE_NAME = "test.thrift";
   source_manager smgr;
+  temp_dir tmp_dir;
   smgr.add_virtual_file(TEST_FILE_NAME, source);
 
   std::vector<diagnostic> extracted_diagnostics =
       extract_expected_diagnostics(source, TEST_FILE_NAME);
-  std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
-      parsed_results = parse_and_mutate_program(smgr, TEST_FILE_NAME, {});
-  auto diagnostics = parsed_results.second.diagnostics();
+  compile_retcode expected_ret_code = compile_retcode::success;
+  for (const auto& diag : extracted_diagnostics) {
+    if (diag.level() == diagnostic_level::error) {
+      expected_ret_code = compile_retcode::failure;
+      break;
+    }
+  }
+
+  args.insert(args.begin(), "thrift_binary"); // Ignored argument
+  args.emplace_back("--gen"); // generator arg
+  args.emplace_back("mstch_cpp2"); // target language
+  args.emplace_back("-o"); // output directory
+  args.emplace_back(tmp_dir.string() + "/");
+  args.emplace_back(TEST_FILE_NAME); // input file name
+
+  compile_result result = compile(args, smgr);
+  EXPECT_EQ(expected_ret_code, result.retcode);
+
+  auto diagnostics = result.detail.diagnostics();
   std::sort(
       diagnostics.begin(),
       diagnostics.end(),
       [](const diagnostic& diag1, const diagnostic& diag2) {
         return diag1.lineno() < diag2.lineno();
       });
-
   EXPECT_EQ(diagnostics, extracted_diagnostics);
+}
+
+void check_compile(const std::string& source) {
+  std::vector<std::string> args;
+  check_compile(source, args);
 }
 
 } // namespace apache::thrift::compiler::test

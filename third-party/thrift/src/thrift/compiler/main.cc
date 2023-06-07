@@ -30,7 +30,8 @@
 using namespace apache::thrift::compiler;
 
 int main(int argc, char** argv) {
-  auto result = compile({argv, argv + argc});
+  source_manager sm;
+  auto result = compile({argv, argv + argc}, sm);
   for (const auto& diag : result.detail.diagnostics()) {
     std::cerr << diag << "\n";
   }

@@ -20,6 +20,16 @@ The case type `ArrayData` cannot be decomposed because it contains overlapping v
   vec_or_dict<arraykey, |()>
   File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
   vec<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 4, characters 11-19:
+The case type `ArrayData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 5, characters 5-30:
+  `AnyArray<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 7, characters 5-26:
+  `dict<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 8, characters 5-19:
+  `keyset<|()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 9, characters 5-16:
+  `vec<|()>` cannot be recovered
 File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
 The case type `ContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 12, characters 5-22:
@@ -38,6 +48,10 @@ The case type `ContainerData` cannot be decomposed because it contains overlappi
   Container<|()>
   File "case_type_overlapping_variants_special_interfaces.php", line 15, characters 5-16:
   vec<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 11, characters 11-23:
+The case type `ContainerData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 13, characters 5-26:
+  `dict<|(), |()>` cannot be recovered
 File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
 The case type `KeyedContainerData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
@@ -50,6 +64,14 @@ The case type `KeyedContainerData` cannot be decomposed because it contains over
   KeyedContainer<|(), |()>
   File "case_type_overlapping_variants_special_interfaces.php", line 20, characters 5-19:
   keyset<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 17, characters 11-28:
+The case type `KeyedContainerData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 18, characters 5-36:
+  `KeyedContainer<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 19, characters 5-26:
+  `dict<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 20, characters 5-19:
+  `keyset<|()>` cannot be recovered
 File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
 The case type `TraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 24, characters 5-24:
@@ -68,6 +90,10 @@ The case type `TraversableData` cannot be decomposed because it contains overlap
   Traversable<|()>
   File "case_type_overlapping_variants_special_interfaces.php", line 27, characters 5-16:
   vec<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 23, characters 11-25:
+The case type `TraversableData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 25, characters 5-26:
+  `dict<|(), |()>` cannot be recovered
 File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
 The case type `KeyedTraversableData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `dict`: (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
@@ -80,6 +106,14 @@ The case type `KeyedTraversableData` cannot be decomposed because it contains ov
   KeyedTraversable<|(), |()>
   File "case_type_overlapping_variants_special_interfaces.php", line 32, characters 5-19:
   keyset<|()>
+File "case_type_overlapping_variants_special_interfaces.php", line 29, characters 11-30:
+The case type `KeyedTraversableData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 30, characters 5-38:
+  `KeyedTraversable<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 31, characters 5-26:
+  `dict<|(), |()>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 32, characters 5-19:
+  `keyset<|()>` cannot be recovered
 File "case_type_overlapping_variants_special_interfaces.php", line 35, characters 11-23:
 The case type `StringishData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `string`: (Typing[4475])
   File "case_type_overlapping_variants_special_interfaces.php", line 36, characters 5-13:
@@ -122,3 +156,11 @@ The case type `XhpData` cannot be decomposed because it contains overlapping var
   XHPChild
   File "case_type_overlapping_variants_special_interfaces.php", line 44, characters 5-12:
   vec<int>
+File "case_type_overlapping_variants_special_interfaces.php", line 39, characters 11-17:
+The case type `XhpData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_special_interfaces.php", line 44, characters 5-12:
+  `vec<int>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 45, characters 5-15:
+  `keyset<int>` cannot be recovered
+  File "case_type_overlapping_variants_special_interfaces.php", line 46, characters 5-18:
+  `dict<int, int>` cannot be recovered

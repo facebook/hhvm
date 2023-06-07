@@ -76,6 +76,12 @@ The case type `DictData` cannot be decomposed because it contains overlapping va
   nonnull
   File "case_type_overlapping_variants_arrays.php", line 7, characters 5-21:
   (function(): void)
+File "case_type_overlapping_variants_arrays.php", line 4, characters 11-18:
+The case type `DictData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 8, characters 5-22:
+  `TypeStructure<int>` cannot be recovered
+  File "case_type_overlapping_variants_arrays.php", line 10, characters 5-18:
+  `dict<int, int>` cannot be recovered
 File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
 The case type `KeysetData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
   File "case_type_overlapping_variants_arrays.php", line 13, characters 5-9:
@@ -150,6 +156,10 @@ The case type `KeysetData` cannot be decomposed because it contains overlapping 
   nonnull
   File "case_type_overlapping_variants_arrays.php", line 15, characters 5-21:
   (function(): void)
+File "case_type_overlapping_variants_arrays.php", line 12, characters 11-20:
+The case type `KeysetData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 16, characters 5-15:
+  `keyset<int>` cannot be recovered
 File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
 The case type `VecData` cannot be decomposed because it contains overlapping variant types. The following types share the same runtime data type `bool`: (Typing[4475])
   File "case_type_overlapping_variants_arrays.php", line 19, characters 5-9:
@@ -226,3 +236,7 @@ The case type `VecData` cannot be decomposed because it contains overlapping var
   (int, int)
   File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
   vec<int>
+File "case_type_overlapping_variants_arrays.php", line 18, characters 11-17:
+The case type `VecData` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_overlapping_variants_arrays.php", line 23, characters 5-12:
+  `vec<int>` cannot be recovered

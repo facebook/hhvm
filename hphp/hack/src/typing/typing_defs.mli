@@ -184,6 +184,7 @@ type expand_env = {
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
+  sub_wildcards: bool;
 }
 
 val empty_expand_env : expand_env

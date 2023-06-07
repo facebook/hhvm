@@ -10161,3 +10161,20 @@ let expr_with_pure_coeffects ?expected env e =
 
 let stmt env st =
   Typing_env.with_origin env Decl_counters.Body (fun env -> stmt env st)
+
+let refine_hint ~pos ~reason env union_ty hint =
+  let h = Decl_hint.hint env.Typing_env_types.decl_env hint in
+  let ety_env =
+    { Typing_defs.empty_expand_env with Typing_defs.sub_wildcards = true }
+  in
+  let ((env, _errors), refining_ty) = Phase.localize env h ~ety_env in
+
+  let (env, rty) = Env.expand_type env refining_ty in
+  refine_and_simplify_intersection
+    ~hint_first:false
+    env
+    pos
+    reason
+    (fst hint)
+    union_ty
+    rty

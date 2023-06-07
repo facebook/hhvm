@@ -626,8 +626,16 @@ and localize_targs_by_kind
 
 and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     =
-  match deref ty with
-  | (r, Tapply ((pos, x), _argl)) when String.equal x SN.Typehints.wildcard ->
+  let use_wild_card =
+    match deref ty with
+    | (_, Tapply ((_pos, x), _argl)) when String.equal x SN.Typehints.wildcard
+      ->
+      true
+    | _ -> ety_env.sub_wildcards
+  in
+  if use_wild_card then
+    let r = get_reason ty in
+    let pos = get_pos ty in
     let r = Typing_reason.localize r in
     let (name, kind) = nkind in
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
@@ -695,7 +703,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
       in
       let ty_err_opt = Typing_error.multiple_opt ty_errs in
       ((env, ty_err_opt, ety_env), ty_fresh)
-  | _ ->
+  else
     let ((env, ty_err_opt), ty) =
       localize_with_kind ~ety_env env ty (snd nkind)
     in

@@ -326,6 +326,7 @@ type expand_env = {
        * set to an expression dependent type if appropriate
        *)
   on_error: Typing_error.Reasons_callback.t option;
+  sub_wildcards: bool;
 }
 
 let empty_expand_env =
@@ -336,6 +337,7 @@ let empty_expand_env =
     this_ty =
       mk (Reason.none, Tgeneric (Naming_special_names.Typehints.this, []));
     on_error = None;
+    sub_wildcards = false;
   }
 
 let empty_expand_env_with_on_error on_error =

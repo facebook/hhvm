@@ -407,6 +407,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Returns the patch that for the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& patchByKey(K&& key) {
+    ensurePatchable();
     if (data_.remove()->count(key)) {
       // We are going to delete key, thus patchByKey is no-op and we return a
       // dummy patch.
@@ -518,8 +519,18 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
+  // If field has assign, we need to replace it with clear && add
+  void ensurePatchable() {
+    if (hasAssign()) {
+      data_.clear() = true;
+      data_.add() = std::move(*data_.assign());
+      data_.assign().reset();
+    }
+  }
+
   using Base::assignOr;
   using Base::data_;
+  using Base::hasAssign;
 
   VP dummy_;
 };

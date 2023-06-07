@@ -476,10 +476,9 @@ TEST(StructPatchTest, MapPatch) {
   assignPatch.put({{"a", "1"}, {"b", "2"}});
   assignPatch.insert_or_assign("b", "3");
   assignPatch.insert_or_assign("c", "4");
-  EXPECT_EQ(
-      *assignPatch.toThrift().assign(),
-      (std::map<std::string, std::string>(
-          {{"a", "1"}, {"b", "3"}, {"c", "4"}})));
+  test::expectPatch(assignPatch, {}, {{"a", "1"}, {"b", "3"}, {"c", "4"}});
+  assignPatch.patchByKey("a") += "2";
+  test::expectPatch(assignPatch, {}, {{"a", "12"}, {"b", "3"}, {"c", "4"}});
 
   MapPatch addPatch;
   addPatch.add({{"a", "1"}, {"b", "2"}});

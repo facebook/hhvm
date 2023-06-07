@@ -57,6 +57,7 @@ namespace HPHP::SystemLib {
   x(Serializable)                               \
   x(ArrayAccess)                                \
   x(ArrayIterator)                              \
+  x(DirectoryIterator)                          \
   x(IteratorAggregate)                          \
   x(Countable)                                  \
   x(LazyKVZipIterable)                          \

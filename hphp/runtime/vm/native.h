@@ -141,15 +141,6 @@ struct Extension;
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
 
-/* special case when we're registering info for a method defined in
- * s_systemNativeFuncs, instead of the current Extension
- */
-#define HHVM_SYS_FE(fn)\
-  HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), Native::s_systemNativeFuncs)
-#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) \
-  REGISTER_NATIVE_FUNC(Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
-#define HHVM_SYS_ME(cn,fn) HHVM_NAMED_SYS_ME(cn,fn, HHVM_MN(cn,fn))
-
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class static methods.
  *
@@ -558,10 +549,6 @@ registerNativeFunc(FuncTable& nativeFuncs, const char* name,
 const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func);
-
-// NativeFunctionInfo for native funcs and methods defined under
-// system/php, separate from normal extensions.
-extern FuncTable s_systemNativeFuncs;
 
 // A permanently empty table, used in contexts were no native bindings
 // are possible (most ordinary code).

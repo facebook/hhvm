@@ -65,16 +65,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
-
-  auto const phpLib = get_systemlib();
-  if (!phpLib.empty()) {
-    auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
-                                  "systemlib.php",
-                                  Native::s_systemNativeFuncs,
-                                  nullptr,
-                                  RepoOptions::defaults());
-    addUnit(phpUnit);
-  }
 }
 
 RepoWrapper::~RepoWrapper() {

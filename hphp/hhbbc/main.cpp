@@ -647,7 +647,7 @@ void process_init(const Options& o,
   // RuntimeOptions.
   gd.load(false);
 
-  register_process_init(!fullInit);
+  register_process_init();
   hphp_process_init(!fullInit);
   SCOPE_FAIL { hphp_process_exit(); };
 

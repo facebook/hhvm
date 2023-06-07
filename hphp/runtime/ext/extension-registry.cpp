@@ -221,11 +221,23 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 }
 
 void moduleInit() {
-  auto const wasDB = RuntimeOption::EvalDumpBytecode;
+  auto db = RuntimeOption::EvalDumpBytecode;
+  auto rp = RuntimeOption::AlwaysUseRelativePath;
+  auto sf = RuntimeOption::SafeFileAccess;
+  auto ah = RuntimeOption::EvalAllowHhas;
+
   RuntimeOption::EvalDumpBytecode &= ~1;
+  RuntimeOption::AlwaysUseRelativePath = false;
+  RuntimeOption::SafeFileAccess = false;
+  RuntimeOption::EvalAllowHhas = true;
+
   SCOPE_EXIT {
-    RuntimeOption::EvalDumpBytecode = wasDB;
+    RuntimeOption::EvalDumpBytecode = db;
+    RuntimeOption::AlwaysUseRelativePath = rp;
+    RuntimeOption::SafeFileAccess = sf;
+    RuntimeOption::EvalAllowHhas = ah;
   };
+
   assertx(s_sorted);
   for (auto& ext : s_ordered) {
     ext->moduleInit();
@@ -359,11 +371,26 @@ static void sortDependencies() {
   Extension::DependencySet resolved;
   Extension::DependencySetMap unresolved;
 
+  // First put core at the beginning of the list
+  {
+    auto kv = s_exts->find("core");
+    // core has to exist
+    always_assert(kv != s_exts->end());
+    auto ext = kv->second;
+    // core can not have dependencies
+    always_assert(ext->getDeps().empty());
+    s_ordered.push_back(ext);
+    resolved.insert(kv->first);
+  }
+
   // First pass, identify the easy(common) case of modules
-  // with no dependencies and put that at the front of the list
+  // with no dependencies and put that at the front of the list but skip core
   // defer all other for slower resolution
   for (auto& kv : (*s_exts)) {
     auto ext = kv.second;
+    if (kv.first.compare("core") == 0) {
+      continue;
+    }
     auto deps = ext->getDeps();
     if (deps.empty()) {
       s_ordered.push_back(ext);

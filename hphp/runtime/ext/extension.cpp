@@ -82,7 +82,11 @@ namespace {
   ) {
     assertx(!name.empty());
     std::string section("ext.");
-    section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
+    if (name.length() > 12) {
+      section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
+    } else {
+      section += name;
+    }
     return get_systemlib(section, dsoName);
   }
 }

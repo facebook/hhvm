@@ -82,7 +82,7 @@ time_t start_time();
 
 struct ExecutionContext;
 
-void hphp_process_init(bool skipModules = false);
+void hphp_process_init(bool skipExtensions = false);
 void cli_client_init();
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport = nullptr);
@@ -123,7 +123,7 @@ void hphp_memory_cleanup();
 void hphp_session_exit(Transport* transport = nullptr);
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(const std::string &section = "systemlib",
+std::string get_systemlib(const std::string &section = "ext.core",
                           const std::string &filename = "");
 
 // Helper function for stats tracking with exceptions.

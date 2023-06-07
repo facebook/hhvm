@@ -1,6 +1,10 @@
 #!/bin/sh
 
-SYSTEMLIB=$1; shift
+OUTDIR=$1; shift
+OUTFILE=$1; shift
+SYSTEMLIB="${OUTDIR}/${OUTFILE}"
+
+mkdir "${OUTDIR}"
 
 # If we put the line we're generating into this file, then the linter will think
 # the generator itself is generated.  Encode it into a variable for safe

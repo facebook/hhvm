@@ -1382,8 +1382,6 @@ StaticString
   s_stdClass("stdClass");
 
 void ExecutionContext::requestInit() {
-  assertx(SystemLib::s_unit);
-
   initBlackHole();
   createGlobalNVTable();
   vmStack().requestInit();
@@ -1412,11 +1410,7 @@ void ExecutionContext::requestInit() {
    * persistent.
    */
   if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
-    SystemLib::s_unit->merge();
     SystemLib::mergePersistentUnits();
-  } else {
-    // System units are merge only, and everything is persistent.
-    assertx(SystemLib::s_unit->isEmpty());
   }
 
   assertx(!ImplicitContext::activeCtx.isInit());

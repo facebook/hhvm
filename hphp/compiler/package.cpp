@@ -307,7 +307,7 @@ void Package::parseInit(const Config& config, FileMetaVec meta) {
 
   // Inhibit extensions and systemlib from being initialized. It
   // takes a while and we don't need it.
-  register_process_init(true);
+  register_process_init();
   hphp_process_init(true);
 
   // Don't use unit emitter's caching here, we're relying on

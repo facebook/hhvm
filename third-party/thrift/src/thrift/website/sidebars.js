@@ -101,7 +101,6 @@ module.exports = {
             id: 'spec/protocol/index',
           },
           items: [
-            "spec/protocol/data",
             {
               type: 'category',
               label: 'Interface Protocol',
@@ -130,7 +129,17 @@ module.exports = {
         // affecting their URLs.
 
         // Released features:
-        'fb/features/serialization',
+        {
+          type: 'category',
+          label: 'Serialization',
+          link: {
+            type: 'doc',
+            id: "features/serialization/index",
+          },
+          items: [
+            'features/serialization/protocols'
+          ]
+        },
         'features/operators',
         'features/universal-name',
         {

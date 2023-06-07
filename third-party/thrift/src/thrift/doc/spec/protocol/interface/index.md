@@ -9,7 +9,7 @@ This document describes the layer immediately preceding the transport protocol (
 
 ## Request
 
-The client **must** take the user provided arguments to the Interface method and serialize the request as described in Serialization Details below. The client **may** compress the serialized request as described in [Request Compression](#request-compression). The name of the Interface method being requested as well as the [data protocol](../data.md) that was used to serialize the request **must** be included in the metadata associated with the request. The client may detect an exception while attempting to perform the request before a valid response is received from the server, in which case, it **must** be raised as a [Client Detected Exception](#client-detected-exceptions).
+The client **must** take the user provided arguments to the Interface method and serialize the request as described in Serialization Details below. The client **may** compress the serialized request as described in [Request Compression](#request-compression). The name of the Interface method being requested as well as the [serialization protocol](/features/serialization/protocols.md) that was used to serialize the request **must** be included in the metadata associated with the request. The client may detect an exception while attempting to perform the request before a valid response is received from the server, in which case, it **must** be raised as a [Client Detected Exception](#client-detected-exceptions).
 
 The client **must** specify the method name in the request as follows:
 - For methods inside an interaction, the method name is `‹InteractionName›.‹MethodName›` where `‹InteractionName›` and `‹MethodName›` are the names in the IDL of the interaction and method respectively.
@@ -17,7 +17,7 @@ The client **must** specify the method name in the request as follows:
 
 ### Serialization Details
 
-The parameters to an Interface method **must** be treated as fields of a Thrift struct with an empty name (`""`). The Field IDs **must** be the same as those specified in the IDL. If the Interface method has no parameters then the struct **must** have no fields. To prepare for sending the request through one of the underlying transport protocols, this unnamed struct **must** be serialized with one of Thrift’s [data protocols](../data.md).
+The parameters to an Interface method **must** be treated as fields of a Thrift struct with an empty name (`""`). The Field IDs **must** be the same as those specified in the IDL. If the Interface method has no parameters then the struct **must** have no fields. To prepare for sending the request through one of the underlying transport protocols, this unnamed struct **must** be serialized with one of Thrift [serialization protocols](/features/serialization/protocols.md).
 
 For example, this method:
 
@@ -43,7 +43,7 @@ struct ‹Anonymous› {
 }
 ```
 
-passing the `‹Anonymous›` to a serializer for the [Compact Protocol](../data.md#compact-protocol) and passing the resulting string to a compressor for [zstd](https://facebook.github.io/zstd/).
+passing the `‹Anonymous›` to a serializer for the [Compact Protocol](/features/serialization/protocols.md#compact-protocol) and passing the resulting string to a compressor for [zstd](https://facebook.github.io/zstd/).
 
 ## Response
 

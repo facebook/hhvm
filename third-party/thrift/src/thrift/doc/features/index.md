@@ -21,7 +21,7 @@ feature in different languages.
 
 | Thrift feature | C++ | Hack | Java | Python |
 | :------------- | :-: | :--: | :--: | :----: |
-| [Serialization](/fb/features/serialization.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
+| [Serialization](/features/serialization/index.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Universal names](/features/universal-name.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Streaming](/fb/features/streaming/index.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Supported/> |
 | [Interactions](/fb/features/interactions.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> |

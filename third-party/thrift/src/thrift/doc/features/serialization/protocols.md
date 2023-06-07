@@ -1,11 +1,6 @@
----
-state: draft
-sidebar_position: 1
----
+# Serialization Protocols
 
-# Data Protocols
-
-A data protocol in Thrift is a format that defines how data is serialized into a sequence of bytes and deserialized from it.
+A serialization protocol in Thrift is a format that defines how data is serialized into a sequence of bytes and deserialized from it.
 
 ## Thrift Types
 

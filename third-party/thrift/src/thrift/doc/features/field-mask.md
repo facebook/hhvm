@@ -25,7 +25,7 @@ union Mask {
 const Mask allMask = {"excludes": {}}; // Masks all fields/whole field.
 const Mask noneMask = {"includes": {}}; // Masks no fields.`
 ```
-[Debug protocol](../spec/protocol/data/#debug-protocol) can be used to convert Mask to a human readable string.
+[Debug protocol](/features/serialization/protocols.md#debug-protocol) can be used to convert Mask to a human readable string.
 
 ## APIs
 

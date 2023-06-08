@@ -219,16 +219,16 @@ TEST(SchemaTest, TestService) {
   auto schema = schema_constants::schemaTestService();
   EXPECT_EQ(schema.definitions()->size(), 4);
 
-  auto ex_schema = schema.definitions()->at(0).get_exceptionDef();
+  auto ex_schema = schema.definitions()->at(1).get_exceptionDef();
   EXPECT_EQ(*ex_schema.name(), "NonSchematizedException");
 
-  auto struct_schema = schema.definitions()->at(1).get_structDef();
+  auto struct_schema = schema.definitions()->at(2).get_structDef();
   EXPECT_EQ(*struct_schema.name(), "NonSchematizedStruct");
 
-  auto union_schema = schema.definitions()->at(2).get_unionDef();
+  auto union_schema = schema.definitions()->at(3).get_unionDef();
   EXPECT_EQ(*union_schema.name(), "NonSchematizedUnion");
 
-  auto svc_schema = schema.definitions()->at(3).get_serviceDef();
+  auto svc_schema = schema.definitions()->at(0).get_serviceDef();
 
   EXPECT_EQ(*svc_schema.name(), "TestService");
   EXPECT_EQ(*svc_schema.uri(), "facebook.com/thrift/test/schema/TestService");

@@ -46,6 +46,10 @@ class schematizer {
   std::unique_ptr<t_const_value> gen_schema(const t_program& node);
   std::unique_ptr<t_const_value> gen_schema(const t_typedef& node);
 
+  // Creates a constant of type schema.Schema describing the argument and all
+  // types recursively referenced by it. Calls gen_schema internally.
+  std::unique_ptr<t_const_value> gen_full_schema(const t_service& node);
+
  private:
   std::function<t_program::value_id(
       std::unique_ptr<t_const_value> val, t_type_ref type, t_program* program)>

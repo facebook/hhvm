@@ -79,8 +79,7 @@ std::shared_ptr<ClientWorker2::Client> ClientWorker2::createConnection() {
   headerChannel->setTimeout(kTimeout);
   channel = std::move(headerChannel);
 
-  return std::shared_ptr<ClientWorker2::Client>(
-      new ClientWorker2::Client(std::move(channel)));
+  return std::make_shared<ClientWorker2::Client>(std::move(channel));
 }
 
 void ClientWorker2::performOperation(

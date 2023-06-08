@@ -32,6 +32,7 @@
 #include <thrift/test/gen-cpp2/adapter_clients.h>
 #include <thrift/test/gen-cpp2/adapter_constants.h>
 #include <thrift/test/gen-cpp2/adapter_handlers.h>
+#include <thrift/test/gen-cpp2/adapter_no_uri_types.h>
 #include <thrift/test/gen-cpp2/adapter_terse_types.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
 
@@ -629,6 +630,54 @@ TEST_F(AdapterTest, StructFieldAdaptedStruct) {
   }
 }
 } // namespace basic
+
+namespace no_uri {
+TEST(AdaptTest, Union_NoUri) {
+  ThriftComparisonUnion obj1;
+  obj1.field1_ref().ensure().value = "1";
+  EXPECT_EQ(obj1.field1_ref()->value, "1");
+
+  RefUnion obj2;
+  obj2.field1_ref().ensure().value = "1";
+  EXPECT_EQ(obj2.field1_ref()->value, "1");
+
+  auto obj1b = ThriftComparisonUnion();
+  obj1b.field1_ref().ensure().value = "1";
+
+  auto obj2b = ThriftComparisonUnion();
+  obj2b.field1_ref().ensure().value = "1";
+  EXPECT_TRUE(obj1b == obj2b);
+}
+
+TEST(AdaptTest, LessThanComparisonFallbackTest) {
+  auto obj1a = AdapterComparisonUnion();
+  obj1a.field1_ref() = "1";
+
+  auto obj2a = AdapterComparisonUnion();
+  obj2a.field1_ref() = "2";
+  // It should use the AdapterComparisonStringAdapter less for comparison.
+  EXPECT_TRUE(obj1a > obj2a);
+  EXPECT_FALSE(obj1a < obj2a);
+
+  auto obj1b = AdaptedComparisonUnion();
+  obj1b.field1_ref().ensure().val = "1";
+
+  auto obj2b = AdaptedComparisonUnion();
+  obj2b.field1_ref().ensure().val = "2";
+  // It should use the AdaptedComparisonString operator< for comparison.
+  EXPECT_TRUE(obj1b > obj2b);
+  EXPECT_FALSE(obj1b < obj2b);
+
+  auto obj1c = ThriftComparisonUnion();
+  obj1c.field1_ref().ensure().value = "1";
+
+  auto obj2c = ThriftComparisonUnion();
+  obj2c.field1_ref().ensure().value = "2";
+  // It uses 'Adapter::toThrift(lhs) < Adapter::toThrift(rhs)' for comparison.
+  EXPECT_FALSE(obj1c > obj2c);
+  EXPECT_TRUE(obj1c < obj2c);
+}
+} // namespace no_uri
 
 namespace terse {
 TEST_F(AdapterTest, UnionCodeGen_Empty_Terse) {

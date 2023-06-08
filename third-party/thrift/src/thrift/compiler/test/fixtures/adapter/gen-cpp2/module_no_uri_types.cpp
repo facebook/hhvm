@@ -79,7 +79,8 @@ bool RefUnion::operator==(const RefUnion& rhs) const {
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::field1:
-      return *value_.field1 == *rhs.value_.field1;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>(
+*value_.field1, *rhs.value_.field1);
     default:
       return true;
   }
@@ -92,7 +93,8 @@ bool RefUnion::operator<(FOLLY_MAYBE_UNUSED const RefUnion& rhs) const {
   }
   switch (lhs.getType()) {
     case Type::field1:
-      return *lhs.value_.field1 < *rhs.value_.field1;
+      return ::apache::thrift::adapt_detail::less<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>(
+*value_.field1, *rhs.value_.field1);
     default:
       return false;
   }

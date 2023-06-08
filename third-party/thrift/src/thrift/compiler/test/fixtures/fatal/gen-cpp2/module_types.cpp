@@ -4183,7 +4183,8 @@ bool UnionWithTypedefFieldAdapter::operator==(const UnionWithTypedefFieldAdapter
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::field:
-      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::test_cpp2::cpp_reflection::I32>(value_.field, rhs.value_.field);
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::test_cpp2::cpp_reflection::I32>(
+value_.field, rhs.value_.field);
     default:
       return true;
   }
@@ -4196,7 +4197,8 @@ bool UnionWithTypedefFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const UnionWithT
   }
   switch (lhs.getType()) {
     case Type::field:
-      return lhs.value_.field < rhs.value_.field;
+      return ::apache::thrift::adapt_detail::less<::my::Adapter1, ::test_cpp2::cpp_reflection::I32>(
+value_.field, rhs.value_.field);
     default:
       return false;
   }

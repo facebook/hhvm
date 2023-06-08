@@ -98,6 +98,38 @@ struct AdaptedEqualsStringAdapter {
   }
 };
 
+struct AdapterComparisonStringAdapter {
+  std::string value;
+
+  static std::string fromThrift(std::string&& val) { return std::move(val); }
+
+  static const std::string& toThrift(const std::string& str) { return str; }
+
+  static bool less(const std::string& lhs, const std::string& rhs) {
+    return lhs > rhs;
+  }
+};
+
+struct AdaptedComparisonString {
+  std::string val;
+
+  bool operator<(const AdaptedComparisonString& other) const {
+    return val > other.val;
+  }
+};
+
+struct AdaptedComparisonStringAdapter {
+  AdaptedComparisonString val;
+
+  static AdaptedComparisonString fromThrift(std::string&& val) {
+    return AdaptedComparisonString{std::move(val)};
+  }
+
+  static std::string toThrift(const AdaptedComparisonString& val) {
+    return val.val;
+  }
+};
+
 struct Num {
   int64_t val = 13;
 

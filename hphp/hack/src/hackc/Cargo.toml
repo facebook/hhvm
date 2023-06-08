@@ -66,4 +66,5 @@ strum_macros = "0.21"
 tempdir = "0.3"
 textual = { version = "0.0.0", path = "ir/conversions/textual/cargo/textual" }
 thiserror = "1.0.36"
+tracing = { features = ["log"] }
 ty = { version = "0.0.0", path = "../hackrs/ty/cargo/ty" }

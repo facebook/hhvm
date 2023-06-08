@@ -240,10 +240,26 @@ impl Opts {
     }
 }
 
-fn main() -> Result<()> {
-    env_logger::init();
-    let mut opts = Opts::parse();
+/// Facebook main: Perform some Facebook-specific initialization.
+#[cfg(fbcode_build)]
+#[cli::main("hackc", error_logging)]
+fn main(_fb: fbinit::FacebookInit, opts: Opts) -> Result<()> {
+    // In FB-mode we convert logs into tracing.
+    tracing_log::LogTracer::init()?;
+    hackc_main(opts)
+}
 
+/// non-Facebook main
+#[cfg(not(fbcode_build))]
+fn main() -> Result<()> {
+    // In non-FB mode we convert tracing into logging (using tracing's 'log'
+    // feature) - so init logs like normal.
+    env_logger::init();
+    let opts = Opts::parse();
+    hackc_main(opts)
+}
+
+fn hackc_main(mut opts: Opts) -> Result<()> {
     // Some subcommands need worker threads with larger than default stacks,
     // even when using Stacker. In particular, various derived traits (e.g. Drop)
     // on AAST nodes are inherently recursive.

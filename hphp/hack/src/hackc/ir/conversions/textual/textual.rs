@@ -282,6 +282,10 @@ impl<'a> TextualFile<'a> {
             FileAttribute::SourceLanguage(lang) => {
                 writeln!(self.w, ".source_language = \"{lang}\"")?;
             }
+            FileAttribute::ExperimentalOptions(opts) => {
+                let opts = opts.iter().map(ToString::to_string).collect_vec();
+                writeln!(self.w, ".experimental_options = \"{}\"", opts.join(", "))?;
+            }
         }
         Ok(())
     }
@@ -974,8 +978,21 @@ where
     }
 }
 
+pub(crate) enum ExperimentalOption {
+    SelfParentInTrait,
+}
+
+impl ToString for ExperimentalOption {
+    fn to_string(&self) -> String {
+        match self {
+            ExperimentalOption::SelfParentInTrait => "self_parent_in_trait".to_string(),
+        }
+    }
+}
+
 pub(crate) enum FileAttribute {
     SourceLanguage(String),
+    ExperimentalOptions(Vec<ExperimentalOption>),
 }
 
 pub(crate) struct FuncBuilder<'a, 'b> {

@@ -690,6 +690,9 @@ cdef class CompiledEnum:
     def __int__(self):
         return self.value
 
+    def __index__(self):
+        return self.value
+
     def __hash__(self):
         return self._fbthrift_hash
 
@@ -769,6 +772,9 @@ cdef class BadEnum:
         return f'<{self.enum.__name__}.{self.name}: {self.value}>'
 
     def __int__(self):
+        return self.value
+
+    def __index__(self):
         return self.value
 
     @property

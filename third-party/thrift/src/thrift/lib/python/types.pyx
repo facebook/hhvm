@@ -882,6 +882,9 @@ cdef class BadEnum:
     def __int__(self):
         return self.value
 
+    def __index__(self):
+        return self.value
+
     @property
     def enum(self):
         return self._enum

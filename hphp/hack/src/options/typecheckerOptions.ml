@@ -307,3 +307,8 @@ let ide_naming_table_update_threshold t =
   t.GlobalOptions.tco_ide_naming_table_update_threshold
 
 let dump_tast_hashes t = t.GlobalOptions.dump_tast_hashes
+
+let tco_autocomplete_mode t = t.GlobalOptions.tco_autocomplete_mode
+
+let set_tco_autocomplete_mode t =
+  { t with GlobalOptions.tco_autocomplete_mode = true }

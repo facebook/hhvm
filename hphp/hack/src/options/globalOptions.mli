@@ -342,6 +342,7 @@ type t = {
   tco_ide_naming_table_update_threshold: int;
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
+  tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
 }
 [@@deriving eq, show]
 
@@ -473,6 +474,7 @@ val set :
   ?tco_ide_load_naming_table_on_disk:bool ->
   ?tco_ide_naming_table_update_threshold:int ->
   ?dump_tast_hashes:bool ->
+  ?tco_autocomplete_mode:bool ->
   t ->
   t
 

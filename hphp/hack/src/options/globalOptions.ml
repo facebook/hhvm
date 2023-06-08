@@ -192,6 +192,7 @@ type t = {
   tco_ide_load_naming_table_on_disk: bool;
   tco_ide_naming_table_update_threshold: int;
   dump_tast_hashes: bool;
+  tco_autocomplete_mode: bool;
 }
 [@@deriving eq, show]
 
@@ -324,6 +325,7 @@ let default =
     tco_ide_load_naming_table_on_disk = false;
     tco_ide_naming_table_update_threshold = 0;
     dump_tast_hashes = false;
+    tco_autocomplete_mode = false;
   }
 
 let set
@@ -454,6 +456,7 @@ let set
     ?tco_ide_load_naming_table_on_disk
     ?tco_ide_naming_table_update_threshold
     ?dump_tast_hashes
+    ?tco_autocomplete_mode
     options =
   let setting setting option =
     match setting with
@@ -797,6 +800,8 @@ let set
         tco_ide_naming_table_update_threshold
         options.tco_ide_naming_table_update_threshold;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
+    tco_autocomplete_mode =
+      setting tco_autocomplete_mode options.tco_autocomplete_mode;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

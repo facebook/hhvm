@@ -303,3 +303,7 @@ let implicit_sdt_for_class ctx this_class =
 let implicit_sdt_for_fun ctx fe =
   TypecheckerOptions.everything_sdt (get_tcopt ctx)
   && not fe.Typing_defs.fe_no_auto_dynamic
+
+let set_autocomplete_mode t =
+  let tcopt = TypecheckerOptions.set_tco_autocomplete_mode t.tcopt in
+  { t with tcopt }

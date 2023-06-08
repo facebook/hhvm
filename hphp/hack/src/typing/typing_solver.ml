@@ -466,8 +466,14 @@ let try_bind_to_equal_bound ~freshen env r var =
    Therefore, we always force to the lower bounds (even contravariant variables),
    because it produces a "more specific" type, which is more likely to support
    the operation which we eagerly solved for in the first place.
+
+   During autocompletion, if the set of lower bounds is empty and the
+   variable appears contravariantly, try an upper bound.
 *)
 let rec always_solve_tyvar_down ~freshen env r var =
+  let autocomplete_mode =
+    TypecheckerOptions.tco_autocomplete_mode env.genv.tcopt
+  in
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let (env, ty_err_opt1) = try_bind_to_equal_bound ~freshen env r var in
   if Env.tyvar_is_solved_or_skip_global env var then
@@ -480,23 +486,40 @@ let rec always_solve_tyvar_down ~freshen env r var =
         r
     in
     let (env, ty_err_opt2) =
-      let lower_bounds = Env.get_tyvar_lower_bounds env var in
+      let (to_lower, bounds) =
+        let lower_bounds = Env.get_tyvar_lower_bounds env var in
+        if autocomplete_mode then
+          let upper_bounds = Env.get_tyvar_upper_bounds env var in
+          if
+            Env.get_tyvar_appears_contravariantly env var
+            && ITySet.is_empty lower_bounds
+            && not (ITySet.is_empty upper_bounds)
+          then
+            (false, upper_bounds)
+          else
+            (true, lower_bounds)
+        else
+          (true, lower_bounds)
+      in
       (* We cannot do more on (<expr#1> as C) than on simply C,
        * so replace expression-dependent types with their bound.
        * This avoids solving to a type so specific that it ends
        * up hurting completeness. *)
-      let lower_bounds =
-        ITySet.map
-          (function
-            | LoclType lty as ity ->
-              let (_env, lty) = Env.expand_type env lty in
-              (match get_node lty with
-              | Tdependent (_, bnd) -> LoclType bnd
-              | _ -> ity)
-            | ity -> ity)
-          lower_bounds
-      in
-      bind_to_lower_bound ~freshen env r var lower_bounds
+      if to_lower then
+        let bounds =
+          ITySet.map
+            (function
+              | LoclType lty as ity ->
+                let (_env, lty) = Env.expand_type env lty in
+                (match get_node lty with
+                | Tdependent (_, bnd) -> LoclType bnd
+                | _ -> ity)
+              | ity -> ity)
+            bounds
+        in
+        bind_to_lower_bound ~freshen env r var bounds
+      else
+        bind_to_upper_bound env r var bounds
     in
     let (env, ety) = Env.expand_var env r var in
     match get_node ety with

@@ -1566,12 +1566,11 @@ and simplify_subtype_i
           if avoid then
             invalid_env env
           else
-            simplify_subtype_of_dynamic env
-            |||
-            if is_tyvar ty then
-              invalid_env
+            simplify_subtype_of_dynamic env ||| fun env ->
+            if Typing_utils.is_tyvar env ty then
+              invalid_env env
             else
-              finish
+              finish env
         in
         let stripped_dynamic =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then

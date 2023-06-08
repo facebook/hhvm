@@ -134,11 +134,16 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
+            {"program:generate_capi?", &python_mstch_program::has_types},
+            {"program:capi_module_prefix",
+             &python_mstch_program::capi_module_prefix},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:include_namespaces",
              &python_mstch_program::include_namespaces},
+            {"program:cpp_namespaces",
+             &python_mstch_program::get_cpp2_namespace},
             {"program:base_library_package",
              &python_mstch_program::base_library_package},
             {"program:root_module_prefix",
@@ -181,6 +186,22 @@ class python_mstch_program : public mstch_program {
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
+  }
+
+  mstch::node has_types() {
+    return program_->structs().size() > 0 || program_->exceptions().size() > 0;
+  }
+
+  mstch::node capi_module_prefix() {
+    std::string prefix = get_py3_namespace_with_name_and_prefix(
+        program_, get_option("root_module_prefix"), "__");
+    // kebab is not kosher in cpp fn names
+    std::replace(prefix.begin(), prefix.end(), '-', '_');
+    return prefix;
+  }
+
+  mstch::node get_cpp2_namespace() {
+    return cpp2::get_gen_namespace(*program_);
   }
 
   mstch::node py_deprecated_module_path() {
@@ -735,6 +756,7 @@ class python_mstch_struct : public mstch_struct {
              &python_mstch_struct::exception_message},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
+            {"struct:cpp_name", &python_mstch_struct::cpp_name},
         });
   }
 
@@ -761,6 +783,8 @@ class python_mstch_struct : public mstch_struct {
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*struct_);
   }
+
+  mstch::node cpp_name() { return cpp2::get_name(struct_); }
 
  private:
   const t_const* adapter_annotation_;
@@ -1197,6 +1221,12 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   generate_file("thrift_types.py", IsTypesFile, generate_root_path_);
   generate_file("thrift_types.pyi", IsTypesFile, generate_root_path_);
+  if (has_option("generate_python_capi")) {
+    generate_file("thrift_types_capi.pxd", IsTypesFile, generate_root_path_);
+    generate_file("thrift_types_capi.pyx", IsTypesFile, generate_root_path_);
+    generate_file("thrift_types_capi.h", IsTypesFile, "");
+    generate_file("thrift_types_capi.cpp", IsTypesFile, "");
+  }
 }
 
 void t_mstch_python_generator::generate_metadata() {

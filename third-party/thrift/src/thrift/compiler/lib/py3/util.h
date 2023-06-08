@@ -36,13 +36,15 @@ inline std::vector<std::string> get_py3_namespace(const t_program* prog) {
 }
 
 inline std::string get_py3_namespace_with_name_and_prefix(
-    const t_program* prog, const std::string& prefix) {
+    const t_program* prog,
+    const std::string& prefix,
+    const std::string& sep = ".") {
   std::ostringstream ss;
   if (!prefix.empty()) {
-    ss << prefix << ".";
+    ss << prefix << sep;
   }
   for (const auto& name : get_py3_namespace(prog)) {
-    ss << name << ".";
+    ss << name << sep;
   }
   ss << prog->name();
   return ss.str();

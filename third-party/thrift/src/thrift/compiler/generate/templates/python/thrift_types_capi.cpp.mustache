@@ -1,0 +1,93 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Cpp2 <-> Python converters for Thrift types
+}}
+{{> common/auto_generated_cpp}}
+
+#include <folly/python/import.h>
+#include <thrift/lib/python/capi/iobuf.h>
+
+#include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_api.h>
+#include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_capi.h>
+
+namespace apache {
+namespace thrift {
+namespace python {
+namespace capi {
+namespace {
+{{#program:generate_capi?}}
+bool ensure_module_imported() {
+  static ::folly::python::import_cache_nocapture import((
+      ::import_{{program:capi_module_prefix}}__thrift_types_capi));
+  return import();
+}
+{{/program:generate_capi?}}
+} // namespace
+
+{{#program:structs}}
+ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
+Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+      "Module {{program:module_path}} import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__{{program:capi_module_prefix}}__{{struct:name}}(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+        "Thrift serialize error: {{struct:name}}");
+  }
+  return detail::deserialize_iobuf<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(std::move(val));
+}
+
+int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module {{program:module_path}} import error");
+  }
+  int result =
+      can_extract__{{program:capi_module_prefix}}__{{struct:name}}(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: {{struct:name}}");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(
+    {{program:cpp_namespaces}}::{{struct:cpp_name}}&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__{{program:capi_module_prefix}}__{{struct:name}}(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+{{/program:structs}}
+} // namespace capi
+} // namespace python
+} // namespace thrift
+} // namespace apache

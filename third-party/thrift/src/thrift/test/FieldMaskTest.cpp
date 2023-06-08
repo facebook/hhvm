@@ -109,11 +109,36 @@ TEST(FieldMaskTest, IsNoneMask) {
     EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
     EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
   }
+}
+
+TEST(FieldMaskTest, IsAllMapMask) {
+  auto allMapMask = [] {
+    Mask m;
+    m.excludes_map_ref().emplace();
+    return m;
+  };
+
+  auto noneMapMask = [] {
+    Mask m;
+    m.includes_map_ref().emplace();
+    return m;
+  };
+
+  EXPECT_TRUE((MaskRef{allMapMask(), false}).isAllMapMask());
+  EXPECT_TRUE((MaskRef{noneMapMask(), true}).isAllMapMask());
+  EXPECT_FALSE((MaskRef{noneMapMask(), false}).isAllMapMask());
+  EXPECT_FALSE((MaskRef{allMapMask(), true}).isAllMapMask());
+  {
+    Mask m;
+    m.excludes_ref().emplace()[5] = allMask();
+    EXPECT_THROW((MaskRef{m, false}).isAllMapMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isAllMapMask(), std::runtime_error);
+  }
   {
     Mask m;
     m.includes_map_ref().emplace()[3].includes_map_ref().emplace();
-    EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
-    EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
+    EXPECT_FALSE((MaskRef{m, false}).isAllMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isAllMapMask());
   }
   {
     Mask m;
@@ -121,8 +146,48 @@ TEST(FieldMaskTest, IsNoneMask) {
         .emplace()["3"]
         .includes_string_map_ref()
         .emplace();
-    EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
-    EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
+    EXPECT_FALSE((MaskRef{m, false}).isAllMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isAllMapMask());
+  }
+}
+
+TEST(FieldMaskTest, IsNoneMapMask) {
+  auto allMapMask = [] {
+    Mask m;
+    m.excludes_map_ref().emplace();
+    return m;
+  };
+
+  auto noneMapMask = [] {
+    Mask m;
+    m.includes_map_ref().emplace();
+    return m;
+  };
+
+  EXPECT_TRUE((MaskRef{noneMapMask(), false}).isNoneMapMask());
+  EXPECT_TRUE((MaskRef{allMapMask(), true}).isNoneMapMask());
+  EXPECT_FALSE((MaskRef{allMapMask(), false}).isNoneMapMask());
+  EXPECT_FALSE((MaskRef{noneMapMask(), true}).isNoneMapMask());
+  {
+    Mask m;
+    m.excludes_ref().emplace()[5] = noneMask();
+    EXPECT_THROW((MaskRef{m, false}).isNoneMapMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isNoneMapMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_map_ref().emplace()[3].includes_map_ref().emplace();
+    EXPECT_FALSE((MaskRef{m, false}).isNoneMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isNoneMapMask());
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref()
+        .emplace()["3"]
+        .includes_string_map_ref()
+        .emplace();
+    EXPECT_FALSE((MaskRef{m, false}).isNoneMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isNoneMapMask());
   }
 }
 

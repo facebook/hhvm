@@ -11,33 +11,33 @@ mkdir "${OUTDIR}"
 # keeping.
 AT="@"
 
-echo "<?hh // partial" > ${SYSTEMLIB}
-echo "// ${AT}generated" >> ${SYSTEMLIB}
+echo "<?hh // partial" > "${SYSTEMLIB}"
+echo "// ${AT}generated" >> "${SYSTEMLIB}"
 
-for i in $@; do
+for i in "$@"; do
   if [ ! -f "$i" ]; then
     echo "File '$i' is in system/php.txt, but does not exist" >&2
     exit 1
   fi
 
-  BN=$(basename $i)
-  BNPHP=$(basename $BN .php)
-  BNNSPHP=$(basename $BN .ns.php)
+  BN=$(basename "$i")
+  BNPHP=$(basename "$BN" .php)
+  BNNSPHP=$(basename "$BN" .ns.php)
   if [ "$BNPHP.php" = "$BN" ]; then
     # First, .php files are included with their open tags stripped.
-    if head -1 $i | grep -qv '^<?\(php\|hh\)'; then
+    if head -1 "$i" | grep -qv '^<?\(php\|hh\)'; then
       echo "Unexpected header in file '$i'" >&2
       exit 1
     fi
-    echo "" >> ${SYSTEMLIB}
+    echo "" >> "${SYSTEMLIB}"
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
-      echo "namespace {" >> ${SYSTEMLIB}
+      echo "namespace {" >> "${SYSTEMLIB}"
     fi
-    tail -n +2 $i >> ${SYSTEMLIB}
+    tail -n +2 "$i" >> "${SYSTEMLIB}"
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
-      echo "}" >> ${SYSTEMLIB}
+      echo "}" >> "${SYSTEMLIB}"
     fi
   fi
 done
 
-echo "" >> ${SYSTEMLIB}
+echo "" >> "${SYSTEMLIB}"

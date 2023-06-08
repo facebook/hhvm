@@ -36,7 +36,7 @@ class RequestCallbackWithValidator : public RequestCallback {
 template <typename AsyncClient>
 class Noop {
  public:
-  Noop(QPSStats* stats) : stats_(stats) {
+  explicit Noop(QPSStats* stats) : stats_(stats) {
     stats_->registerCounter(op_name_);
     stats_->registerCounter(timeout_);
     stats_->registerCounter(error_);
@@ -93,7 +93,7 @@ class Noop {
 template <typename AsyncClient>
 class Sum {
  public:
-  Sum(QPSStats* stats) : stats_(stats) {
+  explicit Sum(QPSStats* stats) : stats_(stats) {
     stats_->registerCounter(op_name_);
     stats_->registerCounter(timeout_);
     stats_->registerCounter(error_);
@@ -165,7 +165,7 @@ class Sum {
 template <typename AsyncClient>
 class Timeout {
  public:
-  Timeout(QPSStats* stats) : stats_(stats) {
+  explicit Timeout(QPSStats* stats) : stats_(stats) {
     stats_->registerCounter(op_name_);
     stats_->registerCounter(timeout_);
     stats_->registerCounter(error_);

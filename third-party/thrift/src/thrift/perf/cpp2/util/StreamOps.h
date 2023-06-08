@@ -35,7 +35,7 @@ using facebook::thrift::benchmarks::TwoInts;
 template <typename AsyncClient>
 class Download {
  public:
-  Download(QPSStats* stats) : stats_(stats) {
+  explicit Download(QPSStats* stats) : stats_(stats) {
     stats_->registerCounter(op_name_);
     stats_->registerCounter(timeout_);
     stats_->registerCounter(error_);

@@ -36,9 +36,9 @@ class AsyncLoadHandler2
   void async_eb_onewaySleep(
       std::unique_ptr<HandlerCallbackBase> callback,
       int64_t microseconds) override;
-  void sync_burn(int64_t microseconds);
+  void sync_burn(int64_t microseconds) override;
   folly::Future<folly::Unit> future_burn(int64_t microseconds) override;
-  void sync_onewayBurn(int64_t microseconds);
+  void sync_onewayBurn(int64_t microseconds) override;
   folly::Future<folly::Unit> future_onewayBurn(int64_t microseconds) override;
   void async_eb_badSleep(
       std::unique_ptr<HandlerCallback<void>> callback,
@@ -65,7 +65,8 @@ class AsyncLoadHandler2
       std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
       std::unique_ptr<std::string> data,
       int64_t recvBytes) override;
-  void sync_echo(std::string& output, std::unique_ptr<std::string> data);
+  void sync_echo(
+      std::string& output, std::unique_ptr<std::string> data) override;
   folly::Future<std::unique_ptr<std::string>> future_echo(
       std::unique_ptr<std::string> data) override;
   void async_eb_add(

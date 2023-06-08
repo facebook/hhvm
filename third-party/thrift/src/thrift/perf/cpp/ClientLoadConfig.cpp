@@ -143,7 +143,8 @@ ClientLoadConfig::ClientLoadConfig() : WeightedLoadConfig(NUM_OPS) {
     PCHECK(!gethostname(hostname, sizeof(hostname)));
     addressHostname_ = hostname;
   } else {
-    struct addrinfo hints, *res, *res0;
+    struct addrinfo hints;
+    struct addrinfo *res, *res0;
     char hostname[NI_MAXHOST] = {};
 
     memset(&hints, 0, sizeof(hints));

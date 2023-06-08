@@ -85,6 +85,8 @@ type options = {
   profile_type_check_multi: int option;
   memtrace: string option;
   rust_provider_backend: bool;
+  naming_table_path: string option;
+  packages_config_path: string option;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -1081,10 +1083,11 @@ let parse_options () =
       profile_type_check_multi = !profile_type_check_multi;
       memtrace = !memtrace;
       rust_provider_backend = !rust_provider_backend;
+      naming_table_path = !naming_table;
+      packages_config_path = !packages_config_path;
     },
     root,
-    !naming_table,
-    (if !rust_provider_backend then
+    if !rust_provider_backend then
       SharedMem.
         {
           !sharedmem_config with
@@ -1093,8 +1096,7 @@ let parse_options () =
             max !sharedmem_config.shm_cache_size (2 * 1024 * 1024 * 1024);
         }
     else
-      !sharedmem_config),
-    !packages_config_path )
+      !sharedmem_config )
 
 let print_elapsed fn desc ~start_time =
   let elapsed_ms = Float.(Unix.gettimeofday () - start_time) *. 1000. in
@@ -2451,11 +2453,11 @@ let decl_and_run_mode
       profile_type_check_multi;
       memtrace;
       rust_provider_backend;
+      naming_table_path;
+      packages_config_path;
     }
     (popt : TypecheckerOptions.t)
-    (hhi_root : Path.t)
-    (naming_table_path : string option)
-    (packages_config_path : string option) : unit =
+    (hhi_root : Path.t) : unit =
   Ident.track_names := true;
   let builtins =
     if no_builtins then
@@ -2647,11 +2649,8 @@ let decl_and_run_mode
     ~verbosity
 
 let main_hack
-    ({ tcopt; _ } as opts)
-    (root : Path.t)
-    (naming_table : string option)
-    (sharedmem_config : SharedMem.config)
-    (packages_config_path : string option) : unit =
+    ({ tcopt; _ } as opts) (root : Path.t) (sharedmem_config : SharedMem.config)
+    : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -2673,7 +2672,7 @@ let main_hack
     Relative_path.set_path_prefix Relative_path.Root root;
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-    decl_and_run_mode opts tcopt hhi_root naming_table packages_config_path;
+    decl_and_run_mode opts tcopt hhi_root;
     TypingLogger.flush_buffers ()
   in
   match opts.custom_hhi_path with
@@ -2690,13 +2689,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, root, naming_table, sharedmem_config, packages_config_path) =
-    parse_options ()
-  in
-  Unix.handle_unix_error
-    main_hack
-    options
-    root
-    naming_table
-    sharedmem_config
-    packages_config_path
+  let (options, root, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options root sharedmem_config

@@ -94,6 +94,7 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
+  using Base::clear;
 
   /// Inverts the bool.
   void invert() {

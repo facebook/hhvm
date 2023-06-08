@@ -47,6 +47,11 @@ TEST(PatchTest, BoolPatch) {
   patch = !patch;
   test::expectPatch(patch, false, false);
   test::expectPatch(patch, true, false);
+
+  // Clear to intrinsic default.
+  patch.clear();
+  test::expectPatch(patch, false, false);
+  test::expectPatch(patch, true, false);
 }
 
 template <typename NPatch>

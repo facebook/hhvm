@@ -959,7 +959,7 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
     case Type::excp_field:
       return value_.excp_field == rhs.value_.excp_field;
     case Type::MyCustomField:
-      return value_.MyCustomField == rhs.value_.MyCustomField;
+      return ::apache::thrift::adapt_detail::equal<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>(value_.MyCustomField, rhs.value_.MyCustomField);
     default:
       return true;
   }

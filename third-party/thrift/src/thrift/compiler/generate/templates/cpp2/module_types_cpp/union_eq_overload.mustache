@@ -32,7 +32,12 @@ bool <%struct:cpp_underlying_name%>::operator==(const <%struct:cpp_underlying_na
           <% > types/apply_indirection_pre%>rhs.value_.<%field:cpp_name%><% > types/apply_indirection_post%>);
 <%/field:raw_binary?%>
 <%^field:raw_binary?%>
+<%#field:cpp_first_adapter%>
+      return ::apache::thrift::adapt_detail::equal<<%field:cpp_first_adapter%>, <%field:cpp_type%>>(value_.<%field:cpp_name%>, rhs.value_.<%field:cpp_name%>);
+<%/field:cpp_first_adapter%>
+<%^field:cpp_first_adapter%>
       return value_.<%field:cpp_name%> == rhs.value_.<%field:cpp_name%>;
+<%/field:cpp_first_adapter%>
 <%/field:raw_binary?%>
 <%/field:type%>
 <%/field:cpp_ref?%>

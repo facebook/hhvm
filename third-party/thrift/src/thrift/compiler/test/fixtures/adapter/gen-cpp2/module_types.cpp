@@ -517,15 +517,15 @@ bool Baz::operator==(const Baz& rhs) const {
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::intField:
-      return value_.intField == rhs.value_.intField;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>(value_.intField, rhs.value_.intField);
     case Type::setField:
-      return value_.setField == rhs.value_.setField;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter2, ::facebook::thrift::test::SetWithAdapter>(value_.setField, rhs.value_.setField);
     case Type::mapField:
-      return value_.mapField == rhs.value_.mapField;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter3, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>(value_.mapField, rhs.value_.mapField);
     case Type::binaryField:
-      return value_.binaryField == rhs.value_.binaryField;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>(value_.binaryField, rhs.value_.binaryField);
     case Type::longField:
-      return value_.longField == rhs.value_.longField;
+      return ::apache::thrift::adapt_detail::equal<::my::Adapter1, ::facebook::thrift::test::MyI64>(value_.longField, rhs.value_.longField);
     default:
       return true;
   }
@@ -2524,9 +2524,9 @@ bool ThriftAdaptTestUnion::operator==(const ThriftAdaptTestUnion& rhs) const {
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::delay:
-      return value_.delay == rhs.value_.delay;
+      return ::apache::thrift::adapt_detail::equal<::apache::thrift::test::AdaptTestMsAdapter, ::facebook::thrift::test::DurationMs>(value_.delay, rhs.value_.delay);
     case Type::custom:
-      return value_.custom == rhs.value_.custom;
+      return ::apache::thrift::adapt_detail::equal<::apache::thrift::test::CustomProtocolAdapter, ::facebook::thrift::test::CustomProtocolType>(value_.custom, rhs.value_.custom);
     default:
       return true;
   }

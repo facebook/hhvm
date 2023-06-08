@@ -100,7 +100,17 @@ struct ComparisonTestStruct {
 }
 
 union AdaptedUnion {
-  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
+  1: string field1;
+}
+
+union AdapterEqualsUnion {
+  @cpp.Adapter{name = "::apache::thrift::test::AdapterEqualsStringAdapter"}
+  1: string field1;
+}
+
+union AdaptedEqualsUnion {
+  @cpp.Adapter{name = "::apache::thrift::test::AdaptedEqualsStringAdapter"}
   1: string field1;
 }
 

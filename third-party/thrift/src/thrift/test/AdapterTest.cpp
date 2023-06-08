@@ -521,10 +521,55 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
 TEST_F(AdapterTest, AdaptedUnion) {
   AdaptedUnion obj1;
   EXPECT_EQ(obj1.getType(), AdaptedUnion::Type::__EMPTY__);
-  auto wrapper = Wrapper<std::string>();
+  auto wrapper = NonComparableWrapper<std::string>();
   wrapper.value = "1";
   obj1.field1_ref() = wrapper;
   EXPECT_EQ(obj1.field1_ref()->value, "1");
+}
+
+TEST(AdaptTest, ComparisonTestUnion) {
+  auto obj = AdaptedUnion();
+  auto wrapper = NonComparableWrapper<std::string>();
+  wrapper.value = "1";
+  obj.field1_ref() = std::move(wrapper);
+
+  auto obj1 = AdaptedUnion();
+  auto wrapper1 = NonComparableWrapper<std::string>();
+  wrapper1.value = "1";
+  obj1.field1_ref() = std::move(wrapper1);
+
+  auto obj2 = AdaptedUnion();
+  auto wrapper2 = NonComparableWrapper<std::string>();
+  wrapper2.value = "2";
+  obj2.field1_ref() = std::move(wrapper2);
+  // It uses 'Adapter::toThrift(lhs) == Adapter::toThrift(rhs)' for comparison.
+  EXPECT_EQ(obj, obj1);
+  EXPECT_FALSE(obj < obj1);
+  EXPECT_FALSE(obj > obj1);
+  EXPECT_TRUE(obj < obj2);
+  EXPECT_FALSE(obj > obj2);
+}
+
+TEST(AdaptTest, ComparisonFallbackTest) {
+  auto obj1a = AdapterEqualsUnion();
+  obj1a.field1_ref() = "1";
+
+  auto obj2a = AdapterEqualsUnion();
+  obj2a.field1_ref() = "1";
+  // It should use the AdapterEqualsStringAdapter operator== for comparison.
+  EXPECT_FALSE(obj1a == obj2a);
+
+  auto obj1b = AdaptedEqualsUnion();
+  auto string1 = AdaptedEqualsString();
+  string1.val = "1";
+  obj1b.field1_ref() = string1;
+
+  auto obj2b = AdaptedEqualsUnion();
+  auto string2 = AdaptedEqualsString();
+  string2.val = "1";
+  obj2b.field1_ref() = string2;
+  // It should use the AdaptedEqualsStringAdapter operator== for comparison.
+  EXPECT_FALSE(obj1b == obj2b);
 }
 
 TEST_F(AdapterTest, StructFieldAdaptedStruct) {

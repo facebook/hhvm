@@ -67,6 +67,37 @@ struct AdaptTestMsAdapter {
   }
 };
 
+struct AdapterEqualsStringAdapter {
+  std::string value;
+
+  static std::string fromThrift(std::string val) { return val; }
+
+  static const std::string& toThrift(const std::string& str) { return str; }
+
+  static bool equal(const std::string& lhs, const std::string& rhs) {
+    return lhs != rhs;
+  }
+};
+
+struct AdaptedEqualsString {
+  std::string val;
+
+  bool operator==(const AdaptedEqualsString& other) const {
+    return val != other.val;
+  }
+};
+
+struct AdaptedEqualsStringAdapter {
+  AdaptedEqualsString val;
+
+  static AdaptedEqualsString fromThrift(std::string&& val) {
+    return AdaptedEqualsString{std::move(val)};
+  }
+  static std::string toThrift(const AdaptedEqualsString& val) {
+    return val.val;
+  }
+};
+
 struct Num {
   int64_t val = 13;
 

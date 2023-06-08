@@ -650,7 +650,7 @@ void RocketServerConnection::handleSinkFrame(
         break;
       }
     }
-      FOLLY_FALLTHROUGH;
+      [[fallthrough]];
 
     default:
       close(folly::make_exception_wrapper<RocketException>(

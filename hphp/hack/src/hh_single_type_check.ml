@@ -320,7 +320,8 @@ let parse_options () =
         " Don't print positions while printing TASTs and NASTs" );
       ( "--naming-table",
         Arg.String (fun s -> naming_table := Some s),
-        " Naming table, to look up undefined symbols; needs --root" );
+        " Naming table, to look up undefined symbols; needs --root."
+        ^ " (Hint: buck2 run //hphp/hack/src/hh_naming_table_builder)" );
       ( "--root",
         Arg.String (fun s -> root := Some s),
         " Root for where to look up undefined symbols; needs --naming-table" );

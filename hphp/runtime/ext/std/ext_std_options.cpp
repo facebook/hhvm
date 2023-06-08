@@ -67,10 +67,6 @@ const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::requestInitOptions() {}
-
-///////////////////////////////////////////////////////////////////////////////
-
 static bool HHVM_FUNCTION(extension_loaded, const String& name) {
   return ExtensionRegistry::isLoaded(name);
 }

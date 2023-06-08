@@ -50,7 +50,6 @@ struct StandardExtension final : Extension {
 
   void requestInit() override {
     requestInitMath();
-    requestInitOptions();
   }
 
  private:
@@ -73,7 +72,6 @@ struct StandardExtension final : Extension {
   void threadInitMisc();
 
   void requestInitMath();
-  void requestInitOptions();
 };
 
 /////////////////////////////////////////////////////////////////////////////

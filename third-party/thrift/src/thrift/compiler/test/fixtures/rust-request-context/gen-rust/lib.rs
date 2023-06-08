@@ -2661,8 +2661,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::my_service::StreamByIdStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::my_service::StreamByIdStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::my_service::StreamByIdStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_service::StreamByIdStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdStreamError> =
@@ -2729,8 +2737,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::my_service::StreamByIdWithExceptionStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::my_service::StreamByIdWithExceptionStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::my_service::StreamByIdWithExceptionStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_service::StreamByIdWithExceptionStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithExceptionStreamError> =
@@ -2797,8 +2813,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::my_service::StreamByIdWithResponseStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::my_service::StreamByIdWithResponseStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::my_service::StreamByIdWithResponseStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::my_service::StreamByIdWithResponseStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithResponseStreamError> =

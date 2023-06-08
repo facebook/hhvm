@@ -3173,8 +3173,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ReturnstreamStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError> =
@@ -3241,8 +3249,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::StreamthrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::StreamthrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError> =
@@ -3309,8 +3325,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ServicethrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError> =
@@ -3377,8 +3401,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::Servicethrows2StreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError> =
@@ -3445,8 +3477,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::BoththrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::BoththrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::BoththrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::BoththrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError> =
@@ -3513,8 +3553,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError> =
@@ -3581,8 +3629,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError> =
@@ -3649,8 +3705,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError> =
@@ -3719,8 +3783,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError> =

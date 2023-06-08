@@ -28,6 +28,30 @@ use crate::FramingDecoded;
 use crate::FramingEncodedFinal;
 use crate::Protocol;
 
+#[derive(Debug)]
+pub enum ClientStreamElement<Payload> {
+    Reply(Payload),
+    ApplicationEx(Payload),
+}
+
+impl<Payload> ClientStreamElement<Payload> {
+    pub fn payload(&self) -> &Payload {
+        match self {
+            ClientStreamElement::Reply(payload) | ClientStreamElement::ApplicationEx(payload) => {
+                payload
+            }
+        }
+    }
+
+    pub fn into_payload(self) -> Payload {
+        match self {
+            ClientStreamElement::Reply(payload) | ClientStreamElement::ApplicationEx(payload) => {
+                payload
+            }
+        }
+    }
+}
+
 pub trait ClientFactory {
     type Api: ?Sized;
 
@@ -70,7 +94,7 @@ pub trait Transport: Framing + Send + Sync + Sized + 'static {
         'static,
         anyhow::Result<(
             FramingDecoded<Self>,
-            BoxStream<'static, anyhow::Result<FramingDecoded<Self>>>,
+            BoxStream<'static, anyhow::Result<ClientStreamElement<FramingDecoded<Self>>>>,
         )>,
     > {
         future::err(anyhow::Error::msg(

@@ -138,8 +138,16 @@
                                 ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}StreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<{{!

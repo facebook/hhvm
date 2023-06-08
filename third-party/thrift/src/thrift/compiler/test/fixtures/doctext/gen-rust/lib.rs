@@ -747,8 +747,16 @@ pub mod client {
                                 ::std::result::Result::Err(crate::errors::c::NumbersStreamError::from(err)),
                             ::std::result::Result::Ok(item_enc) => {
                                 let res = S::spawn(move || {
-                                    let mut de = P::deserializer(item_enc);
-                                    crate::services::c::NumbersStreamExn::read(&mut de)
+                                    match item_enc {
+                                        ::fbthrift::ClientStreamElement::Reply(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            crate::services::c::NumbersStreamExn::read(&mut de)
+                                        }
+                                        ::fbthrift::ClientStreamElement::ApplicationEx(payload) => {
+                                            let mut de = P::deserializer(payload);
+                                            ::fbthrift::ApplicationException::read(&mut de).map(crate::services::c::NumbersStreamExn::ApplicationException)
+                                        }
+                                    }
                                 }).await?;
 
                                 let item: ::std::result::Result<crate::types::number, crate::errors::c::NumbersStreamError> =

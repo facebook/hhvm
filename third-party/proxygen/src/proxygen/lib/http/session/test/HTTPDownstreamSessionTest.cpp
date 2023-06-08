@@ -459,6 +459,14 @@ class HTTPDownstreamTest : public testing::Test {
     return observer;
   }
 
+  std::shared_ptr<MockSessionObserver> addMockSessionObserverShared(
+      MockSessionObserver::EventSet eventSet) {
+    auto observer = std::make_shared<NiceMock<MockSessionObserver>>(eventSet);
+    EXPECT_CALL(*observer, attached(_));
+    httpSession_->addObserver(observer);
+    return observer;
+  }
+
  protected:
   folly::EventBase eventBase_;
   TestAsyncTransport* transport_; // invalid once httpSession_ is destroyed
@@ -4357,6 +4365,40 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
   // Test destroyed callback when session is destroyed
   {
     auto observer = addMockSessionObserver(eventSet);
+    auto handler = addSimpleStrictHandler();
+    handler->expectHeaders();
+    handler->expectEOM([&handler]() {
+      handler->sendReplyWithBody(200 /* status code */,
+                                 100 /* content size */,
+                                 true /* keepalive */,
+                                 true /* sendEOM */,
+                                 false /*trailers*/);
+    });
+    handler->expectDetachTransaction();
+    HTTPSession::DestructorGuard g(httpSession_);
+    HTTPMessage req = getGetRequest();
+    sendRequest(req);
+    flushRequestsAndLoop(true, milliseconds(0));
+
+    EXPECT_CALL(*observer, destroyed(_, _));
+    expectDetachSession();
+    httpSession_->closeWhenIdle();
+  }
+}
+
+TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy_Shared) {
+  MockSessionObserver::EventSet eventSet;
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = addMockSessionObserverShared(eventSet);
+    EXPECT_CALL(*observer, detached(_));
+    httpSession_->removeObserver(observer.get());
+  }
+
+  // Test destroyed callback when session is destroyed
+  {
+    auto observer = addMockSessionObserverShared(eventSet);
     auto handler = addSimpleStrictHandler();
     handler->expectHeaders();
     handler->expectEOM([&handler]() {

@@ -285,6 +285,15 @@ HQDownstreamSessionTest::addMockSessionObserver(
   return observer;
 }
 
+std::shared_ptr<MockSessionObserver>
+HQDownstreamSessionTest::addMockSessionObserverShared(
+    MockSessionObserver::EventSet eventSet) {
+  auto observer = std::make_shared<NiceMock<MockSessionObserver>>(eventSet);
+  EXPECT_CALL(*observer, attached(_));
+  hqSession_->addObserver(observer);
+  return observer;
+}
+
 TEST_P(HQDownstreamSessionTest, GetMaxPushIdOK) {
   folly::Optional<hq::PushId> expectedId = hqSession_->getMaxAllowedPushId();
   EXPECT_EQ(expectedId, folly::none);
@@ -1562,6 +1571,23 @@ TEST_P(HQDownstreamSessionTest, Observer_Attach_Detach_Destroyed) {
 
   {
     auto observer = addMockSessionObserver(eventSet);
+    EXPECT_CALL(*observer, destroyed(_, _));
+    hqSession_->dropConnection();
+  }
+}
+
+TEST_P(HQDownstreamSessionTest, Observer_Attach_Detach_Destroyed_Shared) {
+  MockSessionObserver::EventSet eventSet;
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = addMockSessionObserverShared(eventSet);
+    EXPECT_CALL(*observer, detached(_));
+    hqSession_->removeObserver(observer.get());
+  }
+
+  {
+    auto observer = addMockSessionObserverShared(eventSet);
     EXPECT_CALL(*observer, destroyed(_, _));
     hqSession_->dropConnection();
   }

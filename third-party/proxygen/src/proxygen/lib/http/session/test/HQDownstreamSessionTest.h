@@ -192,6 +192,9 @@ class HQDownstreamSessionTest : public HQSessionTest {
   std::unique_ptr<proxygen::MockSessionObserver> addMockSessionObserver(
       proxygen::MockSessionObserver::EventSet eventSet);
 
+  std::shared_ptr<proxygen::MockSessionObserver> addMockSessionObserverShared(
+      proxygen::MockSessionObserver::EventSet eventSet);
+
   std::unordered_map<quic::StreamId, ClientStream> requests_;
   quic::StreamId nextStreamId_{0};
   quic::QuicSocket::StreamTransportInfo streamTransInfo_;

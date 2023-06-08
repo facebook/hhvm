@@ -237,6 +237,13 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_output = r'\(HPHP::LowPtr<HPHP::Class>\) InvalidArgumentException'
             self.assertRegex(output.strip(), expected_output)
 
+        with self.subTest("HPHP::LowPtr &"):
+            self.run_until_breakpoint("takeLowPtrRef")
+            _, output = self.run_commands(["p v"])
+            expected_output = r'\(const HPHP::LowPtr<HPHP::Class> &\) 0x.* InvalidArgumentException: {'
+            # LLDB always prints the raw contents of references, so just check the first line
+            self.assertRegex(output.split("\n")[0].strip(), expected_output)
+
         with self.subTest("HPHP::LowStrPtr"):
             # This is used e.g. as an alias in types.h, so let's make sure
             # we can handle aliases too.

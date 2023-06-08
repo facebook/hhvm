@@ -5,6 +5,7 @@
 import lldb
 import re
 import sys
+import traceback
 import typing
 
 try:
@@ -69,14 +70,15 @@ def format(datatype: str, regex: bool = False, skip_pointers = False, skip_refer
                 # to get its contents in whatever pretty printers would normally be called.
                 if utils.is_nullptr(val_obj):
                     return '0x0'
-                return func_or_class(val_obj, internal_dict)
 
                 # When the pretty printer for this value fails for some reason,
                 # just show the unformatted version.
                 try:
                     return func_or_class(val_obj, internal_dict)
-                except Exception as e:
-                    utils.debug_print(f"Failed to pretty print '{val_obj.name}' in {func_or_class.__name__}() with error: {str(e)}")
+                except Exception:
+                    utils.debug_print(f"Failed to pretty print '{val_obj.name}' in {func_or_class.__name__}()")
+                    if utils._Debug:
+                        traceback.print_exc()
                     return val_obj.value
             return wrapper
     return inner

@@ -284,8 +284,8 @@ def nullptr(target: lldb.SBTarget):
     return target.CreateValueFromExpression("nullptr", "(void *)0")
 
 
-def is_nullptr(ptr: lldb.SBValue):
-    return ptr.TypeIsPointerType() and ptr.unsigned == 0
+def is_nullptr(val: lldb.SBValue):
+    return val.TypeIsPointerType() and val.unsigned == 0
 
 
 def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
@@ -307,7 +307,7 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     if val.type.IsPointerType():
         return val
     elif val.type.IsReferenceType():
-        return referenced_value(val).addr
+        return referenced_value(val)
 
     name = template_type(val.type)
     ptr = None

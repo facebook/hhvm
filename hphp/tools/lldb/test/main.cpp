@@ -169,6 +169,7 @@ void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
 void takeOptional(Optional<String> UNUSED v) { return; }
 void takeLowPtr(LowPtr<Class> UNUSED v) { return; }
+void takeLowPtrRef(const LowPtr<Class> UNUSED &v) { return; }
 void takeLowStrPtr(LowStrPtr UNUSED v) { return; }
 void takeExtension(Extension UNUSED v) { return; }
 void takeArrayData(ArrayData UNUSED *v) { return; }
@@ -192,6 +193,7 @@ void buildOtherValues() {
   auto s = String("hello");
   auto rsc = Resource(req::make<DummyResource>());
   auto cls = TestObject->getVMClass();
+  auto lp = LowPtr(cls);
   auto func = cls->getCtor();
   auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
 
@@ -208,7 +210,8 @@ void buildOtherValues() {
   takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to get its sole private member m_obj
   takeOptional(Optional<String>("hello"));
   takeOptional(Optional<String>());
-  takeLowPtr(LowPtr(TestObject->getVMClass()));
+  takeLowPtr(lp);
+  takeLowPtrRef(lp);
   takeLowStrPtr(LowStrPtr(StringData::MakeStatic("hello")));
   takeExtension(Extension("test-extension", "0.5", "test-oncall"));
   takeArrayData(vec.get());

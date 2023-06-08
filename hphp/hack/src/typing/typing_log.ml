@@ -221,9 +221,8 @@ let rec log_value env value =
     else
       SMap.iter (log_key_value env "") m
   | Set s -> log_sset s
-  | Type ty -> Typing_print.debug_i env ty |> lprintf (Normal Green) "%s"
-  | SubtypeProp prop ->
-    Typing_print.subtype_prop env prop |> lprintf (Normal Green) "%s"
+  | Type ty -> Pr.debug_i env ty |> lprintf (Normal Green) "%s"
+  | SubtypeProp prop -> Pr.subtype_prop env prop |> lprintf (Normal Green) "%s"
 
 and log_key_value env prefix k v =
   if is_leaf_value v then (
@@ -285,16 +284,16 @@ and log_key_delta env k d =
     lnewline_close ()
   )
 
-let type_as_value env ty = Atom (Typing_print.debug env ty)
+let type_as_value env ty = Atom (Pr.debug env ty)
 
-let decl_type_as_value env ty = Atom (Typing_print.debug_decl env ty)
+let decl_type_as_value env ty = Atom (Pr.debug_decl env ty)
 
 let possibly_enforced_type_as_value env et =
   Atom
     ((match et.et_enforced with
      | Enforced -> "enforced "
      | Unenforced -> "")
-    ^ Typing_print.debug env et.et_type)
+    ^ Pr.debug env et.et_type)
 
 let return_info_as_value env return_info =
   let Typing_env_return_info.{ return_type; return_disposable } = return_info in
@@ -319,11 +318,7 @@ let reify_kind_as_value k =
     | Aast.Reified -> "reified")
 
 let tyset_as_value env tys =
-  Set
-    (TySet.fold
-       (fun t s -> SSet.add (Typing_print.debug env t) s)
-       tys
-       SSet.empty)
+  Set (TySet.fold (fun t s -> SSet.add (Pr.debug env t) s) tys SSet.empty)
 
 let rec tparam_info_as_value env tpinfo =
   let Typing_kinding_defs.
@@ -389,7 +384,7 @@ let continuations_map_as_value f m =
        SMap.empty)
 
 let local_as_value env Typing_local_types.{ ty; pos = _; eid } =
-  Atom (Printf.sprintf "%s [expr_id=%d]" (Typing_print.debug env ty) eid)
+  Atom (Printf.sprintf "%s [expr_id=%d]" (Pr.debug env ty) eid)
 
 let per_cont_env_as_value env per_cont_env =
   continuations_map_as_value
@@ -460,7 +455,7 @@ let log_with_level env key ~level log_f =
 
 let log_subtype_prop env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
-  lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
+  lprintf (Tty.Normal Tty.Green) "%s" (Pr.subtype_prop env prop);
   lnewline ()
 
 let fun_kind_to_string k =
@@ -485,11 +480,11 @@ let lenv_as_value env lenv =
     ]
 
 let param_as_value env (ty, _pos, ty_opt) =
-  let ty_str = Typing_print.debug env ty in
+  let ty_str = Pr.debug env ty in
   match ty_opt with
   | None -> Atom ty_str
   | Some ty2 ->
-    let ty2_str = Typing_print.debug env ty2 in
+    let ty2_str = Pr.debug env ty2 in
     Atom (Printf.sprintf "%s inout %s" ty_str ty2_str)
 
 let genv_as_value env genv =
@@ -605,8 +600,7 @@ let env_as_value env =
       ("checked", checked_as_value checked);
       ("tpenv", tpenv_as_value env tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
-      ( "inference_env",
-        Typing_inference_env.Log.inference_env_as_value inference_env );
+      ("inference_env", Inf.Log.inference_env_as_value inference_env);
       ("fun_tast_info", fun_tast_info_as_map fun_tast_info);
     ]
 
@@ -627,16 +621,14 @@ let hh_show_env ?function_name p env =
 
 let hh_show_full_env p env =
   log_with_level env "show" ~level:0 @@ fun () ->
-  let empty_env =
-    { env with inference_env = Typing_inference_env.empty_inference_env }
-  in
+  let empty_env = { env with inference_env = Inf.empty_inference_env } in
   log_env_diff p empty_env env
 
 (* Log the type of an expression *)
 let hh_show p env ty =
   log_with_level env "show" ~level:0 @@ fun () ->
   let s1 = Pr.with_blank_tyvars (fun () -> Pr.debug env ty) in
-  let s2 = Typing_print.constraints_for_type env ty in
+  let s2 = Pr.constraints_for_type env ty in
   log_position p (fun () ->
       lprintf (Normal Green) "%s" s1;
       if String.( <> ) s2 "" then lprintf (Normal Green) " %s" s2;
@@ -657,17 +649,17 @@ let log_types p env items =
             | Log_head (message, items) ->
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
             | Log_type (message, ty) ->
-              let s = Typing_print.debug env ty in
+              let s = Pr.debug env ty in
               lprintf (Bold Green) "%s: " message;
               lprintf (Normal Green) "%s" s;
               lnewline ()
             | Log_decl_type (message, ty) ->
-              let s = Typing_print.debug_decl env ty in
+              let s = Pr.debug_decl env ty in
               lprintf (Bold Green) "%s: " message;
               lprintf (Normal Green) "%s" s;
               lnewline ()
             | Log_type_i (message, ty) ->
-              let s = Typing_print.debug_i env ty in
+              let s = Pr.debug_i env ty in
               lprintf (Bold Green) "%s: " message;
               lprintf (Normal Green) "%s" s;
               lnewline ())

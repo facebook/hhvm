@@ -512,12 +512,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (if
      (not contains_any)
      && not
-          (both_sub
-             (Typing_make_type.union (Reason.Rcomp p) [ty_num; ty_dynamic])
+          (both_sub (MakeType.union (Reason.Rcomp p) [ty_num; ty_dynamic])
+          || both_sub (MakeType.union (Reason.Rcomp p) [ty_string; ty_dynamic])
           || both_sub
-               (Typing_make_type.union (Reason.Rcomp p) [ty_string; ty_dynamic])
-          || both_sub
-               (Typing_make_type.union
+               (MakeType.union
                   (Reason.Rcomp p)
                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]))
     then

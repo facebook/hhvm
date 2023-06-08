@@ -539,7 +539,7 @@ let check_async env ft_parent ft_child parent_pos pos on_error =
   | _ -> ()
 
 let check_xhp_attr_required env parent_class_elt class_elt on_error =
-  if not (TypecheckerOptions.check_xhp_attribute (Env.get_tcopt env)) then
+  if not (TCO.check_xhp_attribute (Env.get_tcopt env)) then
     ()
   else
     let is_less_strict = function
@@ -634,10 +634,7 @@ let add_member_dep
     in
     let class_name = Cls.name class_ in
     Typing_deps.add_idep (Env.get_deps_mode env) (Dep.Type class_name) dep;
-    if
-      TypecheckerOptions.record_fine_grained_dependencies
-      @@ Typing_env.get_tcopt env
-    then
+    if TCO.record_fine_grained_dependencies @@ Env.get_tcopt env then
       add_pessimisation_dependency
         env
         class_
@@ -650,8 +647,7 @@ let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
   if
     (not (MemberKind.is_constructor member_kind))
-    && TypecheckerOptions.enable_sound_dynamic
-         (Provider_context.get_tcopt (Env.get_ctx env))
+    && TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && get_ce_support_dynamic_type parent_class_elt
     && not (get_ce_support_dynamic_type class_elt)
   then
@@ -755,7 +751,7 @@ let check_multiple_concrete_definitions
 let get_return_value_type ft =
   match (get_ft_async ft, deref ft.ft_ret.et_type) with
   | (true, (_, Tapply ((_, class_name), [inner_ty])))
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+    when String.equal class_name SN.Classes.cAwaitable ->
     inner_ty
   | _ -> ft.ft_ret.et_type
 
@@ -768,9 +764,7 @@ let maybe_poison_ancestors
     origin
     member_name
     member_kind =
-  if
-    TypecheckerOptions.like_casts (Provider_context.get_tcopt (Env.get_ctx env))
-  then
+  if TCO.like_casts (Provider_context.get_tcopt (Env.get_ctx env)) then
     let parent_return_ty = get_return_value_type ft_parent in
     let child_return_ty = get_return_value_type ft_child in
     let (declared_class, declared_return_ty) =
@@ -823,17 +817,17 @@ let maybe_poison_ancestors
         in
         let tmp_env =
           let self_ty =
-            Typing_make_type.class_type
+            MakeType.class_type
               Reason.Rnone
               origin
               (List.map (Cls.tparams declared_class) ~f:(fun tp ->
-                   Typing_make_type.generic Reason.Rnone (snd tp.tp_name)))
+                   MakeType.generic Reason.Rnone (snd tp.tp_name)))
           in
           Env.env_with_tpenv
             env
             (Type_parameter_env.add_upper_bound
                Type_parameter_env.empty
-               Naming_special_names.Typehints.this
+               SN.Typehints.this
                self_ty)
         in
         let child_pos =
@@ -847,7 +841,7 @@ let maybe_poison_ancestors
         in
         (* We need that the enforced child type is a subtype of the enforced parent type *)
         let sub1 =
-          Typing_phase.is_sub_type_decl
+          Phase.is_sub_type_decl
             ~coerce:(Some Typing_logic.CoerceToDynamic)
             tmp_env
             enforced_declared_ty
@@ -855,7 +849,7 @@ let maybe_poison_ancestors
         in
         (* But also the original child type should be a subtype of the enforced parent type *)
         let sub2 =
-          Typing_phase.is_sub_type_decl
+          Phase.is_sub_type_decl
             ~coerce:(Some Typing_logic.CoerceToDynamic)
             tmp_env
             declared_return_ty
@@ -1038,7 +1032,7 @@ let check_override
   | _ ->
     let (env, ty_err_opt) =
       if get_ce_const class_elt then
-        Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
+        Phase.sub_type_decl env fty_child fty_parent @@ Some on_error
       else
         Typing_ops.unify_decl
           pos
@@ -1288,8 +1282,7 @@ let check_inherited_member_is_dynamically_callable
     (member_kind, member_name, parent_class_elt) =
   let (inheriting_class_pos, inheriting_class) = inheriting_class in
   if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && Cls.get_support_dynamic_type inheriting_class
     && not (Cls.get_support_dynamic_type parent_class)
     (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
@@ -1590,7 +1583,7 @@ let make_all_members ~parent_class =
   let wrap_constructor (ctor, kind) =
     ( MemberKind.Constructor { is_consistent = constructor_is_consistent kind },
       ctor
-      |> Option.map ~f:(fun x -> (Naming_special_names.Members.__construct, x))
+      |> Option.map ~f:(fun x -> (SN.Members.__construct, x))
       |> Option.to_list )
   in
   [
@@ -1677,7 +1670,7 @@ let check_constructors env parent_class class_ psubst on_error =
           check_override
             env
             ~check_member_unique:false
-            Naming_special_names.Members.__construct
+            SN.Members.__construct
             (MemberKind.Constructor { is_consistent = true })
             class_
             parent_class
@@ -1810,8 +1803,7 @@ let tconst_subsumption
           match child_typeconst.ttc_kind with
           | TCConcrete _ ->
             if
-              TypecheckerOptions.typeconst_concrete_concrete_error
-                (Env.get_tcopt env)
+              TCO.typeconst_concrete_concrete_error (Env.get_tcopt env)
               && not inherited
             then
               Typing_error_utils.add_typing_error

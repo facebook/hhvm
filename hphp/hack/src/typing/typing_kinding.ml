@@ -159,7 +159,7 @@ end
 *)
 let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
   let report_constraint violating_type used_class used_class_tparam_name =
-    let tparams_in_ty = Typing_env.get_tparams env violating_type in
+    let tparams_in_ty = Env.get_tparams env violating_type in
     let tparams_of_typedef =
       List.fold typedef_info.td_tparams ~init:SSet.empty ~f:(fun s tparam ->
           SSet.add (snd tparam.tp_name) s)

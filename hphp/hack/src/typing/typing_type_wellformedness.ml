@@ -30,7 +30,7 @@ let check_tparams_constraints env use_pos tparams targs =
   let ety_env : expand_env =
     { empty_expand_env with substs = Subst.make_locl tparams targs }
   in
-  Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
+  Phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
 let loclty_of_hint unchecked_tparams env h =
   let hint_pos = fst h in

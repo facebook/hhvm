@@ -920,7 +920,7 @@ module Size = struct
     | ConstraintType ty -> constraint_type_size env ty
 
   let internal_type_set_size env tys =
-    Internal_type_set.elements tys
+    ITySet.elements tys
     |> List.map ~f:(internal_type_size env)
     |> List.fold ~init:0 ~f:( + )
 

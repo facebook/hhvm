@@ -134,13 +134,12 @@ let fun_def ctx fd : Tast.fun_def list option =
   in
   (* Is sound dynamic enabled, and the function marked <<__SupportDynamicType>> explicitly or implicitly? *)
   let sdt_function =
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && Env.get_support_dynamic_type env
   in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.fun_def env fd;
-  Typing_env.make_depend_on_current_module env;
+  Env.make_depend_on_current_module env;
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -289,7 +288,7 @@ let fun_def ctx fd : Tast.fun_def list option =
     if
       sdt_dynamic_check_required
       && (not had_errors)
-      && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
+      && not (TCO.skip_check_under_dynamic tcopt)
     then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in
       let fundef =
@@ -306,7 +305,7 @@ let fun_def ctx fd : Tast.fun_def list option =
           return_ty.et_type
       in
       let fundefs =
-        if TypecheckerOptions.tast_under_dynamic tcopt then
+        if TCO.tast_under_dynamic tcopt then
           [fundef_of_dynamic dynamic_components]
         else
           []

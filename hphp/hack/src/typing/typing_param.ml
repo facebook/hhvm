@@ -127,8 +127,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
           in
           (* For implicit pessimisation, wrap like around non-enforced inout parameters *)
           match (et_enforced, param.param_callconv) with
-          | (Unenforced, Ast_defs.Pinout _) ->
-            Typing_make_type.like (get_reason ty) ty
+          | (Unenforced, Ast_defs.Pinout _) -> MakeType.like (get_reason ty) ty
           | _ -> ty
         else
           ty
@@ -158,7 +157,7 @@ let make_param_local_tys ~dynamic_mode env decl_tys params =
          let ty =
            if dynamic_mode then
              let dyn_ty =
-               Typing_make_type.dynamic
+               MakeType.dynamic
                  (Reason.Rsupport_dynamic_type
                     (Pos_or_decl.of_raw_pos param.param_pos))
              in
@@ -169,7 +168,7 @@ let make_param_local_tys ~dynamic_mode env decl_tys params =
                       env
                       ty ->
                Some
-                 (Typing_make_type.intersection
+                 (MakeType.intersection
                     (Reason.Rsupport_dynamic_type Pos_or_decl.none)
                     [ty; dyn_ty])
              | _ -> Some dyn_ty

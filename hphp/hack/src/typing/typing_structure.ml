@@ -114,7 +114,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
           true
         | Tgeneric _ ->
           let (_env, tyl) =
-            Typing_utils.get_concrete_supertypes
+            TUtils.get_concrete_supertypes
               ~expand_supportdyn:true
               ~abstract_enum:false
               env

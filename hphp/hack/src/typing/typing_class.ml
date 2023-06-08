@@ -51,9 +51,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
    * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
    * The code below must be kept in sync with with the method_def checks.
    *)
-  let make_dynamic pos =
-    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-  in
+  let make_dynamic pos = MakeType.dynamic (Reason.Rsupport_dynamic_type pos) in
   let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
   let dynamic_return_info =
     Typing_env_return_info.
@@ -75,7 +73,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   let env =
     if Cls.get_support_dynamic_type cls then
       let this_ty =
-        Typing_make_type.intersection
+        MakeType.intersection
           (Reason.Rsupport_dynamic_type Pos_or_decl.none)
           [Env.get_local env this; make_dynamic Pos_or_decl.none]
       in
@@ -103,7 +101,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
           m.m_body
           m.m_fun_kind)
       (fun env_and_dynamic_body error ->
-        if not @@ TypecheckerOptions.everything_sdt env.genv.tcopt then
+        if not @@ TCO.everything_sdt env.genv.tcopt then
           Errors.method_is_not_dynamically_callable
             pos
             (snd m.m_name)
@@ -157,9 +155,9 @@ let method_def ~is_disposable env cls m =
   let is_ctor = String.equal method_name SN.Members.__construct in
   let env =
     if is_ctor then
-      Typing_env.env_with_constructor_droot_member env
+      Env.env_with_constructor_droot_member env
     else
-      Typing_env.env_with_method_droot_member env method_name ~static:m.m_static
+      Env.env_with_method_droot_member env method_name ~static:m.m_static
   in
   let initial_env = env in
   (* reset the expression dependent display ids for each method body *)
@@ -223,8 +221,7 @@ let method_def ~is_disposable env cls m =
   (* Is sound dynamic enabled, and the function not a constructor
    * and marked <<__SupportDynamicType>> explicitly or implicitly? *)
   let sdt_method =
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && (not env.inside_constructor)
     && Env.get_support_dynamic_type env
   in
@@ -360,9 +357,7 @@ let method_def ~is_disposable env cls m =
         m_ret = (dynamic_return_ty, return_hint);
       }
     in
-    if
-      sdt_dynamic_check_required
-      && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
+    if sdt_dynamic_check_required && not (TCO.skip_check_under_dynamic tcopt)
     then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in
       let method_def =
@@ -377,7 +372,7 @@ let method_def ~is_disposable env cls m =
           return
       in
       let method_defs =
-        if TypecheckerOptions.tast_under_dynamic tcopt then
+        if TCO.tast_under_dynamic tcopt then
           [method_def_of_dynamic dynamic_components]
         else
           []
@@ -752,7 +747,7 @@ let check_enum_includes env cls =
   )
 
 let skip_hierarchy_checks (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
+  TCO.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
 
 let class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct ~f:Typing.type_param in
@@ -929,12 +924,12 @@ let class_const_def ~in_enum_class c cls env cc =
         match k with
         | CCAbstract _
           when (not (is_enum_or_enum_class c.c_kind))
-               && TypecheckerOptions.require_types_class_consts tcopt > 0 ->
+               && TCO.require_types_class_consts tcopt > 0 ->
           Errors.add_error
             Naming_error.(to_user_error @@ Missing_typehint (fst id))
         | _
           when (not (is_enum_or_enum_class c.c_kind))
-               && TypecheckerOptions.require_types_class_consts tcopt > 1 ->
+               && TCO.require_types_class_consts tcopt > 1 ->
           Errors.add_error
             Naming_error.(to_user_error @@ Missing_typehint (fst id))
         | CCAbstract None -> ()
@@ -1097,11 +1092,8 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
         match cty.et_enforced with
         | Enforced when is_none cv.cv_xhp_attr -> cty
         | _ ->
-          if
-            TypecheckerOptions.everything_sdt env.genv.tcopt
-            && not is_noautodynamic
-          then
-            { cty with et_type = Typing_utils.make_like env cty.et_type }
+          if TCO.everything_sdt env.genv.tcopt && not is_noautodynamic then
+            { cty with et_type = TUtils.make_like env cty.et_type }
           else (
             Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
             cty
@@ -1173,8 +1165,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
   (* if the class implements dynamic, then check that the type of the property
    * is enforceable (for writing) and coerces to dynamic (for reading) *)
   if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
   then (
@@ -1271,8 +1262,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
       c.c_user_attributes
   in
   if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+    TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && check_support_dynamic_type
   then (
     (* Any class that extends a class or implements an interface
@@ -1341,9 +1331,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
     env
 
 let check_SupportDynamicType env c tc =
-  if
-    TypecheckerOptions.enable_sound_dynamic
-      (Provider_context.get_tcopt (Env.get_ctx env))
+  if TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
   then
     let support_dynamic_type =
       Naming_attributes.mem
@@ -1460,9 +1448,7 @@ let check_override_keyword env c tc =
   check_used_methods_with_override env c tc
 
 let check_sealed env c =
-  let hard_error =
-    TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
-  in
+  let hard_error = TCO.enforce_sealed_subclasses (Env.get_tcopt env) in
   let is_enum = is_enum_or_enum_class c.c_kind in
   sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error ~env
 
@@ -1668,10 +1654,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
     let impl = extends @ implements @ uses in
     let impl =
-      if
-        TypecheckerOptions.require_extends_implements_ancestors
-          (Env.get_tcopt env)
-      then
+      if TCO.require_extends_implements_ancestors (Env.get_tcopt env) then
         impl @ req_extends @ req_implements
       else
         impl
@@ -1834,15 +1817,14 @@ let class_def ctx (c : _ class_) =
       ~pos:(Pos.to_relative_string (fst c.c_name) |> Pos.string);
     None
   | Some tc ->
-    Typing_env.make_depend_on_current_module env;
+    Env.make_depend_on_current_module env;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
     if
       not
-        (TypecheckerOptions.saved_state_rollouts
-           (Provider_context.get_tcopt ctx))
+        (TCO.saved_state_rollouts (Provider_context.get_tcopt ctx))
           .Saved_state_rollouts.no_ancestor_edges
     then
-      Typing_env.make_depend_on_ancestors env tc;
+      Env.make_depend_on_ancestors env tc;
     Some (class_def_ env c tc)
 
 type class_member_standalone_check_env = {

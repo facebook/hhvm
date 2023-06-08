@@ -162,7 +162,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
 
 let mutating_this_in_ctor env (_, _, e) : bool =
   match e with
-  | Aast.This when Typing_env.fun_is_constructor env -> true
+  | Aast.This when Env.fun_is_constructor env -> true
   | _ -> false
 
 let rec is_valid_mutable_subscript_expression_target env v =

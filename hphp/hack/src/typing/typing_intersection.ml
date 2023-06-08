@@ -30,7 +30,7 @@ let negate_type env r ty ~approx =
     | Tprim Aast.Tnull -> MkType.nonnull r
     | Tprim tp -> MkType.neg r (Neg_prim tp)
     | Tneg (Neg_prim tp) -> MkType.prim_type r tp
-    | Tneg (Neg_class (_, c)) when Typing_utils.class_has_no_params env c ->
+    | Tneg (Neg_class (_, c)) when Utils.class_has_no_params env c ->
       MkType.class_type r c []
     | Tnonnull -> MkType.null r
     | Tclass (c, Nonexact _, _) -> MkType.neg r (Neg_class c)
@@ -141,7 +141,7 @@ let collapses env ty1 ty2 ~inter_ty =
 
 let make_intersection env r tyl =
   let ty = MkType.intersection r tyl in
-  let (env, ty) = Typing_utils.wrap_union_inter_ty_in_var env r ty in
+  let (env, ty) = Utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
 
 (** Computes the intersection (greatest lower bound) of two types.
@@ -188,13 +188,13 @@ let rec intersect env ~r ty1 ty2 =
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty2) ->
             let (env, ty) = intersect ~r env ty1arg ty2 in
-            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
+            let (env, res) = Utils.simple_make_supportdyn r env ty in
             (env, res)
           | (_, (r, Tnewtype (name1, [ty2arg], _)))
             when String.equal name1 Naming_special_names.Classes.cSupportDyn
                  && not (is_tyvar ty1) ->
             let (env, ty) = intersect ~r env ty1 ty2arg in
-            let (env, res) = Typing_utils.simple_make_supportdyn r env ty in
+            let (env, res) = Utils.simple_make_supportdyn r env ty in
             (env, res)
           | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
           | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
@@ -227,10 +227,10 @@ let rec intersect env ~r ty1 ty2 =
           | (ty_ak, (_, Tneg (Neg_prim Aast.Tstring))) ->
             if
               (* Ocaml warns about ambiguous or-pattern variables under guard if this is in a when clause*)
-              Typing_utils.is_sub_type_for_union
+              Utils.is_sub_type_for_union
                 env
                 (mk ty_ak)
-                (MkType.arraykey Typing_reason.Rnone)
+                (MkType.arraykey Reason.Rnone)
             then
               intersect env ~r (mk ty_ak) (MkType.int r)
             else
@@ -238,10 +238,10 @@ let rec intersect env ~r ty1 ty2 =
           | ((_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum))), ty_ak)
           | (ty_ak, (_, Tneg (Neg_prim (Aast.Tint | Aast.Tnum)))) ->
             if
-              Typing_utils.is_sub_type_for_union
+              Utils.is_sub_type_for_union
                 env
                 (mk ty_ak)
-                (MkType.arraykey Typing_reason.Rnone)
+                (MkType.arraykey Reason.Rnone)
             then
               intersect env ~r (mk ty_ak) (MkType.string r)
             else

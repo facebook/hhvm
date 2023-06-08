@@ -217,7 +217,7 @@ let default_capability p : locl_ty =
   let r = Reason.Rdefault_capability p in
   intersection
     r
-    Naming_special_names.Capabilities.
+    SN.Capabilities.
       [
         class_type r writeProperty [];
         class_type r accessGlobals [];

@@ -126,8 +126,8 @@ let make_all_type_consts_equal
   let is_mixed =
     match ty with
     | LoclType lty ->
-      let (_is_supportdyn, env, lty) = Typing_utils.strip_supportdyn env lty in
-      Typing_utils.is_mixed env lty
+      let (_is_supportdyn, env, lty) = Utils.strip_supportdyn env lty in
+      Utils.is_mixed env lty
     | _ -> false
   in
   if is_mixed then

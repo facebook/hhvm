@@ -85,7 +85,7 @@ let debug_print_last_pos _ =
 let log_iteration_count env pos n =
   let should_log_iteration_count =
     Env.get_tcopt env
-    |> TypecheckerOptions.log_levels
+    |> TCO.log_levels
     |> SMap.find_opt "loop_iteration_count"
     |> Option.is_some
   in
@@ -253,7 +253,7 @@ let with_special_coeffects env cap_ty unsafe_cap_ty f =
         let tpenv = Env.get_tpenv env in
         (initial_locals, tpenv))
   in
-  Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+  LEnv.stash_and_do env (Env.all_continuations env) (fun env ->
       let env =
         match init with
         | None -> env
@@ -312,7 +312,7 @@ let get_value_collection_inst env p vc_kind ty =
     | Keyset ->
       let reason = Reason.Rset_element p in
       let arraykey = MakeType.arraykey reason in
-      let (env, ty) = Typing_intersection.intersect env ~r:reason arraykey ty in
+      let (env, ty) = Inter.intersect env ~r:reason arraykey ty in
       Some (env, ty)
     | Vector
     | ImmVector
@@ -345,7 +345,7 @@ let get_key_value_collection_inst env p ty =
          || String.equal c SN.Collections.cKeyedContainer ->
     let reason = Reason.Rkey_value_collection_key p in
     let arraykey = MakeType.arraykey reason in
-    let (env, kty) = Typing_intersection.intersect env ~r:reason kty arraykey in
+    let (env, kty) = Inter.intersect env ~r:reason kty arraykey in
     Some (env, kty, vty)
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the key type is arraykey and the value type is mixed *)
@@ -467,13 +467,12 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
     List.fold ua_params ~init:env ~f:(fun env (_, _, feature) ->
         match feature with
         | Aast.String s when s = SN.UnstableFeatures.ifc ->
-          Env.map_tcopt ~f:TypecheckerOptions.enable_ifc env
+          Env.map_tcopt ~f:TCO.enable_ifc env
         | Aast.String s when s = SN.UnstableFeatures.modules ->
-          Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_modules t true) env
+          Env.map_tcopt ~f:(fun t -> TCO.set_modules t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
           Env.map_tcopt
-            ~f:(fun t ->
-              TypecheckerOptions.set_tco_enable_expression_trees t true)
+            ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
             env
         | _ -> env)
 
@@ -556,7 +555,7 @@ let rec enforce_return_disposable env e =
       ~env
       Typing_error.(primary @@ Primary.Invalid_return_disposable p)
 
-(* Wrappers around the function with the same name in Typing_lenv, which only
+(* Wrappers around the function with the same name in LEnv, which only
  * performs the move/save and merge operation if we are in a try block or in a
  * function with return type 'noreturn'.
  * This enables significant perf improvement, because this is called at every
@@ -656,7 +655,7 @@ let as_expr env ty1 pe e =
     match ty_err_opt1 with
     | None when is_option ->
       let ty_str = lazy (Typing_print.full_strip_ns env ty1) in
-      let ty_ct = Typing_subtype.can_traverse_to_iface ct in
+      let ty_ct = SubType.can_traverse_to_iface ct in
       let ct_str = lazy (Typing_print.full_strip_ns env ty_ct) in
       let reasons_opt =
         Some
@@ -725,7 +724,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let right_expected_ty =
-      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+      if TCO.enable_sound_dynamic (Env.get_tcopt env) then
         MakeType.locl_like
           (Reason.Renforceable (get_pos expected_ty))
           expected_ty
@@ -845,7 +844,7 @@ let make_result env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
   let env = Env.set_tyvar_variance env ty in
-  let (env, te) = Typing_utils.make_simplify_typed_expr env p ty te in
+  let (env, te) = TUtils.make_simplify_typed_expr env p ty te in
   (env, te, ty)
 
 let localize_targ env ta =
@@ -860,7 +859,7 @@ let rec set_function_pointer env ty =
     (env, mk (get_reason ty, Tfun ft))
   | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
     let (env, ty1) = set_function_pointer env ty1 in
-    Typing_utils.make_supportdyn (get_reason ty) env ty1
+    TUtils.make_supportdyn (get_reason ty) env ty1
   | _ -> (env, ty)
 
 let rec set_readonly_this pos env ty =
@@ -870,7 +869,7 @@ let rec set_readonly_this pos env ty =
     (env, mk (get_reason ty, Tfun ft))
   | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
     let (env, ty1) = set_readonly_this pos env ty1 in
-    Typing_utils.make_supportdyn (get_reason ty) env ty1
+    TUtils.make_supportdyn (get_reason ty) env ty1
   | _ -> (env, ty)
 
 let xhp_attribute_decl_ty env sid obj attr =
@@ -933,7 +932,7 @@ let stash_conts_for_closure env p is_anon (captured : Tast.capture_lid list) f =
   let with_ty_for_lid ((_, name) as lid) = (Env.get_local env name, lid) in
 
   let captured =
-    if is_anon && TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
+    if is_anon && TCO.any_coeffects (Env.get_tcopt env) then
       Typing_coeffects.(
         with_ty_for_lid (Pos.none, local_capability_id)
         :: with_ty_for_lid (Pos.none, capability_id)
@@ -961,7 +960,7 @@ let stash_conts_for_closure env p is_anon (captured : Tast.capture_lid list) f =
         let tpenv = Env.get_tpenv env in
         (initial_locals, initial_fakes, tpenv))
   in
-  Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+  LEnv.stash_and_do env (Env.all_continuations env) (fun env ->
       let env =
         match init with
         | None -> env
@@ -1010,11 +1009,11 @@ let expand_expected_and_get_node
        * So if expected type is ~vec<t> then we can actually ask for vec<~t>
        * which is more generous.
        *)
-      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then begin
+      if TCO.enable_sound_dynamic env.genv.tcopt then begin
         let (env, opt_ty) =
           if
             (not strip_supportdyn)
-            && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            && TCO.enable_sound_dynamic (Env.get_tcopt env)
             && pessimisable_builtin
           then
             (env, None)
@@ -1030,7 +1029,7 @@ let expand_expected_and_get_node
            * if it's yet to be resolved i.e. a type variable, in which case we just
            * remove the expected type.
            *)
-          if under_supportdyn || Typing_utils.is_supportdyn env rty then
+          if under_supportdyn || TUtils.is_supportdyn env rty then
             unbox ~under_supportdyn:true env rty
           else
             (env, None)
@@ -1113,7 +1112,7 @@ let is_hack_collection env ty =
    * of dynamic. It is unclear whether we should change an expression id if the
    * receiver is dynamic. *)
   match get_node ty with
-  | Tvar _ when Typing_utils.is_tyvar_error env ty -> (true, None)
+  | Tvar _ when TUtils.is_tyvar_error env ty -> (true, None)
   | _ ->
     Typing_solver.is_sub_type
       env
@@ -1209,9 +1208,7 @@ let fun_type_of_id env x tal el =
     (match get_node fd.fe_type with
     | Tfun ft ->
       let ft =
-        let pessimise =
-          TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-        in
+        let pessimise = TCO.enable_sound_dynamic (Env.get_tcopt env) in
         Typing_special_fun.transform_special_fun_ty
           ~pessimise
           ft
@@ -1253,9 +1250,9 @@ let fun_type_of_id env x tal el =
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
           ~should_wrap:
-            (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            (TCO.enable_sound_dynamic (Env.get_tcopt env)
             && fd.fe_support_dynamic_type)
-          (Typing_reason.localize (get_reason fd.fe_type))
+          (Reason.localize (get_reason fd.fe_type))
           ft
       in
       Option.iter
@@ -1485,7 +1482,7 @@ let check_argument_type_against_parameter_type_helper
          For like functions, they have to check both sides. *)
       match dyn_func_kind with
       | Supportdyn_function ->
-        Typing_make_type.locl_like
+        MakeType.locl_like
           (get_reason param.fp_type.et_type)
           param.fp_type.et_type
       | Like_function -> param.fp_type.et_type
@@ -1563,7 +1560,7 @@ let check_argument_type_against_parameter_type
   (env, mk_ty_mismatch_opt arg_ty param.fp_type.et_type opt_e, used_dynamic)
 
 let bad_call env p ty =
-  if not (Typing_utils.is_tyvar_error env ty) then
+  if not (TUtils.is_tyvar_error env ty) then
     Typing_error_utils.add_typing_error
       ~env
       Typing_error.(
@@ -1856,10 +1853,10 @@ let refine_and_simplify_intersection
     let (env, hint_ty) =
       if
         is_class
-        && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-        && Typing_utils.is_supportdyn env ty
+        && TCO.enable_sound_dynamic (Env.get_tcopt env)
+        && TUtils.is_supportdyn env ty
       then
-        Typing_utils.make_supportdyn reason env hint_ty
+        TUtils.make_supportdyn reason env hint_ty
       else
         (env, hint_ty)
     in
@@ -1884,11 +1881,11 @@ let refine_and_simplify_intersection
       let (env, dyn_ty) =
         Inter.intersect env ~r:reason (MakeType.dynamic reason) hint_ty
       in
-      Typing_union.union env dyn_ty ty2
+      Union.union env dyn_ty ty2
     | _ -> (env, MakeType.locl_like reason ty2)
   in
-  match Typing_utils.try_strip_dynamic env ivar_ty with
-  | Some ty when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+  match TUtils.try_strip_dynamic env ivar_ty with
+  | Some ty when TCO.enable_sound_dynamic (Env.get_tcopt env) ->
     like_type_simplify ty
   | _ ->
     let (env, (hint_ty, is_class)) =
@@ -1935,7 +1932,7 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let hint_ty = strip_supportdyn hint_ty in
     let hint_ty =
-      if Env.get_tcopt env |> TypecheckerOptions.enable_sound_dynamic then
+      if Env.get_tcopt env |> TCO.enable_sound_dynamic then
         ish_weakening env hint hint_ty
       else
         hint_ty
@@ -2312,12 +2309,12 @@ let rec bind_param
            * as though the default expression had been assigned conditionally to the parameter.
            *)
           let support_dynamic =
-            TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            TCO.enable_sound_dynamic (Env.get_tcopt env)
             && Env.get_support_dynamic_type env
           in
           let like_ty1 =
             if support_dynamic then
-              Typing_utils.make_like env ty1
+              TUtils.make_like env ty1
             else
               ty1
           in
@@ -2381,13 +2378,13 @@ let rec bind_param
       begin
         match enforced with
         | Enforced
-          when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+          when TCO.enable_sound_dynamic env.genv.tcopt
                && Env.get_support_dynamic_type env ->
-          Some (Typing_utils.make_like env ty1)
+          Some (TUtils.make_like env ty1)
         | _ ->
           (* In implicit SD mode, all inout parameters are pessimised *)
-          if TypecheckerOptions.everything_sdt env.genv.tcopt then
-            Some (Typing_utils.make_like env ty1)
+          if TCO.everything_sdt env.genv.tcopt then
+            Some (TUtils.make_like env ty1)
           else
             Some ty1
       end
@@ -2460,15 +2457,13 @@ and fun_
           Typing_return.fun_implicit_return env pos ret.et_type f_kind
       in
       let env =
-        Typing_env.set_fun_tast_info
-          env
-          Tast.{ has_implicit_return; has_readonly }
+        Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
       in
       debug_last_pos := Pos.none;
       (env, tb))
 
 and block env stl =
-  Typing_env.with_origin env Decl_counters.Body @@ fun env ->
+  Env.with_origin env Decl_counters.Body @@ fun env ->
   (* To insert an `AssertEnv`, `stmt` might return a `Block`. We eliminate it here
      to keep ASTs `Block`-free. *)
   let (env, stl) =
@@ -2545,10 +2540,10 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
         env
     in
     let (env, inner_tast) =
-      Typing_utils.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
+      TUtils.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
     in
     let (env, tast) =
-      Typing_utils.make_simplify_typed_expr
+      TUtils.make_simplify_typed_expr
         env
         pos
         ty
@@ -2602,14 +2597,14 @@ and stmt_ env pos st =
     let max_number_of_iterations =
       Option.value
         ~default:alias_depth
-        (Env.get_tcopt env |> TypecheckerOptions.loop_iteration_upper_bound)
+        (Env.get_tcopt env |> TCO.loop_iteration_upper_bound)
     in
     let env = { env with in_loop = true } in
     let continuations_converge env old_conts new_conts =
       CMap.for_all2
         ~f:(fun _ old_cont_entry new_cont_entry ->
           Typing_per_cont_ops.is_sub_opt_entry
-            Typing_subtype.is_sub_type
+            SubType.is_sub_type
             env
             new_cont_entry
             old_cont_entry)
@@ -3122,7 +3117,7 @@ and case_list parent_locals ty env switch_pos cl dfl =
           SN.Classes.cHH_BuiltinEnum
           [MakeType.mixed Reason.Rnone]
       in
-      Typing_subtype.is_sub_type_for_union env ty top_type
+      SubType.is_sub_type_for_union env ty top_type
     in
     (* register that the runtime may throw in case we cannot prove
        that the switch is exhaustive *)
@@ -3192,24 +3187,20 @@ and bind_as_expr env p ty1 ty2 aexpr =
   | As_kv ((_, p, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
-    let (env, tk) =
-      Typing_utils.make_simplify_typed_expr env p ty1 (Aast.Lvar id)
-    in
+    let (env, tk) = TUtils.make_simplify_typed_expr env p ty1 (Aast.Lvar id) in
     (env, Aast.As_kv (tk, te))
   | As_kv ((_, p, (Lplaceholder _ as k)), ev) ->
     let (env, te, _, _) = assign p env ev p ty2 in
-    let (env, tk) = Typing_utils.make_simplify_typed_expr env p ty1 k in
+    let (env, tk) = TUtils.make_simplify_typed_expr env p ty1 k in
     (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
-    let (env, tk) =
-      Typing_utils.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id)
-    in
+    let (env, tk) = TUtils.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id) in
     (env, Aast.Await_as_kv (p, tk, te))
   | Await_as_kv (p, (_, p1, (Lplaceholder _ as k)), ev) ->
     let (env, te, _, _) = assign p env ev p ty2 in
-    let (env, tk) = Typing_utils.make_simplify_typed_expr env p1 ty1 k in
+    let (env, tk) = TUtils.make_simplify_typed_expr env p1 ty1 k in
     (env, Aast.Await_as_kv (p, tk, te))
   | _ ->
     (* TODO Probably impossible, should check that *)
@@ -3237,7 +3228,7 @@ and expr
                 env
                 [
                   Log_head
-                    ( "Typing.expr " ^ Typing_reason.string_of_ureason r,
+                    ( "Typing.expr " ^ Reason.string_of_ureason r,
                       [Log_type ("expected_ty", ty)] );
                 ]))
     end;
@@ -3440,7 +3431,7 @@ and expr_
           _;
         }
       when String.equal s SN.PseudoFunctions.unsafe_cast
-           && TypecheckerOptions.everything_sdt (Env.get_tcopt env) ->
+           && TCO.everything_sdt (Env.get_tcopt env) ->
       (* Under implicit pessimisation, treat UNSAFE case as an upcast to a like type *)
       let new_e = Upcast (arg, (p, Hlike targ_to)) in
       (new_e, ((), p, new_e))
@@ -3481,8 +3472,7 @@ and expr_
       expr_infer =
     (* Is this a pessimisable builtin constructor *and* the flag is set? *)
     let do_pessimise_builtin =
-      can_pessimise
-      && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+      can_pessimise && TCO.enable_sound_dynamic (Env.get_tcopt env)
     in
     (* Under Sound Dynamic, for pessimisable builtins we add a like to the expected type
      * that is used to check the element expressions.
@@ -3494,7 +3484,7 @@ and expr_
      *      and      Pair<int,string> { $li, "A" } which has type Pair<~int,string>
      *)
     let non_pessimised_builtin_explicit =
-      TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+      TCO.enable_sound_dynamic (Env.get_tcopt env)
       && explicit
       && not do_pessimise_builtin
     in
@@ -3513,7 +3503,7 @@ and expr_
          *)
         let (env, like_ty) =
           if
-            TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+            TCO.enable_sound_dynamic (Env.get_tcopt env)
             && (explicit || do_pessimise_builtin || Option.is_some bound)
           then
             Typing_array_access.pessimise_type env ety.et_type
@@ -3536,21 +3526,21 @@ and expr_
             | Tintersection tyl ->
               let (had_dynamic, tyl) =
                 List.map_env false tyl ~f:(fun had_dynamic ty ->
-                    match Typing_utils.try_strip_dynamic env ty with
+                    match TUtils.try_strip_dynamic env ty with
                     | None -> (had_dynamic, ty)
                     | Some ty -> (true, ty))
               in
               if had_dynamic then
                 (* Put the intersection back together without the dynamic *)
                 let (env, ty) =
-                  Typing_intersection.simplify_intersections
+                  Inter.simplify_intersections
                     env
                     (mk (get_reason ety.et_type, Tintersection tyl))
                 in
                 (env, ty)
               else
                 (env, ety.et_type)
-            | _ -> (env, Typing_utils.strip_dynamic env ety.et_type)
+            | _ -> (env, TUtils.strip_dynamic env ety.et_type)
         in
         (env, expected_with_implicit_like, supertype)
       end
@@ -3567,8 +3557,7 @@ and expr_
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let coerce_for_op =
-      Option.is_some bound
-      && not (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
+      Option.is_some bound && not (TCO.enable_sound_dynamic (Env.get_tcopt env))
     in
     (* Take the inferred type ty of each value and assert that it's a subtype
      * of the (optionally with like type added) result type argument.
@@ -3721,7 +3710,7 @@ and expr_
       env
       e
   | Invalid expr_opt ->
-    let ty = Typing_make_type.nothing @@ Typing_reason.Rinvalid in
+    let ty = MakeType.nothing @@ Reason.Rinvalid in
     let expr_opt =
       Option.map
         ~f:(Aast.map_expr (fun _ -> ty) (fun _ -> Tast.dummy_saved_env))
@@ -4152,8 +4141,7 @@ and expr_
         in
         let ty =
           Typing_dynamic.maybe_wrap_with_supportdyn
-            ~should_wrap:
-              (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
+            ~should_wrap:(TCO.enable_sound_dynamic (Env.get_tcopt env))
             reason
             caller
         in
@@ -4641,7 +4629,7 @@ and expr_
     let (env, ty) =
       if
         TUtils.is_dynamic env cty
-        || TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+        || TCO.enable_sound_dynamic (Env.get_tcopt env)
       then
         (env, MakeType.dynamic (Reason.Rwitness p))
       else
@@ -4661,7 +4649,7 @@ and expr_
     let env = xhp_check_get_attribute p env e y nf in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
     let (env, t_rhs) =
-      Typing_utils.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
+      TUtils.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
     in
     make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
   (* Statically-known instance property access e.g. $x->f *)
@@ -4729,7 +4717,7 @@ and expr_
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let (env, inner_te) =
-      Typing_utils.make_simplify_typed_expr env pm result_ty (Aast.Id m)
+      TUtils.make_simplify_typed_expr env pm result_ty (Aast.Id m)
     in
     make_result
       env
@@ -4752,7 +4740,7 @@ and expr_
     in
     let (_, pos, te2) = te2 in
     let env = might_throw env in
-    let (env, te2) = Typing_utils.make_simplify_typed_expr env pos ty te2 in
+    let (env, te2) = TUtils.make_simplify_typed_expr env pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
@@ -4877,9 +4865,9 @@ and expr_
     let env = might_throw env in
     let (env, ty_err_opt1) =
       if
-        TypecheckerOptions.experimental_feature_enabled
+        TCO.experimental_feature_enabled
           (Env.get_tcopt env)
-          TypecheckerOptions.experimental_forbid_nullable_cast
+          TCO.experimental_forbid_nullable_cast
         && not (TUtils.is_mixed env ty2)
       then
         SubType.sub_type_or_fail env ty2 (MakeType.nonnull (get_reason ty2))
@@ -4925,9 +4913,7 @@ and expr_
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
     let hint_ty = strip_supportdyn hint_ty in
-    let enable_sound_dynamic =
-      TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-    in
+    let enable_sound_dynamic = TCO.enable_sound_dynamic env.genv.tcopt in
     let hint_ty =
       if enable_sound_dynamic then
         ish_weakening env hint hint_ty
@@ -4938,7 +4924,7 @@ and expr_
       if Typing_defs.is_dynamic hint_ty then
         let (env, ty_err_opt) =
           if enable_sound_dynamic then
-            Typing_utils.supports_dynamic env expr_ty
+            TUtils.supports_dynamic env expr_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           else
             (env, None)
@@ -5091,7 +5077,7 @@ and expr_
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
       (MakeType.closed_shape (Reason.Rshape_literal p) fdm)
   | ET_Splice e ->
-    Typing_env.with_outside_expr_tree env (fun env dsl_name ->
+    Env.with_outside_expr_tree env (fun env dsl_name ->
         et_splice env dsl_name p e)
   | EnumClassLabel (None, s) ->
     let (env, expect_label, lty_opt) =
@@ -5192,9 +5178,7 @@ and check_function_dynamically_callable
     ~this_class:_ env f_name f params_decl_ty ret_locl_ty =
   let env = { env with checked = CUnderDynamicAssumptions } in
   Typing_log.log_sd_pass env f.f_span;
-  let make_dynamic pos =
-    Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-  in
+  let make_dynamic pos = MakeType.dynamic (Reason.Rsupport_dynamic_type pos) in
   let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
   let hint_pos =
     match f.f_ret with
@@ -5241,7 +5225,7 @@ and check_function_dynamically_callable
       (fun () ->
         fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind)
       (fun env_and_dynamic_body error ->
-        if not @@ TypecheckerOptions.everything_sdt env.genv.tcopt then
+        if not @@ TCO.everything_sdt env.genv.tcopt then
           Errors.function_is_not_dynamically_callable name error;
         env_and_dynamic_body)
   in
@@ -5801,8 +5785,7 @@ and closure_make
       let like_locals =
         Local_id.Map.map
           (fun local ->
-            Typing_local_types.
-              { local with ty = Typing_utils.make_like env local.ty })
+            Typing_local_types.{ local with ty = TUtils.make_like env local.ty })
           locals
       in
       Env.set_locals env like_locals
@@ -5811,8 +5794,7 @@ and closure_make
   in
   (* Inout parameters should be pessimised in implicit pessimisation mode *)
   let ft =
-    if support_dynamic_type && TypecheckerOptions.everything_sdt env.genv.tcopt
-    then
+    if support_dynamic_type && TCO.everything_sdt env.genv.tcopt then
       {
         ft with
         ft_params =
@@ -5824,7 +5806,7 @@ and closure_make
                   fp_type =
                     {
                       fp.fp_type with
-                      et_type = Typing_utils.make_like env fp.fp_type.et_type;
+                      et_type = TUtils.make_like env fp.fp_type.et_type;
                     };
                 }
               | _ -> fp);
@@ -5996,7 +5978,7 @@ and closure_make
   in
   let has_readonly = Env.get_readonly env in
   let env =
-    Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
+    Env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let env =
     if sdt_dynamic_check_required then begin
@@ -6036,7 +6018,7 @@ and closure_make
   in
   let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
   let (env, te) =
-    Typing_utils.make_simplify_typed_expr
+    TUtils.make_simplify_typed_expr
       env
       lambda_pos
       ty
@@ -6111,7 +6093,7 @@ and expression_tree env p et =
 
   (* Next, typecheck the function pointer assignments *)
   let (env, _, t_function_pointers) =
-    Typing_env.with_inside_expr_tree env et_hint (fun env ->
+    Env.with_inside_expr_tree env et_hint (fun env ->
         let (env, t_function_pointers) = block env et_function_pointers in
         (env, (), t_function_pointers))
   in
@@ -6125,7 +6107,7 @@ and expression_tree env p et =
      }
   *)
   let (env, t_virtualized_expr, ty_virtual) =
-    Typing_env.with_inside_expr_tree env et_hint (fun env ->
+    Env.with_inside_expr_tree env et_hint (fun env ->
         expr env et_virtualized_expr ~allow_awaitable:false)
   in
 
@@ -6222,8 +6204,8 @@ and et_splice env dsl_opt p e =
       @@ Typing_print.with_blank_tyvars (fun () ->
              Typing_print.full_strip_ns env ty)
     in
-    Typing_reason.to_string err_splice_ty (get_reason splice_ty)
-    @ Typing_reason.to_string err_ty (get_reason ty)
+    Reason.to_string err_splice_ty (get_reason splice_ty)
+    @ Reason.to_string err_ty (get_reason ty)
   in
   let docs_url =
     lazy
@@ -6240,7 +6222,7 @@ and et_splice env dsl_opt p e =
     let raw_spliceable_type =
       MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
     in
-    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+    if TCO.enable_sound_dynamic (Env.get_tcopt env) then
       MakeType.locl_like (Reason.Rsplice p) raw_spliceable_type
     else
       raw_spliceable_type
@@ -6616,7 +6598,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       (* Generate fresh types for each lhs list element, then subtype against
          rhs type. If original type was generated from an error, propagate this to
          avoid cascading errors. *)
-      let is_error_type = Typing_utils.is_tyvar_error env ty2 in
+      let is_error_type = TUtils.is_tyvar_error env ty2 in
       let env = Env.open_tyvars env p in
       let (env, tyl) =
         List.map_env env el ~f:(fun env (_, p, _e) ->
@@ -6723,10 +6705,10 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let (env, inner_te) =
-        Typing_utils.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
+        TUtils.make_simplify_typed_expr env pm declared_ty (Aast.Id m)
       in
       let (env, te1) =
-        Typing_utils.make_simplify_typed_expr
+        TUtils.make_simplify_typed_expr
           env
           pobj
           declared_ty
@@ -7122,9 +7104,7 @@ and dispatch_call
       | Tfun ft -> ft.ft_ret.et_type
       | _ -> ty_ (Reason.Rwitness p)
     in
-    let (env, te) =
-      Typing_utils.make_simplify_typed_expr env fpos fty (Aast.Id id)
-    in
+    let (env, te) = TUtils.make_simplify_typed_expr env fpos fty (Aast.Id id) in
     make_call env te tal tel None ty
   in
   let overload_function = overload_function make_call fpos in
@@ -7144,7 +7124,7 @@ and dispatch_call
       call ~expected ~expr_pos:p ~recv_pos:(fst id) env fty el unpacked_element
     in
     let (env, inner_te) =
-      Typing_utils.make_simplify_typed_expr env fpos fty (Aast.Id id)
+      TUtils.make_simplify_typed_expr env fpos fty (Aast.Id id)
     in
     let result = make_call env inner_te tal tel typed_unpack_element ty in
     (result, should_forget_fakes)
@@ -7205,11 +7185,7 @@ and dispatch_call
       call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
     in
     let (env, te) =
-      Typing_utils.make_simplify_typed_expr
-        env
-        fpos
-        fty
-        (Aast.Class_const (tcid, m))
+      TUtils.make_simplify_typed_expr env fpos fty (Aast.Class_const (tcid, m))
     in
     let result = make_call env te tal tel typed_unpack_element ty in
     (result, should_forget_fakes)
@@ -7270,7 +7246,7 @@ and dispatch_call
       let result =
         match el with
         | [(Ast_defs.Pnormal, original_expr)]
-          when TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env) ->
+          when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
           expr env original_expr
         | _ ->
           (* first type the `unsafe_cast` as a call, handling arity errors *)
@@ -7409,7 +7385,7 @@ and dispatch_call
           let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
           let () =
             match result with
-            | (_, (ty, _, _), _) when Typing_utils.is_tyvar_error env ty ->
+            | (_, (ty, _, _), _) when TUtils.is_tyvar_error env ty ->
               Typing_error_utils.add_typing_error
                 ~env
                 Typing_error.(
@@ -7449,7 +7425,7 @@ and dispatch_call
         match el with
         | _ :: (_, field) :: _ -> begin
           let (fld_opt, ty_err_opt) =
-            Typing_utils.shape_field_name_with_ty_err env field
+            TUtils.shape_field_name_with_ty_err env field
           in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
           match fld_opt with
@@ -7529,7 +7505,7 @@ and dispatch_call
       call_parent_construct p pos env el unpacked_element
     in
     let (env, te) =
-      Typing_utils.make_simplify_typed_expr
+      TUtils.make_simplify_typed_expr
         env
         fpos
         ctor_fty
@@ -7569,7 +7545,7 @@ and dispatch_call
       let (caller_ty, caller_pos, _) = func in
       (* Rewrap the caller in the readonly expression after we're done *)
       let (env, wrapped_caller) =
-        Typing_utils.make_simplify_typed_expr
+        TUtils.make_simplify_typed_expr
           env
           caller_pos
           caller_ty
@@ -7580,7 +7556,7 @@ and dispatch_call
     | _ -> ((env, expr, ty), s))
   (* Call instance method *)
   | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method)
-    when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
+    when not (TCO.method_call_inference (Env.get_tcopt env)) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
       match nullflavor with
@@ -7620,10 +7596,10 @@ and dispatch_call
         unpacked_element
     in
     let (env, inner_te) =
-      Typing_utils.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
+      TUtils.make_simplify_typed_expr env pos_id tfty (Aast.Id m)
     in
     let (env, te) =
-      Typing_utils.make_simplify_typed_expr
+      TUtils.make_simplify_typed_expr
         env
         fpos
         tfty
@@ -7744,10 +7720,10 @@ and dispatch_call
         (env, ret_ty)
     in
     let (env, inner_te1) =
-      Typing_utils.make_simplify_typed_expr env pos_id method_ty (Aast.Id meth)
+      TUtils.make_simplify_typed_expr env pos_id method_ty (Aast.Id meth)
     in
     let (env, inner_te2) =
-      Typing_utils.make_simplify_typed_expr
+      TUtils.make_simplify_typed_expr
         env
         fpos
         method_ty
@@ -7997,7 +7973,7 @@ and class_get_inner
 
       (env, (ty, []), dflt_rval_err)
     end else
-      let (env, ty) = Typing_intersection.intersect_list env r tyl in
+      let (env, ty) = Inter.intersect_list env r tyl in
       class_get_inner
         ~is_method
         ~is_const
@@ -8238,8 +8214,8 @@ and class_get_inner
                 Typing_dynamic.maybe_wrap_with_supportdyn
                   ~should_wrap:
                     (get_ce_support_dynamic_type ce
-                    && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-                  (Typing_reason.localize r)
+                    && TCO.enable_sound_dynamic env.genv.tcopt)
+                  (Reason.localize r)
                   ft
               in
               (env, fty, Unenforced, explicit_targs)
@@ -8289,7 +8265,7 @@ and class_get_inner
                   ur
                   env
                   ty
-                  (Typing_utils.make_like_if_enforced env ety)
+                  (TUtils.make_like_if_enforced env ety)
                   Typing_error.Callback.unify_error
               in
               Option.iter
@@ -8304,7 +8280,7 @@ and class_get_inner
   | ( _,
       ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
       | Ttuple _ | Tshape _ | Taccess _ | Tneg _ ) ) ->
-    if not (Typing_utils.is_tyvar_error env cty) then
+    if not (TUtils.is_tyvar_error env cty) then
       Typing_error_utils.add_typing_error
         ~env
         Typing_error.(
@@ -8633,7 +8609,7 @@ and class_expr
       | (_, Tdynamic) -> ((env, None), (base_ty, Ok base_ty))
       | (r, Tvar _) ->
         let ty_err2 =
-          if Typing_utils.is_tyvar_error env base_ty then
+          if TUtils.is_tyvar_error env base_ty then
             None
           else
             Some
@@ -8760,7 +8736,7 @@ and call_construct
       (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);
     (* Obtain the type of the constructor *)
     let (env, m) =
-      let _r = get_reason m |> Typing_reason.localize in
+      let _r = get_reason m |> Reason.localize in
       match get_node m with
       | Tfun ft ->
         let ft =
@@ -8812,7 +8788,7 @@ and call_construct
         ( env,
           Typing_dynamic.maybe_wrap_with_supportdyn
             ~should_wrap
-            (Typing_reason.localize (get_reason m))
+            (Reason.localize (get_reason m))
             ft )
       | _ ->
         Errors.internal_error p "Expected function type for constructor";
@@ -8921,11 +8897,9 @@ and call
     let (env, ty) = Env.fresh_type_error env expr_pos in
     (env, ([], None, ty, should_forget_fakes))
   end else
-    let (env, fty) =
-      Typing_intersection.intersect_list env (get_reason fty) tyl
-    in
+    let (env, fty) = Inter.intersect_list env (get_reason fty) tyl in
     let ((env, ty_err_opt), efty) =
-      if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
+      if TCO.method_call_inference (Env.get_tcopt env) then
         let (env, ty) = Env.expand_type env fty in
         ((env, None), ty)
       else
@@ -8936,7 +8910,7 @@ and call
           fty
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    match Typing_utils.try_strip_dynamic env efty with
+    match TUtils.try_strip_dynamic env efty with
     | Some ty
       when TCO.enable_sound_dynamic (Env.get_tcopt env) && is_fun_type ty ->
       call
@@ -9000,7 +8974,7 @@ and call
                 | Ast_defs.Pnormal -> env
               in
               let (env, ty_err_opt) =
-                Typing_subtype.sub_type
+                SubType.sub_type
                   ~coerce:(Some Typing_logic.CoerceToDynamic)
                   env
                   e_ty
@@ -9020,7 +8994,7 @@ and call
       | (r, ((Tprim Tnull | Tdynamic | Tany _ | Tunion [] | Tvar _) as ty))
         when match ty with
              | Tprim Tnull -> Option.is_some nullsafe
-             | Tvar _ -> Typing_utils.is_tyvar_error env efty
+             | Tvar _ -> TUtils.is_tyvar_error env efty
              | _ -> true ->
         let el =
           Option.value_map
@@ -9030,10 +9004,7 @@ and call
         in
         let expected_arg_ty =
           (* Note: We ought to be using 'mixed' here *)
-          ExpectedTy.make
-            expr_pos
-            Reason.URparam
-            (Typing_utils.mk_tany env expr_pos)
+          ExpectedTy.make expr_pos Reason.URparam (TUtils.mk_tany env expr_pos)
         in
         let (env, tel) =
           List.map_env env el ~f:(fun env (pk, elt) ->
@@ -9080,7 +9051,7 @@ and call
           match ty with
           | Tprim Tnull -> (env, mk (r, Tprim Tnull))
           | Tdynamic -> (env, MakeType.dynamic (Reason.Rdynamic_call expr_pos))
-          | Tvar _ when Typing_utils.is_tyvar_error env efty ->
+          | Tvar _ when TUtils.is_tyvar_error env efty ->
             Env.fresh_type_error env expr_pos
           | Tunion []
           | _ (* _ should not happen! *) ->
@@ -9188,7 +9159,7 @@ and call
             (env, Some enum_name)
           | Tgeneric (name, _) ->
             let (env, upper_bounds) =
-              Typing_utils.collect_enum_class_upper_bounds env name
+              TUtils.collect_enum_class_upper_bounds env name
             in
             begin
               match upper_bounds with
@@ -9383,7 +9354,7 @@ and call
             Typing_coeffects.get_type ft.ft_implicit_params.capability
           in
           let should_skip_check =
-            (not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)))
+            (not (TCO.call_coeffects (Env.get_tcopt env)))
             (* When inside an expression tree, expressions are virtualized and
                thus never executed. Safe to skip coeffect checks in this case. *)
             || Env.is_in_expr_tree env
@@ -9593,7 +9564,7 @@ and call
               (* We've got an argument *)
               | (pos, argty) :: argtys ->
                 let (env, ty_err_opt) =
-                  Typing_utils.supports_dynamic env argty
+                  TUtils.supports_dynamic env argty
                   @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
                 in
                 Option.iter
@@ -9619,8 +9590,7 @@ and call
           | _ -> ft.ft_ret.et_type
         in
         (env, (tel, typed_unpack_element, ret, should_forget_fakes))
-      | (r, Tvar _)
-        when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
+      | (r, Tvar _) when TCO.method_call_inference (Env.get_tcopt env) ->
         (*
             Typecheck calls with unresolved function type by constructing a
             suitable function type from the arguments and invoking subtyping.
@@ -9753,7 +9723,7 @@ and call
                     fp_type =
                       {
                         fp.fp_type with
-                        et_type = Typing_utils.make_like env fp.fp_type.et_type;
+                        et_type = TUtils.make_like env fp.fp_type.et_type;
                       };
                   })
             in
@@ -9783,8 +9753,7 @@ and call
               unpacked_element
         end
       | _ ->
-        if not (Typing_utils.is_tyvar_error env efty) then
-          bad_call env expr_pos efty;
+        if not (TUtils.is_tyvar_error env efty) then bad_call env expr_pos efty;
         let (env, ty_err_opt) =
           call_untyped_unpack env (get_pos efty) unpacked_element
         in
@@ -10002,10 +9971,7 @@ and string2 env idl =
     List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
         let (env, te, ty) = expr env x ~allow_awaitable:(*?*) false in
         let (_, p, _) = x in
-        if
-          TypecheckerOptions.enable_strict_string_concat_interp
-            (Env.get_tcopt env)
-        then (
+        if TCO.enable_strict_string_concat_interp (Env.get_tcopt env) then (
           let r = Reason.Rinterp_operand p in
           let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
           let stringlike =
@@ -10115,7 +10081,7 @@ and overload_function
         | ty -> ty)
   in
   let (env, te) =
-    Typing_utils.make_simplify_typed_expr
+    TUtils.make_simplify_typed_expr
       env
       fpos
       fty
@@ -10152,15 +10118,15 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
 
 (* External API *)
 let expr ?expected env e =
-  Typing_env.with_origin2 env Decl_counters.Body (fun env ->
+  Env.with_origin2 env Decl_counters.Body (fun env ->
       expr ?expected env e ~allow_awaitable:(*?*) false)
 
 let expr_with_pure_coeffects ?expected env e =
-  Typing_env.with_origin2 env Decl_counters.Body (fun env ->
+  Env.with_origin2 env Decl_counters.Body (fun env ->
       expr_with_pure_coeffects ?expected env e ~allow_awaitable:(*?*) false)
 
 let stmt env st =
-  Typing_env.with_origin env Decl_counters.Body (fun env -> stmt env st)
+  Env.with_origin env Decl_counters.Body (fun env -> stmt env st)
 
 let refine_hint ~pos ~reason env union_ty hint =
   let h = Decl_hint.hint env.Typing_env_types.decl_env hint in

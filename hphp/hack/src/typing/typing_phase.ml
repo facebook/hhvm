@@ -255,9 +255,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     | _ -> lty
   in
   let push_supportdyn_into_shape lty =
-    let (is_supportdyn, _env, stripped_lty) =
-      Typing_utils.strip_supportdyn env lty
-    in
+    let (is_supportdyn, _env, stripped_lty) = TUtils.strip_supportdyn env lty in
     match deref stripped_lty with
     | (r, Tshape (origin, ty, shape_fields)) when is_supportdyn ->
       MakeType.supportdyn
@@ -371,8 +369,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       if null_is_subtype_of ty then
         (env, ty)
       else
-        Typing_make_type.nullable_locl r ty
-        |> TUtils.wrap_union_inter_ty_in_var env r
+        MakeType.nullable_locl r ty |> TUtils.wrap_union_inter_ty_in_var env r
     in
     let (env, ty) = union_null env ty in
     ((env, ty_err_opt), ty)
@@ -385,17 +382,14 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
     (env, mk (r, Tfun ft))
   | Tapply ((_, x), [arg])
-    when String.equal x Naming_special_names.FB.cIncorrectType
-         && Env.is_typedef env x ->
+    when String.equal x SN.FB.cIncorrectType && Env.is_typedef env x ->
     localize ~ety_env env (mk (get_reason dty, Tlike arg))
-  | Tapply ((_, x), [arg])
-    when String.equal x Naming_special_names.HH.FIXME.tTanyMarker ->
+  | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tTanyMarker ->
     if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
       localize ~ety_env env arg
     else
-      ((env, None), mk (r, Typing_utils.tany env))
-  | Tapply ((_, x), [arg])
-    when String.equal x Naming_special_names.HH.FIXME.tPoisonMarker ->
+      ((env, None), mk (r, TUtils.tany env))
+  | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tPoisonMarker ->
     let decl_ty =
       if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
         mk (get_reason dty, Tlike arg)
@@ -403,13 +397,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         arg
     in
     localize ~ety_env env decl_ty
-  | Tapply ((p, x), [arg])
-    when String.equal x Naming_special_names.HH.FIXME.tSupportdynMarker ->
+  | Tapply ((p, x), [arg]) when String.equal x SN.HH.FIXME.tSupportdynMarker ->
     let decl_ty =
       if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        mk
-          ( get_reason dty,
-            Tapply ((p, Naming_special_names.Classes.cSupportDyn), [arg]) )
+        mk (get_reason dty, Tapply ((p, SN.Classes.cSupportDyn), [arg]))
       else
         arg
     in
@@ -440,7 +431,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     let lty =
       (* If we have supportdyn<t> then push supportdyn into open shape fields *)
-      if String.equal cid Naming_special_names.Classes.cSupportDyn then
+      if String.equal cid SN.Classes.cSupportDyn then
         push_supportdyn_into_shape lty
       else
         lty
@@ -544,11 +535,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     ((env, ty_err_opt), mk (r, Tshape (Missing_origin, shape_kind, tym)))
   | Tnewtype (name, tyl, ty) ->
     let td =
-      Utils.unsafe_opt
-      @@ Decl_provider.get_typedef (Typing_env.get_ctx env) name
+      Utils.unsafe_opt @@ Decl_provider.get_typedef (Env.get_ctx env) name
     in
     let should_expand =
-      Typing_env.is_typedef_visible
+      Env.is_typedef_visible
         env
         ~expand_visible_newtype:ety_env.expand_visible_newtype
         ~name
@@ -575,7 +565,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       | None ->
         Decl_typedef_expand.expand_typedef
           ~force_expand:true
-          (Typing_env.get_ctx env)
+          (Env.get_ctx env)
           (get_reason dty)
           name
           tyl
@@ -663,7 +653,7 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
       let subst_and_add_localized_constraints env ck cstr_tys =
         Typing_set.fold
           (fun cstr_ty env ->
-            let cstr_ty = Typing_kinding.Locl_Inst.instantiate substs cstr_ty in
+            let cstr_ty = Kinding.Locl_Inst.instantiate substs cstr_ty in
             TUtils.add_constraint env ck ty_fresh cstr_ty ety_env.on_error)
           cstr_tys
           env
@@ -739,7 +729,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
                   apply_reasons ~on_error
                   @@ Secondary.Cyclic_enum_constraint pos)
         in
-        ((env, ty_err_opt), mk (r, Typing_utils.tany env))
+        ((env, ty_err_opt), mk (r, TUtils.tany env))
       | None ->
         if Ast_defs.is_c_enum_class (Cls.kind class_info) then
           (* Enum classes no longer has the ambiguity between the type of
@@ -806,7 +796,7 @@ and localize_typedef_instantiation
   | Some typedef_info ->
     if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
       Decl_typedef_expand.expand_typedef
-        (Typing_env.get_ctx env)
+        (Env.get_ctx env)
         decl_r
         type_name
         tyargs
@@ -858,7 +848,7 @@ and localize_with_kind
           let (env, ty) = Env.fresh_type_error env Pos.none in
           ((env, None), ty)
       | Some (Env.TypedefResult typedef) ->
-        if Typing_env.is_typedef_visible env ~name typedef then
+        if Env.is_typedef_visible env ~name typedef then
           ((env, None), mk (r, Tunapplied_alias name))
         else
           (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
@@ -1676,7 +1666,7 @@ let localize_and_add_generic_parameters_with_bounds
       ~combine_ty_errs:Typing_error.multiple_opt
   in
   let add_constraint env (ty1, ck, ty2) =
-    Typing_utils.add_constraint env ck ty1 ty2 ety_env.on_error
+    TUtils.add_constraint env ck ty1 ty2 ety_env.on_error
   in
   let env = List.fold_left (List.concat cstrss) ~f:add_constraint ~init:env in
   (env, ty_err_opt)

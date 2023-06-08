@@ -145,7 +145,7 @@ let subtype_method_decl
   let tvarl = List.map ~f:fst explicit_targs in
   let substs = Decl_subst.make_locl non_reified_tparams tvarl in
   let (env, ty_err3) =
-    Typing_phase.check_tparams_constraints
+    Phase.check_tparams_constraints
       ~use_pos:Pos.none
       ~ety_env:{ ety_env with substs }
       env

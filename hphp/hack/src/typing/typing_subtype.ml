@@ -204,8 +204,7 @@ let log_subtype_i ~level ~this_ty ~function_name env ty_sub ty_super =
         if
           level >= 3
           || not
-               (Typing_utils.is_capability_i ty_sub
-               || Typing_utils.is_capability_i ty_super)
+               (TUtils.is_capability_i ty_sub || TUtils.is_capability_i ty_super)
         then
           log_types
             (Reason.to_pos (reason ty_sub))
@@ -398,8 +397,8 @@ let rec describe_ty_super ~is_coeffect env ty =
         Printf.sprintf
           "a class with `{type %s%s%s}`"
           id
-          (bound_desc ~prefix:" super " ~is_trivial:Typing_utils.is_nothing lo)
-          (bound_desc ~prefix:" as " ~is_trivial:Typing_utils.is_mixed up)
+          (bound_desc ~prefix:" super " ~is_trivial:TUtils.is_nothing lo)
+          (bound_desc ~prefix:" as " ~is_trivial:TUtils.is_mixed up)
     | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
     | (_, Tcan_index _) -> "an array that can be indexed"
     | (_, Tdestructure _) ->
@@ -471,7 +470,7 @@ let can_traverse_to_iface ct =
 
 let liken ~super_like env ty =
   if super_like then
-    Typing_utils.make_like env ty
+    TUtils.make_like env ty
   else
     ty
 
@@ -497,7 +496,7 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
     match sub_supportdyn with
     | None -> (env, ty1)
     | Some r ->
-      let (env, ty1) = Typing_env.expand_internal_type env ty1 in
+      let (env, ty1) = Env.expand_internal_type env ty1 in
       ( env,
         (match ty1 with
         | LoclType ty ->
@@ -516,7 +515,7 @@ let mk_issubtype_prop ~sub_supportdyn ~coerce env ty1 ty2 =
            ends up on the upper bound of a type variable. Here we find if ty2 contains
            dynamic and replace it with supportdyn<mixed> which is equivalent, but does not
            require dynamic-aware subtyping mode to be a supertype of types that support dynamic. *)
-        match (coerce, Typing_utils.try_strip_dynamic env ty2) with
+        match (coerce, TUtils.try_strip_dynamic env ty2) with
         | (Some TL.CoerceToDynamic, Some non_dyn_ty) ->
           let r = get_reason ty2 in
           ( None,
@@ -677,7 +676,7 @@ and default_subtype
           | Tintersection tyl -> List.exists ~f tyl
           | _ -> false
         in
-        let (last_tyl, first_tyl) = Typing_utils.partition_union ~f tyl in
+        let (last_tyl, first_tyl) = TUtils.partition_union ~f tyl in
         let subtype_list env prop tyl =
           List.fold_left tyl ~init:(env, prop) ~f:(fun res ty_sub ->
               res
@@ -1580,7 +1579,7 @@ and simplify_subtype_i
         in
         match stripped_dynamic with
         | Some tyl ->
-          let ty = Typing_make_type.union r tyl in
+          let ty = MakeType.union r tyl in
           let delay_push =
             is_sub_type_for_union_i
               env
@@ -1789,12 +1788,12 @@ and simplify_subtype_i
             *)
             if
               List.exists tyl_super ~f:(fun t ->
-                  Typing_utils.is_tintersection env t
-                  || Typing_utils.is_opt_tyvar env t
-                  || Typing_utils.is_tyvar env t)
+                  TUtils.is_tintersection env t
+                  || TUtils.is_opt_tyvar env t
+                  || TUtils.is_tyvar env t)
             then
               simplify_sub_union env ety_sub tyl_super
-            else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
+            else if List.exists tyl_sub ~f:(TUtils.is_tunion env) then
               simplify_super_intersection env tyl_sub (LoclType ty_super)
             else
               simplify_sub_union env ety_sub tyl_super
@@ -1875,10 +1874,10 @@ and simplify_subtype_i
           (* If the type on the left is disjoint from null, then the Toption on the right is not
              doing anything helpful. *)
           | ((_, (Tintersection _ | Tunion _)), _)
-            when Typing_utils.is_type_disjoint
+            when TUtils.is_type_disjoint
                    env
                    lty_sub
-                   (Typing_make_type.null Reason.Rnone) ->
+                   (MakeType.null Reason.Rnone) ->
             simplify_subtype
               ~subtype_env
               ~sub_supportdyn
@@ -2264,7 +2263,7 @@ and simplify_subtype_i
                   unknown_fields_type
                   ty_super
           | (_, Tclass ((_, class_id), _exact, tyargs)) ->
-            let class_def_sub = Typing_env.get_class env class_id in
+            let class_def_sub = Env.get_class env class_id in
             (match class_def_sub with
             | None ->
               (* This should have been caught already in the naming phase *)
@@ -2410,7 +2409,7 @@ and simplify_subtype_i
                   (match Cls.enum_type class_sub with
                   | Some enum_type ->
                     let ((env, _ty_err_opt), subtype) =
-                      Typing_utils.localize_no_subst
+                      TUtils.localize_no_subst
                         ~ignore_errors:true
                         env
                         enum_type.te_base
@@ -2766,7 +2765,7 @@ and simplify_subtype_i
       | LoclType ty_sub ->
         (match deref ty_sub with
         | (_, Tneg (Neg_class (_, c_sub))) ->
-          if Typing_utils.is_sub_class_refl env c_super c_sub then
+          if TUtils.is_sub_class_refl env c_super c_sub then
             valid env
           else
             invalid_env env
@@ -2968,7 +2967,7 @@ and simplify_subtype_shape
       | (_, true) -> `Optional (make_supportdyn sft_ty)
       | (_, false) -> `Required (make_supportdyn sft_ty))
     | None ->
-      if Typing_utils.is_nothing env shape_kind then
+      if TUtils.is_nothing env shape_kind then
         `Absent
       else
         let printable_name = TUtils.get_printable_shape_field_name field_name in
@@ -3116,8 +3115,8 @@ and simplify_subtype_shape
       res
   in
   match
-    ( Typing_utils.is_nothing env shape_kind_sub,
-      Typing_utils.is_nothing env shape_kind_super )
+    ( TUtils.is_nothing env shape_kind_sub,
+      TUtils.is_nothing env shape_kind_super )
   with
   (* An open shape cannot subtype a closed shape *)
   | (false, true) ->
@@ -3504,8 +3503,7 @@ and simplify_subtype_has_type_member
         &&& simplify_subtype_bound `Super ~bound:memloty loty)
     | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
       concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
-    | (_r_sub, Tgeneric (s, ty_args))
-      when String.equal s Naming_special_names.Typehints.this ->
+    | (_r_sub, Tgeneric (s, ty_args)) when String.equal s SN.Typehints.this ->
       let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
       concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
     | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _)) ->
@@ -4061,7 +4059,7 @@ and simplify_subtype_params
       | Tdynamic
         when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
              && for_override ->
-        { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+        { subtype_env with coerce = Some TL.CoerceToDynamic }
       | _ -> subtype_env
     in
     let simplify_subtype_possibly_enforced =
@@ -4564,14 +4562,12 @@ and simplify_subtype_funs
          * to override Awaitable<dynamic> and and Awaitable<t> to
          * override ~Awaitable<dynamic>.
          *)
-        let super_ty = Typing_utils.strip_dynamic env super_ty in
+        let super_ty = TUtils.strip_dynamic env super_ty in
         match get_node super_ty with
-        | Tdynamic ->
-          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+        | Tdynamic -> { subtype_env with coerce = Some TL.CoerceToDynamic }
         | Tclass ((_, class_name), _, [ty])
-          when String.equal class_name Naming_special_names.Classes.cAwaitable
-               && is_dynamic ty ->
-          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+          when String.equal class_name SN.Classes.cAwaitable && is_dynamic ty ->
+          { subtype_env with coerce = Some TL.CoerceToDynamic }
         | _ -> subtype_env
       else
         subtype_env
@@ -5289,12 +5285,12 @@ let is_type_disjoint env ty1 ty2 =
     | (_, Tgeneric (name, [])) -> is_generic_disjoint visited env name ty2 ty1
     | ((Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _), _) ->
       let (env, bounds) =
-        Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty1
+        TUtils.get_concrete_supertypes ~abstract_enum:false env ty1
       in
       is_intersection_type_disjoint visited env bounds ty2
     | (_, (Tgeneric _ | Tnewtype _ | Tdependent _ | Tintersection _)) ->
       let (env, bounds) =
-        Typing_utils.get_concrete_supertypes ~abstract_enum:false env ty2
+        TUtils.get_concrete_supertypes ~abstract_enum:false env ty2
       in
       is_intersection_type_disjoint visited env bounds ty1
     | (Tvar tv, _) -> is_tyvar_disjoint visited env tv ty2
@@ -5329,7 +5325,7 @@ let is_type_disjoint env ty1 ty2 =
          e.g., in abstract class C {}; class D extends C {}, we wouldn't consider
          neg D and C to be disjoint.
       *)
-      Typing_utils.is_sub_class_refl env c2 c1
+      TUtils.is_sub_class_refl env c2 c1
     | (Tneg _, _)
     | (_, Tneg _) ->
       false
@@ -5375,7 +5371,7 @@ let is_type_disjoint env ty1 ty2 =
       false
     else
       let (env, bounds) =
-        Typing_utils.get_concrete_supertypes ~abstract_enum:false env gen_ty
+        TUtils.get_concrete_supertypes ~abstract_enum:false env gen_ty
       in
       is_intersection_type_disjoint
         (visited_tyvars, SSet.add name visited_generics)
@@ -5692,16 +5688,15 @@ let is_sub_type_for_union = is_sub_type_for_union ~coerce:None
 let is_sub_type_for_union_i = is_sub_type_for_union_i ~coerce:None
 
 let set_fun_refs () =
-  Typing_utils.sub_type_ref := sub_type;
-  Typing_utils.sub_type_i_ref := sub_type_i;
-  Typing_utils.sub_type_with_dynamic_as_bottom_ref :=
-    sub_type_with_dynamic_as_bottom;
-  Typing_utils.add_constraint_ref := add_constraint;
-  Typing_utils.is_sub_type_ref := is_sub_type;
-  Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union;
-  Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
-  Typing_utils.is_sub_type_ignore_generic_params_ref :=
+  TUtils.sub_type_ref := sub_type;
+  TUtils.sub_type_i_ref := sub_type_i;
+  TUtils.sub_type_with_dynamic_as_bottom_ref := sub_type_with_dynamic_as_bottom;
+  TUtils.add_constraint_ref := add_constraint;
+  TUtils.is_sub_type_ref := is_sub_type;
+  TUtils.is_sub_type_for_union_ref := is_sub_type_for_union;
+  TUtils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
+  TUtils.is_sub_type_ignore_generic_params_ref :=
     is_sub_type_ignore_generic_params;
-  Typing_utils.is_type_disjoint_ref := is_type_disjoint
+  TUtils.is_type_disjoint_ref := is_type_disjoint
 
 let () = set_fun_refs ()

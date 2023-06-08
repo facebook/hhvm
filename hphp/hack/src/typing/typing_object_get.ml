@@ -43,7 +43,7 @@ type obj_get_args = {
   meth_caller: bool;
   is_method: bool;
   is_nonnull: bool;
-  nullsafe: Typing_reason.t option;
+  nullsafe: Reason.t option;
   obj_pos: pos;
   coerce_from_ty:
     (MakeType.Nast.pos * Reason.ureason * Typing_defs.locl_ty) option;
@@ -82,27 +82,21 @@ let mk_mismatch_intersection env errs_res =
   Result.fold
     errs_res
     ~ok:(fun tys ->
-      let (env, ty) = Typing_intersection.intersect_list env Reason.none tys in
+      let (env, ty) = Inter.intersect_list env Reason.none tys in
       (env, Ok ty))
     ~error:(fun (actuals, expecteds) ->
-      let (env, ty_actual) =
-        Typing_intersection.intersect_list env Reason.none actuals
-      in
-      let (env, ty_expect) =
-        Typing_intersection.intersect_list env Reason.none expecteds
-      in
+      let (env, ty_actual) = Inter.intersect_list env Reason.none actuals in
+      let (env, ty_expect) = Inter.intersect_list env Reason.none expecteds in
       (env, Error (ty_actual, ty_expect)))
 
 let mk_mismatch_union env =
   Result.fold
     ~ok:(fun tys ->
-      let (env, ty) = Typing_union.union_list env Reason.none tys in
+      let (env, ty) = Union.union_list env Reason.none tys in
       (env, Ok ty))
     ~error:(fun (actuals, expecteds) ->
-      let (env, ty_acutal) = Typing_union.union_list env Reason.none actuals in
-      let (env, ty_expect) =
-        Typing_union.union_list env Reason.none expecteds
-      in
+      let (env, ty_acutal) = Union.union_list env Reason.none actuals in
+      let (env, ty_expect) = Union.union_list env Reason.none expecteds in
       (env, Error (ty_acutal, ty_expect)))
 
 let fold_mismatches mismatches =
@@ -394,9 +388,9 @@ let rec this_appears_covariantly ~contra env ty =
     || this_appears_covariantly ~contra env ty2
   | Tapply (pos_name, tyl) ->
     let tparams =
-      match Typing_env.get_class_or_typedef env (snd pos_name) with
-      | Some (Typing_env.TypedefResult { td_tparams; _ }) -> td_tparams
-      | Some (Typing_env.ClassResult cls) -> Cls.tparams cls
+      match Env.get_class_or_typedef env (snd pos_name) with
+      | Some (Env.TypedefResult { td_tparams; _ }) -> td_tparams
+      | Some (Env.ClassResult cls) -> Cls.tparams cls
       | None -> []
     in
     this_appears_covariantly_params tparams tyl
@@ -410,7 +404,7 @@ let rec this_appears_covariantly ~contra env ty =
     false
   | Tnewtype (name, tyl, _) ->
     let tparams =
-      match Typing_env.get_typedef env name with
+      match Env.get_typedef env name with
       | Some { td_tparams; _ } -> td_tparams
       | None -> []
     in
@@ -789,7 +783,7 @@ and obj_get_concrete_class_with_member_info
 
         ( Typing_dynamic.maybe_wrap_with_supportdyn
             ~should_wrap
-            (Typing_reason.localize r)
+            (Reason.localize r)
             ft1,
           lval_mismatch )
       in
@@ -813,11 +807,11 @@ and obj_get_concrete_class_with_member_info
           let ft_ty2 =
             Typing_dynamic.maybe_wrap_with_supportdyn
               ~should_wrap
-              (Typing_reason.localize r)
+              (Reason.localize r)
               ft2
           in
           let (env, ty) =
-            Inter.intersect_list env (Typing_reason.localize r) [ft_ty1; ft_ty2]
+            Inter.intersect_list env (Reason.localize r) [ft_ty1; ft_ty2]
           in
           (* TODO: should we be taking the intersection of the errors? *)
           let ty_err_opt =
@@ -901,7 +895,7 @@ and obj_get_concrete_class_with_member_info
             ur
             env
             ty
-            (Typing_utils.make_like_if_enforced env ety)
+            (TUtils.make_like_if_enforced env ety)
             err
         in
         let coerce_ty_mismatch =
@@ -1041,7 +1035,7 @@ and nullable_obj_get
     in
     let (env, ty) =
       match r_null with
-      | Typing_reason.Rnullsafe_op p1 ->
+      | Reason.Rnullsafe_op p1 ->
         make_nullable_member_type
           ~is_method:args.is_method
           env
@@ -1224,10 +1218,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       if args.is_nonnull then
         (true, None)
       else
-        Typing_solver.is_sub_type
-          env
-          receiver_ty
-          (Typing_make_type.nonnull Reason.none)
+        Typing_solver.is_sub_type env receiver_ty (MakeType.nonnull Reason.none)
     in
     let ty_err_opt =
       Option.merge expand_ty_err_opt subty_err_opt ~f:Typing_error.both
@@ -1274,7 +1265,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       let (env, ty) = Env.fresh_type_error env id_pos in
       (env, ty_err_opt, (ty, []), lval_mismatch, dflt_rval_mismatch)
     | (env, tyl) ->
-      let (env, ty) = Typing_intersection.intersect_list env r tyl in
+      let (env, ty) = Inter.intersect_list env r tyl in
       let (env, ty) =
         if args.is_nonnull then
           Typing_solver.non_null env (Pos_or_decl.of_raw_pos args.obj_pos) ty
@@ -1289,7 +1280,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
     let ty_err_opt =
-      if Typing_utils.is_tyvar_error env ety1 then
+      if TUtils.is_tyvar_error env ety1 then
         None
       else
         Some
@@ -1488,10 +1479,10 @@ let obj_get_with_mismatches
       Option.is_some e2
       && Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
       && (not (is_dynamic receiver_or_parent_ty))
-      && Typing_utils.is_sub_type
+      && TUtils.is_sub_type
            env
            receiver_or_parent_ty
-           (Typing_make_type.dynamic Reason.none)
+           (MakeType.dynamic Reason.none)
     then
       obj_get_inner
         args

@@ -940,7 +940,7 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
   } =
     method_
   in
-  if String.equal m_name Naming_special_names.Members.__construct then
+  if String.equal m_name SN.Members.__construct then
     ()
   else
     match m_visibility with
@@ -969,8 +969,7 @@ let props_from_constructors : Nast.method_ list -> Nast.class_var list =
  fun methods ->
   let constructors =
     List.filter methods ~f:(fun m ->
-        Ast_defs.get_id m.Aast.m_name
-        |> String.equal Naming_special_names.Members.__construct)
+        Ast_defs.get_id m.Aast.m_name |> String.equal SN.Members.__construct)
   in
   List.map constructors ~f:(fun m ->
       m.Aast.m_params

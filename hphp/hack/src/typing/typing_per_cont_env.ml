@@ -38,7 +38,7 @@ type per_cont_entry = {
   tpenv: Type_parameter_env.t;
 }
 
-type t = per_cont_entry Typing_continuations.Map.t
+type t = per_cont_entry C.Map.t
 
 (*****************************************************************************)
 (* Functions dealing with continuation based flow typing of local variables *)
@@ -51,11 +51,11 @@ let empty_entry =
     tpenv = Type_parameter_env.empty;
   }
 
-let initial_locals entry = CMap.add Typing_continuations.Next entry CMap.empty
+let initial_locals entry = CMap.add C.Next entry CMap.empty
 
 let get_cont_option = CMap.find_opt
 
-let all_continuations : t -> C.t list = Typing_continuations.Map.keys
+let all_continuations : t -> C.t list = C.Map.keys
 
 (** Continuations used to typecheck the `finally` block. *)
 let continuations_for_finally =

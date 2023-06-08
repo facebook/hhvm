@@ -145,8 +145,7 @@ module StateSubConstraintGraphs = struct
     type t = global_type_map * Inf.t_global_with_pos list
   end)
 
-  let global_tvenvs (t : t) : Typing_inference_env.t_global_with_pos list =
-    snd t
+  let global_tvenvs (t : t) : Inf.t_global_with_pos list = snd t
 
   let global_type_map (t : t) : global_type_map = fst t
 

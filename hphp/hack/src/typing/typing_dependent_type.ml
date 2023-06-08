@@ -126,7 +126,7 @@ module ExprDepTy = struct
         else
           (* TODO(T69551141) handle type arguments here? *)
           let (env, tyl) =
-            Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
+            TUtils.get_concrete_supertypes ~abstract_enum:true env ty
           in
           let (env, tyl') =
             List.fold_map tyl ~init:env ~f:(make ~seen:(SSet.add name seen))

@@ -24,7 +24,7 @@ module MakeType = Typing_make_type
 
 let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   let pos = Reason.to_pos r in
-  let td = unsafe_opt @@ Typing_env.get_typedef env x in
+  let td = unsafe_opt @@ Env.get_typedef env x in
   let {
     td_pos;
     td_module = _;
@@ -60,7 +60,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   | None ->
     let should_expand =
       force_expand
-      || Typing_env.is_typedef_visible
+      || Env.is_typedef_visible
            env
            ~expand_visible_newtype:ety_env.expand_visible_newtype
            ~name:x
@@ -91,7 +91,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
           | Some cstr ->
             (* Special case for supportdyn<T> defined with "as T" in order to
              * avoid supportdynamic.hhi appearing in reason *)
-            if String.equal x Naming_special_names.Classes.cSupportDyn then
+            if String.equal x SN.Classes.cSupportDyn then
               ((env, None), List.hd_exn argl)
             else
               Phase.localize ~ety_env env cstr

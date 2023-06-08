@@ -163,7 +163,7 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
  * written). *)
 let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
   let (fld_opt, ty_err_opt) =
-    Typing_utils.shape_field_name_with_ty_err env (ty, p, field)
+    TUtils.shape_field_name_with_ty_err env (ty, p, field)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   match fld_opt with
@@ -283,9 +283,7 @@ let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
   make_locl_like_type env res
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
-  let (fld_opt, ty_err_opt) =
-    Typing_utils.shape_field_name_with_ty_err env field
-  in
+  let (fld_opt, ty_err_opt) = TUtils.shape_field_name_with_ty_err env field in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   match fld_opt with
   | None ->
@@ -314,7 +312,7 @@ let to_collection env pos shape_ty res return_type =
          * or arraykey if there may be unknown fields (open shape)
          *)
         let (env, key) =
-          if not (Typing_utils.is_nothing env shape_kind) then
+          if not (TUtils.is_nothing env shape_kind) then
             (env, MakeType.arraykey r)
           else
             let keys = TShapeMap.keys fdm in
@@ -410,9 +408,7 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
-  let shape_ty =
-    Typing_utils.get_base_type ~expand_supportdyn:true env shape_ty
-  in
+  let shape_ty = TUtils.get_base_type ~expand_supportdyn:true env shape_ty in
   to_collection env pos shape_ty res (fun env r key value ->
       (env, MakeType.dict r key value))
 

@@ -127,7 +127,7 @@ let validator =
       if List.is_empty tyl then
         this#on_type acc ty
       else if
-        String.equal (snd id) Naming_special_names.FB.cIncorrectType
+        String.equal (snd id) SN.FB.cIncorrectType
         && Int.equal (List.length tyl) 1
       then
         let ty = List.hd_exn tyl in

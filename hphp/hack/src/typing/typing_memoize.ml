@@ -105,7 +105,7 @@ let check_param : env -> Nast.fun_param -> unit =
               let singleton =
                 MakeType.class_type
                   Reason.none
-                  Naming_special_names.Classes.cUNSAFESingletonMemoizeParam
+                  SN.Classes.cUNSAFESingletonMemoizeParam
                   []
               in
               if Typing_utils.is_sub_type env ty singleton then

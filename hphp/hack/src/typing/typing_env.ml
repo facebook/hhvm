@@ -48,7 +48,7 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 let get_file env = env.genv.file
 
 let get_current_decl env =
-  Option.map env.decl_env.Decl_env.droot ~f:Typing_deps.Dep.to_decl_reference
+  Option.map env.decl_env.Decl_env.droot ~f:Dep.to_decl_reference
 
 let get_current_decl_and_file env : Pos_or_decl.ctx =
   { Pos_or_decl.file = get_file env; decl = get_current_decl env }
@@ -399,7 +399,7 @@ let env_with_tpenv env tpenv =
       {
         env.lenv with
         per_cont_env =
-          Typing_per_cont_env.(
+          LEnvC.(
             update_cont_entry C.Next env.lenv.per_cont_env (fun entry ->
                 { entry with tpenv }));
       };
@@ -582,22 +582,22 @@ let add_fine_dep_if_enabled env dependency =
    * [Typing_extends.add_pessimisation_dependency] for details. *)
   let dependency_on_origin () =
     match dependency with
-    | Typing_deps.Dep.Method (class_name, method_name) ->
+    | Dep.Method (class_name, method_name) ->
       let origin_name =
         let* cls = Decl_provider.get_class ctx class_name in
         let* elt = Cls.get_method cls method_name in
         Some elt.Typing_defs.ce_origin
       in
       let origin_name = Option.value origin_name ~default:class_name in
-      Typing_deps.Dep.Method (origin_name, method_name)
-    | Typing_deps.Dep.SMethod (class_name, method_name) ->
+      Dep.Method (origin_name, method_name)
+    | Dep.SMethod (class_name, method_name) ->
       let origin_name =
         let* cls = Decl_provider.get_class ctx class_name in
         let* elt = Cls.get_smethod cls method_name in
         Some elt.Typing_defs.ce_origin
       in
       let origin_name = Option.value origin_name ~default:class_name in
-      Typing_deps.Dep.SMethod (origin_name, method_name)
+      Dep.SMethod (origin_name, method_name)
     | _ -> dependency
   in
 
@@ -642,7 +642,7 @@ let make_depend_on_current_module env =
 
 let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
   List.iter (Cls.all_ancestor_names cls) ~f:(fun ancestor ->
-      add_dependency_edge env (Typing_deps.Dep.Type ancestor))
+      add_dependency_edge env (Dep.Type ancestor))
 
 let add_extends_dependency (env : Typing_env_types.env) x =
   add_dependency_edge env (Dep.Extends x)
@@ -766,7 +766,7 @@ let get_fun env x =
   match res with
   | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res
   | _ ->
-    add_dependency_edge env (Typing_deps.Dep.Fun x);
+    add_dependency_edge env (Dep.Fun x);
     res
 
 let get_enum_constraint env x =
@@ -995,7 +995,7 @@ let with_origin2 env origin f =
 let inside_expr_tree env expr_tree_hint =
   let outer_locals =
     match next_cont_opt env with
-    | None -> Local_id.Map.empty
+    | None -> LID.Map.empty
     | Some cont -> cont.LEnvC.local_types
   in
   { env with in_expr_tree = Some { dsl = expr_tree_hint; outer_locals } }
@@ -1433,7 +1433,7 @@ module FakeMembers = struct
     let fake_id = Fake.make_static_id cid member_name in
     match Fake.is_invalid fake_members fake_id with
     | None -> (env, ty)
-    | Some blame -> update_lost_info (Local_id.to_string fake_id) blame env ty
+    | Some blame -> update_lost_info (LID.to_string fake_id) blame env ty
 
   let check_instance_invalid env obj member_name ty =
     match obj with
@@ -1444,8 +1444,7 @@ module FakeMembers = struct
       begin
         match Fake.is_invalid fake_members fake_id with
         | None -> (env, ty)
-        | Some blame ->
-          update_lost_info (Local_id.to_string fake_id) blame env ty
+        | Some blame -> update_lost_info (LID.to_string fake_id) blame env ty
       end
     | _ -> (env, ty)
 

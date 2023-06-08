@@ -133,7 +133,7 @@ let typedef_def ctx typedef =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
   List.iter ~f:(Typing_error_utils.add_typing_error ~env)
   @@ Typing_type_wellformedness.typedef env typedef;
-  Typing_env.make_depend_on_current_module env;
+  Env.make_depend_on_current_module env;
   Typing_variance.typedef env typedef;
   let {
     t_annotation = ();
@@ -163,7 +163,7 @@ let typedef_def ctx typedef =
       | Some _ ->
         let (ty, ty_err_opt2) =
           let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
-          let ctx = Typing_env.get_ctx env in
+          let ctx = Env.get_ctx env in
           let r = Typing_defs_core.get_reason ty in
           let (ty, cycles) =
             Decl_typedef_expand.expand_typedef_with_error

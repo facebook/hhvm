@@ -336,7 +336,7 @@ let check_top_level_access
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in
-  if Typing_env.is_in_expr_tree env then
+  if Env.is_in_expr_tree env then
     match vis with
     | Vpublic -> None
     | _ ->
@@ -381,11 +381,11 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
 let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
   match cross_package with
   | Some target ->
-    let current_module = Typing_env.get_current_module env in
+    let current_module = Env.get_current_module env in
     let current_pkg =
-      Option.bind ~f:(Typing_env.get_package_for_module env) current_module
+      Option.bind ~f:(Env.get_package_for_module env) current_module
     in
-    let target_pkg = Typing_env.get_package_by_name env target in
+    let target_pkg = Env.get_package_by_name env target in
     (match Typing_modules.satisfies_package_deps env current_pkg target_pkg with
     | Some _ ->
       Some

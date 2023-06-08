@@ -35,7 +35,7 @@ type root_kind =
 type context = {
   id: pos_id;  (** The T in the type access C::T *)
   ety_env: expand_env;
-      (** The expand environment as passed in by Typing_phase.localize *)
+      (** The expand environment as passed in by Phase.localize *)
   generics_seen: TySet.t;
       (** A set of visited types used to avoid infinite loops during expansion. *)
   allow_abstract: bool;
@@ -85,7 +85,7 @@ let tp_name class_name id = class_name ^ "::" ^ snd id
     creating is known to be equal to some other type *)
 let abstract_or_exact env id ({ name; _ } as abstr) =
   let tp_name = tp_name name id in
-  if not (Typing_set.is_empty (Env.get_equal_bounds env tp_name [])) then
+  if not (TySet.is_empty (Env.get_equal_bounds env tp_name [])) then
     (* If the resulting abstract type is exactly equal to something,
        mark the result as exact.
        For example, if we have the following
@@ -444,8 +444,7 @@ let rec expand ctx env root =
            likely because originally there was `self::T` written.
            TODO(T54081153): fix `self` in traits and clean this up *)
         let allow_abstract =
-          Ast_defs.is_c_trait (Decl_provider.Class.kind ci)
-          || ctx.allow_abstract
+          Ast_defs.is_c_trait (Cls.kind ci) || ctx.allow_abstract
         in
 
         let ctx = { ctx with allow_abstract } in
@@ -631,9 +630,8 @@ let referenced_typeconsts env ety_env (root, ids) =
                 let ( >>= ) = Option.( >>= ) in
                 Option.value
                   ~default:acc
-                  ( Typing_env.get_class env class_name >>= fun class_ ->
-                    Typing_env.get_typeconst env class_ tconst
-                    >>= fun typeconst ->
+                  ( Env.get_class env class_name >>= fun class_ ->
+                    Env.get_typeconst env class_ tconst >>= fun typeconst ->
                     Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
                   )
               | _ -> acc)

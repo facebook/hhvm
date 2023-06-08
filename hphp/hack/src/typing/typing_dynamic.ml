@@ -18,7 +18,7 @@ module Cls = Decl_provider.Class
 (* Add `supportdyn<mixed>` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
  * Just add the upper bound to others. *)
 let add_require_dynamic_bounds env cls =
-  List.fold_left (Decl_provider.Class.tparams cls) ~init:env ~f:(fun env tp ->
+  List.fold_left (Cls.tparams cls) ~init:env ~f:(fun env tp ->
       let require_dynamic =
         Attributes.mem SN.UserAttributes.uaRequireDynamic tp.tp_user_attributes
       in
@@ -42,7 +42,7 @@ let add_require_dynamic_bounds env cls =
 let is_dynamic_decl env ty =
   match get_node ty with
   | Tdynamic -> true
-  | Tgeneric (name, _) when Typing_env.get_require_dynamic env name -> true
+  | Tgeneric (name, _) when Env.get_require_dynamic env name -> true
   | _ -> false
 
 (* Check that a property type is a subtype of dynamic *)
@@ -163,7 +163,7 @@ let make_like env changed ty =
 
 let maybe_wrap_with_supportdyn ~should_wrap locl_r ft =
   if should_wrap then
-    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos locl_r) in
+    let r = Reason.Rsupport_dynamic_type (Reason.to_pos locl_r) in
     let ft =
       {
         ft with

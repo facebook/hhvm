@@ -752,8 +752,7 @@ module Full = struct
         let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
         let d =
           match r with
-          | Typing_reason.Rsolve_fail _ ->
-            Concat [text "{suggest:"; d; text "}"]
+          | Reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
           | _ -> d
         in
         (fuel, d))
@@ -878,8 +877,7 @@ module Full = struct
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl when show_likes env ->
       let tyl =
-        List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
-        |> Typing_set.elements
+        List.fold_right tyl ~init:TySet.empty ~f:TySet.add |> TySet.elements
       in
       let (dynamic, null, nonnull) =
         List.partition3_map tyl ~f:(fun t ->
@@ -981,8 +979,7 @@ module Full = struct
       end
     | Tunion tyl ->
       let tyl =
-        List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
-        |> Typing_set.elements
+        List.fold_right tyl ~init:TySet.empty ~f:TySet.add |> TySet.elements
       in
       let (null, nonnull) =
         List.partition_tf tyl ~f:(fun ty ->
@@ -1125,7 +1122,7 @@ module Full = struct
     let (fuel, constraint_ty_doc) = constraint_type_ ~fuel to_doc st penv x in
     let constraint_ty_doc =
       match r with
-      | Typing_reason.Rsolve_fail _ ->
+      | Reason.Rsolve_fail _ ->
         Concat [text "{suggest:"; constraint_ty_doc; text "}"]
       | _ -> constraint_ty_doc
     in

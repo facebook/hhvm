@@ -119,7 +119,7 @@ let rec freshen_inside_ty env ty =
   | Tnewtype (name, _, ty)
     when String.equal name Naming_special_names.Classes.cSupportDyn ->
     let (env, ty) = freshen_inside_ty env ty in
-    (env, Typing_make_type.supportdyn r ty)
+    (env, MakeType.supportdyn r ty)
   | Tnewtype (name, tyl, ty) ->
     if List.is_empty tyl then
       default ()
@@ -203,9 +203,9 @@ let bind env var (ty : locl_ty) =
    * nothing, as it will lead to type holes.
    *)
   let proj_ty_err_opt =
-    if Typing_utils.is_tyvar_error env ty then
+    if TUtils.is_tyvar_error env ty then
       None
-    else if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
+    else if TUtils.is_nothing env ty && not (SMap.is_empty tconsts) then
       let (_, ((proj_pos, tconst_name), _)) = SMap.choose tconsts
       and pos = Env.get_tyvar_pos env var in
       Some
@@ -254,7 +254,7 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
               (Typing_error.Reasons_callback.unify_error_at
               @@ Env.get_tyvar_pos env var)
           in
-          let (env, ty_err_opt) = Typing_utils.sub_type env ty newty on_error in
+          let (env, ty_err_opt) = TUtils.sub_type env ty newty on_error in
           (env, ty_err_opt, newty)
         else
           (env, None, ty)
@@ -336,8 +336,7 @@ let bind_to_upper_bound env r var upper_bounds =
 let ty_equal_shallow env ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (_env, ty2) = Env.expand_type env ty2 in
-  if Typing_utils.is_tyvar_error env ty1 && Typing_utils.is_tyvar_error env ty2
-  then
+  if TUtils.is_tyvar_error env ty1 && TUtils.is_tyvar_error env ty2 then
     true
   else
     match (get_node ty1, get_node ty2) with
@@ -353,8 +352,8 @@ let ty_equal_shallow env ty1 ty2 =
     | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
     | (Tshape (_, shape_kind1, fdm1), Tshape (_, shape_kind2, fdm2)) ->
       Bool.equal
-        (Typing_utils.is_nothing env shape_kind1)
-        (Typing_utils.is_nothing env shape_kind2)
+        (TUtils.is_nothing env shape_kind1)
+        (TUtils.is_nothing env shape_kind2)
       && List.equal
            (fun (k1, v1) (k2, v2) ->
              TShapeField.equal k1 k2
@@ -378,7 +377,7 @@ let try_bind_to_equal_bound ~freshen env r var =
           let (env, ty) = Env.expand_internal_type env ty in
           match ty with
           | LoclType ty when strip_supportdyn ->
-            let (_, env, stripped_ty) = Typing_utils.strip_supportdyn env ty in
+            let (_, env, stripped_ty) = TUtils.strip_supportdyn env ty in
             ( env,
               ITySet.add (LoclType stripped_ty) res,
               ITySet.add (LoclType ty) sd_res )
@@ -443,10 +442,10 @@ let try_bind_to_equal_bound ~freshen env r var =
                 @@ Env.get_tyvar_pos env var)
             in
             let (env, ty_sub_err_opt) =
-              Typing_utils.sub_type env ty var_ty on_error
+              TUtils.sub_type env ty var_ty on_error
             in
             let (env, ty_sup_err_opt) =
-              Typing_utils.sub_type env var_ty ty on_error
+              TUtils.sub_type env var_ty ty on_error
             in
             let (env, bind_err_opt) = bind env var ty in
             let ty_err_opt =
@@ -705,7 +704,7 @@ let expand_type_and_solve
   let vars_solved_to_nothing = ref [] in
   let ty_errs = ref [] in
   let (env', ety) =
-    Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
+    TUtils.simplify_unions env ty ~on_tyvar:(fun env r v ->
         let (env, ty_err_opt) = always_solve_tyvar_down ~freshen env r v in
         Option.iter ty_err_opt ~f:(fun ty_err -> ty_errs := ty_err :: !ty_errs);
         let (env, ety) = Env.expand_var env r v in
@@ -721,7 +720,7 @@ let expand_type_and_solve
     match default with
     | Some default_ty ->
       let res =
-        Typing_utils.sub_type env ety default_ty
+        TUtils.sub_type env ety default_ty
         @@ Some (Typing_error.Reasons_callback.unify_error_at p)
       in
       (res, default_ty)
@@ -755,7 +754,7 @@ let expand_type_and_solve
 let expand_type_and_solve_eq env ty =
   let ty_err_opts = ref [] in
   let (env, ty) =
-    Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
+    TUtils.simplify_unions env ty ~on_tyvar:(fun env r v ->
         let (env, ty_err_opt) = try_bind_to_equal_bound ~freshen:true env r v in
         ty_err_opts := ty_err_opt :: !ty_err_opts;
         Env.expand_var env r v)
@@ -812,10 +811,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  Typing_utils.is_sub_type_ignore_generic_params
-    env
-    ty
-    (MakeType.nothing Reason.none)
+  TUtils.is_sub_type_ignore_generic_params env ty (MakeType.nothing Reason.none)
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -899,7 +895,7 @@ let expand_type_and_narrow
         | (false, _, widened_ty) ->
           (* We really don't want to just guess `nothing` if none of the types can be widened *)
           let res =
-            Typing_utils.sub_type env ty widened_ty
+            TUtils.sub_type env ty widened_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           in
           (match res with
@@ -943,7 +939,7 @@ let is_sub_type env ty1 ty2 =
   let ((env, ty_err_opt1), ty1) = expand_type_and_solve_eq env ty1 in
   let ((env, ty_err_opt2), ty2) = expand_type_and_solve_eq env ty2 in
   let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
-  (Typing_utils.is_sub_type env ty1 ty2, ty_err_opt)
+  (TUtils.is_sub_type env ty1 ty2, ty_err_opt)
 
 (**
  * Strips away all Toption that we possible can in a type, expanding type
@@ -962,10 +958,8 @@ let rec non_null env pos ty =
         let ty = mk (r, Tdependent (dep, cstr)) in
         match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
         | (env, [ty'])
-          when Typing_utils.is_sub_type_for_union
-                 env
-                 (MakeType.null Reason.none)
-                 ty' ->
+          when TUtils.is_sub_type_for_union env (MakeType.null Reason.none) ty'
+          ->
           let (env, ty') = non_null env pos ty' in
           (env, mk (r, Tdependent (dep, ty')))
         | (env, _) -> super#on_tdependent env r dep cstr
@@ -974,10 +968,8 @@ let rec non_null env pos ty =
         let ty = mk (r, Tnewtype (x, tyl, cstr)) in
         match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
         | (env, [ty'])
-          when Typing_utils.is_sub_type_for_union
-                 env
-                 (MakeType.null Reason.none)
-                 ty' ->
+          when TUtils.is_sub_type_for_union env (MakeType.null Reason.none) ty'
+          ->
           let (env, ty') = non_null env pos ty' in
           (env, mk (r, Tnewtype (x, tyl, ty')))
         | (env, _) -> super#on_tnewtype env r x tyl cstr

@@ -24,7 +24,7 @@ let strip_awaitable fun_kind env et =
     let (_env, ty) = Env.expand_type env et.et_type in
     match get_node ty with
     | Tclass ((_, class_name), _, [ty])
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name SN.Classes.cAwaitable ->
       { et with et_type = ty }
     | _ -> et
 
@@ -99,15 +99,14 @@ let force_return_kind ~is_toplevel env p ety =
       (* For toplevel functions, this is already checked in the parser *)
       (env, ty)
     | (Ast_defs.FAsync, Tclass ((_, class_name), _, _))
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name SN.Classes.cAwaitable ->
       (* For toplevel functions, this is already checked in the parser *)
       (env, ty)
     | (Ast_defs.FGenerator, Tclass ((_, class_name), _, _))
-      when String.equal class_name Naming_special_names.Classes.cGenerator ->
+      when String.equal class_name SN.Classes.cGenerator ->
       (env, ty)
     | (Ast_defs.FAsyncGenerator, Tclass ((_, class_name), _, _))
-      when String.equal class_name Naming_special_names.Classes.cAsyncGenerator
-      ->
+      when String.equal class_name SN.Classes.cAsyncGenerator ->
       (env, ty)
     | _ ->
       let (env, wrapped_ty) = make_fresh_return_type env p in
@@ -165,10 +164,7 @@ let make_return_type
         let dty =
           match get_node dty with
           | Tfun _ ->
-            Typing_utils.make_supportdyn_decl_type
-              (get_pos dty)
-              (get_reason dty)
-              dty
+            TUtils.make_supportdyn_decl_type (get_pos dty) (get_reason dty) dty
           | _ -> dty
         in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
@@ -186,7 +182,7 @@ let make_return_type
         let et_type =
           match get_node ty with
           | Tprim Aast.Tvoid when not wrap -> ty
-          | _ -> Typing_utils.make_like env ty
+          | _ -> TUtils.make_like env ty
         in
         let et_type =
           if wrap then
@@ -250,9 +246,7 @@ let make_return_type
             (env, et_type)
         in
         (* If return type t is enforced we permit values of type ~t to be returned *)
-        let ety =
-          Typing_utils.make_like_if_enforced env { et_enforced; et_type }
-        in
+        let ety = TUtils.make_like_if_enforced env { et_enforced; et_type } in
         let et_type =
           if wrap then
             wrap_awaitable (get_pos et_type) ety.et_type
@@ -263,12 +257,12 @@ let make_return_type
     in
     (match (Env.get_fn_kind env, deref ty) with
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name SN.Classes.cAwaitable ->
       localize ~wrap:true env inner_ty
     | (Ast_defs.FAsync, (r_like, Tlike ty_like)) -> begin
       match get_node ty_like with
       | Tapply ((_, class_name), [inner_ty])
-        when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+        when String.equal class_name SN.Classes.cAwaitable ->
         let ty = mk (r_like, Tlike inner_ty) in
         localize ~wrap:true env ty
       | _ -> localize ~wrap:false env ty
@@ -363,7 +357,7 @@ let rec remove_like_for_return env ty =
   | None ->
     (match get_node ty with
     | Tclass ((p, class_name), exact, [ty])
-      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name SN.Classes.cAwaitable ->
       mk
         ( get_reason ty,
           Tclass ((p, class_name), exact, [remove_like_for_return env ty]) )

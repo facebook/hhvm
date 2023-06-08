@@ -1566,7 +1566,7 @@ class Baz final  {
   template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
-    ::new (std::addressof(value_.binaryField)) ::std::string(std::forward<T>(t)...);
+    ::new (std::addressof(value_.binaryField)) ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>(std::forward<T>(t)...);
     return value_.binaryField;
   }
 

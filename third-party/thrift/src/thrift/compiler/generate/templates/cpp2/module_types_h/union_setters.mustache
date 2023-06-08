@@ -82,7 +82,7 @@
     ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_storage_type%>(<%^field:boxed_ref?%>new <%/field:boxed_ref?%><%field:cpp_storage_type%>::element_type(std::forward<T>(t)...));
 <%/field:cpp_ref?%>
 <%^field:cpp_ref?%>
-    ::new (std::addressof(value_.<%field:cpp_name%>)) <%type:cpp_type%>(std::forward<T>(t)...);
+    ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_type%>(std::forward<T>(t)...);
 <%/field:cpp_ref?%>
     return value_.<%field:cpp_name%>;
   }

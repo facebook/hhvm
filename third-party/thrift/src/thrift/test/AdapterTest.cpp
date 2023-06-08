@@ -518,6 +518,15 @@ TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedNestedTestStruct) {
   EXPECT_TRUE(obj.adaptedStruct()->adaptedMapDefault()->value.empty());
 }
 
+TEST_F(AdapterTest, AdaptedUnion) {
+  AdaptedUnion obj1;
+  EXPECT_EQ(obj1.getType(), AdaptedUnion::Type::__EMPTY__);
+  auto wrapper = Wrapper<std::string>();
+  wrapper.value = "1";
+  obj1.field1_ref() = wrapper;
+  EXPECT_EQ(obj1.field1_ref()->value, "1");
+}
+
 TEST_F(AdapterTest, StructFieldAdaptedStruct) {
   StructFieldAdaptedStruct obj;
   {

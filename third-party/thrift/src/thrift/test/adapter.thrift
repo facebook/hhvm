@@ -99,6 +99,11 @@ struct ComparisonTestStruct {
   3: MyStruct intern_box_non_comparable_adapted_type;
 }
 
+union AdaptedUnion {
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  1: string field1;
+}
+
 enum ThriftAdaptedEnum {
   Zero = 0,
   One = 1,

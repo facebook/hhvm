@@ -4,6 +4,7 @@ hack:json,typedef,shapes=1 src/module.thrift
 java_deprecated src/module.thrift
 json src/module.thrift
 mstch_cpp2:includes=\"adapter_dependency.h\" src/module.thrift
+mstch_cpp2:includes=\"adapter_dependency.h\" src/module_no_uri.thrift
 mstch_go src/module.thrift
 mstch_pyi:json src/module.thrift
 mstch_py3 src/module.thrift

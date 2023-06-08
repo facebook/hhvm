@@ -221,6 +221,11 @@ void createSchema(SQLiteTxn& txn) {
 void rebuildIndices(SQLiteTxn& txn) {
   // Basically copied wholesale from FlibAutoloadMapSQL.php in WWW.
 
+  // all_paths
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS all_paths__path"
+      " ON all_paths (path)");
+
   // type_details
   txn.exec(
       "CREATE INDEX IF NOT EXISTS type_details__name"

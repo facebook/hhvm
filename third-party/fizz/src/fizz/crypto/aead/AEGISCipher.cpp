@@ -11,16 +11,14 @@
 #if FIZZ_HAS_AEGIS
 
 #include <fizz/crypto/aead/CryptoUtil.h>
+#include <fizz/third-party/libsodium-aegis/aegis.h>
 #include <folly/lang/CheckedMath.h>
-#include <sodium.h>
-#include <sodium/crypto_aead_aegis128l.h>
-#include <sodium/crypto_aead_aegis256.h>
 #include <functional>
 
 namespace fizz {
 
 static_assert(
-    fizz::AEGISCipher::kMaxIVLength == crypto_aead_aegis256_NPUBBYTES,
+    fizz::AEGISCipher::kMaxIVLength == fizz_aegis256_NPUBBYTES,
     "Invalid AEGISCipher::kMaxIVLength");
 
 namespace {
@@ -133,20 +131,20 @@ AEGISCipher::AEGISCipher(
 
 std::unique_ptr<Aead> AEGISCipher::make128L() {
   return std::unique_ptr<Aead>(new AEGISCipher(
-      crypto_aead_aegis128l_encrypt,
-      crypto_aead_aegis128l_decrypt,
-      crypto_aead_aegis128l_KEYBYTES,
-      crypto_aead_aegis128l_NPUBBYTES,
-      crypto_aead_aegis128l_ABYTES));
+      fizz_aegis128l_encrypt,
+      fizz_aegis128l_decrypt,
+      fizz_aegis128l_KEYBYTES,
+      fizz_aegis128l_NPUBBYTES,
+      fizz_aegis128l_ABYTES));
 }
 
 std::unique_ptr<Aead> AEGISCipher::make256() {
   return std::unique_ptr<Aead>(new AEGISCipher(
-      crypto_aead_aegis256_encrypt,
-      crypto_aead_aegis256_decrypt,
-      crypto_aead_aegis256_KEYBYTES,
-      crypto_aead_aegis256_NPUBBYTES,
-      crypto_aead_aegis256_ABYTES));
+      fizz_aegis256_encrypt,
+      fizz_aegis256_decrypt,
+      fizz_aegis256_KEYBYTES,
+      fizz_aegis256_NPUBBYTES,
+      fizz_aegis256_ABYTES));
 }
 
 void AEGISCipher::setKey(TrafficKey trafficKey) {

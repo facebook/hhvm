@@ -118,8 +118,10 @@ def pretty_ptr(val: lldb.SBValue) -> typing.Optional[str]:
     inner_type = utils.rawtype(inner.type)
 
     if inner_type.name == "HPHP::StringData":
-        return utils.string_data_val(inner)
-    return utils.nameof(inner)
+        s = utils.string_data_val(inner)
+    else:
+        s = utils.nameof(inner)
+    return '"' + s + '"'
 
 
 @format("^HPHP::req::ptr<.*>$", regex=True)
@@ -147,7 +149,7 @@ def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 @format("^HPHP::StringData$", regex=True)
 def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     # Note: string_data_val() will dereference a pointer value, if given
-    return utils.string_data_val(val_obj)
+    return '"' + utils.string_data_val(val_obj) + '"'
 
 
 @format("^HPHP::(Static)?String$", regex=True)
@@ -155,13 +157,13 @@ def pp_String(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     # Note: SBValue.GetChildMemberWithName(), used by utils.get(),
     # will get the members of both pointers and the pointed-to values themselves
     val = utils.rawptr(utils.get(val_obj, "m_str"))
-    return utils.string_data_val(val)
+    return '"' + utils.string_data_val(val) + '"'
 
 
 @format("^HPHP::StrNR$", regex=True)
 def pp_StrNR(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     val = utils.get(val_obj, "m_px")
-    return utils.string_data_val(val)
+    return '"' + utils.string_data_val(val) + '"'
 
 #------------------------------------------------------------------------------
 # Optional

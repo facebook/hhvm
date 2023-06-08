@@ -212,7 +212,14 @@ class ConnectionManager : public folly::DelayedDestruction,
   void onDeactivated(ManagedConnection& conn) override;
 
  protected:
-  ~ConnectionManager() override = default;
+  ~ConnectionManager() override {
+    // These timeouts are expected to be canceled in the event base thread, so
+    // we attempt to enforce this.
+    if (drainHelper_.isScheduled()) {
+      eventBase_->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [this]() { drainHelper_.cancelTimeout(); });
+    }
+  }
 
  private:
   enum class ShutdownState : uint8_t {

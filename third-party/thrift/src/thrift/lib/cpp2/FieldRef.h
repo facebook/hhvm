@@ -69,20 +69,27 @@ struct IntWrapper {
   T value{0};
 };
 
+// If the integer is atomic, operations use only relaxed memory-order since the
+// requirement is only to protect the integer against torn reads and writes and
+// not to protect any other objects.
 template <typename U>
 struct IntWrapper<std::atomic<U>> {
   IntWrapper() = default;
 
-  IntWrapper(const IntWrapper& other) noexcept : value(other.value.load()) {}
-  IntWrapper(IntWrapper&& other) noexcept : value(other.value.load()) {}
+  IntWrapper(const IntWrapper& other) noexcept
+      : value(other.value.load(std::memory_order_relaxed)) {}
+  IntWrapper(IntWrapper&& other) noexcept
+      : value(other.value.load(std::memory_order_relaxed)) {}
 
   IntWrapper& operator=(const IntWrapper& other) noexcept {
-    value = other.value.load();
+    value.store(
+        other.value.load(std::memory_order_relaxed), std::memory_order_relaxed);
     return *this;
   }
 
   IntWrapper& operator=(IntWrapper&& other) noexcept {
-    value = other.value.load();
+    value.store(
+        other.value.load(std::memory_order_relaxed), std::memory_order_relaxed);
     return *this;
   }
 
@@ -150,6 +157,9 @@ class BitSet {
     u &= ~(U(1) << bit);
   }
 
+  // If the integer is atomic, operations use only relaxed memory-order since
+  // the requirement is only to protect the integer against torn reads and
+  // writes and not to protect any other objects.
   template <class U>
   static bool get(const std::atomic<U>& u, std::size_t bit) {
     return u.load(std::memory_order_relaxed) & (U(1) << bit);

@@ -19,6 +19,7 @@
   client_highlight_refs
   code_actions_cli_lib
   count_imprecise_types
+  custom_error_types
   decl_parser_options
   default_injector_config
   dep_hash_to_symbol

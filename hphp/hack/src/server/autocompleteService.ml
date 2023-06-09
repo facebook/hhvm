@@ -263,12 +263,15 @@ let insert_text_for_fun_call
       else
         arity_min ft
     in
-    let params = List.take ft.ft_params arity in
-    let snippet =
-      Printf.sprintf "%s(%s)" fun_name (snippet_for_params params)
-    in
     let fallback = Printf.sprintf "%s()" fun_name in
-    InsertAsSnippet { snippet; fallback }
+    if arity = 0 then
+      InsertLiterally fallback
+    else
+      let params = List.take ft.ft_params arity in
+      let snippet =
+        Printf.sprintf "%s(%s)" fun_name (snippet_for_params params)
+      in
+      InsertAsSnippet { snippet; fallback }
 
 let insert_text_for_ty
     env
@@ -819,10 +822,12 @@ let autocomplete_hack_fake_arrow
           | _ -> []
         in
         let params = List.drop required_params 1 in
-        let snippet =
+        let res_insert_text =
           match params with
-          | [] -> ")"
-          | params -> Printf.sprintf ", %s)" (snippet_for_params params)
+          | [] -> InsertLiterally ")"
+          | params ->
+            let snippet = Printf.sprintf ", %s)" (snippet_for_params params) in
+            InsertAsSnippet { snippet; fallback = ")" }
         in
 
         let complete =
@@ -832,7 +837,7 @@ let autocomplete_hack_fake_arrow
             res_replace_pos = replace_pos;
             res_base_class = None;
             res_detail = Tast_env.print_decl_ty env fun_decl.fe_type;
-            res_insert_text = InsertAsSnippet { snippet; fallback = ")" };
+            res_insert_text;
             (* VS Code uses filter text to decide which items match the current
                prefix. However, "C\contains" does not start with "->", so VS
                Code would normally ignore this completion item.

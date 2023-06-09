@@ -461,7 +461,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(int $x = _, int $y = _): void",
                             "sortText": "doStuff",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 4, "character": 6},
@@ -1640,7 +1640,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -1661,7 +1661,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -1849,7 +1849,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "interfaceDocBlockMethod",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 34},
@@ -1964,7 +1964,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~test_do_not_use",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -1985,7 +1985,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "getName",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -2006,7 +2006,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -2027,7 +2027,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~__getLoader",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -3522,7 +3522,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -3543,7 +3543,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -3731,7 +3731,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "interfaceDocBlockMethod",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 34},
@@ -3846,7 +3846,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~test_do_not_use",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -3867,7 +3867,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "getName",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -3888,7 +3888,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -3909,7 +3909,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~__getLoader",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -5177,7 +5177,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -5198,7 +5198,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 35},
@@ -5361,7 +5361,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~test_do_not_use",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -5382,7 +5382,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "getName",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -5403,7 +5403,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},
@@ -5424,7 +5424,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~__getLoader",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
                             "textEdit": {
                                 "range": {
                                     "start": {"line": 3, "character": 17},

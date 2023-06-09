@@ -1,0 +1,39 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor)
+Extract into method (CodeActionKind: refactor)
+Extract shape type (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"type placeholder_ = shape('a' => int, 'b' => A)\n\n",
+          "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract shape type"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {}
+
+type placeholder_ = shape('a' => int, 'b' => A)
+
+class C {
+  public function foo(): void {
+    $a = new A();
+    $x =/*range-start*/ shape("a" => 2, "b" => $a) /*range-end*/;
+  }
+}
+

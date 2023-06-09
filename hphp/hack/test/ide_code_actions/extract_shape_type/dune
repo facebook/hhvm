@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_extract_shape_type)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_shape_type/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_shape_type/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_shape_type/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/extract_shape_type
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "Extract shape type")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_extract_shape_type)))

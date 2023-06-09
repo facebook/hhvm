@@ -1,0 +1,36 @@
+Code actions available:
+------------------------------------------
+Inline variable $sh (CodeActionKind: refactor)
+Extract shape type (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"type placeholder_ = shape('a' => int)\n\n",
+          "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract shape type"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+type placeholder_ = shape('a' => int)
+
+function foo(vec<shape('a' => int)> $v): void {
+  $sh = $v[0];
+  // This test may fail if we start using the tast under Sound Dynamic (https://fburl.com/code/9lkro66x).
+  // If that happens, then try stripping "like types" (`~shape()` to `shape()`)
+  /*range-start*/$sh/*range-end*/;
+}
+

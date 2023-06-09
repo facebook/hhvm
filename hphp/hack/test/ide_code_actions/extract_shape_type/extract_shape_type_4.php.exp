@@ -1,0 +1,40 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor)
+Extract into method (CodeActionKind: refactor)
+Extract shape type (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"type placeholder_ = shape('the_union' => (int | bool))\n\n",
+          "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract shape type"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+type placeholder_ = shape('the_union' => (int | bool))
+
+class C {
+  public function foo(): void {
+    $a = 3;
+    if (1 < 2) {
+      $a = true;
+    }
+    $x =/*range-start*/ shape("the_union" => $a) /*range-end*/;
+  }
+}
+

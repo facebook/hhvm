@@ -611,11 +611,15 @@ let to_string (error : Errors.finalized_error) : string =
           5 | }
   *)
   let all_contexts = format_all_contexts_highlighted marked_messages in
-
+  let custom_msgs = error.User_error.custom_msgs in
   let buf = Buffer.create 50 in
   Buffer.add_string buf (claim ^ "\n");
   if not (List.is_empty reasons) then
     Buffer.add_string buf (String.concat ~sep:"\n" reasons ^ "\n");
   Buffer.add_string buf "\n";
   Buffer.add_string buf all_contexts;
+  if not @@ List.is_empty custom_msgs then
+    Buffer.add_string
+      buf
+      (String.concat ~sep:"\n" error.User_error.custom_msgs ^ "\n");
   Buffer.contents buf

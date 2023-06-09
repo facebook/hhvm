@@ -60,7 +60,14 @@ let to_string (error : Errors.finalized_error) : string =
           @ [newline])
         msgl
     in
-    let to_print = claim @ reasons in
+    let custom_msgs =
+      match error.User_error.custom_msgs with
+      | [] -> []
+      | msgs ->
+        (Tty.Normal Tty.Default, "\n")
+        :: List.map ~f:(fun msg -> (Tty.Normal Tty.Yellow, msg)) msgs
+    in
+    let to_print = claim @ reasons @ custom_msgs in
     if Unix.isatty Unix.stdout then
       List.map to_print ~f:(fun (c, s) -> Tty.apply_color c s) |> String.concat
     else

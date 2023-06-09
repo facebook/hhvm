@@ -196,6 +196,7 @@ let to_string
     ?(claim_color : Tty.raw_color option) (error : Errors.finalized_error) :
     string =
   let error_code = User_error.get_code error in
+  let custom_msgs = error.User_error.custom_msgs in
   let msgl = User_error.to_list error in
   let buf = Buffer.create 50 in
   let color = Option.value claim_color ~default:Tty.Red in
@@ -216,4 +217,8 @@ let to_string
       buf
       "Error could not be pretty-printed. Please file a bug.");
   Buffer.add_string buf "\n";
+  if not @@ List.is_empty custom_msgs then
+    Buffer.add_string
+      buf
+      (String.concat ~sep:"\n" error.User_error.custom_msgs ^ "\n");
   Buffer.contents buf

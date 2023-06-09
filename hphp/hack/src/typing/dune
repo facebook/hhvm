@@ -59,6 +59,7 @@
   (modules typing_error_utils)
   (libraries
     core_kernel
+    custom_error_eval
     errors
     error_codes
     pos

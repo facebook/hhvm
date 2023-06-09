@@ -4891,15 +4891,41 @@ end = struct
     in
     aux ~k:Fn.id t
 
-  let make_error (code, claim, reasons, quickfixes) =
+  let make_error (code, claim, reasons, quickfixes) ~custom_msgs =
     User_error.make
       (Error_code.to_enum code)
       (Lazy.force claim)
       (Lazy.force reasons)
       ~quickfixes
+      ~custom_msgs
+
+  let render_custom_error
+      (t : (string, Custom_error_eval.Value.t) Base.Either.t list) ~env =
+    List.fold_right
+      t
+      ~f:(fun v acc ->
+        match v with
+        | Core.Either.First str -> str ^ acc
+        | Either.Second (Custom_error_eval.Value.Name (_, nm)) ->
+          Markdown_lite.md_codify nm ^ acc
+        | Either.Second (Custom_error_eval.Value.Ty ty) ->
+          (Markdown_lite.md_codify
+          @@ Typing_print.with_blank_tyvars (fun () ->
+                 Typing_print.full_strip_ns_i env
+                 @@ Typing_defs_core.LoclType ty))
+          ^ acc)
+      ~init:""
 
   let to_user_error t ~env ~current_span =
-    Eval_result.map ~f:make_error @@ eval t ~env ~current_span
+    let result = eval t ~env ~current_span in
+    let custom_err_config =
+      TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
+    in
+    let custom_msgs =
+      List.map ~f:(render_custom_error ~env)
+      @@ Custom_error_eval.eval custom_err_config ~err:t
+    in
+    Eval_result.map ~f:(make_error ~custom_msgs) result
 end
 
 and Eval_secondary : sig

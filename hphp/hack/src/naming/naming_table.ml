@@ -724,7 +724,7 @@ let save_async naming_table ~init_id ~root ~destination_path =
 (* Testing functions *)
 (*****************************************************************************)
 
-let assert_is_backed a backed =
-  match a with
-  | Unbacked _ -> assert (not backed)
-  | Backed _ -> assert backed
+let get_backed_delta_TEST_ONLY (t : t) : Naming_sqlite.local_changes option =
+  match t with
+  | Backed (local_changes, _) -> Some local_changes
+  | Unbacked _ -> None

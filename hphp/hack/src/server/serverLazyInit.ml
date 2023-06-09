@@ -1106,6 +1106,44 @@ let post_saved_state_initialization
   let env = PackageConfig.load_and_parse env in
 
   (***********************************************************
+    INVARIANTS.
+    These might help make sense of the rest of the function. *)
+  (* Invariant: old_naming_table is Backed, and has empty delta *)
+  begin
+    match Naming_table.get_backed_delta_TEST_ONLY old_naming_table with
+    | None ->
+      HackEventLogger.invariant_violation_bug
+        "saved-state naming table not backed"
+    | Some { Naming_sqlite.file_deltas; _ }
+      when not (Relative_path.Map.is_empty file_deltas) ->
+      HackEventLogger.invariant_violation_bug
+        "saved-state naming table has deltas"
+    | Some _ -> ()
+  end;
+  (* Invariant: env.naming_table is Unbacked and empty *)
+  begin
+    match Naming_table.get_backed_delta_TEST_ONLY env.naming_table with
+    | None -> ()
+    | Some _ ->
+      HackEventLogger.invariant_violation_bug
+        "ServerLazyInit env.naming_table is backed"
+  end;
+  let count =
+    Naming_table.fold env.naming_table ~init:0 ~f:(fun _ _ acc -> acc + 1)
+  in
+  if count > 0 then
+    HackEventLogger.invariant_violation_bug
+      "ServerLazyInit env.naming_table is non-empty"
+      ~data_int:count;
+  (* Invariant: env.disk_needs_parsing and env.needs_recheck are empty *)
+  if not (Relative_path.Set.is_empty env.disk_needs_parsing) then
+    HackEventLogger.invariant_violation_bug
+      "SeverLazyInit env.disk_needs_parsing is non-empty";
+  if not (Relative_path.Set.is_empty env.needs_recheck) then
+    HackEventLogger.invariant_violation_bug
+      "SeverLazyInit env.needs_recheck is non-empty";
+
+  (***********************************************************
     NAMING TABLE.
     Plan: we'll adjust the forward and reverse naming table to reflect
     changes to files which changed since the saved-state. We'll also

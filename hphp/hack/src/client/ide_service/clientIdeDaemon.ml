@@ -1147,19 +1147,28 @@ let handle_request
     published_errors_ref := Some errors;
     Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
   (* IDE File Changed *)
-  | (During_init dstate, Ide_file_changed { file_path; file_contents }) ->
+  | ( During_init dstate,
+      Ide_file_changed ({ file_path; file_contents }, _should_calculate_errors)
+    ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let dstate = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (During_init dstate, Ok [])
-  | (Initialized istate, Ide_file_changed document) ->
+    Lwt.return (During_init dstate, Ok None)
+  | ( Initialized istate,
+      Ide_file_changed (document, { should_calculate_errors }) ) ->
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in
-    let errors = get_user_facing_errors ~ctx ~entry in
-    published_errors_ref := Some errors;
-    Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
+    let errors =
+      if should_calculate_errors then begin
+        let errors = get_user_facing_errors ~ctx ~entry in
+        published_errors_ref := Some errors;
+        Some (Errors.sort_and_finalize errors)
+      end else
+        None
+    in
+    Lwt.return (Initialized istate, Ok errors)
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),

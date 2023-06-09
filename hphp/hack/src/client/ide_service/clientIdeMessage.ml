@@ -51,6 +51,8 @@ type rename_result =
 
 type completion_request = { is_manually_invoked: bool }
 
+type should_calculate_errors = { should_calculate_errors: bool }
+
 (** Represents a path corresponding to a file which has changed on disk. We
 don't use `Path.t`:
 
@@ -75,7 +77,11 @@ type _ t =
   | Shutdown : unit -> unit t
   | Disk_files_changed : changed_file list -> unit t
   | Ide_file_opened : document -> Errors.finalized_error list t
-  | Ide_file_changed : document -> Errors.finalized_error list t
+  | Ide_file_changed :
+      document * should_calculate_errors
+      -> Errors.finalized_error list option t
+      (** if the bool is true, it will send back an error-list;
+      if false, it will return None. *)
   | Ide_file_closed : Path.t -> Errors.finalized_error list t
       (** This returns diagnostics for the file as it is on disk.
       This is to serve the following scenario: (1) file was open with
@@ -184,8 +190,11 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Disk_file_changed(%s%s)" (String.concat files) remainder
   | Ide_file_opened { file_path; _ } ->
     Printf.sprintf "Ide_file_opened(%s)" (Path.to_string file_path)
-  | Ide_file_changed { file_path; _ } ->
-    Printf.sprintf "Ide_file_changed(%s)" (Path.to_string file_path)
+  | Ide_file_changed ({ file_path; _ }, { should_calculate_errors }) ->
+    Printf.sprintf
+      "Ide_file_changed(%s,%b)"
+      (Path.to_string file_path)
+      should_calculate_errors
   | Ide_file_closed file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)
   | Verbose_to_file verbose -> Printf.sprintf "Verbose_to_file(%b)" verbose

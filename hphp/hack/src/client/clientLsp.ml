@@ -5146,9 +5146,10 @@ let cancel_if_has_pending_cancel_request
 
 (** send DidOpen/Close/Change/Save to hh_server and ide_service as needed *)
 let handle_editor_buffer_message
-    ~(state : state ref)
-    ~(ide_service : ClientIdeService.t ref option)
     ~(env : env)
+    ~(state : state ref)
+    ~(client : Jsonrpc.t)
+    ~(ide_service : ClientIdeService.t ref option)
     ~(metadata : incoming_metadata)
     ~(ref_unblocked_time : float ref)
     ~(message : lsp_message) : unit Lwt.t =
@@ -5212,6 +5213,36 @@ let handle_editor_buffer_message
         | Some files -> files
         | None -> UriMap.empty
       in
+      (* For perf, if there's a subsequent didChange for this uri (e.g. because the user is typing)
+         then we won't ask for errors on this one; let the TAST calculation be deferred until
+         the next one. *)
+      let subsequent_didchange_for_this_uri =
+        Jsonrpc.find_already_queued_message
+          client
+          ~f:(fun { Jsonrpc.json; _ } ->
+            let message =
+              try
+                Lsp_fmt.parse_lsp json (fun _ ->
+                    UnknownRequest ("response", None))
+              with
+              | _ ->
+                NotificationMessage (UnknownNotification ("cannot parse", None))
+            in
+            match message with
+            | NotificationMessage
+                (DidChangeNotification
+                  {
+                    DidChange.textDocument =
+                      { VersionedTextDocumentIdentifier.uri = uri2; _ };
+                    _;
+                  })
+              when Lsp.equal_documentUri uri uri2 ->
+              true
+            | _ -> false)
+      in
+      let should_calculate_errors =
+        Option.is_none subsequent_didchange_for_this_uri
+      in
       begin
         let file_contents = get_document_contents editor_open_files uri in
         let%lwt errors =
@@ -5220,10 +5251,15 @@ let handle_editor_buffer_message
             ~env
             ~tracking_id:metadata.tracking_id
             ~ref_unblocked_time:ref_ide_unblocked_time
-            ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
+            ClientIdeMessage.(
+              Ide_file_changed
+                ({ file_path; file_contents }, { should_calculate_errors }))
         in
         let new_state =
-          publish_errors_if_standalone env !state file_path errors
+          match errors with
+          | None -> !state
+          | Some errors ->
+            publish_errors_if_standalone env !state file_path errors
         in
         Lwt.return new_state
       end
@@ -5873,9 +5909,10 @@ let handle_client_message
           | DidCloseNotification _ | DidSaveNotification _ ) ) ->
       let%lwt () =
         handle_editor_buffer_message
-          ~state
-          ~ide_service
           ~env
+          ~state
+          ~client
+          ~ide_service
           ~metadata
           ~ref_unblocked_time
           ~message

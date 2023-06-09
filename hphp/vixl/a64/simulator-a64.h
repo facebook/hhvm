@@ -437,7 +437,7 @@ class Simulator : public DecoderVisitor {
         return !Z() && (N() == V());
       case le:
         return !(!Z() && (N() == V()));
-      case nv:  // Fall through.
+      case nv:  [[fallthrough]];
       case al:
         return true;
       default:

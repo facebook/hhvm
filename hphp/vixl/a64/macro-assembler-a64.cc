@@ -114,11 +114,11 @@ void MacroAssembler::LogicalMacro(const Register& rd,
         case AND:
           Mov(rd, 0);
           return;
-        case ORR:  // Fall through.
+        case ORR:  [[fallthrough]];
         case EOR:
           Mov(rd, rn);
           return;
-        case ANDS:  // Fall through.
+        case ANDS:  [[fallthrough]];
         case BICS:
           break;
         default:
@@ -136,7 +136,7 @@ void MacroAssembler::LogicalMacro(const Register& rd,
         case EOR:
           Mvn(rd, rn);
           return;
-        case ANDS:  // Fall through.
+        case ANDS:  [[fallthrough]];
         case BICS:
           break;
         default:

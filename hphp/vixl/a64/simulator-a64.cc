@@ -517,7 +517,7 @@ void Simulator::VisitUnconditionalBranch(Instruction* instr) {
   switch (instr->Mask(UnconditionalBranchMask)) {
     case BL:
       set_lr(reinterpret_cast<int64_t>(instr->NextInstruction()));
-      // Fall through.
+      [[fallthrough]];
     case B:
       set_pc(instr->ImmPCOffsetTarget());
       break;
@@ -540,7 +540,7 @@ void Simulator::VisitUnconditionalBranchToRegister(Instruction* instr) {
   switch (instr->Mask(UnconditionalBranchToRegisterMask)) {
     case BLR:
       set_lr(reinterpret_cast<int64_t>(instr->NextInstruction()));
-      // Fall through.
+      [[fallthrough]];
     case BR:
     case RET: set_pc(target); break;
     default: not_reached();
@@ -682,7 +682,7 @@ void Simulator::LogicalHelper(Instruction* instr, int64_t op2) {
   // Switch on the logical operation, stripping out the NOT bit, as it has a
   // different meaning for logical immediate instructions.
   switch (instr->Mask(LogicalOpMask & ~NOT)) {
-    case ANDS: update_flags = true;  // Fall through.
+    case ANDS: update_flags = true;  [[fallthrough]];
     case AND: result = op1 & op2; break;
     case ORR: result = op1 | op2; break;
     case EOR: result = op1 ^ op2; break;

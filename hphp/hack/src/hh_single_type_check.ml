@@ -1275,12 +1275,12 @@ let get_shallow_decls ctx filename file_contents :
          | Shallow_decl_defs.Class c -> SMap.add name c acc
          | _ -> acc)
 
-let test_shallow_class_diff popt filename =
+let test_shallow_class_diff ctx filename =
   let filename_after = Relative_path.to_absolute filename ^ ".after" in
   let contents1 = Sys_utils.cat (Relative_path.to_absolute filename) in
   let contents2 = Sys_utils.cat filename_after in
-  let decls1 = get_shallow_decls popt filename contents1 in
-  let decls2 = get_shallow_decls popt filename contents2 in
+  let decls1 = get_shallow_decls ctx filename contents1 in
+  let decls2 = get_shallow_decls ctx filename contents2 in
   let decls =
     SMap.merge (fun _ a b -> Some (a, b)) decls1 decls2 |> SMap.bindings
   in
@@ -1288,7 +1288,11 @@ let test_shallow_class_diff popt filename =
     List.map decls ~f:(fun (cid, old_and_new) ->
         ( Utils.strip_ns cid,
           match old_and_new with
-          | (Some c1, Some c2) -> Shallow_class_diff.diff_class c1 c2
+          | (Some c1, Some c2) ->
+            Shallow_class_diff.diff_class
+              (Provider_context.get_package_info ctx)
+              c1
+              c2
           | (None, None) -> ClassDiff.(Major_change MajorChange.Unknown)
           | (None, Some _) -> ClassDiff.(Major_change MajorChange.Added)
           | (Some _, None) -> ClassDiff.(Major_change MajorChange.Removed) ))

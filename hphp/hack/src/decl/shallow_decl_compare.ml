@@ -13,6 +13,7 @@ open Reordered_argument_collections
 open Shallow_decl_defs
 
 let diff_class_in_changed_file
+    (package_info : Package.Info.t)
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
     (class_name : string) : ClassDiff.t =
@@ -20,7 +21,7 @@ let diff_class_in_changed_file
   let new_class_opt = SMap.find new_classes class_name in
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
-    Shallow_class_diff.diff_class old_class new_class
+    Shallow_class_diff.diff_class package_info old_class new_class
   | (None, None) -> Major_change MajorChange.Unknown
   | (None, Some _) -> Major_change MajorChange.Added
   | (Some _, None) -> Major_change MajorChange.Removed
@@ -43,8 +44,11 @@ let compute_class_diffs
   let new_classes =
     Shallow_classes_provider.get_batch ctx possibly_changed_classes
   in
+  let package_info = Provider_context.get_package_info ctx in
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
-      let diff = diff_class_in_changed_file old_classes new_classes cid in
+      let diff =
+        diff_class_in_changed_file package_info old_classes new_classes cid
+      in
       Decl_compare_utils.log_class_diff cid diff;
       if ClassDiff.equal diff Unchanged then
         acc

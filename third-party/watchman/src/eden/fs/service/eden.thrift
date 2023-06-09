@@ -1549,6 +1549,19 @@ struct EnsureMaterializedParams {
   5: SyncBehavior sync;
 }
 
+struct MatchFilesystemPathResult {
+  1: optional EdenError error;
+}
+
+struct MatchFileSystemResponse {
+  1: list<MatchFilesystemPathResult> results;
+}
+
+struct MatchFileSystemRequest {
+  1: MountId mountPoint;
+  2: list<PathString> paths;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -1908,6 +1921,15 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: ThriftRootId oldHash,
     3: ThriftRootId newHash,
+  ) throws (1: EdenError ex);
+
+  /**
+   * When eden doctor or another tool noticies that EdenFS is out of sync with
+   * the filesystem this API can be used to poke EdenFS into noticing the file
+   * change.
+   */
+  MatchFileSystemResponse matchFilesystem(
+    1: MatchFileSystemRequest params,
   ) throws (1: EdenError ex);
 
   //////// Administrative APIs ////////

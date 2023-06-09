@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <type_traits>
+#include <utility>
 
 // Workaround a bug that using std::common_type<void, void> causes error with
 // libc++. See https://llvm.org/bugs/show_bug.cgi?id=22135
@@ -93,7 +94,7 @@ struct Either {
    * Post: left() == nullptr && right() == nullptr
    *       isNull()
    */
-  /* implicit */ Either(std::nullptr_t) : bits{0} {}
+  /* implicit */ Either(std::nullptr_t) noexcept : bits{0} {}
 
   /*
    * Create an Either in the left mode.
@@ -101,7 +102,7 @@ struct Either {
    * Post: left() == l && right() == nullptr
    */
   /* implicit */ Either(L l)
-    : bits{reinterpret_cast<Opaque>(l)}
+    noexcept : bits{reinterpret_cast<Opaque>(l)}
   {
     assert(!(reinterpret_cast<Opaque>(l) & TagBit));
   }
@@ -112,7 +113,7 @@ struct Either {
    * Post: left() == nullptr && right() == r
    */
   /* implicit */ Either(R r)
-    : bits{reinterpret_cast<Opaque>(r) | TagBit}
+    noexcept : bits{reinterpret_cast<Opaque>(r) | TagBit}
   {
     assert(!(reinterpret_cast<Opaque>(r) & TagBit));
   }
@@ -122,24 +123,24 @@ struct Either {
    * from identical instantiations of the Either template, and nothing can
    * be assumed about the meaning of the bits.
    */
-  static Either fromOpaque(Opaque raw) {
+  static Either fromOpaque(Opaque raw) noexcept {
     Either result;
     result.bits = raw;
     return result;
   }
-  Opaque toOpaque() const { return bits; }
+  Opaque toOpaque() const noexcept { return bits; }
 
   /*
    * Equality comparison is shallow.  If the pointers are equal, the
    * Eithers are equal.
    */
-  bool operator==(Either<L,R> o) const {
+  bool operator==(Either o) const {
     // We assume L* and R* don't alias, so we don't need to check type tags
     // when comparing.  But we have to put the TagBit in in case we constructed
     // a null from the right (we'll have a tagged null).
     return (bits | TagBit) == (o.bits | TagBit);
   }
-  bool operator!=(Either<L,R> o) const {
+  bool operator!=(Either o) const {
     return !(*this == o);
   }
 
@@ -204,5 +205,76 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}
+/*
+ * Like Either, but treats any stored pointer as if it was in a
+ * unique_ptr (doesn't allow copies and automatically frees on
+ * destruction).
+ */
+template <typename L, typename R, typename TagBitPolicy = void>
+struct UniqueEither : private Either<L, R, TagBitPolicy> {
+  using Parent = Either<L, R, TagBitPolicy>;
 
+  UniqueEither() noexcept : Parent{} {}
+  /* implicit */ UniqueEither(std::nullptr_t) noexcept : Parent{nullptr} {}
+  // Conversions here are explicit unlike in Either, because it takes
+  // ownership of the pointer.
+  explicit UniqueEither(L l) noexcept : Parent{l} {}
+  explicit UniqueEither(R r) noexcept : Parent{r} {}
+
+  UniqueEither(const UniqueEither&) = delete;
+  UniqueEither& operator=(const UniqueEither&) = delete;
+
+  UniqueEither(UniqueEither&& o) noexcept : Parent{o} {
+    static_cast<Parent&&>(o) = nullptr;
+  }
+  UniqueEither& operator=(UniqueEither&& o) {
+    reset();
+    static_cast<Parent&>(*this) = o;
+    static_cast<Parent&&>(o) = nullptr;
+    return *this;
+  }
+  UniqueEither& operator=(std::nullptr_t) {
+    reset();
+    return *this;
+  }
+
+  ~UniqueEither() { reset(); }
+
+  void reset() {
+    if (auto l = left()) {
+      delete l;
+    } else if (auto r = right()) {
+      delete r;
+    }
+    static_cast<Parent&>(*this) = nullptr;
+  }
+
+  bool operator==(const UniqueEither& o) const {
+    return Parent::operator==(o);
+  }
+  bool operator!=(const UniqueEither& o) const {
+    return Parent::operator!=(o);
+  }
+
+  using Parent::left;
+  using Parent::right;
+  using Parent::isNull;
+  using Parent::match;
+
+  // We don't allow getOpaque because it's too easy to break the
+  // ownership model.
+  template <typename... Args>
+  static UniqueEither makeL(Args&&... args) {
+    auto const p = new std::remove_pointer_t<L>{std::forward<Args>(args)...};
+    return UniqueEither{p};
+  }
+  template <typename... Args>
+  static UniqueEither makeR(Args&&... args) {
+    auto const p = new std::remove_pointer_t<R>{std::forward<Args>(args)...};
+    return UniqueEither{p};
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+}

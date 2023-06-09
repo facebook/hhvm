@@ -36,8 +36,8 @@
                        ~returns_readonly:false ~support_dynamic_type:false
                        ~readonly_this:false ~is_memoized:false
                        ~variadic:false);
-                     ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
-                     }));
+                     ft_ifc_decl = FDPolicied {PUBLIC};
+                     ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = []; sc_methods = [];
@@ -79,9 +79,8 @@
                         ~returns_readonly:false ~support_dynamic_type:false
                         ~readonly_this:false ~is_memoized:false
                         ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                       None
-                      }));
+                      ft_ifc_decl = FDPolicied {PUBLIC};
+                      ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -132,9 +131,8 @@
                         ~returns_readonly:false ~support_dynamic_type:false
                         ~readonly_this:false ~is_memoized:false
                         ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                       None
-                      }));
+                      ft_ifc_decl = FDPolicied {PUBLIC};
+                      ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

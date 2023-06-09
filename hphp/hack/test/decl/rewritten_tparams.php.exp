@@ -74,9 +74,8 @@
                            ~returns_readonly:false
                            ~support_dynamic_type:false ~readonly_this:false
                            ~is_memoized:false ~variadic:false);
-                         ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                          None
-                         }))
+                         ft_ifc_decl = FDPolicied {PUBLIC};
+                         ft_cross_package = None }))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -109,7 +108,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\g",
@@ -160,7 +159,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [14:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\h",
@@ -220,9 +219,8 @@
                                ~support_dynamic_type:false
                                ~readonly_this:false ~is_memoized:false
                                ~variadic:false);
-                             ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                              None
-                             }))))
+                             ft_ifc_decl = FDPolicied {PUBLIC};
+                             ft_cross_package = None }))))
                    };
                  fp_flags =
                  (make_fp_flags ~accept_disposable:false ~has_default:false
@@ -258,7 +256,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [18:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]

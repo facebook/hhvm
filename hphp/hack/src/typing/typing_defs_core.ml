@@ -895,6 +895,7 @@ module Pp = struct
     Format.fprintf fmt "@[%s =@ " "ft_ifc_decl";
     pp_ifc_fun_decl fmt x.ft_ifc_decl;
     Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "ft_cross_package";
     pp_cross_package_decl fmt x.ft_cross_package;

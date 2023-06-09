@@ -43,8 +43,8 @@
                        ~returns_readonly:false ~support_dynamic_type:false
                        ~readonly_this:false ~is_memoized:false
                        ~variadic:false);
-                     ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
-                     }));
+                     ft_ifc_decl = FDPolicied {PUBLIC};
+                     ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = [];
@@ -63,7 +63,7 @@
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
@@ -80,7 +80,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
@@ -97,7 +97,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty); sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([14:25-40], "async_generator");
@@ -143,7 +143,7 @@
                  (make_ft_flags FAsyncGenerator ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];
@@ -283,9 +283,8 @@
                         ~returns_readonly:false ~support_dynamic_type:false
                         ~readonly_this:false ~is_memoized:false
                         ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                       None
-                      }));
+                      ft_ifc_decl = FDPolicied {PUBLIC};
+                      ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];

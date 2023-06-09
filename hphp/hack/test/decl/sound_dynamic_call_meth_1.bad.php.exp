@@ -75,7 +75,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:true
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = support_dynamic_type; sm_attributes = [] }
           ];
@@ -124,7 +124,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:true
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = support_dynamic_type; sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([19:19-22], "bar");
@@ -157,7 +157,8 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:true
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
+                  }));
             sm_visibility = Public; sm_deprecated = None;
             sm_flags = support_dynamic_type; sm_attributes = [] }
           ];

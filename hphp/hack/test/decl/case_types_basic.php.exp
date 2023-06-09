@@ -47,7 +47,8 @@
                    (make_ft_flags FSync ~return_disposable:false
                      ~returns_readonly:false ~support_dynamic_type:false
                      ~readonly_this:false ~is_memoized:false ~variadic:false);
-                   ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }))
+                   ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
+                   }))
              ]));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None }));

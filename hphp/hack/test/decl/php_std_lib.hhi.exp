@@ -14,7 +14,7 @@
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+             ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
        fe_pos = [4:10-11]; fe_php_std_lib = true;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\C",
@@ -57,7 +57,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib; sm_attributes = [] }
           ];
@@ -76,7 +76,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags = php_std_lib; sm_attributes = [] }
           ];

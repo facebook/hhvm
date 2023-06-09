@@ -40,7 +40,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {Test}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {Test}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([10:19-20], "g");
@@ -57,7 +57,8 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {Public}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {Public}; ft_cross_package = None
+                  }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([13:19-27], "implicit");
@@ -74,7 +75,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {}; ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([16:19-29], "inferflows");
@@ -91,7 +92,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDInferFlowsft_cross_package = None }));
+                  ft_ifc_decl = FDInferFlows; ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([19:19-28], "classname");
@@ -108,7 +109,8 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {\Policy}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {\Policy}; ft_cross_package = None
+                  }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([22:19-27], "defaults");
@@ -125,7 +127,8 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
+                  }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([24:19-28], "with_args");
@@ -167,9 +170,8 @@
                                 ~support_dynamic_type:false
                                 ~readonly_this:false ~is_memoized:false
                                 ~variadic:false);
-                              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                               None
-                              }))
+                              ft_ifc_decl = FDPolicied {PUBLIC};
+                              ft_cross_package = None }))
                         };
                       fp_flags =
                       (make_fp_flags ~accept_disposable:false
@@ -187,7 +189,8 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
+                  }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
           ];
@@ -208,7 +211,7 @@
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDInferFlowsft_cross_package = None }));
+              ft_ifc_decl = FDInferFlows; ft_cross_package = None }));
         fe_pos = [31:10-20]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
   ]

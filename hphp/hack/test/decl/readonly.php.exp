@@ -34,7 +34,7 @@
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:true ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [5:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\returns_normal",
@@ -59,7 +59,7 @@
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [9:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\Bar",
@@ -117,9 +117,8 @@
                         ~returns_readonly:false ~support_dynamic_type:false
                         ~readonly_this:false ~is_memoized:false
                         ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                       None
-                      }));
+                      ft_ifc_decl = FDPolicied {PUBLIC};
+                      ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = [];
@@ -148,9 +147,8 @@
                               ~returns_readonly:false
                               ~support_dynamic_type:false ~readonly_this:true
                               ~is_memoized:false ~variadic:false);
-                            ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package =
-                                                             None
-                            }))
+                            ft_ifc_decl = FDPolicied {PUBLIC};
+                            ft_cross_package = None }))
                       };
                     fp_flags =
                     (make_fp_flags ~accept_disposable:false
@@ -168,7 +166,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:true ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];

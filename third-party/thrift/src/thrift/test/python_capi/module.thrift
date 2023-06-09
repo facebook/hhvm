@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/lib/thrift/patch.thrift"
+
 package "thrift.org/test/python_capi"
 
 enum MyEnum {
@@ -26,6 +28,7 @@ enum AnnoyingEnum {
   BAR = 2 (cpp.name = "FuBaR"),
 } (cpp.name = "NormalDecentEnum")
 
+@patch.GeneratePatch
 struct MyStruct {
   1: i64 inty;
   2: string stringy;
@@ -37,7 +40,10 @@ struct MyStruct {
   8: set<i32> intSetty;
 }
 
-struct MyDataItem {}
+@patch.GeneratePatch
+struct MyDataItem {
+  1: string s;
+}
 
 union MyUnion {
   1: MyEnum myEnum;

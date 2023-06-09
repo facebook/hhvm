@@ -17,10 +17,11 @@ import unittest
 
 import thrift.python_capi.fixture as fixture
 
-from thrift.test.python_capi.module.thrift_types import (
+from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
     MyDataItem,
     MyEnum,
     MyStruct,
+    MyStructPatch,  # this import breaks autodeps w/o manual
     MyUnion,
 )
 
@@ -41,6 +42,11 @@ class PythonCapiTest(unittest.TestCase):
     def my_union(self) -> MyUnion:
         return MyUnion(myStruct=self.my_struct())
 
+    def struct_patch(self) -> MyStructPatch:
+        return MyStructPatch(
+            assign=self.my_struct(),
+        )
+
     def test_roundtrip_struct(self) -> None:
         i = MyDataItem()
         empty = MyStruct()
@@ -55,6 +61,13 @@ class PythonCapiTest(unittest.TestCase):
     def test_roundtrip_enum(self) -> None:
         self.assertEqual(MyEnum.MyValue1, fixture.roundtrip_MyEnum(MyEnum.MyValue1))
         self.assertEqual(MyEnum.MyValue2, fixture.roundtrip_MyEnum(MyEnum.MyValue2))
+
+    def test_roundtrip_struct_patch(self) -> None:
+        self.assertEqual(
+            self.struct_patch(), fixture.roundtrip_MyStructPatch(self.struct_patch())
+        )
+        empty_patch = MyStructPatch(assign=MyStruct())
+        self.assertEqual(empty_patch, fixture.roundtrip_MyStructPatch(empty_patch))
 
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):
@@ -76,6 +89,11 @@ class PythonCapiTest(unittest.TestCase):
         self.assertTrue(fixture.check_MyUnion(self.my_union()))
         self.assertFalse(fixture.check_MyUnion(self.my_struct()))
         self.assertFalse(fixture.check_MyUnion(MyEnum.MyValue1))
+
+    def test_typeCheck_struct_patch(self) -> None:
+        self.assertTrue(fixture.check_MyStructPatch(self.struct_patch()))
+        self.assertFalse(fixture.check_MyStructPatch(self.my_struct()))
+        self.assertFalse(fixture.check_MyStructPatch(MyEnum.MyValue1))
 
     def test_typeCheck_enum(self) -> None:
         self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue1))

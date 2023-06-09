@@ -789,11 +789,24 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     match ty_compare ty1 ty2 with
     | 0 -> Bool.compare optional1 optional2
     | n -> n
+  and user_attribute_param_compare p1 p2 =
+    let dest_user_attribute_param p =
+      match p with
+      | Classname s -> (0, s)
+      | EnumClassLabel s -> (1, s)
+      | String s -> (2, s)
+      | Int i -> (3, i)
+    in
+    let (id1, s1) = dest_user_attribute_param p1 in
+    let (id2, s2) = dest_user_attribute_param p2 in
+    match Int.compare id1 id2 with
+    | 0 -> String.compare s1 s2
+    | n -> n
   and user_attribute_compare ua1 ua2 =
-    let { ua_name = name1; ua_classname_params = params1 } = ua1 in
-    let { ua_name = name2; ua_classname_params = params2 } = ua2 in
+    let { ua_name = name1; ua_params = params1 } = ua1 in
+    let { ua_name = name2; ua_params = params2 } = ua2 in
     match String.compare (snd name1) (snd name2) with
-    | 0 -> List.compare String.compare params1 params2
+    | 0 -> List.compare user_attribute_param_compare params1 params2
     | n -> n
   and user_attributes_compare ual1 ual2 =
     List.compare user_attribute_compare ual1 ual2

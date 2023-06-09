@@ -1205,7 +1205,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     ) -> &'a shallow_decl_defs::UserAttribute<'a> {
         self.alloc(shallow_decl_defs::UserAttribute {
             name: attr.name.into(),
-            classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
+            params: self.slice(
+                attr.classname_params
+                    .iter()
+                    .map(|p| shallow_decl_defs::UserAttributeParam::Classname(p.name.1)),
+            ),
         })
     }
 }
@@ -5145,7 +5149,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         user_attributes.push(self.alloc(shallow_decl_defs::UserAttribute {
             name: (name.0, "__EnumClass"),
-            classname_params: &[],
+            params: &[],
         }));
         // Match ordering of attributes produced by the OCaml decl parser (even
         // though it's the reverse of the syntactic ordering).

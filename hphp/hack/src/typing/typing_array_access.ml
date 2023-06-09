@@ -120,7 +120,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     (* requires integer literal *)
     match index_expr with
     (* Should freshen type variables *)
-    | (_, _, Int _) ->
+    | (_, _, Aast.Int _) ->
       let (env, params) =
         List.map_env env tyl ~f:(fun env _ty ->
             Env.fresh_type_invariant env expr_pos)
@@ -1041,7 +1041,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
     (* requires integer literal *)
     match index_expr with
     (* Should freshen type variables *)
-    | (_, _, Int _) ->
+    | (_, _, Aast.Int _) ->
       let (env, params) =
         List.map_env env tyl ~f:(fun env _ty ->
             Env.fresh_type_invariant env expr_pos)

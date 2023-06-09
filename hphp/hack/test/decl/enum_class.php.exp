@@ -71,7 +71,7 @@
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([5:12-13], "__EnumClass");
-           ua_classname_params = [] }
+           ua_params = [] }
           ];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([5:14-22]), (Tprim Tarraykey));
@@ -114,7 +114,7 @@
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([11:12-13], "__EnumClass");
-           ua_classname_params = [] }
+           ua_params = [] }
           ];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([11:14-20]), (Tprim Tstring));

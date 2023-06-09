@@ -145,9 +145,16 @@ type dependent_type =
   | DTexpr of Ident.t
 [@@deriving eq, ord, show]
 
+type user_attribute_param =
+  | Classname of string
+  | EnumClassLabel of string
+  | String of Ast_defs.byte_string
+  | Int of string
+[@@deriving eq, hash, show]
+
 type user_attribute = {
   ua_name: pos_id;
-  ua_classname_params: string list;
+  ua_params: user_attribute_param list;
 }
 [@@deriving eq, show]
 

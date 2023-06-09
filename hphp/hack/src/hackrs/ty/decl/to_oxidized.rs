@@ -38,13 +38,27 @@ impl<'a> ToOxidized<'a> for IfcFunDecl {
     }
 }
 
+impl<'a> ToOxidized<'a> for UserAttributeParam {
+    type Output = obr::typing_defs::UserAttributeParam<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::typing_defs::UserAttributeParam as P;
+        match self {
+            UserAttributeParam::Classname(cn) => P::Classname(cn.to_oxidized(arena)),
+            UserAttributeParam::EnumClassLabel(l) => P::EnumClassLabel(l.to_oxidized(arena)),
+            UserAttributeParam::String(s) => P::String(s.to_oxidized(arena).into()),
+            UserAttributeParam::Int(i) => P::Int(i.to_oxidized(arena)),
+        }
+    }
+}
+
 impl<'a, P: Pos> ToOxidized<'a> for UserAttribute<P> {
     type Output = &'a obr::typing_defs::UserAttribute<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         arena.alloc(obr::typing_defs::UserAttribute {
             name: self.name.to_oxidized(arena),
-            classname_params: self.classname_params().to_oxidized(arena),
+            params: self.params.to_oxidized(arena),
         })
     }
 }

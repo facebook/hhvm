@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8135d2dad7fab2c8755ab38de4c0c246>>
+// @generated SignedSource<<17637f092f8e65a71db2ff2673786b66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -398,6 +398,19 @@ impl<'a> Node<'a> for DependentType {
         }
     }
 }
+impl<'a> Node<'a> for UserAttributeParam<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_user_attribute_param(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            UserAttributeParam::Classname(ref __binding_0) => __binding_0.accept(v),
+            UserAttributeParam::EnumClassLabel(ref __binding_0) => __binding_0.accept(v),
+            UserAttributeParam::String(ref __binding_0) => __binding_0.accept(v),
+            UserAttributeParam::Int(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for UserAttribute<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_user_attribute(self)
@@ -406,7 +419,7 @@ impl<'a> Node<'a> for UserAttribute<'a> {
         match self {
             UserAttribute {
                 name: ref __binding_0,
-                classname_params: ref __binding_1,
+                params: ref __binding_1,
             } => {
                 {
                     __binding_0.accept(v)

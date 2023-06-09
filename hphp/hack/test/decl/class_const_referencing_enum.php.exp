@@ -62,7 +62,7 @@
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([8:3-24], "__ConsistentConstruct");
-           ua_classname_params = [] }
+           ua_params = [] }
           ];
         sc_enum_type = None; sc_docs_url = None }))
   ]

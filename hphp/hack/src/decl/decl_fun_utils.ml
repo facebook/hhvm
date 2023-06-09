@@ -13,7 +13,7 @@ open Typing_defs
 module SN = Naming_special_names
 
 let get_classname_or_literal_attribute_param = function
-  | [(_, _, String s)] -> Some s
+  | [(_, _, Aast.String s)] -> Some s
   | [(_, _, Class_const ((_, _, CI (_, s)), (_, name)))]
     when String.equal name SN.Members.mClass ->
     Some s

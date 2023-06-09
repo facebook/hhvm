@@ -41,14 +41,19 @@ and shape_field_info_to_shape_field_type
     env { sfi_optional; sfi_hint; sfi_name = _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
-and aast_user_attribute_to_decl_user_attribute env { ua_name; ua_params } =
+and aast_user_attribute_to_decl_user_attribute
+    env { Aast_defs.ua_name; ua_params } =
   {
     Typing_defs.ua_name = Decl_env.make_decl_posed env ua_name;
-    ua_classname_params =
+    ua_params =
       List.filter_map ua_params ~f:(function
           | (_, _, Class_const ((_, _, CI (_, cls)), (_, name)))
             when String.equal name SN.Members.mClass ->
-            Some cls
+            Some (Typing_defs_core.Classname cls)
+          | (_, _, Aast.EnumClassLabel (_, s)) ->
+            Some (Typing_defs_core.EnumClassLabel s)
+          | (_, _, Aast.String s) -> Some (Typing_defs_core.String s)
+          | (_, _, Aast.Int i) -> Some (Typing_defs_core.Int i)
           | _ -> None);
   }
 

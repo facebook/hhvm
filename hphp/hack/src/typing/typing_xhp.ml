@@ -188,12 +188,12 @@ let rewrite_xml_into_new pos sid attributes children =
   let mk_attribute ix = function
     | Xhp_simple { xs_name = (attr_pos, attr_key); xs_expr = exp; _ } ->
       let attr_aux = attr_pos in
-      let key = ((), attr_aux, String attr_key) in
+      let key = ((), attr_aux, Aast.String attr_key) in
       (key, exp)
     | Xhp_spread exp ->
       let attr_key = Format.asprintf "...$%s" (string_of_int ix) in
       let attr_key_ann = pos in
-      let key = ((), attr_key_ann, String attr_key) in
+      let key = ((), attr_key_ann, Aast.String attr_key) in
       (key, exp)
   in
   let attributes =
@@ -201,8 +201,8 @@ let rewrite_xml_into_new pos sid attributes children =
     ((), pos, Darray (None, attributes))
   in
   let children = ((), pos, Varray (None, children)) in
-  let file = ((), pos, String "") in
-  let line = ((), pos, Int "1") in
+  let file = ((), pos, Aast.String "") in
+  let line = ((), pos, Aast.Int "1") in
   let args = [attributes; children; file; line] in
   let sid_ann = fst sid in
   ((), sid_ann, New (((), sid_ann, cid), [], args, None, ()))

@@ -19,6 +19,7 @@ use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
 use oxidized_by_ref::typing_defs::UserAttribute;
+use oxidized_by_ref::typing_defs::UserAttributeParam;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
 use serde::ser::SerializeSeq;
@@ -542,7 +543,7 @@ fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     }
 }
 
-fn format<'a>(original_name: &'a str) -> String {
+fn format(original_name: &str) -> String {
     let unqualified = strip_global_ns(original_name);
     match unqualified.rsplit('\\').next() {
         Some(id) if original_name.starts_with('\\') && id.starts_with(':') => {
@@ -570,18 +571,18 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
     attributes
         .iter()
         .filter_map(|ua| {
+            let cn_params: Vec<_> = (ua.params.iter())
+                .filter_map(|p| match p {
+                    UserAttributeParam::Classname(cn) => Some(*cn),
+                    _ => None,
+                })
+                .collect();
             let attr_name = format(ua.name.1);
             if user_attributes::is_reserved(&attr_name) {
                 // skip builtins
                 None
             } else {
-                Some((
-                    attr_name,
-                    ua.classname_params
-                        .iter()
-                        .map(|param| format(param))
-                        .collect::<Vec<String>>(),
-                ))
+                Some((attr_name, cn_params.iter().map(|p| format(p)).collect()))
             }
         })
         .collect::<Attributes>()

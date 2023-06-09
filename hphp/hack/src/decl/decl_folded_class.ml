@@ -244,7 +244,15 @@ let synthesize_typeconst_defaults
 let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
   match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
   | None -> None
-  | Some { ua_classname_params; _ } -> Some (SSet.of_list ua_classname_params)
+  | Some { ua_params; _ } ->
+    let cn_params =
+      List.filter_map
+        ~f:(function
+          | Classname cn -> Some cn
+          | _ -> None)
+        ua_params
+    in
+    Some (SSet.of_list cn_params)
 
 let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
     : Typing_defs.decl_ty SMap.t =

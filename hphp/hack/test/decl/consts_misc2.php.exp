@@ -221,7 +221,7 @@
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([17:12-21], "__EnumClass");
-           ua_classname_params = [] }
+           ua_params = [] }
           ];
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([17:22-27]), Tmixed);

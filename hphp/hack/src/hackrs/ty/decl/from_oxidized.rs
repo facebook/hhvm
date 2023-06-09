@@ -83,14 +83,23 @@ fn tshape_field_name_from_decl<P: Pos>(
     }
 }
 
+impl From<&obr::typing_defs::UserAttributeParam<'_>> for ty::UserAttributeParam {
+    fn from(attr: &obr::typing_defs::UserAttributeParam<'_>) -> Self {
+        use obr::typing_defs::UserAttributeParam as UAP;
+        match *attr {
+            UAP::Classname(cn) => Self::Classname(cn.into()),
+            UAP::EnumClassLabel(l) => Self::EnumClassLabel(l.into()),
+            UAP::String(s) => Self::String(s.into()),
+            UAP::Int(i) => Self::Int(i.into()),
+        }
+    }
+}
+
 impl<P: Pos> From<&obr::typing_defs::UserAttribute<'_>> for ty::UserAttribute<P> {
     fn from(attr: &obr::typing_defs::UserAttribute<'_>) -> Self {
         Self {
             name: attr.name.into(),
-            params: (attr.classname_params.iter())
-                .copied()
-                .map(|cn| ty::UserAttributeParam::Classname(cn.into()))
-                .collect(),
+            params: (attr.params.iter()).map(Into::into).collect(),
         }
     }
 }

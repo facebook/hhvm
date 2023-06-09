@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1a44ccaa1355ef6618dc0312ae7b40cc>>
+// @generated SignedSource<<ada3d311d41f052bf0e7f27dd921167e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -325,11 +325,35 @@ pub enum DependentType {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
+#[repr(C, u8)]
+pub enum UserAttributeParam {
+    Classname(String),
+    EnumClassLabel(String),
+    String(bstr::BString),
+    Int(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute {
     pub name: PosId,
-    pub classname_params: Vec<String>,
+    pub params: Vec<UserAttributeParam>,
 }
 
 #[derive(

@@ -802,10 +802,10 @@ let hh_time_start_times = ref SMap.empty
 let do_hh_time el =
   let go command tag =
     match command with
-    | String "start" ->
+    | Aast.String "start" ->
       let start_time = Unix.gettimeofday () in
       hh_time_start_times := SMap.add tag start_time !hh_time_start_times
-    | String "stop" ->
+    | Aast.String "stop" ->
       let stop_time = Unix.gettimeofday () in
       begin
         match SMap.find_opt tag !hh_time_start_times with
@@ -818,7 +818,7 @@ let do_hh_time el =
   in
   match el with
   | [(_, (_, _, command))] -> go command "_"
-  | [(_, (_, _, command)); (_, (_, _, String tag))] -> go command tag
+  | [(_, (_, _, command)); (_, (_, _, Aast.String tag))] -> go command tag
   | _ -> ()
 
 let is_parameter env x = Local_id.Map.mem x (Env.get_params env)
@@ -2186,7 +2186,7 @@ module EnumClassLabelOps = struct
           else
             None
         in
-        let te = (hi, pos, EnumClassLabel (qualifier, label_name)) in
+        let te = (hi, pos, Aast.EnumClassLabel (qualifier, label_name)) in
         (env, Success (te, lty))
       | None ->
         let consts =
@@ -2219,7 +2219,7 @@ module EnumClassLabelOps = struct
                    ty_pos;
                  });
         let (env, ty) = Env.fresh_type_error env pos in
-        let te = (ty, pos, EnumClassLabel (None, label_name)) in
+        let te = (ty, pos, Aast.EnumClassLabel (None, label_name)) in
         (env, LabelNotFound (te, ty)))
     | None -> (env, ClassNotFound)
 end
@@ -4336,8 +4336,8 @@ and expr_
       ) else if String.equal s SN.PseudoFunctions.hh_log_level then
         match args with
         | [
-         (Ast_defs.Pnormal, (_, _, String key_str));
-         (Ast_defs.Pnormal, (_, _, Int level_str));
+         (Ast_defs.Pnormal, (_, _, Aast.String key_str));
+         (Ast_defs.Pnormal, (_, _, Aast.Int level_str));
         ] ->
           Env.set_log_level env key_str (int_of_string level_str)
         | _ -> env
@@ -9228,7 +9228,8 @@ and call
                 | _ -> is_label env ety
               in
               match (arg, is_maybe_label) with
-              | (EnumClassLabel (None, label_name), Some (name, ty_enum)) ->
+              | (Aast.EnumClassLabel (None, label_name), Some (name, ty_enum))
+                ->
                 let ctor = name in
                 (match compute_enum_name env ty_enum with
                 | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
@@ -9242,7 +9243,7 @@ and call
                     (Pos.none, enum_name)
                     label_name
                     (Some ty_pos))
-              | (EnumClassLabel (Some _, _), _) ->
+              | (Aast.EnumClassLabel (Some _, _), _) ->
                 (* Full info is here, use normal inference *)
                 (env, EnumClassLabelOps.Skip)
               | (_, _) -> (env, EnumClassLabelOps.Skip)

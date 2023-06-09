@@ -86,7 +86,7 @@ let split_defs defs split_if_in_defs =
 
 let infer_const expr_ =
   match expr_ with
-  | String _ -> Some Tstring
+  | Aast.String _ -> Some Tstring
   | True
   | False ->
     Some Tbool

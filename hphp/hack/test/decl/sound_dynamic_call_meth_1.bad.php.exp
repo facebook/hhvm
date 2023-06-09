@@ -163,7 +163,7 @@
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([14:3-23], "__SupportDynamicType");
-           ua_classname_params = [] }
+           ua_params = [] }
           ];
         sc_enum_type = None; sc_docs_url = None }))
   ]

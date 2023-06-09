@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c26758f93399334dbeb0ab4ab6cea63>>
+// @generated SignedSource<<34860f03b8f1a004f75a92f5fe9999a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -233,6 +233,37 @@ arena_deserializer::impl_deserialize_in_arena!(DependentType);
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
+#[repr(C, u8)]
+pub enum UserAttributeParam<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Classname(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    EnumClassLabel(&'a str),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    String(&'a bstr::BStr),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Int(&'a str),
+}
+impl<'a> TrivialDrop for UserAttributeParam<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(UserAttributeParam<'arena>);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -253,7 +284,7 @@ pub struct UserAttribute<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub classname_params: &'a [&'a str],
+    pub params: &'a [UserAttributeParam<'a>],
 }
 impl<'a> TrivialDrop for UserAttribute<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(UserAttribute<'arena>);

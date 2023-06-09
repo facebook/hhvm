@@ -46,10 +46,7 @@
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
-        [{ Typing_defs_core.ua_name = ([6:8-11], "\\Bar");
-           ua_classname_params = [] };
-          { Typing_defs_core.ua_name = ([6:3-6], "\\Foo");
-            ua_classname_params = [] }
-          ];
+        [{ Typing_defs_core.ua_name = ([6:8-11], "\\Bar"); ua_params = [] };
+          { Typing_defs_core.ua_name = ([6:3-6], "\\Foo"); ua_params = [] }];
         sc_enum_type = None; sc_docs_url = None }))
   ]

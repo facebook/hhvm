@@ -42,9 +42,7 @@
                sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
-       [{ Typing_defs_core.ua_name = ([3:3-10], "__Const");
-          ua_classname_params = [] }
-         ];
+       [{ Typing_defs_core.ua_name = ([3:3-10], "__Const"); ua_params = [] }];
        sc_enum_type = None; sc_docs_url = None }));
   ("\\B",
    (Shallow_decl_defs.Class

@@ -95,7 +95,7 @@ class ServerTask : public AsyncFizzServer::HandshakeCallback {
   }
 
   virtual void fizzHandshakeAttemptFallback(
-      std::unique_ptr<folly::IOBuf>) noexcept override {
+      AttemptVersionFallback) noexcept override {
     endTask();
   }
 

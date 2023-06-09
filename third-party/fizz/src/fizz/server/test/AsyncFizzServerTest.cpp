@@ -297,14 +297,17 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
         return actions(
             MutateState(
                 [](State& newState) { newState.state() = StateEnum::Error; }),
-            AttemptVersionFallback{IOBuf::copyBuffer("ClientHello")});
+            AttemptVersionFallback{
+                IOBuf::copyBuffer("ClientHello"),
+                folly::Optional<std::string>("www.hostname.com")});
       }));
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeAttemptFallback(_))
-      .WillOnce(Invoke([&](std::unique_ptr<IOBuf>& clientHello) {
+      .WillOnce(Invoke([&](AttemptVersionFallback& fallback) {
         // The mock machine does not move the read buffer so there will be a 2nd
         // ClientHello.
         EXPECT_TRUE(IOBufEqualTo()(
-            clientHello, IOBuf::copyBuffer("ClientHelloClientHello")));
+            fallback.clientHello, IOBuf::copyBuffer("ClientHelloClientHello")));
+        EXPECT_EQ(fallback.sni, "www.hostname.com");
         server_.reset();
       }));
   socketReadCallback_->readBufferAvailable(IOBuf::copyBuffer("ClientHello"));

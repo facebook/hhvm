@@ -119,7 +119,7 @@ folly::SemiFuture<AsyncFizzServer::UniquePtr> fizzAccept(
     }
 
     void fizzHandshakeAttemptFallback(
-        std::unique_ptr<folly::IOBuf>) noexcept override {
+        AttemptVersionFallback) noexcept override {
       fizzHandshakeError(
           fizzSocket_.get(),
           folly::make_exception_wrapper<std::runtime_error>(

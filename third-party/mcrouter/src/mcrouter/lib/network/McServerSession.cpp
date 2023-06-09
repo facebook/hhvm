@@ -727,7 +727,7 @@ void McServerSession::fizzHandshakeError(
 }
 
 void McServerSession::fizzHandshakeAttemptFallback(
-    std::unique_ptr<folly::IOBuf> clientHello) {
+    fizz::server::AttemptVersionFallback fallback) {
   DestructorGuard dg(this);
   auto transport = transport_->getUnderlyingTransport<McFizzServer>();
   CHECK(transport) << " transport should not be nullptr";
@@ -740,7 +740,7 @@ void McServerSession::fizzHandshakeAttemptFallback(
 
   folly::AsyncSSLSocket::UniquePtr sslSocket(new folly::AsyncSSLSocket(
       ctx, evb, folly::NetworkSocket::fromFd(fd), true /* server */));
-  sslSocket->setPreReceivedData(std::move(clientHello));
+  sslSocket->setPreReceivedData(std::move(fallback.clientHello));
   sslSocket->enableClientHelloParsing();
   sslSocket->forceCacheAddrOnFailure(true);
   // need to re apply the socket options

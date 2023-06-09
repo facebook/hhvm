@@ -32,7 +32,7 @@ class AsyncFizzServerT : public AsyncFizzBase {
         folly::exception_wrapper ex) noexcept = 0;
 
     virtual void fizzHandshakeAttemptFallback(
-        std::unique_ptr<folly::IOBuf> clientHello) = 0;
+        AttemptVersionFallback fallback) = 0;
   };
 
   using UniquePtr =

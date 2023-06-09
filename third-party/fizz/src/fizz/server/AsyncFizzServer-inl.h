@@ -362,7 +362,8 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
   if (!server_.transportReadBuf_.empty()) {
     fallback.clientHello->prependChain(server_.transportReadBuf_.move());
   }
-  callback->fizzHandshakeAttemptFallback(std::move(fallback.clientHello));
+  callback->fizzHandshakeAttemptFallback(AttemptVersionFallback{
+      std::move(fallback.clientHello), std::move(fallback.sni)});
 }
 
 template <typename SM>

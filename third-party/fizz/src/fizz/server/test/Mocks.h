@@ -191,13 +191,9 @@ class MockHandshakeCallbackT : public AsyncFizzServerT<SM>::HandshakeCallback {
     _fizzHandshakeError(std::move(ew));
   }
 
-  MOCK_METHOD(
-      void,
-      _fizzHandshakeAttemptFallback,
-      (std::unique_ptr<folly::IOBuf>&));
-  void fizzHandshakeAttemptFallback(
-      std::unique_ptr<folly::IOBuf> clientHello) override {
-    return _fizzHandshakeAttemptFallback(clientHello);
+  MOCK_METHOD(void, _fizzHandshakeAttemptFallback, (AttemptVersionFallback&));
+  void fizzHandshakeAttemptFallback(AttemptVersionFallback fallback) override {
+    return _fizzHandshakeAttemptFallback(fallback);
   }
 };
 

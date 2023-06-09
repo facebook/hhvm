@@ -27,7 +27,16 @@ class State;
 using MutateState = folly::Function<void(State&)>;
 
 struct AttemptVersionFallback {
+  /**
+   * The ClientHello received with a TLS version lower than TLSv1.3.
+   */
   std::unique_ptr<folly::IOBuf> clientHello;
+
+  /**
+   * If set, the SNI that was conveyed in the ClientHello.
+   * Helps downstream implementations to set right context
+   * for processing the ClientHello.
+   */
   folly::Optional<std::string> sni;
 };
 

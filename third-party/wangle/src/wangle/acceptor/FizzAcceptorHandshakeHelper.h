@@ -270,7 +270,7 @@ class FizzAcceptorHandshakeHelper
       fizz::server::AsyncFizzServer* transport,
       folly::exception_wrapper ex) noexcept override;
   void fizzHandshakeAttemptFallback(
-      std::unique_ptr<folly::IOBuf> clientHello) override;
+      fizz::server::AttemptVersionFallback fallback) override;
 
   // AsyncSSLSocket::HandshakeCallback API
   void handshakeSuc(folly::AsyncSSLSocket* sock) noexcept override;

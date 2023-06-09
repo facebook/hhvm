@@ -175,8 +175,7 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
     finish();
   }
 
-  void fizzHandshakeAttemptFallback(
-      std::unique_ptr<IOBuf> clientHello) override {
+  void fizzHandshakeAttemptFallback(AttemptVersionFallback fallback) override {
     CHECK(transport_);
     LOG(INFO) << "Fallback attempt";
     auto socket = transport_->getUnderlyingTransport<AsyncSocket>();
@@ -185,7 +184,7 @@ class FizzExampleServer : public AsyncFizzServer::HandshakeCallback,
     transport_.reset();
     sslSocket_ = AsyncSSLSocket::UniquePtr(
         new AsyncSSLSocket(sslCtx_, evb, folly::NetworkSocket::fromFd(fd)));
-    sslSocket_->setPreReceivedData(std::move(clientHello));
+    sslSocket_->setPreReceivedData(std::move(fallback.clientHello));
     sslSocket_->sslAccept(this);
   }
 

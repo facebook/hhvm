@@ -502,7 +502,7 @@ class McServerSession
       folly::exception_wrapper ex) noexcept final;
 
   void fizzHandshakeAttemptFallback(
-      std::unique_ptr<folly::IOBuf> clientHello) final;
+      fizz::server::AttemptVersionFallback fallback) final;
 
   void onTransactionStarted(bool isSubRequest);
   void onTransactionCompleted(bool isSubRequest);

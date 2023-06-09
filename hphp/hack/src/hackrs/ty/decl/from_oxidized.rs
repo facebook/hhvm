@@ -87,9 +87,9 @@ impl<P: Pos> From<&obr::typing_defs::UserAttribute<'_>> for ty::UserAttribute<P>
     fn from(attr: &obr::typing_defs::UserAttribute<'_>) -> Self {
         Self {
             name: attr.name.into(),
-            classname_params: (attr.classname_params.iter())
+            params: (attr.classname_params.iter())
                 .copied()
-                .map(Into::into)
+                .map(|cn| ty::UserAttributeParam::Classname(cn.into()))
                 .collect(),
         }
     }

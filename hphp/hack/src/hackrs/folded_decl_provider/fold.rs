@@ -724,7 +724,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn get_sealed_whitelist(&self) -> Option<IndexSet<TypeName>> {
         (self.child.user_attributes.iter())
             .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
-            .map(|ua| ua.classname_params.iter().copied().collect())
+            .map(|ua| ua.classname_params().iter().copied().collect())
     }
 
     fn get_deferred_init_members_helper(&self) -> IndexSet<PropName> {

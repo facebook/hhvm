@@ -44,7 +44,7 @@ impl<'a, P: Pos> ToOxidized<'a> for UserAttribute<P> {
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         arena.alloc(obr::typing_defs::UserAttribute {
             name: self.name.to_oxidized(arena),
-            classname_params: self.classname_params.to_oxidized(arena),
+            classname_params: self.classname_params().to_oxidized(arena),
         })
     }
 }

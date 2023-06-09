@@ -136,13 +136,55 @@ pub enum DependentType {
 }
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+pub enum UserAttributeParam {
+    Classname(TypeName),
+    EnumClassLabel(Symbol),
+    String(Bytes),
+    Int(Symbol),
+}
+
+// Temporary, removed in the next diff.
+impl ocamlrep::FromOcamlRep for UserAttributeParam {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self::Classname(TypeName(Symbol::new(
+            ocamlrep::str_from_ocamlrep(value)?,
+        ))))
+    }
+}
+
+// Temporary, removed in the next diff.
+impl ocamlrep::ToOcamlRep for UserAttributeParam {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        alloc.add_copy(match self {
+            Self::Classname(cn) => cn.as_str(),
+            Self::EnumClassLabel(l) => l.as_str(),
+            Self::String(s) => std::str::from_utf8(s.as_bytes()).unwrap(),
+            Self::Int(i) => i.as_str(),
+        })
+    }
+}
+
+walkable!(UserAttributeParam);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
-    pub classname_params: Box<[TypeName]>,
+    pub params: Box<[UserAttributeParam]>,
 }
 
-walkable!(impl<R: Reason> for UserAttribute<R::Pos> => [name, classname_params]);
+impl<P> UserAttribute<P> {
+    pub fn classname_params(&self) -> Vec<TypeName> {
+        (self.params.iter())
+            .filter_map(|p| match p {
+                UserAttributeParam::Classname(cn) => Some(*cn),
+                _ => None,
+            })
+            .collect()
+    }
+}
+
+walkable!(impl<R: Reason> for UserAttribute<R::Pos> => [name, params]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]

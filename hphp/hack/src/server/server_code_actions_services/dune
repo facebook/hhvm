@@ -9,6 +9,7 @@
   decl_provider
   errors
   extract_method
+  inline_method
   full_fidelity
   lsp
   pos

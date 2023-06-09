@@ -1,0 +1,15 @@
+(library
+ (name inline_method)
+ (wrapped true)
+ (libraries
+  annotated_ast
+  ast
+  code_action_types
+  full_fidelity
+  lsp
+  pos
+  provider_context
+  server_command_types
+  tast_env
+  tast_provider
+  utils_core))

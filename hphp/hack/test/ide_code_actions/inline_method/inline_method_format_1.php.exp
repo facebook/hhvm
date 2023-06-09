@@ -1,0 +1,54 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor)
+Inline method (CodeActionKind: refactor) SELECTED
+Extract into method (CodeActionKind: refactor)
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":5,"line":9},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$param_a = \"hello \".\"world\";\n            $param_b = 2 + 2;\n            $z = $param_a;\n            if ($param_b > 1) {\n              $z = $param_a.$param_b;\n            }\n            res = $z;\n            ",
+          "range":{"end":{"character":12,"line":13},"start":{"character":12,"line":13}}
+        },
+        {
+          "newText":"res",
+          "range":{"end":{"character":88,"line":13},"start":{"character":17,"line":13}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {
+
+    public function main(): void {
+        if (true) {
+            echo "test\n";
+            $param_a = "hello "."world";
+            $param_b = 2 + 2;
+            $z = $param_a;
+            if ($param_b > 1) {
+              $z = $param_a.$param_b;
+            }
+            res = $z;
+            $s = res;
+            echo $s . "\n";
+        }
+    }
+}
+

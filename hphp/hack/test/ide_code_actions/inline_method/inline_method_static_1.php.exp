@@ -1,0 +1,45 @@
+Code actions available:
+------------------------------------------
+Inline method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":3,"line":6},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$i = 1;\n    $z = 2;\n    res = $i + $z;\n    ",
+          "range":{"end":{"character":4,"line":9},"start":{"character":4,"line":9}}
+        },
+        {
+          "newText":"res",
+          "range":{"end":{"character":56,"line":9},"start":{"character":8,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class A {
+
+
+  public static function foo(): void {
+    $i = 1;
+    $z = 2;
+    res = $i + $z;
+    1 + res;
+  }
+}
+

@@ -13,5 +13,6 @@ let find ~entry ~(range : Lsp.range) ctx =
   in
   Override_method.find ~entry ~range ctx
   @ variable_actions
+  @ Inline_method.find ~entry ~range ctx
   @ Extract_method.find ~entry ~range ctx
   @ Flip_around_comma.find ~entry ~range ctx

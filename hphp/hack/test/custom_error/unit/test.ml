@@ -389,3 +389,58 @@ let%test_unit "validate ty, mismatch" =
   [%test_eq: Patt_locl_ty.t V.t]
     (fst @@ Patt_locl_ty.validate patt)
     (V.Invalid patt_invalid)
+
+(* Helper for testing - string must be smaller than pipe's buffer *)
+let in_channel_of_string string =
+  let (in_file_descr, out_file_descr) = Unix.pipe () in
+  let in_channel = Unix.in_channel_of_descr in_file_descr in
+  let out_channel = Unix.out_channel_of_descr out_file_descr in
+  begin
+    output_string out_channel string;
+    close_out out_channel;
+    in_channel
+  end
+
+(* Initializing with valid JSON should be ok *)
+let%test "initialize good " =
+  Result.is_ok
+  @@ Custom_error_config.initialize
+  @@ in_channel_of_string
+       {|{
+    "custom_errors": [
+      {
+        "name": "Test",
+        "patt": [
+          "Apply_reasons",
+                {
+                    "patt_rsns_cb": ["Any_reasons_callback"],
+                    "patt_secondary": ["Any_snd"]
+                }
+        ],
+        "error_message": {
+          "message": [
+            [ "Lit", "Custom errors are smashing!"]
+          ]
+        }
+      }
+    ]
+  }|}
+
+(* Initializing with a malformed JSON should be an error *)
+let%test "initialize, malformed json" =
+  Result.is_error
+  @@ Custom_error_config.initialize
+  @@ in_channel_of_string {|*|}
+
+(* Initializing with a valid but non representative JSON should be an error *)
+let%test "initialize, mismatched json" =
+  Result.is_error
+  @@ Custom_error_config.initialize
+  @@ in_channel_of_string
+       {| {
+    "custom_errors": [
+        {
+            "extra field": "Always"
+        }
+    ]
+  }|}

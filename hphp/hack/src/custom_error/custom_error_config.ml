@@ -10,9 +10,9 @@ type t = { custom_errors: Custom_error.t list } [@@deriving eq, show, yojson]
 
 let empty = { custom_errors = [] }
 
-let initialize file =
+let initialize ch =
   try
-    let { custom_errors } = t_of_yojson @@ Yojson.Safe.from_file file in
+    let { custom_errors } = t_of_yojson @@ Yojson.Safe.from_channel ch in
     let (custom_errors, errs) =
       List.partition_map
         (fun c ->
@@ -24,4 +24,10 @@ let initialize file =
 
     Ok ({ custom_errors }, errs)
   with
+  (* Malformed JSON *)
   | Yojson.Json_error err -> Error err
+  (* Serialization format error  *)
+  | Ppx_yojson_conv_lib.Yojson_conv.Of_yojson_error (exn, _) ->
+    Error (Printexc.to_string exn)
+  (* Fallthrough to handle unexpected cases *)
+  | exn -> Error (Printexc.to_string exn)

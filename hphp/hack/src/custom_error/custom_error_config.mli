@@ -10,4 +10,4 @@ type t = { custom_errors: Custom_error.t list } [@@deriving eq, show, yojson]
 
 val empty : t
 
-val initialize : string -> (t * string list, string) result
+val initialize : in_channel -> (t * string list, string) result

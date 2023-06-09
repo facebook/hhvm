@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/datatype.h"
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
+#include "common/serialize/FBSerialize.h"
 
 #include <algorithm>
 #include <utility>

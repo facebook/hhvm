@@ -5802,7 +5802,14 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (CodeActionResolveResult result);
-      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
+      Lwt.return_some
+        {
+          result_count = 1;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.string_ ~key:"title" ~value:title);
+        }
     (* codeAction/resolve request, when not in serverless IDE mode *)
     | ( Main_loop menv,
         None,

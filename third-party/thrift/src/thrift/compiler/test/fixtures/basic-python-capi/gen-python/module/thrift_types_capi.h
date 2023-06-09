@@ -30,7 +30,6 @@ struct Constructor<::test::fixtures::basic-python-capi::MyStruct> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStruct&& val);
 };
 
-
 template <>
 struct Extractor<::test::fixtures::basic-python-capi::MyDataItem>
     : public BaseExtractor<::test::fixtures::basic-python-capi::MyDataItem> {
@@ -42,7 +41,6 @@ template <>
 struct Constructor<::test::fixtures::basic-python-capi::MyDataItem> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItem&& val);
 };
-
 
 template <>
 struct Extractor<::test::fixtures::basic-python-capi::MyUnion>
@@ -56,6 +54,17 @@ struct Constructor<::test::fixtures::basic-python-capi::MyUnion> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyUnion&& val);
 };
 
+template <>
+struct Extractor<::test::fixtures::basic-python-capi::MyEnum>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::MyEnum> {
+  ExtractorResult<::test::fixtures::basic-python-capi::MyEnum> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::MyEnum> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyEnum&& val);
+};
 
 } // namespace capi
 } // namespace python

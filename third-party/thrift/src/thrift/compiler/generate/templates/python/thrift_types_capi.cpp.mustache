@@ -87,6 +87,52 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
 }
 
 {{/program:structs}}
+{{#program:enums}}
+ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
+Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(
+      "Module {{program:module_path}} import error");
+  }
+  int64_t val = extract__{{program:capi_module_prefix}}__{{enum:name}}(obj);
+  if (val == -1 && PyErr_Occurred()) {
+    return extractorError<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(
+        "Error getting python int value: {{enum:name}}");
+  }
+  return static_cast<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(val);
+}
+
+int Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module {{program:module_path}} import error");
+  }
+  int result =
+      can_extract__{{program:capi_module_prefix}}__{{enum:name}}(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: {{enum:name}}");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(
+    {{program:cpp_namespaces}}::{{enum:cpp_name}}&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__{{program:capi_module_prefix}}__{{enum:name}}(
+      static_cast<int64_t>(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+{{/program:enums}}
 } // namespace capi
 } // namespace python
 } // namespace thrift

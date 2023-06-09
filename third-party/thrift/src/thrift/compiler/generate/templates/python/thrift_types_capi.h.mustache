@@ -43,8 +43,21 @@ struct Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
   PyObject* operator()({{program:cpp_namespaces}}::{{struct:cpp_name}}&& val);
 };
 
-
 {{/program:structs}}
+{{#program:enums}}
+template <>
+struct Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
+    : public BaseExtractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+  ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+  PyObject* operator()({{program:cpp_namespaces}}::{{enum:cpp_name}}&& val);
+};
+
+{{/program:enums}}
 } // namespace capi
 } // namespace python
 } // namespace thrift

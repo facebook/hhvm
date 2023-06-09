@@ -61,3 +61,12 @@ cdef api object construct__test__fixtures__basic_python_capi__module__MyUnion(__
         protocol=__Protocol.BINARY
     )
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyEnum(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0
+
+cdef api int64_t extract__test__fixtures__basic_python_capi__module__MyEnum(object __obj) except -1:
+    return __obj.value
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyEnum(int64_t __val):
+    return __thrift_types.MyEnum(__val)
+

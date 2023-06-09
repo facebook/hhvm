@@ -21,6 +21,11 @@ enum MyEnum {
   MyValue2 = 1,
 }
 
+enum AnnoyingEnum {
+  FOO = 1 (cpp.name = "l0O1"),
+  BAR = 2 (cpp.name = "FuBaR"),
+} (cpp.name = "NormalDecentEnum")
+
 struct MyStruct {
   1: i64 inty;
   2: string stringy;

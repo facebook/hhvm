@@ -20,6 +20,7 @@ Generated Cpp2 <-> Python converters for Thrift types
 {{> common/auto_generated_cython}}
 
 from cpython.ref cimport PyObject
+from libc.stdint cimport int64_t
 from libcpp.memory cimport unique_ptr as __unique_ptr
 from folly.iobuf cimport cIOBuf as __cIOBuf
 
@@ -32,3 +33,11 @@ cdef api __cIOBuf* extract__{{program:capi_module_prefix}}__{{struct:name}}(obje
 cdef api object construct__{{program:capi_module_prefix}}__{{struct:name}}(__unique_ptr[__cIOBuf])
 
 {{/program:structs}}
+{{#program:enums}}
+cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
+
+cdef api int64_t extract__{{program:capi_module_prefix}}__{{enum:name}}(object) except -1
+
+cdef api object construct__{{program:capi_module_prefix}}__{{enum:name}}(int64_t)
+
+{{/program:enums}}

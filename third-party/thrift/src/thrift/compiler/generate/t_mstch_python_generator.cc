@@ -189,7 +189,8 @@ class python_mstch_program : public mstch_program {
   }
 
   mstch::node has_types() {
-    return program_->structs().size() > 0 || program_->exceptions().size() > 0;
+    return program_->structs().size() > 0 ||
+        program_->exceptions().size() > 0 || program_->enums().size() > 0;
   }
 
   mstch::node capi_module_prefix() {
@@ -868,6 +869,7 @@ class python_mstch_enum : public mstch_enum {
         {
             {"enum:flags?", &python_mstch_enum::has_flags},
             {"enum:legacy_api?", &python_mstch_enum::legacy_api},
+            {"enum:cpp_name", &python_mstch_enum::cpp_name},
         });
   }
 
@@ -879,6 +881,8 @@ class python_mstch_enum : public mstch_enum {
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*enum_);
   }
+
+  mstch::node cpp_name() { return cpp2::get_name(enum_); }
 };
 
 class python_mstch_enum_value : public mstch_enum_value {

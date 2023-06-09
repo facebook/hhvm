@@ -41,7 +41,7 @@ class PythonCapiTest(unittest.TestCase):
     def my_union(self) -> MyUnion:
         return MyUnion(myStruct=self.my_struct())
 
-    def test_roundtrip(self) -> None:
+    def test_roundtrip_struct(self) -> None:
         i = MyDataItem()
         empty = MyStruct()
         s = self.my_struct()
@@ -52,13 +52,19 @@ class PythonCapiTest(unittest.TestCase):
     def test_roundtrip_union(self) -> None:
         self.assertEqual(self.my_union(), fixture.roundtrip_MyUnion(self.my_union()))
 
+    def test_roundtrip_enum(self) -> None:
+        self.assertEqual(MyEnum.MyValue1, fixture.roundtrip_MyEnum(MyEnum.MyValue1))
+        self.assertEqual(MyEnum.MyValue2, fixture.roundtrip_MyEnum(MyEnum.MyValue2))
+
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):
             fixture.roundtrip_MyDataItem(MyEnum.MyValue1)
         with self.assertRaises(TypeError):
             fixture.roundtrip_MyUnion(MyEnum.MyValue1)
+        with self.assertRaises(AttributeError):
+            fixture.roundtrip_MyEnum(self.my_struct())
 
-    def test_typeCheck(self) -> None:
+    def test_typeCheck_struct(self) -> None:
         i = MyDataItem()
         s = self.my_struct()
         self.assertTrue(fixture.check_MyDataItem(i))
@@ -70,3 +76,8 @@ class PythonCapiTest(unittest.TestCase):
         self.assertTrue(fixture.check_MyUnion(self.my_union()))
         self.assertFalse(fixture.check_MyUnion(self.my_struct()))
         self.assertFalse(fixture.check_MyUnion(MyEnum.MyValue1))
+
+    def test_typeCheck_enum(self) -> None:
+        self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue1))
+        self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue2))
+        self.assertFalse(fixture.check_MyEnum(self.my_struct()))

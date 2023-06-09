@@ -7,6 +7,7 @@
 #
 
 from cpython.ref cimport PyObject
+from libc.stdint cimport int64_t
 from libcpp.memory cimport unique_ptr as __unique_ptr
 from folly.iobuf cimport cIOBuf as __cIOBuf
 
@@ -28,4 +29,10 @@ cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(obj
 cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyUnion(object) except NULL
 
 cdef api object construct__test__fixtures__basic_python_capi__module__MyUnion(__unique_ptr[__cIOBuf])
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyEnum(object) except -1
+
+cdef api int64_t extract__test__fixtures__basic_python_capi__module__MyEnum(object) except -1
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyEnum(int64_t)
 

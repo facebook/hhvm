@@ -18,12 +18,12 @@ from libcpp cimport bool as cbool
 cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "thrift::test::python_capi":
     cppclass MyStruct
     cppclass MyDataItem
+    cppclass MyEnum
     cppclass OurUnion
 
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T](object)
     cdef cbool __shim__typeCheck[T](object)
-
 
 
 def roundtrip_MyStruct(object x):
@@ -35,6 +35,9 @@ def roundtrip_MyDataItem(object x):
 def roundtrip_MyUnion(object x):
     return __shim__roundtrip[OurUnion](x)
 
+def roundtrip_MyEnum(object x):
+    return __shim__roundtrip[MyEnum](x)
+
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))
 
@@ -43,3 +46,6 @@ def check_MyDataItem(object x):
 
 def check_MyUnion(object x):
     return bool(__shim__typeCheck[OurUnion](x))
+
+def check_MyEnum(object x):
+    return bool(__shim__typeCheck[MyEnum](x))

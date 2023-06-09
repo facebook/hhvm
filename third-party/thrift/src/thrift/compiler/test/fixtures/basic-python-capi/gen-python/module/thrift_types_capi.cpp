@@ -163,6 +163,50 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyUnion>::operator()(
   return ptr;
 }
 
+ExtractorResult<::test::fixtures::basic-python-capi::MyEnum>
+Extractor<::test::fixtures::basic-python-capi::MyEnum>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyEnum>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int64_t val = extract__test__fixtures__basic_python_capi__module__MyEnum(obj);
+  if (val == -1 && PyErr_Occurred()) {
+    return extractorError<::test::fixtures::basic-python-capi::MyEnum>(
+        "Error getting python int value: MyEnum");
+  }
+  return static_cast<::test::fixtures::basic-python-capi::MyEnum>(val);
+}
+
+int Extractor<::test::fixtures::basic-python-capi::MyEnum>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyEnum(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyEnum");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyEnum>::operator()(
+    ::test::fixtures::basic-python-capi::MyEnum&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyEnum(
+      static_cast<int64_t>(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

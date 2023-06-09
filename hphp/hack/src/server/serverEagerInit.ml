@@ -62,6 +62,9 @@ let init
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
 
+  (* Load and parse CUSTOM_ERRORS.json if it exists at the root. *)
+  let env = CustomErrorConfig.load_and_parse env in
+
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =
     ServerInitCommon.directory_walk ~telemetry_label:"eager.init.indexing" genv

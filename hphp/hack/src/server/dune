@@ -536,6 +536,7 @@
   (wrapped false)
   (modules
     client_command_handler
+    customErrorConfig
     packageConfig
     serverCommand
     serverCommandLwt
@@ -553,6 +554,7 @@
     build
     ci_util
     cgroupprofiler
+    custom_error_types
     direct_decl_service
     folly_stubs
     load_script

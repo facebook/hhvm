@@ -999,6 +999,7 @@ let full_init
     HackEventLogger.invariant_violation_bug desc ~data_int:existing_name_count
   end;
   Hh_logger.log "full init";
+  let env = CustomErrorConfig.load_and_parse env in
   let (env, t) =
     initialize_naming_table
       ~do_naming:true
@@ -1103,6 +1104,9 @@ let post_saved_state_initialization
 
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
+
+  (* Load and parse CUSTOM_ERRORS.json if it exists at the root. *)
+  let env = CustomErrorConfig.load_and_parse env in
 
   (***********************************************************
     NAMING TABLE.

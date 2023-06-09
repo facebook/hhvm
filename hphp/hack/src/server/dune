@@ -179,6 +179,7 @@
   (wrapped false)
   (modules serverConfig serverLocalConfig)
   (libraries
+   custom_error_config
    server_args
    errors
    experiments_config_file
@@ -532,11 +533,21 @@
   (copy# facebook/serverInitMessages.ml serverInitMessages.fb.ml)))
 
 (library
+  (name custom_error_config)
+  (wrapped false)
+  (modules customErrorConfig)
+  (libraries
+    custom_error_types
+    relative_path
+    sys_utils
+  )
+)
+
+(library
   (name hh_server_monitor)
   (wrapped false)
   (modules
     client_command_handler
-    customErrorConfig
     packageConfig
     serverCommand
     serverCommandLwt
@@ -554,7 +565,7 @@
     build
     ci_util
     cgroupprofiler
-    custom_error_types
+    custom_error_config
     direct_decl_service
     folly_stubs
     load_script

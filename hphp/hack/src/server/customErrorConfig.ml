@@ -15,10 +15,12 @@ let repo_config_path =
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"custom errors" ?exn:None msg
 
-let load_and_parse env : ServerEnv.env =
-  let config_abs_path = Relative_path.to_absolute repo_config_path in
+let load_and_parse ?(path = repo_config_path) () =
+  let config_abs_path = Relative_path.to_absolute path in
+  Option.value ~default:Custom_error_config.empty
+  @@
   if not @@ Sys.file_exists config_abs_path then
-    env
+    None
   else
     let ch = open_in_no_fail config_abs_path in
     let cfg_opt =
@@ -29,13 +31,10 @@ let load_and_parse env : ServerEnv.env =
         else
           log_debug "Parsed %s; found bad rules: %s" config_abs_path
           @@ Core.String.concat ~sep:"\n" bad_rules;
-        let tcopt =
-          ServerEnv.{ env.tcopt with GlobalOptions.tco_custom_error_config }
-        in
-        ServerEnv.{ env with tcopt }
+        Some tco_custom_error_config
       | Error json_error ->
         log_debug "Error whilst parsing %s: %s" config_abs_path json_error;
-        env
+        None
     in
     close_in_no_fail "CustomErrorConfig load_and_parse" ch;
     cfg_opt

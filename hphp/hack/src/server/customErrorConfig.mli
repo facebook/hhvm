@@ -6,6 +6,6 @@
  *
  *)
 
-val load_and_parse : ServerEnv.env -> ServerEnv.env
+val load_and_parse : ?path:Relative_path.t -> unit -> Custom_error_config.t
 
 val repo_config_path : Relative_path.t

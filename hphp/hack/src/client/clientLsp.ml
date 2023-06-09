@@ -1387,6 +1387,12 @@ let hack_errors_to_lsp_diagnostic
                relatedMessage = message;
              })
     in
+    let first_loc = fst first_message in
+    let custom_errors =
+      List.map error.User_error.custom_msgs ~f:(fun relatedMessage ->
+          PublishDiagnostics.{ relatedLocation = first_loc; relatedMessage })
+    in
+    let relatedInformation = relatedInformation @ custom_errors in
     {
       Lsp.PublishDiagnostics.range;
       severity = Some Lsp.PublishDiagnostics.Error;

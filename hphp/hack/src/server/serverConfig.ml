@@ -476,6 +476,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ~f:maybe_relative_path
   in
   let global_opts =
+    let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =
       GlobalOptions.set
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
@@ -508,6 +509,7 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_ide_naming_table_update_threshold:
           local_config.ide_naming_table_update_threshold
         ~dump_tast_hashes:local_config.dump_tast_hashes
+        ~tco_custom_error_config
         GlobalOptions.default
     in
     load_config config local_config_opts

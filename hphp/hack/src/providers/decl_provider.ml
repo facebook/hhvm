@@ -543,7 +543,7 @@ let is_this_def_the_winner ctx name_type (pos, name) =
       (match winner_pos_opt with
       | None -> Not_found
       | Some winner_pos when Pos.overlaps pos winner_pos ->
-        HackEventLogger.invariant_violation_bug
+        HackEventLogger.decl_consistency_bug
           "caller provided wrong capitalization of type name (unnecessarily slow path; should avoid)"
           ~pos:(Pos.to_relative_string pos |> Pos.string)
           ~data:(Printf.sprintf "name=%s cname=%s" name cname);

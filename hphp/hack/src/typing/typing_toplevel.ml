@@ -67,7 +67,7 @@ let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
          gives slightly different answers from what direct-decl-parser provides
          e.g. in case of incorrect parse trees, or order of winner; (2) disk race
          where the file on disk has changed but we haven't yet updated naming table. *)
-      HackEventLogger.invariant_violation_bug
+      HackEventLogger.decl_consistency_bug
         "Decl consistency: Ast definition but no decl"
         ~data:name
         ~pos:(Pos.to_relative_string pos |> Pos.string);

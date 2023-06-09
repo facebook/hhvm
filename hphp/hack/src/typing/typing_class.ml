@@ -1811,7 +1811,7 @@ let class_def ctx (c : _ class_) =
   let env = setup_env_for_class_def_check ctx c in
   match Env.get_class env (snd c.c_name) with
   | None ->
-    HackEventLogger.invariant_violation_bug
+    HackEventLogger.decl_consistency_bug
       "Decl consistency: class_def, but can't find a decl"
       ~data:(snd c.c_name)
       ~pos:(Pos.to_relative_string (fst c.c_name) |> Pos.string);

@@ -275,7 +275,7 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
           (* We found the class prop's origin via Typing_defs.ce_origin, so we
              *should* find the prop in the class. This is an invariant violation.
           *)
-          HackEventLogger.invariant_violation_bug
+          HackEventLogger.decl_consistency_bug
             "nastInitCheck can't find expected class prop"
             ~data:
               (Printf.sprintf

@@ -369,6 +369,8 @@ let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 let invariant_violation_bug ?path:_ ?pos:_ ?data:_ ?data_int:_ ?telemetry:_ _ =
   ()
 
+let decl_consistency_bug ?path:_ ?pos:_ ?data:_ _ = ()
+
 let live_squiggle_diff ~uri:_ ~reason:_ ~expected_error_count:_ _ = ()
 
 let type_check_end

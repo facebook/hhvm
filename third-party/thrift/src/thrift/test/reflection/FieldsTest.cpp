@@ -209,7 +209,7 @@ TEST(FieldsTest, UnifiedAPIs) {
   checkField<struct3, field_ordinal<17>, field_id<17>, ident::fieldQ, true,  TypeTag17, FieldTag17>("fieldQ");
   checkField<struct3, field_ordinal<18>, field_id<18>, ident::fieldR, true,  TypeTag18, FieldTag18>("fieldR");
   checkField<struct3, field_ordinal<19>, field_id<20>, ident::fieldS, true,  TypeTag19, FieldTag19>("fieldS");
-  // clang-format off
+  // clang-format on
 }
 
 struct IncompleteType;
@@ -218,7 +218,9 @@ TEST(FieldsTest, IsReflectionMetadata) {
   using namespace apache::thrift::type::detail;
   static_assert(is_type_tag_v<bool_t>);
   static_assert(is_type_tag_v<list<i32_t>>);
-  static_assert(is_type_tag_v<field<list<i32_t>, FieldContext<test_cpp2::cpp_reflection::struct3, 1>>>);
+  static_assert(is_type_tag_v<field<
+                    list<i32_t>,
+                    FieldContext<test_cpp2::cpp_reflection::struct3, 1>>>);
   static_assert(!is_type_tag_v<bool>);
   static_assert(!is_type_tag_v<std::int32_t>);
   static_assert(!is_type_tag_v<std::vector<int32_t>>);
@@ -244,7 +246,9 @@ TEST(FieldsTest, IsReflectionMetadata) {
 
   static_assert(is_id_v<bool_t>);
   static_assert(is_id_v<list<i32_t>>);
-  static_assert(is_id_v<field<list<i32_t>, FieldContext<test_cpp2::cpp_reflection::struct3, 1>>>);
+  static_assert(is_id_v<field<
+                    list<i32_t>,
+                    FieldContext<test_cpp2::cpp_reflection::struct3, 1>>>);
   static_assert(is_id_v<field_id<0>>);
   static_assert(is_id_v<field_id<1>>);
   static_assert(is_id_v<field_ordinal<0>>);
@@ -294,7 +298,6 @@ TEST(FieldsTest, NotFoundFieldInfo) {
   test::same_tag<op::get_field_tag<Struct, ident::a>, void>;
 }
 
-
 template <typename Ident>
 bool isIdentTag(folly::tag_t<Ident>) {
   return is_ident_v<Ident>;
@@ -305,7 +308,9 @@ TEST(FieldsTest, HelperAPIs) {
 
   test::same_tag<op::get_native_type<Struct, field_ordinal<1>>, std::int32_t>;
   test::same_tag<op::get_native_type<Struct, ident::fieldA>, std::int32_t>;
-  test::same_tag<op::get_native_type<Struct, field_id<11>>, std::deque<std::string>>;
+  test::same_tag<
+      op::get_native_type<Struct, field_id<11>>,
+      std::deque<std::string>>;
   EXPECT_EQ((op::get_field_id_v<Struct, field_ordinal<1>>), FieldId{2});
   EXPECT_EQ((op::get_ordinal_v<Struct, field_id<2>>), FieldOrdinal{1});
 
@@ -333,7 +338,11 @@ TEST(FieldsTest, HelperAPIs) {
 }
 
 TEST(FieldsTest, GetFieldNameCppName) {
-  EXPECT_EQ((op::get_name_v<test_cpp2::cpp_reflection::struct_with_renamed_field, field_ordinal<1>>), "fancy.idl.name");
+  EXPECT_EQ(
+      (op::get_name_v<
+          test_cpp2::cpp_reflection::struct_with_renamed_field,
+          field_ordinal<1>>),
+      "fancy.idl.name");
 }
 
 TEST(FieldsTest, GetClassName) {

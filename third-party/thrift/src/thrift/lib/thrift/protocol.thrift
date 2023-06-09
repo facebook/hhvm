@@ -22,6 +22,7 @@ include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
 cpp_include "folly/container/F14Map.h"
+cpp_include "thrift/lib/thrift/detail/id.h"
 
 @thrift.v1alpha
 package "facebook.com/thrift/protocol"
@@ -38,7 +39,9 @@ namespace py thrift.lib.thrift.protocol
 typedef protocol_detail.Object Object (thrift.uri = "")
 typedef protocol_detail.Value Value (thrift.uri = "")
 
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::protocol::PathSegmentId>",
+}
 typedef id.ExternId PathSegmentId
 
 struct Path {

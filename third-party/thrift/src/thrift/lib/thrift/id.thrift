@@ -39,8 +39,12 @@ namespace py.asyncio apache_thrift_asyncio.id
 namespace go thrift.lib.thrift.id
 namespace py thrift.lib.thrift.id
 
+cpp_include "thrift/lib/thrift/detail/id.h"
+
 /** A field id is a signed 16-bit integer. */
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>",
+}
 typedef i16 FieldId
 
 // An opaque ID for a value stored in an external location (i.e. a Thrift 'pointer').
@@ -101,41 +105,55 @@ const ExternId noId = 0;
 // The id of an externally stored Thrift Value.
 //
 // See 'any.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ValueId>",
+}
 typedef ExternId ValueId
 
 // The id of an externally stored Thrift Protocol.
 //
 // See 'type.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>",
+}
 typedef ExternId ProtocolId
 
 // The id of an externally stored type.
 //
 // See 'type.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::TypeId>",
+}
 typedef ExternId TypeId
 
 // The id of an externally stored definition.
 //
 // See 'schema.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::DefinitionId>",
+}
 typedef ExternId DefinitionId
 
 // The id of an externally stored package.
 //
 // See 'schema.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::PackageId>",
+}
 typedef ExternId PackageId
 
 // The id of an externally stored program.
 //
 // See 'schema.thrift'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProgramId>",
+}
 typedef ExternId ProgramId
 
 // The id of externally stored source code.
 //
 // TODO(afuller): Add concrete definitions for 'source'.
-@cpp.StrongType
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::SourceId>",
+}
 typedef ExternId SourceId

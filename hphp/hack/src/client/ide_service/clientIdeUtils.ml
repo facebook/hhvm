@@ -19,20 +19,21 @@ let make_error_internal
     ~(data : Hh_json.json option)
     ~(exn : Exception.t option) : error =
   let open Hh_json in
-  let (message, stack) =
+  let (message, stack, desc) =
     match exn with
-    | None -> (message, Exception.get_current_callstack_string 99)
-    | Some exn ->
-      let details =
-        match Exception.unwrap exn with
-        | Decl_class.Decl_heap_elems_bug details ->
-          Decl_class.show_decl_heap_elems_bug details
-        | _ -> ""
-      in
-      ( message ^ ": " ^ Exception.get_ctor_string exn ^ details,
-        Exception.get_backtrace_string exn )
+    | None -> (message, Exception.get_current_callstack_string 99, "")
+    | Some e -> begin
+      let backtrace = Exception.get_backtrace_string e in
+      match Exception.to_exn e with
+      | Decl_class.Decl_heap_elems_bug details ->
+        (message ^ ": Decl_heap_elems_bug", backtrace, details)
+      | Decl_defs.Decl_not_found details ->
+        (message ^ ": Decl_not_found", backtrace, details)
+      | _ -> (message ^ ": " ^ Exception.get_ctor_string e, backtrace, "")
+    end
   in
   let stack = ("stack", stack |> Exception.clean_stack |> string_) in
+  let desc = ("desc", string_ desc) in
   let elems =
     match data with
     | None -> [stack]
@@ -41,7 +42,7 @@ let make_error_internal
         elems
       else
         stack :: elems
-    | Some data -> [("data", data); stack]
+    | Some data -> [("data", data); stack; desc]
   in
   let data = Hh_json.JSON_Object elems in
   { message; data }

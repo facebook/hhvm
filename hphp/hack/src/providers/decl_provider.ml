@@ -27,8 +27,6 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-let err_not_found = Typedef_provider.err_not_found
-
 let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
 
 (** This cache caches the result of full class computations
@@ -54,7 +52,7 @@ let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
        Errors.run_in_decl_mode (fun () ->
            Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
      with
-    | None -> err_not_found None name
+    | None -> Decl_defs.raise_decl_not_found None name
     | Some decl_and_members -> decl_and_members)
 
 let lookup_or_populate_class_cache class_name populate =

@@ -6,9 +6,7 @@
  *
  *)
 
-type decl_heap_elems_bug [@@deriving show]
-
-exception Decl_heap_elems_bug of decl_heap_elems_bug
+exception Decl_heap_elems_bug of string
 
 (** Lookup the type signature of a class property.
 

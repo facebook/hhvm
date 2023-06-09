@@ -9,20 +9,14 @@
 open Hh_prelude
 open Shallow_decl_defs
 
-let err_not_found (file : Relative_path.t) (name : string) : 'a =
-  let err_str =
-    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
-  in
-  raise (Decl_defs.Decl_not_found err_str)
-
 let direct_decl_parse ctx filename name =
   match Direct_decl_utils.direct_decl_parse ctx filename with
-  | None -> err_not_found filename name
+  | None -> Decl_defs.raise_decl_not_found (Some filename) name
   | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
 
 let direct_decl_parse_and_cache ctx filename name =
   match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
-  | None -> err_not_found filename name
+  | None -> Decl_defs.raise_decl_not_found (Some filename) name
   | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
 
 let fetch_remote_old_decl_flag (ctx : Provider_context.t) =

@@ -13,22 +13,7 @@ open Decl_defs
 module Inst = Decl_instantiate
 module SN = Naming_special_names
 
-type decl_heap_elems_bug = {
-  child_class_name: string;
-  member_origin: string;
-  member_name: string;
-  err: Decl_folded_class.lazy_member_lookup_error option;
-}
-[@@deriving show { with_path = false }]
-
-exception Decl_heap_elems_bug of decl_heap_elems_bug
-
-let () =
-  Exception.register_printer (function
-      | Decl_heap_elems_bug e ->
-        Some
-          (Printf.sprintf "Decl_heap_elems_bug %s" (show_decl_heap_elems_bug e))
-      | _ -> None)
+exception Decl_heap_elems_bug of string
 
 (** Raise an exception when the class element can't be found.
 
@@ -47,22 +32,26 @@ Note that this exception can be raised in two modes:
    changed while type checking. In this case, we have a
    [lazy_member_lookup_error] available.
 *)
-let raise_not_found
+let raise_decl_heap_elems_bug
     ~(err : Decl_folded_class.lazy_member_lookup_error option)
     ~(child_class_name : string)
     ~(elt_origin : string)
     ~(member_name : string) =
+  let data =
+    Printf.sprintf
+      "could not find %s::%s (inherited by %s) (%s)"
+      elt_origin
+      member_name
+      child_class_name
+      (Option.map ~f:Decl_folded_class.show_lazy_member_lookup_error err
+      |> Option.value ~default:"no lazy member lookup performed")
+  in
   Hh_logger.log
-    "Decl_heap_elems_bug: could not find %s::%s (inherited by %s) (%s):\n%s"
-    elt_origin
-    member_name
-    child_class_name
-    (Option.map ~f:Decl_folded_class.show_lazy_member_lookup_error err
-    |> Option.value ~default:"no lazy member lookup performed")
-    Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
-  raise
-    (Decl_heap_elems_bug
-       { child_class_name; member_origin = elt_origin; member_name; err })
+    "Decl_heap_elems_bug: %s\n%s"
+    data
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  HackEventLogger.decl_consistency_bug ~data "Decl_heap_elems_bug";
+  raise (Decl_heap_elems_bug data)
 
 let unpack_member_lookup_result
     (type a)
@@ -77,7 +66,8 @@ let unpack_member_lookup_result
   in
   match res with
   | Ok a -> a
-  | Error err -> raise_not_found ~err ~child_class_name ~elt_origin ~member_name
+  | Error err ->
+    raise_decl_heap_elems_bug ~err ~child_class_name ~elt_origin ~member_name
 
 let rec apply_substs substs class_context (pos, ty) =
   match SMap.find_opt class_context substs with

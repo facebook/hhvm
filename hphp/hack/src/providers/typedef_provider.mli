@@ -12,8 +12,6 @@ type typedef_decl = Typing_defs.typedef_type
 
 val get_typedef : Provider_context.t -> type_key -> typedef_decl option
 
-val err_not_found : Relative_path.t option -> type_key -> 'a
-
 val find_in_direct_decl_parse :
   cache_results:bool ->
   Provider_context.t ->

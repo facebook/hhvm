@@ -11,15 +11,6 @@ type type_key = string
 
 type typedef_decl = Typing_defs.typedef_type
 
-let err_not_found (file : Relative_path.t option) (name : string) : 'a =
-  let err_str =
-    match file with
-    | Some file ->
-      Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file)
-    | None -> Printf.sprintf "%s not found" name
-  in
-  raise (Decl_defs.Decl_not_found err_str)
-
 let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
     =
   let parse_result =
@@ -29,7 +20,7 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
       Direct_decl_utils.direct_decl_parse ctx filename
   in
   match parse_result with
-  | None -> err_not_found (Some filename) name
+  | None -> Decl_defs.raise_decl_not_found (Some filename) name
   | Some parsed_file ->
     let decls = parsed_file.Direct_decl_utils.pfh_decls in
     List.find_map decls ~f:(function

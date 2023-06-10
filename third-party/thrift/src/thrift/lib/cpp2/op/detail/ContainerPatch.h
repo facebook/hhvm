@@ -339,7 +339,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {
-    put(single(std::pair<K&&, V&&>(key, value)));
+    put(single(
+        std::pair<K&&, V&&>(std::forward<K>(key), std::forward<V>(value))));
   }
 
   /// Inserts entries. Ignore entries that already exist.

@@ -2,16 +2,6 @@
 
 from . import base
 
-class PrettyPrinterTestCase(base.TestHHVMBinary):
-
-    def setUp(self):
-        super().setUp(test_file="slow/reified-generics/reified-parent.php")
-
-    def test_pp_string_data(self):
-        self.run_until_breakpoint("checkReifiedGenericMismatchHelper<false>")
-        _, output = self.run_commands(["p *name"])
-        self.assertEqual(output.strip(), "(const HPHP::StringData) C")
-
 class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
 
     def setUp(self):

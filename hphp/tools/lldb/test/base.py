@@ -7,8 +7,16 @@ import subprocess
 import typing
 from libfb.py.testutil import BaseFacebookTestCase
 
-# For lldb, until there's a buck-visible library we can use:
-lldb_path = subprocess.run(["/opt/llvm/bin/lldb", "-P"], stdout=subprocess.PIPE).stdout.decode("utf-8").strip()
+# For lldb, until there's a buck-visible library we can use.
+# Its path on TW containers starts at /host-mounts.
+lldb_path = None
+for path in ['/opt/llvm/bin/lldb', '/host-mounts/opt/llvm/bin/lldb']:
+    if os.path.exists(path):
+        lldb_path = subprocess.run([path, "-P"], stdout=subprocess.PIPE).stdout.decode("utf-8").strip()
+        break
+
+assert lldb_path, "Couldn't find lldb on host"
+
 sys.path.append(lldb_path)
 import lldb
 from fblldb.utils import run_lldb_command, get_lldb_object_description

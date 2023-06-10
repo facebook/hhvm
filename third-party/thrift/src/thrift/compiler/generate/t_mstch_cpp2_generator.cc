@@ -2445,6 +2445,7 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
   render_to_file(prog, "module_data.h", name + "_data.h");
   render_to_file(prog, "module_data.cpp", name + "_data.cpp");
   render_to_file(prog, "module_types.h", name + "_types.h");
+  render_to_file(prog, "module_types_fwd.h", name + "_types_fwd.h");
   render_to_file(prog, "module_types.tcc", name + "_types.tcc");
 
   if (int split_count = get_split_count(options())) {

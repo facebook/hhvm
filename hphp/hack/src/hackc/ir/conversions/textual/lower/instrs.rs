@@ -863,15 +863,8 @@ fn rewrite_constant_type_check(
             Some(builder.hhbc_builtin(hack::Hhbc::Not, &[is_null], loc))
         }
         TypeStruct::Unresolved(clsid) => {
-            // TODO(arr): sometimes the class name here can be empty. This looks
-            // like a bug in VerifyRetTypeC handling which I plan to address
-            // separately.
-            if !clsid.id.is_empty(&builder.strings) {
-                let instr = Instr::Hhbc(Hhbc::InstanceOfD(obj, clsid, loc));
-                Some(instr)
-            } else {
-                None
-            }
+            let instr = Instr::Hhbc(Hhbc::InstanceOfD(obj, clsid, loc));
+            Some(instr)
         }
     }
 }

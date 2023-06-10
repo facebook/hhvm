@@ -70,8 +70,8 @@ fn convert_types<'a>(
 
 fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
     match ty {
-        BaseType::Class(_) | BaseType::Mixed | BaseType::None | BaseType::Void => None,
-
+        BaseType::Class(_) | BaseType::Mixed | BaseType::Void => None,
+        BaseType::None => Some(Str::new("".as_bytes())),
         BaseType::AnyArray => Some(ir::types::BUILTIN_NAME_ANY_ARRAY),
         BaseType::Arraykey => Some(ir::types::BUILTIN_NAME_ARRAYKEY),
         BaseType::Bool => Some(ir::types::BUILTIN_NAME_BOOL),

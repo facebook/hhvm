@@ -194,7 +194,9 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::Float => is_type_op(IsTypeOp::Dbl, vid, loc),
                 BaseType::Int => is_type_op(IsTypeOp::Int, vid, loc),
                 BaseType::Keyset => is_type_op(IsTypeOp::Keyset, vid, loc),
-                BaseType::Mixed => Instr::copy(self.emit_constant(Constant::Bool(true))),
+                BaseType::Mixed | BaseType::None => {
+                    Instr::copy(self.emit_constant(Constant::Bool(true)))
+                }
                 BaseType::Nothing => Instr::copy(self.emit_constant(Constant::Bool(false))),
                 BaseType::Null => is_type_op(IsTypeOp::Null, vid, loc),
                 BaseType::Num => is_type_op2(IsTypeOp::Int, IsTypeOp::Dbl, self, vid, loc),
@@ -225,7 +227,6 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 }
 
                 BaseType::Noreturn => panic!("Unable to perform 'is' on 'noreturn'"),
-                BaseType::None => panic!("Unable to perform 'is' on 'none'"),
                 BaseType::Typename => panic!("Unable to perform 'is' on 'typename'"),
                 BaseType::Void => panic!("Unable to perform 'is' on 'void'"),
             }

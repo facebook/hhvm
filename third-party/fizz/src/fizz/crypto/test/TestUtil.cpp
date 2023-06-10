@@ -9,7 +9,7 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/fizz-config.h>
 
-#if FIZZ_HAS_AEGIS
+#if FIZZ_BUILD_AEGIS
 #include <fizz/crypto/aead/AEGISCipher.h>
 #endif
 
@@ -95,7 +95,7 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
     case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
       cipher = OpenSSLEVPCipher::makeCipher<AESOCB128>();
       break;
-#if FIZZ_HAS_AEGIS
+#if FIZZ_BUILD_AEGIS
     case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
       cipher = AEGISCipher::make128L();
       break;

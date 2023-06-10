@@ -9,7 +9,7 @@
 #pragma once
 #include <fizz/fizz-config.h>
 
-#if FIZZ_HAS_AEGIS
+#if FIZZ_BUILD_AEGIS
 
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>

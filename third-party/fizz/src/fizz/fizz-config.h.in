@@ -3,4 +3,4 @@
  */
 #pragma once
 
-#define FIZZ_HAS_AEGIS 0
+#define FIZZ_BUILD_AEGIS 0

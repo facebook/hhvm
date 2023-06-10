@@ -8,7 +8,7 @@
 
 #include <fizz/crypto/aead/AEGISCipher.h>
 #include <fizz/fizz-config.h>
-#if FIZZ_HAS_AEGIS
+#if FIZZ_BUILD_AEGIS
 
 #include <fizz/crypto/aead/CryptoUtil.h>
 #include <fizz/third-party/libsodium-aegis/aegis.h>

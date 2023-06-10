@@ -22,7 +22,7 @@
 
 using namespace folly;
 
-#if FIZZ_HAS_AEGIS
+#if FIZZ_BUILD_AEGIS
 namespace fizz {
 namespace test {
 

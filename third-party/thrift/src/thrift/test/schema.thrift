@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 // @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
 include "thrift/lib/thrift/schema.thrift"
+include "thrift/annotation/cpp.thrift"
 
 package "facebook.com/thrift/test/schema"
 
@@ -98,7 +99,8 @@ typedef i32 TD
 @thrift.GenerateRuntimeSchema
 struct Typedefs {
   1: TD named;
-  2: i32 (cpp.type = "uint32_t") unnamed;
+  @cpp.Type{name = "uint32_t"}
+  2: i32 unnamed;
 }
 
 @thrift.GenerateRuntimeSchema

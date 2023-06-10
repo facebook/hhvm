@@ -22,8 +22,10 @@ class OpenSSLFactory : public Factory {
       case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
       case CipherSuite::TLS_AES_128_GCM_SHA256:
       case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
+      case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
         return KeyDerivationImpl::make<Sha256>(getHkdfPrefix());
       case CipherSuite::TLS_AES_256_GCM_SHA384:
+      case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
         return KeyDerivationImpl::make<Sha384>(getHkdfPrefix());
       default:
         throw std::runtime_error("ks: not implemented");
@@ -36,8 +38,10 @@ class OpenSSLFactory : public Factory {
       case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
       case CipherSuite::TLS_AES_128_GCM_SHA256:
       case CipherSuite::TLS_AES_128_OCB_SHA256_EXPERIMENTAL:
+      case CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL:
         return std::make_unique<HandshakeContextImpl<Sha256>>(getHkdfPrefix());
       case CipherSuite::TLS_AES_256_GCM_SHA384:
+      case CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL:
         return std::make_unique<HandshakeContextImpl<Sha384>>(getHkdfPrefix());
       default:
         throw std::runtime_error("hs: not implemented");

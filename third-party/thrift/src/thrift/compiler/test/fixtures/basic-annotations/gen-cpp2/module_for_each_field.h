@@ -48,7 +48,6 @@ struct ForEachField<::cpp2::detail::YourStruct> {
     f(6, static_cast<T&&>(t).my_enum_ref()...);
     f(7, static_cast<T&&>(t).cpp_type_annotation_ref()...);
     f(8, static_cast<T&&>(t).my_union_ref()...);
-    f(9, static_cast<T&&>(t).my_id_ref()...);
   }
 };
 

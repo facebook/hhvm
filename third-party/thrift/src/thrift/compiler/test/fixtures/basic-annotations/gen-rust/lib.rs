@@ -20,7 +20,6 @@ pub mod consts {
             my_enum: crate::types::MyEnum::DOMAIN,
             cpp_type_annotation: ::std::default::Default::default(),
             my_union: ::std::default::Default::default(),
-            my_id: ::std::default::Default::default(),
             ..::std::default::Default::default()
         });
 

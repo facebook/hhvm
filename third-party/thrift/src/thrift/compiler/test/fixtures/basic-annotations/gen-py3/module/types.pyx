@@ -354,4 +354,3 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
 myStruct = MyStruct._fbthrift_create(constant_shared_ptr(cmyStruct()))
-MyId = int

@@ -382,10 +382,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'type' => \TType::STRUCT,
       'class' => MyUnion::class,
     ),
-    10 => shape(
-      'var' => 'my_id',
-      'type' => \TType::I16,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'major' => 2,
@@ -397,7 +393,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'my_enum' => 7,
     'cpp_type_annotation' => 8,
     'my_union' => 9,
-    'my_id' => 10,
   ];
 
   const type TConstructorShape = shape(
@@ -410,7 +405,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'my_enum' => ?MyEnum,
     ?'cpp_type_annotation' => ?Vector<string>,
     ?'my_union' => ?MyUnion,
-    ?'my_id' => ?int,
   );
 
   const type TShape = shape(
@@ -423,10 +417,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'my_enum' => ?MyEnum,
     'cpp_type_annotation' => vec<string>,
     ?'my_union' => ?MyUnion::TShape,
-    'my_id' => int,
     ...
   );
-  const int STRUCTURAL_ID = 2184994839913291136;
+  const int STRUCTURAL_ID = 8440300490729065437;
   /**
    * Original thrift field:-
    * 2: i64 major
@@ -472,13 +465,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    * 9: module.MyUnion my_union
    */
   public ?MyUnion $my_union;
-  /**
-   * Original thrift field:-
-   * 10: module.MyId my_id
-   */
-  public int $my_id;
 
-  public function __construct(?int $major = null, ?string $package = null, ?string $annotation_with_quote = null, ?string $class_ = null, ?string $annotation_with_trailing_comma = null, ?string $empty_annotations = null, ?MyEnum $my_enum = null, ?Vector<string> $cpp_type_annotation = null, ?MyUnion $my_union = null, ?int $my_id = null)[] {
+  public function __construct(?int $major = null, ?string $package = null, ?string $annotation_with_quote = null, ?string $class_ = null, ?string $annotation_with_trailing_comma = null, ?string $empty_annotations = null, ?MyEnum $my_enum = null, ?Vector<string> $cpp_type_annotation = null, ?MyUnion $my_union = null)[] {
     $this->major = $major ?? 0;
     $this->package = $package ?? '';
     $this->annotation_with_quote = $annotation_with_quote ?? '';
@@ -488,7 +476,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     $this->my_enum = $my_enum;
     $this->cpp_type_annotation = $cpp_type_annotation ?? Vector {};
     $this->my_union = $my_union;
-    $this->my_id = $my_id ?? 0;
   }
 
   public static function withDefaultValues()[]: this {
@@ -506,7 +493,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       Shapes::idx($shape, 'my_enum'),
       Shapes::idx($shape, 'cpp_type_annotation'),
       Shapes::idx($shape, 'my_union'),
-      Shapes::idx($shape, 'my_id'),
     );
   }
 
@@ -637,26 +623,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "name" => "my_union",
             )
           ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 10,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
-                    shape(
-                      "name" => "module.MyId",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                        )
-                      ),
-                    )
-                  ),
-                )
-              ),
-              "name" => "my_id",
-            )
-          ),
         ],
         "is_union" => false,
       )
@@ -683,15 +649,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
             ),
           ],
         ),
-        'my_id' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\facebook\thrift\annotation\cpp\StrongType' => \facebook\thrift\annotation\cpp\StrongType::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -707,7 +664,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       Shapes::idx($shape, 'my_enum'),
       (new Vector($shape['cpp_type_annotation'])),
       Shapes::idx($shape, 'my_union') === null ? null : (MyUnion::__fromShape($shape['my_union'])),
-      $shape['my_id'],
     );
   }
 
@@ -722,7 +678,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'my_enum' => $this->my_enum,
       'cpp_type_annotation' => vec($this->cpp_type_annotation),
       'my_union' => $this->my_union?->__toShape(),
-      'my_id' => $this->my_id,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -772,14 +727,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $_tmp7 = MyUnion::withDefaultValues();
       $_tmp7->readFromJson($_tmp6);
       $this->my_union = $_tmp7;
-    }
-    if (idx($parsed, 'my_id') !== null) {
-      $_tmp8 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['my_id']);
-      if ($_tmp8 > 0x7fff) {
-        throw new \TProtocolException("number exceeds limit in field");
-      } else {
-        $this->my_id = (int)$_tmp8;
-      }
     }
   }
 

@@ -68,10 +68,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
 
 func MyEnumPtr(v MyEnum) *MyEnum { return &v }
 
-type MyId = int16
-
-func MyIdPtr(v MyId) *MyId { return &v }
-
 // Attributes:
 //  - Name
 type MyStructNestedAnnotation struct {
@@ -327,7 +323,6 @@ func (p *MyException) Error() string {
 //  - MyEnum
 //  - CppTypeAnnotation
 //  - MyUnion
-//  - MyID
 type MyStruct struct {
   Package string `thrift:"package,1" db:"package" json:"package"`
   Major int64 `thrift:"major,2" db:"major" json:"major"`
@@ -338,7 +333,6 @@ type MyStruct struct {
   MyEnum MyEnum `thrift:"my_enum,7" db:"my_enum" json:"my_enum"`
   CppTypeAnnotation []string `thrift:"cpp_type_annotation,8" db:"cpp_type_annotation" json:"cpp_type_annotation"`
   MyUnion *MyUnion `thrift:"my_union,9" db:"my_union" json:"my_union"`
-  MyID MyId `thrift:"my_id,10" db:"my_id" json:"my_id"`
 }
 
 func NewMyStruct() *MyStruct {
@@ -390,10 +384,6 @@ func (p *MyStruct) DefaultGetMyUnion() *MyUnion {
   }
   return p.MyUnion
 }
-
-func (p *MyStruct) GetMyID() MyId {
-  return p.MyID
-}
 func (p *MyStruct) IsSetMyUnion() bool {
   return p != nil && p.MyUnion != nil
 }
@@ -419,7 +409,6 @@ func (p MyStructBuilder) Emit() *MyStruct{
     MyEnum: p.obj.MyEnum,
     CppTypeAnnotation: p.obj.CppTypeAnnotation,
     MyUnion: p.obj.MyUnion,
-    MyID: p.obj.MyID,
   }
 }
 
@@ -468,11 +457,6 @@ func (m *MyStructBuilder) MyUnion(myUnion *MyUnion) *MyStructBuilder {
   return m
 }
 
-func (m *MyStructBuilder) MyID(myID MyId) *MyStructBuilder {
-  m.obj.MyID = myID
-  return m
-}
-
 func (m *MyStruct) SetMajor(major int64) *MyStruct {
   m.Major = major
   return m
@@ -515,11 +499,6 @@ func (m *MyStruct) SetCppTypeAnnotation(cppTypeAnnotation []string) *MyStruct {
 
 func (m *MyStruct) SetMyUnion(myUnion *MyUnion) *MyStruct {
   m.MyUnion = myUnion
-  return m
-}
-
-func (m *MyStruct) SetMyID(myID MyId) *MyStruct {
-  m.MyID = myID
   return m
 }
 
@@ -570,10 +549,6 @@ func (p *MyStruct) Read(iprot thrift.Protocol) error {
       }
     case 9:
       if err := p.ReadField9(iprot); err != nil {
-        return err
-      }
-    case 10:
-      if err := p.ReadField10(iprot); err != nil {
         return err
       }
     default:
@@ -685,16 +660,6 @@ func (p *MyStruct)  ReadField9(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField10(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI16(); err != nil {
-    return thrift.PrependError("error reading field 10: ", err)
-  } else {
-    temp := MyId(v)
-    p.MyID = temp
-  }
-  return nil
-}
-
 func (p *MyStruct) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("MyStruct"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -707,7 +672,6 @@ func (p *MyStruct) Write(oprot thrift.Protocol) error {
   if err := p.writeField7(oprot); err != nil { return err }
   if err := p.writeField8(oprot); err != nil { return err }
   if err := p.writeField9(oprot); err != nil { return err }
-  if err := p.writeField10(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -814,16 +778,6 @@ func (p *MyStruct) writeField9(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStruct) writeField10(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("my_id", thrift.I16, 10); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 10:my_id: ", p), err) }
-  if err := oprot.WriteI16(int16(p.MyID)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.my_id (10) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 10:my_id: ", p), err) }
-  return err
-}
-
 func (p *MyStruct) String() string {
   if p == nil {
     return "<nil>"
@@ -843,8 +797,7 @@ func (p *MyStruct) String() string {
   } else {
     myUnionVal = fmt.Sprintf("%v", p.MyUnion)
   }
-  myIDVal := fmt.Sprintf("%v", p.MyID)
-  return fmt.Sprintf("MyStruct({Package:%s Major:%s AnnotationWithQuote:%s Class_:%s AnnotationWithTrailingComma:%s EmptyAnnotations:%s MyEnum:%s CppTypeAnnotation:%s MyUnion:%s MyID:%s})", packageVal, majorVal, annotationWithQuoteVal, class_Val, annotationWithTrailingCommaVal, emptyAnnotationsVal, myEnumVal, cppTypeAnnotationVal, myUnionVal, myIDVal)
+  return fmt.Sprintf("MyStruct({Package:%s Major:%s AnnotationWithQuote:%s Class_:%s AnnotationWithTrailingComma:%s EmptyAnnotations:%s MyEnum:%s CppTypeAnnotation:%s MyUnion:%s})", packageVal, majorVal, annotationWithQuoteVal, class_Val, annotationWithTrailingCommaVal, emptyAnnotationsVal, myEnumVal, cppTypeAnnotationVal, myUnionVal)
 }
 
 // Attributes:

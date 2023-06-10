@@ -488,20 +488,6 @@ _readField_my_union:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           9,
-          10,
-          apache::thrift::protocol::T_I16))) {
-    goto _loop;
-  }
-_readField_my_id:
-  {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::MyId>::readWithContext(*iprot, this->__fbthrift_field_my_id, _readState);
-    
-  }
- this->__isset.set(9, true);
-
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          10,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -594,14 +580,6 @@ _loop:
         goto _skip;
       }
     }
-    case 10:
-    {
-      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I16))) {
-        goto _readField_my_id;
-      } else {
-        goto _skip;
-      }
-    }
     default:
     {
 _skip:
@@ -653,10 +631,6 @@ uint32_t YourStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<false>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
   }
-  {
-    xfer += prot_->serializedFieldSize("my_id", apache::thrift::protocol::T_I16, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::MyId>::serializedSize<false>(*prot_, this->__fbthrift_field_my_id);
-  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -700,10 +674,6 @@ uint32_t YourStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<true>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
-  }
-  {
-    xfer += prot_->serializedFieldSize("my_id", apache::thrift::protocol::T_I16, 10);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::MyId>::serializedSize<false>(*prot_, this->__fbthrift_field_my_id);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -775,13 +745,6 @@ uint32_t YourStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 9, kPrevFieldId>(*prot_, "my_union", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::write(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));
-    xfer += prot_->writeFieldEnd();
-  }
-  {
-    constexpr int16_t kPrevFieldId = 9;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I16, 10, kPrevFieldId>(*prot_, "my_id", previousFieldHasValue);
-    previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::cpp2::MyId>::write(*prot_, this->__fbthrift_field_my_id);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

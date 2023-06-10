@@ -2215,13 +2215,6 @@ class CompilerFailureTest(unittest.TestCase):
                 @cpp.Adapter{name="Adapter"}
                 typedef i32 Bar1 (cpp.type = "std::uint32_t")
 
-                @cpp.StrongType
-                typedef i32 Bar2 (cpp.type = "std::uint32_t")
-
-                @cpp.Adapter{name="Adapter"}
-                @cpp.StrongType
-                typedef i32 Bar3
-
                 @cpp.Adapter{name="Adapter"}
                 struct A {
                     1: i32 field;
@@ -2238,11 +2231,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:13] Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[ERROR:foo.thrift:19] Definition `field` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[ERROR:foo.thrift:6] Definition `Bar2` cannot have both cpp.type/cpp.template and @cpp.StrongType annotations\n"
-            "[ERROR:foo.thrift:9] Definition `Bar3` cannot have both @cpp.StrongType and @cpp.Adapter annotations\n",
+            "[ERROR:foo.thrift:6] Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[ERROR:foo.thrift:12] Definition `field` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n",
         )
 
     def test_nonexist_type_in_variable(self):

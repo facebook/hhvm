@@ -71,8 +71,6 @@ struct VisitByFieldId<::cpp2::detail::YourStruct> {
       return f(7, static_cast<T&&>(t).cpp_type_annotation_ref());
     case 9:
       return f(8, static_cast<T&&>(t).my_union_ref());
-    case 10:
-      return f(9, static_cast<T&&>(t).my_id_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::detail::YourStruct");
     }

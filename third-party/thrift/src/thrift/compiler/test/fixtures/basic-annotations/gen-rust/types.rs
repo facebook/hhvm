@@ -6,8 +6,6 @@
 #![allow(clippy::redundant_closure)]
 
 
-pub type MyId = ::std::primitive::i16;
-
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructNestedAnnotation {
     pub name: ::std::string::String,
@@ -62,7 +60,6 @@ pub struct MyStruct {
     pub my_enum: crate::types::MyEnum,
     pub cpp_type_annotation: ::std::vec::Vec<::std::string::String>,
     pub my_union: crate::types::MyUnion,
-    pub my_id: crate::types::MyId,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -495,7 +492,6 @@ impl ::std::default::Default for self::MyStruct {
             my_enum: ::std::default::Default::default(),
             cpp_type_annotation: ::std::default::Default::default(),
             my_union: ::std::default::Default::default(),
-            my_id: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -514,7 +510,6 @@ impl ::std::fmt::Debug for self::MyStruct {
             .field("my_enum", &self.my_enum)
             .field("cpp_type_annotation", &self.cpp_type_annotation)
             .field("my_union", &self.my_union)
-            .field("my_id", &self.my_id)
             .finish()
     }
 }
@@ -566,9 +561,6 @@ where
         p.write_field_begin("my_union", ::fbthrift::TType::Struct, 9);
         ::fbthrift::Serialize::write(&self.my_union, p);
         p.write_field_end();
-        p.write_field_begin("my_id", ::fbthrift::TType::I16, 10);
-        ::fbthrift::Serialize::write(&self.my_id, p);
-        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -587,7 +579,6 @@ where
             ::fbthrift::Field::new("empty_annotations", ::fbthrift::TType::String, 6),
             ::fbthrift::Field::new("major", ::fbthrift::TType::I64, 2),
             ::fbthrift::Field::new("my_enum", ::fbthrift::TType::I32, 7),
-            ::fbthrift::Field::new("my_id", ::fbthrift::TType::I16, 10),
             ::fbthrift::Field::new("my_union", ::fbthrift::TType::Struct, 9),
             ::fbthrift::Field::new("package", ::fbthrift::TType::String, 1),
         ];
@@ -600,7 +591,6 @@ where
         let mut field_my_enum = ::std::option::Option::None;
         let mut field_cpp_type_annotation = ::std::option::Option::None;
         let mut field_my_union = ::std::option::Option::None;
-        let mut field_my_id = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -615,7 +605,6 @@ where
                 (::fbthrift::TType::I32, 7) => field_my_enum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 8) => field_cpp_type_annotation = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 9) => field_my_union = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I16, 10) => field_my_id = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -631,7 +620,6 @@ where
             my_enum: field_my_enum.unwrap_or_default(),
             cpp_type_annotation: field_cpp_type_annotation.unwrap_or_default(),
             my_union: field_my_union.unwrap_or_default(),
-            my_id: field_my_id.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -686,8 +674,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             8 => {
             },
             9 => {
-            },
-            10 => {
             },
             _ => {}
         }

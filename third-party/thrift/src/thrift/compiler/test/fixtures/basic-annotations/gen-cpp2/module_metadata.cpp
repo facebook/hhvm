@@ -104,7 +104,6 @@ void StructMetadata<::cpp2::detail::YourStruct>::unstructured_annotations(FOLLY_
   thriftStruct.fields()[6].unstructured_annotations() = std::map<std::string, std::string>{};
   thriftStruct.fields()[7].unstructured_annotations() = std::map<std::string, std::string>{};
   thriftStruct.fields()[8].unstructured_annotations() = std::map<std::string, std::string>{};
-  thriftStruct.fields()[9].unstructured_annotations() = std::map<std::string, std::string>{};
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
@@ -116,7 +115,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
   module_MyStruct.name() = "module.MyStruct";
   module_MyStruct.is_union() = false;
   static const auto* const
-  module_MyStruct_fields = new std::array<EncodedThriftField, 10>{{
+  module_MyStruct_fields = new std::array<EncodedThriftField, 9>{{
     {2, "major", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
     {1, "package", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "annotation_with_quote", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
@@ -126,7 +125,6 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     {7, "my_enum", false, std::make_unique<Enum<::cpp2::YourEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {8, "cpp_type_annotation", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {9, "my_union", false, std::make_unique<Union<::cpp2::detail::YourUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
-    {10, "my_id", false, std::make_unique<Typedef>("module.MyId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.StrongType", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

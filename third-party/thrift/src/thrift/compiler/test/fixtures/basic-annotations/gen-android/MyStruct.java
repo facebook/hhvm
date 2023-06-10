@@ -33,7 +33,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   private static final TField MY_ENUM_FIELD_DESC = new TField("my_enum", TType.I32, (short)7);
   private static final TField CPP_TYPE_ANNOTATION_FIELD_DESC = new TField("cpp_type_annotation", TType.LIST, (short)8);
   private static final TField MY_UNION_FIELD_DESC = new TField("my_union", TType.STRUCT, (short)9);
-  private static final TField MY_ID_FIELD_DESC = new TField("my_id", TType.I16, (short)10);
 
   public final Long major;
   public final String package;
@@ -48,7 +47,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public final MyEnum my_enum;
   public final List<String> cpp_type_annotation;
   public final MyUnion my_union;
-  public final Short my_id;
   public static final int MAJOR = 2;
   public static final int PACKAGE = 1;
   public static final int ANNOTATION_WITH_QUOTE = 3;
@@ -58,7 +56,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public static final int MY_ENUM = 7;
   public static final int CPP_TYPE_ANNOTATION = 8;
   public static final int MY_UNION = 9;
-  public static final int MY_ID = 10;
 
   public MyStruct(
       Long major,
@@ -69,8 +66,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       String empty_annotations,
       MyEnum my_enum,
       List<String> cpp_type_annotation,
-      MyUnion my_union,
-      Short my_id) {
+      MyUnion my_union) {
     this.major = major;
     this.package = package;
     this.annotation_with_quote = annotation_with_quote;
@@ -80,7 +76,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     this.my_enum = my_enum;
     this.cpp_type_annotation = cpp_type_annotation;
     this.my_union = my_union;
-    this.my_id = my_id;
   }
 
   public static class Builder {
@@ -93,7 +88,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     private MyEnum my_enum;
     private List<String> cpp_type_annotation;
     private MyUnion my_union;
-    private Short my_id;
 
     public Builder() {
     }
@@ -143,11 +137,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
-    public Builder setMy_id(final Short my_id) {
-      this.my_id = my_id;
-      return this;
-    }
-
     public MyStruct build() {
       return new MyStruct(
         this.major,
@@ -158,8 +147,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         this.empty_annotations,
         this.my_enum,
         this.cpp_type_annotation,
-        this.my_union,
-        this.my_id
+        this.my_union
       );
     }
   }
@@ -216,11 +204,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       this.my_union = TBaseHelper.deepCopy(other.my_union);
     } else {
       this.my_union = null;
-    }
-    if (other.isSetMy_id()) {
-      this.my_id = TBaseHelper.deepCopy(other.my_id);
-    } else {
-      this.my_id = null;
     }
   }
 
@@ -313,15 +296,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     return this.my_union != null;
   }
 
-  public Short getMy_id() {
-    return this.my_id;
-  }
-
-  // Returns true if field my_id is set (has been assigned a value) and false otherwise
-  public boolean isSetMy_id() {
-    return this.my_id != null;
-  }
-
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -350,14 +324,12 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetMy_union(), that.isSetMy_union(), this.my_union, that.my_union)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetMy_id(), that.isSetMy_id(), this.my_id, that.my_id)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {major, package, annotation_with_quote, class_, annotation_with_trailing_comma, empty_annotations, my_enum, cpp_type_annotation, my_union, my_id});
+    return Arrays.deepHashCode(new Object[] {major, package, annotation_with_quote, class_, annotation_with_trailing_comma, empty_annotations, my_enum, cpp_type_annotation, my_union});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -375,7 +347,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     MyEnum tmp_my_enum = null;
     List<String> tmp_cpp_type_annotation = null;
     MyUnion tmp_my_union = null;
-    Short tmp_my_id = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -462,13 +433,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case MY_ID:
-          if (__field.type == TType.I16) {
-            tmp_my_id = iprot.readI16();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -488,7 +452,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       ,tmp_my_enum
       ,tmp_cpp_type_annotation
       ,tmp_my_union
-      ,tmp_my_id
     );
     _that.validate();
     return _that;
@@ -547,11 +510,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     if (this.my_union != null) {
       oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
       this.my_union.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.my_id != null) {
-      oprot.writeFieldBegin(MY_ID_FIELD_DESC);
-      oprot.writeI16(this.my_id);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

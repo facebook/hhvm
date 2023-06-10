@@ -94,4 +94,3 @@ class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py_deprecated(self) -> "module.ttypes.SecretStruct": ...   # type: ignore
 
 myStruct: MyStruct = ...
-MyId = int

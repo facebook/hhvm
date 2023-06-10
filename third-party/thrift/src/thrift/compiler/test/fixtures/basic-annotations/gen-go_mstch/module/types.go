@@ -15,32 +15,6 @@ var _ = fmt.Printf
 var _ = thrift.ZERO
 
 
-type MyId = int16
-
-func NewMyId() MyId {
-  return 0
-}
-
-func WriteMyId(item MyId, p thrift.Protocol) error {
-  if err := p.WriteI16(item); err != nil {
-    return err
-}
-  return nil
-}
-
-func ReadMyId(p thrift.Protocol) (MyId, error) {
-  var decodeResult MyId
-  decodeErr := func() error {
-    result, err := p.ReadI16()
-if err != nil {
-    return err
-}
-    decodeResult = result
-    return nil
-  }()
-  return decodeResult, decodeErr
-}
-
 type MyEnum int32
 
 const (
@@ -434,7 +408,6 @@ type MyStruct struct {
     MyEnum MyEnum `thrift:"my_enum,7" json:"my_enum" db:"my_enum"`
     CppTypeAnnotation []string `thrift:"cpp_type_annotation,8" json:"cpp_type_annotation" db:"cpp_type_annotation"`
     MyUnion *MyUnion `thrift:"my_union,9" json:"my_union" db:"my_union"`
-    MyID MyId `thrift:"my_id,10" json:"my_id" db:"my_id"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
@@ -449,8 +422,7 @@ func NewMyStruct() *MyStruct {
         SetEmptyAnnotationsNonCompat("").
         SetMyEnumNonCompat(0).
         SetCppTypeAnnotationNonCompat(nil).
-        SetMyUnionNonCompat(*NewMyUnion()).
-        SetMyIDNonCompat(NewMyId())
+        SetMyUnionNonCompat(*NewMyUnion())
 }
 
 func (x *MyStruct) GetMajorVerNonCompat() int64 {
@@ -531,14 +503,6 @@ func (x *MyStruct) GetMyUnion() *MyUnion {
     }
 
     return x.MyUnion
-}
-
-func (x *MyStruct) GetMyIDNonCompat() MyId {
-    return x.MyID
-}
-
-func (x *MyStruct) GetMyID() MyId {
-    return x.MyID
 }
 
 func (x *MyStruct) SetMajorVerNonCompat(value int64) *MyStruct {
@@ -628,16 +592,6 @@ func (x *MyStruct) SetMyUnionNonCompat(value MyUnion) *MyStruct {
 
 func (x *MyStruct) SetMyUnion(value *MyUnion) *MyStruct {
     x.MyUnion = value
-    return x
-}
-
-func (x *MyStruct) SetMyIDNonCompat(value MyId) *MyStruct {
-    x.MyID = value
-    return x
-}
-
-func (x *MyStruct) SetMyID(value MyId) *MyStruct {
-    x.MyID = value
     return x
 }
 
@@ -812,23 +766,6 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
     return nil
 }
 
-func (x *MyStruct) writeField10(p thrift.Protocol) error {  // MyID
-    if err := p.WriteFieldBegin("my_id", thrift.I16, 10); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetMyIDNonCompat()
-    err := WriteMyId(item, p)
-if err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
 func (x *MyStruct) readField2(p thrift.Protocol) error {  // MajorVer
     result, err := p.ReadI64()
 if err != nil {
@@ -939,16 +876,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField10(p thrift.Protocol) error {  // MyID
-    result, err := ReadMyId(p)
-if err != nil {
-    return err
-}
-
-    x.SetMyIDNonCompat(result)
-    return nil
-}
-
 // Deprecated: Use NewMyStruct().GetMyUnion() instead.
 var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
 
@@ -1023,11 +950,6 @@ func (x *MyStructBuilder) MyUnion(value *MyUnion) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) MyID(value MyId) *MyStructBuilder {
-    x.obj.MyID = value
-    return x
-}
-
 func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
@@ -1071,10 +993,6 @@ func (x *MyStruct) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField9(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField10(p); err != nil {
         return err
     }
 
@@ -1138,10 +1056,6 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
             }
         case 9:  // my_union
             if err := x.readField9(p); err != nil {
-                return err
-            }
-        case 10:  // my_id
-            if err := x.readField10(p); err != nil {
                 return err
             }
         default:

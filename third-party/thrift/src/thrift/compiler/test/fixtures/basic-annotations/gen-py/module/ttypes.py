@@ -32,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct', 'MyId']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct']
 
 class MyEnum:
   MyValue1 = 0
@@ -353,7 +353,6 @@ class MyStruct:
    - my_enum
    - cpp_type_annotation
    - my_union
-   - my_id
   """
 
   thrift_spec = None
@@ -432,11 +431,6 @@ class MyStruct:
           self.my_union.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == 10:
-        if ftype == TType.I16:
-          self.my_id = iprot.readI16()
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -489,10 +483,6 @@ class MyStruct:
       oprot.writeFieldBegin('my_union', TType.STRUCT, 9)
       self.my_union.write(oprot)
       oprot.writeFieldEnd()
-    if self.my_id != None:
-      oprot.writeFieldBegin('my_id', TType.I16, 10)
-      oprot.writeI16(self.my_id)
-      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -535,10 +525,6 @@ class MyStruct:
     if 'my_union' in json_obj and json_obj['my_union'] is not None:
       self.my_union = MyUnion()
       self.my_union.readFromJson(json_obj['my_union'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'my_id' in json_obj and json_obj['my_id'] is not None:
-      self.my_id = json_obj['my_id']
-      if self.my_id > 0x7fff or self.my_id < -0x8000:
-        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
 
   def __repr__(self):
     L = []
@@ -579,10 +565,6 @@ class MyStruct:
       value = pprint.pformat(self.my_union, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    my_union=%s' % (value))
-    if self.my_id is not None:
-      value = pprint.pformat(self.my_id, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    my_id=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -605,7 +587,6 @@ class MyStruct:
       'my_enum',
       'cpp_type_annotation',
       'my_union',
-      'my_id',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -750,7 +731,6 @@ class SecretStruct:
   def _to_py_deprecated(self):
     return self
 
-MyId = UnimplementedTypedef()
 all_structs.append(MyStructNestedAnnotation)
 MyStructNestedAnnotation.thrift_spec = (
   None, # 0
@@ -806,7 +786,6 @@ MyStruct.thrift_spec = (
   (7, TType.I32, 'my_enum', MyEnum, None, 2, ), # 7
   (8, TType.LIST, 'cpp_type_annotation', (TType.STRING,True), None, 2, ), # 8
   (9, TType.STRUCT, 'my_union', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 9
-  (10, TType.I16, 'my_id', None, None, 2, ), # 10
 )
 
 MyStruct.thrift_struct_annotations = {
@@ -835,7 +814,7 @@ MyStruct.thrift_field_annotations = {
   },
 }
 
-def MyStruct__init__(self, major=None, package=None, annotation_with_quote=None, class_=None, annotation_with_trailing_comma=None, empty_annotations=None, my_enum=None, cpp_type_annotation=None, my_union=None, my_id=None,):
+def MyStruct__init__(self, major=None, package=None, annotation_with_quote=None, class_=None, annotation_with_trailing_comma=None, empty_annotations=None, my_enum=None, cpp_type_annotation=None, my_union=None,):
   self.major = major
   self.package = package
   self.annotation_with_quote = annotation_with_quote
@@ -845,7 +824,6 @@ def MyStruct__init__(self, major=None, package=None, annotation_with_quote=None,
   self.my_enum = my_enum
   self.cpp_type_annotation = cpp_type_annotation
   self.my_union = my_union
-  self.my_id = my_id
 
 MyStruct.__init__ = MyStruct__init__
 
@@ -859,7 +837,6 @@ def MyStruct__setstate__(self, state):
   state.setdefault('my_enum', None)
   state.setdefault('cpp_type_annotation', None)
   state.setdefault('my_union', None)
-  state.setdefault('my_id', None)
   self.__dict__ = state
 
 MyStruct.__getstate__ = lambda self: self.__dict__.copy()

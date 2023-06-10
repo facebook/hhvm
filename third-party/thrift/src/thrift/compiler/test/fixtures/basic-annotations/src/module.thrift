@@ -25,9 +25,6 @@ enum MyEnum {
   DOMAIN = 2 (cpp.name = 'REALM'),
 } (cpp.name = "YourEnum")
 
-@cpp.StrongType
-typedef i16 MyId
-
 struct MyStructNestedAnnotation {
   1: string name;
 }
@@ -52,7 +49,6 @@ struct MyStruct {
   7: MyEnum my_enum;
   8: list<string> (cpp.type = "std::deque<std::string>") cpp_type_annotation;
   9: MyUnion my_union;
-  10: MyId my_id;
 } (
   cpp.name = "YourStruct",
   android.generate_builder,

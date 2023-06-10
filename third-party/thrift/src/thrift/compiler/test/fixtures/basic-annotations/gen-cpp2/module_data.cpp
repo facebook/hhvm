@@ -75,7 +75,7 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::Y
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
   "major",
   "package",
   "annotation_with_quote",
@@ -85,9 +85,8 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<:
   "my_enum",
   "cpp_type_annotation",
   "my_union",
-  "my_id",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::cpp2::detail::YourStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_ids = {{
   2,
   1,
   3,
@@ -97,9 +96,8 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 10> TStructDataStorage<::cpp2::deta
   7,
   8,
   9,
-  10,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::detail::YourStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRING,
@@ -109,9 +107,8 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 10> TStructDataStorage<::cp
   TType::T_I32,
   TType::T_LIST,
   TType::T_STRUCT,
-  TType::T_I16,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
   "__fbthrift_field_majorVer",
   "__fbthrift_field_package",
   "__fbthrift_field_annotation_with_quote",
@@ -121,9 +118,8 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<:
   "__fbthrift_field_my_enum",
   "__fbthrift_field_cpp_type_annotation",
   "__fbthrift_field_my_union",
-  "__fbthrift_field_my_id",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::detail::YourStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -133,7 +129,6 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::detail::
   6,
   7,
   8,
-  9,
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::SecretStruct>::name = "SecretStruct";

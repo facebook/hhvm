@@ -16,7 +16,7 @@ pub struct HhvmOptions {
     /// Load specified HDF or INI config file(s)
     #[clap(
         short('c'),
-        long("config"),
+        long("config-file"),
         action(ArgAction::Append),
         value_name("CONFIG")
     )]
@@ -101,7 +101,7 @@ pub struct HphpOptions {
     /// Input directory. If specified, input pathnames are interpreted
     /// relative to this directory. Absolute input pathnames must have this
     /// directory as a prefix, which will be stripped.
-    #[clap(long, default_value(""))]
+    #[clap(long)]
     pub input_dir: PathBuf,
 
     /// Output directory

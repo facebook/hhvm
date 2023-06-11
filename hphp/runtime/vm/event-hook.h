@@ -65,6 +65,8 @@ struct EventHook {
 
   static void Enable();
   static void Disable();
+  static void EnableInternal(ExecutionContext::InternalEventHookCallbackType);
+  static void DisableInternal();
   static void EnableAsync();
   static void DisableAsync();
   static void EnableDebug();

@@ -74,7 +74,22 @@ void EventHook::Enable() {
 }
 
 void EventHook::Disable() {
-  clearSurpriseFlag(EventHookFlag);
+  if (g_context->m_internalEventHookCallback == nullptr) {
+    clearSurpriseFlag(EventHookFlag);
+  }
+}
+
+void EventHook::EnableInternal(ExecutionContext::InternalEventHookCallbackType
+                              callback) {
+  g_context->m_internalEventHookCallback = callback;
+  setSurpriseFlag(EventHookFlag);
+}
+
+void EventHook::DisableInternal() {
+  if (g_context->m_setprofileCallback.isNull()) {
+    clearSurpriseFlag(EventHookFlag);
+  }
+  g_context->m_internalEventHookCallback = nullptr;
 }
 
 void EventHook::EnableAsync() {
@@ -272,6 +287,13 @@ void addFileLine(const ActRec* ar, Array& frameinfo) {
 
 inline bool isResumeAware() {
   return (g_context->m_setprofileFlags & EventHook::ProfileResumeAware) != 0;
+}
+
+void runInternalEventHook(const ActRec* ar,
+                          ExecutionContext::InternalEventHook event_type) {
+  if (g_context->m_internalEventHookCallback != nullptr) {
+    g_context->m_internalEventHookCallback(ar, event_type);
+  }
 }
 
 void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
@@ -618,6 +640,9 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar, isResume);
     }
+    runInternalEventHook(ar, isResume
+                                 ? ExecutionContext::InternalEventHook::Resume
+                                 : ExecutionContext::InternalEventHook::Call);
     if (shouldLog(ar->func())) {
       StructuredLogEntry sample;
       sample.setStr("event_name", "function_enter");
@@ -694,6 +719,13 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
+    }
+    if (!unwind) {
+      runInternalEventHook(ar, isSuspend
+                               ? ExecutionContext::InternalEventHook::Suspend
+                               : ExecutionContext::InternalEventHook::Return);
+    } else {
+      runInternalEventHook(ar, ExecutionContext::InternalEventHook::Unwind);
     }
     if (shouldLog(ar->func())) {
       StructuredLogEntry sample;

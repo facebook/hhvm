@@ -114,6 +114,7 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(funcorder)     \
+      TM(gallium)       \
       TM(gc)            \
       TM(hackc_translate) \
       TM(heapgraph)     \

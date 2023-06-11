@@ -636,6 +636,18 @@ public:
   req::fast_set<String,
                 hphp_string_hash, hphp_string_isame> m_setprofileFunctions;
 public:
+  enum class InternalEventHook: uint8_t {
+    Call = 0,
+    Return = 1,
+    Resume = 2,
+    Suspend = 3,
+    Unwind = 4,
+  };
+  using InternalEventHookCallbackType = void(*)(const ActRec*,
+                                                InternalEventHook);
+  InternalEventHookCallbackType m_internalEventHookCallback{nullptr};
+
+public:
   TypedValue m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
 private:

@@ -252,12 +252,7 @@ let load_naming_table
         | Some naming_table_load_info ->
           let open ClientIdeMessage.Initialize_from_saved_state in
           (* tests may wish to pretend there's a delay *)
-          let%lwt () =
-            if Float.(naming_table_load_info.test_delay > 0.0) then
-              Lwt_unix.sleep naming_table_load_info.test_delay
-            else
-              Lwt.return_unit
-          in
+          let%lwt () = Lwt_unix.sleep naming_table_load_info.test_delay in
           (* Assume that there are no changed files on disk if we're getting
              passed the path to the saved-state directly, and that the saved-state
              corresponds to the current state of the world. *)

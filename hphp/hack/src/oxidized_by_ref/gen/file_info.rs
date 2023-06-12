@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3d43cb90da9a165ed8be598c0f8e9f7a>>
+// @generated SignedSource<<535b805327965a2bc4425742ed41511b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
+use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
+use ocamlrep_caml_builtins::Int64;
 pub use oxidized::file_info::Mode;
 pub use oxidized::file_info::NameType;
 pub use prim_defs::*;
@@ -56,6 +58,55 @@ pub enum Pos<'a> {
 }
 impl<'a> TrivialDrop for Pos<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Pos<'arena>);
+
+/// An id contains a pos, name and a optional decl hash. The decl hash is None
+/// only in the case when we didn't compute it for performance reasons
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C)]
+pub struct Id<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Option<&'a Int64>,
+);
+impl<'a> TrivialDrop for Id<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Id<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving eq")]
+#[repr(C)]
+pub struct HashType<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Option<&'a Int64>,
+);
+impl<'a> TrivialDrop for HashType<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HashType<'arena>);
 
 pub use oxidized::file_info::Names;
 

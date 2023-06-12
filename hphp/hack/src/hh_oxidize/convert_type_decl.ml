@@ -166,6 +166,7 @@ end = struct
         "namespace_env::*";
         "file_info::NameType";
         "file_info::Pos";
+        "file_info::Id";
         "file_info::FileInfo";
         "file_info::Names";
         "file_info::SavedNames";
@@ -281,7 +282,6 @@ let tuple_aliases =
     ("ast_defs", "Pstring");
     ("ast_defs", "PositionedByteString");
     ("errors", "Message");
-    ("file_info", "Id");
     ("typing_reason", "PosId");
   ]
 
@@ -291,6 +291,7 @@ let newtypes =
     ("aast_defs", "FinallyBlock");
     ("aast_defs", "Program");
     ("aast_defs", "UserAttributes");
+    ("file_info", "HashType");
   ]
 
 (*

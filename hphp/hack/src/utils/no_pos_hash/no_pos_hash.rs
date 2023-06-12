@@ -44,6 +44,8 @@ pub fn position_insensitive_hash<T: NoPosHash>(value: &T) -> u64 {
 }
 
 mod impls {
+    use ocamlrep_caml_builtins::Int64;
+
     use super::*;
 
     impl<T: NoPosHash> NoPosHash for [T] {
@@ -105,6 +107,7 @@ mod impls {
         String,
         std::path::PathBuf,
         bstr::BString,
+        Int64,
     }
 
     macro_rules! impl_with_std_hash_unsized {

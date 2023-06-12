@@ -20,6 +20,7 @@ hh24_types = { version = "0.0.0", path = "../utils/hh24_types" }
 hh_hash = { version = "0.0.0", path = "../utils/hh_hash" }
 no_pos_hash = { version = "0.0.0", path = "../utils/no_pos_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
+ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml_attr" }

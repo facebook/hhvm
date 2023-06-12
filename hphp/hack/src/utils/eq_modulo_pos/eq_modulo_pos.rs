@@ -7,6 +7,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 pub use eq_modulo_pos_derive::EqModuloPos;
+use ocamlrep_caml_builtins::Int64;
 
 /// An implementation of `Eq` which is insensitive to positions
 /// (e.g., `pos::BPos`) and reasons (e.g., `ty::reason::BReason`).
@@ -108,6 +109,7 @@ impl_with_equal! {
     std::path::PathBuf,
     bstr::BStr,
     bstr::BString,
+    Int64,
 }
 
 macro_rules! impl_deref {

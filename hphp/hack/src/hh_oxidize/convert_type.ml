@@ -99,7 +99,8 @@ let indirection_types = SSet.of_list ["Vec"]
 
 (* When oxidizing by-reference, do not add a lifetime parameter to these builtins. *)
 let owned_builtins =
-  SSet.of_list (["Option"; "std::cell::RefCell"; "std::cell::Cell"] @ primitives)
+  SSet.of_list
+    (["Option"; "std::cell::RefCell"; "std::cell::Cell"; "Int64"] @ primitives)
 
 let is_owned_builtin = SSet.mem owned_builtins
 
@@ -152,7 +153,8 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
         | Configuration.ByBox -> "std::cell::RefCell"
       end
       | Ldot (Lident "Int64", "t") ->
-        raise (Skip_type_decl "cannot convert type Int64.t")
+        Output.add_extern_use "ocamlrep_caml_builtins::Int64";
+        "Int64"
       | id -> Convert_longident.longident_to_string id
     in
     let id =

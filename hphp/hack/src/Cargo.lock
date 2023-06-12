@@ -205,6 +205,7 @@ version = "0.0.0"
 dependencies = [
  "bstr 1.4.0",
  "bumpalo",
+ "ocamlrep_caml_builtins",
  "serde",
 ]
 
@@ -1755,6 +1756,7 @@ dependencies = [
  "eq_modulo_pos_derive",
  "hcons",
  "indexmap",
+ "ocamlrep_caml_builtins",
 ]
 
 [[package]]
@@ -1895,6 +1897,7 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
+ "ocamlrep_caml_builtins",
  "parser_core_types",
  "rc_pos",
  "relative_path",
@@ -3456,6 +3459,7 @@ dependencies = [
  "fnv",
  "no_pos_hash_derive",
  "ocamlrep",
+ "ocamlrep_caml_builtins",
 ]
 
 [[package]]
@@ -3561,6 +3565,7 @@ version = "0.1.0"
 dependencies = [
  "ocamlrep",
  "ocamlrep_custom",
+ "serde",
 ]
 
 [[package]]
@@ -3731,6 +3736,7 @@ dependencies = [
  "hh_hash",
  "no_pos_hash",
  "ocamlrep",
+ "ocamlrep_caml_builtins",
  "oxidized",
  "pretty_assertions",
  "relative_path",

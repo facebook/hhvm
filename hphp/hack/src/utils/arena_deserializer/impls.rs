@@ -8,6 +8,7 @@ use std::marker::PhantomData;
 
 use bumpalo::collections::Vec as ArenaVec;
 use bumpalo::Bump;
+use ocamlrep_caml_builtins::Int64;
 use serde::de::Deserializer;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
@@ -94,6 +95,7 @@ impl_deserialize_in_arena!(usize);
 impl_deserialize_in_arena!(f32);
 impl_deserialize_in_arena!(f64);
 impl_deserialize_in_arena!(char);
+impl_deserialize_in_arena!(Int64);
 
 impl<'arena> DeserializeInArena<'arena> for &'arena str {
     fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>

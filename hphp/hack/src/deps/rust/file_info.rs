@@ -13,6 +13,7 @@ use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
+use ocamlrep_caml_builtins::Int64;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -101,6 +102,45 @@ pub enum Pos {
     Full(pos::Pos),
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
 }
+
+/// An id contains a pos, name and a optional decl hash. The decl hash is None
+/// only in the case when we didn't compute it for performance reasons
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C)]
+pub struct Id(pub Pos, pub String, pub Option<Int64>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving eq")]
+#[repr(C)]
+pub struct HashType(pub Option<Int64>);
 
 /// The simplified record used after parsing.
 #[derive(

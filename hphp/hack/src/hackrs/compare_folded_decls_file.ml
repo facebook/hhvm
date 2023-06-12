@@ -13,6 +13,7 @@ let popt
     ~auto_namespace_map
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
+    ~keep_user_attributes
     ~interpret_soft_types_as_like_types
     ~everything_sdt
     ~enable_strict_const_semantics =
@@ -22,6 +23,7 @@ let popt
       po
       disable_xhp_element_mangling
   in
+  let po = ParserOptions.with_keep_user_attributes po keep_user_attributes in
   let po = ParserOptions.with_auto_namespace_map po auto_namespace_map in
   let po =
     ParserOptions.with_enable_xhp_class_modifier po enable_xhp_class_modifier
@@ -184,6 +186,7 @@ let () =
   let auto_namespace_map = ref [] in
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
+  let keep_user_attributes = ref false in
   let disallow_static_memoized = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
@@ -207,6 +210,7 @@ let () =
       ( "--disable-xhp-element-mangling",
         Arg.Set disable_xhp_element_mangling,
         "." );
+      ("--keep-user-attributes", Arg.Set keep_user_attributes, ".");
       ( "--disallow-static-memoized",
         Arg.Set disallow_static_memoized,
         " Disallow static memoized methods on non-final methods" );
@@ -299,6 +303,7 @@ let () =
     let auto_namespace_map = !auto_namespace_map in
     let enable_xhp_class_modifier = !enable_xhp_class_modifier in
     let disable_xhp_element_mangling = !disable_xhp_element_mangling in
+    let keep_user_attributes = !keep_user_attributes in
     let interpret_soft_types_as_like_types =
       !interpret_soft_types_as_like_types
     in
@@ -312,6 +317,7 @@ let () =
         ~auto_namespace_map
         ~enable_xhp_class_modifier
         ~disable_xhp_element_mangling
+        ~keep_user_attributes
         ~interpret_soft_types_as_like_types
         ~everything_sdt
         ~enable_strict_const_semantics

@@ -56,7 +56,7 @@ class ProxyConfig {
   std::shared_ptr<typename RouterInfo::RouteHandleIf> getRouteHandleForAsyncLog(
       folly::StringPiece asyncLogName) const;
 
-  std::shared_ptr<typename RouterInfo::RouteHandleIf> getRouteHandleForSRRoute(
+  std::shared_ptr<typename RouterInfo::RouteHandleIf> getRouteHandleForPool(
       folly::StringPiece poolName) const;
 
   const folly::StringKeyedUnorderedMap<
@@ -136,7 +136,7 @@ class ProxyConfig {
       asyncLogRoutes_;
   folly::StringKeyedUnorderedMap<
       std::shared_ptr<typename RouterInfo::RouteHandleIf>>
-      srRoutes_;
+      tierRoutes_;
 
   /**
    * Parses config and creates ProxyRoute

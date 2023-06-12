@@ -570,7 +570,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
 
   if (auto jSRRouteName = json.get_ptr("service_name")) {
     auto srRouteName = parseString(*jSRRouteName, "service_name");
-    srRoutes_.emplace(srRouteName, srRoute);
+    tierRoutes_.emplace(srRouteName, srRoute);
   }
 
   return route;
@@ -660,6 +660,7 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
 
     auto route = createHashRoute<RouterInfo>(
         jhashWithWeights, std::move(destinations), factory.getThreadId());
+    auto poolRoute = route;
 
     auto asynclogName = poolJson.name;
     bool needAsynclog = true;
@@ -689,6 +690,11 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
       // Wrap AxonLogRoute if configured
       route = wrapAxonLogRoute(std::move(route), proxy_, json);
       route = bucketize(std::move(route), json);
+
+      if (auto jPoolId = json.get_ptr("pool_id")) {
+        auto poolId = parseString(*jPoolId, "pool_id");
+        tierRoutes_.emplace(poolId, poolRoute);
+      }
     }
     return route;
   } catch (const std::exception& e) {

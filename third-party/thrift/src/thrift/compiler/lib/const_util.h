@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -111,8 +112,6 @@ folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
 }
 
 // Assigns a t_const_value to a Value.
-// Currently only uses bool/i64/double/string/list/map.
-// TODO: allow increasing type fidelity.
 inline protocol::Value const_to_value(const t_const_value& val) {
   protocol::Value ret;
   auto type = val.ttype() ? val.ttype()->get_type_value() : [&] {
@@ -199,11 +198,24 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       ret.as_i32() = val.get_integer();
       break;
     case t_type::type::t_struct:
-      // TODO: maybe translate to Object
-      ret.emplace_map();
-      for (const auto& map_elem : val.get_map()) {
-        ret.as_map().emplace(
-            const_to_value(*map_elem.first), const_to_value(*map_elem.second));
+      if (val.ttype()) {
+        auto& obj = ret.emplace_object();
+        auto& strct = static_cast<const t_structured&>(*val.ttype());
+        for (const auto& map_elem : val.get_map()) {
+          auto field = strct.get_field_by_name(map_elem.first->get_string());
+          if (!field) {
+            throw std::out_of_range(fmt::format(
+                "invalid field name: {}", map_elem.first->get_string()));
+          }
+          obj[FieldId{field->id()}] = const_to_value(*map_elem.second);
+        }
+      } else {
+        auto& map = ret.emplace_map();
+        for (const auto& map_elem : val.get_map()) {
+          map.emplace(
+              const_to_value(*map_elem.first),
+              const_to_value(*map_elem.second));
+        }
       }
       break;
     case t_type::type::t_void:

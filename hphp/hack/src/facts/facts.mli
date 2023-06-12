@@ -29,13 +29,8 @@ val is_tk_trait : type_kind -> bool
 val is_tk_unknown : type_kind -> bool
 
 type type_facts = {
-  base_types: InvSSet.t;
   kind: type_kind;
   flags: int;
-  require_extends: InvSSet.t;
-  require_implements: InvSSet.t;
-  require_class: InvSSet.t;
-  attributes: string list InvSMap.t;
 }
 
 type module_facts = unit
@@ -44,7 +39,6 @@ type facts = {
   types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
-  modules: module_facts InvSMap.t;
 }
 
 val empty : facts

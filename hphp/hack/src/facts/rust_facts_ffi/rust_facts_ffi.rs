@@ -57,7 +57,7 @@ fn extract_facts_as_json_ffi(
         allow_new_attribute_syntax,
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
-        keep_user_attributes: true,
+        keep_user_attributes: false, // Not needed for any OCaml Facts use cases
         ..Default::default()
     };
 

@@ -82,10 +82,6 @@ pub fn parse_decls_for_bytecode<'a, 'text>(
     text: &'text [u8],
     arena: &'a Bump,
 ) -> ParsedFile<'a> {
-    assert!(
-        opts.keep_user_attributes,
-        "bytecode generation needs user attributes"
-    );
     parse_script_with_text_allocator(
         opts,
         filename,

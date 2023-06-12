@@ -1039,7 +1039,7 @@ class CommonTests(BarebonesTests):
         # We've sent a kill signal to the server, but it may take some time for
         # the server to actually die. For instance, it may be attempting to
         # print a backtrace in the signal handler, which takes less than a
-        # second in @//mode/opt-clang, but can take minutes in @//mode/dev. If we
+        # second in @//mode/opt, but can take minutes in @//mode/dev. If we
         # attempt to connect before the server process actually dies, the
         # monitor will happily hand us off to the dying server, which will
         # abruptly close our connection when its process exits. What we want

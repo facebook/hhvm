@@ -846,8 +846,9 @@ pub fn emit_await<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
-    let func = emitter_special_functions::GENA;
-    let can_inline_gen_functions = !emitter.options().function_is_renamable(func.into());
+    let can_inline_gen_functions = !emitter
+        .options()
+        .function_is_renamable(emitter_special_functions::GENA.into());
     match e.as_call() {
         Some(ast::CallExpr {
             func: ast::Expr(_, _, ast::Expr_::Id(id)),
@@ -856,7 +857,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
             ..
         }) if (can_inline_gen_functions
             && args.len() == 1
-            && string_utils::strip_global_ns(&id.1) == "gena") =>
+            && string_utils::strip_global_ns(&id.1) == emitter_special_functions::GENA) =>
         {
             inline_gena_call(emitter, env, error::expect_normal_paramkind(&args[0])?)
         }

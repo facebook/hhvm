@@ -333,38 +333,28 @@ class C {
   // TEST-CHECK-BAL: define C._86pinit
   // CHECK: define C._86pinit($this: *C) : *HackMixed {
   // CHECK: #b0:
-  // CHECK:   n0 = &$this
-  // CHECK:   n1 = $builtins.hack_string("prop1")
-  // CHECK:   n2 = $builtins.hack_dim_field_get(n0, n1)
-  // CHECK:   n3 = $builtins.hack_int(42)
-  // CHECK:   store n2 <- n3: *HackMixed
-  // CHECK:   n4 = &$this
-  // CHECK:   n5 = $builtins.hack_string("prop2")
-  // CHECK:   n6 = $builtins.hack_dim_field_get(n4, n5)
-  // CHECK:   n7 = $builtins.hack_string("hello")
-  // CHECK:   store n6 <- n7: *HackMixed
-  // CHECK:   n8 = &$this
-  // CHECK:   n9 = $builtins.hack_string("prop5")
-  // CHECK:   n10 = $builtins.hack_dim_field_get(n8, n9)
-  // CHECK:   n11 = null
-  // CHECK:   store n10 <- n11: *HackMixed
-  // CHECK:   n12 = &$this
-  // CHECK:   n13 = $builtins.hack_string("type")
-  // CHECK:   n14 = $builtins.hack_dim_field_get(n12, n13)
-  // CHECK:   n15 = $builtins.hack_int(2)
-  // CHECK:   store n14 <- n15: *HackMixed
+  // CHECK:   n0 = $builtins.hack_int(42)
+  // CHECK:   n1: *HackMixed = load &$this
+  // CHECK:   store n1.?.prop1 <- n0: *HackMixed
+  // CHECK:   n2 = $builtins.hack_string("hello")
+  // CHECK:   n3: *HackMixed = load &$this
+  // CHECK:   store n3.?.prop2 <- n2: *HackMixed
+  // CHECK:   n4 = null
+  // CHECK:   n5: *HackMixed = load &$this
+  // CHECK:   store n5.?.prop5 <- n4: *HackMixed
+  // CHECK:   n6 = $builtins.hack_int(2)
+  // CHECK:   n7: *HackMixed = load &$this
+  // CHECK:   store n7.?.type <- n6: *HackMixed
   // CHECK:   jmp b1, b2
   // CHECK: #b1:
   // CHECK:   prune $builtins.hack_is_true($builtins.hack_bool(false))
   // CHECK:   jmp b3
   // CHECK: #b2:
   // CHECK:   prune ! $builtins.hack_is_true($builtins.hack_bool(false))
-  // CHECK:   n16 = __sil_lazy_class_initialize(<D>)
-  // CHECK:   n17 = $builtins.hack_field_get(n16, "C")
-  // CHECK:   n18 = &$this
-  // CHECK:   n19 = $builtins.hack_string("prop5")
-  // CHECK:   n20 = $builtins.hack_dim_field_get(n18, n19)
-  // CHECK:   store n20 <- n17: *HackMixed
+  // CHECK:   n8 = __sil_lazy_class_initialize(<D>)
+  // CHECK:   n9 = $builtins.hack_field_get(n8, "C")
+  // CHECK:   n10: *HackMixed = load &$this
+  // CHECK:   store n10.?.prop5 <- n9: *HackMixed
   // CHECK:   jmp b3
   // CHECK: #b3:
   // CHECK:   ret null

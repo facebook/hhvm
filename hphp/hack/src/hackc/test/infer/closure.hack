@@ -4,24 +4,20 @@
 // CHECK: define Closure$closure1.__invoke($this: *Closure$closure1) : *HackMixed {
 // CHECK: local $x: *void
 // CHECK: #b0:
-// CHECK:   n0 = &$this
-// CHECK:   n1 = $builtins.hack_string("x")
-// CHECK:   n2 = $builtins.hack_dim_field_get(n0, n1)
-// CHECK:   n3: *HackMixed = load n2
-// CHECK:   store &$x <- n3: *HackMixed
-// CHECK:   n4: *HackMixed = load &$x
-// CHECK:   n5 = $builtins.hhbc_print(n4)
-// CHECK:   ret n5
+// CHECK:   n0: *HackMixed = load &$this
+// CHECK:   n1: *HackMixed = load n0.?.x
+// CHECK:   store &$x <- n1: *HackMixed
+// CHECK:   n2: *HackMixed = load &$x
+// CHECK:   n3 = $builtins.hhbc_print(n2)
+// CHECK:   ret n3
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__construct
 // CHECK: define Closure$closure1.__construct($this: *Closure$closure1, x: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &x
-// CHECK:   n1 = &$this
-// CHECK:   n2 = $builtins.hack_string("x")
-// CHECK:   n3 = $builtins.hack_dim_field_get(n1, n2)
-// CHECK:   store n3 <- n0: *HackMixed
+// CHECK:   n1: *HackMixed = load &$this
+// CHECK:   store n1.?.x <- n0: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 

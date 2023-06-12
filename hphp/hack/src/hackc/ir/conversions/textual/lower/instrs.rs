@@ -12,6 +12,7 @@ use ir::instr::HasLocals;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
 use ir::instr::IteratorArgs;
+use ir::instr::MemberOp;
 use ir::instr::MemoGet;
 use ir::instr::Predicate;
 use ir::instr::Special;
@@ -189,6 +190,7 @@ impl LowerInstrs<'_> {
                     },
                 )
             }
+            Instr::MemberOp(member_op) => self.handle_member_op(builder, member_op),
             Instr::Terminator(term) => {
                 let hhbc = self.handle_terminator_with_builtin(term)?;
                 builder.emit_hhbc_builtin(hhbc, instr.operands(), loc);
@@ -196,6 +198,41 @@ impl LowerInstrs<'_> {
             }
             _ => None,
         }
+    }
+
+    fn handle_member_op(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        member_op: &MemberOp,
+    ) -> Option<Instr> {
+        use ir::instr::BaseOp;
+
+        match member_op.base_op {
+            BaseOp::BaseSC {
+                mode,
+                readonly,
+                loc,
+            } => {
+                let mut operands = member_op.operands.iter().copied();
+                let locals = member_op.locals.iter().copied();
+                let intermediates = member_op.intermediate_ops.iter().cloned();
+
+                let prop = operands.next().unwrap();
+                let base = operands.next().unwrap();
+                if let Some(propname) = lookup_constant_string(&builder.func, prop) {
+                    // Convert BaseSC w/ constant string to BaseST
+                    let pid = PropId::new(propname);
+                    let mut mop = MemberOpBuilder::base_st(base, pid, mode, readonly, loc);
+                    mop.operands.extend(operands);
+                    mop.locals.extend(locals);
+                    mop.intermediate_ops.extend(intermediates);
+                    return Some(Instr::MemberOp(mop.final_op(member_op.final_op.clone())));
+                }
+            }
+            _ => {}
+        }
+
+        None
     }
 
     fn check_prop(&self, builder: &mut FuncBuilder<'_>, _pid: PropId, _loc: LocId) -> Instr {

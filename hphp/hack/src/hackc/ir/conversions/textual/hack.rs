@@ -241,6 +241,60 @@ pub(crate) enum Builtin {
     /// Returns the Class identifier for the given class's static class.
     #[decl(fn hack_get_static_class(*void) -> *class)]
     GetStaticClass,
+    /// Marker to indicate that an array key in HackArrayCowSet is an append operation.
+    #[decl(fn hack_array_append() -> void)]
+    HackArrayAppend,
+    /// Like HackArrayCowSet but increments the tail value.  The final two
+    /// values are (pre, post) and indicate how to increment and what value to
+    /// return.  The basic operation is:
+    ///
+    /// $a[k] += pre;
+    /// tmp = $a[k];
+    /// $a[k] += post;
+    /// return tmp;
+    ///
+    #[decl(fn hack_array_cow_incr(...) -> *HackMixed)]
+    HackArrayCowIncr,
+    /// n-ary array "set".
+    ///
+    /// Performs the n-ary array "get" operation but ensures that the arrays
+    /// along the way are unique and then updates the final value.
+    ///
+    /// A index of '__array_append__()' is an append operation.
+    ///
+    /// Note that the 'a' value is a REFERENCE to the value, NOT the value itsef!
+    ///
+    /// This is equivalent to the sequence:
+    ///   ensure_unique(a)
+    ///   ensure_unique((*a)[b])
+    ///   ensure_unique((*a)[b][c])
+    ///   (*a)[b][c] = d
+    ///
+    #[decl(fn hack_array_cow_set(...) -> void)]
+    HackArrayCowSet,
+    /// n-ary array "get"
+    ///
+    /// Performs the n-ary array "get" operation without any copies and returns
+    /// the tail value.
+    ///
+    /// Note that the 'a' value is a REFERENCE to the value, NOT the value itsef!
+    ///
+    /// This is equivalent to `(*a)[b][c]`.
+    ///
+    #[decl(fn hack_array_get(...) -> *HackMixed)]
+    HackArrayGet,
+    /// 1-ary prop "get".
+    ///
+    /// Dynamically fetches the named key from the instance and returns the
+    /// address of the property.
+    ///
+    /// If null_safe is true then a base of null returns null.
+    ///
+    /// This (when null_safe is false) is equivalent to:
+    ///   base.?.{dynamic key}
+    ///
+    #[decl(fn hack_prop_get(base: *HackMixed, key: *HackMixed, null_safe: int) -> **HackMixed)]
+    HackPropGet,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
     #[decl(skip)]
     Hhbc(Hhbc),

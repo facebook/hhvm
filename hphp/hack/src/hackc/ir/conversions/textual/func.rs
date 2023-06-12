@@ -1091,7 +1091,7 @@ fn write_inc_dec_l(
 
 pub(crate) struct FuncState<'a, 'b, 'c> {
     pub(crate) fb: &'a mut textual::FuncBuilder<'b, 'c>,
-    func: &'a ir::Func<'a>,
+    pub(crate) func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     func_info: Arc<FuncInfo<'a>>,
     pub(crate) strings: Arc<StringInterner>,

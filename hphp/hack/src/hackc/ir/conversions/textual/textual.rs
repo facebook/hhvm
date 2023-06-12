@@ -629,6 +629,7 @@ pub(crate) enum Ty {
     Special(SpecialTy),
     String,
     Type(TypeName),
+    Unknown,
     Void,
     VoidPtr,
 }
@@ -639,18 +640,24 @@ impl Ty {
     }
 
     pub(crate) fn deref(&self) -> Ty {
+        let Some(ty) = self.try_deref() else { panic!("Unable to deref {self:?}"); };
+        ty
+    }
+
+    pub(crate) fn try_deref(&self) -> Option<Ty> {
         match self {
-            Ty::Ptr(box sub) => sub.clone(),
-            Ty::VoidPtr => Ty::Void,
-            Ty::SpecialPtr(special) => Ty::Special(*special),
+            Ty::Ptr(box sub) => Some(sub.clone()),
+            Ty::VoidPtr => Some(Ty::Void),
+            Ty::SpecialPtr(special) => Some(Ty::Special(*special)),
             Ty::Float
             | Ty::Int
             | Ty::Noreturn
             | Ty::String
             | Ty::Special(_)
             | Ty::Type(_)
+            | Ty::Unknown
             | Ty::Void
-            | Ty::Ellipsis => panic!("Unable to deref {self:?}"),
+            | Ty::Ellipsis => None,
         }
     }
 
@@ -658,13 +665,12 @@ impl Ty {
         Ty::SpecialPtr(SpecialTy::Mixed)
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn mixed() -> Ty {
-        Ty::Special(SpecialTy::Mixed)
-    }
-
     pub(crate) fn named_type_ptr(name: TypeName) -> Ty {
         Ty::Ptr(Box::new(Ty::Type(name)))
+    }
+
+    pub(crate) fn unknown() -> Ty {
+        Ty::Unknown
     }
 }
 
@@ -695,6 +701,7 @@ impl fmt::Display for FmtTy<'_> {
             Ty::Special(special) => special.user_type().display(strings).fmt(f),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => s.display(strings).fmt(f),
+            Ty::Unknown => f.write_str("?"),
             Ty::Void => f.write_str("void"),
             Ty::VoidPtr => f.write_str("*void"),
         }
@@ -771,7 +778,6 @@ pub(crate) enum Expr {
     /// *Variable
     Deref(Box<Expr>),
     /// a.b
-    #[allow(dead_code)]
     Field(Box<Expr>, Ty, String),
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
@@ -790,11 +796,10 @@ impl Expr {
         Expr::Deref(Box::new(v.into()))
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn field(base: impl Into<Expr>, ty: Ty, name: impl Into<String>) -> Expr {
+    pub(crate) fn field(base: impl Into<Expr>, base_ty: Ty, name: impl Into<String>) -> Expr {
         let base = base.into();
         let name = name.into();
-        Expr::Field(Box::new(base), ty, name)
+        Expr::Field(Box::new(base), base_ty, name)
     }
 
     #[allow(dead_code)]
@@ -1325,7 +1330,6 @@ pub(crate) enum FieldAttribute {
     Unparameterized {
         name: TypeName,
     },
-    #[allow(dead_code)]
     Parameterized {
         name: TypeName,
         parameters: Vec<String>,

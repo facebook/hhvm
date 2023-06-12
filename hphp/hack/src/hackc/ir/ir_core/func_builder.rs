@@ -429,10 +429,10 @@ impl TransformState {
 /// Used like:
 /// let vid = MemberOpBuilder::base_c(vid1, loc).emit_query_ec(builder, vid2);
 pub struct MemberOpBuilder {
-    operands: Vec<ValueId>,
-    locals: Vec<LocalId>,
-    base_op: BaseOp,
-    intermediate_ops: Vec<IntermediateOp>,
+    pub operands: Vec<ValueId>,
+    pub locals: Vec<LocalId>,
+    pub base_op: BaseOp,
+    pub intermediate_ops: Vec<IntermediateOp>,
 }
 
 impl MemberOpBuilder {
@@ -448,7 +448,7 @@ impl MemberOpBuilder {
         }
     }
 
-    fn final_op(self, final_op: FinalOp) -> MemberOp {
+    pub fn final_op(self, final_op: FinalOp) -> MemberOp {
         MemberOp {
             operands: self.operands.into_boxed_slice(),
             locals: self.locals.into_boxed_slice(),
@@ -467,6 +467,23 @@ impl MemberOpBuilder {
 
     pub fn base_h(loc: LocId) -> Self {
         Self::new(BaseOp::BaseH { loc })
+    }
+
+    pub fn base_st(
+        base: ValueId,
+        prop: PropId,
+        mode: MOpMode,
+        readonly: ReadonlyOp,
+        loc: LocId,
+    ) -> Self {
+        let mut mop = Self::new(BaseOp::BaseST {
+            mode,
+            readonly,
+            loc,
+            prop,
+        });
+        mop.operands.push(base);
+        mop
     }
 
     pub fn isset_ec(mut self, key: ValueId) -> MemberOp {

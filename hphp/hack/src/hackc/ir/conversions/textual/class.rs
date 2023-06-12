@@ -123,7 +123,7 @@ impl ClassState<'_, '_, '_> {
 
     /// Write the type for a (class, is_static) with the properties of the class.
     fn write_type(&mut self, is_static: IsStatic) -> Result {
-        let mut metadata: IndexMap<&str, textual::Expr> = IndexMap::default();
+        let mut metadata: IndexMap<&str, textual::Const> = IndexMap::default();
 
         let kind = if self.class.flags.is_interface() {
             "interface"

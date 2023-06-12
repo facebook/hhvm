@@ -4431,12 +4431,18 @@ the correct version of lsp afterwards). If it hasn't, then we continue,
 and the version mismatch must necessarily indicate that hh_server is the
 wrong version.
 
-If we're in [errors_conn = TrailingErrors] already, this function is a no-op. *)
+If we're in [errors_conn = TrailingErrors] already, this function is a no-op.
+
+If we're called before even having received the initialize request from LSP client
+(hence before we even know the project root), this is a no-op. *)
 let try_open_errors_file ~(state : state ref) : unit Lwt.t =
-  match !latest_hh_server_errors with
-  | TailingErrors _ -> Lwt.return_unit
-  | SeekingErrors { prev_st_ino; seek_reason } ->
-    let errors_file_path = ServerFiles.errors_file_path (get_root_exn ()) in
+  match (!latest_hh_server_errors, get_root_opt ()) with
+  | (TailingErrors _, _) -> Lwt.return_unit
+  | (SeekingErrors _, None) ->
+    (* we haven't received initialize request yet *)
+    Lwt.return_unit
+  | (SeekingErrors { prev_st_ino; seek_reason }, Some root) ->
+    let errors_file_path = ServerFiles.errors_file_path root in
     (* 1. can we open the file? *)
     let result =
       try

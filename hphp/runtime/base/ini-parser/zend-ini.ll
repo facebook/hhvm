@@ -95,7 +95,7 @@ static void zend_ini_escape_string(std::string &lval, char *str, int len,
             *t++ = *s;
             break;
           }
-          /* fallthrough */
+          [[fallthrough]];
         case '\\':
         case '$':
           *t++ = *s;

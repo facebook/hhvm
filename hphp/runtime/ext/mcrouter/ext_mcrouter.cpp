@@ -332,14 +332,14 @@ struct MCRouterResult : AsioExternalThreadEvent {
 
         case mc_op_gets:
           m_cas = getCasToken(reply);
-          /* fallthrough */
+          [[fallthrough]];
         case mc_op_get:
           m_flags = detail::getFlagsIfExist(reply);
           if (mc::isMissResult(*reply.result_ref())) {
             setResultException(request, reply);
             break;
           }
-          /* fallthrough */
+          [[fallthrough]];
         case mc_op_version:
           // We can only allocate memory in the memory-manager thread so stash
           // the data in a std::string until we get to unserialize(). We use a

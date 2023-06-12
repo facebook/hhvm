@@ -1539,7 +1539,7 @@ ArrayLayout MonotypeDictLayout::setType(Type key, Type val) const {
     switch (m_keyType) {
       case KeyTypes::StaticStrings:
         if (key <= TStaticStr) return KeyTypes::StaticStrings;
-        /* fallthrough */
+        [[fallthrough]];
       case KeyTypes::Strings:
         return key <= TStr ? KeyTypes::Strings : KeyTypes::Any;
       case KeyTypes::Ints:

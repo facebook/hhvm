@@ -1071,20 +1071,9 @@ void validate_custom_cpp_type_annotations(
       node.find_structured_annotation_or_null(kCppAdapterUri);
   const bool hasCppType = node.has_annotation(
       {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
-  const bool isStrongType =
-      node.find_structured_annotation_or_null(kCppStrongTypeUri);
-
   ctx.check(
       !(hasCppType && hasAdapter),
       "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations",
-      node.name());
-  ctx.check(
-      !(isStrongType && hasAdapter),
-      "Definition `{}` cannot have both @cpp.StrongType and @cpp.Adapter annotations",
-      node.name());
-  ctx.check(
-      !(isStrongType && hasCppType),
-      "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.StrongType annotations",
       node.name());
 }
 

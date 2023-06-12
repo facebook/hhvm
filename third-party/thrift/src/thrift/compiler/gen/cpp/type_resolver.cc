@@ -37,8 +37,7 @@ namespace {
 const t_type* find_first_type(const t_type& node) {
   const t_type* result = nullptr;
   t_typedef::find_type_if(&node, [&result](const t_type* type) {
-    if (type_resolver::find_type(*type) ||
-        type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
+    if (type_resolver::find_type(*type)) {
       result = type;
       return true;
     }
@@ -484,11 +483,6 @@ std::string type_resolver::gen_type_tag(const t_type& type) {
         "::apache::thrift::type::adapted<{}, {}>",
         adapter->get_value_from_structured_annotation("name").get_string(),
         tag);
-  }
-
-  if (type.find_structured_annotation_or_null(kCppStrongTypeUri)) {
-    return fmt::format(
-        "::apache::thrift::type::cpp_type<{}, {}>", get_native_type(type), tag);
   }
 
   return tag;

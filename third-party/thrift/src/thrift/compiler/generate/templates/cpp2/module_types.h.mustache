@@ -77,12 +77,7 @@ using ::apache::thrift::detail::operator>=;
 
 <%#program:structs_and_typedefs%>
 <%^is_struct?%>
-<%^typedef:cpp_strong_type?%>
 typedef <%typedef:cpp_type%> <%typedef:name%>;
-<%/typedef:cpp_strong_type?%>
-<%#typedef:cpp_strong_type?%>
-enum class <%typedef:name%> : <%typedef:cpp_type%> {};
-<%/typedef:cpp_strong_type?%>
 <%/is_struct?%>
 <%#is_struct?%>
 

@@ -505,30 +505,6 @@ TEST_F(TypeResolverTest, Typedef_cpptype) {
   EXPECT_TRUE(can_resolve_to_scalar(tiumap));
 }
 
-TEST_F(TypeResolverTest, StrongTypeDef) {
-  t_typedef si32(&program_, "si32", t_base_type::t_i32());
-  si32.add_structured_annotation(
-      cpp_annotation_builder::strongType(program_).make());
-  t_map imap(si32, t_base_type::t_string());
-
-  EXPECT_EQ(get_native_type(si32), "::path::to::si32");
-  EXPECT_EQ(get_standard_type(si32), "::path::to::si32");
-  EXPECT_EQ(
-      get_type_tag(si32),
-      "::apache::thrift::type::cpp_type<::path::to::si32, ::apache::thrift::type::i32_t>");
-  // TODO(afuller): Should this be false for enum classes?
-  EXPECT_TRUE(can_resolve_to_scalar(si32));
-
-  EXPECT_EQ(
-      get_native_type(imap), "::std::map<::path::to::si32, ::std::string>");
-  EXPECT_EQ(
-      get_standard_type(imap), "::std::map<::path::to::si32, ::std::string>");
-  EXPECT_FALSE(can_resolve_to_scalar(imap));
-  EXPECT_EQ(
-      get_type_tag(imap),
-      "::apache::thrift::type::map<::apache::thrift::type::cpp_type<::path::to::si32, ::apache::thrift::type::i32_t>, ::apache::thrift::type::string_t>");
-}
-
 TEST_F(TypeResolverTest, AdaptedFieldType) {
   auto i64 = t_base_type::t_i64();
   auto field = t_field(i64, "n", 42);

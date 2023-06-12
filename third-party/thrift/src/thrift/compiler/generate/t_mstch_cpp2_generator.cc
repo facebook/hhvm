@@ -1090,15 +1090,10 @@ class cpp_mstch_typedef : public mstch_typedef {
         this,
         {
             {"typedef:cpp_type", &cpp_mstch_typedef::cpp_type},
-            {"typedef:cpp_strong_type?", &cpp_mstch_typedef::cpp_strong_type},
         });
   }
   mstch::node cpp_type() {
     return cpp_context_->resolver().get_underlying_type_name(*typedef_);
-  }
-  mstch::node cpp_strong_type() {
-    return typedef_->find_structured_annotation_or_null(kCppStrongTypeUri) !=
-        nullptr;
   }
 
  private:

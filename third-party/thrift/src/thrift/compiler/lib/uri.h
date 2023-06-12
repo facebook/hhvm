@@ -76,8 +76,6 @@ constexpr auto kCppPackIssetUri =
 constexpr auto kCppRefUri = "facebook.com/thrift/annotation/cpp/Ref";
 constexpr auto kCppScopedEnumAsUnionTypeUri =
     "facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType";
-constexpr auto kCppStrongTypeUri =
-    "facebook.com/thrift/annotation/cpp/StrongType";
 constexpr auto kCppTriviallyRelocatableUri =
     "facebook.com/thrift/annotation/cpp/TriviallyRelocatable";
 constexpr auto kCppUseOpEncodeUri =

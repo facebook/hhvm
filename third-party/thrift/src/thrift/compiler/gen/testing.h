@@ -114,10 +114,6 @@ struct thrift_annotation_builder : base_thrift_annotation_builder {
 };
 
 struct cpp_annotation_builder : base_thrift_annotation_builder {
-  static cpp_annotation_builder strongType(t_program& p) {
-    return {p, "StrongType"};
-  }
-
   std::unique_ptr<t_const> make() {
     return make_inst(std::make_unique<t_const_value>());
   }

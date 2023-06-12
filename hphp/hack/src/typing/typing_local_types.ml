@@ -20,6 +20,7 @@ type expression_id = Ident.t [@@deriving eq, show]
 
 type local = {
   ty: locl_ty;
+  bound_ty: locl_ty option;
   pos: Pos.t;
   eid: expression_id;
 }

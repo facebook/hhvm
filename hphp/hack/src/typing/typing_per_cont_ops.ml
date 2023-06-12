@@ -67,8 +67,8 @@ let is_sub_entry is_subtype env ctx1 ctx2 =
       match (tyopt1, tyopt2) with
       | (_, None) -> true
       | (None, Some _) -> false
-      | ( Some { ty = ty1; pos = _; eid = _ },
-          Some { ty = ty2; pos = _; eid = _ } ) ->
+      | ( Some { ty = ty1; bound_ty = _; pos = _; eid = _ },
+          Some { ty = ty2; bound_ty = _; pos = _; eid = _ } ) ->
         is_subtype env ty1 ty2)
     ctx1.local_types
     ctx2.local_types

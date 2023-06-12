@@ -1,0 +1,30 @@
+File "init-errors.php", line 6, characters 5-22:
+Typing error (Typing[4110])
+  File "init-errors.php", line 6, characters 14-16:
+  Expected `int`
+  File "init-errors.php", line 5, characters 32-32:
+  But got `T`
+File "init-errors.php", line 7, characters 5-21:
+Typing error (Typing[4110])
+  File "init-errors.php", line 7, characters 14-15:
+  Expected `T1`
+  File "init-errors.php", line 5, characters 32-32:
+  But got `T`
+File "init-errors.php", line 8, characters 5-20:
+Typing error (Typing[4110])
+  File "init-errors.php", line 8, characters 14-14:
+  Expected `T`
+  File "init-errors.php", line 5, characters 38-39:
+  But got `T1 as int`
+File "init-errors.php", line 9, characters 5-32:
+Typing error (Typing[4110])
+  File "init-errors.php", line 9, characters 18-20:
+  Expected `int`
+  File "init-errors.php", line 5, characters 32-32:
+  But got `T`
+File "init-errors.php", line 10, characters 5-25:
+Typing error (Typing[4110])
+  File "init-errors.php", line 10, characters 14-20:
+  Expected `nothing`
+  File "init-errors.php", line 10, characters 24-24:
+  But got `int`

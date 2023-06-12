@@ -1127,7 +1127,7 @@ let set_local_ env x ty =
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
-let set_local ?(immutable = false) env x new_type pos =
+let set_local ?(immutable = false) ~bound_ty env x new_type pos =
   let new_type =
     match get_node new_type with
     | Tunion [ty] -> ty
@@ -1147,7 +1147,9 @@ let set_local ?(immutable = false) env x new_type pos =
       else
         expr_id
     in
-    let local = Typing_local_types.{ ty = new_type; pos; eid = expr_id } in
+    let local =
+      Typing_local_types.{ ty = new_type; bound_ty; pos; eid = expr_id }
+    in
     set_local_ env x local
 
 let is_using_var env x = LID.Set.mem x env.lenv.local_using_vars
@@ -1248,7 +1250,12 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
        have type nothing. *)
     Some
       Typing_local_types.
-        { ty = Typing_make_type.nothing Reason.Rnone; pos = Pos.none; eid = 0 }
+        {
+          ty = Typing_make_type.nothing Reason.Rnone;
+          bound_ty = None;
+          pos = Pos.none;
+          eid = 0;
+        }
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
     begin
@@ -1263,10 +1270,17 @@ let get_local_in_ctx ~undefined_err_fun x ctx_opt =
     lcl
 
 let get_local_ty_in_ctx ~undefined_err_fun x ctx_opt =
-  let open Typing_local_types in
   match get_local_in_ctx ~undefined_err_fun x ctx_opt with
-  | None -> (false, Typing_make_type.nothing Reason.Rnone, Pos.none)
-  | Some { ty = x; pos; eid = _ } -> (true, x, pos)
+  | None ->
+    ( false,
+      Typing_local_types.
+        {
+          ty = Typing_make_type.nothing Reason.Rnone;
+          bound_ty = None;
+          pos = Pos.none;
+          eid = 0;
+        } )
+  | Some local -> (true, local)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let undefined_err_fun = local_undefined_error ~env p in
@@ -1274,16 +1288,12 @@ let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   get_local_ty_in_ctx ~undefined_err_fun x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
-  let (mut, ty, _) =
+  let (mut, local) =
     get_local_in_next_continuation ?error_if_undef_at_pos:p env x
   in
-  (mut, ty)
+  (mut, local)
 
 let get_local env x = snd (get_local_ env x)
-
-let get_local_pos env x =
-  let (_, ty, pos) = get_local_in_next_continuation env x in
-  (ty, pos)
 
 let get_locals ?(quiet = false) env plids =
   let next_cont = next_cont_opt env in
@@ -1318,9 +1328,9 @@ let set_local_expr_id env x new_eid =
   | Some next_cont -> begin
     let open Typing_local_types in
     match LID.Map.find_opt x next_cont.LEnvC.local_types with
-    | Some Typing_local_types.{ ty; pos; eid }
+    | Some Typing_local_types.{ ty; bound_ty; pos; eid }
       when not (equal_expression_id eid new_eid) ->
-      let local = { ty; pos; eid = new_eid } in
+      let local = { ty; bound_ty; pos; eid = new_eid } in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
       let env = { env with lenv = { env.lenv with per_cont_env } } in
       if Ident.is_immutable eid then

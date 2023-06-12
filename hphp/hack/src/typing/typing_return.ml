@@ -316,11 +316,12 @@ let check_inout_return ret_pos env =
           (* Whenever the function exits normally, we require that each local
            * corresponding to an inout parameter be compatible with the original
            * type for the parameter (under subtyping rules). *)
-          let (local_ty, local_pos) = Env.get_local_pos env id in
-          let (env, ety) = Env.expand_type env local_ty in
+          let local = Env.get_local env id in
+          let open Typing_local_types in
+          let (env, ety) = Env.expand_type env local.ty in
           let pos =
-            if not (Pos.equal Pos.none local_pos) then
-              local_pos
+            if not (Pos.equal Pos.none local.pos) then
+              local.pos
             else if not (Pos.equal Pos.none ret_pos) then
               ret_pos
             else

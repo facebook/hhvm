@@ -29,7 +29,11 @@ let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
     let (env, required) = mk_required env in
     let err_opt = mk_err_opt available required in
     let (env, ty_err_opt) =
-      Typing_subtype.sub_type_or_fail env available required err_opt
+      Typing_subtype.sub_type_or_fail
+        env
+        available.Typing_local_types.ty
+        required
+        err_opt
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
@@ -54,8 +58,10 @@ let enforce_local_capability
                {
                  pos = op_pos;
                  op_name = op;
-                 locally_available = Typing_coeffects.pretty env available;
-                 available_pos = Typing_defs.get_pos available;
+                 locally_available =
+                   Typing_coeffects.pretty env available.Typing_local_types.ty;
+                 available_pos =
+                   Typing_defs.get_pos available.Typing_local_types.ty;
                  required = Typing_coeffects.pretty env required;
                  err_code;
                  suggestion;
@@ -99,8 +105,10 @@ let enforce_memoize_object pos env =
                {
                  pos;
                  op_name = "Memoizing object parameters";
-                 locally_available = Typing_coeffects.pretty env available;
-                 available_pos = Typing_defs.get_pos available;
+                 locally_available =
+                   Typing_coeffects.pretty env available.Typing_local_types.ty;
+                 available_pos =
+                   Typing_defs.get_pos available.Typing_local_types.ty;
                  (* Use access globals in error message *)
                  required = Typing_coeffects.pretty env access_globals;
                  (* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
@@ -213,8 +221,11 @@ let rec check_assignment_or_unset_target
                op_name;
                suggestion;
                locally_available =
-                 Typing_coeffects.pretty env capability_available;
-               available_pos = Typing_defs.get_pos capability_available;
+                 Typing_coeffects.pretty
+                   env
+                   capability_available.Typing_local_types.ty;
+               available_pos =
+                 Typing_defs.get_pos capability_available.Typing_local_types.ty;
                required = Typing_coeffects.pretty env capability_required;
                err_code = Error_codes.Typing.OpCoeffects;
              })

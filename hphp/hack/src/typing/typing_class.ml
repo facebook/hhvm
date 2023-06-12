@@ -72,12 +72,18 @@ let method_dynamically_callable env cls m params_decl_ty return =
   let env = Typing_dynamic.add_require_dynamic_bounds env cls in
   let env =
     if Cls.get_support_dynamic_type cls then
+      let this_local = Env.get_local env this in
       let this_ty =
         MakeType.intersection
           (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-          [Env.get_local env this; make_dynamic Pos_or_decl.none]
+          [this_local.Typing_local_types.ty; make_dynamic Pos_or_decl.none]
       in
-      Env.set_local env this this_ty Pos.none
+      Env.set_local
+        ~bound_ty:this_local.Typing_local_types.bound_ty
+        env
+        this
+        this_ty
+        Pos.none
     else
       env
   in
@@ -205,7 +211,13 @@ let method_def ~is_disposable env cls m =
   let env =
     match Env.get_self_ty env with
     | Some ty when not (Env.is_static env) ->
-      Env.set_local env this (MakeType.this (get_reason ty)) Pos.none
+      (* The $this variable isn't a typed local, and so doesn't have a bound type. *)
+      Env.set_local
+        ~bound_ty:None
+        env
+        this
+        (MakeType.this (get_reason ty))
+        Pos.none
     | _ -> env
   in
   let env =

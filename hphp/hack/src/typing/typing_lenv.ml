@@ -27,28 +27,58 @@ let get_all_locals env = env.lenv.per_cont_env
 
 let union
     env
-    Typing_local_types.{ ty = ty1; pos = pos1; eid = eid1 }
-    Typing_local_types.{ ty = ty2; pos = pos2; eid = eid2 } =
+    Typing_local_types.
+      { ty = ty1; bound_ty = bound_ty1; pos = pos1; eid = eid1 }
+    Typing_local_types.
+      { ty = ty2; bound_ty = bound_ty2; pos = pos2; eid = eid2 } =
+  let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
+  let (env, bound_ty) =
+    match (bound_ty1, bound_ty2) with
+    | (None, None) -> (env, None)
+    | (Some ty, None)
+    | (None, Some ty) ->
+      (env, Some ty)
+    | (Some ty1, Some ty2) ->
+      let (env, ty) =
+        Typing_intersection.intersect
+          ~r:(Typing_defs_core.get_reason ty1)
+          env
+          ty1
+          ty2
+      in
+      (env, Some ty)
+  in
+  let pos =
+    if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
+      pos1
+    else if phys_equal ty ty2 || Pos.equal Pos.none pos1 then
+      pos2
+    else
+      Pos.none
+  in
   let eid =
     if Ident.equal eid1 eid2 then
       eid1
     else
       Ident.tmp ()
   in
-  let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
-  Typing_local_types.
-    ( env,
-      {
-        ty;
-        pos =
-          (if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
-            pos1
-          else if phys_equal ty ty2 || Pos.equal Pos.none pos1 then
-            pos2
-          else
-            Pos.none);
-        eid;
-      } )
+  let (env, err_opt) =
+    match bound_ty with
+    | None -> (env, None)
+    | Some bound_ty ->
+      Typing_subtype.sub_type
+        env
+        ty
+        bound_ty
+        (Some
+           (Typing_error.Reasons_callback.unify_error_at
+              (if Pos.equal Pos.none pos then
+                pos1
+              else
+                pos)))
+  in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
+  Typing_local_types.(env, { ty; bound_ty; pos; eid })
 
 let get_cont_option env cont =
   let local_types = get_all_locals env in

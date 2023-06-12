@@ -339,7 +339,14 @@ val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 
 val all_continuations : env -> Typing_continuations.t list
 
-val set_local : ?immutable:bool -> env -> Local_id.t -> locl_ty -> Pos.t -> env
+val set_local :
+  ?immutable:bool ->
+  bound_ty:locl_ty option ->
+  env ->
+  Local_id.t ->
+  locl_ty ->
+  Pos.t ->
+  env
 
 val is_using_var : env -> Local_id.t -> bool
 
@@ -347,9 +354,7 @@ val set_using_var : env -> Local_id.t -> env
 
 val unset_local : env -> Local_id.t -> env
 
-val get_local : env -> Local_id.t -> locl_ty
-
-val get_local_pos : env -> Local_id.t -> locl_ty * Pos.t
+val get_local : env -> Local_id.t -> Typing_local_types.local
 
 val get_locals :
   ?quiet:bool -> env -> 'a Aast.capture_lid list -> Typing_local_types.t
@@ -360,7 +365,7 @@ val set_fake_members : env -> Typing_fake_members.t -> env
 
 val is_local_defined : env -> Local_id.t -> bool
 
-val get_local_check_defined : env -> Aast.lid -> locl_ty
+val get_local_check_defined : env -> Aast.lid -> Typing_local_types.local
 
 val set_local_expr_id :
   env ->

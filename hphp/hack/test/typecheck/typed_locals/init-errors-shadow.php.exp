@@ -1,0 +1,12 @@
+File "init-errors-shadow.php", line 6, characters 3-25:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 5, characters 12-17:
+  Expected `string`
+  File "init-errors-shadow.php", line 6, characters 12-19:
+  But got `arraykey`
+File "init-errors-shadow.php", line 13, characters 5-27:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 11, characters 12-17:
+  Expected `string`
+  File "init-errors-shadow.php", line 13, characters 14-21:
+  But got `arraykey`

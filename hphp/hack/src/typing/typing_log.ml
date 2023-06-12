@@ -383,8 +383,13 @@ let continuations_map_as_value f m =
        m
        SMap.empty)
 
-let local_as_value env Typing_local_types.{ ty; pos = _; eid } =
-  Atom (Printf.sprintf "%s [expr_id=%d]" (Pr.debug env ty) eid)
+let local_as_value env Typing_local_types.{ ty; bound_ty; pos = _; eid } =
+  let bound =
+    match bound_ty with
+    | None -> ""
+    | Some ty -> "(let : " ^ Pr.debug env ty ^ ")"
+  in
+  Atom (Printf.sprintf "%s %s [expr_id=%d]" (Pr.debug env ty) bound eid)
 
 let per_cont_env_as_value env per_cont_env =
   continuations_map_as_value

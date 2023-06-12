@@ -416,7 +416,8 @@ let annot_map env =
   | Some { Typing_per_cont_env.local_types; _ } ->
     Some
       (Local_id.Map.map
-         (fun Typing_local_types.{ ty; pos; eid = _expr_id } -> (pos, ty))
+         (fun Typing_local_types.{ ty; bound_ty = _; pos; eid = _expr_id } ->
+           (pos, ty))
          local_types)
   | None -> None
 
@@ -527,7 +528,7 @@ let check_expected_ty message env inferred_ty expected =
   @@ check_expected_ty_res ~coerce_for_op:false message env inferred_ty expected
 
 (* Set a local; must not be already assigned if it is a using variable *)
-let set_local ?(is_using_clause = false) env (pos, x) ty =
+let set_local ?(is_using_clause = false) ~bound_ty env (pos, x) ty =
   if Env.is_using_var env x then
     Typing_error_utils.add_typing_error
       ~env
@@ -537,7 +538,7 @@ let set_local ?(is_using_clause = false) env (pos, x) ty =
             Primary.Duplicate_using_var pos
           else
             Primary.Illegal_disposable { pos; verb = `assigned }));
-  let env = Env.set_local env x ty pos in
+  let env = Env.set_local ~bound_ty env x ty pos in
   if is_using_clause then
     Env.set_using_var env x
   else
@@ -921,14 +922,16 @@ let closure_check_param env param =
         hint_pos
         Reason.URhint
         env
-        paramty
+        paramty.Typing_local_types.ty
         (MakeType.unenforced hty)
         Typing_error.Callback.unify_error
     in
     Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
     env
 
-let stash_conts_for_closure env p is_anon (captured : Tast.capture_lid list) f =
+let stash_conts_for_closure
+    env p is_anon (captured : Typing_local_types.local Aast.capture_lid list) f
+    =
   let with_ty_for_lid ((_, name) as lid) = (Env.get_local env name, lid) in
 
   let captured =
@@ -1092,12 +1095,51 @@ let coerce_to_throwable pos env exn_ty =
     { et_type = throwable_ty; et_enforced = Enforced }
     Typing_error.Callback.unify_error
 
-let set_valid_rvalue p env x ty =
-  let env = set_local env (p, x) ty in
+(* Bind lvar to ty and, if a hint is supplied, ty must be a subtype of it.
+   If there is already a binding for lvar, make sure that its explicit
+   type bound (if it has one) is respected. *)
+let set_valid_rvalue ?(is_using_clause = false) p env lvar hint ty =
+  let (env, hty, sub_bound_ty) =
+    match hint with
+    | None -> (env, None, ty)
+    | Some hint ->
+      let ((env, err1), hty) =
+        Phase.localize_hint_no_subst env ~ignore_errors:false hint
+      in
+      let (env, err2) =
+        Typing_subtype.sub_type
+          env
+          ty
+          hty
+          (Some (Typing_error.Reasons_callback.unify_error_at p))
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
+      (env, Some hty, hty)
+  in
+  let env =
+    if Env.is_local_defined env lvar then (
+      let local = Env.get_local env lvar in
+      match local.Typing_local_types.bound_ty with
+      | None -> env
+      | Some old_bound_ty ->
+        let (env, err) =
+          Typing_subtype.sub_type
+            env
+            sub_bound_ty
+            old_bound_ty
+            (Some (Typing_error.Reasons_callback.unify_error_at p))
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
+        env
+    ) else
+      env
+  in
+  let env = set_local ~is_using_clause ~bound_ty:hty env (p, lvar) ty in
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
    *)
-  match Env.set_local_expr_id env x (Ident.tmp ()) with
+  match Env.set_local_expr_id env lvar (Ident.tmp ()) with
   | Ok env -> env
   | Error (env, err) ->
     Typing_error_utils.add_typing_error ~env err;
@@ -1598,6 +1640,12 @@ let strip_supportdyn ty =
   | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn -> ty
   | _ -> ty
 
+let get_bound_ty_for_lvar env e =
+  match e with
+  | (_, _, Lvar (_, lid)) ->
+    (Typing_env.get_local env lid).Typing_local_types.bound_ty
+  | _ -> None
+
 (* This function captures the common bits of logic behind refinement
  * of the type of a local variable or a class member variable as a
  * result of a dynamic check (e.g., nullity check, simple type check
@@ -1618,7 +1666,12 @@ let refine_lvalue_type env ((ty, _, _) as te) ~refine =
   match localopt with
   | Some lid ->
     let (env, ty) = refine env ty in
-    (set_local env lid ty, Local_id.Set.singleton (snd lid))
+    let bound_ty = get_bound_ty_for_lvar env e in
+    (* Refining the type of a typed local shouldn't change it's given bound.
+       We assume that the supplied refine function returns a subtype of the
+       type it's given, so that the refined type remains a subtype of the
+       bound *)
+    (set_local ~bound_ty env lid ty, Local_id.Set.singleton (snd lid))
   | None -> (env, Local_id.Set.empty)
 
 let rec condition_nullity ~nonnull (env : env) te =
@@ -1953,7 +2006,9 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
         (fst3 ivar)
         hint_ty
     in
-    (set_local env locl_ivar refined_ty, Local_id.Set.singleton (snd locl_ivar))
+    let bound_ty = get_bound_ty_for_lvar env ivar in
+    ( set_local ~bound_ty env locl_ivar refined_ty,
+      Local_id.Set.singleton (snd locl_ivar) )
   | None -> (env, lset)
 
 let refine_for_equality pos env te ty =
@@ -1972,7 +2027,9 @@ let refine_for_equality pos env te ty =
         (fst3 te)
         ty
     in
-    (set_local env locl_ivar refined_ty, Local_id.Set.singleton (snd locl_ivar))
+    let bound_ty = get_bound_ty_for_lvar env te in
+    ( set_local ~bound_ty env locl_ivar refined_ty,
+      Local_id.Set.singleton (snd locl_ivar) )
   | None -> (env, Local_id.Set.empty)
 
 type legacy_arrays =
@@ -2391,8 +2448,10 @@ let rec bind_param
     | _ -> None
   in
   let id = Local_id.make_unscoped param.param_name in
-
-  let env = Env.set_local ~immutable env id ty1 param.param_pos in
+  (* Parameters are not typed locals and so have no bound *)
+  let env =
+    Env.set_local ~bound_ty:None ~immutable env id ty1 param.param_pos
+  in
   let env = Env.set_param env id (ty1, param.param_pos, out_ty) in
   let env =
     if has_accept_disposable_attribute param then
@@ -2528,16 +2587,8 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
       expr ~is_using_clause:true env e ~allow_awaitable:(*?*) false
     in
     let env = has_dispose_method env has_await pos e ty in
-    let env = set_local ~is_using_clause:true env lvar ty in
-    (* We are assigning a new value to the local variable, so we need to
-     * generate a new expression id
-     *)
     let env =
-      match Env.set_local_expr_id env (snd lvar) (Ident.tmp ()) with
-      | Ok env -> env
-      | Error (env, err) ->
-        Typing_error_utils.add_typing_error err ~env;
-        env
+      set_valid_rvalue ~is_using_clause:true (fst lvar) env (snd lvar) None ty
     in
     let (env, inner_tast) =
       TUtils.make_simplify_typed_expr env lvar_pos ty (Aast.Lvar lvar)
@@ -2991,10 +3042,16 @@ and stmt_ env pos st =
   | Break ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
     (env, Aast.Break)
-  | Declare_local (lvar, hint, exp) ->
-    let (env, te, _ty) = expr env exp in
-    Errors.internal_error pos "typed local variables not implemented";
-    (env, Aast.Declare_local (lvar, hint, te))
+  | Declare_local ((p, lvar), hint, exp) ->
+    let hint =
+      if TypecheckerOptions.everything_sdt env.genv.tcopt then
+        (fst hint, Hlike hint)
+      else
+        hint
+    in
+    let (env, te, ety) = expr env exp in
+    let env = set_valid_rvalue p env lvar (Some hint) ety in
+    (env, Aast.Declare_local ((p, lvar), hint, te))
   | Block _
   | Markup _ ->
     failwith
@@ -3172,7 +3229,7 @@ and catch catchctx env (sid, exn_lvar, b) =
   let (env, ty_err_opt) = coerce_to_throwable ety_p env ety in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
   let (p, x) = exn_lvar in
-  let env = set_valid_rvalue p env x ety in
+  let env = set_valid_rvalue p env x None ety in
   let (env, tb) = block env b in
   (env, (env.lenv, (sid, exn_lvar, tb)))
 
@@ -3185,7 +3242,7 @@ and bind_as_expr env p ty1 ty2 aexpr =
     let (env, te, _, _) = assign p env ev p ty2 in
     (env, Aast.Await_as_v (p, te))
   | As_kv ((_, p, Lvar ((_, k) as id)), ev) ->
-    let env = set_valid_rvalue p env k ty1 in
+    let env = set_valid_rvalue p env k None ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
     let (env, tk) = TUtils.make_simplify_typed_expr env p ty1 (Aast.Lvar id) in
     (env, Aast.As_kv (tk, te))
@@ -3194,7 +3251,7 @@ and bind_as_expr env p ty1 ty2 aexpr =
     let (env, tk) = TUtils.make_simplify_typed_expr env p ty1 k in
     (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
-    let env = set_valid_rvalue p env k ty1 in
+    let env = set_valid_rvalue p env k None ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
     let (env, tk) = TUtils.make_simplify_typed_expr env p1 ty1 (Aast.Lvar id) in
     (env, Aast.Await_as_kv (p, tk, te))
@@ -3944,7 +4001,8 @@ and expr_
         Env.get_local env this
     in
     let r = Reason.Rwitness p in
-    let ty = mk (r, get_node ty) in
+    (* $this isn't a typed local and so has no bound *)
+    let ty = mk (r, get_node ty.Typing_local_types.ty) in
     make_result env p Aast.This ty
   | True -> make_result env p Aast.True (MakeType.bool (Reason.Rwitness p))
   | False -> make_result env p Aast.False (MakeType.bool (Reason.Rwitness p))
@@ -4182,7 +4240,7 @@ and expr_
   | Dollardollar id ->
     let ty = Env.get_local_check_defined env id in
     let env = might_throw env in
-    make_result env p (Aast.Dollardollar id) ty
+    make_result env p (Aast.Dollardollar id) ty.Typing_local_types.ty
   | Lvar ((_, x) as id) ->
     if not accept_using_var then check_escaping_var env id;
     let ty =
@@ -4191,7 +4249,7 @@ and expr_
       else
         Env.get_local env x
     in
-    make_result env p (Aast.Lvar id) ty
+    make_result env p (Aast.Lvar id) ty.Typing_local_types.ty
   | Tuple el ->
     let (env, expected) =
       expand_expected_and_get_node ~pessimisable_builtin:false env expected
@@ -4521,16 +4579,19 @@ and expr_
     let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
     let dd_old_ty =
       if Env.is_local_defined env dd_var then
-        Some (Env.get_local_pos env dd_var)
+        Some (Env.get_local env dd_var)
       else
         None
     in
-    let env = Env.set_local env dd_var ty1 Pos.none in
+    (* $$ isn't a typed local so it doesn't need a bound *)
+    let env = Env.set_local ~bound_ty:None env dd_var ty1 Pos.none in
     let (env, te2, ty2) = expr env e2 ~allow_awaitable:true in
     let env =
       match dd_old_ty with
       | None -> Env.unset_local env dd_var
-      | Some (ty, pos) -> Env.set_local env dd_var ty pos
+      | Some local ->
+        Typing_local_types.(
+          Env.set_local ~bound_ty:local.bound_ty env dd_var local.ty local.pos)
     in
     let (env, te, ty) = make_result env p (Aast.Pipe (e0, te1, te2)) ty2 in
     (env, te, ty)
@@ -4932,7 +4993,22 @@ and expr_
         let (env, locl) = make_a_local_of ~include_this:true env e in
         let env =
           match locl with
-          | Some ivar -> set_local env ivar hint_ty
+          | Some ivar ->
+            let bound_ty = get_bound_ty_for_lvar env e in
+            let env =
+              match bound_ty with
+              | None -> env
+              | Some bound_ty ->
+                (* If the typed local variable will have its type replaced by dynamic,
+                   we need to check that the bound isn't violated. *)
+                let (env, err) =
+                  SubType.sub_type ~coerce:None env hint_ty bound_ty
+                  @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+                in
+                Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
+                env
+            in
+            set_local ~bound_ty env ivar hint_ty
           | None -> env
         in
         ((env, ty_err_opt), hint_ty)
@@ -4945,7 +5021,9 @@ and expr_
         match locl with
         | Some ((ivar_pos, _) as ivar) ->
           let (env, hint_ty) = refine_type env ivar_pos expr_ty hint_ty in
-          let env = set_local env ivar hint_ty in
+          let bound_ty = get_bound_ty_for_lvar env e in
+          (* refine_type returns a subtype of the expr type, and hence cannot violate the bound *)
+          let env = set_local ~bound_ty env ivar hint_ty in
           ((env, None), hint_ty)
         | None ->
           let (_, e_p, _) = e in
@@ -5733,7 +5811,9 @@ and closure_make
          This avoid unnecessary overhead in the most common case, i.e.,
          when a closure does not need a different (usually smaller)
          set of capabilities. *)
-      (env, Env.get_local env Typing_coeffects.local_capability_id)
+      ( env,
+        (Env.get_local env Typing_coeffects.local_capability_id)
+          .Typing_local_types.ty )
     | (_, _) ->
       let (env, cap_ty, unsafe_cap_ty) =
         Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs f.f_span
@@ -6017,6 +6097,9 @@ and closure_make
     }
   in
   let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
+  let idl_ty =
+    List.map idl ~f:(fun (local, lid) -> (local.Typing_local_types.ty, lid))
+  in
   let (env, te) =
     TUtils.make_simplify_typed_expr
       env
@@ -6026,11 +6109,11 @@ and closure_make
         Aast.Efun
           {
             ef_fun = tfun_;
-            ef_use = idl;
+            ef_use = idl_ty;
             ef_closure_class_name = closure_class_name;
           }
       else
-        Aast.Lfun (tfun_, idl))
+        Aast.Lfun (tfun_, idl_ty))
   in
   let env = Env.set_tyvar_variance env ty in
   (env, (te, ft, support_dynamic_type))
@@ -6076,10 +6159,16 @@ and expression_tree env p et =
                    })
         in
         let nothing_ty = MakeType.nothing Reason.Rnone in
-        Env.set_local env dollardollar_var nothing_ty Pos.none
+        Env.set_local ~bound_ty:None env dollardollar_var nothing_ty Pos.none
       else
-        let (dd_ty, dd_pos) = Env.get_local_pos env dd_var in
-        Env.set_local env dollardollar_var dd_ty dd_pos
+        let dd_local = Env.get_local env dd_var in
+        Typing_local_types.(
+          Env.set_local
+            ~bound_ty:None
+            env
+            dollardollar_var
+            dd_local.ty
+            dd_local.pos)
     | None -> env
   in
 
@@ -6583,7 +6672,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     in
     (match e1 with
     | (_, _, Lvar ((_, x) as id)) ->
-      let env = set_valid_rvalue p env x ty2 in
+      let env = set_valid_rvalue p env x None ty2 in
       let (_, p1, _) = e1 in
       let (env, te, ty) = make_result env p1 (Aast.Lvar id) ty2 in
       (env, te, ty, None)
@@ -6727,7 +6816,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           let (env, refined_ty) =
             Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
           in
-          let env = set_valid_rvalue p env local refined_ty in
+          let env = set_valid_rvalue p env local None refined_ty in
           (env, te1, ty2, rval_ty_mismatch_opt)
         | _ -> (env, te1, ty2, rval_ty_mismatch_opt)
       end
@@ -6755,7 +6844,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, refined_ty) =
         Inter.intersect env ~r:(Reason.Rwitness p) declared_ty ty2
       in
-      let env = set_valid_rvalue p env local refined_ty in
+      let env = set_valid_rvalue p env local None refined_ty in
       (env, te1, ty2, rval_err_opt)
     | (_, _, Obj_get _)
     | (_, _, Class_get _) ->
@@ -7470,7 +7559,7 @@ and dispatch_call
               let (env, shape_ty) =
                 Typing_shapes.remove_key p env shape_ty field
               in
-              let env = set_valid_rvalue p env lvar shape_ty in
+              let env = set_valid_rvalue p env lvar None shape_ty in
               (env, res)
             | (_, shape_pos, _) ->
               Typing_error_utils.add_typing_error
@@ -9364,9 +9453,10 @@ and call
             (env, None)
           else
             let env_capability =
-              Env.get_local_check_defined
-                env
-                (expr_pos, Typing_coeffects.capability_id)
+              (Env.get_local_check_defined
+                 env
+                 (expr_pos, Typing_coeffects.capability_id))
+                .Typing_local_types.ty
             in
             let base_error =
               Typing_error.Primary.(
@@ -10107,8 +10197,8 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
       let env =
         if not (Env.is_local_defined env x) then
           (* If the Lvar wasn't in the environment, add it in to avoid reporting
-             subsequent errors *)
-          set_local env (p, x) ty1
+             subsequent errors. It has no bound since it wasn't a typed local. *)
+          set_local ~bound_ty:None env (p, x) ty1
         else
           env
       in

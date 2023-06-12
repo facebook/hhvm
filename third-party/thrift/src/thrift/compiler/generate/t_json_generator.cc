@@ -475,7 +475,7 @@ void t_json_generator::print_structured_annotations(
   indent(f_out_) << "\"structured_annotations\" : {";
   indent_up();
   bool first = true;
-  std::map<std::string, std::string>::const_iterator iter;
+
   for (const auto& annotation : annotations) {
     if (!std::exchange(first, false)) {
       f_out_ << ",";

@@ -500,7 +500,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
     if (init_val != nullptr && isPersistentHandle(h)) {
       memcpy(handleToPtr<void, Mode::Persistent, false>(h), init_val, size);
     }
-    if (handle.exchange(h, std::memory_order_relaxed) ==
+    if (handle.exchange(h, std::memory_order_acq_rel) ==
         kBeingBoundWithWaiters) {
       futex_wake(&handle, INT_MAX);
     }
@@ -512,7 +512,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                                    std::memory_order_relaxed,
                                    std::memory_order_relaxed);
   }
-  while (handle.load(std::memory_order_relaxed) == kBeingBoundWithWaiters) {
+  while (handle.load(std::memory_order_acquire) == kBeingBoundWithWaiters) {
     futex_wait(&handle, kBeingBoundWithWaiters);
   }
   assertx(isHandleBound(handle.load(std::memory_order_relaxed)));

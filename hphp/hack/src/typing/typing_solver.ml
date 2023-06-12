@@ -278,12 +278,22 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
           lower_bounds
           env
       in
-      (* Now actually make the assignment var := ty, and remove var from tvenv *)
-      let (env, bind_ty_err) = bind env var ty in
-      let ty_err_opt =
-        Option.merge freshen_ty_err bind_ty_err ~f:Typing_error.both
+      (* In autocomplete mode, we do not solve to nothing, as it makes a lot
+       * of checks in the autocompletion fail for bad reasons (especially
+       * around invariant generics. Leave them be to try to get leave more
+       * flexibility to type filers *)
+      let autocomplete_mode =
+        TypecheckerOptions.tco_autocomplete_mode env.genv.tcopt
       in
-      (env, ty_err_opt)
+      if autocomplete_mode && TUtils.is_nothing env ty then
+        (env, freshen_ty_err)
+      else
+        (* Now actually make the assignment var := ty, and remove var from tvenv *)
+        let (env, bind_ty_err) = bind env var ty in
+        let ty_err_opt =
+          Option.merge freshen_ty_err bind_ty_err ~f:Typing_error.both
+        in
+        (env, ty_err_opt)
   in
   (Env.log_env_change "bind_to_lower_bound" old_env env, ty_err_opt)
 

@@ -8,7 +8,7 @@
 
 (** Error case for [init]. [stopped_reason] is a human-facing response,
 and [Lsp.Error.t] contains structured telemetry data. *)
-type init_error = ClientIdeMessage.stopped_reason * Lsp.Error.t
+type init_error = ClientIdeMessage.rich_error * Lsp.Error.t
 
 (** Success case for [init]. *)
 type init_ok = {

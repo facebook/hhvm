@@ -1776,19 +1776,21 @@ let report_connect_end (ienv : In_init_env.t) : state =
     in
     Main_loop menv)
 
-let announce_ide_failure (error_data : ClientIdeMessage.stopped_reason) :
-    unit Lwt.t =
+let announce_ide_failure (error_data : ClientIdeMessage.rich_error) : unit Lwt.t
+    =
   let open ClientIdeMessage in
+  let debug_details =
+    Printf.sprintf
+      "%s - %s"
+      error_data.category
+      (Option.value_map error_data.data ~default:"" ~f:Hh_json.json_to_string)
+  in
   log
     "IDE services could not be initialized.\n%s\n%s"
     error_data.long_user_message
-    error_data.debug_details;
-
+    debug_details;
   let input =
-    Printf.sprintf
-      "%s\n\n%s"
-      error_data.long_user_message
-      error_data.debug_details
+    Printf.sprintf "%s\n\n%s" error_data.long_user_message debug_details
   in
   let%lwt upload_result =
     Clowder_paste.clowder_upload_and_get_url ~timeout:10. input
@@ -1799,7 +1801,7 @@ let announce_ide_failure (error_data : ClientIdeMessage.stopped_reason) :
     | Error message ->
       Printf.sprintf
         "\n\nMore details:\n%s\n\nTried to upload those details but it didn't work...\n%s"
-        error_data.debug_details
+        debug_details
         message
   in
   Lsp_helpers.log_error to_stdout (error_data.long_user_message ^ append_to_log);
@@ -1889,7 +1891,7 @@ let stop_ide_service
     "Stopping IDE service process: %s"
     (ClientIdeService.Stop_reason.to_log_string stop_reason);
   let%lwt () =
-    ClientIdeService.stop ide_service ~tracking_id ~stop_reason ~exn:None
+    ClientIdeService.stop ide_service ~tracking_id ~stop_reason ~e:None
   in
   Lwt.return_unit
 

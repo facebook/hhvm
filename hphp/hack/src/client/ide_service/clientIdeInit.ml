@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-type init_error = ClientIdeMessage.stopped_reason * Lsp.Error.t
+type init_error = ClientIdeMessage.rich_error * Lsp.Error.t
 
 type init_ok = {
   naming_table: Naming_table.t;
@@ -125,6 +125,16 @@ let init_via_initialize_or_download
     | Error load_error ->
       (* We'll turn that load_error into a user-facing [reason], and a
          programmatic error [e] for future telemetry *)
+      let data =
+        Some
+          (Hh_json.JSON_Object
+             [
+               ( "debug_details",
+                 Hh_json.string_
+                   (Saved_state_loader.LoadError.debug_details_of_error
+                      load_error) );
+             ])
+      in
       let reason =
         ClientIdeMessage.
           {
@@ -136,8 +146,8 @@ let init_via_initialize_or_download
                 load_error;
             long_user_message =
               Saved_state_loader.LoadError.long_user_message_of_error load_error;
-            debug_details =
-              Saved_state_loader.LoadError.debug_details_of_error load_error;
+            category = Saved_state_loader.LoadError.category_of_error load_error;
+            data;
             is_actionable =
               Saved_state_loader.LoadError.is_error_actionable load_error;
           }
@@ -145,24 +155,18 @@ let init_via_initialize_or_download
       let e =
         {
           Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message = reason.ClientIdeMessage.medium_user_message;
-          data =
-            Some
-              (Hh_json.JSON_Object
-                 [
-                   ( "debug_details",
-                     Hh_json.string_ reason.ClientIdeMessage.debug_details );
-                 ]);
+          message = Saved_state_loader.LoadError.category_of_error load_error;
+          data;
         }
       in
       Lwt.return_error (reason, e)
   with
   | exn ->
-    let exn = Exception.wrap exn in
-    ClientIdeUtils.log_bug "load_exn" ~exn ~telemetry:false;
+    let e = Exception.wrap exn in
+    ClientIdeUtils.log_bug "load_exn" ~e ~telemetry:false;
     (* We need both a user-facing "reason" and an internal error "e" *)
-    let reason = ClientIdeUtils.make_bug_reason "load_exn" ~exn in
-    let e = ClientIdeUtils.make_bug_error "load_exn" ~exn in
+    let reason = ClientIdeUtils.make_rich_error "load_exn" ~e in
+    let e = ClientIdeUtils.to_lsp_error reason in
     Lwt.return_error (reason, e)
 
 (** Performs a full index of [root], building a naming table in [output]
@@ -219,15 +223,13 @@ let init_via_build
            [("naming_table_builder_exit_status", Hh_json.int_ exit_status)])
     in
     let reason =
-      ClientIdeUtils.make_bug_reason "full_index_non_zero_exit" ~data
+      ClientIdeUtils.make_rich_error "full_index_non_zero_exit" ~data
     in
-    let error =
-      ClientIdeUtils.make_bug_error "full_index_non_zero_exit" ~data
-    in
+    let error = ClientIdeUtils.to_lsp_error reason in
     Lwt.return_error (reason, error)
   | Error e ->
-    let reason = ClientIdeUtils.make_bug_reason "full_index_exn" ~exn:e in
-    let e = ClientIdeUtils.make_bug_error "full_index_exn" ~exn:e in
+    let reason = ClientIdeUtils.make_rich_error "full_index_exn" ~e in
+    let e = ClientIdeUtils.to_lsp_error reason in
     Lwt.return_error (reason, e)
 
 let init

@@ -247,24 +247,24 @@ module Processing_files = struct
   let to_string (t : t) : string = Printf.sprintf "%d/%d" t.processed t.total
 end
 
-(** This is a user-facing structure to explain why ClientIde isn't working. *)
-type stopped_reason = {
-  (* max 20 chars, for status bar. Will be prepended by "Hack:" *)
+(** This can be used for user-facing messages as well as LSP error responses. *)
+type rich_error = {
   short_user_message: string;
-  (* max 10 words, for tooltip and alert. Will be postpended by " See <log>" *)
+      (** max 20 chars, for status bar. Will be prepended by "Hack:" *)
   medium_user_message: string;
-  (* should we have window/showMessage, i.e. an alert? *)
+      (** max 10 words, for tooltip and alert. Will be postpended by " See <log>" *)
   is_actionable: bool;
-  (* max 5 lines, for window/logMessage, i.e. Output>Hack window. Will be postpended by "\nDetails: <url>" *)
+      (** used to decide if we hould show window/showMessage, i.e. an alert *)
   long_user_message: string;
-  (* for experts. Will go in Hh_logger.log, and will be uploaded *)
-  debug_details: string;
+      (** max 5 lines, for window/logMessage, i.e. Output>Hack window. Will be postpended by "\nDetails: <url>" *)
+  category: string;  (** used in LSP Error message and telemetry *)
+  data: Hh_json.json option;  (** used in LSP Error message and telemetry *)
 }
 
 type notification =
   | Full_index_fallback
       (** The daemon is falling back to performing a full index of the repo to build a naming table.*)
-  | Done_init of (Processing_files.t, stopped_reason) result
+  | Done_init of (Processing_files.t, rich_error) result
   | Processing_files of Processing_files.t
   | Done_processing
 

@@ -11,19 +11,16 @@
 the logfile, and optionally also record telemetry. *)
 val log_bug :
   ?data:Hh_json.json option ->
-  ?exn:Exception.t ->
+  ?e:Exception.t ->
   telemetry:bool ->
   string ->
   unit
 
-(** for when we encountered an internal bug and want to return an Lsp error.
-These errors are never user-facing. *)
-val make_bug_error :
-  ?data:Hh_json.json option -> ?exn:Exception.t -> string -> Lsp.Error.t
-
 (** for when we encountered an internal bug and want a user-facing problem report. *)
-val make_bug_reason :
+val make_rich_error :
   ?data:Hh_json.json option ->
-  ?exn:Exception.t ->
+  ?e:Exception.t ->
   string ->
-  ClientIdeMessage.stopped_reason
+  ClientIdeMessage.rich_error
+
+val to_lsp_error : ClientIdeMessage.rich_error -> Lsp.Error.t

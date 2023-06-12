@@ -172,7 +172,8 @@ type state =
       (** We're working on the init request. We're still in
       the process of loading the saved state. *)
   | Initialized of istate  (** Finished work on init request. *)
-  | Failed_init of Lsp.Error.t  (** Failed request, with root cause *)
+  | Failed_init of ClientIdeMessage.rich_error
+      (** Failed request, with root cause *)
 
 type t = {
   message_queue: message_queue;
@@ -192,7 +193,8 @@ let state_to_log_string (state : state) : string =
     Printf.sprintf "During_init(%s)" (files_to_log_string dfiles)
   | Initialized { ifiles; _ } ->
     Printf.sprintf "Initialized(%s)" (files_to_log_string ifiles)
-  | Failed_init e -> Printf.sprintf "Failed_init(%s)" e.Lsp.Error.message
+  | Failed_init reason ->
+    Printf.sprintf "Failed_init(%s)" reason.ClientIdeMessage.category
 
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
@@ -251,8 +253,8 @@ let remove_hhi (state : state) : unit =
     log "Removing hhi directory %s..." hhi_root;
     (try Sys_utils.rm_dir_tree hhi_root with
     | exn ->
-      let exn = Exception.wrap exn in
-      ClientIdeUtils.log_bug "remove_hhi" ~exn ~telemetry:true)
+      let e = Exception.wrap exn in
+      ClientIdeUtils.log_bug "remove_hhi" ~e ~telemetry:true)
 
 (** Helper called to process a batch of file changes. Updates the naming table, and invalidates the decl and tast caches for the changes. *)
 let batch_update_naming_table_and_invalidate_caches
@@ -444,7 +446,7 @@ let initialize2
     in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
-  | Error (reason, e) ->
+  | Error (reason, _e) ->
     log_debug "initialize2.error";
     let%lwt () =
       write_message
@@ -454,7 +456,7 @@ let initialize2
              (ClientIdeMessage.Done_init (Error reason)))
     in
     remove_hhi (During_init dstate);
-    Lwt.return (Failed_init e)
+    Lwt.return (Failed_init reason)
 
 (** This funtion is about papering over a bug. Sometimes, rarely, we're
 failing to receive DidOpen messages from clientLsp. Our model is to
@@ -697,12 +699,12 @@ let handle_request
       Lwt.return (During_init dstate, Ok ())
     with
     | exn ->
-      let exn = Exception.wrap exn in
-      let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
+      let e = Exception.wrap exn in
+      let reason = ClientIdeUtils.make_rich_error "initialize1" ~e in
       (* Our caller has an exception handler. But we must handle this ourselves
          to change state to Failed_init; our caller's handler doesn't change state. *)
       (* TODO: remove_hhi *)
-      Lwt.return (Failed_init e, Error e)
+      Lwt.return (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
   end
   | (_, Initialize_from_saved_state _) ->
     failwith ("Unexpected init in " ^ state_to_log_string state)
@@ -806,7 +808,8 @@ let handle_request
       }
     in
     Lwt.return (During_init dstate, Error e)
-  | (Failed_init e, _) -> Lwt.return (Failed_init e, Error e)
+  | (Failed_init reason, _) ->
+    Lwt.return (Failed_init reason, Error (ClientIdeUtils.to_lsp_error reason))
   | (Pending_init, _) ->
     failwith
       (Printf.sprintf
@@ -1335,9 +1338,9 @@ let handle_one_message_exn
           (* Our caller has an exception handler which logs the exception.
              But we instead must fulfil our contract of responding to the client,
              even if we have an exception. Hence we need our own handler here. *)
-          let exn = Exception.wrap exn in
-          let e = ClientIdeUtils.make_bug_error "handle_request" ~exn in
-          Lwt.return (state, Error e)
+          let e = Exception.wrap exn in
+          let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
+          Lwt.return (state, Error (ClientIdeUtils.to_lsp_error reason))
       in
       let%lwt () =
         write_message
@@ -1399,9 +1402,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         Lwt.return state
       with
       | exn ->
-        let exn = Exception.wrap exn in
-        ClientIdeUtils.log_bug "handle_one_message" ~exn ~telemetry:true;
-        if is_outfd_write_error exn then exit 1;
+        let e = Exception.wrap exn in
+        ClientIdeUtils.log_bug "handle_one_message" ~e ~telemetry:true;
+        if is_outfd_write_error e then exit 1;
         (* if out_fd is down then there's no use continuing. *)
         Lwt.return_some state
     in
@@ -1421,8 +1424,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     Lwt.return_unit
   with
   | exn ->
-    let exn = Exception.wrap exn in
-    ClientIdeUtils.log_bug "fatal clientIdeDaemon" ~exn ~telemetry:true;
+    let e = Exception.wrap exn in
+    ClientIdeUtils.log_bug "fatal clientIdeDaemon" ~e ~telemetry:true;
     Lwt.return_unit
 
 let daemon_main

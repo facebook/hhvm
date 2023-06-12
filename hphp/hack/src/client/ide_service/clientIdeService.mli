@@ -30,7 +30,7 @@ module Status : sig
         one or more existing requests. The telemetry items are information
         about each received request currently being performed. *)
     | Ready  (** The IDE services are available. *)
-    | Stopped of ClientIdeMessage.stopped_reason
+    | Stopped of ClientIdeMessage.rich_error
         (** The IDE services are not available. *)
 end
 
@@ -64,7 +64,7 @@ val initialize_from_saved_state :
   config:(string * string) list ->
   ignore_hh_version:bool ->
   open_files:Path.t list ->
-  (unit, ClientIdeMessage.stopped_reason) Lwt_result.t
+  (unit, ClientIdeMessage.rich_error) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)
@@ -77,7 +77,7 @@ val stop :
   t ->
   tracking_id:string ->
   stop_reason:Stop_reason.t ->
-  exn:Exception.t option ->
+  e:Exception.t option ->
   unit Lwt.t
 
 (** Make an RPC call to the IDE service. *)

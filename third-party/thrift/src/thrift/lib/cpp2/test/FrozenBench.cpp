@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <random>
+
 #include <folly/Benchmark.h>
 #include <folly/Conv.h>
 #include <folly/hash/Hash.h>
@@ -122,19 +124,21 @@ BENCHMARK_DRAW_LINE();
 
 const int nEntries = 10000000;
 auto entries = [] {
+  std::mt19937 gen;
   std::vector<std::pair<int, int>> entries(nEntries);
   for (size_t i = 0; i < nEntries; ++i) {
     entries[i].first = i;
   }
-  std::random_shuffle(entries.begin(), entries.end());
+  std::shuffle(entries.begin(), entries.end(), gen);
   for (int i = 0; i < nEntries; ++i) {
     entries[i].second = i;
   }
   return entries;
 }();
 auto shuffled = [] {
+  std::mt19937 gen;
   auto shuffled = entries;
-  std::random_shuffle(shuffled.begin(), shuffled.end());
+  std::shuffle(shuffled.begin(), shuffled.end(), gen);
   return shuffled;
 }();
 auto hmap = [] {

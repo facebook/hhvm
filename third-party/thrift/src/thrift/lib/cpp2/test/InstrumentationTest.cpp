@@ -16,7 +16,9 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdlib>
 #include <optional>
+#include <random>
 #include <thread>
 
 #include <folly/ThreadLocal.h>
@@ -913,7 +915,7 @@ TEST(ThriftServerDeathTest, getSnapshotOnServerShutdown) {
                 ASSERT_EQ(snapshot.requests.size(), 1);
                 // We exit here with a specific exit code to test that this
                 // code is reached
-                std::quick_exit(kExitCode);
+                std::exit(kExitCode);
               }),
               2s};
         };
@@ -1085,6 +1087,7 @@ TEST(RegistryTests, RootId) {
 }
 
 TEST(RegistryTests, ManyRegistries) {
+  std::mt19937 gen;
   // Verify we can create > 4096 RequestRegistries
   for (size_t i = 0; i < 50; i++) {
     std::vector<std::unique_ptr<RequestsRegistry>> registries;
@@ -1095,7 +1098,7 @@ TEST(RegistryTests, ManyRegistries) {
       registries.push_back(std::move(registry));
     }
     // destruction orders deal reusing request ids correctly
-    std::random_shuffle(registries.begin(), registries.end());
+    std::shuffle(registries.begin(), registries.end(), gen);
   }
 }
 

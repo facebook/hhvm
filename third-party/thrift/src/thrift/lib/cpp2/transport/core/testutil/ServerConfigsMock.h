@@ -78,7 +78,7 @@ class ServerConfigsMock : public ServerConfigs {
 
   bool getTosReflect() const override { return false; }
 
-  AdaptiveConcurrencyController& getAdaptiveConcurrencyController() {
+  AdaptiveConcurrencyController& getAdaptiveConcurrencyController() override {
     return adaptiveConcurrencyController_;
   }
   const AdaptiveConcurrencyController& getAdaptiveConcurrencyController()
@@ -132,7 +132,7 @@ class ServerConfigsMock : public ServerConfigs {
     return {};
   }
 
-  folly::Executor::KeepAlive<> getHandlerExecutorKeepAlive() const {
+  folly::Executor::KeepAlive<> getHandlerExecutorKeepAlive() const override {
     return {};
   }
 

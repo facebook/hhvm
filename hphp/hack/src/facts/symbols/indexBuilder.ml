@@ -32,7 +32,6 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
         | TKEnum -> SI_Enum
         | TKTrait -> SI_Trait
         | TKMixed -> SI_Mixed
-        | TKRecord -> SI_Unknown
         | TKTypeAlias -> SI_Typedef
         | _ -> SI_Unknown
       in

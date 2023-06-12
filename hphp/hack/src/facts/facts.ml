@@ -20,7 +20,6 @@ module InvSSet = Caml.Set.Make (InvStringKey)
 
 type type_kind =
   | TKClass
-  | TKRecord
   | TKInterface
   | TKEnum
   | TKTrait
@@ -28,20 +27,8 @@ type type_kind =
   | TKUnknown
   | TKMixed
 
-let is_tk_record = function
-  | TKRecord -> true
-  | TKClass
-  | TKInterface
-  | TKEnum
-  | TKTrait
-  | TKTypeAlias
-  | TKUnknown
-  | TKMixed ->
-    false
-
 let is_tk_unknown = function
   | TKUnknown -> true
-  | TKRecord
   | TKClass
   | TKInterface
   | TKEnum
@@ -52,7 +39,6 @@ let is_tk_unknown = function
 
 let is_tk_interface = function
   | TKInterface -> true
-  | TKRecord
   | TKClass
   | TKEnum
   | TKTrait
@@ -63,7 +49,6 @@ let is_tk_interface = function
 
 let is_tk_trait = function
   | TKTrait -> true
-  | TKRecord
   | TKClass
   | TKInterface
   | TKEnum
@@ -75,8 +60,6 @@ let is_tk_trait = function
 let type_kind_from_string s =
   if String.equal s "class" then
     TKClass
-  else if String.equal s "record" then
-    TKRecord
   else if String.equal s "interface" then
     TKInterface
   else if String.equal s "enum" then

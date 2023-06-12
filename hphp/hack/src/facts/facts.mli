@@ -15,15 +15,12 @@ module InvSSet : Caml.Set.S with type elt = InvStringKey.t
 
 type type_kind =
   | TKClass
-  | TKRecord
   | TKInterface
   | TKEnum
   | TKTrait
   | TKTypeAlias
   | TKUnknown
   | TKMixed
-
-val is_tk_record : type_kind -> bool
 
 val is_tk_interface : type_kind -> bool
 

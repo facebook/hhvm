@@ -74,7 +74,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
     case KindOfString:
       type = KindOfPersistentString;
-      // Intentional fall-through.
+      [[fallthrough]];
     case KindOfPersistentString:
       data.pstr = MakeUncountedString(data.pstr, env);
       break;
@@ -83,7 +83,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfDict:
     case KindOfKeyset:
       type = dt_with_persistence(type);
-      // Intentional fall-through.
+      [[fallthrough]];
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:

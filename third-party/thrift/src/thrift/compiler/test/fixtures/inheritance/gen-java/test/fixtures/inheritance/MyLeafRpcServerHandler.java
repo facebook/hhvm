@@ -91,11 +91,15 @@ public class MyLeafRpcServerHandler  extends test.fixtures.inheritance.MyNodeRpc
           reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.doLeaf());
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.doLeaf();
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.doLeaf();
+            _delegateResponse = _delegate
+              .doLeaf()
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

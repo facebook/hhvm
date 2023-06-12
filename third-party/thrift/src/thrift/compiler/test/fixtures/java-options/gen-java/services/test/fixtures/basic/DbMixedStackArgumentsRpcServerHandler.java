@@ -101,11 +101,15 @@ oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter0));
           reactor.core.publisher.Mono<byte[]> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.getDataByKey0(key));
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.getDataByKey0(key);
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.getDataByKey0(key);
+            _delegateResponse = _delegate
+              .getDataByKey0(key)
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -197,11 +201,15 @@ oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter0));
           reactor.core.publisher.Mono<byte[]> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.getDataByKey1(key));
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.getDataByKey1(key);
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.getDataByKey1(key);
+            _delegateResponse = _delegate
+              .getDataByKey1(key)
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

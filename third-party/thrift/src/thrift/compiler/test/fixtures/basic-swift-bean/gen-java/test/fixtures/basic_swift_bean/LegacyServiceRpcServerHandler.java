@@ -112,11 +112,15 @@ oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
           reactor.core.publisher.Mono<Map<String, List<Integer>>> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.getPoints(key, legacyStuff));
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.getPoints(key, legacyStuff);
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.getPoints(key, legacyStuff);
+            _delegateResponse = _delegate
+              .getPoints(key, legacyStuff)
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

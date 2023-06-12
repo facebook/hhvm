@@ -91,11 +91,15 @@ public class FooServiceRpcServerHandler
           reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.simpleRpc());
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.simpleRpc();
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.simpleRpc();
+            _delegateResponse = _delegate
+              .simpleRpc()
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

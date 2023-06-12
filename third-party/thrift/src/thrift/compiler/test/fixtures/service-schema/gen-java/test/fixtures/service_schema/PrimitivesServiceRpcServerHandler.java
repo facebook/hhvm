@@ -107,11 +107,15 @@ oprot.writeI64(_iter0);
           reactor.core.publisher.Mono<Long> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.init(param0, param1));
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.init(param0, param1);
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.init(param0, param1);
+            _delegateResponse = _delegate
+              .init(param0, param1)
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -226,11 +230,15 @@ oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
           reactor.core.publisher.Mono<test.fixtures.service_schema.Result> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.methodThatThrows());
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.methodThatThrows();
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.methodThatThrows();
+            _delegateResponse = _delegate
+              .methodThatThrows()
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -330,11 +338,15 @@ oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
           reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
-            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
-              _delegate.returnVoidMethod(id));
+            _delegateResponse = reactor.core.publisher.Mono.defer(() -> {
+                com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext());
+                return _delegate.returnVoidMethod(id);
+              });
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
           } else {
-            _delegateResponse = _delegate.returnVoidMethod(id);
+            _delegateResponse = _delegate
+              .returnVoidMethod(id)
+              .doFirst(() -> com.facebook.nifty.core.RequestContexts.setCurrentContext(_payload.getRequestContext()));
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

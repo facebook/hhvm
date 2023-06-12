@@ -640,7 +640,9 @@ def files_with_ext(files: List[str], ext: str) -> List[str]:
     return filtered_files
 
 
-def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
+def list_test_files(
+    root: str, disabled_ext: str, test_ext: str, include_directories: bool
+) -> List[str]:
     if os.path.isfile(root):
         if root.endswith(test_ext):
             return [root]
@@ -648,12 +650,19 @@ def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
             return []
     elif os.path.isdir(root):
         result: List[str] = []
+        if include_directories and root.endswith(test_ext):
+            result.append(root)
         children = os.listdir(root)
         disabled = files_with_ext(children, disabled_ext)
         for child in children:
             if child != "disabled" and child not in disabled:
                 result.extend(
-                    list_test_files(os.path.join(root, child), disabled_ext, test_ext)
+                    list_test_files(
+                        os.path.join(root, child),
+                        disabled_ext,
+                        test_ext,
+                        include_directories,
+                    )
                 )
         return result
     elif os.path.islink(root):
@@ -856,6 +865,7 @@ if __name__ == "__main__":
     parser.add_argument("--fallback-expect-extension", type=str)
     parser.add_argument("--default-expect-regex", type=str)
     parser.add_argument("--in-extension", type=str, default=".php")
+    parser.add_argument("--include-directories", action="store_true")
     parser.add_argument("--disabled-extension", type=str, default=".no_typecheck")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument(
@@ -957,7 +967,10 @@ if __name__ == "__main__":
         os.chdir("fbcode")
 
     files: List[str] = list_test_files(
-        args.test_path, args.disabled_extension, args.in_extension
+        args.test_path,
+        args.disabled_extension,
+        args.in_extension,
+        args.include_directories,
     )
 
     if len(files) == 0:

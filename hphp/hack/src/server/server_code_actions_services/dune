@@ -8,6 +8,7 @@
   collections
   decl_provider
   errors
+  extract_classish
   extract_method
   inline_method
   full_fidelity

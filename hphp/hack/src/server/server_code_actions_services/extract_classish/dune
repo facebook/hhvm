@@ -1,0 +1,14 @@
+(library
+ (name extract_classish)
+ (wrapped true)
+ (libraries
+  annotated_ast
+  ast
+  code_action_types
+  full_fidelity
+  lsp
+  pos
+  provider_context
+  tast_env
+  tast_provider
+  utils_core))

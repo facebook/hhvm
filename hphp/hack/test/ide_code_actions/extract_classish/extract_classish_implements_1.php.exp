@@ -1,0 +1,29 @@
+Code actions available:
+------------------------------------------
+Extract interface (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "FILE.php":[]}},
+  "kind":"refactor",
+  "title":"Extract interface"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class TheParent {}
+
+interface I {}
+class A extends TheParent
+ implements I {
+  /*range-start*/
+  public function foo(): void {
+    400 + 8;
+  }
+  /*range-end*/
+}
+

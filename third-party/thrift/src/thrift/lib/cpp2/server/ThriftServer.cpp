@@ -465,12 +465,14 @@ void ThriftServer::setup() {
     // We don't use SIG_IGN here as child processes will inherit that handler.
     // Instead, we swallow the signal to enable SIGPIPE in children to behave
     // normally.
-    // Furthermore, setting flags to 0 and using sigaction prevents SA_RESTART
-    // from restarting syscalls after the handler completed. This is important
-    // for code using SIGPIPE to interrupt syscalls in other threads.
+    // Furthermore, the signal flags passed below to sigaction prevents
+    // SA_RESTART from restarting syscalls after the handler completed. This is
+    // important for code using SIGPIPE to interrupt syscalls in other threads.
+    // Also pass SA_ONSTACK to prevent using the default stack which causes
+    // panics in Go (see https://pkg.go.dev/os/signal).
     struct sigaction sa = {};
     sa.sa_handler = [](int) {};
-    sa.sa_flags = 0;
+    sa.sa_flags = SA_ONSTACK;
     sigemptyset(&sa.sa_mask);
     sigaction(SIGPIPE, &sa, nullptr);
 #endif

@@ -14,6 +14,7 @@ use ir::instr::Hhbc;
 use ir::instr::IteratorArgs;
 use ir::instr::MemberOp;
 use ir::instr::MemoGet;
+use ir::instr::MemoGetEager;
 use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
@@ -403,6 +404,15 @@ impl LowerInstrs<'_> {
         Instr::tombstone()
     }
 
+    fn memo_get_eager(&self, builder: &mut FuncBuilder<'_>, mge: MemoGetEager) -> Instr {
+        // MemoGetEager is the async version of MemoGet.  Ignore the async edge
+        // and just treat it as a MemoGet.
+        self.memo_get(
+            builder,
+            MemoGet::new(mge.eager_edge(), mge.no_value_edge(), &mge.locals, mge.loc),
+        )
+    }
+
     fn memo_set(
         &self,
         builder: &mut FuncBuilder<'_>,
@@ -413,6 +423,18 @@ impl LowerInstrs<'_> {
         let mut ops = self.compute_memo_ops(builder, locals, loc);
         ops.push(vid);
         builder.hhbc_builtin(hack::Hhbc::MemoSet, &ops, loc)
+    }
+
+    fn memo_set_eager(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        vid: ValueId,
+        locals: &[LocalId],
+        loc: LocId,
+    ) -> Instr {
+        // MemoSetEager is the async version of MemoSet. Ignore the async edge
+        // and just treat it as a MemoSet.
+        self.memo_set(builder, vid, locals, loc)
     }
 
     fn verify_out_type(
@@ -659,6 +681,9 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::MemoSet(vid, locals, loc)) => {
                 self.memo_set(builder, vid, &locals, loc)
             }
+            Instr::Hhbc(Hhbc::MemoSetEager(vid, locals, loc)) => {
+                self.memo_set_eager(builder, vid, &locals, loc)
+            }
             Instr::Hhbc(Hhbc::NewStructDict(names, values, loc)) => {
                 let args = names
                     .iter()
@@ -743,6 +768,7 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Terminator(Terminator::IterNext(args)) => self.iter_next(builder, args),
             Instr::Terminator(Terminator::MemoGet(memo)) => self.memo_get(builder, memo),
+            Instr::Terminator(Terminator::MemoGetEager(memo)) => self.memo_get_eager(builder, memo),
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
                 // ret a, b;
                 // =>

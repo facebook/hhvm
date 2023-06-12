@@ -99,6 +99,9 @@ let disable_xhp_element_mangling po =
 let with_disable_xhp_element_mangling po b =
   { po with GlobalOptions.po_disable_xhp_element_mangling = b }
 
+let with_keep_user_attributes po b =
+  { po with GlobalOptions.po_keep_user_attributes = b }
+
 let allow_unstable_features po = po.GlobalOptions.po_allow_unstable_features
 
 let with_allow_unstable_features po b =

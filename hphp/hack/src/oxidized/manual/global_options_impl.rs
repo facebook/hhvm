@@ -106,6 +106,7 @@ impl Default for GlobalOptions {
             po_enable_xhp_class_modifier: false, // true in ocaml
             po_disable_xhp_element_mangling: false, // true in ocaml
             po_disable_xhp_children_declarations: false, // true in ocaml
+            po_keep_user_attributes: false,
             glean_service: String::new(),
             glean_hostname: String::new(),
             glean_port: 0,

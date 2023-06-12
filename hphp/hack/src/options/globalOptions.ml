@@ -145,6 +145,7 @@ type t = {
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
   po_disable_hh_ignore_error: int;
+  po_keep_user_attributes: bool;
   tco_is_systemlib: bool;
   tco_higher_kinded_types: bool;
   tco_method_call_inference: bool;
@@ -278,6 +279,7 @@ let default =
     po_disable_xhp_element_mangling = true;
     po_disable_xhp_children_declarations = true;
     po_disable_hh_ignore_error = 0;
+    po_keep_user_attributes = false;
     tco_is_systemlib = false;
     tco_higher_kinded_types = false;
     tco_method_call_inference = false;
@@ -408,6 +410,7 @@ let set
     ?po_disable_xhp_element_mangling
     ?po_disable_xhp_children_declarations
     ?po_disable_hh_ignore_error
+    ?po_keep_user_attributes
     ?po_allow_unstable_features
     ?tco_is_systemlib
     ?tco_higher_kinded_types
@@ -667,6 +670,8 @@ let set
         options.po_disable_xhp_children_declarations;
     po_disable_hh_ignore_error =
       setting po_disable_hh_ignore_error options.po_disable_hh_ignore_error;
+    po_keep_user_attributes =
+      setting po_keep_user_attributes options.po_keep_user_attributes;
     tco_is_systemlib = setting tco_is_systemlib options.tco_is_systemlib;
     tco_higher_kinded_types =
       setting tco_higher_kinded_types options.tco_higher_kinded_types;

@@ -35,7 +35,7 @@ let from_parser_options popt =
     gi_reinfer_types = popt.tco_gi_reinfer_types;
     php5_compat_mode = false;
     hhvm_compat_mode = false;
-    keep_user_attributes = false;
+    keep_user_attributes = popt.po_keep_user_attributes;
   }
 
 let default = from_parser_options ParserOptions.default

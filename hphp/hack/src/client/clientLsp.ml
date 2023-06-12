@@ -20,6 +20,7 @@ type args = {
   ignore_hh_version: bool;
   naming_table: string option;
   verbose: bool;
+  root_from_cli: Path.t;
 }
 
 type serverless_ide =
@@ -5448,9 +5449,18 @@ let handle_client_message
          we get root, here in the handler of the initialize request. The function
          [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
       let root = get_root_exn () in
-      Relative_path.set_path_prefix Relative_path.Root root;
       ServerProgress.set_root root;
       set_up_hh_logger_for_client_lsp root;
+      Relative_path.set_path_prefix Relative_path.Root root;
+      if not (Path.equal root env.args.root_from_cli) then
+        HackEventLogger.invariant_violation_bug
+          ~data:
+            (Printf.sprintf
+               "root_from_cli=%s initialize.root=%s"
+               (Path.to_string env.args.root_from_cli)
+               (Path.to_string root))
+          "lsp initialize.root differs from launch arg";
+
       Hh_logger.log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
       Hh_logger.log "LSP Init id: %s" env.init_id;
       Hh_logger.log

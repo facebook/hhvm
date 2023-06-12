@@ -66,7 +66,7 @@ class LspCommandProcessor:
         cls: Type[U],
         env: Mapping[str, str],
         lsp_args: List[str],
-        repo_dir: Optional[str] = None,
+        repo_dir: str,
     ) -> Iterator[U]:
         args = lsp_args + ["--enhanced-hover", "--verbose"]
         proc = subprocess.Popen(

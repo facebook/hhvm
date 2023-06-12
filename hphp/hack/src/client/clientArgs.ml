@@ -1031,19 +1031,16 @@ let parse_lsp_args () =
     ]
   in
   let args = parse_without_command options usage "lsp" in
-  match args with
-  | [] ->
-    CLsp
-      {
-        ClientLsp.from = !from;
-        config = !config;
-        ignore_hh_version = !ignore_hh_version;
-        naming_table = !naming_table;
-        verbose = !verbose;
-      }
-  | _ ->
-    Printf.printf "%s\n" usage;
-    exit 2
+  let root = Wwwroot.interpret_command_line_root_parameter args in
+  CLsp
+    {
+      ClientLsp.from = !from;
+      config = !config;
+      ignore_hh_version = !ignore_hh_version;
+      naming_table = !naming_table;
+      verbose = !verbose;
+      root_from_cli = root;
+    }
 
 let parse_rage_args () =
   let usage =

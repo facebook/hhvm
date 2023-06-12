@@ -15,6 +15,14 @@ type args = {
   naming_table: string option;
   verbose: bool;
       (** Extra logging, including logs per LSP message (voluminous!) *)
+  root_from_cli: Path.t;
+      (** clientLsp only ever uses the root path provided to us in the initialize request.
+      This field here isn't that! it's a record of what root was derived upon launch
+      (well before the initialize request), either from an argument if supplied, or
+      otherwise by searching from the CWD. We use this field solely to validate
+      whether there's a mismatch between the project root implied by how we launched,
+      and the project root supplied by initialize, in case we want to warn about
+      any difference. *)
 }
 
 (** This is the main loop for processing incoming Lsp client requests,

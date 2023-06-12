@@ -282,7 +282,7 @@ class TestLsp(TestCase[LspTestDriver]):
         ]
 
         with LspCommandProcessor.create(
-            self.test_driver.test_env, lsp_config_args
+            self.test_driver.test_env, lsp_config_args, self.test_driver.repo_dir
         ) as lsp_command_processor:
             (observed_transcript, error_details) = spec.run(
                 lsp_command_processor=lsp_command_processor, variables=variables

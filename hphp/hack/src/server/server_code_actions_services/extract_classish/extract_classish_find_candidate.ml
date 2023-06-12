@@ -4,14 +4,16 @@ module T = Extract_classish_types
 let class_kind_supports_extraction =
   Ast_defs.(
     function
-    | Cclass (Concrete | Abstract) -> true
+    | Cclass Concrete -> true
+    | Cclass Abstract -> false (* could handle with more logic *)
     | Cinterface
     | Ctrait
     | Cenum
     | Cenum_class _ ->
       false)
 
-let find_candidate ~(selection : Pos.t) ~entry ctx : T.candidate option =
+let find_candidate ~(selection : Pos.t) (entry : Provider_context.entry) ctx :
+    T.candidate option =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in

@@ -15,9 +15,9 @@ let find ~entry ~(range : Lsp.range) ctx =
     in
     let path = entry.Provider_context.path in
     let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-    Extract_classish_find_candidate.find_candidate ~selection ~entry ctx
+    Extract_classish_find_candidate.find_candidate ~selection entry ctx
     |> Option.map
-         ~f:(Extract_classish_to_refactors.to_refactors ~path ~source_text)
+         ~f:(Extract_classish_to_refactors.to_refactors source_text path)
     |> Option.value ~default:[]
   | Some _
   | None ->

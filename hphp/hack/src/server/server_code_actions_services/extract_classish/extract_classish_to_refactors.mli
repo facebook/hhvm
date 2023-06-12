@@ -6,7 +6,7 @@
  *
  *)
 val to_refactors :
-  source_text:Full_fidelity_source_text.t ->
-  path:Relative_path.t ->
+  Full_fidelity_source_text.t ->
+  Relative_path.t ->
   Extract_classish_types.candidate ->
   Code_action_types.Refactor.t list

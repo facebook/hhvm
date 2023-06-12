@@ -6,7 +6,20 @@ JSON for selected code action:
 ------------------------------------------
 {
   "diagnostics":[],
-  "FILE.php":[]}},
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  implements Placeholder_",
+          "range":{"end":{"character":7,"line":4},"start":{"character":7,"line":4}}
+        },
+        {
+          "newText":"interface Placeholder_ {\n  public function foo(): void;\n}\n\n",
+          "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
+        }
+      ]
+    }
+  },
   "kind":"refactor",
   "title":"Extract interface"
 }
@@ -17,7 +30,12 @@ Applied edit for code action:
 
 trait Tr {}
 
-class A {
+interface Placeholder_ {
+  public function foo(): void;
+}
+
+class A
+  implements Placeholder_ {
   use Tr;
   /*range-start*/
   public function foo(): void {

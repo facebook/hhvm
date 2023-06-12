@@ -6,7 +6,20 @@ JSON for selected code action:
 ------------------------------------------
 {
   "diagnostics":[],
-  "FILE.php":[]}},
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":", Placeholder_",
+          "range":{"end":{"character":13,"line":6},"start":{"character":13,"line":6}}
+        },
+        {
+          "newText":"interface Placeholder_ {\n  public function foo(): void;\n}\n\n",
+          "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
+        }
+      ]
+    }
+  },
   "kind":"refactor",
   "title":"Extract interface"
 }
@@ -18,8 +31,12 @@ Applied edit for code action:
 class TheParent {}
 
 interface I {}
+interface Placeholder_ {
+  public function foo(): void;
+}
+
 class A extends TheParent
- implements I {
+ implements I, Placeholder_ {
   /*range-start*/
   public function foo(): void {
     400 + 8;

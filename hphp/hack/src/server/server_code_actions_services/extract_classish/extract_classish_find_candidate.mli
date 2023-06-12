@@ -7,6 +7,6 @@
  *)
 val find_candidate :
   selection:Pos.t ->
-  entry:Provider_context.entry ->
+  Provider_context.entry ->
   Provider_context.t ->
   Extract_classish_types.candidate option

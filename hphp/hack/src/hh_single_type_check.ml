@@ -285,6 +285,7 @@ let parse_options () =
   let error_php_lambdas = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
+  let keep_user_attributes = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
@@ -683,6 +684,9 @@ let parse_options () =
         Arg.Set disable_xhp_element_mangling,
         " Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
       );
+      ( "--keep-user-attributes",
+        Arg.Set keep_user_attributes,
+        " Keep user attributes when parsing decls" );
       ( "--disable-xhp-children-declarations",
         Arg.Set disable_xhp_children_declarations,
         " Disable XHP children declarations, e.g. children (foo, bar+)" );
@@ -975,6 +979,7 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
+      ~po_keep_user_attributes:!keep_user_attributes
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_is_systemlib:!is_systemlib
       ~tco_higher_kinded_types:!enable_higher_kinded_types

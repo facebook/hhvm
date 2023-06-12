@@ -53,20 +53,6 @@ type completion_request = { is_manually_invoked: bool }
 
 type should_calculate_errors = { should_calculate_errors: bool }
 
-(** Represents a path corresponding to a file which has changed on disk. We
-don't use `Path.t`:
-
-  * It invokes `realpath`. However, for files that don't exist (i.e. deleted
-  files), it returns the path unchanged. This can cause bugs. For example, if
-  the repo root is a symlink, it will be resolved for files which do exist,
-  but left unchanged for files that don't exist.
-  * It's an unnecessary syscall per file.
-  * It can cause accidental file fetches on a virtual filesystem. We typically
-  end up filtering the list of changed files, so we may never use the fetched
-  file content.
-*)
-type changed_file = Changed_file of string
-
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -75,7 +61,9 @@ type _ t =
       Initialize_from_state. And the daemon sends no messages before
       it has responded. *)
   | Shutdown : unit -> unit t
-  | Disk_files_changed : changed_file list -> unit t
+  | Did_change_watched_files : Relative_path.Set.t -> unit t
+      (** This might include deleted files. The caller is responsible for filtering,
+      and resolving symlinks (even resolving root symlink for a deleted file...) *)
   | Ide_file_opened : document -> Errors.finalized_error list t
   | Ide_file_changed :
       document * should_calculate_errors
@@ -178,9 +166,11 @@ type _ t =
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
   | Shutdown () -> "Shutdown"
-  | Disk_files_changed files ->
-    let files = List.map files ~f:(fun (Changed_file path) -> path) in
-    let (files, remainder) = List.split_n files 10 in
+  | Did_change_watched_files paths ->
+    let paths =
+      paths |> Relative_path.Set.elements |> List.map ~f:Relative_path.suffix
+    in
+    let (files, remainder) = List.split_n paths 10 in
     let remainder =
       if List.is_empty remainder then
         ""

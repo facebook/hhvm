@@ -5579,10 +5579,26 @@ let handle_client_message
         Some ide_service,
         NotificationMessage (DidChangeWatchedFilesNotification notification) )
       ->
-      let open DidChangeWatchedFiles in
       let changes =
-        List.map notification.changes ~f:(fun change ->
-            ClientIdeMessage.Changed_file (lsp_uri_to_path change.uri))
+        List.filter_map
+          notification.DidChangeWatchedFiles.changes
+          ~f:(fun change ->
+            let path = lsp_uri_to_path change.DidChangeWatchedFiles.uri in
+            (* This is just the file:///foo/bar uri turned into a string path /foo/bar.
+               There's nothing in VSCode/LSP spec to stipulate that the uris are
+               canonical paths file:///data/users/ljw/www-hg/foo.php or to
+               symlinked paths file:///home/ljw/www/foo.php (where ~/www -> /data/users/ljw/www-hg)
+               but experimentally the uris seem to be canonical paths. That's lucky
+               because if we had to turn a symlink of a deleted file file:///home/ljw/www/foo.php
+               into the actual canonical path /data/users/ljw/www-hg/foo.php then it'd be hard!
+               Anyway, because they refer to canonical paths, we can safely use [FindUtils.file_filter]
+               and [Relative_path.create_detect_prefix], both of which match string prefix on the
+               canonical root. *)
+            if FindUtils.file_filter path then
+              Some (Relative_path.create_detect_prefix path)
+            else
+              None)
+        |> Relative_path.Set.of_list
       in
       let%lwt () =
         ide_rpc
@@ -5590,7 +5606,7 @@ let handle_client_message
           ~env
           ~tracking_id
           ~ref_unblocked_time
-          ClientIdeMessage.(Disk_files_changed changes)
+          (ClientIdeMessage.Did_change_watched_files changes)
       in
       Lwt.return_none
     (* Text document completion: "AutoComplete!" *)

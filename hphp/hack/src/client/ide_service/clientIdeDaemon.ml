@@ -716,25 +716,14 @@ let handle_request
   (************************* CAN HANDLE DURING INIT **********)
   (***********************************************************)
   | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
-      Disk_files_changed paths ) ->
-    let paths =
-      List.filter paths ~f:(fun (Changed_file path) ->
-          FindUtils.file_filter path)
-    in
-    (* That filtered-out non-hack files *)
+      Did_change_watched_files changes ) ->
     let files =
       {
         files with
         changed_files_to_process =
-          List.fold
-            paths
-            ~init:files.changed_files_to_process
-            ~f:(fun acc (Changed_file path) ->
-              Relative_path.Set.add
-                acc
-                (Relative_path.create_detect_prefix path));
+          Relative_path.Set.union files.changed_files_to_process changes;
         changed_files_denominator =
-          files.changed_files_denominator + List.length paths;
+          files.changed_files_denominator + Relative_path.Set.cardinal changes;
       }
     in
     Lwt.return (update_state_files state files, Ok ())

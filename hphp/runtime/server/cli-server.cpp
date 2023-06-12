@@ -940,9 +940,10 @@ void CLIWorker::doJob(int client) {
     RemoteFile cli_err(client, "stderr", "w");
     RemoteFile cli_afdt(client, "afdt", "rw");
 
+    int unused_flag;
     std::vector<std::string> args;
     std::vector<std::string> env;
-    cli_read(client, args, env);
+    cli_read(client, unused_flag, args, env);
 
     FTRACE(2, "CLIWorker::doJob({}): args = \n", client);
 
@@ -1754,7 +1755,7 @@ Optional<int> run_client(const char* sock_path,
     cli_write_fd(fd, delegate);
 
     FTRACE(2, "run_command_on_cli_server(): file/args...\n", fd);
-    cli_write(fd, args, env_vec);
+    cli_write(fd, 0 /* unused */, args, env_vec);
     return cli_process_command_loop(fd, ignore_bg);
   } catch (const Exception& ex) {
     Logger::Error(

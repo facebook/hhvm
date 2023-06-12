@@ -356,19 +356,19 @@ let init
     (Telemetry.create (), ClientIdeUtils.make_rich_error "trying...")
   in
 
-  (* Find on disk? *)
-  let%lwt result =
-    init_via_find ctx ~local_config ~root ~ignore_hh_version
-    |> map_attempt "find" ctx ~prev ~f:(fun (path, changed_files) ->
-           (path, changed_files, sienv))
-  in
   (* Specified in the LSP initialize message? *)
+  let%lwt result =
+    init_via_lsp ~naming_table_load_info
+    |> map_attempt "lsp" ctx ~prev ~f:(fun path -> (path, [], sienv))
+  in
+  (* Find on disk? *)
   let%lwt result =
     match result with
     | Ok _ -> Lwt.return result
     | Error prev ->
-      init_via_lsp ~naming_table_load_info
-      |> map_attempt "lsp" ctx ~prev ~f:(fun path -> (path, [], sienv))
+      init_via_find ctx ~local_config ~root ~ignore_hh_version
+      |> map_attempt "find" ctx ~prev ~f:(fun (path, changed_files) ->
+             (path, changed_files, sienv))
   in
   (* Fetch? *)
   let%lwt result =

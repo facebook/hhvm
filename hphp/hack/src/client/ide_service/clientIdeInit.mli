@@ -23,13 +23,13 @@ type init_result = {
 
 (** "Initialization" for clinetIdeDaemon means setting up naming-table and search-index
 and figuring out what files have changed and need to be indexed.
-We uses a strategy of "find/lsp/fetch/build":
-1. [FIND] (if ide_load_naming_table_on_disk) look for any saved-state already on disk
+We uses a strategy of "lsp/find/fetch/build":
+1. [LSP] If the LSP initialize request contains the path of a naming-table
+then use it, trust that there are no files-changed since that saved-state, and initialize sienv empty
+2. [FIND] Otherwise, (if ide_load_naming_table_on_disk) look for any saved-state already on disk
 in the canonical location /tmp/hh_server that's within an age threshold,
 and if found then use it, ask mercurial for files changed since that saved-state,
 and initialize sienv empty
-2. [LSP] Otherwise, if the LSP initialize request contains the path of a naming-table
-then use it, trust that there are no files-changed since that saved-state, and initialize sienv empty
 3. [FETCH] Otherwise, try [State_loader_lwt.load] which uses manifold to look for
 the best saved-state. If one is found then download it, ask mercurial for
 files changed since that saved-state, and initialize sienv empty

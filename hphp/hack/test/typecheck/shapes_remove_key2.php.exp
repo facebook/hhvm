@@ -19,14 +19,14 @@ This shape doesn't have a field `a` (Typing[4108])
   File "shapes_remove_key2.php", line 34, characters 3-34:
   The shape is defined here
 File "shapes_remove_key2.php", line 5, characters 6-8:
-The field `a` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "shapes_remove_key2.php", line 4, characters 31-33:
   This is where the field was declared as optional.
 File "shapes_remove_key2.php", line 11, characters 6-8:
-The field `a` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "shapes_remove_key2.php", line 10, characters 31-33:
   This is where the field was declared as optional.
 File "shapes_remove_key2.php", line 17, characters 6-8:
-The field `a` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "shapes_remove_key2.php", line 16, characters 31-33:
   This is where the field was declared as optional.

@@ -1,8 +1,8 @@
 File "shape_structural_subtyping_disallows_indexing_for_expression_when_null_coalescing.php", line 7, characters 24-34:
-The field `outer_opt` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `outer_opt` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
 File "shape_structural_subtyping_disallows_indexing_for_expression_when_null_coalescing.php", line 4, characters 26-36:
 This is where the field was declared as optional.
 File "shape_structural_subtyping_disallows_indexing_for_expression_when_null_coalescing.php", line 7, characters 46-56:
-The field `outer_opt` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `outer_opt` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
 File "shape_structural_subtyping_disallows_indexing_for_expression_when_null_coalescing.php", line 4, characters 26-36:
 This is where the field was declared as optional.

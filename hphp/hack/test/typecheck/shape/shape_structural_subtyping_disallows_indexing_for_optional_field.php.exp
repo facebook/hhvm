@@ -1,4 +1,4 @@
 File "shape_structural_subtyping_disallows_indexing_for_optional_field.php", line 6, characters 10-12:
-The field `a` may not be present in this shape. Use `Shapes::idx()` instead. (Typing[4165])
+The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
 File "shape_structural_subtyping_disallows_indexing_for_optional_field.php", line 3, characters 38-40:
 This is where the field was declared as optional.

@@ -4234,7 +4234,7 @@ module Eval_primary = struct
       lazy
         ( field_pos,
           Printf.sprintf
-            "The field %s may not be present in this shape. Use `Shapes::idx()` instead."
+            "The field %s may not be present in this shape. Use `??` or `Shapes::idx()` instead."
             (Markdown_lite.md_codify name) ),
       lazy [(decl_pos, "This is where the field was declared as optional.")],
       quickfixes )

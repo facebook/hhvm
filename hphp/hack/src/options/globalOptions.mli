@@ -333,16 +333,11 @@ type t = {
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
-  tco_ide_should_use_hack_64_distc: bool;
   (* Produce variations of methods and functions in TASTs that are cheked under
      dynamic assumptions. *)
   tco_tast_under_dynamic: bool;
   (* Use the Rust implementation of naming elaboration and NAST checks. *)
   tco_rust_elab: bool;
-  tco_ide_load_naming_table_on_disk: bool;
-      (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
-  tco_ide_naming_table_update_threshold: int;
-      (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
 }
@@ -471,11 +466,8 @@ val set :
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_load_hack_64_distc_saved_state:bool ->
-  ?tco_ide_should_use_hack_64_distc:bool ->
   ?tco_tast_under_dynamic:bool ->
   ?tco_rust_elab:bool ->
-  ?tco_ide_load_naming_table_on_disk:bool ->
-  ?tco_ide_naming_table_update_threshold:int ->
   ?dump_tast_hashes:bool ->
   ?tco_autocomplete_mode:bool ->
   t ->

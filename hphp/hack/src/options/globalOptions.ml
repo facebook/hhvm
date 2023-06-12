@@ -187,11 +187,8 @@ type t = {
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
-  tco_ide_should_use_hack_64_distc: bool;
   tco_tast_under_dynamic: bool;
   tco_rust_elab: bool;
-  tco_ide_load_naming_table_on_disk: bool;
-  tco_ide_naming_table_update_threshold: int;
   dump_tast_hashes: bool;
   tco_autocomplete_mode: bool;
 }
@@ -321,11 +318,8 @@ let default =
     tco_populate_dead_unsafe_cast_heap = false;
     po_disallow_static_constants_in_default_func_args = false;
     tco_load_hack_64_distc_saved_state = false;
-    tco_ide_should_use_hack_64_distc = false;
     tco_tast_under_dynamic = false;
     tco_rust_elab = false;
-    tco_ide_load_naming_table_on_disk = false;
-    tco_ide_naming_table_update_threshold = 0;
     dump_tast_hashes = false;
     tco_autocomplete_mode = false;
   }
@@ -453,11 +447,8 @@ let set
     ?tco_populate_dead_unsafe_cast_heap
     ?po_disallow_static_constants_in_default_func_args
     ?tco_load_hack_64_distc_saved_state
-    ?tco_ide_should_use_hack_64_distc
     ?tco_tast_under_dynamic
     ?tco_rust_elab
-    ?tco_ide_load_naming_table_on_disk
-    ?tco_ide_naming_table_update_threshold
     ?dump_tast_hashes
     ?tco_autocomplete_mode
     options =
@@ -789,21 +780,9 @@ let set
       setting
         tco_load_hack_64_distc_saved_state
         options.tco_load_hack_64_distc_saved_state;
-    tco_ide_should_use_hack_64_distc =
-      setting
-        tco_ide_should_use_hack_64_distc
-        options.tco_ide_should_use_hack_64_distc;
     tco_tast_under_dynamic =
       setting tco_tast_under_dynamic options.tco_tast_under_dynamic;
     tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
-    tco_ide_load_naming_table_on_disk =
-      setting
-        tco_ide_load_naming_table_on_disk
-        options.tco_ide_load_naming_table_on_disk;
-    tco_ide_naming_table_update_threshold =
-      setting
-        tco_ide_naming_table_update_threshold
-        options.tco_ide_naming_table_update_threshold;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;

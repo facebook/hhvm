@@ -393,12 +393,6 @@ let load_config config options =
     ?po_disallow_static_constants_in_default_func_args:
       (bool_opt "disallow_static_constants_in_default_func_args" config)
     ?tco_tast_under_dynamic:(bool_opt "tast_under_dynamic" config)
-    ?tco_ide_should_use_hack_64_distc:
-      (bool_opt "ide_should_use_hack_64_distc" config)
-    ?tco_ide_load_naming_table_on_disk:
-      (bool_opt "ide_load_naming_table_on_disk" config)
-    ?tco_ide_naming_table_update_threshold:
-      (int_opt "ide_naming_table_update_threshold" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =
@@ -475,9 +469,6 @@ let load ~silent options : t * ServerLocalConfig.t =
     let local_config_opts =
       GlobalOptions.set
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
-        ?tco_ide_should_use_hack_64_distc:
-          (Some local_config.ide_should_use_hack_64_distc)
-          (* clientIdeDaemon should load a naming table from hack/64_distc *)
         ?tco_log_large_fanouts_threshold:
           local_config.log_large_fanouts_threshold
         ~tco_remote_old_decls_no_limit:
@@ -499,10 +490,6 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
         ~tco_global_access_check_enabled:
           (ServerArgs.enable_global_access_check options)
-        ~tco_ide_load_naming_table_on_disk:
-          local_config.ide_load_naming_table_on_disk
-        ~tco_ide_naming_table_update_threshold:
-          local_config.ide_naming_table_update_threshold
         ~dump_tast_hashes:local_config.dump_tast_hashes
         ~tco_custom_error_config
         GlobalOptions.default

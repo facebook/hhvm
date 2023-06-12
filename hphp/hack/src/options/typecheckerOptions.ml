@@ -289,9 +289,6 @@ let populate_dead_unsafe_cast_heap t =
 let load_hack_64_distc_saved_state t =
   t.GlobalOptions.tco_load_hack_64_distc_saved_state
 
-let ide_should_use_hack_64_distc t =
-  t.GlobalOptions.tco_ide_should_use_hack_64_distc
-
 let tast_under_dynamic t = t.GlobalOptions.tco_tast_under_dynamic
 
 let rust_elab t = t.GlobalOptions.tco_rust_elab
@@ -299,12 +296,6 @@ let rust_elab t = t.GlobalOptions.tco_rust_elab
 let locl_cache_capacity t = t.GlobalOptions.tco_locl_cache_capacity
 
 let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold
-
-let ide_load_naming_table_on_disk t =
-  t.GlobalOptions.tco_ide_load_naming_table_on_disk
-
-let ide_naming_table_update_threshold t =
-  t.GlobalOptions.tco_ide_naming_table_update_threshold
 
 let dump_tast_hashes t = t.GlobalOptions.dump_tast_hashes
 

@@ -165,11 +165,8 @@ impl Default for GlobalOptions {
             tco_populate_dead_unsafe_cast_heap: false,
             po_disallow_static_constants_in_default_func_args: false,
             tco_load_hack_64_distc_saved_state: false,
-            tco_ide_should_use_hack_64_distc: false,
             tco_tast_under_dynamic: false,
             tco_rust_elab: false,
-            tco_ide_load_naming_table_on_disk: false,
-            tco_ide_naming_table_update_threshold: 0,
             dump_tast_hashes: false,
             tco_autocomplete_mode: false,
         }

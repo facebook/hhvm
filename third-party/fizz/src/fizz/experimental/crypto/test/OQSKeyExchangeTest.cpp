@@ -18,8 +18,8 @@ TEST(OQSKeyExchangeTest, InvalidKeyGenerationTest) {
 }
 
 TEST(OQSKeyExchangeTest, SuccessKeyExchangeTest) {
-  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_sike_p503);
-  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_sike_p503);
+  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_768);
+  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_768);
 
   clientKex.generateKeyPair();
   serverKex.generateKeyPair();
@@ -34,8 +34,8 @@ TEST(OQSKeyExchangeTest, SuccessKeyExchangeTest) {
 }
 
 TEST(OQSKeyExchangeTest, GetKeyShareBeforeGenerationTest) {
-  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_sidh_p751_compressed);
-  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_sidh_p751_compressed);
+  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_768);
+  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_768);
   EXPECT_THROW(clientKex.getKeyShare(), std::runtime_error);
   EXPECT_THROW(serverKex.getKeyShare(), std::runtime_error);
 }
@@ -43,8 +43,8 @@ TEST(OQSKeyExchangeTest, GetKeyShareBeforeGenerationTest) {
 TEST(OQSKeyExchangeTest, InvalidExternalInputTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_hqc_128);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_hqc_128);
-  auto wrongClientKex = OQSClientKeyExchange(OQS_KEM_alg_ntru_hps2048677);
-  auto wrongServerKex = OQSServerKeyExchange(OQS_KEM_alg_ntru_hps2048677);
+  auto wrongClientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_768);
+  auto wrongServerKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_768);
 
   clientKex.generateKeyPair();
   serverKex.generateKeyPair();
@@ -92,8 +92,8 @@ TEST(OQSKeyExchangeTest, CloneTest) {
 }
 
 TEST(OQSKeyExchangeTest, FailedCloneTest) {
-  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_saber_lightsaber);
-  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_saber_lightsaber);
+  auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_kyber_768);
+  auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_kyber_768);
   EXPECT_THROW(clientKex.clone(), std::runtime_error);
   EXPECT_THROW(serverKex.clone(), std::runtime_error);
 }

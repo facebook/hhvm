@@ -184,8 +184,7 @@ let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
 let compute_file_info
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
   let ast = compute_ast ~popt ~entry in
-  let (funs, classes, typedefs, consts, modules) = Nast.get_def_names ast in
-  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts; modules }
+  Nast.get_def_names ast
 
 let get_ast_with_error ~(full : bool) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->

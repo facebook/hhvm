@@ -238,6 +238,7 @@ let denylisted_types () =
       ("typing_defs_core", "HasMember");
       ("typing_defs_core", "HasTypeMember");
       ("typing_defs_core", "InternalType");
+      ("nast", "Defs");
     ]
   | Configuration.ByBox -> [])
   @ [

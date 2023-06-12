@@ -183,8 +183,17 @@ let get_simple_xhp_attrs =
       | Xhp_simple { xs_name = id; xs_expr = e; _ } -> Some (id, e)
       | Xhp_spread _ -> None)
 
+(* Definitions appearing in a Nast.program *)
+type defs = {
+  funs: (FileInfo.id * fun_def) list;
+  classes: (FileInfo.id * class_) list;
+  typedefs: (FileInfo.id * typedef) list;
+  constants: (FileInfo.id * gconst) list;
+  modules: (FileInfo.id * module_def) list;
+}
+
 (* Given a Nast.program, give me the list of entities it defines *)
-let get_defs (ast : program) =
+let get_defs (ast : program) : defs =
   (* fold_right traverses the file from top to bottom, and as such gives nicer
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
@@ -192,42 +201,24 @@ let get_defs (ast : program) =
   let to_id (a, b) = (a, b, None) in
   (* TODO(hgoldstein): Just have this return four values, not five *)
   let rec get_defs ast acc =
-    List.fold_right
-      ast
-      ~init:acc
-      ~f:(fun def ((funs, classes, typedefs, constants, modules) as acc) ->
+    List.fold_right ast ~init:acc ~f:(fun def acc ->
         Aast.(
           match def with
           | Fun f ->
-            ( (FileInfo.pos_full (to_id f.fd_name), f) :: funs,
-              classes,
-              typedefs,
-              constants,
-              modules )
+            let f = (FileInfo.pos_full (to_id f.fd_name), f) in
+            { acc with funs = f :: acc.funs }
           | Class c ->
-            ( funs,
-              (FileInfo.pos_full (to_id c.c_name), c) :: classes,
-              typedefs,
-              constants,
-              modules )
+            let c = (FileInfo.pos_full (to_id c.c_name), c) in
+            { acc with classes = c :: acc.classes }
           | Typedef t ->
-            ( funs,
-              classes,
-              (FileInfo.pos_full (to_id t.t_name), t) :: typedefs,
-              constants,
-              modules )
+            let t = (FileInfo.pos_full (to_id t.t_name), t) in
+            { acc with typedefs = t :: acc.typedefs }
           | Constant cst ->
-            ( funs,
-              classes,
-              typedefs,
-              (FileInfo.pos_full (to_id cst.cst_name), cst) :: constants,
-              modules )
+            let cst = (FileInfo.pos_full (to_id cst.cst_name), cst) in
+            { acc with constants = cst :: acc.constants }
           | Module md ->
-            ( funs,
-              classes,
-              typedefs,
-              constants,
-              (FileInfo.pos_full (to_id md.md_name), md) :: modules )
+            let md = (FileInfo.pos_full (to_id md.md_name), md) in
+            { acc with modules = md :: acc.modules }
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
           | SetNamespaceEnv _
@@ -238,15 +229,22 @@ let get_defs (ast : program) =
           | Stmt _ ->
             acc))
   in
-  get_defs ast ([], [], [], [], [])
+  let acc =
+    { funs = []; classes = []; typedefs = []; constants = []; modules = [] }
+  in
+  get_defs ast acc
 
-let get_def_names ast =
-  let (funs, classes, typedefs, constants, modules) = get_defs ast in
-  ( List.map funs ~f:fst,
-    List.map classes ~f:fst,
-    List.map typedefs ~f:fst,
-    List.map constants ~f:fst,
-    List.map modules ~f:fst )
+let get_def_names ast : FileInfo.t =
+  let { funs; classes; typedefs; constants; modules } = get_defs ast in
+  FileInfo.
+    {
+      empty_t with
+      funs = List.map funs ~f:fst;
+      classes = List.map classes ~f:fst;
+      typedefs = List.map typedefs ~f:fst;
+      consts = List.map constants ~f:fst;
+      modules = List.map modules ~f:fst;
+    }
 
 type ignore_attribute_env = { ignored_attributes: string list }
 

@@ -72,19 +72,8 @@ let invalidate_local_decl_caches_for_entries
     match entry.Provider_context.parser_return with
     | None -> () (* hasn't been parsed, hence nothing to invalidate *)
     | Some { Parser_return.ast; _ } ->
-      let (funs, classes, typedefs, consts, modules) = Nast.get_def_names ast in
-      invalidate_local_decl_caches_for_file
-        local_memory
-        {
-          FileInfo.funs;
-          classes;
-          typedefs;
-          consts;
-          modules;
-          hash = None;
-          comments = None;
-          file_mode = None;
-        }
+      let file_info = Nast.get_def_names ast in
+      invalidate_local_decl_caches_for_file local_memory file_info
   in
   Relative_path.Map.iter entries ~f:invalidate_for_entry
 

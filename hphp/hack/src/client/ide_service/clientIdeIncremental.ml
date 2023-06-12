@@ -258,7 +258,7 @@ module Batch = struct
       let paths_with_addenda =
         List.filter_map index_result ~f:get_addenda_opt
       in
-      SymbolIndexCore.update_from_addenda ~sienv ~paths:paths_with_addenda
+      SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda
     in
     log
       "Update search index with new files in %f seconds"

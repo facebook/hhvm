@@ -14,7 +14,9 @@ type message =
   | ClientRequest : 'a ClientIdeMessage.tracked_t -> message
       (** ClientRequest came from ClientIdeService over stdin;
       it expects a response. *)
-  | GotNamingTable : ClientIdeInit.init_result -> message
+  | GotNamingTable :
+      (ClientIdeInit.init_result, ClientIdeMessage.rich_error) result
+      -> message
       (** GotNamingTable is posted from within ClientIdeDaemon itself once
       our attempt at loading saved-state has finished; it's picked
       up by handle_messages. *)
@@ -378,7 +380,9 @@ state. *)
 let initialize2
     (out_fd : Lwt_unix.file_descr)
     (dstate : dstate)
-    (init_result : ClientIdeInit.init_result) : state Lwt.t =
+    (init_result :
+      (ClientIdeInit.init_result, ClientIdeMessage.rich_error) result) :
+    state Lwt.t =
   let (_ : float) = log_startup_time "saved_state" dstate.start_time in
   log_debug "initialize2";
   match init_result with
@@ -446,7 +450,7 @@ let initialize2
     in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
-  | Error (reason, _e) ->
+  | Error reason ->
     log_debug "initialize2.error";
     let%lwt () =
       write_message

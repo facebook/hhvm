@@ -232,9 +232,7 @@ let client_lsp_exception ~root:_ ~message:_ ~data_opt:_ ~source:_ = ()
 
 let serverless_ide_startup ~component:_ ~start_time:_ = ()
 
-let serverless_ide_local_files ~local_file_count:_ = ()
-
-let serverless_ide_load_naming_table ~start_time:_ = ()
+let serverless_ide_load_naming_table ~start_time:_ ~local_file_count:_ _ = ()
 
 let serverless_ide_destroy_ok _ = ()
 

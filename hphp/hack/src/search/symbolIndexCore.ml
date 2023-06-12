@@ -78,17 +78,21 @@ let update_files
           LocalSearchService.update_file ~ctx ~sienv ~path ~info
         | _ -> sienv)
 
+type paths_with_addenda =
+  (Relative_path.t * SearchUtils.si_addendum list * SearchUtils.file_source)
+  list
+
 let update_from_addenda
-    ~(sienv : si_env)
-    ~(paths :
-       (Relative_path.t * SearchUtils.si_addendum list * file_source) list) :
-    si_env =
+    ~(sienv : si_env) ~(paths_with_addenda : paths_with_addenda) : si_env =
   match sienv.sie_provider with
   | NoIndex -> sienv
   | CustomIndex
   | LocalIndex
   | SqliteIndex ->
-    List.fold paths ~init:sienv ~f:(fun sienv (path, addenda, detector) ->
+    List.fold
+      paths_with_addenda
+      ~init:sienv
+      ~f:(fun sienv (path, addenda, detector) ->
         match detector with
         | SearchUtils.TypeChecker ->
           LocalSearchService.update_file_from_addenda ~sienv ~path ~addenda

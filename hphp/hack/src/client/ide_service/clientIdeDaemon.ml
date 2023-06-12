@@ -52,8 +52,8 @@ type common_state = {
       (** Local_memory backend; includes decl caches *)
   fall_back_to_full_index: bool;
       (** fall back to a full index naming table build if loading the saved state fails. *)
-  batch_process_changes: bool;
-      (** See [ServerConfig.ide_batch_process_changes] for details. *)
+  ide_batch_process_changes: bool;
+      (** index file changes synchronously in rust (rather than asynchronously in lwt/ocaml) *)
 }
 [@@deriving show]
 
@@ -722,7 +722,9 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let fall_back_to_full_index =
     ServerConfig.ide_fall_back_to_full_index config
   in
-  let batch_process_changes = ServerConfig.ide_batch_process_changes config in
+  let ide_batch_process_changes =
+    local_config.ServerLocalConfig.ide_batch_process_changes
+  in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
@@ -753,7 +755,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
         tcopt;
         local_memory;
         fall_back_to_full_index;
-        batch_process_changes;
+        ide_batch_process_changes;
       };
     dfiles =
       {
@@ -791,7 +793,7 @@ let initialize2
                (path, addenda, SearchUtils.TypeChecker)))
     in
     let istate =
-      if dstate.dcommon.batch_process_changes then
+      if dstate.dcommon.ide_batch_process_changes then
         let benchmark_start = Unix.gettimeofday () in
         let () =
           log
@@ -1689,7 +1691,7 @@ let handle_one_message_exn
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
     let%lwt istate =
-      if istate.icommon.batch_process_changes then
+      if istate.icommon.ide_batch_process_changes then
         batch_process_file_changes ~out_fd istate
       else
         process_one_file_change out_fd istate

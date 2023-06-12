@@ -17,6 +17,7 @@ use hash::HashMap;
 use hash::HashSet;
 use ir::func::SrcLoc;
 use ir::BlockId;
+use ir::FloatBits;
 use ir::LocalId;
 use ir::StringInterner;
 use itertools::Itertools;
@@ -656,7 +657,7 @@ impl fmt::Display for FmtTy<'_> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub(crate) enum Var {
     Global(GlobalName),
     Local(LocalId),
@@ -686,10 +687,10 @@ impl fmt::Display for FmtVar<'_> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub(crate) enum Const {
     False,
-    Float(f64),
+    Float(FloatBits),
     Int(i64),
     Null,
     String(AsciiString),
@@ -716,7 +717,7 @@ impl From<bool> for Const {
 
 impl From<f64> for Const {
     fn from(f: f64) -> Self {
-        Const::Float(f)
+        Const::Float(f.into())
     }
 }
 
@@ -733,7 +734,7 @@ impl fmt::Display for FmtConst<'_> {
         let FmtConst(const_) = *self;
         match const_ {
             Const::False => f.write_str("false"),
-            Const::Float(d) => write!(f, "{d:?}"),
+            Const::Float(d) => write!(f, "{:?}", d.to_f64()),
             Const::Int(i) => i.fmt(f),
             Const::Null => f.write_str("null"),
             Const::String(ref s) => {
@@ -745,7 +746,7 @@ impl fmt::Display for FmtConst<'_> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub(crate) enum Expr {
     /// __sil_allocate(\<ty\>)
     Alloc(Ty),

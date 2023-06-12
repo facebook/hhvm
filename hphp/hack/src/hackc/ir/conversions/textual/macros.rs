@@ -26,11 +26,22 @@ use syn::Token;
 /// This macro is used to derive the TextualDecl trait for builtins.
 ///
 /// When applied to an enum expects that each variant has an attribute in the form:
-///   #[decl(fn name(ty1, ty2) -> ty)]
+///   #[decl(fn name(ty1, ty2) -> ty, opts...)]
 ///
-/// and it generates an impl containing a write_decls() method:
+/// opts can be:
+///   can_write - this function writes to memory. This isn't currently used and
+///               is basically a placeholder for other decl options.
+///
+/// and it generates an impl:
 ///   impl ... {
-///     fn write_decls(w: &mut TextualFile<'_>) -> Result<()> { ... }
+///     /// Write the listed set of decls to the TextualFile.
+///     fn write_decls(w: &mut TextualFile<'_>, subset: &HashSet<Name>) -> Result<()> { ... }
+///
+///     /// Returns a string representing the builtin declaration.
+///     fn as_str(&self) -> &'static str;
+///
+///     /// Returns `true` if the builtin can write to memory.
+///     fn can_write(&self) -> bool;
 ///   }
 ///
 /// It also implements the Display trait for the enum.
@@ -47,6 +58,7 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
     let mut last = None;
     let mut decls: Vec<TokenStream> = Vec::new();
     let mut displays: Vec<TokenStream> = Vec::new();
+    let mut can_writes: Vec<TokenStream> = Vec::new();
     match input.data {
         syn::Data::Enum(e) => {
             for variant in e.variants {
@@ -69,7 +81,10 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                 last = Some(variant_name_str);
 
                 match decl {
-                    Decl::FnSignature(signature) => {
+                    Decl::FnSignature {
+                        signature,
+                        can_write,
+                    } => {
                         let builtin_name =
                             Literal::string(&format!("$builtins.{}", signature.ident));
                         let params = signature
@@ -100,9 +115,13 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
                         let display = quote!(#name::#variant_name => #builtin_name,);
                         displays.push(display);
+
+                        let can_write = quote!(#name::#variant_name => #can_write,);
+                        can_writes.push(can_write);
                     }
                     Decl::Skip => {
                         displays.push(quote!(#name::#variant_name(f) => f.as_str(),));
+                        can_writes.push(quote!(#name::#variant_name(f) => f.can_write(),));
                     }
                 }
             }
@@ -121,6 +140,12 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
             #vis fn as_str(&self) -> &'static str {
                 match self {
                     #(#displays)*
+                }
+            }
+
+            #vis fn can_write(&self) -> bool {
+                match self {
+                    #(#can_writes)*
                 }
             }
         }
@@ -149,7 +174,7 @@ fn extract_exactly_one_attr(ident: &Ident, attrs: Vec<Attribute>, name: &str) ->
 }
 
 enum Decl {
-    FnSignature(DeclSig),
+    FnSignature { signature: DeclSig, can_write: bool },
     Skip,
 }
 
@@ -158,27 +183,49 @@ impl Parse for Decl {
         let input;
         parenthesized!(input in wrapped_input);
 
-        if input.peek(Token![fn]) {
+        let signature = if input.peek(Token![fn]) {
             let args;
-            Ok(Decl::FnSignature(DeclSig {
+            DeclSig {
                 fn_token: input.parse()?,
                 ident: input.parse()?,
                 paren_token: parenthesized!(args in input),
                 parameters: args.parse_terminated(DeclArg::parse)?,
                 arrow: input.parse()?,
                 ret: input.parse()?,
-            }))
+            }
         } else {
             let tag: Ident = input.parse()?;
             if tag == "skip" {
                 if !input.is_empty() {
                     return Err(input.error("'skip' may not be followed by additional tokens"));
                 }
-                Ok(Decl::Skip)
+                return Ok(Decl::Skip);
             } else {
                 abort!(tag, "Unknown 'decl' type");
             }
+        };
+
+        let mut can_write = false;
+
+        while input.peek(Token![,]) {
+            let _t: Token![,] = input.parse()?;
+
+            let name: Ident = input.parse()?;
+            if name == "can_write" {
+                can_write = true;
+            } else {
+                return Err(input.error("unknown decl"));
+            }
         }
+
+        if !input.is_empty() {
+            return Err(input.error("unexpected input"));
+        }
+
+        Ok(Decl::FnSignature {
+            signature,
+            can_write,
+        })
     }
 }
 

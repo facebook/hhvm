@@ -23,9 +23,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
         TypedValue::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
         TypedValue::Bool(false) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::False)]),
         TypedValue::Bool(true) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::True)]),
-        TypedValue::Float(f) => {
-            hack::expr_builtin(Builtin::Float, [Expr::Const(Const::Float(f.to_f64()))])
-        }
+        TypedValue::Float(f) => hack::expr_builtin(Builtin::Float, [Expr::Const(Const::Float(f))]),
         TypedValue::String(s) | TypedValue::LazyClass(ClassId { id: s }) => {
             let s = util::escaped_string(&strings.lookup_bytes(s));
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])

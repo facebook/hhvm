@@ -713,7 +713,7 @@ fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> 
                 Constant::Bool(true) => Expr::Const(Const::True),
                 Constant::Dir => todo!(),
                 Constant::File => todo!(),
-                Constant::Float(f) => Expr::Const(Const::Float(f.to_f64())),
+                Constant::Float(f) => Expr::Const(Const::Float(*f)),
                 Constant::FuncCred => todo!(),
                 Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(*i))]),
                 Constant::Method => todo!(),

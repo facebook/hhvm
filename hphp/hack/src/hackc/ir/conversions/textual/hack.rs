@@ -52,6 +52,8 @@ pub(crate) enum Hhbc {
     AwaitAll,
     #[decl(fn hhbc_cast_keyset(*HackMixed) -> *HackMixed)]
     CastKeyset,
+    #[decl(fn hhbc_cast_string(*HackMixed) -> *HackString)]
+    CastString,
     #[decl(fn hhbc_cast_vec(*HackMixed) -> *HackMixed)]
     CastVec,
     #[decl(fn hhbc_class_get_c(*HackMixed) -> void)]
@@ -114,6 +116,8 @@ pub(crate) enum Hhbc {
     GetMemoKeyL,
     #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]
     HasReifiedParent,
+    #[decl(fn hhbc_idx(*HackMixed, *HackMixed) -> *HackMixed)]
+    Idx,
     #[decl(fn hhbc_is_late_bound_cls(*HackMixed) -> *HackMixed)]
     IsLateBoundCls,
     #[decl(fn hhbc_is_type_arr_like(*HackMixed) -> *HackMixed)]
@@ -156,6 +160,8 @@ pub(crate) enum Hhbc {
     IterInit,
     #[decl(fn hhbc_iter_next(it: *Iterator, key: **HackMixed, var: **HackMixed) -> *HackBool)]
     IterNext,
+    #[decl(fn hhbc_lazy_class_from_class(*HackMixed) -> *HackString)]
+    LazyClassFromClass,
     #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]
     LockObj,
     #[decl(fn hhbc_memo_set(...) -> *HackMixed)]

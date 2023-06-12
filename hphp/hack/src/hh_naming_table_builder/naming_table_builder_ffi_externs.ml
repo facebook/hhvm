@@ -10,9 +10,11 @@ open Hh_prelude
 
 type build_progress
 
+type si_addenda = (Relative_path.t * SearchUtils.si_addendum list) list
+
 type build_result = {
   exit_status: int;
-  si_addenda: (Relative_path.t * SearchUtils.si_addendum list) list;
+  si_addenda: si_addenda;
   time_taken_secs: float;
 }
 

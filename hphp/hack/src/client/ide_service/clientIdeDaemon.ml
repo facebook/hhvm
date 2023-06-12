@@ -9,22 +9,12 @@
 
 open Hh_prelude
 
-(** This is the result type from attempting to prepare the naming table.
-In the error case, [stopped_reason] is a human-facing response,
-and [Lsp.Error.t] contains structured telemetry data. *)
-type prepare_naming_table_result =
-  ( Naming_table.t
-    * Saved_state_loader.changed_files
-    * (Relative_path.t * SearchUtils.si_addendum list) list,
-    ClientIdeMessage.stopped_reason * Lsp.Error.t )
-  result
-
 (** These are messages on ClientIdeDaemon's internal message-queue *)
 type message =
   | ClientRequest : 'a ClientIdeMessage.tracked_t -> message
       (** ClientRequest came from ClientIdeService over stdin;
       it expects a response. *)
-  | GotNamingTable : prepare_naming_table_result -> message
+  | GotNamingTable : ClientIdeInit.init_result -> message
       (** GotNamingTable is posted from within ClientIdeDaemon itself once
       our attempt at loading saved-state has finished; it's picked
       up by handle_messages. *)
@@ -42,18 +32,10 @@ type common_state = {
   hhi_root: Path.t;
       (** hhi_root files are written during initialize, deleted at shutdown, and
       refreshed periodically in case the tmp-cleaner has deleted them. *)
-  sienv: SearchUtils.si_env; [@opaque]
-      (** sienv provides autocomplete and find-symbols. It is constructed during
-      initialization and stores a few in-memory structures such as namespace-list,
-      plus in-memory deltas. It is also updated during process_changed_files. *)
-  popt: ParserOptions.t;  (** parser options *)
-  tcopt: TypecheckerOptions.t;  (** typechecker options *)
+  config: ServerConfig.t; [@opaque]
+  local_config: ServerLocalConfig.t; [@opaque]
   local_memory: Provider_backend.local_memory; [@opaque]
       (** Local_memory backend; includes decl caches *)
-  fall_back_to_full_index: bool;
-      (** fall back to a full index naming table build if loading the saved state fails. *)
-  ide_batch_process_changes: bool;
-      (** index file changes synchronously in rust (rather than asynchronously in lwt/ocaml) *)
 }
 [@@deriving show]
 
@@ -65,13 +47,13 @@ type open_files_state = {
       by didOpen/didChange/didClose/codeAction. *)
   changed_files_to_process: Relative_path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily
-  whittled down one by one in `serve` as we get around to processing them
-  via `process_changed_files`. *)
+      whittled down one by one in `serve` as we get around to processing them
+      via `process_changed_files`. *)
   changed_files_denominator: int;
       (** the user likes to see '5/10' for how many changed files has been processed
-  in the current batch of changes. The denominator counts up for every new file
-  that has to be processed, until the batch ends - i.e. changed_files_to_process
-  becomes empty - and we reset the denominator. *)
+      in the current batch of changes. The denominator counts up for every new file
+      that has to be processed, until the batch ends - i.e. changed_files_to_process
+      becomes empty - and we reset the denominator. *)
 }
 
 (** istate, "initialized state", is the state the daemon after it has
@@ -166,6 +148,10 @@ type istate = {
       have changed since sqlite. When a file is changed on disk, we need this to
       know which shallow decls to invalidate. Note: while the forward-naming-table
       is stored here, the reverse-naming-table is instead stored in ctx. *)
+  sienv: SearchUtils.si_env; [@opaque]
+      (** sienv provides autocomplete and find-symbols. It is constructed during
+      initialize and updated during process_changed_files. It stores a few
+      in-memory structures such as namespace-list, plus in-memory deltas. *)
 }
 
 (** dstate, "during_init state", is the state the daemon after it has received an
@@ -184,7 +170,7 @@ type state =
   | Pending_init  (** We haven't yet received init request *)
   | During_init of dstate
       (** We're working on the init request. We're still in
-  the process of loading the saved state. *)
+      the process of loading the saved state. *)
   | Initialized of istate  (** Finished work on init request. *)
   | Failed_init of Lsp.Error.t  (** Failed request, with root cause *)
 
@@ -232,345 +218,6 @@ let write_message
   with
   | Unix.Unix_error (Unix.EPIPE, fn, param) ->
     raise @@ Outfd_write_error (fn, param)
-
-(** Load the naming table specified by [naming_table_load_info], or download one based on [root].
-
-Note: no symbol index addenda are generated from this load. *)
-let load_naming_table
-    (ctx : Provider_context.t)
-    ~(root : Path.t)
-    ~(naming_table_load_info :
-       ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
-       option)
-    ~(ignore_hh_version : bool) : prepare_naming_table_result Lwt.t =
-  log "[saved-state] Starting load in root %s" (Path.to_string root);
-  let%lwt result =
-    try%lwt
-      let start_time = Unix.gettimeofday () in
-      let%lwt result =
-        match naming_table_load_info with
-        | Some naming_table_load_info ->
-          let open ClientIdeMessage.Initialize_from_saved_state in
-          (* tests may wish to pretend there's a delay *)
-          let%lwt () = Lwt_unix.sleep naming_table_load_info.test_delay in
-          (* Assume that there are no changed files on disk if we're getting
-             passed the path to the saved-state directly, and that the saved-state
-             corresponds to the current state of the world. *)
-          let changed_files = [] in
-          (* Test hook, for tests that want to get messages in before init *)
-          Lwt.return_ok
-            {
-              Saved_state_loader.main_artifacts =
-                {
-                  Saved_state_loader.Naming_table_info.naming_table_path =
-                    naming_table_load_info.path;
-                };
-              additional_info = ();
-              changed_files;
-              manifold_path = "<not provided>";
-              corresponding_rev = "<not provided>";
-              mergebase_rev = "<not provided>";
-              is_cached = true;
-            }
-        | None ->
-          let ide_should_use_hack_64_distc =
-            ctx
-            |> Provider_context.get_tcopt
-            |> TypecheckerOptions.ide_should_use_hack_64_distc
-          in
-          let ssopt =
-            TypecheckerOptions.saved_state (Provider_context.get_tcopt ctx)
-          in
-          let%lwt result =
-            if ide_should_use_hack_64_distc then
-              let%lwt result =
-                State_loader_lwt.load
-                  ~ssopt
-                  ~progress_callback:(fun _ -> ())
-                  ~watchman_opts:
-                    Saved_state_loader.Watchman_options.
-                      { root; sockname = None }
-                  ~ignore_hh_version
-                  ~saved_state_type:
-                    Saved_state_loader.Naming_and_dep_table_distc
-              in
-              match result with
-              | Ok
-                  {
-                    Saved_state_loader.main_artifacts;
-                    changed_files;
-                    manifold_path;
-                    corresponding_rev;
-                    mergebase_rev;
-                    is_cached;
-                    additional_info = _;
-                  } ->
-                let main_artifacts =
-                  {
-                    Saved_state_loader.Naming_table_info.naming_table_path =
-                      main_artifacts
-                        .Saved_state_loader.Naming_and_dep_table_info
-                         .naming_sqlite_table_path;
-                  }
-                in
-                Lwt.return
-                  (Ok
-                     {
-                       Saved_state_loader.main_artifacts;
-                       additional_info = ();
-                       manifold_path;
-                       changed_files;
-                       corresponding_rev;
-                       mergebase_rev;
-                       is_cached;
-                     })
-              | Error e -> Lwt.return (Error e)
-            else
-              State_loader_lwt.load
-                ~ssopt
-                ~progress_callback:(fun _ -> ())
-                ~watchman_opts:
-                  Saved_state_loader.Watchman_options.{ root; sockname = None }
-                ~ignore_hh_version
-                ~saved_state_type:Saved_state_loader.Naming_table
-          in
-          Lwt.return result
-      in
-      match result with
-      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
-        let path =
-          Path.to_string
-            main_artifacts
-              .Saved_state_loader.Naming_table_info.naming_table_path
-        in
-        log "[saved-state] Loading naming-table... %s" path;
-        let naming_table = Naming_table.load_from_sqlite ctx path in
-        log "[saved-state] Loaded naming-table.";
-        (* Track how many files we have to change locally *)
-        HackEventLogger.serverless_ide_local_files
-          ~local_file_count:(List.length changed_files);
-        HackEventLogger.serverless_ide_load_naming_table ~start_time;
-
-        Lwt.return_ok (naming_table, changed_files, [])
-      | Error load_error ->
-        (* We'll turn that load_error into a user-facing [reason], and a
-           programmatic error [e] for future telemetry *)
-        let reason =
-          ClientIdeMessage.
-            {
-              short_user_message =
-                Saved_state_loader.LoadError.short_user_message_of_error
-                  load_error;
-              medium_user_message =
-                Saved_state_loader.LoadError.medium_user_message_of_error
-                  load_error;
-              long_user_message =
-                Saved_state_loader.LoadError.long_user_message_of_error
-                  load_error;
-              debug_details =
-                Saved_state_loader.LoadError.debug_details_of_error load_error;
-              is_actionable =
-                Saved_state_loader.LoadError.is_error_actionable load_error;
-            }
-        in
-        let e =
-          {
-            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-            message = reason.ClientIdeMessage.medium_user_message;
-            data =
-              Some
-                (Hh_json.JSON_Object
-                   [
-                     ( "debug_details",
-                       Hh_json.string_ reason.ClientIdeMessage.debug_details );
-                   ]);
-          }
-        in
-        Lwt.return_error (reason, e)
-    with
-    | exn ->
-      let exn = Exception.wrap exn in
-      ClientIdeUtils.log_bug "load_exn" ~exn ~telemetry:false;
-      (* We need both a user-facing "reason" and an internal error "e" *)
-      let reason = ClientIdeUtils.make_bug_reason "load_exn" ~exn in
-      let e = ClientIdeUtils.make_bug_error "load_exn" ~exn in
-      Lwt.return_error (reason, e)
-  in
-  Lwt.return result
-
-(** Performs a full index of [root], building a naming table in hh_server's
-temporary directory, and then loading that naming table.
-
-This is an alternative to [load_naming_table] to produce a naming table. *)
-let build_naming_table
-    (ctx : Provider_context.t)
-    ~(root : Path.t)
-    ~(hhi_root : Path.t)
-    ~(output : Path.t) : prepare_naming_table_result Lwt.t =
-  log
-    "[full-index] Beginning full index naming table build with destination %s"
-    (Path.to_string output);
-  let progress =
-    Naming_table_builder_ffi_externs.build
-      ~www:root
-      ~custom_hhi_path:hhi_root
-      ~output
-  in
-  let rec poll_build_until_complete_exn () :
-      Naming_table_builder_ffi_externs.build_result Lwt.t =
-    match Naming_table_builder_ffi_externs.poll_exn progress with
-    | Some build_result -> Lwt.return build_result
-    | None ->
-      let%lwt () = Lwt_unix.sleep 0.1 in
-      poll_build_until_complete_exn ()
-  in
-  try%lwt
-    let%lwt Naming_table_builder_ffi_externs.
-              { exit_status; time_taken_secs; si_addenda } =
-      poll_build_until_complete_exn ()
-    in
-    if exit_status = 0 then begin
-      log
-        "[full-index] Successfully built naming table from full index in %f seconds."
-        time_taken_secs;
-      log "[full-index] Loading naming-table... %s" (Path.to_string output);
-      let naming_table =
-        Naming_table.load_from_sqlite ctx (Path.to_string output)
-      in
-      log "[full-index] Loaded naming-table. %s" (Path.to_string output);
-      Lwt.return_ok (naming_table, [], si_addenda)
-    end else begin
-      log
-        "[full-index] Naming table build failed with nonzero exit status: %d in %f seconds"
-        exit_status
-        time_taken_secs;
-      let data =
-        Some
-          (Hh_json.JSON_Object
-             [("naming_table_builder_exit_status", Hh_json.int_ exit_status)])
-      in
-      let reason =
-        ClientIdeUtils.make_bug_reason "full_index_non_zero_exit" ~data
-      in
-      let error =
-        ClientIdeUtils.make_bug_error "full_index_non_zero_exit" ~data
-      in
-      Lwt.return_error (reason, error)
-    end
-  with
-  | exn ->
-    let exn = Exception.wrap exn in
-    let reason = ClientIdeUtils.make_bug_reason "full_index_exn" ~exn in
-    let e = ClientIdeUtils.make_bug_error "full_index_exn" ~exn in
-    Lwt.return_error (reason, e)
-
-(** Prepare the naming table as part of the daemon's initialization.
-  First, attempt to find a naming table on disk from a previously downloaded saved state. If there is one, load it.
-  If no naming table on disk, attempt to load the naming table via Watchman and Manifold.
-  If loading the naming table fails, fall back to building one if [dstate.dcommon.fall_back_to_full_index] is [true].
-*)
-let prepare_naming_table
-    (param : ClientIdeMessage.Initialize_from_saved_state.t)
-    (dstate : dstate)
-    ~(out_fd : Lwt_unix.file_descr) : prepare_naming_table_result Lwt.t =
-  let ctx =
-    Provider_context.empty_for_tool
-      ~popt:dstate.dcommon.popt
-      ~tcopt:dstate.dcommon.tcopt
-      ~backend:(Provider_backend.Local_memory dstate.dcommon.local_memory)
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ~package_info:Package.Info.empty
-  in
-  let open ClientIdeMessage.Initialize_from_saved_state in
-  (* First, attempt to see if ANY naming table is on disk - avoid the Watchman
-     query to find the closest saved state and instead prefer a naive grep.
-
-     If fails, fall back to Watchman for a precise download.
-  *)
-  let ide_should_use_hack_64_distc =
-    TypecheckerOptions.ide_should_use_hack_64_distc dstate.dcommon.tcopt
-  in
-  let ide_load_naming_table_on_disk =
-    TypecheckerOptions.ide_load_naming_table_on_disk dstate.dcommon.tcopt
-  in
-  let saved_state_type =
-    if ide_should_use_hack_64_distc then
-      Saved_state_loader.Naming_and_dep_table_distc
-    else
-      Saved_state_loader.Naming_and_dep_table
-  in
-  let ssopt = TypecheckerOptions.saved_state dstate.dcommon.tcopt in
-  let%lwt naming_table_load_from_disk_result =
-    if ide_load_naming_table_on_disk then
-      let () = log "Attempting to load a naming table from disk..." in
-      let%lwt result =
-        State_loader_lwt.get_project_metadata
-          ~opts:ssopt
-          ~progress_callback:(fun _ -> ())
-          ~repo:param.root
-          ~ignore_hh_version:param.ignore_hh_version
-          ~saved_state_type
-      in
-      match result with
-      | Ok (project_metadata, _telemetry) ->
-        State_loader_lwt.load_arbitrary_naming_table_from_disk
-          ~saved_state_type
-          ~project_metadata
-          ~threshold:
-            (TypecheckerOptions.ide_naming_table_update_threshold
-               dstate.dcommon.tcopt)
-          ~root:param.root
-      | Error (load_err, _telemetry) ->
-        let err =
-          Saved_state_loader.LoadError.medium_user_message_of_error load_err
-        in
-        let str = Printf.sprintf "Failed to get project_metadata: %s" err in
-        Lwt.return_error str
-    else
-      Lwt.return_error
-        "Skipping attempt to naively load naming table from disk..."
-  in
-  match naming_table_load_from_disk_result with
-  | Ok (naming_table_path, changed_files) ->
-    let naming_table =
-      Naming_table.load_from_sqlite ctx (Path.to_string naming_table_path)
-    in
-    Lwt.return @@ Ok (naming_table, changed_files, [])
-  | Error err ->
-    log "%s" err;
-    let%lwt load_result =
-      load_naming_table
-        ctx
-        ~root:param.root
-        ~naming_table_load_info:param.naming_table_load_info
-        ~ignore_hh_version:param.ignore_hh_version
-    in
-    (match load_result with
-    | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index ->
-      let message =
-        Printf.sprintf
-          "Falling back to full index naming table build because naming table load failed: %s"
-          e.Lsp.Error.message
-      in
-      ClientIdeUtils.log_bug message ~data:e.Lsp.Error.data ~telemetry:true;
-      let%lwt () =
-        write_message
-          ~out_fd
-          ~message:
-            (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
-      in
-      let%lwt full_index_result =
-        build_naming_table
-          ctx
-          ~root:param.root
-          ~hhi_root:dstate.dcommon.hhi_root
-          ~output:(Path.make @@ ServerFiles.client_ide_naming_table param.root)
-      in
-      log "Completed index";
-      Lwt.return full_index_result
-    | Error _
-    | Ok _ ->
-      Lwt.return load_result)
 
 let log_startup_time (component : string) (start_time : float) : float =
   let now = Unix.gettimeofday () in
@@ -637,8 +284,8 @@ let batch_update_naming_table_and_invalidate_caches
 (** An empty ctx with no entries *)
 let make_empty_ctx (common : common_state) : Provider_context.t =
   Provider_context.empty_for_tool
-    ~popt:common.popt
-    ~tcopt:common.tcopt
+    ~popt:(ServerConfig.parser_options common.config)
+    ~tcopt:(ServerConfig.typechecker_options common.config)
     ~backend:(Provider_backend.Local_memory common.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
     ~package_info:Package.Info.empty
@@ -691,35 +338,6 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     | _ -> failwith "expected local memory backend"
   in
 
-  (* Use config to modify server_env with the correct symbol index *)
-  let genv = ServerEnvBuild.make_genv server_args config local_config [] in
-  let init_id = Random_id.short_string () in
-  let { ServerEnv.tcopt; popt; gleanopt; _ } =
-    ServerEnvBuild.make_env
-      ~init_id
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      genv.ServerEnv.config
-  in
-
-  let start_time = log_startup_time "basic_startup" start_time in
-  let sienv =
-    SymbolIndex.initialize
-      ~globalrev:None
-      ~gleanopt
-      ~namespace_map:(ParserOptions.auto_namespace_map tcopt)
-      ~provider_name:
-        local_config.ServerLocalConfig.ide_symbolindex_search_provider
-      ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
-      ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
-      ~workers:None
-  in
-  let sienv = { sienv with SearchUtils.sie_log_timings = true } in
-  let fall_back_to_full_index =
-    ServerConfig.ide_fall_back_to_full_index config
-  in
-  let ide_batch_process_changes =
-    local_config.ServerLocalConfig.ide_batch_process_changes
-  in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
@@ -742,16 +360,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   log_debug "initialize1.done";
   {
     start_time;
-    dcommon =
-      {
-        hhi_root;
-        sienv;
-        popt;
-        tcopt;
-        local_memory;
-        fall_back_to_full_index;
-        ide_batch_process_changes;
-      };
+    dcommon = { hhi_root; config; local_config; local_memory };
     dfiles =
       {
         open_files;
@@ -767,11 +376,11 @@ state. *)
 let initialize2
     (out_fd : Lwt_unix.file_descr)
     (dstate : dstate)
-    (prepare_table_result : prepare_naming_table_result) : state Lwt.t =
+    (init_result : ClientIdeInit.init_result) : state Lwt.t =
   let (_ : float) = log_startup_time "saved_state" dstate.start_time in
   log_debug "initialize2";
-  match prepare_table_result with
-  | Ok (naming_table, changed_files, si_addenda) ->
+  match init_result with
+  | Ok { ClientIdeInit.naming_table; sienv; changed_files } ->
     let changed_files_to_process =
       Relative_path.Set.union
         dstate.dfiles.changed_files_to_process
@@ -780,15 +389,9 @@ let initialize2
     let changed_files_denominator =
       Relative_path.Set.cardinal changed_files_to_process
     in
-    let sienv =
-      SymbolIndexCore.update_from_addenda
-        ~sienv:dstate.dcommon.sienv
-        ~paths:
-          (List.map si_addenda ~f:(fun (path, addenda) ->
-               (path, addenda, SearchUtils.TypeChecker)))
-    in
     let istate =
-      if dstate.dcommon.ide_batch_process_changes then
+      if dstate.dcommon.local_config.ServerLocalConfig.ide_batch_process_changes
+      then
         let benchmark_start = Unix.gettimeofday () in
         let () =
           log
@@ -809,7 +412,8 @@ let initialize2
         let () = log "Completed batch update in %f seconds." benchmark_s in
         {
           naming_table;
-          icommon = { dstate.dcommon with sienv };
+          sienv;
+          icommon = dstate.dcommon;
           ifiles =
             {
               open_files = dstate.dfiles.open_files;
@@ -820,7 +424,8 @@ let initialize2
       else
         {
           naming_table;
-          icommon = { dstate.dcommon with sienv };
+          sienv;
+          icommon = dstate.dcommon;
           ifiles =
             {
               open_files = dstate.dfiles.open_files;
@@ -1064,9 +669,21 @@ let handle_request
       let dstate = initialize1 param in
       (* We're going to kick off the asynchronous part of initializing now.
          Once it's done, it will appear as a GotNamingTable message on the queue. *)
+      let notify_callback_in_case_of_fallback_to_full_init () =
+        write_message
+          ~out_fd
+          ~message:
+            (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
+      in
       Lwt.async (fun () ->
           let%lwt naming_table_result =
-            prepare_naming_table param dstate ~out_fd
+            ClientIdeInit.init
+              ~config:dstate.dcommon.config
+              ~local_config:dstate.dcommon.local_config
+              ~param
+              ~hhi_root:dstate.dcommon.hhi_root
+              ~local_memory:dstate.dcommon.local_memory
+              ~notify_callback_in_case_of_fallback_to_full_init
           in
           (* if the following push fails, that must be because the queues
              have been shut down, in which case there's nothing to do. *)
@@ -1172,7 +789,9 @@ let handle_request
       Document_symbol document ) ->
     let (files, entry, _) = update_file files document in
     let result =
-      FileOutline.outline_entry_no_comments ~popt:common.popt ~entry
+      FileOutline.outline_entry_no_comments
+        ~popt:(ServerConfig.parser_options common.config)
+        ~entry
     in
     Lwt.return (update_state_files state files, Ok result)
   (***********************************************************)
@@ -1410,7 +1029,7 @@ let handle_request
       ServerAutoComplete.go_ctx
         ~ctx
         ~entry
-        ~sienv:istate.icommon.sienv
+        ~sienv:istate.sienv
         ~is_manually_invoked
         ~line
         ~column
@@ -1532,9 +1151,7 @@ let handle_request
        decl for Foo. *)
     (* Note: we intentionally don't give results from unsaved files *)
     let ctx = make_empty_ctx istate.icommon in
-    let result =
-      ServerSearch.go ctx query ~kind_filter:"" istate.icommon.sienv
-    in
+    let result = ServerSearch.go ctx query ~kind_filter:"" istate.sienv in
     Lwt.return (Initialized istate, Ok result)
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
@@ -1599,7 +1216,7 @@ let batch_process_file_changes ~(out_fd : Lwt_unix.file_descr) (istate : istate)
     batch_update_naming_table_and_invalidate_caches
       ~ctx:(make_empty_ctx istate.icommon)
       ~naming_table:istate.naming_table
-      ~sienv:istate.icommon.sienv
+      ~sienv:istate.sienv
       ~local_memory:istate.icommon.local_memory
       ~open_files:istate.ifiles.open_files
       istate.ifiles.changed_files_to_process
@@ -1607,7 +1224,8 @@ let batch_process_file_changes ~(out_fd : Lwt_unix.file_descr) (istate : istate)
   let istate =
     {
       naming_table;
-      icommon = { istate.icommon with sienv };
+      sienv;
+      icommon = istate.icommon;
       ifiles =
         {
           istate.ifiles with
@@ -1635,7 +1253,7 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     ClientIdeIncremental.update_naming_tables_for_changed_file
       ~ctx:(make_empty_ctx istate.icommon)
       ~naming_table:istate.naming_table
-      ~sienv:istate.icommon.sienv
+      ~sienv:istate.sienv
       ~path:next_file
   in
   Option.iter
@@ -1654,7 +1272,8 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   let istate =
     {
       naming_table;
-      icommon = { istate.icommon with sienv };
+      sienv;
+      icommon = istate.icommon;
       ifiles =
         {
           istate.ifiles with
@@ -1686,7 +1305,8 @@ let handle_one_message_exn
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
     let%lwt istate =
-      if istate.icommon.ide_batch_process_changes then
+      if istate.icommon.local_config.ServerLocalConfig.ide_batch_process_changes
+      then
         batch_process_file_changes ~out_fd istate
       else
         process_one_file_change out_fd istate

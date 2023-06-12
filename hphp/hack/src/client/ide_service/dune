@@ -1,7 +1,7 @@
 (library
  (name client_ide_service)
  (wrapped false)
- (modules clientIdeDaemon clientIdeIncremental clientIdeService)
+ (modules clientIdeDaemon clientIdeIncremental clientIdeInit clientIdeService)
  (libraries
   client_ide_message
   client_ide_utils

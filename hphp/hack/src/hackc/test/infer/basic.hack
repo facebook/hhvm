@@ -175,6 +175,16 @@ function check_constant(): void {
   echo GLOBAL_CONSTANT;
 }
 
+// TEST-CHECK-BAL: define $root.check_file
+// CHECK: define $root.check_file($this: *void) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $root.printf(null, $builtins.hack_string("FILE: %s\n"), $builtins.hack_string("__FILE__"))
+// CHECK:   ret null
+// CHECK: }
+function check_file(): void {
+  printf("FILE: %s\n", __FILE__);
+}
+
 // TEST-CHECK-1: global global::_SERVER
 // CHECK: global global::_SERVER : *HackMixed
 

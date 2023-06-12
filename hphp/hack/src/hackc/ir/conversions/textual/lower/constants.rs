@@ -23,6 +23,19 @@ use log::trace;
 /// Write the complex constants to the start of the entry block (and 'default'
 /// handling blocks) and remap their uses to the emitted values.
 pub(crate) fn write_constants(builder: &mut FuncBuilder<'_>) {
+    // Rewrite some types of constants.
+    for c in builder.func.constants.iter_mut() {
+        match c {
+            Constant::File => {
+                // Rewrite __FILE__ as a simple string since the real filename
+                // shouldn't matter for analysis.
+                let id = builder.strings.intern_str("__FILE__");
+                *c = Constant::String(id);
+            }
+            _ => {}
+        }
+    }
+
     // Write the complex constants to the entry block.
     insert_constants(builder, Func::ENTRY_BID);
 }

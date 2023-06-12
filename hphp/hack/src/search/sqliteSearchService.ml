@@ -71,13 +71,6 @@ let find_or_build_sqlite_file
       {
         IndexBuilderTypes.repo_folder = repo_path;
         sqlite_filename = Some tempfilename;
-        text_filename = None;
-        json_filename = None;
-        json_repo_name = None;
-        json_chunk_size = 0;
-        custom_service = None;
-        custom_repo_name = None;
-        set_paths_for_worker = false;
         hhi_root_folder = Some (Hhi.get_hhi_root ());
         namespace_map;
         silent;

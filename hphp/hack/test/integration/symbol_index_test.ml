@@ -88,13 +88,6 @@ let run_index_builder (harness : Test_harness.t) : si_env =
     {
       repo_folder = repo_path;
       sqlite_filename = file_opt;
-      text_filename = None;
-      json_filename = None;
-      json_repo_name = None;
-      json_chunk_size = 0;
-      custom_service = None;
-      custom_repo_name = None;
-      set_paths_for_worker = false;
       hhi_root_folder = Some hhi_folder;
       namespace_map = [];
       silent = true;

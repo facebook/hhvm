@@ -143,18 +143,6 @@ let update_file_from_addenda
     lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
   }
 
-let update_file_facts
-    ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env
-    =
-  let tombstone = get_tombstone path in
-  let contents = IndexBuilder.convert_facts ~path ~facts in
-  {
-    sienv with
-    lss_fullitems =
-      Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
-  }
-
 (* Remove files from local when they are deleted *)
 let remove_file ~(sienv : si_env) ~(path : Relative_path.t) : si_env =
   let tombstone = get_tombstone path in

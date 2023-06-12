@@ -11,14 +11,7 @@
 type index_builder_context = {
   repo_folder: string;
   sqlite_filename: string option;
-  text_filename: string option;
-  json_filename: string option;
-  json_chunk_size: int;
-  json_repo_name: string option;
-  custom_service: string option;
-  custom_repo_name: string option;
   hhi_root_folder: Path.t option;
-  set_paths_for_worker: bool;
   silent: bool;
   namespace_map: (string * string) list;
 }

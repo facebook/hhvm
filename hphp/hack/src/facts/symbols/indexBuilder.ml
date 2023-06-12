@@ -124,13 +124,6 @@ let parse_batch
     (ctxt : index_builder_context)
     (acc : si_capture)
     (files : Relative_path.t list) : si_capture =
-  let repo_path = Path.make ctxt.repo_folder in
-  if ctxt.set_paths_for_worker then (
-    Relative_path.set_path_prefix Relative_path.Root repo_path;
-    Relative_path.set_path_prefix
-      Relative_path.Hhi
-      (Option.value_exn ctxt.hhi_root_folder)
-  );
   List.fold files ~init:acc ~f:(fun acc file ->
       try
         let res = (parse_file ctxt) file in
@@ -158,21 +151,6 @@ let parallel_parse
 let entry =
   WorkerControllerEntryPoint.register ~restore:(fun () ~(worker_id : int) ->
       Hh_logger.set_id (Printf.sprintf "indexBuilder %d" worker_id))
-
-(* Create one worker per cpu *)
-let init_workers () =
-  let nbr_procs = Sys_utils.nbr_procs in
-  let gc_control = GlobalConfig.gc_control in
-  let config = SharedMem.default_config in
-  let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
-  MultiWorker.make
-    ?call_wrapper:None
-    ~longlived_workers:false
-    ~saved_state:()
-    ~entry
-    nbr_procs
-    ~gc_control
-    ~heap_handle
 
 let gather_file_list (path : string) : Relative_path.t list =
   Find.find ~file_only:true ~filter:FindUtils.file_filter [Path.make path]
@@ -211,158 +189,76 @@ let convert_capture (incoming : si_capture) : si_scan_result =
         Caml.Hashtbl.add result.sisr_filepaths s.sif_filepath path_hash);
   result
 
-let export_to_custom_writer
-    (json_exported_files : string list) (ctxt : index_builder_context) : unit =
-  match (ctxt.custom_service, ctxt.custom_repo_name) with
-  | (Some _, None)
-  | (None, Some _) ->
-    print_endline "API export requires both a service and a repo name."
-  | (None, None) -> ()
-  | (Some service, Some repo_name) ->
-    let name =
-      Printf.sprintf
-        "Exported to custom symbol index writer [%s] [%s] in "
-        service
-        repo_name
-    in
-    measure_time
-      ~silent:ctxt.silent
-      ~f:(fun () ->
-        CustomJsonUploader.send_to_custom_writer
-          ~workers:None
-          ~print_file_status:true
-          ~files:json_exported_files
-          ~service
-          ~repo_name
-          ~repo_folder:ctxt.repo_folder)
-      ~name
-
 (* Run the index builder project *)
 let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
     : unit =
-  if Option.is_some ctxt.json_repo_name then
-    (* if json repo is specified, just export to custom writer directly *)
-    let json_exported_files =
-      match ctxt.json_repo_name with
-      | None -> []
-      | Some repo_name ->
-        Sys_utils.collect_paths
-          begin
-            fun filename ->
-              Str.string_match (Str.regexp "[./a-zA-Z0-9_]+.json") filename 0
-          end
-          repo_name
-    in
-    export_to_custom_writer json_exported_files ctxt
-  else
-    (* Gather list of files *)
-    let name =
-      Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder
-    in
-    let hhconfig_path = Path.concat (Path.make ctxt.repo_folder) ".hhconfig" in
-    let files =
-      (* Sanity test.  If the folder does not have an .hhconfig file, this is probably
-         * an integration test that's using a fake repository.  Don't do anything! *)
-      if Disk.file_exists (Path.to_string hhconfig_path) then
-        let options = ServerArgs.default_options ~root:ctxt.repo_folder in
-        let (hhconfig, _) = ServerConfig.load ~silent:ctxt.silent options in
-        let popt = ServerConfig.parser_options hhconfig in
-        let ctxt =
-          { ctxt with namespace_map = ParserOptions.auto_namespace_map popt }
-        in
-        measure_time
-          ~silent:ctxt.silent
-          ~f:(fun () -> gather_file_list ctxt.repo_folder)
-          ~name
-      else (
-        if not ctxt.silent then
-          Hh_logger.log
-            "The repository [%s] lacks an .hhconfig file.  Skipping index of repository."
-            ctxt.repo_folder;
-        []
-      )
-    in
-    (* If desired, get the HHI root folder and add all HHI files from there *)
-    let files =
-      if Option.is_some ctxt.hhi_root_folder then
-        let hhi_root_folder_path =
-          Path.to_string (Option.value_exn ctxt.hhi_root_folder)
-        in
-        let name =
-          Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path
-        in
-        let hhi_files =
-          measure_time
-            ~silent:ctxt.silent
-            ~f:(fun () -> gather_file_list hhi_root_folder_path)
-            ~name
-        in
-        (* Merge lists *)
-        List.append files hhi_files
-      else
-        files
-    in
-    (* Spawn the parallel parser *)
-    let name = Printf.sprintf "Parsed %d files in " (List.length files) in
-    let capture =
+  (* Gather list of files *)
+  let name =
+    Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder
+  in
+  let hhconfig_path = Path.concat (Path.make ctxt.repo_folder) ".hhconfig" in
+  let files =
+    (* Sanity test.  If the folder does not have an .hhconfig file, this is probably
+       * an integration test that's using a fake repository.  Don't do anything! *)
+    if Disk.file_exists (Path.to_string hhconfig_path) then
+      let options = ServerArgs.default_options ~root:ctxt.repo_folder in
+      let (hhconfig, _) = ServerConfig.load ~silent:ctxt.silent options in
+      let popt = ServerConfig.parser_options hhconfig in
+      let ctxt =
+        { ctxt with namespace_map = ParserOptions.auto_namespace_map popt }
+      in
       measure_time
         ~silent:ctxt.silent
-        ~f:(fun () -> parallel_parse ~workers files ctxt)
+        ~f:(fun () -> gather_file_list ctxt.repo_folder)
         ~name
+    else (
+      if not ctxt.silent then
+        Hh_logger.log
+          "The repository [%s] lacks an .hhconfig file.  Skipping index of repository."
+          ctxt.repo_folder;
+      []
+    )
+  in
+  (* If desired, get the HHI root folder and add all HHI files from there *)
+  let files =
+    if Option.is_some ctxt.hhi_root_folder then
+      let hhi_root_folder_path =
+        Path.to_string (Option.value_exn ctxt.hhi_root_folder)
+      in
+      let name =
+        Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path
+      in
+      let hhi_files =
+        measure_time
+          ~silent:ctxt.silent
+          ~f:(fun () -> gather_file_list hhi_root_folder_path)
+          ~name
+      in
+      (* Merge lists *)
+      List.append files hhi_files
+    else
+      files
+  in
+  (* Spawn the parallel parser *)
+  let name = Printf.sprintf "Parsed %d files in " (List.length files) in
+  let capture =
+    measure_time
+      ~silent:ctxt.silent
+      ~f:(fun () -> parallel_parse ~workers files ctxt)
+      ~name
+  in
+  (* Convert the raw capture into results *)
+  let results = convert_capture capture in
+  (* Are we exporting a sqlite file? *)
+  match ctxt.sqlite_filename with
+  | None -> ()
+  | Some filename ->
+    let name =
+      Printf.sprintf
+        "Wrote %d symbols to sqlite in "
+        (List.length results.sisr_capture)
     in
-    (* Convert the raw capture into results *)
-    let results = convert_capture capture in
-    (* Are we exporting a sqlite file? *)
-    begin
-      match ctxt.sqlite_filename with
-      | None -> ()
-      | Some filename ->
-        let name =
-          Printf.sprintf
-            "Wrote %d symbols to sqlite in "
-            (List.length results.sisr_capture)
-        in
-        measure_time
-          ~silent:ctxt.silent
-          ~f:(fun () -> SqliteSymbolIndexWriter.record_in_db filename results)
-          ~name
-    end;
-
-    (* Are we exporting a text file? *)
-    begin
-      match ctxt.text_filename with
-      | None -> ()
-      | Some filename ->
-        let name =
-          Printf.sprintf
-            "Wrote %d symbols to text in "
-            (List.length results.sisr_capture)
-        in
-        measure_time
-          ~silent:ctxt.silent
-          ~f:(fun () ->
-            TextSymbolIndexWriter.record_in_textfile filename results)
-          ~name
-    end;
-
-    (* Are we exporting a json file? *)
-    let json_exported_files =
-      match ctxt.json_filename with
-      | None -> []
-      | Some filename ->
-        let name =
-          Printf.sprintf
-            "Wrote %d symbols to json in "
-            (List.length results.sisr_capture)
-        in
-        measure_time
-          ~silent:ctxt.silent
-          ~f:(fun () ->
-            JsonSymbolIndexWriter.record_in_jsonfiles
-              ctxt.json_chunk_size
-              filename
-              results)
-          ~name
-    in
-    (* Are we exporting to a custom writer? *)
-    export_to_custom_writer json_exported_files ctxt
+    measure_time
+      ~silent:ctxt.silent
+      ~f:(fun () -> SqliteSymbolIndexWriter.record_in_db filename results)
+      ~name

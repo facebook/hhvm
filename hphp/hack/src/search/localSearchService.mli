@@ -10,7 +10,7 @@
 (* Size of local tracking environment *)
 val count_local_fileinfos : sienv:SearchUtils.si_env -> int
 
-(* SLOWER: FileInfo.t objects don't include all the data we need, so this function has to re-parse the file. Use [update_file_facts] or [update_file_from_addenda] when possible. *)
+(* SLOWER: FileInfo.t objects don't include all the data we need, so this function has to re-parse the file. Use [update_file_from_addenda] when possible. *)
 val update_file :
   ctx:Provider_context.t ->
   sienv:SearchUtils.si_env ->
@@ -23,13 +23,6 @@ val update_file_from_addenda :
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
   addenda:SearchUtils.si_addendum list ->
-  SearchUtils.si_env
-
-(* FASTER: Uses the "facts" objects directly from a previous parse of the file. *)
-val update_file_facts :
-  sienv:SearchUtils.si_env ->
-  path:Relative_path.t ->
-  facts:Facts.facts ->
   SearchUtils.si_env
 
 (* Returns an updated env clearing out tracked information for a file *)

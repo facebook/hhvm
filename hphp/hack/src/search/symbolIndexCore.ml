@@ -98,12 +98,6 @@ let update_from_addenda
           LocalSearchService.update_file_from_addenda ~sienv ~path ~addenda
         | _ -> sienv)
 
-(* Update from fast facts parser directly *)
-let update_from_facts
-    ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env
-    =
-  LocalSearchService.update_file_facts ~sienv ~path ~facts
-
 (*
  * This method is called when the typechecker is about to re-check a file.
  * Any local caches should be cleared of values for this file.

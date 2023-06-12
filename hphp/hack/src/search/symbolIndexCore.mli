@@ -37,13 +37,6 @@ val update_from_addenda :
   paths_with_addenda:paths_with_addenda ->
   SearchUtils.si_env
 
-(* FASTER: Update from facts directly *)
-val update_from_facts :
-  sienv:SearchUtils.si_env ->
-  path:Relative_path.t ->
-  facts:Facts.facts ->
-  SearchUtils.si_env
-
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
   sienv:SearchUtils.si_env -> paths:Relative_path.Set.t -> SearchUtils.si_env

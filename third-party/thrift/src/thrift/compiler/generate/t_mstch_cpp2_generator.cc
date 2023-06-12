@@ -650,7 +650,7 @@ class cpp_mstch_service : public mstch_service {
             {"service:program_name", &cpp_mstch_service::program_name},
             {"service:program_qualified_name",
              &cpp_mstch_service::program_qualified_name},
-            {"service:program_path", &cpp_mstch_service::program_path},
+            {"service:autogen_path", &cpp_mstch_service::autogen_path},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
             {"service:namespace_cpp2", &cpp_mstch_service::namespace_cpp2},
@@ -688,7 +688,11 @@ class cpp_mstch_service : public mstch_service {
     return get_service_namespace(service_->program()) +
         "::" + service_->program()->name();
   }
-  mstch::node program_path() { return service_->program()->path(); }
+  mstch::node autogen_path() {
+    std::string path = service_->program()->path();
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+  }
   mstch::node cpp_includes() {
     return t_mstch_cpp2_generator::cpp_includes(service_->program());
   }

@@ -420,7 +420,7 @@ class mstch_program : public mstch_base {
         this,
         {
             {"program:name", &mstch_program::name},
-            {"program:path", &mstch_program::path},
+            {"program:autogen_path", &mstch_program::autogen_path},
             {"program:includePrefix", &mstch_program::include_prefix},
             {"program:structs", &mstch_program::structs},
             {"program:enums", &mstch_program::enums},
@@ -450,7 +450,13 @@ class mstch_program : public mstch_base {
   virtual std::string get_program_namespace(const t_program*) { return {}; }
 
   mstch::node name() { return program_->name(); }
-  mstch::node path() { return program_->path(); }
+  mstch::node autogen_path() {
+    std::string path = program_->path();
+    // use posix path separators, even on windows, for autogen comment
+    // to avoid spurious fixture regen diffs
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+  }
   mstch::node include_prefix() { return program_->include_prefix(); }
   mstch::node has_enums() { return !program_->enums().empty(); }
   mstch::node has_structs() {

@@ -1607,6 +1607,26 @@ fn print_member_op(
                 FmtVid(func, prop, verbose, strings)
             )?;
         }
+        BaseOp::BaseST {
+            mode,
+            readonly,
+            prop,
+            ..
+        } => {
+            if mode != MOpMode::None {
+                write!(w, "{} ", FmtMOpMode(mode))?;
+            }
+            if readonly != ReadonlyOp::Any {
+                write!(w, "{} ", FmtReadonly(readonly))?;
+            }
+            let cls = operands.next().unwrap();
+            write!(
+                w,
+                "{}::{}",
+                FmtVid(func, cls, true, strings),
+                FmtQuotedStringId(prop.id, strings)
+            )?;
+        }
     }
 
     for op in op.intermediate_ops.iter() {

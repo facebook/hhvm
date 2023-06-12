@@ -433,7 +433,8 @@ fn member_op_mutates_stack_base(op: &instr::MemberOp) -> bool {
         BaseOp::BaseGC { .. }
         | BaseOp::BaseH { .. }
         | BaseOp::BaseL { .. }
-        | BaseOp::BaseSC { .. } => false,
+        | BaseOp::BaseSC { .. }
+        | BaseOp::BaseST { .. } => false,
     }
 }
 
@@ -598,6 +599,7 @@ fn convert_final<'a, 'b>(ctx: &mut Context<'a, 'b>, fin: &Opcode<'a>) {
             instr::BaseOp::BaseH { .. } => 0,
             instr::BaseOp::BaseL { .. } => 0,
             instr::BaseOp::BaseSC { .. } => 2,
+            instr::BaseOp::BaseST { .. } => 1,
         };
         for op in member_op.intermediate_ops.iter() {
             count += member_key_stack_count(&op.key);

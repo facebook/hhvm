@@ -806,6 +806,9 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 stack_index -= 2;
                 self.push_opcode(Opcode::BaseSC(stack_index + 1, stack_index, mode, readonly));
             }
+            BaseOp::BaseST { .. } => {
+                todo!("BaseST not allowed in HHBC");
+            }
         }
 
         for interm_op in op.intermediate_ops.iter() {
@@ -1260,6 +1263,7 @@ fn member_op_may_mutate_stack_base(member_op: &instr::MemberOp) -> bool {
         BaseOp::BaseGC { .. }
         | BaseOp::BaseH { .. }
         | BaseOp::BaseL { .. }
-        | BaseOp::BaseSC { .. } => false,
+        | BaseOp::BaseSC { .. }
+        | BaseOp::BaseST { .. } => false,
     }
 }

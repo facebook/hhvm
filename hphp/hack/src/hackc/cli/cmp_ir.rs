@@ -1090,12 +1090,20 @@ fn cmp_instr_member_op_base(
             cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
             cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
         }
+        (BaseOp::BaseST { mode: a_mode, readonly: a_readonly, loc: a_loc, prop: a_prop },
+         BaseOp::BaseST { mode: b_mode, readonly: b_readonly, loc: b_loc, prop: b_prop }) => {
+            cmp_eq(a_mode, b_mode).qualified("mode")?;
+            cmp_eq(a_readonly, b_readonly).qualified("readonly")?;
+            cmp_loc_id((*a_loc, a_func, a_strings), (*b_loc, b_func, b_strings)).qualified("loc")?;
+            cmp_id((a_prop.id, a_strings), (b_prop.id, b_strings)).qualified("prop")?;
+        }
 
         (BaseOp::BaseC { .. }, _)
         | (BaseOp::BaseGC { .. }, _)
         | (BaseOp::BaseH { .. }, _)
         | (BaseOp::BaseL { .. }, _)
-        | (BaseOp::BaseSC { .. }, _) => unreachable!(),
+        | (BaseOp::BaseSC { .. }, _)
+        | (BaseOp::BaseST { .. }, _) => unreachable!(),
     };
 
     Ok(())

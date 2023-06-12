@@ -1282,7 +1282,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
 
-  if (RuntimeOption::EvalEnableDecl) {
+  if (RuntimeOption::EvalEnableDecl || RuntimeOption::EvalAutoloadInitEarly) {
     // Initialize AutoloadHandler before we parse the file so HhvmDeclProvider
     // can respond to queries from HackC.
     AutoloadHandler::s_instance.getCheck();

@@ -1512,6 +1512,7 @@ struct RuntimeOption {
   F(bool, ModuleLevelTraits, false)                                     \
   F(bool, AutoloadEagerSyncUnitCache, true)                             \
   F(bool, AutoloadEagerReloadUnitCache, true)                           \
+  F(bool, AutoloadInitEarly, false)                                     \
   /* */
 
 private:

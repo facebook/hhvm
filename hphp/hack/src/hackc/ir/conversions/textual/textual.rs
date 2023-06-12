@@ -194,6 +194,7 @@ impl<'a> TextualFile<'a> {
             cur_loc: loc.cloned(),
             next_id: Sid::from_usize(0),
             txf: self,
+            cache: VarCache::default(),
         };
 
         writer.write_label(BlockId::from_usize(0), &[])?;
@@ -955,6 +956,7 @@ pub(crate) struct FuncBuilder<'a, 'b> {
     cur_loc: Option<SrcLoc>,
     next_id: Sid,
     pub(crate) txf: &'a mut TextualFile<'b>,
+    cache: VarCache,
 }
 
 impl FuncBuilder<'_, '_> {
@@ -1007,15 +1009,7 @@ impl FuncBuilder<'_, '_> {
                 ty.display(&self.txf.strings)
             )?,
             Expr::Call(ref target, ref params) => {
-                self.txf.register_called_function(target);
-                write!(self.txf.w, "{}(", target.display(&self.txf.strings))?;
-                let mut sep = "";
-                for param in params.iter() {
-                    self.txf.w.write_all(sep.as_bytes())?;
-                    self.write_expr(param)?;
-                    sep = ", ";
-                }
-                write!(self.txf.w, ")")?;
+                self.write_call_expr(target, params)?;
             }
             Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c))?,
             Expr::Deref(ref var) => {
@@ -1075,6 +1069,7 @@ impl FuncBuilder<'_, '_> {
     }
 
     pub(crate) fn write_label(&mut self, bid: BlockId, params: &[Sid]) -> Result {
+        self.cache.clear();
         if params.is_empty() {
             writeln!(self.txf.w, "#{}:", FmtBid(bid))?;
         } else {
@@ -1199,23 +1194,31 @@ impl FuncBuilder<'_, '_> {
         Ok(dst)
     }
 
-    pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
+    fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
         self.txf.register_called_function(target);
-        let dst = self.alloc_sid();
-        write!(
-            self.txf.w,
-            "{INDENT}{dst} = {target}(",
-            dst = FmtSid(dst),
-            target = target.display(&self.txf.strings)
-        )?;
+        write!(self.txf.w, "{}(", target.display(&self.txf.strings))?;
         let mut sep = "";
-        let params = params.into_exprs();
-        for param in params {
+        for param in params.iter() {
             self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(&param)?;
+            self.write_expr(param)?;
             sep = ", ";
         }
-        writeln!(self.txf.w, ")")?;
+        write!(self.txf.w, ")")?;
+
+        // Treat any call as if it can modify memory.
+        for param in params.iter() {
+            self.cache.clear_expr(param);
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
+        let params = params.into_exprs();
+        let dst = self.alloc_sid();
+        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
+        self.write_call_expr(target, &params)?;
+        writeln!(self.txf.w)?;
         Ok(dst)
     }
 
@@ -1238,16 +1241,24 @@ impl FuncBuilder<'_, '_> {
 
     pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
-        let dst = self.alloc_sid();
-        write!(
-            self.txf.w,
-            "{INDENT}{dst}: {ty} = load ",
-            dst = FmtSid(dst),
-            ty = ty.display(&self.txf.strings),
-        )?;
-        self.write_expr(&src)?;
-        writeln!(self.txf.w)?;
-        Ok(dst)
+        // Technically the load should include the type because you could have
+        // two loads of the same expression to two different types. I doubt that
+        // it matters in reality.
+        Ok(if let Some(sid) = self.cache.lookup(&src) {
+            sid
+        } else {
+            let dst = self.alloc_sid();
+            write!(
+                self.txf.w,
+                "{INDENT}{dst}: {ty} = load ",
+                dst = FmtSid(dst),
+                ty = ty.display(&self.txf.strings),
+            )?;
+            self.write_expr(&src)?;
+            writeln!(self.txf.w)?;
+            self.cache.load(&src, dst);
+            dst
+        })
     }
 
     // Terminate this branch if `expr` is false.
@@ -1289,6 +1300,7 @@ impl FuncBuilder<'_, '_> {
         self.txf.w.write_all(b" <- ")?;
         self.write_expr(&src)?;
         writeln!(self.txf.w, ": {ty}", ty = src_ty.display(&self.txf.strings))?;
+        self.cache.store(&dst, src);
         Ok(())
     }
 
@@ -1311,6 +1323,61 @@ impl FuncBuilder<'_, '_> {
             self.cur_loc = Some(src_loc.clone());
         }
         Ok(())
+    }
+}
+
+#[derive(Default, Debug)]
+struct VarCache {
+    cache: HashMap<Var, Sid>,
+}
+
+impl VarCache {
+    fn clear(&mut self) {
+        self.cache.clear();
+    }
+
+    fn load(&mut self, src: &Expr, sid: Sid) {
+        match src {
+            Expr::Deref(box Expr::Var(var)) => {
+                self.cache.insert(var.clone(), sid);
+            }
+            _ => {}
+        }
+    }
+
+    fn clear_expr(&mut self, target: &Expr) {
+        match target {
+            Expr::Deref(box Expr::Var(var)) => {
+                self.cache.remove(var);
+            }
+            _ => {}
+        }
+    }
+
+    fn store(&mut self, target: &Expr, value: Expr) {
+        match target {
+            Expr::Deref(box Expr::Var(var)) => {
+                // If we're storing into a local then clear it.
+                match value {
+                    Expr::Sid(sid) => {
+                        // If we're storing a direct value then remember the
+                        // value for later.
+                        self.load(target, sid);
+                    }
+                    _ => {
+                        self.cache.remove(var);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn lookup(&self, expr: &Expr) -> Option<Sid> {
+        match expr {
+            Expr::Deref(box Expr::Var(var)) => self.cache.get(var).cloned(),
+            _ => None,
+        }
     }
 }
 

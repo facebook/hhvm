@@ -9,43 +9,43 @@ function binops(int $a, int $b): void {
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
   $c = $a + $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_eq
-  // CHECK:   n5 = $builtins.hhbc_cmp_eq(n4, n3)
+  // CHECK:   n3 = $builtins.hhbc_cmp_eq(n1, n0)
   $c = $a == $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_gt
-  // CHECK:   n8 = $builtins.hhbc_cmp_gt(n7, n6)
+  // CHECK:   n4 = $builtins.hhbc_cmp_gt(n1, n0)
   $c = $a > $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_gte
-  // CHECK:   n11 = $builtins.hhbc_cmp_gte(n10, n9)
+  // CHECK:   n5 = $builtins.hhbc_cmp_gte(n1, n0)
   $c = $a >= $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_lt
-  // CHECK:   n14 = $builtins.hhbc_cmp_lt(n13, n12)
+  // CHECK:   n6 = $builtins.hhbc_cmp_lt(n1, n0)
   $c = $a < $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_lte
-  // CHECK:   n17 = $builtins.hhbc_cmp_lte(n16, n15)
+  // CHECK:   n7 = $builtins.hhbc_cmp_lte(n1, n0)
   $c = $a <= $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_nsame
-  // CHECK:   n20 = $builtins.hhbc_cmp_nsame(n19, n18)
+  // CHECK:   n8 = $builtins.hhbc_cmp_nsame(n1, n0)
   $c = $a !== $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_neq
-  // CHECK:   n23 = $builtins.hhbc_cmp_neq(n22, n21)
+  // CHECK:   n9 = $builtins.hhbc_cmp_neq(n1, n0)
   $c = $a != $b;
   // TEST-CHECK-1*: $builtins.hhbc_cmp_same
-  // CHECK:   n26 = $builtins.hhbc_cmp_same(n25, n24)
+  // CHECK:   n10 = $builtins.hhbc_cmp_same(n1, n0)
   $c = $a === $b;
   // TEST-CHECK-1*: $builtins.hhbc_concat
-  // CHECK:   n29 = $builtins.hhbc_concat(n28, n27)
+  // CHECK:   n11 = $builtins.hhbc_concat(n1, n0)
   $c = $a . $b;
   // TEST-CHECK-1*: $builtins.hhbc_div
-  // CHECK:   n32 = $builtins.hhbc_div(n31, n30)
+  // CHECK:   n12 = $builtins.hhbc_div(n1, n0)
   $c = $a / $b;
   // TEST-CHECK-1*: $builtins.hhbc_modulo
-  // CHECK:   n35 = $builtins.hhbc_modulo(n34, n33)
+  // CHECK:   n13 = $builtins.hhbc_modulo(n1, n0)
   $c = $a % $b;
   // TEST-CHECK-1*: $builtins.hhbc_mul
-  // CHECK:   n38 = $builtins.hhbc_mul(n37, n36)
+  // CHECK:   n14 = $builtins.hhbc_mul(n1, n0)
   $c = $a * $b;
   // TEST-CHECK-1*: $builtins.hhbc_sub
-  // CHECK:   n41 = $builtins.hhbc_sub(n40, n39)
+  // CHECK:   n15 = $builtins.hhbc_sub(n1, n0)
   $c = $a - $b;
 }
 
@@ -112,17 +112,13 @@ function add_elem(string $s1, string $s2) : void {
 // CHECK:   n5 = $builtins.hhbc_col_from_array_imm_set(n4)
 // CHECK:   store &$c1 <- n5: *HackMixed
 // CHECK:   n6 = $builtins.hhbc_new_dict()
-// CHECK:   n7: *HackMixed = load &$s1
-// CHECK:   n8 = $builtins.hhbc_add_elem_c(n6, n7, $builtins.hack_int(1))
-// CHECK:   n9: *HackMixed = load &$s2
-// CHECK:   n10 = $builtins.hhbc_add_elem_c(n8, n9, $builtins.hack_int(2))
-// CHECK:   n11 = $builtins.hhbc_col_from_array_imm_map(n10)
-// CHECK:   store &$c2 <- n11: *HackMixed
-// CHECK:   n12: *HackMixed = load &$s1
-// CHECK:   n13: *HackMixed = load &$s2
-// CHECK:   n14 = $builtins.hhbc_new_vec(n12, n13)
-// CHECK:   n15 = $builtins.hhbc_col_from_array_imm_vector(n14)
-// CHECK:   store &$c3 <- n15: *HackMixed
+// CHECK:   n7 = $builtins.hhbc_add_elem_c(n6, n1, $builtins.hack_int(1))
+// CHECK:   n8 = $builtins.hhbc_add_elem_c(n7, n3, $builtins.hack_int(2))
+// CHECK:   n9 = $builtins.hhbc_col_from_array_imm_map(n8)
+// CHECK:   store &$c2 <- n9: *HackMixed
+// CHECK:   n10 = $builtins.hhbc_new_vec(n1, n3)
+// CHECK:   n11 = $builtins.hhbc_col_from_array_imm_vector(n10)
+// CHECK:   store &$c3 <- n11: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function col_from_array(string $s1, string $s2) : void {

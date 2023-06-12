@@ -10,11 +10,10 @@ class D {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_check_this(n0)
-  // CHECK:   n2: *HackMixed = load &$this
-  // CHECK:   n3: *HackMixed = load n2.?.foo
-  // CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
-  // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
-  // CHECK:   ret n3
+  // CHECK:   n2: *HackMixed = load n0.?.foo
+  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
+  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
+  // CHECK:   ret n2
   // CHECK: }
   public function mop_baseh_querym_pt(): int {
     return $this->foo;

@@ -169,6 +169,7 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
   using Base::apply;
   using Base::Base;
   using Base::operator=;
+  using Base::clear;
 
   /// Increases the value.
   template <typename U>

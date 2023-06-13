@@ -75,6 +75,10 @@ void testNumberPatch() {
   test::expectPatch(patch, {7}, 2);
   patch -= 2;
   test::expectPatch(patch, {7}, 0);
+
+  // Clear to intrinsic default.
+  patch.clear();
+  test::expectPatch(patch, {7}, 0);
 }
 
 TEST(PatchTest, NumberPatch) {

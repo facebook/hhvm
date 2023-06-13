@@ -223,6 +223,8 @@ let build_is_async_json fun_kind =
   in
   JSON_Bool is_async
 
+let build_readonly_kind_json _ = JSON_Number "0"
+
 let build_parameter_json
     source_text
     param_name
@@ -230,6 +232,7 @@ let build_parameter_json
     def_val
     is_inout
     is_variadic
+    readonly_kind_opt
     attrs
     type_info =
   let fields =
@@ -255,6 +258,12 @@ let build_parameter_json
     match type_info with
     | None -> fields
     | Some fact_id -> ("typeInfo", build_id_json fact_id) :: fields
+  in
+  let fields =
+    match readonly_kind_opt with
+    | None -> fields
+    | Some readonly_kind ->
+      ("readonly", build_readonly_kind_json readonly_kind) :: fields
   in
   JSON_Object fields
 
@@ -287,6 +296,7 @@ let build_signature_json
       def_value
       is_inout
       p.param_is_variadic
+      p.param_readonly
       p.param_user_attributes
       type_xref
   in

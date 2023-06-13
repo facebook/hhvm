@@ -290,6 +290,10 @@ let build_signature ctx pos_map_opt source_text params ctxs ret progress =
   in
   (signature, progress)
 
+let readonly_assoc key = function
+  | None -> []
+  | Some elem -> [(key, Build_json.build_readonly_kind_json elem)]
+
 let method_defn ctx source_text meth decl_id progress =
   let tparams =
     List.map
@@ -306,22 +310,34 @@ let method_defn ctx source_text meth decl_id progress =
       meth.m_ret
       progress
   in
+  let readonly_ret = readonly_assoc "readonlyRet" meth.m_readonly_ret in
+  let is_readonly_this =
+    if meth.m_readonly_this then
+      [("isReadonlyThis", JSON_Bool meth.m_readonly_this)]
+    else
+      []
+  in
   let json =
     JSON_Object
-      [
-        ("declaration", Build_json.build_id_json decl_id);
-        ("signature", signature);
-        ("visibility", Build_json.build_visibility_json meth.m_visibility);
-        ("isAbstract", JSON_Bool meth.m_abstract);
-        ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
-        ("isFinal", JSON_Bool meth.m_final);
-        ("isStatic", JSON_Bool meth.m_static);
-        ( "attributes",
-          Build_json.build_attributes_json_nested
-            source_text
-            meth.m_user_attributes );
-        ("typeParams", JSON_Array tparams);
-      ]
+      (List.concat
+         [
+           [
+             ("declaration", Build_json.build_id_json decl_id);
+             ("signature", signature);
+             ("visibility", Build_json.build_visibility_json meth.m_visibility);
+             ("isAbstract", JSON_Bool meth.m_abstract);
+             ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
+             ("isFinal", JSON_Bool meth.m_final);
+             ("isStatic", JSON_Bool meth.m_static);
+             ( "attributes",
+               Build_json.build_attributes_json_nested
+                 source_text
+                 meth.m_user_attributes );
+             ("typeParams", JSON_Array tparams);
+           ];
+           readonly_ret;
+           is_readonly_this;
+         ])
   in
   Fact_acc.add_fact Predicate.(Hack MethodDefinition) json progress
 
@@ -489,19 +505,25 @@ let func_defn ctx source_text fd decl_id progress =
       elem.f_ret
       prog
   in
+  let readonly_ret = readonly_assoc "readonlyRet" elem.f_readonly_ret in
   let json_fields =
-    mf
-    @ [
-        ("declaration", Build_json.build_id_json decl_id);
-        ("signature", signature);
-        ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
-        ( "attributes",
-          Build_json.build_attributes_json_nested
-            source_text
-            elem.f_user_attributes );
-        ("typeParams", JSON_Array tparams);
+    List.concat
+      [
+        mf;
+        [
+          ("declaration", Build_json.build_id_json decl_id);
+          ("signature", signature);
+          ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
+          ( "attributes",
+            Build_json.build_attributes_json_nested
+              source_text
+              elem.f_user_attributes );
+          ("typeParams", JSON_Array tparams);
+        ];
+        readonly_ret;
       ]
   in
+
   Fact_acc.add_fact
     Predicate.(Hack FunctionDefinition)
     (JSON_Object json_fields)

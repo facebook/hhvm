@@ -85,6 +85,8 @@ val build_type_param_json :
 
 val build_visibility_json : Aast.visibility -> Hh_json.json
 
+val build_readonly_kind_json : Ast_defs.readonly_kind -> Hh_json.json
+
 val build_xrefs_json : (Hh_json.json * Pos.t list) Fact_id.Map.t -> Hh_json.json
 
 val build_hint_xrefs_json : (Hh_json.json * Util.pos list) list -> Hh_json.json

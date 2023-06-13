@@ -217,7 +217,7 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
   in
   String.concat ~sep:", " param_templates
 
-let insert_text_for_xhp_req_attrs tag attrs has_children =
+let get_snippet_for_xhp_req_attrs tag attrs has_children =
   let content =
     if List.length attrs > 0 then
       let attr_content =
@@ -229,17 +229,36 @@ let insert_text_for_xhp_req_attrs tag attrs has_children =
     else
       tag
   in
-  let content =
-    if has_children then
-      Format.sprintf "%s>$0</%s>" content tag
-    else
-      content ^ " />"
-  in
+  if has_children then
+    Format.sprintf "%s>$0</%s>" content tag
+  else
+    content ^ " />"
+
+let insert_text_for_xhp_req_attrs tag attrs has_children =
+  let content = get_snippet_for_xhp_req_attrs tag attrs has_children in
   let insert_type = List.length attrs > 0 && has_children in
   if insert_type then
     InsertAsSnippet { snippet = content; fallback = tag }
   else
     InsertLiterally content
+
+let get_snippet_for_xhp_classname cls ctx env =
+  (* This is used to check if the class exists or not *)
+  let class_ = Decl_provider.get_class ctx cls in
+  match class_ with
+  | None -> None
+  | Some class_ ->
+    if Cls.is_xhp class_ then
+      let cls = Utils.add_ns cls in
+      let attrs = get_class_req_attrs env ctx cls None in
+      let has_children = not (get_class_is_child_empty ctx cls) in
+      Option.some
+        (get_snippet_for_xhp_req_attrs
+           (Utils.strip_both_ns cls)
+           attrs
+           has_children)
+    else
+      None
 
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)

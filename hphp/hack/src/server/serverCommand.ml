@@ -60,6 +60,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DOCBLOCK_AT _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false
   | IDE_SIGNATURE_HELP _ -> false
+  | XHP_AUTOCOMPLETE_SNIPPET _ -> true
   | IDENTIFY_FUNCTION _ -> false
   | IDENTIFY_SYMBOL _ -> false
   | METHOD_JUMP_BATCH _ -> false

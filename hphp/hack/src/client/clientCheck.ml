@@ -614,6 +614,16 @@ let main_internal
     let%lwt (responses, telemetry) = rpc args @@ Rpc.DEPS_OUT_BATCH positions in
     List.iter responses ~f:print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
+  | MODE_XHP_AUTOCOMPLETE_SNIPPET cls ->
+    let%lwt (result, telemetry) =
+      rpc args @@ Rpc.XHP_AUTOCOMPLETE_SNIPPET cls
+    in
+    let _ =
+      match result with
+      | Some str -> print_endline str
+      | None -> print_endline "<null>"
+    in
+    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_OUTLINE
   | MODE_OUTLINE2 ->
     let (_handle : SharedMem.handle) =

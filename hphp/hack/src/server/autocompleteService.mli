@@ -20,3 +20,6 @@ val go_ctx :
   sienv:SearchUtils.si_env ->
   naming_table:Naming_table.t ->
   AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t
+
+val get_snippet_for_xhp_classname :
+  Decl_provider.type_key -> Provider_context.t -> Tast_env.env -> string option

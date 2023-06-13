@@ -100,12 +100,12 @@ struct PackageInfo {
 
 bool will_symbol_raise_deployment_boundary_violation(
   const PackageInfo& packageInfo,
-  const Func* callee
+  const Func& callee
 );
 
 bool will_symbol_raise_deployment_boundary_violation(
   const PackageInfo& packageInfo,
-  const Class* callee
+  const Class& callee
 );
 
 } // namespace HPHP

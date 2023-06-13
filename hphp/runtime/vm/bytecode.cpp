@@ -932,29 +932,29 @@ static inline void lookup_sprop(ActRec* fp,
 
 namespace {
 
-void checkModuleBoundaryViolation(const Class* ctx, const Func* callee) {
+void checkModuleBoundaryViolation(const Class* ctx, const Func& callee) {
   auto const caller = vmfp()->func();
-  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
-    raiseModuleBoundaryViolation(ctx, callee, caller->moduleName());
+  if (will_symbol_raise_module_boundary_violation(&callee, caller)) {
+    raiseModuleBoundaryViolation(ctx, &callee, caller->moduleName());
   }
   // Only check deployment boundary violation for toplevel function calls
   // since class method calls will be handled at the class level.
   if (!ctx && RO::EvalEnforceDeployment &&
       will_symbol_raise_deployment_boundary_violation(
         g_context->getPackageInfo(), callee)) {
-    raiseDeploymentBoundaryViolation(callee);
+    raiseDeploymentBoundaryViolation(&callee);
   }
 }
 
-void checkModuleBoundaryViolation(const Class* cls) {
+void checkModuleBoundaryViolation(const Class& cls) {
   auto const caller = vmfp()->func();
-  if (will_symbol_raise_module_boundary_violation(cls, caller)) {
-    raiseModuleBoundaryViolation(cls, caller->moduleName());
+  if (will_symbol_raise_module_boundary_violation(&cls, caller)) {
+    raiseModuleBoundaryViolation(&cls, caller->moduleName());
   }
   if (RO::EvalEnforceDeployment &&
       will_symbol_raise_deployment_boundary_violation(
         g_context->getPackageInfo(), cls)) {
-    raiseDeploymentBoundaryViolation(cls);
+    raiseDeploymentBoundaryViolation(&cls);
   }
 }
 
@@ -3610,8 +3610,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
     raise_error("Invalid callable (array)");
   }
 
-  checkModuleBoundaryViolation(cls, func);
-  if (cls) checkModuleBoundaryViolation(cls);
+  checkModuleBoundaryViolation(cls, *func);
+  if (cls) checkModuleBoundaryViolation(*cls);
 
   Object thisRC(thiz);
   arr.reset();
@@ -3647,8 +3647,8 @@ OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
     raise_call_to_undefined(str.get());
   }
 
-  checkModuleBoundaryViolation(cls, func);
-  if (cls) checkModuleBoundaryViolation(cls);
+  checkModuleBoundaryViolation(cls, *func);
+  if (cls) checkModuleBoundaryViolation(*cls);
 
   Object thisRC(thiz);
   str.reset();
@@ -3970,7 +3970,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   assertx(res == LookupResult::MethodFoundNoThis);
   assertx(func);
   checkClsMethFuncHelper(func);
-  checkModuleBoundaryViolation(cls, func);
+  checkModuleBoundaryViolation(cls, *func);
   return func;
 }
 

@@ -299,7 +299,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       if (!func->unit()->isSystemLib()) {
         auto const packageInfo = g_context->getPackageInfo();
         if (RO::EvalEnforceDeployment &&
-            will_symbol_raise_deployment_boundary_violation(packageInfo, func)) {
+            will_symbol_raise_deployment_boundary_violation(packageInfo, *func)) {
           // If we raised an exception, do not cache/smash the func.
           return func;
         }
@@ -337,7 +337,7 @@ handleStaticCall(const Class* cls, const StringData* name,
     }
     if (RO::EvalEnforceDeployment &&
         will_symbol_raise_deployment_boundary_violation(
-          g_context->getPackageInfo(), cls)) {
+          g_context->getPackageInfo(), *cls)) {
       // If we raised an exception, do not cache the func.
       return func;
     }
@@ -406,7 +406,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       }
       if (RO::EvalEnforceDeployment) {
         auto const packageInfo = g_context->getPackageInfo();
-        if (will_symbol_raise_deployment_boundary_violation(packageInfo, cls)) {
+        if (will_symbol_raise_deployment_boundary_violation(packageInfo, *cls)) {
           raiseDeploymentBoundaryViolation(cls);
           return cand;
         }
@@ -436,7 +436,7 @@ handleStaticCall(const Class* cls, const StringData* name,
     }
     if (RO::EvalEnforceDeployment) {
       auto const packageInfo = g_context->getPackageInfo();
-      if (will_symbol_raise_deployment_boundary_violation(packageInfo, cls)) {
+      if (will_symbol_raise_deployment_boundary_violation(packageInfo, *cls)) {
         raiseDeploymentBoundaryViolation(cls);
         return cand;
       }

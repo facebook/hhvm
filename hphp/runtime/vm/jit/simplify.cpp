@@ -349,12 +349,12 @@ SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,
   if (inst->src(0)->hasConstVal(TFunc)) {
     auto const symbol = inst->src(0)->funcVal();
     return cns(env,
-               will_symbol_raise_deployment_boundary_violation(packageInfo, symbol));
+               will_symbol_raise_deployment_boundary_violation(packageInfo, *symbol));
   }
   if (inst->src(0)->hasConstVal(TCls)) {
     auto const symbol = inst->src(0)->clsVal();
     return cns(env,
-               will_symbol_raise_deployment_boundary_violation(packageInfo, symbol));
+               will_symbol_raise_deployment_boundary_violation(packageInfo, *symbol));
   }
   return nullptr;
 }

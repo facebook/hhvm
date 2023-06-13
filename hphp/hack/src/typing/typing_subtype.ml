@@ -5188,6 +5188,18 @@ let is_sub_type env ty1 ty2 =
     ty2
   = Some true
 
+let is_dynamic_aware_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  is_sub_type_alt
+    ~require_completeness:false
+    ~no_top_bottom:false
+    ~coerce:(Some TL.CoerceToDynamic)
+    ~sub_supportdyn:None
+    env
+    ty1
+    ty2
+  = Some true
+
 let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt

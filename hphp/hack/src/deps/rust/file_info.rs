@@ -142,6 +142,35 @@ pub struct Id(pub Pos, pub String, pub Option<Int64>);
 #[repr(C)]
 pub struct HashType(pub Option<Int64>);
 
+/// The record produced by the parsing phase.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C)]
+pub struct FileInfo {
+    pub hash: HashType,
+    pub file_mode: Option<Mode>,
+    pub funs: Vec<Id>,
+    pub classes: Vec<Id>,
+    pub typedefs: Vec<Id>,
+    pub consts: Vec<Id>,
+    pub modules: Vec<Id>,
+    /// None if loaded from saved state
+    pub comments: Option<Vec<(pos::Pos, Comment)>>,
+}
+
 /// The simplified record used after parsing.
 #[derive(
     Clone,

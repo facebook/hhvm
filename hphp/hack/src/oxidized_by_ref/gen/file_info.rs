@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<535b805327965a2bc4425742ed41511b>>
+// @generated SignedSource<<fb5ff079a89c68380480970d4f614b8b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -107,6 +107,44 @@ pub struct HashType<'a>(
 );
 impl<'a> TrivialDrop for HashType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(HashType<'arena>);
+
+/// The record produced by the parsing phase.
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C)]
+pub struct FileInfo<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub hash: &'a HashType<'a>,
+    pub file_mode: Option<oxidized::file_info::Mode>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub funs: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub classes: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub typedefs: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub consts: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub modules: &'a [&'a Id<'a>],
+    /// None if loaded from saved state
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub comments: Option<&'a [(&'a pos::Pos<'a>, Comment<'a>)]>,
+}
+impl<'a> TrivialDrop for FileInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(FileInfo<'arena>);
 
 pub use oxidized::file_info::Names;
 

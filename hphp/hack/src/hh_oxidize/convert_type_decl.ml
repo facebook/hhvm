@@ -249,7 +249,6 @@ let denylisted_types () =
       ("errors", "Marker");
       ("errors", "MarkedMessage");
       ("errors", "PositionGroup");
-      ("file_info", "FileInfo");
       ("file_info", "Saved");
       ("typing_defs", "ExpandEnv");
       ("typing_defs", "PhaseTy");

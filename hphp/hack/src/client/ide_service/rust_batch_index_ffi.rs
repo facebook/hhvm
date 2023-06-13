@@ -9,9 +9,9 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use bumpalo::Bump;
-use hackrs_provider_backend::FileInfo;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::file_info::FileInfo;
 use oxidized::search_types::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
@@ -26,7 +26,7 @@ ocaml_ffi! {
         filenames: Vec<RelativePath>,
     ) -> Vec<(RelativePath, Option<(FileInfo, Vec<SiAddendum>)>)> {
         let filenames_and_contents = par_read_file_root_only(&root, filenames).unwrap_ocaml();
-        filenames_and_contents
+        let filenames_and_contents: Vec<_> = filenames_and_contents
             .into_par_iter()
             .map(|(relpath, contents)| {
                 let contents = match contents {
@@ -51,10 +51,15 @@ ocaml_ffi! {
                 );
 
                 let addenda = si_addendum::get_si_addenda(&with_hashes);
+                let file_info: hackrs_provider_backend::FileInfo = with_hashes.into();
 
-                (relpath, Some((with_hashes.into(), addenda)))
+                (relpath, Some((file_info, addenda)))
             })
-            .collect()
+            .collect();
+        filenames_and_contents.into_iter().map(|(relpath, contents)| {
+            (relpath, contents.map(|(with_hashes, addenda)| {
+                (with_hashes.into(), addenda)}))
+            }).collect()
     }
 }
 

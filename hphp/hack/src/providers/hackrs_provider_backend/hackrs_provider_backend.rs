@@ -29,6 +29,10 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_caml_builtins::Int64;
+use oxidized::file_info::HashType;
+use oxidized::file_info::Mode;
+use oxidized::file_info::NameType;
+use oxidized::file_info::Names;
 use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
@@ -217,19 +221,19 @@ impl HhServerProviderBackend {
         self.ctx_is_empty.store(is_empty, Ordering::SeqCst);
     }
 
-    pub fn oldify_defs(&self, names: &file_info::Names) -> Result<()> {
+    pub fn oldify_defs(&self, names: &Names) -> Result<()> {
         self.folded_classes_store
             .remove_batch(&mut names.classes.iter().map(Into::into))?;
         self.shallow_decl_changes_store.oldify_defs(names)
     }
 
-    pub fn remove_old_defs(&self, names: &file_info::Names) -> Result<()> {
+    pub fn remove_old_defs(&self, names: &Names) -> Result<()> {
         self.folded_classes_store
             .remove_batch(&mut names.classes.iter().map(Into::into))?;
         self.shallow_decl_changes_store.remove_old_defs(names)
     }
 
-    pub fn remove_defs(&self, names: &file_info::Names) -> Result<()> {
+    pub fn remove_defs(&self, names: &Names) -> Result<()> {
         self.folded_classes_store
             .remove_batch(&mut names.classes.iter().map(Into::into))?;
         self.shallow_decl_changes_store.remove_defs(names)
@@ -237,7 +241,7 @@ impl HhServerProviderBackend {
 
     pub fn get_old_defs(
         &self,
-        names: &file_info::Names,
+        names: &Names,
     ) -> Result<(
         BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BR>>>>,
         BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BR>>>>,
@@ -458,7 +462,7 @@ impl ShallowStoreWithChanges {
     }
 
     #[rustfmt::skip]
-    fn oldify_defs(&self, names: &file_info::Names) -> Result<()> {
+    fn oldify_defs(&self, names: &Names) -> Result<()> {
         self.oldify(&*self.classes,  &mut names.classes.iter().map(Into::into))?;
         self.oldify(&*self.funs,     &mut names.funs.iter().map(Into::into))?;
         self.oldify(&*self.typedefs, &mut names.types.iter().map(Into::into))?;
@@ -468,7 +472,7 @@ impl ShallowStoreWithChanges {
     }
 
     #[rustfmt::skip]
-    fn remove_old_defs(&self, names: &file_info::Names) -> Result<()> {
+    fn remove_old_defs(&self, names: &Names) -> Result<()> {
         self.remove_old(&*self.classes,  &mut names.classes.iter().map(Into::into))?;
         self.remove_old(&*self.funs,     &mut names.funs.iter().map(Into::into))?;
         self.remove_old(&*self.typedefs, &mut names.types.iter().map(Into::into))?;
@@ -478,7 +482,7 @@ impl ShallowStoreWithChanges {
     }
 
     #[rustfmt::skip]
-    fn remove_defs(&self, names: &file_info::Names) -> Result<()> {
+    fn remove_defs(&self, names: &Names) -> Result<()> {
         self.classes .remove_batch(&mut names.classes.iter().map(Into::into))?;
         self.funs    .remove_batch(&mut names.funs.iter().map(Into::into))?;
         self.typedefs.remove_batch(&mut names.types.iter().map(Into::into))?;
@@ -490,7 +494,7 @@ impl ShallowStoreWithChanges {
     #[rustfmt::skip]
     fn get_old_defs(
         &self,
-        names: &file_info::Names,
+        names: &Names,
     ) -> Result<(
         BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BR>>>>,
         BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BR>>>>,
@@ -599,7 +603,7 @@ impl NamingTableWithContext {
     fn find_symbol_in_context_with_suppression(
         &self,
         find_symbol_callback_name: &'static str,
-        fallback: impl Fn() -> Result<Option<(naming_table::Pos, file_info::NameType)>>,
+        fallback: impl Fn() -> Result<Option<(naming_table::Pos, NameType)>>,
         name: pos::Symbol,
     ) -> Result<Option<(naming_table::Pos, file_info::NameType)>> {
         if self.ctx_is_empty() {
@@ -660,7 +664,7 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_fun_in_context",
                 || {
                     let pos_opt = self.fallback.get_fun_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Fun)))
+                    Ok(pos_opt.map(|pos| (pos, NameType::Fun)))
                 },
                 name.as_symbol(),
             )?
@@ -673,7 +677,7 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_const_in_context",
                 || {
                     let pos_opt = self.fallback.get_const_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Const)))
+                    Ok(pos_opt.map(|pos| (pos, NameType::Const)))
                 },
                 name.as_symbol(),
             )?
@@ -686,7 +690,7 @@ impl NamingTableWithContext {
                 "hh_rust_provider_backend_find_module_in_context",
                 || {
                     let pos_opt = self.fallback.get_module_pos(name)?;
-                    Ok(pos_opt.map(|pos| (pos, file_info::NameType::Module)))
+                    Ok(pos_opt.map(|pos| (pos, NameType::Module)))
                 },
                 name.as_symbol(),
             )?
@@ -742,49 +746,72 @@ impl NamingProvider for NamingTableWithContext {
 
 /// An id contains a pos, name and a optional decl hash. The decl hash is None
 /// only in the case when we didn't compute it for performance reasons
-pub type Id = (naming_table::Pos, String, Option<Int64>);
+///
+/// We can't use oxidized::file_info::Id here because that data structure
+/// contains an RcOc, which can't be used in a multi-threading context.
+#[derive(Clone, Debug)]
+pub struct Id(naming_table::Pos, String, Option<Int64>);
 
-pub type HashType = Option<Int64>;
+impl From<Id> for oxidized::file_info::Id {
+    fn from(val: Id) -> Self {
+        oxidized::file_info::Id(val.0.into(), val.1, val.2)
+    }
+}
 
-/// A port of `FileInfo.ml`. The record produced by the parsing phase.
-#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
-#[repr(C)]
+/// Variant of `FileInfo` which is compatible with parallelism.
+///
+/// Can be converted into OCaml via it's `Into<oxidized::file_info::FileInfo>` trait.
+#[derive(Clone, Debug)]
 pub struct FileInfo {
     pub hash: HashType,
-    pub file_mode: Option<oxidized::file_info::Mode>,
+    pub file_mode: Option<Mode>,
     pub funs: Vec<Id>,
     pub classes: Vec<Id>,
     pub typedefs: Vec<Id>,
     pub consts: Vec<Id>,
     pub modules: Vec<Id>,
-    /// None if loaded from saved state
-    pub comments: Option<()>,
+}
+
+impl From<FileInfo> for oxidized::file_info::FileInfo {
+    fn from(val: FileInfo) -> Self {
+        oxidized::file_info::FileInfo {
+            hash: val.hash,
+            file_mode: val.file_mode,
+            funs: val.funs.into_iter().map(Into::into).collect(),
+            classes: val.classes.into_iter().map(Into::into).collect(),
+            typedefs: val.typedefs.into_iter().map(Into::into).collect(),
+            consts: val.consts.into_iter().map(Into::into).collect(),
+            modules: val.modules.into_iter().map(Into::into).collect(),
+            comments: None,
+        }
+    }
 }
 
 impl<'a> From<ParsedFileWithHashes<'a>> for FileInfo {
     /// c.f. OCaml Direct_decl_parser.decls_to_fileinfo
 
-    fn from(file: ParsedFileWithHashes<'a>) -> FileInfo {
+    fn from(file: ParsedFileWithHashes<'a>) -> Self {
         let mut info = FileInfo {
-            hash: Some(Int64::from(file.file_decls_hash.as_u64() as i64)),
+            hash: HashType(Some(Int64::from(file.file_decls_hash.as_u64() as i64))),
             file_mode: file.mode,
             funs: vec![],
             classes: vec![],
             typedefs: vec![],
             consts: vec![],
             modules: vec![],
-            comments: None,
         };
         let pos = |p: &oxidized_by_ref::pos::Pos<'_>| naming_table::Pos::Full(p.into());
         use oxidized_by_ref::shallow_decl_defs::Decl;
         for &(name, decl, hash) in file.iter() {
             let hash = Int64::from(hash.as_u64() as i64);
             match decl {
-                Decl::Class(x) => info.classes.push((pos(x.name.0), name.into(), Some(hash))),
-                Decl::Fun(x) => info.funs.push((pos(x.pos), name.into(), Some(hash))),
-                Decl::Typedef(x) => info.typedefs.push((pos(x.pos), name.into(), Some(hash))),
-                Decl::Const(x) => info.consts.push((pos(x.pos), name.into(), Some(hash))),
-                Decl::Module(x) => info.modules.push((pos(x.pos), name.into(), Some(hash))),
+                Decl::Class(x) => info
+                    .classes
+                    .push(Id(pos(x.name.0), name.into(), Some(hash))),
+                Decl::Fun(x) => info.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
+                Decl::Typedef(x) => info.typedefs.push(Id(pos(x.pos), name.into(), Some(hash))),
+                Decl::Const(x) => info.consts.push(Id(pos(x.pos), name.into(), Some(hash))),
+                Decl::Module(x) => info.modules.push(Id(pos(x.pos), name.into(), Some(hash))),
             }
         }
         // Match OCaml ordering

@@ -367,6 +367,14 @@ const folly::StringPiece struct1::__fbthrift_get_class_name() {
 
 struct1::struct1(const struct1&) = default;
 struct1& struct1::operator=(const struct1&) = default;
+struct1::struct1() :
+      __fbthrift_field_a(static_cast<::std::int32_t>(1234567)),
+      __fbthrift_field_b(apache::thrift::StringTraits<std::string>::fromStringLiteral("<uninitialized>")) {
+}
+
+
+struct1::~struct1() {}
+
 struct1::struct1(FOLLY_MAYBE_UNUSED struct1&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
@@ -478,6 +486,13 @@ const folly::StringPiece struct2::__fbthrift_get_class_name() {
 
 struct2::struct2(const struct2&) = default;
 struct2& struct2::operator=(const struct2&) = default;
+struct2::struct2() :
+      __fbthrift_field_a() {
+}
+
+
+struct2::~struct2() {}
+
 struct2::struct2(FOLLY_MAYBE_UNUSED struct2&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
@@ -635,6 +650,13 @@ const folly::StringPiece struct3::__fbthrift_get_class_name() {
 
 struct3::struct3(const struct3&) = default;
 struct3& struct3::operator=(const struct3&) = default;
+struct3::struct3() :
+      __fbthrift_field_b() {
+}
+
+
+struct3::~struct3() {}
+
 struct3::struct3(FOLLY_MAYBE_UNUSED struct3&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),

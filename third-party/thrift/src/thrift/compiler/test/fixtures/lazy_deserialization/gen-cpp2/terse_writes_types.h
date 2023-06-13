@@ -173,8 +173,8 @@ class TerseFoo final  {
 
  public:
 
-  TerseFoo() {
-  }
+  TerseFoo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TerseFoo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, ::std::vector<::std::int32_t> field2__arg, ::std::vector<double> field3__arg, ::std::vector<::std::int32_t> field4__arg);
@@ -186,6 +186,9 @@ class TerseFoo final  {
 
   TerseFoo& operator=(TerseFoo&&) noexcept;
   TerseFoo& operator=(const TerseFoo& src);
+
+  ~TerseFoo();
+
  private:
   ::std::vector<double> __fbthrift_field_field1;
  private:
@@ -477,8 +480,8 @@ class TerseLazyFoo final  {
 
  public:
 
-  TerseLazyFoo() {
-  }
+  TerseLazyFoo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TerseLazyFoo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, ::std::vector<::std::int32_t> field2__arg, ::std::vector<double> field3__arg, ::std::vector<::std::int32_t> field4__arg);
@@ -489,6 +492,9 @@ class TerseLazyFoo final  {
 
   TerseLazyFoo& operator=(TerseLazyFoo&&) noexcept;
   TerseLazyFoo& operator=(const TerseLazyFoo& src);
+
+  ~TerseLazyFoo();
+
  private:
   ::std::vector<double> __fbthrift_field_field1;
  private:
@@ -785,8 +791,8 @@ class TerseOptionalFoo final  {
 
  public:
 
-  TerseOptionalFoo() {
-  }
+  TerseOptionalFoo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TerseOptionalFoo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, ::std::vector<::std::int32_t> field2__arg, ::std::vector<double> field3__arg, ::std::vector<::std::int32_t> field4__arg);
@@ -798,6 +804,9 @@ class TerseOptionalFoo final  {
 
   TerseOptionalFoo& operator=(TerseOptionalFoo&&) noexcept;
   TerseOptionalFoo& operator=(const TerseOptionalFoo& src);
+
+  ~TerseOptionalFoo();
+
  private:
   ::std::vector<double> __fbthrift_field_field1;
  private:
@@ -1093,8 +1102,8 @@ class TerseOptionalLazyFoo final  {
 
  public:
 
-  TerseOptionalLazyFoo() {
-  }
+  TerseOptionalLazyFoo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TerseOptionalLazyFoo(apache::thrift::FragileConstructor, ::std::vector<double> field1__arg, ::std::vector<::std::int32_t> field2__arg, ::std::vector<double> field3__arg, ::std::vector<::std::int32_t> field4__arg);
@@ -1105,6 +1114,9 @@ class TerseOptionalLazyFoo final  {
 
   TerseOptionalLazyFoo& operator=(TerseOptionalLazyFoo&&) noexcept;
   TerseOptionalLazyFoo& operator=(const TerseOptionalLazyFoo& src);
+
+  ~TerseOptionalLazyFoo();
+
  private:
   ::std::vector<double> __fbthrift_field_field1;
  private:

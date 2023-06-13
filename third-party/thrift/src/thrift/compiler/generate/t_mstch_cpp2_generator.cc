@@ -1437,16 +1437,12 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node is_large() {
-    // Outline constructors and destructors if the struct has
-    // enough members and at least one has a non-trivial destructor
-    // (involving at least a branch and a likely deallocation).
+    // Outline constructors and destructors if the struct has at least one
+    // member with a non-trivial destructor (involving at least a branch and a
+    // likely deallocation).
     // TODO(ott): Support unions.
     if (struct_->is_exception()) {
       return true;
-    }
-    constexpr size_t kLargeStructThreshold = 4;
-    if (struct_->fields().size() <= kLargeStructThreshold) {
-      return false;
     }
     for (const auto& field : struct_->fields()) {
       const auto* resolved_typedef = field.type()->get_true_type();

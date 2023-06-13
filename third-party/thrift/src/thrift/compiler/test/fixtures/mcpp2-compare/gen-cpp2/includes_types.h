@@ -302,9 +302,8 @@ class AStructB final  {
 
  public:
 
-  AStructB() :
-      __fbthrift_field_FieldA(std::make_shared<::a::different::ns::AStruct>()) {
-  }
+  AStructB();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AStructB(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::a::different::ns::AStruct> FieldA__arg);
@@ -316,6 +315,9 @@ class AStructB final  {
 
   AStructB& operator=(AStructB&&) noexcept;
   AStructB& operator=(const AStructB& src);
+
+  ~AStructB();
+
  private:
   ::std::shared_ptr<const ::a::different::ns::AStruct> __fbthrift_field_FieldA;
 

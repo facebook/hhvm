@@ -99,6 +99,13 @@ const folly::StringPiece MyAnnotation::__fbthrift_get_class_name() {
 
 MyAnnotation::MyAnnotation(const MyAnnotation&) = default;
 MyAnnotation& MyAnnotation::operator=(const MyAnnotation&) = default;
+MyAnnotation::MyAnnotation() :
+      __fbthrift_field_color( ::facebook::thrift::test::Color::RED) {
+}
+
+
+MyAnnotation::~MyAnnotation() {}
+
 MyAnnotation::MyAnnotation(FOLLY_MAYBE_UNUSED MyAnnotation&& other) noexcept :
     __fbthrift_field_signature(std::move(other.__fbthrift_field_signature)),
     __fbthrift_field_color(std::move(other.__fbthrift_field_color)),
@@ -1027,6 +1034,16 @@ StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldA
   return *this;
 }
 
+StructWithFieldAdapter::StructWithFieldAdapter() :
+      __fbthrift_field_field(),
+      __fbthrift_field_shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
+}
+
+
+StructWithFieldAdapter::~StructWithFieldAdapter() {}
+
 StructWithFieldAdapter::StructWithFieldAdapter(FOLLY_MAYBE_UNUSED StructWithFieldAdapter&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __fbthrift_field_shared_field(std::move(other.__fbthrift_field_shared_field)),
@@ -1170,6 +1187,16 @@ TerseAdaptedFields& TerseAdaptedFields::operator=(const TerseAdaptedFields& othe
   swap(*this, tmp);
   return *this;
 }
+
+TerseAdaptedFields::TerseAdaptedFields() :
+      __fbthrift_field_int_field() {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+}
+
+
+TerseAdaptedFields::~TerseAdaptedFields() {}
 
 TerseAdaptedFields::TerseAdaptedFields(FOLLY_MAYBE_UNUSED TerseAdaptedFields&& other) noexcept :
     __fbthrift_field_int_field(std::move(other.__fbthrift_field_int_field)),
@@ -1484,6 +1511,12 @@ const folly::StringPiece Config::__fbthrift_get_class_name() {
 
 Config::Config(const Config&) = default;
 Config& Config::operator=(const Config&) = default;
+Config::Config() {
+}
+
+
+Config::~Config() {}
+
 Config::Config(FOLLY_MAYBE_UNUSED Config&& other) noexcept :
     __fbthrift_field_path(std::move(other.__fbthrift_field_path)),
     __isset(other.__isset) {
@@ -1593,6 +1626,14 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
   swap(*this, tmp);
   return *this;
 }
+
+MyStruct::MyStruct() :
+      __fbthrift_field_field() {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+}
+
+
+MyStruct::~MyStruct() {}
 
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
@@ -3069,6 +3110,12 @@ CircularStruct& CircularStruct::operator=(const CircularStruct& other) {
   return *this;
 }
 
+CircularStruct::CircularStruct() {
+}
+
+
+CircularStruct::~CircularStruct() {}
+
 CircularStruct::CircularStruct(FOLLY_MAYBE_UNUSED CircularStruct&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)) {
   if (__fbthrift_field_field) ::apache::thrift::adapt_detail::construct<::apache::thrift::test::MemberAccessAdapter, 1>(*__fbthrift_field_field, *this);
@@ -3180,6 +3227,14 @@ ReorderedStruct& ReorderedStruct::operator=(const ReorderedStruct& other) {
   swap(*this, tmp);
   return *this;
 }
+
+ReorderedStruct::ReorderedStruct() :
+      __fbthrift_field_reordered_dependent_adapted(std::make_unique<::facebook::thrift::test::DeclaredAfterStruct>()) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
+}
+
+
+ReorderedStruct::~ReorderedStruct() {}
 
 ReorderedStruct::ReorderedStruct(FOLLY_MAYBE_UNUSED ReorderedStruct&& other) noexcept :
     __fbthrift_field_reordered_dependent_adapted(std::move(other.__fbthrift_field_reordered_dependent_adapted)) {
@@ -3957,6 +4012,17 @@ CountingStruct& CountingStruct::operator=(const CountingStruct& other) {
   return *this;
 }
 
+CountingStruct::CountingStruct() :
+      __fbthrift_field_regularInt(),
+      __fbthrift_field_countingInt() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, int>, 1>(__fbthrift_field_regularInt, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<true, int>, 2>(__fbthrift_field_countingInt, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, std::string>, 3>(__fbthrift_field_regularString, *this);
+}
+
+
+CountingStruct::~CountingStruct() {}
+
 CountingStruct::CountingStruct(FOLLY_MAYBE_UNUSED CountingStruct&& other) noexcept :
     __fbthrift_field_regularInt(std::move(other.__fbthrift_field_regularInt)),
     __fbthrift_field_countingInt(std::move(other.__fbthrift_field_countingInt)),
@@ -4082,6 +4148,12 @@ const folly::StringPiece Person::__fbthrift_get_class_name() {
 
 Person::Person(const Person&) = default;
 Person& Person::operator=(const Person&) = default;
+Person::Person() {
+}
+
+
+Person::~Person() {}
+
 Person::Person(FOLLY_MAYBE_UNUSED Person&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
@@ -4181,6 +4253,12 @@ const folly::StringPiece Person2::__fbthrift_get_class_name() {
 
 Person2::Person2(const Person2&) = default;
 Person2& Person2::operator=(const Person2&) = default;
+Person2::Person2() {
+}
+
+
+Person2::~Person2() {}
+
 Person2::Person2(FOLLY_MAYBE_UNUSED Person2&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {

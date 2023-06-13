@@ -45,6 +45,13 @@ const folly::StringPiece IncludedA::__fbthrift_get_class_name() {
 
 IncludedA::IncludedA(const IncludedA&) = default;
 IncludedA& IncludedA::operator=(const IncludedA&) = default;
+IncludedA::IncludedA() :
+      __fbthrift_field_i32Field() {
+}
+
+
+IncludedA::~IncludedA() {}
+
 IncludedA::IncludedA(FOLLY_MAYBE_UNUSED IncludedA&& other) noexcept :
     __fbthrift_field_i32Field(std::move(other.__fbthrift_field_i32Field)),
     __fbthrift_field_strField(std::move(other.__fbthrift_field_strField)),

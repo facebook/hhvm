@@ -248,8 +248,8 @@ class A final  {
 
  public:
 
-  A() {
-  }
+  A();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   A(apache::thrift::FragileConstructor, std::unordered_map<::std::int32_t, ::apache::thrift::test::B> some_map__arg);
@@ -261,6 +261,9 @@ class A final  {
 
   A& operator=(A&&) noexcept;
   A& operator=(const A& src);
+
+  ~A();
+
  private:
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B> __fbthrift_field_some_map;
  private:

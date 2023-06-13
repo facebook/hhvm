@@ -70,6 +70,15 @@ const folly::StringPiece MyStructFloatFieldThrowExp::__fbthrift_get_class_name()
 
 MyStructFloatFieldThrowExp::MyStructFloatFieldThrowExp(const MyStructFloatFieldThrowExp&) = default;
 MyStructFloatFieldThrowExp& MyStructFloatFieldThrowExp::operator=(const MyStructFloatFieldThrowExp&) = default;
+MyStructFloatFieldThrowExp::MyStructFloatFieldThrowExp() :
+      __fbthrift_field_myLongField(),
+      __fbthrift_field_MyByteField(),
+      __fbthrift_field_myFloatField() {
+}
+
+
+MyStructFloatFieldThrowExp::~MyStructFloatFieldThrowExp() {}
+
 MyStructFloatFieldThrowExp::MyStructFloatFieldThrowExp(FOLLY_MAYBE_UNUSED MyStructFloatFieldThrowExp&& other) noexcept :
     __fbthrift_field_myLongField(std::move(other.__fbthrift_field_myLongField)),
     __fbthrift_field_MyByteField(std::move(other.__fbthrift_field_MyByteField)),
@@ -205,6 +214,13 @@ const folly::StringPiece MyStructMapFloatThrowExp::__fbthrift_get_class_name() {
 
 MyStructMapFloatThrowExp::MyStructMapFloatThrowExp(const MyStructMapFloatThrowExp&) = default;
 MyStructMapFloatThrowExp& MyStructMapFloatThrowExp::operator=(const MyStructMapFloatThrowExp&) = default;
+MyStructMapFloatThrowExp::MyStructMapFloatThrowExp() :
+      __fbthrift_field_myLongField() {
+}
+
+
+MyStructMapFloatThrowExp::~MyStructMapFloatThrowExp() {}
+
 MyStructMapFloatThrowExp::MyStructMapFloatThrowExp(FOLLY_MAYBE_UNUSED MyStructMapFloatThrowExp&& other) noexcept :
     __fbthrift_field_myLongField(std::move(other.__fbthrift_field_myLongField)),
     __fbthrift_field_mapListOfFloats(std::move(other.__fbthrift_field_mapListOfFloats)),
@@ -925,6 +941,14 @@ const folly::StringPiece SimpleStruct::__fbthrift_get_class_name() {
 
 SimpleStruct::SimpleStruct(const SimpleStruct&) = default;
 SimpleStruct& SimpleStruct::operator=(const SimpleStruct&) = default;
+SimpleStruct::SimpleStruct() :
+      __fbthrift_field_age(static_cast<::std::int64_t>(60)),
+      __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("Batman")) {
+}
+
+
+SimpleStruct::~SimpleStruct() {}
+
 SimpleStruct::SimpleStruct(FOLLY_MAYBE_UNUSED SimpleStruct&& other) noexcept :
     __fbthrift_field_age(std::move(other.__fbthrift_field_age)),
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
@@ -2637,6 +2661,13 @@ const folly::StringPiece TypeRemapped::__fbthrift_get_class_name() {
 
 TypeRemapped::TypeRemapped(const TypeRemapped&) = default;
 TypeRemapped& TypeRemapped::operator=(const TypeRemapped&) = default;
+TypeRemapped::TypeRemapped() :
+      __fbthrift_field_BigInteger() {
+}
+
+
+TypeRemapped::~TypeRemapped() {}
+
 TypeRemapped::TypeRemapped(FOLLY_MAYBE_UNUSED TypeRemapped&& other) noexcept :
     __fbthrift_field_lsMap(std::move(other.__fbthrift_field_lsMap)),
     __fbthrift_field_ioMap(std::move(other.__fbthrift_field_ioMap)),

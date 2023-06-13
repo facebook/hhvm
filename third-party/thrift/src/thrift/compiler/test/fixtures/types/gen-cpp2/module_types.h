@@ -720,8 +720,8 @@ class decorated_struct final  {
 
  public:
 
-  decorated_struct() {
-  }
+  decorated_struct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   decorated_struct(apache::thrift::FragileConstructor, ::std::string field__arg);
@@ -733,6 +733,9 @@ class decorated_struct final  {
 
   decorated_struct& operator=(decorated_struct&&) noexcept;
   decorated_struct& operator=(const decorated_struct& src);
+
+  ~decorated_struct();
+
  private:
   ::std::string __fbthrift_field_field;
  private:
@@ -1392,8 +1395,8 @@ class CppTypeStruct final  {
 
  public:
 
-  CppTypeStruct() {
-  }
+  CppTypeStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CppTypeStruct(apache::thrift::FragileConstructor, std::list<int32_t> fieldA__arg);
@@ -1405,6 +1408,9 @@ class CppTypeStruct final  {
 
   CppTypeStruct& operator=(CppTypeStruct&&) noexcept;
   CppTypeStruct& operator=(const CppTypeStruct& src);
+
+  ~CppTypeStruct();
+
  private:
   std::list<int32_t> __fbthrift_field_fieldA;
  private:
@@ -2301,8 +2307,8 @@ class ComplexString final  {
 
  public:
 
-  ComplexString() {
-  }
+  ComplexString();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ComplexString(apache::thrift::FragileConstructor, ::std::string a__arg, ::std::map<::std::string, ::std::int32_t> b__arg);
@@ -2314,6 +2320,9 @@ class ComplexString final  {
 
   ComplexString& operator=(ComplexString&&) noexcept;
   ComplexString& operator=(const ComplexString& src);
+
+  ~ComplexString();
+
  private:
   ::std::string __fbthrift_field_a;
  private:
@@ -2506,10 +2515,8 @@ class ComplexNestedWithDefault final  {
 
  public:
 
-  ComplexNestedWithDefault() :
-      __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
-      __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3)}}))) {
-  }
+  ComplexNestedWithDefault();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ComplexNestedWithDefault(apache::thrift::FragileConstructor, ::std::string z__arg, ::apache::thrift::fixtures::types::ComplexString n__arg);
@@ -2521,6 +2528,9 @@ class ComplexNestedWithDefault final  {
 
   ComplexNestedWithDefault& operator=(ComplexNestedWithDefault&&) noexcept;
   ComplexNestedWithDefault& operator=(const ComplexNestedWithDefault& src);
+
+  ~ComplexNestedWithDefault();
+
  private:
   ::std::string __fbthrift_field_z;
  private:
@@ -3528,10 +3538,8 @@ class MyStruct final  {
 
  public:
 
-  MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_majorVer() {
-  }
+  MyStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::std::int64_t majorVer__arg, ::apache::thrift::fixtures::types::MyDataItem data__arg);
@@ -3543,6 +3551,9 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
+
+  ~MyStruct();
+
  private:
   ::std::int64_t __fbthrift_field_MyIntField;
  private:
@@ -3985,8 +3996,8 @@ class AnnotatedTypes final  {
 
  public:
 
-  AnnotatedTypes() {
-  }
+  AnnotatedTypes();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::TBinary binary_field__arg, ::apache::thrift::fixtures::types::SomeListOfTypeMap list_field__arg);
@@ -3998,6 +4009,9 @@ class AnnotatedTypes final  {
 
   AnnotatedTypes& operator=(AnnotatedTypes&&) noexcept;
   AnnotatedTypes& operator=(const AnnotatedTypes& src);
+
+  ~AnnotatedTypes();
+
  private:
   ::apache::thrift::fixtures::types::TBinary __fbthrift_field_binary_field;
  private:
@@ -4188,8 +4202,8 @@ class ForwardUsageStruct final  {
 
  public:
 
-  ForwardUsageStruct() {
-  }
+  ForwardUsageStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ForwardUsageStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg);
@@ -4200,6 +4214,9 @@ class ForwardUsageStruct final  {
 
   ForwardUsageStruct& operator=(ForwardUsageStruct&&) noexcept;
   ForwardUsageStruct& operator=(const ForwardUsageStruct& src);
+
+  ~ForwardUsageStruct();
+
  private:
   ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> __fbthrift_field_foo;
 
@@ -4323,8 +4340,8 @@ class ForwardUsageRoot final  {
 
  public:
 
-  ForwardUsageRoot() {
-  }
+  ForwardUsageRoot();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ForwardUsageRoot(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageStruct ForwardUsageStruct__arg, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef> ForwardUsageByRef__arg);
@@ -4335,6 +4352,9 @@ class ForwardUsageRoot final  {
 
   ForwardUsageRoot& operator=(ForwardUsageRoot&&) noexcept;
   ForwardUsageRoot& operator=(const ForwardUsageRoot& src);
+
+  ~ForwardUsageRoot();
+
  private:
   ::apache::thrift::fixtures::types::ForwardUsageStruct __fbthrift_field_ForwardUsageStruct;
  private:
@@ -4510,8 +4530,8 @@ class ForwardUsageByRef final  {
 
  public:
 
-  ForwardUsageByRef() {
-  }
+  ForwardUsageByRef();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ForwardUsageByRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg);
@@ -4522,6 +4542,9 @@ class ForwardUsageByRef final  {
 
   ForwardUsageByRef& operator=(ForwardUsageByRef&&) noexcept;
   ForwardUsageByRef& operator=(const ForwardUsageByRef& src);
+
+  ~ForwardUsageByRef();
+
  private:
   ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> __fbthrift_field_foo;
 
@@ -4643,8 +4666,8 @@ class IncompleteMap final  {
 
  public:
 
-  IncompleteMap() {
-  }
+  IncompleteMap();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   IncompleteMap(apache::thrift::FragileConstructor, ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep> field__arg);
@@ -4656,6 +4679,9 @@ class IncompleteMap final  {
 
   IncompleteMap& operator=(IncompleteMap&&) noexcept;
   IncompleteMap& operator=(const IncompleteMap& src);
+
+  ~IncompleteMap();
+
  private:
   ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep> __fbthrift_field_field;
  private:
@@ -4974,8 +5000,8 @@ class CompleteMap final  {
 
  public:
 
-  CompleteMap() {
-  }
+  CompleteMap();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CompleteMap(apache::thrift::FragileConstructor, std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep> field__arg);
@@ -4987,6 +5013,9 @@ class CompleteMap final  {
 
   CompleteMap& operator=(CompleteMap&&) noexcept;
   CompleteMap& operator=(const CompleteMap& src);
+
+  ~CompleteMap();
+
  private:
   std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep> __fbthrift_field_field;
  private:
@@ -5121,8 +5150,8 @@ class IncompleteList final  {
 
  public:
 
-  IncompleteList() {
-  }
+  IncompleteList();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   IncompleteList(apache::thrift::FragileConstructor, ::std::list<::apache::thrift::fixtures::types::IncompleteListDep> field__arg);
@@ -5134,6 +5163,9 @@ class IncompleteList final  {
 
   IncompleteList& operator=(IncompleteList&&) noexcept;
   IncompleteList& operator=(const IncompleteList& src);
+
+  ~IncompleteList();
+
  private:
   ::std::list<::apache::thrift::fixtures::types::IncompleteListDep> __fbthrift_field_field;
  private:
@@ -5452,8 +5484,8 @@ class CompleteList final  {
 
  public:
 
-  CompleteList() {
-  }
+  CompleteList();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CompleteList(apache::thrift::FragileConstructor, folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep> field__arg);
@@ -5465,6 +5497,9 @@ class CompleteList final  {
 
   CompleteList& operator=(CompleteList&&) noexcept;
   CompleteList& operator=(const CompleteList& src);
+
+  ~CompleteList();
+
  private:
   folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep> __fbthrift_field_field;
  private:
@@ -5599,8 +5634,8 @@ class AdaptedList final  {
 
  public:
 
-  AdaptedList() {
-  }
+  AdaptedList();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AdaptedList(apache::thrift::FragileConstructor, ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep> field__arg);
@@ -5612,6 +5647,9 @@ class AdaptedList final  {
 
   AdaptedList& operator=(AdaptedList&&) noexcept;
   AdaptedList& operator=(const AdaptedList& src);
+
+  ~AdaptedList();
+
  private:
   ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep> __fbthrift_field_field;
  private:
@@ -5895,8 +5933,8 @@ class DependentAdaptedListDep final  {
 
  public:
 
-  DependentAdaptedListDep() {
-  }
+  DependentAdaptedListDep();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   DependentAdaptedListDep(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::std::int16_t> field__arg);
@@ -5908,6 +5946,9 @@ class DependentAdaptedListDep final  {
 
   DependentAdaptedListDep& operator=(DependentAdaptedListDep&&) noexcept;
   DependentAdaptedListDep& operator=(const DependentAdaptedListDep& src);
+
+  ~DependentAdaptedListDep();
+
  private:
   ::apache::thrift::detail::boxed_value_ptr<::std::int16_t> __fbthrift_field_field;
 
@@ -6033,8 +6074,8 @@ class DependentAdaptedList final  {
 
  public:
 
-  DependentAdaptedList() {
-  }
+  DependentAdaptedList();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   DependentAdaptedList(apache::thrift::FragileConstructor, ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep> field__arg);
@@ -6046,6 +6087,9 @@ class DependentAdaptedList final  {
 
   DependentAdaptedList& operator=(DependentAdaptedList&&) noexcept;
   DependentAdaptedList& operator=(const DependentAdaptedList& src);
+
+  ~DependentAdaptedList();
+
  private:
   ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep> __fbthrift_field_field;
  private:
@@ -6680,11 +6724,8 @@ class AllocatorAware2 final  {
 
  public:
 
-  AllocatorAware2() :
-    __fbthrift_alloc(allocator_type()),
-    __fbthrift_field_not_a_container(),
-    __fbthrift_field_box_field(::std::int32_t()) {
-  }
+  AllocatorAware2();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AllocatorAware2(apache::thrift::FragileConstructor, ::std::int32_t not_a_container__arg, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> box_field__arg);
@@ -6711,6 +6752,9 @@ class AllocatorAware2 final  {
 
   AllocatorAware2& operator=(AllocatorAware2&&) noexcept;
   AllocatorAware2& operator=(const AllocatorAware2& src);
+
+  ~AllocatorAware2();
+
  private:
   ::std::int32_t __fbthrift_field_not_a_container;
  private:

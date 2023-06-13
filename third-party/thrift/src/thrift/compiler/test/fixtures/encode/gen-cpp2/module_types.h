@@ -375,8 +375,8 @@ class Bar final  {
 
  public:
 
-  Bar() {
-  }
+  Bar();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Bar(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg);
@@ -388,6 +388,9 @@ class Bar final  {
 
   Bar& operator=(Bar&&) noexcept;
   Bar& operator=(const Bar& src);
+
+  ~Bar();
+
  private:
   ::std::vector<::facebook::thrift::test::AdaptedFoo> __fbthrift_field_list_field;
  private:
@@ -523,8 +526,8 @@ class Baz final  {
 
  public:
 
-  Baz() {
-  }
+  Baz();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Baz(apache::thrift::FragileConstructor, ::std::vector<::facebook::thrift::test::AdaptedFoo> list_field__arg, ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> nested_list_field__arg);
@@ -536,6 +539,9 @@ class Baz final  {
 
   Baz& operator=(Baz&&) noexcept;
   Baz& operator=(const Baz& src);
+
+  ~Baz();
+
  private:
   ::std::vector<::facebook::thrift::test::AdaptedFoo> __fbthrift_field_list_field;
  private:

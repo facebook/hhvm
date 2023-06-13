@@ -1267,9 +1267,8 @@ class MyData final  {
 
  public:
 
-  MyData() :
-      __fbthrift_field_data2() {
-  }
+  MyData();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyData(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg);
@@ -1281,6 +1280,9 @@ class MyData final  {
 
   MyData& operator=(MyData&&) noexcept;
   MyData& operator=(const MyData& src);
+
+  ~MyData();
+
  private:
   ::std::string __fbthrift_field_data1;
  private:
@@ -1473,10 +1475,8 @@ class MyDataWithCustomDefault final  {
 
  public:
 
-  MyDataWithCustomDefault() :
-      __fbthrift_field_data1(apache::thrift::StringTraits<std::string>::fromStringLiteral("1")),
-      __fbthrift_field_data2(static_cast<::std::int32_t>(2)) {
-  }
+  MyDataWithCustomDefault();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataWithCustomDefault(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg);
@@ -1488,6 +1488,9 @@ class MyDataWithCustomDefault final  {
 
   MyDataWithCustomDefault& operator=(MyDataWithCustomDefault&&) noexcept;
   MyDataWithCustomDefault& operator=(const MyDataWithCustomDefault& src);
+
+  ~MyDataWithCustomDefault();
+
  private:
   ::std::string __fbthrift_field_data1;
  private:
@@ -4374,8 +4377,8 @@ class Recursive final  {
 
  public:
 
-  Recursive() {
-  }
+  Recursive();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Recursive(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> nodes__arg);
@@ -4387,6 +4390,9 @@ class Recursive final  {
 
   Recursive& operator=(Recursive&&) noexcept;
   Recursive& operator=(const Recursive& src);
+
+  ~Recursive();
+
  private:
   ::std::map<::std::string, ::test::fixtures::patch::Recursive> __fbthrift_field_nodes;
 
@@ -4519,9 +4525,8 @@ class Bar final  {
 
  public:
 
-  Bar() :
-      __fbthrift_field_loop(std::make_unique<::test::fixtures::patch::Loop>()) {
-  }
+  Bar();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Bar(apache::thrift::FragileConstructor, ::std::unique_ptr<::test::fixtures::patch::Loop> loop__arg);
@@ -4532,6 +4537,9 @@ class Bar final  {
 
   Bar& operator=(Bar&&) noexcept;
   Bar& operator=(const Bar& src);
+
+  ~Bar();
+
  private:
   ::std::unique_ptr<::test::fixtures::patch::Loop> __fbthrift_field_loop;
 
@@ -4800,10 +4808,8 @@ class MyDataFieldPatchStruct final  {
 
  public:
 
-  MyDataFieldPatchStruct() :
-      __fbthrift_field_data1(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())),
-      __fbthrift_field_data2(::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>())) {
-  }
+  MyDataFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> data1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> data2__arg);
@@ -4814,6 +4820,9 @@ class MyDataFieldPatchStruct final  {
 
   MyDataFieldPatchStruct& operator=(MyDataFieldPatchStruct&&) noexcept;
   MyDataFieldPatchStruct& operator=(const MyDataFieldPatchStruct& src);
+
+  ~MyDataFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> __fbthrift_field_data1;
  private:
@@ -4982,9 +4991,8 @@ class MyDataEnsureStruct final  {
 
  public:
 
-  MyDataEnsureStruct() :
-      __fbthrift_field_data2() {
-  }
+  MyDataEnsureStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataEnsureStruct(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg);
@@ -4996,6 +5004,9 @@ class MyDataEnsureStruct final  {
 
   MyDataEnsureStruct& operator=(MyDataEnsureStruct&&) noexcept;
   MyDataEnsureStruct& operator=(const MyDataEnsureStruct& src);
+
+  ~MyDataEnsureStruct();
+
  private:
   ::std::string __fbthrift_field_data1;
  private:
@@ -5529,10 +5540,8 @@ class MyDataWithCustomDefaultFieldPatchStruct final  {
 
  public:
 
-  MyDataWithCustomDefaultFieldPatchStruct() :
-      __fbthrift_field_data1(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())),
-      __fbthrift_field_data2(::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>())) {
-  }
+  MyDataWithCustomDefaultFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataWithCustomDefaultFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> data1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> data2__arg);
@@ -5543,6 +5552,9 @@ class MyDataWithCustomDefaultFieldPatchStruct final  {
 
   MyDataWithCustomDefaultFieldPatchStruct& operator=(MyDataWithCustomDefaultFieldPatchStruct&&) noexcept;
   MyDataWithCustomDefaultFieldPatchStruct& operator=(const MyDataWithCustomDefaultFieldPatchStruct& src);
+
+  ~MyDataWithCustomDefaultFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> __fbthrift_field_data1;
  private:
@@ -5711,9 +5723,8 @@ class MyDataWithCustomDefaultEnsureStruct final  {
 
  public:
 
-  MyDataWithCustomDefaultEnsureStruct() :
-      __fbthrift_field_data2() {
-  }
+  MyDataWithCustomDefaultEnsureStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataWithCustomDefaultEnsureStruct(apache::thrift::FragileConstructor, ::std::string data1__arg, ::std::int32_t data2__arg);
@@ -5725,6 +5736,9 @@ class MyDataWithCustomDefaultEnsureStruct final  {
 
   MyDataWithCustomDefaultEnsureStruct& operator=(MyDataWithCustomDefaultEnsureStruct&&) noexcept;
   MyDataWithCustomDefaultEnsureStruct& operator=(const MyDataWithCustomDefaultEnsureStruct& src);
+
+  ~MyDataWithCustomDefaultEnsureStruct();
+
  private:
   ::std::string __fbthrift_field_data1;
  private:
@@ -6256,9 +6270,8 @@ class InnerUnionFieldPatchStruct final  {
 
  public:
 
-  InnerUnionFieldPatchStruct() :
-      __fbthrift_field_innerOption(::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>>())) {
-  }
+  InnerUnionFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   InnerUnionFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch> innerOption__arg);
@@ -6269,6 +6282,9 @@ class InnerUnionFieldPatchStruct final  {
 
   InnerUnionFieldPatchStruct& operator=(InnerUnionFieldPatchStruct&&) noexcept;
   InnerUnionFieldPatchStruct& operator=(const InnerUnionFieldPatchStruct& src);
+
+  ~InnerUnionFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch> __fbthrift_field_innerOption;
 
@@ -6722,11 +6738,8 @@ class MyUnionFieldPatchStruct final  {
 
  public:
 
-  MyUnionFieldPatchStruct() :
-      __fbthrift_field_option1(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())),
-      __fbthrift_field_option2(::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I32PatchStruct>>>())),
-      __fbthrift_field_option3(::apache::thrift::detail::boxed_value<::test::fixtures::patch::InnerUnionPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::InnerUnionPatchStruct>>>())) {
-  }
+  MyUnionFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyUnionFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> option1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch> option2__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::InnerUnionPatch> option3__arg);
@@ -6737,6 +6750,9 @@ class MyUnionFieldPatchStruct final  {
 
   MyUnionFieldPatchStruct& operator=(MyUnionFieldPatchStruct&&) noexcept;
   MyUnionFieldPatchStruct& operator=(const MyUnionFieldPatchStruct& src);
+
+  ~MyUnionFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> __fbthrift_field_option1;
  private:
@@ -8063,9 +8079,8 @@ class MyStructField27PatchStruct final  {
 
  public:
 
-  MyStructField27PatchStruct() :
-      __fbthrift_field_clear() {
-  }
+  MyStructField27PatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructField27PatchStruct(apache::thrift::FragileConstructor, ::std::set<::std::string> assign__arg, bool clear__arg, ::std::set<::std::string> remove__arg, ::std::set<::std::string> add__arg);
@@ -8077,6 +8092,9 @@ class MyStructField27PatchStruct final  {
 
   MyStructField27PatchStruct& operator=(MyStructField27PatchStruct&&) noexcept;
   MyStructField27PatchStruct& operator=(const MyStructField27PatchStruct& src);
+
+  ~MyStructField27PatchStruct();
+
  private:
   ::std::set<::std::string> __fbthrift_field_assign;
  private:
@@ -14936,9 +14954,8 @@ class RecursiveField1PatchStruct final  {
 
  public:
 
-  RecursiveField1PatchStruct() :
-      __fbthrift_field_clear() {
-  }
+  RecursiveField1PatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   RecursiveField1PatchStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> assign__arg, bool clear__arg);
@@ -14950,6 +14967,9 @@ class RecursiveField1PatchStruct final  {
 
   RecursiveField1PatchStruct& operator=(RecursiveField1PatchStruct&&) noexcept;
   RecursiveField1PatchStruct& operator=(const RecursiveField1PatchStruct& src);
+
+  ~RecursiveField1PatchStruct();
+
  private:
   ::std::map<::std::string, ::test::fixtures::patch::Recursive> __fbthrift_field_assign;
  private:
@@ -15138,9 +15158,8 @@ class RecursiveFieldPatchStruct final  {
 
  public:
 
-  RecursiveFieldPatchStruct() :
-      __fbthrift_field_nodes(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveField1Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveField1PatchStruct>>>())) {
-  }
+  RecursiveFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   RecursiveFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveField1Patch> nodes__arg);
@@ -15151,6 +15170,9 @@ class RecursiveFieldPatchStruct final  {
 
   RecursiveFieldPatchStruct& operator=(RecursiveFieldPatchStruct&&) noexcept;
   RecursiveFieldPatchStruct& operator=(const RecursiveFieldPatchStruct& src);
+
+  ~RecursiveFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveField1Patch> __fbthrift_field_nodes;
 
@@ -15275,8 +15297,8 @@ class RecursiveEnsureStruct final  {
 
  public:
 
-  RecursiveEnsureStruct() {
-  }
+  RecursiveEnsureStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   RecursiveEnsureStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::test::fixtures::patch::Recursive> nodes__arg);
@@ -15288,6 +15310,9 @@ class RecursiveEnsureStruct final  {
 
   RecursiveEnsureStruct& operator=(RecursiveEnsureStruct&&) noexcept;
   RecursiveEnsureStruct& operator=(const RecursiveEnsureStruct& src);
+
+  ~RecursiveEnsureStruct();
+
  private:
   ::std::map<::std::string, ::test::fixtures::patch::Recursive> __fbthrift_field_nodes;
  private:
@@ -15758,9 +15783,8 @@ class LoopPatchStruct final  {
 
  public:
 
-  LoopPatchStruct() :
-      __fbthrift_field_clear() {
-  }
+  LoopPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   LoopPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> assign__arg, bool clear__arg);
@@ -15772,6 +15796,9 @@ class LoopPatchStruct final  {
 
   LoopPatchStruct& operator=(LoopPatchStruct&&) noexcept;
   LoopPatchStruct& operator=(const LoopPatchStruct& src);
+
+  ~LoopPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> __fbthrift_field_assign;
  private:
@@ -15948,9 +15975,8 @@ class BarFieldPatchStruct final  {
 
  public:
 
-  BarFieldPatchStruct() :
-      __fbthrift_field_loop(::apache::thrift::detail::boxed_value<::test::fixtures::patch::LoopPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::LoopPatchStruct>>>())) {
-  }
+  BarFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   BarFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LoopPatch> loop__arg);
@@ -15961,6 +15987,9 @@ class BarFieldPatchStruct final  {
 
   BarFieldPatchStruct& operator=(BarFieldPatchStruct&&) noexcept;
   BarFieldPatchStruct& operator=(const BarFieldPatchStruct& src);
+
+  ~BarFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LoopPatch> __fbthrift_field_loop;
 
@@ -16085,8 +16114,8 @@ class BarEnsureStruct final  {
 
  public:
 
-  BarEnsureStruct() {
-  }
+  BarEnsureStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   BarEnsureStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> loop__arg);
@@ -16098,6 +16127,9 @@ class BarEnsureStruct final  {
 
   BarEnsureStruct& operator=(BarEnsureStruct&&) noexcept;
   BarEnsureStruct& operator=(const BarEnsureStruct& src);
+
+  ~BarEnsureStruct();
+
  private:
   ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Loop> __fbthrift_field_loop;
 

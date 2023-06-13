@@ -161,9 +161,8 @@ class MyStruct final  {
 
  public:
 
-  MyStruct() :
-      __fbthrift_field_myIntField() {
-  }
+  MyStruct();
+
 
   MyStruct(MyStruct&&) noexcept;
 
@@ -172,6 +171,9 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
+
+  ~MyStruct();
+
  private:
   ::std::int64_t __fbthrift_field_myIntField;
  private:

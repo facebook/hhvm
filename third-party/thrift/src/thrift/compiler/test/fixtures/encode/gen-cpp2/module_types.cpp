@@ -160,6 +160,12 @@ const folly::StringPiece Bar::__fbthrift_get_class_name() {
 
 Bar::Bar(const Bar&) = default;
 Bar& Bar::operator=(const Bar&) = default;
+Bar::Bar() {
+}
+
+
+Bar::~Bar() {}
+
 Bar::Bar(FOLLY_MAYBE_UNUSED Bar&& other) noexcept :
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
     __isset(other.__isset) {
@@ -267,6 +273,12 @@ const folly::StringPiece Baz::__fbthrift_get_class_name() {
 
 Baz::Baz(const Baz&) = default;
 Baz& Baz::operator=(const Baz&) = default;
+Baz::Baz() {
+}
+
+
+Baz::~Baz() {}
+
 Baz::Baz(FOLLY_MAYBE_UNUSED Baz&& other) noexcept :
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
     __fbthrift_field_nested_list_field(std::move(other.__fbthrift_field_nested_list_field)),

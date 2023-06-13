@@ -7993,10 +7993,8 @@ class MyIncludedStruct final  {
 
  public:
 
-  MyIncludedStruct() :
-      __fbthrift_field_MyIncludedInt(static_cast<::a::different::ns::IncludedInt64>(42)),
-      __fbthrift_field_ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
-  }
+  MyIncludedStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyIncludedStruct(apache::thrift::FragileConstructor, ::a::different::ns::IncludedInt64 MyIncludedInt__arg, ::some::valid::ns::AStruct MyIncludedStruct__arg, ::std::unique_ptr<::some::valid::ns::AStruct> ARefField__arg, ::some::valid::ns::AStruct ARequiredField__arg);
@@ -8007,6 +8005,9 @@ class MyIncludedStruct final  {
 
   MyIncludedStruct& operator=(MyIncludedStruct&&) noexcept;
   MyIncludedStruct& operator=(const MyIncludedStruct& src);
+
+  ~MyIncludedStruct();
+
  private:
   ::a::different::ns::IncludedInt64 __fbthrift_field_MyIncludedInt;
  private:
@@ -9545,8 +9546,8 @@ class ComplexContainerStruct final  {
 
  public:
 
-  ComplexContainerStruct() {
-  }
+  ComplexContainerStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ComplexContainerStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::some::valid::ns::IOBuf> map_of_iobufs__arg, ::std::map<::std::string, ::some::valid::ns::IOBufPtr> map_of_iobuf_ptrs__arg);
@@ -9557,6 +9558,9 @@ class ComplexContainerStruct final  {
 
   ComplexContainerStruct& operator=(ComplexContainerStruct&&) noexcept;
   ComplexContainerStruct& operator=(const ComplexContainerStruct& src);
+
+  ~ComplexContainerStruct();
+
  private:
   ::std::map<::std::string, ::some::valid::ns::IOBuf> __fbthrift_field_map_of_iobufs;
  private:

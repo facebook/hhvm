@@ -2834,9 +2834,8 @@ class MyAnnotation final  {
 
  public:
 
-  MyAnnotation() :
-      __fbthrift_field_color( ::facebook::thrift::test::Color::RED) {
-  }
+  MyAnnotation();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::Color color__arg);
@@ -2848,6 +2847,9 @@ class MyAnnotation final  {
 
   MyAnnotation& operator=(MyAnnotation&&) noexcept;
   MyAnnotation& operator=(const MyAnnotation& src);
+
+  ~MyAnnotation();
+
  private:
   ::std::string __fbthrift_field_signature;
  private:
@@ -3196,12 +3198,8 @@ class StructWithFieldAdapter final  {
 
  public:
 
-  StructWithFieldAdapter() :
-      __fbthrift_field_field(),
-      __fbthrift_field_shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
-  }
+  StructWithFieldAdapter();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field__arg, ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> opt_boxed_field__arg);
@@ -3212,6 +3210,9 @@ class StructWithFieldAdapter final  {
 
   StructWithFieldAdapter& operator=(StructWithFieldAdapter&&) noexcept;
   StructWithFieldAdapter& operator=(const StructWithFieldAdapter& src);
+
+  ~StructWithFieldAdapter();
+
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
  private:
@@ -3464,12 +3465,8 @@ class TerseAdaptedFields final  {
 
  public:
 
-  TerseAdaptedFields() :
-      __fbthrift_field_int_field() {
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
-  }
+  TerseAdaptedFields();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg);
@@ -3480,6 +3477,9 @@ class TerseAdaptedFields final  {
 
   TerseAdaptedFields& operator=(TerseAdaptedFields&&) noexcept;
   TerseAdaptedFields& operator=(const TerseAdaptedFields& src);
+
+  ~TerseAdaptedFields();
+
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> __fbthrift_field_int_field;
  private:
@@ -3823,8 +3823,8 @@ class Config final  {
 
  public:
 
-  Config() {
-  }
+  Config();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Config(apache::thrift::FragileConstructor, ::std::string path__arg);
@@ -3836,6 +3836,9 @@ class Config final  {
 
   Config& operator=(Config&&) noexcept;
   Config& operator=(const Config& src);
+
+  ~Config();
+
  private:
   ::std::string __fbthrift_field_path;
  private:
@@ -3977,10 +3980,8 @@ class MyStruct final  {
 
  public:
 
-  MyStruct() :
-      __fbthrift_field_field() {
-    ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
-  }
+  MyStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg, ::facebook::thrift::test::SetWithAdapter set_string__arg);
@@ -3991,6 +3992,9 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
+
+  ~MyStruct();
+
  private:
   ::std::int32_t __fbthrift_field_field;
  private:
@@ -6523,8 +6527,8 @@ class CircularStruct final  {
 
  public:
 
-  CircularStruct() {
-  }
+  CircularStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CircularStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee> field__arg);
@@ -6535,6 +6539,9 @@ class CircularStruct final  {
 
   CircularStruct& operator=(CircularStruct&&) noexcept;
   CircularStruct& operator=(const CircularStruct& src);
+
+  ~CircularStruct();
+
  private:
   ::std::unique_ptr<::facebook::thrift::test::AdaptedCircularAdaptee> __fbthrift_field_field;
 
@@ -6898,10 +6905,8 @@ class ReorderedStruct final  {
 
  public:
 
-  ReorderedStruct() :
-      __fbthrift_field_reordered_dependent_adapted(std::make_unique<::facebook::thrift::test::DeclaredAfterStruct>()) {
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
-  }
+  ReorderedStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> reordered_dependent_adapted__arg);
@@ -6912,6 +6917,9 @@ class ReorderedStruct final  {
 
   ReorderedStruct& operator=(ReorderedStruct&&) noexcept;
   ReorderedStruct& operator=(const ReorderedStruct& src);
+
+  ~ReorderedStruct();
+
  private:
   ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> __fbthrift_field_reordered_dependent_adapted;
 
@@ -7894,13 +7902,8 @@ class CountingStruct final  {
 
  public:
 
-  CountingStruct() :
-      __fbthrift_field_regularInt(),
-      __fbthrift_field_countingInt() {
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, int>, 1>(__fbthrift_field_regularInt, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<true, int>, 2>(__fbthrift_field_countingInt, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::test::CountingAdapter<false, std::string>, 3>(__fbthrift_field_regularString, *this);
-  }
+  CountingStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CountingStruct(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct> regularInt__arg, ::facebook::thrift::test::CountingInt countingInt__arg, ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, std::string>, 3, ::std::string, CountingStruct> regularString__arg);
@@ -7911,6 +7914,9 @@ class CountingStruct final  {
 
   CountingStruct& operator=(CountingStruct&&) noexcept;
   CountingStruct& operator=(const CountingStruct& src);
+
+  ~CountingStruct();
+
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, CountingStruct> __fbthrift_field_regularInt;
  private:
@@ -8119,8 +8125,8 @@ class Person final  {
 
  public:
 
-  Person() {
-  }
+  Person();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Person(apache::thrift::FragileConstructor, ::std::string name__arg);
@@ -8132,6 +8138,9 @@ class Person final  {
 
   Person& operator=(Person&&) noexcept;
   Person& operator=(const Person& src);
+
+  ~Person();
+
  private:
   ::std::string __fbthrift_field_name;
  private:
@@ -8271,8 +8280,8 @@ class Person2 final  {
 
  public:
 
-  Person2() {
-  }
+  Person2();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Person2(apache::thrift::FragileConstructor, ::std::string name__arg);
@@ -8284,6 +8293,9 @@ class Person2 final  {
 
   Person2& operator=(Person2&&) noexcept;
   Person2& operator=(const Person2& src);
+
+  ~Person2();
+
  private:
   ::std::string __fbthrift_field_name;
  private:

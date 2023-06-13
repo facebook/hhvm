@@ -70,6 +70,12 @@ const folly::StringPiece MyStructNestedAnnotation::__fbthrift_get_class_name() {
 
 MyStructNestedAnnotation::MyStructNestedAnnotation(const MyStructNestedAnnotation&) = default;
 MyStructNestedAnnotation& MyStructNestedAnnotation::operator=(const MyStructNestedAnnotation&) = default;
+MyStructNestedAnnotation::MyStructNestedAnnotation() {
+}
+
+
+MyStructNestedAnnotation::~MyStructNestedAnnotation() {}
+
 MyStructNestedAnnotation::MyStructNestedAnnotation(FOLLY_MAYBE_UNUSED MyStructNestedAnnotation&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __isset(other.__isset) {
@@ -571,6 +577,13 @@ const folly::StringPiece SecretStruct::__fbthrift_get_class_name() {
 
 SecretStruct::SecretStruct(const SecretStruct&) = default;
 SecretStruct& SecretStruct::operator=(const SecretStruct&) = default;
+SecretStruct::SecretStruct() :
+      __fbthrift_field_id() {
+}
+
+
+SecretStruct::~SecretStruct() {}
+
 SecretStruct::SecretStruct(FOLLY_MAYBE_UNUSED SecretStruct&& other) noexcept :
     __fbthrift_field_id(std::move(other.__fbthrift_field_id)),
     __fbthrift_field_password(std::move(other.__fbthrift_field_password)),

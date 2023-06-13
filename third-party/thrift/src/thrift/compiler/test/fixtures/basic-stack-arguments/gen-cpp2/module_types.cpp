@@ -70,6 +70,13 @@ const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
 
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
+MyStruct::MyStruct() :
+      __fbthrift_field_MyIntField() {
+}
+
+
+MyStruct::~MyStruct() {}
+
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
     __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),

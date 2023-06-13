@@ -37,7 +37,7 @@ const (
 	LIST   = 15
 	UTF8   = 16
 	UTF16  = 17
-	BINARY = 18
+	STREAM = 18
 	FLOAT  = 19
 )
 
@@ -46,6 +46,7 @@ var typeNames = map[int]string{
 	VOID:   "VOID",
 	BOOL:   "BOOL",
 	BYTE:   "BYTE",
+	DOUBLE: "DOUBLE",
 	I16:    "I16",
 	I32:    "I32",
 	I64:    "I64",
@@ -56,6 +57,8 @@ var typeNames = map[int]string{
 	LIST:   "LIST",
 	UTF8:   "UTF8",
 	UTF16:  "UTF16",
+	STREAM: "STREAM",
+	FLOAT:  "FLOAT",
 }
 
 func (p Type) String() string {

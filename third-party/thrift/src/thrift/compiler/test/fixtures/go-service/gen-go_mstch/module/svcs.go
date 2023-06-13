@@ -2410,7 +2410,7 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Valu
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.BINARY, 0); err != nil {
+    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

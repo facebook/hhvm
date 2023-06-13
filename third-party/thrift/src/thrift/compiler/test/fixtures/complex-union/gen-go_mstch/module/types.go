@@ -1053,7 +1053,7 @@ func (x *DataUnion) writeField1(p thrift.Protocol) error {  // BinaryData
         return nil
     }
 
-    if err := p.WriteFieldBegin("binaryData", thrift.BINARY, 1); err != nil {
+    if err := p.WriteFieldBegin("binaryData", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

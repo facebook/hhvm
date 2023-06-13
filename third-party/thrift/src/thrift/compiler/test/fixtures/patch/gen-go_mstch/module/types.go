@@ -510,7 +510,7 @@ func (x *InnerUnion) writeField1(p thrift.Protocol) error {  // InnerOption
         return nil
     }
 
-    if err := p.WriteFieldBegin("innerOption", thrift.BINARY, 1); err != nil {
+    if err := p.WriteFieldBegin("innerOption", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -1942,7 +1942,7 @@ func (x *MyStruct) writeField_9(p thrift.Protocol) error {  // BinaryVal
         return nil
     }
 
-    if err := p.WriteFieldBegin("binaryVal", thrift.BINARY, -9); err != nil {
+    if err := p.WriteFieldBegin("binaryVal", thrift.STRING, -9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -2198,7 +2198,7 @@ func (x *MyStruct) writeField_22(p thrift.Protocol) error {  // OptBinaryVal
         return nil
     }
 
-    if err := p.WriteFieldBegin("optBinaryVal", thrift.BINARY, -22); err != nil {
+    if err := p.WriteFieldBegin("optBinaryVal", thrift.STRING, -22); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -17670,7 +17670,7 @@ func (x *MyStructEnsureStruct) writeField_22(p thrift.Protocol) error {  // OptB
         return nil
     }
 
-    if err := p.WriteFieldBegin("optBinaryVal", thrift.BINARY, -22); err != nil {
+    if err := p.WriteFieldBegin("optBinaryVal", thrift.STRING, -22); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -17930,7 +17930,7 @@ func (x *MyStructEnsureStruct) writeField_9(p thrift.Protocol) error {  // Binar
         return nil
     }
 
-    if err := p.WriteFieldBegin("binaryVal", thrift.BINARY, -9); err != nil {
+    if err := p.WriteFieldBegin("binaryVal", thrift.STRING, -9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

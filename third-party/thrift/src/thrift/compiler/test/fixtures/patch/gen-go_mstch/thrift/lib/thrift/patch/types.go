@@ -2664,7 +2664,7 @@ func (x *BinaryPatch) writeField1(p thrift.Protocol) error {  // Assign
         return nil
     }
 
-    if err := p.WriteFieldBegin("assign", thrift.BINARY, 1); err != nil {
+    if err := p.WriteFieldBegin("assign", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -2701,7 +2701,7 @@ func (x *BinaryPatch) writeField8(p thrift.Protocol) error {  // Prepend
         return nil
     }
 
-    if err := p.WriteFieldBegin("prepend", thrift.BINARY, 8); err != nil {
+    if err := p.WriteFieldBegin("prepend", thrift.STRING, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -2722,7 +2722,7 @@ func (x *BinaryPatch) writeField9(p thrift.Protocol) error {  // Append
         return nil
     }
 
-    if err := p.WriteFieldBegin("append", thrift.BINARY, 9); err != nil {
+    if err := p.WriteFieldBegin("append", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

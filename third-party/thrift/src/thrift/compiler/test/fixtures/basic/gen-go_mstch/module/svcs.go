@@ -4525,7 +4525,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) 
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.BINARY, 0); err != nil {
+    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
@@ -4824,7 +4824,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) 
         return nil
     }
 
-    if err := p.WriteFieldBegin("value", thrift.BINARY, 0); err != nil {
+    if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

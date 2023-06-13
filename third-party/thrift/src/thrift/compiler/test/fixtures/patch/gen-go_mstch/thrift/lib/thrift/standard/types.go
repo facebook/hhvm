@@ -302,7 +302,7 @@ func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_
         return nil
     }
 
-    if err := p.WriteFieldBegin("typeHashPrefixSha2_256", thrift.BINARY, 2); err != nil {
+    if err := p.WriteFieldBegin("typeHashPrefixSha2_256", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 

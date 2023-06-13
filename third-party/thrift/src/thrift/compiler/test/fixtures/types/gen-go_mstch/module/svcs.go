@@ -698,7 +698,7 @@ func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  
     }
 
     item := x.GetValueNonCompat()
-    if err := p.WriteMapBegin(thrift.BINARY, thrift.I64, len(item)); err != nil {
+    if err := p.WriteMapBegin(thrift.STRING, thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
 for k, v := range item {

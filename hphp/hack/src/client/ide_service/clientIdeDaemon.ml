@@ -292,7 +292,7 @@ let make_empty_ctx (common : common_state) : Provider_context.t =
     ~tcopt:(ServerConfig.typechecker_options common.config)
     ~backend:(Provider_backend.Local_memory common.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    ~package_info:Package.Info.empty
+    ~package_info:PackageInfo.empty
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (common : common_state) (entry : Provider_context.entry)

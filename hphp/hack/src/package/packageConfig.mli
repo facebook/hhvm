@@ -6,6 +6,6 @@
  *
  *)
 val load_and_parse :
-  ?pkgs_config_abs_path:string option -> unit -> Errors.t * Package.Info.t
+  ?pkgs_config_abs_path:string option -> unit -> Errors.t * PackageInfo.t
 
 val repo_config_path : Relative_path.t

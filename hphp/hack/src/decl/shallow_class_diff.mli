@@ -9,4 +9,4 @@
 
 open Shallow_decl_defs
 
-val diff_class : Package.Info.t -> shallow_class -> shallow_class -> ClassDiff.t
+val diff_class : PackageInfo.t -> shallow_class -> shallow_class -> ClassDiff.t

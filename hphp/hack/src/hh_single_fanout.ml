@@ -236,7 +236,7 @@ let init (hhi_root : Path.t) : Provider_context.t =
       ~popt
       ~tcopt
       ~deps_mode
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
   Typing_deps.add_dependency_callback
     ~name:"dep_to_symbol"

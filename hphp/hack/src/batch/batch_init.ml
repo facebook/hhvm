@@ -50,7 +50,7 @@ let init_state
       ~tcopt
       ~backend:Provider_backend.Shared_memory
       ~deps_mode
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
   let batch_state = Batch_global_state.save ~trace:true in
   (ctx, batch_state)

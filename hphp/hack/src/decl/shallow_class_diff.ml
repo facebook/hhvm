@@ -679,17 +679,17 @@ let diff_class_shells (c1 : shallow_class) (c2 : shallow_class) :
   }
 
 let same_package
-    (info : Package.Info.t) (c1 : shallow_class) (c2 : shallow_class) : bool =
+    (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class) : bool =
   let get_package_for_module info sc_module =
     match sc_module with
-    | Some (_, name) -> Package.Info.get_package_for_module info name
+    | Some (_, name) -> PackageInfo.get_package_for_module info name
     | None -> None
   in
   let p1 = get_package_for_module info c1.sc_module in
   let p2 = get_package_for_module info c2.sc_module in
-  Option.equal Package.equal_package p1 p2
+  Option.equal Package.equal p1 p2
 
-let diff_class (info : Package.Info.t) (c1 : shallow_class) (c2 : shallow_class)
+let diff_class (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class)
     : ClassDiff.t =
   let same_package = same_package info c1 c2 in
   let class_shell1 = normalize c1 ~same_package

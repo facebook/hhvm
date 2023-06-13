@@ -23,7 +23,10 @@
 
 (library
  (name package)
- (modules package)
+ (wrapped false)
+ (modules
+  package
+  packageInfo)
  (libraries
   annotated_ast
   ast

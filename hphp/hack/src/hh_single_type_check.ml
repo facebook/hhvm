@@ -2624,7 +2624,7 @@ let decl_and_run_mode
   | _ -> ());
   let package_info =
     match packages_config_path with
-    | None -> Package.Info.empty
+    | None -> PackageInfo.empty
     | Some _ ->
       let (_errors, info) =
         PackageConfig.load_and_parse

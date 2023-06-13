@@ -327,7 +327,7 @@ let decl_and_run_mode
       ~popt
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.

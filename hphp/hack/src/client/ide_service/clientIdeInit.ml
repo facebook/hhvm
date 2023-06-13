@@ -302,7 +302,7 @@ let init
       ~tcopt
       ~backend:(Provider_backend.Local_memory local_memory)
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
   let sienv =
     SymbolIndex.initialize

@@ -5,10 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 type pos_id = Pos.t * string [@@deriving eq, show]
 
-type package = {
+type t = {
   name: pos_id;
   uses: pos_id list;
   includes: pos_id list;
@@ -23,22 +22,8 @@ type package_relationship =
   | Soft_includes
   | Equal
 
-val get_package_name : package -> string
+val get_package_name : t -> string
 
-val get_package_pos : package -> Pos.t
+val get_package_pos : t -> Pos.t
 
-val relationship : package -> package -> package_relationship
-
-module Info : sig
-  type t [@@deriving show]
-
-  val empty : t
-
-  val from_packages : package list -> t
-
-  val get_package_for_module : t -> string -> package option
-
-  val get_package : t -> string -> package option
-
-  val package_exists : t -> string -> bool
-end
+val relationship : t -> t -> package_relationship

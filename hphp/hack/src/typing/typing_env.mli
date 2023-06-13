@@ -565,9 +565,9 @@ val is_consistent : env -> bool
 
 val mark_inconsistent : env -> env
 
-val get_package_for_module : env -> string -> Package.package option
+val get_package_for_module : env -> string -> Package.t option
 
-val get_package_by_name : env -> string -> Package.package option
+val get_package_by_name : env -> string -> Package.t option
 
 val load_packages : env -> SSet.t -> env
 

@@ -42,7 +42,7 @@ type t = {
   backend: Provider_backend.t;
   deps_mode: Typing_deps_mode.t;
   entries: entries;
-  package_info: Package.Info.t;
+  package_info: PackageInfo.t;
 }
 
 let empty_for_tool ~popt ~tcopt ~backend ~deps_mode ~package_info =
@@ -62,7 +62,7 @@ let empty_for_worker ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
-    package_info = Package.Info.empty;
+    package_info = PackageInfo.empty;
   }
 
 let empty_for_test ~popt ~tcopt ~deps_mode ~package_info =
@@ -82,7 +82,7 @@ let empty_for_debugging ~popt ~tcopt ~deps_mode =
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
-    package_info = Package.Info.empty;
+    package_info = PackageInfo.empty;
   }
 
 let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
@@ -120,7 +120,7 @@ let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
 
-let get_package_info (t : t) : Package.Info.t = t.package_info
+let get_package_info (t : t) : PackageInfo.t = t.package_info
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }

@@ -88,7 +88,7 @@ and genv = {
   current_module: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
-  package_info: Package.Info.t;
+  package_info: PackageInfo.t;
 }
 
 let initial_local tpenv =

@@ -13,7 +13,7 @@ open Reordered_argument_collections
 open Shallow_decl_defs
 
 let diff_class_in_changed_file
-    (package_info : Package.Info.t)
+    (package_info : PackageInfo.t)
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
     (class_name : string) : ClassDiff.t =

@@ -66,7 +66,7 @@ let init root popt ~rust_provider_backend : Provider_context.t =
       ~tcopt
       ~backend:(Provider_backend.get ())
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
 
   (* Push local stacks here so we don't include shared memory in our timing. *)

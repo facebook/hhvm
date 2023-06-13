@@ -23,7 +23,7 @@ let get_default_provider_context () =
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    ~package_info:Package.Info.empty
+    ~package_info:PackageInfo.empty
 
 let get_naming_table_and_errors provider_context path =
   let sqlite_path = Some path in

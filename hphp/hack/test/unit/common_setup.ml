@@ -99,7 +99,7 @@ let setup
       ~tcopt
       ~backend:(Provider_backend.get ())
       ~deps_mode
-      ~package_info:Package.Info.empty
+      ~package_info:PackageInfo.empty
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =

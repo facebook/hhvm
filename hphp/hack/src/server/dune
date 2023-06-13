@@ -548,7 +548,6 @@
   (wrapped false)
   (modules
     client_command_handler
-    packageConfig
     serverCommand
     serverCommandLwt
     serverEagerInit
@@ -571,6 +570,7 @@
     load_script
     lwt
     memory_stats
+    package_config
     parent
     provider_backend
     security_stubs

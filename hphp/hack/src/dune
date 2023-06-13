@@ -32,6 +32,7 @@
   naming_ast_print
   memtrace
   package
+  package_config
   parent
   rust_provider_backend_stubs
   refactor_sd

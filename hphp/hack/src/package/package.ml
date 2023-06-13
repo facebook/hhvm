@@ -17,8 +17,6 @@ open Hh_prelude
 
 type pos_id = Pos.t * string [@@deriving eq, show]
 
-type errors = (Pos.t * string * (Pos.t * string) list) list
-
 type package = {
   name: pos_id;
   uses: pos_id list;
@@ -32,10 +30,6 @@ type package_relationship =
   | Includes
   | Soft_includes
   | Equal
-
-external extract_packages_from_text :
-  string -> string -> (package list, errors) result
-  = "extract_packages_from_text_ffi"
 
 module Info = struct
   type t = {
@@ -73,34 +67,16 @@ module Info = struct
   let get_package (info : t) (pkg : string) : package option =
     SMap.find_opt pkg info.existing_packages
 
-  let initialize (path : string) : Errors.t * t =
-    let contents = Sys_utils.cat path in
-    match extract_packages_from_text path contents with
-    | Error errors ->
-      let empty_info = empty in
-      let errors =
-        List.map errors ~f:(fun (pos, msg, reasons) ->
-            let reasons =
-              List.map ~f:(fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
-            in
-            Parsing_error.(
-              to_user_error @@ Package_config_error { pos; msg; reasons }))
-        |> Errors.from_error_list
-      in
-      (errors, empty_info)
-    | Ok packages ->
-      let info =
-        List.fold packages ~init:empty ~f:(fun acc pkg ->
-            let existing_packages =
-              SMap.add (snd pkg.name) pkg acc.existing_packages
-            in
-            let acc = { acc with existing_packages } in
-            List.fold pkg.uses ~init:acc ~f:(fun acc (_, glob) ->
-                let glob_to_package = SMap.add glob pkg acc.glob_to_package in
-                let acc = { acc with glob_to_package } in
-                acc))
-      in
-      (Errors.empty, info)
+  let from_packages (packages : package list) : t =
+    List.fold packages ~init:empty ~f:(fun acc pkg ->
+        let existing_packages =
+          SMap.add (snd pkg.name) pkg acc.existing_packages
+        in
+        let acc = { acc with existing_packages } in
+        List.fold pkg.uses ~init:acc ~f:(fun acc (_, glob) ->
+            let glob_to_package = SMap.add glob pkg acc.glob_to_package in
+            let acc = { acc with glob_to_package } in
+            acc))
 end
 
 let get_package_pos pkg = fst pkg.name

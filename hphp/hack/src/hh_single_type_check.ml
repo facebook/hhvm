@@ -2625,8 +2625,12 @@ let decl_and_run_mode
   let package_info =
     match packages_config_path with
     | None -> Package.Info.empty
-    | Some path ->
-      let (_errors, info) = Package.Info.initialize path in
+    | Some _ ->
+      let (_errors, info) =
+        PackageConfig.load_and_parse
+          ~pkgs_config_abs_path:packages_config_path
+          ()
+      in
       info
   in
   let ctx =

@@ -28,8 +28,21 @@
   annotated_ast
   ast
   collections
+  pos)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name package_config)
+ (wrapped false)
+ (modules packageConfig)
+ (libraries
+  annotated_ast
+  ast
+  collections
   errors
   parsing_error
+  package
   package_ocaml_ffi)
  (preprocess
   (pps ppx_deriving.std)))

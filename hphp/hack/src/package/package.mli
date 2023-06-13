@@ -34,7 +34,7 @@ module Info : sig
 
   val empty : t
 
-  val initialize : string -> Errors.t * t
+  val from_packages : package list -> t
 
   val get_package_for_module : t -> string -> package option
 

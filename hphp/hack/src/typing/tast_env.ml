@@ -364,3 +364,5 @@ let fill_in_pos_filename_if_in_current_decl =
 let is_hhi = Typing_env.is_hhi
 
 let get_check_status env = env.Typing_env_types.checked
+
+let get_current_decl_and_file = Typing_env.get_current_decl_and_file

@@ -327,3 +327,5 @@ val is_hhi : env -> bool
 (** See {!Tast.check_status} to understand what this function returns from the
     environment. *)
 val get_check_status : env -> Tast.check_status
+
+val get_current_decl_and_file : env -> Pos_or_decl.ctx

@@ -13,6 +13,8 @@
  *
  *)
 
+open Hh_prelude
+
 type pos_id = Pos.t * string [@@deriving eq, show]
 
 type errors = (Pos.t * string * (Pos.t * string) list) list
@@ -37,16 +39,16 @@ external extract_packages_from_text :
 
 module Info = struct
   type t = {
-    glob_to_package: (string, package) Hashtbl.t;
-    existing_packages: (string, package) Hashtbl.t;
+    glob_to_package: package SMap.t;
+    existing_packages: package SMap.t;
   }
+  [@@deriving show]
 
-  let empty =
-    { glob_to_package = Hashtbl.create 0; existing_packages = Hashtbl.create 0 }
+  let empty = { glob_to_package = SMap.empty; existing_packages = SMap.empty }
 
   let get_package_for_module (info : t) (md : string) : package option =
     let matching_pkgs =
-      Hashtbl.fold
+      SMap.fold
         (fun glob pkg acc ->
           if Str.string_match (Str.regexp glob) md 0 then
             (glob, pkg) :: acc
@@ -56,7 +58,9 @@ module Info = struct
         []
     in
     let sorted_pkgs =
-      List.sort (fun (md1, _) (md2, _) -> String.compare md1 md2) matching_pkgs
+      List.sort
+        ~compare:(fun (md1, _) (md2, _) -> String.compare md1 md2)
+        matching_pkgs
       |> List.rev
     in
     match sorted_pkgs with
@@ -64,38 +68,39 @@ module Info = struct
     | (_, pkg) :: _ -> Some pkg
 
   let package_exists (info : t) (pkg : string) : bool =
-    Hashtbl.mem info.existing_packages pkg
+    SMap.mem pkg info.existing_packages
 
   let get_package (info : t) (pkg : string) : package option =
-    Hashtbl.find_opt info.existing_packages pkg
+    SMap.find_opt pkg info.existing_packages
 
-  let initialize (path : string) =
+  let initialize (path : string) : Errors.t * t =
     let contents = Sys_utils.cat path in
-    let info = empty in
-    let errors =
-      match extract_packages_from_text path contents with
-      | Error errors ->
-        List.map
-          (fun (pos, msg, reasons) ->
+    match extract_packages_from_text path contents with
+    | Error errors ->
+      let empty_info = empty in
+      let errors =
+        List.map errors ~f:(fun (pos, msg, reasons) ->
             let reasons =
-              List.map (fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
+              List.map ~f:(fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
             in
             Parsing_error.(
               to_user_error @@ Package_config_error { pos; msg; reasons }))
-          errors
         |> Errors.from_error_list
-      | Ok packages ->
-        List.iter
-          (fun pkg ->
-            List.iter
-              (fun (_, glob) ->
-                Hashtbl.add info.glob_to_package glob pkg;
-                Hashtbl.add info.existing_packages (snd pkg.name) pkg)
-              pkg.uses)
-          packages;
-        Errors.empty
-    in
-    (errors, info)
+      in
+      (errors, empty_info)
+    | Ok packages ->
+      let info =
+        List.fold packages ~init:empty ~f:(fun acc pkg ->
+            let existing_packages =
+              SMap.add (snd pkg.name) pkg acc.existing_packages
+            in
+            let acc = { acc with existing_packages } in
+            List.fold pkg.uses ~init:acc ~f:(fun acc (_, glob) ->
+                let glob_to_package = SMap.add glob pkg acc.glob_to_package in
+                let acc = { acc with glob_to_package } in
+                acc))
+      in
+      (Errors.empty, info)
 end
 
 let get_package_pos pkg = fst pkg.name
@@ -104,12 +109,12 @@ let get_package_name pkg = snd pkg.name
 
 let includes pkg1 pkg2 =
   List.exists
-    (fun (_, name) -> String.equal name @@ get_package_name pkg2)
+    ~f:(fun (_, name) -> String.equal name @@ get_package_name pkg2)
     pkg1.includes
 
 let soft_includes pkg1 pkg2 =
   List.exists
-    (fun (_, name) -> String.equal name @@ get_package_name pkg2)
+    ~f:(fun (_, name) -> String.equal name @@ get_package_name pkg2)
     pkg1.soft_includes
 
 let relationship pkg1 pkg2 =

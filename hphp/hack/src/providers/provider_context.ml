@@ -65,14 +65,14 @@ let empty_for_worker ~popt ~tcopt ~deps_mode =
     package_info = Package.Info.empty;
   }
 
-let empty_for_test ~popt ~tcopt ~deps_mode =
+let empty_for_test ~popt ~tcopt ~deps_mode ~package_info =
   {
     popt;
     tcopt;
     backend = Provider_backend.Shared_memory;
     deps_mode;
     entries = Relative_path.Map.empty;
-    package_info = Package.Info.empty;
+    package_info;
   }
 
 let empty_for_debugging ~popt ~tcopt ~deps_mode =

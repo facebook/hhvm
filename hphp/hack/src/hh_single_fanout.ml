@@ -231,7 +231,13 @@ let init (hhi_root : Path.t) : Provider_context.t =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
   init_paths hhi_root;
-  let ctx = Provider_context.empty_for_test ~popt ~tcopt ~deps_mode in
+  let ctx =
+    Provider_context.empty_for_test
+      ~popt
+      ~tcopt
+      ~deps_mode
+      ~package_info:Package.Info.empty
+  in
   Typing_deps.add_dependency_callback
     ~name:"dep_to_symbol"
     DepToSymbolsMap.callback;

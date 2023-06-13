@@ -387,6 +387,7 @@ let decl_and_run_mode
       ~popt
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      ~package_info:Package.Info.empty
   in
   let (_errors, files_info) = parse_name_and_decl ctx to_decl in
   let naming_table = Naming_table.create files_info in

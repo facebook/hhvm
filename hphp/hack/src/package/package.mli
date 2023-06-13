@@ -30,7 +30,7 @@ val get_package_pos : package -> Pos.t
 val relationship : package -> package -> package_relationship
 
 module Info : sig
-  type t
+  type t [@@deriving show]
 
   val empty : t
 

@@ -131,6 +131,7 @@ val empty_for_test :
   popt:ParserOptions.t ->
   tcopt:TypecheckerOptions.t ->
   deps_mode:Typing_deps_mode.t ->
+  package_info:Package.Info.t ->
   t
 
 (** The empty context, for use in debugging aides in production code, where

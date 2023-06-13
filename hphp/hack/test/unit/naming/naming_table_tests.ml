@@ -133,7 +133,11 @@ let run_naming_table_test f =
         "Expected to add 12 rows (6 files and 6 symbols)";
 
       let ctx_for_sqlite_load =
-        Provider_context.empty_for_test ~popt ~tcopt ~deps_mode
+        Provider_context.empty_for_test
+          ~popt
+          ~tcopt
+          ~deps_mode
+          ~package_info:Package.Info.empty
       in
       let backed_naming_table =
         Naming_table.load_from_sqlite ctx_for_sqlite_load db_name

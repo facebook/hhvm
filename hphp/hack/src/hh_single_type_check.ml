@@ -2643,6 +2643,7 @@ let decl_and_run_mode
         ~popt
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+        ~package_info
   in
 
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"

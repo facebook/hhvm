@@ -5,7 +5,7 @@
 
 use anyhow::Error;
 use hash::HashSet;
-use strum_macros::EnumIter;
+use strum::EnumIter;
 use textual_macros::TextualDecl;
 
 use crate::mangle::FunctionName;

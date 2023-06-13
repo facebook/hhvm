@@ -23,7 +23,6 @@ use ir::StringInterner;
 use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
-use strum_macros::EnumProperty;
 
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;

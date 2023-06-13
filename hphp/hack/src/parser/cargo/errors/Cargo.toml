@@ -19,5 +19,4 @@ naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }
 stack_limit = { version = "0.0.0", path = "../../../utils/stack_limit" }
-strum = "0.21"
-strum_macros = "0.21"
+strum = { version = "0.24", features = ["derive"] }

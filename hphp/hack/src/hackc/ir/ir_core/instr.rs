@@ -7,7 +7,7 @@ use macros::HasLocals;
 use macros::HasOperands;
 use newtype::newtype_int;
 use smallvec::SmallVec;
-use strum_macros::Display;
+use strum::Display;
 
 use crate::BareThisOp;
 use crate::BlockId;

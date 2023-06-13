@@ -10,7 +10,7 @@ use fnv::FnvHasher;
 /// Variant types used in the depgraph table.
 ///
 /// NOTE: Keep in sync with the order of the fields in `Typing_deps.ml`.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, strum_macros::EnumString)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, strum::EnumString)]
 #[repr(u8)]
 pub enum DepType {
     GConst = 0,

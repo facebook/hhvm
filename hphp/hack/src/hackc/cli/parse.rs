@@ -21,10 +21,10 @@ use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use relative_path::Prefix;
 use relative_path::RelativePath;
+use strum::Display;
+use strum::EnumString;
+use strum::EnumVariantNames;
 use strum::VariantNames;
-use strum_macros::Display;
-use strum_macros::EnumString;
-use strum_macros::EnumVariantNames;
 
 #[derive(Args, Clone, Debug)]
 pub struct BenchOpts {

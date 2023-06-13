@@ -31,11 +31,11 @@ use parser_core_types::syntax_error::{self as errors};
 use parser_core_types::syntax_trait::SyntaxTrait;
 use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::token_kind::TokenKind;
+use strum::Display;
+use strum::EnumIter;
+use strum::EnumString;
 use strum::IntoEnumIterator;
-use strum_macros::Display;
-use strum_macros::EnumIter;
-use strum_macros::EnumString;
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 
 #[derive(Clone, PartialEq, Debug)]
 struct Location {

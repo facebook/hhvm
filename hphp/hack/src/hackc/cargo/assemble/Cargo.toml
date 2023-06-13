@@ -22,4 +22,4 @@ naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parse_macro = { version = "0.0.0", path = "../parse_macro" }
 stack_depth = { version = "0.0.0", path = "../../utils/cargo/stack_depth" }
-strum_macros = "0.21"
+strum = { version = "0.24", features = ["derive"] }

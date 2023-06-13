@@ -13,7 +13,7 @@ use newtype::newtype_int;
 // 1-based line number.
 newtype_int!(Line, u32, LineMap, LineSet);
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone, strum_macros::IntoStaticStr)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, strum::IntoStaticStr)]
 pub(crate) enum Token<'a> {
     // See Lexer::from_slice for regex definitions
     Global(&'a [u8], Line),

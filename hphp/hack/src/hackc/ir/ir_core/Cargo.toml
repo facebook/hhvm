@@ -20,7 +20,7 @@ naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
-strum_macros = "0.21"
+strum = { version = "0.24", features = ["derive"] }
 
 [dev-dependencies]
 static_assertions = "1.1.0"

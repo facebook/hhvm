@@ -27,6 +27,7 @@ use oxidized_by_ref::ast_defs::ClassishKind;
 use oxidized_by_ref::ast_defs::ConstraintKind;
 use oxidized_by_ref::ast_defs::FunKind;
 use oxidized_by_ref::ast_defs::Id;
+use oxidized_by_ref::ast_defs::Id_;
 use oxidized_by_ref::ast_defs::ShapeFieldName;
 use oxidized_by_ref::ast_defs::Uop;
 use oxidized_by_ref::ast_defs::Variance;
@@ -844,18 +845,19 @@ pub struct ShapeFieldNode<'a> {
 }
 
 #[derive(Copy, Clone, Debug)]
-struct ClassNameParam<'a> {
-    name: Id<'a>,
-    #[allow(dead_code)]
-    full_pos: &'a Pos<'a>, // Position of the full expression `Foo::class`
+enum AttributeParam<'a> {
+    Classname(Id<'a>),
+    EnumClassLabel(&'a Id_<'a>),
+    String(&'a Pos<'a>, &'a BStr),
+    Int(&'a Id_<'a>),
 }
 
 #[derive(Debug)]
 pub struct UserAttributeNode<'a> {
     name: Id<'a>,
-    classname_params: &'a [ClassNameParam<'a>],
+    params: &'a [AttributeParam<'a>],
     /// This is only used for __Deprecated attribute message and CIPP parameters
-    string_literal_params: &'a [(&'a Pos<'a>, &'a BStr)],
+    string_literal_param: Option<(&'a Pos<'a>, &'a BStr)>,
 }
 
 mod fixed_width_token {
@@ -981,6 +983,7 @@ pub enum Node<'a> {
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
     RefinedConst(&'a (&'a str, RefinedConst<'a>)),
+    EnumClassLabel(&'a str),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -1128,8 +1131,8 @@ impl<'a> Node<'a> {
         self.iter().any(|node| match node {
             Node::Attribute(&UserAttributeNode {
                 name: Id(_pos, attr_name),
-                classname_params: [],
-                string_literal_params: [],
+                params: [],
+                string_literal_param: None,
             }) => attr_name == name,
             _ => false,
         })
@@ -1203,13 +1206,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
         &self,
         attr: &UserAttributeNode<'a>,
     ) -> &'a shallow_decl_defs::UserAttribute<'a> {
+        use shallow_decl_defs::UserAttributeParam as UAP;
         self.alloc(shallow_decl_defs::UserAttribute {
             name: attr.name.into(),
-            params: self.slice(
-                attr.classname_params
-                    .iter()
-                    .map(|p| shallow_decl_defs::UserAttributeParam::Classname(p.name.1)),
-            ),
+            params: self.slice(attr.params.iter().map(|p| match p {
+                AttributeParam::Classname(cls) => UAP::Classname(cls.1),
+                AttributeParam::EnumClassLabel(lbl) => UAP::EnumClassLabel(lbl),
+                AttributeParam::String(_, s) => UAP::String(s),
+                AttributeParam::Int(i) => UAP::Int(i),
+            })),
         })
     }
 }
@@ -1652,9 +1657,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 match attribute.name.1 {
                     "__Deprecated" => {
                         attributes.deprecated = attribute
-                            .string_literal_params
-                            .first()
-                            .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
+                            .string_literal_param
+                            .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
@@ -1691,18 +1695,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         attributes.php_std_lib = true;
                     }
                     "__Policied" => {
-                        let string_literal_params = || {
-                            attribute
-                                .string_literal_params
-                                .first()
-                                .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x))
-                        };
-                        // Take the classname param by default
-                        attributes.ifc_attribute =
-                            IfcFunDecl::FDPolicied(attribute.classname_params.first().map_or_else(
-                                string_literal_params, // default
-                                |&x| Some(x.name.1),   // f
-                            ));
+                        attributes.ifc_attribute = IfcFunDecl::FDPolicied(
+                            attribute.params.first().and_then(|a| match a {
+                                AttributeParam::Classname(cn) => Some(cn.1),
+                                AttributeParam::String(_, s) => {
+                                    Some(self.str_from_utf8_for_bytes_in_arena(s))
+                                }
+                                _ => None,
+                            }),
+                        );
                         ifc_already_policied = true;
                     }
 
@@ -1728,9 +1729,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__CrossPackage" => {
                         attributes.cross_package = attribute
-                            .string_literal_params
-                            .first()
-                            .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
+                            .string_literal_param
+                            .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     _ => {}
                 }
@@ -3229,6 +3229,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }
     }
 
+    fn make_enum_class_label_expression(
+        &mut self,
+        _class: Self::Output,
+        _hash: Self::Output,
+        label: Self::Output,
+    ) -> Self::Output {
+        // In case we want it later on, _class is either Ignored(Missing)
+        // or a Name node, like label
+        match label {
+            Node::Name((lbl, _)) => Node::EnumClassLabel(lbl),
+            _ => Node::Ignored(SK::EnumClassLabelExpression),
+        }
+    }
+
     fn make_list_item(&mut self, item: Self::Output, sep: Self::Output) -> Self::Output {
         match (item.is_ignored(), sep.is_ignored()) {
             (true, true) => Node::Ignored(SK::ListItem),
@@ -3370,7 +3384,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             match attribute {
                 Node::Attribute(attr) => {
                     if attr.name.1 == "__Docs" {
-                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                        if let Some((_, bstr)) = attr.string_literal_param {
                             docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
                         }
                     }
@@ -3554,7 +3568,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             match attribute {
                 Node::Attribute(attr) => {
                     if attr.name.1 == "__Docs" {
-                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                        if let Some((_, bstr)) = attr.string_literal_param {
                             docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
                         }
                     }
@@ -4363,7 +4377,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             match attribute {
                 Node::Attribute(attr) => {
                     if attr.name.1 == "__Docs" {
-                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                        if let Some((_, bstr)) = attr.string_literal_param {
                             docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
                         }
                     }
@@ -4922,7 +4936,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             match attribute {
                 Node::Attribute(attr) => {
                     if attr.name.1 == "__Docs" {
-                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                        if let Some((_, bstr)) = attr.string_literal_param {
                             docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
                         }
                     }
@@ -5134,7 +5148,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             match attribute {
                 Node::Attribute(attr) => {
                     if attr.name.1 == "__Docs" {
-                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                        if let Some((_, bstr)) = attr.string_literal_param {
                             docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
                         }
                     }
@@ -5534,18 +5548,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 None => return Node::Ignored(SK::ConstructorCall),
             }
         };
-        let classname_params = self.slice(args.iter().filter_map(|node| match node {
+        let params = self.slice(args.iter().filter_map(|node| match node {
             Node::Expr(aast::Expr(
                 _,
-                full_pos,
+                _,
                 aast::Expr_::ClassConst(&(
                     aast::ClassId(_, _, aast::ClassId_::CI(&Id(pos, class_name))),
                     (_, "class"),
                 )),
             )) => {
-                let name = if class_name.starts_with(':')
-                    && self.opts.disable_xhp_element_mangling
-                    && self.opts.keep_user_attributes
+                let name = if class_name.starts_with(':') && self.opts.disable_xhp_element_mangling
                 {
                     // for facts, allow xhp class consts to be mangled later on
                     // even when xhp_element_mangling is disabled
@@ -5557,64 +5569,48 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 } else {
                     self.elaborate_id(Id(pos, class_name))
                 };
-                Some(ClassNameParam { name, full_pos })
+                Some(AttributeParam::Classname(name))
             }
-            Node::StringLiteral((name, full_pos)) if self.opts.keep_user_attributes => {
-                Some(ClassNameParam {
-                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(name)),
-                    full_pos,
-                })
+            Node::EnumClassLabel(label) => Some(AttributeParam::EnumClassLabel(label)),
+            Node::Expr(e @ aast::Expr(_, pos, _)) => {
+                // Try to parse a sequence of string concatenations
+                fn fold_string_concat<'a>(
+                    expr: &nast::Expr<'a>,
+                    acc: &mut bump::Vec<'a, u8>,
+                ) -> bool {
+                    match *expr {
+                        aast::Expr(_, _, aast::Expr_::String(val)) => {
+                            acc.extend_from_slice(val);
+                            true
+                        }
+                        aast::Expr(
+                            _,
+                            _,
+                            aast::Expr_::Binop(&aast::Binop {
+                                bop: Bop::Dot,
+                                lhs,
+                                rhs,
+                            }),
+                        ) => fold_string_concat(lhs, acc) && fold_string_concat(rhs, acc),
+                        _ => false,
+                    }
+                }
+                let mut acc = bump::Vec::new_in(self.arena);
+                fold_string_concat(e, &mut acc)
+                    .then(|| AttributeParam::String(pos, acc.into_bump_slice().into()))
             }
-            Node::IntLiteral((name, full_pos)) if self.opts.keep_user_attributes => {
-                Some(ClassNameParam {
-                    name: Id(NO_POS, name),
-                    full_pos,
-                })
-            }
+            Node::StringLiteral((slit, pos)) => Some(AttributeParam::String(pos, slit)),
+            Node::IntLiteral((ilit, _)) => Some(AttributeParam::Int(ilit)),
             _ => None,
         }));
-
-        let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Docs"
-            | "__CrossPackage" => true,
-            _ => false,
-        } {
-            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {
-                match *expr {
-                    aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
-                    aast::Expr(
-                        _,
-                        _,
-                        aast::Expr_::Binop(&aast::Binop {
-                            bop: Bop::Dot,
-                            lhs,
-                            rhs,
-                        }),
-                    ) => {
-                        fold_string_concat(lhs, acc);
-                        fold_string_concat(rhs, acc);
-                    }
-                    _ => {}
-                }
-            }
-
-            self.slice(args.iter().filter_map(|expr| match expr {
-                Node::StringLiteral((x, p)) => Some((*p, *x)),
-                Node::Expr(e @ aast::Expr(_, p, aast::Expr_::Binop(_))) => {
-                    let mut acc = bump::Vec::new_in(self.arena);
-                    fold_string_concat(e, &mut acc);
-                    Some((p, acc.into_bump_slice().into()))
-                }
-                _ => None,
-            }))
-        } else {
-            &[]
-        };
-
+        let string_literal_param = params.first().and_then(|p| match *p {
+            AttributeParam::String(pos, s) => Some((pos, s)),
+            _ => None,
+        });
         Node::Attribute(self.alloc(UserAttributeNode {
             name,
-            classname_params,
-            string_literal_params,
+            params,
+            string_literal_param,
         }))
     }
 

@@ -571,9 +571,11 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
     attributes
         .iter()
         .filter_map(|ua| {
-            let cn_params: Vec<_> = (ua.params.iter())
-                .filter_map(|p| match p {
-                    UserAttributeParam::Classname(cn) => Some(*cn),
+            let params = (ua.params.iter())
+                .filter_map(|p| match *p {
+                    UserAttributeParam::Classname(cn) => Some(format(cn)),
+                    UserAttributeParam::String(s) => Some(s.to_string()),
+                    UserAttributeParam::Int(i) => Some(i.to_owned()),
                     _ => None,
                 })
                 .collect();
@@ -582,7 +584,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
                 // skip builtins
                 None
             } else {
-                Some((attr_name, cn_params.iter().map(|p| format(p)).collect()))
+                Some((attr_name, params))
             }
         })
         .collect::<Attributes>()

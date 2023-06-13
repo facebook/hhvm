@@ -37,13 +37,19 @@ impl From<facts::TypeKind> for compile_ffi::TypeKind {
     }
 }
 
-impl IntoKeyValue<String, Vec<String>> for compile_ffi::Attribute {
-    fn into_key_value(self) -> (String, Vec<String>) {
-        (self.name, self.args)
+impl IntoKeyValue<String, Vec<serde_json::Value>> for compile_ffi::Attribute {
+    fn into_key_value(self) -> (String, Vec<serde_json::Value>) {
+        let args = (self.args.into_iter())
+            .map(|s| serde_json::from_str(&s).unwrap())
+            .collect();
+        (self.name, args)
     }
 }
-impl FromKeyValue<String, Vec<String>> for compile_ffi::Attribute {
-    fn from_key_value(name: String, args: Vec<String>) -> compile_ffi::Attribute {
+impl FromKeyValue<String, Vec<serde_json::Value>> for compile_ffi::Attribute {
+    fn from_key_value(name: String, args: Vec<serde_json::Value>) -> compile_ffi::Attribute {
+        let args = (args.into_iter())
+            .map(|v| serde_json::to_string(&v).unwrap())
+            .collect();
         compile_ffi::Attribute { name, args }
     }
 }
@@ -68,6 +74,7 @@ impl From<compile_ffi::MethodFacts> for facts::MethodFacts {
         }
     }
 }
+
 impl From<facts::MethodFacts> for compile_ffi::MethodFacts {
     fn from(method_facts: facts::MethodFacts) -> compile_ffi::MethodFacts {
         compile_ffi::MethodFacts {
@@ -269,7 +276,7 @@ mod tests {
         let ffi_attributes = vec![
             compile_ffi::Attribute {
                 name: "MyAttribute1".to_string(),
-                args: vec!["arg1".to_string(), "arg2".to_string(), "arg3".to_string()],
+                args: vec!["\"arg1\"".into(), "\"arg2\"".into(), "\"arg3\"".into()],
             },
             compile_ffi::Attribute {
                 name: "MyAttribute2".to_string(),
@@ -280,7 +287,7 @@ mod tests {
         let mut rust_attributes = BTreeMap::new();
         rust_attributes.insert(
             "MyAttribute1".to_string(),
-            vec!["arg1".to_string(), "arg2".to_string(), "arg3".to_string()],
+            vec!["arg1".into(), "arg2".into(), "arg3".into()],
         );
         rust_attributes.insert("MyAttribute2".to_string(), vec![]);
 

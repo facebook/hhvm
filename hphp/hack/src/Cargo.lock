@@ -873,6 +873,7 @@ dependencies = [
  "options",
  "parser_core_types",
  "relative_path",
+ "serde_json",
  "sha1",
  "thiserror",
 ]

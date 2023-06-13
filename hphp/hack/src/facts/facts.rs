@@ -48,7 +48,7 @@ impl Default for TypeKind {
 }
 
 pub type StringSet = BTreeSet<String>;
-pub type Attributes = BTreeMap<String, Vec<String>>;
+pub type Attributes = BTreeMap<String, Vec<serde_json::Value>>;
 pub type Methods = BTreeMap<String, MethodFacts>;
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
@@ -568,14 +568,15 @@ fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: Abstraction) ->
 }
 
 fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attributes {
+    use serde_json::Value;
     attributes
         .iter()
         .filter_map(|ua| {
             let params = (ua.params.iter())
                 .filter_map(|p| match *p {
-                    UserAttributeParam::Classname(cn) => Some(format(cn)),
-                    UserAttributeParam::String(s) => Some(s.to_string()),
-                    UserAttributeParam::Int(i) => Some(i.to_owned()),
+                    UserAttributeParam::Classname(cn) => Some(Value::String(format(cn))),
+                    UserAttributeParam::String(s) => Some(Value::String(s.to_string())),
+                    UserAttributeParam::Int(i) => Some(Value::String(i.to_owned())),
                     _ => None,
                 })
                 .collect();
@@ -705,12 +706,9 @@ mod tests {
                     (
                         String::from("one_attr_with_arg"),
                         MethodFacts {
-                            attributes: vec![(
-                                String::from("attr_with_arg"),
-                                vec![String::from("arg")],
-                            )]
-                            .into_iter()
-                            .collect(),
+                            attributes: vec![(String::from("attr_with_arg"), vec!["arg".into()])]
+                                .into_iter()
+                                .collect(),
                         },
                     ),
                 ]

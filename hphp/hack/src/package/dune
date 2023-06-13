@@ -27,11 +27,7 @@
  (modules
   package
   packageInfo)
- (libraries
-  annotated_ast
-  ast
-  collections
-  pos)
+ (libraries pos)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -40,12 +36,10 @@
  (wrapped false)
  (modules packageConfig)
  (libraries
-  annotated_ast
-  ast
-  collections
   errors
   parsing_error
   package
-  package_ocaml_ffi)
+  package_ocaml_ffi
+  pos_or_decl)
  (preprocess
   (pps ppx_deriving.std)))

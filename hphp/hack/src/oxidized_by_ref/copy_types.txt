@@ -129,6 +129,7 @@ oxidized::typing_reason::BlameSource
 oxidized::user_error::Severity
 oxidized::xhp_attribute::Tag
 oxidized::xhp_attribute::XhpAttribute
+package::PackageRelationship
 patt_binding_ty::PattBindingTy
 patt_locl_ty::Prim
 patt_error::Primary

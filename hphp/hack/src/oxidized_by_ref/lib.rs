@@ -47,6 +47,8 @@ pub use gen::file_info;
 pub use gen::namespace_env;
 pub use gen::naming_types;
 pub use gen::nast;
+pub use gen::package;
+pub use gen::package_info;
 pub use gen::patt_binding_ty;
 pub use gen::patt_error;
 pub use gen::patt_locl_ty;

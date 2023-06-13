@@ -18,6 +18,8 @@ pub mod lazy;
 pub mod local_id;
 pub mod local_id_map;
 pub mod namespace_env_impl;
+pub mod package_impl;
+pub mod package_info_impl;
 pub mod s_map;
 pub mod s_set;
 pub mod saved_state_rollouts_impl;

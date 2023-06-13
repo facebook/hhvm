@@ -7,6 +7,7 @@ use crate::custom_error_config::CustomErrorConfig;
 use crate::gen::global_options::GlobalOptions;
 use crate::gen::global_options::SavedState;
 use crate::gen::global_options::SavedStateLoading;
+use crate::gen::package_info::PackageInfo;
 use crate::gen::saved_state_rollouts::SavedStateRollouts;
 use crate::i_set;
 use crate::s_map;
@@ -169,6 +170,7 @@ impl Default for GlobalOptions {
             tco_rust_elab: false,
             dump_tast_hashes: false,
             tco_autocomplete_mode: false,
+            tco_package_info: PackageInfo::default(),
         }
     }
 }

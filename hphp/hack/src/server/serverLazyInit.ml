@@ -1104,8 +1104,11 @@ let post_saved_state_initialization
 
   (* Load and parse PACKAGES.toml if it exists at the root. *)
   let (errors, package_info) = PackageConfig.load_and_parse () in
+  let tcopt =
+    { env.ServerEnv.tcopt with GlobalOptions.tco_package_info = package_info }
+  in
   let env =
-    ServerEnv.{ env with package_info; errorl = Errors.merge env.errorl errors }
+    ServerEnv.{ env with tcopt; errorl = Errors.merge env.errorl errors }
   in
 
   (***********************************************************

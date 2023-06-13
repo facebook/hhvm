@@ -233,6 +233,7 @@ set(FIZZ_SOURCES
   third-party/libsodium-aegis/aegis256/aesni/aead_aegis256_aesni.c
   third-party/libsodium-aegis/aegis256/armcrypto/aead_aegis256_armcrypto.c
   third-party/libsodium-aegis/aegis256/soft/aead_aegis256_soft.c
+  third-party/libsodium-aegis/private/softaes.c
 )
 
 add_library(fizz

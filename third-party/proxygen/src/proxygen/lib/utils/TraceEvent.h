@@ -220,10 +220,6 @@ class TraceEvent {
     return addMetaInternal(key, std::move(val));
   }
 
-  void removeMeta(TraceFieldType key) {
-    metaData_.erase(key);
-  }
-
   template <typename T>
   bool readIntMeta(TraceFieldType key, T& dest) const {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value,

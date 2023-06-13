@@ -417,6 +417,15 @@ class DynamicStructInfo {
 detail::TypeInfo createStructTypeInfo(
     const DynamicStructInfo& dynamicStructInfo);
 
+namespace capi {
+/**
+ * Retrieves internal _fbthrift_data from `StructOrUnion`. On import failure,
+ * returns nullptr. Caller is responsible for clearing Err indicator on failure.
+ * Do not use externally; use capi interface instead.
+ */
+PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion);
+} // namespace capi
+
 } // namespace python
 } // namespace thrift
 } // namespace apache

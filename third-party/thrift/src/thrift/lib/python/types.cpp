@@ -21,6 +21,7 @@
 #include <folly/Range.h>
 #include <folly/ScopeGuard.h>
 #include <folly/lang/New.h>
+#include <folly/python/import.h>
 #include <thrift/lib/cpp2/protocol/TableBasedSerializer.h>
 
 namespace apache {
@@ -32,8 +33,14 @@ constexpr const size_t kFieldOffset = sizeof(PyObject*);
 
 namespace {
 
-void do_import() {
-  if (0 != import_thrift__python__types()) {
+bool ensure_module_imported() {
+  static ::folly::python::import_cache_nocapture import(
+      ::import_thrift__python__types);
+  return import();
+}
+
+void ensureImportOrThrow() {
+  if (!ensure_module_imported()) {
     throw std::runtime_error("import_thrift__python__types failed");
   }
 }
@@ -57,7 +64,7 @@ UniquePyObjectPtr getDefaultValue(
     const detail::TypeInfo* typeInfo,
     const FieldValueMap& userValueMap,
     int16_t index) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  ensureImportOrThrow();
   auto userValueFound = userValueMap.find(index);
   if (userValueFound != userValueMap.end()) {
     auto value = userValueFound->second;
@@ -275,7 +282,7 @@ void setString(void* object, const std::string& value) {
 
 detail::OptionalThriftValue getIOBuf(
     const void* object, const detail::TypeInfo& /* typeInfo */) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  ensureImportOrThrow();
   PyObject* pyObj = *toPyObjectPtr(object);
   folly::IOBuf* buf = pyObj != nullptr ? get_cIOBuf(pyObj) : nullptr;
   return buf ? folly::make_optional<detail::ThriftValue>(buf)
@@ -283,7 +290,7 @@ detail::OptionalThriftValue getIOBuf(
 }
 
 void setIOBuf(void* object, const folly::IOBuf& value) {
-  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  ensureImportOrThrow();
   const auto buf = create_IOBuf(value.clone());
   Py_INCREF(buf);
   UniquePyObjectPtr iobufObj{buf};
@@ -618,6 +625,15 @@ const detail::TypeInfo iobufTypeInfo{
     /* .set */ reinterpret_cast<detail::VoidFuncPtr>(setIOBuf),
     /* .typeExt */ &ioBufFieldType,
 };
+
+namespace capi {
+PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion) {
+  if (!ensure_module_imported()) {
+    return nullptr;
+  }
+  return _get_fbthrift_data(structOrUnion);
+}
+} // namespace capi
 
 } // namespace python
 } // namespace thrift

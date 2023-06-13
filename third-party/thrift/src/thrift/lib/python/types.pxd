@@ -147,6 +147,8 @@ cdef class StructOrUnion:
     cdef uint32_t _deserialize(StructOrUnion self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(self, int16_t index)
 
+cdef api object _get_fbthrift_data(object struct_or_union)
+
 cdef class Struct(StructOrUnion):
     cdef tuple _fbthrift_field_cache
     cdef folly.iobuf.IOBuf _serialize(Struct self, Protocol proto)

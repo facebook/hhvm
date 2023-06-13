@@ -450,6 +450,9 @@ def _unpickle_struct(klass, bytes data):
     (<Struct>inst)._deserialize(iobuf, Protocol.COMPACT)
     return inst
 
+cdef api object _get_fbthrift_data(object struct_or_union):
+    return (<StructOrUnion> struct_or_union)._fbthrift_data
+
 cdef class Struct(StructOrUnion):
     def __cinit__(self):
         cdef StructInfo info = self._fbthrift_struct_info

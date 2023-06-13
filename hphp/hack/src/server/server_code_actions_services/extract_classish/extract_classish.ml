@@ -8,8 +8,8 @@
 open Hh_prelude
 
 let find ~entry ~(range : Lsp.range) ctx =
-  match entry.Provider_context.source_text with
-  | Some source_text when Lsp_helpers.lsp_range_is_selection range ->
+  if Lsp_helpers.lsp_range_is_selection range then
+    let source_text = Ast_provider.compute_source_text ~entry in
     let line_to_offset line =
       Full_fidelity_source_text.position_to_offset source_text (line, 0)
     in
@@ -19,6 +19,5 @@ let find ~entry ~(range : Lsp.range) ctx =
     |> Option.map
          ~f:(Extract_classish_to_refactors.to_refactors source_text path)
     |> Option.value ~default:[]
-  | Some _
-  | None ->
+  else
     []

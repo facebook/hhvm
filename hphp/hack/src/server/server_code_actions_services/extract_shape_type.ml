@@ -101,14 +101,12 @@ let to_refactor ~path candidate =
   Code_action_types.Refactor.{ title = "Extract shape type"; edit }
 
 let find ~entry ~(range : Lsp.range) ctx =
-  match entry.Provider_context.source_text with
-  | Some source_text ->
-    let line_to_offset line =
-      Full_fidelity_source_text.position_to_offset source_text (line, 0)
-    in
-    let path = entry.Provider_context.path in
-    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-    find_candidate ~selection ~entry ctx
-    |> Option.map ~f:(to_refactor ~path)
-    |> Option.to_list
-  | None -> []
+  let source_text = Ast_provider.compute_source_text ~entry in
+  let line_to_offset line =
+    Full_fidelity_source_text.position_to_offset source_text (line, 0)
+  in
+  let path = entry.Provider_context.path in
+  let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
+  find_candidate ~selection ~entry ctx
+  |> Option.map ~f:(to_refactor ~path)
+  |> Option.to_list

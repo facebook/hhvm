@@ -181,16 +181,14 @@ let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
 
 let find ~entry ~(range : Lsp.range) ctx =
   let path = entry.Provider_context.path in
-  match entry.Provider_context.source_text with
-  | Some source_text when Lsp_helpers.lsp_range_is_selection range ->
-    let line_to_offset line =
-      Full_fidelity_source_text.position_to_offset source_text (line, 0)
-    in
-    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-    let { Tast_provider.Compute_tast.tast; _ } =
-      Tast_provider.compute_tast_quarantined ~ctx ~entry
-    in
-    (top_visitor selection ~source_text)#go ctx tast
-    |> Option.map ~f:(refactor_of_candidate ~source_text ~path)
-    |> Option.to_list
-  | _ -> []
+  let source_text = Ast_provider.compute_source_text ~entry in
+  let line_to_offset line =
+    Full_fidelity_source_text.position_to_offset source_text (line, 0)
+  in
+  let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
+  in
+  (top_visitor selection ~source_text)#go ctx tast
+  |> Option.map ~f:(refactor_of_candidate ~source_text ~path)
+  |> Option.to_list

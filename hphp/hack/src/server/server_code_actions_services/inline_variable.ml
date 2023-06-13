@@ -302,18 +302,16 @@ let refactor_of_candidate ~path ~source_text candidate =
     { title = Printf.sprintf "Inline variable %s" candidate.name; edit }
 
 let find ~entry ~(range : Lsp.range) ctx =
-  match entry.Provider_context.source_text with
-  | Some source_text ->
-    let line_to_offset line =
-      Full_fidelity_source_text.position_to_offset source_text (line, 0)
-    in
-    let { Tast_provider.Compute_tast.tast; _ } =
-      Tast_provider.compute_tast_quarantined ~ctx ~entry
-    in
-    let path = entry.Provider_context.path in
-    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-    (visitor ~selection)#go ctx tast
-    |> Var_info.to_candidate_opt ~selection
-    |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
-    |> Option.to_list
-  | None -> []
+  let source_text = Ast_provider.compute_source_text ~entry in
+  let line_to_offset line =
+    Full_fidelity_source_text.position_to_offset source_text (line, 0)
+  in
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
+  in
+  let path = entry.Provider_context.path in
+  let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
+  (visitor ~selection)#go ctx tast
+  |> Var_info.to_candidate_opt ~selection
+  |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
+  |> Option.to_list

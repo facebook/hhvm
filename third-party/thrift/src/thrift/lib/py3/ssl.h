@@ -129,6 +129,8 @@ inline folly::Future<RequestChannel_ptr> createThriftChannelTCP(
 
         if (client_t == CLIENT_TYPE::THRIFT_ROCKET_CLIENT_TYPE) {
           handler->setSupportedApplicationProtocols({"rs"});
+        } else if (client_t == CLIENT_TYPE::THRIFT_HEADER_CLIENT_TYPE) {
+          handler->setSupportedApplicationProtocols({"thrift"});
         }
         auto future = handler->connect();
         handler.release();

@@ -6584,3 +6584,185 @@ function aaa(): string {
             .notification(method="exit", params={})
         )
         self.run_spec(spec, variables)
+
+    def test_serverless_ide_requests_before_init(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_serverless_ide_requests_before_init"),
+                has_status_capability=True,
+                wait_for_init_done=False,
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .ignore_requests(
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "message": "Hack IDE support is initializing (loading saved state)\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "message": "Hack is working on IDE requests\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                },
+            )
+            .write_to_disk(
+                notify=True,
+                uri="file://${root_path}/beforeInit1.php",
+                contents="<?hh // strict\nfunction beforeInit1(): int {\n  return 42;\n}\n",
+            )
+            .notification(
+                comment="open a file before init has finished",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "file://${root_path}/beforeInit2.php",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh // strict\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover before init will fail",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "file://${root_path}/beforeInit2.php"},
+                    "position": {"line": 2, "character": 4},
+                },
+                result=None,
+            )
+            .request(
+                line=line(),
+                comment="documentSymbol before init will succeed",
+                method="textDocument/documentSymbol",
+                params={"textDocument": {"uri": "file://${root_path}/beforeInit2.php"}},
+                result=[
+                    {
+                        "name": "beforeInit2",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/beforeInit2.php",
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 3, "character": 1},
+                            },
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                comment="wait for sIDE to init",
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "type": 1,
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                },
+                result=NoResponse(),
+            )
+            .request(
+                line=line(),
+                comment="hover after init will succeed",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "file://${root_path}/beforeInit2.php"},
+                    "position": {"line": 2, "character": 4},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "int"}],
+                    "range": {
+                        "start": {"line": 2, "character": 2},
+                        "end": {"line": 2, "character": 6},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
+        self.run_spec(spec, variables)
+
+    def test_errors_before_init(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update({"php_file_uri": self.repo_file_uri("php_file.php")})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("errors_before_init"),
+                wait_for_init_done=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction f(): int { return 1 }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .wait_for_notification(
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+            .request(
+                comment="the codeAction request will push diagnostics if they've not already been pushed",
+                line=line(),
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 0, "character": 0},
+                        "end": {"line": 0, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 29},
+                                "end": {"line": 1, "character": 29},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)

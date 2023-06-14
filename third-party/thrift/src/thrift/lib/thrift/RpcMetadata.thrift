@@ -28,6 +28,8 @@ namespace py.asyncio thrift.lib.thrift.asyncio.RpcMetadata
 namespace py3 thrift.lib.thrift
 namespace go thrift.lib.thrift.RpcMetadata
 
+include "thrift/annotation/thrift.thrift"
+
 cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 cpp_include "thrift/lib/thrift/RpcMetadata_extra.h"
 cpp_include "folly/container/F14Map.h"
@@ -132,6 +134,11 @@ struct InteractionTerminate {
   1: i64 interactionId;
 }
 
+struct FdMetadata {
+  1: optional i64 fdSeqNum; // Counter for # of FDs sent via socket, can wrap
+  2: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD (253).
+}
+
 struct RequestRpcMetadata {
   // The protocol using which the request payload has been serialized. MUST be
   // set.
@@ -187,7 +194,9 @@ struct RequestRpcMetadata {
   // Thrift is typically used within a larger framework.
   // This field is for storing framework-specific metadata.
   20: optional IOBufPtr frameworkMetadata;
-  21: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
+  // 21: Deprecated
+  @thrift.Box
+  22: optional FdMetadata fdMetadata;
 }
 
 struct ErrorClassification {
@@ -285,7 +294,9 @@ struct ResponseRpcMetadata {
   9: optional i32 streamId;
   // Set on a sampled basis for tracking queueing times.
   10: optional QueueMetadata queueMetadata;
-  11: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
+  // 11: Deprecated
+  @thrift.Box
+  12: optional FdMetadata fdMetadata;
 }
 
 enum ResponseRpcErrorCategory {
@@ -386,7 +397,9 @@ struct StreamPayloadMetadata {
   // Metadata describing the type of stream payload. MUST be set for protocol
   // version 8+.
   3: optional PayloadMetadata payloadMetadata;
-  4: optional i32 numFds; // Linux currently limits this to SCM_MAX_FD.
+  // 4: Deprecated
+  @thrift.Box
+  5: optional FdMetadata fdMetadata;
 }
 
 // Setup metadata sent from the client to the server at the time

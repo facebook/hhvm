@@ -132,6 +132,8 @@ rocket::Payload packWithFds(
   }
   auto numFds = fds.size();
   if (numFds) {
+    FdMetadata fdMetadata;
+
     // When received, the request will know to retrieve this many FDs.
     //
     // NB: The receiver could more confidently assert that the right FDs are
@@ -146,7 +148,10 @@ rocket::Payload packWithFds(
     // we got the right # of FDs, and documenting the correct FD+data
     // ordering invariant in the client & server code that interacts with
     // the socket.
-    metadata->numFds() = numFds;
+    fdMetadata.numFds() = numFds;
+
+    DCHECK(!metadata->fdMetadata().has_value());
+    metadata->fdMetadata() = fdMetadata;
   }
   auto ret = apache::thrift::rocket::detail::makePayload(
       *metadata, std::move(serializedPayload));

@@ -162,6 +162,11 @@ module Batch = struct
       ~(naming_table : Naming_table.t)
       ~(sienv : SearchUtils.si_env)
       ~(changes : Relative_path.Set.t) : update_result =
+    log
+      "Batch change %d files, e.g. %s"
+      (Relative_path.Set.cardinal changes)
+      (Relative_path.Set.choose_opt changes
+      |> Option.value_map ~default:"[none]" ~f:Relative_path.suffix);
     Relative_path.Set.filter changes ~f:(fun path ->
         not @@ should_update_changed_file path)
     |> Relative_path.Set.iter ~f:(fun ignored_path ->

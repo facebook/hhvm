@@ -3471,14 +3471,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="workspace/didChangeWatchedFiles",
                 params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
             )
-            .wait_for_notification(
-                comment="wait for sIDE to process file change",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Done processing file changes",
-                },
-            )
             .request(
                 line=line(),
                 method="textDocument/hover",
@@ -3520,18 +3512,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         "version": 1,
                         "text": "${php_file}",
                     }
-                },
-            )
-            .notification(
-                method="workspace/didChangeWatchedFiles",
-                params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
-            )
-            .wait_for_notification(
-                comment="wait for sIDE to process file change",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Done processing file changes",
                 },
             )
             .request(
@@ -6473,7 +6453,6 @@ function aaa(): string {
             )
             .write_to_disk(
                 notify=True,
-                wait=False,
                 uri="file://${root_path}/beforeInit1.php",
                 contents="<?hh // strict\nfunction beforeInit1(): int {\n  return 42;\n}\n",
             )

@@ -5624,7 +5624,11 @@ let handle_client_message
           ~ref_unblocked_time
           (ClientIdeMessage.Did_change_watched_files changes)
       in
-      Lwt.return_none
+      Lwt.return_some
+        {
+          result_count = Relative_path.Set.cardinal changes;
+          result_extra_telemetry = None;
+        }
     (* Text document completion: "AutoComplete!" *)
     | (_, Some ide_service, RequestMessage (id, CompletionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

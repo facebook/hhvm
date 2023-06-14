@@ -223,9 +223,10 @@ let write_message
   | Unix.Unix_error (Unix.EPIPE, fn, param) ->
     raise @@ Outfd_write_error (fn, param)
 
-let log_startup_time (component : string) (start_time : float) : float =
+let log_startup_time
+    ?(count : int option) (component : string) (start_time : float) : float =
   let now = Unix.gettimeofday () in
-  HackEventLogger.serverless_ide_startup ~component ~start_time;
+  HackEventLogger.serverless_ide_startup ?count ~start_time component;
   now
 
 let restore_hhi_root_if_necessary (istate : istate) : istate =
@@ -342,7 +343,6 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     | _ -> failwith "expected local memory backend"
   in
 
-  let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
      at the time we were launched. We don't actually care about their contents
@@ -360,6 +360,12 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
                  ~contents:Provider_context.Raise_exn_on_attempt_to_read,
                ref None ) ))
     |> Relative_path.Map.of_list
+  in
+  let start_time =
+    log_startup_time
+      "initialize1"
+      ~count:(List.length param.open_files)
+      start_time
   in
   log_debug "initialize1.done";
   {
@@ -383,7 +389,7 @@ let initialize2
     (init_result :
       (ClientIdeInit.init_result, ClientIdeMessage.rich_error) result) :
     state Lwt.t =
-  let (_ : float) = log_startup_time "saved_state" dstate.start_time in
+  let start_time = log_startup_time "load_naming_table" dstate.start_time in
   log_debug "initialize2";
   match init_result with
   | Ok { ClientIdeInit.naming_table; sienv; changed_files } ->
@@ -391,6 +397,7 @@ let initialize2
       Relative_path.Set.union
         dstate.dfiles.changed_files_to_process
         (Relative_path.Set.of_list changed_files)
+      |> Relative_path.Set.filter ~f:FindUtils.path_filter
     in
     let changed_files_denominator =
       Relative_path.Set.cardinal changed_files_to_process
@@ -398,12 +405,6 @@ let initialize2
     let istate =
       if dstate.dcommon.local_config.ServerLocalConfig.ide_batch_process_changes
       then
-        let benchmark_start = Unix.gettimeofday () in
-        let () =
-          log
-            "Running batch update on %d changes synchronously..."
-            changed_files_denominator
-        in
         let ClientIdeIncremental.Batch.
               { naming_table; sienv; changes = _changes } =
           batch_update_naming_table_and_invalidate_caches
@@ -414,8 +415,6 @@ let initialize2
             ~open_files:dstate.dfiles.open_files
             changed_files_to_process
         in
-        let benchmark_s = Unix.gettimeofday () -. benchmark_start in
-        let () = log "Completed batch update in %f seconds." benchmark_s in
         {
           naming_table;
           sienv;
@@ -448,6 +447,12 @@ let initialize2
         ~message:
           (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok p)))
     in
+    let count =
+      Option.some_if
+        dstate.dcommon.local_config.ServerLocalConfig.ide_batch_process_changes
+        changed_files_denominator
+    in
+    let (_ : float) = log_startup_time "initialize2" start_time ?count in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
   | Error reason ->
@@ -715,18 +720,46 @@ let handle_request
   (***********************************************************)
   (************************* CAN HANDLE DURING INIT **********)
   (***********************************************************)
-  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
-      Did_change_watched_files changes ) ->
-    let files =
+  | (During_init { dfiles; _ }, Did_change_watched_files changes) ->
+    (* While init is happening, we accumulate changes in [changed_files_to_process].
+       Once naming-table has been loaded, then [initialize2] will process+discharge all these
+       accumulated changes. *)
+    let dfiles =
       {
-        files with
+        dfiles with
         changed_files_to_process =
-          Relative_path.Set.union files.changed_files_to_process changes;
+          Relative_path.Set.union dfiles.changed_files_to_process changes;
         changed_files_denominator =
-          files.changed_files_denominator + Relative_path.Set.cardinal changes;
+          dfiles.changed_files_denominator + Relative_path.Set.cardinal changes;
       }
     in
-    Lwt.return (update_state_files state files, Ok ())
+    Lwt.return (update_state_files state dfiles, Ok ())
+  | (Initialized istate, Did_change_watched_files changes)
+    when istate.icommon.local_config.ServerLocalConfig.ide_batch_process_changes
+    ->
+    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+      batch_update_naming_table_and_invalidate_caches
+        ~ctx:(make_empty_ctx istate.icommon)
+        ~naming_table:istate.naming_table
+        ~sienv:istate.sienv
+        ~local_memory:istate.icommon.local_memory
+        ~open_files:istate.ifiles.open_files
+        changes
+    in
+    let istate = { istate with naming_table; sienv } in
+    Lwt.return (Initialized istate, Ok ())
+  | (Initialized { ifiles; _ }, Did_change_watched_files changes) ->
+    (* Legacy, will be deleted once we rollout ide_batch_process_changes *)
+    let ifiles =
+      {
+        ifiles with
+        changed_files_to_process =
+          Relative_path.Set.union ifiles.changed_files_to_process changes;
+        changed_files_denominator =
+          ifiles.changed_files_denominator + Relative_path.Set.cardinal changes;
+      }
+    in
+    Lwt.return (update_state_files state ifiles, Ok ())
     (* IDE File Closed *)
   | (During_init { dfiles = files; _ }, Ide_file_closed file_path) ->
     let path =
@@ -1194,49 +1227,6 @@ let should_process_file_change
   && (not (Lwt_unix.readable in_fd))
   && not (Relative_path.Set.is_empty istate.ifiles.changed_files_to_process)
 
-let batch_process_file_changes ~(out_fd : Lwt_unix.file_descr) (istate : istate)
-    : istate Lwt.t =
-  (* TODO: with batch processing, the "processed" field isn't meaningful (it'll always be 0 in this notification). *)
-  let%lwt () =
-    write_message
-      ~out_fd
-      ~message:
-        (ClientIdeMessage.Notification
-           (ClientIdeMessage.Processing_files
-              {
-                ClientIdeMessage.Processing_files.processed = 0;
-                total = istate.ifiles.changed_files_denominator;
-              }))
-  in
-  let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
-    batch_update_naming_table_and_invalidate_caches
-      ~ctx:(make_empty_ctx istate.icommon)
-      ~naming_table:istate.naming_table
-      ~sienv:istate.sienv
-      ~local_memory:istate.icommon.local_memory
-      ~open_files:istate.ifiles.open_files
-      istate.ifiles.changed_files_to_process
-  in
-  let istate =
-    {
-      naming_table;
-      sienv;
-      icommon = istate.icommon;
-      ifiles =
-        {
-          istate.ifiles with
-          changed_files_to_process = Relative_path.Set.empty;
-          changed_files_denominator = 0;
-        };
-    }
-  in
-  let%lwt () =
-    write_message
-      ~out_fd
-      ~message:(ClientIdeMessage.Notification ClientIdeMessage.Done_processing)
-  in
-  Lwt.return istate
-
 let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     istate Lwt.t =
   let next_file =
@@ -1300,13 +1290,7 @@ let handle_one_message_exn
   match state with
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
-    let%lwt istate =
-      if istate.icommon.local_config.ServerLocalConfig.ide_batch_process_changes
-      then
-        batch_process_file_changes ~out_fd istate
-      else
-        process_one_file_change out_fd istate
-    in
+    let%lwt istate = process_one_file_change out_fd istate in
     Lwt.return_some (Initialized istate)
   | _ ->
     let%lwt message = Lwt_message_queue.pop message_queue in

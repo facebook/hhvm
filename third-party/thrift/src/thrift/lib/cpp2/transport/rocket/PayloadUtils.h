@@ -131,7 +131,7 @@ rocket::Payload packWithFds(
         serializedPayload, *compress);
   }
   auto numFds = fds.size();
-  if (numFds) {
+  if (kTempKillswitch__EnableFdPassing && numFds) {
     FdMetadata fdMetadata;
 
     // When received, the request will know to retrieve this many FDs.
@@ -155,7 +155,7 @@ rocket::Payload packWithFds(
   }
   auto ret = apache::thrift::rocket::detail::makePayload(
       *metadata, std::move(serializedPayload));
-  if (numFds) {
+  if (kTempKillswitch__EnableFdPassing && numFds) {
     ret.fds = std::move(fds.dcheckToSendOrEmpty());
   }
   return ret;

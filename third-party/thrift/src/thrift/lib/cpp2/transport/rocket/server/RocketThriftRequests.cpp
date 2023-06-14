@@ -468,11 +468,14 @@ void ThriftServerRequestResponse::sendThriftResponse(
         [&](...) { sendErrorWrapped(std::move(error), kUnknownErrorCode); });
     return;
   }
-
+  auto payload = packWithFds(
+      &metadata,
+      std::move(data),
+      kTempKillswitch__EnableFdPassing
+          ? std::move(getRequestContext()->getHeader()->fds)
+          : folly::SocketFds{});
   context_.sendPayload(
-      packWithFds(&metadata, std::move(data), folly::SocketFds{}),
-      Flags().next(true).complete(true),
-      std::move(cb));
+      std::move(payload), Flags().next(true).complete(true), std::move(cb));
 }
 
 void ThriftServerRequestResponse::sendThriftException(
@@ -616,10 +619,13 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
   context_.unsetMarkRequestComplete();
   stream->resetClientCallback(*clientCallback_);
   clientCallback_->setProtoId(getProtoId());
+  auto payload = FirstResponsePayload{std::move(data), std::move(metadata)};
+  if (kTempKillswitch__EnableFdPassing) {
+    payload.fds =
+        std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
+  }
   return clientCallback_->onFirstResponse(
-      FirstResponsePayload{std::move(data), std::move(metadata)},
-      nullptr /* evb */,
-      stream.release());
+      std::move(payload), nullptr /* evb */, stream.release());
 }
 
 void ThriftServerRequestStream::sendStreamThriftResponse(
@@ -637,11 +643,13 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
   }
   context_.unsetMarkRequestComplete();
   clientCallback_->setProtoId(getProtoId());
-  stream(
-      apache::thrift::FirstResponsePayload{
-          std::move(data), std::move(metadata)},
-      clientCallback_,
-      &evb_);
+  auto payload = apache::thrift::FirstResponsePayload{
+      std::move(data), std::move(metadata)};
+  if (kTempKillswitch__EnableFdPassing) {
+    payload.fds =
+        std::move(getRequestContext()->getHeader()->fds.dcheckToSendOrEmpty());
+  }
+  stream(std::move(payload), clientCallback_, &evb_);
 }
 
 void ThriftServerRequestStream::sendSerializedError(
@@ -747,6 +755,7 @@ void ThriftServerRequestSink::sendSinkThriftResponse(
   clientCallback_->setChunkTimeout(sinkConsumer.chunkTimeout);
   auto serverCallback = apache::thrift::detail::ServerSinkBridge::create(
       std::move(sinkConsumer), *getEventBase(), clientCallback_);
+  DCHECK(getRequestContext()->getHeader()->fds.empty()); // No FDs for sinks
   clientCallback_->onFirstResponse(
       FirstResponsePayload{std::move(data), std::move(metadata)},
       nullptr /* evb */,
@@ -775,6 +784,7 @@ bool ThriftServerRequestSink::sendSinkThriftResponse(
   context_.unsetMarkRequestComplete();
   serverCallback->resetClientCallback(*clientCallback_);
   clientCallback_->setProtoId(getProtoId());
+  DCHECK(getRequestContext()->getHeader()->fds.empty()); // No FDs for sinks
   return clientCallback_->onFirstResponse(
       FirstResponsePayload{std::move(data), std::move(metadata)},
       nullptr, /* evb */

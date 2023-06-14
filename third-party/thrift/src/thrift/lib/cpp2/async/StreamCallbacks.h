@@ -54,10 +54,17 @@ struct StreamPayload {
         metadata(std::move(md)),
         isOrderedHeader(isOrderedHdr) {}
 
+  // IMPORTANT: The copy constructor / copy assignment are only intended for
+  // `StreamPayload`s that are intended to be sent.  Never copy received
+  // payloads.
+
   StreamPayload(const StreamPayload& oth)
       : metadata(oth.metadata), isOrderedHeader(oth.isOrderedHeader) {
     if (oth.payload) {
       payload = oth.payload->clone();
+    }
+    if (kTempKillswitch__EnableFdPassing) {
+      fds.cloneToSendFromOrDfatal(oth.fds);
     }
   }
 
@@ -67,6 +74,9 @@ struct StreamPayload {
     }
     metadata = oth.metadata;
     isOrderedHeader = oth.isOrderedHeader;
+    if (kTempKillswitch__EnableFdPassing) {
+      fds.cloneToSendFromOrDfatal(oth.fds);
+    }
     return *this;
   }
 
@@ -74,7 +84,7 @@ struct StreamPayload {
   StreamPayloadMetadata metadata;
   // OrderedHeader is sent as a PAYLOAD frame with an empty payload
   bool isOrderedHeader;
-  folly::SocketFds fds;
+  folly::SocketFds fds; // Sent only via `RichPayloadToSend`
 };
 
 struct HeadersPayload {
@@ -125,6 +135,7 @@ template <typename T>
 struct RichPayloadToSend { // received as `RichPayloadReceived`
   T payload;
   transport::THeader::StringToStringMap metadata;
+  folly::SocketFds::ToSend fdsToSend;
 };
 struct UnorderedHeader {
   transport::THeader::StringToStringMap metadata;
@@ -145,6 +156,9 @@ folly::Try<StreamPayload> encodeMessageVariant(
       [&](RichPayloadToSend<T>&& val) {
         auto ret = (*encode)(std::move(val.payload));
         ret->metadata.otherMetadata() = std::move(val.metadata);
+        if (kTempKillswitch__EnableFdPassing && !val.fdsToSend.empty()) {
+          ret->fds = folly::SocketFds(std::move(val.fdsToSend));
+        }
         return ret;
       },
       [&](UnorderedHeader&& val) {

@@ -11,7 +11,7 @@ contained within a [ServerEnv.env]. *)
 val ctx_from_server_env : ServerEnv.env -> Provider_context.t
 
 (** Load the declarations of [t] into any global-memory storage, then call
-[f], then unload those declarations. Quarantine is REQUIRED in sIDE and
+[f], then unload those declarations. Quarantine is REQUIRED in clientIdeDaemon and
 hh_server scenarios because it embodies local-file-changes and the naming-
 table updates therein, and if you try to typecheck a local files without
 those updates them it will often fail. Quarantine is INAPPROPRIATE in

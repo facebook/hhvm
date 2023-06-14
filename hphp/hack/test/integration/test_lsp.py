@@ -3013,7 +3013,7 @@ class TestLsp(TestCase[LspTestDriver]):
 
         if wait_for_init_done:
             spec = spec.wait_for_notification(
-                comment="wait for sIDE to finish init",
+                comment="wait for clientIdeDaemon to finish init",
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )
@@ -6499,7 +6499,7 @@ function aaa(): string {
                 powered_by="serverless_ide",
             )
             .wait_for_notification(
-                comment="wait for sIDE to init",
+                comment="wait for clientIdeDaemon to init",
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )
@@ -6659,7 +6659,7 @@ function aaa(): string {
                 powered_by="serverless_ide",
             )
             .wait_for_notification(
-                comment="wait for sIDE to init",
+                comment="wait for clientIdeDaemon to init",
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )

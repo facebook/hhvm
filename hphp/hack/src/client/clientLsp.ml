@@ -2288,8 +2288,18 @@ let merge_statuses_standalone
     | (ServerProgress.DReady, _, ServerProgress.DReady) ->
       (ServerProgress.DReady, "Hack")
   in
+  let root_tooltip =
+    if Sys_utils.deterministic_behavior_for_tests () then
+      "<ROOT>"
+    else
+      get_root_exn () |> Path.to_string
+  in
   let tooltip =
-    Printf.sprintf "%s\n\n%s" client_ide_tooltip hh_server_tooltip
+    Printf.sprintf
+      "%s\n\n%s\n\n%s"
+      root_tooltip
+      client_ide_tooltip
+      hh_server_tooltip
   in
   let type_ =
     match disposition with

@@ -5517,7 +5517,7 @@ function unsaved_bar(): string { return "hello"; }
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support is ready\n\nhh_server is ready",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is ready",
                     "shortMessage": "Hack",
                     "type": 3,
                 },
@@ -5546,7 +5546,7 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 1,
-                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                 },
                 result=NoResponse(),
@@ -5573,7 +5573,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="standalone status upon startup when it starts with hh_server stopped",
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                     "type": 1,
                 },
@@ -5584,7 +5584,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="standalone status when hh_server transitions to starting up",
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support is ready\n\nhh_server is ready",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is ready",
                     "shortMessage": "Hack",
                     "type": 3,
                 },
@@ -5595,7 +5595,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="standalone status when hh_server transitions to stopped",
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                     "type": 1,
                 },
@@ -6006,7 +6006,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="standalone status upon startup when it starts with hh_server stopped",
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                     "type": 1,
                 },
@@ -6049,7 +6049,7 @@ function unsaved_bar(): string { return "hello"; }
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE support has failed. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support has failed. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: failed",
                     "type": 1,
                 },
@@ -6439,7 +6439,7 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE support is initializing (loading saved state)\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is initializing (loading saved state)\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6507,7 +6507,7 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 1,
-                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                 },
                 result=NoResponse(),

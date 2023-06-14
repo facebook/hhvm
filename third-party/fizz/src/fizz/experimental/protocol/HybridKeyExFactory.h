@@ -27,11 +27,6 @@ class HybridKeyExFactory : public OpenSSLFactory {
         return std::make_unique<HybridKeyExchange>(
             std::make_unique<OpenSSLECKeyExchange<P384>>(),
             OQSKeyExchange::createOQSKeyExchange(mode, OQS_KEM_alg_bike_l3));
-      case NamedGroup::cecpq2:
-        return std::make_unique<HybridKeyExchange>(
-            std::make_unique<X25519KeyExchange>(),
-            OQSKeyExchange::createOQSKeyExchange(
-                mode, OQS_KEM_alg_ntru_hrss701));
       case NamedGroup::x25519_kyber512:
         return std::make_unique<HybridKeyExchange>(
             std::make_unique<X25519KeyExchange>(),

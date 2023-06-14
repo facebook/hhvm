@@ -37,11 +37,11 @@ INSTANTIATE_TEST_SUITE_P(
     Values(
         NamedGroup::secp521r1_x25519,
         NamedGroup::secp384r1_bikel3,
-        NamedGroup::secp256r1_kyber512,
         NamedGroup::x25519_kyber512,
-        NamedGroup::secp384r1_kyber768,
+        NamedGroup::secp256r1_kyber512,
         NamedGroup::x25519_kyber768_draft00,
         NamedGroup::secp256r1_kyber768_draft00,
+        NamedGroup::secp384r1_kyber768,
         NamedGroup::x25519 // Non-hybrid named group using hybrid factory
         ),
     [](const testing::TestParamInfo<HybridKeyExchangeHandshakeTest::ParamType>&

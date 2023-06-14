@@ -367,18 +367,6 @@ enum class NamedGroup : uint16_t {
    */
   secp384r1_bikel3 = 12091,
 
-  /**
-   * cecpq2 is used by Chrome. see https://www.chromium.org/cecpq2/ and
-   * https://github.com/open-quantum-safe/boringssl/blob/master/include/openssl/ssl.h#L2392
-   */
-  /**
-   * TODO: this is NOT a real cecpq2: we used x25519+ntru_hrss701 while cecpq2
-   * is x25519+ntru_hrss. Use cecpq2 just for test purposes and would change to
-   * the correct implementation in future. CECPQ = Combined Elliptic-Curve and
-   * Post-Quantum
-   */
-  cecpq2 = 16696,
-
   // Standardized algorithms. See
   // https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05#section-5
 
@@ -395,7 +383,7 @@ enum class NamedGroup : uint16_t {
   secp256r1_kyber512 = 12090,
 
   /**
-   * Performance test only. Purely rely on unverified post-quantum crypto may
+   * Performance test only. Purely relying on unverified post-quantum crypto may
    * cause security flaws.
    */
   kyber512 = 511,

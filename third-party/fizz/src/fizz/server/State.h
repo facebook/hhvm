@@ -47,6 +47,8 @@ struct ECHState {
   uint8_t configId;
   // HPKE context saved for use with HRR, if needed.
   mutable std::unique_ptr<hpke::HpkeContext> hpkeContext;
+  // Sni of the outer client hello, for logging.
+  folly::Optional<std::string> outerSni;
 };
 
 struct HandshakeLogging {

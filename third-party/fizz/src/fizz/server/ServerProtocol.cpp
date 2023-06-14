@@ -1041,6 +1041,17 @@ static Buf getCertificateRequest(
   return encodedCertificateRequest;
 }
 
+static std::string getSNI(const ClientHello& chlo) {
+  auto serverNameList = getExtension<ServerNameList>(chlo.extensions);
+  std::string sni;
+  if (serverNameList && !serverNameList->server_name_list.empty()) {
+    sni = serverNameList->server_name_list.front()
+              .hostname->moveToFbString()
+              .toStdString();
+  }
+  return sni;
+}
+
 static std::tuple<ECHStatus, uint8_t> processECHHRR(
     const Optional<CookieState>& cookieState,
     const State& state,
@@ -1154,12 +1165,15 @@ static std::pair<ECHStatus, folly::Optional<ECHState>> processECH(
     // to aid in logging (and detecting misconfigurations)
     if (requestedECH) {
       auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
-      echState = ECHState{echExt->cipher_suite, echExt->config_id, nullptr};
+      echState = ECHState{
+          echExt->cipher_suite, echExt->config_id, nullptr, folly::none};
       if (decrypter) {
         auto gotChlo = decrypter->decryptClientHello(chlo);
         if (gotChlo.has_value()) {
+          auto outerSni = getSNI(chlo);
           echStatus = ECHStatus::Accepted;
           echState->hpkeContext = std::move(gotChlo->context);
+          echState->outerSni = outerSni;
           chlo = std::move(gotChlo->chlo);
         } else {
           echStatus = ECHStatus::Rejected;

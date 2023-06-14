@@ -36,39 +36,6 @@ void RequestContextQueue::enqueueScheduledWrite(RequestContext& req) noexcept {
   trackIfRequestResponse(req);
 }
 
-std::unique_ptr<folly::IOBuf>
-RequestContextQueue::getNextScheduledWritesBatch() noexcept {
-  std::unique_ptr<folly::IOBuf> batchBuf;
-  size_t endOffset = 0;
-
-  while (!writeScheduledQueue_.empty()) {
-    auto& req = writeScheduledQueue_.front();
-    writeScheduledQueue_.pop_front();
-
-    DCHECK(req.state_ == State::WRITE_SCHEDULED);
-    req.state_ = State::WRITE_SENDING;
-    if (req.isRequestResponse()) {
-      req.scheduleTimeoutForResponse();
-    }
-    writeSendingQueue_.push_back(req);
-
-    if (writeScheduledQueue_.empty()) {
-      req.lastInWriteBatch_ = true;
-    }
-
-    auto reqBuf = req.serializedChain();
-    endOffset += reqBuf->computeChainDataLength();
-    req.setEndOffsetInBatch(endOffset);
-    if (!batchBuf) {
-      batchBuf = std::move(reqBuf);
-    } else {
-      batchBuf->prependChain(std::move(reqBuf));
-    }
-  }
-
-  return batchBuf;
-}
-
 void RequestContextQueue::timeOutSendingRequest(RequestContext& req) noexcept {
   DCHECK(req.state_ == State::WRITE_SENDING);
   DCHECK(!req.responsePayload_.hasException());

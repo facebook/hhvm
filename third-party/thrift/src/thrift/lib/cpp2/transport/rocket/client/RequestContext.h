@@ -38,6 +38,7 @@
 namespace apache {
 namespace thrift {
 namespace rocket {
+class RocketClient;
 class RequestContextQueue;
 
 class RequestContext {
@@ -134,7 +135,7 @@ class RequestContext {
     }
   }
 
-  std::unique_ptr<folly::IOBuf> serializedChain() {
+  std::unique_ptr<folly::IOBuf> releaseSerializedChain() {
     DCHECK(serializedFrame_);
     return std::move(serializedFrame_);
   }
@@ -172,6 +173,11 @@ class RequestContext {
   }
 
   folly::SocketFds fds;
+
+ protected:
+  friend class RocketClient;
+
+  void markLastInWriteBatch() { lastInWriteBatch_ = true; }
 
  private:
   RequestContextQueue& queue_;

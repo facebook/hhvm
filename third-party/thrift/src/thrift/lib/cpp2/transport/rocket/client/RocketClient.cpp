@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
+#include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
@@ -1159,10 +1160,39 @@ void RocketClient::writeScheduledRequestsToSocket() noexcept {
   DestructorGuard dg(this);
 
   if (clientState_.connState == ConnectionState::CONNECTED) {
-    auto buf = queue_.getNextScheduledWritesBatch();
+    size_t endOffset = 0;
+    std::unique_ptr<folly::IOBuf> buf;
+    queue_.prepareNextScheduledWritesBatch([&](RequestContext& req) {
+      auto reqBuf = req.releaseSerializedChain();
+      endOffset += reqBuf->computeChainDataLength(); // for `writeErr`
+      req.setEndOffsetInBatch(endOffset);
+      if (!buf) {
+        buf = std::move(reqBuf);
+      } else {
+        buf->prependChain(std::move(reqBuf));
+      }
+      if (!kTempKillswitch__EnableFdPassing || LIKELY(req.fds.empty())) {
+        return; // Fast path: no FDs, no batch splitting.
+      }
 
+      // The current request has FDs, send them together with any
+      // accumulated data.
+      //
+      // First, split up the batch -- each `writeChain*` gets a separate
+      // `writeSuccess` callback (which might be called synchronously from
+      // `writeChainWithFds` below).
+      req.markLastInWriteBatch();
+      // KEEP THIS INVARIANT: For the receiver to correctly match FDs to a
+      // message, the FDs must be sent with the IOBuf ending with the
+      // FINAL fragment of that message.  Today, message fragments are not
+      // interleaved, so there is no explicit logic around this, but this
+      // invariant must be preserved going forward.
+      writeChainWithFds(
+          socket_.get(), this, std::move(buf), std::move(req.fds));
+    });
+    // This batch didn't have any FDs attached.
     if (buf) {
-      socket_->writeChain(this, std::move(buf), folly::WriteFlags::NONE);
+      socket_->writeChain(this, std::move(buf));
     }
   }
 

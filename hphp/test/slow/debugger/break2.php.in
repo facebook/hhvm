@@ -1,4 +1,4 @@
-break quick/debugger/break2.php:7
+break slow/debugger/break2.php:7
 break foo2()
 break cls2::pubObj()
 break cls2::pubCls()

@@ -71,6 +71,37 @@ At a high level, the socket has an associated `queue<vector<File>>`. Each messag
 
 The prior section covered the principles / invariants that Rocket has to adhere to make this work correctly. Read those for the details, but at a high level, we write data frames in lockstep with FDs, in such a way that FDs are sent with the last frame of each message. Rocket uses `AsyncFdSocket::writeChainWithFds` to express this data-FD pairing.
 
+### Detecting message-FD mismatches
+
+Despite the care taken in previous sections to send & receive FDs and messages in the same order, Thrift is complex enough such that it is not possible to guarantee that no code changes would ever lead to reordering bugs. Operating on the wrong FDs can easily lead to data loss or data corruption, so Thrift FD-passing takes special care to avoid brittleness in this area.
+
+Specifically, `rocket::pack*` functions query `AsyncFdSocket` for an "FD sequence number", which is a 64-bit signed integer that grows from 0 by "number of FDs sent", and deterministically wraps to 0 (modulo max) instead of overflowing (though this would take > 1000 years). Sequence numbers are used throughout to guarantee that messages always get the right FDs.
+ - `pack*` stores this inside the message's metadata as `fdSeqNum`
+ - `AsyncFdSocket::writeChainWithFds` enforces that writes happen in the same order that the sequence numbers were generated, detecting server-side reordering.
+ - `popReceivedFdsFromSocket` verifies the sequence number of the just-received FDs against the metadata of the message, closing the loop.
+
+At present, the receiving code does **not** attempt to buffer received FDs and reconstruct them in the right order based on sequence numbers. This is unnecessary in normal, ordered operation. Supporting out-of-order transmission would also add cost and complexity, not least requiring the receiver to keep open FDs it cannot yet pass to client code (see "FD exhaustion" issue above).
+
+To make it clear that reordering isn't an abstract "maybe just in case" problem, let's discuss *how* things can go wrong.
+
+First, `RocketClient::handleRequestResponseFrame` documents a potential reordering when a single socket is being operated on via a fiber manager, and via regular async code. This seems like an edge-case setup that client code could generally choose **not** to do, so it merits no further treatment.
+
+Second, reordering bugs can happen when FDs were sent with a message, but we **failed** to call `popReceivedFdsFromSocket` for it. This can happen if anything goes wrong at the protocol layer -- either we fail to parse a message, or we fail to pop the FDs due to a code bug. Then, the un-popped FDs would be associated with the **next** message on the socket. Because message metadata only contains `numFds`, it can happen that the "correct" and "wrong" FD counts are the same, letting the error go undetected.
+
+A detailed timeline of this hypothetical issue:
+
+- (a) `MessageData1` + `FDs1` arrive.
+- (b) Parsing MessageData1 fails -- `handleDecompressionFailure` in `ThriftRocketServerHandler::handleRequestCommon`, decoding errors in `RocketClientChannel::SingleRequestSingleResponseCallback::onResponsePayload`, etc. As a result, we don't get `numFds` and cannot call `popReceivedFdsFromSocket`.
+- (c) Despite the prior parsing failure, we start to handle `MessageData2` + `FDs2` that arrived on the same socket. NB: Rocket currently makes no effort to prevent this.
+- (d) `MessageData2` parses successfully, **and** by bad luck `FDs1` has the same size as `FDs2`, so we end up associating `FDs1` with `MessageData2` and not failing the request.
+- (e) The socket returns the FDs to the wrong request, causing **undefined behavior** -- potentially, data corruption or data loss.
+
+The main mitigating factor for "failed to `popReceivedFdsFromSocket`" reorderings is that with Unix sockets, "failed to decode / parse / decompress / etc" can only normally happen on the very last message when the socket is prematurely closed. Abnormally, it could also happen:
+  - If a protocol version change is rolled out incorrectly, and certain messages become unparseable by the recipient,
+  - If any "receive" path that can get FDs has a code bug that prevents the timely execution of `popReceivedFdsFromSocket`. So whenever we add a "send FDs" path, we have to make sure the "receive" counterpart is updated and tested.
+
+So, it is not obvious how this failure mode could be triggered in normal operation, without code bugs. Thankfully, if it does, sequence number checks will detect the error, and fail the read/write -- an eventuality that well-written user code must be prepared to handle anyway.
+
 ### FD ownership: always RAII, shared for send, unique for receive
 
 Concurrent programs must never handle bare FDs, since accidentally closing the FD outside of the thread / coro can trivially cause you to act on the **wrong file**, due to FD reuse — `EBADF` is peanuts by comparison.

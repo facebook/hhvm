@@ -215,6 +215,8 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataPatchStruct> {
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyDataPatchStruct");
     }
@@ -266,6 +268,8 @@ struct VisitByFieldId<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruc
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct");
     }
@@ -389,6 +393,8 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructPatchStruct> {
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructPatchStruct");
     }
@@ -755,6 +761,8 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructPatchStruct");
     }
@@ -798,6 +806,8 @@ struct VisitByFieldId<::test::fixtures::patch::RecursivePatchStruct> {
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::RecursivePatchStruct");
     }
@@ -860,6 +870,8 @@ struct VisitByFieldId<::test::fixtures::patch::BarPatchStruct> {
       return f(3, static_cast<T&&>(t).ensure_ref());
     case 6:
       return f(4, static_cast<T&&>(t).patch_ref());
+    case 7:
+      return f(5, static_cast<T&&>(t).remove_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::BarPatchStruct");
     }

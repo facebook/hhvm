@@ -10,6 +10,8 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import apache.thrift.type.id.types as _apache_thrift_type_id_types
+import apache.thrift.type.id.builders as _apache_thrift_type_id_builders
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 import apache.thrift.type.standard.builders as _apache_thrift_type_standard_builders
 

@@ -699,6 +699,14 @@ class MyDataPatch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -864,6 +872,14 @@ class MyDataWithCustomDefaultPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataWithCustomDefaultFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1272,6 +1288,14 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -2595,6 +2619,14 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -2728,6 +2760,14 @@ class RecursivePatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(RecursiveFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -2928,6 +2968,14 @@ class BarPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "patch",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(BarFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

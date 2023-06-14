@@ -142,6 +142,8 @@ pub struct MyDataPatch {
     pub ensure: crate::types::MyDataEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyDataFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -186,6 +188,8 @@ pub struct MyDataWithCustomDefaultPatch {
     pub ensure: crate::types::MyDataWithCustomDefaultEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyDataWithCustomDefaultFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -294,6 +298,8 @@ pub struct MyStructPatch {
     pub ensure: crate::types::MyStructEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyStructFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -582,6 +588,8 @@ pub struct LateDefStructPatch {
     pub ensure: crate::types::LateDefStructEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::LateDefStructFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -622,6 +630,8 @@ pub struct RecursivePatch {
     pub ensure: crate::types::RecursiveEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::RecursiveFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -678,6 +688,8 @@ pub struct BarPatch {
     pub ensure: crate::types::BarEnsureStruct,
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::BarFieldPatch,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -2188,6 +2200,7 @@ impl ::std::default::Default for self::MyDataPatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -2202,6 +2215,7 @@ impl ::std::fmt::Debug for self::MyDataPatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -2243,6 +2257,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -2259,12 +2276,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2275,6 +2294,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2286,6 +2306,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -2479,6 +2500,7 @@ impl ::std::default::Default for self::MyDataWithCustomDefaultPatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -2493,6 +2515,7 @@ impl ::std::fmt::Debug for self::MyDataWithCustomDefaultPatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -2534,6 +2557,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -2550,12 +2576,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2566,6 +2594,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2577,6 +2606,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -3172,6 +3202,7 @@ impl ::std::default::Default for self::MyStructPatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -3186,6 +3217,7 @@ impl ::std::fmt::Debug for self::MyStructPatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -3227,6 +3259,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -3243,12 +3278,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -3259,6 +3296,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3270,6 +3308,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -5127,6 +5166,7 @@ impl ::std::default::Default for self::LateDefStructPatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -5141,6 +5181,7 @@ impl ::std::fmt::Debug for self::LateDefStructPatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -5182,6 +5223,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -5198,12 +5242,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5214,6 +5260,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5225,6 +5272,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -5378,6 +5426,7 @@ impl ::std::default::Default for self::RecursivePatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -5392,6 +5441,7 @@ impl ::std::fmt::Debug for self::RecursivePatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -5433,6 +5483,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -5449,12 +5502,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5465,6 +5520,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5476,6 +5532,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -5737,6 +5794,7 @@ impl ::std::default::Default for self::BarPatch {
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
             patch: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -5751,6 +5809,7 @@ impl ::std::fmt::Debug for self::BarPatch {
             .field("patchPrior", &self.patchPrior)
             .field("ensure", &self.ensure)
             .field("patch", &self.patch)
+            .field("remove", &self.remove)
             .finish()
     }
 }
@@ -5792,6 +5851,9 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -5808,12 +5870,14 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_patchPrior = ::std::option::Option::None;
         let mut field_ensure = ::std::option::Option::None;
         let mut field_patch = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -5824,6 +5888,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5835,6 +5900,7 @@ where
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
             patch: field_patch.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

@@ -41,6 +41,7 @@ from thrift.py3.common cimport (
     MetadataBox as __MetadataBox,
 )
 from folly.optional cimport cOptional as __cOptional
+cimport apache.thrift.type.id.types as _apache_thrift_type_id_types
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport apache.thrift.op.patch.types_fields as _fbthrift_types_fields

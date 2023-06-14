@@ -17,6 +17,7 @@ if sys.version_info[0] >= 3:
   long = int
 
 import thrift.lib.thrift.standard.ttypes
+import thrift.lib.thrift.id.ttypes
 
 
 import pprint
@@ -34,7 +35,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'ListPatchIndex']
+__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'FieldId', 'ListPatchIndex']
 
 class PatchOp:
   r"""
@@ -1626,6 +1627,7 @@ class BinaryPatch:
   def _to_py_deprecated(self):
     return self
 
+FieldId = thrift.lib.thrift.id.ttypes.FieldId
 ListPatchIndex = UnimplementedTypedef()
 all_structs.append(GeneratePatch)
 GeneratePatch.thrift_spec = (

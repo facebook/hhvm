@@ -129,6 +129,7 @@ struct ForEachField<::test::fixtures::patch::MyDataPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 
@@ -159,6 +160,7 @@ struct ForEachField<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 
@@ -231,6 +233,7 @@ struct ForEachField<::test::fixtures::patch::MyStructPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 
@@ -432,6 +435,7 @@ struct ForEachField<::test::fixtures::patch::LateDefStructPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 
@@ -458,6 +462,7 @@ struct ForEachField<::test::fixtures::patch::RecursivePatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 
@@ -495,6 +500,7 @@ struct ForEachField<::test::fixtures::patch::BarPatchStruct> {
     f(2, static_cast<T&&>(t).patchPrior_ref()...);
     f(3, static_cast<T&&>(t).ensure_ref()...);
     f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
   }
 };
 

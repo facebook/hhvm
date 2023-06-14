@@ -18,6 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/lib/thrift/id.thrift"
 
 cpp_include "thrift/lib/cpp2/op/detail/Patch.h"
 
@@ -35,6 +36,8 @@ namespace js apache.thrift.op
 namespace py.asyncio apache_thrift_asyncio.patch
 namespace go thrift.lib.thrift.patch
 namespace py thrift.lib.thrift.patch
+
+typedef id.FieldId FieldId
 
 /**
  * An annotation that indicates a patch representation should be generated for

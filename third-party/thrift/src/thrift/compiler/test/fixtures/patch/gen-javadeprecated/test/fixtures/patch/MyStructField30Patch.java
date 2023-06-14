@@ -688,73 +688,8 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
         case ASSIGN:
           if (__field.type == TType.MAP) {
             {
-              TMap _map156 = iprot.readMapBegin();
-              this.assign = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map156.size));
-              for (int _i157 = 0; 
-                   (_map156.size < 0) ? iprot.peekMap() : (_i157 < _map156.size); 
-                   ++_i157)
-              {
-                String _key158;
-                Map<String,Integer> _val159;
-                _key158 = iprot.readString();
-                {
-                  TMap _map160 = iprot.readMapBegin();
-                  _val159 = new HashMap<String,Integer>(Math.max(0, 2*_map160.size));
-                  for (int _i161 = 0; 
-                       (_map160.size < 0) ? iprot.peekMap() : (_i161 < _map160.size); 
-                       ++_i161)
-                  {
-                    String _key162;
-                    int _val163;
-                    _key162 = iprot.readString();
-                    _val163 = iprot.readI32();
-                    _val159.put(_key162, _val163);
-                  }
-                  iprot.readMapEnd();
-                }
-                this.assign.put(_key158, _val159);
-              }
-              iprot.readMapEnd();
-            }
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case CLEAR:
-          if (__field.type == TType.BOOL) {
-            this.clear = iprot.readBool();
-            setClearIsSet(true);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case PATCHPRIOR:
-          if (__field.type == TType.MAP) {
-            {
-              TMap _map164 = iprot.readMapBegin();
-              this.patchPrior = new HashMap<String,MyStructField30Patch1>(Math.max(0, 2*_map164.size));
-              for (int _i165 = 0; 
-                   (_map164.size < 0) ? iprot.peekMap() : (_i165 < _map164.size); 
-                   ++_i165)
-              {
-                String _key166;
-                MyStructField30Patch1 _val167;
-                _key166 = iprot.readString();
-                _val167 = new MyStructField30Patch1();
-                _val167.read(iprot);
-                this.patchPrior.put(_key166, _val167);
-              }
-              iprot.readMapEnd();
-            }
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case ADD:
-          if (__field.type == TType.MAP) {
-            {
               TMap _map168 = iprot.readMapBegin();
-              this.add = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map168.size));
+              this.assign = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map168.size));
               for (int _i169 = 0; 
                    (_map168.size < 0) ? iprot.peekMap() : (_i169 < _map168.size); 
                    ++_i169)
@@ -777,7 +712,72 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
                   }
                   iprot.readMapEnd();
                 }
-                this.add.put(_key170, _val171);
+                this.assign.put(_key170, _val171);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case CLEAR:
+          if (__field.type == TType.BOOL) {
+            this.clear = iprot.readBool();
+            setClearIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case PATCHPRIOR:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map176 = iprot.readMapBegin();
+              this.patchPrior = new HashMap<String,MyStructField30Patch1>(Math.max(0, 2*_map176.size));
+              for (int _i177 = 0; 
+                   (_map176.size < 0) ? iprot.peekMap() : (_i177 < _map176.size); 
+                   ++_i177)
+              {
+                String _key178;
+                MyStructField30Patch1 _val179;
+                _key178 = iprot.readString();
+                _val179 = new MyStructField30Patch1();
+                _val179.read(iprot);
+                this.patchPrior.put(_key178, _val179);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case ADD:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map180 = iprot.readMapBegin();
+              this.add = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map180.size));
+              for (int _i181 = 0; 
+                   (_map180.size < 0) ? iprot.peekMap() : (_i181 < _map180.size); 
+                   ++_i181)
+              {
+                String _key182;
+                Map<String,Integer> _val183;
+                _key182 = iprot.readString();
+                {
+                  TMap _map184 = iprot.readMapBegin();
+                  _val183 = new HashMap<String,Integer>(Math.max(0, 2*_map184.size));
+                  for (int _i185 = 0; 
+                       (_map184.size < 0) ? iprot.peekMap() : (_i185 < _map184.size); 
+                       ++_i185)
+                  {
+                    String _key186;
+                    int _val187;
+                    _key186 = iprot.readString();
+                    _val187 = iprot.readI32();
+                    _val183.put(_key186, _val187);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.add.put(_key182, _val183);
               }
               iprot.readMapEnd();
             }
@@ -788,18 +788,18 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
         case PATCH:
           if (__field.type == TType.MAP) {
             {
-              TMap _map176 = iprot.readMapBegin();
-              this.patch = new HashMap<String,MyStructField30Patch1>(Math.max(0, 2*_map176.size));
-              for (int _i177 = 0; 
-                   (_map176.size < 0) ? iprot.peekMap() : (_i177 < _map176.size); 
-                   ++_i177)
+              TMap _map188 = iprot.readMapBegin();
+              this.patch = new HashMap<String,MyStructField30Patch1>(Math.max(0, 2*_map188.size));
+              for (int _i189 = 0; 
+                   (_map188.size < 0) ? iprot.peekMap() : (_i189 < _map188.size); 
+                   ++_i189)
               {
-                String _key178;
-                MyStructField30Patch1 _val179;
-                _key178 = iprot.readString();
-                _val179 = new MyStructField30Patch1();
-                _val179.read(iprot);
-                this.patch.put(_key178, _val179);
+                String _key190;
+                MyStructField30Patch1 _val191;
+                _key190 = iprot.readString();
+                _val191 = new MyStructField30Patch1();
+                _val191.read(iprot);
+                this.patch.put(_key190, _val191);
               }
               iprot.readMapEnd();
             }
@@ -810,15 +810,15 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
         case REMOVE:
           if (__field.type == TType.SET) {
             {
-              TSet _set180 = iprot.readSetBegin();
-              this.remove = new HashSet<String>(Math.max(0, 2*_set180.size));
-              for (int _i181 = 0; 
-                   (_set180.size < 0) ? iprot.peekSet() : (_i181 < _set180.size); 
-                   ++_i181)
+              TSet _set192 = iprot.readSetBegin();
+              this.remove = new HashSet<String>(Math.max(0, 2*_set192.size));
+              for (int _i193 = 0; 
+                   (_set192.size < 0) ? iprot.peekSet() : (_i193 < _set192.size); 
+                   ++_i193)
               {
-                String _elem182;
-                _elem182 = iprot.readString();
-                this.remove.add(_elem182);
+                String _elem194;
+                _elem194 = iprot.readString();
+                this.remove.add(_elem194);
               }
               iprot.readSetEnd();
             }
@@ -829,31 +829,31 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
         case PUT:
           if (__field.type == TType.MAP) {
             {
-              TMap _map183 = iprot.readMapBegin();
-              this.put = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map183.size));
-              for (int _i184 = 0; 
-                   (_map183.size < 0) ? iprot.peekMap() : (_i184 < _map183.size); 
-                   ++_i184)
+              TMap _map195 = iprot.readMapBegin();
+              this.put = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map195.size));
+              for (int _i196 = 0; 
+                   (_map195.size < 0) ? iprot.peekMap() : (_i196 < _map195.size); 
+                   ++_i196)
               {
-                String _key185;
-                Map<String,Integer> _val186;
-                _key185 = iprot.readString();
+                String _key197;
+                Map<String,Integer> _val198;
+                _key197 = iprot.readString();
                 {
-                  TMap _map187 = iprot.readMapBegin();
-                  _val186 = new HashMap<String,Integer>(Math.max(0, 2*_map187.size));
-                  for (int _i188 = 0; 
-                       (_map187.size < 0) ? iprot.peekMap() : (_i188 < _map187.size); 
-                       ++_i188)
+                  TMap _map199 = iprot.readMapBegin();
+                  _val198 = new HashMap<String,Integer>(Math.max(0, 2*_map199.size));
+                  for (int _i200 = 0; 
+                       (_map199.size < 0) ? iprot.peekMap() : (_i200 < _map199.size); 
+                       ++_i200)
                   {
-                    String _key189;
-                    int _val190;
-                    _key189 = iprot.readString();
-                    _val190 = iprot.readI32();
-                    _val186.put(_key189, _val190);
+                    String _key201;
+                    int _val202;
+                    _key201 = iprot.readString();
+                    _val202 = iprot.readI32();
+                    _val198.put(_key201, _val202);
                   }
                   iprot.readMapEnd();
                 }
-                this.put.put(_key185, _val186);
+                this.put.put(_key197, _val198);
               }
               iprot.readMapEnd();
             }
@@ -883,13 +883,13 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, this.assign.size()));
-          for (Map.Entry<String, Map<String,Integer>> _iter191 : this.assign.entrySet())          {
-            oprot.writeString(_iter191.getKey());
+          for (Map.Entry<String, Map<String,Integer>> _iter203 : this.assign.entrySet())          {
+            oprot.writeString(_iter203.getKey());
             {
-              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter191.getValue().size()));
-              for (Map.Entry<String, Integer> _iter192 : _iter191.getValue().entrySet())              {
-                oprot.writeString(_iter192.getKey());
-                oprot.writeI32(_iter192.getValue());
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter203.getValue().size()));
+              for (Map.Entry<String, Integer> _iter204 : _iter203.getValue().entrySet())              {
+                oprot.writeString(_iter204.getKey());
+                oprot.writeI32(_iter204.getValue());
               }
               oprot.writeMapEnd();
             }
@@ -906,9 +906,9 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.patchPrior.size()));
-        for (Map.Entry<String, MyStructField30Patch1> _iter193 : this.patchPrior.entrySet())        {
-          oprot.writeString(_iter193.getKey());
-          _iter193.getValue().write(oprot);
+        for (Map.Entry<String, MyStructField30Patch1> _iter205 : this.patchPrior.entrySet())        {
+          oprot.writeString(_iter205.getKey());
+          _iter205.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -918,13 +918,13 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(ADD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, this.add.size()));
-        for (Map.Entry<String, Map<String,Integer>> _iter194 : this.add.entrySet())        {
-          oprot.writeString(_iter194.getKey());
+        for (Map.Entry<String, Map<String,Integer>> _iter206 : this.add.entrySet())        {
+          oprot.writeString(_iter206.getKey());
           {
-            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter194.getValue().size()));
-            for (Map.Entry<String, Integer> _iter195 : _iter194.getValue().entrySet())            {
-              oprot.writeString(_iter195.getKey());
-              oprot.writeI32(_iter195.getValue());
+            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter206.getValue().size()));
+            for (Map.Entry<String, Integer> _iter207 : _iter206.getValue().entrySet())            {
+              oprot.writeString(_iter207.getKey());
+              oprot.writeI32(_iter207.getValue());
             }
             oprot.writeMapEnd();
           }
@@ -937,9 +937,9 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(PATCH_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.patch.size()));
-        for (Map.Entry<String, MyStructField30Patch1> _iter196 : this.patch.entrySet())        {
-          oprot.writeString(_iter196.getKey());
-          _iter196.getValue().write(oprot);
+        for (Map.Entry<String, MyStructField30Patch1> _iter208 : this.patch.entrySet())        {
+          oprot.writeString(_iter208.getKey());
+          _iter208.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -949,8 +949,8 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
-        for (String _iter197 : this.remove)        {
-          oprot.writeString(_iter197);
+        for (String _iter209 : this.remove)        {
+          oprot.writeString(_iter209);
         }
         oprot.writeSetEnd();
       }
@@ -960,13 +960,13 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(PUT_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, this.put.size()));
-        for (Map.Entry<String, Map<String,Integer>> _iter198 : this.put.entrySet())        {
-          oprot.writeString(_iter198.getKey());
+        for (Map.Entry<String, Map<String,Integer>> _iter210 : this.put.entrySet())        {
+          oprot.writeString(_iter210.getKey());
           {
-            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter198.getValue().size()));
-            for (Map.Entry<String, Integer> _iter199 : _iter198.getValue().entrySet())            {
-              oprot.writeString(_iter199.getKey());
-              oprot.writeI32(_iter199.getValue());
+            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter210.getValue().size()));
+            for (Map.Entry<String, Integer> _iter211 : _iter210.getValue().entrySet())            {
+              oprot.writeString(_iter211.getKey());
+              oprot.writeI32(_iter211.getValue());
             }
             oprot.writeMapEnd();
           }

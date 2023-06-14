@@ -1,0 +1,84 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "id",
+  "includes": {
+    "cpp": "thrift/annotation/cpp.thrift",
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
+  "namespaces": {
+    "cpp2": "apache.thrift.type",
+    "go": "thrift.lib.thrift.id",
+    "java": "com.facebook.thrift.type",
+    "java.swift": "com.facebook.thrift.type_id",
+    "js": "apache.thrift.type",
+    "php": "apache_thrift_type_id",
+    "py": "thrift.lib.thrift.id",
+    "py.asyncio": "apache_thrift_asyncio.id",
+    "py3": "apache.thrift.type"
+  },
+  "typedefs": {
+      "FieldId": {
+        "name": "FieldId",
+        "type": "i16",
+        "is_exception": false,
+        "lineno": 45
+      },
+      "ExternId": {
+        "name": "ExternId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 99
+      },
+      "ValueId": {
+        "name": "ValueId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 108
+      },
+      "ProtocolId": {
+        "name": "ProtocolId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 116
+      },
+      "TypeId": {
+        "name": "TypeId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 124
+      },
+      "DefinitionId": {
+        "name": "DefinitionId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 132
+      },
+      "PackageId": {
+        "name": "PackageId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 140
+      },
+      "ProgramId": {
+        "name": "ProgramId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 148
+      },
+      "SourceId": {
+        "name": "SourceId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 156
+      }
+  },
+  "constants": {
+      "noId": {
+        "name": "noId",
+        "type": "i64",
+        "value": 0,
+        "lineno": 103
+      }
+  },  "source_path" : "thrift/lib/thrift/id",
+  "py_namespace" : "thrift.lib.thrift.id"
+}

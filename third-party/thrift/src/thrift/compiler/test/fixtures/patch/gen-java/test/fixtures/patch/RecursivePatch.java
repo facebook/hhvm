@@ -28,13 +28,15 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveFieldPatch patchPrior,
         @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveEnsureStruct ensure,
-        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveFieldPatch patch
+        @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.RecursiveFieldPatch patch,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final Set<Short> remove
     ) {
         this.assign = assign;
         this.clear = clear;
         this.patchPrior = patchPrior;
         this.ensure = ensure;
         this.patch = patch;
+        this.remove = remove;
     }
     
     @ThriftConstructor
@@ -44,6 +46,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
       this.patchPrior = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
       this.ensure = test.fixtures.patch.RecursiveEnsureStruct.defaultInstance();
       this.patch = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
+      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     }
     
     public static class Builder {
@@ -52,6 +55,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         private test.fixtures.patch.RecursiveFieldPatch patchPrior = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
         private test.fixtures.patch.RecursiveEnsureStruct ensure = test.fixtures.patch.RecursiveEnsureStruct.defaultInstance();
         private test.fixtures.patch.RecursiveFieldPatch patch = test.fixtures.patch.RecursiveFieldPatch.defaultInstance();
+        private Set<Short> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(test.fixtures.patch.Recursive assign) {
@@ -93,6 +97,14 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
     
         public test.fixtures.patch.RecursiveFieldPatch getPatch() { return patch; }
     
+            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
+        public Builder setRemove(Set<Short> remove) {
+            this.remove = remove;
+            return this;
+        }
+    
+        public Set<Short> getRemove() { return remove; }
+    
         public Builder() { }
         public Builder(RecursivePatch other) {
             this.assign = other.assign;
@@ -100,6 +112,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
             this.patchPrior = other.patchPrior;
             this.ensure = other.ensure;
             this.patch = other.patch;
+            this.remove = other.remove;
         }
     
         @ThriftConstructor
@@ -109,7 +122,8 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
                 this.clear,
                 this.patchPrior,
                 this.ensure,
-                this.patch
+                this.patch,
+                this.remove
             );
             return result;
         }
@@ -134,6 +148,9 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         private final test.fixtures.patch.RecursiveFieldPatch patch;
     public static final int _PATCH = 6;
     private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
+        private final Set<Short> remove;
+    public static final int _REMOVE = 7;
+    private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
     static {
       NAMES_TO_IDS.put("assign", 1);
       THRIFT_NAMES_TO_IDS.put("assign", 1);
@@ -150,6 +167,9 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
       NAMES_TO_IDS.put("patch", 6);
       THRIFT_NAMES_TO_IDS.put("patch", 6);
       FIELD_METADATA.put(6, PATCH_FIELD_DESC);
+      NAMES_TO_IDS.put("remove", 7);
+      THRIFT_NAMES_TO_IDS.put("remove", 7);
+      FIELD_METADATA.put(7, REMOVE_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/RecursivePatch"),
         RecursivePatch.class, RecursivePatch::read0));
@@ -179,6 +199,11 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
     @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.RecursiveFieldPatch getPatch() { return patch; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
+    public Set<Short> getRemove() { return remove; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -187,6 +212,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         helper.add("patchPrior", patchPrior);
         helper.add("ensure", ensure);
         helper.add("patch", patch);
+        helper.add("remove", remove);
         return helper.toString();
     }
     
@@ -207,6 +233,7 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
             Objects.equals(patchPrior, other.patchPrior) &&
             Objects.equals(ensure, other.ensure) &&
             Objects.equals(patch, other.patch) &&
+            Objects.equals(remove, other.remove) &&
             true;
     }
     
@@ -217,7 +244,8 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
             clear,
             patchPrior,
             ensure,
-            patch
+            patch,
+            remove
         });
     }
     
@@ -270,6 +298,24 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
           if (__field.type == TType.STRUCT) {
             test.fixtures.patch.RecursiveFieldPatch patch = test.fixtures.patch.RecursiveFieldPatch.read0(oprot);
             builder.setPatch(patch);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _REMOVE:
+          if (__field.type == TType.SET) {
+            Set<Short> remove;
+            {
+            TSet _set = oprot.readSetBegin();
+            remove = new HashSet<Short>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                short _value1 = oprot.readI16();
+                remove.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setRemove(remove);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -329,6 +375,18 @@ public final class RecursivePatch implements com.facebook.thrift.payload.ThriftS
         } else {
           p.rollback(structStart);
         }    
+      java.util.Objects.requireNonNull(remove, "remove must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(remove)) {
+        oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+        Set<Short> _iter0 = remove;
+        oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

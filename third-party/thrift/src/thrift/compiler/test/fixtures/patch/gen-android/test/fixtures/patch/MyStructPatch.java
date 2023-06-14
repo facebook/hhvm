@@ -31,6 +31,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
   private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
+  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
 
   /**
    * Assigns to a (set) value.
@@ -57,23 +58,30 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
    * Patches any set value, including newly set values. Applies last.
    */
   public final MyStructFieldPatch patch;
+  /**
+   * Removes entries, if present. Applies third.
+   */
+  public final Set<Short> remove;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
   public static final int PATCHPRIOR = 3;
   public static final int ENSURE = 5;
   public static final int PATCH = 6;
+  public static final int REMOVE = 7;
 
   public MyStructPatch(
       MyStruct assign,
       Boolean clear,
       MyStructFieldPatch patchPrior,
       MyStructEnsureStruct ensure,
-      MyStructFieldPatch patch) {
+      MyStructFieldPatch patch,
+      Set<Short> remove) {
     this.assign = assign;
     this.clear = clear;
     this.patchPrior = patchPrior;
     this.ensure = ensure;
     this.patch = patch;
+    this.remove = remove;
   }
 
   /**
@@ -104,6 +112,11 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
       this.patch = TBaseHelper.deepCopy(other.patch);
     } else {
       this.patch = null;
+    }
+    if (other.isSetRemove()) {
+      this.remove = TBaseHelper.deepCopy(other.remove);
+    } else {
+      this.remove = null;
     }
   }
 
@@ -176,6 +189,18 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
     return this.patch != null;
   }
 
+  /**
+   * Removes entries, if present. Applies third.
+   */
+  public Set<Short> getRemove() {
+    return this.remove;
+  }
+
+  // Returns true if field remove is set (has been assigned a value) and false otherwise
+  public boolean isSetRemove() {
+    return this.remove != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -196,12 +221,14 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, ensure, patch});
+    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, ensure, patch, remove});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -215,6 +242,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
     MyStructFieldPatch tmp_patchPrior = null;
     MyStructEnsureStruct tmp_ensure = null;
     MyStructFieldPatch tmp_patch = null;
+    Set<Short> tmp_remove = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -260,6 +288,25 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case REMOVE:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set45 = iprot.readSetBegin();
+              tmp_remove = new HashSet<Short>(Math.max(0, 2*_set45.size));
+              for (int _i46 = 0; 
+                   (_set45.size < 0) ? iprot.peekSet() : (_i46 < _set45.size); 
+                   ++_i46)
+              {
+                Short _elem47;
+                _elem47 = iprot.readI16();
+                tmp_remove.add(_elem47);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -275,6 +322,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
       ,tmp_patchPrior
       ,tmp_ensure
       ,tmp_patch
+      ,tmp_remove
     );
     _that.validate();
     return _that;
@@ -309,6 +357,17 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable {
     if (this.patch != null) {
       oprot.writeFieldBegin(PATCH_FIELD_DESC);
       this.patch.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.remove != null) {
+      oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.I16, this.remove.size()));
+        for (Short _iter48 : this.remove)        {
+          oprot.writeI16(_iter48);
+        }
+        oprot.writeSetEnd();
+      }
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

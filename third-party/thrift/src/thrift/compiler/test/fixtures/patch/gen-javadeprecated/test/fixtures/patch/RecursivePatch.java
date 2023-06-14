@@ -31,6 +31,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
   private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
   private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
+  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
 
   /**
    * Assigns to a (set) value.
@@ -57,11 +58,16 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
    * Patches any set value, including newly set values. Applies last.
    */
   public RecursiveFieldPatch patch;
+  /**
+   * Removes entries, if present. Applies third.
+   */
+  public Set<Short> remove;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
   public static final int PATCHPRIOR = 3;
   public static final int ENSURE = 5;
   public static final int PATCH = 6;
+  public static final int REMOVE = 7;
 
   // isset id assignments
   private static final int __CLEAR_ISSET_ID = 0;
@@ -81,6 +87,9 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
         new StructMetaData(TType.STRUCT, RecursiveEnsureStruct.class)));
     tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, RecursiveFieldPatch.class)));
+    tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new FieldValueMetaData(TType.I16))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -95,13 +104,15 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       boolean clear,
       RecursiveFieldPatch patchPrior,
       RecursiveEnsureStruct ensure,
-      RecursiveFieldPatch patch) {
+      RecursiveFieldPatch patch,
+      Set<Short> remove) {
     this();
     this.clear = clear;
     setClearIsSet(true);
     this.patchPrior = patchPrior;
     this.ensure = ensure;
     this.patch = patch;
+    this.remove = remove;
   }
 
   public RecursivePatch(
@@ -109,7 +120,8 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       boolean clear,
       RecursiveFieldPatch patchPrior,
       RecursiveEnsureStruct ensure,
-      RecursiveFieldPatch patch) {
+      RecursiveFieldPatch patch,
+      Set<Short> remove) {
     this();
     this.assign = assign;
     this.clear = clear;
@@ -117,6 +129,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     this.patchPrior = patchPrior;
     this.ensure = ensure;
     this.patch = patch;
+    this.remove = remove;
   }
 
   public static class Builder {
@@ -125,6 +138,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     private RecursiveFieldPatch patchPrior;
     private RecursiveEnsureStruct ensure;
     private RecursiveFieldPatch patch;
+    private Set<Short> remove;
 
     BitSet __optional_isset = new BitSet(1);
 
@@ -157,6 +171,11 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
+    public Builder setRemove(final Set<Short> remove) {
+      this.remove = remove;
+      return this;
+    }
+
     public RecursivePatch build() {
       RecursivePatch result = new RecursivePatch();
       result.setAssign(this.assign);
@@ -166,6 +185,7 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       result.setPatchPrior(this.patchPrior);
       result.setEnsure(this.ensure);
       result.setPatch(this.patch);
+      result.setRemove(this.remove);
       return result;
     }
   }
@@ -192,6 +212,9 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     }
     if (other.isSetPatch()) {
       this.patch = TBaseHelper.deepCopy(other.patch);
+    }
+    if (other.isSetRemove()) {
+      this.remove = TBaseHelper.deepCopy(other.remove);
     }
   }
 
@@ -358,6 +381,37 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     }
   }
 
+  /**
+   * Removes entries, if present. Applies third.
+   */
+  public Set<Short> getRemove() {
+    return this.remove;
+  }
+
+  /**
+   * Removes entries, if present. Applies third.
+   */
+  public RecursivePatch setRemove(Set<Short> remove) {
+    this.remove = remove;
+    return this;
+  }
+
+  public void unsetRemove() {
+    this.remove = null;
+  }
+
+  // Returns true if field remove is set (has been assigned a value) and false otherwise
+  public boolean isSetRemove() {
+    return this.remove != null;
+  }
+
+  public void setRemoveIsSet(boolean __value) {
+    if (!__value) {
+      this.remove = null;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case ASSIGN:
@@ -400,6 +454,14 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       }
       break;
 
+    case REMOVE:
+      if (__value == null) {
+        unsetRemove();
+      } else {
+        setRemove((Set<Short>)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -421,6 +483,9 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
 
     case PATCH:
       return getPatch();
+
+    case REMOVE:
+      return getRemove();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -447,12 +512,14 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, ensure, patch});
+    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, ensure, patch, remove});
   }
 
   public void read(TProtocol iprot) throws TException {
@@ -506,6 +573,25 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case REMOVE:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set277 = iprot.readSetBegin();
+              this.remove = new HashSet<Short>(Math.max(0, 2*_set277.size));
+              for (int _i278 = 0; 
+                   (_set277.size < 0) ? iprot.peekSet() : (_i278 < _set277.size); 
+                   ++_i278)
+              {
+                short _elem279;
+                _elem279 = iprot.readI16();
+                this.remove.add(_elem279);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -546,6 +632,17 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
     if (this.patch != null) {
       oprot.writeFieldBegin(PATCH_FIELD_DESC);
       this.patch.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.remove != null) {
+      oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.I16, this.remove.size()));
+        for (short _iter280 : this.remove)        {
+          oprot.writeI16(_iter280);
+        }
+        oprot.writeSetEnd();
+      }
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -619,6 +716,17 @@ public class RecursivePatch implements TBase, java.io.Serializable, Cloneable {
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getPatch(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("remove");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getRemove() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getRemove(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

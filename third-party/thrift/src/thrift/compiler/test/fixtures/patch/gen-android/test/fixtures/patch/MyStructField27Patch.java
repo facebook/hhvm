@@ -200,15 +200,15 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
         case ASSIGN:
           if (__field.type == TType.SET) {
             {
-              TSet _set54 = iprot.readSetBegin();
-              tmp_assign = new HashSet<String>(Math.max(0, 2*_set54.size));
-              for (int _i55 = 0; 
-                   (_set54.size < 0) ? iprot.peekSet() : (_i55 < _set54.size); 
-                   ++_i55)
+              TSet _set66 = iprot.readSetBegin();
+              tmp_assign = new HashSet<String>(Math.max(0, 2*_set66.size));
+              for (int _i67 = 0; 
+                   (_set66.size < 0) ? iprot.peekSet() : (_i67 < _set66.size); 
+                   ++_i67)
               {
-                String _elem56;
-                _elem56 = iprot.readString();
-                tmp_assign.add(_elem56);
+                String _elem68;
+                _elem68 = iprot.readString();
+                tmp_assign.add(_elem68);
               }
               iprot.readSetEnd();
             }
@@ -226,15 +226,15 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
         case REMOVE:
           if (__field.type == TType.SET) {
             {
-              TSet _set57 = iprot.readSetBegin();
-              tmp_remove = new HashSet<String>(Math.max(0, 2*_set57.size));
-              for (int _i58 = 0; 
-                   (_set57.size < 0) ? iprot.peekSet() : (_i58 < _set57.size); 
-                   ++_i58)
+              TSet _set69 = iprot.readSetBegin();
+              tmp_remove = new HashSet<String>(Math.max(0, 2*_set69.size));
+              for (int _i70 = 0; 
+                   (_set69.size < 0) ? iprot.peekSet() : (_i70 < _set69.size); 
+                   ++_i70)
               {
-                String _elem59;
-                _elem59 = iprot.readString();
-                tmp_remove.add(_elem59);
+                String _elem71;
+                _elem71 = iprot.readString();
+                tmp_remove.add(_elem71);
               }
               iprot.readSetEnd();
             }
@@ -245,15 +245,15 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
         case ADD:
           if (__field.type == TType.SET) {
             {
-              TSet _set60 = iprot.readSetBegin();
-              tmp_add = new HashSet<String>(Math.max(0, 2*_set60.size));
-              for (int _i61 = 0; 
-                   (_set60.size < 0) ? iprot.peekSet() : (_i61 < _set60.size); 
-                   ++_i61)
+              TSet _set72 = iprot.readSetBegin();
+              tmp_add = new HashSet<String>(Math.max(0, 2*_set72.size));
+              for (int _i73 = 0; 
+                   (_set72.size < 0) ? iprot.peekSet() : (_i73 < _set72.size); 
+                   ++_i73)
               {
-                String _elem62;
-                _elem62 = iprot.readString();
-                tmp_add.add(_elem62);
+                String _elem74;
+                _elem74 = iprot.readString();
+                tmp_add.add(_elem74);
               }
               iprot.readSetEnd();
             }
@@ -289,8 +289,8 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.assign.size()));
-          for (String _iter63 : this.assign)          {
-            oprot.writeString(_iter63);
+          for (String _iter75 : this.assign)          {
+            oprot.writeString(_iter75);
           }
           oprot.writeSetEnd();
         }
@@ -306,8 +306,8 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
-        for (String _iter64 : this.remove)        {
-          oprot.writeString(_iter64);
+        for (String _iter76 : this.remove)        {
+          oprot.writeString(_iter76);
         }
         oprot.writeSetEnd();
       }
@@ -317,8 +317,8 @@ public class MyStructField27Patch implements TBase, java.io.Serializable, Clonea
       oprot.writeFieldBegin(ADD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.add.size()));
-        for (String _iter65 : this.add)        {
-          oprot.writeString(_iter65);
+        for (String _iter77 : this.add)        {
+          oprot.writeString(_iter77);
         }
         oprot.writeSetEnd();
       }

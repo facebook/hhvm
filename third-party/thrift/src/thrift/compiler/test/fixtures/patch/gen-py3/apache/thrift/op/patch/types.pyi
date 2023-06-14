@@ -14,6 +14,7 @@ from typing_extensions import Final
 
 import sys
 import itertools
+import apache.thrift.type.id.types as _apache_thrift_type_id_types
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 
@@ -86,3 +87,4 @@ class AssignOnlyPatch(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> AssignOnlyPatch: ...
     def _to_py_deprecated(self) -> "thrift.lib.thrift.patch.ttypes.AssignOnlyPatch": ...   # type: ignore
 
+FieldId = int

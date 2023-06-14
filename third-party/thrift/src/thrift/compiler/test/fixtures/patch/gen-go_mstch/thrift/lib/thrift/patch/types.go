@@ -7,15 +7,44 @@ import (
     "fmt"
 
     standard "thrift/lib/thrift/standard"
+    id "thrift/lib/thrift/id"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = standard.GoUnusedProtection__
+var _ = id.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = thrift.ZERO
 
+
+type FieldId = id.FieldId
+
+func NewFieldId() FieldId {
+  return id.NewFieldId()
+}
+
+func WriteFieldId(item FieldId, p thrift.Protocol) error {
+  err := id.WriteFieldId(item, p)
+if err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadFieldId(p thrift.Protocol) (FieldId, error) {
+  var decodeResult FieldId
+  decodeErr := func() error {
+    result, err := id.ReadFieldId(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type ListPatchIndex = int32
 

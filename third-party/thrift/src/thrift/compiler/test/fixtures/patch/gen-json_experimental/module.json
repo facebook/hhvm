@@ -554,6 +554,16 @@
   "type" : "struct",
   "name" : "MyDataFieldPatch"
 }
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
+}
                   }
         },
         "is_exception" : false,
@@ -711,6 +721,16 @@
             "type" : {
   "type" : "struct",
   "name" : "MyDataWithCustomDefaultFieldPatch"
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
 }
                   }
         },
@@ -1142,6 +1162,16 @@
             "type" : {
   "type" : "struct",
   "name" : "MyStructFieldPatch"
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
 }
                   }
         },
@@ -2894,6 +2924,16 @@
   "type" : "struct",
   "name" : "LateDefStructFieldPatch"
 }
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
+}
                   }
         },
         "is_exception" : false,
@@ -2991,6 +3031,16 @@
             "type" : {
   "type" : "struct",
   "name" : "RecursiveFieldPatch"
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
 }
                   }
         },
@@ -3167,6 +3217,16 @@
             "type" : {
   "type" : "struct",
   "name" : "BarFieldPatch"
+}
+                  },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 23,
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
 }
                   }
         },

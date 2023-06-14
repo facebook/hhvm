@@ -362,6 +362,8 @@ def _fbthrift_gen_metadata_struct_MyDataPatch(metadata_struct: _fbthrift_metadat
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyDataFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -376,6 +378,7 @@ def _fbthrift_gen_metadata_struct_MyDataPatch(metadata_struct: _fbthrift_metadat
     new_struct = _fbthrift_gen_metadata_struct_MyDataFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_MyDataEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_MyDataFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_MyDataPatch() -> _fbthrift_metadata.ThriftMetadata:
@@ -457,6 +460,8 @@ def _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultPatch(metadata_struct: 
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyDataWithCustomDefaultFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -471,6 +476,7 @@ def _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultPatch(metadata_struct: 
     new_struct = _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_MyDataWithCustomDefaultPatch() -> _fbthrift_metadata.ThriftMetadata:
@@ -688,6 +694,8 @@ def _fbthrift_gen_metadata_struct_MyStructPatch(metadata_struct: _fbthrift_metad
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStructFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -702,6 +710,7 @@ def _fbthrift_gen_metadata_struct_MyStructPatch(metadata_struct: _fbthrift_metad
     new_struct = _fbthrift_gen_metadata_struct_MyStructFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_MyStructEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_MyStructFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_MyStructPatch() -> _fbthrift_metadata.ThriftMetadata:
@@ -1368,6 +1377,8 @@ def _fbthrift_gen_metadata_struct_LateDefStructPatch(metadata_struct: _fbthrift_
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.LateDefStructFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -1382,6 +1393,7 @@ def _fbthrift_gen_metadata_struct_LateDefStructPatch(metadata_struct: _fbthrift_
     new_struct = _fbthrift_gen_metadata_struct_LateDefStructFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_LateDefStructEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_LateDefStructFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_LateDefStructPatch() -> _fbthrift_metadata.ThriftMetadata:
@@ -1449,6 +1461,8 @@ def _fbthrift_gen_metadata_struct_RecursivePatch(metadata_struct: _fbthrift_meta
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.RecursiveFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -1463,6 +1477,7 @@ def _fbthrift_gen_metadata_struct_RecursivePatch(metadata_struct: _fbthrift_meta
     new_struct = _fbthrift_gen_metadata_struct_RecursiveFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_RecursiveEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_RecursiveFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_RecursivePatch() -> _fbthrift_metadata.ThriftMetadata:
@@ -1567,6 +1582,8 @@ def _fbthrift_gen_metadata_struct_BarPatch(metadata_struct: _fbthrift_metadata.T
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BarFieldPatch")), name="patch", is_optional=False, structured_annotations=[
         ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -1581,6 +1598,7 @@ def _fbthrift_gen_metadata_struct_BarPatch(metadata_struct: _fbthrift_metadata.T
     new_struct = _fbthrift_gen_metadata_struct_BarFieldPatch(new_struct) # patchPrior
     new_struct = _fbthrift_gen_metadata_struct_BarEnsureStruct(new_struct) # ensure
     new_struct = _fbthrift_gen_metadata_struct_BarFieldPatch(new_struct) # patch
+     # remove
 
     return new_struct
 def gen_metadata_struct_BarPatch() -> _fbthrift_metadata.ThriftMetadata:

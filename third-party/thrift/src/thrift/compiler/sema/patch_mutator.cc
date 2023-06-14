@@ -434,6 +434,9 @@ t_struct& patch_generator::add_struct_patch(
   gen.patchPrior(patch_type);
   gen.ensureStruct(add_ensure_struct(annot, value_type));
   gen.patchAfter(patch_type);
+  if (const auto* p = program_.scope()->find_type("patch.FieldId")) {
+    gen.remove(inst_set(*p));
+  }
   gen.set_adapter("StructPatchAdapter");
   return gen;
 }

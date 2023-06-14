@@ -20,6 +20,8 @@
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/op/Testing.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
 #include <thrift/test/gen-cpp2/StructPatchTest_fatal_types.h>
@@ -1071,6 +1073,29 @@ TEST(PatchTest, IsPatch) {
     using value_type = bool;
   };
   static_assert(!is_patch_v<CounterfeitBoolPatch>);
+}
+
+TEST(PatchTest, StructRemove) {
+  MyStructPatch patch;
+  patch.toThrift().remove() = {
+      op::get_field_id<MyStruct, ident::optI32Val>::value};
+
+  MyStruct obj;
+  obj.optI32Val() = 32;
+  obj.optI64Val() = 64;
+
+  protocol::Value value =
+      protocol::asValueStruct<type::struct_t<MyStruct>>(obj);
+
+  protocol::applyPatch(patch.toObject(), value);
+
+  auto buffer = protocol::serializeValue<CompactProtocolWriter>(value);
+
+  MyStruct patched;
+  CompactSerializer::deserialize(buffer.get(), patched);
+
+  EXPECT_FALSE(patched.optI32Val().has_value());
+  EXPECT_EQ(patched.optI64Val(), 64);
 }
 
 } // namespace

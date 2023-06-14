@@ -5,10 +5,12 @@ package patch // [[[ program thrift source path ]]]
 
 import (
     standard "thrift/lib/thrift/standard"
+    id "thrift/lib/thrift/id"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = standard.GoUnusedProtection__
+var _ = id.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
 

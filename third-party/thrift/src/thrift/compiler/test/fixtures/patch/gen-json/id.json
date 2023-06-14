@@ -1,0 +1,167 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "id",
+  "constants" : {
+    "noId" : {
+      "lineno" : 103,
+      "value" : 0,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 103,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 103,
+          "column" : 25
+        }
+      }
+    }
+  },
+  "includes": {
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
+  "typedefs" : {
+    "FieldId" : {
+      "lineno" : 45,
+      "type_enum" : "I16",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 45,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 48,
+          "column" : 20
+        }
+      }
+    },
+    "ExternId" : {
+      "lineno" : 99,
+      "type_enum" : "I64",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 99,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 100,
+          "column" : 21
+        }
+      }
+    },
+    "ValueId" : {
+      "lineno" : 108,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 108,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 111,
+          "column" : 25
+        }
+      }
+    },
+    "ProtocolId" : {
+      "lineno" : 116,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 116,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 119,
+          "column" : 28
+        }
+      }
+    },
+    "TypeId" : {
+      "lineno" : 124,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 124,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 127,
+          "column" : 24
+        }
+      }
+    },
+    "DefinitionId" : {
+      "lineno" : 132,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 132,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 135,
+          "column" : 30
+        }
+      }
+    },
+    "PackageId" : {
+      "lineno" : 140,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 140,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 143,
+          "column" : 27
+        }
+      }
+    },
+    "ProgramId" : {
+      "lineno" : 148,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 148,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 151,
+          "column" : 27
+        }
+      }
+    },
+    "SourceId" : {
+      "lineno" : 156,
+      "type_enum" : "TYPEDEF",
+      "spec_args" : "ExternId",
+      "source_range" : {
+        "begin" : {
+          "line" : 156,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 159,
+          "column" : 26
+        }
+      }
+    }
+  }
+}

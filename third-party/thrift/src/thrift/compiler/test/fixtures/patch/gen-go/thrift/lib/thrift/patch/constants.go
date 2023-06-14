@@ -11,6 +11,7 @@ import (
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	standard0 "thrift/lib/thrift/standard"
+	id1 "thrift/lib/thrift/id"
 
 )
 
@@ -22,6 +23,7 @@ var _ = bytes.Equal
 var _ = context.Background
 
 var _ = standard0.GoUnusedProtection__
+var _ = id1.GoUnusedProtection__
 
 func init() {
 }

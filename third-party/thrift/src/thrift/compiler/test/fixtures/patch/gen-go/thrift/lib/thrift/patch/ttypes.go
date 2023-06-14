@@ -11,6 +11,7 @@ import (
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	standard0 "thrift/lib/thrift/standard"
+	id1 "thrift/lib/thrift/id"
 
 )
 
@@ -22,6 +23,7 @@ var _ = bytes.Equal
 var _ = context.Background
 
 var _ = standard0.GoUnusedProtection__
+var _ = id1.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 //The meaning of the patch op field ids, in all properly formulated patch
@@ -110,6 +112,10 @@ func PatchOpFromString(s string) (PatchOp, error) {
 }
 
 func PatchOpPtr(v PatchOp) *PatchOp { return &v }
+
+type FieldId = id1.FieldId
+
+func FieldIdPtr(v FieldId) *FieldId { return &v }
 
 type ListPatchIndex = int32
 

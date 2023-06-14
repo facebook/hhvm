@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(int $param1, _ $param2): void {\n    $param1 = $param1;\n    $z = $param2;\n  }\n\n",
+          "newText":"  private function ${0:method0}(int $param1, _ $param2): void {\n  $param1 = $param1;\n      $z = $param2;\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
-          "newText":"$this->method0($param1, $param2);",
+          "newText":"$this->${0:method0}($param1, $param2);",
           "range":{"end":{"character":17,"line":14},"start":{"character":4,"line":13}}
         }
       ]
@@ -33,9 +33,9 @@ class Foo<T> {
 }
 
 class Klass {
-  private function method0(int $param1, _ $param2): void {
-    $param1 = $param1;
-    $z = $param2;
+  private function ${0:method0}(int $param1, _ $param2): void {
+  $param1 = $param1;
+      $z = $param2;
   }
 
   public function foo(): void {
@@ -44,7 +44,7 @@ class Klass {
     $param2 = "";
     $param2 = new Foo($param2);
     /*range-start*/
-    $this->method0($param1, $param2);
+    $this->${0:method0}($param1, $param2);
     /*range-end*/
     $ignore2 = 1;
   }

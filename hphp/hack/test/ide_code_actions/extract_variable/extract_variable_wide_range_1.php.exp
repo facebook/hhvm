@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$placeholder0 = $x + 1;\n  ",
+          "newText":"$${0:placeholder0} = $x + 1;\n  ",
           "range":{"end":{"character":2,"line":4},"start":{"character":2,"line":4}}
         },
         {
-          "newText":"$placeholder0",
+          "newText":"$${0:placeholder0}",
           "range":{"end":{"character":31,"line":4},"start":{"character":25,"line":4}}
         }
       ]
@@ -30,7 +30,7 @@ Applied edit for code action:
 
 function main(): void {
   $x = 1;
-  $placeholder0 = $x + 1;
-  $_ = /*range-start*/   $placeholder0   /*range-end*/;
+  $${0:placeholder0} = $x + 1;
+  $_ = /*range-start*/   $${0:placeholder0}   /*range-end*/;
 }
 

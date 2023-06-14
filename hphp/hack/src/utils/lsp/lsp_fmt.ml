@@ -1027,6 +1027,8 @@ let parse_initialize (params : json option) : Initialize.params =
         textDocument = Jget.obj_opt json "textDocument" |> parse_textDocument;
         window = Jget.obj_opt json "window" |> parse_window;
         telemetry = Jget.obj_opt json "telemetry" |> parse_telemetry;
+        client_experimental =
+          Jget.obj_opt json "experimental" |> parse_client_experimental;
       }
     and parse_workspace json =
       {
@@ -1102,6 +1104,9 @@ let parse_initialize (params : json option) : Initialize.params =
         connectionStatus =
           Jget.obj_opt json "connectionStatus" |> Option.is_some;
       }
+    and parse_client_experimental json =
+      ClientExperimentalCapabilities.
+        { snippetTextEdit = Jget.bool_d json "snippetTextEdit" ~default:false }
     in
     parse_initialize params)
 
@@ -1207,6 +1212,17 @@ let print_initialize (r : Initialize.result) : json =
               ( "implementationProvider",
                 Some (JSON_Bool cap.implementationProvider) );
               ("rageProvider", Some (JSON_Bool cap.rageProviderFB));
+              ( "experimental",
+                Option.map
+                  cap.server_experimental
+                  ~f:(fun experimental_capabilities ->
+                    JSON_Object
+                      [
+                        ( "snippetTextEdit",
+                          JSON_Bool
+                            experimental_capabilities
+                              .ServerExperimentalCapabilities.snippetTextEdit );
+                      ]) );
             ] );
       ])
 

@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(bool $referenced): void {\n    (\n      () ==> {\n        $shadowed = false || $referenced;\n      }\n    );\n  }\n\n",
+          "newText":"  private function ${0:method0}(bool $referenced): void {\n  (() ==> {\n        $shadowed = false || $referenced;\n      });\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"$this->method0($referenced);",
+          "newText":"$this->${0:method0}($referenced);",
           "range":{"end":{"character":7,"line":9},"start":{"character":4,"line":7}}
         }
       ]
@@ -29,19 +29,17 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function method0(bool $referenced): void {
-    (
-      () ==> {
+  private function ${0:method0}(bool $referenced): void {
+  (() ==> {
         $shadowed = false || $referenced;
-      }
-    );
+      });
   }
 
   public function foo(): void {
     $shadowed = true;
     $referenced = true; // should become a param to the extracted method
     /*range-start*/
-    $this->method0($referenced);
+    $this->${0:method0}($referenced);
     /*range-end*/
     $z = $shadowed;
   }

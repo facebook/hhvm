@@ -261,6 +261,14 @@ module Initialize = struct
     }
   end
 
+  module ServerExperimentalCapabilities = struct
+    type t = { snippetTextEdit: bool }
+  end
+
+  module ClientExperimentalCapabilities = struct
+    type t = { snippetTextEdit: bool }
+  end
+
   type params = {
     processId: int option;
     rootPath: string option;
@@ -290,6 +298,7 @@ module Initialize = struct
     textDocument: textDocumentClientCapabilities;
     window: windowClientCapabilities;
     telemetry: telemetryClientCapabilities;
+    client_experimental: ClientExperimentalCapabilities.t;
   }
 
   and workspaceClientCapabilities = {
@@ -363,6 +372,7 @@ module Initialize = struct
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
     rageProviderFB: bool;  (** Nuclide-specific feature *)
+    server_experimental: ServerExperimentalCapabilities.t option;
   }
 
   and signatureHelpOptions = { sighelp_triggerCharacters: string list }

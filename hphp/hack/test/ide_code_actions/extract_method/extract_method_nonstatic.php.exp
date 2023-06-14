@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(): int {\n    $return = $this->one();\n    return $return;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): int {\n  $return = $this->one();\n      return $return;\n  }\n\n",
           "range":{"end":{"character":0,"line":6},"start":{"character":0,"line":6}}
         },
         {
-          "newText":"$return = $this->method0();",
+          "newText":"$return = $this->${0:method0}();",
           "range":{"end":{"character":27,"line":9},"start":{"character":4,"line":9}}
         }
       ]
@@ -32,15 +32,15 @@ class Klass {
   public function one(): int {
     return 1;
   }
-  private function method0(): int {
-    $return = $this->one();
-    return $return;
+  private function ${0:method0}(): int {
+  $return = $this->one();
+      return $return;
   }
 
   public function foo(): void {
     // The extracted function is static iff the function we are extracting from is static.
     /*range-start*/
-    $return = $this->method0();
+    $return = $this->${0:method0}();
     /*range-end*/
     var_dump($return);
   }

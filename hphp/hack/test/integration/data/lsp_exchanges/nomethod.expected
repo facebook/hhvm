@@ -54,7 +54,10 @@
         },
         "renameProvider": true,
         "implementationProvider": true,
-        "rageProvider": true
+        "rageProvider": true,
+        "experimental": {
+          "snippetTextEdit": true
+         }
       }
     }
   },

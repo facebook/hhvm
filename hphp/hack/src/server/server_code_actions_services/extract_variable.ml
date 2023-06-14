@@ -7,8 +7,6 @@
  *)
 open Hh_prelude
 
-let placeholder_base = "$placeholder"
-
 let placeholder_regexp = Str.regexp {|\$placeholder\([0-9]+\)|}
 
 type candidate = {
@@ -146,8 +144,14 @@ let top_visitor (selection : Pos.t) ~source_text =
         None
   end
 
+(** Generate a snippet from the placeholder number.
+This relies on a nonstandard LSP extension recognized by the client:
+https://fburl.com/code/0vzkqds8. We can implement non-hackily if LSP is updated:
+https://github.com/microsoft/language-server-protocol/issues/592 *)
+let placeholder_name_of_n (n : int) = Format.sprintf "$${0:placeholder%d}" n
+
 let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
-  let placeholder = Format.sprintf "%s%d" placeholder_base placeholder_n in
+  let placeholder = placeholder_name_of_n placeholder_n in
   let exp_string = Full_fidelity_source_text.sub_of_pos source_text pos in
   let change_expression =
     Lsp.TextEdit.

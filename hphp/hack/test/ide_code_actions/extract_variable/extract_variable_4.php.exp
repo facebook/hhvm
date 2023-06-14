@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$placeholder0 = 3 * 2\n  * 7;\n  ",
+          "newText":"$${0:placeholder0} = 3 * 2\n  * 7;\n  ",
           "range":{"end":{"character":2,"line":5},"start":{"character":2,"line":5}}
         },
         {
-          "newText":"$placeholder0",
+          "newText":"$${0:placeholder0}",
           "range":{"end":{"character":5,"line":9},"start":{"character":18,"line":8}}
         }
       ]
@@ -31,11 +31,11 @@ Applied edit for code action:
 <<__EntryPoint>>
 function main(): void {
   // expect variable extracted to here
-  $placeholder0 = 3 * 2
+  $${0:placeholder0} = 3 * 2
   * 7;
   $z = 100 +
   /* */
   3 *
-  (/*range-start*/$placeholder0/*range-end*/);
+  (/*range-start*/$${0:placeholder0}/*range-end*/);
 }
 

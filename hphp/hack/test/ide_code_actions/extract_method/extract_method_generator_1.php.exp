@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(int $x): Iterator<_> {\n    $y = $x;\n    yield 1;\n  }\n\n",
+          "newText":"  private function ${0:method0}(int $x): Iterator<_> {\n  $y = $x;\n        yield 1;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"foreach ($this->method0($x) as $value__) {\n        /* TODO: assign to $y */\n        \n      }",
+          "newText":"foreach ($this->${0:method0}($x) as $value__) {\n        /* TODO: assign to $y */\n        \n      }",
           "range":{"end":{"character":14,"line":6},"start":{"character":6,"line":5}}
         }
       ]
@@ -29,14 +29,14 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function method0(int $x): Iterator<_> {
-    $y = $x;
-    yield 1;
+  private function ${0:method0}(int $x): Iterator<_> {
+  $y = $x;
+        yield 1;
   }
 
   public function foo(int $x): void {
       /*range-start*/
-      foreach ($this->method0($x) as $value__) {
+      foreach ($this->${0:method0}($x) as $value__) {
         /* TODO: assign to $y */
         
       }

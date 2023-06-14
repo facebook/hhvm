@@ -11,11 +11,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(): Iterator<_> {\n    yield 2;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): Iterator<_> {\n  yield 2;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"foreach ($this->method0() as $value__) {\n      \n    }",
+          "newText":"foreach ($this->${0:method0}() as $value__) {\n      \n    }",
           "range":{"end":{"character":12,"line":5},"start":{"character":4,"line":5}}
         }
       ]
@@ -30,13 +30,13 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function method0(): Iterator<_> {
-    yield 2;
+  private function ${0:method0}(): Iterator<_> {
+  yield 2;
   }
 
   public function foo(): Iterator<int> {
     /*range-start*/
-    foreach ($this->method0() as $value__) {
+    foreach ($this->${0:method0}() as $value__) {
       
     }
     /*range-end*/

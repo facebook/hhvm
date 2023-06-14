@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(): void {\n    $x = 1;\n    $y = $x;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): void {\n  $x = 1;\n          $y = $x;\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
-          "newText":"$this->method0();",
+          "newText":"$this->${0:method0}();",
           "range":{"end":{"character":16,"line":12},"start":{"character":8,"line":11}}
         }
       ]
@@ -33,16 +33,16 @@ function cond(): bool {
 }
 
 class Klass {
-  private function method0(): void {
-    $x = 1;
-    $y = $x;
+  private function ${0:method0}(): void {
+  $x = 1;
+          $y = $x;
   }
 
   public function foo(): void {
     if (cond()) {
       while (cond()) {
         /*range-start*/
-        $this->method0();
+        $this->${0:method0}();
         /*range-end*/;
       }
     }

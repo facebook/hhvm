@@ -11,11 +11,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(): int {\n    return 1 * 2;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): int {\n  return 1 * 2;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"$this->method0()",
+          "newText":"$this->${0:method0}()",
           "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
         }
       ]
@@ -30,12 +30,12 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function method0(): int {
-    return 1 * 2;
+  private function ${0:method0}(): int {
+  return 1 * 2;
   }
 
   public function foo(): void {
-    $x = /*range-start*/$this->method0()/*range-end*/ + 3;
+    $x = /*range-start*/$this->${0:method0}()/*range-end*/ + 3;
   }
 }
 

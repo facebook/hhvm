@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private async function method0(int $x): AsyncIterator<_, _, _> {\n    await gen_void();\n    $y = $x;\n    yield 3;\n  }\n\n",
+          "newText":"  private async function ${0:method0}(int $x): AsyncIterator<_, _, _> {\n  await gen_void();\n      $y = $x;\n      yield 3;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"foreach ($this->method0($x) await as $value__) {\n      /* TODO: assign to $y */\n      \n    }",
+          "newText":"foreach ($this->${0:method0}($x) await as $value__) {\n      /* TODO: assign to $y */\n      \n    }",
           "range":{"end":{"character":12,"line":7},"start":{"character":4,"line":5}}
         }
       ]
@@ -29,15 +29,15 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private async function method0(int $x): AsyncIterator<_, _, _> {
-    await gen_void();
-    $y = $x;
-    yield 3;
+  private async function ${0:method0}(int $x): AsyncIterator<_, _, _> {
+  await gen_void();
+      $y = $x;
+      yield 3;
   }
 
   public async function foo(int $x): AsyncIterator<int> {
     /*range-start*/
-    foreach ($this->method0($x) await as $value__) {
+    foreach ($this->${0:method0}($x) await as $value__) {
       /* TODO: assign to $y */
       
     }

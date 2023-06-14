@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$placeholder0 = $item + 1;\n    ",
+          "newText":"$${0:placeholder0} = $item + 1;\n    ",
           "range":{"end":{"character":4,"line":8},"start":{"character":4,"line":8}}
         },
         {
-          "newText":"$placeholder0",
+          "newText":"$${0:placeholder0}",
           "range":{"end":{"character":33,"line":8},"start":{"character":24,"line":8}}
         }
       ]
@@ -34,8 +34,8 @@ function map<T>(vec<T> $v, (function(T): T) $f): vec<T> {
 
 function main(): void {
   () ==> map(vec[], $item ==> {
-    $placeholder0 = $item + 1;
-    $y = /*range-start*/$placeholder0/*range-end*/;
+    $${0:placeholder0} = $item + 1;
+    $y = /*range-start*/$${0:placeholder0}/*range-end*/;
     return $y;
   });
 }

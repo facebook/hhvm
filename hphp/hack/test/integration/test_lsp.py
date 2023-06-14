@@ -2987,6 +2987,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "renameProvider": True,
                     "implementationProvider": True,
                     "rageProvider": True,
+                    "experimental": {"snippetTextEdit": True},
                 }
             },
         )

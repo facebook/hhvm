@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private async function method0(): Awaitable<void> {\n    $local = await foo();\n  }\n\n",
+          "newText":"  private async function ${0:method0}(): Awaitable<void> {\n  $local = await foo();\n  }\n\n",
           "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
         },
         {
-          "newText":"await $this->method0();",
+          "newText":"await $this->${0:method0}();",
           "range":{"end":{"character":25,"line":8},"start":{"character":4,"line":8}}
         }
       ]
@@ -31,14 +31,14 @@ Applied edit for code action:
 async function foo(): Awaitable<void> {}
 
 class Klass {
-  private async function method0(): Awaitable<void> {
-    $local = await foo();
+  private async function ${0:method0}(): Awaitable<void> {
+  $local = await foo();
   }
 
   public async function foo(): Awaitable<void> {
     $ignore1 = 1;
     /*range-start*/
-    await $this->method0();
+    await $this->${0:method0}();
     /*range-end*/
     $ignore2 = 1;
   }

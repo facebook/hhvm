@@ -344,6 +344,14 @@ module Initialize : sig
     }
   end
 
+  module ServerExperimentalCapabilities : sig
+    type t = { snippetTextEdit: bool }
+  end
+
+  module ClientExperimentalCapabilities : sig
+    type t = { snippetTextEdit: bool }
+  end
+
   type params = {
     processId: int option;  (** pid of parent process *)
     rootPath: string option;  (** deprecated *)
@@ -387,6 +395,7 @@ module Initialize : sig
     textDocument: textDocumentClientCapabilities;
     window: windowClientCapabilities;
     telemetry: telemetryClientCapabilities;  (** omitted: experimental *)
+    client_experimental: ClientExperimentalCapabilities.t;
   }
 
   and workspaceClientCapabilities = {
@@ -488,6 +497,7 @@ module Initialize : sig
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
     rageProviderFB: bool;
+    server_experimental: ServerExperimentalCapabilities.t option;
   }
 
   and signatureHelpOptions = { sighelp_triggerCharacters: string list }

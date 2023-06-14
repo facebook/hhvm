@@ -4871,6 +4871,8 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           implementationProvider =
             local_config.ServerLocalConfig.go_to_implementation;
           rageProviderFB = true;
+          server_experimental =
+            Some ServerExperimentalCapabilities.{ snippetTextEdit = true };
         };
     }
 

@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$placeholder0 = $a->toggle_mut_and_ret_false();\n  ",
+          "newText":"$${0:placeholder0} = $a->toggle_mut_and_ret_false();\n  ",
           "range":{"end":{"character":2,"line":13},"start":{"character":2,"line":13}}
         },
         {
-          "newText":"$placeholder0",
+          "newText":"$${0:placeholder0}",
           "range":{"end":{"character":61,"line":13},"start":{"character":31,"line":13}}
         }
       ]
@@ -39,8 +39,8 @@ class A {
 <<__EntryPoint>>
 function main(): void {
   $a = new A(false);
-  $placeholder0 = $a->toggle_mut_and_ret_false();
-  $x = $a->b || /*range-start*/$placeholder0/*range-end*/;
+  $${0:placeholder0} = $a->toggle_mut_and_ret_false();
+  $x = $a->b || /*range-start*/$${0:placeholder0}/*range-end*/;
   var_dump($x); // false
 
   // The refactor can change the meaning of the code in a way that is hard to detect.

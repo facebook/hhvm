@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(): (int, _) {\n    $return1 = 100;\n    $local = 500 + $return1;\n    $return2 = new Foo($local);\n    return tuple($return1, $return2);\n  }\n\n",
+          "newText":"  private function ${0:method0}(): (int, _) {\n  $return1 = 100;\n      $local = 500 + $return1;\n      $return2 = new Foo($local);\n      return tuple($return1, $return2);\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
-          "newText":"list($return1, $return2) = $this->method0();",
+          "newText":"list($return1, $return2) = $this->${0:method0}();",
           "range":{"end":{"character":31,"line":12},"start":{"character":4,"line":10}}
         }
       ]
@@ -33,17 +33,17 @@ class Foo<T> {
 }
 
 class Klass {
-  private function method0(): (int, _) {
-    $return1 = 100;
-    $local = 500 + $return1;
-    $return2 = new Foo($local);
-    return tuple($return1, $return2);
+  private function ${0:method0}(): (int, _) {
+  $return1 = 100;
+      $local = 500 + $return1;
+      $return2 = new Foo($local);
+      return tuple($return1, $return2);
   }
 
   public function foo(): void {
     $ignore1 = 1;
     /*range-start*/
-    list($return1, $return2) = $this->method0();
+    list($return1, $return2) = $this->${0:method0}();
     /*range-end*/
     $ignore2 = 1 + $return1;
     var_dump($return2);

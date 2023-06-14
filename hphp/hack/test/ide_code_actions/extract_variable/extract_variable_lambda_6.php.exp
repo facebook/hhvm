@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"$placeholder0 = 3 + 3;\n                   ",
+          "newText":"$${0:placeholder0} = 3 + 3;\n                   ",
           "range":{"end":{"character":19,"line":6},"start":{"character":19,"line":6}}
         },
         {
-          "newText":"$placeholder0",
+          "newText":"$${0:placeholder0}",
           "range":{"end":{"character":24,"line":6},"start":{"character":19,"line":6}}
         }
       ]
@@ -32,8 +32,8 @@ function foo(): void {
   // The curly braces in the param complicate our expression lambda check.
   // Make sure we don't crash.
   (($a = () ==> {}) ==>
-    /*range-start*/$placeholder0 = 3 + 3;
-                   $placeholder0/*range-end*/
+    /*range-start*/$${0:placeholder0} = 3 + 3;
+                   $${0:placeholder0}/*range-end*/
   );
 }
 

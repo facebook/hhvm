@@ -102,8 +102,8 @@ let method_string_of_candidate
     ~source_text
     ~(params : (string * T.ty_string) list)
     ~(return : (string * T.ty_string) list)
-    (T.{ placeholder_name; method_is_static; is_async; method_pos; _ } as
-    candidate) =
+    ~(snippet : string)
+    (T.{ method_is_static; is_async; method_pos; _ } as candidate) =
   let return_type_string = return_type_string_of_candidate ~return candidate in
   let body_string = body_string_of_candidate ~source_text ~return candidate in
   let add_modifiers : string -> string =
@@ -136,7 +136,7 @@ let method_string_of_candidate
   let raw_function_string =
     Format.sprintf
       "function %s(%s): %s {\n%s\n}"
-      placeholder_name
+      snippet
       params_string
       return_type_string
       body_string
@@ -152,9 +152,9 @@ let method_string_of_candidate
 let method_call_string_of_candidate
     ~(params : (string * T.ty_string) list)
     ~(return : (string * T.ty_string) list)
+    ~(snippet : string)
     T.
       {
-        placeholder_name;
         method_is_static;
         selection_kind;
         is_async;
@@ -171,7 +171,7 @@ let method_call_string_of_candidate
       "$this->"
   in
   let call_expr =
-    Format.sprintf "%s%s(%s)" receiver_string placeholder_name args_string
+    Format.sprintf "%s%s(%s)" receiver_string snippet args_string
   in
   match iterator_kind with
   | None ->
@@ -252,7 +252,9 @@ let method_call_string_of_candidate
       comment_and_whitespace
 
 let edit_of_candidate
-    ~source_text ~path (T.{ method_pos; params; return; pos; _ } as candidate) :
+    ~source_text
+    ~path
+    (T.{ method_pos; params; return; pos; placeholder_name; _ } as candidate) :
     Lsp.WorkspaceEdit.t =
   let type_assoc_list_of map =
     map
@@ -262,9 +264,10 @@ let edit_of_candidate
   in
   let params = type_assoc_list_of params in
   let return = type_assoc_list_of return in
+  let snippet = Format.sprintf "${0:%s}" placeholder_name in
   let change_add_call =
     let call_string =
-      method_call_string_of_candidate ~params ~return candidate
+      method_call_string_of_candidate ~params ~return ~snippet candidate
     in
     {
       Lsp.TextEdit.range =
@@ -276,7 +279,7 @@ let edit_of_candidate
     let line = (fst @@ Pos.line_column method_pos) - 1 in
     let character = 0 in
     let method_string =
-      method_string_of_candidate ~source_text ~params ~return candidate
+      method_string_of_candidate ~source_text ~params ~return ~snippet candidate
     in
     Lsp.
       {

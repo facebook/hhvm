@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method0(int $param1, int $param2, int $param3_and_ret1): (int, int) {\n    $param3_and_ret1 = $param3_and_ret1 + $param1;\n    $local = $param3_and_ret1 + $param2;\n    $param3_and_ret1 = $local;\n    $ret2 = 1;\n    return tuple($param3_and_ret1, $ret2);\n  }\n\n",
+          "newText":"  private function ${0:method0}(int $param1, int $param2, int $param3_and_ret1): (int, int) {\n  $param3_and_ret1 = $param3_and_ret1 + $param1;\n      $local = $param3_and_ret1 + $param2;\n      $param3_and_ret1 = $local;\n      $ret2 = 1;\n      return tuple($param3_and_ret1, $ret2);\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
-          "newText":"list($param3_and_ret1, $ret2) = $this->method0($param1, $param2, $param3_and_ret1);",
+          "newText":"list($param3_and_ret1, $ret2) = $this->${0:method0}($param1, $param2, $param3_and_ret1);",
           "range":{"end":{"character":14,"line":12},"start":{"character":4,"line":9}}
         }
       ]
@@ -29,12 +29,12 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function method0(int $param1, int $param2, int $param3_and_ret1): (int, int) {
-    $param3_and_ret1 = $param3_and_ret1 + $param1;
-    $local = $param3_and_ret1 + $param2;
-    $param3_and_ret1 = $local;
-    $ret2 = 1;
-    return tuple($param3_and_ret1, $ret2);
+  private function ${0:method0}(int $param1, int $param2, int $param3_and_ret1): (int, int) {
+  $param3_and_ret1 = $param3_and_ret1 + $param1;
+      $local = $param3_and_ret1 + $param2;
+      $param3_and_ret1 = $local;
+      $ret2 = 1;
+      return tuple($param3_and_ret1, $ret2);
   }
 
   public function foo(): void {
@@ -43,7 +43,7 @@ class Klass {
     $param2 = 1;
     $param3_and_ret1 = 1;
     /*range-start*/
-    list($param3_and_ret1, $ret2) = $this->method0($param1, $param2, $param3_and_ret1);
+    list($param3_and_ret1, $ret2) = $this->${0:method0}($param1, $param2, $param3_and_ret1);
     /*range-end*/
     $ignore2 = 0;
     $ignore3 = $param3_and_ret1;

@@ -10,11 +10,11 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function method3(): void {\n    $x = 1;\n  }\n\n",
+          "newText":"  private function ${0:method3}(): void {\n  $x = 1;\n  }\n\n",
           "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
         },
         {
-          "newText":"$this->method3();",
+          "newText":"$this->${0:method3}();",
           "range":{"end":{"character":11,"line":8},"start":{"character":4,"line":8}}
         }
       ]
@@ -31,14 +31,14 @@ Applied edit for code action:
 class Klass {
   public function method0(): void {}
   public static async function method1(): Promise<void> {}
-  private function method3(): void {
-    $x = 1;
+  private function ${0:method3}(): void {
+  $x = 1;
   }
 
   public function method2(): void {
     // extracted method should be called "method3" because 0-2 inclusive are taken
     /*range-start*/
-    $this->method3();
+    $this->${0:method3}();
     /*range-end*/
   }
 }

@@ -23,6 +23,7 @@
 
 #include "hphp/hhbbc/options.h"
 
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/util/compact-vector.h"
@@ -33,7 +34,6 @@
 #include "hphp/util/tribool.h"
 
 namespace HPHP {
-struct StringData;
 struct ArrayData;
 }
 
@@ -173,6 +173,64 @@ private:
   StructuredLogEntry* logEntry;
   int64_t beforeRss;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * One-to-one case insensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
+ */
+template<class T> using ISStringToOneT =
+  hphp_fast_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_isame
+  >;
+
+/*
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
+
+/*
+ * One-to-one case sensitive concurrent map, where the keys are static
+ * strings and the values are some T.
+ *
+ * Concurrent insertions and lookups are supported.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<class T> using SStringToOneConcurrentT =
+  folly_concurrent_hash_map_simd<SString, T>;
+
+/*
+ * One-to-one case insensitive concurrent map, where the keys are
+ * static strings and the values are some T.
+ *
+ * Concurrent insertions and lookups are supported.
+ */
+template<class T> using ISStringToOneConcurrentT =
+  folly_concurrent_hash_map_simd<SString, T,
+                                 string_data_hash, string_data_isame>;
+
+/*
+ * Case sensitive static string set.
+ */
+using SStringSet = hphp_fast_set<SString>;
+/*
+ * Case insensitive static string set.
+ */
+using ISStringSet = hphp_fast_set<SString, string_data_hash, string_data_isame>;
 
 //////////////////////////////////////////////////////////////////////
 

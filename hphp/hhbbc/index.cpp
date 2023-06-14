@@ -113,64 +113,6 @@ static_assert(CheckSize<RepoAuthType, 8>(), "");
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * One-to-one case insensitive map, where the keys are static strings
- * and the values are some T.
- *
- * Elements are not stable under insert/erase.
- */
-template<class T> using ISStringToOneT =
-  hphp_fast_map<
-    SString,
-    T,
-    string_data_hash,
-    string_data_isame
-  >;
-
-/*
- * One-to-one case sensitive map, where the keys are static strings
- * and the values are some T.
- *
- * Elements are not stable under insert/erase.
- *
- * Static strings are always uniquely defined by their pointer, so
- * pointer hashing/comparison is sufficient.
- */
-template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
-
-/*
- * One-to-one case sensitive concurrent map, where the keys are static
- * strings and the values are some T.
- *
- * Concurrent insertions and lookups are supported.
- *
- * Static strings are always uniquely defined by their pointer, so
- * pointer hashing/comparison is sufficient.
- */
-template<class T> using SStringToOneConcurrentT =
-  folly_concurrent_hash_map_simd<SString, T>;
-
-/*
- * One-to-one case insensitive concurrent map, where the keys are
- * static strings and the values are some T.
- *
- * Concurrent insertions and lookups are supported.
- */
-template<class T> using ISStringToOneConcurrentT =
-  folly_concurrent_hash_map_simd<SString, T,
-                                 string_data_hash, string_data_isame>;
-
-/*
- * Case sensitive static string set.
- */
-using SStringSet = hphp_fast_set<SString>;
-/*
- * Case insensitive static string set.
- */
-using ISStringSet = hphp_fast_set<SString, string_data_hash, string_data_isame>;
-
-//////////////////////////////////////////////////////////////////////
-
 template<typename T> using UniquePtrRef = Ref<std::unique_ptr<T>>;
 
 //////////////////////////////////////////////////////////////////////
@@ -205,23 +147,11 @@ using DepMap =
 
 /*
  * Each ClassInfo has a table of public static properties with these entries.
- * The `initializerType' is for use during refine_public_statics, and
- * inferredType will always be a supertype of initializerType.
  */
 struct PublicSPropEntry {
-  Type inferredType;
-  Type initializerType;
-  const php::Prop* prop;
-  uint32_t refinements;
-  /*
-   * This flag is set during analysis to indicate that we resolved the
-   * initial value (and updated it on the php::Class). This doesn't
-   * need to be atomic, because only one thread can resolve the value
-   * (the one processing the 86sinit), and it's been joined by the
-   * time we read the flag in refine_public_statics.
-   */
-  bool initialValueResolved;
-  bool everModified;
+  Type inferredType{TInitCell};
+  uint32_t refinements{0};
+  bool everModified{true};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1377,13 +1307,6 @@ struct ClassInfo {
   /*
    * Property types for public static properties, declared on this exact class
    * (i.e. not flattened in the hierarchy).
-   *
-   * These maps always have an entry for each public static property declared
-   * in this class, so it can also be used to check if this class declares a
-   * public static property of a given name.
-   *
-   * Note: the effective type we can assume a given static property may hold is
-   * not just the value in these maps.
    */
   SStringToOneT<PublicSPropEntry> publicStaticProps;
 
@@ -1655,6 +1578,12 @@ struct ClassInfo2 {
   bool hasBadRedeclareProp{true};
 
   /*
+   * Track if this class has any properties with initial values that might
+   * violate their type-hints.
+   */
+  bool hasBadInitialPropValues{true};
+
+  /*
    * Track if this class has any const props (including inherited ones).
    */
   bool hasConstProp{false};
@@ -1731,6 +1660,7 @@ struct ClassInfo2 {
       (methodFamilies, string_data_lt{})
       (funcInfos)
       (hasBadRedeclareProp)
+      (hasBadInitialPropValues)
       (hasConstProp)
       (subHasConstProp)
       (hasReifiedParent)
@@ -5239,6 +5169,26 @@ visit_parent_cinfo(const ClassInfo* cinfo, F fun) -> decltype(fun(cinfo)) {
   return {};
 }
 
+//////////////////////////////////////////////////////////////////////
+
+// The type of a public static property, considering only it's initial
+// value.
+Type initial_type_for_public_sprop(const Index& index,
+                                   const php::Class& cls,
+                                   const php::Prop& prop) {
+  /*
+   * If the initializer type is TUninit, it means an 86sinit provides
+   * the actual initialization type or it is AttrLateInit. So we don't
+   * want to include the Uninit (which isn't really a user-visible
+   * type for the property) or by the time we union things in we'll
+   * have inferred nothing much.
+   */
+  auto const ty = from_cell(prop.val);
+  if (ty.subtypeOf(BUninit)) return TBottom;
+  if (prop.attrs & AttrSystemInitialValue) return ty;
+  return adjust_type_for_prop(index, cls, &prop.typeConstraint, ty);
+}
+
 Type lookup_public_prop_impl(
   const IndexData& data,
   const ClassInfo* cinfo,
@@ -5411,9 +5361,28 @@ PropLookupResult lookup_static_impl(IndexData& data,
       case AttrPublic:
       case AttrProtected: {
         if (ctx.unit) add_dependency(data, &prop, ctx, Dep::PublicSProp);
+        if (!data.seenPublicSPropMutations) {
+          // If we haven't recorded any mutations yet, we need to be
+          // conservative and consider only the type-hint and initial
+          // value.
+          return union_of(
+            adjust_type_for_prop(
+              *data.m_index,
+              *ci->cls,
+              &prop.typeConstraint,
+              TInitCell
+            ),
+            initial_type_for_public_sprop(*data.m_index, *ci->cls, prop)
+          );
+        }
         auto const it = ci->publicStaticProps.find(propName);
-        assertx(it != end(ci->publicStaticProps));
-        return remove_uninit(it->second.inferredType);
+        if (it == end(ci->publicStaticProps)) {
+          // We've recorded mutations, but have information for this
+          // property. That means there's no mutations so only
+          // consider the initial value.
+          return initial_type_for_public_sprop(*data.m_index, *ci->cls, prop);
+        }
+        return it->second.inferredType;
       }
       case AttrPrivate: {
         assertx(clsCtx == ci);
@@ -5579,7 +5548,7 @@ PropMergeResult merge_static_type_impl(IndexData& data,
 
     ITRACE(
       6, "merging {} into {}::${}\n",
-      show(effects.adjusted), ci->cls->name, prop.name
+      show(effects), ci->cls->name, prop.name
     );
 
     switch (prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
@@ -5589,6 +5558,9 @@ PropMergeResult merge_static_type_impl(IndexData& data,
          // If the property is internal, accessing it may throw
          // TODO(T131951529): we can do better by checking modules here
         if ((prop.attrs & AttrInternal) && effects.throws == TriBool::No) {
+          ITRACE(6, "{}::${} is internal, "
+                 "being pessimistic with regards to throwing\n",
+                 ci->cls->name, prop.name);
           return PropMergeResult{
             effects.adjusted,
             TriBool::Maybe
@@ -8439,13 +8411,56 @@ private:
                                   php::Class& cls,
                                   ClassInfo2& cinfo) {
     assertx(cinfo.hasBadRedeclareProp);
+    assertx(cinfo.hasBadInitialPropValues);
 
     auto const isClosure = is_closure(cls);
 
     cinfo.hasBadRedeclareProp = false;
+    cinfo.hasBadInitialPropValues = false;
     for (auto& prop : cls.properties) {
       assertx(!(prop.attrs & AttrNoBadRedeclare));
       assertx(!(prop.attrs & AttrNoImplicitNullable));
+      assertx(!(prop.attrs & AttrInitialSatisfiesTC));
+
+      // Check whether the property's initial value satisfies it's
+      // type-hint.
+      auto const initialSatisfies = [&] {
+        if (isClosure) return true;
+        if (is_used_trait(cls)) return false;
+        if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return true;
+
+        auto const initial = from_cell(prop.val);
+        if (initial.subtypeOf(BUninit)) return false;
+
+        auto const make_type = [&] (const TypeConstraint& tc) {
+          auto lookup = type_from_constraint(
+            tc,
+            TInitCell,
+            [] (SString name) { return res::Class::makeUnresolved(name); },
+            [&] () -> Optional<Type> {
+              auto const& ctx = cls.closureContextCls
+                ? index.cls(cls.closureContextCls)
+                : cls;
+              if (ctx.attrs & AttrTrait) return std::nullopt;
+              return subCls(res::Class::makeUnresolved(ctx.name));
+            }
+          );
+          return unctx(std::move(lookup.lower));
+        };
+
+        if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
+        for (auto ub : prop.ubs) {
+          applyFlagsToUB(ub, prop.typeConstraint);
+          if (!initial.subtypeOf(make_type(ub))) return false;
+        }
+        return true;
+      }();
+
+      if (initialSatisfies) {
+        attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
+      } else {
+        cinfo.hasBadInitialPropValues = true;
+      }
 
       auto const noBadRedeclare = [&] {
         // Closures should never have redeclared properties.
@@ -12993,6 +13008,7 @@ void make_class_infos_local(
       std::sort(begin(cinfo->subclassList), end(cinfo->subclassList));
 
       cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
+      cinfo->hasBadInitialPropValues = rcinfo->hasBadInitialPropValues;
       cinfo->hasConstProp = rcinfo->hasConstProp;
       cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
       cinfo->subHasConstProp = rcinfo->subHasConstProp;
@@ -13861,26 +13877,6 @@ void Index::for_each_unit_class_mutable(php::Unit& unit,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void Index::preinit_bad_initial_prop_values() {
-  trace_time tracer("preinit bad initial prop values", m_data->sample);
-  parallel::for_each(
-    m_data->allClassInfos,
-    [&] (std::unique_ptr<ClassInfo>& cinfo) {
-      if (is_used_trait(*cinfo->cls)) return;
-
-      cinfo->hasBadInitialPropValues = false;
-      for (auto& prop : const_cast<php::Class*>(cinfo->cls)->properties) {
-        if (prop_might_have_bad_initial_value(*this, *cinfo->cls, prop)) {
-          cinfo->hasBadInitialPropValues = true;
-          prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
-        } else {
-          prop.attrs |= AttrInitialSatisfiesTC;
-        }
-      }
-    }
-  );
-}
 
 void Index::preresolve_type_structures() {
   trace_time tracer("pre-resolve type-structures", m_data->sample);
@@ -15290,10 +15286,31 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
 
     auto [ty, everModified] = [&] {
       if (!cinfo) return std::make_pair(TInitCell, true);
+
+      if (!m_data->seenPublicSPropMutations) {
+        return std::make_pair(
+          union_of(
+            adjust_type_for_prop(
+              *this,
+              *cls,
+              &prop.typeConstraint,
+              TInitCell
+            ),
+            initial_type_for_public_sprop(*this, *cls, prop)
+          ),
+          true
+        );
+      }
+
       auto const it = cinfo->publicStaticProps.find(prop.name);
-      assertx(it != end(cinfo->publicStaticProps));
+      if (it == end(cinfo->publicStaticProps)) {
+        return std::make_pair(
+          initial_type_for_public_sprop(*this, *cls, prop),
+          false
+        );
+      }
       return std::make_pair(
-        remove_uninit(it->second.inferredType),
+        it->second.inferredType,
         it->second.everModified
       );
     }();
@@ -15579,6 +15596,10 @@ DependencyContext Index::dependency_context(const Context& ctx) const {
   return dep_context(*m_data, ctx);
 }
 
+bool Index::using_class_dependencies() const {
+  return m_data->useClassDependencies;
+}
+
 void Index::use_class_dependencies(bool f) {
   if (f != m_data->useClassDependencies) {
     m_data->dependencyMap.clear();
@@ -15586,58 +15607,9 @@ void Index::use_class_dependencies(bool f) {
   }
 }
 
-void Index::init_public_static_prop_types() {
-  trace_time tracer("init public static prop types", m_data->sample);
-
-  for (auto const& cinfo : m_data->allClassInfos) {
-    for (auto const& prop : cinfo->cls->properties) {
-      if (!(prop.attrs & (AttrPublic|AttrProtected)) ||
-          !(prop.attrs & AttrStatic)) {
-        continue;
-      }
-
-      /*
-       * If the initializer type is TUninit, it means an 86sinit provides the
-       * actual initialization type or it is AttrLateInit.  So we don't want to
-       * include the Uninit (which isn't really a user-visible type for the
-       * property) or by the time we union things in we'll have inferred nothing
-       * much.
-       */
-      auto const initial = [&] {
-        auto const tyRaw = from_cell(prop.val);
-        if (tyRaw.subtypeOf(BUninit)) return TBottom;
-        if (prop.attrs & AttrSystemInitialValue) return tyRaw;
-        return adjust_type_for_prop(
-          *this, *cinfo->cls, &prop.typeConstraint, tyRaw
-        );
-      }();
-
-      cinfo->publicStaticProps[prop.name] =
-        PublicSPropEntry {
-          union_of(
-            adjust_type_for_prop(
-              *this,
-              *cinfo->cls,
-              &prop.typeConstraint,
-              TInitCell
-            ),
-            initial
-          ),
-          initial,
-          &prop,
-          0,
-          false,
-          true
-      };
-    }
-  }
-}
-
-void Index::refine_class_constants(
-  const Context& ctx,
-  const CompactVector<std::pair<size_t, ClsConstInfo>>& resolved,
-  DependencyContextSet& deps
-) {
+void Index::refine_class_constants(const Context& ctx,
+                                   const ResolvedConstants& resolved,
+                                   DependencyContextSet& deps) {
   if (resolved.empty()) return;
 
   auto changed = false;
@@ -15931,19 +15903,74 @@ void Index::record_public_static_mutations(const php::Func& func,
   m_data->publicSPropMutations.insert_or_assign(&func, std::move(mutations));
 }
 
-void Index::update_static_prop_init_val(const php::Class* cls,
-                                        SString name) const {
-  auto const cls_it = m_data->classInfo.find(cls->name);
-  if (cls_it == end(m_data->classInfo)) {
-    return;
+void Index::update_prop_initial_values(const Context& ctx,
+                                       const ResolvedPropInits& resolved,
+                                       DependencyContextSet& deps) {
+  auto& props = const_cast<php::Class*>(ctx.cls)->properties;
+
+  auto changed = false;
+  for (auto const& [idx, info] : resolved) {
+    assertx(idx < props.size());
+    auto& prop = props[idx];
+
+    if (info.satisfies) {
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
+        changed = true;
+      }
+    } else {
+      always_assert_flog(
+        !(prop.attrs & AttrInitialSatisfiesTC),
+        "AttrInitialSatisfiesTC invariant violated for {}::{}\n"
+        "  Went from true to false",
+        ctx.cls->name, prop.name
+      );
+    }
+
+    always_assert_flog(
+      IMPLIES(!(prop.attrs & AttrDeepInit), !info.deepInit),
+      "AttrDeepInit invariant violated for {}::{}\n"
+      "  Went from false to true",
+      ctx.cls->name, prop.name
+    );
+    attribute_setter(prop.attrs, info.deepInit, AttrDeepInit);
+
+    if (type(info.val) != KindOfUninit) {
+      always_assert_flog(
+        type(prop.val) == KindOfUninit || tvSame(prop.val, info.val),
+        "Property initial value invariant violated for {}::{}\n"
+        "  Value went from {} to {}",
+        ctx.cls->name, prop.name,
+        show(from_cell(prop.val)), show(from_cell(info.val))
+      );
+      prop.val = info.val;
+    } else {
+      always_assert_flog(
+        type(prop.val) == KindOfUninit,
+        "Property initial value invariant violated for {}::{}\n"
+        " Value went from {} to not set",
+        ctx.cls->name, prop.name,
+        show(from_cell(prop.val))
+      );
+    }
   }
-  auto const cinfo = cls_it->second;
-  if (cinfo->cls != cls) {
-    return;
-  }
-  auto const it = cinfo->publicStaticProps.find(name);
-  if (it != cinfo->publicStaticProps.end()) {
-    it->second.initialValueResolved = true;
+  if (!changed) return;
+
+  auto const it = m_data->classInfo.find(ctx.cls->name);
+  if (it == end(m_data->classInfo)) return;
+  auto const cinfo = it->second;
+
+  assertx(cinfo->hasBadInitialPropValues);
+  auto const noBad = std::all_of(
+    begin(props), end(props),
+    [] (const php::Prop& prop) {
+      return bool(prop.attrs & AttrInitialSatisfiesTC);
+    }
+  );
+
+  if (noBad) {
+    cinfo->hasBadInitialPropValues = false;
+    find_deps(*m_data, ctx.cls, Dep::PropBadInitialValues, deps);
   }
 }
 
@@ -15981,114 +16008,92 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
   m_data->seenPublicSPropMutations = true;
 
   // Refine known class state
-  for (auto const& cinfo : m_data->allClassInfos) {
-    for (auto& kv : cinfo->publicStaticProps) {
-      auto knownClsType = [&] {
-        auto const it = known.find(
-          PublicSPropMutations::KnownKey { cinfo.get(), kv.first }
-        );
-        // If we didn't see a mutation, the type is TBottom.
-        return it == end(known) ? TBottom : it->second;
-      }();
-
-      auto unknownClsType = [&] {
-        auto const it = unknown.find(kv.first);
-        // If we didn't see a mutation, the type is TBottom.
-        return it == end(unknown) ? TBottom : it->second;
-      }();
-
-      // We can't keep context dependent types in public properties.
-      auto newType = adjust_type_for_prop(
-        *this,
-        *cinfo->cls,
-        &kv.second.prop->typeConstraint,
-        unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))
-      );
-
-      if (!newType.is(BBottom)) {
-        always_assert_flog(
-          kv.second.everModified,
-          "Static property index invariant violated on {}::{}:\n"
-          " everModified flag went from false to true",
-          cinfo->cls->name->data(),
-          kv.first->data()
-        );
-      } else {
-        kv.second.everModified = false;
-      }
-
-      if (kv.second.initialValueResolved) {
-        for (auto& prop : cinfo->cls->properties) {
-          if (prop.name != kv.first) continue;
-          kv.second.initializerType = from_cell(prop.val);
-          kv.second.initialValueResolved = false;
-          break;
+  parallel::for_each(
+    m_data->allClassInfos,
+    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      for (auto const& prop : cinfo->cls->properties) {
+        if (!(prop.attrs & (AttrPublic|AttrProtected)) ||
+            !(prop.attrs & AttrStatic)) {
+          continue;
         }
-        assertx(!kv.second.initialValueResolved);
-      }
 
-      // The type from the indexer doesn't contain the in-class initializer
-      // types. Add that here.
-      auto effectiveType =
-        union_of(std::move(newType), kv.second.initializerType);
-
-      /*
-       * We may only shrink the types we recorded for each property. (If a
-       * property type ever grows, the interpreter could infer something
-       * incorrect at some step.)
-       */
-      always_assert_flog(
-        effectiveType.subtypeOf(kv.second.inferredType),
-        "Static property index invariant violated on {}::{}:\n"
-        "  {} is not a subtype of {}",
-        cinfo->cls->name->data(),
-        kv.first->data(),
-        show(effectiveType),
-        show(kv.second.inferredType)
-      );
-
-      // Put a limit on the refinements to ensure termination. Since we only
-      // ever refine types, we can stop at any point and still maintain
-      // correctness.
-      if (effectiveType.strictSubtypeOf(kv.second.inferredType)) {
-        if (kv.second.refinements + 1 < options.publicSPropRefineLimit) {
-          find_deps(*m_data, kv.second.prop, Dep::PublicSProp, deps);
-          kv.second.inferredType = std::move(effectiveType);
-          ++kv.second.refinements;
-        } else {
-          FTRACE(
-            1, "maxed out public static property refinements for {}:{}\n",
-            cinfo->cls->name->data(),
-            kv.first->data()
+        auto knownClsType = [&] {
+          auto const it = known.find(
+            PublicSPropMutations::KnownKey { cinfo.get(), prop.name }
           );
+          // If we didn't see a mutation, the type is TBottom.
+          return it == end(known) ? TBottom : it->second;
+        }();
+
+        auto unknownClsType = [&] {
+          auto const it = unknown.find(prop.name);
+          // If we didn't see a mutation, the type is TBottom.
+          return it == end(unknown) ? TBottom : it->second;
+        }();
+
+        // We can't keep context dependent types in public properties.
+        auto newType = adjust_type_for_prop(
+          *this,
+          *cinfo->cls,
+          &prop.typeConstraint,
+          unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))
+        );
+
+        auto& entry = cinfo->publicStaticProps[prop.name];
+
+        if (!newType.is(BBottom)) {
+          always_assert_flog(
+            entry.everModified,
+            "Static property index invariant violated on {}::{}:\n"
+            " everModified flag went from false to true",
+            cinfo->cls->name,
+            prop.name
+          );
+        } else {
+          entry.everModified = false;
+        }
+
+        // The type from the mutations doesn't contain the in-class
+        // initializer types. Add that here.
+        auto effectiveType = union_of(
+          std::move(newType),
+          initial_type_for_public_sprop(*this, *cinfo->cls, prop)
+        );
+
+        /*
+         * We may only shrink the types we recorded for each property. (If a
+         * property type ever grows, the interpreter could infer something
+         * incorrect at some step.)
+         */
+        always_assert_flog(
+          effectiveType.subtypeOf(entry.inferredType),
+          "Static property index invariant violated on {}::{}:\n"
+          "  {} is not a subtype of {}",
+          cinfo->cls->name,
+          prop.name,
+          show(effectiveType),
+          show(entry.inferredType)
+        );
+
+        // Put a limit on the refinements to ensure termination. Since
+        // we only ever refine types, we can stop at any point and still
+        // maintain correctness.
+        if (effectiveType.strictSubtypeOf(entry.inferredType)) {
+          if (entry.refinements + 1 < options.publicSPropRefineLimit) {
+            find_deps(*m_data, &prop, Dep::PublicSProp, deps);
+            entry.inferredType = std::move(effectiveType);
+            ++entry.refinements;
+          } else {
+            FTRACE(
+              1, "maxed out public static property refinements for {}:{}\n",
+              cinfo->cls->name,
+              prop.name
+            );
+          }
         }
       }
     }
-  }
-}
-
-void Index::refine_bad_initial_prop_values(const php::Class* cls,
-                                           bool value,
-                                           DependencyContextSet& deps) {
-  assertx(!is_used_trait(*cls));
-  auto const it = m_data->classInfo.find(cls->name);
-  if (it == end(m_data->classInfo)) {
-    return;
-  }
-  auto const cinfo = it->second;
-  if (cinfo->cls != cls) {
-    return;
-  }
-  always_assert_flog(
-    cinfo->hasBadInitialPropValues || !value,
-    "Bad initial prop values going from false to true on {}",
-    cls->name->data()
   );
-
-  if (cinfo->hasBadInitialPropValues && !value) {
-    cinfo->hasBadInitialPropValues = false;
-    find_deps(*m_data, cls, Dep::PropBadInitialValues, deps);
-  }
 }
 
 bool Index::frozen() const {
@@ -16193,6 +16198,8 @@ void Index::thaw() {
 
 //////////////////////////////////////////////////////////////////////
 
+PublicSPropMutations::PublicSPropMutations(bool enabled) : m_enabled{enabled} {}
+
 PublicSPropMutations::Data& PublicSPropMutations::get() {
   if (!m_data) m_data = std::make_unique<Data>();
   return *m_data;
@@ -16201,6 +16208,7 @@ PublicSPropMutations::Data& PublicSPropMutations::get() {
 void PublicSPropMutations::mergeKnown(const ClassInfo* ci,
                                       const php::Prop& prop,
                                       const Type& val) {
+  if (!m_enabled) return;
   ITRACE(4, "PublicSPropMutations::mergeKnown: {} {} {}\n",
          ci->cls->name->data(), prop.name, show(val));
 
@@ -16211,6 +16219,7 @@ void PublicSPropMutations::mergeKnown(const ClassInfo* ci,
 }
 
 void PublicSPropMutations::mergeUnknownClass(SString prop, const Type& val) {
+  if (!m_enabled) return;
   ITRACE(4, "PublicSPropMutations::mergeUnknownClass: {} {}\n",
          prop, show(val));
 
@@ -16219,6 +16228,7 @@ void PublicSPropMutations::mergeUnknownClass(SString prop, const Type& val) {
 }
 
 void PublicSPropMutations::mergeUnknown(Context ctx) {
+  if (!m_enabled) return;
   ITRACE(4, "PublicSPropMutations::mergeUnknown\n");
 
   /*

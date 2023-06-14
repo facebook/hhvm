@@ -83,6 +83,11 @@ void dump_class_state(std::ostream& out,
                       const php::Class* c) {
   auto const clsName = c->name->toCppString();
 
+  auto const add_attrs = [&] (Attr attrs) {
+    if (!(attrs & AttrInitialSatisfiesTC)) out << " (no-satisfies-tc)";
+    if (attrs & AttrDeepInit) out << " (deep-init)";
+  };
+
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
     auto const useVars = index.lookup_closure_use_vars(invoke);
@@ -91,12 +96,14 @@ void dump_class_state(std::ostream& out,
           << show(useVars[i]) << '\n';
     }
   } else {
-    auto const pprops = sorted_prop_state(
+     auto const pprops = sorted_prop_state(
       index.lookup_private_props(c)
     );
     for (auto const& kv : pprops) {
       out << clsName << "->" << kv.first->data() << " :: "
-          << show(kv.second.ty) << '\n';
+          << show(kv.second.ty);
+      add_attrs(kv.second.attrs);
+      out << '\n';
     }
 
     auto const private_sprops = sorted_prop_state(
@@ -106,6 +113,7 @@ void dump_class_state(std::ostream& out,
       out << clsName << "::$" << kv.first->data() << " :: "
           << show(kv.second.ty);
       if (!kv.second.everModified) out << " (persistent)";
+      add_attrs(kv.second.attrs);
       out << '\n';
     }
 
@@ -116,6 +124,7 @@ void dump_class_state(std::ostream& out,
       out << clsName << "::$" << kv.first->data() << " :: "
           << show(kv.second.ty);
       if (!kv.second.everModified) out << " (persistent)";
+      add_attrs(kv.second.attrs);
       out << '\n';
     }
   }

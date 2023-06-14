@@ -500,7 +500,10 @@ struct PropertiesInfo {
                                 bool ignoreConst,
                                 bool mustBeReadOnly);
 
-  void setBadPropInitialValues();
+  void setInitialValue(const php::Prop&, TypedValue, bool, bool);
+
+  bool hasInitialValues() const { return !m_inits.empty(); }
+  const PropInitInfo* getInitialValue(const php::Prop&) const;
 
   const PropState& privatePropertiesRaw() const;
   const PropState& privateStaticsRaw() const;
@@ -509,6 +512,7 @@ private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
+  hphp_fast_map<const php::Prop*, PropInitInfo> m_inits;
   const php::Func* m_func;
 };
 

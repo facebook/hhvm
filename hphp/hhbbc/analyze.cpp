@@ -468,6 +468,18 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.inferredReturn =
     fixup_return_type(index, *ctx.func, std::move(ai.inferredReturn));
 
+  if (collect.props.hasInitialValues()) {
+    for (size_t i = 0, size = ctx.cls->properties.size(); i < size; ++i) {
+      auto const& prop = ctx.cls->properties[i];
+      auto initial = collect.props.getInitialValue(prop);
+      if (!initial) continue;
+      if (ai.resolvedInitializers.isNull()) {
+        ai.resolvedInitializers = decltype(ai.resolvedInitializers)::makeR();
+      }
+      ai.resolvedInitializers.right()->emplace_back(i, std::move(*initial));
+    }
+  }
+
   /*
    * If inferredReturn is TBottom, the callee didn't execute a return
    * at all.  (E.g. it unconditionally throws, or is an abstract
@@ -578,7 +590,11 @@ FuncAnalysis do_analyze(const Index& index,
     if (!cns.val) continue;
     if (cns.val->m_type != KindOfUninit) continue;
     auto& info = clsCnsWork->constants.at(cns.name);
-    ret.resolvedConstants.emplace_back(i, std::move(info));
+    if (ret.resolvedInitializers.isNull()) {
+      ret.resolvedInitializers = decltype(ret.resolvedInitializers)::makeL();
+    }
+    assertx(ret.resolvedInitializers.left());
+    ret.resolvedInitializers.left()->emplace_back(i, std::move(info));
   }
   return ret;
 }
@@ -810,15 +826,39 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * Also, set Uninit properties to TBottom, so that analysis
    * of 86pinit methods sets them to the correct type.
    */
-  for (auto& prop : const_cast<php::Class*>(ctx.cls)->properties) {
+
+  auto const initialMightBeBad = [&] (const php::Prop& prop,
+                                      const Type& initial) {
+    if (is_closure(*ctx.cls)) return false;
+    if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
+    if (!initial.moreRefined(
+          lookup_constraint(index, ctx, prop.typeConstraint, initial).lower
+        )) {
+      return true;
+    }
+    return std::any_of(
+      begin(prop.ubs), end(prop.ubs),
+      [&] (TypeConstraint ub) {
+        applyFlagsToUB(ub, prop.typeConstraint);
+        return !initial.moreRefined(
+          lookup_constraint(index, ctx, ub, initial).lower
+        );
+      }
+    );
+  };
+
+  for (size_t propIdx = 0, size = ctx.cls->properties.size();
+       propIdx < size; ++propIdx) {
+    auto const& prop = ctx.cls->properties[propIdx];
     auto const cellTy = from_cell(prop.val);
 
-    if (prop_might_have_bad_initial_value(index, *ctx.cls, prop)) {
-      prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
-      // If Uninit, it will be determined in the 86[s,p]init function.
-      if (!cellTy.subtypeOf(BUninit)) clsAnalysis.badPropInitialValues = true;
-    } else {
-      prop.attrs |= AttrInitialSatisfiesTC;
+    if (!(prop.attrs & AttrInitialSatisfiesTC) &&
+        !cellTy.subtypeOf(BUninit)) {
+      if (!initialMightBeBad(prop, cellTy)) {
+        clsAnalysis.resolvedProps.emplace_back(
+          propIdx, PropInitInfo{prop.val, true, false}
+        );
+      }
     }
 
     if (!(prop.attrs & AttrPrivate)) continue;

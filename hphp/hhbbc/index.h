@@ -268,6 +268,17 @@ struct ClsConstInfo {
   size_t refinements = 0;
 };
 
+using ResolvedConstants = CompactVector<std::pair<size_t, ClsConstInfo>>;
+
+//////////////////////////////////////////////////////////////////////
+
+struct PropInitInfo {
+  TypedValue val;
+  bool satisfies;
+  bool deepInit;
+};
+using ResolvedPropInits = CompactVector<std::pair<size_t, PropInitInfo>>;
+
 //////////////////////////////////////////////////////////////////////
 
 // private types
@@ -1211,6 +1222,7 @@ struct Index {
    * Must be called in single-threaded context.
    */
   void use_class_dependencies(bool f);
+  bool using_class_dependencies() const;
 
   /*
    * Merge the type `val' into the known type for static property
@@ -1238,19 +1250,6 @@ struct Index {
                                     bool mustBeReadOnly = false) const;
 
   /*
-   * Initialize the initial types for public static properties. This should be
-   * done after rewriting initial property values, as that affects the types.
-   */
-  void init_public_static_prop_types();
-
-  /*
-   * Initialize the initial "may have bad initial value" bit for
-   * properties. By initially setting this before analysis, we save
-   * redundant re-analyzes.
-   */
-  void preinit_bad_initial_prop_values();
-
-  /*
    * Attempt to pre-resolve as many type-structures as possible in
    * type-constants and type-aliases.
    */
@@ -1266,10 +1265,9 @@ struct Index {
    * Merges the set of Contexts that depended on the constants defined
    * by this 86cinit.
    */
-  void refine_class_constants(
-    const Context& ctx,
-    const CompactVector<std::pair<size_t, ClsConstInfo>>& resolved,
-    DependencyContextSet& deps);
+  void refine_class_constants(const Context& ctx,
+                              const ResolvedConstants& resolved,
+                              DependencyContextSet& deps);
 
   /*
    * Refine the types of the constants defined by a function, based on
@@ -1344,19 +1342,6 @@ struct Index {
   void record_public_static_mutations(const php::Func& func,
                                       PublicSPropMutations mutations);
 
-
-  /*
-   * If we resolve the intial value of a public property, we need to
-   * tell the refine_public_statics phase about it, because the init
-   * value won't be included in the mutations any more.
-   *
-   * Note that we can't modify the initial value here, because other
-   * threads might be reading it (via loookup_public_static), so we
-   * set a flag to tell us to update it during the next
-   * refine_public_statics pass.
-   */
-  void update_static_prop_init_val(const php::Class* cls,
-                                   SString name) const;
   /*
    * After a round of analysis with all the public static property mutations
    * being recorded with record_public_static_mutations, the types can be
@@ -1371,15 +1356,14 @@ struct Index {
   void refine_public_statics(DependencyContextSet& deps);
 
   /*
-   * Refine whether the given class has properties with initial values which
-   * might violate their type-hints.
-   *
-   * No other threads should be calling functions on this Index when this
-   * function is called.
+   * Update the initial values for properties inferred from
+   * 86[p/s]init functions during analysis. The modification of the
+   * relevant php::Prop instances must be done here when we know
+   * nobody else is reading them.
    */
-  void refine_bad_initial_prop_values(const php::Class* cls,
-                                      bool value,
-                                      DependencyContextSet& deps);
+  void update_prop_initial_values(const Context&,
+                                  const ResolvedPropInits&,
+                                  DependencyContextSet&);
 
   /*
    * Return true if the function is effect free.
@@ -1416,21 +1400,25 @@ private:
  * Used for collecting all mutations of public static property types.
  */
 struct PublicSPropMutations {
+  explicit PublicSPropMutations(bool enabled = true);
 private:
   friend struct Index;
 
   struct KnownKey {
-    bool operator<(KnownKey o) const {
-      if (cinfo != o.cinfo) return cinfo < o.cinfo;
-      return prop < o.prop;
-    }
-
     ClassInfo* cinfo;
     SString prop;
+    bool operator==(const KnownKey& o) const {
+      return cinfo == o.cinfo && prop == o.prop;
+    }
+    struct Hasher {
+      size_t operator()(const KnownKey& k) const {
+        return folly::hash::hash_combine(k.cinfo, k.prop);
+      }
+    };
   };
 
-  using UnknownMap = std::map<SString,Type>;
-  using KnownMap = std::map<KnownKey,Type>;
+  using UnknownMap = SStringToOneT<Type>;
+  using KnownMap = hphp_fast_map<KnownKey, Type, KnownKey::Hasher>;
 
   // Public static property mutations are actually rare, so defer allocating the
   // maps until we actually see one.
@@ -1440,6 +1428,7 @@ private:
     KnownMap m_known;
   };
   std::unique_ptr<Data> m_data;
+  bool m_enabled;
 
   Data& get();
 

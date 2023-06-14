@@ -335,8 +335,8 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
     ++round;
     trace_time update_time("updating");
 
-    auto update_func = [&] (FuncAnalysisResult& fa,
-                            DependencyContextSet& deps) {
+    auto const update_func = [&] (FuncAnalysisResult& fa,
+                                  DependencyContextSet& deps) {
       SCOPE_ASSERT_DETAIL("update_func") {
         return "Updating Func: " + show(fa.ctx);
       };
@@ -353,9 +353,12 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
         );
       }
 
-      if (fa.resolvedConstants.size()) {
-        index.refine_class_constants(fa.ctx, fa.resolvedConstants, deps);
+      if (auto const l = fa.resolvedInitializers.left()) {
+        index.refine_class_constants(fa.ctx, *l, deps);
+      } else if (auto const r = fa.resolvedInitializers.right()) {
+        index.update_prop_initial_values(fa.ctx, *r, deps);
       }
+
       for (auto const& [cls, vars] : fa.closureUseTypes) {
         assertx(is_closure(*cls));
         if (index.refine_closure_use_vars(cls, vars)) {
@@ -372,8 +375,8 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
       }
     };
 
-    auto update_class = [&] (ClassAnalysis& ca,
-                             DependencyContextSet& deps) {
+    auto const update_class = [&] (ClassAnalysis& ca,
+                                   DependencyContextSet& deps) {
       {
         SCOPE_ASSERT_DETAIL("update_class") {
           return "Updating Class: " + show(ca.ctx);
@@ -382,9 +385,7 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
                                    ca.privateProperties);
         index.refine_private_statics(ca.ctx.cls,
                                      ca.privateStatics);
-        index.refine_bad_initial_prop_values(ca.ctx.cls,
-                                             ca.badPropInitialValues,
-                                             deps);
+        index.update_prop_initial_values(ca.ctx, ca.resolvedProps, deps);
       }
       for (auto& fa : ca.methods)  update_func(fa, deps);
       for (auto& fa : ca.closures) update_func(fa, deps);
@@ -976,8 +977,6 @@ void whole_program(WholeProgramInput inputs,
   // property types until after the constant pass, to try to get
   // better initial values.
   index.preresolve_type_structures();
-  index.init_public_static_prop_types();
-  index.preinit_bad_initial_prop_values();
   index.use_class_dependencies(true);
   analyze_iteratively(index, AnalyzeMode::NormalPass);
   auto cleanup_for_final = std::thread([&] { index.cleanup_for_final(); });

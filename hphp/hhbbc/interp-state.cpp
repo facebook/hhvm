@@ -163,6 +163,7 @@ CollectedInfo::CollectedInfo(const Index& index,
     , methods{ctx, cls}
     , clsCns{clsCns}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
+    , publicSPropMutations{index.using_class_dependencies() && !fa}
 {
   if (fa) {
     unfoldableFuncs = fa->unfoldableFuncs;
@@ -375,8 +376,16 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
   }
 }
 
-void PropertiesInfo::setBadPropInitialValues() {
-  if (m_cls) m_cls->badPropInitialValues = true;
+void PropertiesInfo::setInitialValue(const php::Prop& prop,
+                                     TypedValue val,
+                                     bool satisfies,
+                                     bool deepInit) {
+  m_inits[&prop] = PropInitInfo{val, satisfies, deepInit};
+}
+
+const PropInitInfo*
+PropertiesInfo::getInitialValue(const php::Prop& prop) const {
+  return folly::get_ptr(m_inits, &prop);
 }
 
 //////////////////////////////////////////////////////////////////////

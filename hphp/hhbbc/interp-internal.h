@@ -1042,10 +1042,41 @@ void killPrivateStatics(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // misc
 
-void badPropInitialValue(ISS& env) {
-  FTRACE(2, "    badPropInitialValue\n");
-  env.collect.props.setBadPropInitialValues();
+inline void propInitialValue(ISS& env,
+                             const php::Prop& prop,
+                             TypedValue val,
+                             bool satisfies,
+                             bool deepInit) {
+  FTRACE(2, "    propInitialValue \"{}\" -> {}{}{}\n",
+         prop.name, show(from_cell(val)),
+         satisfies ? " (initial satisfies TC)" : "",
+         deepInit ? " (deep init)" : "");
+  env.collect.props.setInitialValue(prop, val, satisfies, deepInit);
 }
+
+inline PropMergeResult mergeStaticProp(ISS& env,
+                                       const Type& self,
+                                       const Type& name,
+                                       const Type& val,
+                                       bool checkUB = false,
+                                       bool ignoreConst = false,
+                                       bool mustBeReadOnly = false) {
+  FTRACE(2, "    mergeStaticProp {}::{} -> {}\n",
+         show(self), show(name), show(val));
+  return env.index.merge_static_type(
+    env.ctx,
+    env.collect.publicSPropMutations,
+    env.collect.props,
+    self,
+    name,
+    val,
+    checkUB,
+    ignoreConst,
+    mustBeReadOnly
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
 
 #ifdef __clang__
 #pragma clang diagnostic pop

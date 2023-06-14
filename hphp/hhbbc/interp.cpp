@@ -2297,7 +2297,9 @@ void in(ISS& env, const bc::CGetS& op) {
   if (mustBeMutable && lookup.readOnly == TriBool::Yes) {
     return throws();
   }
-  auto const mightReadOnlyThrow = mustBeMutable && lookup.readOnly == TriBool::Maybe;
+  auto const mightReadOnlyThrow =
+    mustBeMutable &&
+    lookup.readOnly == TriBool::Maybe;
 
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
@@ -3270,18 +3272,10 @@ void in(ISS& env, const bc::SetS& op) {
 
   if (!tcls.couldBe(BCls)) return throws();
 
-  auto merge = env.index.merge_static_type(
-    env.ctx,
-    env.collect.publicSPropMutations,
-    env.collect.props,
-    tcls,
-    tname,
-    val,
-    true,
-    false,
-    ReadonlyOp::Readonly == op.subop1
+  auto merge = mergeStaticProp(
+    env, tcls, tname, val, true, false,
+    op.subop1 == ReadonlyOp::Readonly
   );
-
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
     return throws();
   }
@@ -3336,15 +3330,7 @@ void in(ISS& env, const bc::SetOpS& op) {
   auto const newTy = typeSetOp(op.subop1, lookup.ty, rhs);
   if (newTy.subtypeOf(BBottom)) return throws();
 
-  auto merge = env.index.merge_static_type(
-    env.ctx,
-    env.collect.publicSPropMutations,
-    env.collect.props,
-    tcls,
-    tname,
-    newTy
-  );
-
+  auto merge = mergeStaticProp(env, tcls, tname, newTy);
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
     return throws();
   }
@@ -3399,15 +3385,7 @@ void in(ISS& env, const bc::IncDecS& op) {
   auto newTy = typeIncDec(op.subop1, lookup.ty);
   if (newTy.subtypeOf(BBottom)) return throws();
 
-  auto const merge = env.index.merge_static_type(
-    env.ctx,
-    env.collect.publicSPropMutations,
-    env.collect.props,
-    tcls,
-    tname,
-    newTy
-  );
-
+  auto const merge = mergeStaticProp(env, tcls, tname, newTy);
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
     return throws();
   }
@@ -5641,16 +5619,7 @@ void in(ISS& env, const bc::InitProp& op) {
       // If class isn't instantiable, this bytecode isn't reachable
       // anyways.
       if (!rcls) break;
-      env.index.merge_static_type(
-        env.ctx,
-        env.collect.publicSPropMutations,
-        env.collect.props,
-        clsExact(*rcls),
-        sval(op.str1),
-        t,
-        false,
-        true
-      );
+      mergeStaticProp(env, clsExact(*rcls), sval(op.str1), t, false, true);
       break;
     }
     case InitPropOp::NonStatic:
@@ -5658,7 +5627,7 @@ void in(ISS& env, const bc::InitProp& op) {
       break;
   }
 
-  for (auto& prop : env.ctx.func->cls->properties) {
+  for (auto const& prop : env.ctx.func->cls->properties) {
     if (prop.name != op.str1) continue;
 
     ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
@@ -5690,22 +5659,25 @@ void in(ISS& env, const bc::InitProp& op) {
       return { std::move(refined), effectFree };
     }();
 
-    if (effectFree) {
-      prop.attrs |= AttrInitialSatisfiesTC;
-    } else {
-      badPropInitialValue(env);
-      prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
-      continue;
-    }
+    auto const val = [effectFree = effectFree] (const Type& t) {
+      if (!effectFree) return make_tv<KindOfUninit>();
+      if (auto const v = tv(t)) return *v;
+      return make_tv<KindOfUninit>();
+    }(refined);
 
-    auto const v = tv(refined);
-    if (v || !could_contain_objects(refined)) {
-      prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
-      if (!v) break;
-      prop.val = *v;
-      env.index.update_static_prop_init_val(env.ctx.func->cls, op.str1);
-      return reduce(env, bc::PopC {});
-    }
+    auto const deepInit =
+      (prop.attrs & AttrDeepInit) &&
+      (type(val) == KindOfUninit) &&
+      could_contain_objects(refined);
+    propInitialValue(
+      env,
+      prop,
+      val,
+      effectFree,
+      deepInit
+    );
+    if (type(val) == KindOfUninit) break;
+    return reduce(env, bc::PopC {});
   }
 
   popC(env);

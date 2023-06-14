@@ -773,13 +773,14 @@ std::string show(Context ctx) {
 
 std::string show(const PropLookupResult& r) {
   return folly::sformat(
-    "{{{},ty:{},found:{},const:{},late:{},init:{}}}",
+    "{{{},ty:{},found:{},const:{},late:{},init:{},internal:{}}}",
     r.name,
     show(r.ty),
     show(r.found),
     show(r.isConst),
     show(r.lateInit),
-    r.classInitMightRaise
+    r.classInitMightRaise,
+    show(r.internal)
   );
 }
 

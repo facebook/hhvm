@@ -284,14 +284,7 @@ void setStaticForBase(ISS& env, Type ty) {
     show(base.locTy), show(nameTy), show(ty)
   );
 
-  env.index.merge_static_type(
-    env.ctx,
-    env.collect.publicSPropMutations,
-    env.collect.props,
-    base.locTy,
-    nameTy,
-    remove_uninit(std::move(ty))
-  );
+  mergeStaticProp(env, base.locTy, nameTy, remove_uninit(std::move(ty)));
 }
 
 // Run backwards through an array chain doing array_set operations

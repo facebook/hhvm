@@ -932,7 +932,9 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
       php::Prop {
         prop.name(),
         static_cast<Attr>(
-          prop.attrs() & ~(AttrNoBadRedeclare | AttrNoImplicitNullable)
+          prop.attrs() & ~(AttrNoBadRedeclare |
+                           AttrNoImplicitNullable |
+                           AttrInitialSatisfiesTC)
         ),
         prop.userAttributes(),
         prop.docComment(),

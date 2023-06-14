@@ -118,35 +118,6 @@ bool is_regular_class(const php::Class& c) {
                  AttrEnumClass));
 }
 
-bool prop_might_have_bad_initial_value(const Index& index,
-                                       const php::Class& cls,
-                                       const php::Prop& prop) {
-  assertx(!is_used_trait(cls));
-
-  if (is_closure(cls)) return false;
-  if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
-
-  auto const initial = from_cell(prop.val);
-  if (initial.subtypeOf(BUninit)) return true;
-
-  auto const ctx = Context{ cls.unit, nullptr, &cls };
-  if (!initial.moreRefined(
-        lookup_constraint(index, ctx, prop.typeConstraint, initial).lower
-      )) {
-    return true;
-  }
-
-  return std::any_of(
-    begin(prop.ubs), end(prop.ubs),
-    [&] (TypeConstraint ub) {
-      applyFlagsToUB(ub, prop.typeConstraint);
-      return !initial.moreRefined(
-        lookup_constraint(index, ctx, ub, initial).lower
-      );
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 Type get_type_of_reified_list(const UserAttributeMap& ua) {

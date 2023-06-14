@@ -52,6 +52,47 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::MyDataItem> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::TransitiveDoubler");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::basic-python-capi::detail::DoubledPair> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).s_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).x_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::detail::DoubledPair");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::basic-python-capi::StringPair> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).normal_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).doubled_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::StringPair");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::basic-python-capi::MyUnion> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

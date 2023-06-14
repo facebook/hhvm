@@ -47,6 +47,48 @@ cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItem
         protocol=__Protocol.BINARY
     )
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.TransitiveDoubler) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__TransitiveDoubler(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.TransitiveDoubler,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__DoubledPair(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.DoubledPair) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__DoubledPair(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__DoubledPair(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.DoubledPair,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__StringPair(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.StringPair) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__StringPair(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__StringPair(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.StringPair,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
 

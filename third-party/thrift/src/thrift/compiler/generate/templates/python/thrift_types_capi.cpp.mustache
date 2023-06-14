@@ -54,7 +54,14 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
     return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
         "Thrift serialize error: {{struct:name}}");
   }
+  {{#struct:cpp_adapter?}}
+  return detail::deserialize_iobuf_to_adapted<
+      {{program:cpp_namespaces}}::{{struct:cpp_name}}, {{cpp_adapter:name}}
+    >(std::move(val));
+  {{/struct:cpp_adapter?}}
+  {{^struct:cpp_adapter?}}
   return detail::deserialize_iobuf<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(std::move(val));
+  {{/struct:cpp_adapter?}}
 }
 
 int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
@@ -79,7 +86,12 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
     return nullptr;
   }
   auto ptr = construct__{{program:capi_module_prefix}}__{{struct:name}}(
+  {{#struct:cpp_adapter?}}
+      detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(std::move(val)));
+  {{/struct:cpp_adapter?}}
+  {{^struct:cpp_adapter?}}
       detail::serialize_to_iobuf(std::move(val)));
+  {{/struct:cpp_adapter?}}
   if (!ptr) {
     CHECK(PyErr_Occurred());
   }

@@ -18,15 +18,17 @@ import unittest
 import thrift.python_capi.fixture as fixture
 
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
+    DoubledPair,
     MyDataItem,
     MyEnum,
     MyStruct,
     MyStructPatch,  # this import breaks autodeps w/o manual
     MyUnion,
+    StringPair,
 )
 
 
-class PythonCapiTest(unittest.TestCase):
+class PythonCapiFixture(unittest.TestCase):
     def my_struct(self) -> MyStruct:
         return MyStruct(
             inty=1,
@@ -47,6 +49,8 @@ class PythonCapiTest(unittest.TestCase):
             assign=self.my_struct(),
         )
 
+
+class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_struct(self) -> None:
         i = MyDataItem()
         empty = MyStruct()
@@ -69,6 +73,15 @@ class PythonCapiTest(unittest.TestCase):
         empty_patch = MyStructPatch(assign=MyStruct())
         self.assertEqual(empty_patch, fixture.roundtrip_MyStructPatch(empty_patch))
 
+    def test_roundtrip_field_adapted(self) -> None:
+        a, b = ("TacosSalad", "DaLassoCat")
+        s = StringPair(normal=a, doubled=b)
+        self.assertEqual(s, fixture.roundtrip_StringPair(s)),
+
+    def test_roundtrip_type_adapted(self) -> None:
+        s = DoubledPair(s="TacosSalad", x=42)
+        self.assertEqual(s, fixture.roundtrip_DoubledPair(s))
+
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):
             fixture.roundtrip_MyDataItem(MyEnum.MyValue1)
@@ -77,6 +90,8 @@ class PythonCapiTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             fixture.roundtrip_MyEnum(self.my_struct())
 
+
+class PythonCapiTypeCheck(PythonCapiFixture):
     def test_typeCheck_struct(self) -> None:
         i = MyDataItem()
         s = self.my_struct()
@@ -99,3 +114,14 @@ class PythonCapiTest(unittest.TestCase):
         self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue1))
         self.assertTrue(fixture.check_MyEnum(MyEnum.MyValue2))
         self.assertFalse(fixture.check_MyEnum(self.my_struct()))
+
+    def test_roundtrip_field_adapted(self) -> None:
+        a, b = ("TacosSalad", "DaLassoCat")
+        self.assertTrue(fixture.check_StringPair(StringPair(normal=a, doubled=b)))
+        self.assertFalse(fixture.check_StringPair(MyEnum.MyValue1))
+
+    def test_roundtrip_type_adapted(self) -> None:
+        self.assertTrue(
+            fixture.check_DoubledPair(DoubledPair(s="TacosSalad" * 2, x=42))
+        )
+        self.assertFalse(fixture.check_DoubledPair(MyEnum.MyValue1))

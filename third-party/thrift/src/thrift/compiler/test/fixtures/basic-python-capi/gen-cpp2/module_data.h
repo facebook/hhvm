@@ -78,6 +78,54 @@ template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::MyDat
   static const std::array<int, fields_size> isset_indexes;
 };
 
+template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+  static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair> {
+  static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::StringPair> {
+  static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
 template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::MyUnion> {
   static constexpr const std::size_t fields_size = 6;
   static const folly::StringPiece name;

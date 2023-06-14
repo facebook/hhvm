@@ -21,6 +21,8 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass MyDataItem
     cppclass MyEnum
     cppclass OurUnion
+    cppclass StringPair
+    cppclass DoubledPair
 
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T](object)
@@ -42,6 +44,12 @@ def roundtrip_MyEnum(object x):
 def roundtrip_MyStructPatch(object x):
     return __shim__roundtrip[MyStructPatch](x)
 
+def roundtrip_StringPair(object x):
+    return __shim__roundtrip[StringPair](x)
+
+def roundtrip_DoubledPair(object x):
+    return __shim__roundtrip[DoubledPair](x)
+
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))
 
@@ -56,3 +64,9 @@ def check_MyEnum(object x):
 
 def check_MyStructPatch(object x):
     return bool(__shim__typeCheck[MyStructPatch](x))
+
+def check_StringPair(object x):
+    return __shim__typeCheck[StringPair](x)
+
+def check_DoubledPair(object x):
+    return __shim__typeCheck[DoubledPair](x)

@@ -81,6 +81,70 @@ StructMetadata<::test::fixtures::basic-python-capi::MyDataItem>::gen(ThriftMetad
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::TransitiveDoubler>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.TransitiveDoubler", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_TransitiveDoubler = res.first->second;
+  module_TransitiveDoubler.name() = "module.TransitiveDoubler";
+  module_TransitiveDoubler.is_union() = false;
+  module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::thrift::test::lib::StructDoubler")}}).cv_struct_ref());
+  module_TransitiveDoubler.structured_annotations()->push_back(*cvStruct("scope.Transitive", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::detail::DoubledPair>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.DoubledPair", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_DoubledPair = res.first->second;
+  module_DoubledPair.name() = "module.DoubledPair";
+  module_DoubledPair.is_union() = false;
+  static const auto* const
+  module_DoubledPair_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "s", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "x", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_DoubledPair_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_DoubledPair.fields()->push_back(std::move(field));
+  }
+  module_DoubledPair.structured_annotations()->push_back(*cvStruct("module.TransitiveDoubler", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::StringPair>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.StringPair", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_StringPair = res.first->second;
+  module_StringPair.name() = "module.StringPair";
+  module_StringPair.is_union() = false;
+  static const auto* const
+  module_StringPair_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "normal", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "doubled", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::thrift::test::lib::StringDoubler")}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_StringPair_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_StringPair.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic-python-capi::MyUnion>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

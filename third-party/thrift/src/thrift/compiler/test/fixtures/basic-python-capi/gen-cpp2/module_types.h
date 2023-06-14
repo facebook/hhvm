@@ -21,6 +21,10 @@ struct oneway;
 struct floatList;
 struct strMap;
 struct floatSet;
+struct s;
+struct x;
+struct normal;
+struct doubled;
 struct myEnum;
 struct myStruct;
 struct myDataItem;
@@ -60,6 +64,22 @@ APACHE_THRIFT_DEFINE_ACCESSOR(strMap);
 #ifndef APACHE_THRIFT_ACCESSOR_floatSet
 #define APACHE_THRIFT_ACCESSOR_floatSet
 APACHE_THRIFT_DEFINE_ACCESSOR(floatSet);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_s
+#define APACHE_THRIFT_ACCESSOR_s
+APACHE_THRIFT_DEFINE_ACCESSOR(s);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_x
+#define APACHE_THRIFT_ACCESSOR_x
+APACHE_THRIFT_DEFINE_ACCESSOR(x);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_normal
+#define APACHE_THRIFT_ACCESSOR_normal
+APACHE_THRIFT_DEFINE_ACCESSOR(normal);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_doubled
+#define APACHE_THRIFT_ACCESSOR_doubled
+APACHE_THRIFT_DEFINE_ACCESSOR(doubled);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_myEnum
 #define APACHE_THRIFT_ACCESSOR_myEnum
@@ -153,6 +173,11 @@ extern const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAME
 namespace test { namespace fixtures { namespace basic-python-capi {
 class MyStruct;
 class MyDataItem;
+class TransitiveDoubler;
+namespace detail {
+class DoubledPair;
+} // namespace detail
+class StringPair;
 class MyUnion;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare
@@ -780,6 +805,509 @@ class MyStruct final  {
 
 template <class Protocol_>
 unsigned long MyStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class TransitiveDoubler final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = TransitiveDoubler;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  TransitiveDoubler() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  TransitiveDoubler(apache::thrift::FragileConstructor);
+
+  TransitiveDoubler(TransitiveDoubler&&) = default;
+
+  TransitiveDoubler(const TransitiveDoubler&) = default;
+
+
+  TransitiveDoubler& operator=(TransitiveDoubler&&) = default;
+
+  TransitiveDoubler& operator=(const TransitiveDoubler&) = default;
+
+ public:
+
+  bool operator==(const TransitiveDoubler&) const;
+  bool operator<(const TransitiveDoubler&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<TransitiveDoubler>;
+  friend void swap(TransitiveDoubler& a, TransitiveDoubler& b);
+};
+
+template <class Protocol_>
+unsigned long TransitiveDoubler::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+namespace detail {
+class DoubledPair final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::s,
+    ::apache::thrift::ident::x
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::i32_t
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = DoubledPair;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  DoubledPair();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  DoubledPair(apache::thrift::FragileConstructor, ::std::string s__arg, ::std::int32_t x__arg);
+
+  DoubledPair(DoubledPair&&) noexcept;
+
+  DoubledPair(const DoubledPair& src);
+
+
+  DoubledPair& operator=(DoubledPair&&) noexcept;
+  DoubledPair& operator=(const DoubledPair& src);
+
+  ~DoubledPair();
+
+ private:
+  ::std::string __fbthrift_field_s;
+ private:
+  ::std::int32_t __fbthrift_field_x;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const DoubledPair&) const;
+  bool operator<(const DoubledPair&) const;
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> s_ref() const& {
+    return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> s_ref() & {
+    return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> s_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> s() const& {
+    return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> s() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> s() & {
+    return {this->__fbthrift_field_s, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> s() && {
+    return {static_cast<T&&>(this->__fbthrift_field_s), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> x_ref() const& {
+    return {this->__fbthrift_field_x, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> x_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_x), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> x_ref() & {
+    return {this->__fbthrift_field_x, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> x_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_x), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> x() const& {
+    return {this->__fbthrift_field_x, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> x() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_x), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> x() & {
+    return {this->__fbthrift_field_x, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> x() && {
+    return {static_cast<T&&>(this->__fbthrift_field_x), __isset.at(1), __isset.bit(1)};
+  }
+
+  const ::std::string& get_s() const& {
+    return __fbthrift_field_s;
+  }
+
+  ::std::string get_s() && {
+    return std::move(__fbthrift_field_s);
+  }
+
+  template <typename T_DoubledPair_s_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.s_ref() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  ::std::string& set_s(T_DoubledPair_s_struct_setter&& s_) {
+    s_ref() = std::forward<T_DoubledPair_s_struct_setter>(s_);
+    return __fbthrift_field_s;
+  }
+
+  ::std::int32_t get_x() const {
+    return __fbthrift_field_x;
+  }
+
+  [[deprecated("Use `FOO.x_ref() = BAR;` instead of `FOO.set_x(BAR);`")]]
+  ::std::int32_t& set_x(::std::int32_t x_) {
+    x_ref() = x_;
+    return __fbthrift_field_x;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<DoubledPair>;
+  friend void swap(DoubledPair& a, DoubledPair& b);
+};
+
+template <class Protocol_>
+unsigned long DoubledPair::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+} // namespace detail
+
+using DoubledPair = ::apache::thrift::adapt_detail::adapted_t<::thrift::test::lib::StructDoubler, ::test::fixtures::basic-python-capi::detail::DoubledPair>;
+
+
+class StringPair final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::normal,
+    ::apache::thrift::ident::doubled
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::adapted<::thrift::test::lib::StringDoubler, ::apache::thrift::type::string_t>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = StringPair;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  StringPair();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  StringPair(apache::thrift::FragileConstructor, ::std::string normal__arg, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair> doubled__arg);
+
+  StringPair(StringPair&&) noexcept;
+  StringPair(const StringPair& src);
+
+
+  StringPair& operator=(StringPair&&) noexcept;
+  StringPair& operator=(const StringPair& src);
+
+  ~StringPair();
+
+ private:
+  ::std::string __fbthrift_field_normal;
+ private:
+  ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair> __fbthrift_field_doubled;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const StringPair&) const;
+  bool operator<(const StringPair&) const;
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> normal_ref() const& {
+    return {this->__fbthrift_field_normal, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> normal_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_normal), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> normal_ref() & {
+    return {this->__fbthrift_field_normal, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> normal_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_normal), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> normal() const& {
+    return {this->__fbthrift_field_normal, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> normal() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_normal), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> normal() & {
+    return {this->__fbthrift_field_normal, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> normal() && {
+    return {static_cast<T&&>(this->__fbthrift_field_normal), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> doubled_ref() const& {
+    return {this->__fbthrift_field_doubled, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> doubled_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_doubled), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> doubled_ref() & {
+    return {this->__fbthrift_field_doubled, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> doubled_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_doubled), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> doubled() const& {
+    return {this->__fbthrift_field_doubled, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> doubled() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_doubled), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> doubled() & {
+    return {this->__fbthrift_field_doubled, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> doubled() && {
+    return {static_cast<T&&>(this->__fbthrift_field_doubled), __isset.at(1), __isset.bit(1)};
+  }
+
+  const ::std::string& get_normal() const& {
+    return __fbthrift_field_normal;
+  }
+
+  ::std::string get_normal() && {
+    return std::move(__fbthrift_field_normal);
+  }
+
+  template <typename T_StringPair_normal_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.normal_ref() = BAR;` instead of `FOO.set_normal(BAR);`")]]
+  ::std::string& set_normal(T_StringPair_normal_struct_setter&& normal_) {
+    normal_ref() = std::forward<T_StringPair_normal_struct_setter>(normal_);
+    return __fbthrift_field_normal;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<StringPair>;
+  friend void swap(StringPair& a, StringPair& b);
+};
+
+template <class Protocol_>
+unsigned long StringPair::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

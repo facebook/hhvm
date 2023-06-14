@@ -10,6 +10,11 @@
 namespace test { namespace fixtures { namespace basic-python-capi {
 class MyStruct;
 class MyDataItem;
+class TransitiveDoubler;
+namespace detail {
+class DoubledPair;
+} // namespace detail
+class StringPair;
 class MyUnion;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare

@@ -43,6 +43,42 @@ struct Constructor<::test::fixtures::basic-python-capi::MyDataItem> {
 };
 
 template <>
+struct Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+  ExtractorResult<::test::fixtures::basic-python-capi::TransitiveDoubler> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::TransitiveDoubler&& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::basic-python-capi::DoubledPair>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::DoubledPair> {
+  ExtractorResult<::test::fixtures::basic-python-capi::DoubledPair> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::DoubledPair> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::DoubledPair&& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::basic-python-capi::StringPair>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::StringPair> {
+  ExtractorResult<::test::fixtures::basic-python-capi::StringPair> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::StringPair> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::StringPair&& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic-python-capi::MyUnion>
     : public BaseExtractor<::test::fixtures::basic-python-capi::MyUnion> {
   ExtractorResult<::test::fixtures::basic-python-capi::MyUnion> operator()(PyObject* obj);

@@ -141,6 +141,134 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItem, self)
 
 
+class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.TransitiveDoubler"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/TransitiveDoubler"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_TransitiveDoubler()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.TransitiveDoubler, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.TransitiveDoubler, self)
+
+
+class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "s",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "x",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.DoubledPair"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/DoubledPair"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_DoubledPair()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.DoubledPair, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.DoubledPair, self)
+
+
+class StringPair(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "normal",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "doubled",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.StringPair"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/StringPair"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_StringPair()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.StringPair, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.StringPair, self)
+
+
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         (
@@ -257,12 +385,21 @@ def _fbthrift_metadata__struct_MyStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStruct()
 def _fbthrift_metadata__struct_MyDataItem():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyDataItem()
+def _fbthrift_metadata__struct_TransitiveDoubler():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_TransitiveDoubler()
+def _fbthrift_metadata__struct_DoubledPair():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_DoubledPair()
+def _fbthrift_metadata__struct_StringPair():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_StringPair()
 def _fbthrift_metadata__struct_MyUnion():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyUnion()
 
 _fbthrift_all_structs = [
     MyStruct,
     MyDataItem,
+    TransitiveDoubler,
+    DoubledPair,
+    StringPair,
     MyUnion,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)

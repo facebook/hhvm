@@ -97,6 +97,62 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic-python-capi::MyDataItem>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::name = "TransitiveDoubler";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::fields_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::fields_ids = {{
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::fields_types = {{
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::storage_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>::isset_indexes = {{
+}};
+
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::name = "DoubledPair";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::fields_names = {{
+  "s",
+  "x",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::fields_types = {{
+  TType::T_STRING,
+  TType::T_I32,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::storage_names = {{
+  "__fbthrift_field_s",
+  "__fbthrift_field_x",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>::isset_indexes = {{
+  0,
+  1,
+}};
+
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::name = "StringPair";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::fields_names = {{
+  "normal",
+  "doubled",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::fields_types = {{
+  TType::T_STRING,
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::storage_names = {{
+  "__fbthrift_field_normal",
+  "__fbthrift_field_doubled",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>::isset_indexes = {{
+  0,
+  1,
+}};
+
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::MyUnion>::fields_names = {{
   "myEnum",

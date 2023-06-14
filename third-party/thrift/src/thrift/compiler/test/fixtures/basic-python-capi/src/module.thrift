@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 package "test.dev/fixtures/basic-python-capi"
 
 enum MyEnum {
@@ -33,6 +35,22 @@ struct MyStruct {
 }
 
 struct MyDataItem {}
+
+@cpp.Adapter{name = "::thrift::test::lib::StructDoubler"}
+@scope.Transitive
+struct TransitiveDoubler {}
+
+@TransitiveDoubler
+struct DoubledPair {
+  1: string s;
+  2: i32 x;
+}
+
+struct StringPair {
+  1: string normal;
+  @cpp.Adapter{name = "::thrift::test::lib::StringDoubler"}
+  2: string doubled;
+}
 
 union MyUnion {
   1: MyEnum myEnum;

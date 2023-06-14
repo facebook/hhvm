@@ -325,6 +325,327 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::TransitiveDoubler>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::TransitiveDoubler>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* TransitiveDoubler::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/TransitiveDoubler";
+}
+
+const folly::StringPiece TransitiveDoubler::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<TransitiveDoubler>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece TransitiveDoubler::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TransitiveDoubler>::name;
+}
+
+
+TransitiveDoubler::TransitiveDoubler(apache::thrift::FragileConstructor) {}
+
+
+void TransitiveDoubler::__fbthrift_clear() {
+  // clear all fields
+}
+
+void TransitiveDoubler::__fbthrift_clear_terse_fields() {
+}
+
+bool TransitiveDoubler::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool TransitiveDoubler::operator==(FOLLY_MAYBE_UNUSED const TransitiveDoubler& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool TransitiveDoubler::operator<(FOLLY_MAYBE_UNUSED const TransitiveDoubler& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED TransitiveDoubler& a, FOLLY_MAYBE_UNUSED TransitiveDoubler& b) {
+  using ::std::swap;
+}
+
+template void TransitiveDoubler::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t TransitiveDoubler::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t TransitiveDoubler::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t TransitiveDoubler::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void TransitiveDoubler::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t TransitiveDoubler::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t TransitiveDoubler::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t TransitiveDoubler::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::detail::DoubledPair>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::detail::DoubledPair>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {namespace detail {
+
+
+const char* DoubledPair::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/DoubledPair";
+}
+
+const folly::StringPiece DoubledPair::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<DoubledPair>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece DoubledPair::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<DoubledPair>::name;
+}
+
+DoubledPair::DoubledPair(const DoubledPair&) = default;
+DoubledPair& DoubledPair::operator=(const DoubledPair&) = default;
+DoubledPair::DoubledPair() :
+      __fbthrift_field_x() {
+}
+
+
+DoubledPair::~DoubledPair() {}
+
+DoubledPair::DoubledPair(FOLLY_MAYBE_UNUSED DoubledPair&& other) noexcept :
+    __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
+    __fbthrift_field_x(std::move(other.__fbthrift_field_x)),
+    __isset(other.__isset) {
+}
+
+DoubledPair& DoubledPair::operator=(FOLLY_MAYBE_UNUSED DoubledPair&& other) noexcept {
+    this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
+    this->__fbthrift_field_x = std::move(other.__fbthrift_field_x);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+DoubledPair::DoubledPair(apache::thrift::FragileConstructor, ::std::string s__arg, ::std::int32_t x__arg) :
+    __fbthrift_field_s(std::move(s__arg)),
+    __fbthrift_field_x(std::move(x__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void DoubledPair::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_x = ::std::int32_t();
+  __isset = {};
+}
+
+void DoubledPair::__fbthrift_clear_terse_fields() {
+}
+
+bool DoubledPair::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool DoubledPair::operator==(FOLLY_MAYBE_UNUSED const DoubledPair& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
+  if (!(lhs.x_ref() == rhs.x_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool DoubledPair::operator<(FOLLY_MAYBE_UNUSED const DoubledPair& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED DoubledPair& a, FOLLY_MAYBE_UNUSED DoubledPair& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
+  swap(a.__fbthrift_field_x, b.__fbthrift_field_x);
+  swap(a.__isset, b.__isset);
+}
+
+template void DoubledPair::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t DoubledPair::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t DoubledPair::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t DoubledPair::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void DoubledPair::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t DoubledPair::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t DoubledPair::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t DoubledPair::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace detail
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::StringPair>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::StringPair>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* StringPair::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/StringPair";
+}
+
+const folly::StringPiece StringPair::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<StringPair>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StringPair::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StringPair>::name;
+}
+
+StringPair::StringPair(const StringPair& srcObj) :
+    __fbthrift_field_normal(srcObj.__fbthrift_field_normal),
+    __fbthrift_field_doubled(srcObj.__fbthrift_field_doubled),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+}
+
+StringPair& StringPair::operator=(const StringPair& other) {
+  StringPair tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+StringPair::StringPair() {
+  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+}
+
+
+StringPair::~StringPair() {}
+
+StringPair::StringPair(FOLLY_MAYBE_UNUSED StringPair&& other) noexcept :
+    __fbthrift_field_normal(std::move(other.__fbthrift_field_normal)),
+    __fbthrift_field_doubled(std::move(other.__fbthrift_field_doubled)),
+    __isset(other.__isset) {
+  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+}
+
+StringPair& StringPair::operator=(FOLLY_MAYBE_UNUSED StringPair&& other) noexcept {
+    this->__fbthrift_field_normal = std::move(other.__fbthrift_field_normal);
+    this->__fbthrift_field_doubled = std::move(other.__fbthrift_field_doubled);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+StringPair::StringPair(apache::thrift::FragileConstructor, ::std::string normal__arg, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair> doubled__arg) :
+    __fbthrift_field_normal(std::move(normal__arg)),
+    __fbthrift_field_doubled(std::move(doubled__arg)) {
+  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void StringPair::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_normal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  ::apache::thrift::adapt_detail::clear<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+  __isset = {};
+}
+
+void StringPair::__fbthrift_clear_terse_fields() {
+}
+
+bool StringPair::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool StringPair::operator==(FOLLY_MAYBE_UNUSED const StringPair& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.normal_ref() == rhs.normal_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::thrift::test::lib::StringDoubler>(lhs.__fbthrift_field_doubled, rhs.__fbthrift_field_doubled)) {
+    return false;
+  }
+  return true;
+}
+
+bool StringPair::operator<(FOLLY_MAYBE_UNUSED const StringPair& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED StringPair& a, FOLLY_MAYBE_UNUSED StringPair& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_normal, b.__fbthrift_field_normal);
+  swap(a.__fbthrift_field_doubled, b.__fbthrift_field_doubled);
+  swap(a.__isset, b.__isset);
+}
+
+template void StringPair::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t StringPair::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t StringPair::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t StringPair::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void StringPair::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t StringPair::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t StringPair::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t StringPair::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::MyUnion>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -459,5 +780,6 @@ static_assert(
 
 namespace test { namespace fixtures { namespace basic-python-capi { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::thrift::test::lib::StringDoubler, 2, ::std::string, ::test::fixtures::basic-python-capi::StringPair>();
 }
 }}}} // test::fixtures::basic-python-capi

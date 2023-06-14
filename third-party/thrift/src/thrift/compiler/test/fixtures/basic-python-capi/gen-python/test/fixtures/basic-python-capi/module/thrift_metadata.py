@@ -79,6 +79,85 @@ def gen_metadata_struct_MyDataItem() -> _fbthrift_metadata.ThriftMetadata:
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_TransitiveDoubler(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.TransitiveDoubler"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::thrift::test::lib::StructDoubler"),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="scope.Transitive"), fields= {  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+
+    return new_struct
+def gen_metadata_struct_TransitiveDoubler() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_TransitiveDoubler(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_DoubledPair(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.DoubledPair"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="s", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="x", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="module.TransitiveDoubler"), fields= {  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+     # s
+     # x
+
+    return new_struct
+def gen_metadata_struct_DoubledPair() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_DoubledPair(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_StringPair(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.StringPair"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="normal", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="doubled", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::thrift::test::lib::StringDoubler"),  }),
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+     # normal
+     # doubled
+
+    return new_struct
+def gen_metadata_struct_StringPair() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_StringPair(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_MyUnion(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.MyUnion"
 
@@ -142,5 +221,8 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_enum_MyEnum(meta)
     meta = _fbthrift_gen_metadata_struct_MyStruct(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItem(meta)
+    meta = _fbthrift_gen_metadata_struct_TransitiveDoubler(meta)
+    meta = _fbthrift_gen_metadata_struct_DoubledPair(meta)
+    meta = _fbthrift_gen_metadata_struct_StringPair(meta)
     meta = _fbthrift_gen_metadata_struct_MyUnion(meta)
     return meta

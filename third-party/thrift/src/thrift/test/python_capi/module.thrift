@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/patch.thrift"
+
+cpp_include "thrift/test/python_capi/adapter.h"
 
 package "thrift.org/test/python_capi"
 
@@ -43,6 +46,22 @@ struct MyStruct {
 @patch.GeneratePatch
 struct MyDataItem {
   1: string s;
+}
+
+@cpp.Adapter{name = "::thrift::test::lib::StructDoubler"}
+@scope.Transitive
+struct TransitiveDoubler {}
+
+@TransitiveDoubler
+struct DoubledPair {
+  1: string s;
+  2: i32 x;
+}
+
+struct StringPair {
+  1: string normal;
+  @cpp.Adapter{name = "::thrift::test::lib::StringDoubler"}
+  2: string doubled;
 }
 
 union MyUnion {

@@ -88,9 +88,44 @@ std::enable_if_t<is_wrap_v<W>, W> deserialize_iobuf(
       std::forward<std::unique_ptr<folly::IOBuf>>(buf))};
 }
 
+/**
+ * Serialize an adapted thrift type T, which is return type of type adapter
+ * A::fromThrift
+ *
+ * The `if` branch is an edge case for serializing a field adapter struct T.
+ * This is needed to handle a field adapter denoted by a structured annotation
+ * struct S annotated with cpp.Adapter and cpp.Transitive annotations.
+ */
+template <typename Adapter, typename T>
+std::unique_ptr<folly::IOBuf> serialize_adapted_to_iobuf(T&& s) {
+  if constexpr (apache::thrift::is_thrift_class_v<T>) {
+    return serialize_to_iobuf(std::forward<T>(s));
+  } else {
+    return serialize_to_iobuf(Adapter::toThrift(std::forward<T>(s)));
+  }
+}
+
+/**
+ * Deserialize an adapted thrift type T, which is return type of type adapter
+ * A::fromThrift
+
+ * The `if` branch is an edge case for deserializing a field adapter struct T.
+ * This is needed to handle a field adapter denoted by a structured annotation
+ * struct T annotated with cpp.Adapter and cpp.Transitive annotations.
+ */
+template <typename T, typename Adapter>
+T deserialize_iobuf_to_adapted(std::unique_ptr<folly::IOBuf>&& buf) {
+  if constexpr (apache::thrift::is_thrift_class_v<T>) {
+    return deserialize_iobuf<T>(std::move(buf));
+  } else {
+    using S =
+        std::remove_reference_t<decltype(Adapter::toThrift(std::declval<T>()))>;
+    return Adapter::fromThrift(deserialize_iobuf<S>(std::move(buf)));
+  }
+}
+
 } // namespace detail
 } // namespace capi
 } // namespace python
 } // namespace thrift
-
 } // namespace apache

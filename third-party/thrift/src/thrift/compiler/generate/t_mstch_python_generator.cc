@@ -50,10 +50,10 @@ const t_const* find_structured_adapter_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kPythonAdapterUri);
 }
 
-const t_const* find_structured_adapter_annotation(const t_type& type) {
+const t_const* find_structured_adapter_annotation(
+    const t_type& type, const char* uri = kPythonAdapterUri) {
   // Traverse typedefs and find first adapter if any.
-  return t_typedef::get_first_structured_annotation_or_null(
-      &type, kPythonAdapterUri);
+  return t_typedef::get_first_structured_annotation_or_null(&type, uri);
 }
 
 const std::string get_annotation_property(
@@ -758,6 +758,7 @@ class python_mstch_struct : public mstch_struct {
             {"struct:has_adapter?", &python_mstch_struct::adapter},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
             {"struct:cpp_name", &python_mstch_struct::cpp_name},
+            {"struct:cpp_adapter?", &python_mstch_struct::cpp_adapter},
         });
   }
 
@@ -779,6 +780,18 @@ class python_mstch_struct : public mstch_struct {
 
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);
+  }
+
+  mstch::node cpp_adapter() {
+    auto adapter_annotation =
+        find_structured_adapter_annotation(*struct_, kCppAdapterUri);
+    if (!adapter_annotation) {
+      return false;
+    }
+    return mstch::map{
+        {"cpp_adapter:name",
+         get_annotation_property(adapter_annotation, "name")},
+    };
   }
 
   mstch::node legacy_api() {

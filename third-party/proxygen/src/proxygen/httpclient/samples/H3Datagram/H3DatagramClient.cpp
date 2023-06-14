@@ -26,6 +26,8 @@ DEFINE_int32(proxy_port, 6666, "Proxy port");
 DEFINE_string(cert, "", "Certificate file path");
 DEFINE_string(key, "", "Private key file path");
 
+constexpr size_t kMaxReadBufferSize{1232};
+
 namespace {
 
 /*
@@ -87,8 +89,8 @@ class DatagramClient
   }
 
   void getReadBuffer(void** buf, size_t* len) noexcept override {
-    *buf = buf_;
-    *len = 1024;
+    *buf = buf_.data();
+    *len = buf_.size();
   }
 
   void onDataAvailable(const folly::SocketAddress& client,
@@ -97,8 +99,8 @@ class DatagramClient
                        OnDataAvailableParams) noexcept override {
     ++pongRecvd_;
     VLOG(4) << "Read " << len << " bytes (trun:" << truncated << ") from "
-            << client.describe() << " - " << std::string(buf_, len);
-    auto datagramString = std::string(buf_, len);
+            << client.describe() << " - " << std::string(buf_.data(), len);
+    auto datagramString = std::string(buf_.data(), len);
     auto datagramInt = folly::tryTo<uint16_t>(datagramString);
     if (!datagramInt.hasValue()) {
       VLOG(2) << "Received Datagram without Integer value. Stopping. len="
@@ -138,7 +140,7 @@ class DatagramClient
   H3DatagramAsyncSocket& socket_;
   int pongRecvd_{0};
   int n_{0};
-  char buf_[1024];
+  std::array<char, kMaxReadBufferSize> buf_;
   bool closing_{false};
 };
 }; // namespace
@@ -165,6 +167,7 @@ int main(int argc, char* argv[]) {
   options.certAndKey_ = std::make_pair(FLAGS_cert, FLAGS_key);
   options.certVerifier_ = std::make_unique<
       proxygen::InsecureVerifierDangerousDoNotUseInProduction>();
+  options.maxDatagramSize_ = kMaxReadBufferSize;
 
   H3DatagramAsyncSocket datagramSocket(&evb, options);
   DatagramClient client(&evb, datagramSocket);

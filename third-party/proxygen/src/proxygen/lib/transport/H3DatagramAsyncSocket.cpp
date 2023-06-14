@@ -183,6 +183,8 @@ void H3DatagramAsyncSocket::onEgressResumed() noexcept {
 void H3DatagramAsyncSocket::startClient() {
   quic::TransportSettings transportSettings;
   transportSettings.datagramConfig.enabled = true;
+  transportSettings.maxRecvPacketSize = options_.maxDatagramSize_;
+  transportSettings.canIgnorePathMTU = true;
   if (sndBufPkts_ > 0) {
     transportSettings.datagramConfig.writeBufSize = sndBufPkts_;
   }

@@ -1,0 +1,11 @@
+Program %s loaded. Type '[r]un' or '[c]ontinue' to go.
+run
+%s loaded
+Program %s exited normally.
+print package_exists('foo')
+true
+print package_exists('bar')
+true
+print package_exists('nope')
+false
+quit

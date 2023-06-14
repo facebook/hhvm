@@ -603,6 +603,20 @@ let get_db_and_stmt_cache (path : db_path) : Sqlite3.db * StatementCache.t =
     (db, stmt_cache)
 
 let validate_can_open_db (db_path : db_path) : unit =
+  (* sqlite is entirely happy opening a non-existent file;
+     all it does is touches the file (giving it zero size) and
+     reports that the file doesn't contain any tables. Here
+     we catch the zero-size case as well as the file-not-found
+     case, so we're robust against accidental sqlite touching
+     prior to this function. *)
+  let (Db_path path) = db_path in
+  let exists =
+    try (Unix.stat path).Unix.st_size > 0 with
+    | exn ->
+      Hh_logger.log "opening naming-table sqlite: %s" (Exn.to_string exn);
+      false
+  in
+  if not exists then failwith "naming-table sqlite absent or empty";
   let (_ : Sqlite3.db * StatementCache.t) = get_db_and_stmt_cache db_path in
   ()
 

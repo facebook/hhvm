@@ -502,6 +502,9 @@ class ExtFrame {
   Payload payload_;
 };
 
+// All frame sizes (header size + payload size) are encoded in 3 bytes
+constexpr size_t kMaxFragmentedPayloadSize = 0xffffff - 512;
+
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

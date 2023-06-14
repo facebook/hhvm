@@ -2990,6 +2990,14 @@ class ServerResponseEnqueuedInterface : public TestInterface {
       std::unique_ptr<
           apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>
           callback) override {
+    // Since `eventBaseAsync` is a `thread = 'eb'` method, this runs on
+    // the IO thread, and we can guarantee that the baton is posted
+    // no earlier than the write was enqueued to the WriteBatcher.
+    //
+    // In contrast, if we posted the baton from a regular request handler
+    // thread pool, there would be a chance that it would fire BEFORE the IO
+    // thread could enqueue the write.
+    callback->getEventBase()->dcheckIsInEventBaseThread();
     callback->getEventBase()->runInEventBaseThread(
         [&]() mutable { responseEnqueuedBaton_.post(); });
 

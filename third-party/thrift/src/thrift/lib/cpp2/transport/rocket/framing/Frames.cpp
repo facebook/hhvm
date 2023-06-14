@@ -41,9 +41,6 @@ namespace thrift {
 namespace rocket {
 
 namespace {
-// All frame sizes (header size + payload size) are encoded in 3 bytes
-constexpr size_t kMaxFragmentedPayloadSize = 0xffffff - 512;
-
 std::unique_ptr<folly::IOBuf> trimBuffer(
     std::unique_ptr<folly::IOBuf> buffer, size_t toTrim) {
   folly::IOBufQueue bufQueue;

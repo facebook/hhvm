@@ -465,7 +465,8 @@ class THeader final {
   static constexpr std::string_view ID_VERSION_HEADER = "id_version";
   static constexpr std::string_view ID_VERSION = "1";
 
-  // Anything not in this sub-struct must be copied explicitly in XXX
+  // IMPORTANT: Anything not in this sub-struct must be copied explicitly by
+  // `copyOrDfatalIfReceived` to support sending shadow requests.
   struct TriviallyCopiable {
     explicit TriviallyCopiable(int options);
 

@@ -22,6 +22,8 @@ class HPACKEncoderBase {
   explicit HPACKEncoderBase(bool huffman)
       : streamBuffer_(kBufferGrowth, huffman) {
     indexingStrat_ = HeaderIndexingStrategy::getDefaultInstance();
+    // if huffman is false, the huffman limits don't matter
+    streamBuffer_.setHuffmanLimits(indexingStrat_->getHuffmanLimits());
   }
 
   /**
@@ -40,6 +42,9 @@ class HPACKEncoderBase {
 
   void setHeaderIndexingStrategy(const HeaderIndexingStrategy* indexingStrat) {
     indexingStrat_ = indexingStrat;
+    if (indexingStrat_) {
+      streamBuffer_.setHuffmanLimits(indexingStrat_->getHuffmanLimits());
+    }
   }
   const HeaderIndexingStrategy* getHeaderIndexingStrategy() const {
     return indexingStrat_;

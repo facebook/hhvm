@@ -30,6 +30,13 @@ class HeaderIndexingStrategy {
   // indexed
   virtual bool indexHeader(const HPACKHeaderName& name,
                            folly::StringPiece value) const;
+
+  // Only apply huffman to literal strings in the range [first, second]
+  // Huffman encoding small strings doesn't save that many bytes
+  // Huffman encoding very large strings is expensive
+  [[nodiscard]] virtual std::pair<uint32_t, uint32_t> getHuffmanLimits() const {
+    return {0, std::numeric_limits<uint32_t>::max()};
+  }
 };
 
 } // namespace proxygen

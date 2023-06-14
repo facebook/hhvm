@@ -19,8 +19,6 @@ QPACKEncoder::QPACKEncoder(bool huffman, uint32_t tableSize)
       QPACKContext(tableSize, true),
       controlBuffer_(kBufferGrowth, huffman),
       maxTableSize_(tableSize) {
-  // Default the encoder indexing strategy; it can be updated later as well
-  setHeaderIndexingStrategy(HeaderIndexingStrategy::getDefaultInstance());
 }
 
 QPACKEncoder::EncodeResult QPACKEncoder::encode(

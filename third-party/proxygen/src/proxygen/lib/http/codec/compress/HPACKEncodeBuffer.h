@@ -26,6 +26,13 @@ class HPACKEncodeBuffer {
   ~HPACKEncodeBuffer() {
   }
 
+  void setHuffmanLimits(std::pair<uint32_t, uint32_t> limits) {
+    if (huffMax_ >= huffMin_) {
+      huffMin_ = limits.first;
+      huffMax_ = limits.second;
+    }
+  }
+
   /**
    * transfer ownership of the underlying IOBuf's
    */
@@ -115,7 +122,8 @@ class HPACKEncodeBuffer {
   folly::IOBufQueue* bufQueuePtr_{&bufQueue_};
   folly::io::QueueAppender buf_;
   uint32_t growthSize_;
-  bool huffmanEnabled_;
+  uint32_t huffMin_{0};
+  uint32_t huffMax_{std::numeric_limits<uint32_t>::max()};
 };
 
 } // namespace proxygen

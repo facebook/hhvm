@@ -271,3 +271,35 @@ TEST_F(HPACKCodecTests, DefaultHeaderIndexingStrategy) {
   EXPECT_EQ(testCodec.getCompressionInfo().egress.headersStored_,
             headersIndexableSize);
 }
+
+namespace {
+class TestIndexingStrat : public HeaderIndexingStrategy {
+ public:
+  [[nodiscard]] bool indexHeader(const HPACKHeaderName&,
+                                 folly::StringPiece) const override {
+    return false;
+  }
+
+  [[nodiscard]] std::pair<uint32_t, uint32_t> getHuffmanLimits()
+      const override {
+    // Too small for "gzip", too big for "www.facebook.com"
+    return {5, 10};
+  }
+};
+} // namespace
+
+TEST_F(HPACKCodecTests, CustomHeaderIndexingStrategy) {
+  vector<Header> headers = basicHeaders();
+  size_t headersIndexableSize = 0;
+
+  TestIndexingStrat strat;
+  client.setHeaderIndexingStrategy(&strat);
+  auto buf = client.encode(headers);
+  // Nothing is indexed
+  EXPECT_EQ(client.getCompressionInfo().egress.headersStored_,
+            headersIndexableSize);
+  EXPECT_NE(memmem(buf->data(), buf->length(), "gzip", 4), nullptr);
+  EXPECT_NE(memmem(buf->data(), buf->length(), "www.facebook.com", 16),
+            nullptr);
+  EXPECT_EQ(memmem(buf->data(), buf->length(), "/index.php", 10), nullptr);
+}

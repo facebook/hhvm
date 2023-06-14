@@ -22,13 +22,12 @@ namespace proxygen {
 HPACKEncodeBuffer::HPACKEncodeBuffer(uint32_t growthSize, bool huffmanEnabled)
     : buf_(&bufQueue_, growthSize),
       growthSize_(growthSize),
-      huffmanEnabled_(huffmanEnabled) {
+      huffMin_(huffmanEnabled ? 0 : std::numeric_limits<uint32_t>::max()),
+      huffMax_(huffmanEnabled ? std::numeric_limits<uint32_t>::max() : 0) {
 }
 
 HPACKEncodeBuffer::HPACKEncodeBuffer(uint32_t growthSize)
-    : buf_(&bufQueue_, growthSize),
-      growthSize_(growthSize),
-      huffmanEnabled_(false) {
+    : buf_(&bufQueue_, growthSize), growthSize_(growthSize), huffMax_(0) {
 }
 
 void HPACKEncodeBuffer::addHeadroom(uint32_t headroom) {
@@ -124,7 +123,7 @@ uint32_t HPACKEncodeBuffer::encodeLiteral(folly::StringPiece literal) {
 uint32_t HPACKEncodeBuffer::encodeLiteral(uint8_t instruction,
                                           uint8_t nbit,
                                           folly::StringPiece literal) {
-  if (huffmanEnabled_) {
+  if (literal.size() >= huffMin_ && literal.size() <= huffMax_) {
     return encodeHuffman(instruction, nbit, literal);
   }
   // otherwise use simple layout

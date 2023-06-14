@@ -1122,11 +1122,11 @@ let set_valid_rvalue ?(is_using_clause = false) p env lvar hint ty =
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
       (env, Some hty, hty)
   in
-  let env =
-    if Env.is_local_present env lvar then (
+  let (env, new_bound_ty, new_ty) =
+    if Env.is_local_present env lvar then
       let local = Env.get_local env lvar in
       match local.Typing_local_types.bound_ty with
-      | None -> env
+      | None -> (env, hty, ty)
       | Some old_bound_ty ->
         let (env, err) =
           Typing_subtype.sub_type
@@ -1135,12 +1135,20 @@ let set_valid_rvalue ?(is_using_clause = false) p env lvar hint ty =
             old_bound_ty
             (Some (Typing_error.Reasons_callback.unify_error_at p))
         in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
-        env
-    ) else
-      env
+        (match err with
+        | None -> (env, Some (Option.value hty ~default:old_bound_ty), ty)
+        | Some err ->
+          Typing_error_utils.add_typing_error ~env err;
+          (* If the new type or bound violates the old one, then we want to
+             check the remainder of the code with the type of the variable
+             set to the bound *)
+          (env, Some old_bound_ty, old_bound_ty))
+    else
+      (env, hty, ty)
   in
-  let env = set_local ~is_using_clause ~bound_ty:hty env (p, lvar) ty in
+  let env =
+    set_local ~is_using_clause ~bound_ty:new_bound_ty env (p, lvar) new_ty
+  in
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
    *)

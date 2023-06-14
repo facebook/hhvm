@@ -11,4 +11,10 @@ function f() : void {
   hh_expect_equivalent<string>($y);
   $y = 1;
   hh_expect_equivalent<int>($y);
+
+  let $z : arraykey = 1;
+  /* HH_FIXME[4110] */
+  $z = null;
+  hh_expect_equivalent<arraykey>($z);
+
 }

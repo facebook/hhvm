@@ -1,0 +1,6 @@
+File "loop-error.php", line 10, characters 4-10:
+Typing error (Typing[4110])
+  File "loop-error.php", line 11, characters 13-18:
+  Expected `string`
+  File "loop-error.php", line 10, characters 9-10:
+  But got `int`

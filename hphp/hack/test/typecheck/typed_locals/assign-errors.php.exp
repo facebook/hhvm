@@ -1,0 +1,6 @@
+File "assign-errors.php", line 7, characters 3-9:
+Typing error (Typing[4110])
+  File "assign-errors.php", line 5, characters 12-14:
+  Expected `int`
+  File "assign-errors.php", line 7, characters 8-9:
+  But got `string`

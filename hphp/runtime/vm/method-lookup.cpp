@@ -358,6 +358,13 @@ ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
       // We can use this function. If its persistent (which means its unit's
       // pseudo-main is trivial), its safe to use unconditionally.
       if (f->isPersistent()) {
+        if (RO::EvalJitEnableRenameFunction == 1 &&
+          StructuredLog::coinflip(RO::EvalJitRenameFunctionLogRate)) {
+          StructuredLogEntry entry;
+          entry.setStr("details_log", "Function is renamable and persistent");
+          entry.setStr("old_function_name", name->data());
+          StructuredLog::log("hhvm_rename_function", entry);
+        }
         if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
           return {f, false};
         }

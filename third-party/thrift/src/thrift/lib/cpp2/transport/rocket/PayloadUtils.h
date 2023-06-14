@@ -18,8 +18,10 @@
 
 #include <fmt/core.h>
 #include <folly/Try.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -121,10 +123,14 @@ inline std::unique_ptr<folly::IOBuf> packCompact(
   return std::move(data);
 }
 
-// NB: Populates `metadata.numFds` if `fds` is nonempty.
+// NB: If `fds` is non-empty, populates `metadata.{numFds,fdSeqNum}` and
+// `fds.seqNum()`.  Then, moves the FDs into `Payload::fds`.
 template <typename Payload, typename Metadata>
 rocket::Payload packWithFds(
-    Metadata* metadata, Payload&& payload, folly::SocketFds fds) {
+    Metadata* metadata,
+    Payload&& payload,
+    folly::SocketFds fds,
+    folly::AsyncTransport* transport) {
   auto serializedPayload = packCompact(std::forward<Payload>(payload));
   if (auto compress = metadata->compression_ref()) {
     apache::thrift::rocket::detail::compressPayload(
@@ -134,21 +140,37 @@ rocket::Payload packWithFds(
   if (kTempKillswitch__EnableFdPassing && numFds) {
     FdMetadata fdMetadata;
 
-    // When received, the request will know to retrieve this many FDs.
-    //
-    // NB: The receiver could more confidently assert that the right FDs are
-    // associated with the right request if we could:
-    //  - Additionally store the "socket sequence number" of these FDs into
-    //    the metadata here.
-    //  - Have `AsyncFdSocket::writeIOBufsWithFds` check, via a token
-    //    object, that the sequence number chosen at parse-time matches the
-    //    actual write order).
-    // Unfortunately, implementing this check would require adding
-    // considerable plumbing to Rocket, so we skip it in favor of asserting
-    // we got the right # of FDs, and documenting the correct FD+data
-    // ordering invariant in the client & server code that interacts with
-    // the socket.
-    fdMetadata.numFds() = numFds;
+    // The kernel maximum is actually much lower (at least on Linux, and
+    // MacOS doesn't seem to document it at all), but that will only fail in
+    // in `AsyncFdSocket`.
+    constexpr auto numFdsTypeMax = std::numeric_limits<
+        op::get_native_type<FdMetadata, ident::numFds>>::max();
+    if (UNLIKELY(numFds > numFdsTypeMax)) {
+      LOG(DFATAL) << numFds << " would overflow FdMetadata::numFds";
+      fdMetadata.numFds() = numFdsTypeMax;
+      // This will cause "AsyncFdSocket::writeChainWithFds" to error out.
+      fdMetadata.fdSeqNum() = folly::SocketFds::kNoSeqNum;
+    } else {
+      // When received, the request will know to retrieve this many FDs.
+      fdMetadata.numFds() = numFds;
+      // FD sequence numbers count the total number of FDs sent on this
+      // socket, and are used to detect & fail on the dire class of bugs where
+      // the wrong FDs are about to be associated with a message.
+      //
+      // We currently require message bytes and FDs to be both sent and
+      // received in a coherent order, so sequence numbers here in `pack*` are
+      // expected to exactly match the sequencing of socket sends, and also the
+      // sequencing of `popNextReceivedFds` on the receiving side.
+      //
+      // NB: If `transport` is not backed by a `AsyncFdSocket*`, this will
+      // store `fdSeqNum == -1`, which cannot happen otherwise, thanks to
+      // AsyncFdSocket's 2^63 -> 0 wrap-around logic.  Furthermore, the
+      // subsequent `writeChainWithFds` will discard `fds`.  As a result, the
+      // recipient will see read errors on the FDs due to both `numFds` not
+      // matching, and `fdSeqNum` not matching.
+      fdMetadata.fdSeqNum() =
+          injectFdSocketSeqNumIntoFdsToSend(transport, &fds);
+    }
 
     DCHECK(!metadata->fdMetadata().has_value());
     metadata->fdMetadata() = fdMetadata;
@@ -162,12 +184,13 @@ rocket::Payload packWithFds(
 }
 
 template <class T>
-rocket::Payload pack(T&& payload) {
+rocket::Payload pack(T&& payload, folly::AsyncTransport* transport) {
   auto metadata = std::forward<T>(payload).metadata;
   return packWithFds(
       &metadata,
       std::forward<T>(payload).payload,
-      std::forward<T>(payload).fds);
+      std::forward<T>(payload).fds,
+      transport);
 }
 } // namespace rocket
 } // namespace thrift

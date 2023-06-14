@@ -87,7 +87,9 @@ bool RocketStreamClientCallback::onFirstResponse(
   firstResponse.metadata.streamId_ref() = static_cast<uint32_t>(streamId_);
 
   connection_.sendPayload(
-      streamId_, pack(std::move(firstResponse)), Flags().next(true));
+      streamId_,
+      pack(std::move(firstResponse), connection_.getRawSocket()),
+      Flags().next(true));
 
   if (tokens) {
     return request(tokens);
@@ -105,7 +107,9 @@ void RocketStreamClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                pack(std::move(encodedError.encoded)),
+                pack(
+                    std::move(encodedError.encoded),
+                    connection_.getRawSocket()),
                 Flags().next(true).complete(true));
           });
   DCHECK(isEncodedError);
@@ -130,7 +134,9 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
   }
 
   connection_.sendPayload(
-      streamId_, pack(std::move(payload)), Flags().next(true));
+      streamId_,
+      pack(std::move(payload), connection_.getRawSocket()),
+      Flags().next(true));
 
   return true;
 }
@@ -166,7 +172,7 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
         }
         connection_.sendPayload(
             streamId_,
-            pack(std::move(err.encoded)),
+            pack(std::move(err.encoded), connection_.getRawSocket()),
             Flags().next(true).complete(true));
       },
       [this, &ew](...) {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <folly/io/async/fdsock/AsyncFdSocket.h>
+
 #include "FdSocket.h"
 
 namespace apache {
@@ -36,6 +38,23 @@ void writeChainWithFds(
     return;
   }
   fdSocket->writeChainWithFds(callback, std::move(buf), std::move(fds));
+}
+
+folly::SocketFds::SeqNum injectFdSocketSeqNumIntoFdsToSend(
+    folly::AsyncTransport* transport, folly::SocketFds* fds) {
+  auto fdSocket = transport->getUnderlyingTransport<folly::AsyncFdSocket>();
+  if (!fdSocket) {
+    LOG(DFATAL) << "`injectFdSocketSeqNumIntoFdsToSend` called when the "
+                << "socket is not an `AsyncFdSocket`: " << transport;
+    // Since `AsyncFdSocket` sequence numbers are guaranteed non-negative (even
+    // with overflow), this will cause the receiving side to treat the request
+    // as an error.
+    //
+    // NB: Even with 2's complement overflow, reaching -1 at 1M QPS with
+    // 253 FDs per request would take require a socket to live ~2000 years.
+    return -1;
+  }
+  return fdSocket->injectSocketSeqNumIntoFdsToSend(fds);
 }
 
 } // namespace rocket

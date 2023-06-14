@@ -17,7 +17,7 @@
 #pragma once
 
 #include <folly/io/async/AsyncTransport.h>
-#include <folly/io/async/fdsock/AsyncFdSocket.h>
+#include <folly/io/async/fdsock/SocketFds.h>
 
 namespace apache {
 namespace thrift {
@@ -36,6 +36,13 @@ void writeChainWithFds(
     folly::AsyncTransport::WriteCallback* callback,
     std::unique_ptr<folly::IOBuf> buf,
     folly::SocketFds fds);
+
+// Must be used to commit `SocketFds` to be written to `AsyncFdSocket`
+// before actually calling `writeChainWithFds`.  Writes must be done in the
+// same order as the `inject*` calls.  It is a DFATAL error to pass a
+// transport that is not an `AsyncFdSocket`.
+folly::SocketFds::SeqNum injectFdSocketSeqNumIntoFdsToSend(
+    folly::AsyncTransport*, folly::SocketFds*);
 
 } // namespace rocket
 } // namespace thrift

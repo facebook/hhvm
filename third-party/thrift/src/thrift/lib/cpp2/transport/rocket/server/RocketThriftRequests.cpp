@@ -473,7 +473,8 @@ void ThriftServerRequestResponse::sendThriftResponse(
       std::move(data),
       kTempKillswitch__EnableFdPassing
           ? std::move(getRequestContext()->getHeader()->fds)
-          : folly::SocketFds{});
+          : folly::SocketFds{},
+      context_.connection().getRawSocket());
   context_.sendPayload(
       std::move(payload), Flags().next(true).complete(true), std::move(cb));
 }

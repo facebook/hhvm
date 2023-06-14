@@ -961,7 +961,8 @@ void RocketClient::cancelStream(StreamId streamId) {
 bool RocketClient::sendPayload(
     StreamId streamId, StreamPayload&& payload, Flags flags) {
   return sendFrame(
-      PayloadFrame(streamId, pack(std::move(payload)), flags),
+      PayloadFrame(
+          streamId, pack(std::move(payload), getTransportWrapper()), flags),
       [this,
        dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::INTERNAL)](

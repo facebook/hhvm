@@ -4,6 +4,7 @@
 
 import lldb
 import re
+import sizeof
 import sys
 import traceback
 import typing
@@ -201,19 +202,17 @@ class pp_ArrayData:
         # We use this class for both the synthetic children and for the summary.
         # For the summary, we will be given the synthetic lldb.SBValue so we
         # must make sure to get the non-synthetic lldb.SBValue.
+        utils.debug_print(f"pp_ArrayData::__init__ with val_obj (load_addr: {val_obj.load_addr}, type: {val_obj.type.name})")
         self.val_obj = val_obj.GetNonSyntheticValue()
+        self.size = None
+        self.func = None
         self.update()
 
     def num_children(self) -> int:
-        if self._is('Vec'):
-            m_size = utils.get(self.val_obj, "m_size")
-            return m_size.unsigned
-        elif self._is('Dict') or self._is('Keyset'):
-            m_used = utils.get(self.val_obj.children[1].children[0], "m_used")
-            return m_used.unsigned
-        else:
-            print("Invalid array type!", file=sys.stderr)
+        if self.size is None:
+            print("Unable to determine number of children of ArrayData object, returning 0", file=sys.stderr)
             return 0
+        return self.size.unsigned
 
     def get_child_index(self, name: str) -> int:
         try:
@@ -222,51 +221,44 @@ class pp_ArrayData:
             return -1
 
     def get_child_at_index(self, index: int) -> lldb.SBValue:
+        utils.debug_print(f"pp_ArrayData::get_child_at_index with index {index}")
         if index < 0:
             return None
         if index >= self.num_children():
             return None
-        char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()
-        # Note: use CreateChildAtOffset was working when pretty printing the dereferenced m_arr
-        # from an Array struct, but not when pretty printing an ArrayData itself.
-        # base = self.val_obj.CreateChildAtOffset("tmp", self.val_obj.type.size, char_ptr_type)
-        base = self.val_obj.CreateValueFromAddress("tmp", self.val_obj.load_addr + self.val_obj.type.size, char_ptr_type)
-        assert base.IsValid(), "Couldn't get base address of array"
-        if self._is('Vec'):
-            return idx.vec_at(base, index)
-        elif self._is('Dict'):
-            return idx.dict_at(base, index)
-        elif self._is('Keyset'):
-            return idx.keyset_at(base, index)
-        else:
+        if self.at_func is None:
             print("Invalid array type!", file=sys.stderr)
             return None
+        return self.at_func(index)
 
     def update(self):
-        # Doing all of this logic in here, rather than __init__(), because the API
+        # Doing this in here, rather than __init__(), because the API
         # says we should be re-updating internal state as much as possible (since the
         # state of variables can change since the last invocation).
-        heap_obj = self.val_obj.children[0].children[0]  # HPHP::HeapObject
-        self.m_kind = utils.get(heap_obj, "m_kind")
-        self.m_count = utils.get(heap_obj, "m_count").unsigned
-        if self._is('Vec'):
-            pass
-        elif self._is('Dict'):
-            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaDict", self.val_obj.target))
-        elif self._is('Keyset'):
-            self.val_obj = self.val_obj.Cast(utils.Type("HPHP::VanillaKeyset", self.val_obj.target))
-        elif self._is('BespokeVec') or self._is('BespokeDict') or self._is('BespokeKeyset'):
-            print(f"Unsupported bespoke array type ('{self.m_kind}')! Run `expression -R -- {self.val_obj.path}` to see its raw form", file=sys.stderr)
-        else:
-            print(f"Invalid array type ('{self.m_kind}')! Run `expression -R -- {self.val_obj.path}` to see its raw form", file=sys.stderr)
+        self.size = sizeof.array_data_size(self.val_obj)
+
+        specialized_obj = utils.cast_as_specialized_array_data_kind(self.val_obj)
+        utils.debug_print(
+            f"pp_ArrayData::update() with specialized_obj (type {specialized_obj.type.name}); "
+            f"specialized_obj.load_addr 0x{specialized_obj.load_addr:x} + specialized_obj.type.size {specialized_obj.type.size}"
+        )
+        char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()
+        base = specialized_obj.CreateValueFromAddress("tmp", specialized_obj.load_addr + specialized_obj.type.size, char_ptr_type)
+        assert base.IsValid(), "Couldn't get base address of array"
+
+        if utils.has_array_kind(self.val_obj, 'Vec'):
+            self.at_func = lambda ix: idx.vec_at(base, ix)
+        elif utils.has_array_kind(self.val_obj, 'Dict'):
+            self.at_func = lambda ix: idx.dict_at(base, ix)
+        elif utils.has_array_kind(self.val_obj, 'Keyset'):
+            self.at_func = lambda ix: idx.keyset_at(base, ix)
+
+        return False
+
 
         # Return false to make sure we always update this object every time we
         # stop. If we return True, then the value will never update again.
         return False
-
-    def _is(self, member: str) -> bool:
-        kind = utils.Enum("HPHP::ArrayData::ArrayKind", "k" + member + "Kind", self.val_obj.target).unsigned
-        return self.m_kind.unsigned == kind
 
 
 @format("^HPHP::Array$", regex=True, synthetic_children=True)

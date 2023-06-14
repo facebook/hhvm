@@ -725,6 +725,46 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
 
 
 #------------------------------------------------------------------------------
+# Array helpers
+
+def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
+    """ Determine if array_data has a particular kind (e.g. 'Vec', 'Keyset', etc.)
+
+    Arguments:
+        array_data: an SBValue wrapping an ArrayData
+        kinds: one or more ArrayKind members
+    
+    Returns:
+        True if the array data's kind is one of those specified in kinds
+    """
+
+    heap_obj = array_data.children[0].children[0]  # HPHP::HeapObject
+    m_kind = get(heap_obj, "m_kind")
+
+    for kind in kinds:
+        kind = Enum("HPHP::ArrayData::ArrayKind", "k" + kind + "Kind", array_data.target).unsigned
+        if m_kind.unsigned == kind:
+            return True
+    return False
+
+
+def cast_as_specialized_array_data_kind(array_data: lldb.SBValue) -> lldb.SBValue:
+    heap_obj = array_data.children[0].children[0]  # HPHP::HeapObject
+    m_kind = get(heap_obj, "m_kind")
+    if has_array_kind(array_data, 'Vec'):
+        pass
+    elif has_array_kind(array_data, 'Dict'):
+        array_data = array_data.Cast(Type("HPHP::VanillaDict", array_data.target))
+    elif has_array_kind(array_data, 'Keyset'):
+        array_data = array_data.Cast(Type("HPHP::VanillaKeyset", array_data.target))
+    elif has_array_kind(array_data, 'BespokeVec', 'BespokeDict', 'BespokeKeyset'):
+        print(f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
+    else:
+        print(f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
+    return array_data
+
+
+#------------------------------------------------------------------------------
 # Architecture
 
 

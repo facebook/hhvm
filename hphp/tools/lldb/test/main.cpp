@@ -261,6 +261,27 @@ void buildValuesForNameofTests() {
   takeFunc(func);
 }
 
+// sizeof tests
+void takeArray(Array UNUSED v) { return; }
+
+void buildValuesForSizeofTests() {
+  Array d = make_dict_array(
+    "key1", 42,
+    "key2", 3.14,
+    "key3", "Salutations, earth!"
+  );
+  takeArray(d);
+  takeArrayData(d.get());
+
+  Array v = make_vec_array(1, 2, 3, 4, 5);
+  takeArray(v);
+  takeArrayData(v.get());
+
+  Array k = make_keyset_array(1, 2);
+  takeArray(k);
+  takeArrayData(k.get());
+}
+
 } // namespace lldb_test
 } // namespace HPHP
 
@@ -271,7 +292,7 @@ int main(int argc, char** argv) {
   SCOPE_EXIT { HPHP::hphp_process_exit(); };
 
   if (argc < 2) {
-    std::cout << "Specify what to run (options: \"typed-values\", \"other-values\")" << std::endl;
+    std::cout << "Specify what to run (options: \"typed-values\", \"other-values\", \"nameof-values\", \"sizeof-values\", \"utility\")" << std::endl;
     return 1;
   }
   if (!strcmp(argv[1], "typed-values")) {
@@ -280,10 +301,12 @@ int main(int argc, char** argv) {
     HPHP::lldb_test::buildOtherValues();
   } else if (!strcmp(argv[1], "nameof-values")) {
     HPHP::lldb_test::buildValuesForNameofTests();
+  } else if (!strcmp(argv[1], "sizeof-values")) {
+    HPHP::lldb_test::buildValuesForSizeofTests();
   } else if (!strcmp(argv[1], "utility")) {
     HPHP::lldb_test::buildValuesForUtilityTests();
   } else {
-    std::cout << "Invalid option (options: \"typed-values\", \"other-values\", \"nameof-values\", \"utility\"" << std::endl;
+    std::cout << "Invalid option (options: \"typed-values\", \"other-values\", \"nameof-values\", \"sizeof-values\", \"utility\"" << std::endl;
     return 1;
   }
   return 0;

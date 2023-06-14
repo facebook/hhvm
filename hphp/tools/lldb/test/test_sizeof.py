@@ -25,3 +25,40 @@ class IdxCommandTestCase(base.TestHHVMBinary):
         status, output = self.run_commands(["sizeof this_->m_cls"], check=False)
         self.assertNotEqual(status, 0)
         self.assertEqual(output.strip(), "error: unrecognized container")
+
+
+class SizeofCommandTestCase(base.TestHHVMTypesBinary):
+
+    def setUp(self):
+        super().setUp(test_type="sizeof-values")
+
+    def test_sizeof(self):
+        with self.subTest("Array (Dict)"):
+            self.run_until_breakpoint("takeArray")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "3")
+
+        with self.subTest("ArrayData<Dict>"):
+            self.run_until_breakpoint("takeArrayData")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "3")
+
+        with self.subTest("Array (Vec)"):
+            self.run_until_breakpoint("takeArray")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "5")
+
+        with self.subTest("ArrayData<Vec>"):
+            self.run_until_breakpoint("takeArrayData")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "5")
+
+        with self.subTest("Array (Keyset)"):
+            self.run_until_breakpoint("takeArray")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "2")
+
+        with self.subTest("ArrayData<Keyset>"):
+            self.run_until_breakpoint("takeArrayData")
+            _, output = self.run_commands(["sizeof v"])
+            self.assertEqual(output.strip(), "2")

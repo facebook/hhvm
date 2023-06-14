@@ -70,6 +70,7 @@ size_t HPACKEncoder::encodeHeader(const std::string& nameStr,
 }
 
 void HPACKEncoder::encodeAsLiteralImpl(const HPACKHeaderName& name,
+                                       uint32_t nameIndex,
                                        folly::StringPiece value,
                                        bool& indexing) {
   if (HPACKHeader::bytes(name.size(), value.size()) > table_.capacity()) {
@@ -83,13 +84,14 @@ void HPACKEncoder::encodeAsLiteralImpl(const HPACKHeaderName& name,
   HPACK::Instruction instruction =
       (indexing) ? HPACK::LITERAL_INC_INDEX : HPACK::LITERAL;
 
-  encodeLiteral(name, value, nameIndex(name), instruction);
+  encodeLiteral(name, value, nameIndex, instruction);
 }
 
 bool HPACKEncoder::encodeAsLiteral(const HPACKHeaderName& name,
+                                   uint32_t nameIndex,
                                    folly::StringPiece value,
                                    bool indexing) {
-  encodeAsLiteralImpl(name, value, indexing);
+  encodeAsLiteralImpl(name, nameIndex, value, indexing);
   // indexed ones need to get added to the header table
   if (indexing) {
     CHECK(table_.add(HPACKHeader(name, value)));
@@ -98,9 +100,10 @@ bool HPACKEncoder::encodeAsLiteral(const HPACKHeaderName& name,
 }
 
 bool HPACKEncoder::encodeAsLiteral(HPACKHeaderName&& name,
+                                   uint32_t nameIndex,
                                    folly::fbstring&& value,
                                    bool indexing) {
-  encodeAsLiteralImpl(name, value, indexing);
+  encodeAsLiteralImpl(name, nameIndex, value, indexing);
   // indexed ones need to get added to the header table
   if (indexing) {
     CHECK(table_.add(HPACKHeader(std::move(name), std::move(value))));
@@ -109,9 +112,10 @@ bool HPACKEncoder::encodeAsLiteral(HPACKHeaderName&& name,
 }
 
 bool HPACKEncoder::encodeAsLiteral(HPACKHeaderName&& name,
+                                   uint32_t nameIndex,
                                    folly::StringPiece value,
                                    bool indexing) {
-  encodeAsLiteralImpl(name, value, indexing);
+  encodeAsLiteralImpl(name, nameIndex, value, indexing);
   // indexed ones need to get added to the header table
   if (indexing) {
     CHECK(table_.add(HPACKHeader(std::move(name), value)));
@@ -140,55 +144,53 @@ void HPACKEncoder::encodeAsIndex(uint32_t index) {
   streamBuffer_.encodeInteger(index, HPACK::INDEX_REF);
 }
 
-bool HPACKEncoder::encodeHeaderImpl(const HPACKHeaderName& name,
-                                    folly::StringPiece value,
-                                    bool& indexable) {
-  // First determine whether the header is defined as indexable using the
-  // set strategy if applicable, else assume it is indexable
-  indexable = !indexingStrat_ || indexingStrat_->indexHeader(name, value);
-
-  // If the header was not defined as indexable, its a reasonable assumption
-  // that it does not appear in either the static or dynamic table and should
-  // not be searched.  The only time this is not true is if the header indexing
-  // strat specified an exact header/value pair that is in the static header
-  // table although semantically the header indexing strategy should indeed act
-  // as an override so we assume this is desired if such a case occurs
+folly::Optional<uint32_t> HPACKEncoder::encodeHeaderImpl(
+    const HPACKHeaderName& name, folly::StringPiece value, bool& indexable) {
   uint32_t index = 0;
-  if (indexable) {
-    index = getIndex(name, value);
-  }
+  uint32_t nameIndex = 0;
+  // Check to see if the header is the static or dynamic table
+  std::tie(index, nameIndex) = getIndex(name, value);
 
   // Finally encode the header as determined above
   if (index) {
     encodeAsIndex(index);
-    return true;
+    return folly::none;
   } else {
+    indexable =
+        HPACKHeader::bytes(name.size(), value.size()) <= table_.capacity() &&
+        (!indexingStrat_ ||
+         indexingStrat_->indexHeader(
+             name, value, nameIndex > 0 && !isStatic(nameIndex)));
+
     // caller must encodeAsLiteral
-    return false;
+    return nameIndex;
   }
 }
 
 void HPACKEncoder::encodeHeader(const HPACKHeaderName& name,
                                 folly::StringPiece value) {
   bool indexable = false;
-  if (!encodeHeaderImpl(name, value, indexable)) {
-    encodeAsLiteral(name, value, indexable);
+  auto nameIndex = encodeHeaderImpl(name, value, indexable);
+  if (nameIndex) {
+    encodeAsLiteral(name, *nameIndex, value, indexable);
   }
 }
 
 void HPACKEncoder::encodeHeader(HPACKHeaderName&& name,
                                 folly::fbstring&& value) {
   bool indexable = false;
-  if (!encodeHeaderImpl(name, value, indexable)) {
-    encodeAsLiteral(std::move(name), std::move(value), indexable);
+  auto nameIndex = encodeHeaderImpl(name, value, indexable);
+  if (nameIndex) {
+    encodeAsLiteral(std::move(name), *nameIndex, std::move(value), indexable);
   }
 }
 
 void HPACKEncoder::encodeHeader(HPACKHeaderName&& name,
                                 folly::StringPiece value) {
   bool indexable = false;
-  if (!encodeHeaderImpl(name, value, indexable)) {
-    encodeAsLiteral(std::move(name), value, indexable);
+  auto nameIndex = encodeHeaderImpl(name, value, indexable);
+  if (nameIndex) {
+    encodeAsLiteral(std::move(name), *nameIndex, value, indexable);
   }
 }
 

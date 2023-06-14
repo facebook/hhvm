@@ -60,23 +60,29 @@ class HPACKEncoder
   // neither movable
   void encodeHeader(const HPACKHeaderName& name, folly::StringPiece value);
 
-  bool encodeHeaderImpl(const HPACKHeaderName& name,
-                        folly::StringPiece value,
-                        bool& indexable);
+  // Returns folly::none if the header was encoded, or a nameIndex to use
+  // when encoding the literal if not (may be 0)
+  folly::Optional<uint32_t> encodeHeaderImpl(const HPACKHeaderName& name,
+                                             folly::StringPiece value,
+                                             bool& indexable);
 
   bool encodeAsLiteral(HPACKHeaderName&& name,
+                       uint32_t nameIndex,
                        folly::fbstring&& value,
                        bool indexing);
 
   bool encodeAsLiteral(HPACKHeaderName&& name,
+                       uint32_t nameIndex,
                        folly::StringPiece value,
                        bool indexing);
 
   bool encodeAsLiteral(const HPACKHeaderName& name,
+                       uint32_t nameIndex,
                        folly::StringPiece value,
                        bool indexing);
 
   void encodeAsLiteralImpl(const HPACKHeaderName& name,
+                           uint32_t nameIndex,
                            folly::StringPiece value,
                            bool& indexing);
 

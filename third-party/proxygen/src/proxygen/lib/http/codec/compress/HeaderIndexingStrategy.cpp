@@ -16,7 +16,8 @@ const HeaderIndexingStrategy* HeaderIndexingStrategy::getDefaultInstance() {
 }
 
 bool HeaderIndexingStrategy::indexHeader(const HPACKHeaderName& name,
-                                         folly::StringPiece value) const {
+                                         folly::StringPiece value,
+                                         bool) const {
   // Handle all the cases where we want to return false in the switch statement
   // below; else let the code fall through and return true
   switch (name.getHeaderCode()) {

@@ -276,7 +276,8 @@ namespace {
 class TestIndexingStrat : public HeaderIndexingStrategy {
  public:
   [[nodiscard]] bool indexHeader(const HPACKHeaderName&,
-                                 folly::StringPiece) const override {
+                                 folly::StringPiece,
+                                 bool) const override {
     return false;
   }
 

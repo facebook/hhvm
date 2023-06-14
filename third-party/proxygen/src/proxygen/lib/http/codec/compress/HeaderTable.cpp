@@ -61,30 +61,32 @@ bool HeaderTable::add(HPACKHeader header) {
   return true;
 }
 
-uint32_t HeaderTable::getIndex(const HPACKHeader& header) const {
+std::pair<uint32_t, uint32_t> HeaderTable::getIndex(
+    const HPACKHeader& header) const {
   return getIndexImpl(header.name, header.value, false);
 }
 
-uint32_t HeaderTable::getIndex(const HPACKHeaderName& name,
-                               folly::StringPiece value) const {
+std::pair<uint32_t, uint32_t> HeaderTable::getIndex(
+    const HPACKHeaderName& name, folly::StringPiece value) const {
   return getIndexImpl(name, value, false);
 }
 
-uint32_t HeaderTable::getIndexImpl(const HPACKHeaderName& headerName,
-                                   folly::StringPiece value,
-                                   bool nameOnly) const {
+std::pair<uint32_t, uint32_t> HeaderTable::getIndexImpl(
+    const HPACKHeaderName& headerName,
+    folly::StringPiece value,
+    bool nameOnly) const {
   auto it = names_.find(headerName);
   if (it == names_.end()) {
-    return 0;
+    return {0, 0};
   }
   for (auto indexIt = it->second.rbegin(); indexIt != it->second.rend();
        ++indexIt) {
     auto i = *indexIt;
     if (nameOnly || table_[i].value == value) {
-      return toExternal(i);
+      return {toExternal(i), 0};
     }
   }
-  return 0;
+  return {0, toExternal(*it->second.rbegin())};
 }
 
 bool HeaderTable::hasName(const HPACKHeaderName& headerName) {
@@ -93,7 +95,7 @@ bool HeaderTable::hasName(const HPACKHeaderName& headerName) {
 
 uint32_t HeaderTable::nameIndex(const HPACKHeaderName& headerName) const {
   folly::StringPiece value;
-  return getIndexImpl(headerName, value, true /* name only */);
+  return getIndexImpl(headerName, value, true /* name only */).first;
 }
 
 const HPACKHeader& HeaderTable::getHeader(uint32_t index) const {

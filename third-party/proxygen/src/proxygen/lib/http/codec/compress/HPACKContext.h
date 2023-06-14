@@ -26,10 +26,11 @@ class HPACKContext {
    *
    * @return 0 if cannot be found
    */
-  uint32_t getIndex(const HPACKHeader& header) const;
+  std::pair<uint32_t, uint32_t> getIndex(const HPACKHeader& header) const;
 
-  uint32_t getIndex(const HPACKHeaderName& name,
-                    folly::StringPiece value) const;
+  std::pair<uint32_t, uint32_t> getIndex(const HPACKHeaderName& name,
+                                         folly::StringPiece value,
+                                         bool checkDynamicTable = true) const;
 
   /**
    * index of a header entry with the given name from dynamic or static table

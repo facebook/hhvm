@@ -105,7 +105,7 @@ size_t QPACKEncoder::encodeHeaderQ(HPACKHeaderName name,
                                    uint32_t baseIndex,
                                    uint32_t& requiredInsertCount) {
   size_t uncompressed = HPACKHeader::realBytes(name.size(), value.size()) + 2;
-  uint32_t index = getStaticTable().getIndex(name, value);
+  uint32_t index = getStaticTable().getIndex(name, value).first;
   if (index > 0) {
     // static reference
     staticRefs_++;

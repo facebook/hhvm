@@ -52,19 +52,22 @@ class HeaderTable {
   virtual bool add(HPACKHeader header);
 
   /**
-   * Get the index of the given header, if found.
+   * Get the index of the given header, if found, and the index of a header
+   * with the same name if not.
    *
-   * @return 0 in case the header is not found
+   * @return a pair containing <index, 0>, <0, nameIndex>, or <0, 0>
    */
-  uint32_t getIndex(const HPACKHeader& header) const;
+  [[nodiscard]] std::pair<uint32_t, uint32_t> getIndex(
+      const HPACKHeader& header) const;
 
   /**
-   * Get the index of the given header, if found.
+   * Get the index of the given header, if found, and the index of a header
+   * with the same name if not.
    *
-   * @return 0 in case the header is not found
+   * @return a pair containing <index, 0>, <0, nameIndex>, or <0, 0>
    */
-  uint32_t getIndex(const HPACKHeaderName& name,
-                    folly::StringPiece value) const;
+  [[nodiscard]] std::pair<uint32_t, uint32_t> getIndex(
+      const HPACKHeaderName& name, folly::StringPiece value) const;
 
   /**
    * Get the table entry at the given external index.
@@ -218,9 +221,10 @@ class HeaderTable {
   /*
    * Shared implementation for getIndex and nameIndex
    */
-  uint32_t getIndexImpl(const HPACKHeaderName& header,
-                        folly::StringPiece value,
-                        bool nameOnly) const;
+  [[nodiscard]] std::pair<uint32_t, uint32_t> getIndexImpl(
+      const HPACKHeaderName& header,
+      folly::StringPiece value,
+      bool nameOnly) const;
 
   uint32_t initialTableLength(uint32_t capacity);
 };

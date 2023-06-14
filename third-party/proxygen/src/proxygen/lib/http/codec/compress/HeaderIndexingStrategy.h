@@ -29,7 +29,8 @@ class HeaderIndexingStrategy {
   // Returns a bool that indicates whether the specified header should be
   // indexed
   virtual bool indexHeader(const HPACKHeaderName& name,
-                           folly::StringPiece value) const;
+                           folly::StringPiece value,
+                           bool nameExists = false) const;
 
   // Only apply huffman to literal strings in the range [first, second]
   // Huffman encoding small strings doesn't save that many bytes

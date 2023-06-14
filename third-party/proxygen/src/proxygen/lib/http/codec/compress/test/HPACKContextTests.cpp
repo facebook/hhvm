@@ -40,7 +40,7 @@ TEST_F(HPACKContextTests, GetIndex) {
   HPACKHeader method(":method", "POST");
 
   // this will get it from the static table
-  CHECK_EQ(context.getIndex(method), 3);
+  CHECK_EQ(context.getIndex(method).first, 3);
 }
 
 TEST_F(HPACKContextTests, IsStatic) {
@@ -292,8 +292,8 @@ TEST_F(HPACKContextTests, ExcludeHeadersLargerThanTable) {
 
   encoder.encode(headers);
 
-  CHECK_EQ(encoder.getIndex(headers[1]), 0);
-  CHECK_EQ(encoder.getIndex(headers[0]), 62);
+  CHECK_EQ(encoder.getIndex(headers[1]).first, 0);
+  CHECK_EQ(encoder.getIndex(headers[0]).first, 62);
 }
 
 TEST_F(HPACKContextTests, EncodeToWriteBuf) {

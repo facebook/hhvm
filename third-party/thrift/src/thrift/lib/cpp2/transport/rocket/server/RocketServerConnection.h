@@ -101,7 +101,8 @@ class RocketServerConnection final
   void send(
       std::unique_ptr<folly::IOBuf> data,
       MessageChannel::SendCallbackPtr cb = nullptr,
-      StreamId streamId = StreamId());
+      StreamId streamId = StreamId(),
+      folly::SocketFds fds = folly::SocketFds{});
 
   // does not create callback and returns nullptr if streamId is already in use
   RocketStreamClientCallback* FOLLY_NULLABLE createStreamClientCallback(
@@ -391,6 +392,8 @@ class RocketServerConnection final
   bool streamsPaused_{false};
   folly::Function<Config::AllocIOBufFn>* allocIOBufFnPtr_{nullptr};
 
+  using FdsAndOffsets = std::vector<std::pair<folly::SocketFds, size_t>>;
+
   class WriteBatcher : private folly::EventBase::LoopCallback,
                        private folly::HHWheelTimer::Callback {
    public:
@@ -407,7 +410,8 @@ class RocketServerConnection final
     void enqueueWrite(
         std::unique_ptr<folly::IOBuf> data,
         MessageChannel::SendCallbackPtr cb,
-        StreamId streamId) {
+        StreamId streamId,
+        folly::SocketFds fds) {
       if (cb) {
         cb->sendQueued();
         bufferedWritesContext_.sendCallbacks.push_back(std::move(cb));
@@ -423,6 +427,7 @@ class RocketServerConnection final
         }
         totalBytesBuffered_ += totalBytesInWrite;
       }
+
       if (!bufferedWrites_) {
         bufferedWrites_ = std::move(data);
         if (batchingInterval_ != std::chrono::milliseconds::zero()) {
@@ -434,6 +439,23 @@ class RocketServerConnection final
       } else {
         bufferedWrites_->prependChain(std::move(data));
       }
+
+      // We want the FDs to arrive no later than the last byte of `data`.
+      // By attaching the FDs after growing `bufferedWrites_`, it
+      // means that `fds` are associated with `[prev offset, offset)`.
+      if (kTempKillswitch__EnableFdPassing && !fds.empty()) {
+        fdsAndOffsets_.emplace_back(
+            std::move(fds),
+            // This is costly, but the alternatives are all bad:
+            //  - Too fragile: capturing the IOBuf* before `appendToChain`
+            //    above would access invalid memory if the chain were coalesced.
+            //  - Too messy: `totalBytesBuffered_` as currently implemented
+            //    isn't trustworthy -- it's not always set, and even if it
+            //    were, it could be wrong because `hasObservers` could've
+            //    changed midway through the batch.
+            bufferedWrites_->computeChainDataLength());
+      }
+
       ++bufferedWritesCount_;
       if (batchingInterval_ != std::chrono::milliseconds::zero() &&
           (bufferedWritesCount_ == batchingSize_ ||
@@ -471,9 +493,18 @@ class RocketServerConnection final
       bufferedWritesCount_ = 0;
       totalBytesBuffered_ = 0;
       earlyFlushRequested_ = false;
-      connection_.flushWrites(
-          std::move(bufferedWrites_),
-          std::exchange(bufferedWritesContext_, WriteBatchContext{}));
+      if (!kTempKillswitch__EnableFdPassing || fdsAndOffsets_.empty()) {
+        // Fast path: no FDs, write as one batch.
+        connection_.flushWrites(
+            std::move(bufferedWrites_),
+            std::exchange(bufferedWritesContext_, WriteBatchContext{}));
+      } else {
+        // Slow path: each set of FDs is split into its own batch.
+        connection_.flushWritesWithFds(
+            std::move(bufferedWrites_),
+            std::exchange(bufferedWritesContext_, WriteBatchContext{}),
+            std::exchange(fdsAndOffsets_, FdsAndOffsets{}));
+      }
     }
 
     RocketServerConnection& connection_;
@@ -486,6 +517,8 @@ class RocketServerConnection final
     size_t totalBytesBuffered_{0};
     bool earlyFlushRequested_{false};
     WriteBatchContext bufferedWritesContext_;
+    // Offset in `bufferedWrites_` before which these FDs must be sent.
+    FdsAndOffsets fdsAndOffsets_;
   };
   WriteBatcher writeBatcher_;
   class SocketDrainer : private folly::HHWheelTimer::Callback {
@@ -536,6 +569,10 @@ class RocketServerConnection final
   void closeIfNeeded();
   void flushWrites(
       std::unique_ptr<folly::IOBuf> writes, WriteBatchContext&& context);
+  void flushWritesWithFds(
+      std::unique_ptr<folly::IOBuf> writes,
+      WriteBatchContext&& context,
+      FdsAndOffsets&&);
 
   void timeoutExpired() noexcept final;
   void describe(std::ostream&) const final {}

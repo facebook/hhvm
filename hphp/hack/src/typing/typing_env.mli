@@ -363,7 +363,7 @@ val set_locals : env -> Typing_local_types.t -> env
 
 val set_fake_members : env -> Typing_fake_members.t -> env
 
-val is_local_defined : env -> Local_id.t -> bool
+val is_local_present : env -> Local_id.t -> bool
 
 val get_local_check_defined : env -> Aast.lid -> Typing_local_types.local
 

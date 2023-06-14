@@ -18,5 +18,5 @@ function f(bool $b, J $j, I $i) : void {
   $x = "";  // error, $x has bound int
   $y = $i;  // error, $y has bound J
   $z;       // error, $z is not defined
-  $z = "";  // error, $z has bound int. TODO: make this error
+  $z = "";  // error, $z has bound int
 }

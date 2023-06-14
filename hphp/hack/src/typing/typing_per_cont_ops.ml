@@ -32,7 +32,10 @@ let union union_types env context1 context2 =
         | (Some ty1, Some ty2) ->
           let (env, ty) = union_types env ty1 ty2 in
           (env, Some ty)
-        | _ -> (env, None))
+        | (Some local, None)
+        | (None, Some local) ->
+          (env, Some { local with Typing_local_types.defined = false })
+        | (None, None) -> (env, None))
       (* TODO: we could do better here in case only in one side. *)
       context1.local_types
       context2.local_types
@@ -67,9 +70,10 @@ let is_sub_entry is_subtype env ctx1 ctx2 =
       match (tyopt1, tyopt2) with
       | (_, None) -> true
       | (None, Some _) -> false
-      | ( Some { ty = ty1; bound_ty = _; pos = _; eid = _ },
-          Some { ty = ty2; bound_ty = _; pos = _; eid = _ } ) ->
-        is_subtype env ty1 ty2)
+      | ( Some { ty = ty1; defined = defined1; bound_ty = _; pos = _; eid = _ },
+          Some { ty = ty2; defined = defined2; bound_ty = _; pos = _; eid = _ }
+        ) ->
+        (not defined2) || (defined1 && is_subtype env ty1 ty2))
     ctx1.local_types
     ctx2.local_types
   && Typing_fake_members.sub ctx1.fake_members ctx2.fake_members

@@ -10,3 +10,9 @@ Typing error (Typing[4110])
   Expected `string`
   File "init-errors-shadow.php", line 13, characters 14-21:
   But got `arraykey`
+File "init-errors-shadow.php", line 16, characters 3-24:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 14, characters 14-16:
+  Expected `int`
+  File "init-errors-shadow.php", line 16, characters 12-19:
+  But got `arraykey`

@@ -415,9 +415,14 @@ let annot_map env =
   match Env.next_cont_opt env with
   | Some { Typing_per_cont_env.local_types; _ } ->
     Some
-      (Local_id.Map.map
-         (fun Typing_local_types.{ ty; bound_ty = _; pos; eid = _expr_id } ->
-           (pos, ty))
+      (Local_id.Map.filter_map
+         (fun _
+              Typing_local_types.
+                { ty; defined; bound_ty = _; pos; eid = _expr_id } ->
+           if defined then
+             Some (pos, ty)
+           else
+             None)
          local_types)
   | None -> None
 
@@ -944,7 +949,7 @@ let stash_conts_for_closure
       captured
   in
   let captured =
-    if Env.is_local_defined env this && not (Env.is_in_expr_tree env) then
+    if Env.is_local_present env this && not (Env.is_in_expr_tree env) then
       with_ty_for_lid (Pos.none, this) :: captured
     else
       captured
@@ -1118,7 +1123,7 @@ let set_valid_rvalue ?(is_using_clause = false) p env lvar hint ty =
       (env, Some hty, hty)
   in
   let env =
-    if Env.is_local_defined env lvar then (
+    if Env.is_local_present env lvar then (
       let local = Env.get_local env lvar in
       match local.Typing_local_types.bound_ty with
       | None -> env
@@ -4578,7 +4583,7 @@ and expr_
     let (env, te1, ty1) = expr env e1 in
     let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
     let dd_old_ty =
-      if Env.is_local_defined env dd_var then
+      if Env.is_local_present env dd_var then
         Some (Env.get_local env dd_var)
       else
         None
@@ -6145,7 +6150,7 @@ and expression_tree env p et =
         Local_id.make_unscoped SN.ExpressionTrees.dollardollarTmpVar
       in
       let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
-      let dd_defined = Env.is_local_defined env dd_var in
+      let dd_defined = Env.is_local_present env dd_var in
       if not dd_defined then
         let () =
           Errors.add_error
@@ -10195,7 +10200,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
     match e1 with
     | (_, _, Lvar (_, x)) ->
       let env =
-        if not (Env.is_local_defined env x) then
+        if not (Env.is_local_present env x) then
           (* If the Lvar wasn't in the environment, add it in to avoid reporting
              subsequent errors. It has no bound since it wasn't a typed local. *)
           set_local ~bound_ty:None env (p, x) ty1

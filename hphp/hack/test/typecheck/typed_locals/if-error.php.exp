@@ -14,3 +14,9 @@ Typing error (Typing[4110])
   Expected `J`
   File "if-error.php", line 9, characters 27-27:
   But got `I`
+File "if-error.php", line 21, characters 3-9:
+Typing error (Typing[4110])
+  File "if-error.php", line 16, characters 14-16:
+  Expected `int`
+  File "if-error.php", line 21, characters 8-9:
+  But got `string`

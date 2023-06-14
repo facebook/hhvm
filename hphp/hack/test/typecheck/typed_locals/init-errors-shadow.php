@@ -13,5 +13,5 @@ function g(bool $b) : void {
     let $a : arraykey = "";
     let $c : int = 1;
   }
-  let $c : arraykey = 1; // TODO: want this to be an error
+  let $c : arraykey = 1;
 }

@@ -28,9 +28,21 @@ let get_all_locals env = env.lenv.per_cont_env
 let union
     env
     Typing_local_types.
-      { ty = ty1; bound_ty = bound_ty1; pos = pos1; eid = eid1 }
+      {
+        ty = ty1;
+        defined = defined1;
+        bound_ty = bound_ty1;
+        pos = pos1;
+        eid = eid1;
+      }
     Typing_local_types.
-      { ty = ty2; bound_ty = bound_ty2; pos = pos2; eid = eid2 } =
+      {
+        ty = ty2;
+        defined = defined2;
+        bound_ty = bound_ty2;
+        pos = pos2;
+        eid = eid2;
+      } =
   let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
   let (env, bound_ty) =
     match (bound_ty1, bound_ty2) with
@@ -78,7 +90,8 @@ let union
                 pos)))
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
-  Typing_local_types.(env, { ty; bound_ty; pos; eid })
+  Typing_local_types.
+    (env, { ty; defined = defined1 && defined2; bound_ty; pos; eid })
 
 let get_cont_option env cont =
   let local_types = get_all_locals env in

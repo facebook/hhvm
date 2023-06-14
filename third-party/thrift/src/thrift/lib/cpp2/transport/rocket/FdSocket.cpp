@@ -15,12 +15,48 @@
  */
 
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
+#include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
 #include "FdSocket.h"
 
 namespace apache {
 namespace thrift {
 namespace rocket {
+
+using TryFds = folly::Try<folly::SocketFds>;
+
+TryFds popReceivedFdsFromSocket(
+    folly::AsyncTransport* transport,
+    size_t expectedNumFds,
+    folly::SocketFds::SeqNum expectedFdSeqNum) {
+  if (expectedNumFds == 0) {
+    return TryFds{folly::SocketFds{}};
+  }
+  if (auto fdSock = transport->getUnderlyingTransport<folly::AsyncFdSocket>()) {
+    auto fds = fdSock->popNextReceivedFds();
+    const auto numFds = fds.size();
+    const auto fdSeqNum = fds.getFdSocketSeqNum(); // DFATALs if `fds.empty()`
+    if (numFds != expectedNumFds || fdSeqNum != expectedFdSeqNum) {
+      auto error = fmt::format(
+          "`{}` got {} FDs with seq num {}, but expected {} / {}",
+          __func__,
+          numFds,
+          fdSeqNum,
+          expectedNumFds,
+          expectedFdSeqNum);
+      LOG(DFATAL) << error;
+      return TryFds{folly::make_exception_wrapper<RocketException>(
+          ErrorCode::INVALID, error)};
+    }
+    return TryFds{std::move(fds)};
+  }
+  const char* error =
+      ("`populatePayloadReceivedFds` called when the underlying "
+       "socket was not a `AsyncFdSocket`");
+  LOG(DFATAL) << error;
+  return TryFds{folly::make_exception_wrapper<RocketException>(
+      ErrorCode::INVALID, error)};
+}
 
 void writeChainWithFds(
     folly::AsyncTransport* transport,

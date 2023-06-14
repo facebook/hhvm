@@ -49,6 +49,7 @@
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
+#include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocketMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -581,8 +582,10 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
 
   void onResponsePayload(
+      folly::AsyncTransport* transport,
       folly::Try<rocket::Payload>&& payload) noexcept override {
     folly::Try<FirstResponsePayload> response;
+    folly::Try<folly::SocketFds> tryFds;
     RpcSizeStats stats;
     stats.requestSerializedSizeBytes = requestSerializedSize_;
     stats.requestWireSizeBytes = requestWireSize_;
@@ -602,6 +605,15 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
         cb_.release()->onResponseError(std::move(response.exception()));
         return;
       }
+      const auto& metadata = response->metadata;
+      if (kTempKillswitch__EnableFdPassing &&
+          metadata.fdMetadata().has_value()) {
+        const auto& fdMetadata = *metadata.fdMetadata();
+        tryFds = rocket::popReceivedFdsFromSocket(
+            transport,
+            fdMetadata.numFds().value_or(0),
+            fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
+      }
     } else {
       stats.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
@@ -611,6 +623,18 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
         cb_.release()->onResponseError(std::move(response.exception()));
         return;
       }
+
+      // Precedes `processFirstResponse` to promptly close the FDs on error.
+      const auto& metadata = response->metadata;
+      if (kTempKillswitch__EnableFdPassing &&
+          metadata.fdMetadata().has_value()) {
+        const auto& fdMetadata = *metadata.fdMetadata();
+        tryFds = rocket::popReceivedFdsFromSocket(
+            transport,
+            fdMetadata.numFds().value_or(0),
+            fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
+      }
+
       if (auto error = processFirstResponse(
               protocolId_, response->metadata, response->payload, handler)) {
         cb_.release()->onResponseError(std::move(error));
@@ -618,11 +642,20 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       }
     }
 
+    // Both `if` and `else` set this -- share the error handling.
+    if (kTempKillswitch__EnableFdPassing && tryFds.hasException()) {
+      cb_.release()->onResponseError(std::move(tryFds.exception()));
+      return;
+    }
+
     stats.responseSerializedSizeBytes =
         response->payload->computeChainDataLength();
 
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
+    if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
+      tHeader->fds = std::move(tryFds->dcheckReceivedOrEmpty());
+    }
 
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         response->metadata, *tHeader);
@@ -974,8 +1007,10 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       requestMetadataAndPayloadSize);
 
   if (isSync && folly::fibers::onFiber()) {
-    callback.onResponsePayload(rocket::RocketClient::sendRequestResponseSync(
-        std::move(requestPayload), timeout, &callback));
+    callback.onResponsePayload(
+        getTransportWrapper(),
+        rocket::RocketClient::sendRequestResponseSync(
+            std::move(requestPayload), timeout, &callback));
   } else {
     rocket::RocketClient::sendRequestResponse(
         std::move(requestPayload),

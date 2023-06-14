@@ -243,6 +243,22 @@ void RocketClient::handleRequestResponseFrame(
             "Client received single response payload without next or "
             "complete flag"));
       }
+      // We're handling a response to a request.  When sending the request,
+      // `RocketClientChannel::sendSingleRequestSingleResponse` had wired up
+      // the `queue_.baton_.post()` triggered by `onPayloadFrame` to call
+      // into `SingleRequestSingleResponseCallback::onResponsePayload`,
+      // which will parse the response and extract the FDs.
+      //
+      // Per @andrii, there are three possible scenarios here:
+      //  - Socket used without fibers. `onResponsePayload` runs immediately.
+      //  - Socket used only from a fiber manager.  There may be a delay in
+      //    calling `popReceivedFdsFromSocket`, but there should be no
+      //    reordering of events.
+      //  - EDGE CASE: Socket used both from fiber manager and not.  In this
+      //    case, reordering is possible.  This kind of usage is not
+      //    supported with FD passing, and it will exhibit (potentially
+      //    nondeterministic) runtime failures due to sequence number
+      //    checks.
       return ctx.onPayloadFrame(std::move(payloadFrame));
     }
     case FrameType::ERROR: {
@@ -355,6 +371,34 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     return StreamChannelStatus::Complete;
   }
+
+  // Populate `firstResponse->fds`.  Then,
+  // `RequestClientCallbackWrapper::onFirstResponse` moves the FDs into
+  // `THeader`.  The user can access `THeader::fds` via the
+  // `header_semifuture_*` generated methods.
+  //
+  // The rough dataflow is:
+  //   (RocketSinkServerCallback and friends)::onInitialPayload
+  //   -> ClientStreamBridge::onFirstResponse
+  //      created via createStreamClientCallback in codegen code
+  //      which wraps makeHeaderSemiFutureCallback in codegen code
+  //   -> RequestClientCallbackWrapper::onFirstResponse
+  //      populates THeader
+  const auto& metadata = firstResponse->metadata;
+  if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+    const auto& fdMetadata = *metadata.fdMetadata();
+    auto tryFds = popReceivedFdsFromSocket(
+        getTransportWrapper(),
+        fdMetadata.numFds().value_or(0),
+        fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
+    if (tryFds.hasException()) {
+      auto errMsg = tryFds.exception().what().toStdString();
+      serverCallback.onInitialError(std::move(tryFds.exception()));
+      return {StreamChannelStatus::ContractViolation, std::move(errMsg)};
+    }
+    firstResponse->fds = std::move(tryFds->dcheckReceivedOrEmpty());
+  }
+
   if (!serverCallback.onInitialPayload(std::move(*firstResponse), evb_)) {
     // we return Alive so RocketClient doesn't call freeStream() twice
     return StreamChannelStatus::Alive;
@@ -380,6 +424,35 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
     }
+
+    // Populates `streamPayload->fds`.  Then, if the user calls
+    // `toAsyncGeneratorWithHeader`, the FDs get moved into
+    // ``RichPayloadReceived::fds`, where the stream consumer can access
+    // them together with the payload.
+    //
+    // The rough dataflow is:
+    //   -> RocketStreamServerCallback::{onStreamPayload,onStreamFinalPayload}
+    //   -> ClientStreamBridge::onStreamNext
+    //      created via createStreamClientCallback in codegen code
+    //      which wraps makeHeaderSemiFutureCallback in codegen code
+    //   -> TwoWayBridge:serverPush
+    //   -> feeds into `toAsyncGeneratorImpl` via the inline `ReadyCallback`
+    //      if the user calls `toAsyncGeneratorWithHeader`
+    const auto metadata = streamPayload->metadata;
+    if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+      const auto& fdMetadata = *metadata.fdMetadata();
+      auto tryFds = popReceivedFdsFromSocket(
+          getTransportWrapper(),
+          fdMetadata.numFds().value_or(0),
+          fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
+      if (tryFds.hasException()) {
+        auto errMsg = tryFds.exception().what().toStdString();
+        serverCallback.onStreamError(std::move(tryFds.exception()));
+        return {StreamChannelStatus::ContractViolation, std::move(errMsg)};
+      }
+      streamPayload->fds = std::move(tryFds->dcheckReceivedOrEmpty());
+    }
+
     streamPayload->isOrderedHeader = true;
     auto payloadMetadataRef = streamPayload->metadata.payloadMetadata_ref();
     if (payloadMetadataRef &&
@@ -419,6 +492,15 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
       return serverCallback.onFinalResponseError(
           std::move(streamPayload.exception()));
     }
+
+    // FIXME: Don't bother populating `streamPayload.fds`.  Unfortunately,
+    // FDs currently have nowhere to go in the sink codegen'd code, since
+    // sinks don't seem to have the analog of `header_semifuture_METHOD`.
+    DCHECK(
+        !streamPayload->metadata.fdMetadata().has_value() ||
+        streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+        << "FD passing is not implemented for sinks";
+
     auto payloadMetadataRef = streamPayload->metadata.payloadMetadata_ref();
     if (payloadMetadataRef &&
         payloadMetadataRef->getType() ==
@@ -599,11 +681,12 @@ void RocketClient::sendRequestResponse(
       queue_,
       setupFrame.get(),
       callback.get());
-  auto callbackWithGuard = [dg = DestructorGuard(this),
+  auto callbackWithGuard = [this,
+                            dg = DestructorGuard(this),
                             g = makeRequestCountGuard(RequestType::CLIENT),
                             callback =
                                 std::move(callback)](auto&& response) mutable {
-    callback->onResponsePayload(std::move(response));
+    callback->onResponsePayload(getTransportWrapper(), std::move(response));
   };
 
   using CallbackWithGuard = decltype(callbackWithGuard);

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Try.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/fdsock/SocketFds.h>
 
@@ -43,6 +44,13 @@ void writeChainWithFds(
 // transport that is not an `AsyncFdSocket`.
 folly::SocketFds::SeqNum injectFdSocketSeqNumIntoFdsToSend(
     folly::AsyncTransport*, folly::SocketFds*);
+
+// Returns the next batch of FDs from the socket, ensuring that the count
+// matches.  On error, does LOG(DFATAL) and returns the error.
+folly::Try<folly::SocketFds> popReceivedFdsFromSocket(
+    folly::AsyncTransport* transport,
+    size_t expectedNumFds,
+    folly::SocketFds::SeqNum expectedFdSeqNum);
 
 } // namespace rocket
 } // namespace thrift

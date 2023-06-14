@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/server/MonitoringMethodNames.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
+#include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
@@ -74,10 +75,11 @@ bool isMetadataValid(const RequestRpcMetadata& metadata, RpcKind expectedKind) {
 ThriftRocketServerHandler::ThriftRocketServerHandler(
     std::shared_ptr<Cpp2Worker> worker,
     const folly::SocketAddress& clientAddress,
-    const folly::AsyncTransport* transport,
+    folly::AsyncTransport* transport,
     const std::vector<std::unique_ptr<SetupFrameHandler>>& handlers)
     : worker_(std::move(worker)),
       connectionGuard_(worker_->getActiveRequestsGuard()),
+      transport_(transport),
       connContext_(
           &clientAddress,
           transport,
@@ -397,6 +399,33 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto& data = requestPayloadTry->payload;
   auto& metadata = requestPayloadTry->metadata;
 
+  // Extract FDs as early as possible to avoid holding them open if the
+  // request fails.
+  //
+  // The `transport_` raw pointer is valid for the entire lifetime of this
+  // class -- see in `~ThriftRocketServerHandler` and the comment in
+  // `handleRequestResponseFrame` for evidence.
+  folly::Try<folly::SocketFds> tryFds;
+  if (kTempKillswitch__EnableFdPassing && metadata.fdMetadata().has_value()) {
+    const auto& fdMetadata = *metadata.fdMetadata();
+    tryFds = popReceivedFdsFromSocket(
+        transport_,
+        fdMetadata.numFds().value_or(0),
+        fdMetadata.fdSeqNum().value_or(folly::SocketFds::kNoSeqNum));
+    if (tryFds.hasException()) {
+      if (auto* observer = serverConfigs_->getObserver()) {
+        observer->taskKilled();
+      }
+      makeActiveRequest(
+          std::move(metadata),
+          std::move(debugPayload),
+          createDefaultRequestContext())
+          ->sendErrorWrapped(
+              std::move(tryFds.exception()), kRequestParsingErrorCode);
+      return;
+    }
+  }
+
   if (!isMetadataValid(metadata, expectedKind)) {
     handleRequestWithBadMetadata(makeActiveRequest(
         std::move(metadata),
@@ -555,6 +584,11 @@ void ThriftRocketServerHandler::handleRequestCommon(
   if (UNLIKELY(samplingStatus.isEnabled())) {
     timestamps.readEnd = readEnd;
     timestamps.processBegin = std::chrono::steady_clock::now();
+  }
+
+  if (kTempKillswitch__EnableFdPassing && tryFds.hasValue()) {
+    cpp2ReqCtx->getHeader()->fds.dcheckEmpty() =
+        std::move(tryFds->dcheckReceivedOrEmpty());
   }
 
   if (auto* observer = serverConfigs_->getObserver()) {

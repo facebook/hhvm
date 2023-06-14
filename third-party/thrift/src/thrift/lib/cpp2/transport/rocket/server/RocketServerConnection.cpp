@@ -635,6 +635,13 @@ void RocketServerConnection::handleSinkFrame(
             freeStream(streamId, true);
           }
         } else {
+          // FIXME: As noted in `RocketClient::handleSinkResponse`, sinks
+          // currently lack the codegen to be able to support FD passing.
+          DCHECK(
+              !streamPayload->metadata.fdMetadata().has_value() ||
+              streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+              << "FD passing is not implemented for sinks";
+
           auto payloadMetadataRef =
               streamPayload->metadata.payloadMetadata_ref();
           if (payloadMetadataRef &&

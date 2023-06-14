@@ -25,6 +25,7 @@
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/futures/Future.h>
+#include <folly/io/async/fdsock/SocketFds.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 
@@ -142,6 +143,7 @@ class ClientBufferedStream {
   struct RichPayloadReceived { // sent as `RichPayloadToSend` from server
     T payload;
     StreamPayloadMetadata metadata;
+    folly::SocketFds fds;
   };
   struct UnorderedHeader {
     StreamPayloadMetadata metadata;
@@ -261,9 +263,17 @@ class ClientBufferedStream {
         if constexpr (WithHeader) {
           if (payload.hasValue()) {
             if (payloadSize) {
-              if (payload->metadata.otherMetadata().has_value()) {
+              // The "else" is the normal, lightweight path -- no user
+              // metadata, no FDs.  In that case the user code gets plain
+              // `T` in the variant.  Otherwise -- if the payload had either
+              // custom metadata, or FDs, we pass back `RichPayloadReceived`.
+              if (payload->metadata.otherMetadata().has_value() ||
+                  (kTempKillswitch__EnableFdPassing && !payload->fds.empty())) {
                 RichPayloadReceived ret;
                 ret.metadata = std::move(payload->metadata);
+                if (kTempKillswitch__EnableFdPassing) {
+                  ret.fds = std::move(payload->fds.dcheckReceivedOrEmpty());
+                }
                 ret.payload = *decode(std::move(payload));
                 queue.pop();
                 co_yield std::move(ret);

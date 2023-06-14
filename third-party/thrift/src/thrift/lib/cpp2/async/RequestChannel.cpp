@@ -176,6 +176,9 @@ class RequestClientCallbackWrapper
       ClientBridgePtr clientBridge) override {
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
+    if (kTempKillswitch__EnableFdPassing) {
+      tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
+    }
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         firstResponse.metadata, *tHeader);
     requestCallback_.release()->onResponse(ClientReceiveState::create(

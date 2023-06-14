@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <stdexcept>
+#include <folly/Overload.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/op/detail/Get.h>
@@ -263,7 +265,70 @@ struct get_adapter<type::adapted<Adapter, UTag>> {
 template <typename Tag>
 using get_adapter_t = typename get_adapter<Tag>::type;
 
+template <typename T, std::size_t pos = 0>
+class InvokeByFieldId {
+  static constexpr auto N = size_v<T>;
+
+  // We use std::min to avoid index > N.
+  template <std::size_t Ordinal>
+  using OrdToFieldId = get_field_id<T, field_ordinal<std::min(Ordinal, N)>>;
+
+ public:
+  template <
+      typename F,
+      std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>
+  constexpr decltype(auto) operator()(FieldId id, F&& f) const {
+    // By default clang's maximum depth of recursive template instantiation is
+    // 512. If we handle 8 cases at a time, it works with struct that has 4096
+    // fields.
+    if (id == OrdToFieldId<pos + 1>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 1>{});
+    } else if (id == OrdToFieldId<pos + 2>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 2>{});
+    } else if (id == OrdToFieldId<pos + 3>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 3>{});
+    } else if (id == OrdToFieldId<pos + 4>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 4>{});
+    } else if (id == OrdToFieldId<pos + 5>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 5>{});
+    } else if (id == OrdToFieldId<pos + 6>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 6>{});
+    } else if (id == OrdToFieldId<pos + 7>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 7>{});
+    } else if (id == OrdToFieldId<pos + 8>::value) {
+      return std::forward<F>(f)(OrdToFieldId<pos + 8>{});
+    }
+
+    return InvokeByFieldId<T, std::min(pos + 8, N)>{}(id, std::forward<F>(f));
+  }
+
+  template <
+      typename F,
+      std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>
+  constexpr decltype(auto) operator()(FieldId, F&& f) const {
+    // If not found, f() will be invoked.
+    return std::forward<F>(f)();
+  }
+
+  template <typename... F>
+  constexpr decltype(auto) operator()(FieldId id, F&&... f) const {
+    return operator()(id, folly::overload(std::forward<F>(f)...));
+  }
+};
+
 } // namespace detail
+
+/// Given a Thrift struct, callback with a runtime dynamic field id, convert it
+/// to static compile-time field id and invoke the callback. For example,
+///
+/// `invoke_by_field_id<T>(FieldId{10}, f)` invokes `f(field_id<10>{})`.
+///
+/// If field id is not found in T, `f()` will be invoked.
+///
+/// In addition, `invoke_by_field_id<T>(id, f...)` is a syntactic sugar of
+/// `invoke_by_field_id<T>(id, folly::overload(f...))`.
+template <typename T>
+FOLLY_INLINE_VARIABLE constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
 
 } // namespace op
 } // namespace thrift

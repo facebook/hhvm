@@ -353,4 +353,49 @@ TEST(FieldsTest, GetClassName) {
   EXPECT_EQ(op::get_class_name_v<test::RenamedMyUnion>, "MyUnion2");
   EXPECT_EQ(op::get_class_name_v<test::RenamedMyException>, "MyException2");
 }
+
+TEST(FieldsTest, InvokeByFieldId) {
+  using namespace test_cpp2::cpp_reflection;
+  constexpr auto toValue = [](auto id) { return id.value; };
+  constexpr auto notFound = [] { return FieldId{0}; };
+  static_assert(
+      op::invoke_by_field_id<struct3>(FieldId{18}, toValue, notFound) ==
+      FieldId{18});
+  static_assert(
+      op::invoke_by_field_id<struct3>(FieldId{19}, toValue, notFound) ==
+      FieldId{0});
+  static_assert(
+      op::invoke_by_field_id<struct3>(FieldId{20}, toValue, notFound) ==
+      FieldId{20});
+  static_assert(
+      op::invoke_by_field_id<struct3>(FieldId{21}, toValue, notFound) ==
+      FieldId{0});
+  static_assert(
+      op::invoke_by_field_id<struct3>(FieldId{0}, toValue, notFound) ==
+      FieldId{0});
+
+  for (std::int16_t id = 0; id <= 21; id++) {
+    if (std::unordered_set{0, 19, 21}.contains(id)) {
+      EXPECT_EQ(
+          op::invoke_by_field_id<struct3>(FieldId{id}, toValue, notFound),
+          FieldId{0});
+    } else {
+      EXPECT_EQ(
+          op::invoke_by_field_id<struct3>(FieldId{id}, toValue, notFound),
+          FieldId{id});
+    }
+  }
+
+  for (std::int16_t id = 0; id <= 10; id++) {
+    if (std::unordered_set{1, 2, 3, 6}.contains(id)) {
+      EXPECT_EQ(
+          op::invoke_by_field_id<struct4>(FieldId{id}, toValue, notFound),
+          FieldId{id});
+    } else {
+      EXPECT_EQ(
+          op::invoke_by_field_id<struct4>(FieldId{id}, toValue, notFound),
+          FieldId{0});
+    }
+  }
+}
 } // namespace apache::thrift::type

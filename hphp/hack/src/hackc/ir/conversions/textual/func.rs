@@ -1002,9 +1002,9 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 let is_static = mi.is_static;
                 let (target, args) = if state.experimental_self_parent_in_trait && in_trait {
                     let base = ClassId::from_str("__parent__", &state.strings);
-                    let var = LocalId::Named(state.strings.intern_str("parent"));
-                    let parent = state.load_mixed(textual::Expr::deref(var))?;
-                    args.push(textual::Expr::Sid(parent));
+                    let var = LocalId::Named(state.strings.intern_str("self"));
+                    let self_ = state.load_mixed(textual::Expr::deref(var))?;
+                    args.push(textual::Expr::Sid(self_));
                     let target = FunctionName::method(base, is_static, method);
                     (target, args)
                 } else {

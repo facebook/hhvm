@@ -725,15 +725,6 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = LocalId::Named(lid);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
-            Instr::Hhbc(Hhbc::ParentCls(loc))
-                if self.experimental_self_parent_in_trait && self.func_info.declared_in_trait() =>
-            {
-                // In a trait, turn the `parent` keyword into the fresh parameter we add
-                // to the type signatures.
-                let lid = builder.strings.intern_str("parent");
-                let lid = LocalId::Named(lid);
-                Instr::Hhbc(Hhbc::CGetL(lid, loc))
-            }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
             }

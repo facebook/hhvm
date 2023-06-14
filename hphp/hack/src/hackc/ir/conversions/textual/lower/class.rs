@@ -69,19 +69,7 @@ pub(crate) fn lower_class<'a>(
                 ty: TypeInfo::empty(),
                 default_value: None,
             };
-            let parent_param = Param {
-                name: strings.intern_str("parent"),
-                is_variadic: false,
-                is_inout: false,
-                is_readonly: false,
-                user_attributes: vec![],
-                ty: TypeInfo::empty(),
-                default_value: None,
-            };
-            method
-                .func
-                .params
-                .splice(0..0, [self_param, parent_param].into_iter());
+            method.func.params.push(self_param);
         }
     }
 

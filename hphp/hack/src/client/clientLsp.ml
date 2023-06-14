@@ -5159,6 +5159,65 @@ let cancel_if_has_pending_cancel_request
     else
       ()
 
+(** Sends the file to [ide_service], which will respond by registering this file
+as one of the "open files" (hence with persistent cached TAST until such time as
+it receives Did_close).
+
+We ask it to calculate that TAST and send us back errors which we then publish.
+Unless there are subsequent didChange events for this uri already in the queue
+(e.g. because the user is typing). In this case we don't ask for TAST/errors;
+the work can be deferred until that next didChange. *)
+let send_file_to_ide_and_get_errors_if_needed
+    ~env
+    ~client
+    ~ide_service
+    ~state
+    ~uri
+    ~file_contents
+    ~tracking_id
+    ~ref_unblocked_time : state Lwt.t =
+  let file_path = uri |> lsp_uri_to_path |> Path.make in
+  let subsequent_didchange_for_this_uri =
+    Jsonrpc.find_already_queued_message client ~f:(fun { Jsonrpc.json; _ } ->
+        let message =
+          try
+            Lsp_fmt.parse_lsp json (fun _ -> UnknownRequest ("response", None))
+          with
+          | _ ->
+            NotificationMessage (UnknownNotification ("cannot parse", None))
+        in
+        match message with
+        | NotificationMessage
+            (DidChangeNotification
+              {
+                DidChange.textDocument =
+                  { VersionedTextDocumentIdentifier.uri = uri2; _ };
+                _;
+              })
+          when Lsp.equal_documentUri uri uri2 ->
+          true
+        | _ -> false)
+  in
+  let should_calculate_errors =
+    Option.is_none subsequent_didchange_for_this_uri
+  in
+  let%lwt errors =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      ClientIdeMessage.(
+        Did_open_or_change
+          ({ file_path; file_contents }, { should_calculate_errors }))
+  in
+  let new_state =
+    match errors with
+    | None -> !state
+    | Some errors -> publish_errors_if_standalone env !state file_path errors
+  in
+  Lwt.return new_state
+
 (************************************************************************)
 (* Message handling                                                     *)
 (************************************************************************)
@@ -5199,89 +5258,36 @@ let handle_editor_buffer_message
   in
 
   (* send to ide_service as necessary *)
-  (* For now 'ide_service_promise' is immediately fulfilled, but in future it will
-     be fulfilled only when the ide_service has finished processing the message. *)
   let (ide_service_promise : state Lwt.t) =
     match (ide_service, message) with
-    | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
-      let file_path =
-        uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri
-      in
-      let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
-      (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
-         never to let is miss a DidOpen. *)
-      let%lwt errors =
-        ide_rpc
-          ide_service
-          ~env
-          ~tracking_id:metadata.tracking_id
-          ~ref_unblocked_time:ref_ide_unblocked_time
-          ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
-      in
-      let new_state =
-        publish_errors_if_standalone env !state file_path errors
-      in
-      Lwt.return new_state
-    | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
-      let uri =
-        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-      in
-      let file_path = uri_to_path uri in
+    | ( Some ide_service,
+        NotificationMessage
+          ( DidOpenNotification
+              { DidOpen.textDocument = { TextDocumentItem.uri; _ }; _ }
+          | DidChangeNotification
+              {
+                DidChange.textDocument =
+                  { VersionedTextDocumentIdentifier.uri; _ };
+                _;
+              } ) ) ->
       let editor_open_files =
         match get_editor_open_files !state with
         | Some files -> files
         | None -> UriMap.empty
       in
-      (* For perf, if there's a subsequent didChange for this uri (e.g. because the user is typing)
-         then we won't ask for errors on this one; let the TAST calculation be deferred until
-         the next one. *)
-      let subsequent_didchange_for_this_uri =
-        Jsonrpc.find_already_queued_message
-          client
-          ~f:(fun { Jsonrpc.json; _ } ->
-            let message =
-              try
-                Lsp_fmt.parse_lsp json (fun _ ->
-                    UnknownRequest ("response", None))
-              with
-              | _ ->
-                NotificationMessage (UnknownNotification ("cannot parse", None))
-            in
-            match message with
-            | NotificationMessage
-                (DidChangeNotification
-                  {
-                    DidChange.textDocument =
-                      { VersionedTextDocumentIdentifier.uri = uri2; _ };
-                    _;
-                  })
-              when Lsp.equal_documentUri uri uri2 ->
-              true
-            | _ -> false)
+      let file_contents = get_document_contents editor_open_files uri in
+      let%lwt new_state =
+        send_file_to_ide_and_get_errors_if_needed
+          ~env
+          ~client
+          ~ide_service
+          ~state
+          ~uri
+          ~file_contents
+          ~ref_unblocked_time:ref_ide_unblocked_time
+          ~tracking_id:metadata.tracking_id
       in
-      let should_calculate_errors =
-        Option.is_none subsequent_didchange_for_this_uri
-      in
-      begin
-        let file_contents = get_document_contents editor_open_files uri in
-        let%lwt errors =
-          ide_rpc
-            ide_service
-            ~env
-            ~tracking_id:metadata.tracking_id
-            ~ref_unblocked_time:ref_ide_unblocked_time
-            ClientIdeMessage.(
-              Ide_file_changed
-                ({ file_path; file_contents }, { should_calculate_errors }))
-        in
-        let new_state =
-          match errors with
-          | None -> !state
-          | Some errors ->
-            publish_errors_if_standalone env !state file_path errors
-        in
-        Lwt.return new_state
-      end
+      Lwt.return new_state
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
       let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
@@ -5292,7 +5298,7 @@ let handle_editor_buffer_message
           ~env
           ~tracking_id:metadata.tracking_id
           ~ref_unblocked_time:ref_ide_unblocked_time
-          ClientIdeMessage.(Ide_file_closed file_path)
+          (ClientIdeMessage.Did_close file_path)
       in
       let new_state =
         publish_errors_if_standalone env !state file_path errors

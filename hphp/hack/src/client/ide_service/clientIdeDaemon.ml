@@ -760,37 +760,23 @@ let handle_request
       }
     in
     Lwt.return (update_state_files state ifiles, Ok ())
-    (* IDE File Closed *)
-  | (During_init { dfiles = files; _ }, Ide_file_closed file_path) ->
+    (* didClose *)
+  | (During_init { dfiles = files; _ }, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let files = close_file files path in
     Lwt.return (update_state_files state files, Ok [])
-  | (Initialized istate, Ide_file_closed file_path) ->
+  | (Initialized istate, Did_close file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
     let files = close_file istate.ifiles path in
     Lwt.return (update_state_files state files, Ok errors)
-  (* IDE File Opened *)
-  | (During_init dstate, Ide_file_opened { file_path; file_contents }) ->
-    let path =
-      file_path |> Path.to_string |> Relative_path.create_detect_prefix
-    in
-    let dstate = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (During_init dstate, Ok [])
-  | (Initialized istate, Ide_file_opened document) ->
-    let (istate, ctx, entry, published_errors_ref) =
-      update_file_ctx istate document
-    in
-    let errors = get_user_facing_errors ~ctx ~entry in
-    published_errors_ref := Some errors;
-    Lwt.return (Initialized istate, Ok (Errors.sort_and_finalize errors))
-  (* IDE File Changed *)
+  (* didOpen or didChange *)
   | ( During_init dstate,
-      Ide_file_changed ({ file_path; file_contents }, _should_calculate_errors)
+      Did_open_or_change ({ file_path; file_contents }, _should_calculate_errors)
     ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
@@ -798,7 +784,7 @@ let handle_request
     let dstate = open_or_change_file_during_init dstate path file_contents in
     Lwt.return (During_init dstate, Ok None)
   | ( Initialized istate,
-      Ide_file_changed (document, { should_calculate_errors }) ) ->
+      Did_open_or_change (document, { should_calculate_errors }) ) ->
     let (istate, ctx, entry, published_errors_ref) =
       update_file_ctx istate document
     in

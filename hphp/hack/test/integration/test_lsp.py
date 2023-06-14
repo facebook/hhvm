@@ -6716,10 +6716,6 @@ function aaa(): string {
                 },
             )
             .wait_for_notification(
-                method="textDocument/publishDiagnostics",
-                params={"uri": "${php_file_uri}", "diagnostics": []},
-            )
-            .wait_for_notification(
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )

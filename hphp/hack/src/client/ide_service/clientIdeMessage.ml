@@ -64,13 +64,12 @@ type _ t =
   | Did_change_watched_files : Relative_path.Set.t -> unit t
       (** This might include deleted files. The caller is responsible for filtering,
       and resolving symlinks (even resolving root symlink for a deleted file...) *)
-  | Ide_file_opened : document -> Errors.finalized_error list t
-  | Ide_file_changed :
+  | Did_open_or_change :
       document * should_calculate_errors
       -> Errors.finalized_error list option t
       (** if the bool is true, it will send back an error-list;
       if false, it will return None. *)
-  | Ide_file_closed : Path.t -> Errors.finalized_error list t
+  | Did_close : Path.t -> Errors.finalized_error list t
       (** This returns diagnostics for the file as it is on disk.
       This is to serve the following scenario: (1) file was open with
       modified contents and squiggles appropriate to the modified contents,
@@ -177,15 +176,16 @@ let t_to_string : type a. a t -> string = function
       else
         ",..."
     in
-    Printf.sprintf "Disk_file_changed(%s%s)" (String.concat files) remainder
-  | Ide_file_opened { file_path; _ } ->
-    Printf.sprintf "Ide_file_opened(%s)" (Path.to_string file_path)
-  | Ide_file_changed ({ file_path; _ }, { should_calculate_errors }) ->
     Printf.sprintf
-      "Ide_file_changed(%s,%b)"
+      "Did_change_watched_files(%s%s)"
+      (String.concat files)
+      remainder
+  | Did_open_or_change ({ file_path; _ }, { should_calculate_errors }) ->
+    Printf.sprintf
+      "Did_open_or_change(%s,%b)"
       (Path.to_string file_path)
       should_calculate_errors
-  | Ide_file_closed file_path ->
+  | Did_close file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)
   | Verbose_to_file verbose -> Printf.sprintf "Verbose_to_file(%b)" verbose
   | Hover ({ file_path; _ }, _) ->

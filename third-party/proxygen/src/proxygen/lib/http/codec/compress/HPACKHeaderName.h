@@ -221,7 +221,11 @@ namespace std {
 template <>
 struct hash<proxygen::HPACKHeaderName> {
   size_t operator()(const proxygen::HPACKHeaderName& headerName) const {
-    return std::hash<std::string>()(headerName.get());
+    auto code = headerName.getHeaderCode();
+    if (code == proxygen::HTTP_HEADER_OTHER) {
+      return std::hash<std::string>()(headerName.get());
+    }
+    return std::hash<uint8_t>()(code);
   }
 };
 

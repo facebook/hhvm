@@ -45,7 +45,8 @@ const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion09(0, 9);
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion10(1, 0);
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion11(1, 1);
 
-void HTTPMessage::stripPerHopHeaders(bool stripPriority) {
+void HTTPMessage::stripPerHopHeaders(bool stripPriority,
+                                     const HTTPHeaders* customPerHopHeaders) {
   // Some code paths end up recyling a single HTTPMessage instance for multiple
   // requests, and adding their own per-hop headers each time. In that case, we
   // don't want to accumulate these headers.
@@ -61,7 +62,8 @@ void HTTPMessage::stripPerHopHeaders(bool stripPriority) {
     trailersAllowed_ = checkForHeaderToken(HTTP_HEADER_TE, "trailers", false);
   }
 
-  headers_.stripPerHopHeaders(*strippedPerHopHeaders_, stripPriority);
+  headers_.stripPerHopHeaders(
+      *strippedPerHopHeaders_, stripPriority, customPerHopHeaders);
 }
 
 HTTPMessage::HTTPMessage()
@@ -303,8 +305,9 @@ const pair<uint8_t, uint8_t>& HTTPMessage::getHTTPVersion() const {
 }
 
 int HTTPMessage::processMaxForwards() {
+  static const std::string kMaxForwards = "Max-Forwards";
   if (getMethod() == HTTPMethod::TRACE || getMethod() == HTTPMethod::OPTIONS) {
-    const string& value = headers_.getSingleOrEmpty(HTTP_HEADER_MAX_FORWARDS);
+    const string& value = headers_.getSingleOrEmpty(kMaxForwards);
     if (value.length() > 0) {
       int64_t max_forwards = 0;
       try {
@@ -318,8 +321,7 @@ int HTTPMessage::processMaxForwards() {
       } else if (max_forwards == 0) {
         return 501;
       } else {
-        headers_.set(HTTP_HEADER_MAX_FORWARDS,
-                     folly::to<string>(max_forwards - 1));
+        headers_.set(kMaxForwards, folly::to<string>(max_forwards - 1));
       }
     }
   }

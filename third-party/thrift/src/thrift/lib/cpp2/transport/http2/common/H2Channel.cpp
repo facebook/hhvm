@@ -22,6 +22,25 @@
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
+namespace {
+template <uint64_t x>
+// TODO: Replace `encode_<base64url(name)>` with encode_thrift_header, and add
+// that header to proxygen/lib/http/HTTPCommonHeaders.txt
+// encode_C2VYDMLJZXJVDXRLCJPOB3BFCGF0AA = "servicerouter:hop_path"
+typename std::enable_if<(x > 200), bool>::type isEncodeHeader(
+    proxygen::HTTPHeaderCode code, const std::string& key) {
+  return code == proxygen::HTTP_HEADER_ENCODE_C2VYDMLJZXJVDXRLCJPOB3BFCGF0AA ||
+      (code == proxygen::HTTP_HEADER_OTHER &&
+       folly::StringPiece(key).startsWith("encode_"));
+}
+template <uint64_t x>
+typename std::enable_if<(x <= 200), bool>::type isEncodeHeader(
+    proxygen::HTTPHeaderCode code, const std::string& key) {
+  return (
+      code == proxygen::HTTP_HEADER_OTHER &&
+      folly::StringPiece(key).startsWith("encode_"));
+}
+} // namespace
 namespace apache {
 namespace thrift {
 
@@ -76,38 +95,34 @@ void H2Channel::decodeHeaders(
       // These headers are not part of thrift metadata
       return;
     }
-
-    if (code == proxygen::HTTP_HEADER_OTHER) {
+    if (metadata && handleThriftMetadata(metadata, code, key, val)) {
+      return;
+    }
+    if (isEncodeHeader<proxygen::HTTPCommonHeaders::num_codes>(code, key)) {
       // This decodes key-value pairs that have been encoded using
       // encodeHeaders() or equivalent methods.  If the key starts with
       // "encode_", the value is split at the underscore and then the
       // key and value are decoded from there.  The key is not used
       // because it will get converted to lowercase and therefore the
       // original key cannot be recovered.
-      if (folly::StringPiece(key).startsWith("encode_")) {
-        auto us = val.find("_");
-        if (us != string::npos) {
-          std::string decodedKey;
-          std::string decodedVal;
-          try {
-            decodedKey =
-                folly::base64URLDecode(std::string_view(val.data(), us));
-            decodedVal = folly::base64URLDecode(
-                std::string_view(val.data() + us + 1, val.length() - us - 1));
-          } catch (...) {
-            // Code previously used proxygen::Base64::urlDecode which converted
-            // exceptions to empty string.  Preserving that behavior.
-          }
-          dest.emplace(std::move(decodedKey), std::move(decodedVal));
-          return;
+      auto us = val.find("_");
+      if (us != string::npos) {
+        std::string decodedKey;
+        std::string decodedVal;
+        try {
+          decodedKey = folly::base64URLDecode(std::string_view(val.data(), us));
+          decodedVal = folly::base64URLDecode(
+              std::string_view(val.data() + us + 1, val.length() - us - 1));
+        } catch (...) {
+          // Code previously used proxygen::Base64::urlDecode which converted
+          // exceptions to empty string.  Preserving that behavior.
         }
-        LOG(ERROR) << "Encoded value does not contain '_'; preserving original";
-      }
-
-      // If request metadata present, handle special thrift headers
-      if (metadata && handleThriftMetadata(metadata, key, val)) {
+        dest.emplace(std::move(decodedKey), std::move(decodedVal));
         return;
       }
+      LOG(ERROR) << "Encoded value does not contain '_'; preserving original";
+    } else if (code != proxygen::HTTP_HEADER_OTHER) {
+      DCHECK(!folly::StringPiece(key).startsWith("encode_"));
     }
     dest.emplace(key, val);
   };
@@ -116,18 +131,10 @@ void H2Channel::decodeHeaders(
 
 bool H2Channel::handleThriftMetadata(
     RequestRpcMetadata* metadata,
-    const std::string& key,
+    proxygen::HTTPHeaderCode code,
+    const std::string&,
     const std::string& value) noexcept {
-  if (key == transport::THeader::CLIENT_TIMEOUT_HEADER) {
-    auto parsed = folly::tryTo<int64_t>(value);
-    if (!parsed) {
-      LOG(INFO) << "Bad client timeout " << value;
-      return false;
-    }
-    metadata->clientTimeoutMs_ref() = *parsed;
-    return true;
-  }
-  if (key == RPC_KIND) {
+  if (code == proxygen::HTTP_HEADER_RPCKIND) {
     auto parsed = folly::tryTo<int32_t>(value);
     if (!parsed) {
       LOG(INFO) << "Bad Request Kind " << value;
@@ -135,8 +142,7 @@ bool H2Channel::handleThriftMetadata(
     }
     metadata->kind_ref() = static_cast<RpcKind>(*parsed);
     return true;
-  }
-  if (key == transport::THeader::QUEUE_TIMEOUT_HEADER) {
+  } else if (code == proxygen::HTTP_HEADER_QUEUE_TIMEOUT) {
     auto parsed = folly::tryTo<int64_t>(value);
     if (!parsed) {
       LOG(INFO) << "Bad client timeout " << value;
@@ -144,8 +150,7 @@ bool H2Channel::handleThriftMetadata(
     }
     metadata->queueTimeoutMs_ref() = *parsed;
     return true;
-  }
-  if (key == transport::THeader::PRIORITY_HEADER) {
+  } else if (code == proxygen::HTTP_HEADER_THRIFT_PRIORITY) {
     auto parsed = folly::tryTo<int32_t>(value);
     if (!parsed) {
       LOG(INFO) << "Bad method priority " << value;
@@ -157,6 +162,14 @@ bool H2Channel::handleThriftMetadata(
       return false;
     }
     metadata->priority_ref() = pr;
+    return true;
+  } else if (code == proxygen::HTTP_HEADER_CLIENT_TIMEOUT) {
+    auto parsed = folly::tryTo<int64_t>(value);
+    if (!parsed) {
+      LOG(INFO) << "Bad client timeout " << value;
+      return false;
+    }
+    metadata->clientTimeoutMs_ref() = *parsed;
     return true;
   }
   return false;

@@ -104,6 +104,7 @@ class H2Channel : public ThriftChannelIf {
 
   static bool handleThriftMetadata(
       RequestRpcMetadata* metadata,
+      proxygen::HTTPHeaderCode code,
       const std::string& name,
       const std::string& value) noexcept;
 };

@@ -30,6 +30,9 @@ uint32_t HPACKContext::getIndex(const HPACKHeaderName& name,
   // small subset of header names, there is no point consulting the StaticTable
   bool consultStaticTable = false;
   if (value.empty()) {
+    // For uncommon static names and empty values, we will send them as a
+    // literal with static name reference.  See uncommon list in
+    // HPACKContextTests - StaticTableHeaderNamesAreCommon
     consultStaticTable = name.isCommonHeader();
   } else {
     consultStaticTable =

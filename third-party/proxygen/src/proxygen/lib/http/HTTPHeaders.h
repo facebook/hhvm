@@ -281,7 +281,9 @@ class HTTPHeaders {
    * coalesces requests from multiple downstream connections over the same
    * upstream connection may want to use a hop-by-hop semantics.
    */
-  void stripPerHopHeaders(HTTPHeaders& strippedHeaders, bool stripPriority);
+  void stripPerHopHeaders(HTTPHeaders& strippedHeaders,
+                          bool stripPriority,
+                          const HTTPHeaders* customPerHopHeaders);
 
   /**
    * Get the total number of headers.

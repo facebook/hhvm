@@ -253,7 +253,8 @@ bool HTTPHeaders::transferHeaderIfPresent(folly::StringPiece name,
 }
 
 void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
-                                     bool stripPriority) {
+                                     bool stripPriority,
+                                     const HTTPHeaders* customPerHopHeaders) {
   int len;
   forEachValueOfHeader(
       HTTP_HEADER_CONNECTION, [&](const string& stdStr) -> bool {
@@ -306,11 +307,19 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
   // Strip hop-by-hop headers
   auto& perHopHeaders = perHopHeaderCodes();
   for (size_t i = 0; i < length_; ++i) {
-    if (perHopHeaders[codes()[i]] ||
-        (stripPriority && codes()[i] == HTTP_HEADER_PRIORITY)) {
-      strippedHeaders.emplace_back(
-          codes()[i], names()[i], std::move(values()[i]));
-      codes()[i] = HTTP_HEADER_NONE;
+    auto& code = codes()[i];
+    bool perHop = false;
+    if (code != HTTP_HEADER_OTHER) {
+      perHop = (perHopHeaders[code] ||
+                (stripPriority && code == HTTP_HEADER_PRIORITY) ||
+                (customPerHopHeaders && customPerHopHeaders->exists(code)));
+    } else if (customPerHopHeaders &&
+               customPerHopHeaders->exists(*names()[i])) {
+      perHop = true;
+    }
+    if (perHop) {
+      strippedHeaders.emplace_back(code, names()[i], std::move(values()[i]));
+      code = HTTP_HEADER_NONE;
       ++deletedCount_;
       VLOG(5) << "Stripped hop-by-hop header " << *names()[i];
     }

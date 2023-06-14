@@ -75,8 +75,19 @@ TEST_F(HPACKContextTests, StaticTable) {
 
 TEST_F(HPACKContextTests, StaticTableHeaderNamesAreCommon) {
   auto& table = StaticHeaderTable::get();
+  std::set<std::string> uncommonStaticEntries{"allow",
+                                              "content-location",
+                                              "from",
+                                              "if-match",
+                                              "if-unmodified-since",
+                                              "max-forwards",
+                                              "if-range",
+                                              "refresh"};
   for (std::pair<HPACKHeaderName, std::list<uint32_t>> entry : table.names()) {
-    EXPECT_TRUE(entry.first.isCommonHeader());
+    EXPECT_TRUE(entry.first.isCommonHeader() ||
+                uncommonStaticEntries.find(entry.first.get()) !=
+                    uncommonStaticEntries.end())
+        << entry.first.get();
   }
 }
 

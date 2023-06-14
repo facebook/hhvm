@@ -1942,10 +1942,6 @@ void t_go_generator::generate_go_struct_reader(
     indent_up();
     thriftFieldTypeId = type_to_enum((*f_iter)->get_type());
 
-    if (thriftFieldTypeId == "thrift.BINARY") {
-      thriftFieldTypeId = "thrift.STRING";
-    }
-
     out << indent() << "if err := p." << field_method << "(iprot); err != nil {"
         << endl;
     out << indent() << "  return err" << endl;

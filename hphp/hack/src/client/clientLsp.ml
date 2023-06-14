@@ -478,11 +478,11 @@ type event =
       (** The editor e.g. VSCode might send a request or notification LSP message to us
       at any time. This event represents those LSP messages. The fields store
       raw json as well as the parsed form of it. Handled by [handle_client_message]. *)
-  | Client_ide_notification of ClientIdeMessage.notification
+  | Daemon_notification of ClientIdeMessage.notification
       (** Under [--config ide_serverless=true], we spin up a clientIdeDaemon process
       and communicate its stdin/stdout. This event represents whenever clientIdeDaemon
       pushes a notification to us, e.g. a progress or status update.
-      Handled by [handle_client_ide_notification]. *)
+      Handled by [handle_daemon_notification]. *)
   | Errors_file of ServerProgress.ErrorsRead.read_result option
       (** Under [--config ide_standalone=true], we once a second seek out a new errors.bin
       file that the server has produced to accumulate errors in the current typecheck.
@@ -514,9 +514,9 @@ let event_to_string (event : event) : string =
       "Client_message(#%s: %s)"
       metadata.tracking_id
       (Lsp_fmt.denorm_message_to_string m)
-  | Client_ide_notification n ->
+  | Daemon_notification n ->
     Printf.sprintf
-      "Client_ide_notification(%s)"
+      "Daemon_notification(%s)"
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
   | Errors_file None -> "Errors_file(anomalous end-of-stream)"
@@ -547,7 +547,7 @@ let is_tick (event : event) : bool =
   | Server_hello
   | Server_message _
   | Client_message _
-  | Client_ide_notification _ ->
+  | Daemon_notification _ ->
     false
 
 (* Here are some exit points. *)
@@ -874,7 +874,7 @@ let pop_from_ide_service (ide_service : ClientIdeService.t ref option) :
     in
     (match notification_opt with
     | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
-    | Some notification -> Lwt.return (Client_ide_notification notification))
+    | Some notification -> Lwt.return (Daemon_notification notification))
 
 (** This cancellable async function will block indefinitely until
 data is available from the server, but won't read from it. *)
@@ -5364,9 +5364,7 @@ let set_verbose_to_file
       ~terminate_on_failure:false
   | None -> ()
 
-(* handle_event: Process and respond to a message, and update the LSP state
-   machine accordingly. In case the message was a request, it returns the
-   json it responded with, so the caller can log it. *)
+(* Process and respond to a message from VSCode, and update [state] accordingly. *)
 let handle_client_message
     ~(env : env)
     ~(state : state ref)
@@ -6344,16 +6342,22 @@ let handle_server_hello ~(state : state ref) : result_telemetry option Lwt.t =
   in
   Lwt.return_none
 
-let handle_client_ide_notification
-    ~(notification : ClientIdeMessage.notification) :
-    result_telemetry option Lwt.t =
-  (* In response to ide_service notifications we have three goals:
-     (1) in case of Done_init, we might have to announce the failure to the user
-     (2) in a few other cases, we send telemetry events so that test harnesses
-     get insight into the internal state of the ide_service
-     (3) after every single event, includinng client_ide_notification events,
-     our caller queries the ide_service for what status it wants to display to
-     the user, so these notifications have the goal of triggering that refresh. *)
+(* Process and respond to a notification from clientIdeDaemon, and update [state] accordingly. *)
+let handle_daemon_notification
+    ~(env : env)
+    ~(state : state ref)
+    ~(client : Jsonrpc.t)
+    ~(ide_service : ClientIdeService.t ref)
+    ~(notification : ClientIdeMessage.notification)
+    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
+  (* In response to ide_service notifications we have these goals:
+     * in case of Done_init failure, we have to announce the failure to the user
+     * in case of Done_init success, we need squiggles for open files
+     * in a few other cases, we send telemetry events so that test harnesses
+       get insight into the internal state of the ide_service
+     * after every single event, including client_ide_notification events,
+       our caller queries the ide_service for what status it wants to display to
+       the user, so these notifications have the goal of triggering that refresh. *)
   match notification with
   | ClientIdeMessage.Done_init (Ok p) ->
     Lsp_helpers.telemetry_log to_stdout "[client-ide] Finished init: ok";
@@ -6362,6 +6366,30 @@ let handle_client_ide_notification
       (Printf.sprintf
          "[client-ide] Initialized; %d file changes to process"
          p.ClientIdeMessage.Processing_files.total);
+    let editor_open_files =
+      (match get_editor_open_files !state with
+      | Some files -> files
+      | None -> UriMap.empty)
+      |> UriMap.elements
+    in
+    let%lwt () =
+      Lwt_list.iter_s
+        (fun (uri, { TextDocumentItem.text = file_contents; _ }) ->
+          let%lwt new_state =
+            send_file_to_ide_and_get_errors_if_needed
+              ~env
+              ~client
+              ~ide_service
+              ~state
+              ~uri
+              ~file_contents
+              ~ref_unblocked_time
+              ~tracking_id:(Random_id.short_string ())
+          in
+          state := new_state;
+          Lwt.return_unit)
+        editor_open_files
+    in
     Lwt.return_none
   | ClientIdeMessage.Done_init (Error error_data) ->
     log_debug "<-- done_init";
@@ -6573,8 +6601,14 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
             ~metadata
             ~message
             ~ref_unblocked_time
-        | Client_ide_notification notification ->
-          handle_client_ide_notification ~notification
+        | Daemon_notification notification ->
+          handle_daemon_notification
+            ~env
+            ~state
+            ~client
+            ~ide_service:(Option.value_exn ide_service)
+            ~notification
+            ~ref_unblocked_time
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
         | Errors_file result ->

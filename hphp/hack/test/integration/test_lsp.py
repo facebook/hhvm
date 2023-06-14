@@ -6719,6 +6719,26 @@ function aaa(): string {
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 29},
+                                "end": {"line": 1, "character": 29},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
             .request(
                 comment="the codeAction request will push diagnostics if they've not already been pushed",
                 line=line(),
@@ -6734,6 +6754,69 @@ function aaa(): string {
                 result=[],
                 powered_by="serverless_ide",
             )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_skip_errors(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update({"php_file_uri": self.repo_file_uri("php_file.php")})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("skip_errors"),
+                wait_for_init_done=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction f(): int { return 1 }\n",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 30},
+                            },
+                            "text": "function f(): int { return 12 }",
+                        }
+                    ],
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "text": "function f(): int { return 123 }",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
             .wait_for_notification(
                 method="textDocument/publishDiagnostics",
                 params={
@@ -6741,8 +6824,8 @@ function aaa(): string {
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 1, "character": 29},
-                                "end": {"line": 1, "character": 29},
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
                             },
                             "severity": 1,
                             "code": 1002,

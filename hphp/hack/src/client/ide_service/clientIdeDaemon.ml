@@ -439,6 +439,8 @@ let initialize2
             };
         }
     in
+    (* Note: Done_init is needed to (1) transition clientIdeService state, (2) cause
+       clientLsp to know to ask for squiggles to be refreshed on open files. *)
     (* TODO: Done_init always shows "Done_init(0/0)". We should remove the progress here. *)
     let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
     let%lwt () =

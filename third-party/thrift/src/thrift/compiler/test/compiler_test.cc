@@ -178,3 +178,209 @@ TEST(CompilerTest, out_of_range_field_ids_underflow) {
     }
   )");
 }
+
+TEST(CompilerTest, oneway_exception) {
+  check_compile(R"(
+    exception A {}
+
+    service MyService {
+        oneway void foo();
+        oneway void baz() throws (1: A ex); # expected-error: Oneway methods can't throw exceptions: baz
+    }
+  )");
+}
+
+TEST(CompilerTest, oneway_return) {
+  check_compile(R"(
+    service MyService {
+      oneway void foo();
+      oneway string bar(); # expected-error: Oneway methods must have void return type: bar
+    }
+  )");
+}
+
+TEST(CompilerTest, enum_wrong_default_value) {
+  check_compile(R"(
+    enum Color {
+      RED = 1,
+      GREEN = 2,
+      BLUE = 3,
+    }
+
+    struct MyS {
+      1: Color color = -1; # expected-warning: type error: const `color` was declared as enum `Color` with a value not of that enum.
+    }
+  )");
+}
+
+TEST(CompilerTest, duplicate_enum_value_name) {
+  check_compile(R"(
+    enum Foo {
+      Bar = 1,
+      Bar = 2, # expected-error: Enum value `Bar` is already defined for `Foo`.
+    }
+  )");
+}
+
+TEST(CompilerTest, duplicate_enum_value) {
+  check_compile(R"(
+    enum Foo {
+      Bar = 1,
+      Baz = 1, # expected-error: Duplicate value `Baz=1` with value `Bar` in enum `Foo`.
+    }
+  )");
+}
+
+TEST(CompilerTest, unset_enum_value) {
+  check_compile(R"(
+    enum Foo {
+      Foo = 1,
+      Bar, # expected-error: The enum value, `Bar`, must have an explicitly assigned value.
+      Baz, # expected-error: The enum value, `Baz`, must have an explicitly assigned value.
+    }
+  )");
+}
+
+TEST(CompilerTest, enum_overflow) {
+  check_compile(R"(
+    enum Foo {
+      Bar = 2147483647
+      Baz = 2147483648 # expected-error: Integer constant 2147483648 outside the range of enum values ([-2147483648, 2147483647]).
+    }
+  )");
+}
+
+TEST(CompilerTest, enum_underflow) {
+  check_compile(R"(
+    enum Foo {
+      Bar = -2147483648
+      Baz = -2147483649 # expected-error: Integer constant -2147483649 outside the range of enum values ([-2147483648, 2147483647]).
+    }
+  )");
+}
+
+TEST(CompilerTest, integer_overflow_underflow) {
+  check_compile(R"(
+    const i64 overflowInt = 9223372036854775808;  # max int64 + 1
+      # expected-error@-1: integer constant 9223372036854775808 is too large
+      # expected-warning@-2: 64-bit constant -9223372036854775808 may not work in all languages
+  )");
+  check_compile(R"(
+    const i64 underflowInt = -9223372036854775809; # min int64 - 1
+      # expected-error@-1: integer constant -9223372036854775809 is too small
+      # expected-warning@-2: 64-bit constant 9223372036854775807 may not work in all languages
+  )");
+  check_compile(R"(
+    # Unsigned Ints
+    const i64 overflowUint = 18446744073709551615;  # max uint64
+      # expected-error@-1: integer constant 18446744073709551615 is too large
+  )");
+  check_compile(R"(
+    const i64 overflowUint2 = 18446744073709551616;  # max uint64 + 1
+      # expected-error@-1: integer constant 18446744073709551616 is too large
+  )");
+}
+
+TEST(CompilerTest, double_overflow_underflow) {
+  check_compile(R"(
+    const double overflowConst = 1.7976931348623159e+308;
+      # expected-error@-1: floating-point constant 1.7976931348623159e+308 is out of range
+  )");
+  check_compile(R"(
+    const double overflowConst = 1.7976931348623159e+309;
+      # expected-error@-1: floating-point constant 1.7976931348623159e+309 is out of range
+  )");
+  check_compile(R"(
+    const double overflowConst = 4.9406564584124654e-325;
+      # expected-error@-1: magnitude of floating-point constant 4.9406564584124654e-325 is too small
+  )");
+  check_compile(R"(
+    const double overflowConst = 1e-324;
+      # expected-error@-1: magnitude of floating-point constant 1e-324 is too small
+  )");
+}
+
+TEST(CompilerTest, const_wrong_type) {
+  check_compile(R"(
+    const i32 wrongInt = "stringVal" # expected-error: type error: const `wrongInt` was declared as i32.
+    const set<string> wrongSet = {1: 2}
+      # expected-warning@-1: type error: const `wrongSet` was declared as set. This will become an error in future versions of thrift.
+    const map<i32, i32> wrongMap = [1,32,3];
+      # expected-warning@-1: type error: const `wrongMap` was declared as map. This will become an error in future versions of thrift.
+    const map<i32, i32> wierdMap = [];
+      # expected-warning@-1: type error: map `wierdMap` initialized with empty list.
+    const set<i32> wierdSet = {};
+      # expected-warning@-1: type error: set `wierdSet` initialized with empty map.
+    const list<i32> wierdList = {};
+      # expected-warning@-1: type error: list `wierdList` initialized with empty map.
+    const list<string> badValList = [1]
+      # expected-error@-1: type error: const `badValList<elem>` was declared as string.
+    const set<string> badValSet = [2]
+      # expected-error@-1: type error: const `badValSet<elem>` was declared as string.
+    const map<string, i32> badValMap = {1: "str"}
+      # expected-error@-1: type error: const `badValMap<key>` was declared as string.
+      # expected-error@-2: type error: const `badValMap<val>` was declared as i32.
+  )");
+}
+
+TEST(CompilerTest, struct_fields_wrong_type) {
+  check_compile(R"(
+    struct Annot {
+      1: i32 val
+      2: list<string> otherVal
+    }
+
+    @Annot{val="hi", otherVal=5}
+      #expected-error@-1: type error: const `.val` was declared as i32.
+      #expected-warning@-2: type error: const `.otherVal` was declared as list. This will become an error in future versions of thrift.
+    struct BadFields {
+      1: i32 badInt = "str" # expected-error: type error: const `badInt` was declared as i32.
+    }
+  )");
+}
+
+TEST(CompilerTest, duplicate_method_name) {
+  check_compile(R"(
+    service MySBB {
+      void lol(),
+      i32 lol(), # expected-error:  Function `lol` is already defined for `MySBB`.
+    }
+  )");
+}
+
+TEST(CompilerTest, nonexistent_type) {
+  check_compile(R"(
+    struct S {
+      1: Random.Type field # expected-error: Type `Random.Type` not defined.
+    }
+  )");
+}
+
+TEST(CompilerTest, field_names_uniqueness) {
+  check_compile(R"(
+    struct S {
+      1: i32 a;
+      2: i32 b;
+      3: i32 a; # expected-error: Field `a` is already defined for `S`.
+    }
+  )");
+}
+
+TEST(CompilerTest, mixin_field_names_uniqueness) {
+  check_compile(R"(
+    struct A { 1: i32 i }
+    struct B { 2: i64 i }
+    struct C {
+      1: A a (cpp.mixin);
+      2: B b (cpp.mixin); # expected-error: Field `B.i` and `A.i` can not have same name in `C`.
+    }
+  )");
+  check_compile(R"(
+    struct A { 1: i32 i }
+
+    struct C {
+      1: A a (cpp.mixin);
+      2: i64 i; # expected-error: Field `C.i` and `A.i` can not have same name in `C`.
+    }
+  )");
+}

@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/http/codec/CodecUtil.h>
 
+#include <folly/String.h>
 #include <folly/ThreadLocal.h>
 #include <proxygen/lib/http/HeaderConstants.h>
 #include <proxygen/lib/http/RFC2616.h>
@@ -69,7 +70,7 @@ bool CodecUtil::hasGzipAndDeflate(const std::string& value,
   RFC2616::parseQvalues(value, output);
   for (const auto& encodingQ : output) {
     std::string lower(encodingQ.first.str());
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    folly::toLowerAscii(lower);
     // RFC says 3 sig figs
     if (lower == "gzip" && encodingQ.second >= 0.001) {
       hasGzip = true;

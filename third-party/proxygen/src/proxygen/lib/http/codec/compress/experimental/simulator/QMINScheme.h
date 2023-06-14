@@ -255,7 +255,7 @@ class QMINScheme : public CompressionScheme {
 
     for (const auto header : allHeaders) {
       std::string name{header.name->c_str()};
-      std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+      folly::toLowerAscii(name);
       qes = qmin_enc_encode(qms_enc,
                             qms_next_stream_id_to_encode,
                             name.c_str(),

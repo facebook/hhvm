@@ -10,6 +10,7 @@
 
 #include <sstream>
 
+#include <folly/String.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 #include <proxygen/lib/utils/ParseURL.h>
 
@@ -180,7 +181,7 @@ class URL {
     } else {
       scheme_ = std::move(scheme);
     }
-    std::transform(scheme_.begin(), scheme_.end(), scheme_.begin(), ::tolower);
+    folly::toLowerAscii(scheme_);
 
     valid_ = (scheme_ == "http" || scheme_ == "https");
   }

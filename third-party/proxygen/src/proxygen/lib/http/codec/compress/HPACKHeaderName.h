@@ -12,6 +12,7 @@
 #include <boost/variant.hpp>
 #include <cstdint>
 #include <folly/Range.h>
+#include <folly/String.h>
 #include <functional>
 #include <glog/logging.h>
 #include <iostream>
@@ -150,8 +151,8 @@ class HPACKHeaderName {
         HTTPCommonHeaders::hash(name.data(), name.size());
     if (headerCode == HTTPHeaderCode::HTTP_HEADER_NONE ||
         headerCode == HTTPHeaderCode::HTTP_HEADER_OTHER) {
-      std::string* newAddress = new std::string(name.size(), 0);
-      std::transform(name.begin(), name.end(), newAddress->begin(), ::tolower);
+      auto newAddress = new std::string(name);
+      folly::toLowerAscii(*newAddress);
       address_ = newAddress;
     } else {
       address_ = HTTPCommonHeaders::getPointerToName(

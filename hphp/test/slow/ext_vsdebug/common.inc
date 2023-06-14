@@ -485,3 +485,56 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
 abstract final class ExtVsdebugCommonInc {
   public static $bpId = 0;
 }
+
+////////////////////////////////////////////
+// Common Helpers for Writing Unit Tests
+////////////////////////////////////////////
+
+function skip_events() {
+  $msg = json_decode(getNextVsDebugMessage(), true);
+  while ($msg['type'] == 'event') {
+    if ($msg['event'] === 'output') {
+      $body = $msg['body'];
+      printf("OUT: %s", $body['output']);
+    }
+    $msg = json_decode(getNextVsDebugMessage(), true);
+  }
+  return $msg;
+}
+
+function send_eval($expr) {
+  return sendVsCommand(darray[
+    "command" => "evaluate",
+    "type" => "request",
+    "arguments" =>
+    darray[
+      'expression' => $expr,
+      'context' => 'repl',
+      'frameId' => 2]]);
+}
+
+function expect_success($seq) {
+  $msg = skip_events();
+  checkObjEqualRecursively($msg, darray[
+    "type" => "response",
+    "command" => "evaluate",
+    "success" => true,
+    "request_seq" => $seq]);
+}
+
+function expect_tv($seq, string $type, $val) {
+  $msg = skip_events();
+  checkObjEqualRecursively($msg, darray[
+    "type" => "response",
+    "command" => "evaluate",
+    "success" => true,
+    'body' => dict[
+      'type' => $type,
+      'result' => $val,
+    ],
+    "request_seq" => $seq]);
+}
+
+function expect_int($seq, $i) {
+  return expect_tv($seq, 'int', $i);
+}

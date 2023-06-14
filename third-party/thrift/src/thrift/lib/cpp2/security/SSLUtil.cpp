@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/security/SSLUtil.h>
 
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 
 #include <fizz/client/AsyncFizzClient.h>
@@ -30,7 +31,9 @@ namespace thrift {
 // private class meant to encapsulate all the information that needs to be
 // preserved across sockets for the tls downgrade scenario
 namespace {
-class StopTLSSocket : public folly::AsyncSocket {
+
+template <class Parent>
+class StopTLSSocket : public Parent {
  public:
   StopTLSSocket(
       folly::EventBase* evb,
@@ -38,7 +41,16 @@ class StopTLSSocket : public folly::AsyncSocket {
       uint32_t zeroCopyBufId,
       std::shared_ptr<const fizz::Cert> selfCert,
       std::shared_ptr<const fizz::Cert> peerCert)
-      : AsyncSocket(evb, fd, zeroCopyBufId),
+      : Parent(evb, fd, zeroCopyBufId),
+        selfCert_(std::move(selfCert)),
+        peerCert_(std::move(peerCert)) {}
+
+  StopTLSSocket(
+      folly::EventBase* evb,
+      folly::NetworkSocket fd,
+      std::shared_ptr<const fizz::Cert> selfCert,
+      std::shared_ptr<const fizz::Cert> peerCert)
+      : Parent(evb, fd),
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}
 
@@ -46,7 +58,7 @@ class StopTLSSocket : public folly::AsyncSocket {
       folly::EventBase* evb,
       std::shared_ptr<const fizz::Cert> selfCert,
       std::shared_ptr<const fizz::Cert> peerCert)
-      : AsyncSocket(evb),
+      : Parent(evb),
         selfCert_(std::move(selfCert)),
         peerCert_(std::move(peerCert)) {}
 
@@ -54,7 +66,9 @@ class StopTLSSocket : public folly::AsyncSocket {
 
   std::string getApplicationProtocol() const noexcept override { return alpn_; }
 
-  void setApplicationProtocol(std::string alpn) noexcept { alpn_ = alpn; }
+  void setApplicationProtocol(std::string alpn) noexcept {
+    alpn_ = std::move(alpn);
+  }
 
   const folly::AsyncTransportCertificate* getPeerCertificate() const override {
     return peerCert_.get();
@@ -122,8 +136,9 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
 #if __has_include(<liburing.h>)
   if (!sock &&
       fizzSock->template getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
-    auto stopTLSSocket =
-        new StopTLSSocket(fizzSock->getEventBase(), selfCert, peerCert);
+    // `AsyncFdSocket` currently lacks uring support, so hardcode `AsyncSocket`
+    auto stopTLSSocket = new StopTLSSocket<folly::AsyncSocket>(
+        fizzSock->getEventBase(), selfCert, peerCert);
     if (cipher.hasValue()) {
       stopTLSSocket->setCipher(cipher.value());
       stopTLSSocket->setExportedMasterSecret(std::move(exportedMasterSecret));
@@ -145,14 +160,27 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
     auto fd = sock->detachNetworkSocket();
     auto zcId = sock->getZeroCopyBufId();
 
-    // create new socket make sure not to throw
-    auto stopTLSSocket = new StopTLSSocket(eb, fd, zcId, selfCert, peerCert);
-    stopTLSSocket->setApplicationProtocol(fizzSock->getApplicationProtocol());
-    if (cipher.hasValue()) {
-      stopTLSSocket->setCipher(cipher.value());
-      stopTLSSocket->setExportedMasterSecret(std::move(exportedMasterSecret));
+    folly::SocketAddress addr;
+    sock->getPeerAddress(&addr);
+
+    // Create new socket from old, make sure not to throw
+    auto populateStopTLSSocket = [&](auto stopTLSSock) -> folly::AsyncSocket* {
+      stopTLSSock->setApplicationProtocol(fizzSock->getApplicationProtocol());
+      if (cipher.hasValue()) {
+        stopTLSSock->setCipher(cipher.value());
+        stopTLSSock->setExportedMasterSecret(std::move(exportedMasterSecret));
+      }
+      return stopTLSSock;
+    };
+    if (addr.getFamily() == AF_UNIX) {
+      DCHECK_EQ(0, zcId) << "Zero-copy not supported on AF_UNIX sockets";
+      plaintextTransport.reset(populateStopTLSSocket(
+          new StopTLSSocket<folly::AsyncFdSocket>(eb, fd, selfCert, peerCert)));
+    } else {
+      plaintextTransport.reset(
+          populateStopTLSSocket(new StopTLSSocket<folly::AsyncSocket>(
+              eb, fd, zcId, selfCert, peerCert)));
     }
-    plaintextTransport = folly::AsyncSocketTransport::UniquePtr(stopTLSSocket);
   }
   return plaintextTransport;
 }

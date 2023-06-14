@@ -429,7 +429,8 @@ class HQSession
     versionUtilsReady_.then([this, stats] { qpackCodec_.setStats(stats); });
   }
 
-  void setHeaderIndexingStrategy(const HeaderIndexingStrategy* indexingStrat) {
+  void setHeaderIndexingStrategy(
+      const HeaderIndexingStrategy* indexingStrat) override {
     versionUtilsReady_.then([this, indexingStrat] {
       qpackCodec_.setHeaderIndexingStrategy(indexingStrat);
     });
@@ -663,6 +664,7 @@ class HQSession
     attachToSessionController();
     nextEgressResults_.reserve(maxConcurrentIncomingStreams_);
     quicInfo_ = std::make_shared<QuicProtocolInfo>();
+    initCodecHeaderIndexingStrategy();
   }
 
   // EventBase::LoopCallback methods

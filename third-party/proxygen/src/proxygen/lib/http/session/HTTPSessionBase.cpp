@@ -39,6 +39,7 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
                       rootNodeId),
       localAddr_(localAddr),
       peerAddr_(peerAddr),
+      controller_(controller),
       prioritySample_(false),
       h2PrioritiesEnabled_(true),
       exHeadersEnabled_(false) {
@@ -46,8 +47,6 @@ HTTPSessionBase::HTTPSessionBase(const SocketAddress& localAddr,
   // If we receive IPv4-mapped IPv6 addresses, convert them to IPv4.
   localAddr_.tryConvertToIPv4();
   peerAddr_.tryConvertToIPv4();
-
-  setController(controller);
 }
 
 HTTPSessionBase::~HTTPSessionBase() {
@@ -92,15 +91,8 @@ void HTTPSessionBase::onCodecChanged() {
 }
 
 void HTTPSessionBase::initCodecHeaderIndexingStrategy() {
-  // Set the header indexing strategy to be employed by the codec if H2
-  // This is done here so that the strategy could be dynamic depending on the
-  // session
-  if (controller_ && isHTTP2CodecProtocol(codec_->getProtocol())) {
-    auto* h2Codec = dynamic_cast<HTTP2Codec*>(codec_.getChainEndPtr());
-    if (h2Codec) {
-      h2Codec->setHeaderIndexingStrategy(
-          controller_->getHeaderIndexingStrategy());
-    }
+  if (controller_) {
+    setHeaderIndexingStrategy(controller_->getHeaderIndexingStrategy());
   }
 }
 

@@ -175,6 +175,9 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return infoCallback_;
   }
 
+  virtual void setHeaderIndexingStrategy(
+      const HeaderIndexingStrategy* strat) = 0;
+
   virtual void setSessionStats(HTTPSessionStats* stats);
 
   virtual HTTPTransaction::Transport::Type getType() const noexcept = 0;

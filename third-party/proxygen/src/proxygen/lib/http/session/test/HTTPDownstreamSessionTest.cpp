@@ -50,6 +50,8 @@ class HTTPDownstreamTest : public testing::Test {
         flowControl_(flowControl) {
     EXPECT_CALL(mockController_, getGracefulShutdownTimeout())
         .WillRepeatedly(Return(std::chrono::milliseconds(0)));
+    EXPECT_CALL(mockController_, getHeaderIndexingStrategy())
+        .WillRepeatedly(Return(HeaderIndexingStrategy::getDefaultInstance()));
 
     {
       InSequence s;

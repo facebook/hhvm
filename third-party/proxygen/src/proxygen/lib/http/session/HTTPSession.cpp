@@ -129,6 +129,7 @@ HTTPSession::HTTPSession(const WheelTimerInstance& wheelTimer,
   if (!sock_->isReplaySafe()) {
     sock_->setReplaySafetyCallback(this);
   }
+  initCodecHeaderIndexingStrategy();
 }
 
 uint32_t HTTPSession::getCertAuthSettingVal() {
@@ -2067,6 +2068,16 @@ bool HTTPSession::getCurrentTransportInfo(TransportInfo* tinfo) {
     return true;
   }
   return false;
+}
+
+void HTTPSession::setHeaderIndexingStrategy(
+    const HeaderIndexingStrategy* strat) {
+  if (isHTTP2CodecProtocol(codec_->getProtocol())) {
+    auto* h2Codec = dynamic_cast<HTTP2Codec*>(codec_.getChainEndPtr());
+    if (h2Codec) {
+      h2Codec->setHeaderIndexingStrategy(strat);
+    }
+  }
 }
 
 void HTTPSession::getFlowControlInfo(HTTPTransaction::FlowControlInfo* info) {

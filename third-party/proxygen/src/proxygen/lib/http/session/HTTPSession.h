@@ -244,6 +244,8 @@ class HTTPSession
   bool getCurrentTransportInfoWithoutUpdate(
       wangle::TransportInfo* tinfo) const override;
 
+  void setHeaderIndexingStrategy(const HeaderIndexingStrategy* strat) override;
+
   void setHeaderCodecStats(HeaderCodec::Stats* stats) override {
     codec_->setHeaderCodecStats(stats);
   }

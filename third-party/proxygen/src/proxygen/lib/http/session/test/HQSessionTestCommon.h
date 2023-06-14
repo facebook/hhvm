@@ -312,6 +312,9 @@ class HQSessionTest
 
   struct MockControllerContainer {
     explicit MockControllerContainer(TestParams params) {
+      EXPECT_CALL(mockController, getHeaderIndexingStrategy())
+          .WillRepeatedly(testing::Return(
+              proxygen::HeaderIndexingStrategy::getDefaultInstance()));
       testing::InSequence s;
       EXPECT_CALL(mockController, attachSession(testing::_));
       if (params.expectOnTransportReady) {

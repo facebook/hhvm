@@ -6423,12 +6423,28 @@ and new_object
         Typing_error.(primary @@ Primary.Invalid_new_disposable p);
     let r_witness = Reason.Rwitness p in
     let obj_ty = mk (r_witness, obj_ty_) in
-    let c_ty =
+    let (env, c_ty) =
       match cid_ with
-      | CIstatic
+      | CIstatic -> (env, mk (r_witness, get_node c_ty))
       | CIexpr _ ->
-        mk (r_witness, get_node c_ty)
-      | _ -> obj_ty
+        let c_ty = mk (r_witness, get_node c_ty) in
+        (* When constructing from a (classname) variable, the variable
+         * dictates what the constructed object is going to be. This allows
+         * for generic and dependent types to be correctly carried
+         * through the 'new $foo()' iff the constructed obj_ty is a
+         * supertype of the variable-dictated c_ty *)
+        let (env, ty_err_opt) =
+          Typing_ops.sub_type
+            p
+            Reason.URnone
+            env
+            c_ty
+            obj_ty
+            Typing_error.Callback.unify_error
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        (env, c_ty)
+      | _ -> (env, obj_ty)
     in
     let (env, new_ty) =
       let (cid_ty, _, _) = tcid in
@@ -6507,21 +6523,6 @@ and new_object
       ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
         (c_ty, ctor_fty) )
     | CIexpr _ ->
-      (* When constructing from a (classname) variable, the variable
-       * dictates what the constructed object is going to be. This allows
-       * for generic and dependent types to be correctly carried
-       * through the 'new $foo()' iff the constructed obj_ty is a
-       * supertype of the variable-dictated c_ty *)
-      let (env, ty_err_opt) =
-        Typing_ops.sub_type
-          p
-          Reason.URnone
-          env
-          c_ty
-          obj_ty
-          Typing_error.Callback.unify_error
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
         (c_ty, ctor_fty) )
   in

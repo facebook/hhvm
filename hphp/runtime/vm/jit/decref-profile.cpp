@@ -128,16 +128,17 @@ const StringData* decRefProfileKey(const IRInstruction* inst) {
   return decRefProfileKey(local);
 }
 
-SharedProfile<DecRefProfile> decRefProfile(
+TargetProfile<DecRefProfile> decRefProfile(
     const TransContext& context, const IRInstruction* inst) {
   auto const profileKey = decRefProfileKey(inst);
-  return SharedProfile<DecRefProfile>(context, inst->marker(), profileKey);
+  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
 }
 
-SharedProfile<DecRefProfile> decRefProfile(
-    const TransContext& context, const BCMarker& marker, int locId) {
+TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
+                                           const BCMarker& marker,
+                                           int locId) {
   auto const profileKey = decRefProfileKey(locId);
-  return SharedProfile<DecRefProfile>(context, marker, profileKey);
+  return TargetProfile<DecRefProfile>(context, marker, profileKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

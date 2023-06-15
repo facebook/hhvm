@@ -29,6 +29,8 @@ struct StringData;
 
 namespace jit {
 
+struct DecRefProfile;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -71,14 +73,15 @@ struct ArrayAccessProfile {
   /*
    * Update the profile to register an access at `key' in `ad'.
    */
-  void update(const ArrayData* ad, int64_t key, DecRefProfileEntry*);
-  void update(const ArrayData* ad, const StringData* key, DecRefProfileEntry*);
+  void update(const ArrayData* ad, int64_t key, DecRefProfile*);
+  void update(const ArrayData* ad, const StringData* key, DecRefProfile*);
 
   /*
    * Combine `l' and `r', retaining the kNumTrackedSamples with the highest
    * counts.
    */
-  static void reduce(ArrayAccessProfile& l, const ArrayAccessProfile& r);
+  static void reduce(ArrayAccessProfile& l,
+                     const ArrayAccessProfile& r);
 
   std::string toString() const;
   folly::dynamic toDynamic() const;

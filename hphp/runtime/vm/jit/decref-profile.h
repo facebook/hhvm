@@ -18,9 +18,8 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/shared-profile.h"
-#include "hphp/runtime/vm/jit/type.h"
 
 #include <folly/dynamic.h>
 
@@ -190,11 +189,12 @@ struct DecRefProfile {
 const StringData* decRefProfileKey(int locId);
 const StringData* decRefProfileKey(const IRInstruction* inst);
 
-SharedProfile<DecRefProfile> decRefProfile(
+TargetProfile<DecRefProfile> decRefProfile(
     const TransContext& context, const IRInstruction* inst);
 
-SharedProfile<DecRefProfile> decRefProfile(
-    const TransContext& context, const BCMarker& marker, int locId);
+TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
+                                           const BCMarker& marker,
+                                           int locId);
 
 ///////////////////////////////////////////////////////////////////////////////
 

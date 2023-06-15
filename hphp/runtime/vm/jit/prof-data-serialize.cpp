@@ -1819,8 +1819,6 @@ std::string serializeProfData(const std::string& filename) {
     }
     write_container(ser, Class::serializeLazyAPCClasses(), write_class);
 
-    serializeSharedProfiles(ser);
-
     write_target_profiles(ser);
 
     // We've written everything directly referenced by the profile
@@ -1974,8 +1972,6 @@ std::string deserializeProfData(const std::string& filename,
       read_container(ser, [&] { list.push_back(read_class(ser)); });
       Class::deserializeLazyAPCClasses(list);
     }
-
-    deserializeSharedProfiles(ser);
 
     read_target_profiles(ser);
 

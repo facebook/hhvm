@@ -148,7 +148,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   if (profile.profiling()) {
     auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
     auto const data =
-      ArrayAccessProfileData { profile.handle(), nullptr };
+      RDSHandlePairData { profile.handle(), rds::kUninitHandle };
     gen(env, op, data, arr, key);
   }
   if (!profile.optimizing()) return generic(key, SizeHintData{});
@@ -250,7 +250,7 @@ SSATmp* profiledArraySet(IRGS& env, SSATmp* mbase, SSATmp* arr, SSATmp* key,
     );
     auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
     auto const data =
-      ArrayAccessProfileData { profile.handle(), decRefProf.entry() };
+      RDSHandlePairData { profile.handle(), decRefProf.handle() };
     gen(env, op, data, arr, key);
   }
   if (!profile.optimizing()) return generic(key, SizeHintData{});

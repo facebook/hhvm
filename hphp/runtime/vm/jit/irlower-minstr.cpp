@@ -410,11 +410,16 @@ void implProfileHackArrayAccess(IRLS& env, const IRInstruction* inst,
                                 const CallSpec& target) {
   auto& v = vmain(env);
 
-  auto const extra = inst->extra<ArrayAccessProfileData>();
-  auto const handle = safe_cast<int32_t>(extra->handle);
-  auto const args = argGroup(env, inst)
-    .ssa(0).ssa(1).addr(rvmtl(), handle).immPtr(extra->extra);
-
+  auto const extra = inst->extra<RDSHandlePairData>();
+  auto args = argGroup(env, inst)
+                .ssa(0)
+                .ssa(1)
+                .addr(rvmtl(), safe_cast<int32_t>(extra->handle));
+  if (extra->extra == rds::kUninitHandle) {
+    args.immPtr(nullptr);
+  } else {
+    args.addr(rvmtl(), safe_cast<int32_t>(extra->extra));
+  }
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
 

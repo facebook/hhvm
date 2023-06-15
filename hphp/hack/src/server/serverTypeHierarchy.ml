@@ -19,8 +19,10 @@ let classish_kind_to_entryKind (kind : Ast_defs.classish_kind) : entryKind =
   | Cenum -> Enum
 
 let decl_to_hierarchy ctx class_ : hierarchyEntry =
-  let ancestors = Decl_provider.Class.all_ancestor_names class_ in
-  let name = Decl_provider.Class.name class_ in
+  let ancestors =
+    List.map ~f:Utils.strip_ns (Decl_provider.Class.all_ancestor_names class_)
+  in
+  let name = Utils.strip_ns (Decl_provider.Class.name class_) in
   let kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_) in
   let pos =
     Naming_provider.resolve_position ctx (Decl_provider.Class.pos class_)

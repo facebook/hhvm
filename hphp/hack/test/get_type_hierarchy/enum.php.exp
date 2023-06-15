@@ -1,6 +1,6 @@
 {
-  "name":"\\E2",
+  "name":"E2",
   "kind":"ServerTypeHierarchyTypes.Enum",
   "pos":"line 4, characters 6-7",
-  "ancestors":["\\HH\\BuiltinEnum"]
+  "ancestors":["HH\\BuiltinEnum"]
 }

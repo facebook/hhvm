@@ -92,8 +92,6 @@ THRIFT_FLAG_DEFINE_bool(enable_io_queue_lag_detection, true);
 
 THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
 
-THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
-
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     apache::thrift::ThriftServer::DumpSnapshotOnLongShutdownResult,
@@ -2022,8 +2020,5 @@ ThriftServer::extractNewConnectionContext(folly::AsyncTransport& transport) {
   return folly::none;
 }
 
-folly::observer::Observer<bool> ThriftServer::enableHybridKex() {
-  return THRIFT_FLAG_OBSERVE(fizz_server_enable_hybrid_kex);
-}
 } // namespace thrift
 } // namespace apache

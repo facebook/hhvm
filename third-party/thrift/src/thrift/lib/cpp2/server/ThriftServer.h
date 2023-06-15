@@ -586,9 +586,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setSSLConfig(
       folly::observer::Observer<wangle::SSLContextConfig> contextObserver) {
     sslContextObserver_ = folly::observer::makeObserver(
-        [observer = std::move(contextObserver),
-         hybridKexObserver = enableHybridKex()]() {
-          **hybridKexObserver; // Flag change will trigger SSL context reloading
+        [observer = std::move(contextObserver)]() {
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -1089,8 +1087,6 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setQuickExitOnShutdownTimeout(bool quickExitOnShutdownTimeout) {
     quickExitOnShutdownTimeout_ = quickExitOnShutdownTimeout;
   }
-
-  static folly::observer::Observer<bool> enableHybridKex();
 
   /**
    * For each request debug stub, a snapshot information can be constructed to

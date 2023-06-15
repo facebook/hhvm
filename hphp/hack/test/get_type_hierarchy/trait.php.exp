@@ -2,5 +2,11 @@
   "name":"Trait_2",
   "kind":"ServerTypeHierarchyTypes.Trait",
   "pos":"line 6, characters 7-13",
-  "ancestors":["Trait_1"]
+  "ancestors":[
+    {
+      "name":"Trait_1",
+      "kind":"ServerTypeHierarchyTypes.Trait",
+      "pos":"line 3, characters 7-13"
+    }
+  ]
 }

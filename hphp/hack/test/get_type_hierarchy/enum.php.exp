@@ -2,5 +2,11 @@
   "name":"E2",
   "kind":"ServerTypeHierarchyTypes.Enum",
   "pos":"line 4, characters 6-7",
-  "ancestors":["HH\\BuiltinEnum"]
+  "ancestors":[
+    {
+      "name":"HH\\BuiltinEnum",
+      "kind":"ServerTypeHierarchyTypes.Class",
+      "pos":"line 26, characters 18-28"
+    }
+  ]
 }

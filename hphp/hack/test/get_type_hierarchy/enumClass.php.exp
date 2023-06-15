@@ -2,5 +2,16 @@
   "name":"EC2",
   "kind":"ServerTypeHierarchyTypes.Enum",
   "pos":"line 4, characters 12-14",
-  "ancestors":["HH\\BuiltinAbstractEnumClass","HH\\BuiltinEnumClass"]
+  "ancestors":[
+    {
+      "name":"HH\\BuiltinAbstractEnumClass",
+      "kind":"ServerTypeHierarchyTypes.Class",
+      "pos":"line 95, characters 18-41"
+    },
+    {
+      "name":"HH\\BuiltinEnumClass",
+      "kind":"ServerTypeHierarchyTypes.Class",
+      "pos":"line 110, characters 18-33"
+    }
+  ]
 }

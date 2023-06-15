@@ -2,5 +2,46 @@
   "name":"Baz",
   "kind":"ServerTypeHierarchyTypes.Class",
   "pos":"line 26, characters 16-18",
-  "ancestors":["Bar","Foo","IBar","IFoo","IQux","Trait_1","Trait_2","Trait_3"]
+  "ancestors":[
+    {
+      "name":"Bar",
+      "kind":"ServerTypeHierarchyTypes.Class",
+      "pos":"line 24, characters 7-9"
+    },
+    {
+      "name":"Foo",
+      "kind":"ServerTypeHierarchyTypes.Class",
+      "pos":"line 22, characters 7-9"
+    },
+    {
+      "name":"IBar",
+      "kind":"ServerTypeHierarchyTypes.Interface",
+      "pos":"line 5, characters 11-14"
+    },
+    {
+      "name":"IFoo",
+      "kind":"ServerTypeHierarchyTypes.Interface",
+      "pos":"line 3, characters 11-14"
+    },
+    {
+      "name":"IQux",
+      "kind":"ServerTypeHierarchyTypes.Interface",
+      "pos":"line 7, characters 11-14"
+    },
+    {
+      "name":"Trait_1",
+      "kind":"ServerTypeHierarchyTypes.Trait",
+      "pos":"line 10, characters 7-13"
+    },
+    {
+      "name":"Trait_2",
+      "kind":"ServerTypeHierarchyTypes.Trait",
+      "pos":"line 13, characters 7-13"
+    },
+    {
+      "name":"Trait_3",
+      "kind":"ServerTypeHierarchyTypes.Trait",
+      "pos":"line 17, characters 7-13"
+    }
+  ]
 }

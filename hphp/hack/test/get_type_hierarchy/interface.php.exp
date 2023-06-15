@@ -2,5 +2,16 @@
   "name":"IQux",
   "kind":"ServerTypeHierarchyTypes.Interface",
   "pos":"line 7, characters 11-14",
-  "ancestors":["IBar","IFoo"]
+  "ancestors":[
+    {
+      "name":"IBar",
+      "kind":"ServerTypeHierarchyTypes.Interface",
+      "pos":"line 5, characters 11-14"
+    },
+    {
+      "name":"IFoo",
+      "kind":"ServerTypeHierarchyTypes.Interface",
+      "pos":"line 3, characters 11-14"
+    }
+  ]
 }

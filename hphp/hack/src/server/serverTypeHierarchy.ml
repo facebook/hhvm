@@ -18,9 +18,24 @@ let classish_kind_to_entryKind (kind : Ast_defs.classish_kind) : entryKind =
   | Ctrait -> Trait
   | Cenum -> Enum
 
+let get_ancestor_entry ctx name : ancestorEntry =
+  let class_ = Decl_provider.get_class ctx name in
+  match class_ with
+  | None -> AncestorName (Utils.strip_ns name)
+  | Some class_ ->
+    AncestorDetails
+      {
+        name = Utils.strip_ns name;
+        kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_);
+        pos =
+          Naming_provider.resolve_position ctx (Decl_provider.Class.pos class_);
+      }
+
 let decl_to_hierarchy ctx class_ : hierarchyEntry =
   let ancestors =
-    List.map ~f:Utils.strip_ns (Decl_provider.Class.all_ancestor_names class_)
+    List.map
+      ~f:(get_ancestor_entry ctx)
+      (Decl_provider.Class.all_ancestor_names class_)
   in
   let name = Utils.strip_ns (Decl_provider.Class.name class_) in
   let kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_) in
@@ -69,13 +84,24 @@ let go_quarantined
       Option.map class_ ~f:(fun class_ -> decl_to_hierarchy ctx class_)
     | _ -> None)
 
+let json_of_ancestor_entry (entry : ancestorEntry) =
+  match entry with
+  | AncestorName name -> Hh_json.string_ name
+  | AncestorDetails entry ->
+    Hh_json.JSON_Object
+      [
+        ("name", Hh_json.string_ entry.name);
+        ("kind", Hh_json.string_ (show_entryKind entry.kind));
+        ("pos", Hh_json.string_ (Pos.string_no_file entry.pos));
+      ]
+
 let json_of_hierarchy_entry (entry : hierarchyEntry) =
   Hh_json.JSON_Object
     [
       ("name", Hh_json.string_ entry.name);
       ("kind", Hh_json.string_ (show_entryKind entry.kind));
       ("pos", Hh_json.string_ (Pos.string_no_file entry.pos));
-      ("ancestors", Hh_json.array_ Hh_json.string_ entry.ancestors);
+      ("ancestors", Hh_json.array_ json_of_ancestor_entry entry.ancestors);
     ]
 
 let json_of_results ~(results : result) =

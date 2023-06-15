@@ -13,11 +13,19 @@ type entryKind =
   | Trait [@value 4]
 [@@deriving show]
 
+type ancestorEntry =
+  | AncestorName of string
+  | AncestorDetails of {
+      name: string;
+      kind: entryKind;
+      pos: Pos.t;
+    }
+
 type hierarchyEntry = {
   name: string;
   kind: entryKind;
   pos: Pos.t;
-  ancestors: string list;
+  ancestors: ancestorEntry list;
 }
 
 type result = hierarchyEntry option

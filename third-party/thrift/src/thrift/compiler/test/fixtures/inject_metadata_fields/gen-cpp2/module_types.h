@@ -128,8 +128,8 @@ class Fields final  {
 
  public:
 
-  Fields();
-
+  Fields() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Fields(apache::thrift::FragileConstructor, ::std::string injected_field__arg);
@@ -141,9 +141,6 @@ class Fields final  {
 
   Fields& operator=(Fields&&) noexcept;
   Fields& operator=(const Fields& src);
-
-  ~Fields();
-
  private:
   ::std::string __fbthrift_field_injected_field;
  private:
@@ -282,8 +279,8 @@ class FieldsInjectedToEmptyStruct final  {
 
  public:
 
-  FieldsInjectedToEmptyStruct();
-
+  FieldsInjectedToEmptyStruct() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   FieldsInjectedToEmptyStruct(apache::thrift::FragileConstructor, ::std::string injected_field__arg);
@@ -295,9 +292,6 @@ class FieldsInjectedToEmptyStruct final  {
 
   FieldsInjectedToEmptyStruct& operator=(FieldsInjectedToEmptyStruct&&) noexcept;
   FieldsInjectedToEmptyStruct& operator=(const FieldsInjectedToEmptyStruct& src);
-
-  ~FieldsInjectedToEmptyStruct();
-
  private:
   ::std::string __fbthrift_field_injected_field;
  private:
@@ -438,8 +432,8 @@ class FieldsInjectedToStruct final  {
 
  public:
 
-  FieldsInjectedToStruct();
-
+  FieldsInjectedToStruct() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   FieldsInjectedToStruct(apache::thrift::FragileConstructor, ::std::string string_field__arg, ::std::string injected_field__arg);
@@ -451,9 +445,6 @@ class FieldsInjectedToStruct final  {
 
   FieldsInjectedToStruct& operator=(FieldsInjectedToStruct&&) noexcept;
   FieldsInjectedToStruct& operator=(const FieldsInjectedToStruct& src);
-
-  ~FieldsInjectedToStruct();
-
  private:
   ::std::string __fbthrift_field_string_field;
  private:
@@ -655,8 +646,8 @@ class FieldsInjectedWithIncludedStruct final  {
 
  public:
 
-  FieldsInjectedWithIncludedStruct();
-
+  FieldsInjectedWithIncludedStruct() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   FieldsInjectedWithIncludedStruct(apache::thrift::FragileConstructor, ::std::string string_field__arg, ::std::string injected_field__arg, ::apache::thrift::detail::boxed_value_ptr<::std::string> injected_structured_annotation_field__arg, ::apache::thrift::detail::boxed_value_ptr<::std::string> injected_unstructured_annotation_field__arg);
@@ -668,9 +659,6 @@ class FieldsInjectedWithIncludedStruct final  {
 
   FieldsInjectedWithIncludedStruct& operator=(FieldsInjectedWithIncludedStruct&&) noexcept;
   FieldsInjectedWithIncludedStruct& operator=(const FieldsInjectedWithIncludedStruct& src);
-
-  ~FieldsInjectedWithIncludedStruct();
-
  private:
   ::std::string __fbthrift_field_string_field;
  private:

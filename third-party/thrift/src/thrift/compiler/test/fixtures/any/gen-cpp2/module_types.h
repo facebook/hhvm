@@ -102,8 +102,8 @@ class MyStruct final  {
 
  public:
 
-  MyStruct();
-
+  MyStruct() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStruct(apache::thrift::FragileConstructor, ::std::string myString__arg);
@@ -115,9 +115,6 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
-
-  ~MyStruct();
-
  private:
   ::std::string __fbthrift_field_myString;
  private:

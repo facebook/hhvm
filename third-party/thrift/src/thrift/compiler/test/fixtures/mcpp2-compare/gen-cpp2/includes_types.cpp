@@ -160,13 +160,6 @@ const folly::StringPiece AStructB::__fbthrift_get_class_name() {
 
 AStructB::AStructB(const AStructB&) = default;
 AStructB& AStructB::operator=(const AStructB&) = default;
-AStructB::AStructB() :
-      __fbthrift_field_FieldA(std::make_shared<::a::different::ns::AStruct>()) {
-}
-
-
-AStructB::~AStructB() {}
-
 AStructB::AStructB(FOLLY_MAYBE_UNUSED AStructB&& other) noexcept :
     __fbthrift_field_FieldA(std::move(other.__fbthrift_field_FieldA)) {
 }

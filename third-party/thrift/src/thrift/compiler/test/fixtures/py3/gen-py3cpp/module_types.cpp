@@ -236,12 +236,6 @@ OptionalRefStruct& OptionalRefStruct::operator=(const OptionalRefStruct& other) 
   return *this;
 }
 
-OptionalRefStruct::OptionalRefStruct() {
-}
-
-
-OptionalRefStruct::~OptionalRefStruct() {}
-
 OptionalRefStruct::OptionalRefStruct(FOLLY_MAYBE_UNUSED OptionalRefStruct&& other) noexcept :
     __fbthrift_field_optional_blob(std::move(other.__fbthrift_field_optional_blob)),
     __isset(other.__isset) {
@@ -535,13 +529,6 @@ HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=(const HiddenTypeFields
   swap(*this, tmp);
   return *this;
 }
-
-HiddenTypeFieldsStruct::HiddenTypeFieldsStruct() {
-  ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
-}
-
-
-HiddenTypeFieldsStruct::~HiddenTypeFieldsStruct() {}
 
 HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),

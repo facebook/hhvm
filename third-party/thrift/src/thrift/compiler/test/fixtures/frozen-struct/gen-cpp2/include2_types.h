@@ -96,8 +96,9 @@ class IncludedB final  {
 
  public:
 
-  IncludedB();
-
+  IncludedB() :
+      __fbthrift_field_i32Field() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   IncludedB(apache::thrift::FragileConstructor, ::std::int32_t i32Field__arg, ::std::string strField__arg);
@@ -109,9 +110,6 @@ class IncludedB final  {
 
   IncludedB& operator=(IncludedB&&) noexcept;
   IncludedB& operator=(const IncludedB& src);
-
-  ~IncludedB();
-
  private:
   ::std::int32_t __fbthrift_field_i32Field;
  private:

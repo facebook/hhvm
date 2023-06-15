@@ -715,8 +715,11 @@ class MyStructFloatFieldThrowExp final  {
 
  public:
 
-  MyStructFloatFieldThrowExp();
-
+  MyStructFloatFieldThrowExp() :
+      __fbthrift_field_myLongField(),
+      __fbthrift_field_MyByteField(),
+      __fbthrift_field_myFloatField() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructFloatFieldThrowExp(apache::thrift::FragileConstructor, ::std::int64_t myLongField__arg, ::std::int8_t MyByteField__arg, ::std::string myStringField__arg, float myFloatField__arg);
@@ -728,9 +731,6 @@ class MyStructFloatFieldThrowExp final  {
 
   MyStructFloatFieldThrowExp& operator=(MyStructFloatFieldThrowExp&&) noexcept;
   MyStructFloatFieldThrowExp& operator=(const MyStructFloatFieldThrowExp& src);
-
-  ~MyStructFloatFieldThrowExp();
-
  private:
   ::std::int64_t __fbthrift_field_myLongField;
  private:
@@ -1027,8 +1027,9 @@ class MyStructMapFloatThrowExp final  {
 
  public:
 
-  MyStructMapFloatThrowExp();
-
+  MyStructMapFloatThrowExp() :
+      __fbthrift_field_myLongField() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructMapFloatThrowExp(apache::thrift::FragileConstructor, ::std::int64_t myLongField__arg, ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>> mapListOfFloats__arg);
@@ -1040,9 +1041,6 @@ class MyStructMapFloatThrowExp final  {
 
   MyStructMapFloatThrowExp& operator=(MyStructMapFloatThrowExp&&) noexcept;
   MyStructMapFloatThrowExp& operator=(const MyStructMapFloatThrowExp& src);
-
-  ~MyStructMapFloatThrowExp();
-
  private:
   ::std::int64_t __fbthrift_field_myLongField;
  private:
@@ -2912,8 +2910,10 @@ class SimpleStruct final  {
 
  public:
 
-  SimpleStruct();
-
+  SimpleStruct() :
+      __fbthrift_field_age(static_cast<::std::int64_t>(60)),
+      __fbthrift_field_name(apache::thrift::StringTraits<std::string>::fromStringLiteral("Batman")) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   SimpleStruct(apache::thrift::FragileConstructor, ::std::int64_t age__arg, ::std::string name__arg);
@@ -2925,9 +2925,6 @@ class SimpleStruct final  {
 
   SimpleStruct& operator=(SimpleStruct&&) noexcept;
   SimpleStruct& operator=(const SimpleStruct& src);
-
-  ~SimpleStruct();
-
  private:
   ::std::int64_t __fbthrift_field_age;
  private:
@@ -7177,8 +7174,9 @@ class TypeRemapped final  {
 
  public:
 
-  TypeRemapped();
-
+  TypeRemapped() :
+      __fbthrift_field_BigInteger() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   TypeRemapped(apache::thrift::FragileConstructor, ::std::map<::std::int64_t, ::std::string> lsMap__arg, ::std::map<::std::int32_t, ::cpp2::FMap> ioMap__arg, ::std::int32_t BigInteger__arg, ::std::string binaryTestBuffer__arg);
@@ -7190,9 +7188,6 @@ class TypeRemapped final  {
 
   TypeRemapped& operator=(TypeRemapped&&) noexcept;
   TypeRemapped& operator=(const TypeRemapped& src);
-
-  ~TypeRemapped();
-
  private:
   ::std::map<::std::int64_t, ::std::string> __fbthrift_field_lsMap;
  private:

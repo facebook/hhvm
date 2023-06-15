@@ -955,8 +955,9 @@ class DoubledPair final  {
 
  public:
 
-  DoubledPair();
-
+  DoubledPair() :
+      __fbthrift_field_x() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   DoubledPair(apache::thrift::FragileConstructor, ::std::string s__arg, ::std::int32_t x__arg);
@@ -968,9 +969,6 @@ class DoubledPair final  {
 
   DoubledPair& operator=(DoubledPair&&) noexcept;
   DoubledPair& operator=(const DoubledPair& src);
-
-  ~DoubledPair();
-
  private:
   ::std::string __fbthrift_field_s;
  private:
@@ -1167,8 +1165,9 @@ class StringPair final  {
 
  public:
 
-  StringPair();
-
+  StringPair() {
+    ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StringPair(apache::thrift::FragileConstructor, ::std::string normal__arg, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair> doubled__arg);
@@ -1179,9 +1178,6 @@ class StringPair final  {
 
   StringPair& operator=(StringPair&&) noexcept;
   StringPair& operator=(const StringPair& src);
-
-  ~StringPair();
-
  private:
   ::std::string __fbthrift_field_normal;
  private:

@@ -200,12 +200,6 @@ const folly::StringPiece decorated_struct::__fbthrift_get_class_name() {
 
 decorated_struct::decorated_struct(const decorated_struct&) = default;
 decorated_struct& decorated_struct::operator=(const decorated_struct&) = default;
-decorated_struct::decorated_struct() {
-}
-
-
-decorated_struct::~decorated_struct() {}
-
 decorated_struct::decorated_struct(FOLLY_MAYBE_UNUSED decorated_struct&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -537,12 +531,6 @@ const folly::StringPiece CppTypeStruct::__fbthrift_get_class_name() {
 
 CppTypeStruct::CppTypeStruct(const CppTypeStruct&) = default;
 CppTypeStruct& CppTypeStruct::operator=(const CppTypeStruct&) = default;
-CppTypeStruct::CppTypeStruct() {
-}
-
-
-CppTypeStruct::~CppTypeStruct() {}
-
 CppTypeStruct::CppTypeStruct(FOLLY_MAYBE_UNUSED CppTypeStruct&& other) noexcept :
     __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
     __isset(other.__isset) {
@@ -1057,12 +1045,6 @@ const folly::StringPiece ComplexString::__fbthrift_get_class_name() {
 
 ComplexString::ComplexString(const ComplexString&) = default;
 ComplexString& ComplexString::operator=(const ComplexString&) = default;
-ComplexString::ComplexString() {
-}
-
-
-ComplexString::~ComplexString() {}
-
 ComplexString::ComplexString(FOLLY_MAYBE_UNUSED ComplexString&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
@@ -1179,14 +1161,6 @@ const folly::StringPiece ComplexNestedWithDefault::__fbthrift_get_class_name() {
 
 ComplexNestedWithDefault::ComplexNestedWithDefault(const ComplexNestedWithDefault&) = default;
 ComplexNestedWithDefault& ComplexNestedWithDefault::operator=(const ComplexNestedWithDefault&) = default;
-ComplexNestedWithDefault::ComplexNestedWithDefault() :
-      __fbthrift_field_z(apache::thrift::StringTraits<std::string>::fromStringLiteral("4")),
-      __fbthrift_field_n(::apache::thrift::detail::make_structured_constant<::apache::thrift::fixtures::types::ComplexString>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::a>(apache::thrift::StringTraits<std::string>::fromStringLiteral("3")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::b>(std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(3)}}))) {
-}
-
-
-ComplexNestedWithDefault::~ComplexNestedWithDefault() {}
-
 ComplexNestedWithDefault::ComplexNestedWithDefault(FOLLY_MAYBE_UNUSED ComplexNestedWithDefault&& other) noexcept :
     __fbthrift_field_z(std::move(other.__fbthrift_field_z)),
     __fbthrift_field_n(std::move(other.__fbthrift_field_n)),
@@ -1585,14 +1559,6 @@ const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
 
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
-MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_majorVer() {
-}
-
-
-MyStruct::~MyStruct() {}
-
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
     __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
@@ -1868,12 +1834,6 @@ const folly::StringPiece AnnotatedTypes::__fbthrift_get_class_name() {
 
 AnnotatedTypes::AnnotatedTypes(const AnnotatedTypes&) = default;
 AnnotatedTypes& AnnotatedTypes::operator=(const AnnotatedTypes&) = default;
-AnnotatedTypes::AnnotatedTypes() {
-}
-
-
-AnnotatedTypes::~AnnotatedTypes() {}
-
 AnnotatedTypes::AnnotatedTypes(FOLLY_MAYBE_UNUSED AnnotatedTypes&& other) noexcept :
     __fbthrift_field_binary_field(std::move(other.__fbthrift_field_binary_field)),
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
@@ -2000,12 +1960,6 @@ ForwardUsageRoot& ForwardUsageRoot::operator=(const ForwardUsageRoot& other) {
   swap(*this, tmp);
   return *this;
 }
-
-ForwardUsageRoot::ForwardUsageRoot() {
-}
-
-
-ForwardUsageRoot::~ForwardUsageRoot() {}
 
 ForwardUsageRoot::ForwardUsageRoot(FOLLY_MAYBE_UNUSED ForwardUsageRoot&& other) noexcept :
     __fbthrift_field_ForwardUsageStruct(std::move(other.__fbthrift_field_ForwardUsageStruct)),
@@ -2144,12 +2098,6 @@ ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct& othe
   return *this;
 }
 
-ForwardUsageStruct::ForwardUsageStruct() {
-}
-
-
-ForwardUsageStruct::~ForwardUsageStruct() {}
-
 ForwardUsageStruct::ForwardUsageStruct(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept :
     __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
 }
@@ -2259,12 +2207,6 @@ ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef& other) 
   return *this;
 }
 
-ForwardUsageByRef::ForwardUsageByRef() {
-}
-
-
-ForwardUsageByRef::~ForwardUsageByRef() {}
-
 ForwardUsageByRef::ForwardUsageByRef(FOLLY_MAYBE_UNUSED ForwardUsageByRef&& other) noexcept :
     __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
 }
@@ -2365,12 +2307,6 @@ const folly::StringPiece IncompleteMap::__fbthrift_get_class_name() {
 
 IncompleteMap::IncompleteMap(const IncompleteMap&) = default;
 IncompleteMap& IncompleteMap::operator=(const IncompleteMap&) = default;
-IncompleteMap::IncompleteMap() {
-}
-
-
-IncompleteMap::~IncompleteMap() {}
-
 IncompleteMap::IncompleteMap(FOLLY_MAYBE_UNUSED IncompleteMap&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -2554,12 +2490,6 @@ const folly::StringPiece CompleteMap::__fbthrift_get_class_name() {
 
 CompleteMap::CompleteMap(const CompleteMap&) = default;
 CompleteMap& CompleteMap::operator=(const CompleteMap&) = default;
-CompleteMap::CompleteMap() {
-}
-
-
-CompleteMap::~CompleteMap() {}
-
 CompleteMap::CompleteMap(FOLLY_MAYBE_UNUSED CompleteMap&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -2743,12 +2673,6 @@ const folly::StringPiece IncompleteList::__fbthrift_get_class_name() {
 
 IncompleteList::IncompleteList(const IncompleteList&) = default;
 IncompleteList& IncompleteList::operator=(const IncompleteList&) = default;
-IncompleteList::IncompleteList() {
-}
-
-
-IncompleteList::~IncompleteList() {}
-
 IncompleteList::IncompleteList(FOLLY_MAYBE_UNUSED IncompleteList&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -2932,12 +2856,6 @@ const folly::StringPiece CompleteList::__fbthrift_get_class_name() {
 
 CompleteList::CompleteList(const CompleteList&) = default;
 CompleteList& CompleteList::operator=(const CompleteList&) = default;
-CompleteList::CompleteList() {
-}
-
-
-CompleteList::~CompleteList() {}
-
 CompleteList::CompleteList(FOLLY_MAYBE_UNUSED CompleteList&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -3121,12 +3039,6 @@ const folly::StringPiece AdaptedList::__fbthrift_get_class_name() {
 
 AdaptedList::AdaptedList(const AdaptedList&) = default;
 AdaptedList& AdaptedList::operator=(const AdaptedList&) = default;
-AdaptedList::AdaptedList() {
-}
-
-
-AdaptedList::~AdaptedList() {}
-
 AdaptedList::AdaptedList(FOLLY_MAYBE_UNUSED AdaptedList&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -3349,12 +3261,6 @@ const folly::StringPiece DependentAdaptedList::__fbthrift_get_class_name() {
 
 DependentAdaptedList::DependentAdaptedList(const DependentAdaptedList&) = default;
 DependentAdaptedList& DependentAdaptedList::operator=(const DependentAdaptedList&) = default;
-DependentAdaptedList::DependentAdaptedList() {
-}
-
-
-DependentAdaptedList::~DependentAdaptedList() {}
-
 DependentAdaptedList::DependentAdaptedList(FOLLY_MAYBE_UNUSED DependentAdaptedList&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
@@ -3463,12 +3369,6 @@ const folly::StringPiece DependentAdaptedListDep::__fbthrift_get_class_name() {
 
 DependentAdaptedListDep::DependentAdaptedListDep(const DependentAdaptedListDep&) = default;
 DependentAdaptedListDep& DependentAdaptedListDep::operator=(const DependentAdaptedListDep&) = default;
-DependentAdaptedListDep::DependentAdaptedListDep() {
-}
-
-
-DependentAdaptedListDep::~DependentAdaptedListDep() {}
-
 DependentAdaptedListDep::DependentAdaptedListDep(FOLLY_MAYBE_UNUSED DependentAdaptedListDep&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)) {
 }
@@ -3785,15 +3685,6 @@ AllocatorAware2& AllocatorAware2::operator=(const AllocatorAware2& other) {
   ::apache::thrift::detail::copy_allocator(__fbthrift_alloc, other.__fbthrift_alloc);
   return *this;
 }
-
-AllocatorAware2::AllocatorAware2() :
-    __fbthrift_alloc(allocator_type()),
-    __fbthrift_field_not_a_container(),
-    __fbthrift_field_box_field(::std::int32_t()) {
-}
-
-
-AllocatorAware2::~AllocatorAware2() {}
 
 AllocatorAware2::AllocatorAware2(FOLLY_MAYBE_UNUSED AllocatorAware2&& other) noexcept :
     __fbthrift_alloc(std::move(other.__fbthrift_alloc)),

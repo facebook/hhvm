@@ -2528,8 +2528,9 @@ class structA final  {
 
  public:
 
-  structA();
-
+  structA() :
+      __fbthrift_field_a() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   structA(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::std::string b__arg);
@@ -2541,9 +2542,6 @@ class structA final  {
 
   structA& operator=(structA&&) noexcept;
   structA& operator=(const structA& src);
-
-  ~structA();
-
  private:
   ::std::int32_t __fbthrift_field_a;
  private:
@@ -7148,8 +7146,11 @@ class struct4 final  {
 
  public:
 
-  struct4();
-
+  struct4() :
+      __fbthrift_field_field0(),
+      __fbthrift_field_field2(),
+      __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   struct4(apache::thrift::FragileConstructor, ::std::int32_t field0__arg, ::std::string field1__arg, ::test_cpp2::cpp_reflection::enum1 field2__arg, ::std::unique_ptr<::test_cpp2::cpp_reflection::structA> field3__arg);
@@ -7160,9 +7161,6 @@ class struct4 final  {
 
   struct4& operator=(struct4&&) noexcept;
   struct4& operator=(const struct4& src);
-
-  ~struct4();
-
  private:
   ::std::int32_t __fbthrift_field_field0;
  private:
@@ -7816,8 +7814,8 @@ class struct_binary final  {
 
  public:
 
-  struct_binary();
-
+  struct_binary() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   struct_binary(apache::thrift::FragileConstructor, ::std::string bi__arg);
@@ -7829,9 +7827,6 @@ class struct_binary final  {
 
   struct_binary& operator=(struct_binary&&) noexcept;
   struct_binary& operator=(const struct_binary& src);
-
-  ~struct_binary();
-
  private:
   ::std::string __fbthrift_field_bi;
  private:

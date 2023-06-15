@@ -1286,8 +1286,10 @@ class MyStruct final  {
 
  public:
 
-  MyStruct();
-
+  MyStruct() :
+      __fbthrift_field_ref(std::make_unique<::cpp2::MyField>()),
+      __fbthrift_field_req_ref(std::make_unique<::cpp2::MyField>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyField> opt_ref__arg, ::std::unique_ptr<::cpp2::MyField> ref__arg, ::std::unique_ptr<::cpp2::MyField> req_ref__arg);
@@ -1298,9 +1300,6 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
-
-  ~MyStruct();
-
  private:
   ::std::unique_ptr<::cpp2::MyField> __fbthrift_field_opt_ref;
  private:
@@ -1507,8 +1506,10 @@ class StructWithUnion final  {
 
  public:
 
-  StructWithUnion();
-
+  StructWithUnion() :
+      __fbthrift_field_u(std::make_unique<::cpp2::MyUnion>()),
+      __fbthrift_field_aDouble(std::make_unique<double>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithUnion(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyUnion> u__arg, ::std::unique_ptr<double> aDouble__arg, ::cpp2::MyField f__arg);
@@ -1519,9 +1520,6 @@ class StructWithUnion final  {
 
   StructWithUnion& operator=(StructWithUnion&&) noexcept;
   StructWithUnion& operator=(const StructWithUnion& src);
-
-  ~StructWithUnion();
-
  private:
   ::std::unique_ptr<::cpp2::MyUnion> __fbthrift_field_u;
  private:
@@ -1736,8 +1734,8 @@ class RecursiveStruct final  {
 
  public:
 
-  RecursiveStruct();
-
+  RecursiveStruct() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   RecursiveStruct(apache::thrift::FragileConstructor, ::std::vector<::cpp2::RecursiveStruct> mes__arg);
@@ -1749,9 +1747,6 @@ class RecursiveStruct final  {
 
   RecursiveStruct& operator=(RecursiveStruct&&) noexcept;
   RecursiveStruct& operator=(const RecursiveStruct& src);
-
-  ~RecursiveStruct();
-
  private:
   ::std::vector<::cpp2::RecursiveStruct> __fbthrift_field_mes;
  private:
@@ -2239,8 +2234,10 @@ class StructWithSharedConst final  {
 
  public:
 
-  StructWithSharedConst();
-
+  StructWithSharedConst() :
+      __fbthrift_field_shared_const(std::make_shared<::cpp2::MyField>()),
+      __fbthrift_field_req_shared_const(std::make_shared<::cpp2::MyField>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::MyField> opt_shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> req_shared_const__arg);
@@ -2252,9 +2249,6 @@ class StructWithSharedConst final  {
 
   StructWithSharedConst& operator=(StructWithSharedConst&&) noexcept;
   StructWithSharedConst& operator=(const StructWithSharedConst& src);
-
-  ~StructWithSharedConst();
-
  private:
   ::std::shared_ptr<const ::cpp2::MyField> __fbthrift_field_opt_shared_const;
  private:
@@ -2552,8 +2546,10 @@ class StructWithRef final  {
 
  public:
 
-  StructWithRef();
-
+  StructWithRef() :
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg);
@@ -2564,9 +2560,6 @@ class StructWithRef final  {
 
   StructWithRef& operator=(StructWithRef&&) noexcept;
   StructWithRef& operator=(const StructWithRef& src);
-
-  ~StructWithRef();
-
  private:
   ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
  private:
@@ -2773,8 +2766,8 @@ class StructWithBox final  {
 
  public:
 
-  StructWithBox();
-
+  StructWithBox() {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::std::string> a__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::int64_t>> b__arg, ::apache::thrift::detail::boxed_value_ptr<::cpp2::StructWithRef> c__arg);
@@ -2786,9 +2779,6 @@ class StructWithBox final  {
 
   StructWithBox& operator=(StructWithBox&&) noexcept;
   StructWithBox& operator=(const StructWithBox& src);
-
-  ~StructWithBox();
-
  private:
   ::apache::thrift::detail::boxed_value_ptr<::std::string> __fbthrift_field_a;
  private:
@@ -3000,8 +2990,12 @@ class StructWithInternBox final  {
 
  public:
 
-  StructWithInternBox();
-
+  StructWithInternBox() :
+      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
+      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())),
+      __fbthrift_field_field3(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
+      __fbthrift_field_field4(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::cpp2::Empty> field1__arg, ::apache::thrift::detail::boxed_value<::cpp2::MyField> field2__arg, ::apache::thrift::detail::boxed_value<::cpp2::Empty> field3__arg, ::apache::thrift::detail::boxed_value<::cpp2::MyField> field4__arg);
@@ -3013,9 +3007,6 @@ class StructWithInternBox final  {
 
   StructWithInternBox& operator=(StructWithInternBox&&) noexcept;
   StructWithInternBox& operator=(const StructWithInternBox& src);
-
-  ~StructWithInternBox();
-
  private:
   ::apache::thrift::detail::boxed_value<::cpp2::Empty> __fbthrift_field_field1;
  private:
@@ -3271,8 +3262,12 @@ class AdaptedStructWithInternBox final  {
 
  public:
 
-  AdaptedStructWithInternBox();
-
+  AdaptedStructWithInternBox() :
+      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>())),
+      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>())),
+      __fbthrift_field_field3(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<3>>>())),
+      __fbthrift_field_field4(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<4>>>())) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AdaptedStructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>> field1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>> field2__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>> field3__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>> field4__arg);
@@ -3283,9 +3278,6 @@ class AdaptedStructWithInternBox final  {
 
   AdaptedStructWithInternBox& operator=(AdaptedStructWithInternBox&&) noexcept;
   AdaptedStructWithInternBox& operator=(const AdaptedStructWithInternBox& src);
-
-  ~AdaptedStructWithInternBox();
-
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>> __fbthrift_field_field1;
  private:
@@ -3539,8 +3531,10 @@ class StructWithRefTypeUnique final  {
 
  public:
 
-  StructWithRefTypeUnique();
-
+  StructWithRefTypeUnique() :
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithRefTypeUnique(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg);
@@ -3551,9 +3545,6 @@ class StructWithRefTypeUnique final  {
 
   StructWithRefTypeUnique& operator=(StructWithRefTypeUnique&&) noexcept;
   StructWithRefTypeUnique& operator=(const StructWithRefTypeUnique& src);
-
-  ~StructWithRefTypeUnique();
-
  private:
   ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
  private:
@@ -3760,8 +3751,10 @@ class StructWithRefTypeShared final  {
 
  public:
 
-  StructWithRefTypeShared();
-
+  StructWithRefTypeShared() :
+      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithRefTypeShared(apache::thrift::FragileConstructor, ::std::shared_ptr<::cpp2::Empty> def_field__arg, ::std::shared_ptr<::cpp2::Empty> opt_field__arg, ::std::shared_ptr<::cpp2::Empty> req_field__arg);
@@ -3773,9 +3766,6 @@ class StructWithRefTypeShared final  {
 
   StructWithRefTypeShared& operator=(StructWithRefTypeShared&&) noexcept;
   StructWithRefTypeShared& operator=(const StructWithRefTypeShared& src);
-
-  ~StructWithRefTypeShared();
-
  private:
   ::std::shared_ptr<::cpp2::Empty> __fbthrift_field_def_field;
  private:
@@ -3982,8 +3972,10 @@ class StructWithRefTypeSharedConst final  {
 
  public:
 
-  StructWithRefTypeSharedConst();
-
+  StructWithRefTypeSharedConst() :
+      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithRefTypeSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::Empty> def_field__arg, ::std::shared_ptr<const ::cpp2::Empty> opt_field__arg, ::std::shared_ptr<const ::cpp2::Empty> req_field__arg);
@@ -3995,9 +3987,6 @@ class StructWithRefTypeSharedConst final  {
 
   StructWithRefTypeSharedConst& operator=(StructWithRefTypeSharedConst&&) noexcept;
   StructWithRefTypeSharedConst& operator=(const StructWithRefTypeSharedConst& src);
-
-  ~StructWithRefTypeSharedConst();
-
  private:
   ::std::shared_ptr<const ::cpp2::Empty> __fbthrift_field_def_field;
  private:
@@ -4200,8 +4189,9 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
 
  public:
 
-  StructWithRefAndAnnotCppNoexceptMoveCtor();
-
+  StructWithRefAndAnnotCppNoexceptMoveCtor() :
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructWithRefAndAnnotCppNoexceptMoveCtor(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg);
@@ -4212,9 +4202,6 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
 
   StructWithRefAndAnnotCppNoexceptMoveCtor& operator=(StructWithRefAndAnnotCppNoexceptMoveCtor&&) noexcept;
   StructWithRefAndAnnotCppNoexceptMoveCtor& operator=(const StructWithRefAndAnnotCppNoexceptMoveCtor& src);
-
-  ~StructWithRefAndAnnotCppNoexceptMoveCtor();
-
  private:
   ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
 

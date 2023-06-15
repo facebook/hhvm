@@ -456,8 +456,11 @@ class SomeStruct final  {
 
  public:
 
-  SomeStruct();
-
+  SomeStruct() :
+      __fbthrift_field_reasonable( ::test::fixtures::enums::Metasyntactic::FOO),
+      __fbthrift_field_fine( ::test::fixtures::enums::Metasyntactic::BAR),
+      __fbthrift_field_questionable(static_cast< ::test::fixtures::enums::Metasyntactic>(-1)) {
+  }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   SomeStruct(apache::thrift::FragileConstructor, ::test::fixtures::enums::Metasyntactic reasonable__arg, ::test::fixtures::enums::Metasyntactic fine__arg, ::test::fixtures::enums::Metasyntactic questionable__arg, ::std::set<::std::int32_t> tags__arg);
@@ -469,9 +472,6 @@ class SomeStruct final  {
 
   SomeStruct& operator=(SomeStruct&&) noexcept;
   SomeStruct& operator=(const SomeStruct& src);
-
-  ~SomeStruct();
-
  private:
   ::test::fixtures::enums::Metasyntactic __fbthrift_field_reasonable;
  private:

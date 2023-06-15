@@ -45,12 +45,6 @@ const folly::StringPiece InitialResponse::__fbthrift_get_class_name() {
 
 InitialResponse::InitialResponse(const InitialResponse&) = default;
 InitialResponse& InitialResponse::operator=(const InitialResponse&) = default;
-InitialResponse::InitialResponse() {
-}
-
-
-InitialResponse::~InitialResponse() {}
-
 InitialResponse::InitialResponse(FOLLY_MAYBE_UNUSED InitialResponse&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
@@ -150,12 +144,6 @@ const folly::StringPiece FinalResponse::__fbthrift_get_class_name() {
 
 FinalResponse::FinalResponse(const FinalResponse&) = default;
 FinalResponse& FinalResponse::operator=(const FinalResponse&) = default;
-FinalResponse::FinalResponse() {
-}
-
-
-FinalResponse::~FinalResponse() {}
-
 FinalResponse::FinalResponse(FOLLY_MAYBE_UNUSED FinalResponse&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
@@ -255,12 +243,6 @@ const folly::StringPiece SinkPayload::__fbthrift_get_class_name() {
 
 SinkPayload::SinkPayload(const SinkPayload&) = default;
 SinkPayload& SinkPayload::operator=(const SinkPayload&) = default;
-SinkPayload::SinkPayload() {
-}
-
-
-SinkPayload::~SinkPayload() {}
-
 SinkPayload::SinkPayload(FOLLY_MAYBE_UNUSED SinkPayload&& other) noexcept :
     __fbthrift_field_content(std::move(other.__fbthrift_field_content)),
     __isset(other.__isset) {
@@ -360,12 +342,6 @@ const folly::StringPiece CompatibleWithKeywordSink::__fbthrift_get_class_name() 
 
 CompatibleWithKeywordSink::CompatibleWithKeywordSink(const CompatibleWithKeywordSink&) = default;
 CompatibleWithKeywordSink& CompatibleWithKeywordSink::operator=(const CompatibleWithKeywordSink&) = default;
-CompatibleWithKeywordSink::CompatibleWithKeywordSink() {
-}
-
-
-CompatibleWithKeywordSink::~CompatibleWithKeywordSink() {}
-
 CompatibleWithKeywordSink::CompatibleWithKeywordSink(FOLLY_MAYBE_UNUSED CompatibleWithKeywordSink&& other) noexcept :
     __fbthrift_field_sink(std::move(other.__fbthrift_field_sink)),
     __isset(other.__isset) {

@@ -45,15 +45,6 @@ const folly::StringPiece Default::__fbthrift_get_class_name() {
 
 Default::Default(const Default&) = default;
 Default& Default::operator=(const Default&) = default;
-Default::Default() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-}
-
-
-Default::~Default() {}
-
 Default::Default(FOLLY_MAYBE_UNUSED Default&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -192,15 +183,6 @@ const folly::StringPiece NonAtomic::__fbthrift_get_class_name() {
 
 NonAtomic::NonAtomic(const NonAtomic&) = default;
 NonAtomic& NonAtomic::operator=(const NonAtomic&) = default;
-NonAtomic::NonAtomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-}
-
-
-NonAtomic::~NonAtomic() {}
-
 NonAtomic::NonAtomic(FOLLY_MAYBE_UNUSED NonAtomic&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -339,15 +321,6 @@ const folly::StringPiece Atomic::__fbthrift_get_class_name() {
 
 Atomic::Atomic(const Atomic&) = default;
 Atomic& Atomic::operator=(const Atomic&) = default;
-Atomic::Atomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-}
-
-
-Atomic::~Atomic() {}
-
 Atomic::Atomic(FOLLY_MAYBE_UNUSED Atomic&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -486,15 +459,6 @@ const folly::StringPiece AtomicFoo::__fbthrift_get_class_name() {
 
 AtomicFoo::AtomicFoo(const AtomicFoo&) = default;
 AtomicFoo& AtomicFoo::operator=(const AtomicFoo&) = default;
-AtomicFoo::AtomicFoo() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-}
-
-
-AtomicFoo::~AtomicFoo() {}
-
 AtomicFoo::AtomicFoo(FOLLY_MAYBE_UNUSED AtomicFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),

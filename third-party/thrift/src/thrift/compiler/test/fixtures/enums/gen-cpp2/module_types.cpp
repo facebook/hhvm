@@ -224,15 +224,6 @@ const folly::StringPiece SomeStruct::__fbthrift_get_class_name() {
 
 SomeStruct::SomeStruct(const SomeStruct&) = default;
 SomeStruct& SomeStruct::operator=(const SomeStruct&) = default;
-SomeStruct::SomeStruct() :
-      __fbthrift_field_reasonable( ::test::fixtures::enums::Metasyntactic::FOO),
-      __fbthrift_field_fine( ::test::fixtures::enums::Metasyntactic::BAR),
-      __fbthrift_field_questionable(static_cast< ::test::fixtures::enums::Metasyntactic>(-1)) {
-}
-
-
-SomeStruct::~SomeStruct() {}
-
 SomeStruct::SomeStruct(FOLLY_MAYBE_UNUSED SomeStruct&& other) noexcept :
     __fbthrift_field_reasonable(std::move(other.__fbthrift_field_reasonable)),
     __fbthrift_field_fine(std::move(other.__fbthrift_field_fine)),

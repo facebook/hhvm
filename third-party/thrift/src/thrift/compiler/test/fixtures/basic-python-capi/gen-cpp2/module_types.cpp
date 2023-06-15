@@ -435,13 +435,6 @@ const folly::StringPiece DoubledPair::__fbthrift_get_class_name() {
 
 DoubledPair::DoubledPair(const DoubledPair&) = default;
 DoubledPair& DoubledPair::operator=(const DoubledPair&) = default;
-DoubledPair::DoubledPair() :
-      __fbthrift_field_x() {
-}
-
-
-DoubledPair::~DoubledPair() {}
-
 DoubledPair::DoubledPair(FOLLY_MAYBE_UNUSED DoubledPair&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __fbthrift_field_x(std::move(other.__fbthrift_field_x)),
@@ -561,13 +554,6 @@ StringPair& StringPair::operator=(const StringPair& other) {
   swap(*this, tmp);
   return *this;
 }
-
-StringPair::StringPair() {
-  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
-}
-
-
-StringPair::~StringPair() {}
 
 StringPair::StringPair(FOLLY_MAYBE_UNUSED StringPair&& other) noexcept :
     __fbthrift_field_normal(std::move(other.__fbthrift_field_normal)),

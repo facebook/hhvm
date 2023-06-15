@@ -520,13 +520,6 @@ const folly::StringPiece structA::__fbthrift_get_class_name() {
 
 structA::structA(const structA&) = default;
 structA& structA::operator=(const structA&) = default;
-structA::structA() :
-      __fbthrift_field_a() {
-}
-
-
-structA::~structA() {}
-
 structA::structA(FOLLY_MAYBE_UNUSED structA&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
@@ -2489,15 +2482,6 @@ struct4& struct4::operator=(const struct4& other) {
   return *this;
 }
 
-struct4::struct4() :
-      __fbthrift_field_field0(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
-}
-
-
-struct4::~struct4() {}
-
 struct4::struct4(FOLLY_MAYBE_UNUSED struct4&& other) noexcept :
     __fbthrift_field_field0(std::move(other.__fbthrift_field_field0)),
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
@@ -2819,12 +2803,6 @@ const folly::StringPiece struct_binary::__fbthrift_get_class_name() {
 
 struct_binary::struct_binary(const struct_binary&) = default;
 struct_binary& struct_binary::operator=(const struct_binary&) = default;
-struct_binary::struct_binary() {
-}
-
-
-struct_binary::~struct_binary() {}
-
 struct_binary::struct_binary(FOLLY_MAYBE_UNUSED struct_binary&& other) noexcept :
     __fbthrift_field_bi(std::move(other.__fbthrift_field_bi)),
     __isset(other.__isset) {

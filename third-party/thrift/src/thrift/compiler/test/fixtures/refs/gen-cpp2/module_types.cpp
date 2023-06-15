@@ -438,14 +438,6 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
   return *this;
 }
 
-MyStruct::MyStruct() :
-      __fbthrift_field_ref(std::make_unique<::cpp2::MyField>()),
-      __fbthrift_field_req_ref(std::make_unique<::cpp2::MyField>()) {
-}
-
-
-MyStruct::~MyStruct() {}
-
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_opt_ref(std::move(other.__fbthrift_field_opt_ref)),
     __fbthrift_field_ref(std::move(other.__fbthrift_field_ref)),
@@ -593,14 +585,6 @@ StructWithUnion& StructWithUnion::operator=(const StructWithUnion& other) {
   return *this;
 }
 
-StructWithUnion::StructWithUnion() :
-      __fbthrift_field_u(std::make_unique<::cpp2::MyUnion>()),
-      __fbthrift_field_aDouble(std::make_unique<double>()) {
-}
-
-
-StructWithUnion::~StructWithUnion() {}
-
 StructWithUnion::StructWithUnion(FOLLY_MAYBE_UNUSED StructWithUnion&& other) noexcept :
     __fbthrift_field_u(std::move(other.__fbthrift_field_u)),
     __fbthrift_field_aDouble(std::move(other.__fbthrift_field_aDouble)),
@@ -742,12 +726,6 @@ const folly::StringPiece RecursiveStruct::__fbthrift_get_class_name() {
 
 RecursiveStruct::RecursiveStruct(const RecursiveStruct&) = default;
 RecursiveStruct& RecursiveStruct::operator=(const RecursiveStruct&) = default;
-RecursiveStruct::RecursiveStruct() {
-}
-
-
-RecursiveStruct::~RecursiveStruct() {}
-
 RecursiveStruct::RecursiveStruct(FOLLY_MAYBE_UNUSED RecursiveStruct&& other) noexcept :
     __fbthrift_field_mes(std::move(other.__fbthrift_field_mes)),
     __isset(other.__isset) {
@@ -1033,14 +1011,6 @@ const folly::StringPiece StructWithSharedConst::__fbthrift_get_class_name() {
 
 StructWithSharedConst::StructWithSharedConst(const StructWithSharedConst&) = default;
 StructWithSharedConst& StructWithSharedConst::operator=(const StructWithSharedConst&) = default;
-StructWithSharedConst::StructWithSharedConst() :
-      __fbthrift_field_shared_const(std::make_shared<::cpp2::MyField>()),
-      __fbthrift_field_req_shared_const(std::make_shared<::cpp2::MyField>()) {
-}
-
-
-StructWithSharedConst::~StructWithSharedConst() {}
-
 StructWithSharedConst::StructWithSharedConst(FOLLY_MAYBE_UNUSED StructWithSharedConst&& other) noexcept :
     __fbthrift_field_opt_shared_const(std::move(other.__fbthrift_field_opt_shared_const)),
     __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
@@ -1261,14 +1231,6 @@ StructWithRef& StructWithRef::operator=(const StructWithRef& other) {
   return *this;
 }
 
-StructWithRef::StructWithRef() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
-}
-
-
-StructWithRef::~StructWithRef() {}
-
 StructWithRef::StructWithRef(FOLLY_MAYBE_UNUSED StructWithRef&& other) noexcept :
     __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
     __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
@@ -1400,12 +1362,6 @@ const folly::StringPiece StructWithBox::__fbthrift_get_class_name() {
 
 StructWithBox::StructWithBox(const StructWithBox&) = default;
 StructWithBox& StructWithBox::operator=(const StructWithBox&) = default;
-StructWithBox::StructWithBox() {
-}
-
-
-StructWithBox::~StructWithBox() {}
-
 StructWithBox::StructWithBox(FOLLY_MAYBE_UNUSED StructWithBox&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __fbthrift_field_b(std::move(other.__fbthrift_field_b)),
@@ -1530,16 +1486,6 @@ const folly::StringPiece StructWithInternBox::__fbthrift_get_class_name() {
 
 StructWithInternBox::StructWithInternBox(const StructWithInternBox&) = default;
 StructWithInternBox& StructWithInternBox::operator=(const StructWithInternBox&) = default;
-StructWithInternBox::StructWithInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())),
-      __fbthrift_field_field3(::apache::thrift::detail::boxed_value<::cpp2::Empty>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::Empty>>())),
-      __fbthrift_field_field4(::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>())) {
-}
-
-
-StructWithInternBox::~StructWithInternBox() {}
-
 StructWithInternBox::StructWithInternBox(FOLLY_MAYBE_UNUSED StructWithInternBox&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -1711,16 +1657,6 @@ AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=(const AdaptedS
   swap(*this, tmp);
   return *this;
 }
-
-AdaptedStructWithInternBox::AdaptedStructWithInternBox() :
-      __fbthrift_field_field1(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<1>>>())),
-      __fbthrift_field_field2(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<2>>>())),
-      __fbthrift_field_field3(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<3>>>())),
-      __fbthrift_field_field4(::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::op::get_field_tag<AdaptedStructWithInternBox, ::apache::thrift::field_id<4>>>())) {
-}
-
-
-AdaptedStructWithInternBox::~AdaptedStructWithInternBox() {}
 
 AdaptedStructWithInternBox::AdaptedStructWithInternBox(FOLLY_MAYBE_UNUSED AdaptedStructWithInternBox&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
@@ -1899,14 +1835,6 @@ StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(const StructWithRefT
   return *this;
 }
 
-StructWithRefTypeUnique::StructWithRefTypeUnique() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
-}
-
-
-StructWithRefTypeUnique::~StructWithRefTypeUnique() {}
-
 StructWithRefTypeUnique::StructWithRefTypeUnique(FOLLY_MAYBE_UNUSED StructWithRefTypeUnique&& other) noexcept :
     __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
     __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
@@ -2038,14 +1966,6 @@ const folly::StringPiece StructWithRefTypeShared::__fbthrift_get_class_name() {
 
 StructWithRefTypeShared::StructWithRefTypeShared(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared& StructWithRefTypeShared::operator=(const StructWithRefTypeShared&) = default;
-StructWithRefTypeShared::StructWithRefTypeShared() :
-      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
-}
-
-
-StructWithRefTypeShared::~StructWithRefTypeShared() {}
-
 StructWithRefTypeShared::StructWithRefTypeShared(FOLLY_MAYBE_UNUSED StructWithRefTypeShared&& other) noexcept :
     __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
     __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
@@ -2177,14 +2097,6 @@ const folly::StringPiece StructWithRefTypeSharedConst::__fbthrift_get_class_name
 
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(const StructWithRefTypeSharedConst&) = default;
 StructWithRefTypeSharedConst& StructWithRefTypeSharedConst::operator=(const StructWithRefTypeSharedConst&) = default;
-StructWithRefTypeSharedConst::StructWithRefTypeSharedConst() :
-      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
-      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
-}
-
-
-StructWithRefTypeSharedConst::~StructWithRefTypeSharedConst() {}
-
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(FOLLY_MAYBE_UNUSED StructWithRefTypeSharedConst&& other) noexcept :
     __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
     __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
@@ -2324,13 +2236,6 @@ StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCt
   swap(*this, tmp);
   return *this;
 }
-
-StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor() :
-      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()) {
-}
-
-
-StructWithRefAndAnnotCppNoexceptMoveCtor::~StructWithRefAndAnnotCppNoexceptMoveCtor() {}
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(FOLLY_MAYBE_UNUSED StructWithRefAndAnnotCppNoexceptMoveCtor&& other) noexcept :
     __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)) {

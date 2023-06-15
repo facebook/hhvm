@@ -45,12 +45,6 @@ const folly::StringPiece A::__fbthrift_get_class_name() {
 
 A::A(const A&) = default;
 A& A::operator=(const A&) = default;
-A::A() {
-}
-
-
-A::~A() {}
-
 A::A(FOLLY_MAYBE_UNUSED A&& other) noexcept :
     __fbthrift_field_some_map(std::move(other.__fbthrift_field_some_map)),
     __isset(other.__isset) {

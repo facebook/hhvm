@@ -45,12 +45,6 @@ const folly::StringPiece TerseFoo::__fbthrift_get_class_name() {
 
 TerseFoo::TerseFoo(const TerseFoo&) = default;
 TerseFoo& TerseFoo::operator=(const TerseFoo&) = default;
-TerseFoo::TerseFoo() {
-}
-
-
-TerseFoo::~TerseFoo() {}
-
 TerseFoo::TerseFoo(FOLLY_MAYBE_UNUSED TerseFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -245,12 +239,6 @@ TerseLazyFoo& TerseLazyFoo::operator=(const TerseLazyFoo& other) {
   swap(*this, tmp);
   return *this;
 }
-
-TerseLazyFoo::TerseLazyFoo() {
-}
-
-
-TerseLazyFoo::~TerseLazyFoo() {}
 
 TerseLazyFoo::TerseLazyFoo(FOLLY_MAYBE_UNUSED TerseLazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
@@ -522,12 +510,6 @@ const folly::StringPiece TerseOptionalFoo::__fbthrift_get_class_name() {
 
 TerseOptionalFoo::TerseOptionalFoo(const TerseOptionalFoo&) = default;
 TerseOptionalFoo& TerseOptionalFoo::operator=(const TerseOptionalFoo&) = default;
-TerseOptionalFoo::TerseOptionalFoo() {
-}
-
-
-TerseOptionalFoo::~TerseOptionalFoo() {}
-
 TerseOptionalFoo::TerseOptionalFoo(FOLLY_MAYBE_UNUSED TerseOptionalFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -722,12 +704,6 @@ TerseOptionalLazyFoo& TerseOptionalLazyFoo::operator=(const TerseOptionalLazyFoo
   swap(*this, tmp);
   return *this;
 }
-
-TerseOptionalLazyFoo::TerseOptionalLazyFoo() {
-}
-
-
-TerseOptionalLazyFoo::~TerseOptionalLazyFoo() {}
 
 TerseOptionalLazyFoo::TerseOptionalLazyFoo(FOLLY_MAYBE_UNUSED TerseOptionalLazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),

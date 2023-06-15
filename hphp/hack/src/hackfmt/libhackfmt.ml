@@ -7,10 +7,6 @@
  *
  *)
 
-module SyntaxTree =
-  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
-module EditableSyntax = Full_fidelity_editable_syntax
-module SourceText = Full_fidelity_source_text
 module Env = Format_env
 open Hh_prelude
 open Noformat
@@ -21,25 +17,6 @@ let env_from_config config =
   if env.Env.indent_width < 0 then invalid_arg "Invalid indent width";
   if env.Env.line_width < 0 then invalid_arg "Invalid line width";
   env
-
-(** Format a single node.
- *
- * A trailing newline will be included (and leading indentation, if
- * requested). *)
-let format_node ?config ?(indent = 0) node =
-  let source_text = EditableSyntax.text node in
-  let env = env_from_config config in
-  let rec nest times doc =
-    if times <= 0 then
-      doc
-    else
-      nest (times - 1) (Doc.BlockNest [doc])
-  in
-  node
-  |> Hack_format.transform env
-  |> nest indent
-  |> Chunk_builder.build env
-  |> Line_splitter.solve env ~source_text
 
 let text_with_formatted_ranges
     ?(range : Interval.t option)
@@ -63,7 +40,6 @@ let text_with_formatted_ranges
   done;
   buf
 
-(** Format an entire file. *)
 let format_tree ?config tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
@@ -87,21 +63,6 @@ let format_tree ?config tree =
   let buf = text_with_formatted_ranges text formatted_ranges in
   Buffer.contents buf
 
-(** Format a given range in a file.
- *
- * The range is a half-open interval of byte offsets into the file.
- *
- * If the range boundaries would bisect a token, the entire token will appear in
- * the formatted output.
- *
- * If the first token in the range would have indentation preceding it in the
- * full formatted file, the leading indentation will be included in the output.
- *
- * If the last token in the range would have a trailing newline in the full
- * formatted file, the trailing newline will be included in the output.
- *
- * Non-indentation space characters are not included at the beginning or end of
- * the formatted output (unless they are in a comment or string literal). *)
 let format_range ?config range tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
@@ -124,10 +85,6 @@ let format_range ?config range tree =
   let buf = text_with_formatted_ranges ~range text formatted_ranges in
   Buffer.contents buf
 
-(** Return the source of the entire file with the given intervals formatted.
- *
- * The intervals are a list of half-open intervals of 1-based line numbers.
- * They are permitted to overlap. *)
 let format_intervals ?config intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
@@ -183,17 +140,6 @@ let format_intervals ?config intervals tree =
     Buffer.add_char buf '\n';
   Buffer.contents buf
 
-(** Format a node at the given offset.
- *
- * Finds the node which is the direct parent of the token at the given byte
- * offset and formats a range containing that node which ends at the given
- * offset. The range that was formatted is returned (as a pair of 0-based byte
- * offsets in the original file) along with the formatted text.
- *
- * The provided offset must point to the last byte in a token. If not, an
- * invalid_arg exception will be raised.
- *
- * Designed to be suitable for as-you-type-formatting. *)
 let format_at_offset ?config (tree : SyntaxTree.t) offset =
   let source_text = SyntaxTree.text tree in
   let env = env_from_config config in

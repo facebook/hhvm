@@ -9,11 +9,12 @@
 
 open Hh_prelude
 module SyntaxError = Full_fidelity_syntax_error
+module SyntaxTree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 open Printf
 open Boundaries
-open Libhackfmt
 open Hackfmt_error
 open Ocaml_overrides
 open FindUtils
@@ -503,11 +504,11 @@ let format ?config ?range ?ranges env tree =
   match range with
   | None ->
     logging_time_taken env Logger.format_tree_end (fun () ->
-        format_tree ?config tree)
+        Libhackfmt.format_tree ?config tree)
   | Some range ->
     let range = expand_or_convert_range ?ranges source_text range in
     logging_time_taken env Logger.format_range_end (fun () ->
-        let formatted = format_range ?config range tree in
+        let formatted = Libhackfmt.format_range ?config range tree in
         (* This is a bit of a hack to deal with situations where a newline exists
          * in the original source in a location where hackfmt refuses to split,
          * and the range end falls at that newline. It is correct for format_range
@@ -536,7 +537,7 @@ let output ?text_source str =
 let format_diff_intervals ?config env intervals tree =
   try
     logging_time_taken env Logger.format_intervals_end (fun () ->
-        format_intervals ?config intervals tree)
+        Libhackfmt.format_intervals ?config intervals tree)
   with
   | Invalid_argument s -> raise (InvalidDiff s)
 
@@ -598,7 +599,7 @@ let main
     let (range, formatted) =
       try
         logging_time_taken env Logger.format_at_offset_end (fun () ->
-            format_at_offset ~config tree pos)
+            Libhackfmt.format_at_offset ~config tree pos)
       with
       | Invalid_argument s -> raise (InvalidCliArg s)
     in

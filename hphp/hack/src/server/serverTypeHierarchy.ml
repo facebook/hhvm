@@ -103,11 +103,6 @@ let get_ancestor_entry ctx name : ancestorEntry =
       }
 
 let decl_to_hierarchy ctx class_ : hierarchyEntry =
-  let ancestors =
-    List.map
-      ~f:(get_ancestor_entry ctx)
-      (Decl_provider.Class.all_ancestor_names class_)
-  in
   let name = Utils.strip_ns (Decl_provider.Class.name class_) in
   let kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_) in
   let pos =
@@ -116,6 +111,14 @@ let decl_to_hierarchy ctx class_ : hierarchyEntry =
     |> Pos.to_absolute
   in
   let members = get_members ctx class_ in
+  let ancestors =
+    Decl_provider.Class.all_ancestor_names class_
+    |> List.map ~f:(get_ancestor_entry ctx)
+    |> List.filter ~f:(function
+           | AncestorDetails e ->
+             (not (phys_equal e.kind Interface)) || phys_equal kind Interface
+           | _ -> false)
+  in
   { name; kind; pos; ancestors; members }
 
 let go_quarantined

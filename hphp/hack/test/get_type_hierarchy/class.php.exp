@@ -14,21 +14,6 @@
       "pos":"line 29, characters 7-9"
     },
     {
-      "name":"IBar",
-      "kind":"ServerTypeHierarchyTypes.Interface",
-      "pos":"line 5, characters 11-14"
-    },
-    {
-      "name":"IFoo",
-      "kind":"ServerTypeHierarchyTypes.Interface",
-      "pos":"line 3, characters 11-14"
-    },
-    {
-      "name":"IQux",
-      "kind":"ServerTypeHierarchyTypes.Interface",
-      "pos":"line 7, characters 11-14"
-    },
-    {
       "name":"Trait_1",
       "kind":"ServerTypeHierarchyTypes.Trait",
       "pos":"line 10, characters 7-13"

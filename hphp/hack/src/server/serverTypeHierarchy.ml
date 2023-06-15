@@ -9,6 +9,47 @@ open Hh_prelude
 open ServerTypeHierarchyTypes
 open Typing_defs
 
+let get_members ctx class_ : memberEntry list =
+  let class_etl_to_member_entry kind (name, member) : memberEntry =
+    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+    let snippet =
+      Typing_print.full_strip_ns_decl
+        env
+        (Lazy.force member.Typing_defs.ce_type)
+    in
+    let pos =
+      Lazy.force member.Typing_defs.ce_pos
+      |> Naming_provider.resolve_position ctx
+    in
+    let origin = Utils.strip_ns member.Typing_defs.ce_origin in
+    { name; kind; snippet; pos; origin }
+  in
+  let class_const_to_member_entry
+      ((name, const) : string * Typing_defs.class_const) : memberEntry =
+    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+    let snippet =
+      Typing_print.full_strip_ns_decl env const.Typing_defs.cc_type
+    in
+    let pos =
+      const.Typing_defs.cc_pos |> Naming_provider.resolve_position ctx
+    in
+    let origin = Utils.strip_ns const.Typing_defs.cc_origin in
+    { name; kind = ServerTypeHierarchyTypes.Const; snippet; pos; origin }
+  in
+  (Decl_provider.Class.methods class_
+  |> List.map ~f:(class_etl_to_member_entry ServerTypeHierarchyTypes.Method))
+  @ (Decl_provider.Class.smethods class_
+    |> List.map ~f:(class_etl_to_member_entry ServerTypeHierarchyTypes.SMethod)
+    )
+  @ (Decl_provider.Class.props class_
+    |> List.map ~f:(class_etl_to_member_entry ServerTypeHierarchyTypes.Property)
+    )
+  @ (Decl_provider.Class.sprops class_
+    |> List.map
+         ~f:(class_etl_to_member_entry ServerTypeHierarchyTypes.SProperty))
+  @ (Decl_provider.Class.consts class_
+    |> List.map ~f:class_const_to_member_entry)
+
 let classish_kind_to_entryKind (kind : Ast_defs.classish_kind) : entryKind =
   let open Ast_defs in
   match kind with
@@ -42,7 +83,8 @@ let decl_to_hierarchy ctx class_ : hierarchyEntry =
   let pos =
     Naming_provider.resolve_position ctx (Decl_provider.Class.pos class_)
   in
-  { name; kind; pos; ancestors }
+  let members = get_members ctx class_ in
+  { name; kind; pos; ancestors; members }
 
 let go_quarantined
     ~(ctx : Provider_context.t)
@@ -84,6 +126,17 @@ let go_quarantined
       Option.map class_ ~f:(fun class_ -> decl_to_hierarchy ctx class_)
     | _ -> None)
 
+let json_of_member_entry (entry : memberEntry) =
+  Hh_json.JSON_Object
+    [
+      ("name", Hh_json.string_ entry.name);
+      ("snippet", Hh_json.string_ entry.snippet);
+      ( "kind",
+        Hh_json.string_ (ServerTypeHierarchyTypes.show_memberKind entry.kind) );
+      ("pos", Hh_json.string_ (Pos.string_no_file entry.pos));
+      ("origin", Hh_json.string_ entry.origin);
+    ]
+
 let json_of_ancestor_entry (entry : ancestorEntry) =
   match entry with
   | AncestorName name -> Hh_json.string_ name
@@ -102,6 +155,7 @@ let json_of_hierarchy_entry (entry : hierarchyEntry) =
       ("kind", Hh_json.string_ (show_entryKind entry.kind));
       ("pos", Hh_json.string_ (Pos.string_no_file entry.pos));
       ("ancestors", Hh_json.array_ json_of_ancestor_entry entry.ancestors);
+      ("members", Hh_json.array_ json_of_member_entry entry.members);
     ]
 
 let json_of_results ~(results : result) =

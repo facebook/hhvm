@@ -1,17 +1,68 @@
 {
   "name":"IQux",
   "kind":"ServerTypeHierarchyTypes.Interface",
-  "pos":"line 7, characters 11-14",
+  "pos":"line 15, characters 11-14",
   "ancestors":[
     {
       "name":"IBar",
       "kind":"ServerTypeHierarchyTypes.Interface",
-      "pos":"line 5, characters 11-14"
+      "pos":"line 9, characters 11-14"
     },
     {
       "name":"IFoo",
       "kind":"ServerTypeHierarchyTypes.Interface",
       "pos":"line 3, characters 11-14"
+    }
+  ],
+  "members":[
+    {
+      "name":"method_from_IBar",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.Method",
+      "pos":"line 12, characters 12-27",
+      "origin":"IBar"
+    },
+    {
+      "name":"method_from_IFoo",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.Method",
+      "pos":"line 6, characters 12-27",
+      "origin":"IFoo"
+    },
+    {
+      "name":"method_from_IQux",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.Method",
+      "pos":"line 19, characters 12-27",
+      "origin":"IQux"
+    },
+    {
+      "name":"class",
+      "snippet":"classname<this>",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 15, characters 11-14",
+      "origin":"IQux"
+    },
+    {
+      "name":"const_from_IBar",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 10, characters 9-23",
+      "origin":"IBar"
+    },
+    {
+      "name":"const_from_IFoo",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 4, characters 9-23",
+      "origin":"IFoo"
+    },
+    {
+      "name":"const_from_IQux",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 17, characters 9-23",
+      "origin":"IQux"
     }
   ]
 }

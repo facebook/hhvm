@@ -1,12 +1,77 @@
 {
   "name":"Trait_2",
   "kind":"ServerTypeHierarchyTypes.Trait",
-  "pos":"line 6, characters 7-13",
+  "pos":"line 13, characters 7-13",
   "ancestors":[
     {
       "name":"Trait_1",
       "kind":"ServerTypeHierarchyTypes.Trait",
       "pos":"line 3, characters 7-13"
+    }
+  ],
+  "members":[
+    {
+      "name":"method_from_trait_1",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.Method",
+      "pos":"line 8, characters 12-30",
+      "origin":"Trait_1"
+    },
+    {
+      "name":"method_from_trait_2",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.Method",
+      "pos":"line 20, characters 12-30",
+      "origin":"Trait_2"
+    },
+    {
+      "name":"static_method_from_Trait_1",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 10, characters 19-44",
+      "origin":"Trait_1"
+    },
+    {
+      "name":"static_method_from_Trait_2",
+      "snippet":"(function(): void)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 22, characters 19-44",
+      "origin":"Trait_2"
+    },
+    {
+      "name":"prop_from_Trait_1",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.Property",
+      "pos":"line 4, characters 3-5",
+      "origin":"Trait_1"
+    },
+    {
+      "name":"prop_from_Trait_2",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.Property",
+      "pos":"line 16, characters 3-5",
+      "origin":"Trait_2"
+    },
+    {
+      "name":"$static_prop_from_Trait_1",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.SProperty",
+      "pos":"line 6, characters 10-12",
+      "origin":"Trait_1"
+    },
+    {
+      "name":"$static_prop_from_Trait_2",
+      "snippet":"int",
+      "kind":"ServerTypeHierarchyTypes.SProperty",
+      "pos":"line 18, characters 10-12",
+      "origin":"Trait_2"
+    },
+    {
+      "name":"class",
+      "snippet":"classname<this>",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 13, characters 7-13",
+      "origin":"Trait_2"
     }
   ]
 }

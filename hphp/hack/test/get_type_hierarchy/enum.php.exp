@@ -8,5 +8,56 @@
       "kind":"ServerTypeHierarchyTypes.Class",
       "pos":"line 26, characters 18-28"
     }
+  ],
+  "members":[
+    {
+      "name":"assert",
+      "snippet":"(function(mixed $value): E2)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 65, characters 34-39",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"assertAll",
+      "snippet":"(function(Traversable<mixed> $values): Container<E2>)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 72, characters 34-42",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"coerce",
+      "snippet":"(function(mixed $value): ?E2)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 58, characters 34-39",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"getNames",
+      "snippet":"(function(): dict<E2, string>)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 43, characters 34-41",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"getValues",
+      "snippet":"(function(): dict<string, E2>)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 34, characters 34-42",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"isValid",
+      "snippet":"(function(mixed $value): bool)",
+      "kind":"ServerTypeHierarchyTypes.SMethod",
+      "pos":"line 51, characters 34-40",
+      "origin":"HH\\BuiltinEnum"
+    },
+    {
+      "name":"class",
+      "snippet":"classname<this>",
+      "kind":"ServerTypeHierarchyTypes.Const",
+      "pos":"line 4, characters 6-7",
+      "origin":"E2"
+    }
   ]
 }

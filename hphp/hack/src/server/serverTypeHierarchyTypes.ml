@@ -6,6 +6,22 @@
  *
  *)
 
+type memberKind =
+  | Method [@value 1]
+  | SMethod [@value 2]
+  | Property [@value 3]
+  | SProperty [@value 4]
+  | Const [@value 5]
+[@@deriving show]
+
+type memberEntry = {
+  name: string;
+  snippet: string;
+  kind: memberKind;
+  pos: Pos.t;
+  origin: string;
+}
+
 type entryKind =
   | Class [@value 1]
   | Interface [@value 2]
@@ -26,6 +42,7 @@ type hierarchyEntry = {
   kind: entryKind;
   pos: Pos.t;
   ancestors: ancestorEntry list;
+  members: memberEntry list;
 }
 
 type result = hierarchyEntry option

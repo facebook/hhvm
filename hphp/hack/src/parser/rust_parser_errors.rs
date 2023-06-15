@@ -133,7 +133,7 @@ impl UnstableFeatures {
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => Unstable,
             UnstableFeatures::CaseTypes => Unstable,
-            UnstableFeatures::ModuleLevelTraits => Unstable,
+            UnstableFeatures::ModuleLevelTraits => Preview,
             UnstableFeatures::TypedLocalVariables => Unstable,
         }
     }

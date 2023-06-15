@@ -20,4 +20,4 @@ type hierarchyEntry = {
   ancestors: string list;
 }
 
-type result = hierarchyEntry list
+type result = hierarchyEntry option

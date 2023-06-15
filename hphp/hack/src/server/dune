@@ -108,7 +108,10 @@
  (name server_type_hierarchy)
  (wrapped false)
  (modules serverTypeHierarchy)
- (libraries provider_context server_services)
+ (libraries
+  provider_context
+  server_services
+  server_infer_type)
  (preprocess
   (pps
   lwt_ppx

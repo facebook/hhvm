@@ -1,0 +1,6 @@
+{
+  "name":"\\Trait_2",
+  "kind":"ServerTypeHierarchyTypes.Trait",
+  "pos":"line 6, characters 7-13",
+  "ancestors":["\\Trait_1"]
+}

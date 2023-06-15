@@ -1,0 +1,15 @@
+{
+  "name":"\\Baz",
+  "kind":"ServerTypeHierarchyTypes.Class",
+  "pos":"line 26, characters 16-18",
+  "ancestors":[
+    "\\Bar",
+    "\\Foo",
+    "\\IBar",
+    "\\IFoo",
+    "\\IQux",
+    "\\Trait_1",
+    "\\Trait_2",
+    "\\Trait_3"
+  ]
+}

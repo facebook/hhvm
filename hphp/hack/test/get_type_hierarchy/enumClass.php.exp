@@ -1,0 +1,6 @@
+{
+  "name":"\\EC2",
+  "kind":"ServerTypeHierarchyTypes.Enum",
+  "pos":"line 4, characters 12-14",
+  "ancestors":["\\HH\\BuiltinAbstractEnumClass","\\HH\\BuiltinEnumClass"]
+}

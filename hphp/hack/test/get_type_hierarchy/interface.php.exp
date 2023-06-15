@@ -1,0 +1,6 @@
+{
+  "name":"\\IQux",
+  "kind":"ServerTypeHierarchyTypes.Interface",
+  "pos":"line 7, characters 11-14",
+  "ancestors":["\\IBar","\\IFoo"]
+}

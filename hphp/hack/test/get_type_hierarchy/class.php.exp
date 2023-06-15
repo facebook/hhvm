@@ -47,105 +47,105 @@
   "members":[
     {
       "name":"method_from_Baz",
-      "snippet":"(function(): void)",
+      "snippet":"method_from_Baz(int $val, int ...$vals): void",
       "kind":"ServerTypeHierarchyTypes.Method",
       "pos":"line 52, characters 12-26",
       "origin":"Baz"
     },
     {
       "name":"method_from_Foo",
-      "snippet":"(function(): void)",
+      "snippet":"method_from_Foo(): void",
       "kind":"ServerTypeHierarchyTypes.Method",
       "pos":"line 36, characters 12-26",
       "origin":"Foo"
     },
     {
       "name":"method_from_trait_1",
-      "snippet":"(function(): void)",
+      "snippet":"method_from_trait_1(): void",
       "kind":"ServerTypeHierarchyTypes.Method",
       "pos":"line 15, characters 12-30",
       "origin":"Trait_1"
     },
     {
       "name":"static_method_from_Baz",
-      "snippet":"(function(): void)",
+      "snippet":"static_method_from_Baz(): void",
       "kind":"ServerTypeHierarchyTypes.SMethod",
       "pos":"line 54, characters 19-40",
       "origin":"Baz"
     },
     {
       "name":"static_method_from_Foo",
-      "snippet":"(function(): void)",
+      "snippet":"static_method_from_Foo(): void",
       "kind":"ServerTypeHierarchyTypes.SMethod",
       "pos":"line 38, characters 19-40",
       "origin":"Foo"
     },
     {
       "name":"static_method_from_Trait_1",
-      "snippet":"(function(): void)",
+      "snippet":"static_method_from_Trait_1(): void",
       "kind":"ServerTypeHierarchyTypes.SMethod",
       "pos":"line 17, characters 19-44",
       "origin":"Trait_1"
     },
     {
       "name":"prop_from_Baz",
-      "snippet":"int",
+      "snippet":"prop_from_Baz: int",
       "kind":"ServerTypeHierarchyTypes.Property",
       "pos":"line 48, characters 3-5",
       "origin":"Baz"
     },
     {
       "name":"prop_from_Foo",
-      "snippet":"int",
+      "snippet":"prop_from_Foo: int",
       "kind":"ServerTypeHierarchyTypes.Property",
       "pos":"line 32, characters 3-5",
       "origin":"Foo"
     },
     {
       "name":"prop_from_Trait_1",
-      "snippet":"int",
+      "snippet":"prop_from_Trait_1: int",
       "kind":"ServerTypeHierarchyTypes.Property",
       "pos":"line 11, characters 3-5",
       "origin":"Trait_1"
     },
     {
       "name":"$static_prop_from_Baz",
-      "snippet":"int",
+      "snippet":"$static_prop_from_Baz: int",
       "kind":"ServerTypeHierarchyTypes.SProperty",
       "pos":"line 50, characters 10-12",
       "origin":"Baz"
     },
     {
       "name":"$static_prop_from_Foo",
-      "snippet":"int",
+      "snippet":"$static_prop_from_Foo: int",
       "kind":"ServerTypeHierarchyTypes.SProperty",
       "pos":"line 34, characters 10-12",
       "origin":"Foo"
     },
     {
       "name":"$static_prop_from_Trait_1",
-      "snippet":"int",
+      "snippet":"$static_prop_from_Trait_1: int",
       "kind":"ServerTypeHierarchyTypes.SProperty",
       "pos":"line 13, characters 10-12",
       "origin":"Trait_1"
     },
     {
       "name":"class",
-      "snippet":"classname<this>",
+      "snippet":"class: classname<this>",
       "kind":"ServerTypeHierarchyTypes.Const",
       "pos":"line 43, characters 16-18",
       "origin":"Baz"
     },
     {
       "name":"const_from_Baz",
-      "snippet":"int",
+      "snippet":"const_from_Baz: int",
       "kind":"ServerTypeHierarchyTypes.Const",
       "pos":"line 46, characters 13-26",
       "origin":"Baz"
     },
     {
       "name":"const_from_Foo",
-      "snippet":"int",
+      "snippet":"const_from_Foo: int",
       "kind":"ServerTypeHierarchyTypes.Const",
       "pos":"line 30, characters 13-26",
       "origin":"Foo"

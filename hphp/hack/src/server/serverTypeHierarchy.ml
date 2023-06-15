@@ -9,13 +9,41 @@ open Hh_prelude
 open ServerTypeHierarchyTypes
 open Typing_defs
 
+let get_snippet ctx name ty =
+  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+  let (_, ty) = Typing_phase.localize_no_subst env ~ignore_errors:true ty in
+  let tast_env = Tast_env.empty ctx in
+  match get_node ty with
+  | Tfun ft ->
+    let params = ft.ft_params in
+    let n = List.length params in
+    let is_variadic = get_ft_variadic ft in
+    let param_snippet =
+      params
+      |> List.mapi ~f:(fun i param ->
+             let name =
+               match param.fp_name with
+               | Some pn -> pn
+               | None -> ""
+             in
+             let prefix =
+               if is_variadic && i + 1 = n then
+                 "..."
+               else
+                 ""
+             in
+             let ty = Tast_env.print_ty tast_env param.fp_type.et_type in
+             Printf.sprintf "%s %s%s" ty prefix name)
+      |> String.concat ~sep:", "
+    in
+    let ret_type = Tast_env.print_ty tast_env ft.ft_ret.et_type in
+    Printf.sprintf "%s(%s): %s" name param_snippet ret_type
+  | _ -> Printf.sprintf "%s: %s" name (Tast_env.print_ty tast_env ty)
+
 let get_members ctx class_ : memberEntry list =
   let class_etl_to_member_entry kind (name, member) : memberEntry =
-    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let snippet =
-      Typing_print.full_strip_ns_decl
-        env
-        (Lazy.force member.Typing_defs.ce_type)
+      get_snippet ctx name (Lazy.force member.Typing_defs.ce_type)
     in
     let pos =
       Lazy.force member.Typing_defs.ce_pos
@@ -27,10 +55,7 @@ let get_members ctx class_ : memberEntry list =
   in
   let class_const_to_member_entry
       ((name, const) : string * Typing_defs.class_const) : memberEntry =
-    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-    let snippet =
-      Typing_print.full_strip_ns_decl env const.Typing_defs.cc_type
-    in
+    let snippet = get_snippet ctx name const.Typing_defs.cc_type in
     let pos =
       const.Typing_defs.cc_pos
       |> Naming_provider.resolve_position ctx

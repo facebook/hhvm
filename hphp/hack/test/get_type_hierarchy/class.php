@@ -49,7 +49,7 @@ abstract class Baz extends Bar {
 
   static int $static_prop_from_Baz = 1;
 
-  function method_from_Baz(): void {}
+  function method_from_Baz(int $val, int ...$vals): void {}
 
   static function static_method_from_Baz(): void {}
 }

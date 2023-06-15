@@ -18,7 +18,7 @@ type memberEntry = {
   name: string;
   snippet: string;
   kind: memberKind;
-  pos: Pos.t;
+  pos: Pos.absolute;
   origin: string;
 }
 
@@ -34,13 +34,13 @@ type ancestorEntry =
   | AncestorDetails of {
       name: string;
       kind: entryKind;
-      pos: Pos.t;
+      pos: Pos.absolute;
     }
 
 type hierarchyEntry = {
   name: string;
   kind: entryKind;
-  pos: Pos.t;
+  pos: Pos.absolute;
   ancestors: ancestorEntry list;
   members: memberEntry list;
 }

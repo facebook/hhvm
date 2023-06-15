@@ -842,6 +842,56 @@ module SignatureHelp = struct
   }
 end
 
+(* Document Type Hierarchy request, method="textDocument/typeHierarchy" *)
+module TypeHierarchy = struct
+  type params = TextDocumentPositionParams.t
+
+  type memberKind =
+    | Method [@value 1]
+    | SMethod [@value 2]
+    | Property [@value 3]
+    | SProperty [@value 4]
+    | Const [@value 5]
+  [@@deriving enum]
+
+  type memberEntry = {
+    name: string;
+    snippet: string;
+    kind: memberKind;
+    uri: documentUri;
+    range: range;
+    origin: string;
+  }
+
+  type entryKind =
+    | Class [@value 1]
+    | Interface [@value 2]
+    | Enum [@value 3]
+    | Trait [@value 4]
+  [@@deriving enum]
+
+  type ancestorEntry =
+    | AncestorName of string
+    | AncestorDetails of {
+        name: string;
+        kind: entryKind;
+        uri: documentUri;
+        range: range;
+      }
+
+  type hierarchyEntry = {
+    name: string;
+    uri: documentUri;
+    range: range;
+    kind: entryKind;
+    ancestors: ancestorEntry list;
+    members: memberEntry list;
+  }
+
+  type result = hierarchyEntry option
+end
+
+(* Workspace Rename request, method="textDocument/rename" *)
 module Rename = struct
   type params = renameParams
 
@@ -1009,6 +1059,7 @@ type lsp_request =
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
+  | TypeHierarchyRequest of TypeHierarchy.params
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
@@ -1043,6 +1094,7 @@ type lsp_result =
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
+  | TypeHierarchyResult of TypeHierarchy.result
   | HackTestStartServerResultFB
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
@@ -1138,3 +1190,4 @@ let lsp_result_to_log_string = function
   | RegisterCapabilityRequestResult -> "RegisterCapabilityRequestResult"
   | WillSaveWaitUntilResult _ -> "WillSaveWaitUntilResult"
   | ErrorResult _ -> "ErrorResult"
+  | TypeHierarchyResult _ -> "TypeHierarchyResult"

@@ -161,6 +161,8 @@ type _ t =
       resolve_title: string;
     }
       -> Lsp.CodeActionResolve.result t
+  | Type_Hierarchy : document * location -> ServerTypeHierarchyTypes.result t
+      (** Handles "textDocument/typeHierarchy" LSP messages *)
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -218,6 +220,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
   | Rename ({ file_path; _ }, _, _, _) ->
     Printf.sprintf "Rename(%s)" (Path.to_string file_path)
+  | Type_Hierarchy ({ file_path; _ }, _) ->
+    Printf.sprintf "Type_Hierarchy(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {
   tracking_id: string;

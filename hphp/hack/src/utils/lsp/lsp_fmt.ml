@@ -377,6 +377,54 @@ let print_signatureHelp (r : SignatureHelp.result) : json =
 
 (************************************************************************)
 
+let parse_typeHierarchy (params : json option) : TypeHierarchy.params =
+  parse_textDocumentPositionParams params
+
+let print_typeHierarchy (r : TypeHierarchy.result) : json =
+  TypeHierarchy.(
+    let print_member_entry (entry : TypeHierarchy.memberEntry) =
+      Hh_json.JSON_Object
+        [
+          ("name", Hh_json.string_ entry.name);
+          ("snippet", Hh_json.string_ entry.snippet);
+          ("uri", JSON_String (string_of_uri entry.uri));
+          ("range", print_range entry.range);
+          ("kind", Hh_json.int_ (memberKind_to_enum entry.kind));
+          ("origin", Hh_json.string_ entry.origin);
+        ]
+    in
+    let print_ancestor_entry (entry : TypeHierarchy.ancestorEntry) =
+      match entry with
+      | AncestorName name -> Hh_json.string_ name
+      | AncestorDetails entry ->
+        Hh_json.JSON_Object
+          [
+            ("name", Hh_json.string_ entry.name);
+            ("uri", JSON_String (string_of_uri entry.uri));
+            ("range", print_range entry.range);
+            ("kind", Hh_json.int_ (entryKind_to_enum entry.kind));
+          ]
+    in
+    let print_hierarchy_entry (entry : TypeHierarchy.hierarchyEntry) =
+      Hh_json.JSON_Object
+        [
+          ("name", Hh_json.string_ entry.name);
+          ("uri", JSON_String (string_of_uri entry.uri));
+          ("range", print_range entry.range);
+          ("kind", Hh_json.int_ (entryKind_to_enum entry.kind));
+          ( "ancestors",
+            Hh_json.JSON_Array
+              (List.map ~f:print_ancestor_entry entry.ancestors) );
+          ( "members",
+            Hh_json.JSON_Array (List.map ~f:print_member_entry entry.members) );
+        ]
+    in
+    match r with
+    | None -> Hh_json.JSON_Object []
+    | Some r -> print_hierarchy_entry r)
+
+(************************************************************************)
+
 let parse_codeLensResolve (params : json option) : CodeLensResolve.params =
   parse_codeLens params
 
@@ -1362,6 +1410,8 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | RequestMessage (_, RenameRequest p) -> Some p.Rename.textDocument.uri
   | RequestMessage (_, SignatureHelpRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, TypeHierarchyRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
   | NotificationMessage (PublishDiagnosticsNotification p) ->
     Some p.PublishDiagnostics.uri
   | NotificationMessage (DidOpenNotification p) ->
@@ -1434,6 +1484,7 @@ let request_name_to_string (request : lsp_request) : string =
   | RenameRequest _ -> "textDocument/rename"
   | DocumentCodeLensRequest _ -> "textDocument/codeLens"
   | SignatureHelpRequest _ -> "textDocument/signatureHelp"
+  | TypeHierarchyRequest _ -> "textDocument/typeHierarchy"
   | HackTestStartServerRequestFB -> "$test/startHhServer"
   | HackTestStopServerRequestFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessRequestFB -> "$test/shutdownServerlessIde"
@@ -1469,6 +1520,7 @@ let result_name_to_string (result : lsp_result) : string =
   | RenameResult _ -> "textDocument/rename"
   | DocumentCodeLensResult _ -> "textDocument/codeLens"
   | SignatureHelpResult _ -> "textDocument/signatureHelp"
+  | TypeHierarchyResult _ -> "textDocument/typeHierarchy"
   | HackTestStartServerResultFB -> "$test/startHhServer"
   | HackTestStopServerResultFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessResultFB -> "$test/shutdownServerlessIde"
@@ -1566,6 +1618,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     DocumentOnTypeFormattingRequest (parse_documentOnTypeFormatting params)
   | "textDocument/signatureHelp" ->
     SignatureHelpRequest (parse_signatureHelp params)
+  | "textDocument/typeHierarchy" ->
+    TypeHierarchyRequest (parse_typeHierarchy params)
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
   | "telemetry/rage" -> RageRequestFB
@@ -1635,6 +1689,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | RenameRequest _
   | DocumentCodeLensRequest _
   | SignatureHelpRequest _
+  | TypeHierarchyRequest _
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
@@ -1708,6 +1763,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | RenameRequest _
     | DocumentCodeLensRequest _
     | SignatureHelpRequest _
+    | TypeHierarchyRequest _
     | HackTestStartServerRequestFB
     | HackTestStopServerRequestFB
     | HackTestShutdownServerlessRequestFB
@@ -1754,6 +1810,7 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | RenameResult r -> print_documentRename r
     | DocumentCodeLensResult r -> print_documentCodeLens r
     | SignatureHelpResult r -> print_signatureHelp r
+    | TypeHierarchyResult r -> print_typeHierarchy r
     | HackTestStartServerResultFB -> JSON_Null
     | HackTestStopServerResultFB -> JSON_Null
     | HackTestShutdownServerlessResultFB -> JSON_Null

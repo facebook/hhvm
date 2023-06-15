@@ -20,6 +20,7 @@ let get_members ctx class_ : memberEntry list =
     let pos =
       Lazy.force member.Typing_defs.ce_pos
       |> Naming_provider.resolve_position ctx
+      |> Pos.to_absolute
     in
     let origin = Utils.strip_ns member.Typing_defs.ce_origin in
     { name; kind; snippet; pos; origin }
@@ -31,7 +32,9 @@ let get_members ctx class_ : memberEntry list =
       Typing_print.full_strip_ns_decl env const.Typing_defs.cc_type
     in
     let pos =
-      const.Typing_defs.cc_pos |> Naming_provider.resolve_position ctx
+      const.Typing_defs.cc_pos
+      |> Naming_provider.resolve_position ctx
+      |> Pos.to_absolute
     in
     let origin = Utils.strip_ns const.Typing_defs.cc_origin in
     { name; kind = ServerTypeHierarchyTypes.Const; snippet; pos; origin }
@@ -69,7 +72,9 @@ let get_ancestor_entry ctx name : ancestorEntry =
         name = Utils.strip_ns name;
         kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_);
         pos =
-          Naming_provider.resolve_position ctx (Decl_provider.Class.pos class_);
+          Decl_provider.Class.pos class_
+          |> Naming_provider.resolve_position ctx
+          |> Pos.to_absolute;
       }
 
 let decl_to_hierarchy ctx class_ : hierarchyEntry =
@@ -81,7 +86,9 @@ let decl_to_hierarchy ctx class_ : hierarchyEntry =
   let name = Utils.strip_ns (Decl_provider.Class.name class_) in
   let kind = classish_kind_to_entryKind (Decl_provider.Class.kind class_) in
   let pos =
-    Naming_provider.resolve_position ctx (Decl_provider.Class.pos class_)
+    Decl_provider.Class.pos class_
+    |> Naming_provider.resolve_position ctx
+    |> Pos.to_absolute
   in
   let members = get_members ctx class_ in
   { name; kind; pos; ancestors; members }

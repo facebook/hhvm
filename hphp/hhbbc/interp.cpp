@@ -903,11 +903,7 @@ void in(ISS& env, const bc::ColFromArray& op) {
 
 void in(ISS& env, const bc::CnsE& op) {
   auto t = env.index.lookup_constant(env.ctx, op.str1);
-  if (t.strictSubtypeOf(TInitCell)) {
-    // constprop will take care of nothrow *if* its a constant; and if
-    // its not, we might trigger autoload.
-    constprop(env);
-  }
+  constprop(env);
   push(env, std::move(t));
 }
 

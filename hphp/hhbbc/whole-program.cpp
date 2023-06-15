@@ -169,16 +169,25 @@ std::vector<Context> const_pass_contexts(const Index& index) {
   std::vector<Context> ret;
   for (auto const& c : index.program().classes) {
     for (auto const& m : c->methods) {
-      if (is_86init_func(*m)) {
-        ret.emplace_back(
-          Context {
-            c->unit,
-            m.get(),
-            c.get()
-          }
-        );
-      }
+      if (!is_86init_func(*m)) continue;
+      ret.emplace_back(
+        Context {
+          c->unit,
+          m.get(),
+          c.get()
+        }
+      );
     }
+  }
+  for (auto const& f : index.program().funcs) {
+    if (!Constant::nameFromFuncName(f->name)) continue;
+    ret.emplace_back(
+      Context {
+        f->unit,
+        f.get(),
+        nullptr
+      }
+    );
   }
   return ret;
 }

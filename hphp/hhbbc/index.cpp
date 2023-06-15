@@ -15665,23 +15665,38 @@ void Index::refine_class_constants(const Context& ctx,
 void Index::refine_constants(const FuncAnalysisResult& fa,
                              DependencyContextSet& deps) {
   auto const& func = fa.ctx.func;
-  if (func->cls != nullptr) return;
-
-  auto const val = tv(fa.inferredReturn);
-  if (!val) return;
+  if (func->cls) return;
 
   auto const cns_name = Constant::nameFromFuncName(func->name);
   if (!cns_name) return;
 
-  auto& cs = m_data->units.at(fa.ctx.unit)->constants;
-  auto it = std::find_if(
-    cs.begin(),
-    cs.end(),
-    [&] (auto const& c) {
-      return cns_name->same(c->name);
-    });
-  assertx(it != cs.end() && "Did not find constant");
-  (*it)->val = val.value();
+  auto const cns = m_data->constants.at(cns_name);
+  auto const val = tv(fa.inferredReturn);
+  if (!val) {
+    always_assert_flog(
+      type(cns->val) == KindOfUninit,
+      "Constant value invariant violated in {}.\n"
+      "    Value went from {} to {}",
+      cns_name,
+      show(from_cell(cns->val)),
+      show(fa.inferredReturn)
+    );
+    return;
+  }
+
+  if (type(cns->val) != KindOfUninit) {
+    always_assert_flog(
+      from_cell(cns->val) == fa.inferredReturn,
+      "Constant value invariant violated in {}.\n"
+      "    Value went from {} to {}",
+      cns_name,
+      show(from_cell(cns->val)),
+      show(fa.inferredReturn)
+    );
+  } else {
+    cns->val = *val;
+  }
+
   find_deps(*m_data, func, Dep::ConstVal, deps);
 }
 
@@ -15732,8 +15747,8 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
       // We've modifed the return type, so reset any cached FuncFamily
       // return types.
       resetFuncFamilies = true;
-      dep = is_scalar(fa.inferredReturn) ?
-        Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
+      dep = is_scalar(fa.inferredReturn)
+        ? Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
       finfo->returnRefinements += fa.localReturnRefinements + 1;
       if (finfo->returnRefinements > options.returnTypeRefineLimit) {
         FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
@@ -15754,12 +15769,10 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 
   always_assert_flog(
     !finfo->effectFree || fa.effectFree,
-    "Index effectFree changed from true to false in {} {}{}.\n",
+    "Index effectFree changed from true to false in {} {}.\n",
     func->unit,
-    func->cls
-      ? folly::to<std::string>(func->cls->name->data(), "::")
-      : std::string{},
-    func->name);
+    func_fullname(*func)
+  );
 
   if (finfo->effectFree != fa.effectFree) {
     finfo->effectFree = fa.effectFree;
@@ -15937,7 +15950,8 @@ void Index::update_prop_initial_values(const Context& ctx,
 
     if (type(info.val) != KindOfUninit) {
       always_assert_flog(
-        type(prop.val) == KindOfUninit || tvSame(prop.val, info.val),
+        type(prop.val) == KindOfUninit ||
+        from_cell(prop.val) == from_cell(info.val),
         "Property initial value invariant violated for {}::{}\n"
         "  Value went from {} to {}",
         ctx.cls->name, prop.name,

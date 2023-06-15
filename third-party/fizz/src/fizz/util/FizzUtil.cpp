@@ -13,6 +13,7 @@
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/OpenSSL.h>
 #include <folly/ssl/Init.h>
+#include <sodium.h>
 
 #include <openssl/bio.h>
 #include <fstream>
@@ -162,4 +163,38 @@ std::vector<std::string> FizzUtil::getAlpnsFromNpnList(
   }
   return std::vector<std::string>(protoList->begin(), protoList->end());
 }
+
+/**
+ * Generates a curve25519 keypair encoded in hex.
+ * @return a tuple of keys: {publicKey, privateKey}
+ */
+[[maybe_unused]] std::tuple<std::string, std::string>
+FizzUtil::generateKeypairCurve25519() {
+  constexpr static size_t kCurve25519PubBytes = 32;
+  constexpr static size_t kCurve25519PrivBytes = 32;
+  using PrivKey = std::array<uint8_t, kCurve25519PubBytes>;
+  using PubKey = std::array<uint8_t, kCurve25519PrivBytes>;
+  static_assert(
+      PrivKey().size() == crypto_scalarmult_SCALARBYTES,
+      "Incorrect size of the private key");
+  static_assert(
+      PubKey().size() == crypto_scalarmult_BYTES,
+      "Incorrect size of the public key");
+  auto privKey = PrivKey();
+  auto pubKey = PubKey();
+  auto err = crypto_box_curve25519xsalsa20poly1305_keypair(
+      pubKey.data(), privKey.data());
+  if (err != 0) {
+    throw std::runtime_error(
+        folly::to<std::string>("Could not generate keys ", err));
+  }
+
+  std::string pubKeyHex =
+      folly::hexlify(std::string_view((char*)pubKey.data(), pubKey.size()));
+  std::string privKeyHex =
+      folly::hexlify(std::string_view((char*)privKey.data(), privKey.size()));
+
+  return std::make_tuple(pubKeyHex, privKeyHex);
+}
+
 } // namespace fizz

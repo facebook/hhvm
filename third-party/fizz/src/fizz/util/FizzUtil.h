@@ -47,6 +47,8 @@ class FizzUtil {
       hpke::KEMId kemId,
       const std::string& echPrivateKeyFile);
 
+  static std::tuple<std::string, std::string> generateKeypairCurve25519();
+
   // Creates a TicketCipherT with given params
   template <class TicketCipherT>
   static std::unique_ptr<TicketCipherT> createTicketCipher(

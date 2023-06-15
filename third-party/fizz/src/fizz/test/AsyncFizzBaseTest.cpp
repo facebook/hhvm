@@ -1024,6 +1024,32 @@ TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingWriteInCallback) {
   wcb->writeSuccess();
 }
 
+TYPED_TEST(AsyncFizzBaseTest, TestWriteBufferingCloseInCallback) {
+  AsyncTransportWrapper::WriteCallback* wcb;
+  StrictMock<folly::test::MockWriteCallback> cb1, cb2;
+
+  this->expectWrite('a', kPartialWriteThreshold, &wcb);
+  auto buf = getBuf('a', kPartialWriteThreshold + 1);
+  this->writeChain(&cb1, buf->clone());
+  this->writeChain(&cb2, getBuf('b', 200));
+
+  this->expectWrite('a', 1);
+  EXPECT_CALL(cb1, writeSuccess_())
+      .InSequence(this->writeSeq_)
+      .WillOnce(Invoke([this, &cb2]() {
+        bool deliverErrorReturned = false;
+        EXPECT_CALL(cb2, writeErr_(0, _))
+            .InSequence(this->writeSeq_)
+            .WillOnce(InvokeWithoutArgs([&deliverErrorReturned]() {
+              EXPECT_FALSE(deliverErrorReturned);
+            }));
+        this->deliverError(this->ase_);
+        deliverErrorReturned = true;
+      }));
+
+  wcb->writeSuccess();
+}
+
 TYPED_TEST(AsyncFizzBaseTest, TestAlignedRecordReads) {
   this->setHandshakeRecordAlignedReads(true);
 

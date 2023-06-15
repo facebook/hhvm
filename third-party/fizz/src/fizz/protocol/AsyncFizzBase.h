@@ -478,6 +478,8 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
     void unlinkFromBase();
 
+    void fail(const folly::AsyncSocketException&);
+
     size_t getEntireChainBytesBuffered() {
       DCHECK(!next_);
       return entireChainBytesBuffered;
@@ -558,6 +560,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   size_t readSizeHint_{0};
 
   QueuedWriteRequest* tailWriteRequest_{nullptr};
+  QueuedWriteRequest* immediatelyPendingWriteRequest_{nullptr};
 
   HandshakeTimeout handshakeTimeout_;
 

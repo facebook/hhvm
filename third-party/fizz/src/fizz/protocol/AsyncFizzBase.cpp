@@ -113,6 +113,11 @@ void AsyncFizzBase::QueuedWriteRequest::unlinkFromBase() {
   asyncFizzBase_ = nullptr;
 }
 
+void AsyncFizzBase::QueuedWriteRequest::fail(
+    const folly::AsyncSocketException& ex) {
+  writeErr(0, ex);
+}
+
 void AsyncFizzBase::QueuedWriteRequest::writeSuccess() noexcept {
   if (!data_.empty()) {
     startWriting();
@@ -125,10 +130,13 @@ void AsyncFizzBase::QueuedWriteRequest::writeSuccess() noexcept {
 
     DelayedDestruction::DestructorGuard dg(base);
 
+    DCHECK(!base->immediatelyPendingWriteRequest_);
+    base->immediatelyPendingWriteRequest_ = next;
     if (callback) {
       callback->writeSuccess();
     }
-    if (next) {
+    if (next && base->immediatelyPendingWriteRequest_ == next) {
+      base->immediatelyPendingWriteRequest_ = nullptr;
       next->startWriting();
     }
   }
@@ -312,6 +320,14 @@ void AsyncFizzBase::deliverError(
     } else {
       readCallback->readErr(ex);
     }
+  }
+
+  if (immediatelyPendingWriteRequest_) {
+    // If we were about to start writing a QueuedWriteRequest, error it here.
+    // This is done to ensure writeErr is invoked synchronously.
+    auto immediatelyPendingWriteRequest = immediatelyPendingWriteRequest_;
+    immediatelyPendingWriteRequest_ = nullptr;
+    immediatelyPendingWriteRequest->fail(ex);
   }
 
   // Clear the secret callback too.

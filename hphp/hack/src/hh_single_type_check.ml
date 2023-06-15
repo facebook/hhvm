@@ -68,6 +68,7 @@ type mode =
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
   | SDT_analysis of string
+  | Get_type_hierarchy
 
 type options = {
   files: string list;
@@ -855,6 +856,9 @@ let parse_options () =
       ( "--custom-error-config-path",
         Arg.String (fun s -> custom_error_config_path := Some s),
         " Config file for custom error messages" );
+      ( "--get-type-hierarchy-at-caret",
+        Arg.Unit (set_mode Get_type_hierarchy),
+        " Produce type hierarchy at caret location" );
     ]
   in
 
@@ -1475,13 +1479,13 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
       in
       tasts)
 
-(* Given source code containing the string "^ hover-at-caret", return
+(* Given source code containing a caret marker (e.g. "^ hover-at-caret"), return
    the line and column of the position indicated. *)
-let hover_at_caret_pos (src : string) : int * int =
+let caret_pos (src : string) (marker : string) : int * int =
   let lines = String.split_lines src in
   match
     List.findi lines ~f:(fun _ line ->
-        String.is_substring line ~substring:"^ hover-at-caret")
+        String.is_substring line ~substring:marker)
   with
   | Some (line_num, line_src) ->
     let col_num =
@@ -1492,7 +1496,10 @@ let hover_at_caret_pos (src : string) : int * int =
     in
     (line_num, Option.value_exn col_num + 1)
   | None ->
-    failwith "Could not find any occurrence of ^ hover-at-caret in source code"
+    failwith
+      (Printf.sprintf
+         "Could not find any occurrence of '%s' in source code"
+         marker)
 
 (* Given source code containing the patterns [start_marker] and [end_marker], calculate the range between the markers *)
 let find_ide_range src : Ide_api_types.range =
@@ -2407,7 +2414,7 @@ let handle_mode
       | Some (line, column) -> (line, column)
       | None ->
         let src = Provider_context.read_file_contents_exn entry in
-        hover_at_caret_pos src
+        caret_pos src "^ hover-at-caret"
     in
     let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     let formatted_results =
@@ -2474,6 +2481,16 @@ let handle_mode
       in
       let json = Count_imprecise_types.json_of_results results in
       Printf.printf "%s" (Hh_json.json_to_string json)
+  | Get_type_hierarchy ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let src = Provider_context.read_file_contents_exn entry in
+    let (line, column) = caret_pos src "^ type-hierarchy-at-caret" in
+    let results =
+      ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column
+    in
+    let json = ServerTypeHierarchy.json_of_results ~results in
+    Printf.printf "%s" (Hh_json.json_to_string ~pretty:true json)
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -105,6 +105,18 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name server_type_hierarchy)
+ (wrapped false)
+ (modules serverTypeHierarchy)
+ (libraries provider_context server_services)
+ (preprocess
+  (pps
+  lwt_ppx
+  ppx_deriving.std
+  ppx_deriving.show
+  ppx_deriving.enum)))
+
+(library
  (name server_file_outline)
  (wrapped false)
  (modules fileOutline)
@@ -255,6 +267,7 @@
   serverFormatTypes
   serverGlobalInferenceTypes
   serverHighlightRefsTypes
+  serverTypeHierarchyTypes
   serverLintTypes
   serverRageTypes
   serverRenameTypes
@@ -276,7 +289,7 @@
   utils_lint
   version)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum)))
 
 (library
  (name server_client_provider)

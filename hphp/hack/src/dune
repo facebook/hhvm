@@ -47,6 +47,7 @@
   server_go_to
   server_highlight_refs
   server_symbol_info_service_utils
+  server_type_hierarchy
   shape_analysis
   sys_utils
   temp_file

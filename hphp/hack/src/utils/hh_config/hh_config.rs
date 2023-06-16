@@ -88,13 +88,15 @@ impl HhConfig {
             .with_context(|| hhconfig_path.display().to_string())?;
         // Grab extra config and use it to process the hash
         let package_contents: String = if package_config_path.exists() {
-            let bytes = std::fs::read(package_config_path).unwrap_or(vec![]);
+            let ctxt = || package_config_path.display().to_string();
+            let bytes = std::fs::read(&package_config_path).with_context(ctxt)?;
             String::from_utf8(bytes).unwrap()
         } else {
             String::new()
         };
         let custom_error_contents: String = if custom_error_config_path.exists() {
-            let bytes = std::fs::read(custom_error_config_path).unwrap_or(vec![]);
+            let ctxt = || custom_error_config_path.as_path().display().to_string();
+            let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
             String::from_utf8(bytes).unwrap()
         } else {
             "[]".to_string()

@@ -13,7 +13,6 @@
 
 #include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
-#include <quic/server/QuicCcpThreadLauncher.h>
 #include <quic/server/QuicServer.h>
 
 namespace proxygen {
@@ -48,7 +47,6 @@ class HQServer {
  private:
   HQServerParams params_;
   std::shared_ptr<quic::QuicServer> server_;
-  QuicCcpThreadLauncher quicCcpThreadLauncher_;
 };
 
 class ScopedHQServer {

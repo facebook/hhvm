@@ -107,10 +107,6 @@ DEFINE_bool(use_inplace_write,
             false,
             "Transport use inplace packet build and socket writing");
 
-DEFINE_string(ccp_config,
-              "",
-              "Additional args to pass to ccp. Ccp disabled if empty string.");
-
 DEFINE_bool(send_knob_frame,
             false,
             "Send a Knob Frame to the peer when a QUIC connection is "
@@ -268,9 +264,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   if (hqUberParams.mode == HQMode::CLIENT) {
     boost::get<HQToolClientParams>(hqUberParams.params).connectTimeout =
         std::chrono::milliseconds(FLAGS_connect_timeout);
-  } else {
-    boost::get<HQToolServerParams>(hqUberParams.params).ccpConfig =
-        FLAGS_ccp_config;
   }
   hqParams.sendKnobFrame = FLAGS_send_knob_frame;
   if (hqParams.sendKnobFrame) {

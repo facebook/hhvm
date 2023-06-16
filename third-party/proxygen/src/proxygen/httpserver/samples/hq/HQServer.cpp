@@ -250,12 +250,6 @@ HQServer::HQServer(
       std::make_shared<ServerCongestionControllerFactory>());
   server_->setTransportSettings(params_.transportSettings);
 
-  if (params_.transportSettings.defaultCongestionController ==
-      quic::CongestionControlType::CCP) {
-    quicCcpThreadLauncher_.start(params_.ccpConfig);
-    server_->setCcpId(quicCcpThreadLauncher_.getCcpId());
-  }
-
   server_->setQuicServerTransportFactory(
       std::make_unique<HQServerTransportFactory>(
           params_,
@@ -293,7 +287,6 @@ const folly::SocketAddress HQServer::getAddress() const {
 }
 
 void HQServer::stop() {
-  quicCcpThreadLauncher_.stop();
   server_->shutdown();
 }
 

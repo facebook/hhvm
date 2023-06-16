@@ -275,12 +275,32 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   template <typename Id>
   decltype(auto) patchPrior() {
-    return (derived().ensurePatchable(), getRawPatch<Id>(data_.patchPrior()));
+    return (ensurePatchable(), getRawPatch<Id>(data_.patchPrior()));
   }
 
   template <typename Id>
   decltype(auto) patchAfter() {
-    return (derived().ensurePatchable(), getRawPatch<Id>(data_.patch()));
+    return (ensurePatchable(), getRawPatch<Id>(data_.patch()));
+  }
+
+  void ensurePatchable() {
+    if (data_.assign().has_value()) {
+      for_each_field_id<T>([&](auto id) {
+        using Id = decltype(id);
+        auto&& field = op::get<>(id, *data_.assign());
+        auto&& prior = getRawPatch<Id>(data_.patchPrior());
+        auto&& ensure = op::get<>(id, *data_.ensure());
+        auto&& after = getRawPatch<Id>(data_.patch());
+        if (isAbsent(field)) {
+          prior.toThrift().clear() = true;
+        } else {
+          ensure = {};
+          after.assign(std::move(*field));
+        }
+      });
+      // Unset assign.
+      data_.assign().reset();
+    }
   }
 
   template <typename Id>
@@ -302,15 +322,12 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return true;
   }
 
- protected:
+ private:
   template <typename Id, typename U>
   decltype(auto) getRawPatch(U&& patch) const {
     // Field Ids must always be used to access patch(Prior).
     return *patch->get(get_field_id<T, Id>{});
   }
-
- private:
-  using Base::derived;
 
   // Needed for merge(...). We can consider making this a public API.
   template <typename Id, typename FieldPatch>
@@ -335,8 +352,6 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using T = typename Base::value_type;
   template <typename Id>
   using F = type::native_type<get_field_tag<T, Id>>;
-
-  friend class BaseEnsurePatch<Patch, StructPatch>;
 
  public:
   using Base::apply;
@@ -367,25 +382,6 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
 
  private:
   using Base::data_;
-
-  void ensurePatchable() {
-    if (data_.assign().has_value()) {
-      for_each_field_id<T>([&](auto id) {
-        using Id = decltype(id);
-        auto&& field = op::get<>(id, *data_.assign());
-        auto&& prior = Base::template getRawPatch<Id>(data_.patchPrior());
-        auto&& ensure = op::get<>(id, *data_.ensure());
-        auto&& after = Base::template getRawPatch<Id>(data_.patch());
-        if (isAbsent(field)) {
-          prior.toThrift().clear() = true;
-        } else {
-          ensure = {};
-          after.assign(std::move(*field));
-        }
-      });
-      data_.assign().reset();
-    }
-  }
 };
 
 /// Patch for a Thrift union.
@@ -405,38 +401,17 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   template <typename Id>
   using F = type::native_type<get_field_tag<T, Id>>;
 
-  friend class BaseEnsurePatch<Patch, UnionPatch>;
-
  public:
   using Base::Base;
   using Base::operator=;
   using Base::apply;
   using Base::assign;
   using Base::clear;
-  using Base::patch;
 
   /// Assigns to the given field, ensuring first if needed.
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
-  }
-
- private:
-  using Base::data_;
-
-  void ensurePatchable() {
-    if (data_.assign().has_value()) {
-      union_match(
-          std::move(data_.assign().value()),
-          [&](auto&& value, auto type) {
-            using Id = field_id<folly::to_underlying(type.value)>;
-
-            data_.ensure() = {};
-            Base::template getRawPatch<Id>(data_.patch()) = std::move(value);
-          },
-          [&] { clear(); });
-      data_.assign().reset();
-    }
   }
 };
 

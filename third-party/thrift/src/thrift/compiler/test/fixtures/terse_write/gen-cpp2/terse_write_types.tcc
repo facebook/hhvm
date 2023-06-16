@@ -3342,12 +3342,9 @@ void AdaptedFields::readNoXfer(Protocol_* iprot) {
 _readField_field1:
   {
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::facebook::thrift::test::terse_write::MyInteger>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_field1);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(this->__fbthrift_field_field1), _readState);
+    } else {
       ::std::int32_t tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_field1 = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter, 1>(::std::move(tvalue), *this);
@@ -3365,12 +3362,9 @@ _readField_field1:
 _readField_field2:
   {
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_field2);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(this->__fbthrift_field_field2), _readState);
+    } else {
       ::std::int32_t tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_field2 = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter, 2>(::std::move(tvalue), *this);

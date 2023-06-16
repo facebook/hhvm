@@ -2194,12 +2194,9 @@ _readField_big:
 _readField_medium:
   {
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, ::my::Adapter::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_medium);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, ::my::Adapter::toThrift(this->__fbthrift_field_medium), _readState);
+    } else {
       ::std::int16_t tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_medium = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter, 3>(::std::move(tvalue), *this);

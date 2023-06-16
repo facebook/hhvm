@@ -2796,12 +2796,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, ::test::fixtures::patch::MyDataFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::MyDataFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -2836,12 +2833,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, ::test::fixtures::patch::MyDataFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::MyDataFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -3108,12 +3102,9 @@ _readField_data1:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::op::StringPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::StringPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(::std::move(tvalue), *this);
@@ -3135,12 +3126,9 @@ _readField_data2:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(::std::move(tvalue), *this);
@@ -3513,12 +3501,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -3553,12 +3538,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -3825,12 +3807,9 @@ _readField_data1:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::op::StringPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::StringPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(::std::move(tvalue), *this);
@@ -3852,12 +3831,9 @@ _readField_data2:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(::std::move(tvalue), *this);
@@ -4230,12 +4206,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, ::test::fixtures::patch::InnerUnionFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::InnerUnionFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -4272,12 +4245,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, ::test::fixtures::patch::InnerUnionFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::InnerUnionFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -4520,12 +4490,9 @@ _readField_innerOption:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::op::BinaryPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BinaryPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, 1>(::std::move(tvalue), *this);
@@ -4698,12 +4665,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, ::test::fixtures::patch::MyUnionFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::MyUnionFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -4740,12 +4704,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, ::test::fixtures::patch::MyUnionFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::MyUnionFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -4988,12 +4949,9 @@ _readField_option1:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::op::StringPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::StringPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(::std::move(tvalue), *this);
@@ -5015,12 +4973,9 @@ _readField_option2:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, 2>(::std::move(tvalue), *this);
@@ -5042,12 +4997,9 @@ _readField_option3:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::InnerUnionPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, ::test::fixtures::patch::InnerUnionPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::InnerUnionPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::InnerUnionPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -5302,12 +5254,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, ::test::fixtures::patch::MyStructFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::MyStructFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -5342,12 +5291,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, ::test::fixtures::patch::MyStructFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::MyStructFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -8195,12 +8141,9 @@ _readField_structWithCustomDefault:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>, ::test::fixtures::patch::MyDataWithCustomDefaultPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>, -32>(::std::move(tvalue), *this);
@@ -8222,12 +8165,9 @@ _readField_i32WithCustomDefault:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, -31>(::std::move(tvalue), *this);
@@ -8249,12 +8189,9 @@ _readField_mapMap:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField30Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>, ::test::fixtures::patch::MyStructField30Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField30PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField30PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField30PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField30PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>, -30>(::std::move(tvalue), *this);
@@ -8276,12 +8213,9 @@ _readField_listMap:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField29Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>, ::test::fixtures::patch::MyStructField29Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField29PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField29PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField29PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField29PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>, -29>(::std::move(tvalue), *this);
@@ -8303,12 +8237,9 @@ _readField_optMapVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField28Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>, ::test::fixtures::patch::MyStructField28Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField28PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField28PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField28PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField28PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>, -28>(::std::move(tvalue), *this);
@@ -8330,12 +8261,9 @@ _readField_optSetVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField27Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>, ::test::fixtures::patch::MyStructField27Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField27PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField27PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField27PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField27PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>, -27>(::std::move(tvalue), *this);
@@ -8357,12 +8285,9 @@ _readField_optListVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField26Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>, ::test::fixtures::patch::MyStructField26Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField26PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField26PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField26PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField26PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>, -26>(::std::move(tvalue), *this);
@@ -8384,12 +8309,9 @@ _readField_optLateStructVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>, ::test::fixtures::patch::LateDefStructPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::LateDefStructPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>, -25>(::std::move(tvalue), *this);
@@ -8411,12 +8333,9 @@ _readField_optStructVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, ::test::fixtures::patch::MyDataPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyDataPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, -24>(::std::move(tvalue), *this);
@@ -8438,12 +8357,9 @@ _readField_optEnumVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField23Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>, ::test::fixtures::patch::MyStructField23Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField23PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField23PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>, -23>(::std::move(tvalue), *this);
@@ -8465,12 +8381,9 @@ _readField_optBinaryVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::op::BinaryPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BinaryPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, -22>(::std::move(tvalue), *this);
@@ -8492,12 +8405,9 @@ _readField_optStringVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::op::StringPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::StringPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, -21>(::std::move(tvalue), *this);
@@ -8519,12 +8429,9 @@ _readField_optDoubleVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::DoublePatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>, ::apache::thrift::op::DoublePatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::DoublePatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>, -20>(::std::move(tvalue), *this);
@@ -8546,12 +8453,9 @@ _readField_optFloatVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::FloatPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>, ::apache::thrift::op::FloatPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::FloatPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>, -19>(::std::move(tvalue), *this);
@@ -8573,12 +8477,9 @@ _readField_optI64Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::op::I64Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I64PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, -18>(::std::move(tvalue), *this);
@@ -8600,12 +8501,9 @@ _readField_optI32Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, -17>(::std::move(tvalue), *this);
@@ -8627,12 +8525,9 @@ _readField_optI16Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I16Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, ::apache::thrift::op::I16Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I16PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, -16>(::std::move(tvalue), *this);
@@ -8654,12 +8549,9 @@ _readField_optByteVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BytePatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>, ::apache::thrift::op::BytePatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BytePatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>, -15>(::std::move(tvalue), *this);
@@ -8681,12 +8573,9 @@ _readField_optBoolVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::op::BoolPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BoolPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, -14>(::std::move(tvalue), *this);
@@ -8708,12 +8597,9 @@ _readField_lateStructVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>, ::test::fixtures::patch::LateDefStructPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::LateDefStructPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>, -13>(::std::move(tvalue), *this);
@@ -8735,12 +8621,9 @@ _readField_unionVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyUnionPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>, ::test::fixtures::patch::MyUnionPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyUnionPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyUnionPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>, -12>(::std::move(tvalue), *this);
@@ -8762,12 +8645,9 @@ _readField_structVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, ::test::fixtures::patch::MyDataPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyDataPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, -11>(::std::move(tvalue), *this);
@@ -8789,12 +8669,9 @@ _readField_enumVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructField10Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>, ::test::fixtures::patch::MyStructField10Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField10PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField10PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyStructField10PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructField10PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>, -10>(::std::move(tvalue), *this);
@@ -8816,12 +8693,9 @@ _readField_binaryVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BinaryPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, ::apache::thrift::op::BinaryPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BinaryPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BinaryPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>, -9>(::std::move(tvalue), *this);
@@ -8843,12 +8717,9 @@ _readField_stringVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::op::StringPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::StringPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::StringPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, -8>(::std::move(tvalue), *this);
@@ -8870,12 +8741,9 @@ _readField_doubleVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::DoublePatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>, ::apache::thrift::op::DoublePatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::DoublePatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::DoublePatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>, -7>(::std::move(tvalue), *this);
@@ -8897,12 +8765,9 @@ _readField_floatVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::FloatPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>, ::apache::thrift::op::FloatPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::FloatPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::FloatPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>, -6>(::std::move(tvalue), *this);
@@ -8924,12 +8789,9 @@ _readField_i64Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::op::I64Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I64PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I64PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, -5>(::std::move(tvalue), *this);
@@ -8951,12 +8813,9 @@ _readField_i32Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I32Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, ::apache::thrift::op::I32Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I32PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I32PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>, -4>(::std::move(tvalue), *this);
@@ -8978,12 +8837,9 @@ _readField_i16Val:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::I16Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, ::apache::thrift::op::I16Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::I16PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::I16PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, -3>(::std::move(tvalue), *this);
@@ -9005,12 +8861,9 @@ _readField_byteVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BytePatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>, ::apache::thrift::op::BytePatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BytePatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BytePatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>, -2>(::std::move(tvalue), *this);
@@ -9032,12 +8885,9 @@ _readField_boolVal:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::op::BoolPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::apache::thrift::op::BoolPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::op::BoolPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, -1>(::std::move(tvalue), *this);
@@ -9059,12 +8909,9 @@ _readField_structWithFieldCustomDefault:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, ::test::fixtures::patch::MyDataPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::MyDataPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>, 1>(::std::move(tvalue), *this);
@@ -11953,12 +11800,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, ::test::fixtures::patch::LateDefStructFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::LateDefStructFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -11993,12 +11837,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, ::test::fixtures::patch::LateDefStructFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::LateDefStructFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -12452,12 +12293,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, ::test::fixtures::patch::RecursiveFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::RecursiveFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -12492,12 +12330,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, ::test::fixtures::patch::RecursiveFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::RecursiveFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -12925,12 +12760,9 @@ _readField_nodes:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveField1Patch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, ::test::fixtures::patch::RecursiveField1Patch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveField1PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveField1PatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::RecursiveField1PatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveField1PatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>, -1>(::std::move(tvalue), *this);
@@ -13226,12 +13058,9 @@ _readField_patchPrior:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, ::test::fixtures::patch::BarFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patchPrior);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>::toThrift(this->__fbthrift_field_patchPrior), _readState);
+    } else {
       ::test::fixtures::patch::BarFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patchPrior = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, 3>(::std::move(tvalue), *this);
@@ -13266,12 +13095,9 @@ _readField_patch:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, ::test::fixtures::patch::BarFieldPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_patch);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>::toThrift(this->__fbthrift_field_patch), _readState);
+    } else {
       ::test::fixtures::patch::BarFieldPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_patch = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, 6>(::std::move(tvalue), *this);
@@ -13538,12 +13364,9 @@ _readField_loop:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::LoopPatch>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, ::test::fixtures::patch::LoopPatch>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LoopPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LoopPatchStruct>::readWithContext(*iprot, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>::toThrift(ptr.mut()), _readState);
+    } else {
       ::test::fixtures::patch::LoopPatchStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LoopPatchStruct>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>, -1>(::std::move(tvalue), *this);

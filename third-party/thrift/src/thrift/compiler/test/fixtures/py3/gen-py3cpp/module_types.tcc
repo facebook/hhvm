@@ -722,12 +722,9 @@ _readField_field1:
   {
     _readState.beforeSubobject(iprot);
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<Adapter, ::py3::simple::AdaptedTypeDef>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, Adapter::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_field1);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, Adapter::toThrift(this->__fbthrift_field_field1), _readState);
+    } else {
       ::py3::simple::SimpleStruct tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_field1 = ::apache::thrift::adapt_detail::fromThriftField<Adapter, 1>(::std::move(tvalue), *this);

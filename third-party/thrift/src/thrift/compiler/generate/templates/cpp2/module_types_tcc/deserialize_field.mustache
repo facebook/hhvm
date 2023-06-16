@@ -27,15 +27,12 @@ auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_
 <%#field:cpp_first_adapter%>
 <%#field:cpp_exactly_one_adapter?%>
 constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, <%field:cpp_type%>>::value;
-::folly::if_constexpr<hasInplaceToThrift>(
-  [&](auto& field) {
-    <%^field:cpp_ref?%><%#type:resolves_to_container?%>
-    ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(field, *this);
-    <%/type:resolves_to_container?%><%/field:cpp_ref?%>
-    <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(field), _readState);
-  },
-  [&](auto&) {})(<% > module_types_tcc/member_or_ptr%>);
-if (!hasInplaceToThrift) {
+if constexpr(hasInplaceToThrift) {
+  <%^field:cpp_ref?%><%#type:resolves_to_container?%>
+  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(<% > module_types_tcc/member_or_ptr%>, *this);
+  <%/type:resolves_to_container?%><%/field:cpp_ref?%>
+  <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(<% > module_types_tcc/member_or_ptr%>), _readState);
+} else {
 <%/field:cpp_exactly_one_adapter?%>
 <%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><%type:cpp_standard_type%> tvalue<%#type:resolves_to_container?%><%#type:cpp_use_allocator?%>(this->get_allocator())<%/type:cpp_use_allocator?%><%/type:resolves_to_container?%>;
 <%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><% > module_types_tcc/pm%>::readWithContext(*iprot, tvalue, _readState);

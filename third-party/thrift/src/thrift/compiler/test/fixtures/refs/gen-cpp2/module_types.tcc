@@ -2853,12 +2853,9 @@ _readField_field1:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, ::my::Adapter1::toThrift(ptr.mut()), _readState);
+    } else {
       ::cpp2::Empty tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 1>(::std::move(tvalue), *this);
@@ -2881,12 +2878,9 @@ _readField_field2:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, ::my::Adapter1::toThrift(ptr.mut()), _readState);
+    } else {
       ::cpp2::MyField tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 2>(::std::move(tvalue), *this);
@@ -2909,12 +2903,9 @@ _readField_field3:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, ::my::Adapter1::toThrift(ptr.mut()), _readState);
+    } else {
       ::cpp2::Empty tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::std::move(tvalue), *this);
@@ -2936,12 +2927,9 @@ _readField_field4:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>>();
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-      },
-      [&](auto&) {})(ptr.mut());
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, ::my::Adapter1::toThrift(ptr.mut()), _readState);
+    } else {
       ::cpp2::MyField tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::readWithContext(*iprot, tvalue, _readState);
       ptr.mut() = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 4>(::std::move(tvalue), *this);

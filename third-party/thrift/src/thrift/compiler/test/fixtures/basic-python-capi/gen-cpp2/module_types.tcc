@@ -802,12 +802,9 @@ _readField_normal:
 _readField_doubled:
   {
     constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::thrift::test::lib::StringDoubler, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>::value;
-    ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) {
-        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::thrift::test::lib::StringDoubler::toThrift(field), _readState);
-      },
-      [&](auto&) {})(this->__fbthrift_field_doubled);
-    if (!hasInplaceToThrift) {
+    if constexpr(hasInplaceToThrift) {
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::thrift::test::lib::StringDoubler::toThrift(this->__fbthrift_field_doubled), _readState);
+    } else {
       ::std::string tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, tvalue, _readState);
       this->__fbthrift_field_doubled = ::apache::thrift::adapt_detail::fromThriftField<::thrift::test::lib::StringDoubler, 2>(::std::move(tvalue), *this);

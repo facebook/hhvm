@@ -50,12 +50,9 @@ void RefUnion::readNoXfer(Protocol_* iprot) {
           this->set_field1();
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>();
           constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>::value;
-          ::folly::if_constexpr<hasInplaceToThrift>(
-            [&](auto& field) {
-              ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState);
-            },
-            [&](auto&) {})(*ptr);
-          if (!hasInplaceToThrift) {
+          if constexpr(hasInplaceToThrift) {
+            ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::my::Adapter1::toThrift(*ptr), _readState);
+          } else {
             ::std::string tvalue;
             ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, tvalue, _readState);
             *ptr = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 1>(::std::move(tvalue), *this);

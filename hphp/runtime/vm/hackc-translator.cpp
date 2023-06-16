@@ -1179,10 +1179,9 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   translateUserAttributes(f.attributes, userAttrs);
 
   Attr attrs = f.attrs;
-  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent));
-  if (ts.isSystemLib) {
-    attrs |= AttrUnique | AttrBuiltin;
-  }
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent &&
+                                  attrs & AttrBuiltin &&
+                                  attrs & AttrUnique));
 
   auto const name = toStaticString(f.name._0);
   ts.fe = ts.ue->newFuncEmitter(name);
@@ -1225,8 +1224,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   translateShadowedTParams(shadowedTParams, m.body.shadowed_tparams);
 
   Attr attrs = m.attrs;
-  if (ts.isSystemLib) attrs |= AttrBuiltin;
-
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrBuiltin));
   auto const name = toStaticString(m.name._0);
   ts.fe = ts.ue->newMethodEmitter(name, ts.pce);
   ts.pce->addMethod(ts.fe);
@@ -1272,8 +1270,9 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   ITRACE(2, "Translating attribute list {}\n", c.attributes.len);
   translateUserAttributes(c.attributes, userAttrs);
   auto attrs = c.flags;
-  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent));
-  if (ts.isSystemLib) attrs |= AttrUnique | AttrBuiltin;
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent &&
+                                  attrs & AttrBuiltin &&
+                                  attrs & AttrUnique));
 
   auto const parentName = maybeOrElse(c.base,
     [&](ClassName& s) { return toStaticString(s._0); },

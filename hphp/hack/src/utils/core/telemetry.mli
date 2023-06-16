@@ -70,7 +70,7 @@ val object_ : key:string -> value:t -> t -> t
 
 val object_opt : key:string -> value:t option -> t -> t
 
-val duration : ?key:string -> start_time:float -> t -> t
+val duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
 
 val float_ : key:string -> value:float -> t -> t
 

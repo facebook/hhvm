@@ -491,14 +491,14 @@ type event =
       or [Some Error _] that either the typecheck completed or hh_server failed.
       The [None] case never arises; it represents a logic bug, an unexpected close
       of the underlying [Lwt_stream.t]. All handled in [handle_errors_file_item]. *)
-  | Shell_out_hh_feature_complete of
+  | Shell_out_complete of
       ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
       * Lost_env.shellable_type)
       (** Under [--config ide_standlone=true], LSP requests for rename or
       find-refs are accomplished by kicking off an asynchronous shell-out to
       "hh --refactor" or "hh --ide-find-refs". This event signals that the
       shell-out has completed and it's now time to process the results.
-      Handled in [handle_shell_out_hh_feature]. *)
+      Handled in [handle_shell_out_complete]. *)
   | Tick
       (** Once a second, if no other events are pending, we synthesize a Tick
       event. Handled in [handle_tick]. It does things like send IDE_IDLE if
@@ -537,13 +537,13 @@ let event_to_string (event : event) : string =
       "Errors_file: %s [%s]"
       (ServerProgress.show_errors_file_error e)
       log_message
-  | Shell_out_hh_feature_complete _ -> "Shell_out_hh_feature"
+  | Shell_out_complete _ -> "Shell_out_complete"
 
 let is_tick (event : event) : bool =
   match event with
   | Tick -> true
   | Errors_file _
-  | Shell_out_hh_feature_complete _
+  | Shell_out_complete _
   | Server_hello
   | Server_message _
   | Client_message _
@@ -1058,8 +1058,7 @@ let get_next_event
     when not (Lwt.is_sleeping sh.Lost_env.process) ->
     state := Lost_server { lenv with Lost_env.current_hh_shell = None };
     let%lwt result = sh.Lost_env.process in
-    Lwt.return
-      (Shell_out_hh_feature_complete (result, sh.Lost_env.shellable_type))
+    Lwt.return (Shell_out_complete (result, sh.Lost_env.shellable_type))
   | Pre_init
   | Lost_server _
   | Post_shutdown ->
@@ -1467,6 +1466,116 @@ let get_document_location
   let file_contents = get_document_contents editor_open_files uri in
   ( { ClientIdeMessage.file_path; file_contents },
     { ClientIdeMessage.line; column } )
+
+(** Parses output of "hh --ide-find-references" and "hh --ide-go-to-impl".
+If the output is malformed, raises an exception. *)
+let shellout_locations_to_lsp_locations_exn (stdout : string) :
+    Lsp.Location.t list =
+  let json = Yojson.Safe.from_string stdout in
+  match json with
+  | `List positions ->
+    let lsp_locations =
+      List.map positions ~f:(fun pos ->
+          let open Yojson.Basic.Util in
+          let pos_json = Yojson.Safe.to_basic pos in
+          let filename = pos_json |> member "filename" |> to_string in
+          let line = pos_json |> member "line" |> to_int in
+          let char_start = pos_json |> member "char_start" |> to_int in
+          let char_end = pos_json |> member "char_end" |> to_int in
+          let pos = { filename; line; char_start; char_end } in
+          ide_shell_out_pos_to_lsp_location pos)
+    in
+    lsp_locations
+  | `Int _
+  | `Tuple _
+  | `Bool _
+  | `Intlit _
+  | `Null
+  | `Variant _
+  | `Assoc _
+  | `Float _
+  | `String _ ->
+    failwith ("Expected list, got json like " ^ stdout)
+
+(** Parses output of "hh --ide-rename-by-symbol".
+If the output is malformed, raises an exception. *)
+let shellout_patch_list_to_lsp_edits_exn (stdout : string) : Lsp.WorkspaceEdit.t
+    =
+  let json = Yojson.Safe.from_string stdout in
+  match json with
+  | `List positions ->
+    let patch_locations =
+      List.map positions ~f:(fun pos ->
+          let open Yojson.Basic.Util in
+          let lst_json = Yojson.Safe.to_basic pos in
+          let filename = lst_json |> member "filename" |> to_string in
+          let patches = lst_json |> member "patches" |> to_list in
+          let patches =
+            List.map
+              ~f:(fun x ->
+                let char_start = x |> member "col_start" |> to_int in
+                let char_end = x |> member "col_end" |> to_int in
+                let line = x |> member "line" |> to_int in
+                let patch_type = x |> member "patch_type" |> to_string in
+                let replacement = x |> member "replacement" |> to_string in
+                {
+                  filename;
+                  char_start;
+                  char_end;
+                  line;
+                  patch_type;
+                  replacement;
+                })
+              patches
+          in
+          patches)
+    in
+    let locations = List.concat patch_locations in
+    let patch_to_workspace_edit_change patch =
+      let ide_shell_out_pos =
+        {
+          filename = patch.filename;
+          char_start = patch.char_start;
+          char_end = patch.char_end + 1;
+          (* This end is inclusive for range replacement *)
+          line = patch.line;
+        }
+      in
+      match patch.patch_type with
+      | "insert"
+      | "replace" ->
+        let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+        ( File_url.create patch.filename,
+          {
+            TextEdit.range = loc.Lsp.Location.range;
+            newText = patch.replacement;
+          } )
+      | "remove" ->
+        let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+        ( File_url.create patch.filename,
+          { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
+      | e -> failwith ("invalid patch type: " ^ e)
+    in
+    let changes = List.map ~f:patch_to_workspace_edit_change locations in
+    let changes =
+      List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
+          let current_edits =
+            Option.value ~default:[] (SMap.find_opt uri acc)
+          in
+          let new_edits = text_edit :: current_edits in
+          SMap.add uri new_edits acc)
+    in
+    { WorkspaceEdit.changes }
+  | `Int _
+  | `Tuple _
+  | `Bool _
+  | `Intlit _
+  | `Null
+  | `Variant _
+  | `Assoc _
+  | `Float _
+  | `String _ ->
+    failwith ("Expected list, got json like " ^ stdout)
 
 (************************************************************************)
 (* Connection and rpc                                                   *)
@@ -3080,8 +3189,6 @@ let do_completion_local
 
 exception NoLocationFound
 
-exception InvalidIdePatchType of string
-
 let docblock_to_markdown (raw_docblock : DocblockService.result) :
     Completion.completionDocumentation option =
   match raw_docblock with
@@ -4645,119 +4752,14 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
 let respond_jsonrpc_for_shell
     (shellable_type : Lost_env.shellable_type) (stdout : string) :
     (int * Telemetry.t) option Lwt.t =
-  let parse_lsp_locations stdout : (Lsp.Location.t list, string) result =
-    let json = Yojson.Safe.from_string stdout in
-    match json with
-    | `List positions ->
-      let lsp_locations =
-        List.map positions ~f:(fun pos ->
-            let open Yojson.Basic.Util in
-            let pos_json = Yojson.Safe.to_basic pos in
-            let filename = pos_json |> member "filename" |> to_string in
-            let line = pos_json |> member "line" |> to_int in
-            let char_start = pos_json |> member "char_start" |> to_int in
-            let char_end = pos_json |> member "char_end" |> to_int in
-            let pos = { filename; line; char_start; char_end } in
-            ide_shell_out_pos_to_lsp_location pos)
-      in
-      Ok lsp_locations
-    | `Int _
-    | `Tuple _
-    | `Bool _
-    | `Intlit _
-    | `Null
-    | `Variant _
-    | `Assoc _
-    | `Float _
-    | `String _ ->
-      let str = Printf.sprintf "Expected list, got json like %s" stdout in
-      Error str
-  in
-  let parse_patch_list stdout =
-    let json = Yojson.Safe.from_string stdout in
-    match json with
-    | `List positions ->
-      let patch_locations =
-        List.map positions ~f:(fun pos ->
-            let open Yojson.Basic.Util in
-            let lst_json = Yojson.Safe.to_basic pos in
-            let filename = lst_json |> member "filename" |> to_string in
-            let patches = lst_json |> member "patches" |> to_list in
-            let patches =
-              List.map
-                ~f:(fun x ->
-                  let char_start = x |> member "col_start" |> to_int in
-                  let char_end = x |> member "col_end" |> to_int in
-                  let line = x |> member "line" |> to_int in
-                  let patch_type = x |> member "patch_type" |> to_string in
-                  let replacement = x |> member "replacement" |> to_string in
-                  {
-                    filename;
-                    char_start;
-                    char_end;
-                    line;
-                    patch_type;
-                    replacement;
-                  })
-                patches
-            in
-            patches)
-      in
-      let locations = List.concat patch_locations in
-      let patch_to_workspace_edit_change patch =
-        let ide_shell_out_pos =
-          {
-            filename = patch.filename;
-            char_start = patch.char_start;
-            char_end = patch.char_end + 1;
-            (* This end is inclusive for range replacement *)
-            line = patch.line;
-          }
-        in
-        let (uri, text_edit) =
-          match patch.patch_type with
-          | "insert"
-          | "replace" ->
-            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-            ( File_url.create patch.filename,
-              {
-                TextEdit.range = loc.Lsp.Location.range;
-                newText = patch.replacement;
-              } )
-          | "remove" ->
-            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-            ( File_url.create patch.filename,
-              { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
-          | e -> raise (InvalidIdePatchType e)
-        in
-        (uri, text_edit)
-      in
-      let changes = List.map ~f:patch_to_workspace_edit_change locations in
-      let changes =
-        List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
-            let current_edits =
-              Option.value ~default:[] (SMap.find_opt uri acc)
-            in
-            let new_edits = text_edit :: current_edits in
-            SMap.add uri new_edits acc)
-      in
-      Ok { WorkspaceEdit.changes }
-    | `Int _
-    | `Tuple _
-    | `Bool _
-    | `Intlit _
-    | `Null
-    | `Variant _
-    | `Assoc _
-    | `Float _
-    | `String _ ->
-      let str = Printf.sprintf "Expected list, got json like %s" stdout in
-      Error str
-  in
   let lsp_id = get_lsp_id_of_shell_out shellable_type in
   match shellable_type with
   | Lost_env.FindRefs { ide_calculated_refs; _ } -> begin
-    match parse_lsp_locations stdout with
+    let parsed =
+      try Ok (shellout_locations_to_lsp_locations_exn stdout) with
+      | exn -> Error (Exn.to_string exn)
+    in
+    match parsed with
     | Ok parsed_stdout_lsp_locations ->
       (* lsp_locations return a file for each position. To support unsaved, edited files
          let's discard locations for files that we previously fetched from ClientIDEDaemon.
@@ -4810,7 +4812,11 @@ let respond_jsonrpc_for_shell
       Lwt.return @@ Some (0, error_telemetry)
   end
   | Lost_env.GoToImpl _ -> begin
-    match parse_lsp_locations stdout with
+    let parsed =
+      try Ok (shellout_locations_to_lsp_locations_exn stdout) with
+      | exn -> Error (Exn.to_string exn)
+    in
+    match parsed with
     | Ok lsp_locations ->
       let () =
         respond_jsonrpc
@@ -4834,7 +4840,11 @@ let respond_jsonrpc_for_shell
       Lwt.return @@ Some (0, error_telemetry)
   end
   | Lost_env.Rename { ide_calculated_patches; _ } -> begin
-    match parse_patch_list stdout with
+    let parsed =
+      try Ok (shellout_patch_list_to_lsp_edits_exn stdout) with
+      | exn -> Error (Exn.to_string exn)
+    in
+    match parsed with
     | Ok result ->
       (* The list of patches we receive from shelling out reflect the state
          of files on disk, which is incorrect for edited files. To fix,
@@ -4885,55 +4895,33 @@ let respond_jsonrpc_for_shell
       Lwt.return @@ Some (0, error_telemetry)
   end
 
-let handle_shell_out_hh_feature
+let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
-  let telemetry =
-    match result with
-    | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
-      match%lwt respond_jsonrpc_for_shell shellable_type stdout with
-      | Some (length, telemetry) ->
-        Lwt.return
-        @@ Some
-             {
-               result_count = length;
-               result_extra_telemetry =
-                 Some
-                   (telemetry
-                   |> Telemetry.float_
-                        ~key:"duration"
-                        ~value:(end_time -. start_time));
-             }
-      | None ->
-        Lwt.return
-        @@ Some
-             {
-               result_count = 0;
-               result_extra_telemetry =
-                 Some
-                   (Telemetry.create ()
-                   |> Telemetry.float_
-                        ~key:"duration"
-                        ~value:(end_time -. start_time));
-             }
-    end
-    | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
-      Lwt.return
-      @@ Some
-           {
-             result_count = 0;
-             result_extra_telemetry =
-               Some
-                 (Telemetry.create ()
-                 |> Telemetry.float_
-                      ~key:"duration"
-                      ~value:(end_time -. start_time)
-                 |> Telemetry.string_
-                      ~key:"exn"
-                      ~value:(Lwt_utils.Process_failure.to_string e));
-           }
-  in
-  telemetry
+  match result with
+  | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } ->
+    let%lwt result = respond_jsonrpc_for_shell shellable_type stdout in
+    let (result_count, telemetry) =
+      Option.value result ~default:(0, Telemetry.create ())
+    in
+    Lwt.return
+    @@ Some
+         {
+           result_count;
+           result_extra_telemetry =
+             Some (telemetry |> Telemetry.duration ~start_time ~end_time);
+         }
+  | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
+    Lwt.return
+    @@ Some
+         {
+           result_count = 0;
+           result_extra_telemetry =
+             Some
+               (Telemetry.create ()
+               |> Telemetry.duration ~start_time ~end_time
+               |> Telemetry.error ~e:(Lwt_utils.Process_failure.to_string e));
+         }
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -5126,7 +5114,7 @@ let log_response_if_necessary
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
-  | Shell_out_hh_feature_complete (result, _) ->
+  | Shell_out_complete (result, _) ->
     let command_line =
       match result with
       | Ok Lwt_utils.Process_success.{ command_line; _ }
@@ -6741,8 +6729,8 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | Server_hello -> handle_server_hello ~state
         | Errors_file result ->
           handle_errors_file_item ~state ~ide_service result
-        | Shell_out_hh_feature_complete (result, shellable_type) ->
-          handle_shell_out_hh_feature result shellable_type
+        | Shell_out_complete (result, shellable_type) ->
+          handle_shell_out_complete result shellable_type
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

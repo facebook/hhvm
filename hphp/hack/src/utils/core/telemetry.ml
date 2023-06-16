@@ -118,9 +118,13 @@ let object_opt ~(key : string) ~(value : t option) (telemetry : t) : t =
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> object_ ~key ~value telemetry
 
-let duration ?(key : string = "duration") ~(start_time : float) (telemetry : t)
-    : t =
-  let seconds = Unix.gettimeofday () -. start_time in
+let duration
+    ?(key : string = "duration")
+    ~(start_time : float)
+    ?(end_time : float option)
+    (telemetry : t) : t =
+  let end_time = Option.value end_time ~default:(Unix.gettimeofday ()) in
+  let seconds = end_time -. start_time in
   let ms = int_of_float (1000.0 *. seconds) in
   (key, Hh_json.int_ ms) :: telemetry
 

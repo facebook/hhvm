@@ -264,7 +264,7 @@ wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::createSSLHelper(
     if (!helper) {
       return nullptr;
     }
-    if (auto parametersContext = getThriftParametersContext()) {
+    if (auto parametersContext = getThriftParametersContext(clientAddr)) {
       helper->setThriftParametersContext(
           folly::copy_to_shared_ptr(*parametersContext));
     }
@@ -290,8 +290,8 @@ bool Cpp2Worker::shouldPerformSSL(
   }
 }
 
-std::optional<ThriftParametersContext>
-Cpp2Worker::getThriftParametersContext() {
+std::optional<ThriftParametersContext> Cpp2Worker::getThriftParametersContext(
+    const folly::SocketAddress& clientAddr) {
   auto thriftConfigBase =
       folly::get_ptr(accConfig_.customConfigMap, "thrift_tls_config");
   if (!thriftConfigBase) {
@@ -305,7 +305,8 @@ Cpp2Worker::getThriftParametersContext() {
 
   auto thriftParametersContext = ThriftParametersContext();
   thriftParametersContext.setUseStopTLS(
-      thriftConfig->enableStopTLS || **ThriftServer::enableStopTLS());
+      clientAddr.getFamily() == AF_UNIX || thriftConfig->enableStopTLS ||
+      **ThriftServer::enableStopTLS());
   return thriftParametersContext;
 }
 

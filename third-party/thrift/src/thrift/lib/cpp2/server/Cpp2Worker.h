@@ -420,7 +420,8 @@ class Cpp2Worker : public IOWorkerContext,
       const std::vector<uint8_t>& bytes,
       const folly::SocketAddress& clientAddr);
 
-  std::optional<ThriftParametersContext> getThriftParametersContext();
+  std::optional<ThriftParametersContext> getThriftParametersContext(
+      const folly::SocketAddress& clientAddr);
 
   static const std::string& errorCodeFromTapplicationException(
       TApplicationException::TApplicationExceptionType exceptionType);

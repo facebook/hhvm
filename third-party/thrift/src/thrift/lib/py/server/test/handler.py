@@ -37,7 +37,7 @@ class AsyncSleepHandler(AsyncSleep.Iface):
         self._loop = loop
 
     async def echo(self, message, delay):
-        return await asyncio.sleep(delay, result=message, loop=self._loop)
+        return await asyncio.sleep(delay, result=message)
 
     async def overflow(self, value):
         # simply return the value in OverflowResult

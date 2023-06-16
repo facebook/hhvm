@@ -60,7 +60,6 @@ async def test_server_with_client(sock, loop, factory=ThriftClientProtocolFactor
     add_result = await asyncio.wait_for(
         client.add(1, 2),
         timeout=None,
-        loop=loop,
     )
     transport.close()
     protocol.close()
@@ -81,7 +80,6 @@ async def test_echo_timeout(sock, loop, factory=ThriftClientProtocolFactory):
     await asyncio.wait_for(
         client.echo("test", 30),
         timeout=None,
-        loop=loop,
     )
     transport.close()
     protocol.close()
@@ -99,7 +97,6 @@ async def test_overflow(sock, value, loop, factory=ThriftClientProtocolFactory):
     await asyncio.wait_for(
         client.overflow(value),
         timeout=None,
-        loop=loop,
     )
     transport.close()
     protocol.close()
@@ -269,7 +266,7 @@ class TAsyncioServerTest(unittest.TestCase):
         with client_manager as client:
             futures = [client.echo(str(delay), delay * 0.1) for delay in [3, 2, 1]]
             results_in_arrival_order = []
-            for f in asyncio.as_completed(futures, loop=loop):
+            for f in asyncio.as_completed(futures):
                 result = await f
                 results_in_arrival_order.append(result)
             self.assertEquals(["1", "2", "3"], results_in_arrival_order)

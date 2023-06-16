@@ -311,8 +311,6 @@ class SSLContextManager {
       const std::string& lastCertPath,
       bool firstCert) const;
 
-  void addServerContext(std::shared_ptr<ServerSSLContext> sslCtx);
-
  private:
   SSLContextManager(const SSLContextManager&) = delete;
 

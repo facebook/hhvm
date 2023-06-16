@@ -230,7 +230,6 @@ SSLContextManagerSettings& getSettings() {
 
 class SSLContextManagerForTest : public SSLContextManager {
  public:
-  using SSLContextManager::addServerContext;
   using SSLContextManager::insertSSLCtxByDomainName;
   using SSLContextManager::SSLContextManager;
 };
@@ -468,12 +467,9 @@ TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
   auto www_abc_example_com_ctx = std::make_shared<ServerSSLContext>();
 
   sslCtxMgr.insertSSLCtxByDomainName("www.example.com", www_example_com_ctx);
-  sslCtxMgr.addServerContext(www_example_com_ctx);
   sslCtxMgr.insertSSLCtxByDomainName("*.example.com", start_example_com_ctx);
-  sslCtxMgr.addServerContext(start_example_com_ctx);
   sslCtxMgr.insertSSLCtxByDomainName(
       "*.abc.example.com", start_abc_example_com_ctx);
-  sslCtxMgr.addServerContext(start_abc_example_com_ctx);
 
   shared_ptr<SSLContext> retCtx;
   retCtx = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.example.com"));
@@ -497,7 +493,6 @@ TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
 
   // Add it back and delete again but with the other API.
   sslCtxMgr.insertSSLCtxByDomainName("*.example.com", start_example_com_ctx);
-  sslCtxMgr.addServerContext(start_example_com_ctx);
   retCtx = sslCtxMgr.getSSLCtx("foo.example.com"s);
   EXPECT_TRUE(retCtx);
   sslCtxMgr.removeSSLContextConfigByDomainName("*.example.com");

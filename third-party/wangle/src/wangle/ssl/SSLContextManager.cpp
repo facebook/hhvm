@@ -217,7 +217,7 @@ void configureTicketResumption(
 }
 
 TicketSeedHandler* getTicketSeedHandler(
-    const std::shared_ptr<ServerSSLContext>& ctx) {
+    const std::shared_ptr<folly::SSLContext>& ctx) {
   if (!ctx) {
     return nullptr;
   }
@@ -273,8 +273,6 @@ class SSLContextManager::SslContexts
       std::shared_ptr<folly::SSLContext> sslCtx,
       CertCrypto certCrypto,
       bool defaultFallback);
-
-  void addServerContext(std::shared_ptr<ServerSSLContext> sslCtx);
 
   // Does feature-specific setup for OpenSSL
   void ctxSetupByOpensslFeature(
@@ -363,7 +361,6 @@ class SSLContextManager::SslContexts
 
   void insertIntoDefaultKeys(SSLContextKey key, bool overwrite);
 
-  std::vector<std::shared_ptr<ServerSSLContext>> ctxs_;
   std::vector<SSLContextKey> defaultCtxKeys_;
   std::string defaultCtxDomainName_;
   bool strict_{true};
@@ -399,13 +396,11 @@ SSLContextManager::SslContexts::create(bool strict) {
 }
 
 void SSLContextManager::SslContexts::swap(SslContexts& other) noexcept {
-  ctxs_.swap(other.ctxs_);
   defaultCtxKeys_.swap(other.defaultCtxKeys_);
   dnMap_.swap(other.dnMap_);
 }
 
 void SSLContextManager::SslContexts::clear() {
-  ctxs_.clear();
   defaultCtxKeys_.clear();
   dnMap_.clear();
 }
@@ -414,8 +409,8 @@ TLSTicketKeySeeds SSLContextManager::SslContexts::getTicketKeys() const {
   TLSTicketKeySeeds seeds;
   // This assumes that all ctxs have the same ticket seeds. Which we assume in
   // other places as well
-  for (auto& ctx : ctxs_) {
-    if (auto ticketHandler = getTicketSeedHandler(ctx)) {
+  for (auto& ctxEntry : dnMap_) {
+    if (auto ticketHandler = getTicketSeedHandler(ctxEntry.second)) {
       ticketHandler->getTLSTicketKeySeeds(
           seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
       break;
@@ -489,9 +484,6 @@ void SSLContextManager::SslContexts::removeSSLContextConfig(
 
   auto mapIt = dnMap_.find(key);
   if (mapIt != dnMap_.end()) {
-    auto vIt = std::find(ctxs_.begin(), ctxs_.end(), mapIt->second);
-    CHECK(vIt != ctxs_.end());
-    ctxs_.erase(vIt);
     dnMap_.erase(mapIt);
   }
 }
@@ -802,11 +794,6 @@ void SSLContextManager::verifyCertNames(
   }
 }
 
-void SSLContextManager::SslContexts::addServerContext(
-    std::shared_ptr<ServerSSLContext> sslCtx) {
-  ctxs_.emplace_back(sslCtx);
-}
-
 #if FOLLY_OPENSSL_HAS_SNI
 /*static*/ SSLContext::ServerNameCallbackResult
 SSLContextManager::SslContexts::serverNameCallback(
@@ -1049,8 +1036,6 @@ void SSLContextManager::SslContexts::insert(
 
   if (defaultFallback) {
     defaultCtxDomainName_ = *identity;
-  } else {
-    addServerContext(sslCtx);
   }
 }
 
@@ -1060,7 +1045,6 @@ void SSLContextManager::SslContexts::insert(
   for (const auto& sni : snis) {
     insertSSLCtxByDomainName(sni, sslCtx, CertCrypto::BEST_AVAILABLE, false);
   }
-  addServerContext(sslCtx);
 }
 
 void SSLContextManager::SslContexts::insertSSLCtxByDomainName(
@@ -1288,9 +1272,14 @@ void SSLContextManager::SslContexts::reloadTLSTicketKeys(
     const std::vector<std::string>& currentSeeds,
     const std::vector<std::string>& newSeeds) {
 #ifdef SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB
-  for (auto& ctx : ctxs_) {
-    if (auto ticketHandler = getTicketSeedHandler(ctx)) {
-      ticketHandler->setTLSTicketKeySeeds(oldSeeds, currentSeeds, newSeeds);
+  std::unordered_set<const folly::SSLContext*> seen;
+  seen.reserve(dnMap_.size());
+  for (auto& ctxEntry : dnMap_) {
+    if (seen.count(ctxEntry.second.get()) == 0) {
+      if (auto ticketHandler = getTicketSeedHandler(ctxEntry.second)) {
+        ticketHandler->setTLSTicketKeySeeds(oldSeeds, currentSeeds, newSeeds);
+      }
+      seen.emplace(ctxEntry.second.get());
     }
   }
 #endif
@@ -1427,10 +1416,5 @@ void SSLContextManager::insertSSLCtxByDomainName(
     CertCrypto certCrypto,
     bool defaultFallback) {
   contexts_->insertSSLCtxByDomainName(dn, sslCtx, certCrypto, defaultFallback);
-}
-
-void SSLContextManager::addServerContext(
-    std::shared_ptr<ServerSSLContext> sslCtx) {
-  contexts_->addServerContext(sslCtx);
 }
 } // namespace wangle

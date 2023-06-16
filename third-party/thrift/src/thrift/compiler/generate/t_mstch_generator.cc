@@ -82,9 +82,9 @@ mstch::map t_mstch_generator::dump(const t_struct& strct, bool shallow) {
       {"fields?", strct.has_fields()},
       {"fields",
        shallow ? static_cast<mstch::node>(false) : dump_elems(strct.fields())},
-      {"exception?", strct.is_xception()},
+      {"exception?", strct.is_exception()},
       {"union?", strct.is_union()},
-      {"plain?", !strct.is_xception() && !strct.is_union()},
+      {"plain?", !strct.is_exception() && !strct.is_union()},
       {"annotations", dump_elems(strct.annotations())},
   };
 
@@ -136,7 +136,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"double?", type.is_double()},
       {"float?", type.is_float()},
       {"floating_point?", type.is_floating_point()},
-      {"struct?", type.is_struct() || type.is_xception()},
+      {"struct?", type.is_struct() || type.is_exception()},
       {"union?", type.is_union()},
       {"enum?", type.is_enum()},
       {"stream?", type.is_streamresponse()},
@@ -149,7 +149,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"typedef?", type.is_typedef()},
   };
 
-  if (type.is_struct() || type.is_xception()) {
+  if (type.is_struct() || type.is_exception()) {
     // Shallow dump the struct
     result.emplace("struct", dump(dynamic_cast<const t_struct&>(type), true));
   } else if (type.is_enum()) {

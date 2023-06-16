@@ -72,7 +72,7 @@ void t_concat_generator::generate_program() {
 
   // Generate structs, exceptions, and unions in declared order
   for (const auto* object : objects) {
-    if (object->is_xception()) {
+    if (object->is_exception()) {
       generate_xception(object);
     } else {
       generate_struct(object);

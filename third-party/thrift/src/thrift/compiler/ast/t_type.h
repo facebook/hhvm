@@ -157,7 +157,6 @@ class t_type : public t_named {
   virtual bool is_enum() const { return false; }
   virtual bool is_struct() const { return false; }
   virtual bool is_union() const { return false; }
-  virtual bool is_xception() const { return is_exception(); }
   virtual bool is_exception() const { return false; }
   virtual bool is_container() const { return false; }
   virtual bool is_list() const { return false; }

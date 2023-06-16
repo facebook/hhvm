@@ -553,7 +553,7 @@ class mstch_java_struct : public mstch_struct {
     return false;
   }
   mstch::node is_as_bean() {
-    if (!struct_->is_xception() && !struct_->is_union()) {
+    if (!struct_->is_exception() && !struct_->is_union()) {
       return struct_->get_annotation("java.swift.mutable") == "true" ||
           struct_->find_structured_annotation_or_null(kJavaMutableUri);
     } else {
@@ -597,7 +597,7 @@ class mstch_java_struct : public mstch_struct {
   //  2 - there is no struct field named 'message'
   //      (since it will generate getMessage() as well)
   mstch::node needs_exception_message() {
-    return struct_->is_xception() && struct_->has_annotation("message") &&
+    return struct_->is_exception() && struct_->has_annotation("message") &&
         struct_->get_field_by_name("message") == nullptr;
   }
 };

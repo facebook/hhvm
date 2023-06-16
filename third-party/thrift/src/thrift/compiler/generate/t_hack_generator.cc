@@ -2930,7 +2930,7 @@ void t_hack_generator::generate_php_type_spec(
     // Noop, type is all we need
   } else if (t->is_enum()) {
     indent(out) << "'enum' => " << hack_name(t) << "::class,\n";
-  } else if (t->is_struct() || t->is_xception()) {
+  } else if (t->is_struct() || t->is_exception()) {
     auto sname = hack_name(t);
     if (const auto* tstruct = dynamic_cast<const t_struct*>(t)) {
       auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
@@ -3364,7 +3364,7 @@ bool t_hack_generator::field_is_nullable(
   std::string dval = "";
   const t_type* t = field->type()->get_true_type();
   if (field->default_value() != nullptr &&
-      !(t->is_struct() || t->is_xception())) {
+      !(t->is_struct() || t->is_exception())) {
     dval = render_const_value(t, field->default_value());
   } else {
     dval = render_default_value(t);
@@ -4566,7 +4566,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   std::string dval = "";
   bool is_exception = tstruct->is_exception();
   if (field.default_value() != nullptr &&
-      !(t->is_struct() || t->is_xception() || skip_custom_default)) {
+      !(t->is_struct() || t->is_exception() || skip_custom_default)) {
     dval = render_const_value(t, field.default_value());
   } else if (
       tstruct->is_exception() &&
@@ -6666,7 +6666,7 @@ std::string t_hack_generator::type_to_typehint(
     return typedef_to_typehint(ttypedef, variations);
   }
 
-  if (ttype->is_struct() || ttype->is_xception()) {
+  if (ttype->is_struct() || ttype->is_exception()) {
     std::string struct_name = hack_name(ttype);
 
     auto [wrapper, name, ns] = find_hack_wrapper(ttype, false);
@@ -7539,7 +7539,7 @@ std::string t_hack_generator::declare_field(
       } else {
         result += " = Set {}";
       }
-    } else if (type->is_struct() || type->is_xception()) {
+    } else if (type->is_struct() || type->is_exception()) {
       if (obj) {
         result += " = " + hack_name(type) + "::withDefaultValues()";
       } else {
@@ -7704,7 +7704,7 @@ std::string t_hack_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "\\TType::I32";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "\\TType::STRUCT";
   } else if (type->is_map()) {
     return "\\TType::MAP";

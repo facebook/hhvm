@@ -190,7 +190,7 @@ void t_json_generator::generate_program() {
       if (o_iter != objects.begin()) {
         f_out_ << "," << endl;
       }
-      if ((*o_iter)->is_xception()) {
+      if ((*o_iter)->is_exception()) {
         generate_xception(*o_iter);
       } else {
         generate_struct(*o_iter);
@@ -258,7 +258,7 @@ string t_json_generator::type_to_string(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "ENUM";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "STRUCT";
   } else if (type->is_map()) {
     return "MAP";
@@ -293,7 +293,7 @@ string t_json_generator::type_to_spec_args(const t_type* ttype) {
   if (ttype->is_base_type()) {
     return "null";
   } else if (
-      ttype->is_struct() || ttype->is_xception() || ttype->is_service() ||
+      ttype->is_struct() || ttype->is_exception() || ttype->is_service() ||
       ttype->is_enum() || ttype->is_typedef()) {
     string module = "";
     if (ttype->program() != program_) {
@@ -632,7 +632,7 @@ void t_json_generator::generate_struct(const t_struct* tstruct) {
   indent_up();
   print_lineno(*tstruct);
   indent(f_out_) << "\"is_exception\" : "
-                 << (tstruct->is_xception() ? "true" : "false") << "," << endl;
+                 << (tstruct->is_exception() ? "true" : "false") << "," << endl;
   indent(f_out_) << "\"is_union\" : "
                  << (tstruct->is_union() ? "true" : "false") << "," << endl;
   print_node_annotations(

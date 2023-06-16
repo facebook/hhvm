@@ -101,11 +101,11 @@ class t_cocoa_generator : public t_concat_generator {
 
   void generate_cocoa_struct(const t_struct* tstruct, bool is_exception);
   void generate_cocoa_struct_interface(
-      std::ofstream& out, const t_struct* tstruct, bool is_xception = false);
+      std::ofstream& out, const t_struct* tstruct, bool is_exception = false);
   void generate_cocoa_struct_implementation(
       std::ofstream& out,
       const t_struct* tstruct,
-      bool is_xception = false,
+      bool is_exception = false,
       bool is_result = false);
   void generate_cocoa_struct_initializer_signature(
       std::ofstream& out, const t_struct* tstruct);
@@ -243,7 +243,7 @@ class t_cocoa_generator : public t_concat_generator {
     ttype = ttype->get_true_type();
 
     return ttype->is_container() || ttype->is_struct() ||
-        ttype->is_xception() || ttype->is_string_or_binary();
+        ttype->is_exception() || ttype->is_string_or_binary();
   }
 
  private:
@@ -2187,7 +2187,7 @@ void t_cocoa_generator::generate_deserialize_field(
         "CANNOT GENERATE DESERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, fieldName);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, fieldName);
@@ -2448,7 +2448,7 @@ void t_cocoa_generator::generate_serialize_field(
         "CANNOT GENERATE SERIALIZE CODE FOR void TYPE: " + tfield->name());
   }
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_serialize_struct(out, (t_struct*)type, fieldName);
   } else if (type->is_container()) {
     generate_serialize_container(out, type, fieldName);
@@ -2758,7 +2758,7 @@ void t_cocoa_generator::print_const_value(
     out << name << " = " << render_const_value(out, type, value) << ";"
         << std::endl
         << std::endl;
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     const auto* as_struct = static_cast<const t_struct*>(type);
     if (defval) {
       out << type_name(type) << " ";
@@ -2942,7 +2942,7 @@ std::string t_cocoa_generator::render_const_value(std::string name,
     }
   } else if (type->is_enum()) {
     render << value->get_integer();
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     const auto* as_struct = std::static_cast<const t_struct*>(type);
     if (value->get_map().empty()) {
       render << "[[" << type_name(type, true) << " alloc] init";
@@ -3139,7 +3139,7 @@ std::string t_cocoa_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "TType_I32";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "TType_STRUCT";
   } else if (type->is_map()) {
     return "TType_MAP";
@@ -3183,7 +3183,7 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "%i";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "%@";
   } else if (type->is_map()) {
     return "%@";

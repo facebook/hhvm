@@ -278,7 +278,7 @@ class t_java_deprecated_generator : public t_concat_generator {
     ttype = ttype->get_true_type();
 
     return generate_boxed_primitive || ttype->is_container() ||
-        ttype->is_struct() || ttype->is_xception() ||
+        ttype->is_struct() || ttype->is_exception() ||
         ttype->is_string_or_binary() || ttype->is_enum();
   }
 

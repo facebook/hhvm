@@ -74,7 +74,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
 
 bool is_complex_return(const t_type* type) {
   return type->is_container() || type->is_string_or_binary() ||
-      type->is_struct() || type->is_xception();
+      type->is_struct() || type->is_exception();
 }
 
 bool same_types(const t_type* a, const t_type* b) {
@@ -197,7 +197,7 @@ bool should_mangle_field_storage_name_in_struct(const t_struct& s) {
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
-  return type->is_container() || type->is_struct() || type->is_xception();
+  return type->is_container() || type->is_struct() || type->is_exception();
 }
 
 class cpp2_generator_context {
@@ -330,7 +330,7 @@ class cpp_mstch_program : public mstch_program {
       const t_type* alias = i->get_type();
       if (alias->is_typedef() && alias->has_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
-        if ((ttype->is_struct() || ttype->is_xception()) &&
+        if ((ttype->is_struct() || ttype->is_exception()) &&
             !gen::cpp::type_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
         }

@@ -280,7 +280,7 @@ bool is_orderable_walk(
                         memo, next, &type, context, enabledReflection) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
-  } else if (type.is_struct() || type.is_xception()) {
+  } else if (type.is_struct() || type.is_exception()) {
     const auto& as_struct = static_cast<t_struct const&>(type);
     return result = std::all_of(
                as_struct.fields().begin(),
@@ -635,7 +635,7 @@ bool deprecated_terse_writes(const t_field* field) {
   auto t = field->get_type()->get_true_type();
   return field->get_req() == t_field::e_req::opt_in_req_out &&
       (is_cpp_ref_unique_either(field) ||
-       (!t->is_struct() && !t->is_xception()));
+       (!t->is_struct() && !t->is_exception()));
 }
 
 t_field_id get_internal_injected_field_id(t_field_id id) {

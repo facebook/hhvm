@@ -649,7 +649,7 @@ class py3_mstch_type : public mstch_type {
   mstch::node resolves_to_complex_return() {
     return resolved_type_->is_container() ||
         resolved_type_->is_string_or_binary() || resolved_type_->is_struct() ||
-        resolved_type_->is_xception();
+        resolved_type_->is_exception();
   }
 
   const std::string& get_flat_name() const { return cached_props_.flatName; }

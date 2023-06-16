@@ -72,7 +72,6 @@ class t_exception : public t_struct {
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:
-  bool is_xception() const override { return is_exception(); }
   bool is_exception() const override { return true; }
 
  private:

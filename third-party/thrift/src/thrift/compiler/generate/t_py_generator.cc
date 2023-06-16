@@ -138,7 +138,7 @@ class t_py_generator : public t_concat_generator {
   void generate_py_struct_definition(
       std::ofstream& out,
       const t_struct* tstruct,
-      bool is_xception = false,
+      bool is_exception = false,
       bool is_result = false);
   void generate_py_struct_reader(std::ofstream& out, const t_struct* tstruct);
   void generate_py_struct_writer(std::ofstream& out, const t_struct* tstruct);
@@ -398,7 +398,7 @@ void t_py_generator::generate_json_field(
   string name = prefix_thrift + rename_reserved_keywords(tfield->get_name()) +
       suffix_thrift;
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_json_struct(out, (t_struct*)type, name, prefix_json);
   } else if (type->is_container()) {
     generate_json_container(out, (t_container*)type, name, prefix_json);
@@ -987,7 +987,7 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
     f_types_ << varname << " = " << *adapter << ".Type" << endl;
   } else if (
       type->is_typedef() || type->is_enum() || type->is_struct() ||
-      type->is_xception()) {
+      type->is_exception()) {
     f_types_ << varname << " = " << type_name(type) << endl;
   } else {
     // Emit dummy symbols for other type names, because otherwise a typedef
@@ -1127,7 +1127,7 @@ string t_py_generator::render_const_value(
     }
   } else if (type->is_enum()) {
     indent(out) << value->get_integer();
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     out << rename_reserved_keywords(type_name(type)) << "(**{" << endl;
     indent_up();
     const vector<t_field*>& fields = ((t_struct*)type)->get_members();
@@ -1204,7 +1204,7 @@ string t_py_generator::render_const_value(
 
 void t_py_generator::generate_forward_declaration(const t_struct* tstruct) {
   if (!tstruct->is_union()) {
-    generate_py_struct(tstruct, tstruct->is_xception());
+    generate_py_struct(tstruct, tstruct->is_exception());
   } else {
     generate_py_union(f_types_, tstruct);
   }
@@ -3141,7 +3141,7 @@ void t_py_generator::generate_deserialize_field(
 
   string name = prefix + rename_reserved_keywords(tfield->get_name());
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, name);
@@ -3366,7 +3366,7 @@ void t_py_generator::generate_serialize_field(
     indent(out) << name << " = " << *adapter << ".to_thrift(" << real_name
                 << ")" << endl;
   }
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_serialize_struct(out, (t_struct*)type, name);
   } else if (type->is_container()) {
     generate_serialize_container(out, type, name);
@@ -3728,7 +3728,7 @@ string t_py_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "TType.I32";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "TType.STRUCT";
   } else if (type->is_map()) {
     return "TType.MAP";
@@ -3763,7 +3763,7 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
       ret += ", " + *adapter;
     }
     return ret + "]";
-  } else if (ttype->is_xception()) {
+  } else if (ttype->is_exception()) {
     return "[" + type_name(ttype) + ", " + type_name(ttype) +
         ".thrift_spec, False]";
   } else if (ttype->is_map()) {

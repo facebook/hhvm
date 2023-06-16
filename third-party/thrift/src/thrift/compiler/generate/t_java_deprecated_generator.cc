@@ -330,7 +330,7 @@ void t_java_deprecated_generator::print_const_value(
     out << name << " = " << render_const_value(out, name, type, value) << ";"
         << endl
         << endl;
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     const vector<t_field*>& fields = ((t_struct*)type)->get_members();
     vector<t_field*>::const_iterator f_iter;
     const vector<pair<t_const_value*, t_const_value*>>& val = value->get_map();
@@ -2270,7 +2270,7 @@ std::string t_java_deprecated_generator::get_java_type_string(
     return "TType.MAP";
   } else if (type->is_set()) {
     return "TType.SET";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "TType.STRUCT";
   } else if (type->is_enum()) {
     return "TType.I32";
@@ -3247,7 +3247,7 @@ void t_java_deprecated_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, name);
@@ -3466,7 +3466,7 @@ void t_java_deprecated_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_serialize_struct(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is_container()) {
@@ -3925,7 +3925,7 @@ string t_java_deprecated_generator::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "TType.I32";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "TType.STRUCT";
   } else if (type->is_map()) {
     return "TType.MAP";
@@ -4117,7 +4117,7 @@ bool t_java_deprecated_generator::is_comparable(
     bool ret = struct_has_all_comparable_fields((t_struct*)type, enclosing);
     enclosing->pop_back();
     return ret;
-  } else if (type->is_xception()) {
+  } else if (type->is_exception()) {
     // There's no particular reason this wouldn't work exactly the same
     // as it does for structs. I'm not sure we actually want exceptions
     // to be Comparable though: in addition to the fields we have, which
@@ -4158,7 +4158,7 @@ bool t_java_deprecated_generator::type_has_naked_binary(const t_type* type) {
     return type->is_binary();
   } else if (type->is_enum()) {
     return false;
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return false;
   } else if (type->is_map()) {
     return type_has_naked_binary(((t_map*)type)->get_key_type()) ||

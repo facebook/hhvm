@@ -77,7 +77,7 @@ class t_js_generator : public t_concat_generator {
   void generate_js_struct_definition(
       std::ofstream& out,
       const t_struct* tstruct,
-      bool is_xception = false,
+      bool is_exception = false,
       bool is_exported = true,
       const std::string& namePrefix = "");
   void generate_js_struct_reader(
@@ -406,7 +406,7 @@ string t_js_generator::render_const_value(
     }
   } else if (type->is_enum()) {
     out << value->get_integer();
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     out << "new " << js_type_namespace(type->program()) << type->get_name()
         << "({" << endl;
     indent_up();
@@ -539,7 +539,7 @@ void t_js_generator::generate_js_struct_definition(
     string dval = declare_field(*m_iter, false, true);
     const t_type* t = (*m_iter)->get_type()->get_true_type();
     if ((*m_iter)->get_value() != nullptr &&
-        !(t->is_struct() || t->is_xception())) {
+        !(t->is_struct() || t->is_exception())) {
       dval = render_const_value((*m_iter)->get_type(), (*m_iter)->get_value());
       out << indent() << "this." << (*m_iter)->get_name() << " = " << dval
           << ";" << endl;
@@ -553,7 +553,7 @@ void t_js_generator::generate_js_struct_definition(
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
       if ((*m_iter)->get_value() != nullptr &&
-          (t->is_struct() || t->is_xception())) {
+          (t->is_struct() || t->is_exception())) {
         indent(out) << "this." << (*m_iter)->get_name() << " = "
                     << render_const_value(t, (*m_iter)->get_value()) << ";"
                     << endl;
@@ -563,7 +563,7 @@ void t_js_generator::generate_js_struct_definition(
     // Early returns for exceptions
     for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
       const t_type* t = (*m_iter)->get_type()->get_true_type();
-      if (t->is_xception()) {
+      if (t->is_exception()) {
         out << indent() << "if (args instanceof "
             << js_type_namespace(t->program()) << t->get_name() << ") {" << endl
             << indent() << indent() << "this." << (*m_iter)->get_name()
@@ -1247,7 +1247,7 @@ void t_js_generator::generate_deserialize_field(
 
   string name = prefix + tfield->get_name();
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_deserialize_struct(out, (t_struct*)type, name);
   } else if (type->is_container()) {
     generate_deserialize_container(out, type, name);
@@ -1459,7 +1459,7 @@ void t_js_generator::generate_serialize_field(
         tfield->get_name());
   }
 
-  if (type->is_struct() || type->is_xception()) {
+  if (type->is_struct() || type->is_exception()) {
     generate_serialize_struct(
         out, (t_struct*)type, prefix + tfield->get_name());
   } else if (type->is_container()) {
@@ -1674,7 +1674,7 @@ string t_js_generator::declare_field(
       result += " = null";
     } else if (type->is_container()) {
       result += " = null";
-    } else if (type->is_struct() || type->is_xception()) {
+    } else if (type->is_struct() || type->is_exception()) {
       if (obj) {
         result += " = new " + js_type_namespace(type->program()) +
             type->get_name() + "()";
@@ -1766,7 +1766,7 @@ string t_js_generator ::type_to_enum(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "Thrift.Type.I32";
-  } else if (type->is_struct() || type->is_xception()) {
+  } else if (type->is_struct() || type->is_exception()) {
     return "Thrift.Type.STRUCT";
   } else if (type->is_map()) {
     return "Thrift.Type.MAP";

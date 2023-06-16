@@ -259,11 +259,16 @@ wangle::AcceptorHandshakeHelper::UniquePtr Cpp2Worker::createSSLHelper(
     std::chrono::steady_clock::time_point acceptTime,
     wangle::TransportInfo& tInfo) {
   if (accConfig_.fizzConfig.enableFizz) {
+    auto helper =
+        fizzPeeker_.getThriftHelper(bytes, clientAddr, acceptTime, tInfo);
+    if (!helper) {
+      return nullptr;
+    }
     if (auto parametersContext = getThriftParametersContext()) {
-      fizzPeeker_.setThriftParametersContext(
+      helper->setThriftParametersContext(
           folly::copy_to_shared_ptr(*parametersContext));
     }
-    return getFizzPeeker()->getHelper(bytes, clientAddr, acceptTime, tInfo);
+    return helper;
   }
   return defaultPeekingCallback_.getHelper(
       bytes, clientAddr, acceptTime, tInfo);

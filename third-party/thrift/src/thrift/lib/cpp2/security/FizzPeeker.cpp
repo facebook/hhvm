@@ -106,6 +106,15 @@ void ThriftFizzAcceptorHandshakeHelper::stopTLSSuccess(
 }
 
 wangle::AcceptorHandshakeHelper::UniquePtr FizzPeeker::getHelper(
+    const std::vector<uint8_t>& bytes,
+    const folly::SocketAddress& clientAddr,
+    std::chrono::steady_clock::time_point acceptTime,
+    wangle::TransportInfo& tinfo) {
+  return getThriftHelper(bytes, clientAddr, acceptTime, tinfo);
+}
+
+folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>
+FizzPeeker::getThriftHelper(
     const std::vector<uint8_t>& /* bytes */,
     const folly::SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
@@ -114,16 +123,14 @@ wangle::AcceptorHandshakeHelper::UniquePtr FizzPeeker::getHelper(
     return nullptr;
   }
   auto optionsCopy = options_;
-  return wangle::AcceptorHandshakeHelper::UniquePtr(
+  return folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>(
       new ThriftFizzAcceptorHandshakeHelper(
           context_,
           clientAddr,
           acceptTime,
           tinfo,
           std::move(optionsCopy),
-          thriftParametersContext_,
           transportOptions_));
 }
-
 } // namespace thrift
 } // namespace apache

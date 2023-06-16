@@ -1,5 +1,33 @@
 Code actions available:
 ------------------------------------------
 Inline variable $the_variable (CodeActionKind: refactor)
+Add local type hint (CodeActionKind: refactor) SELECTED
 
-No code action titles match prefix: Add local type hint
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"let $x : int ",
+          "range":{"end":{"character":4,"line":6},"start":{"character":2,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add local type hint"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file:__EnableUnstableFeatures('typed_local_variables')>>
+
+function f() : void {
+  $the_variable = 3;
+  // Offer refactroing to add type hint for $x
+  let $x : int  = /*range-start*/$the_variable/*range-end*/;
+}

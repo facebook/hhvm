@@ -1,1 +1,31 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Add local type hint (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"let $the_variable : int ",
+          "range":{"end":{"character":30,"line":5},"start":{"character":17,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add local type hint"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file:__EnableUnstableFeatures('typed_local_variables')>>
+
+function f() : void {
+  // convert to `let $the_variable: int = 1;`
+  /*range-start*/let $the_variable : int  = 1;/*range-end*/
+}

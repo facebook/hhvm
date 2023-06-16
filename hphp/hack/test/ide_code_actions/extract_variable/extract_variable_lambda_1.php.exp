@@ -1,1 +1,5 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Add local type hint (CodeActionKind: refactor)
+
+No code action titles match prefix: Extract into variable

@@ -1,5 +1,6 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: refactor)
+Add local type hint (CodeActionKind: refactor)
 
 No code action titles match prefix: Extract shape type

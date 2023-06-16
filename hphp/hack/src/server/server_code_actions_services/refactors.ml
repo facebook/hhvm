@@ -18,3 +18,4 @@ let find ~entry ~(range : Lsp.range) ctx =
   @ Extract_classish.find ~entry ~range ctx
   @ Extract_shape_type.find ~entry ~range ctx
   @ Flip_around_comma.find ~entry ~range ctx
+  @ Add_local_type_hint.find ~entry ~range ctx

@@ -6,6 +6,7 @@
  */
 
 use std::io;
+use std::io::IsTerminal;
 use std::io::Stdout;
 use std::io::Write;
 
@@ -58,7 +59,7 @@ impl Stream {
     }
 
     pub fn new(hostname: Option<String>) -> Self {
-        if atty::isnt(atty::Stream::Stdout) {
+        if !std::io::stdout().is_terminal() {
             Self::new_stdout()
         } else if let Ok(reporter) = FbReporter::new(hostname) {
             Self::Child(reporter)
@@ -72,7 +73,7 @@ impl Stream {
         if let Self::Child(_) = self {
             true
         } else {
-            atty::isnt(atty::Stream::Stdout)
+            !std::io::stdout().is_terminal()
         }
     }
 

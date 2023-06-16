@@ -9,7 +9,6 @@ edition = "2021"
 [dependencies]
 ahash = "0.8"
 anyhow = "1.0.65"
-atty = "0.2"
 duct = "0.13.6"
 jwalk = "0.6"
 serde = { version = "1.0.136", features = ["derive", "rc"] }

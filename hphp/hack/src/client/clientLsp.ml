@@ -2522,6 +2522,7 @@ let kickoff_shell_out_and_maybe_cancel
     let process =
       Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
     in
+    log "kickoff_shell_out: %s" (String.concat ~sep:" " (Array.to_list cmd));
     Lwt.return
       (Lost_server
          {

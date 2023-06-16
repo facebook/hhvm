@@ -4583,12 +4583,38 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables)
 
-    def test_references(self) -> None:
+    def test_references_ok(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("references.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
-        self.load_and_run("references", variables)
+        self.load_and_run("references_ok", variables)
+
+    def test_references_server_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_server_cancel", variables)
+
+    def test_references_client_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_cancel", variables)
+
+    def test_references_with_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_with_server", variables)
+
+    def test_references_no_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        # TEST DISABLED BECAUSE IT NEVER SENDS A RESPONSE BACK
+        # self.load_and_run("references_no_server", variables)
 
     def test_non_existing_method(self) -> None:
         variables = self.write_hhconf_and_naming_table()

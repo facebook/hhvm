@@ -81,7 +81,8 @@ let edit_of_candidate ~path { lhs_var; lhs_type; lhs_pos } : Lsp.WorkspaceEdit.t
 
 let to_refactor ~path candidate =
   let edit = lazy (edit_of_candidate ~path candidate) in
-  Code_action_types.Refactor.{ title = "Add local type hint"; edit }
+  let title = Printf.sprintf "Add local type hint for %s" candidate.lhs_var in
+  Code_action_types.Refactor.{ title; edit }
 
 let has_typed_local_variables_enabled root_node =
   let open Full_fidelity_positioned_syntax in

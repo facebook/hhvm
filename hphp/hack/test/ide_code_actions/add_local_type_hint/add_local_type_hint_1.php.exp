@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Add local type hint (CodeActionKind: refactor) SELECTED
+Add local type hint for $the_variable (CodeActionKind: refactor) SELECTED
 
 JSON for selected code action:
 ------------------------------------------
@@ -17,7 +17,7 @@ JSON for selected code action:
     }
   },
   "kind":"refactor",
-  "title":"Add local type hint"
+  "title":"Add local type hint for $the_variable"
 }
 
 Applied edit for code action:
@@ -29,3 +29,4 @@ function f() : void {
   // convert to `let $the_variable: int = 1;`
   /*range-start*/let $the_variable : int /*range-end*/ = 1;
 }
+

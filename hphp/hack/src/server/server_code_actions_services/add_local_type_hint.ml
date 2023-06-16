@@ -83,13 +83,57 @@ let to_refactor ~path candidate =
   let edit = lazy (edit_of_candidate ~path candidate) in
   Code_action_types.Refactor.{ title = "Add local type hint"; edit }
 
+let has_typed_local_variables_enabled root_node =
+  let open Full_fidelity_positioned_syntax in
+  let skip_traversal n =
+    Full_fidelity_positioned_syntax.(
+      is_classish_declaration n
+      || is_classish_body n
+      || is_methodish_declaration n
+      || is_methodish_trait_resolution n
+      || is_function_declaration n
+      || is_function_declaration_header n)
+  in
+  let has_file_attr kwrd attrs =
+    String.equal kwrd "file"
+    && String.is_substring attrs ~substring:"EnableUnstableFeatures"
+    && String.is_substring attrs ~substring:"typed_local_variables"
+  in
+  let rec aux nodes =
+    match nodes with
+    | [] -> false
+    | [] :: nss -> aux nss
+    | (n :: ns) :: nss ->
+      (match n.syntax with
+      | FileAttributeSpecification r ->
+        if
+          has_file_attr
+            (text r.file_attribute_specification_keyword)
+            (text r.file_attribute_specification_attributes)
+        then
+          true
+        else
+          aux (ns :: nss)
+      | _ ->
+        if skip_traversal n then
+          aux (ns :: nss)
+        else
+          aux (children n :: ns :: nss))
+  in
+  aux [[root_node]]
+
 let find ~entry ~(range : Lsp.range) ctx =
   let source_text = Ast_provider.compute_source_text ~entry in
-  let line_to_offset line =
-    Full_fidelity_source_text.position_to_offset source_text (line, 0)
-  in
-  let path = entry.Provider_context.path in
-  let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-  find_candidate ~selection ~entry ctx
-  |> Option.map ~f:(to_refactor ~path)
-  |> Option.to_list
+  let cst = Ast_provider.compute_cst ~ctx ~entry in
+  let root_node = Provider_context.PositionedSyntaxTree.root cst in
+  if has_typed_local_variables_enabled root_node then
+    let line_to_offset line =
+      Full_fidelity_source_text.position_to_offset source_text (line, 0)
+    in
+    let path = entry.Provider_context.path in
+    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
+    find_candidate ~selection ~entry ctx
+    |> Option.map ~f:(to_refactor ~path)
+    |> Option.to_list
+  else
+    []

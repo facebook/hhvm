@@ -2,9 +2,8 @@
  (name custom_error_types)
  (wrapped false)
  (preprocess
-  (pps ppx_deriving.std ppx_yojson_conv ppx_compare ppx_sexp_conv))
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv))
  (modules
-   can_validate
    custom_error
    custom_error_config
    error_message
@@ -14,13 +13,31 @@
    patt_name
    patt_string
    patt_var
-   validated
-   validation_env
    validation_err
    )
  (libraries
   core_kernel
-  ))
+  relative_path
+  )
+ (foreign_archives custom_error_config_ffi))
+
+(library
+ (name custom_error_config_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives custom_error_config_ffi))
+
+(rule
+ (targets libcustom_error_config_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   custom_error_config_ffi
+   custom_error_config_ffi)))
+
 
 (library
  (name custom_error_eval)

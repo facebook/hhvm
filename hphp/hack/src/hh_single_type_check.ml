@@ -194,26 +194,18 @@ let comma_string_to_iset (s : string) : ISet.t =
   Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
 
 let load_and_parse_custom_error_config path =
-  if not @@ Sys.file_exists path then
+  match Custom_error_config.initialize (`Absolute path) with
+  | Ok (cfg, bad_rules) ->
+    if not @@ List.is_empty bad_rules then
+      eprintf
+        "Encountered invalid rules with loading custom error config: \n %s\n"
+      @@ String.concat ~sep:"\n" bad_rules;
+    Some cfg
+  | Error msg ->
+    eprintf
+      "Encountered and error when loading custom error config: \n %s\n"
+      msg;
     None
-  else
-    let ch = Sys_utils.open_in_no_fail path in
-    let cfg_opt =
-      match Custom_error_config.initialize ch with
-      | Ok (cfg, errs) ->
-        if not @@ List.is_empty errs then
-          eprintf
-            "Encountered invalid rules with loading custom error config: \n %s"
-          @@ String.concat ~sep:"\n" errs;
-        Some cfg
-      | Error json_error ->
-        eprintf
-          "Encountered and error when loading custom error config: \n %s"
-          json_error;
-        None
-    in
-    Sys_utils.close_in_no_fail "hh_single_type_check custom error config" ch;
-    cfg_opt
 
 let parse_options () =
   let fn_ref = ref [] in

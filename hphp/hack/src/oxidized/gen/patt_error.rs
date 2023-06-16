@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<82deed33a2357cc3cc7ba5befb91a1fd>>
+// @generated SignedSource<<c5592265f8d5e918ba1feb0a4b5de323>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -167,7 +167,7 @@ arena_deserializer::impl_deserialize_in_arena!(Callback);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (eq, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum ReasonsCallback {
     #[rust_to_ocaml(name = "Any_reasons_callback")]

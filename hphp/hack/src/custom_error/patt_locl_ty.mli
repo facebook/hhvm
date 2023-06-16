@@ -87,6 +87,4 @@ and shape_label =
       cls_nm: string;
       cnst_nm: string;
     }
-[@@deriving compare, eq, sexp, show, yojson]
-
-include Can_validate.S with type t := t
+[@@deriving compare, eq, sexp, show]

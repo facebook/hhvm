@@ -7,4 +7,4 @@
  *)
 open Core
 
-type t = string [@@deriving compare, eq, sexp, show, yojson]
+type t = string [@@deriving compare, eq, sexp, show]

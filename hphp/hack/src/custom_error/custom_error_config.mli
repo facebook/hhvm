@@ -6,8 +6,10 @@
  *
  *)
 
-type t = { custom_errors: Custom_error.t list } [@@deriving eq, show, yojson]
+type t = { custom_errors: Custom_error.t list } [@@deriving eq, show]
 
 val empty : t
 
-val initialize : in_channel -> (t * string list, string) result
+val initialize :
+  [ `Absolute of string | `Relative of Relative_path.t ] ->
+  (t * string list, string) result

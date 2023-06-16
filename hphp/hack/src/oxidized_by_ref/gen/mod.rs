@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d41d4334e4e5c1352f631fcc017d7272>>
+// @generated SignedSource<<9f072f8c3bcc6d2b481c2cd3f7578681>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,6 +35,5 @@ pub mod shallow_decl_defs;
 pub mod typing_defs;
 pub mod typing_defs_core;
 pub mod typing_reason;
-pub mod validated;
 pub mod validation_err;
 pub mod xhp_attribute;

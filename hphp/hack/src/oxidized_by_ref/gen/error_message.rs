@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cee4932fa44189e75eb0151eec10d5ea>>
+// @generated SignedSource<<4dc517f09c9acf71e5cd9bb3d3d5b3eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,7 +35,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum Elem<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -66,7 +66,7 @@ arena_deserializer::impl_deserialize_in_arena!(Elem<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ErrorMessage<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

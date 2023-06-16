@@ -10,4 +10,4 @@
 type t =
   | Name
   | Ty
-[@@deriving compare, eq, sexp, show, yojson]
+[@@deriving compare, eq, sexp, show]

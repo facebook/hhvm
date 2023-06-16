@@ -4,6 +4,7 @@ members = [
     "arena_trait",
     "asdl_to_rust/lrgen",
     "client/ide_service/cargo/rust_batch_index_ffi",
+    "custom_error/cargo/custom_error_config_ffi",
     "decl/cargo/rust_decl_ffi",
     "decl/direct_decl_smart_constructors",
     "deps/cargo/deps_rust",

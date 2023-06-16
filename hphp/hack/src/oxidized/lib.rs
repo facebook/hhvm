@@ -2,7 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+#![feature(box_patterns)]
+#![feature(drain_filter)]
 #[macro_use]
 extern crate rust_to_ocaml_attr;
 
@@ -22,6 +23,7 @@ pub use manual::aast;
 pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
 pub use manual::ast_defs_impl;
+pub use manual::custom_error_config_impl;
 pub use manual::global_options_impl;
 pub use manual::i_map;
 pub use manual::i_set;
@@ -102,6 +104,5 @@ pub use gen::typing_kinding_defs;
 pub use gen::typing_reason;
 pub use gen::typing_tyvar_occurrences;
 pub use gen::user_error;
-pub use gen::validated;
 pub use gen::validation_err;
 pub use gen::xhp_attribute;

@@ -10,8 +10,6 @@ type elem =
   | Lit of string
   | Ty_var of Patt_var.t
   | Name_var of Patt_var.t
-[@@deriving eq, show, yojson]
+[@@deriving eq, show]
 
-type t = { message: elem list } [@@deriving eq, show, yojson]
-
-include Can_validate.S with type t := t
+type t = { message: elem list } [@@deriving eq, show]

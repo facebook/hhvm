@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e14cb2398ac7da8bbe2c57eb0fd5bdfb>>
+// @generated SignedSource<<acf24b460a12454a077abf53cc96851c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,7 +37,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show)")]
 #[repr(u8)]
 pub enum PattBindingTy {
     Name,

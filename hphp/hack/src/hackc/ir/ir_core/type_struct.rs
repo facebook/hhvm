@@ -44,11 +44,11 @@ impl TypeStruct {
         let dv = tv.get_dict()?;
         let kind_key = ArrayKey::String(strings.intern_str("kind"));
         let kind = dv.get(&kind_key)?.get_int()?;
-        if kind == TypeStructureKind::T_null.into() {
+        if kind == i64::from(TypeStructureKind::T_null) {
             Some(TypeStruct::Null)
-        } else if kind == TypeStructureKind::T_nonnull.into() {
+        } else if kind == i64::from(TypeStructureKind::T_nonnull) {
             Some(TypeStruct::Nonnull)
-        } else if kind == TypeStructureKind::T_unresolved.into() {
+        } else if kind == i64::from(TypeStructureKind::T_unresolved) {
             let classname_key = ArrayKey::String(strings.intern_str("classname"));
             let classname = dv.get(&classname_key)?.get_string()?;
             let classname = strings.lookup_bytes_or_none(classname)?;

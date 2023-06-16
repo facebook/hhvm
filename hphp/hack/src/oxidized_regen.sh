@@ -52,7 +52,6 @@ summary "Write oxidized/gen/"
   hphp/hack/src/custom_error/patt_name.ml                                     \
   hphp/hack/src/custom_error/patt_string.ml                                   \
   hphp/hack/src/custom_error/patt_var.ml                                      \
-  hphp/hack/src/custom_error/validated.ml                                     \
   hphp/hack/src/custom_error/validation_err.ml                                \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
@@ -161,7 +160,6 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/custom_error/patt_name.ml                                     \
   hphp/hack/src/custom_error/patt_string.ml                                   \
   hphp/hack/src/custom_error/patt_var.ml                                      \
-  hphp/hack/src/custom_error/validated.ml                                     \
   hphp/hack/src/custom_error/validation_err.ml                                \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \

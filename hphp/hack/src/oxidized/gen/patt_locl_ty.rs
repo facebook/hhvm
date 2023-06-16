@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0469f8ebec2130798215afea9dad10df>>
+// @generated SignedSource<<d8f37fdd1f7d06a03fdce08710c86926>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -19,7 +19,6 @@ use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub use crate::validated as v;
 #[allow(unused_imports)]
 use crate::*;
 
@@ -192,7 +191,7 @@ pub struct ShapeField {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show)")]
 #[repr(C, u8)]
 pub enum ShapeLabel {
     StrLbl(String),

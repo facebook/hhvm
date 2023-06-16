@@ -7,7 +7,6 @@
  *)
 [@@@warning "-66"]
 
-module V = Validated
 open Core
 
 type t =
@@ -31,14 +30,4 @@ and namespace =
       prefix: namespace;
       elt: Patt_string.t;
     }
-[@@deriving compare, eq, sexp, show, yojson]
-
-let validate ?(env = Validation_env.empty) t =
-  match t with
-  | As { lbl; _ } ->
-    (match Validation_env.add ~key:lbl ~data:Patt_binding_ty.Name env with
-    | Error env ->
-      ( V.invalid (Invalid { errs = [Validation_err.Shadowed lbl]; patt = t }),
-        env )
-    | Ok env -> (V.valid t, env))
-  | _ -> (V.valid t, env)
+[@@deriving compare, eq, sexp, show]

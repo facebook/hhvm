@@ -41,6 +41,4 @@ and secondary =
 
 and callback = Any_callback
 
-and reasons_callback = Any_reasons_callback [@@deriving eq, show, yojson]
-
-include Can_validate.S with type t := t
+and reasons_callback = Any_reasons_callback [@@deriving eq, show]

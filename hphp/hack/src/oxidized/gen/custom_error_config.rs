@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<661603ad8925de807755aaa69a3d189a>>
+// @generated SignedSource<<9db1f4aaa63a74dbbef2186842f1c6c8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,7 +33,8 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(attr = "boxed")]
 #[repr(C)]
 pub struct CustomErrorConfig {
     pub custom_errors: Vec<custom_error::CustomError>,

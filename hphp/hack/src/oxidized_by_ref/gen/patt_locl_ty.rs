@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4b18928ca01435a3778c0b8049278ff4>>
+// @generated SignedSource<<e95a5ef8ef6ac2ee707fdfa4bcf42b2d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,7 +18,6 @@ use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-pub use crate::validated as v;
 #[allow(unused_imports)]
 use crate::*;
 
@@ -191,7 +190,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeField<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show, yojson)")]
+#[rust_to_ocaml(attr = "deriving (compare, eq, sexp, show)")]
 #[repr(C, u8)]
 pub enum ShapeLabel<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

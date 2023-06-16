@@ -62,10 +62,15 @@
     }
   },
   {
-    "powered_by": "serverless_ide",
     "jsonrpc": "2.0",
     "id": 11,
-    "error": "not yet implemented"
+    "error": {
+      "code": -32603,
+      "message": "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n\n",
+      "data": {
+        "status": "Unix.WEXITED 6"
+      }
+    }
   },
   {
     "jsonrpc": "2.0",

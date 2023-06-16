@@ -144,6 +144,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         del response["error"]["data"]["stack"]
                     if "current_stack" in response["error"]["data"]:
                         del response["error"]["data"]["current_stack"]
+                    if "command_line" in response["error"]["data"]:
+                        del response["error"]["data"]["command_line"]
                     if "server_finale_stack" in response["error"]["data"]:
                         del response["error"]["data"]["server_finale_stack"]
         return sanitized
@@ -3966,11 +3968,10 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: interface",
+                comment="go to implementation: interface",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3985,11 +3986,10 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: trait",
+                comment="go to implementation: trait",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4004,11 +4004,10 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: method",
+                comment="go to implementation: method",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -4023,7 +4022,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                     }
                 ],
-                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
@@ -4613,8 +4611,7 @@ class TestLsp(TestCase[LspTestDriver]):
     def test_references_no_server(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("references.php"))
-        # TEST DISABLED BECAUSE IT NEVER SENDS A RESPONSE BACK
-        # self.load_and_run("references_no_server", variables)
+        self.load_and_run("references_no_server", variables)
 
     def test_non_existing_method(self) -> None:
         variables = self.write_hhconf_and_naming_table()

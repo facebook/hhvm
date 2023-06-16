@@ -3631,6 +3631,38 @@ let do_findReferences_local
   in
   state
 
+(** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
+let do_findReferences2 ~ide_calculated_refs ~hh_locations : Lsp.lsp_result * int
+    =
+  (* lsp_locations return a file for each position. To support unsaved, edited files
+     let's discard locations for files that we previously fetched from ClientIDEDaemon.
+
+     First: filter out locations for any where the documentUri matches a relative_path
+     in the returned map
+     Second: augment above list with values in `ide_calculated_refs`
+  *)
+  let hh_locations =
+    List.filter
+      ~f:(fun location ->
+        let uri = location.Lsp.Location.uri in
+        not @@ UriMap.mem uri ide_calculated_refs)
+      hh_locations
+  in
+  let ide_locations =
+    UriMap.bindings ide_calculated_refs
+    |> List.map ~f:(fun (lsp_uri, pos_list) ->
+           let filename = Lsp.string_of_uri lsp_uri in
+           let lsp_locations =
+             List.map
+               ~f:(hack_pos_to_lsp_location ~default_path:filename)
+               pos_list
+           in
+           lsp_locations)
+    |> List.concat
+  in
+  let all_locations = List.rev_append ide_locations hh_locations in
+  (FindReferencesResult all_locations, List.length all_locations)
+
 let do_goToImplementation_local
     (state : state) (params : Implementation.params) (lsp_id : lsp_id) :
     state Lwt.t =
@@ -3644,6 +3676,10 @@ let do_goToImplementation_local
   let shellable_type = Lost_env.GoToImpl (lsp_id, filename, line, column) in
   let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
   state
+
+(** This is called when a shellout to "hh --ide-go-to-impl" completes successfully *)
+let do_goToImplementation2 ~hh_locations : Lsp.lsp_result * int =
+  (ImplementationResult hh_locations, List.length hh_locations)
 
 let do_goToImplementation
     (conn : server_conn)
@@ -4041,6 +4077,28 @@ let do_documentRename_local
       Lwt.return state
   in
   state
+
+(** This is called when a shell-out to "hh --ide-rename-by-symbol" completes successfully *)
+let do_documentRename2 ~ide_calculated_patches ~hh_edits : Lsp.lsp_result * int
+    =
+  (* The list of patches we receive from shelling out reflect the state
+     of files on disk, which is incorrect for edited files. To fix,
+
+     1) Filter out all changes for files that are open
+     2) add the list of ide_calculated changes
+  *)
+  let hh_changes = hh_edits.WorkspaceEdit.changes in
+  let ide_changes = patches_to_workspace_edit ide_calculated_patches in
+  let changes =
+    SMap.fold
+      (fun file ide combined -> SMap.add file ide combined)
+      ide_changes.WorkspaceEdit.changes
+      hh_changes
+  in
+  let result_count =
+    SMap.fold (fun _file changes tot -> tot + List.length changes) changes 0
+  in
+  (RenameResult { WorkspaceEdit.changes }, result_count)
 
 let hack_type_hierarchy_to_lsp
     (filename : string) (type_hierarchy : ServerTypeHierarchyTypes.result) :
@@ -4749,179 +4807,89 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
     latest_hh_server_errors := errors_conn;
     Lwt.return_unit
 
-let respond_jsonrpc_for_shell
-    (shellable_type : Lost_env.shellable_type) (stdout : string) :
-    (int * Telemetry.t) option Lwt.t =
-  let lsp_id = get_lsp_id_of_shell_out shellable_type in
-  match shellable_type with
-  | Lost_env.FindRefs { ide_calculated_refs; _ } -> begin
-    let parsed =
-      try Ok (shellout_locations_to_lsp_locations_exn stdout) with
-      | exn -> Error (Exn.to_string exn)
-    in
-    match parsed with
-    | Ok parsed_stdout_lsp_locations ->
-      (* lsp_locations return a file for each position. To support unsaved, edited files
-         let's discard locations for files that we previously fetched from ClientIDEDaemon.
-
-         First: filter out locations for any where the documentUri matches a relative_path
-         in the returned map
-         Second: augment above list with values in `ide_calculated_refs`
-      *)
-      let lsp_locations_to_keep =
-        List.filter
-          ~f:(fun location ->
-            let uri = location.Lsp.Location.uri in
-            not @@ UriMap.mem uri ide_calculated_refs)
-          parsed_stdout_lsp_locations
-      in
-      let ide_calculated_locations =
-        UriMap.bindings ide_calculated_refs
-        |> List.map ~f:(fun (lsp_uri, pos_list) ->
-               let filename = Lsp.string_of_uri lsp_uri in
-               let lsp_locations =
-                 List.map
-                   ~f:(hack_pos_to_lsp_location ~default_path:filename)
-                   pos_list
-               in
-               lsp_locations)
-        |> List.concat
-      in
-      let lsp_locations =
-        List.rev_append ide_calculated_locations lsp_locations_to_keep
-      in
-      let () =
-        respond_jsonrpc
-          ~powered_by:Serverless_ide
-          lsp_id
-          (FindReferencesResult lsp_locations)
-      in
-      Lwt.return @@ Some (List.length lsp_locations, Telemetry.create ())
-    | Error str ->
-      let () =
-        respond_jsonrpc
-          ~powered_by:Serverless_ide
-          lsp_id
-          (FindReferencesResult [])
-      in
-      let error_telemetry =
-        Telemetry.create ()
-        |> Telemetry.string_ ~key:"name" ~value:"shellout_find_refs"
-        |> Telemetry.string_ ~key:"error" ~value:str
-      in
-      Lwt.return @@ Some (0, error_telemetry)
-  end
-  | Lost_env.GoToImpl _ -> begin
-    let parsed =
-      try Ok (shellout_locations_to_lsp_locations_exn stdout) with
-      | exn -> Error (Exn.to_string exn)
-    in
-    match parsed with
-    | Ok lsp_locations ->
-      let () =
-        respond_jsonrpc
-          ~powered_by:Serverless_ide
-          lsp_id
-          (ImplementationResult lsp_locations)
-      in
-      Lwt.return @@ Some (List.length lsp_locations, Telemetry.create ())
-    | Error str ->
-      let () =
-        respond_jsonrpc
-          ~powered_by:Serverless_ide
-          lsp_id
-          (ImplementationResult [])
-      in
-      let error_telemetry =
-        Telemetry.create ()
-        |> Telemetry.string_ ~key:"name" ~value:"shellout_go_to_impl"
-        |> Telemetry.string_ ~key:"error" ~value:str
-      in
-      Lwt.return @@ Some (0, error_telemetry)
-  end
-  | Lost_env.Rename { ide_calculated_patches; _ } -> begin
-    let parsed =
-      try Ok (shellout_patch_list_to_lsp_edits_exn stdout) with
-      | exn -> Error (Exn.to_string exn)
-    in
-    match parsed with
-    | Ok result ->
-      (* The list of patches we receive from shelling out reflect the state
-         of files on disk, which is incorrect for edited files. To fix,
-
-         1) Filter out all changes for files that are open
-         2) add the list of ide_calculated changes
-      *)
-      let server_supplied_changes = result.WorkspaceEdit.changes in
-      let ide_supplied_changes =
-        patches_to_workspace_edit ide_calculated_patches
-      in
-      let combined_changes =
-        SMap.fold
-          (fun file ide combined -> SMap.add file ide combined)
-          ide_supplied_changes.WorkspaceEdit.changes
-          server_supplied_changes
-      in
-      let result = { WorkspaceEdit.changes = combined_changes } in
-      let () =
-        respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
-      in
-      let result_count =
-        SMap.fold
-          (fun _file changes tot -> tot + List.length changes)
-          combined_changes
-          0
-      in
-      let result_extra_telemetry =
-        Telemetry.create ()
-        |> Telemetry.int_
-             ~key:"files"
-             ~value:(SMap.cardinal result.WorkspaceEdit.changes)
-      in
-      Lwt.return @@ Some (result_count, result_extra_telemetry)
-    | Error str ->
-      let empty_changes = { WorkspaceEdit.changes = SMap.empty } in
-      let () =
-        respond_jsonrpc
-          ~powered_by:Serverless_ide
-          lsp_id
-          (RenameResult empty_changes)
-      in
-      let error_telemetry =
-        Telemetry.create ()
-        |> Telemetry.string_ ~key:"name" ~value:"shellout_rename"
-        |> Telemetry.string_ ~key:"error" ~value:str
-      in
-      Lwt.return @@ Some (0, error_telemetry)
-  end
-
 let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
-    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
-  match result with
-  | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } ->
-    let%lwt result = respond_jsonrpc_for_shell shellable_type stdout in
-    let (result_count, telemetry) =
-      Option.value result ~default:(0, Telemetry.create ())
-    in
-    Lwt.return
-    @@ Some
-         {
-           result_count;
-           result_extra_telemetry =
-             Some (telemetry |> Telemetry.duration ~start_time ~end_time);
-         }
-  | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
-    Lwt.return
-    @@ Some
-         {
-           result_count = 0;
-           result_extra_telemetry =
-             Some
-               (Telemetry.create ()
-               |> Telemetry.duration ~start_time ~end_time
-               |> Telemetry.error ~e:(Lwt_utils.Process_failure.to_string e));
-         }
+    (shellable_type : Lost_env.shellable_type) : result_telemetry option =
+  let (lsp_result, result_count, result_extra_telemetry) =
+    match result with
+    | Error
+        ({
+           Lwt_utils.Process_failure.start_time;
+           end_time;
+           stderr;
+           stdout;
+           command_line;
+           process_status;
+           exn = _;
+         } as failure) ->
+      log "shell-out failure: %s" (Lwt_utils.Process_failure.to_string failure);
+      let message = stderr ^ "\n" ^ stdout in
+      let data =
+        Some
+          (Hh_json.JSON_Object
+             [
+               ("command_line", Hh_json.string_ command_line);
+               ( "status",
+                 Hh_json.string_ (Process.status_to_string process_status) );
+             ])
+      in
+      let lsp_error =
+        make_lsp_error
+          ~code:Lsp.Error.InternalError
+          ~data
+          ~current_stack:false
+          message
+      in
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.duration ~start_time ~end_time
+        |> Telemetry.error ~e:message
+      in
+      (ErrorResult lsp_error, 0, Some telemetry)
+    | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
+      log
+        "shell-out completed. %s"
+        (String_utils.split_into_lines stdout
+        |> List.hd
+        |> Option.value ~default:""
+        |> String_utils.truncate 80);
+      let telemetry =
+        Telemetry.create () |> Telemetry.duration ~start_time ~end_time
+      in
+      try
+        let (lsp_result, result_count) =
+          match shellable_type with
+          | Lost_env.FindRefs { ide_calculated_refs; _ } ->
+            let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
+            do_findReferences2 ~ide_calculated_refs ~hh_locations
+          | Lost_env.GoToImpl _ ->
+            let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
+            do_goToImplementation2 ~hh_locations
+          | Lost_env.Rename { ide_calculated_patches; _ } ->
+            let hh_edits = shellout_patch_list_to_lsp_edits_exn stdout in
+            do_documentRename2 ~ide_calculated_patches ~hh_edits
+        in
+        (lsp_result, result_count, Some telemetry)
+      with
+      | exn ->
+        let e = Exception.wrap exn in
+        let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
+        let message = Exception.get_ctor_string e in
+        let lsp_error =
+          make_lsp_error
+            ~code:Lsp.Error.InternalError
+            ~stack
+            ~current_stack:false
+            message
+        in
+        (ErrorResult lsp_error, 0, None)
+    end
+  in
+  respond_jsonrpc
+    ~powered_by:Hh_server
+    (get_lsp_id_of_shell_out shellable_type)
+    lsp_result;
+  Some { result_count; result_extra_telemetry }
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -6730,7 +6698,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | Errors_file result ->
           handle_errors_file_item ~state ~ide_service result
         | Shell_out_complete (result, shellable_type) ->
-          handle_shell_out_complete result shellable_type
+          Lwt.return (handle_shell_out_complete result shellable_type)
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

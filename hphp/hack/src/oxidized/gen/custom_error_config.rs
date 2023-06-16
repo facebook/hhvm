@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9db1f4aaa63a74dbbef2186842f1c6c8>>
+// @generated SignedSource<<23cde003bbf25dd2db8f59e068868701>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,5 +37,6 @@ use crate::*;
 #[rust_to_ocaml(attr = "boxed")]
 #[repr(C)]
 pub struct CustomErrorConfig {
-    pub custom_errors: Vec<custom_error::CustomError>,
+    pub valid: Vec<custom_error::CustomError>,
+    pub invalid: Vec<custom_error::CustomError>,
 }

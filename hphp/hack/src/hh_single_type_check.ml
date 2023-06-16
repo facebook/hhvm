@@ -195,11 +195,13 @@ let comma_string_to_iset (s : string) : ISet.t =
 
 let load_and_parse_custom_error_config path =
   match Custom_error_config.initialize (`Absolute path) with
-  | Ok (cfg, bad_rules) ->
-    if not @@ List.is_empty bad_rules then
+  | Ok cfg ->
+    if not @@ List.is_empty cfg.Custom_error_config.invalid then
       eprintf
         "Encountered invalid rules with loading custom error config: \n %s\n"
-      @@ String.concat ~sep:"\n" bad_rules;
+      @@ String.concat ~sep:"\n"
+      @@ List.map ~f:(fun Custom_error.{ name; _ } -> name)
+      @@ cfg.Custom_error_config.invalid;
     Some cfg
   | Error msg ->
     eprintf

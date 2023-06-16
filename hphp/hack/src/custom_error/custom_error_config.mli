@@ -6,10 +6,15 @@
  *
  *)
 
-type t = { custom_errors: Custom_error.t list } [@@deriving eq, show]
+type t = {
+  valid: Custom_error.t list;
+  invalid: Custom_error.t list;
+}
+[@@deriving eq, show] [@@boxed]
 
 val empty : t
 
+val is_valid : t -> bool
+
 val initialize :
-  [ `Absolute of string | `Relative of Relative_path.t ] ->
-  (t * string list, string) result
+  [ `Absolute of string | `Relative of Relative_path.t ] -> (t, string) result

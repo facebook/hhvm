@@ -6,12 +6,19 @@
  *
  *)
 
-type t = { custom_errors: Custom_error.t list } [@@deriving eq, show] [@@boxed]
+type t = {
+  valid: Custom_error.t list;
+  invalid: Custom_error.t list;
+}
+[@@deriving eq, show] [@@boxed]
 
-let empty = { custom_errors = [] }
+let empty = { valid = []; invalid = [] }
 
-external initialize_custom_error_config :
-  string -> (t * string list, string) Result.t
+let is_valid = function
+  | { invalid = []; _ } -> true
+  | _ -> false
+
+external initialize_custom_error_config : string -> (t, string) Result.t
   = "initialize_custom_error_config"
 
 let initialize path =

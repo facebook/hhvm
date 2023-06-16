@@ -34,24 +34,26 @@ use crate::patt_string::PattString;
 use crate::validation_err::ValidationErr;
 
 impl CustomErrorConfig {
-    pub fn validate(&mut self) -> Vec<String> {
-        let invalid = self
-            .custom_errors
+    pub fn from_path(path: &Path) -> Result<CustomErrorConfig> {
+        let file = File::open(path).with_context(|| path.display().to_string())?;
+        let reader = BufReader::new(file);
+        let mut valid: Vec<CustomError> = serde_json::from_reader(reader)?;
+        let invalid = valid
             .drain_filter(|e| {
                 let mut env = ValidationEnv::default();
                 !e.validate(&mut env)
             })
-            .map(|e| e.name)
             .collect();
-        invalid
+        Ok(Self { valid, invalid })
     }
+}
 
-    pub fn initialize(path: &Path) -> Result<(CustomErrorConfig, Vec<String>)> {
-        let file = File::open(path).with_context(|| path.display().to_string())?;
-        let reader = BufReader::new(file);
-        let mut cfg: CustomErrorConfig = serde_json::from_reader(reader)?;
-        let errs = cfg.validate();
-        Ok((cfg, errs))
+impl Default for CustomErrorConfig {
+    fn default() -> Self {
+        Self {
+            valid: vec![],
+            invalid: vec![],
+        }
     }
 }
 

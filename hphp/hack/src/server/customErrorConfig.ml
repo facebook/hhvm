@@ -16,8 +16,11 @@ let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
 
 let load_and_parse ?(path = repo_config_path) () =
   match Custom_error_config.initialize (`Relative path) with
-  | Ok (cfg, bad_rules) ->
-    List.iter (log_debug "CustomErrorConfig bad rule: %s") bad_rules;
+  | Ok cfg ->
+    List.iter
+      (fun rule ->
+        log_debug "CustomErrorConfig bad rule: %s" rule.Custom_error.name)
+      cfg.Custom_error_config.invalid;
     cfg
   | Error msg ->
     log_debug "CustomErrorConfig: %s" msg;

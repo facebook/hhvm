@@ -33,14 +33,6 @@ impl Default for SavedState {
     }
 }
 
-impl Default for CustomErrorConfig {
-    fn default() -> Self {
-        Self {
-            custom_errors: vec![],
-        }
-    }
-}
-
 impl Default for GlobalOptions {
     fn default() -> Self {
         Self {

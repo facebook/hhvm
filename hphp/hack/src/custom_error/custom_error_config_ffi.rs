@@ -13,10 +13,8 @@ use oxidized::custom_error_config::CustomErrorConfig;
 
 ocamlrep_ocamlpool::ocaml_ffi! {
 
-fn initialize_custom_error_config(
-    path: String,
-) -> Result<(CustomErrorConfig, Vec<String>), String> {
-    CustomErrorConfig::initialize(Path::new(&path)).map_err(|e| format!("{}", e))
+fn initialize_custom_error_config(path: String) -> Result<CustomErrorConfig, String> {
+    CustomErrorConfig::from_path(Path::new(&path)).map_err(|e| format!("{}", e))
 }
 
 }

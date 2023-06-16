@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dba578a46c032dbe6e0453350cc4f0fe>>
+// @generated SignedSource<<c9bf242ea153714ce7d72bb11b59dfdf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,9 @@ use crate::*;
 #[repr(C)]
 pub struct CustomErrorConfig<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub custom_errors: &'a [custom_error::CustomError<'a>],
+    pub valid: &'a [custom_error::CustomError<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub invalid: &'a [custom_error::CustomError<'a>],
 }
 impl<'a> TrivialDrop for CustomErrorConfig<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CustomErrorConfig<'arena>);

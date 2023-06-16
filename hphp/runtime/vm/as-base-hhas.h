@@ -50,7 +50,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrDeepInit,                 P,       "deep_init");            \
   X(AttrInterface,                C,       "interface");            \
   X(AttrNoExpandTrait,            C,       "no_expand_trait");      \
-  X(AttrAbstract,                 C|F|T,   "abstract");             \
+  X(AttrAbstract,                 C|F|T|K, "abstract");             \
   X(AttrNoOverride,               C|F,     "no_override");          \
   X(AttrNoOverrideRegular,        C,       "no_override_regular");  \
   X(AttrFinal,                    C|F|T,   "final");                \

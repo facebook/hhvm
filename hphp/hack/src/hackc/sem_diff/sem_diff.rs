@@ -414,12 +414,12 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
     let Constant {
         name: a_name,
         value: a_value,
-        is_abstract: a_is_abstract,
+        attrs: a_attrs,
     } = a;
     let Constant {
         name: b_name,
         value: b_value,
-        is_abstract: b_is_abstract,
+        attrs: b_attrs,
     } = b;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_option(
@@ -428,7 +428,7 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
         b_value.as_ref().into_option(),
         sem_diff_eq,
     )?;
-    sem_diff_eq(&path.qualified("is_abstract"), a_is_abstract, b_is_abstract)?;
+    sem_diff_eq(&path.qualified("attrs"), a_attrs, b_attrs)?;
     Ok(())
 }
 

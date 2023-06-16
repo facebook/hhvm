@@ -481,12 +481,12 @@ fn cmp_hack_constant(
     let HackConstant {
         name: a_name,
         value: a_value,
-        is_abstract: a_is_abstract,
+        attrs: a_attrs,
     } = a;
     let HackConstant {
         name: b_name,
         value: b_value,
-        is_abstract: b_is_abstract,
+        attrs: b_attrs,
     } = b;
     cmp_id(a_name.id, b_name.id).qualified("name")?;
     cmp_option(
@@ -495,7 +495,7 @@ fn cmp_hack_constant(
         cmp_typed_value,
     )
     .qualified("value")?;
-    cmp_eq(a_is_abstract, b_is_abstract).qualified("is_abstract")?;
+    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())
 }
 

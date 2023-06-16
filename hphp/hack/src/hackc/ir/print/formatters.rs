@@ -81,6 +81,7 @@ where
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum AttrContext {
     Class,
+    Constant,
     Function,
     Method,
     Property,
@@ -124,6 +125,7 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrNoInjection, "no_injection"),
                 get_bit(&mut attr, Attr::AttrNoOverride, "no_override"),
                 get_bit(&mut attr, Attr::AttrNoReifiedInit, "no_reified_init"),
+                get_bit(&mut attr, Attr::AttrPersistent, "persistent"),
                 get_bit(&mut attr, Attr::AttrPrivate, "private"),
                 get_bit(&mut attr, Attr::AttrProtected, "protected"),
                 get_bit(&mut attr, Attr::AttrProvenanceSkipFrame, "provenance_skip_frame"),

@@ -70,6 +70,9 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             None, /* doc_comment */
             Some(env),
         )?;
+        let mut attrs = Attr::AttrNoInjection;
+        attrs.set(Attr::AttrPersistent, e.systemlib());
+
         Ok(Function {
             attributes: Slice::empty(),
             name: original_name,
@@ -77,7 +80,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             span: Span::from_pos(&constant.span),
             coeffects: Coeffects::default(),
             flags: FunctionFlags::empty(),
-            attrs: Attr::AttrNoInjection,
+            attrs,
         })
     })
     .transpose()
@@ -124,10 +127,14 @@ pub fn from_ast<'a, 'arena, 'decl>(
             ),
         },
     };
+    let mut attrs = Attr::AttrNone;
+    attrs.set(Attr::AttrPersistent, emitter.systemlib());
+    attrs.set(Attr::AttrAbstract, is_abstract);
+
     let constant = Constant {
         name: hhbc::ConstName::from_ast_name(alloc, id.name()),
         value: Maybe::from(value),
-        is_abstract,
+        attrs,
     };
     Ok((constant, initializer_instrs))
 }

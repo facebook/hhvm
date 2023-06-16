@@ -1327,10 +1327,11 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
 }
 
 fn print_hack_constant(w: &mut dyn Write, c: &HackConstant, strings: &StringInterner) -> Result {
-    let is_abstract = if c.is_abstract { "abstract" } else { "" };
+    let attr = FmtAttr(c.attrs, AttrContext::Constant);
+
     write!(
         w,
-        "constant [{is_abstract}] {name}",
+        "constant {attr} {name}",
         name = FmtIdentifierId(c.name.id, strings)
     )?;
 

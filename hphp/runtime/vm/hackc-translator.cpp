@@ -346,7 +346,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   UserAttributeMap userAttrs;
   translateUserAttributes(t.attributes, userAttrs);
   auto attrs = t.attrs;
-  if (ts.isSystemLib) attrs |= AttrPersistent;
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent));
   auto const name = toStaticString(t.name._0);
 
   auto const tis = range(t.type_info_union);
@@ -414,7 +414,7 @@ void addConstant(TranslationState& ts,
 void translateClassConstant(TranslationState& ts, const hhbc::Constant& c) {
   auto const name = toStaticString(c.name._0);
   auto const tv = maybe(c.value);
-  addConstant<false>(ts, name, tv, c.is_abstract);
+  addConstant<false>(ts, name, tv, c.attrs & AttrAbstract);
 }
 
 void translateTypeConstant(TranslationState& ts, const hhbc::TypeConstant& c) {
@@ -1163,7 +1163,7 @@ void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) 
     ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::GeneratorThis{}));
   }
 
-  if (coeffects.caller) {
+if (coeffects.caller) {
     ts.fe->coeffectRules.emplace_back(CoeffectRule(CoeffectRule::Caller{}));
   }
 }
@@ -1179,11 +1179,13 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   translateUserAttributes(f.attributes, userAttrs);
 
   Attr attrs = f.attrs;
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent));
   if (ts.isSystemLib) {
-    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+    attrs |= AttrUnique | AttrBuiltin;
   }
 
-  ts.fe = ts.ue->newFuncEmitter(toStaticString(f.name._0));
+  auto const name = toStaticString(f.name._0);
+  ts.fe = ts.ue->newFuncEmitter(name);
   ts.fe->init(f.span.line_begin, f.span.line_end, attrs, nullptr);
   ts.fe->isGenerator = (bool)(f.flags & hhbc::FunctionFlags_GENERATOR);
   ts.fe->isAsync = (bool)(f.flags & hhbc::FunctionFlags_ASYNC);
@@ -1270,7 +1272,8 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
   ITRACE(2, "Translating attribute list {}\n", c.attributes.len);
   translateUserAttributes(c.attributes, userAttrs);
   auto attrs = c.flags;
-  if (ts.isSystemLib) attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+  assertx(IMPLIES(ts.isSystemLib, attrs & AttrPersistent));
+  if (ts.isSystemLib) attrs |= AttrUnique | AttrBuiltin;
 
   auto const parentName = maybeOrElse(c.base,
     [&](ClassName& s) { return toStaticString(s._0); },
@@ -1326,7 +1329,8 @@ void translateAdata(TranslationState& ts, const hhbc::Adata& ad) {
 void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
   HPHP::Constant constant;
   constant.name = toStaticString(c.name._0);
-  constant.attrs = ts.isSystemLib ? AttrPersistent : AttrNone;
+  constant.attrs = c.attrs;
+  assertx(IMPLIES(ts.isSystemLib, c.attrs & AttrPersistent));
 
   constant.val = maybeOrElse(c.value,
     [&](hhbc::TypedValue& tv) {return toTypedValue(tv);},

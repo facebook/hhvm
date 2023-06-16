@@ -2641,12 +2641,17 @@ void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
  *                 : isAbstract
  *                 ;
  *
- * directive-const : identifier const-flags member-tv-initializer
- *                 | identifier const-flags ';'
+ * directive-const : [attrs] identifier const-flags member-tv-initializer
+ *                 | [attrs] identifier const-flags ';'
  *                 ;
  */
 void parse_class_constant(AsmState& as) {
   as.in.skipWhitespace();
+
+  Attr attrs = AttrNone;
+  if (as.in.peek() == '[') {
+    attrs = parse_attribute_list(as, AttrContext::Constant);
+  }
 
   std::string name;
   if (!as.in.readword(name)) {
@@ -2656,8 +2661,16 @@ void parse_class_constant(AsmState& as) {
   bool isType = as.in.tryConsume("isType");
   auto const kind =
     isType ? ConstModifiers::Kind::Type : ConstModifiers::Kind::Value;
+
   as.in.skipWhitespace();
-  DEBUG_ONLY bool isAbstract = as.in.tryConsume("isAbstract");
+  bool isAbstract;
+  if (kind == ConstModifiers::Kind::Value) {
+    isAbstract = attrs & AttrAbstract;
+  } else {
+    isAbstract = as.in.tryConsume("isAbstract");
+  }
+
+
   as.in.skipWhitespace();
 
   if (as.in.peek() == ';') {
@@ -3174,7 +3187,7 @@ void parse_constant(AsmState& as) {
   as.in.skipWhitespace();
 
   Constant constant;
-  Attr attrs = as.ue->isASystemLib() ? AttrPersistent : AttrNone;
+  Attr attrs = parse_attribute_list(as, AttrContext::Constant);
 
   std::string name;
   if (!as.in.readword(name)) {

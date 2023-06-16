@@ -97,11 +97,7 @@ pub(crate) fn lower_class<'a>(
     // TODO: Need to think about abstract constants. Maybe constants lookups
     // should really be function calls...
     for constant in class.constants.drain(..) {
-        let HackConstant {
-            name,
-            value,
-            is_abstract: _,
-        } = constant;
+        let HackConstant { name, value, attrs } = constant;
         // Mark the property as originally being a constant.
         let attributes = vec![Attribute {
             name: ClassId::from_str(INFER_CONSTANT, &strings),
@@ -114,7 +110,7 @@ pub(crate) fn lower_class<'a>(
         };
         let prop = Property {
             name: PropId::new(name.id),
-            flags: Attr::AttrStatic,
+            flags: attrs | Attr::AttrStatic,
             attributes,
             visibility: Visibility::Public,
             initial_value: value,

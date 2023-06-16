@@ -15,7 +15,7 @@ pub(crate) fn convert_constant<'a>(
     let Constant {
         name,
         ref value,
-        is_abstract,
+        attrs,
     } = *constant;
 
     let value = value
@@ -25,9 +25,5 @@ pub(crate) fn convert_constant<'a>(
 
     let name = ir::ConstId::from_hhbc(name, strings);
 
-    ir::HackConstant {
-        name,
-        value,
-        is_abstract,
-    }
+    ir::HackConstant { name, value, attrs }
 }

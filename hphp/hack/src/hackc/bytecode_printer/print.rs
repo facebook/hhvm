@@ -424,10 +424,8 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property<'_>)
 fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
+    print_special_and_user_attrs(ctx, w, &[], &AttrContext::Constant, &c.attrs)?;
     w.write_all(c.name.as_bstr())?;
-    if c.is_abstract {
-        w.write_all(b" isAbstract")?;
-    }
     match c.value.as_ref() {
         Just(TypedValue::Uninit) => w.write_all(b" = uninit")?,
         Just(value) => {

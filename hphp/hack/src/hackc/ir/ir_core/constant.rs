@@ -2,6 +2,8 @@
 
 use std::sync::Arc;
 
+use hhvm_types_ffi::Attr;
+
 use crate::instr::HasOperands;
 use crate::CollectionType;
 use crate::ConstId;
@@ -45,5 +47,5 @@ impl HasOperands for Constant<'_> {
 pub struct HackConstant {
     pub name: ConstId,
     pub value: Option<TypedValue>,
-    pub is_abstract: bool,
+    pub attrs: Attr,
 }

@@ -12,11 +12,7 @@ pub(crate) fn convert_hack_constant<'a>(
     constant: ir::HackConstant,
     strings: &StringCache<'a>,
 ) -> Constant<'a> {
-    let ir::HackConstant {
-        name,
-        value,
-        is_abstract,
-    } = constant;
+    let ir::HackConstant { name, value, attrs } = constant;
 
     let value = value
         .map(|v| convert::convert_typed_value(&v, strings))
@@ -24,9 +20,5 @@ pub(crate) fn convert_hack_constant<'a>(
 
     let name = strings.lookup_const_name(name);
 
-    Constant {
-        name,
-        value,
-        is_abstract,
-    }
+    Constant { name, value, attrs }
 }

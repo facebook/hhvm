@@ -677,12 +677,12 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result {
     let Constant {
         name: a_name,
         value: a_value,
-        is_abstract: a_is_abstract,
+        attrs: a_attrs,
     } = a;
     let Constant {
         name: b_name,
         value: b_value,
-        is_abstract: b_is_abstract,
+        attrs: b_attrs,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_option(
@@ -691,7 +691,7 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result {
         cmp_eq,
     )
     .qualified("value")?;
-    cmp_eq(a_is_abstract, b_is_abstract).qualified("is_abstract")?;
+    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
     Ok(())
 }
 

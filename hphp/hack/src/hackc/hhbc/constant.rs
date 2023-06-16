@@ -8,6 +8,7 @@
 // Also interestingly, abstract constants are not emitted at all.
 
 use ffi::Maybe;
+use hhvm_types_ffi::ffi::Attr;
 use serde::Serialize;
 
 use crate::typed_value::TypedValue;
@@ -18,5 +19,5 @@ use crate::ConstName;
 pub struct Constant<'arena> {
     pub name: ConstName<'arena>,
     pub value: Maybe<TypedValue<'arena>>,
-    pub is_abstract: bool,
+    pub attrs: Attr,
 }

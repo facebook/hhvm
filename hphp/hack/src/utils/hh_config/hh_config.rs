@@ -144,11 +144,11 @@ impl HhConfig {
         if let Some(hash) = parsed.get_str("override_hhconfig_hash") {
             return hash.to_owned();
         }
-        let full_contents = format!(
-            "{}{}{}",
-            config_contents, package_config, custom_error_config
-        );
-        format!("{:x}", Sha1::digest(full_contents.as_bytes()))
+        let mut hasher = Sha1::new();
+        hasher.update(config_contents.as_bytes());
+        hasher.update(package_config.as_bytes());
+        hasher.update(custom_error_config.as_bytes());
+        format!("{:x}", hasher.finalize())
     }
 
     pub fn from_slice(bytes: &[u8]) -> Result<Self> {

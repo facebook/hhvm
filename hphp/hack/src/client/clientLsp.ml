@@ -2641,6 +2641,21 @@ let kickoff_shell_out_and_maybe_cancel
          })
   | _ -> Lwt.return state
 
+(** If there's a current_hh_shell with [id], then send it a SIGTERM.
+All we're doing is triggering the cancellation; we rely upon normal
+[handle_shell_out_complete] for once the process has terminated. *)
+let cancel_shellout_if_applicable (state : state) (id : lsp_id) : unit =
+  match state with
+  | Lost_server
+      {
+        Lost_env.current_hh_shell =
+          Some { Lost_env.cancellation_token; shellable_type; _ };
+        _;
+      }
+    when Lsp.IdKey.compare id (get_lsp_id_of_shell_out shellable_type) = 0 ->
+    Lwt.wakeup_later cancellation_token ()
+  | _ -> ()
+
 (************************************************************************)
 (* Protocol                                                             *)
 (************************************************************************)
@@ -4823,7 +4838,12 @@ let handle_shell_out_complete
            exn = _;
          } as failure) ->
       log "shell-out failure: %s" (Lwt_utils.Process_failure.to_string failure);
-      let message = stderr ^ "\n" ^ stdout in
+      let message =
+        [stderr; stdout; Process.status_to_string process_status]
+        |> List.map ~f:String.strip
+        |> List.filter ~f:(fun s -> not (String.is_empty s))
+        |> String.concat ~sep:"\n"
+      in
       let data =
         Some
           (Hh_json.JSON_Object
@@ -4833,13 +4853,12 @@ let handle_shell_out_complete
                  Hh_json.string_ (Process.status_to_string process_status) );
              ])
       in
-      let lsp_error =
-        make_lsp_error
-          ~code:Lsp.Error.InternalError
-          ~data
-          ~current_stack:false
-          message
+      let code =
+        match process_status with
+        | Unix.WSIGNALED -7 -> Lsp.Error.RequestCancelled
+        | _ -> Lsp.Error.InternalError
       in
+      let lsp_error = make_lsp_error ~code ~data ~current_stack:false message in
       let telemetry =
         Telemetry.create ()
         |> Telemetry.duration ~start_time ~end_time
@@ -5465,13 +5484,22 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Language_server id ShutdownResult;
       Lwt.return_none
     (* cancel notification *)
-    | (_, _, NotificationMessage (CancelRequestNotification _)) ->
-      (* In [cancel_if_has_pending_cancel_request] above, when we received request ID "x",
-         then at that time then we scanned through the queue for any CancelRequestNotification
-         of the same ID. We didn't remove that CancelRequestNotification though.
-         If we worked through the queue long enough to handle a CancelRequestNotification,
-         it means that either we've earlier cancelled it, or that processing was done
-         before the cancel request got into the queue. Either way, there's nothing to do now! *)
+    | ( _,
+        _,
+        NotificationMessage (CancelRequestNotification { CancelRequest.id }) )
+      ->
+      (* Most requests are handled in-order here in clientLsp:
+         our loop gets around to pickup up request ID "x" off the queue,
+         before doing anything else it does [cancel_if_has_pending_cancel_request]
+         to see if there's a CancelRequestNotification ahead of it in the queue
+         and if so just sends a cancellation response rather than handling it.
+         Thus, we'll still get around to picking the CnacelRequestNotification
+         off the queue right here and now, which is fine!
+
+         A few requests are handled asynchronously, though -- those that shell out
+         to hh. In these cases, upon receipt of the CancelRequestNotification,
+         we should actively SIGTERM the shell-out... *)
+      cancel_shellout_if_applicable !state id;
       Lwt.return_none
     (* exit notification *)
     | (_, _, NotificationMessage ExitNotification) ->

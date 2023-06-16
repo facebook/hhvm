@@ -66,7 +66,7 @@
     "id": 11,
     "error": {
       "code": -32603,
-      "message": "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n\n",
+      "message": "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\nUnix.WEXITED 6",
       "data": {
         "status": "Unix.WEXITED 6"
       }

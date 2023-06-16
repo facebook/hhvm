@@ -106,34 +106,13 @@
   {
     "jsonrpc": "2.0",
     "id": 12,
-    "result": [
-      {
-        "uri": "file://${root_path}/references.php",
-        "range": {
-          "start": {
-            "line": 36,
-            "character": 9
-          },
-          "end": {
-            "line": 36,
-            "character": 19
-          }
-        }
-      },
-      {
-        "uri": "file://${root_path}/references2.php",
-        "range": {
-          "start": {
-            "line": 3,
-            "character": 2
-          },
-          "end": {
-            "line": 3,
-            "character": 12
-          }
-        }
+    "error": {
+      "code": -32800,
+      "message": "Unix.WSIGNALED -7",
+      "data": {
+        "status": "Unix.WSIGNALED -7"
       }
-    ]
+    }
   },
   {
     "jsonrpc": "2.0",

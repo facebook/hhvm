@@ -104,10 +104,10 @@ let union_errs env errs =
    the rhs expression of an assignment *)
 let apply_rules_with_array_index_value_ty_mismatches
     ?(ignore_type_structure = false) ?(preserve_supportdyn = true) env ty f =
-  let rec iter ~is_nonnull env ty =
+  let rec iter ~supportdyn ~is_nonnull env ty =
     let (env, ety) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
-    let default () = f env ty in
+    let default () = f env ~supportdyn ty in
 
     match deref ety with
     (* For intersections, collect up all successful applications and compute
@@ -119,7 +119,10 @@ let apply_rules_with_array_index_value_ty_mismatches
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       let (env, res) =
-        Typing_utils.run_on_intersection env ~f:(iter ~is_nonnull) tyl
+        Typing_utils.run_on_intersection
+          env
+          ~f:(iter ~supportdyn ~is_nonnull)
+          tyl
       in
       let (tys, arr_errs, key_errs, val_errs) = List.unzip4 res in
       let (env, arr_ty_mismatch) = intersect_errs env arr_errs in
@@ -137,7 +140,7 @@ let apply_rules_with_array_index_value_ty_mismatches
     | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
       ->
       let (env, (ty, arr_errs, key_errs, val_errs)) =
-        iter ~is_nonnull env bound
+        iter ~supportdyn:true ~is_nonnull env bound
       in
       let (env, ty) =
         if preserve_supportdyn then
@@ -154,7 +157,7 @@ let apply_rules_with_array_index_value_ty_mismatches
           ~init:(env, [], [], [], [])
           ~f:(fun (env, tys, arr_errs, key_errs, val_errs) ty ->
             let (env, (ty, arr_err, key_err, val_err)) =
-              iter ~is_nonnull env ty
+              iter ~supportdyn ~is_nonnull env ty
             in
             ( env,
               ty :: tys,
@@ -179,7 +182,8 @@ let apply_rules_with_array_index_value_ty_mismatches
       when Env.is_enum env cid && is_arraykey bound ->
       default ()
     (* If there is an explicit upper bound, delegate to it *)
-    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) -> iter ~is_nonnull env ty
+    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) ->
+      iter ~supportdyn ~is_nonnull env ty
     (* For type parameters with upper bounds, delegate to intersection of the upper bounds *)
     | (r, Tgeneric _) ->
       let (env, tyl) = get_transitive_upper_bounds env ty in
@@ -193,11 +197,11 @@ let apply_rules_with_array_index_value_ty_mismatches
           else
             (env, ty)
         in
-        iter ~is_nonnull env ty
+        iter ~supportdyn ~is_nonnull env ty
     | _ -> default ()
   in
   let (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch)) =
-    iter ~is_nonnull:false env ty
+    iter ~supportdyn:false ~is_nonnull:false env ty
   in
   let opt_of_res =
     Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
@@ -207,38 +211,18 @@ let apply_rules_with_array_index_value_ty_mismatches
   and val_err_opt = opt_of_res val_ty_mismatch in
   (env, (ty, arr_err_opt, key_err_opt, val_err_opt))
 
-let apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty f =
-  let g env ty =
-    let (env, (ty, idx_ty_mismatch, val_ty_mismatch)) = f env ty in
+let apply_rules_with_index_value_ty_mismatches
+    ?ignore_type_structure ~preserve_supportdyn env ty f =
+  let g env ~supportdyn ty =
+    let (env, (ty, idx_ty_mismatch, val_ty_mismatch)) = f env ~supportdyn ty in
     (env, (ty, Ok ty, idx_ty_mismatch, val_ty_mismatch))
   in
   let (env, (ty, _, idx_ty_mismatch, val_ty_mismatch)) =
     apply_rules_with_array_index_value_ty_mismatches
+      ~preserve_supportdyn
       ?ignore_type_structure
       env
       ty
       g
   in
   (env, (ty, idx_ty_mismatch, val_ty_mismatch))
-
-(* Here we have a function returns the updated environment, a local type
-   and a result indicating type errors for the rhs of an assignment *)
-let apply_rules_with_ty_mismatch ?ignore_type_structure env ty f =
-  let g env ty =
-    let (env, (ty, ty_mismatch)) = f env ty in
-    (env, (ty, Ok ty, ty_mismatch))
-  in
-  let (env, (ty, _, ty_mismatch)) =
-    apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty g
-  in
-  (env, (ty, ty_mismatch))
-
-let apply_rules ?ignore_type_structure env ty f =
-  let g env ty =
-    let (env, ty) = f env ty in
-    (env, (ty, Ok ty))
-  in
-  let (env, (ty, _)) =
-    apply_rules_with_ty_mismatch ?ignore_type_structure env ty g
-  in
-  (env, ty)

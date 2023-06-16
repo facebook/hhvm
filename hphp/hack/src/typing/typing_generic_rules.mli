@@ -6,32 +6,13 @@
  *
  *)
 
-val apply_rules :
-  ?ignore_type_structure:bool ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  (Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty) ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-val apply_rules_with_ty_mismatch :
-  ?ignore_type_structure:bool ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  (Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_env_types.env
-  * (Typing_defs.locl_ty
-    * (Typing_defs.locl_ty, Typing_defs.locl_ty * Typing_defs.locl_ty) result)) ->
-  Typing_env_types.env
-  * (Typing_defs.locl_ty * (Typing_defs.locl_ty * Typing_defs.locl_ty) option)
-
 val apply_rules_with_index_value_ty_mismatches :
   ?ignore_type_structure:bool ->
+  preserve_supportdyn:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   (Typing_env_types.env ->
+  supportdyn:bool ->
   Typing_defs.locl_ty ->
   Typing_env_types.env
   * (Typing_defs.locl_ty
@@ -48,6 +29,7 @@ val apply_rules_with_array_index_value_ty_mismatches :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   (Typing_env_types.env ->
+  supportdyn:bool ->
   Typing_defs.locl_ty ->
   Typing_env_types.env
   * (Typing_defs.locl_ty

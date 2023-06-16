@@ -15,6 +15,7 @@
  */
 
 #define __STDC_LIMIT_MACROS
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include <stdint.h>
@@ -1030,7 +1031,7 @@ static PyObject* encodeT(PyObject* enc_obj, PyObject* spec, int utf8strings) {
 static std::unique_ptr<folly::IOBuf> refill(
     DecodeBuffer* input,
     const uint8_t* remaining,
-    int rlen,
+    Py_ssize_t rlen,
     int read,
     int len) {
   PyObject* newiobuf;

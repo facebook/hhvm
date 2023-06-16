@@ -5,6 +5,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+use std::str::FromStr;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -34,17 +35,24 @@ use crate::patt_string::PattString;
 use crate::validation_err::ValidationErr;
 
 impl CustomErrorConfig {
-    pub fn from_path(path: &Path) -> Result<CustomErrorConfig> {
-        let file = File::open(path).with_context(|| path.display().to_string())?;
-        let reader = BufReader::new(file);
-        let mut valid: Vec<CustomError> = serde_json::from_reader(reader)?;
-        let invalid = valid
+    pub fn new(mut errors: Vec<CustomError>) -> Self {
+        let invalid = errors
             .drain_filter(|e| {
                 let mut env = ValidationEnv::default();
                 !e.validate(&mut env)
             })
             .collect();
-        Ok(Self { valid, invalid })
+        Self {
+            valid: errors,
+            invalid,
+        }
+    }
+
+    pub fn from_path(path: &Path) -> Result<CustomErrorConfig> {
+        let file = File::open(path).with_context(|| path.display().to_string())?;
+        let reader = BufReader::new(file);
+        let errors = serde_json::from_reader(reader)?;
+        Ok(Self::new(errors))
     }
 }
 
@@ -54,6 +62,14 @@ impl Default for CustomErrorConfig {
             valid: vec![],
             invalid: vec![],
         }
+    }
+}
+
+impl FromStr for CustomErrorConfig {
+    type Err = anyhow::Error;
+    fn from_str(contents: &str) -> Result<Self, Self::Err> {
+        let errors: Vec<CustomError> = serde_json::from_str(contents)?;
+        Ok(Self::new(errors))
     }
 }
 

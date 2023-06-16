@@ -584,9 +584,9 @@ void DynamicStructInfo::addFieldValue(int16_t index, PyObject* fieldValue) {
 const detail::TypeInfo& boolTypeInfo =
     PrimitiveTypeInfo<bool, protocol::TType::T_BOOL>::typeInfo;
 const detail::TypeInfo& byteTypeInfo =
-    PrimitiveTypeInfo<std::int32_t, protocol::TType::T_BYTE>::typeInfo;
+    PrimitiveTypeInfo<std::int8_t, protocol::TType::T_BYTE>::typeInfo;
 const detail::TypeInfo& i16TypeInfo =
-    PrimitiveTypeInfo<std::int32_t, protocol::TType::T_I16>::typeInfo;
+    PrimitiveTypeInfo<std::int16_t, protocol::TType::T_I16>::typeInfo;
 const detail::TypeInfo& i32TypeInfo =
     PrimitiveTypeInfo<std::int32_t, protocol::TType::T_I32>::typeInfo;
 const detail::TypeInfo& i64TypeInfo =

@@ -202,7 +202,10 @@ module Lost_env = struct
     hh_server_status_diagnostic: PublishDiagnostics.params option;
         (** Diagnostic messages warning about server not fully running (not used for standalone). *)
     current_hh_shell: current_hh_shell option;
-        (** If a shell-out to, ex --ide-find-refs is currently underway *)
+        (** If a shell-out to "hh --ide-find-refs" or similar is currently underway.
+        Invariant: if this is Some, then an LSP response will be delivered for it;
+        when it is turned to None, either the LSP response has been sent, or the
+        obligation has been handed off to a method that will assuredly respond. *)
     lock_file: string;
   }
 
@@ -498,7 +501,9 @@ type event =
       find-refs are accomplished by kicking off an asynchronous shell-out to
       "hh --refactor" or "hh --ide-find-refs". This event signals that the
       shell-out has completed and it's now time to process the results.
-      Handled in [handle_shell_out_complete]. *)
+      Handled in [handle_shell_out_complete].
+      Invariant: if we have one of these events, then we must eventually produce
+      an LSP response for it. *)
   | Tick
       (** Once a second, if no other events are pending, we synthesize a Tick
       event. Handled in [handle_tick]. It does things like send IDE_IDLE if
@@ -1056,6 +1061,10 @@ let get_next_event
     | `No_source -> Lwt.return Tick)
   | Lost_server ({ Lost_env.current_hh_shell = Some sh; _ } as lenv)
     when not (Lwt.is_sleeping sh.Lost_env.process) ->
+    (* Invariant is that if current_hh_shell is Some, then we will eventually
+       produce an LSP response for it. We're turning it into None here;
+       the obligation to return an LSP response has been transferred onto
+       our Shell_out_complete result. *)
     state := Lost_server { lenv with Lost_env.current_hh_shell = None };
     let%lwt result = sh.Lost_env.process in
     Lwt.return (Shell_out_complete (result, sh.Lost_env.shellable_type))
@@ -2583,9 +2592,36 @@ let kickoff_shell_out_and_maybe_cancel
   match state with
   | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
     let open ServerCommandTypes in
-    (* If there's an existing shell process, cancel it *)
-    Option.iter current_hh_shell ~f:(fun sh ->
-        Lwt.wakeup_later sh.Lost_env.cancellation_token ());
+    (* Cancel any existing shell-out, if there is one. *)
+    Option.iter
+      current_hh_shell
+      ~f:(fun
+           {
+             Lost_env.cancellation_token;
+             shellable_type = prev_shellable_type;
+             _;
+           }
+         ->
+        (* Send SIGTERM to the underlying process.
+           We won't wait for it -- that'd make it too hard to reason about concurrency. *)
+        Lwt.wakeup_later cancellation_token ();
+        (* We still have to respond to the LSP's prev request. We'll do so now
+           without waiting for the underlying process to finish. In this way we fulfill
+           the invariant that "current_hh_shell must always give rise to an LSP response".
+           (Later in the function we overwrite current_hh_shell with the new shellout, so right here
+           right now is the only place that can fulfill that invariant for the prev shellout). *)
+        let prev_id = get_lsp_id_of_shell_out prev_shellable_type in
+        let id = get_lsp_id_of_shell_out shellable_type in
+        let message =
+          Printf.sprintf "Displaced by %s" (Lsp_fmt.id_to_string id)
+        in
+        let lsp_error =
+          make_lsp_error ~code:Lsp.Error.RequestCancelled message
+        in
+        respond_jsonrpc
+          ~powered_by:Language_server
+          prev_id
+          (ErrorResult lsp_error));
     let (cancel, cancellation_token) = Lwt.wait () in
     let cmd =
       begin
@@ -4822,6 +4858,8 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
     latest_hh_server_errors := errors_conn;
     Lwt.return_unit
 
+(** This function handles the success/failure of a shell-out.
+It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option =

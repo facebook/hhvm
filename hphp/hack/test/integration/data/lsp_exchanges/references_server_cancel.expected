@@ -63,6 +63,24 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 11,
+    "error": {
+      "code": -32800,
+      "message": "Displaced by 12",
+      "data": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "error": {
+      "code": -32800,
+      "message": "Displaced by 13",
+      "data": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 13,
     "result": [
       {

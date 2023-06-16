@@ -239,6 +239,7 @@ class SSLContextManager::SslContexts
    * For details regarding their arguments, see public API in the header.
    */
   void addSSLContextConfig(
+      const std::vector<std::string>& snis,
       const SSLContextConfig& ctxConfig,
       const SSLCacheOptions& cacheOptions,
       const TLSTicketKeySeeds* ticketSeeds,
@@ -277,8 +278,9 @@ class SSLContextManager::SslContexts
 
   // Does feature-specific setup for OpenSSL
   void ctxSetupByOpensslFeature(
-      std::shared_ptr<ServerSSLContext> sslCtx,
+      std::shared_ptr<ServerSSLContext>& sslCtx,
       const SSLContextConfig& ctxConfig,
+      const bool enableServerNameCallback,
       ClientHelloExtStats* stats,
       std::shared_ptr<ServerSSLContext>& newDefault);
 
@@ -318,22 +320,35 @@ class SSLContextManager::SslContexts
    *
    * 1. It is a best match.
    *
-   * 2. It allows wildcard CN and wildcard subject alternative name in a X509.
-   *    The wildcard name must be _prefixed_ by '*.'.  It errors out whenever
-   *    it sees '*' in any other locations.
+   * 2. It uses CN and subject alternative name (SAN) in a X509 as keys to
+   *    context map. It allows wildcard CN and wildcard subject alternative
+   *    name. The wildcard name must be _prefixed_ by '*.'.  It errors
+   *    out whenever it sees '*' in any other locations.
    *
    * 3. It uses one std::unordered_map<DomainName, SSL_CTX> object to
    *    do this.  For wildcard name like "*.facebook.com", ".facebook.com"
    *    is used as the key.
    *
-   * 4. After getting tlsext_hostname from the client hello message, it
-   *    will do a full string search first and then try one level up to
+   * 4. It uses Server Name Indication (SNI) extension from client hello
+   *    message to serve the correct context (X509 and tls crypto).
+   *    Given an SNI that is conveyed into the client hello, it will
+   *    do a full string search first and then try one level up to
    *    match any wildcard name (if any) in the X509.
    *    [Note, browser also only looks one level up when matching the
    * requesting domain name with the wildcard name in the server X509].
    */
 
   void insert(std::shared_ptr<ServerSSLContext> sslCtx, bool defaultFallback);
+
+  /**
+   * The following function maintains the data structure for server name
+   * matching using SNI extension value. It uses SNIs provided by
+   * caller as keys to map to the context generated from the given
+   * SSLContextConfig, instead of using the CN and SANs as keys from the X509.
+   */
+  void insert(
+      const std::vector<std::string>& snis,
+      std::shared_ptr<ServerSSLContext> sslCtx);
 
   void insertSSLCtxByDomainNameImpl(
       const std::string& dn,
@@ -367,12 +382,14 @@ SSLContextManager::~SSLContextManager() = default;
 
 SSLContextManager::SSLContextManager(
     const std::string& vipName,
-    bool strict,
+    SSLContextManagerSettings settings,
     SSLStats* stats)
     : vipName_(vipName),
       stats_(stats),
-      contexts_(SslContexts::create(strict)),
-      strict_(strict) {}
+      contexts_(SslContexts::create(settings.strict)),
+      strict_(settings.strict),
+      enableOpenSSLServerNameCallback_(
+          settings.enableOpenSSLServerNameCallback) {}
 
 SSLContextManager::SslContexts::SslContexts(bool strict) : strict_(strict) {}
 
@@ -431,6 +448,7 @@ void SSLContextManager::resetSSLContextConfigs(
 
   for (const auto& ctxConfig : ctxConfigs) {
     contexts->addSSLContextConfig(
+        {},
         ctxConfig,
         cacheOptions,
         ticketSeeds ? ticketSeeds : &oldTicketSeeds,
@@ -439,6 +457,7 @@ void SSLContextManager::resetSSLContextConfigs(
         this,
         defaultCtx);
   }
+
   contexts_.swap(contexts);
   defaultCtx_.swap(defaultCtx);
 }
@@ -535,6 +554,7 @@ static void setSupportedClientCANames(
 }
 
 void SSLContextManager::SslContexts::addSSLContextConfig(
+    const std::vector<std::string>& snis,
     const SSLContextConfig& ctxConfig,
     const SSLCacheOptions& cacheOptions,
     const TLSTicketKeySeeds* ticketSeeds,
@@ -558,6 +578,10 @@ void SSLContextManager::SslContexts::addSSLContextConfig(
     VLOG(3) << "Context with CN=" << commonName
             << " loaded no certs, skipping...";
     return;
+  }
+
+  if (!snis.empty()) {
+    commonName = snis.front();
   }
 
   mgr->overrideConfiguration(sslCtx, ctxConfig);
@@ -643,10 +667,19 @@ void SSLContextManager::SslContexts::addSSLContextConfig(
 
   // finalize sslCtx setup by the individual features supported by openssl
   ctxSetupByOpensslFeature(
-      sslCtx, ctxConfig, mgr->clientHelloTLSExtStats_, newDefault);
+      sslCtx,
+      ctxConfig,
+      mgr->enableOpenSSLServerNameCallback_,
+      mgr->clientHelloTLSExtStats_,
+      newDefault);
 
   try {
-    insert(sslCtx, ctxConfig.isDefault);
+    if (!snis.empty()) {
+      // associate given SNIs with the ssl context.
+      insert(snis, sslCtx);
+    } else {
+      insert(sslCtx, ctxConfig.isDefault);
+    }
   } catch (const std::exception& ex) {
     string msg = folly::to<string>(
         "Error adding certificate : ", folly::exceptionStr(ex));
@@ -872,8 +905,9 @@ SSLContextManager::SslContexts::serverNameCallback(
 
 // Consolidate all SSL_CTX setup which depends on openssl version/feature
 void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
-    shared_ptr<ServerSSLContext> sslCtx,
+    shared_ptr<ServerSSLContext>& sslCtx,
     const SSLContextConfig& ctxConfig,
+    const bool enableServerNameCallback,
     ClientHelloExtStats* stats,
     std::shared_ptr<ServerSSLContext>& newDefault) {
   // Disable compression - profiling shows this to be very expensive in
@@ -919,10 +953,12 @@ void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
     }
 
     newDefault = sslCtx;
-    newDefault->setServerNameCallback(
-        [stats, contexts = shared_from_this()](SSL* ssl) {
-          return serverNameCallback(ssl, stats, contexts);
-        });
+    if (enableServerNameCallback) {
+      newDefault->setServerNameCallback(
+          [stats, contexts = shared_from_this()](SSL* ssl) {
+            return serverNameCallback(ssl, stats, contexts);
+          });
+    }
   }
 #else
   // without SNI support, we expect only a single cert. set it as default and
@@ -934,7 +970,7 @@ void SSLContextManager::SslContexts::ctxSetupByOpensslFeature(
   newDefault = sslCtx;
 
   // Silence unused parameter warning
-  (stats);
+  (mgr);
 #endif
 #ifdef SSL_OP_NO_RENEGOTIATION
   // Disable renegotiation at the OpenSSL layer
@@ -1016,6 +1052,15 @@ void SSLContextManager::SslContexts::insert(
   } else {
     addServerContext(sslCtx);
   }
+}
+
+void SSLContextManager::SslContexts::insert(
+    const std::vector<std::string>& snis,
+    shared_ptr<ServerSSLContext> sslCtx) {
+  for (const auto& sni : snis) {
+    insertSSLCtxByDomainName(sni, sslCtx, CertCrypto::BEST_AVAILABLE, false);
+  }
+  addServerContext(sslCtx);
 }
 
 void SSLContextManager::SslContexts::insertSSLCtxByDomainName(
@@ -1260,6 +1305,25 @@ void SSLContextManager::addSSLContextConfig(
     const folly::SocketAddress& vipAddress,
     const std::shared_ptr<SSLCacheProvider>& externalCache) {
   contexts_->addSSLContextConfig(
+      {},
+      ctxConfig,
+      cacheOptions,
+      ticketSeeds,
+      vipAddress,
+      externalCache,
+      this,
+      defaultCtx_);
+}
+
+void SSLContextManager::addSSLContextConfig(
+    const std::vector<std::string>& snis,
+    const SSLContextConfig& ctxConfig,
+    const SSLCacheOptions& cacheOptions,
+    const TLSTicketKeySeeds* ticketSeeds,
+    const folly::SocketAddress& vipAddress,
+    const std::shared_ptr<SSLCacheProvider>& externalCache) {
+  contexts_->addSSLContextConfig(
+      snis,
       ctxConfig,
       cacheOptions,
       ticketSeeds,
@@ -1280,6 +1344,32 @@ void SSLContextManager::removeSSLContextConfig(const SSLContextKey& key) {
 
 std::shared_ptr<folly::SSLContext> SSLContextManager::getDefaultSSLCtx() const {
   return defaultCtx_;
+}
+
+std::shared_ptr<folly::SSLContext> SSLContextManager::getSSLCtx(
+    const std::string& sni) const {
+  DNString dnstr(sni.c_str(), sni.size());
+  SSLContextKey key(std::move(dnstr), CertCrypto::BEST_AVAILABLE);
+  auto ctx = contexts_->getSSLCtx(key);
+  if (!ctx && contexts_->isDefaultCtx(key)) {
+    ctx = defaultCtx_;
+  }
+
+  if (ctx) {
+    if (clientHelloTLSExtStats_) {
+      clientHelloTLSExtStats_->recordMatch();
+      clientHelloTLSExtStats_->recordCertCrypto(
+          CertCrypto::BEST_AVAILABLE, CertCrypto::BEST_AVAILABLE);
+    }
+
+    return ctx;
+  }
+
+  if (clientHelloTLSExtStats_) {
+    clientHelloTLSExtStats_->recordNotMatch();
+  }
+
+  return nullptr;
 }
 
 std::shared_ptr<folly::SSLContext> SSLContextManager::getSSLCtx(
@@ -1318,13 +1408,17 @@ void SSLContextManager::reloadTLSTicketKeys(
 
 void SSLContextManager::setClientHelloExtStats(ClientHelloExtStats* stats) {
   clientHelloTLSExtStats_ = stats;
-  if (defaultCtx_) {
+  if (defaultCtx_ && enableOpenSSLServerNameCallback_) {
     defaultCtx_->setServerNameCallback(
         [stats = clientHelloTLSExtStats_, contexts = contexts_](SSL* ssl) {
           return SSLContextManager::SslContexts::serverNameCallback(
               ssl, stats, contexts);
         });
   }
+}
+
+ClientHelloExtStats* SSLContextManager::getClientHelloExtStats() const {
+  return clientHelloTLSExtStats_;
 }
 
 void SSLContextManager::insertSSLCtxByDomainName(

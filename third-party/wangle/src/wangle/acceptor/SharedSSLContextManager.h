@@ -159,7 +159,9 @@ class SharedSSLContextManagerImpl : public SharedSSLContextManager {
       }
     }
     auto ctxManager = std::make_shared<SSLContextManager>(
-        "vip_" + config_.name, config_.strictSSL, nullptr);
+        "vip_" + config_.name,
+        SSLContextManagerSettings().setStrict(config_.strictSSL),
+        nullptr);
     for (const auto& sslCtxConfig : config_.sslContextConfigs) {
       ctxManager->addSSLContextConfig(
           sslCtxConfig,

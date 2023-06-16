@@ -88,7 +88,9 @@ void Acceptor::init(
 
     if (!sslCtxManager_) {
       sslCtxManager_ = std::make_unique<SSLContextManager>(
-          "vip_" + getName(), accConfig_.strictSSL, stats);
+          "vip_" + getName(),
+          SSLContextManagerSettings().setStrict(accConfig_.strictSSL),
+          stats);
     }
     try {
       // If the default ctx is nullptr, we can assume it hasn't been configured
@@ -212,6 +214,15 @@ void Acceptor::resetSSLContextConfigs(
           nullptr,
           accConfig_.bindAddress,
           cacheProvider_);
+      for (const auto& sniConfig : accConfig_.sniConfigs) {
+        sslCtxManager_->addSSLContextConfig(
+            sniConfig.snis,
+            sniConfig.contextConfig,
+            accConfig_.sslCacheOptions,
+            nullptr,
+            accConfig_.bindAddress,
+            cacheProvider_);
+      }
     }
   } catch (const std::runtime_error& ex) {
     LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()

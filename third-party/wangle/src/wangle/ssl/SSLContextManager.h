@@ -46,6 +46,35 @@ class TLSTicketKeyManager;
 struct TLSTicketKeySeeds;
 class ServerSSLContext;
 
+struct SSLContextManagerSettings {
+  SSLContextManagerSettings() = default;
+
+  SSLContextManagerSettings& setStrict(bool isStrict) {
+    strict = isStrict;
+    return *this;
+  }
+
+  SSLContextManagerSettings& setEnableSNICallback(bool isEnabled) {
+    enableOpenSSLServerNameCallback = isEnabled;
+    return *this;
+  }
+
+  /**
+   * If true, throws exceptions when a context creation fails.
+   */
+  bool strict{true};
+
+  /**
+   * If true, uses Open SSL ServerNameIndication (SNI) extension
+   * callback to switch context based on SNI.
+   * Set to false when
+   * 1- using Fizz fizzHandshakeAttempFallback callback to select
+   * context
+   * 2- you don't need to support SNI e.g., manager with single context
+   */
+  bool enableOpenSSLServerNameCallback{true};
+};
+
 // SSLContextManager represents all of the different server side
 // SSL configurations behind a VIP.
 //
@@ -86,10 +115,11 @@ class SSLContextManager {
     virtual ~ClientCertVerifyCallback() {}
   };
 
-  explicit SSLContextManager(
+  SSLContextManager(
       const std::string& vipName,
-      bool strict,
+      SSLContextManagerSettings settings,
       SSLStats* stats);
+
   virtual ~SSLContextManager();
 
   /**
@@ -112,6 +142,27 @@ class SSLContextManager {
       const std::shared_ptr<SSLCacheProvider>& externalCache);
 
   /**
+   * Adds a list of domain associated with a new X509 to SSLContextManager.
+   * The details of a X509 is passed as a SSLContextConfig object.
+   *
+   * @param snis          The list of SNIs associated with the given X509.
+   * @param ctxConfig     Details of a X509, its private key, password, etc.
+   * @param cacheOptions  Options for how to do session caching.
+   * @param ticketSeeds   If non-null, the initial ticket key seeds to use.
+   * @param vipAddress    Which VIP are the X509(s) used for? It is only for
+   *                      for user friendly log message
+   * @param externalCache Optional external provider for the session cache;
+   *                      may be null
+   */
+  void addSSLContextConfig(
+      const std::vector<std::string>& snis,
+      const SSLContextConfig& ctxConfig,
+      const SSLCacheOptions& cacheOptions,
+      const TLSTicketKeySeeds* ticketSeeds,
+      const folly::SocketAddress& vipAddress,
+      const std::shared_ptr<SSLCacheProvider>& externalCache);
+
+  /**
    * Resets SSLContextManager with new X509s
    *
    * @param ctxConfigs    Details of a X509s, private key, password, etc.
@@ -125,7 +176,7 @@ class SSLContextManager {
    *                      may be null
    */
   void resetSSLContextConfigs(
-      const std::vector<SSLContextConfig>& ctxConfig,
+      const std::vector<SSLContextConfig>& ctxConfigs,
       const SSLCacheOptions& cacheOptions,
       const TLSTicketKeySeeds* ticketSeeds,
       const folly::SocketAddress& vipAddress,
@@ -151,7 +202,14 @@ class SSLContextManager {
   std::shared_ptr<folly::SSLContext> getDefaultSSLCtx() const;
 
   /**
-   * Search first by exact domain, then by one level up
+   * Gets the SSLContext for the given SNI.
+   * Searches first by exact domain, then by one level up.
+   * Returns nullptr if nothing matches.
+   */
+  std::shared_ptr<folly::SSLContext> getSSLCtx(const std::string& sni) const;
+
+  /**
+   * Gets the SSLContext for the given key.
    */
   std::shared_ptr<folly::SSLContext> getSSLCtx(const SSLContextKey& key) const;
 
@@ -184,6 +242,8 @@ class SSLContextManager {
    * SSLContextManager only collects SNI stats now
    */
   void setClientHelloExtStats(ClientHelloExtStats* stats);
+
+  ClientHelloExtStats* getClientHelloExtStats() const;
 
   /*
    * Please read class header before setting this callback, it may have
@@ -259,6 +319,7 @@ class SSLContextManager {
   std::shared_ptr<SslContexts> contexts_;
   ClientHelloExtStats* clientHelloTLSExtStats_{nullptr};
   bool strict_{true};
+  bool enableOpenSSLServerNameCallback_{true};
   std::unique_ptr<ClientCertVerifyCallback> clientCertVerifyCallback_{nullptr};
   std::shared_ptr<ServerSSLContext> defaultCtx_;
   std::shared_ptr<PasswordInFileFactory> passwordFactory_{nullptr};

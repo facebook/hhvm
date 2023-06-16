@@ -27,131 +27,206 @@
 using std::shared_ptr;
 using namespace folly;
 
-// @lint-ignore-every PRIVATEKEY
-
 namespace wangle {
 
-static const std::string kTestCert1PEM{
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIICFzCCAb6gAwIBAgIJAO6xBdXUFQqgMAkGByqGSM49BAEwaDELMAkGA1UEBhMC\n"
-    "VVMxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21w\n"
-    "YW55IEx0ZDERMA8GA1UECwwIdGVzdC5jb20xETAPBgNVBAMMCHRlc3QuY29tMCAX\n"
-    "DTE2MDMxNjE4MDg1M1oYDzQ3NTQwMjExMTgwODUzWjBoMQswCQYDVQQGEwJVUzEV\n"
-    "MBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBhbnkg\n"
-    "THRkMREwDwYDVQQLDAh0ZXN0LmNvbTERMA8GA1UEAwwIdGVzdC5jb20wWTATBgcq\n"
-    "hkjOPQIBBggqhkjOPQMBBwNCAARZ4vDgSPwytxU2HfQG/wxhsk0uHfr1eUmheqoC\n"
-    "yiQPB7aXZPbFs3JtvhzKc8DZ0rrZIQpkVLAGEIAa5UbuCy32o1AwTjAdBgNVHQ4E\n"
-    "FgQU05wwrHKWuyGM0qAIzeprza/FM9UwHwYDVR0jBBgwFoAU05wwrHKWuyGM0qAI\n"
-    "zeprza/FM9UwDAYDVR0TBAUwAwEB/zAJBgcqhkjOPQQBA0gAMEUCIBofo+kW0kxn\n"
-    "wzvNvopVKr/cFuDzwRKHdozoiZ492g6QAiEAo55BTcbSwBeszWR6Cr8gOCS4Oq7Z\n"
-    "Mt8v4GYjd1KT4fE=\n"
-    "-----END CERTIFICATE-----\n"};
+// @lint-ignore-every PRIVATEKEY
+static const std::string kTestCert1PEM = R"(
+-----BEGIN CERTIFICATE-----
+MIICFzCCAb6gAwIBAgIJAO6xBdXUFQqgMAkGByqGSM49BAEwaDELMAkGA1UEBhMC
+VVMxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21w
+YW55IEx0ZDERMA8GA1UECwwIdGVzdC5jb20xETAPBgNVBAMMCHRlc3QuY29tMCAX
+DTE2MDMxNjE4MDg1M1oYDzQ3NTQwMjExMTgwODUzWjBoMQswCQYDVQQGEwJVUzEV
+MBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBhbnkg
+THRkMREwDwYDVQQLDAh0ZXN0LmNvbTERMA8GA1UEAwwIdGVzdC5jb20wWTATBgcq
+hkjOPQIBBggqhkjOPQMBBwNCAARZ4vDgSPwytxU2HfQG/wxhsk0uHfr1eUmheqoC
+yiQPB7aXZPbFs3JtvhzKc8DZ0rrZIQpkVLAGEIAa5UbuCy32o1AwTjAdBgNVHQ4E
+FgQU05wwrHKWuyGM0qAIzeprza/FM9UwHwYDVR0jBBgwFoAU05wwrHKWuyGM0qAI
+zeprza/FM9UwDAYDVR0TBAUwAwEB/zAJBgcqhkjOPQQBA0gAMEUCIBofo+kW0kxn
+wzvNvopVKr/cFuDzwRKHdozoiZ492g6QAiEAo55BTcbSwBeszWR6Cr8gOCS4Oq7Z
+Mt8v4GYjd1KT4fE=
+-----END CERTIFICATE-----
+)";
 
-static const std::string kTestCert1Key{
-    "-----BEGIN EC PARAMETERS-----\n"
-    "BggqhkjOPQMBBw==\n"
-    "-----END EC PARAMETERS-----\n"
-    "-----BEGIN EC PRIVATE KEY-----\n"
-    "MHcCAQEEIKhuz+7RoCLvsXzcD1+Bq5ahrOViFJmgHiGR3w3OmXEroAoGCCqGSM49\n"
-    "AwEHoUQDQgAEWeLw4Ej8MrcVNh30Bv8MYbJNLh369XlJoXqqAsokDwe2l2T2xbNy\n"
-    "bb4cynPA2dK62SEKZFSwBhCAGuVG7gst9g==\n"
-    "-----END EC PRIVATE KEY-----\n"};
+static const std::string kTestCert1Key = R"(
+-----BEGIN EC PARAMETERS-----
+BggqhkjOPQMBBw==
+-----END EC PARAMETERS-----
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIKhuz+7RoCLvsXzcD1+Bq5ahrOViFJmgHiGR3w3OmXEroAoGCCqGSM49
+AwEHoUQDQgAEWeLw4Ej8MrcVNh30Bv8MYbJNLh369XlJoXqqAsokDwe2l2T2xbNy
+bb4cynPA2dK62SEKZFSwBhCAGuVG7gst9g==
+-----END EC PRIVATE KEY-----
+)";
 
-static const std::string kTestCert2PEM{
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIICHDCCAcOgAwIBAgIJAMXIoAvQSr5HMAoGCCqGSM49BAMCMGoxCzAJBgNVBAYT\n"
-    "AlVTMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t\n"
-    "cGFueSBMdGQxEjAQBgNVBAsMCXRlc3QyLmNvbTESMBAGA1UEAwwJdGVzdDIuY29t\n"
-    "MCAXDTIwMDMxODIwNDI1NFoYDzMwMTkwNzIwMjA0MjU0WjBqMQswCQYDVQQGEwJV\n"
-    "UzEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBh\n"
-    "bnkgTHRkMRIwEAYDVQQLDAl0ZXN0Mi5jb20xEjAQBgNVBAMMCXRlc3QyLmNvbTBZ\n"
-    "MBMGByqGSM49AgEGCCqGSM49AwEHA0IABLY1a1jMILAhlIvJS+G30h52LDnaeOvJ\n"
-    "SZf8SBV4kk0cx2/11wuA/Dw9auBOqadkhRI06cdT1SMfkxU+j0/Sh96jUDBOMB0G\n"
-    "A1UdDgQWBBRmOoWWWQR840qg207DzbHtUfmLZzAfBgNVHSMEGDAWgBRmOoWWWQR8\n"
-    "40qg207DzbHtUfmLZzAMBgNVHRMEBTADAQH/MAoGCCqGSM49BAMCA0cAMEQCIBYI\n"
-    "7R2QG2aBXqXi5YUkDYH140ZvWSVO72Ny8Vv0fHNUAiA8khaQGXyhSmg5XtdYf+95\n"
-    "FMG3ZdzUrVbeGa66iTqsKA==\n"
-    "-----END CERTIFICATE-----\n"};
+static const std::string kTestCert2PEM = R"(
+-----BEGIN CERTIFICATE-----
+MIICHDCCAcOgAwIBAgIJAMXIoAvQSr5HMAoGCCqGSM49BAMCMGoxCzAJBgNVBAYT
+AlVTMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
+cGFueSBMdGQxEjAQBgNVBAsMCXRlc3QyLmNvbTESMBAGA1UEAwwJdGVzdDIuY29t
+MCAXDTIwMDMxODIwNDI1NFoYDzMwMTkwNzIwMjA0MjU0WjBqMQswCQYDVQQGEwJV
+UzEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBh
+bnkgTHRkMRIwEAYDVQQLDAl0ZXN0Mi5jb20xEjAQBgNVBAMMCXRlc3QyLmNvbTBZ
+MBMGByqGSM49AgEGCCqGSM49AwEHA0IABLY1a1jMILAhlIvJS+G30h52LDnaeOvJ
+SZf8SBV4kk0cx2/11wuA/Dw9auBOqadkhRI06cdT1SMfkxU+j0/Sh96jUDBOMB0G
+A1UdDgQWBBRmOoWWWQR840qg207DzbHtUfmLZzAfBgNVHSMEGDAWgBRmOoWWWQR8
+40qg207DzbHtUfmLZzAMBgNVHRMEBTADAQH/MAoGCCqGSM49BAMCA0cAMEQCIBYI
+7R2QG2aBXqXi5YUkDYH140ZvWSVO72Ny8Vv0fHNUAiA8khaQGXyhSmg5XtdYf+95
+FMG3ZdzUrVbeGa66iTqsKA==
+-----END CERTIFICATE-----
+)";
 
-static const std::string kTestCert2Key{
-    "-----BEGIN PRIVATE KEY-----\n"
-    "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgBUbZOZgJPOvfmZ\n"
-    "kfkqXA0kjCv+q9Mn4mSvnFZQ02ihRANCAAS2NWtYzCCwIZSLyUvht9Iediw52njr\n"
-    "yUmX/EgVeJJNHMdv9dcLgPw8PWrgTqmnZIUSNOnHU9UjH5MVPo9P0ofe\n"
-    "-----END PRIVATE KEY-----\n"};
+static const std::string kTestCert2Key = R"(
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgBUbZOZgJPOvfmZ
+kfkqXA0kjCv+q9Mn4mSvnFZQ02ihRANCAAS2NWtYzCCwIZSLyUvht9Iediw52njr
+yUmX/EgVeJJNHMdv9dcLgPw8PWrgTqmnZIUSNOnHU9UjH5MVPo9P0ofe
+-----END PRIVATE KEY-----
+)";
 
-static const std::string kTestCert3PEM{
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIICHTCCAcOgAwIBAgIJANhD01ZIjSaYMAoGCCqGSM49BAMCMGoxCzAJBgNVBAYT\n"
-    "AlVTMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t\n"
-    "cGFueSBMdGQxEjAQBgNVBAsMCXRlc3QzLmNvbTESMBAGA1UEAwwJdGVzdDMuY29t\n"
-    "MCAXDTIwMDMxODIwNDM1M1oYDzMwMTkwNzIwMjA0MzUzWjBqMQswCQYDVQQGEwJV\n"
-    "UzEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBh\n"
-    "bnkgTHRkMRIwEAYDVQQLDAl0ZXN0My5jb20xEjAQBgNVBAMMCXRlc3QzLmNvbTBZ\n"
-    "MBMGByqGSM49AgEGCCqGSM49AwEHA0IABPnM70rusTOR2a/6pp9ySifIak6E8OjG\n"
-    "OTInCWJinpcIL6/84dKkBbvnxoEnCac9D91Qn/DMS0SbFR+Ffy3eaJSjUDBOMB0G\n"
-    "A1UdDgQWBBSsgk2YknDXsMVAmPcNvmnsdQRe4DAfBgNVHSMEGDAWgBSsgk2YknDX\n"
-    "sMVAmPcNvmnsdQRe4DAMBgNVHRMEBTADAQH/MAoGCCqGSM49BAMCA0gAMEUCIHbT\n"
-    "lKFFkvhZk8ZA/R44o9uuUonJm5Gc4GrIU8FhprPyAiEA7X7y9w0wqBsRnqHY69/M\n"
-    "P1ay9D55cC8ZtIHW9Ioz4tU=\n"
-    "-----END CERTIFICATE-----\n"};
+static const std::string kTestCert3PEM = R"(
+-----BEGIN CERTIFICATE-----
+MIICHTCCAcOgAwIBAgIJANhD01ZIjSaYMAoGCCqGSM49BAMCMGoxCzAJBgNVBAYT
+AlVTMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t
+cGFueSBMdGQxEjAQBgNVBAsMCXRlc3QzLmNvbTESMBAGA1UEAwwJdGVzdDMuY29t
+MCAXDTIwMDMxODIwNDM1M1oYDzMwMTkwNzIwMjA0MzUzWjBqMQswCQYDVQQGEwJV
+UzEVMBMGA1UEBwwMRGVmYXVsdCBDaXR5MRwwGgYDVQQKDBNEZWZhdWx0IENvbXBh
+bnkgTHRkMRIwEAYDVQQLDAl0ZXN0My5jb20xEjAQBgNVBAMMCXRlc3QzLmNvbTBZ
+MBMGByqGSM49AgEGCCqGSM49AwEHA0IABPnM70rusTOR2a/6pp9ySifIak6E8OjG
+OTInCWJinpcIL6/84dKkBbvnxoEnCac9D91Qn/DMS0SbFR+Ffy3eaJSjUDBOMB0G
+A1UdDgQWBBSsgk2YknDXsMVAmPcNvmnsdQRe4DAfBgNVHSMEGDAWgBSsgk2YknDX
+sMVAmPcNvmnsdQRe4DAMBgNVHRMEBTADAQH/MAoGCCqGSM49BAMCA0gAMEUCIHbT
+lKFFkvhZk8ZA/R44o9uuUonJm5Gc4GrIU8FhprPyAiEA7X7y9w0wqBsRnqHY69/M
+P1ay9D55cC8ZtIHW9Ioz4tU=
+-----END CERTIFICATE-----
+)";
 
-static const std::string kTestCert3Key{
-    "-----BEGIN PRIVATE KEY-----\n"
-    "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVTwC3zm6JwlDVi/J\n"
-    "scDGImwGGxlgzHchexWJAsM/YNWhRANCAAT5zO9K7rEzkdmv+qafckonyGpOhPDo\n"
-    "xjkyJwliYp6XCC+v/OHSpAW758aBJwmnPQ/dUJ/wzEtEmxUfhX8t3miU\n"
-    "-----END PRIVATE KEY-----\n"};
+static const std::string kTestCert3Key = R"(
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgVTwC3zm6JwlDVi/J
+scDGImwGGxlgzHchexWJAsM/YNWhRANCAAT5zO9K7rEzkdmv+qafckonyGpOhPDo
+xjkyJwliYp6XCC+v/OHSpAW758aBJwmnPQ/dUJ/wzEtEmxUfhX8t3miU
+-----END PRIVATE KEY-----
+)";
 
-static const std::string kCertWithNoCNButWithSAN{
-    "-----BEGIN CERTIFICATE-----\n"
-    "MIIC4DCCAcigAwIBAgIJALTMdz3uPpCKMA0GCSqGSIb3DQEBCwUAMC8xLTArBgNV\n"
-    "BAoMJGludGVyb3AgcnVubmVyIENlcnRpZmljYXRlIEF1dGhvcml0eTAeFw0yMDA5\n"
-    "MjMxNjQyMzVaFw0yMTA5MjMxNjQyMzVaMBkxFzAVBgNVBAoMDmludGVyb3AgcnVu\n"
-    "bmVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1mRHbCeMxpws+sHC\n"
-    "OFAALZpm0Lme6a2rmtAQDdNl+ZHj9jENaNpyqhtgmADQ4xe4eQ/3b+9Dzp5ZZttq\n"
-    "XQuJwSitVQkzk3C8fwEFxbU9lXmn2eU07EbNjc6yp+TNtfFiae5NaivuryeBGFAW\n"
-    "tZ7DfJW6u2nD4iGcCz8DGiWQ3A66yZr2F7vyww7L3IJgZJHLtNEJqyqNp/V6437y\n"
-    "e/av1MVptvyHF/x1G2C5sg7OmoL8Sh2eI9KSJ7cP8GK7AKUTGUNn86CUe1lshGof\n"
-    "sFxiOHUgOqGcWEC24G18rgt1vCKaxWDfTGO3pY+55bzFpnVdnBlK7kPG2+j+Bj8W\n"
-    "NwUEwQIDAQABoxUwEzARBgNVHREECjAIggZzZXJ2ZXIwDQYJKoZIhvcNAQELBQAD\n"
-    "ggEBAKawb0cI0Ieu19mk5LFkK74Hw7s4+58SucdC93zNBvitm1fnMDmCpYfFTsEV\n"
-    "LuuheCQGQSCwL5IMDXdhaHMefL1VTvkws/QOQWYcHB3M3SvC+nApkiSy7Z77+Q1i\n"
-    "oetv9zLnPX1l9wV2GozxygbLrFAICBNbfCBoES06ZrAVI5WKpRyH1iBN0O2oky8g\n"
-    "J6zWLo7/3QdkDXqxjPzAhe0QiLZj3gVbmb0qCDOQOb59WxfoXqH+0LYYWcz046p7\n"
-    "Qc0UmyO6jI4gPtR+E3C/U7qHpD0fkz2aVJp+vleOBtzinGfAhYPDgTCwQ55xGU72\n"
-    "MPZDaUDgJLPG+bgt0iK1AV7EBec=\n"
-    "-----END CERTIFICATE-----\n"};
+static const std::string kCertWithNoCNButWithSAN = R"(
+-----BEGIN CERTIFICATE-----
+MIIC4DCCAcigAwIBAgIJALTMdz3uPpCKMA0GCSqGSIb3DQEBCwUAMC8xLTArBgNV
+BAoMJGludGVyb3AgcnVubmVyIENlcnRpZmljYXRlIEF1dGhvcml0eTAeFw0yMDA5
+MjMxNjQyMzVaFw0yMTA5MjMxNjQyMzVaMBkxFzAVBgNVBAoMDmludGVyb3AgcnVu
+bmVyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1mRHbCeMxpws+sHC
+OFAALZpm0Lme6a2rmtAQDdNl+ZHj9jENaNpyqhtgmADQ4xe4eQ/3b+9Dzp5ZZttq
+XQuJwSitVQkzk3C8fwEFxbU9lXmn2eU07EbNjc6yp+TNtfFiae5NaivuryeBGFAW
+tZ7DfJW6u2nD4iGcCz8DGiWQ3A66yZr2F7vyww7L3IJgZJHLtNEJqyqNp/V6437y
+e/av1MVptvyHF/x1G2C5sg7OmoL8Sh2eI9KSJ7cP8GK7AKUTGUNn86CUe1lshGof
+sFxiOHUgOqGcWEC24G18rgt1vCKaxWDfTGO3pY+55bzFpnVdnBlK7kPG2+j+Bj8W
+NwUEwQIDAQABoxUwEzARBgNVHREECjAIggZzZXJ2ZXIwDQYJKoZIhvcNAQELBQAD
+ggEBAKawb0cI0Ieu19mk5LFkK74Hw7s4+58SucdC93zNBvitm1fnMDmCpYfFTsEV
+LuuheCQGQSCwL5IMDXdhaHMefL1VTvkws/QOQWYcHB3M3SvC+nApkiSy7Z77+Q1i
+oetv9zLnPX1l9wV2GozxygbLrFAICBNbfCBoES06ZrAVI5WKpRyH1iBN0O2oky8g
+J6zWLo7/3QdkDXqxjPzAhe0QiLZj3gVbmb0qCDOQOb59WxfoXqH+0LYYWcz046p7
+Qc0UmyO6jI4gPtR+E3C/U7qHpD0fkz2aVJp+vleOBtzinGfAhYPDgTCwQ55xGU72
+MPZDaUDgJLPG+bgt0iK1AV7EBec=
+-----END CERTIFICATE-----
+)";
 
-static const std::string kCertWithNoCNButWithSANKey{
-    "-----BEGIN PRIVATE KEY-----\n"
-    "MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDWZEdsJ4zGnCz6\n"
-    "wcI4UAAtmmbQuZ7praua0BAN02X5keP2MQ1o2nKqG2CYANDjF7h5D/dv70POnllm\n"
-    "22pdC4nBKK1VCTOTcLx/AQXFtT2VeafZ5TTsRs2NzrKn5M218WJp7k1qK+6vJ4EY\n"
-    "UBa1nsN8lbq7acPiIZwLPwMaJZDcDrrJmvYXu/LDDsvcgmBkkcu00QmrKo2n9Xrj\n"
-    "fvJ79q/UxWm2/IcX/HUbYLmyDs6agvxKHZ4j0pIntw/wYrsApRMZQ2fzoJR7WWyE\n"
-    "ah+wXGI4dSA6oZxYQLbgbXyuC3W8IprFYN9MY7elj7nlvMWmdV2cGUruQ8bb6P4G\n"
-    "PxY3BQTBAgMBAAECggEBAJsCzGVVv0KG/zqbR6thpI9UeQxneY/pww7fawwkEjI9\n"
-    "mr6RvulWMNvviYq95EqeBwJ5WeWz8Kn+8hMdiC0YP5TKrXCzg3gSZifJ/HtzzMA7\n"
-    "wvIX+IjxtIPYtHISS+5GRmrjI1QlyaEZBg0nMxREY4G73NTO5xOkS2gSOlL4YGHK\n"
-    "bNdzQpLyZj6Goosr0g1J+l2/EVKO+/xBvZv6Fj6im+PmAimb+xe9iul7QDQHlYtI\n"
-    "T9J+2lvgzAof+uGYkMLwIO4R6xnjfd+Ey91rrQXgLfu1H63IT5qD0cOQ8sp+6XOW\n"
-    "slX6n1UxCjGYAJeSXqqu+5fX03XZt4h2zej2xtwLzeUCgYEA/RcnrLjzW2K1fnZq\n"
-    "WYuLcl9YwG4gUqqAzPsVOBPsWpnU1DMuC/L24u/CIlGLEEPRXgt8r6nGqfSg6Hs4\n"
-    "EOve8px3So5Nvt8EhugbANuQJlBPb3rkbV6cnCAbzpS6KYwCMNRZImO2K1bsab17\n"
-    "GBNagzKy5wqp6TFY0+CMySxytJ8CgYEA2Ns70YY3iYDFLLxrVpxHQG9bR4chATE2\n"
-    "tnePihfGgaW0oa744cMhJF/JIfpepB2JG/aOD6vmgtDO/z+vMqkO9Dvt/6wHa+S4\n"
-    "5AVkJnIkApNWXYdPM53szLx9fiuiQrQszsVpBSA20ytG9JjZ8/8i4T80KTgV0Il+\n"
-    "BrfzYYzjap8CgYEApCg8p59e2UtxBRGxcVs9m3WUj1vewz+sQ0goPzNM/ocAsJJx\n"
-    "r3ZsBE4W0UOqu2YBispQmW+5V8tAAwrJFtCmzx4FkeozKzZkLUynFytSmEdG/rvr\n"
-    "JbVURz/cSWXWSdRyJ1HUbqXWJs4+kWdBTCBheO+NcqZMBuDnCKaBKosV62kCgYEA\n"
-    "mvx9ES+Cy9Rrl6CGep0w012C+GkcbpS0zM5AmWqKpig/I/tAx2HFcxC+WHlvYI33\n"
-    "azPYrlymX8JK3uSuG1/2Xxnh7IQPvc33UoiD3nJfSDPzWt8U/QgWsPDaI+2dh1zs\n"
-    "VU+D0nUGmf/pM3F2/ErRq/iXGAqMlMFff//Cg2rFMnMCgYEA7De3L3aNpHFWhtUi\n"
-    "7c3DGtP3qTC6FAS9GJlA1TVsjgHt4nL3ZAKWOqXwVa1kXNDeYgN/Br39dfYW/KRE\n"
-    "Liz9kBryc02/2YSjg4YFDgrCqzeERPmwj8AKM3sPyL+nLzZOvJ3EbhyiQiOYGh+U\n"
-    "osLtL9tFEp8IrKHnoNVDuMPaZPM=\n"
-    "-----END PRIVATE KEY-----\n"};
+static const std::string kCertWithNoCNButWithSANKey = R"(
+-----BEGIN PRIVATE KEY-----
+MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDWZEdsJ4zGnCz6
+wcI4UAAtmmbQuZ7praua0BAN02X5keP2MQ1o2nKqG2CYANDjF7h5D/dv70POnllm
+22pdC4nBKK1VCTOTcLx/AQXFtT2VeafZ5TTsRs2NzrKn5M218WJp7k1qK+6vJ4EY
+UBa1nsN8lbq7acPiIZwLPwMaJZDcDrrJmvYXu/LDDsvcgmBkkcu00QmrKo2n9Xrj
+fvJ79q/UxWm2/IcX/HUbYLmyDs6agvxKHZ4j0pIntw/wYrsApRMZQ2fzoJR7WWyE
+ah+wXGI4dSA6oZxYQLbgbXyuC3W8IprFYN9MY7elj7nlvMWmdV2cGUruQ8bb6P4G
+PxY3BQTBAgMBAAECggEBAJsCzGVVv0KG/zqbR6thpI9UeQxneY/pww7fawwkEjI9
+mr6RvulWMNvviYq95EqeBwJ5WeWz8Kn+8hMdiC0YP5TKrXCzg3gSZifJ/HtzzMA7
+wvIX+IjxtIPYtHISS+5GRmrjI1QlyaEZBg0nMxREY4G73NTO5xOkS2gSOlL4YGHK
+bNdzQpLyZj6Goosr0g1J+l2/EVKO+/xBvZv6Fj6im+PmAimb+xe9iul7QDQHlYtI
+T9J+2lvgzAof+uGYkMLwIO4R6xnjfd+Ey91rrQXgLfu1H63IT5qD0cOQ8sp+6XOW
+slX6n1UxCjGYAJeSXqqu+5fX03XZt4h2zej2xtwLzeUCgYEA/RcnrLjzW2K1fnZq
+WYuLcl9YwG4gUqqAzPsVOBPsWpnU1DMuC/L24u/CIlGLEEPRXgt8r6nGqfSg6Hs4
+EOve8px3So5Nvt8EhugbANuQJlBPb3rkbV6cnCAbzpS6KYwCMNRZImO2K1bsab17
+GBNagzKy5wqp6TFY0+CMySxytJ8CgYEA2Ns70YY3iYDFLLxrVpxHQG9bR4chATE2
+tnePihfGgaW0oa744cMhJF/JIfpepB2JG/aOD6vmgtDO/z+vMqkO9Dvt/6wHa+S4
+5AVkJnIkApNWXYdPM53szLx9fiuiQrQszsVpBSA20ytG9JjZ8/8i4T80KTgV0Il+
+BrfzYYzjap8CgYEApCg8p59e2UtxBRGxcVs9m3WUj1vewz+sQ0goPzNM/ocAsJJx
+r3ZsBE4W0UOqu2YBispQmW+5V8tAAwrJFtCmzx4FkeozKzZkLUynFytSmEdG/rvr
+JbVURz/cSWXWSdRyJ1HUbqXWJs4+kWdBTCBheO+NcqZMBuDnCKaBKosV62kCgYEA
+mvx9ES+Cy9Rrl6CGep0w012C+GkcbpS0zM5AmWqKpig/I/tAx2HFcxC+WHlvYI33
+azPYrlymX8JK3uSuG1/2Xxnh7IQPvc33UoiD3nJfSDPzWt8U/QgWsPDaI+2dh1zs
+VU+D0nUGmf/pM3F2/ErRq/iXGAqMlMFff//Cg2rFMnMCgYEA7De3L3aNpHFWhtUi
+7c3DGtP3qTC6FAS9GJlA1TVsjgHt4nL3ZAKWOqXwVa1kXNDeYgN/Br39dfYW/KRE
+Liz9kBryc02/2YSjg4YFDgrCqzeERPmwj8AKM3sPyL+nLzZOvJ3EbhyiQiOYGh+U
+osLtL9tFEp8IrKHnoNVDuMPaZPM=
+-----END PRIVATE KEY-----
+)";
+
+/**
+ * CN = *.test4.com
+ * SANS:
+ *  - *.test4.com
+ *  - test4.com
+ *  - www.testtest4.com
+ */
+static const std::string kTestCert4PEM = R"(
+-----BEGIN CERTIFICATE-----
+MIIDsDCCApigAwIBAgIUYuo0xcXR8Y5C2+RqF2tStzkjmnYwDQYJKoZIhvcNAQEL
+BQAwYzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRMwEQYDVQQHDApNZW5sbyBQ
+YXJrMQ0wCwYDVQQKDARNZXRhMQ0wCwYDVQQLDARUZXN0MRQwEgYDVQQDDAsqLnRl
+c3Q0LmNvbTAgFw0yMzA1MzAyMTU3MTFaGA8yMDUwMTAxNTIxNTcxMVowYzELMAkG
+A1UEBhMCVVMxCzAJBgNVBAgMAkNBMRMwEQYDVQQHDApNZW5sbyBQYXJrMQ0wCwYD
+VQQKDARNZXRhMQ0wCwYDVQQLDARUZXN0MRQwEgYDVQQDDAsqLnRlc3Q0LmNvbTCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM51A+Ay2e2bTzXcA6Umk9y/
+0/87WMFG3YB0cFBdqN24HuxbV9PQ3+HA8QtUVgxnQToQIVvBodXMTOYe8KUuOl1X
+8LVu6HkYwmyVt12loL4q9XTmYFII8mNIebgzFlMMf8ujmLpqpW62+1b7LxtsP0ES
+rOXGJXHso1b5WAF41SCad3B3QUEIK/TiFNw9/LaLjBetZoWrE3WVJczzuSqZ3DJ3
+8uh8dIa0xdCKAYgXkjhoPSapW9u5RzN6z58XAOjj0X8fXBKSF9bnP9C736H23YjP
+7YaL1s/u3CEw6aX7GGg8v8zt6zdIgLRT8u8nQgFn8yAcnOzMLbJOiG2bUzya6FEC
+AwEAAaNaMFgwCwYDVR0PBAQDAgQwMBMGA1UdJQQMMAoGCCsGAQUFBwMBMDQGA1Ud
+EQQtMCuCCyoudGVzdDQuY29tggl0ZXN0NC5jb22CEXd3dy50ZXN0dGVzdDQuY29t
+MA0GCSqGSIb3DQEBCwUAA4IBAQAPH/IQn2TXwQCd1JyhHDUdLNkEZlSdmirssus3
+S0qH3U/BS2c7V+TuWFTh2HLXWDJFt/n7s3EEFBFOtJJtpu9o2fi2u3Qbx0sS8fde
+JH3vq+qK7VpH4l4aSOW44xVWqGw2byhIL0pCw9W1KIlhTqCCm3SPD1NSF1vyS2e0
+XMSc4vn6/2YwRwW7H6TjgeZQk7S3fK7mgg1tuzeA93P1I+GhwRXpiRnmUiOz2xWB
+6FJGog2kEiakuw0LwR+61jSG4R3gCkkiHtRy+2OWZ0ugwERlNV8YzKHGBHJyDf7t
+YSUTP0iLkFWK2J5ytvrjjpCxKiF83Qp2rUlaq+1GdBGrDnjC
+-----END CERTIFICATE-----
+)";
+
+static const std::string kTestCert4Key = R"(
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDOdQPgMtntm081
+3AOlJpPcv9P/O1jBRt2AdHBQXajduB7sW1fT0N/hwPELVFYMZ0E6ECFbwaHVzEzm
+HvClLjpdV/C1buh5GMJslbddpaC+KvV05mBSCPJjSHm4MxZTDH/Lo5i6aqVutvtW
++y8bbD9BEqzlxiVx7KNW+VgBeNUgmndwd0FBCCv04hTcPfy2i4wXrWaFqxN1lSXM
+87kqmdwyd/LofHSGtMXQigGIF5I4aD0mqVvbuUczes+fFwDo49F/H1wSkhfW5z/Q
+u9+h9t2Iz+2Gi9bP7twhMOml+xhoPL/M7es3SIC0U/LvJ0IBZ/MgHJzszC2yToht
+m1M8muhRAgMBAAECggEBAMqXfOQmQj+tJb9eVJ1dC7+U5b0RSXjvxy/kEspp/ekE
+YiPhRn/t+aOYJ3DMo1usfw8xAOr/SYV44wT124LbqB4sy2HeoXUjXLYc/ECC5Qd3
+NEIwRth5OxE972NXjlKUc1srABX9zLSmDmE+Pu2T/UYnw03+cIQoh+gy6a8YGVvR
+M7jZH3viSMImyeoWSCoaUPl212AywEdCY16WMJh+4Pg/3BO+P3b79eKAB9RunmED
+Szc8l5czajFPKjo0BUKXNZQDE5qDws+picR6z5IN+YDLKbq+CTJPzaYsNkq2oxkI
+fqnudhFZLuudbV6sXRvLHXVe9rcfgwKPrPJRpfBZLpkCgYEA9VuW6DSHsomR8LvD
+QWsB09MwlQ47SIoJzdQGh4n7a6zCPBd6uD6e2F+RQLCPtu1emooxh6xhTPGWJLb8
+LQUqdGAtgPJniIJrFqhRXKOMx8RakXPx+PdLcgKDuqqosS0nBH1REfNFT7Olx4oF
+OdB9kOwWzDFIRTDECNPTH35KXP8CgYEA12l6q8ezNcDSGGuKACr9XQOwrwNl8070
+xDhbaEOXc5dHBFq9A/gryUE2HFtWpMxtnzm5IBDza0h0vVcDu9PhAtNK5fBcP/kD
+wRgHdI5oINa2G6IXSIk8JZqSq4rtNMfODlrjurfo+zZGfeQcZ3T+L8oaIfJeYKLG
++8JkFgX8qq8CgYA6L6xMCRkdOA7KHl0hyHS4fV8KGkPo4gONMnkR76EWWfP+ODs8
+Mm2NNqzFwJl0cjp7P8abPEAe9TP8JQEM1CrLSnvAFryC3Rr0Vppk88xRG7m2wN5j
+gpH7yajfvdUfn2ufXvC45w5K5nmsJokyusTsd3C4n/9ZmUUEKufokhSklQKBgDME
+1nsNB1L54kjKX5r+k5eOIjCxW1ovHyXCO1QMfjhwYe+UFiR0iNpXyZsZvwG1MVl+
+8Gu52A1W0d9uVoIMAsUKiji/nvm/3rXDHTDr8ZmlgOg2kdEqP8agP5DFjLztfc5E
+lJ9Ko7Gr/zId7uRJ/1IOSfY0U0oMA5jpR483x8odAoGAV9DnSNb3snnEUCALDs9G
+ezOhadBeQ+cLd2E0yXMKvib14hIOG6+mqVDRySz66AX5ekGBxSzFCKQ1pTMb2MjB
+aK/EhwyLhJNHqVm2FtHxjmI4UNPSEOnRVtG6non09QgnTpNQucqOTxng3bPtpFOf
+n3gKgnsMFz0yff/NT4tr8XE=
+-----END PRIVATE KEY-----
+)";
+
+SSLContextManagerSettings& getSettings() {
+  static SSLContextManagerSettings settings;
+  return settings;
+}
 
 class SSLContextManagerForTest : public SSLContextManager {
  public:
@@ -162,7 +237,7 @@ class SSLContextManagerForTest : public SSLContextManager {
 
 TEST(SSLContextManagerTest, Test1) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   auto www_example_com_ctx = std::make_shared<SSLContext>();
   auto start_example_com_ctx = std::make_shared<SSLContext>();
   auto start_abc_example_com_ctx = std::make_shared<SSLContext>();
@@ -227,7 +302,7 @@ TEST(SSLContextManagerTest, Test1) {
 #if FOLLY_OPENSSL_HAS_SNI
 TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLCacheOptions cacheOptions;
   SocketAddress addr;
 
@@ -340,7 +415,7 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
 #if !(FOLLY_OPENSSL_IS_110) && !defined(OPENSSL_IS_BORINGSSL)
 TEST(SSLContextManagerTest, TestSessionContextIfSupplied) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLContextConfig ctxConfig;
   ctxConfig.sessionContext = "test";
   ctxConfig.addCertificateBuf(kTestCert1PEM, kTestCert1Key);
@@ -351,8 +426,8 @@ TEST(SSLContextManagerTest, TestSessionContextIfSupplied) {
   sslCtxMgr.addSSLContextConfig(
       ctxConfig, cacheOptions, nullptr, addr, nullptr);
 
-  SSLContextKey key("test.com", CertCrypto::BEST_AVAILABLE);
-  auto ctx = sslCtxMgr.getSSLCtx(key);
+  using namespace std::string_literals;
+  auto ctx = sslCtxMgr.getSSLCtx("test.com"s);
   ASSERT_NE(ctx, nullptr);
   auto sessCtxFromCtx = std::string(
       reinterpret_cast<char*>(ctx->getSSLCtx()->sid_ctx),
@@ -362,7 +437,7 @@ TEST(SSLContextManagerTest, TestSessionContextIfSupplied) {
 
 TEST(SSLContextManagerTest, TestSessionContextIfSessionCacheAbsent) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLContextConfig ctxConfig;
   ctxConfig.sessionContext = "test";
   ctxConfig.sessionCacheEnabled = false;
@@ -374,8 +449,8 @@ TEST(SSLContextManagerTest, TestSessionContextIfSessionCacheAbsent) {
   sslCtxMgr.addSSLContextConfig(
       ctxConfig, cacheOptions, nullptr, addr, nullptr);
 
-  SSLContextKey key("test.com", CertCrypto::BEST_AVAILABLE);
-  auto ctx = sslCtxMgr.getSSLCtx(key);
+  using namespace std::string_literals;
+  auto ctx = sslCtxMgr.getSSLCtx("test.com"s);
   ASSERT_NE(ctx, nullptr);
   auto sessCtxFromCtx = std::string(
       reinterpret_cast<char*>(ctx->getSSLCtx()->sid_ctx),
@@ -386,7 +461,7 @@ TEST(SSLContextManagerTest, TestSessionContextIfSessionCacheAbsent) {
 
 TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   auto www_example_com_ctx = std::make_shared<ServerSSLContext>();
   auto start_example_com_ctx = std::make_shared<ServerSSLContext>();
   auto start_abc_example_com_ctx = std::make_shared<ServerSSLContext>();
@@ -416,16 +491,17 @@ TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
   // If the wildcard context is successfully removed, there should be no context
   // for a random domain that is of the form *.example.com.
   sslCtxMgr.removeSSLContextConfig(SSLContextKey(".example.com"));
-  retCtx = sslCtxMgr.getSSLCtx(SSLContextKey("foo.example.com"));
+  using namespace std::string_literals;
+  retCtx = sslCtxMgr.getSSLCtx("foo.example.com"s);
   EXPECT_FALSE(retCtx);
 
   // Add it back and delete again but with the other API.
   sslCtxMgr.insertSSLCtxByDomainName("*.example.com", start_example_com_ctx);
   sslCtxMgr.addServerContext(start_example_com_ctx);
-  retCtx = sslCtxMgr.getSSLCtx(SSLContextKey("foo.example.com"));
+  retCtx = sslCtxMgr.getSSLCtx("foo.example.com"s);
   EXPECT_TRUE(retCtx);
   sslCtxMgr.removeSSLContextConfigByDomainName("*.example.com");
-  retCtx = sslCtxMgr.getSSLCtx(SSLContextKey("foo.example.com"));
+  retCtx = sslCtxMgr.getSSLCtx("foo.example.com"s);
   EXPECT_FALSE(retCtx);
 
   // Try to remove the context which does not exist - must be NOOP
@@ -446,7 +522,7 @@ TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
 
 TEST(SSLContextManagerTest, TestCertificateWithNoCN) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLContextConfig ctxConfig;
   ctxConfig.sessionContext = "ctx";
   ctxConfig.setCertificateBuf(
@@ -458,14 +534,14 @@ TEST(SSLContextManagerTest, TestCertificateWithNoCN) {
   SocketAddress addr;
   sslCtxMgr.addSSLContextConfig(
       ctxConfig, cacheOptions, nullptr, addr, nullptr);
-  SSLContextKey key("O = interop runner", CertCrypto::BEST_AVAILABLE);
-  auto ctx = sslCtxMgr.getSSLCtx(key);
+  using namespace std::string_literals;
+  auto ctx = sslCtxMgr.getSSLCtx("O = interop runner"s);
   ASSERT_NE(ctx, nullptr);
 }
 
 TEST(SSLContextManagerTest, TestAlpnAllowMismatch) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLContextConfig ctxConfig;
   ctxConfig.alpnAllowMismatch = true;
   ctxConfig.sessionContext = "ctx";
@@ -478,15 +554,15 @@ TEST(SSLContextManagerTest, TestAlpnAllowMismatch) {
   SocketAddress addr;
   sslCtxMgr.addSSLContextConfig(
       ctxConfig, cacheOptions, nullptr, addr, nullptr);
-  SSLContextKey key("O = interop runner", CertCrypto::BEST_AVAILABLE);
-  auto ctx = sslCtxMgr.getSSLCtx(key);
+  using namespace std::string_literals;
+  auto ctx = sslCtxMgr.getSSLCtx("O = interop runner"s);
   ASSERT_NE(ctx, nullptr);
   ASSERT_TRUE(ctx->getAlpnAllowMismatch());
 }
 
 TEST(SSLContextManagerTest, TestAlpnNotAllowMismatch) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   SSLContextConfig ctxConfig;
   ctxConfig.alpnAllowMismatch = false;
   ctxConfig.sessionContext = "ctx";
@@ -499,15 +575,15 @@ TEST(SSLContextManagerTest, TestAlpnNotAllowMismatch) {
   SocketAddress addr;
   sslCtxMgr.addSSLContextConfig(
       ctxConfig, cacheOptions, nullptr, addr, nullptr);
-  SSLContextKey key("O = interop runner", CertCrypto::BEST_AVAILABLE);
-  auto ctx = sslCtxMgr.getSSLCtx(key);
+  using namespace std::string_literals;
+  auto ctx = sslCtxMgr.getSSLCtx("O = interop runner"s);
   ASSERT_NE(ctx, nullptr);
   ASSERT_FALSE(ctx->getAlpnAllowMismatch());
 }
 
 TEST(SSLContextManagerTest, TestSingleClientCAFileSet) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   const std::string clientCAFile = "folly/io/async/test/certs/client_chain.pem";
 
   SSLContextConfig ctxConfig;
@@ -546,7 +622,7 @@ TEST(SSLContextManagerTest, TestSingleClientCAFileSet) {
 
 TEST(SSLContextManagerTest, TestMultipleClientCAsSet) {
   SSLContextManagerForTest sslCtxMgr(
-      "vip_ssl_context_manager_test_", true, nullptr);
+      "vip_ssl_context_manager_test_", getSettings(), nullptr);
   const std::vector<std::string> clientCAFiles{
       "folly/io/async/test/certs/client_cert.pem",
       "folly/io/async/test/certs/tests-cert.pem"};
@@ -585,4 +661,100 @@ TEST(SSLContextManagerTest, TestMultipleClientCAsSet) {
   }
 }
 
+TEST(SSLContextManagerTest, TestDomainAssociatedSSLContextConfigs) {
+  using namespace std::string_literals;
+  SSLContextManagerForTest sslCtxMgr(
+      "vip_ssl_context_manager_test_",
+      SSLContextManagerSettings().setEnableSNICallback(false),
+      nullptr);
+  SSLCacheOptions cacheOptions;
+  SocketAddress addr;
+  TLSTicketKeySeeds seeds{{"67"}, {"68"}, {"69"}};
+
+  std::vector<std::string> domains1 = {"*.test4.com", "test4.com"};
+  SSLContextConfig ctxConfig1;
+  ctxConfig1.domains = {"*.test4.com"};
+  ctxConfig1.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig1.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  ctxConfig1.isDefault = true;
+
+  std::vector<std::string> domains2 = {"www.testtest4.com"};
+  SSLContextConfig ctxConfig2;
+  ctxConfig2.domains = domains2;
+  ctxConfig2.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig2.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  auto configs = {
+      std::pair{domains1, ctxConfig1}, std::pair{domains2, ctxConfig2}};
+  for (const auto& config : configs) {
+    sslCtxMgr.addSSLContextConfig(
+        config.first, config.second, cacheOptions, &seeds, addr, nullptr);
+  }
+
+  auto ctx1 = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey(".test4.com"));
+  auto ctx2 =
+      sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.testtest4.com"));
+  EXPECT_EQ(sslCtxMgr.getDefaultSSLCtx(), ctx1);
+  EXPECT_NE(ctx1, ctx2);
+  EXPECT_EQ(ctx1, sslCtxMgr.getSSLCtx("foo.test4.com"s));
+  EXPECT_EQ(nullptr, sslCtxMgr.getSSLCtx("foo.unknown.com"s));
+}
+
+TEST(
+    SSLContextManagerTest,
+    TestDomainsAssociatedSSLContextConfigsCompatibility) {
+  using namespace std::string_literals;
+  SSLContextManagerForTest sslCtxMgr(
+      "vip_ssl_context_manager_test_",
+      SSLContextManagerSettings().setEnableSNICallback(false),
+      nullptr);
+  SSLCacheOptions cacheOptions;
+  SocketAddress addr;
+  TLSTicketKeySeeds seeds{{"67"}, {"68"}, {"69"}};
+
+  SSLContextConfig ctxConfig1;
+  ctxConfig1.setCertificateBuf(kTestCert1PEM, kTestCert1Key);
+  ctxConfig1.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  ctxConfig1.isDefault = true;
+
+  SSLContextConfig ctxConfig2;
+  ctxConfig2.setCertificateBuf(kTestCert2PEM, kTestCert2Key);
+  ctxConfig2.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  SSLContextConfig ctxConfig3;
+  ctxConfig3.setCertificateBuf(kTestCert3PEM, kTestCert3Key);
+  ctxConfig3.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  SSLContextConfig ctxConfig4;
+  ctxConfig4.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig4.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  std::vector<std::string> domains = {"www.test4.com"};
+  SSLContextConfig ctxConfig4Override;
+  ctxConfig4Override.domains = domains;
+  ctxConfig4Override.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig4Override.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  sslCtxMgr.resetSSLContextConfigs(
+      {ctxConfig1, ctxConfig2, ctxConfig3, ctxConfig4},
+      cacheOptions,
+      &seeds,
+      addr,
+      nullptr);
+  sslCtxMgr.addSSLContextConfig(
+      domains, ctxConfig4Override, cacheOptions, &seeds, addr, nullptr);
+
+  auto ctx = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com"));
+  EXPECT_NE(ctx, sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey(".test4.com")));
+  EXPECT_EQ(
+      sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey(".test4.com")),
+      sslCtxMgr.getSSLCtx("foo.test4.com"s));
+}
 } // namespace wangle

@@ -2673,15 +2673,17 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env declare_local_keyword;
           Space;
           t env declare_local_variable;
-          Space;
           t env declare_local_colon;
+          SplitWith Cost.Base;
           Space;
-          t env declare_local_type;
+          Nest [t env declare_local_type];
           Space;
           t env declare_local_equal;
           Space;
-          t env declare_local_init;
+          SplitWith Cost.Base;
+          Nest [t env declare_local_init];
           t env declare_local_semicolon;
+          Newline;
         ])
 
 and when_present node f =

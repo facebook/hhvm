@@ -689,6 +689,11 @@ let handle_request
             (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
       in
       Lwt.async (fun () ->
+          let%lwt () = Lwt.pause () in
+          (* [Lwt.pause] yields, i.e. resumes continuation on the next tick.
+             This is so that we don't [notify_callback_in_case_of_fallback_to_full_init] until after
+             we've responded to the initialize request. That fulfills the clientIdeService.ml contract
+             is that the first message after an Initialize request is its response; not a [Full_index_fallback]. *)
           let%lwt naming_table_result =
             ClientIdeInit.init
               ~config:dstate.dcommon.config

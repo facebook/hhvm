@@ -3694,11 +3694,18 @@ let do_documentFormatting
 let do_willSaveWaitUntil
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : WillSaveWaitUntil.params) : WillSaveWaitUntil.result =
-  let uri = params.WillSaveWaitUntil.textDocument.TextDocumentIdentifier.uri in
+  let { WillSaveWaitUntil.textDocument; reason } = params in
+  let is_autosave =
+    match reason with
+    | AfterDelay -> true
+    | Manual
+    | FocusOut ->
+      false
+  in
+  let uri = textDocument.TextDocumentIdentifier.uri in
   let lsp_doc = UriMap.find uri editor_open_files in
   let content = lsp_doc.Lsp.TextDocumentItem.text in
-  match Formatting.is_formattable content with
-  | true ->
+  if (not is_autosave) && Formatting.is_formattable content then
     let open DocumentFormatting in
     do_documentFormatting
       editor_open_files
@@ -3706,7 +3713,8 @@ let do_willSaveWaitUntil
         textDocument = params.WillSaveWaitUntil.textDocument;
         options = { tabSize = 2; insertSpaces = true };
       }
-  | false -> []
+  else
+    []
 
 let do_codeAction_local
     (ide_service : ClientIdeService.t ref)

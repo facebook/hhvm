@@ -22,6 +22,7 @@ concurrency:
 # https://github.com/actions/runner/issues/480
 env:
   OUT: ${{ format('{0}/out', github.workspace) }}
+  DEBIAN_FRONTEND: "noninteractive"
 
 jobs:
   build_ubuntu_focal_nightly:
@@ -31,9 +32,24 @@ jobs:
       env:
         DISTRO: ubuntu-20.04-focal
         IS_NIGHTLY: 1
+        CLANG_VERSION: 12
     steps:
-    - name: Installing git
-      run: apt update -y && apt install -y git
+    - name: Installing dependencies to bootstrap env
+      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg
+    - name: Installing llvm
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        # Note: Keep this version in sync with the one in the Debian control file.
+        ./llvm.sh ${CLANG_VERSION}
+    - name: Making LLVM the default compiler
+      run: |
+        update-alternatives --remove-all cc
+        update-alternatives --remove-all c++
+        update-alternatives --install /usr/bin/cc cc /usr/bin/clang++-${CLANG_VERSION} 500
+        update-alternatives --set cc /usr/bin/clang++-${CLANG_VERSION}
+        update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_VERSION} 500
+        update-alternatives --set c++ /usr/bin/clang++-${CLANG_VERSION}
     - name: Fetching HHVM and its submodules
       uses: actions/checkout@v3
       with:

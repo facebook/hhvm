@@ -55,7 +55,9 @@
         "renameProvider": true,
         "implementationProvider": true,
         "rageProvider": true,
-        "experimental": {"snippetTextEdit": true}
+        "experimental": {
+          "snippetTextEdit": true
+        }
       }
     }
   },
@@ -808,6 +810,70 @@
               }
             },
             "newText": "TSHIRT_SIZES"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 14,
+    "result": {
+      "changes": {
+        "${rename2_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 2
+              },
+              "end": {
+                "line": 3,
+                "character": 25
+              }
+            },
+            "newText": "multifile_newname"
+          }
+        ],
+        "${php_file_uri}": [
+          {
+            "range": {
+              "start": {
+                "line": 90,
+                "character": 0
+              },
+              "end": {
+                "line": 90,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Use `multifile_newname` instead\")>>\nfunction multifile_rename_target(): void {\n  multifile_newname();\n}\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 91,
+                "character": 9
+              },
+              "end": {
+                "line": 91,
+                "character": 32
+              }
+            },
+            "newText": "multifile_newname"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 95,
+                "character": 2
+              },
+              "end": {
+                "line": 95,
+                "character": 25
+              }
+            },
+            "newText": "multifile_newname"
           }
         ]
       }

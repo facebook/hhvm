@@ -1,0 +1,133 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 990,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": true,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\"",
+            "{",
+            "#"
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "typeDefinitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": {
+          "resolveProvider": true
+        },
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "implementationProvider": true,
+        "rageProvider": true,
+        "experimental": {
+          "snippetTextEdit": true
+        }
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "changes": {
+        "file://${root_path}/rename2.php": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 2
+              },
+              "end": {
+                "line": 3,
+                "character": 25
+              }
+            },
+            "newText": "multifile_newname"
+          }
+        ],
+        "file://${root_path}/rename.php": [
+          {
+            "range": {
+              "start": {
+                "line": 90,
+                "character": 0
+              },
+              "end": {
+                "line": 90,
+                "character": 0
+              }
+            },
+            "newText": "\n<<__Deprecated(\"Use `multifile_newname` instead\")>>\nfunction multifile_rename_target(): void {\n  multifile_newname();\n}\n"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 91,
+                "character": 9
+              },
+              "end": {
+                "line": 91,
+                "character": 32
+              }
+            },
+            "newText": "multifile_newname"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 95,
+                "character": 2
+              },
+              "end": {
+                "line": 95,
+                "character": 25
+              }
+            },
+            "newText": "multifile_newname"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

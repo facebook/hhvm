@@ -4526,12 +4526,25 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables)
 
-    def test_rename(self) -> None:
+    def test_rename_ok(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("rename.php"))
+        variables.update(
+            {
+                "rename2_file_uri": self.repo_file_uri("rename2.php"),
+                "rename2_file": self.read_repo_file("rename2.php"),
+            }
+        )
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("rename_ok", variables)
+
+    def test_rename_with_server(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("rename.php"))
         self.test_driver.start_hh_server()
         self.test_driver.run_check()
-        self.load_and_run("rename", variables)
+        self.load_and_run("rename_with_server", variables)
 
     def test_rename_in_interface(self) -> None:
         variables = self.write_hhconf_and_naming_table()

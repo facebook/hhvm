@@ -31,6 +31,18 @@
   },
   {
     "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${rename2_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${rename2_file}"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 1,
     "method": "textDocument/rename",
     "params": {
@@ -313,6 +325,28 @@
     "method": "$test/waitForResponse",
     "params": {
       "id": 13
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 14,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 91,
+        "character": 20
+      },
+      "newName": "multifile_newname"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 14
     }
   },
   {

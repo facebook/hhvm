@@ -88,3 +88,10 @@ function test_rename_shape_keys(): void {
   shape(RenameTestEnum::SMALL => 123); // 4. Rename STR_CONSTANT
   shape(TestClass::STR_CONSTANT => 123); // 13. Rename TestEnum
 }
+
+function multifile_rename_target(): void { // 14. Rename multifile_rename_target
+}
+
+function test_multifile_1(): void {
+  multifile_rename_target();
+}

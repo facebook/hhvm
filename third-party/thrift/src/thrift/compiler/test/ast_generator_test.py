@@ -35,7 +35,6 @@ thrift2ast = str(
 )
 
 
-@unittest.skipIf(sys.platform == "win32", "test not supported on Windows")
 class AstGeneratorTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()

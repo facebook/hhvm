@@ -113,7 +113,7 @@ class t_ast_generator : public t_generator {
 void t_ast_generator::generate_program() {
   boost::filesystem::create_directory(get_out_dir());
   std::string fname = fmt::format("{}/{}.ast", get_out_dir(), program_->name());
-  f_out_.open(fname.c_str());
+  f_out_.open(fname.c_str(), std::ios::out | std::ios::binary);
 
   cpp2::Ast ast;
   std::unordered_map<const t_program*, apache::thrift::type::ProgramId>

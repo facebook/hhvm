@@ -50,15 +50,15 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual ::facebook::thrift::test::MyI32 sync_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
-  [[deprecated("Use sync_func instead")]] virtual ::facebook::thrift::test::MyI32 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
-  virtual folly::Future<::facebook::thrift::test::MyI32> future_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
-  virtual folly::SemiFuture<::facebook::thrift::test::MyI32> semifuture_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual ::facebook::thrift::test::MyI32_4873 sync_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
+  [[deprecated("Use sync_func instead")]] virtual ::facebook::thrift::test::MyI32_4873 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
+  virtual folly::Future<::facebook::thrift::test::MyI32_4873> future_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual folly::SemiFuture<::facebook::thrift::test::MyI32_4873> semifuture_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
 #if FOLLY_HAS_COROUTINES
-  virtual folly::coro::Task<::facebook::thrift::test::MyI32> co_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
-  virtual folly::coro::Task<::facebook::thrift::test::MyI32> co_func(apache::thrift::RequestParams params, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual folly::coro::Task<::facebook::thrift::test::MyI32_4873> co_func(apache::thrift::RequestParams params, std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
 #endif
-  virtual void async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32>> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
+  virtual void async_tm_func(std::unique_ptr<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>> callback, std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
  private:
   static ::facebook::thrift::test::ServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_func{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -72,7 +72,7 @@ using ServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<Service> inst
 namespace facebook { namespace thrift { namespace test {
 class ServiceSvNull : public ::apache::thrift::ServiceHandler<Service> {
  public:
-  ::facebook::thrift::test::MyI32 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) override;
+  ::facebook::thrift::test::MyI32_4873 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter_7208> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) override;
 };
 
 class ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -97,7 +97,7 @@ class ServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBa
   template <typename ProtocolIn_, typename ProtocolOut_>
   void executeRequest_func(apache::thrift::ServerRequest&& serverRequest);
   template <class ProtocolIn_, class ProtocolOut_>
-  static apache::thrift::SerializedResponse return_func(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::MyI32 const& _return);
+  static apache::thrift::SerializedResponse return_func(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::MyI32_4873 const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_func(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:

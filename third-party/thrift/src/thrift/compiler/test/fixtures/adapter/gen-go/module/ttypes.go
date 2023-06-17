@@ -237,6 +237,24 @@ type CountingInt = int64
 
 func CountingIntPtr(v CountingInt) *CountingInt { return &v }
 
+type FooWithAdapter_9317 = *FooWithAdapter
+
+func FooWithAdapter_9317Ptr(v FooWithAdapter_9317) *FooWithAdapter_9317 { return &v }
+
+func NewFooWithAdapter_9317() FooWithAdapter_9317 { return NewFooWithAdapter() }
+
+type ListWithElemAdapterWithAdapter_2312 = ListWithElemAdapterWithAdapter
+
+func ListWithElemAdapterWithAdapter_2312Ptr(v ListWithElemAdapterWithAdapter_2312) *ListWithElemAdapterWithAdapter_2312 { return &v }
+
+type MyI32_4873 = MyI32
+
+func MyI32_4873Ptr(v MyI32_4873) *MyI32_4873 { return &v }
+
+type StringWithAdapter_7208 = StringWithAdapter
+
+func StringWithAdapter_7208Ptr(v StringWithAdapter_7208) *StringWithAdapter_7208 { return &v }
+
 // Attributes:
 //  - Signature
 //  - Color
@@ -411,8 +429,8 @@ type Foo struct {
   IntFieldWithDefault int32 `thrift:"intFieldWithDefault,3" db:"intFieldWithDefault" json:"intFieldWithDefault"`
   SetField SetWithAdapter `thrift:"setField,4" db:"setField" json:"setField"`
   OptionalSetField SetWithAdapter `thrift:"optionalSetField,5,optional" db:"optionalSetField" json:"optionalSetField,omitempty"`
-  MapField map[string]ListWithElemAdapterWithAdapter `thrift:"mapField,6" db:"mapField" json:"mapField"`
-  OptionalMapField map[string]ListWithElemAdapterWithAdapter `thrift:"optionalMapField,7,optional" db:"optionalMapField" json:"optionalMapField,omitempty"`
+  MapField map[string][]StringWithAdapter `thrift:"mapField,6" db:"mapField" json:"mapField"`
+  OptionalMapField map[string][]StringWithAdapter `thrift:"optionalMapField,7,optional" db:"optionalMapField" json:"optionalMapField,omitempty"`
   BinaryField []byte `thrift:"binaryField,8" db:"binaryField" json:"binaryField"`
   LongField MyI64 `thrift:"longField,9" db:"longField" json:"longField"`
   AdaptedLongField MyI64 `thrift:"adaptedLongField,10" db:"adaptedLongField" json:"adaptedLongField"`
@@ -450,12 +468,12 @@ func (p *Foo) GetOptionalSetField() SetWithAdapter {
   return p.OptionalSetField
 }
 
-func (p *Foo) GetMapField() map[string]ListWithElemAdapterWithAdapter {
+func (p *Foo) GetMapField() map[string][]StringWithAdapter {
   return p.MapField
 }
-var Foo_OptionalMapField_DEFAULT map[string]ListWithElemAdapterWithAdapter
+var Foo_OptionalMapField_DEFAULT map[string][]StringWithAdapter
 
-func (p *Foo) GetOptionalMapField() map[string]ListWithElemAdapterWithAdapter {
+func (p *Foo) GetOptionalMapField() map[string][]StringWithAdapter {
   return p.OptionalMapField
 }
 
@@ -537,12 +555,12 @@ func (f *FooBuilder) OptionalSetField(optionalSetField SetWithAdapter) *FooBuild
   return f
 }
 
-func (f *FooBuilder) MapField(mapField map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
+func (f *FooBuilder) MapField(mapField map[string][]StringWithAdapter) *FooBuilder {
   f.obj.MapField = mapField
   return f
 }
 
-func (f *FooBuilder) OptionalMapField(optionalMapField map[string]ListWithElemAdapterWithAdapter) *FooBuilder {
+func (f *FooBuilder) OptionalMapField(optionalMapField map[string][]StringWithAdapter) *FooBuilder {
   f.obj.OptionalMapField = optionalMapField
   return f
 }
@@ -592,12 +610,12 @@ func (f *Foo) SetOptionalSetField(optionalSetField SetWithAdapter) *Foo {
   return f
 }
 
-func (f *Foo) SetMapField(mapField map[string]ListWithElemAdapterWithAdapter) *Foo {
+func (f *Foo) SetMapField(mapField map[string][]StringWithAdapter) *Foo {
   f.MapField = mapField
   return f
 }
 
-func (f *Foo) SetOptionalMapField(optionalMapField map[string]ListWithElemAdapterWithAdapter) *Foo {
+func (f *Foo) SetOptionalMapField(optionalMapField map[string][]StringWithAdapter) *Foo {
   f.OptionalMapField = optionalMapField
   return f
 }
@@ -770,7 +788,7 @@ func (p *Foo)  ReadField6(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]ListWithElemAdapterWithAdapter, size)
+  tMap := make(map[string][]StringWithAdapter, size)
   p.MapField =  tMap
   for i := 0; i < size; i ++ {
     var _key2 string
@@ -783,7 +801,7 @@ func (p *Foo)  ReadField6(iprot thrift.Protocol) error {
     if err != nil {
       return thrift.PrependError("error reading list begin: ", err)
     }
-    tSlice := make(ListWithElemAdapterWithAdapter, 0, size)
+    tSlice := make([]StringWithAdapter, 0, size)
     _val3 :=  tSlice
     for i := 0; i < size; i ++ {
       var _elem4 StringWithAdapter
@@ -811,7 +829,7 @@ func (p *Foo)  ReadField7(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]ListWithElemAdapterWithAdapter, size)
+  tMap := make(map[string][]StringWithAdapter, size)
   p.OptionalMapField =  tMap
   for i := 0; i < size; i ++ {
     var _key5 string
@@ -824,7 +842,7 @@ func (p *Foo)  ReadField7(iprot thrift.Protocol) error {
     if err != nil {
       return thrift.PrependError("error reading list begin: ", err)
     }
-    tSlice := make(ListWithElemAdapterWithAdapter, 0, size)
+    tSlice := make([]StringWithAdapter, 0, size)
     _val6 :=  tSlice
     for i := 0; i < size; i ++ {
       var _elem7 StringWithAdapter
@@ -1124,7 +1142,7 @@ type Baz struct {
   // unused fields # 2 to 3
   SetField SetWithAdapter `thrift:"setField,4,optional" db:"setField" json:"setField,omitempty"`
   // unused field # 5
-  MapField map[string]ListWithElemAdapterWithAdapter `thrift:"mapField,6,optional" db:"mapField" json:"mapField,omitempty"`
+  MapField map[string][]StringWithAdapter `thrift:"mapField,6,optional" db:"mapField" json:"mapField,omitempty"`
   // unused field # 7
   BinaryField []byte `thrift:"binaryField,8,optional" db:"binaryField" json:"binaryField,omitempty"`
   LongField *MyI64 `thrift:"longField,9,optional" db:"longField" json:"longField,omitempty"`
@@ -1146,9 +1164,9 @@ var Baz_SetField_DEFAULT SetWithAdapter
 func (p *Baz) GetSetField() SetWithAdapter {
   return p.SetField
 }
-var Baz_MapField_DEFAULT map[string]ListWithElemAdapterWithAdapter
+var Baz_MapField_DEFAULT map[string][]StringWithAdapter
 
-func (p *Baz) GetMapField() map[string]ListWithElemAdapterWithAdapter {
+func (p *Baz) GetMapField() map[string][]StringWithAdapter {
   return p.MapField
 }
 var Baz_BinaryField_DEFAULT []byte
@@ -1234,7 +1252,7 @@ func (b *BazBuilder) SetField(setField SetWithAdapter) *BazBuilder {
   return b
 }
 
-func (b *BazBuilder) MapField(mapField map[string]ListWithElemAdapterWithAdapter) *BazBuilder {
+func (b *BazBuilder) MapField(mapField map[string][]StringWithAdapter) *BazBuilder {
   b.obj.MapField = mapField
   return b
 }
@@ -1259,7 +1277,7 @@ func (b *Baz) SetSetField(setField SetWithAdapter) *Baz {
   return b
 }
 
-func (b *Baz) SetMapField(mapField map[string]ListWithElemAdapterWithAdapter) *Baz {
+func (b *Baz) SetMapField(mapField map[string][]StringWithAdapter) *Baz {
   b.MapField = mapField
   return b
 }
@@ -1358,7 +1376,7 @@ func (p *Baz)  ReadField6(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]ListWithElemAdapterWithAdapter, size)
+  tMap := make(map[string][]StringWithAdapter, size)
   p.MapField =  tMap
   for i := 0; i < size; i ++ {
     var _key9 string
@@ -1371,7 +1389,7 @@ func (p *Baz)  ReadField6(iprot thrift.Protocol) error {
     if err != nil {
       return thrift.PrependError("error reading list begin: ", err)
     }
-    tSlice := make(ListWithElemAdapterWithAdapter, 0, size)
+    tSlice := make([]StringWithAdapter, 0, size)
     _val10 :=  tSlice
     for i := 0; i < size; i ++ {
       var _elem11 StringWithAdapter
@@ -1558,8 +1576,8 @@ func (p *Baz) String() string {
 type Bar struct {
   StructField *Foo `thrift:"structField,1" db:"structField" json:"structField"`
   OptionalStructField *Foo `thrift:"optionalStructField,2,optional" db:"optionalStructField" json:"optionalStructField,omitempty"`
-  StructListField []*FooWithAdapter `thrift:"structListField,3" db:"structListField" json:"structListField"`
-  OptionalStructListField []*FooWithAdapter `thrift:"optionalStructListField,4,optional" db:"optionalStructListField" json:"optionalStructListField,omitempty"`
+  StructListField []*Foo `thrift:"structListField,3" db:"structListField" json:"structListField"`
+  OptionalStructListField []*Foo `thrift:"optionalStructListField,4,optional" db:"optionalStructListField" json:"optionalStructListField,omitempty"`
   UnionField *Baz `thrift:"unionField,5" db:"unionField" json:"unionField"`
   OptionalUnionField *Baz `thrift:"optionalUnionField,6,optional" db:"optionalUnionField" json:"optionalUnionField,omitempty"`
   AdaptedStructField *DirectlyAdapted `thrift:"adaptedStructField,7" db:"adaptedStructField" json:"adaptedStructField"`
@@ -1587,12 +1605,12 @@ func (p *Bar) GetOptionalStructField() *Foo {
   return p.OptionalStructField
 }
 
-func (p *Bar) GetStructListField() []*FooWithAdapter {
+func (p *Bar) GetStructListField() []*Foo {
   return p.StructListField
 }
-var Bar_OptionalStructListField_DEFAULT []*FooWithAdapter
+var Bar_OptionalStructListField_DEFAULT []*Foo
 
-func (p *Bar) GetOptionalStructListField() []*FooWithAdapter {
+func (p *Bar) GetOptionalStructListField() []*Foo {
   return p.OptionalStructListField
 }
 var Bar_UnionField_DEFAULT *Baz
@@ -1672,12 +1690,12 @@ func (b *BarBuilder) OptionalStructField(optionalStructField *Foo) *BarBuilder {
   return b
 }
 
-func (b *BarBuilder) StructListField(structListField []*FooWithAdapter) *BarBuilder {
+func (b *BarBuilder) StructListField(structListField []*Foo) *BarBuilder {
   b.obj.StructListField = structListField
   return b
 }
 
-func (b *BarBuilder) OptionalStructListField(optionalStructListField []*FooWithAdapter) *BarBuilder {
+func (b *BarBuilder) OptionalStructListField(optionalStructListField []*Foo) *BarBuilder {
   b.obj.OptionalStructListField = optionalStructListField
   return b
 }
@@ -1707,12 +1725,12 @@ func (b *Bar) SetOptionalStructField(optionalStructField *Foo) *Bar {
   return b
 }
 
-func (b *Bar) SetStructListField(structListField []*FooWithAdapter) *Bar {
+func (b *Bar) SetStructListField(structListField []*Foo) *Bar {
   b.StructListField = structListField
   return b
 }
 
-func (b *Bar) SetOptionalStructListField(optionalStructListField []*FooWithAdapter) *Bar {
+func (b *Bar) SetOptionalStructListField(optionalStructListField []*Foo) *Bar {
   b.OptionalStructListField = optionalStructListField
   return b
 }
@@ -1809,10 +1827,10 @@ func (p *Bar)  ReadField3(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]*FooWithAdapter, 0, size)
+  tSlice := make([]*Foo, 0, size)
   p.StructListField =  tSlice
   for i := 0; i < size; i ++ {
-    _elem12 := NewFooWithAdapter()
+    _elem12 := NewFooWithAdapter_9317()
     if err := _elem12.Read(iprot); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem12), err)
     }
@@ -1829,10 +1847,10 @@ func (p *Bar)  ReadField4(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]*FooWithAdapter, 0, size)
+  tSlice := make([]*Foo, 0, size)
   p.OptionalStructListField =  tSlice
   for i := 0; i < size; i ++ {
-    _elem13 := NewFooWithAdapter()
+    _elem13 := NewFooWithAdapter_9317()
     if err := _elem13.Read(iprot); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem13), err)
     }

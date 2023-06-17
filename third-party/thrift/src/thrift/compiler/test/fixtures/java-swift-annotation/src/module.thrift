@@ -50,7 +50,7 @@ struct MyMapping {
   2: map<i32, FMap> (
     java.swift.type = "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
   ) ioMap;
-  3: map<string, string (java.swift.binary_string)> binaryMap;
+  3: map<string, string_6863> binaryMap;
   4: map<string, binary> regularBinary;
 }
 
@@ -58,3 +58,6 @@ struct BinaryMapping {
   3: map<string, binary_string> binaryMap;
   4: map<string, binary> regularBinary;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef string (java.swift.binary_string = "1") string_6863

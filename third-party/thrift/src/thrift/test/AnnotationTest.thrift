@@ -31,4 +31,7 @@ struct foo {
 )
 
 typedef string (unicode.encoding = "UTF-16") non_latin_string
-typedef list<double (cpp.fixed_point = "16")> tiny_float_list
+typedef list<double_7102> tiny_float_list
+
+// The following were automatically generated and may benefit from renaming.
+typedef double (cpp.fixed_point = "16") double_7102

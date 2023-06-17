@@ -1473,3 +1473,7 @@ AdaptedTypedef = AdaptedStruct
 TypedefOfDirect = DirectlyAdaptedStruct
 AdaptedCircularAdaptee = CircularAdaptee
 CountingInt = int
+FooWithAdapter_9317 = my.Adapter1.Type
+ListWithElemAdapter_withAdapter_2312 = __T.List[str]
+MyI32_4873 = int
+StringWithAdapter_7208 = str

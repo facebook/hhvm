@@ -89,16 +89,15 @@ struct Foo {
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  6: map<string, ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')> (
+  6: map<string, ListWithElemAdapter_withAdapter_2312> (
     py.adapter = 'my.Adapter3',
   ) mapField;
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  7: optional map<
-    string,
-    ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')
-  > (py.adapter = 'my.Adapter3') optionalMapField;
+  7: optional map<string, ListWithElemAdapter_withAdapter_2312> (
+    py.adapter = 'my.Adapter3',
+  ) optionalMapField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
@@ -122,7 +121,7 @@ union Baz {
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  6: map<string, ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')> (
+  6: map<string, ListWithElemAdapter_withAdapter_2312> (
     py.adapter = 'my.Adapter3',
   ) mapField;
   @hack.Adapter{name = '\\Adapter1'}
@@ -144,10 +143,8 @@ struct Bar {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   2: optional Foo (py.adapter = 'my.Adapter1') optionalStructField;
-  3: list<FooWithAdapter (py.adapter = 'my.Adapter1')> structListField;
-  4: optional list<
-    FooWithAdapter (py.adapter = 'my.Adapter1')
-  > optionalStructListField;
+  3: list<FooWithAdapter_9317> structListField;
+  4: optional list<FooWithAdapter_9317> optionalStructListField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   5: Baz (py.adapter = 'my.Adapter1') unionField;
@@ -216,8 +213,8 @@ typedef A AdaptedA
 struct A {}
 
 service Service {
-  MyI32 (py.adapter = 'my.Adapter1') func(
-    1: StringWithAdapter (py.adapter = 'my.Adapter2') arg1,
+  MyI32_4873 func(
+    1: StringWithAdapter_7208 arg1,
     @cpp.Adapter{name = "::my::Adapter2"}
     2: string arg2,
     3: Foo arg3,
@@ -498,3 +495,11 @@ const AdaptedBool type_adapted = true;
 const MoveOnly nested_adapted = {"ptr": {}};
 
 const list<AdaptedByte> container_of_adapted = [1, 2, 3];
+
+// The following were automatically generated and may benefit from renaming.
+typedef FooWithAdapter (py.adapter = "my.Adapter1") FooWithAdapter_9317
+typedef ListWithElemAdapter_withAdapter (
+  py.adapter = "my.Adapter2",
+) ListWithElemAdapter_withAdapter_2312
+typedef MyI32 (py.adapter = "my.Adapter1") MyI32_4873
+typedef StringWithAdapter (py.adapter = "my.Adapter2") StringWithAdapter_7208

@@ -60,6 +60,14 @@ pub type AdaptedCircularAdaptee = crate::types::CircularAdaptee;
 
 pub type CountingInt = ::std::primitive::i64;
 
+pub type FooWithAdapter_9317 = crate::types::FooWithAdapter;
+
+pub type ListWithElemAdapter_withAdapter_2312 = crate::types::ListWithElemAdapter_withAdapter;
+
+pub type MyI32_4873 = crate::types::MyI32;
+
+pub type StringWithAdapter_7208 = crate::types::StringWithAdapter;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyAnnotation {
     pub signature: ::std::string::String,

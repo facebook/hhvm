@@ -16,12 +16,12 @@ namespace facebook\thrift\test;
 interface ServiceAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
-   * MyI32
-   *   func(1: StringWithAdapter arg1,
+   * MyI32_4873
+   *   func(1: StringWithAdapter_7208 arg1,
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32>;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
 }
 
 /**
@@ -32,12 +32,12 @@ interface ServiceAsyncIf extends \IThriftAsyncIf {
 interface ServiceIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
-   * MyI32
-   *   func(1: StringWithAdapter arg1,
+   * MyI32_4873
+   *   func(1: StringWithAdapter_7208 arg1,
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): \facebook\thrift\test\MyI32_4873;
 }
 
 /**
@@ -56,12 +56,12 @@ interface ServiceAsyncClientIf extends ServiceAsyncIf {
 interface ServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
-   * MyI32
-   *   func(1: StringWithAdapter arg1,
+   * MyI32_4873
+   *   func(1: StringWithAdapter_7208 arg1,
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32>;
+  public function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873>;
 }
 
 /**
@@ -78,12 +78,12 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
 
   /**
    * Original thrift definition:-
-   * MyI32
-   *   func(1: StringWithAdapter arg1,
+   * MyI32_4873
+   *   func(1: StringWithAdapter_7208 arg1,
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public async function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32> {
+  public async function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -106,12 +106,12 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
 
   /**
    * Original thrift definition:-
-   * MyI32
-   *   func(1: StringWithAdapter arg1,
+   * MyI32_4873
+   *   func(1: StringWithAdapter_7208 arg1,
    *        2: string arg2,
    *        3: Foo arg3);
    */
-  public async function func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32> {
+  public async function func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): Awaitable<\facebook\thrift\test\MyI32_4873> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -128,7 +128,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
   }
 
   /* send and recv functions */
-  public function send_func(\facebook\thrift\test\StringWithAdapter $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): int {
+  public function send_func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): int {
     $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
       'arg1' => $arg1,
       'arg2' => $arg2,
@@ -136,7 +136,7 @@ class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
     ));
     return $this->sendImplHelper($args, "func", false);
   }
-  public function recv_func(?int $expectedsequenceid = null): \facebook\thrift\test\MyI32 {
+  public function recv_func(?int $expectedsequenceid = null): \facebook\thrift\test\MyI32_4873 {
     return $this->recvImplHelper(\facebook\thrift\test\Service_func_result::class, "func", false, $expectedsequenceid);
   }
 }
@@ -169,22 +169,22 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
   ];
 
   const type TConstructorShape = shape(
-    ?'arg1' => ?\facebook\thrift\test\StringWithAdapter,
+    ?'arg1' => ?\facebook\thrift\test\StringWithAdapter_7208,
     ?'arg2' => ?string,
     ?'arg3' => ?\facebook\thrift\test\Foo,
   );
 
   const type TShape = shape(
-    'arg1' => \facebook\thrift\test\StringWithAdapter,
+    'arg1' => \facebook\thrift\test\StringWithAdapter_7208,
     'arg2' => string,
     ?'arg3' => ?\facebook\thrift\test\Foo::TShape,
   );
-  const int STRUCTURAL_ID = 4977133747708930688;
-  public \facebook\thrift\test\StringWithAdapter $arg1;
+  const int STRUCTURAL_ID = 1456593986927498685;
+  public \facebook\thrift\test\StringWithAdapter_7208 $arg1;
   public string $arg2;
   public ?\facebook\thrift\test\Foo $arg3;
 
-  public function __construct(?\facebook\thrift\test\StringWithAdapter $arg1 = null, ?string $arg2 = null, ?\facebook\thrift\test\Foo $arg3 = null)[] {
+  public function __construct(?\facebook\thrift\test\StringWithAdapter_7208 $arg1 = null, ?string $arg2 = null, ?\facebook\thrift\test\Foo $arg3 = null)[] {
     $this->arg1 = $arg1 ?? \Adapter1::fromThrift('');
     $this->arg2 = $arg2 ?? '';
     $this->arg3 = $arg3;
@@ -221,15 +221,33 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
                 shape(
                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "module.StringWithAdapter",
+                      "name" => "module.StringWithAdapter_7208",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.StringWithAdapter",
+                              "name" => "module.StringWithAdapter_7208",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.StringWithAdapter",
+                                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                            shape(
+                                              "name" => "module.StringWithAdapter",
+                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                shape(
+                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                )
+                                              ),
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                             )
@@ -320,7 +338,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
     }
 
     if (idx($parsed, 'arg1') !== null) {
-      $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\StringWithAdapter>($parsed['arg1']);
+      $this->arg1 = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\StringWithAdapter_7208>($parsed['arg1']);
     }
     if (idx($parsed, 'arg2') !== null) {
       $this->arg2 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['arg2']);
@@ -342,7 +360,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
 class Service_func_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = \facebook\thrift\test\MyI32;
+  const type TResult = \facebook\thrift\test\MyI32_4873;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
@@ -359,7 +377,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 2679926375535497837;
+  const int STRUCTURAL_ID = 1013885591449640654;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -395,15 +413,33 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
                 shape(
                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "module.MyI32",
+                      "name" => "module.MyI32_4873",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.MyI32",
+                              "name" => "module.MyI32_4873",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.MyI32",
+                                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                            shape(
+                                              "name" => "module.MyI32",
+                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                shape(
+                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                                )
+                                              ),
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                             )
@@ -443,7 +479,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
     }
 
     if (idx($parsed, 'success') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI32>($parsed['success']);
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\MyI32_4873>($parsed['success']);
       if ($_tmp0 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -471,15 +507,33 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                 shape(
                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "name" => "module.MyI32",
+                      "name" => "module.MyI32_4873",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.MyI32",
+                              "name" => "module.MyI32_4873",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                    shape(
+                                      "name" => "module.MyI32",
+                                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                            shape(
+                                              "name" => "module.MyI32",
+                                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                shape(
+                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                                )
+                                              ),
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    )
+                                  ),
                                 )
                               ),
                             )
@@ -498,15 +552,33 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                       shape(
                         "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                           shape(
-                            "name" => "module.StringWithAdapter",
+                            "name" => "module.StringWithAdapter_7208",
                             "underlyingType" => \tmeta_ThriftType::fromShape(
                               shape(
                                 "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                                   shape(
-                                    "name" => "module.StringWithAdapter",
+                                    "name" => "module.StringWithAdapter_7208",
                                     "underlyingType" => \tmeta_ThriftType::fromShape(
                                       shape(
-                                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                          shape(
+                                            "name" => "module.StringWithAdapter",
+                                            "underlyingType" => \tmeta_ThriftType::fromShape(
+                                              shape(
+                                                "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                                                  shape(
+                                                    "name" => "module.StringWithAdapter",
+                                                    "underlyingType" => \tmeta_ThriftType::fromShape(
+                                                      shape(
+                                                        "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                                      )
+                                                    ),
+                                                  )
+                                                ),
+                                              )
+                                            ),
+                                          )
+                                        ),
                                       )
                                     ),
                                   )

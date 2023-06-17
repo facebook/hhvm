@@ -391,7 +391,7 @@ struct StreamPayloadMetadata {
   1: optional CompressionAlgorithm compression;
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  2: optional map<string, string (java.swift.binary_string)> (
+  2: optional map<string, string_8874> (
     cpp.template = "folly::F14NodeMap",
   ) otherMetadata;
   // Metadata describing the type of stream payload. MUST be set for protocol
@@ -511,7 +511,7 @@ union ClientPushMetadata {
 struct HeadersPayloadContent {
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  1: optional map<string, string (java.swift.binary_string)> (
+  1: optional map<string, string_8874> (
     cpp.template = "folly::F14NodeMap",
   ) otherMetadata;
 }
@@ -522,3 +522,6 @@ struct HeadersPayloadMetadata {
   // in compressionConfig in RequestRpcMetadata
   1: optional CompressionAlgorithm compression;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef string (java.swift.binary_string = "1") string_8874

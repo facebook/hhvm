@@ -11,8 +11,8 @@
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
 namespace facebook { namespace thrift { namespace test {
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::MyI32*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::string, ::facebook::thrift::test::StringWithAdapter_7208*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>, apache::thrift::FieldData<2, ::apache::thrift::type_class::string, ::std::string*>, apache::thrift::FieldData<3, ::apache::thrift::type_class::structure, ::facebook::thrift::test::Foo*>> Service_func_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::facebook::thrift::test::MyI32_4873*, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>> Service_func_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
 void ServiceAsyncProcessor::setUpAndProcess_func(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
@@ -29,7 +29,7 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::facebook::thrift::test::Service_func_pargs args;
-  auto uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter>();
+  auto uarg_arg1 = std::make_unique<::facebook::thrift::test::StringWithAdapter_7208>();
   args.get<0>().value = uarg_arg1.get();
   auto uarg_arg2 = std::make_unique<::std::string>();
   args.get<1>().value = uarg_arg2.get();
@@ -51,7 +51,7 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32>>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<::facebook::thrift::test::MyI32_4873>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , return_func<ProtocolIn_,ProtocolOut_>
@@ -67,10 +67,10 @@ void ServiceAsyncProcessor::executeRequest_func(apache::thrift::ServerRequest&& 
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::MyI32 const& _return) {
+apache::thrift::SerializedResponse ServiceAsyncProcessor::return_func(apache::thrift::ContextStack* ctx, ::facebook::thrift::test::MyI32_4873 const& _return) {
   ProtocolOut_ prot;
   ::facebook::thrift::test::Service_func_presult result;
-  result.get<0>().value = const_cast<::facebook::thrift::test::MyI32*>(&_return);
+  result.get<0>().value = const_cast<::facebook::thrift::test::MyI32_4873*>(&_return);
   result.setIsSet(0, true);
   return serializeResponse("func", &prot, ctx, result);
 }

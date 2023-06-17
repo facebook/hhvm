@@ -143,7 +143,7 @@ pub struct MyDataPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyDataFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -189,7 +189,7 @@ pub struct MyDataWithCustomDefaultPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyDataWithCustomDefaultFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -299,7 +299,7 @@ pub struct MyStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::MyStructFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -589,7 +589,7 @@ pub struct LateDefStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::LateDefStructFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -631,7 +631,7 @@ pub struct RecursivePatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::RecursiveFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -689,7 +689,7 @@ pub struct BarPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: crate::types::BarFieldPatch,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::fbthrift::builtin_types::HashSet<patch::types::FieldId>,
+    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation

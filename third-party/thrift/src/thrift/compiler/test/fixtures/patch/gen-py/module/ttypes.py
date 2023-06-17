@@ -9691,6 +9691,9 @@ MyDataPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
   },
+  7: {
+    "rust.box": "",
+  },
 }
 
 def MyDataPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None, remove=None,):
@@ -9784,6 +9787,9 @@ MyDataWithCustomDefaultPatch.thrift_struct_annotations = {
 MyDataWithCustomDefaultPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  7: {
+    "rust.box": "",
   },
 }
 
@@ -10008,6 +10014,9 @@ MyStructPatch.thrift_struct_annotations = {
 MyStructPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  7: {
+    "rust.box": "",
   },
 }
 
@@ -10648,6 +10657,9 @@ LateDefStructPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
   },
+  7: {
+    "rust.box": "",
+  },
 }
 
 def LateDefStructPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None, remove=None,):
@@ -10707,6 +10719,9 @@ RecursivePatch.thrift_struct_annotations = {
 RecursivePatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  7: {
+    "rust.box": "",
   },
 }
 
@@ -10819,6 +10834,9 @@ BarPatch.thrift_struct_annotations = {
 BarPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  7: {
+    "rust.box": "",
   },
 }
 

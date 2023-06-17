@@ -31,6 +31,11 @@ namespace thrift {
 namespace compiler {
 namespace {
 
+t_field& rust_box(t_field& node) {
+  node.set_annotation("rust.box");
+  return node;
+}
+
 // TODO(afuller): Index all types by uri, and find them that way.
 const char* getPatchTypeName(t_base_type::type base_type) {
   switch (base_type) {
@@ -435,7 +440,8 @@ t_struct& patch_generator::add_struct_patch(
   gen.ensureStruct(add_ensure_struct(annot, value_type));
   gen.patchAfter(patch_type);
   if (const auto* p = program_.scope()->find_type("patch.FieldId")) {
-    gen.remove(inst_set(*p));
+    // Box it in rust to avoid stack-overflow
+    rust_box(gen.remove(inst_set(*p)));
   }
   gen.set_adapter("StructPatchAdapter");
   return gen;

@@ -74,7 +74,6 @@ naming_error::Visibility
 naming_error::ReturnOnlyHint
 naming_error::UnsupportedFeature
 name_context::NameContext
-package::PackageRelationship
 patt_binding_ty::PattBindingTy
 patt_locl_ty::Prim
 patt_error::Primary

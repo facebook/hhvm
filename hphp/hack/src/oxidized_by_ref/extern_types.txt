@@ -89,8 +89,6 @@ oxidized::full_fidelity_parser_env::FullFidelityParserEnv
 oxidized::name_context::NameContext
 oxidized::naming_types::KindOfType
 oxidized::naming_types::NameKind
-oxidized::package::Package;
-oxidized::package_info::PackageInfo;
 oxidized::parser_options::FfiT
 oxidized::typing_defs::ClassConstKind
 oxidized::typing_defs_core::ConsistentKind

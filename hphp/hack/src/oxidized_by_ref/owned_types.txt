@@ -7,7 +7,6 @@ decl_defs::XhpAttr
 ident::Ident
 lazy::Lazy
 method_flags::MethodFlags
-package::PackageRelationship
 prop_flags::PropFlags
 saved_state_rollouts::Flag
 saved_state_rollouts::FlagName

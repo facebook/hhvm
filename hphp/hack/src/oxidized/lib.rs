@@ -78,8 +78,6 @@ pub use gen::namespace_env;
 pub use gen::naming_error;
 pub use gen::naming_phase_error;
 pub use gen::nast_check_error;
-pub use gen::package;
-pub use gen::package_info;
 pub use gen::parser_options;
 pub use gen::parsing_error;
 pub use gen::patt_binding_ty;

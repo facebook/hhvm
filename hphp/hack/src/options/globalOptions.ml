@@ -191,7 +191,6 @@ type t = {
   tco_rust_elab: bool;
   dump_tast_hashes: bool;
   tco_autocomplete_mode: bool;
-  tco_package_info: PackageInfo.t;
 }
 [@@deriving eq, show]
 
@@ -323,7 +322,6 @@ let default =
     tco_rust_elab = false;
     dump_tast_hashes = false;
     tco_autocomplete_mode = false;
-    tco_package_info = PackageInfo.empty;
   }
 
 let set
@@ -453,7 +451,6 @@ let set
     ?tco_rust_elab
     ?dump_tast_hashes
     ?tco_autocomplete_mode
-    ?tco_package_info
     options =
   let setting setting option =
     match setting with
@@ -789,7 +786,6 @@ let set
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
-    tco_package_info = setting tco_package_info options.tco_package_info;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

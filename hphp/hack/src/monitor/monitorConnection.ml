@@ -160,7 +160,12 @@ let read_and_log_process_information ~timeout =
     HackEventLogger.invariant_violation_bug desc ~telemetry;
     ()
 
-let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
+let connect_to_monitor
+    ?(log_on_slow_connect = false)
+    ~tracker
+    ~timeout
+    ~terminate_monitor_on_version_mismatch
+    config =
   (* There are some pathological scenarios concerned with high volumes of requests.
      1. There's a finite unix pipe between monitor and server, used for handoff. When
      that pipe gets full (~30 requests), the monitor will freeze for 4s before closing
@@ -225,7 +230,11 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
 
             (* 2. send version, followed by newline *)
             phase := MonitorUtils.Connect_send_version;
-            let version_str = MonitorUtils.VersionPayload.serialize ~tracker in
+            let version_str =
+              MonitorUtils.VersionPayload.serialize
+                ~tracker
+                ~terminate_monitor_on_version_mismatch
+            in
             let (_ : int) =
               Marshal_tools.to_fd_with_preamble
                 (Unix.descr_of_out_channel oc)
@@ -265,11 +274,31 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
             | Build_id_mismatch ->
               wait_on_server_restart ic;
               Error (Build_id_mismatched_monitor_will_terminate None)
-            | Build_id_mismatch_ex mismatch_info
-            | Build_id_mismatch_v3 (mismatch_info, _) ->
+            | Build_id_mismatch_ex mismatch_info ->
               wait_on_server_restart ic;
               Error
-                (Build_id_mismatched_monitor_will_terminate (Some mismatch_info)))
+                (Build_id_mismatched_monitor_will_terminate (Some mismatch_info))
+            | Build_id_mismatch_v3 (mismatch_info, mismatch_payload) ->
+              let monitor_will_terminate =
+                match
+                  MonitorUtils.MismatchPayload.deserialize mismatch_payload
+                with
+                | Error msg ->
+                  Hh_logger.log
+                    "Unparseable response from monitor - %s\n%s"
+                    msg
+                    mismatch_payload;
+                  true
+                | Ok { MonitorUtils.MismatchPayload.monitor_will_terminate } ->
+                  monitor_will_terminate
+              in
+              if monitor_will_terminate then begin
+                wait_on_server_restart ic;
+                Error
+                  (Build_id_mismatched_monitor_will_terminate
+                     (Some mismatch_info))
+              end else
+                Error (Build_id_mismatched_client_must_terminate mismatch_info))
           ~on_timeout:(fun _timings ->
             Error
               (Connect_to_monitor_failure
@@ -298,7 +327,12 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
 let connect_and_shut_down ~tracker root =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
-  connect_to_monitor ~tracker ~timeout:3 config >>= fun (ic, oc, tracker) ->
+  connect_to_monitor
+    ~tracker
+    ~timeout:3
+    ~terminate_monitor_on_version_mismatch:true
+    config
+  >>= fun (ic, oc, tracker) ->
   log "send_shutdown" ~tracker;
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble
@@ -325,7 +359,12 @@ let connect_and_shut_down ~tracker root =
           Ok MonitorUtils.SHUTDOWN_VERIFIED
       end
 
-let connect_once ~tracker ~timeout root handoff_options =
+let connect_once
+    ~tracker
+    ~timeout
+    ~terminate_monitor_on_version_mismatch
+    root
+    handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
@@ -333,7 +372,12 @@ let connect_once ~tracker ~timeout root handoff_options =
     let tracker =
       Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
     in
-    connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
+    connect_to_monitor
+      ~tracker
+      ~timeout
+      ~terminate_monitor_on_version_mismatch
+      config
+    >>= fun (ic, oc, tracker) ->
     let tracker =
       Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
     in

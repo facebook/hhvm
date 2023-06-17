@@ -220,6 +220,21 @@ let wait_for_server_hello
   in
   Lwt.return_unit
 
+let describe_mismatch (mismatch_info : MonitorUtils.build_mismatch_info option)
+    : string =
+  match mismatch_info with
+  | None -> ""
+  | Some
+      { MonitorUtils.existing_version; existing_argv; existing_launch_time; _ }
+    ->
+    Printf.sprintf
+      "  hh_server '%s', version '%s', launched %s\n  hh_client '%s', version '%s', launched [just now]\n"
+      (String.concat ~sep:" " existing_argv)
+      existing_version
+      (Utils.timestring existing_launch_time)
+      (String.concat ~sep:" " (Array.to_list Sys.argv))
+      Build_id.build_revision
+
 let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     conn Lwt.t =
   env.progress_callback (Some "connecting");
@@ -262,8 +277,16 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     ~connection_log_id
     "ClientConnect.connect: attempting MonitorConnection.connect_once (%ds)"
     timeout;
+  let terminate_monitor_on_version_mismatch = env.autostart in
+  (* We've put our money where our mouth is -- only ask the monitor to terminate
+     if we're prepared to start it again afterwards! *)
   let conn =
-    MonitorConnection.connect_once ~tracker ~timeout env.root handoff_options
+    MonitorConnection.connect_once
+      ~tracker
+      ~timeout
+      ~terminate_monitor_on_version_mismatch
+      env.root
+      handoff_options
   in
 
   let t_connected_to_monitor = Unix.gettimeofday () in
@@ -420,48 +443,28 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         ^^ " on next server to be started. Please wait patiently. If you really"
         ^^ " know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with No_server_running_should_retry)
+    | MonitorUtils.Build_id_mismatched_client_must_terminate mismatch_info ->
+      Printf.eprintf
+        "Error: version mismatch.\nUse --autostart-server true if you want it to restart.\n%s"
+        (describe_mismatch (Some mismatch_info));
+      raise Exit_status.(Exit_with Build_id_mismatch)
     | MonitorUtils.Build_id_mismatched_monitor_will_terminate mismatch_info_opt
       ->
-      MonitorUtils.(
-        Printf.eprintf
-          "hh_server's version doesn't match the client's, so it will exit.\n";
-        begin
-          match mismatch_info_opt with
-          | None -> ()
-          | Some mismatch_info ->
-            let secs =
-              int_of_float
-                (Unix.gettimeofday () -. mismatch_info.existing_launch_time)
-            in
-            let time =
-              if secs > 86400 then
-                Printf.sprintf "%n days" (secs / 86400)
-              else if secs > 3600 then
-                Printf.sprintf "%n hours" (secs / 3600)
-              else if secs > 60 then
-                Printf.sprintf "%n minutes" (secs / 60)
-              else
-                Printf.sprintf "%n seconds" secs
-            in
-            Printf.eprintf
-              "  hh_server '%s' was launched %s ago;\n  hh_client '%s' launched now.\n%!"
-              (String.concat ~sep:" " mismatch_info.existing_argv)
-              time
-              (String.concat ~sep:" " (Array.to_list Sys.argv));
-            ()
-        end;
-        if env.autostart then (
-          (* The new server is definitely not running yet, adjust the
-           * start time and deadline to absorb the server startup time.
-           *)
-          let now = Unix.time () in
-          let deadline =
-            Option.map ~f:(fun d -> d +. (now -. start_time)) env.deadline
-          in
-          Printf.eprintf "Going to launch a new one.\n%!";
-          connect { env with deadline } now
-        ) else
-          raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)))
+      Printf.eprintf
+        "hh_server's version doesn't match the client's, so it will exit.\n%s"
+        (describe_mismatch mismatch_info_opt);
+      if env.autostart then begin
+        (* The new server is definitely not running yet, adjust the
+         * start time and deadline to absorb the server startup time.
+         *)
+        let now = Unix.time () in
+        let deadline =
+          Option.map ~f:(fun d -> d +. (now -. start_time)) env.deadline
+        in
+        Printf.eprintf "Going to launch a new one.\n%!";
+        connect { env with deadline } now
+      end else
+        raise Exit_status.(Exit_with Build_id_mismatch))
 
 let connect (env : env) : conn Lwt.t =
   let start_time = Unix.time () in

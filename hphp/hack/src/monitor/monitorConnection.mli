@@ -12,6 +12,7 @@ val server_exists : string -> bool
 val connect_once :
   tracker:Connection_tracker.t ->
   timeout:int ->
+  terminate_monitor_on_version_mismatch:bool ->
   Path.t ->
   MonitorRpc.handoff_options ->
   ( Timeout.in_channel * out_channel * ServerCommandTypes.server_specific_files,

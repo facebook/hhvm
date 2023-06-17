@@ -265,13 +265,23 @@ let should_start env =
     "[%s] ClientStart.should_start"
     (Connection_tracker.log_id tracker);
   match
-    MonitorConnection.connect_once ~tracker ~timeout:3 env.root handoff_options
+    MonitorConnection.connect_once
+      ~tracker
+      ~timeout:3
+      ~terminate_monitor_on_version_mismatch:true
+      env.root
+      handoff_options
   with
   | Ok _conn -> false
   | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })
   | Error (MonitorUtils.Build_id_mismatched_monitor_will_terminate _)
   | Error MonitorUtils.Server_died ->
     true
+  | Error (MonitorUtils.Build_id_mismatched_client_must_terminate _) ->
+    HackEventLogger.invariant_violation_bug
+      "we requested terminate_monitor_on_version_mismatch";
+    Printf.eprintf "Internal error. Please try `hh stop`\n";
+    false
   | Error MonitorUtils.Server_dormant
   | Error MonitorUtils.Server_dormant_out_of_retries ->
     Printf.eprintf "Server already exists but is dormant";

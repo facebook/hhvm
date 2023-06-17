@@ -94,6 +94,8 @@ type connection_error =
   | Build_id_mismatched_monitor_will_terminate of build_mismatch_info option
     (* hh_client binary is a different version from hh_server binary,
        so hh_server will terminate. *)
+  | Build_id_mismatched_client_must_terminate of build_mismatch_info
+    (* hh_client binary is a different version and must abandon its connection attempt *)
 [@@deriving show { with_path = false }]
 
 (** The telemetry we get from this ends up appearing in our telemetry a HUGE number of times.
@@ -105,7 +107,8 @@ let connection_error_to_telemetry (e : connection_error) :
   | Server_died
   | Server_dormant
   | Server_dormant_out_of_retries
-  | Build_id_mismatched_monitor_will_terminate _ ->
+  | Build_id_mismatched_monitor_will_terminate _
+  | Build_id_mismatched_client_must_terminate _ ->
     (* these errors come from MonitorConnection.connect_to_monitor [match cstate] *)
     (show_connection_error e, None)
   | Connect_to_monitor_failure { server_exists; failure_phase; failure_reason }
@@ -167,13 +170,18 @@ module VersionPayload = struct
   type t = {
     client_version: string;
     tracker_id: string;
+    terminate_monitor_on_version_mismatch: bool;
   }
 
-  let serialize ~(tracker : Connection_tracker.t) : serialized =
+  let serialize
+      ~(tracker : Connection_tracker.t)
+      ~(terminate_monitor_on_version_mismatch : bool) : serialized =
     Hh_json.JSON_Object
       [
         ("client_version", Hh_json.string_ Build_id.build_revision);
         ("tracker_id", Hh_json.string_ (Connection_tracker.log_id tracker));
+        ( "terminate_monitor_on_version_mismatch",
+          Hh_json.bool_ terminate_monitor_on_version_mismatch );
       ]
     |> Hh_json.json_to_string
 
@@ -193,7 +201,42 @@ module VersionPayload = struct
       Hh_json_helpers.Jget.string_opt (Some json) "tracker_id"
       |> Option.value ~default:"t#?"
     in
-    Ok { client_version; tracker_id }
+    let terminate_monitor_on_version_mismatch =
+      Hh_json_helpers.Jget.bool_opt
+        (Some json)
+        "terminate_monitor_on_version_mismatch"
+      |> Option.value ~default:true
+    in
+    Ok { client_version; tracker_id; terminate_monitor_on_version_mismatch }
+end
+
+(** The second part of the client/monitor handshake is that monitor sends
+[connection_state] over the socket. In case of version mismatch it sends
+[Build_id_mismatch_v3], which includes a [MismatchPayload.serialized].
+Note that this is just an ocaml string, and can never be anything else,
+because we have to maintain forwards and backwards compatibility between
+different versions of hh_client and hh_server. (However, every version
+in existince understands the binary format of Build_id_mismatch_v3...) *)
+module MismatchPayload = struct
+  type serialized = string [@@deriving show]
+
+  type t = { monitor_will_terminate: bool }
+
+  let serialize ~(monitor_will_terminate : bool) : serialized =
+    Hh_json.JSON_Object
+      [("monitor_will_terminate", Hh_json.bool_ monitor_will_terminate)]
+    |> Hh_json.json_to_string
+
+  let deserialize (s : serialized) : (t, string) result =
+    let open Hh_prelude.Result.Monad_infix in
+    (try Ok (Hh_json.json_of_string s) with
+    | exn -> Error (Exn.to_string exn))
+    >>= fun json ->
+    let monitor_will_terminate =
+      Hh_json_helpers.Jget.bool_opt (Some json) "monitor_will_terminate"
+      |> Option.value ~default:true
+    in
+    Ok { monitor_will_terminate }
 end
 
 type connection_state =
@@ -203,9 +246,9 @@ type connection_state =
           the sequence of constructors here is part of the binary protocol
           we want to support between mismatched versions of client_server. *)
   | Build_id_mismatch_ex of build_mismatch_info
-      (** Build_id_mismatch_ex *is* used. Ex stands for 'extended' *)
-  | Build_id_mismatch_v3 of build_mismatch_info * string
-      (** Build_id_mismatch_v3 isn't used yet, but might be *)
+      (** Build_id_mismatch_ex also isn't used. *)
+  | Build_id_mismatch_v3 of build_mismatch_info * MismatchPayload.serialized
+      (** Build_id_mismatch_v3 is used! *)
   | Connection_ok_v2 of string
       (** Connection_ok_v2 isn't used yet, but might be *)
 [@@deriving show]

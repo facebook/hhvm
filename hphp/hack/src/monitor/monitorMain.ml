@@ -527,14 +527,19 @@ let ack_and_handoff_client (env : env msg_update) client_fd : env msg_update =
   read_version_string_then_newline client_fd
   >>= MonitorUtils.VersionPayload.deserialize
   |> Result.map_error ~f:(fun _err -> (env, "Malformed Build ID"))
-  >>= fun { MonitorUtils.VersionPayload.client_version; tracker_id } ->
+  >>= fun {
+            MonitorUtils.VersionPayload.client_version;
+            tracker_id;
+            terminate_monitor_on_version_mismatch;
+          } ->
   Hh_logger.log
-    "[%s] read_version: start_wait=%s, client_version=%s, monitor_version=%s, monitor_ignore_hh_version=%b"
+    "[%s] read_version: start_wait=%s, client_version=%s, monitor_version=%s, monitor_ignore_hh_version=%b, terminate_monitor_on_version_mismatch=%b"
     tracker_id
     (start_time |> Utils.timestring)
     client_version
     Build_id.build_revision
-    env.ignore_hh_version;
+    env.ignore_hh_version
+    terminate_monitor_on_version_mismatch;
   (* Version is okay if *monitor* was started with --ignore-hh-version, or versions match. *)
   let is_version_ok =
     env.ignore_hh_version || String.equal client_version Build_id.build_revision
@@ -549,17 +554,27 @@ let ack_and_handoff_client (env : env msg_update) client_fd : env msg_update =
     (* following function returns [env msg_update] monad *)
     handle_monitor_rpc (Ok env) client_fd
   end else begin
+    let monitor_will_terminate = terminate_monitor_on_version_mismatch in
     let connection_state =
-      Build_id_mismatch_ex MonitorUtils.current_build_info
+      Build_id_mismatch_v3
+        ( MonitorUtils.current_build_info,
+          MonitorUtils.MismatchPayload.serialize ~monitor_will_terminate )
     in
     Hh_logger.log
       "[%s] sending %s"
       tracker_id
       (MonitorUtils.show_connection_state connection_state);
-    (try msg_to_channel client_fd () with
-    | exn -> Hh_logger.log "while sending, exn : %s" (Exn.to_string exn));
-    kill_server_with_check_and_wait env.server;
-    Exit.exit Exit_status.Build_id_mismatch
+    (try msg_to_channel client_fd connection_state with
+    | exn -> Hh_logger.log "while sending, exn: %s" (Exn.to_string exn));
+    if monitor_will_terminate then begin
+      kill_server_with_check_and_wait env.server;
+      Exit.exit Exit_status.Build_id_mismatch
+    end else begin
+      Hh_logger.log "Closing client_fd";
+      (try Unix.close client_fd with
+      | exn -> Hh_logger.log "while closing, exn: %s" (Exn.to_string exn));
+      Ok env
+    end
   end
 
 let push_purgatory_clients (env : env msg_update) : env msg_update =

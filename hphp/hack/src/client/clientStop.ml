@@ -48,7 +48,7 @@ let nice_kill env =
           root_s;
         raise FailedToKill
     end
-    | Error (MonitorUtils.Build_id_mismatched _) ->
+    | Error (MonitorUtils.Build_id_mismatched_monitor_will_terminate _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
     | Error
         MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })

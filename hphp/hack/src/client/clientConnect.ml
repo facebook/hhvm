@@ -420,7 +420,8 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         ^^ " on next server to be started. Please wait patiently. If you really"
         ^^ " know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with No_server_running_should_retry)
-    | MonitorUtils.Build_id_mismatched mismatch_info_opt ->
+    | MonitorUtils.Build_id_mismatched_monitor_will_terminate mismatch_info_opt
+      ->
       MonitorUtils.(
         Printf.eprintf
           "hh_server's version doesn't match the client's, so it will exit.\n";

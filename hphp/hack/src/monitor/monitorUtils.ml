@@ -87,23 +87,13 @@ type connect_to_monitor_failure = {
 type connection_error =
   | Connect_to_monitor_failure of connect_to_monitor_failure
   | Server_died
-  (* Server dormant and can't join the (now full) queue of connections
-   * waiting for the next server. *)
   | Server_dormant
+      (** Server dormant, i.e. waiting for a rebase to settle, and monitor's queue
+          of pending connections in the now-full queue of connections waiting for the next server. *)
   | Server_dormant_out_of_retries
-  (* Build ID mismatch indicates that hh_client binary is a different
-   * version from hh_server binary, and hence hh_server will shutdown.
-   *
-   * It may happen due to several reasons:
-   * - It is the expected mechanism by which hh_server shuts down upon a
-   *   version bump (i.e. it doesn't shutdown until a newer version of the client
-   *   pings it).
-   * - It can arise also if you've rebuilt Hack yourself and this versionless
-   *   hh_client connects to an already-running hh_server.
-   * - More rarely, it may happen if chef/fbpkg didn't update binaries on disk
-   *   correctly.
-   *)
-  | Build_id_mismatched of build_mismatch_info option
+  | Build_id_mismatched_monitor_will_terminate of build_mismatch_info option
+    (* hh_client binary is a different version from hh_server binary,
+       so hh_server will terminate. *)
 [@@deriving show { with_path = false }]
 
 (** The telemetry we get from this ends up appearing in our telemetry a HUGE number of times.
@@ -115,7 +105,7 @@ let connection_error_to_telemetry (e : connection_error) :
   | Server_died
   | Server_dormant
   | Server_dormant_out_of_retries
-  | Build_id_mismatched _ ->
+  | Build_id_mismatched_monitor_will_terminate _ ->
     (* these errors come from MonitorConnection.connect_to_monitor [match cstate] *)
     (show_connection_error e, None)
   | Connect_to_monitor_failure { server_exists; failure_phase; failure_reason }

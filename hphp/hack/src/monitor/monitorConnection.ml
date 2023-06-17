@@ -264,11 +264,12 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
               Ok (ic, oc, tracker)
             | Build_id_mismatch ->
               wait_on_server_restart ic;
-              Error (Build_id_mismatched None)
+              Error (Build_id_mismatched_monitor_will_terminate None)
             | Build_id_mismatch_ex mismatch_info
             | Build_id_mismatch_v3 (mismatch_info, _) ->
               wait_on_server_restart ic;
-              Error (Build_id_mismatched (Some mismatch_info)))
+              Error
+                (Build_id_mismatched_monitor_will_terminate (Some mismatch_info)))
           ~on_timeout:(fun _timings ->
             Error
               (Connect_to_monitor_failure

@@ -269,7 +269,7 @@ let should_start env =
   with
   | Ok _conn -> false
   | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })
-  | Error (MonitorUtils.Build_id_mismatched _)
+  | Error (MonitorUtils.Build_id_mismatched_monitor_will_terminate _)
   | Error MonitorUtils.Server_died ->
     true
   | Error MonitorUtils.Server_dormant

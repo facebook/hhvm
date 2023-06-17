@@ -108,7 +108,7 @@ struct IterArgs {
 // Arguments to FCall opcodes.
 // hhas format: <flags> <numArgs> <numRets> <inoutArgs> <readonlyArgs>
 //              <asyncEagerOffset>
-// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
+// hhbc format: <uint16:flags> ?<iva:numArgs> ?<iva:numRets>
 //              ?<boolvec:inoutArgs> ?<boolvec:readonlyArgs>
 //              ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)

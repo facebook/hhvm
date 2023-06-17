@@ -50,14 +50,6 @@ let wait_on_server_restart ic =
     (* Server has exited and hung up on us *)
     ()
 
-let produce_version_payload ~(tracker : Connection_tracker.t) : string =
-  Hh_json.JSON_Object
-    [
-      ("client_version", Hh_json.JSON_String Build_id.build_revision);
-      ("tracker_id", Hh_json.JSON_String (Connection_tracker.log_id tracker));
-    ]
-  |> Hh_json.json_to_string
-
 let get_sockaddr config =
   let sock_name = Socket.get_path config.MonitorUtils.socket_file in
   if Sys.win32 then (
@@ -233,7 +225,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
 
             (* 2. send version, followed by newline *)
             phase := MonitorUtils.Connect_send_version;
-            let version_str = produce_version_payload ~tracker in
+            let version_str = MonitorUtils.VersionPayload.serialize ~tracker in
             let (_ : int) =
               Marshal_tools.to_fd_with_preamble
                 (Unix.descr_of_out_channel oc)

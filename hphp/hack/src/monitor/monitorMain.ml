@@ -116,8 +116,6 @@ module Sent_fds_collector = struct
     collect_fds ~sequence_receipt_high_water_mark:Int.max_value
 end
 
-exception Malformed_build_id of string
-
 exception Send_fd_failure of int
 
 type env = {
@@ -312,20 +310,16 @@ let kill_and_maybe_restart_server (env : env msg_update) exit_status :
      * See diagram on ServerProcess.server_process docs. *)
     start_new_server (Ok env) exit_status
 
-let read_version fd =
+let read_version_string_then_newline (fd : Unix.file_descr) :
+    (MonitorUtils.VersionPayload.serialized, string) result =
   (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
   let s : string = Marshal_tools.from_fd_with_preamble fd in
   let newline_byte = Bytes.create 1 in
   let _ = Unix.read fd newline_byte 0 1 in
-  if not (String.equal (Bytes.to_string newline_byte) "\n") then
-    raise (Malformed_build_id "missing newline after version");
-  (* Newer clients send version in a json object.
-     Older clients sent just a client_version string *)
-  if String.is_prefix s ~prefix:"{" then
-    try Hh_json.json_of_string s with
-    | e -> raise (Malformed_build_id (Exn.to_string e))
+  if String.equal (Bytes.to_string newline_byte) "\n" then
+    Ok s
   else
-    Hh_json.JSON_Object [("client_version", Hh_json.JSON_String s)]
+    Error "missing newline after version"
 
 let hand_off_client_connection ~tracker server_fd client_fd =
   (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
@@ -407,27 +401,6 @@ let hand_off_client_connection_wrapper ~tracker server_fd client_fd =
           "Sending Monitor_failed_to_handoff to client, and closing FD";
         msg_to_channel client_fd ServerCommandTypes.Monitor_failed_to_handoff;
         ensure_fd_closed client_fd)
-
-(* Does not return. *)
-let client_out_of_date_ client_fd mismatch_info =
-  msg_to_channel client_fd (Build_id_mismatch_ex mismatch_info);
-  HackEventLogger.out_of_date ()
-
-(* Kills servers, sends build ID mismatch message to client, and exits.
- *
- * Does not return. Exits after waiting for server processes to exit. So
- * the client can wait for socket closure as indication that both the monitor
- * and server have exited.
- *)
-let client_out_of_date (env : env) client_fd mismatch_info =
-  Hh_logger.log "Client out of date. Killing server.";
-  (* If we detect out of date client, should always kill server and exit
-   * monitor, even if messaging to channel or event logger fails. *)
-  (try client_out_of_date_ client_fd mismatch_info with
-  | e ->
-    Hh_logger.log "Handling client_out_of_date threw with: %s" (Exn.to_string e));
-  kill_server_with_check_and_wait env.server;
-  Exit.exit Exit_status.Build_id_mismatch
 
 (** Send (possibly empty) sequences of messages before handing off to
       server. *)
@@ -550,43 +523,44 @@ let handle_monitor_rpc (env : env msg_update) client_fd =
 let ack_and_handoff_client (env : env msg_update) client_fd : env msg_update =
   env >>= fun env ->
   (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-  try
-    let start_time = Unix.gettimeofday () in
-    let json = read_version client_fd in
-    let client_version =
-      match Hh_json_helpers.Jget.string_opt (Some json) "client_version" with
-      | Some client_version -> client_version
-      | None -> raise (Malformed_build_id "Missing client_version")
-    in
-    let tracker_id =
-      Hh_json_helpers.Jget.string_opt (Some json) "tracker_id"
-      |> Option.value ~default:"t#?"
+  let start_time = Unix.gettimeofday () in
+  read_version_string_then_newline client_fd
+  >>= MonitorUtils.VersionPayload.deserialize
+  |> Result.map_error ~f:(fun _err -> (env, "Malformed Build ID"))
+  >>= fun { MonitorUtils.VersionPayload.client_version; tracker_id } ->
+  Hh_logger.log
+    "[%s] read_version: start_wait=%s, client_version=%s, monitor_version=%s, monitor_ignore_hh_version=%b"
+    tracker_id
+    (start_time |> Utils.timestring)
+    client_version
+    Build_id.build_revision
+    env.ignore_hh_version;
+  (* Version is okay if *monitor* was started with --ignore-hh-version, or versions match. *)
+  let is_version_ok =
+    env.ignore_hh_version || String.equal client_version Build_id.build_revision
+  in
+  if is_version_ok then begin
+    let connection_state = Connection_ok in
+    Hh_logger.log
+      "[%s] sending %s"
+      tracker_id
+      (MonitorUtils.show_connection_state connection_state);
+    msg_to_channel client_fd connection_state;
+    (* following function returns [env msg_update] monad *)
+    handle_monitor_rpc (Ok env) client_fd
+  end else begin
+    let connection_state =
+      Build_id_mismatch_ex MonitorUtils.current_build_info
     in
     Hh_logger.log
-      "[%s] read_version: got version %s, started at %s"
+      "[%s] sending %s"
       tracker_id
-      (Hh_json.json_to_string json)
-      (start_time |> Utils.timestring);
-    if
-      (not env.ignore_hh_version)
-      && not (String.equal client_version Build_id.build_revision)
-    then (
-      Hh_logger.log
-        "New client version is %s, while currently running server version is %s"
-        client_version
-        Build_id.build_revision;
-      client_out_of_date env client_fd MonitorUtils.current_build_info
-    ) else (
-      Hh_logger.log "[%s] sending Connection_ok..." tracker_id;
-      msg_to_channel client_fd Connection_ok;
-      handle_monitor_rpc (Ok env) client_fd
-    )
-  with
-  | Malformed_build_id _ as exn ->
-    let e = Exception.wrap exn in
-    HackEventLogger.malformed_build_id e;
-    Hh_logger.log "Malformed Build ID - %s" (Exception.to_string e);
-    Error (env, "Malformed Build ID")
+      (MonitorUtils.show_connection_state connection_state);
+    (try msg_to_channel client_fd () with
+    | exn -> Hh_logger.log "while sending, exn : %s" (Exn.to_string exn));
+    kill_server_with_check_and_wait env.server;
+    Exit.exit Exit_status.Build_id_mismatch
+  end
 
 let push_purgatory_clients (env : env msg_update) : env msg_update =
   (* We create a queue and transfer all the purgatory clients to it before

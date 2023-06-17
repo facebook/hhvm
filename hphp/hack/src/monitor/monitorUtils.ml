@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type monitor_config = {
   socket_file: string;
       (** The socket file on which the monitor is listening for connections. *)
@@ -158,11 +160,51 @@ let connection_error_to_telemetry (e : connection_error) :
     in
     let telemetry =
       Option.map
-        (fun value ->
+        ~f:(fun value ->
           Telemetry.create () |> Telemetry.string_ ~key:"stack" ~value)
         stack
     in
     (reason, telemetry)
+
+(** The first part of the client/monitor handshake is that client sends
+a [VersionPayload.serialized] over the socket, followed by a newline byte.
+Note that [VersionPayload.serialized] is just an ocaml string, and can
+never be anything else, because we have to maintain forwards and backwards
+compatibility between different version of hh_client and hh_server. *)
+module VersionPayload = struct
+  type serialized = string
+
+  type t = {
+    client_version: string;
+    tracker_id: string;
+  }
+
+  let serialize ~(tracker : Connection_tracker.t) : serialized =
+    Hh_json.JSON_Object
+      [
+        ("client_version", Hh_json.string_ Build_id.build_revision);
+        ("tracker_id", Hh_json.string_ (Connection_tracker.log_id tracker));
+      ]
+    |> Hh_json.json_to_string
+
+  let deserialize (s : serialized) : (t, string) result =
+    let open Hh_prelude.Result.Monad_infix in
+    (* Newer clients send version in a json object; older clients sent just a client_version string *)
+    (if String.is_prefix s ~prefix:"{" then
+      try Ok (Hh_json.json_of_string s) with
+      | exn -> Error (Exn.to_string exn)
+    else
+      Ok (Hh_json.JSON_Object [("client_version", Hh_json.string_ s)]))
+    >>= fun json ->
+    Hh_json_helpers.Jget.string_opt (Some json) "client_version"
+    |> Result.of_option ~error:"Missing client_version"
+    >>= fun client_version ->
+    let tracker_id =
+      Hh_json_helpers.Jget.string_opt (Some json) "tracker_id"
+      |> Option.value ~default:"t#?"
+    in
+    Ok { client_version; tracker_id }
+end
 
 type connection_state =
   | Connection_ok
@@ -176,6 +218,7 @@ type connection_state =
       (** Build_id_mismatch_v3 isn't used yet, but might be *)
   | Connection_ok_v2 of string
       (** Connection_ok_v2 isn't used yet, but might be *)
+[@@deriving show]
 
 (* Result of a shutdown monitor RPC. *)
 type shutdown_result =

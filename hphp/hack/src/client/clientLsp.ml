@@ -231,6 +231,7 @@ module Lost_env = struct
   and triggering_request = {
     id: lsp_id;
     metadata: incoming_metadata;
+    start_time_local_handle: float;
     request: lsp_request;
   }
   [@@warning "-69"]
@@ -301,11 +302,17 @@ type result_handler = lsp_result -> state -> state Lwt.t
 type result_telemetry = {
   result_count: int;  (** how many results did we send back to the user? *)
   result_extra_data: Telemetry.t option;  (** other message-specific data *)
+  log_immediately: bool;
+      (** Should we log telemetry about this response to an LSP action immediately?
+      (default true, in case result_telemetry isn't provided.)
+      Or should we defer logging until some later time, e.g. [handle_shell_out_complete]? *)
 }
 
 let make_result_telemetry
-    ?(result_extra_data : Telemetry.t option) (count : int) : result_telemetry =
-  { result_count = count; result_extra_data }
+    ?(result_extra_data : Telemetry.t option)
+    ?(log_immediately : bool = true)
+    (count : int) : result_telemetry =
+  { result_count = count; result_extra_data; log_immediately }
 
 (* --ide-find-refs returns a list of positions, this is a mapping of the response *)
 type ide_shell_out_pos = {
@@ -2577,10 +2584,139 @@ let ide_rpc
   | Ok result -> Lwt.return result
   | Error error_data -> raise (Server_nonfatal_exception error_data)
 
+(** Historical quirk: we log kind and method-name a bit idiosyncratically... *)
+let get_message_kind_and_method_for_logging (message : lsp_message) :
+    string * string =
+  match message with
+  | ResponseMessage (_id, result) ->
+    ("Response", Lsp.lsp_result_to_log_string result)
+  | RequestMessage (_id, r) -> ("Request", Lsp_fmt.request_name_to_string r)
+  | NotificationMessage n ->
+    ("Notification", Lsp_fmt.notification_name_to_string n)
+
+let get_filename_in_message_for_logging (message : lsp_message) :
+    Relative_path.t option =
+  let uri_opt = Lsp_fmt.get_uri_opt message in
+  match uri_opt with
+  | None -> None
+  | Some uri ->
+    (try
+       let path = Lsp_helpers.lsp_uri_to_path uri in
+       Some (Relative_path.create_detect_prefix path)
+     with
+    | _ ->
+      Some (Relative_path.create Relative_path.Dummy (Lsp.string_of_uri uri)))
+
+let log_response_if_necessary
+    (env : env)
+    (event : event)
+    (result_telemetry_opt : result_telemetry option)
+    (unblocked_time : float) : unit =
+  let (result_count, result_extra_telemetry, log_immediately) =
+    match result_telemetry_opt with
+    | None -> (None, None, true)
+    | Some { result_count; result_extra_data; log_immediately } ->
+      (Some result_count, result_extra_data, log_immediately)
+  in
+  let to_log =
+    match event with
+    | _ when not log_immediately -> None
+    | Client_message (metadata, message) ->
+      Some (metadata, unblocked_time, message)
+    | Shell_out_complete (_result, triggering_request, _shellable_type) ->
+      let { Lost_env.id; metadata; start_time_local_handle; request } =
+        triggering_request
+      in
+      Some (metadata, start_time_local_handle, RequestMessage (id, request))
+    | Tick
+    | Server_hello
+    | Server_message _
+    | Daemon_notification _
+    | Errors_file _ ->
+      None
+  in
+  match to_log with
+  | None -> ()
+  | Some ({ timestamp; tracking_id }, start_handle_time, message) ->
+    let (kind, method_) = get_message_kind_and_method_for_logging message in
+    HackEventLogger.client_lsp_method_handled
+      ~root:(get_root_opt ())
+      ~method_
+      ~kind
+      ~path_opt:(get_filename_in_message_for_logging message)
+      ~result_count
+      ~result_extra_telemetry
+      ~tracking_id
+      ~start_queue_time:timestamp
+      ~start_hh_server_state:
+        (get_older_hh_server_state timestamp |> hh_server_state_to_string)
+      ~start_handle_time
+      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
+
+type error_source =
+  | Error_from_server_fatal
+  | Error_from_client_fatal
+  | Error_from_client_recoverable
+  | Error_from_server_recoverable
+  | Error_from_lsp_cancelled
+  | Error_from_lsp_misc
+
+let hack_log_error
+    (event : event option)
+    (e : Lsp.Error.t)
+    (source : error_source)
+    (unblocked_time : float) : unit =
+  let root = get_root_opt () in
+  let is_expected =
+    match source with
+    | Error_from_lsp_cancelled -> true
+    | Error_from_server_fatal
+    | Error_from_client_fatal
+    | Error_from_client_recoverable
+    | Error_from_server_recoverable
+    | Error_from_lsp_misc ->
+      false
+  in
+  let source =
+    match source with
+    | Error_from_server_fatal -> "server_fatal"
+    | Error_from_client_fatal -> "client_fatal"
+    | Error_from_client_recoverable -> "client_recoverable"
+    | Error_from_server_recoverable -> "server_recoverable"
+    | Error_from_lsp_cancelled -> "lsp_cancelled"
+    | Error_from_lsp_misc -> "lsp_misc"
+  in
+  if not is_expected then log "%s" (Lsp_fmt.error_to_log_string e);
+  match event with
+  | Some (Client_message (metadata, message)) ->
+    let start_hh_server_state =
+      get_older_hh_server_state metadata.timestamp |> hh_server_state_to_string
+    in
+    let (kind, method_) = get_message_kind_and_method_for_logging message in
+    HackEventLogger.client_lsp_method_exception
+      ~root
+      ~method_
+      ~kind
+      ~path_opt:(get_filename_in_message_for_logging message)
+      ~tracking_id:metadata.tracking_id
+      ~start_queue_time:metadata.timestamp
+      ~start_hh_server_state
+      ~start_handle_time:unblocked_time
+      ~message:e.Error.message
+      ~data_opt:e.Error.data
+      ~source
+  | _ ->
+    HackEventLogger.client_lsp_exception
+      ~root
+      ~message:e.Error.message
+      ~data_opt:e.Error.data
+      ~source
+
 let kickoff_shell_out_and_maybe_cancel
     (state : state)
     (shellable_type : Lost_env.shellable_type)
-    ~(triggering_request : Lost_env.triggering_request) : state Lwt.t =
+    ~(triggering_request : Lost_env.triggering_request) :
+    (state * result_telemetry) Lwt.t =
   let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
   let compose_shellout_cmd
       ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
@@ -2606,7 +2742,13 @@ let kickoff_shell_out_and_maybe_cancel
       ~f:(fun
            {
              Lost_env.cancellation_token;
-             triggering_request = { Lost_env.id = prev_id; _ };
+             triggering_request =
+               {
+                 Lost_env.id = prev_id;
+                 metadata = prev_metadata;
+                 request = prev_request;
+                 start_time_local_handle = prev_start_time_local_handle;
+               };
              _;
            }
          ->
@@ -2620,7 +2762,7 @@ let kickoff_shell_out_and_maybe_cancel
            right now is the only place that can fulfill that invariant for the prev shellout). *)
         let message =
           Printf.sprintf
-            "Displaced by %s"
+            "Cancelled (displaced by another request #%s)"
             (Lsp_fmt.id_to_string triggering_request.Lost_env.id)
         in
         let lsp_error =
@@ -2629,7 +2771,15 @@ let kickoff_shell_out_and_maybe_cancel
         respond_jsonrpc
           ~powered_by:Language_server
           prev_id
-          (ErrorResult lsp_error));
+          (ErrorResult lsp_error);
+        hack_log_error
+          (Some
+             (Client_message
+                (prev_metadata, RequestMessage (prev_id, prev_request))))
+          lsp_error
+          Error_from_server_recoverable
+          prev_start_time_local_handle;
+        ());
     let (cancel, cancellation_token) = Lwt.wait () in
     let cmd =
       begin
@@ -2676,20 +2826,25 @@ let kickoff_shell_out_and_maybe_cancel
       Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
     in
     log "kickoff_shell_out: %s" (String.concat ~sep:" " (Array.to_list cmd));
-    Lwt.return
-      (Lost_server
-         {
-           lenv with
-           Lost_env.current_hh_shell =
-             Some
-               {
-                 Lost_env.process;
-                 cancellation_token;
-                 shellable_type;
-                 triggering_request;
-               };
-         })
-  | _ -> Lwt.return state
+    let state =
+      Lost_server
+        {
+          lenv with
+          Lost_env.current_hh_shell =
+            Some
+              {
+                Lost_env.process;
+                cancellation_token;
+                shellable_type;
+                triggering_request;
+              };
+        }
+    in
+    let result_telemetry = make_result_telemetry 0 ~log_immediately:false in
+    Lwt.return (state, result_telemetry)
+  | _ ->
+    HackEventLogger.invariant_violation_bug "kickoff when not in Lost_env";
+    Lwt.return (state, make_result_telemetry 0)
 
 (** If there's a current_hh_shell with [id], then send it a SIGTERM.
 All we're doing is triggering the cancellation; we rely upon normal
@@ -3634,7 +3789,8 @@ let do_findReferences_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : FindReferences.params)
-    (id : lsp_id) =
+    (id : lsp_id) : (state * result_telemetry) Lwt.t =
+  let start_time_local_handle = Unix.gettimeofday () in
   let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
@@ -3647,60 +3803,60 @@ let do_findReferences_local
       ~ref_unblocked_time
       (ClientIdeMessage.Find_references (document, location, all_open_documents))
   in
-  let state =
-    match response with
-    | ClientIdeMessage.Invalid_symbol ->
-      respond_jsonrpc ~powered_by:Serverless_ide id (FindReferencesResult []);
-      Lwt.return state
-    | ClientIdeMessage.Find_refs_success
-        (_symbol_name, None, ide_calculated_refs) ->
-      let positions =
-        match UriMap.values ide_calculated_refs with
-        (*
+  match response with
+  | ClientIdeMessage.Invalid_symbol ->
+    respond_jsonrpc ~powered_by:Serverless_ide id (FindReferencesResult []);
+    let result_telemetry = make_result_telemetry (-1) in
+    Lwt.return (state, result_telemetry)
+  | ClientIdeMessage.Find_refs_success (_symbol_name, None, ide_calculated_refs)
+    ->
+    let positions =
+      match UriMap.values ide_calculated_refs with
+      (*
           UriMap.values returns [Pos.absolute list list] and if we're here,
           we should only have one element - the list of positions in the file the localvar is defined.
         *)
-        | positions :: [] -> positions
-        | _ -> assert false (* Explicitly handled in ClientIdeDaemon *)
-      in
-      let filename =
-        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-          params.FindReferences.loc.TextDocumentPositionParams.textDocument
-      in
-      let positions =
-        List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
-      in
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        id
-        (FindReferencesResult positions);
-      Lwt.return state
-    | ClientIdeMessage.Find_refs_success
-        (symbol_name, Some action, ide_calculated_refs) ->
-      (* ClientIdeMessage.Find_references only supports localvar.
-         Receiving an error with a non-localvar action indicates that we attempted to
-         try and find references for a non-localvar
-      *)
-      let shellable_type =
-        Lost_env.FindRefs
+      | positions :: [] -> positions
+      | _ -> assert false (* Explicitly handled in ClientIdeDaemon *)
+    in
+    let filename =
+      Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+        params.FindReferences.loc.TextDocumentPositionParams.textDocument
+    in
+    let positions =
+      List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
+    in
+    respond_jsonrpc
+      ~powered_by:Serverless_ide
+      id
+      (FindReferencesResult positions);
+    let result_telemetry = make_result_telemetry (List.length positions) in
+    Lwt.return (state, result_telemetry)
+  | ClientIdeMessage.Find_refs_success
+      (symbol_name, Some action, ide_calculated_refs) ->
+    (* ClientIdeMessage.Find_references only supports localvar.
+       Receiving an error with a non-localvar action indicates that we attempted to
+       try and find references for a non-localvar
+    *)
+    let shellable_type =
+      Lost_env.FindRefs
+        { symbol = symbol_name; find_refs_action = action; ide_calculated_refs }
+    in
+    (* If we reach kickoff a shell-out to hh_server, processing that response
+       also invokes respond_jsonrpc *)
+    let%lwt (state, result_telemetry) =
+      kickoff_shell_out_and_maybe_cancel
+        state
+        shellable_type
+        ~triggering_request:
           {
-            symbol = symbol_name;
-            find_refs_action = action;
-            ide_calculated_refs;
+            Lost_env.id;
+            metadata;
+            start_time_local_handle;
+            request = FindReferencesRequest params;
           }
-      in
-      (* If we reach kickoff a shell-out to hh_server, processing that response
-         also invokes respond_jsonrpc *)
-      let%lwt state =
-        kickoff_shell_out_and_maybe_cancel
-          state
-          shellable_type
-          ~triggering_request:
-            { Lost_env.id; metadata; request = FindReferencesRequest params }
-      in
-      Lwt.return state
-  in
-  state
+    in
+    Lwt.return (state, result_telemetry)
 
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
 let do_findReferences2 ~ide_calculated_refs ~hh_locations : Lsp.lsp_result * int
@@ -3738,7 +3894,8 @@ let do_goToImplementation_local
     (state : state)
     (metadata : incoming_metadata)
     (params : Implementation.params)
-    (id : lsp_id) : state Lwt.t =
+    (id : lsp_id) : (state * result_telemetry) Lwt.t =
+  let start_time_local_handle = Unix.gettimeofday () in
   let { Ide_api_types.line; column } =
     lsp_position_to_ide params.TextDocumentPositionParams.position
   in
@@ -3747,14 +3904,19 @@ let do_goToImplementation_local
       params.TextDocumentPositionParams.textDocument
   in
   let shellable_type = Lost_env.GoToImpl (filename, line, column) in
-  let state =
+  let%lwt (state, result_telemetry) =
     kickoff_shell_out_and_maybe_cancel
       state
       shellable_type
       ~triggering_request:
-        { Lost_env.id; metadata; request = ImplementationRequest params }
+        {
+          Lost_env.id;
+          metadata;
+          start_time_local_handle;
+          request = ImplementationRequest params;
+        }
   in
-  state
+  Lwt.return (state, result_telemetry)
 
 (** This is called when a shellout to "hh --ide-go-to-impl" completes successfully *)
 let do_goToImplementation2 ~hh_locations : Lsp.lsp_result * int =
@@ -4107,7 +4269,8 @@ let do_documentRename_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Rename.params)
-    (id : lsp_id) : state Lwt.t =
+    (id : lsp_id) : (state * result_telemetry) Lwt.t =
+  let start_time_local_handle = Unix.gettimeofday () in
   let document_position = rename_params_to_document_position params in
   let (document, location) =
     get_document_location editor_open_files document_position
@@ -4122,45 +4285,46 @@ let do_documentRename_local
       ~ref_unblocked_time
       (ClientIdeMessage.Rename (document, location, new_name, all_open_documents))
   in
-  let state =
-    match response with
-    | ClientIdeMessage.Not_renameable_position ->
-      let message = "Tried to rename a non-renameable symbol" in
-      raise
-        (Error.LspException
-           { Error.code = Error.InvalidRequest; message; data = None })
-    | ClientIdeMessage.Rename_success { shellout = None; local } ->
-      let patches = patches_to_workspace_edit local in
-      respond_jsonrpc ~powered_by:Hh_server id (RenameResult patches);
-      Lwt.return state
-    | ClientIdeMessage.Rename_success
+  match response with
+  | ClientIdeMessage.Not_renameable_position ->
+    let message = "Tried to rename a non-renameable symbol" in
+    raise
+      (Error.LspException
+         { Error.code = Error.InvalidRequest; message; data = None })
+  | ClientIdeMessage.Rename_success { shellout = None; local } ->
+    let patches = patches_to_workspace_edit local in
+    respond_jsonrpc ~powered_by:Hh_server id (RenameResult patches);
+    let result_telemetry = make_result_telemetry (List.length local) in
+    Lwt.return (state, result_telemetry)
+  | ClientIdeMessage.Rename_success
+      {
+        shellout = Some (symbol_definition, find_refs_action);
+        local = ide_calculated_patches;
+      } ->
+    let (filename, _line, _col) = lsp_file_position_to_hack document_position in
+    let shellable_type =
+      Lost_env.Rename
         {
-          shellout = Some (symbol_definition, find_refs_action);
-          local = ide_calculated_patches;
-        } ->
-      let (filename, _line, _col) =
-        lsp_file_position_to_hack document_position
-      in
-      let shellable_type =
-        Lost_env.Rename
+          symbol_definition;
+          find_refs_action;
+          new_name;
+          filename;
+          ide_calculated_patches;
+        }
+    in
+    let%lwt (state, result_telemetry) =
+      kickoff_shell_out_and_maybe_cancel
+        state
+        shellable_type
+        ~triggering_request:
           {
-            symbol_definition;
-            find_refs_action;
-            new_name;
-            filename;
-            ide_calculated_patches;
+            Lost_env.id;
+            metadata;
+            start_time_local_handle;
+            request = RenameRequest params;
           }
-      in
-      let%lwt state =
-        kickoff_shell_out_and_maybe_cancel
-          state
-          shellable_type
-          ~triggering_request:
-            { Lost_env.id; metadata; request = RenameRequest params }
-      in
-      Lwt.return state
-  in
-  state
+    in
+    Lwt.return (state, result_telemetry)
 
 (** This is called when a shell-out to "hh --ide-rename-by-symbol" completes successfully *)
 let do_documentRename2 ~ide_calculated_patches ~hh_edits : Lsp.lsp_result * int
@@ -4897,6 +5061,27 @@ let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (triggering_request : Lost_env.triggering_request)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option =
+  let start_postprocess_time = Unix.gettimeofday () in
+  let make_duration_telemetry ~start_time ~end_time =
+    let end_postprocess_time = Unix.gettimeofday () in
+    let start_time_local_handle =
+      triggering_request.Lost_env.start_time_local_handle
+    in
+    Telemetry.create ()
+    |> Telemetry.duration
+         ~key:"local_duration"
+         ~start_time:start_time_local_handle
+         ~end_time:start_time
+    |> Telemetry.duration ~key:"shellout_duration" ~start_time ~end_time
+    |> Telemetry.duration
+         ~key:"post_shellout_wait"
+         ~start_time:end_time
+         ~end_time:start_postprocess_time
+    |> Telemetry.duration
+         ~key:"postprocess_duration"
+         ~start_time:start_postprocess_time
+         ~end_time:end_postprocess_time
+  in
   let (lsp_result, result_count, result_extra_data) =
     match result with
     | Error
@@ -4909,34 +5094,33 @@ let handle_shell_out_complete
            process_status;
            exn = _;
          } as failure) ->
-      log "shell-out failure: %s" (Lwt_utils.Process_failure.to_string failure);
-      let message =
-        [stderr; stdout; Process.status_to_string process_status]
-        |> List.map ~f:String.strip
-        |> List.filter ~f:(fun s -> not (String.is_empty s))
-        |> String.concat ~sep:"\n"
-      in
-      let data =
-        Some
-          (Hh_json.JSON_Object
-             [
-               ("command_line", Hh_json.string_ command_line);
-               ( "status",
-                 Hh_json.string_ (Process.status_to_string process_status) );
-             ])
-      in
       let code =
         match process_status with
         | Unix.WSIGNALED -7 -> Lsp.Error.RequestCancelled
         | _ -> Lsp.Error.InternalError
       in
-      let lsp_error = make_lsp_error ~code ~data ~current_stack:false message in
+      let process_status = Process.status_to_string process_status in
+      log "shell-out failure: %s" (Lwt_utils.Process_failure.to_string failure);
+      let message =
+        [stderr; stdout; process_status]
+        |> List.map ~f:String.strip
+        |> List.filter ~f:(fun s -> not (String.is_empty s))
+        |> String.concat ~sep:"\n"
+      in
       let telemetry =
-        Telemetry.create ()
-        |> Telemetry.duration ~start_time ~end_time
+        make_duration_telemetry ~start_time ~end_time
+        |> Telemetry.string_ ~key:"command_line" ~value:command_line
+        |> Telemetry.string_ ~key:"status" ~value:process_status
         |> Telemetry.error ~e:message
       in
-      (ErrorResult lsp_error, 0, Some telemetry)
+      let lsp_error =
+        make_lsp_error
+          ~code
+          ~data:(Some (Telemetry.to_json telemetry))
+          ~current_stack:false
+          message
+      in
+      (ErrorResult lsp_error, 0, None)
     | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
       log
         "shell-out completed. %s"
@@ -4944,9 +5128,6 @@ let handle_shell_out_complete
         |> List.hd
         |> Option.value ~default:""
         |> String_utils.truncate 80);
-      let telemetry =
-        Telemetry.create () |> Telemetry.duration ~start_time ~end_time
-      in
       try
         let (lsp_result, result_count) =
           match shellable_type with
@@ -4960,15 +5141,19 @@ let handle_shell_out_complete
             let hh_edits = shellout_patch_list_to_lsp_edits_exn stdout in
             do_documentRename2 ~ide_calculated_patches ~hh_edits
         in
-        (lsp_result, result_count, Some telemetry)
+        ( lsp_result,
+          result_count,
+          Some (make_duration_telemetry ~start_time ~end_time) )
       with
       | exn ->
         let e = Exception.wrap exn in
         let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
         let message = Exception.get_ctor_string e in
+        let telemetry = make_duration_telemetry ~start_time ~end_time in
         let lsp_error =
           make_lsp_error
             ~code:Lsp.Error.InternalError
+            ~data:(Some (Telemetry.to_json telemetry))
             ~stack
             ~current_stack:false
             message
@@ -4976,9 +5161,22 @@ let handle_shell_out_complete
         (ErrorResult lsp_error, 0, None)
     end
   in
-  let { Lost_env.id; _ } = triggering_request in
+  let { Lost_env.id; metadata; start_time_local_handle; request } =
+    triggering_request
+  in
+  (* The normal error-response-and-logging flow isn't easy for us to fit into,
+     because it handles errors+exceptions thinking they come from the current event.
+     So we'll do our json response and error-logging ourselves. *)
   respond_jsonrpc ~powered_by:Hh_server id lsp_result;
-  Some (make_result_telemetry result_count ?result_extra_data)
+  match lsp_result with
+  | ErrorResult lsp_error ->
+    hack_log_error
+      (Some (Client_message (metadata, RequestMessage (id, request))))
+      lsp_error
+      Error_from_server_recoverable
+      start_time_local_handle;
+    Some (make_result_telemetry 0 ~log_immediately:false)
+  | _ -> Some (make_result_telemetry result_count ?result_extra_data)
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -5120,131 +5318,6 @@ let track_edits_if_necessary (state : state) (event : event) : state =
   | Lost_server lenv ->
     Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
   | _ -> state
-
-let get_filename_in_message_for_logging (message : lsp_message) :
-    Relative_path.t option =
-  let uri_opt = Lsp_fmt.get_uri_opt message in
-  match uri_opt with
-  | None -> None
-  | Some uri ->
-    (try
-       let path = Lsp_helpers.lsp_uri_to_path uri in
-       Some (Relative_path.create_detect_prefix path)
-     with
-    | _ ->
-      Some (Relative_path.create Relative_path.Dummy (Lsp.string_of_uri uri)))
-
-(* Historical quirk: we log kind and method-name a bit idiosyncratically... *)
-let get_message_kind_and_method_for_logging (message : lsp_message) :
-    string * string =
-  match message with
-  | ResponseMessage (_id, result) ->
-    ("Response", Lsp.lsp_result_to_log_string result)
-  | RequestMessage (_id, r) -> ("Request", Lsp_fmt.request_name_to_string r)
-  | NotificationMessage n ->
-    ("Notification", Lsp_fmt.notification_name_to_string n)
-
-let log_response_if_necessary
-    (env : env)
-    (event : event)
-    (result_telemetry_opt : result_telemetry option)
-    (unblocked_time : float) : unit =
-  let (result_count, result_extra_telemetry) =
-    match result_telemetry_opt with
-    | None -> (None, None)
-    | Some { result_count; result_extra_data } ->
-      (Some result_count, result_extra_data)
-  in
-  match event with
-  | Client_message ({ timestamp; tracking_id }, message) ->
-    let (kind, method_) = get_message_kind_and_method_for_logging message in
-    HackEventLogger.client_lsp_method_handled
-      ~root:(get_root_opt ())
-      ~method_
-      ~kind
-      ~path_opt:(get_filename_in_message_for_logging message)
-      ~result_count
-      ~result_extra_telemetry
-      ~tracking_id
-      ~start_queue_time:timestamp
-      ~start_hh_server_state:
-        (get_older_hh_server_state timestamp |> hh_server_state_to_string)
-      ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
-  | Shell_out_complete (result, _triggering_request, _shellable_type) ->
-    let command_line =
-      match result with
-      | Ok Lwt_utils.Process_success.{ command_line; _ }
-      | Error Lwt_utils.Process_failure.{ command_line; _ } ->
-        command_line
-    in
-    HackEventLogger.client_lsp_shellout
-      ~root:(get_root_opt ())
-      ~command_line
-      ~result_count
-      ~result_extra_telemetry
-  | _ -> ()
-
-type error_source =
-  | Error_from_server_fatal
-  | Error_from_client_fatal
-  | Error_from_client_recoverable
-  | Error_from_server_recoverable
-  | Error_from_lsp_cancelled
-  | Error_from_lsp_misc
-
-let hack_log_error
-    (event : event option)
-    (e : Lsp.Error.t)
-    (source : error_source)
-    (unblocked_time : float)
-    (env : env) : unit =
-  let root = get_root_opt () in
-  let is_expected =
-    match source with
-    | Error_from_lsp_cancelled -> true
-    | Error_from_server_fatal
-    | Error_from_client_fatal
-    | Error_from_client_recoverable
-    | Error_from_server_recoverable
-    | Error_from_lsp_misc ->
-      false
-  in
-  let source =
-    match source with
-    | Error_from_server_fatal -> "server_fatal"
-    | Error_from_client_fatal -> "client_fatal"
-    | Error_from_client_recoverable -> "client_recoverable"
-    | Error_from_server_recoverable -> "server_recoverable"
-    | Error_from_lsp_cancelled -> "lsp_cancelled"
-    | Error_from_lsp_misc -> "lsp_misc"
-  in
-  if not is_expected then log "%s" (Lsp_fmt.error_to_log_string e);
-  match event with
-  | Some (Client_message (metadata, message)) ->
-    let start_hh_server_state =
-      get_older_hh_server_state metadata.timestamp |> hh_server_state_to_string
-    in
-    let (kind, method_) = get_message_kind_and_method_for_logging message in
-    HackEventLogger.client_lsp_method_exception
-      ~root
-      ~method_
-      ~kind
-      ~path_opt:(get_filename_in_message_for_logging message)
-      ~tracking_id:metadata.tracking_id
-      ~start_queue_time:metadata.timestamp
-      ~start_hh_server_state
-      ~start_handle_time:unblocked_time
-      ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
-      ~message:e.Error.message
-      ~data_opt:e.Error.data
-      ~source
-  | _ ->
-    HackEventLogger.client_lsp_exception
-      ~root
-      ~message:e.Error.message
-      ~data_opt:e.Error.data
-      ~source
 
 (* cancel_if_stale: If a message is stale, throw the necessary exception to
    cancel it. A message is considered stale if it's sufficiently old and there
@@ -5933,7 +6006,7 @@ let handle_client_message
     | (_, Some ide_service, RequestMessage (id, FindReferencesRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state =
+      let%lwt (new_state, result_telemetry) =
         do_findReferences_local
           !state
           ide_service
@@ -5945,21 +6018,21 @@ let handle_client_message
           id
       in
       state := new_state;
-      Lwt.return_none
+      Lwt.return_some result_telemetry
     (* textDocument/implementation request *)
     | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state =
+      let%lwt (new_state, result_telemetry) =
         do_goToImplementation_local !state metadata params id
       in
       state := new_state;
-      Lwt.return_none
+      Lwt.return_some result_telemetry
     (* textDocument/rename request *)
     | (_, Some ide_service, RequestMessage (id, RenameRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state =
+      let%lwt (new_state, result_telemetry) =
         do_documentRename_local
           !state
           ide_service
@@ -5971,7 +6044,7 @@ let handle_client_message
           id
       in
       state := new_state;
-      Lwt.return_none
+      Lwt.return_some result_telemetry
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, Some ide_service, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -6776,12 +6849,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         in
         let e = make_lsp_error ~stack ~data message in
         (* Log all the things! *)
-        hack_log_error
-          !ref_event
-          e
-          Error_from_server_fatal
-          !ref_unblocked_time
-          env;
+        hack_log_error !ref_event e Error_from_server_fatal !ref_unblocked_time;
         Lsp_helpers.telemetry_error
           to_stdout
           (message ^ ", from_server\n" ^ stack);
@@ -6846,12 +6914,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       Lwt.return_unit
     | Client_fatal_connection_exception { Marshal_tools.stack; message } ->
       let e = make_lsp_error ~stack message in
-      hack_log_error
-        !ref_event
-        e
-        Error_from_client_fatal
-        !ref_unblocked_time
-        env;
+      hack_log_error !ref_event e Error_from_client_fatal !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
       let () = exit_fail () in
       Lwt.return_unit
@@ -6862,8 +6925,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         !ref_event
         e
         Error_from_client_recoverable
-        !ref_unblocked_time
-        env;
+        !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
       Lwt.return_unit
     | (Server_nonfatal_exception e | Error.LspException e) as exn ->
@@ -6878,7 +6940,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         make_lsp_error ~data:e.Error.data ~code:e.Error.code e.Error.message
       in
       respond_to_error !ref_event e;
-      hack_log_error !ref_event e error_source !ref_unblocked_time env;
+      hack_log_error !ref_event e error_source !ref_unblocked_time;
       Lwt.return_unit
     | exn ->
       let exn = Exception.wrap exn in
@@ -6889,7 +6951,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           (Exception.get_ctor_string exn)
       in
       respond_to_error !ref_event e;
-      hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time env;
+      hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time;
       Lwt.return_unit
   in
   let rec main_loop () : unit Lwt.t =

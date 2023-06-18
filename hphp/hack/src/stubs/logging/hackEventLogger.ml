@@ -193,10 +193,6 @@ let client_check_bad_exit _ _ ~init_proc_stack:_ ~spinner:_ = ()
 
 let client_check_errors_file_restarted _ = ()
 
-let client_lsp_shellout
-    ~root:_ ~command_line:_ ~result_count:_ ~result_extra_telemetry:_ =
-  ()
-
 let client_lsp_method_handled
     ~root:_
     ~method_:_
@@ -220,7 +216,6 @@ let client_lsp_method_exception
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
-    ~serverless_ide_flag:_
     ~message:_
     ~data_opt:_
     ~source:_ =

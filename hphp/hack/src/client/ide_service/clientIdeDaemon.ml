@@ -845,7 +845,7 @@ let handle_request
           ServerHover.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (Initialized istate, Ok result)
-    (* textDocument/rename - localvar only *)
+    (* textDocument/rename *)
   | ( Initialized istate,
       Rename (document, { line; column }, new_name, document_list) ) ->
     let (istate, ctx, entry, _errors) = update_file_ctx istate document in

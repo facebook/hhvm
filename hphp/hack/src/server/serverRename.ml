@@ -564,6 +564,21 @@ let go_for_single_file
           end
         ~init:[]
     in
+    let should_write_deprecated_wrapper_patch =
+      (* Context: D46818062
+         When we rename symbols looking at one file at a time we always pass the [SymbolDefinition.t] along.
+         Generating a deprecated_wrapper_patch looks at the symbol definition pos, checks to see if there's a matching
+         CST node and if so, will send back a deprecated wrapper patch to write.
+
+         However, if we're renaming a symbol in a file where the (method or function) is NOT defined,
+         we should reject any deprecated wrapper patches. We only want a patch IFF the rename action is editing
+         the file matching [symbol_definition.pos.file]
+      *)
+      Relative_path.equal
+        filename
+        (Relative_path.create_detect_prefix
+        @@ Pos.filename symbol_definition.SymbolDefinition.pos)
+    in
     let deprecated_wrapper_patch =
       let open ServerCommandTypes.Find_refs in
       match find_refs_action with
@@ -590,8 +605,13 @@ let go_for_single_file
       | GConst _ ->
         None
     in
-    Option.value_map deprecated_wrapper_patch ~default:changes ~f:(fun patch ->
-        patch :: changes) )
+    if should_write_deprecated_wrapper_patch then
+      Option.value_map
+        deprecated_wrapper_patch
+        ~default:changes
+        ~f:(fun patch -> patch :: changes)
+    else
+      changes )
   |> fun rename_patches -> Ok rename_patches
 
 (**

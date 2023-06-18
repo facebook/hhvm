@@ -224,19 +224,25 @@ module Lost_env = struct
     process:
       (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t;
     cancellation_token: unit Lwt.u;
+    triggering_request: triggering_request;
     shellable_type: shellable_type;
   }
 
+  and triggering_request = {
+    id: lsp_id;
+    metadata: incoming_metadata;
+    request: lsp_request;
+  }
+  [@@warning "-69"]
+
   and shellable_type =
     | FindRefs of {
-        lsp_id: lsp_id;
         symbol: string;
         find_refs_action: ServerCommandTypes.Find_refs.action;
         ide_calculated_refs: Pos.absolute list UriMap.t;
       }
-    | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
+    | GoToImpl of string * int * int (* filename, line, col *)
     | Rename of {
-        lsp_id: lsp_id;
         symbol_definition: string SymbolDefinition.t;
         find_refs_action: ServerCommandTypes.Find_refs.action;
         new_name: string;
@@ -244,11 +250,6 @@ module Lost_env = struct
         ide_calculated_patches: ServerRenameTypes.patch list;
       }
 end
-
-let get_lsp_id_of_shell_out = function
-  | Lost_env.FindRefs { lsp_id; _ } -> lsp_id
-  | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
-  | Lost_env.Rename { lsp_id; _ } -> lsp_id
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
@@ -498,6 +499,7 @@ type event =
       of the underlying [Lwt_stream.t]. All handled in [handle_errors_file_item]. *)
   | Shell_out_complete of
       ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
+      * Lost_env.triggering_request
       * Lost_env.shellable_type)
       (** Under [--config ide_standlone=true], LSP requests for rename or
       find-refs are accomplished by kicking off an asynchronous shell-out to
@@ -1069,7 +1071,9 @@ let get_next_event
        our Shell_out_complete result. *)
     state := Lost_server { lenv with Lost_env.current_hh_shell = None };
     let%lwt result = sh.Lost_env.process in
-    Lwt.return (Shell_out_complete (result, sh.Lost_env.shellable_type))
+    Lwt.return
+      (Shell_out_complete
+         (result, sh.Lost_env.triggering_request, sh.Lost_env.shellable_type))
   | Pre_init
   | Lost_server _
   | Post_shutdown ->
@@ -2574,7 +2578,9 @@ let ide_rpc
   | Error error_data -> raise (Server_nonfatal_exception error_data)
 
 let kickoff_shell_out_and_maybe_cancel
-    (state : state) (shellable_type : Lost_env.shellable_type) : state Lwt.t =
+    (state : state)
+    (shellable_type : Lost_env.shellable_type)
+    ~(triggering_request : Lost_env.triggering_request) : state Lwt.t =
   let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
   let compose_shellout_cmd
       ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
@@ -2600,7 +2606,7 @@ let kickoff_shell_out_and_maybe_cancel
       ~f:(fun
            {
              Lost_env.cancellation_token;
-             shellable_type = prev_shellable_type;
+             triggering_request = { Lost_env.id = prev_id; _ };
              _;
            }
          ->
@@ -2612,10 +2618,10 @@ let kickoff_shell_out_and_maybe_cancel
            the invariant that "current_hh_shell must always give rise to an LSP response".
            (Later in the function we overwrite current_hh_shell with the new shellout, so right here
            right now is the only place that can fulfill that invariant for the prev shellout). *)
-        let prev_id = get_lsp_id_of_shell_out prev_shellable_type in
-        let id = get_lsp_id_of_shell_out shellable_type in
         let message =
-          Printf.sprintf "Displaced by %s" (Lsp_fmt.id_to_string id)
+          Printf.sprintf
+            "Displaced by %s"
+            (Lsp_fmt.id_to_string triggering_request.Lost_env.id)
         in
         let lsp_error =
           make_lsp_error ~code:Lsp.Error.RequestCancelled message
@@ -2639,7 +2645,7 @@ let kickoff_shell_out_and_maybe_cancel
               symbol_action_arg
           in
           cmd
-        | Lost_env.GoToImpl (_, filename, line, col) ->
+        | Lost_env.GoToImpl (filename, line, col) ->
           let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
           let cmd =
             compose_shellout_cmd
@@ -2675,7 +2681,13 @@ let kickoff_shell_out_and_maybe_cancel
          {
            lenv with
            Lost_env.current_hh_shell =
-             Some { Lost_env.process; cancellation_token; shellable_type };
+             Some
+               {
+                 Lost_env.process;
+                 cancellation_token;
+                 shellable_type;
+                 triggering_request;
+               };
          })
   | _ -> Lwt.return state
 
@@ -2687,10 +2699,15 @@ let cancel_shellout_if_applicable (state : state) (id : lsp_id) : unit =
   | Lost_server
       {
         Lost_env.current_hh_shell =
-          Some { Lost_env.cancellation_token; shellable_type; _ };
+          Some
+            {
+              Lost_env.cancellation_token;
+              triggering_request = { Lost_env.id = peek_id; _ };
+              _;
+            };
         _;
       }
-    when Lsp.IdKey.compare id (get_lsp_id_of_shell_out shellable_type) = 0 ->
+    when Lsp.IdKey.compare id peek_id = 0 ->
     Lwt.wakeup_later cancellation_token ()
   | _ -> ()
 
@@ -3613,11 +3630,11 @@ let do_findReferences_local
     (state : state)
     (ide_service : ClientIdeService.t ref)
     (env : env)
-    (tracking_id : string)
+    (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : FindReferences.params)
-    (lsp_id : lsp_id) =
+    (id : lsp_id) =
   let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
@@ -3626,17 +3643,14 @@ let do_findReferences_local
     ide_rpc
       ide_service
       ~env
-      ~tracking_id
+      ~tracking_id:metadata.tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Find_references (document, location, all_open_documents))
   in
   let state =
     match response with
     | ClientIdeMessage.Invalid_symbol ->
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        lsp_id
-        (FindReferencesResult []);
+      respond_jsonrpc ~powered_by:Serverless_ide id (FindReferencesResult []);
       Lwt.return state
     | ClientIdeMessage.Find_refs_success
         (_symbol_name, None, ide_calculated_refs) ->
@@ -3658,7 +3672,7 @@ let do_findReferences_local
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
-        lsp_id
+        id
         (FindReferencesResult positions);
       Lwt.return state
     | ClientIdeMessage.Find_refs_success
@@ -3670,16 +3684,20 @@ let do_findReferences_local
       let shellable_type =
         Lost_env.FindRefs
           {
-            lsp_id;
             symbol = symbol_name;
             find_refs_action = action;
             ide_calculated_refs;
           }
       in
       (* If we reach kickoff a shell-out to hh_server, processing that response
-         also invokes respond_jsonrpc
-      *)
-      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+         also invokes respond_jsonrpc *)
+      let%lwt state =
+        kickoff_shell_out_and_maybe_cancel
+          state
+          shellable_type
+          ~triggering_request:
+            { Lost_env.id; metadata; request = FindReferencesRequest params }
+      in
       Lwt.return state
   in
   state
@@ -3717,8 +3735,10 @@ let do_findReferences2 ~ide_calculated_refs ~hh_locations : Lsp.lsp_result * int
   (FindReferencesResult all_locations, List.length all_locations)
 
 let do_goToImplementation_local
-    (state : state) (params : Implementation.params) (lsp_id : lsp_id) :
-    state Lwt.t =
+    (state : state)
+    (metadata : incoming_metadata)
+    (params : Implementation.params)
+    (id : lsp_id) : state Lwt.t =
   let { Ide_api_types.line; column } =
     lsp_position_to_ide params.TextDocumentPositionParams.position
   in
@@ -3726,8 +3746,14 @@ let do_goToImplementation_local
     Lsp_helpers.lsp_textDocumentIdentifier_to_filename
       params.TextDocumentPositionParams.textDocument
   in
-  let shellable_type = Lost_env.GoToImpl (lsp_id, filename, line, column) in
-  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  let shellable_type = Lost_env.GoToImpl (filename, line, column) in
+  let state =
+    kickoff_shell_out_and_maybe_cancel
+      state
+      shellable_type
+      ~triggering_request:
+        { Lost_env.id; metadata; request = ImplementationRequest params }
+  in
   state
 
 (** This is called when a shellout to "hh --ide-go-to-impl" completes successfully *)
@@ -4077,11 +4103,11 @@ let do_documentRename_local
     (state : state)
     (ide_service : ClientIdeService.t ref)
     (env : env)
-    (tracking_id : string)
+    (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Rename.params)
-    (lsp_id : lsp_id) : state Lwt.t =
+    (id : lsp_id) : state Lwt.t =
   let document_position = rename_params_to_document_position params in
   let (document, location) =
     get_document_location editor_open_files document_position
@@ -4092,7 +4118,7 @@ let do_documentRename_local
     ide_rpc
       ide_service
       ~env
-      ~tracking_id
+      ~tracking_id:metadata.tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Rename (document, location, new_name, all_open_documents))
   in
@@ -4105,7 +4131,7 @@ let do_documentRename_local
            { Error.code = Error.InvalidRequest; message; data = None })
     | ClientIdeMessage.Rename_success { shellout = None; local } ->
       let patches = patches_to_workspace_edit local in
-      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
+      respond_jsonrpc ~powered_by:Hh_server id (RenameResult patches);
       Lwt.return state
     | ClientIdeMessage.Rename_success
         {
@@ -4118,7 +4144,6 @@ let do_documentRename_local
       let shellable_type =
         Lost_env.Rename
           {
-            lsp_id;
             symbol_definition;
             find_refs_action;
             new_name;
@@ -4126,7 +4151,13 @@ let do_documentRename_local
             ide_calculated_patches;
           }
       in
-      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+      let%lwt state =
+        kickoff_shell_out_and_maybe_cancel
+          state
+          shellable_type
+          ~triggering_request:
+            { Lost_env.id; metadata; request = RenameRequest params }
+      in
       Lwt.return state
   in
   state
@@ -4864,6 +4895,7 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
 It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
+    (triggering_request : Lost_env.triggering_request)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option =
   let (lsp_result, result_count, result_extra_data) =
     match result with
@@ -4944,10 +4976,8 @@ let handle_shell_out_complete
         (ErrorResult lsp_error, 0, None)
     end
   in
-  respond_jsonrpc
-    ~powered_by:Hh_server
-    (get_lsp_id_of_shell_out shellable_type)
-    lsp_result;
+  let { Lost_env.id; _ } = triggering_request in
+  respond_jsonrpc ~powered_by:Hh_server id lsp_result;
   Some (make_result_telemetry result_count ?result_extra_data)
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
@@ -5141,7 +5171,7 @@ let log_response_if_necessary
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
-  | Shell_out_complete (result, _) ->
+  | Shell_out_complete (result, _triggering_request, _shellable_type) ->
     let command_line =
       match result with
       | Ok Lwt_utils.Process_success.{ command_line; _ }
@@ -5908,7 +5938,7 @@ let handle_client_message
           !state
           ide_service
           env
-          tracking_id
+          metadata
           ref_unblocked_time
           editor_open_files
           params
@@ -5920,7 +5950,9 @@ let handle_client_message
     | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state = do_goToImplementation_local !state params id in
+      let%lwt new_state =
+        do_goToImplementation_local !state metadata params id
+      in
       state := new_state;
       Lwt.return_none
     (* textDocument/rename request *)
@@ -5932,7 +5964,7 @@ let handle_client_message
           !state
           ide_service
           env
-          tracking_id
+          metadata
           ref_unblocked_time
           editor_open_files
           params
@@ -6702,8 +6734,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | Server_hello -> handle_server_hello ~state
         | Errors_file result ->
           handle_errors_file_item ~state ~ide_service result
-        | Shell_out_complete (result, shellable_type) ->
-          Lwt.return (handle_shell_out_complete result shellable_type)
+        | Shell_out_complete (result, triggering_request, shellable_type) ->
+          Lwt.return
+            (handle_shell_out_complete result triggering_request shellable_type)
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

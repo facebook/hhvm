@@ -298,11 +298,13 @@ let is_pre_init (state : state) : bool =
 type result_handler = lsp_result -> state -> state Lwt.t
 
 type result_telemetry = {
-  (* how many results did we send back to the user? *)
-  result_count: int;
-  (* other message-specific data *)
-  result_extra_telemetry: Telemetry.t option;
+  result_count: int;  (** how many results did we send back to the user? *)
+  result_extra_data: Telemetry.t option;  (** other message-specific data *)
 }
+
+let make_result_telemetry
+    ?(result_extra_data : Telemetry.t option) (count : int) : result_telemetry =
+  { result_count = count; result_extra_data }
 
 (* --ide-find-refs returns a list of positions, this is a mapping of the response *)
 type ide_shell_out_pos = {
@@ -4863,7 +4865,7 @@ It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option =
-  let (lsp_result, result_count, result_extra_telemetry) =
+  let (lsp_result, result_count, result_extra_data) =
     match result with
     | Error
         ({
@@ -4946,7 +4948,7 @@ let handle_shell_out_complete
     ~powered_by:Hh_server
     (get_lsp_id_of_shell_out shellable_type)
     lsp_result;
-  Some { result_count; result_extra_telemetry }
+  Some (make_result_telemetry result_count ?result_extra_data)
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -5120,8 +5122,8 @@ let log_response_if_necessary
   let (result_count, result_extra_telemetry) =
     match result_telemetry_opt with
     | None -> (None, None)
-    | Some { result_count; result_extra_telemetry } ->
-      (Some result_count, result_extra_telemetry)
+    | Some { result_count; result_extra_data } ->
+      (Some result_count, result_extra_data)
   in
   match event with
   | Client_message ({ timestamp; tracking_id }, message) ->
@@ -5710,7 +5712,7 @@ let handle_client_message
         Lsp_helpers.telemetry_log
           to_stdout
           ("Version in hhconfig and switch=" ^ !hhconfig_version_and_switch);
-      Lwt.return_some { result_count = 0; result_extra_telemetry = None }
+      Lwt.return_none
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _, _) ->
       raise
@@ -5734,8 +5736,7 @@ let handle_client_message
     | (_, _, RequestMessage (id, RageRequestFB)) ->
       let%lwt result = do_rageFB !state in
       respond_jsonrpc ~powered_by:Language_server id (RageResultFB result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     | ( _,
         Some ide_service,
         NotificationMessage (DidChangeWatchedFilesNotification notification) )
@@ -5770,10 +5771,7 @@ let handle_client_message
           (ClientIdeMessage.Did_change_watched_files changes)
       in
       Lwt.return_some
-        {
-          result_count = Relative_path.Set.cardinal changes;
-          result_extra_telemetry = None;
-        }
+        (make_result_telemetry (Relative_path.Set.cardinal changes))
     (* Text document completion: "AutoComplete!" *)
     | (_, Some ide_service, RequestMessage (id, CompletionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5788,10 +5786,7 @@ let handle_client_message
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CompletionResult result);
       Lwt.return_some
-        {
-          result_count = List.length result.Completion.items;
-          result_extra_telemetry = None;
-        }
+        (make_result_telemetry (List.length result.Completion.items))
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | ( _,
         Some ide_service,
@@ -5804,7 +5799,7 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (CompletionItemResolveResult result);
-      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
+      Lwt.return_none
     (* Document highlighting in serverless IDE *)
     | (_, Some ide_service, RequestMessage (id, DocumentHighlightRequest params))
       ->
@@ -5822,8 +5817,7 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (DocumentHighlightResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* Hover docblocks in serverless IDE *)
     | (_, Some ide_service, RequestMessage (id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5842,7 +5836,7 @@ let handle_client_message
         | None -> 0
         | Some { Hover.contents; _ } -> List.length contents
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry result_count)
     | (_, Some ide_service, RequestMessage (id, DocumentSymbolRequest params))
       ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5859,8 +5853,7 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (DocumentSymbolResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     | (_, Some ide_service, RequestMessage (id, WorkspaceSymbolRequest params))
       ->
       let%lwt result =
@@ -5875,11 +5868,10 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (WorkspaceSymbolResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     | (_, Some ide_service, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt (result, has_xhp_attribute) =
+      let%lwt (result, _has_xhp_attribute) =
         do_definition_local
           ide_service
           env
@@ -5888,15 +5880,8 @@ let handle_client_message
           editor_open_files
           params
       in
-      let result_extra_telemetry =
-        Option.some_if
-          has_xhp_attribute
-          (Telemetry.create ()
-          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true)
-      in
       respond_jsonrpc ~powered_by:Serverless_ide id (DefinitionResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry }
+      Lwt.return_some (make_result_telemetry (List.length result))
     | (_, Some ide_service, RequestMessage (id, TypeDefinitionRequest params))
       ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5913,8 +5898,7 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (TypeDefinitionResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/references request *)
     | (_, Some ide_service, RequestMessage (id, FindReferencesRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
@@ -5974,7 +5958,7 @@ let handle_client_message
         | None -> 0
         | Some { SignatureHelp.signatures; _ } -> List.length signatures
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry result_count)
     (* textDocument/codeAction request *)
     | (_, Some ide_service, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5997,8 +5981,7 @@ let handle_client_message
         | Some errors ->
           state := publish_errors_if_standalone env !state file_path errors
       end;
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* codeAction/resolve request *)
     | (_, Some ide_service, RequestMessage (id, CodeActionResolveRequest params))
       ->
@@ -6021,14 +6004,10 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (CodeActionResolveResult result);
-      Lwt.return_some
-        {
-          result_count = 1;
-          result_extra_telemetry =
-            Some
-              (Telemetry.create ()
-              |> Telemetry.string_ ~key:"title" ~value:title);
-        }
+      let result_extra_data =
+        Telemetry.create () |> Telemetry.string_ ~key:"title" ~value:title
+      in
+      Lwt.return_some (make_result_telemetry 1 ~result_extra_data)
     (* codeAction/resolve request, when not in serverless IDE mode *)
     | ( Main_loop menv,
         None,
@@ -6046,7 +6025,7 @@ let handle_client_message
           ~resolve_title:title
       in
       respond_jsonrpc ~powered_by:Hh_server id (CodeActionResolveResult result);
-      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
+      Lwt.return_none
     (* textDocument/formatting *)
     | (_, _, RequestMessage (id, DocumentFormattingRequest params)) ->
       let result = do_documentFormatting editor_open_files params in
@@ -6054,8 +6033,7 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentFormattingResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/rangeFormatting *)
     | (_, _, RequestMessage (id, DocumentRangeFormattingRequest params)) ->
       let result = do_documentRangeFormatting editor_open_files params in
@@ -6063,8 +6041,7 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentRangeFormattingResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/onTypeFormatting *)
     | (_, _, RequestMessage (id, DocumentOnTypeFormattingRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -6073,8 +6050,7 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (DocumentOnTypeFormattingResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/willSaveWaitUntil request *)
     | (_, _, RequestMessage (id, WillSaveWaitUntilRequest params)) ->
       let result = do_willSaveWaitUntil editor_open_files params in
@@ -6082,8 +6058,7 @@ let handle_client_message
         ~powered_by:Language_server
         id
         (WillSaveWaitUntilResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* editor buffer events *)
     | ( _,
         _,
@@ -6130,36 +6105,21 @@ let handle_client_message
         | None -> 0
         | Some { Hover.contents; _ } -> List.length contents
       in
-      let pos = params.Lsp.TextDocumentPositionParams.position in
-      let result_extra_telemetry =
-        Telemetry.create ()
-        |> Telemetry.int_ ~key:"line" ~value:pos.line
-        |> Telemetry.int_ ~key:"character" ~value:pos.character
-      in
-      Lwt.return_some
-        { result_count; result_extra_telemetry = Some result_extra_telemetry }
+      Lwt.return_some (make_result_telemetry result_count)
     (* textDocument/typeDefinition request *)
     | (Main_loop menv, _, RequestMessage (id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_typeDefinition menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (TypeDefinitionResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/definition request *)
     | (Main_loop menv, _, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt (result, has_xhp_attribute) =
+      let%lwt (result, _has_xhp_attribute) =
         do_definition menv.conn ref_unblocked_time editor_open_files params
       in
-      let result_extra_telemetry =
-        Option.some_if
-          has_xhp_attribute
-          (Telemetry.create ()
-          |> Telemetry.bool_ ~key:"has_xhp_attribute" ~value:true)
-      in
       respond_jsonrpc ~powered_by:Hh_server id (DefinitionResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (*textDocument/prepareCallHierarchy request*)
     | ( Main_loop menv,
         _,
@@ -6168,17 +6128,13 @@ let handle_client_message
       let%lwt result =
         do_prepareCallHierarchy menv.conn ref_unblocked_time params
       in
-      let result_count_ =
-        match result with
-        | None -> 1
-        | Some s -> List.length s
-      in
       respond_jsonrpc
         ~powered_by:Hh_server
         id
         (PrepareCallHierarchyResult result);
       Lwt.return_some
-        { result_count = result_count_; result_extra_telemetry = None }
+        (make_result_telemetry
+           (Option.value_map result ~default:1 ~f:List.length))
     (* callHierarchy/incomingCalls request *)
     | ( Main_loop menv,
         _,
@@ -6187,17 +6143,13 @@ let handle_client_message
       let%lwt result =
         do_callHierarchyIncoming menv.conn ref_unblocked_time params
       in
-      let result_count_ =
-        match result with
-        | None -> 1
-        | Some s -> List.length s
-      in
       respond_jsonrpc
         ~powered_by:Hh_server
         id
         (CallHierarchyIncomingCallsResult result);
       Lwt.return_some
-        { result_count = result_count_; result_extra_telemetry = None }
+        (make_result_telemetry
+           (Option.value_map result ~default:1 ~f:List.length))
     (* callHierarchy/outgoingCalls request *)
     | ( Main_loop menv,
         _,
@@ -6206,27 +6158,20 @@ let handle_client_message
       let%lwt result =
         do_callHierarchyOutgoing menv.conn ref_unblocked_time params
       in
-      let result_count_ =
-        match result with
-        | None -> 1
-        | Some s -> List.length s
-      in
       respond_jsonrpc
         ~powered_by:Hh_server
         id
         (CallHierarchyOutgoingCallsResult result);
       Lwt.return_some
-        { result_count = result_count_; result_extra_telemetry = None }
+        (make_result_telemetry
+           (Option.value_map result ~default:1 ~f:List.length))
     (* textDocument/completion request *)
     | (Main_loop menv, _, RequestMessage (id, CompletionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_completion menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (CompletionResult result);
       Lwt.return_some
-        {
-          result_count = List.length result.Completion.items;
-          result_extra_telemetry = None;
-        }
+        (make_result_telemetry (List.length result.Completion.items))
     (* completionItem/resolve request *)
     | ( Main_loop menv,
         _,
@@ -6239,26 +6184,23 @@ let handle_client_message
         ~powered_by:Hh_server
         id
         (CompletionItemResolveResult result);
-      Lwt.return_some { result_count = 1; result_extra_telemetry = None }
+      Lwt.return_none
     (* workspace/symbol request *)
     | (Main_loop menv, _, RequestMessage (id, WorkspaceSymbolRequest params)) ->
       let%lwt result = do_workspaceSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (WorkspaceSymbolResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/documentSymbol request *)
     | (Main_loop menv, _, RequestMessage (id, DocumentSymbolRequest params)) ->
       let%lwt result = do_documentSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (DocumentSymbolResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/references request *)
     | (Main_loop menv, _, RequestMessage (id, FindReferencesRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result = do_findReferences menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (FindReferencesResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/implementation request *)
     | (Main_loop menv, _, RequestMessage (id, ImplementationRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
@@ -6266,8 +6208,7 @@ let handle_client_message
         do_goToImplementation menv.conn ref_unblocked_time params
       in
       respond_jsonrpc ~powered_by:Hh_server id (ImplementationResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/rename *)
     | (Main_loop menv, _, RequestMessage (id, RenameRequest params)) ->
       let%lwt result = do_documentRename menv.conn ref_unblocked_time params in
@@ -6278,14 +6219,13 @@ let handle_client_message
           result.WorkspaceEdit.changes
           0
       in
-      let result_extra_telemetry =
+      let result_extra_data =
         Telemetry.create ()
         |> Telemetry.int_
              ~key:"files"
              ~value:(SMap.cardinal result.WorkspaceEdit.changes)
       in
-      Lwt.return_some
-        { result_count; result_extra_telemetry = Some result_extra_telemetry }
+      Lwt.return_some (make_result_telemetry result_count ~result_extra_data)
     (* textDocument/documentHighlight *)
     | (Main_loop menv, _, RequestMessage (id, DocumentHighlightRequest params))
       ->
@@ -6294,8 +6234,7 @@ let handle_client_message
         do_documentHighlight menv.conn ref_unblocked_time params
       in
       respond_jsonrpc ~powered_by:Hh_server id (DocumentHighlightResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, _, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in
@@ -6305,7 +6244,7 @@ let handle_client_message
         | None -> 0
         | Some result -> List.length result.SignatureHelp.signatures
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry result_count)
     (* typeHierarchy request *)
     | (_, Some ide_service, RequestMessage (id, TypeHierarchyRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -6324,7 +6263,7 @@ let handle_client_message
         | None -> 0
         | Some _result -> 1
       in
-      Lwt.return_some { result_count; result_extra_telemetry = None }
+      Lwt.return_some (make_result_telemetry result_count)
     (* catch-all for client reqs/notifications we haven't yet implemented *)
     | (Main_loop _menv, _, message) ->
       let method_ = Lsp_fmt.message_name_to_string message in

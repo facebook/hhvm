@@ -66,8 +66,7 @@
     "id": 2,
     "error": {
       "code": -32601,
-      "message": "not implemented: textDocument/nonExistingMethod",
-      "data": {}
+      "message": "not implemented: textDocument/nonExistingMethod"
     }
   },
   {

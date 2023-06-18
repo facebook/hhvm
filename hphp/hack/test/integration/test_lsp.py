@@ -140,14 +140,7 @@ class TestLsp(TestCase[LspTestDriver]):
         for response in sanitized:
             if "error" in response:
                 if "data" in response["error"]:
-                    if "stack" in response["error"]["data"]:
-                        del response["error"]["data"]["stack"]
-                    if "current_stack" in response["error"]["data"]:
-                        del response["error"]["data"]["current_stack"]
-                    if "command_line" in response["error"]["data"]:
-                        del response["error"]["data"]["command_line"]
-                    if "server_finale_stack" in response["error"]["data"]:
-                        del response["error"]["data"]["server_finale_stack"]
+                    del response["error"]["data"]
         return sanitized
 
     # dumps an LSP response into a standard json format that can be used for
@@ -6484,7 +6477,7 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack is working on IDE requests\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "message": "<ROOT>\n\nHack is working on IDE requests\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: hh_server stopped",
                 },
             )

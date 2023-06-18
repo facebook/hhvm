@@ -108,10 +108,7 @@
     "id": 12,
     "error": {
       "code": -32800,
-      "message": "Unix.WSIGNALED -7",
-      "data": {
-        "status": "Unix.WSIGNALED -7"
-      }
+      "message": "Unix.WSIGNALED -7"
     }
   },
   {

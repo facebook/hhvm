@@ -1251,13 +1251,6 @@ void SymbolMap::updateDBPath(
   }
 }
 
-bool SymbolMap::isPathDeleted(Path path) const noexcept {
-  auto rlock = m_syncedData.rlock();
-  auto const& fileExistsMap = rlock->m_fileExistsMap;
-  auto const it = fileExistsMap.find(path);
-  return it != fileExistsMap.end() && !it->second;
-}
-
 template <typename Ret, typename ReadFn, typename GetFromDBFn, typename WriteFn>
 Ret SymbolMap::readOrUpdate(
     ReadFn readFn,

@@ -550,11 +550,6 @@ struct SymbolMap {
       const FileFacts& facts) const;
 
   /**
-   * True iff the given path is known to be deleted.
-   */
-  bool isPathDeleted(Path path) const noexcept;
-
-  /**
    * Mark `derivedType` as inheriting from each of the `baseTypes`.
    */
   void setBaseTypes(

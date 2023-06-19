@@ -32,29 +32,55 @@ let compute_tast_and_errors_unquarantined_internal
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
+  let dynamic_requested =
+    TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx)
+  in
   match
     ( mode,
-      TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
-      entry.Provider_context.tast,
+      dynamic_requested,
+      Provider_context.(entry.tast.entry_tast_under_normal),
+      Provider_context.(entry.tast.entry_tast_under_dynamic),
       entry.Provider_context.all_errors )
   with
-  | (Compute_tast_only, false, Provider_context.Entry_tast_no_dynamic tast, _)
-    ->
-    { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_only, true, Provider_context.Entry_tast_under_dynamic tast, _)
-    ->
-    { Compute_tast.tast; telemetry = Telemetry.create () }
+  | ( Compute_tast_only,
+      false,
+      Some entry_tast_under_normal,
+      _entry_tast_under_dynamic,
+      _all_errors ) ->
+    {
+      Compute_tast.tast = entry_tast_under_normal;
+      telemetry = Telemetry.create ();
+    }
+  | ( Compute_tast_only,
+      true,
+      _entry_tast_under_normal,
+      Some entry_tast_under_dynamic,
+      _all_errors ) ->
+    {
+      Compute_tast.tast = entry_tast_under_dynamic;
+      telemetry = Telemetry.create ();
+    }
   | ( Compute_tast_and_errors,
       false,
-      Provider_context.Entry_tast_no_dynamic tast,
+      Some entry_tast_under_normal,
+      _entry_tast_under_dynamic,
       Some errors ) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+    {
+      Compute_tast_and_errors.tast = entry_tast_under_normal;
+      errors;
+      telemetry = Telemetry.create ();
+    }
   | ( Compute_tast_and_errors,
       true,
-      Provider_context.Entry_tast_under_dynamic tast,
+      _entry_tast_under_normal,
+      Some entry_tast_under_dynamic,
       Some errors ) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
-  | (mode, tast_under_dynamic, _, _) ->
+    {
+      Compute_tast_and_errors.tast = entry_tast_under_dynamic;
+      errors;
+      telemetry = Telemetry.create ();
+    }
+  | (mode, dynamic_requested, _, _, _) ->
     (* prepare logging *)
     Provider_context.reset_telemetry ctx;
     let prev_ctx_telemetry = Provider_context.get_telemetry ctx in
@@ -129,10 +155,11 @@ let compute_tast_and_errors_unquarantined_internal
       ~start_time;
 
     let some_tast =
-      if tast_under_dynamic then
-        Provider_context.Entry_tast_under_dynamic tast
+      if dynamic_requested then
+        Provider_context.
+          { entry.tast with entry_tast_under_dynamic = Some tast }
       else
-        Provider_context.Entry_tast_no_dynamic tast
+        Provider_context.{ entry.tast with entry_tast_under_normal = Some tast }
     in
     (match mode with
     | Compute_tast_and_errors ->
@@ -168,13 +195,24 @@ let compute_tast_and_errors_quarantined
   (* If results have already been memoized, don't bother quarantining anything *)
   match
     ( TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
-      entry.Provider_context.tast,
+      Provider_context.(entry.tast.entry_tast_under_normal),
+      Provider_context.(entry.tast.entry_tast_under_dynamic),
       entry.Provider_context.all_errors )
   with
-  | (false, Provider_context.Entry_tast_no_dynamic tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
-  | (true, Provider_context.Entry_tast_under_dynamic tast, Some errors) ->
-    { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
+  | (false, Some entry_tast_under_normal, _entry_tast_under_dynamic, Some errors)
+    ->
+    {
+      Compute_tast_and_errors.tast = entry_tast_under_normal;
+      errors;
+      telemetry = Telemetry.create ();
+    }
+  | (true, _entry_tast_under_normal, Some entry_tast_under_dynamic, Some errors)
+    ->
+    {
+      Compute_tast_and_errors.tast = entry_tast_under_dynamic;
+      errors;
+      telemetry = Telemetry.create ();
+    }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
@@ -188,14 +226,21 @@ let compute_tast_quarantined
   (* If results have already been memoized, don't bother quarantining anything *)
   match
     ( TypecheckerOptions.tast_under_dynamic (Provider_context.get_tcopt ctx),
-      entry.Provider_context.tast )
+      Provider_context.(entry.tast.entry_tast_under_normal),
+      Provider_context.(entry.tast.entry_tast_under_dynamic) )
   with
-  | (false, Provider_context.Entry_tast_no_dynamic tast) ->
-    { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (true, Provider_context.Entry_tast_under_dynamic tast) ->
-    { Compute_tast.tast; telemetry = Telemetry.create () }
+  | (false, Some entry_tast_under_normal, _entry_tast_under_dynamic) ->
+    {
+      Compute_tast.tast = entry_tast_under_normal;
+      telemetry = Telemetry.create ();
+    }
+  | (true, _entry_tast_under_normal, Some entry_tast_under_dynamic) ->
+    {
+      Compute_tast.tast = entry_tast_under_dynamic;
+      telemetry = Telemetry.create ();
+    }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
-  | (_, _) ->
+  | (_, _, _) ->
     let f () =
       compute_tast_and_errors_unquarantined_internal
         ~ctx

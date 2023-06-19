@@ -131,6 +131,13 @@ void HTTPServerAcceptor::onNewConnection(
       return;
     }
   }
+
+  const auto& func = serverOptions_.zeroCopyEnableFunc;
+  if (func && sock) {
+    sock->setZeroCopy(true);
+    sock->setZeroCopyEnableFunc(func);
+  }
+
   HTTPSessionAcceptor::onNewConnection(
       std::move(sock), address, nextProtocolName, secureTransportType, tinfo);
 }

@@ -150,6 +150,7 @@ folly::Expected<folly::Unit, std::exception_ptr> HTTPServer::startTcpServer(
       }
       bootstrap_.push_back(wangle::ServerBootstrap<wangle::DefaultPipeline>());
       bootstrap_[i].childHandler(acceptorFactory);
+      bootstrap_[i].useZeroCopy(options_->useZeroCopy);
       if (accConfig.enableTCPFastOpen) {
         // We need to do this because wangle's bootstrap has 2 acceptor configs
         // and the socketConfig gets passed to the SocketFactory. The number of

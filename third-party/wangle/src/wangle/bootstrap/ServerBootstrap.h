@@ -73,6 +73,11 @@ class ServerBootstrap {
     return this;
   }
 
+  ServerBootstrap* useZeroCopy(bool zc) {
+    socketConfig.useZeroCopy = zc;
+    return this;
+  }
+
   /*
    * BACKWARDS COMPATIBILITY - an acceptor factory can be set.  Your
    * Acceptor is responsible for managing the connection pool.
@@ -176,7 +181,7 @@ class ServerBootstrap {
         accConfig_.maxNumPendingConnectionsPerWorker);
 
     folly::via(acceptor_group_.get(), [&] {
-      if (useZeroCopy_) {
+      if (socketConfig.useZeroCopy) {
         socket->setZeroCopy(true);
       }
       socket->attachEventBase(folly::EventBaseManager::get()->getEventBase());
@@ -377,7 +382,6 @@ class ServerBootstrap {
   std::unique_ptr<folly::Baton<>> stopBaton_{
       std::make_unique<folly::Baton<>>()};
   bool stopped_{false};
-  bool useZeroCopy_{false};
   bool useSharedSSLContextManager_{false};
 };
 

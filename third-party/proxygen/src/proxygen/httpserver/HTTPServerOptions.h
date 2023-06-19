@@ -216,5 +216,15 @@ class HTTPServerOptions {
    * throws any exception.
    */
   NewConnectionFilter newConnectionFilter;
+
+  /**
+   * Use zero copy socket option
+   */
+  bool useZeroCopy{false};
+
+  /**
+   *  zerocopy enable function
+   */
+  folly::AsyncWriter::ZeroCopyEnableFunc zeroCopyEnableFunc;
 };
 } // namespace proxygen

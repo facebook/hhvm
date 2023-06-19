@@ -49,10 +49,14 @@ impl CustomErrorConfig {
     }
 
     pub fn from_path(path: &Path) -> Result<CustomErrorConfig> {
-        let file = File::open(path).with_context(|| path.display().to_string())?;
-        let reader = BufReader::new(file);
-        let errors = serde_json::from_reader(reader)?;
-        Ok(Self::new(errors))
+        if path.exists() {
+            let file = File::open(path).with_context(|| path.display().to_string())?;
+            let reader = BufReader::new(file);
+            let errors = serde_json::from_reader(reader)?;
+            Ok(Self::new(errors))
+        } else {
+            Ok(Self::default())
+        }
     }
 }
 

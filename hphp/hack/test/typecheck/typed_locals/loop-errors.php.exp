@@ -1,18 +1,24 @@
-File "loop-errors.php", line 11, characters 4-10:
+File "loop-errors.php", line 11, characters 5-11:
 Typing error (Typing[4110])
   File "loop-errors.php", line 12, characters 13-18:
   Expected `string`
-  File "loop-errors.php", line 11, characters 9-10:
+  File "loop-errors.php", line 11, characters 10-11:
   But got `int`
 File "loop-errors.php", line 17, characters 5-10:
 Typing error (Typing[4110])
-  File "loop-errors.php", line 15, characters 12-17:
+  File "loop-errors.php", line 15, characters 11-16:
   Expected `string`
   File "loop-errors.php", line 17, characters 10-10:
   But got `int`
 File "loop-errors.php", line 23, characters 3-8:
 Typing error (Typing[4110])
-  File "loop-errors.php", line 21, characters 12-17:
+  File "loop-errors.php", line 21, characters 13-18:
   Expected `string`
   File "loop-errors.php", line 23, characters 8-8:
+  But got `int`
+File "loop-errors.php", line 27, characters 3-23:
+Typing error (Typing[4110])
+  File "loop-errors.php", line 32, characters 13-18:
+  Expected `string`
+  File "loop-errors.php", line 27, characters 22-22:
   But got `int`

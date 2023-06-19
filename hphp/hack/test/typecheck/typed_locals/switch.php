@@ -8,13 +8,16 @@ interface I {}
 interface J extends I {}
 ;
 
-function f(bool $b, J $j): void {
+function f(int $i, J $j): void {
   let $x: arraykey = 1;
-  if ($b) {
-    let $x: int = 1;
-    let $y: I = $j;
-  } else {
-    let $y: J = $j;
+  switch ($i) {
+    case 0:
+      let $x: int = 1;
+      let $y: I = $j;
+      break;
+    default:
+      let $y: J = $j;
+      break;
   }
   $x = 4;
   $y = $j;

@@ -1,18 +1,36 @@
-File "init-errors-shadow.php", line 6, characters 3-25:
+File "init-errors-shadow.php", line 6, characters 3-24:
 Typing error (Typing[4110])
-  File "init-errors-shadow.php", line 5, characters 12-17:
+  File "init-errors-shadow.php", line 5, characters 11-16:
   Expected `string`
-  File "init-errors-shadow.php", line 6, characters 12-19:
+  File "init-errors-shadow.php", line 6, characters 11-18:
   But got `arraykey`
-File "init-errors-shadow.php", line 13, characters 5-27:
+File "init-errors-shadow.php", line 13, characters 5-26:
 Typing error (Typing[4110])
-  File "init-errors-shadow.php", line 11, characters 12-17:
+  File "init-errors-shadow.php", line 11, characters 11-16:
   Expected `string`
-  File "init-errors-shadow.php", line 13, characters 14-21:
+  File "init-errors-shadow.php", line 13, characters 13-20:
   But got `arraykey`
-File "init-errors-shadow.php", line 16, characters 3-24:
+File "init-errors-shadow.php", line 16, characters 3-23:
 Typing error (Typing[4110])
-  File "init-errors-shadow.php", line 14, characters 14-16:
+  File "init-errors-shadow.php", line 14, characters 13-15:
   Expected `int`
-  File "init-errors-shadow.php", line 16, characters 12-19:
+  File "init-errors-shadow.php", line 16, characters 11-18:
   But got `arraykey`
+File "init-errors-shadow.php", line 21, characters 3-21:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 21, characters 11-16:
+  Expected `string`
+  File "init-errors-shadow.php", line 21, characters 20-20:
+  But got `int`
+File "init-errors-shadow.php", line 26, characters 3-19:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 25, characters 11-18:
+  Expected `arraykey`
+  File "init-errors-shadow.php", line 26, characters 11-14:
+  But got `null`
+File "init-errors-shadow.php", line 26, characters 3-19:
+Typing error (Typing[4110])
+  File "init-errors-shadow.php", line 26, characters 11-14:
+  Expected `null`
+  File "init-errors-shadow.php", line 26, characters 18-18:
+  But got `int`

@@ -1,0 +1,36 @@
+File "array-error.php", line 7, characters 3-13:
+Typing error (Typing[4110])
+  File "array-error.php", line 6, characters 15-22:
+  Expected `arraykey`
+  File "array-error.php", line 7, characters 10-13:
+  But got `null`
+File "array-error.php", line 12, characters 3-13:
+Invalid assignment (Typing[4110])
+  File "array-error.php", line 11, characters 18-25:
+  Expected `arraykey`
+  File "array-error.php", line 11, characters 18-25:
+  This type argument to `Vector` must match exactly (it is invariant)
+  File "array-error.php", line 12, characters 10-13:
+  But got `null`
+File "array-error.php", line 16, characters 3-40:
+Typing error (Typing[4110])
+  File "array-error.php", line 16, characters 15-20:
+  Expected `string`
+  File "array-error.php", line 16, characters 29-36:
+  But got `arraykey`
+File "array-error.php", line 20, characters 3-47:
+Typing error (Typing[4110])
+  File "array-error.php", line 20, characters 18-23:
+  Expected `string`
+  File "array-error.php", line 20, characters 18-23:
+  This type argument to `Vector` must match exactly (it is invariant)
+  File "array-error.php", line 20, characters 35-42:
+  But got `arraykey`
+File "array-error.php", line 24, characters 3-47:
+Typing error (Typing[4110])
+  File "array-error.php", line 24, characters 37-42:
+  Expected `string`
+  File "array-error.php", line 24, characters 18-25:
+  But got `arraykey`
+  File "array-error.php", line 24, characters 18-25:
+  This type argument to `Vector` must match exactly (it is invariant)

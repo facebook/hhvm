@@ -1,8 +1,9 @@
 <?hh
 <<file: __EnableUnstableFeatures('typed_local_variables')>>
 
-function f(): void {
+function g(): void {
   let $x: int = 1;
-  $x = 2; // ok
-  $x = ""; // Error
+  if ($x is arraykey) {
+    $x = "";
+  }
 }

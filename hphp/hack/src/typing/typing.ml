@@ -1103,23 +1103,19 @@ let coerce_to_throwable pos env exn_ty =
 (* Bind lvar to ty and, if a hint is supplied, ty must be a subtype of it.
    If there is already a binding for lvar, make sure that its explicit
    type bound (if it has one) is respected. *)
-let set_valid_rvalue ?(is_using_clause = false) p env lvar hint ty =
+let set_valid_rvalue ?(is_using_clause = false) p env lvar hint_ty ty =
   let (env, hty, sub_bound_ty) =
-    match hint with
+    match hint_ty with
     | None -> (env, None, ty)
-    | Some hint ->
-      let ((env, err1), hty) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false hint
-      in
-      let (env, err2) =
+    | Some hty ->
+      let (env, err) =
         Typing_subtype.sub_type
           env
           ty
           hty
           (Some (Typing_error.Reasons_callback.unify_error_at p))
       in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
       (env, Some hty, hty)
   in
   let (env, new_bound_ty, new_ty) =
@@ -3062,8 +3058,12 @@ and stmt_ env pos st =
       else
         hint
     in
+    let ((env, err), hty) =
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
+    in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
     let (env, te, ety) = expr env exp in
-    let env = set_valid_rvalue p env lvar (Some hint) ety in
+    let env = set_valid_rvalue p env lvar (Some hty) ety in
     (env, Aast.Declare_local ((p, lvar), hint, te))
   | Block _
   | Markup _ ->

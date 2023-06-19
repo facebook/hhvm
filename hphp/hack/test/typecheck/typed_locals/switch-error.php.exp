@@ -1,0 +1,22 @@
+File "switch-error.php", line 25, characters 3-4:
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+  File "switch-error.php", line 24, characters 3-9:
+  Did you mean `$y` instead?
+File "switch-error.php", line 23, characters 3-9:
+Typing error (Typing[4110])
+  File "switch-error.php", line 15, characters 15-17:
+  Expected `int`
+  File "switch-error.php", line 23, characters 8-9:
+  But got `string`
+File "switch-error.php", line 24, characters 3-9:
+Typing error (Typing[4110])
+  File "switch-error.php", line 19, characters 15-15:
+  Expected `J`
+  File "switch-error.php", line 11, characters 26-26:
+  But got `I`
+File "switch-error.php", line 26, characters 3-9:
+Typing error (Typing[4110])
+  File "switch-error.php", line 20, characters 15-17:
+  Expected `int`
+  File "switch-error.php", line 26, characters 8-9:
+  But got `string`

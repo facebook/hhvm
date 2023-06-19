@@ -21,7 +21,8 @@
 
 using namespace apache::thrift::frozen;
 using namespace apache::thrift::test;
-using namespace folly;
+using folly::ByteRange;
+using folly::StringPiece;
 
 namespace {
 byte test[]{0xDE, 0xAD, 0x00, 0xBE, 0xEF};

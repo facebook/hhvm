@@ -25,24 +25,17 @@ use namespace HH\Lib\_Private\_Str;
  *
  * @guide /hack/built-in-types/string
  */
-function slice(
-  string $string,
-  int $offset,
-  ?int $length = null,
-)[]: string {
+function slice(string $string, int $offset, ?int $length = null)[]: string {
   return _Str\slice_l($string, $offset, $length ?? \PHP_INT_MAX);
 }
 
 /**
- * Returns the string with the given prefix removed, or the string itself if
- * it doesn't start with the prefix.
+ * Returns the string with one instance of the given prefix removed, or the
+ * string itself if it doesn't start with the prefix.
  *
  * @guide /hack/built-in-types/string
  */
-function strip_prefix(
-  string $string,
-  string $prefix,
-)[]: string {
+function strip_prefix(string $string, string $prefix)[]: string {
   return _Str\strip_prefix_l($string, $prefix);
 }
 
@@ -52,10 +45,7 @@ function strip_prefix(
  *
  * @guide /hack/built-in-types/string
  */
-function strip_suffix(
-  string $string,
-  string $suffix,
-)[]: string {
+function strip_suffix(string $string, string $suffix)[]: string {
   return _Str\strip_suffix_l($string, $suffix);
 }
 
@@ -70,10 +60,7 @@ function strip_suffix(
  *
  * @guide /hack/built-in-types/string
  */
-function trim(
-  string $string,
-  ?string $char_mask = null,
-)[]: string {
+function trim(string $string, ?string $char_mask = null)[]: string {
   return _Str\trim_l($string, $char_mask);
 }
 
@@ -88,10 +75,7 @@ function trim(
  *
  * @guide /hack/built-in-types/string
  */
-function trim_left(
-  string $string,
-  ?string $char_mask = null,
-)[]: string {
+function trim_left(string $string, ?string $char_mask = null)[]: string {
   return _Str\trim_left_l($string, $char_mask);
 }
 
@@ -106,9 +90,6 @@ function trim_left(
  *
  * @guide /hack/built-in-types/string
  */
-function trim_right(
-  string $string,
-  ?string $char_mask = null,
-)[]: string {
+function trim_right(string $string, ?string $char_mask = null)[]: string {
   return _Str\trim_right_l($string, $char_mask);
 }

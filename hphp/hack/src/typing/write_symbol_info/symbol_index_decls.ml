@@ -231,7 +231,7 @@ let process_typedef_decl ctx path source_text elem (xrefs, all_decls, progress)
       elem.t_span
       id
       elem
-      None
+      elem.t_doc_comment
       progress
   in
   (xrefs, all_decls @ [Build.build_typedef_decl_json_ref decl_id], prog)

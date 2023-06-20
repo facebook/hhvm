@@ -16,7 +16,7 @@ Typing error (Typing[4110])
   Expected `string`
   File "loop-errors.php", line 23, characters 8-8:
   But got `int`
-File "loop-errors.php", line 27, characters 3-23:
+File "loop-errors.php", line 28, characters 3-219:
 Typing error (Typing[4110])
   File "loop-errors.php", line 32, characters 13-18:
   Expected `string`

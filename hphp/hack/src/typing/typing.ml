@@ -566,31 +566,35 @@ let rec enforce_return_disposable env e =
  * function with return type 'noreturn'.
  * This enables significant perf improvement, because this is called at every
  * function of method call, when most calls are outside of a try block. *)
-let move_and_merge_next_in_catch env =
+let move_and_merge_next_in_catch ~join_pos env =
   if env.in_try || TFTerm.is_noreturn env then
-    LEnv.move_and_merge_next_in_cont env C.Catch
+    LEnv.move_and_merge_next_in_cont env ~join_pos C.Catch
   else
     LEnv.drop_cont env C.Next
 
-let save_and_merge_next_in_catch env =
+let save_and_merge_next_in_catch ~join_pos env =
   if env.in_try || TFTerm.is_noreturn env then
-    LEnv.save_and_merge_next_in_cont env C.Catch
+    LEnv.save_and_merge_next_in_cont env ~join_pos C.Catch
   else
     env
 
 let might_throw env = save_and_merge_next_in_catch env
 
 let branch :
-    type res. env -> (env -> env * res) -> (env -> env * res) -> env * res * res
-    =
- fun env branch1 branch2 ->
+    type res.
+    join_pos:Pos.t ->
+    env ->
+    (env -> env * res) ->
+    (env -> env * res) ->
+    env * res * res =
+ fun ~join_pos env branch1 branch2 ->
   let parent_lenv = env.lenv in
   let (env, tbr1) = branch1 env in
   let lenv1 = env.lenv in
   let env = { env with lenv = parent_lenv } in
   let (env, tbr2) = branch2 env in
   let lenv2 = env.lenv in
-  let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+  let env = LEnv.union_lenvs env ~join_pos parent_lenv lenv1 lenv2 in
   (env, tbr1, tbr2)
 
 let as_expr env ty1 pe e =
@@ -2699,18 +2703,20 @@ and stmt_ env pos st =
   @@
   match st with
   | Fallthrough ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Fallthrough in
+    let env =
+      LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Fallthrough
+    in
     (env, Aast.Fallthrough)
   | Noop -> (env, Aast.Noop)
   | AssertEnv _ -> (env, Aast.Noop)
   | Yield_break ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Exit in
+    let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
     (env, Aast.Yield_break)
   | Expr e ->
     let (env, te, _) = expr env e in
     let env =
       if TFTerm.typed_expression_exits te then
-        LEnv.move_and_merge_next_in_cont env C.Exit
+        LEnv.move_and_merge_next_in_cont env ~join_pos:pos C.Exit
       else
         env
     in
@@ -2722,6 +2728,7 @@ and stmt_ env pos st =
     let (env, te, _) = expr env e in
     let (env, tb1, tb2) =
       branch
+        ~join_pos:pos
         env
         (fun env ->
           let (env, { lset; pkgs }) = condition env true te in
@@ -2789,7 +2796,7 @@ and stmt_ env pos st =
           ~hint_pos:None
           ~is_async:false
     in
-    let env = LEnv.move_and_merge_next_in_cont env C.Exit in
+    let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
     (env, Aast.Return None)
   | Return (Some e) ->
     let env = Typing_return.check_inout_return pos env in
@@ -2826,7 +2833,7 @@ and stmt_ env pos st =
     let ty_mismatch_opt =
       mk_ty_mismatch_opt rty return_type.et_type ty_err_opt
     in
-    let env = LEnv.move_and_merge_next_in_cont env C.Exit in
+    let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
     (env, Aast.Return (Some (hole_on_ty_mismatch ~ty_mismatch_opt te)))
   | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
@@ -2834,41 +2841,57 @@ and stmt_ env pos st =
     *)
     let (env, (tb, te)) =
       LEnv.stash_and_do env [C.Continue; C.Break; C.Do] (fun env ->
-          let env = LEnv.save_and_merge_next_in_cont env C.Do in
+          let env = LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Do in
           let (env, _) = block env b in
           (* saving the locals in continue here even if there is no continue
            * statement because they must be merged at the end of the loop, in
            * case there is no iteration *)
-          let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+          let env =
+            LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
+          in
           let (env, tb) =
             infer_loop env (fun env ->
                 let env =
-                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                  LEnv.update_next_from_conts
+                    ~join_pos:pos
+                    env
+                    [C.Continue; C.Next]
                 in
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te, _) = expr env e in
                 let (env, { pkgs; _ }) = condition env true te in
                 Env.with_packages env pkgs @@ fun env ->
-                let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
+                let env =
+                  LEnv.update_next_from_conts ~join_pos:pos env [C.Do; C.Next]
+                in
                 let (env, tb) = block env b in
                 (env, tb))
           in
-          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+          let env =
+            LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
+          in
           let (env, te, _) = expr env e in
           let (env, _) = condition env false te in
-          let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+          let env =
+            LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
+          in
           (env, (tb, te)))
     in
     (env, Aast.Do (tb, te))
   | While (e, b) ->
     let (env, (te, tb, refinement_map)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
-          let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+          let env =
+            LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
+          in
           let (env, tb) =
             infer_loop env (fun env ->
                 let env =
-                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                  LEnv.update_next_from_conts
+                    ~join_pos:pos
+                    env
+                    [C.Continue; C.Next]
                 in
                 let join_map = annot_map env in
                 (* The following is necessary in case there is an assignment in the
@@ -2887,11 +2910,15 @@ and stmt_ env pos st =
 
                 (env, tb))
           in
-          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+          let env =
+            LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
+          in
           let (env, te, _) = expr env e in
           let (env, { lset; _ }) = condition env false te in
           let refinement_map_at_exit = refinement_annot_map env lset in
-          let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+          let env =
+            LEnv.update_next_from_conts env ~join_pos:pos [C.Break; C.Next]
+          in
           (env, (te, tb, refinement_map_at_exit)))
     in
     let while_st = Aast.While (te, tb) in
@@ -2936,7 +2963,9 @@ and stmt_ env pos st =
           *)
           let (env, te1, _) = exprs env e1 in
           (* initializer *)
-          let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+          let env =
+            LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
+          in
           let (env, (tb, te3)) =
             infer_loop env (fun env ->
                 (* The following is necessary in case there is an assignment in the
@@ -2947,7 +2976,10 @@ and stmt_ env pos st =
                 let refinement_map = refinement_annot_map env lset in
                 let (env, tb) = block env b in
                 let env =
-                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                  LEnv.update_next_from_conts
+                    ~join_pos:pos
+                    env
+                    [C.Continue; C.Next]
                 in
                 let join_map = annot_map env in
                 let (env, te3, _) = exprs env e3 in
@@ -2959,11 +2991,15 @@ and stmt_ env pos st =
 
                 (env, (tb, te3)))
           in
-          let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
+          let env =
+            LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
+          in
           let (env, te2, _) = expr env e2 in
           let (env, { lset; _ }) = condition env false te2 in
           let refinement_map_at_exit = refinement_annot_map env lset in
-          let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
+          let env =
+            LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
+          in
           (env, (te1, te2, te3, tb, refinement_map_at_exit)))
     in
     let for_st = Aast.For (te1, Some te2, te3, tb) in
@@ -2981,7 +3017,10 @@ and stmt_ env pos st =
           let parent_locals = LEnv.get_all_locals env in
           let (env, tcl, tdfl) = case_list parent_locals ty env pos cl dfl in
           let env =
-            LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
+            LEnv.update_next_from_conts
+              ~join_pos:pos
+              env
+              [C.Continue; C.Break; C.Next]
           in
           (env, (te, tcl, tdfl)))
     in
@@ -2991,7 +3030,9 @@ and stmt_ env pos st =
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, (te1, te2, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
-          let env = LEnv.save_and_merge_next_in_cont env C.Continue in
+          let env =
+            LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
+          in
           let (_, p1, _) = e1 in
           let ((env, ty_err_opt), tk, tv, ty_mismatch_opt) =
             as_expr env ty1 p1 e2
@@ -3000,7 +3041,10 @@ and stmt_ env pos st =
           let (env, (te2, tb)) =
             infer_loop env (fun env ->
                 let env =
-                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                  LEnv.update_next_from_conts
+                    ~join_pos:pos
+                    env
+                    [C.Continue; C.Next]
                 in
                 let join_map = annot_map env in
                 let (env, te2) = bind_as_expr env p1 tk tv e2 in
@@ -3010,16 +3054,19 @@ and stmt_ env pos st =
                 (env, (te2, tb)))
           in
           let env =
-            LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
+            LEnv.update_next_from_conts
+              ~join_pos:pos
+              env
+              [C.Continue; C.Break; C.Next]
           in
           (env, (hole_on_ty_mismatch ~ty_mismatch_opt te1, te2, tb)))
     in
     (env, Aast.Foreach (te1, te2, tb))
   | Try (tb, cl, fb) ->
-    let (env, ttb, tcl, tfb) = try_catch env tb cl fb in
+    let (env, ttb, tcl, tfb) = try_catch ~join_pos:pos env tb cl fb in
     (env, Aast.Try (ttb, tcl, tfb))
   | Awaitall (el, b) ->
-    let env = might_throw env in
+    let env = might_throw ~join_pos:pos env in
     let (env, el) =
       List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
           let (env, te2, ty2) = expr env e2 ~allow_awaitable:true in
@@ -3043,13 +3090,13 @@ and stmt_ env pos st =
     let (env, te, ty) = expr env e in
     let (env, ty_err_opt) = coerce_to_throwable p env ty in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-    let env = move_and_merge_next_in_catch env in
+    let env = move_and_merge_next_in_catch ~join_pos:pos env in
     (env, Aast.Throw te)
   | Continue ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Continue in
+    let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Continue in
     (env, Aast.Continue)
   | Break ->
-    let env = LEnv.move_and_merge_next_in_cont env C.Break in
+    let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Break in
     (env, Aast.Break)
   | Declare_local ((p, lvar), hint, exp) ->
     let hint =
@@ -3076,10 +3123,10 @@ and finally_w_cont fb env ctx =
   let (env, _tfb) = block env fb in
   (env, LEnv.get_all_locals env)
 
-and finally env fb =
+and finally ~join_pos env fb =
   match fb with
   | [] ->
-    let env = LEnv.update_next_from_conts env [C.Next; C.Finally] in
+    let env = LEnv.update_next_from_conts ~join_pos env [C.Next; C.Finally] in
     (env, [])
   | _ ->
     let initial_locals = LEnv.get_all_locals env in
@@ -3090,6 +3137,7 @@ and finally env fb =
      * the resulting environment. *)
     let env =
       LEnv.update_next_from_conts
+        ~join_pos
         env
         Typing_per_cont_env.continuations_for_finally
     in
@@ -3107,11 +3155,11 @@ and finally env fb =
     let (env, locals_map) =
       Errors.ignore_ (fun () -> CMap.map_env finally_w_cont env initial_locals)
     in
-    let union env _key = LEnv.union_contextopts env in
+    let union env _key = LEnv.union_contextopts ~join_pos env in
     let (env, locals) = Try.finally_merge union env locals_map in
     (Env.env_with_locals env locals, tfb)
 
-and try_catch env tb cl fb =
+and try_catch ~join_pos env tb cl fb =
   let parent_locals = LEnv.get_all_locals env in
   (* If any `break`, `continue`, `exit`, etc. happens directly inside the `try`
    * block, they will cause control flow to go to the `finally` block first.
@@ -3122,19 +3170,20 @@ and try_catch env tb cl fb =
   let (env, (ttb, tcb)) =
     Env.in_try env (fun env ->
         let (env, ttb) = block env tb in
-        let env = LEnv.move_and_merge_next_in_cont env C.Finally in
+        let env = LEnv.move_and_merge_next_in_cont ~join_pos env C.Finally in
         let catchctx = LEnv.get_cont_option env C.Catch in
         let (env, lenvtcblist) = List.map_env env ~f:(catch catchctx) cl in
         let (lenvl, tcb) = List.unzip lenvtcblist in
-        let env = LEnv.union_lenv_list env env.lenv lenvl in
-        let env = LEnv.move_and_merge_next_in_cont env C.Finally in
+        let env = LEnv.union_lenv_list ~join_pos env env.lenv lenvl in
+        let env = LEnv.move_and_merge_next_in_cont ~join_pos env C.Finally in
         (env, (ttb, tcb)))
   in
-  let (env, tfb) = finally env fb in
-  let env = LEnv.update_next_from_conts env [C.Finally] in
+  let (env, tfb) = finally ~join_pos env fb in
+  let env = LEnv.update_next_from_conts ~join_pos env [C.Finally] in
   let env = LEnv.drop_cont env C.Finally in
   let env =
     LEnv.restore_and_merge_conts_from
+      ~join_pos
       env
       parent_locals
       Typing_per_cont_env.continuations_for_finally
@@ -3144,7 +3193,12 @@ and try_catch env tb cl fb =
 and case_list parent_locals ty env switch_pos cl dfl =
   let initialize_next_cont env =
     let env = LEnv.restore_conts_from env parent_locals [C.Next] in
-    let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
+    let env =
+      LEnv.update_next_from_conts
+        ~join_pos:switch_pos
+        env
+        [C.Next; C.Fallthrough]
+    in
     LEnv.drop_cont env C.Fallthrough
   in
   let check_fallthrough
@@ -3194,7 +3248,7 @@ and case_list parent_locals ty env switch_pos cl dfl =
     if has_default || is_enum then
       env
     else
-      might_throw env
+      might_throw ~join_pos:switch_pos env
   in
   let (env, tcl) =
     let rec case_list env = function
@@ -3393,7 +3447,7 @@ and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
   let (env, _) = condition env false tc in
   let (env, te2, ty2) = expr ?expected ?in_await env e2 ~allow_awaitable:true in
   let lenv2 = env.lenv in
-  let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+  let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
   let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
   make_result env p (Aast.Eif (tc, te1, te2)) ty
 
@@ -4252,7 +4306,7 @@ and expr_
     make_result env p (Aast.Lplaceholder p) ty
   | Dollardollar id ->
     let ty = Env.get_local_check_defined env id in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     make_result env p (Aast.Dollardollar id) ty.Typing_local_types.ty
   | Lvar ((_, x) as id) ->
     if not accept_using_var then check_escaping_var env id;
@@ -4347,7 +4401,7 @@ and expr_
     make_result env p (Aast.Pair (th, te1, te2)) ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e valkind in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     (* NAST check reports an error if [] is used for reading in an
          lvalue context. *)
     let (env, ty) = Env.fresh_type_error env p in
@@ -4357,7 +4411,7 @@ and expr_
       update_array_type ?lhs_of_null_coalesce p env e1 valkind
     in
     let (env, te2, ty2) = expr env e2 in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let is_lvalue = is_lvalue valkind in
     let (_, p1, _) = e1 in
     let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
@@ -4429,7 +4483,7 @@ and expr_
        make sure that pseudo functions don't change the typechecker behaviour.
     *)
     let ((_env, te, ty), _should_forget_fakes) =
-      let env = might_throw env in
+      let env = might_throw ~join_pos:p env in
       dispatch_call
         ~is_using_clause
         ~expected
@@ -4444,7 +4498,7 @@ and expr_
     in
     (env, te, ty)
   | Call { func; targs; args; unpacked_arg } ->
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let ((env, te, ty), should_forget_fakes) =
       dispatch_call
         ~is_using_clause
@@ -4480,7 +4534,7 @@ and expr_
     let lenv1 = env.lenv in
     let (env, te2, ty2) = expr ?expected env e2 ~allow_awaitable:true in
     let lenv2 = env.lenv in
-    let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+    let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
     (* There are two cases: either the left argument was null in which case we
        evaluate the second argument which gets as ty2, or that ty1 wasn't null.
        The following intersection adds the nonnull information. *)
@@ -4568,7 +4622,7 @@ and expr_
       | Ast_defs.Eqeqeq
       | Ast_defs.Diff2 ->
         env
-      | _ -> might_throw env
+      | _ -> might_throw ~join_pos:p env
     in
     let (_, p1, _) = e1 in
     let (_, p2, _) = e2 in
@@ -4610,7 +4664,7 @@ and expr_
     (env, te, ty)
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
     let env = Typing_local_ops.check_assignment env te in
     (env, tuop, ty)
@@ -4675,7 +4729,7 @@ and expr_
   (* Statically-known static property access e.g. Foo::$x *)
   | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let (env, (ty, _tal)) =
       class_get
         ~is_method:(equal_prop_or_method prop_or_method Is_method)
@@ -4709,14 +4763,14 @@ and expr_
       else
         Env.fresh_type_error env p
     in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
    *)
   | Obj_get (e, (_, pid, Id (py, y)), nf, is_prop)
     when Env.FakeMembers.is_valid env e y ->
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let (env, local) = Env.FakeMembers.make env e y p in
     let local = ((), p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
@@ -4730,7 +4784,7 @@ and expr_
   | Obj_get (e1, (_, pm, Id m), nullflavor, prop_or_method) ->
     let env = xhp_check_get_attribute p env e1 (snd m) nullflavor in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     (* We typecheck Obj_get by checking whether it is a subtype of
        Thas_member(m, #1) where #1 is a fresh type variable. *)
     let (env, mem_ty) = Env.fresh_type env p in
@@ -4813,7 +4867,7 @@ and expr_
         Env.fresh_type_error env p
     in
     let (_, pos, te2) = te2 in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let (env, te2) = TUtils.make_simplify_typed_expr env pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
   | Yield af ->
@@ -4868,7 +4922,7 @@ and expr_
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     let env = Env.forget_members env Reason.(Blame (p, BScall)) in
-    let env = LEnv.save_and_merge_next_in_cont env C.Exit in
+    let env = LEnv.save_and_merge_next_in_cont ~join_pos:p env C.Exit in
     make_result
       env
       p
@@ -4885,7 +4939,7 @@ and expr_
           Typing_error.(primary @@ Primary.Unsafe_cast_await p)
       | _ -> ()
     end;
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)
     let (env, te, rty) =
       expr
@@ -4902,7 +4956,7 @@ and expr_
     let (env, te, rty) = expr ~is_using_clause env e in
     make_result env p (Aast.ReadonlyExpr te) rty
   | New (((_, pos, _) as cid), explicit_targs, el, unpacked_element, ()) ->
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let ( env,
           tc,
           tal,
@@ -4936,7 +4990,7 @@ and expr_
       ty
   | Cast (hint, e) ->
     let (env, te, ty2) = expr ?in_await env e in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let (env, ty_err_opt1) =
       if
         TCO.experimental_feature_enabled
@@ -4981,7 +5035,7 @@ and expr_
         rty
     in
     let (env, te, expr_ty) = expr env e in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let ((env, ty_err_opt1), hint_ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
@@ -6786,7 +6840,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, tobj, obj_ty) =
         expr ~accept_using_var:true env obj ~allow_awaitable
       in
-      let env = might_throw env in
+      let env = might_throw ~join_pos:p env in
       let (_, p1, _) = obj in
       let ( (env, ty_err_opt),
             (declared_ty, _tal),
@@ -6842,7 +6896,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, ety2) = Env.expand_type env ty2 in
       (* This defers the coercion check to class_get, which looks up the appropriate target type *)
       let (env, _tal, _, cty) = class_expr env [] cid in
-      let env = might_throw env in
+      let env = might_throw ~join_pos:p env in
       let (env, (declared_ty, _), rval_err_opt) =
         class_get_err
           ~is_method:false
@@ -6898,7 +6952,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
           let env = { env with lenv = parent_lenv } in
-          let env = might_throw env in
+          let env = might_throw ~join_pos:p env in
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in
@@ -6918,7 +6972,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, te, ty) = expr env e ~allow_awaitable in
       let parent_lenv = env.lenv in
       let (env, te1, ty1) = update_array_type pos env e1 Lvalue in
-      let env = might_throw env in
+      let env = might_throw ~join_pos:p env in
       let (_, p1, _) = e1 in
       let ( env,
             (ty1', arr_ty_mismatch_opt, key_ty_mismatch_opt, val_ty_mismatch_opt)
@@ -6939,7 +6993,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
           let env = { env with lenv = parent_lenv } in
-          let env = might_throw env in
+          let env = might_throw ~join_pos:p env in
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in
@@ -7724,7 +7778,7 @@ and dispatch_call
     let (env, typed_receiver, receiver_ty) =
       expr ~accept_using_var:true env receiver
     in
-    let env = might_throw env in
+    let env = might_throw ~join_pos:p env in
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
@@ -9988,6 +10042,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
     let (env, { lset = lset1; _ }, { lset = lset2; _ }) =
       branch
+        ~join_pos:p
         env
         (fun env ->
           (* Either cond1 is true and we don't know anything about cond2... *)

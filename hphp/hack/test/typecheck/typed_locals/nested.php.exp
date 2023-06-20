@@ -1,12 +1,16 @@
-File "nested.php", line 8, characters 1-165:
-Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-  File "", line 0, characters 0-0:
-  Typing error
+File "nested.php", line 10, characters 3-106:
+Typing error (Typing[4110])
   File "nested.php", line 14, characters 15-17:
   Expected `int`
   File "nested.php", line 9, characters 22-23:
   But got `string`
-File "nested.php", line 9, characters 3-24:
+File "nested.php", line 11, characters 5-79:
+Typing error (Typing[4110])
+  File "nested.php", line 14, characters 15-17:
+  Expected `int`
+  File "nested.php", line 9, characters 22-23:
+  But got `string`
+File "nested.php", line 12, characters 7-15:
 Typing error (Typing[4110])
   File "nested.php", line 14, characters 15-17:
   Expected `int`
@@ -18,3 +22,9 @@ Typing error (Typing[4110])
   Expected `int`
   File "nested.php", line 17, characters 8-9:
   But got `string`
+File "nested.php", line 37, characters 3-235:
+Typing error (Typing[4110])
+  File "nested.php", line 41, characters 16-17:
+  Expected `I2`
+  File "nested.php", line 47, characters 25-25:
+  But got `D`

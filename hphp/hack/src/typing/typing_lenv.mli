@@ -31,31 +31,42 @@ val restore_conts_from :
   env -> Typing_per_cont_env.t -> Typing_continuations.t list -> env
 
 val restore_and_merge_conts_from :
-  env -> Typing_per_cont_env.t -> Typing_continuations.t list -> env
+  env ->
+  join_pos:Pos.t ->
+  Typing_per_cont_env.t ->
+  Typing_continuations.t list ->
+  env
 
-val update_next_from_conts : env -> Typing_continuations.t list -> env
+val update_next_from_conts :
+  env -> join_pos:Pos.t -> Typing_continuations.t list -> env
 
-val save_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+val save_and_merge_next_in_cont :
+  env -> join_pos:Pos.t -> Typing_continuations.t -> env
 
-val move_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+val move_and_merge_next_in_cont :
+  env -> join_pos:Pos.t -> Typing_continuations.t -> env
 
 val union :
   env ->
+  join_pos:Pos.t ->
   Typing_local_types.local ->
   Typing_local_types.local ->
   env * Typing_local_types.local
 
-val union_by_cont : env -> local_env -> local_env -> env
+val union_by_cont : env -> join_pos:Pos.t -> local_env -> local_env -> env
 
 val union_contextopts :
+  join_pos:Pos.t ->
   env ->
   Typing_per_cont_env.per_cont_entry option ->
   Typing_per_cont_env.per_cont_entry option ->
   env * Typing_per_cont_env.per_cont_entry option
 
-val union_lenvs : env -> local_env -> local_env -> local_env -> env
+val union_lenvs :
+  env -> join_pos:Pos.t -> local_env -> local_env -> local_env -> env
 
-val union_lenv_list : env -> local_env -> local_env list -> env
+val union_lenv_list :
+  env -> join_pos:Pos.t -> local_env -> local_env list -> env
 
 (* When entering control flow structures, some
  * preexisting continuations must be stashed away and then restored

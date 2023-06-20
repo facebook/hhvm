@@ -106,3 +106,64 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 """
             ),
         )
+
+    def test_ref(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct S {
+                    1: i32 plain;
+                    2: i32 ref (cpp.ref);
+                    3: i32 ref2 (cpp2.ref);
+                    4: i32 ref3 (cpp2.ref = "true");
+                    5: i32 unique (cpp.ref_type = "unique");
+                    6: i32 shared (cpp.ref_type = "shared");
+                    7: i32 shared_const (cpp.ref_type = "shared_const");
+                    8: i32 shared_mutable (cpp.ref_type = "shared_mutable");
+                    9: i32 box (cpp.box);
+                    10: i32 box2 (thrift.box);
+                    11: i32 overwrite (cpp.ref, cpp.ref_type = "shared_const");
+                }
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                include "thrift/annotation/thrift.thrift"
+
+                struct S {
+                    1: i32 plain;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    2: i32 ref ;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    3: i32 ref2 ;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    4: i32 ref3 ;
+                    @cpp.Ref{type = cpp.RefType.Unique}
+                    5: i32 unique ;
+                    @cpp.Ref{type = cpp.RefType.SharedMutable}
+                    6: i32 shared ;
+                    @cpp.Ref{type = cpp.RefType.Shared}
+                    7: i32 shared_const ;
+                    @cpp.Ref{type = cpp.RefType.SharedMutable}
+                    8: i32 shared_mutable ;
+                    @thrift.Box
+                    9: i32 box ;
+                    @thrift.Box
+                    10: i32 box2 ;
+                    @cpp.Ref{type = cpp.RefType.Shared}
+                    11: i32 overwrite ;
+                }
+                """
+            ),
+        )

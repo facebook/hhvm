@@ -26,6 +26,7 @@
 #include <thrift/compiler/codemod/file_manager.h>
 #include <thrift/compiler/compiler.h>
 #include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/lib/uri.h>
 
 using namespace apache::thrift::compiler;
 
@@ -44,8 +45,9 @@ class structure_annotations {
          static_cast<const t_typedef&>(*type).typedef_kind() !=
              t_typedef::kind::defined)) {
       std::vector<t_annotation> to_remove;
+      bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
       for (const auto& [name, data] : type->annotations()) {
-        bool has_cpp_type = false;
+        // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
           if (type->get_true_type()->is_container() &&
@@ -78,8 +80,12 @@ class structure_annotations {
     // Annotations on node
     {
       std::vector<t_annotation> to_remove;
+      bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
+      bool has_cpp_ref = node.find_structured_annotation_or_null(kBoxUri) ||
+          node.find_structured_annotation_or_null(kInternBoxUri) ||
+          node.find_structured_annotation_or_null(kCppRefUri);
       for (const auto& [name, data] : node.annotations()) {
-        bool has_cpp_type = false;
+        // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
           if (!is_field && type->get_true_type()->is_container() &&
@@ -94,6 +100,39 @@ class structure_annotations {
           if (!is_field && !std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{name = \"{}\"}}", data.value));
+            fm_.add_include("thrift/annotation/cpp.thrift");
+          }
+        }
+
+        // cpp ref
+        if (name == "cpp.box" || name == "thrift.box") {
+          to_remove.emplace_back(name, data);
+          if (!std::exchange(has_cpp_ref, true)) {
+            to_add.insert("@thrift.Box");
+            fm_.add_include("thrift/annotation/thrift.thrift");
+          }
+        }
+        if (name == "cpp.ref_type" || name == "cpp2.ref_type") {
+          to_remove.emplace_back(name, data);
+          if (!node.find_annotation_or_null({"cpp.box", "thrift.box"}) &&
+              !std::exchange(has_cpp_ref, true)) {
+            if (data.value == "unique") {
+              to_add.insert("@cpp.Ref{type = cpp.RefType.Unique}");
+            } else if (
+                data.value == "shared" || data.value == "shared_mutable") {
+              to_add.insert("@cpp.Ref{type = cpp.RefType.SharedMutable}");
+            } else if (data.value == "shared_const") {
+              to_add.insert("@cpp.Ref{type = cpp.RefType.Shared}");
+            }
+            fm_.add_include("thrift/annotation/cpp.thrift");
+          }
+        }
+        if (name == "cpp.ref" || name == "cpp2.ref") {
+          to_remove.emplace_back(name, data);
+          if (!node.find_annotation_or_null(
+                  {"cpp.box", "thrift.box", "cpp.ref_type", "cpp2.ref_type"}) &&
+              !std::exchange(has_cpp_ref, true)) {
+            to_add.insert("@cpp.Ref{type = cpp.RefType.Unique}");
             fm_.add_include("thrift/annotation/cpp.thrift");
           }
         }

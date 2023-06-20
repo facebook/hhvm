@@ -36,48 +36,57 @@ namespace HPHP::SystemLib {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define SYSTEMLIB_CLASSES(x)                    \
-  x(stdClass)                                   \
-  x(Exception)                                  \
-  x(BadMethodCallException)                     \
-  x(InvalidArgumentException)                   \
-  x(TypeAssertionException)                     \
-  x(RuntimeException)                           \
-  x(OutOfBoundsException)                       \
-  x(InvalidOperationException)                  \
-  x(pinitSentinel)                              \
-  x(resource)                                   \
-  x(Directory)                                  \
-  x(SplFileInfo)                                \
-  x(SplFileObject)                              \
-  x(DateTimeInterface)                          \
-  x(DateTimeImmutable)                          \
-  x(DOMException)                               \
-  x(PDOException)                               \
-  x(SoapFault)                                  \
-  x(Serializable)                               \
-  x(ArrayAccess)                                \
-  x(ArrayIterator)                              \
-  x(DirectoryIterator)                          \
-  x(IteratorAggregate)                          \
-  x(Countable)                                  \
-  x(LazyKVZipIterable)                          \
-  x(LazyIterableView)                           \
-  x(LazyKeyedIterableView)                      \
-  x(CURLFile)                                   \
-  x(__PHP_Incomplete_Class)                     \
-  x(DivisionByZeroException)                    \
-  x(InvalidForeachArgumentException)            \
-  x(UndefinedPropertyException)                 \
-  x(UndefinedVariableException)                 \
-  x(TypecastException)                          \
-  x(ReadonlyViolationException)                 \
-  x(CoeffectViolationException)                 \
-  x(ModuleBoundaryViolationException)           \
-  x(DeploymentBoundaryViolationException)
-
-#define SYSTEMLIB_HH_CLASSES(x) \
-  x(Traversable)                \
-  x(Iterator)                   \
+  x(stdClass,,)                                 \
+  x(Exception,,)                                \
+  x(BadMethodCallException,,)                   \
+  x(InvalidArgumentException,,)                 \
+  x(TypeAssertionException,,)                   \
+  x(RuntimeException,,)                         \
+  x(OutOfBoundsException,,)                     \
+  x(InvalidOperationException,,)                \
+  x(pinitSentinel,, __)                         \
+  x(resource,, __)                              \
+  x(Directory,,)                                \
+  x(SplFileInfo,,)                              \
+  x(SplFileObject,,)                            \
+  x(DateTimeInterface,,)                        \
+  x(DateTimeImmutable,,)                        \
+  x(DOMException,,)                             \
+  x(PDOException,,)                             \
+  x(SoapFault,,)                                \
+  x(Serializable,,)                             \
+  x(ArrayAccess,,)                              \
+  x(ArrayIterator,,)                            \
+  x(DirectoryIterator,,)                        \
+  x(IteratorAggregate,,)                        \
+  x(Countable,,)                                \
+  x(LazyKVZipIterable,,)                        \
+  x(LazyIterableView,,)                         \
+  x(LazyKeyedIterableView,,)                    \
+  x(CURLFile,,)                                 \
+  x(__PHP_Incomplete_Class,,)                   \
+  x(DivisionByZeroException,,)                  \
+  x(InvalidForeachArgumentException,,)          \
+  x(UndefinedPropertyException,,)               \
+  x(UndefinedVariableException,,)               \
+  x(TypecastException,,)                        \
+  x(ReadonlyViolationException,,)               \
+  x(CoeffectViolationException,,)               \
+  x(ModuleBoundaryViolationException,,)         \
+  x(DeploymentBoundaryViolationException,,)     \
+  x(Throwable,,)                                \
+  x(BaseException,, \\__SystemLib\\)            \
+  x(Error,,)                                    \
+  x(ArithmeticError,,)                          \
+  x(ArgumentCountError,,)                       \
+  x(AssertionError,,)                           \
+  x(DivisionByZeroError,,)                      \
+  x(ParseError,,)                               \
+  x(TypeError,,)                                \
+  x(MethCallerHelper,, \\__SystemLib\\)         \
+  x(DynMethCallerHelper,, \\__SystemLib\\)      \
+  x(Traversable, HH_, HH\\)                     \
+  x(Iterator, HH_, HH\\)                        \
 /* */
 
 extern bool s_anyNonPersistentBuiltins;
@@ -86,27 +95,10 @@ extern Unit* s_unit;
 extern Func* s_nullFunc;
 extern Func* s_nullCtor;
 
-#define DECLARE_SYSTEMLIB_CLASS(cls)       \
-extern Class* s_ ## cls ## Class;
+#define DECLARE_SYSTEMLIB_CLASS(cls, prefix, ...)       \
+extern Class* s_ ## prefix ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
-
-#define DECLARE_SYSTEMLIB_HH_CLASS(cls) \
-extern Class* s_HH_ ## cls ## Class;
-  SYSTEMLIB_HH_CLASSES(DECLARE_SYSTEMLIB_HH_CLASS)
-#undef DECLARE_SYSTEMLIB_HH_CLASS
-
-extern Class* s_ThrowableClass;
-extern Class* s_BaseExceptionClass;
-extern Class* s_ErrorClass;
-extern Class* s_ArithmeticErrorClass;
-extern Class* s_ArgumentCountErrorClass;
-extern Class* s_AssertionErrorClass;
-extern Class* s_DivisionByZeroErrorClass;
-extern Class* s_ParseErrorClass;
-extern Class* s_TypeErrorClass;
-extern Class* s_MethCallerHelperClass;
-extern Class* s_DynMethCallerHelperClass;
 
 Object AllocStdClassObject();
 Object AllocPinitSentinel();

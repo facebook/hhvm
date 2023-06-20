@@ -103,27 +103,10 @@ Func* s_nullCtor = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define DEFINE_SYSTEMLIB_CLASS(cls)       \
-  Class* s_ ## cls ## Class = nullptr;
+#define DEFINE_SYSTEMLIB_CLASS(cls, prefix, ...)       \
+  Class* s_ ## prefix ## cls ## Class = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
-
-#define DEFINE_SYSTEMLIB_HH_CLASS(cls)       \
-  Class* s_HH_ ## cls ## Class = nullptr;
-SYSTEMLIB_HH_CLASSES(DEFINE_SYSTEMLIB_HH_CLASS)
-#undef DEFINE_SYSTEMLIB_HH_CLASS
-
-Class* s_ThrowableClass;
-Class* s_BaseExceptionClass;
-Class* s_ErrorClass;
-Class* s_ArithmeticErrorClass;
-Class* s_ArgumentCountErrorClass;
-Class* s_AssertionErrorClass;
-Class* s_DivisionByZeroErrorClass;
-Class* s_ParseErrorClass;
-Class* s_TypeErrorClass;
-Class* s_MethCallerHelperClass;
-Class* s_DynMethCallerHelperClass;
 
 Object AllocStdClassObject() {
   return Object{s_stdClassClass};

@@ -17,7 +17,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [6:1-30]; t_emit_id = None; t_is_ctx = false; t_internal = true; 
-       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None });
+       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([8:18-21], "\\CT2"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_kind = ([8:24-27], (Hprim Tint)); 
@@ -36,7 +36,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [8:1-28]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None });
+       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([11:11-14], "\\CT3"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_kind = ([11:17-20], (Hprim Tint)); 
@@ -55,5 +55,5 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [10:1-11:21]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None })
+       t_module = (Some ([4:8-16], "some.mod")); t_docs_url = None; t_doc_comment = None })
   ]

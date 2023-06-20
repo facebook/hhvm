@@ -16,7 +16,7 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       t_span = [4:1-27]; t_emit_id = None; t_is_ctx = true; t_internal = false; 
-      t_module = None; t_docs_url = None });
+      t_module = None; t_docs_url = None; t_doc_comment = None });
   (Class
      { c_span = [6:1-9:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 

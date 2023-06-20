@@ -534,4 +534,4 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [35:1-36:15]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None })
+       t_module = None; t_docs_url = None; t_doc_comment = None })

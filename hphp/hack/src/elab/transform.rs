@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83f2ad607710bf0763a37d55b36a1833>>
+// @generated SignedSource<<a4948e8e316260a25c049a811e254b12>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1710,6 +1710,7 @@ impl Transform for Typedef {
                 internal: ref mut __binding_14,
                 module: ref mut __binding_15,
                 docs_url: ref mut __binding_16,
+                doc_comment: ref mut __binding_17,
                 ..
             } => {
                 {
@@ -1759,7 +1760,10 @@ impl Transform for Typedef {
                 {
                     __binding_15.transform(env, pass)
                 }
-                { __binding_16.transform(env, pass) }
+                {
+                    __binding_16.transform(env, pass)
+                }
+                { __binding_17.transform(env, pass) }
             }
         }
     }

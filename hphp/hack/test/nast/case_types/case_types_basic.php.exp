@@ -31,7 +31,7 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       t_span = [4:1-84]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-      t_module = None; t_docs_url = None });
+      t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([6:11-14], "\\CT2"); t_tparams = []; 
        t_as_constraint = (Some ([6:18-31], (Hintersection [([6:18-26], (Hprim Tarraykey)); ([6:28-31], (Hprim Tnum))]))); 
@@ -51,7 +51,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [6:1-38]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([8:11-14], "\\CT3"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_kind = ([8:17-30], (Hunion [([8:17-23], (Hprim Tstring)); ([8:26-30], (Hprim Tbool))])); 
@@ -70,5 +70,5 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [8:1-31]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None })
+       t_module = None; t_docs_url = None; t_doc_comment = None })
   ]

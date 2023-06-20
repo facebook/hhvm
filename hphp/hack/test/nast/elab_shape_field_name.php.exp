@@ -50,7 +50,7 @@ Errors:
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [11:1-65]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-29], "\\with_self_outside_class"); 
        t_tparams = []; t_as_constraint = None; t_super_constraint = None;
@@ -66,7 +66,7 @@ Errors:
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [13:1-57]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([15:6-22], "\\with_string_name"); 
        t_tparams = []; t_as_constraint = None; t_super_constraint = None;
@@ -79,7 +79,7 @@ Errors:
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [15:1-48]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([18:6-19], "\\with_int_name"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None;
@@ -92,5 +92,5 @@ Errors:
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [18:1-38]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None })
+       t_module = None; t_docs_url = None; t_doc_comment = None })
   ]

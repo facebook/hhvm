@@ -77,6 +77,7 @@ let casetype_def env typedef =
     t_internal = _;
     t_module = _;
     t_docs_url = _;
+    t_doc_comment = _;
   } =
     typedef
   in
@@ -153,6 +154,7 @@ let typedef_def ctx typedef =
     t_internal = _;
     t_module = _;
     t_docs_url = _;
+    t_doc_comment = _;
   } =
     typedef
   in
@@ -289,4 +291,5 @@ let typedef_def ctx typedef =
     Aast.t_internal = typedef.t_internal;
     Aast.t_module = typedef.t_module;
     Aast.t_docs_url = typedef.t_docs_url;
+    Aast.t_doc_comment = typedef.t_doc_comment;
   }

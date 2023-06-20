@@ -68,7 +68,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [7:1-8:15]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T2"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_kind = ([11:11-18], (Hoption ([11:12-18], (Hprim Tstring))));
@@ -79,7 +79,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [10:1-11:19]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
        t_tparams = [{ tp_variance = Contravariant; tp_name = ([13:25-26], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
@@ -91,7 +91,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [13:1-37]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
        t_tparams = [{ tp_variance = Covariant; tp_name = ([14:21-22], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
@@ -103,4 +103,4 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        t_span = [14:1-33]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None })
+       t_module = None; t_docs_url = None; t_doc_comment = None })

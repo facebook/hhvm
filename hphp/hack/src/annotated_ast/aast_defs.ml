@@ -1072,6 +1072,7 @@ and ('ex, 'en) typedef = {
   t_internal: bool;
   t_module: sid option;
   t_docs_url: string option;
+  t_doc_comment: doc_comment option;
 }
 
 and ('ex, 'en) gconst = {

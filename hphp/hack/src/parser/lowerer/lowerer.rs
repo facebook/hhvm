@@ -5860,6 +5860,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
                 docs_url,
+                doc_comment: doc_comment_opt,
             })])
         }
         CaseTypeDeclaration(c) => {
@@ -5946,6 +5947,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
                 docs_url,
+                doc_comment: doc_comment_opt,
             })])
         }
         ContextAliasDeclaration(c) => {
@@ -6005,6 +6007,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: false,
                 module: None,
                 docs_url: None,
+                doc_comment: doc_comment_opt,
             })])
         }
         EnumDeclaration(c) => {

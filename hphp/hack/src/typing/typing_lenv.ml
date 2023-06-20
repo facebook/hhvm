@@ -75,19 +75,37 @@ let union
     else
       Ident.tmp ()
   in
-  let (env, err_opt) =
-    match bound_ty with
-    | None -> (env, None)
-    | Some bound_ty ->
+  match bound_ty with
+  | None ->
+    Typing_local_types.
+      (env, { ty; defined = defined1 && defined2; bound_ty; pos; eid })
+  | Some bound_ty ->
+    let (env, err_opt) =
       Typing_subtype.sub_type
         env
         ty
         bound_ty
         (Some (Typing_error.Reasons_callback.unify_error_at join_pos))
-  in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
-  Typing_local_types.
-    (env, { ty; defined = defined1 && defined2; bound_ty; pos; eid })
+    in
+    let ty =
+      match err_opt with
+      | None -> ty
+      | Some err ->
+        Typing_error_utils.add_typing_error ~env err;
+        (* If the new type or bound violates the old one, then we want to
+           check the remainder of the code with the type of the variable
+           set to the bound *)
+        bound_ty
+    in
+    Typing_local_types.
+      ( env,
+        {
+          ty;
+          defined = defined1 && defined2;
+          bound_ty = Some bound_ty;
+          pos;
+          eid;
+        } )
 
 let get_cont_option env cont =
   let local_types = get_all_locals env in

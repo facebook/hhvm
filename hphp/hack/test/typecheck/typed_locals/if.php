@@ -19,3 +19,14 @@ function f(bool $b, J $j): void {
   $x = 4;
   $y = $j;
 }
+
+function g(bool $b): void {
+  /* HH_FIXME[4110] silence error when control flow joins at the end of the if
+    * because we're just trying to test the type of $x after a join error. */
+  if ($b) {
+    let $x: arraykey = "";
+  } else {
+    let $x: num = 1.0;
+  }
+  hh_expect_equivalent<int>($x);
+}

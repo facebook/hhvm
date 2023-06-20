@@ -537,7 +537,7 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Query", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("query", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

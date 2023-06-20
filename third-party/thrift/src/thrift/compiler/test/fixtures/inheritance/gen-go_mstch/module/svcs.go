@@ -370,7 +370,7 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DoRoot", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("do_root", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -731,7 +731,7 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, o
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DoMid", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("do_mid", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1092,7 +1092,7 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DoLeaf", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("do_leaf", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

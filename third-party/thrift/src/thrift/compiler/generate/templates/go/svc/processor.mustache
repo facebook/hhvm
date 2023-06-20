@@ -123,7 +123,7 @@ func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStru
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("{{function:go_name}}", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("{{function:name}}", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

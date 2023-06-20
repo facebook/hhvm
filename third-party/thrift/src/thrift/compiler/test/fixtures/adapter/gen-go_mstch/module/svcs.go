@@ -635,7 +635,7 @@ func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, o
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Func", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("func", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1453,7 +1453,7 @@ func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableS
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Count", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("count", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1504,7 +1504,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.Wr
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("AdaptedTypes", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("adaptedTypes", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

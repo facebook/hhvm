@@ -370,7 +370,7 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Foo", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

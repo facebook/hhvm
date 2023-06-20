@@ -2127,7 +2127,7 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Ping", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("ping", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2182,7 +2182,7 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetRandomData", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getRandomData", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2233,7 +2233,7 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("HasDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("hasDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2285,7 +2285,7 @@ func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2337,7 +2337,7 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("PutDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("putDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2388,7 +2388,7 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("LobDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("lobDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2438,7 +2438,7 @@ func (p *procFuncMyServiceGoDoNothing) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GoDoNothing", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("doNothing", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3004,7 +3004,7 @@ func (p *procFuncMyServicePrioParentPing) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Ping", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("ping", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3054,7 +3054,7 @@ func (p *procFuncMyServicePrioParentPong) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Pong", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("pong", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3415,7 +3415,7 @@ func (p *procFuncMyServicePrioChildPang) Write(seqId int32, result thrift.Writab
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Pang", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("pang", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3851,7 +3851,7 @@ func (p *procFuncBadServiceBar) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Bar", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("bar", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

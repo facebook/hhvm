@@ -1948,7 +1948,7 @@ func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("MapList", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("mapList", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1999,7 +1999,7 @@ func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.Writab
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("MapSet", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("mapSet", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2050,7 +2050,7 @@ func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("ListMap", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("listMap", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2101,7 +2101,7 @@ func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("ListSet", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("listSet", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -2152,7 +2152,7 @@ func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Turtles", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("turtles", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

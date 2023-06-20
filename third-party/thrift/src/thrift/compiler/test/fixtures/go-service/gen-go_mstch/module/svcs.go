@@ -3846,7 +3846,7 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetEntity", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getEntity", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3898,7 +3898,7 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetBool", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getBool", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3949,7 +3949,7 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetByte", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getByte", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4000,7 +4000,7 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetI16", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getI16", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4051,7 +4051,7 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetI32", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getI32", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4102,7 +4102,7 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetI64", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getI64", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4153,7 +4153,7 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetDouble", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getDouble", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4204,7 +4204,7 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetString", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getString", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4255,7 +4255,7 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetBinary", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getBinary", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4306,7 +4306,7 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetMap", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getMap", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4357,7 +4357,7 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetSet", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getSet", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4408,7 +4408,7 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetList", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getList", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4459,7 +4459,7 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetLegacyStuff", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getLegacyStuff", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

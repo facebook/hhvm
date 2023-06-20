@@ -370,7 +370,7 @@ func (p *procFuncFooServiceSimpleRPC) Write(seqId int32, result thrift.WritableS
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("SimpleRPC", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("simple_rpc", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -890,7 +890,7 @@ func (p *procFuncFB303ServiceSimpleRPC) Write(seqId int32, result thrift.Writabl
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("SimpleRPC", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("simple_rpc", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3722,7 +3722,7 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Ping", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("ping", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3772,7 +3772,7 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetRandomData", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getRandomData", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3823,7 +3823,7 @@ func (p *procFuncMyServiceSink) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Sink", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("sink", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3874,7 +3874,7 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("PutDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("putDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3925,7 +3925,7 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("HasDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("hasDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3977,7 +3977,7 @@ func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4029,7 +4029,7 @@ func (p *procFuncMyServiceDeleteDataById) Write(seqId int32, result thrift.Writa
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DeleteDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("deleteDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4080,7 +4080,7 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("LobDataById", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("lobDataById", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4130,7 +4130,7 @@ func (p *procFuncMyServiceInvalidReturnForHack) Write(seqId int32, result thrift
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("InvalidReturnForHack", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("invalid_return_for_hack", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -4181,7 +4181,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) Write(seqId int32, result thrift.Wr
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("RpcSkippedCodegen", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("rpc_skipped_codegen", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -5009,7 +5009,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Write(seqId int32, result t
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetDataByKey0", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getDataByKey0", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -5061,7 +5061,7 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Write(seqId int32, result t
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("GetDataByKey1", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("getDataByKey1", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

@@ -1159,7 +1159,7 @@ func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("ByPlate", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("byPlate", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1211,7 +1211,7 @@ func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableSt
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("AliasByPlate", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("aliasByPlate", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1263,7 +1263,7 @@ func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableS
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("PreviousPlate", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("previousPlate", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

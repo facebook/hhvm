@@ -926,7 +926,7 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thri
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("F", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("f", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -980,7 +980,7 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Thing", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("thing", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

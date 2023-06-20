@@ -1577,7 +1577,7 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DoBland", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("doBland", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1639,7 +1639,7 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("DoRaise", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("doRaise", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1698,7 +1698,7 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Get200", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("get200", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1761,7 +1761,7 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Get500", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("get500", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {

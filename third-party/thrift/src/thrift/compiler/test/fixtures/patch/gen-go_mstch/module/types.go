@@ -8803,7 +8803,6 @@ func (x *MyStructField23Patch) Read(p thrift.Protocol) error {
 type MyStructField26Patch struct {
     Assign []int16 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Patch map[patch.ListPatchIndex]*patch.I16Patch `thrift:"patch,3" json:"patch" db:"patch"`
     Prepend []int16 `thrift:"prepend,8" json:"prepend" db:"prepend"`
     Append []int16 `thrift:"append,9" json:"append" db:"append"`
 }
@@ -8813,7 +8812,6 @@ var _ thrift.Struct = &MyStructField26Patch{}
 func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{}).
         SetClearNonCompat(false).
-        SetPatchNonCompat(nil).
         SetPrependNonCompat(nil).
         SetAppendNonCompat(nil)
 }
@@ -8836,18 +8834,6 @@ func (x *MyStructField26Patch) GetClearNonCompat() bool {
 
 func (x *MyStructField26Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField26Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*patch.I16Patch {
-    return x.Patch
-}
-
-func (x *MyStructField26Patch) GetPatch() map[patch.ListPatchIndex]*patch.I16Patch {
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    return x.Patch
 }
 
 func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
@@ -8894,16 +8880,6 @@ func (x *MyStructField26Patch) SetClear(value bool) *MyStructField26Patch {
     return x
 }
 
-func (x *MyStructField26Patch) SetPatchNonCompat(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26Patch {
-    x.Patch = value
-    return x
-}
-
-func (x *MyStructField26Patch) SetPatch(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26Patch {
-    x.Patch = value
-    return x
-}
-
 func (x *MyStructField26Patch) SetPrependNonCompat(value []int16) *MyStructField26Patch {
     x.Prepend = value
     return x
@@ -8926,10 +8902,6 @@ func (x *MyStructField26Patch) SetAppend(value []int16) *MyStructField26Patch {
 
 func (x *MyStructField26Patch) IsSetAssign() bool {
     return x.Assign != nil
-}
-
-func (x *MyStructField26Patch) IsSetPatch() bool {
-    return x.Patch != nil
 }
 
 func (x *MyStructField26Patch) IsSetPrepend() bool {
@@ -8979,45 +8951,6 @@ func (x *MyStructField26Patch) writeField2(p thrift.Protocol) error {  // Clear
     item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField26Patch) writeField3(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("patch", thrift.MAP, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPatchNonCompat()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        err := patch.WriteListPatchIndex(item, p)
-if err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := item.Write(p); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -9126,45 +9059,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStructField26Patch) readField3(p thrift.Protocol) error {  // Patch
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[patch.ListPatchIndex]*patch.I16Patch, size)
-for i := 0; i < size; i++ {
-    var key patch.ListPatchIndex
-    {
-        result, err := patch.ReadListPatchIndex(p)
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value *patch.I16Patch
-    {
-        result := *patch.NewI16Patch()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-        value = &result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetPatchNonCompat(result)
-    return nil
-}
-
 func (x *MyStructField26Patch) readField8(p thrift.Protocol) error {  // Prepend
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
@@ -9249,11 +9143,6 @@ func (x *MyStructField26PatchBuilder) Clear(value bool) *MyStructField26PatchBui
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Patch(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26PatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
 func (x *MyStructField26PatchBuilder) Prepend(value []int16) *MyStructField26PatchBuilder {
     x.obj.Prepend = value
     return x
@@ -9279,10 +9168,6 @@ func (x *MyStructField26Patch) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField3(p); err != nil {
         return err
     }
 
@@ -9326,10 +9211,6 @@ func (x *MyStructField26Patch) Read(p thrift.Protocol) error {
             }
         case 2:  // clear
             if err := x.readField2(p); err != nil {
-                return err
-            }
-        case 3:  // patch
-            if err := x.readField3(p); err != nil {
                 return err
             }
         case 8:  // prepend
@@ -10629,7 +10510,6 @@ func (x *MyStructField28Patch) Read(p thrift.Protocol) error {
 type MyStructField29Patch struct {
     Assign []map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Patch map[patch.ListPatchIndex]*MyStructField29Patch1 `thrift:"patch,3" json:"patch" db:"patch"`
     Prepend []map[string]int32 `thrift:"prepend,8" json:"prepend" db:"prepend"`
     Append []map[string]int32 `thrift:"append,9" json:"append" db:"append"`
 }
@@ -10639,7 +10519,6 @@ var _ thrift.Struct = &MyStructField29Patch{}
 func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{}).
         SetClearNonCompat(false).
-        SetPatchNonCompat(nil).
         SetPrependNonCompat(nil).
         SetAppendNonCompat(nil)
 }
@@ -10662,18 +10541,6 @@ func (x *MyStructField29Patch) GetClearNonCompat() bool {
 
 func (x *MyStructField29Patch) GetClear() bool {
     return x.Clear
-}
-
-func (x *MyStructField29Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*MyStructField29Patch1 {
-    return x.Patch
-}
-
-func (x *MyStructField29Patch) GetPatch() map[patch.ListPatchIndex]*MyStructField29Patch1 {
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    return x.Patch
 }
 
 func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
@@ -10720,16 +10587,6 @@ func (x *MyStructField29Patch) SetClear(value bool) *MyStructField29Patch {
     return x
 }
 
-func (x *MyStructField29Patch) SetPatchNonCompat(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
-    x.Patch = value
-    return x
-}
-
-func (x *MyStructField29Patch) SetPatch(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
-    x.Patch = value
-    return x
-}
-
 func (x *MyStructField29Patch) SetPrependNonCompat(value []map[string]int32) *MyStructField29Patch {
     x.Prepend = value
     return x
@@ -10752,10 +10609,6 @@ func (x *MyStructField29Patch) SetAppend(value []map[string]int32) *MyStructFiel
 
 func (x *MyStructField29Patch) IsSetAssign() bool {
     return x.Assign != nil
-}
-
-func (x *MyStructField29Patch) IsSetPatch() bool {
-    return x.Patch != nil
 }
 
 func (x *MyStructField29Patch) IsSetPrepend() bool {
@@ -10823,45 +10676,6 @@ func (x *MyStructField29Patch) writeField2(p thrift.Protocol) error {  // Clear
     item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch) writeField3(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("patch", thrift.MAP, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPatchNonCompat()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        err := patch.WriteListPatchIndex(item, p)
-if err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := item.Write(p); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -11034,45 +10848,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStructField29Patch) readField3(p thrift.Protocol) error {  // Patch
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[patch.ListPatchIndex]*MyStructField29Patch1, size)
-for i := 0; i < size; i++ {
-    var key patch.ListPatchIndex
-    {
-        result, err := patch.ReadListPatchIndex(p)
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value *MyStructField29Patch1
-    {
-        result := *NewMyStructField29Patch1()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-        value = &result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetPatchNonCompat(result)
-    return nil
-}
-
 func (x *MyStructField29Patch) readField8(p thrift.Protocol) error {  // Prepend
     _ /* elemType */, size, err := p.ReadListBegin()
 if err != nil {
@@ -11213,11 +10988,6 @@ func (x *MyStructField29PatchBuilder) Clear(value bool) *MyStructField29PatchBui
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Patch(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29PatchBuilder {
-    x.obj.Patch = value
-    return x
-}
-
 func (x *MyStructField29PatchBuilder) Prepend(value []map[string]int32) *MyStructField29PatchBuilder {
     x.obj.Prepend = value
     return x
@@ -11243,10 +11013,6 @@ func (x *MyStructField29Patch) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField3(p); err != nil {
         return err
     }
 
@@ -11292,842 +11058,11 @@ func (x *MyStructField29Patch) Read(p thrift.Protocol) error {
             if err := x.readField2(p); err != nil {
                 return err
             }
-        case 3:  // patch
-            if err := x.readField3(p); err != nil {
-                return err
-            }
         case 8:  // prepend
             if err := x.readField8(p); err != nil {
                 return err
             }
         case 9:  // append
-            if err := x.readField9(p); err != nil {
-                return err
-            }
-        default:
-            if err := p.Skip(typ); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-
-type MyStructField29Patch1 struct {
-    Assign map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
-    Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    PatchPrior map[string]*patch.I32Patch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
-    Add map[string]int32 `thrift:"add,5" json:"add" db:"add"`
-    Patch map[string]*patch.I32Patch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []string `thrift:"remove,7" json:"remove" db:"remove"`
-    Put map[string]int32 `thrift:"put,9" json:"put" db:"put"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &MyStructField29Patch1{}
-
-func NewMyStructField29Patch1() *MyStructField29Patch1 {
-    return (&MyStructField29Patch1{}).
-        SetClearNonCompat(false).
-        SetPatchPriorNonCompat(nil).
-        SetAddNonCompat(nil).
-        SetPatchNonCompat(nil).
-        SetRemoveNonCompat(nil).
-        SetPutNonCompat(nil)
-}
-
-func (x *MyStructField29Patch1) GetAssignNonCompat() map[string]int32 {
-    return x.Assign
-}
-
-func (x *MyStructField29Patch1) GetAssign() map[string]int32 {
-    if !x.IsSetAssign() {
-        return nil
-    }
-
-    return x.Assign
-}
-
-func (x *MyStructField29Patch1) GetClearNonCompat() bool {
-    return x.Clear
-}
-
-func (x *MyStructField29Patch1) GetClear() bool {
-    return x.Clear
-}
-
-func (x *MyStructField29Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Patch {
-    return x.PatchPrior
-}
-
-func (x *MyStructField29Patch1) GetPatchPrior() map[string]*patch.I32Patch {
-    if !x.IsSetPatchPrior() {
-        return nil
-    }
-
-    return x.PatchPrior
-}
-
-func (x *MyStructField29Patch1) GetAddNonCompat() map[string]int32 {
-    return x.Add
-}
-
-func (x *MyStructField29Patch1) GetAdd() map[string]int32 {
-    if !x.IsSetAdd() {
-        return nil
-    }
-
-    return x.Add
-}
-
-func (x *MyStructField29Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
-    return x.Patch
-}
-
-func (x *MyStructField29Patch1) GetPatch() map[string]*patch.I32Patch {
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    return x.Patch
-}
-
-func (x *MyStructField29Patch1) GetRemoveNonCompat() []string {
-    return x.Remove
-}
-
-func (x *MyStructField29Patch1) GetRemove() []string {
-    if !x.IsSetRemove() {
-        return nil
-    }
-
-    return x.Remove
-}
-
-func (x *MyStructField29Patch1) GetPutNonCompat() map[string]int32 {
-    return x.Put
-}
-
-func (x *MyStructField29Patch1) GetPut() map[string]int32 {
-    if !x.IsSetPut() {
-        return nil
-    }
-
-    return x.Put
-}
-
-func (x *MyStructField29Patch1) SetAssignNonCompat(value map[string]int32) *MyStructField29Patch1 {
-    x.Assign = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetAssign(value map[string]int32) *MyStructField29Patch1 {
-    x.Assign = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetClearNonCompat(value bool) *MyStructField29Patch1 {
-    x.Clear = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetClear(value bool) *MyStructField29Patch1 {
-    x.Clear = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPatchPriorNonCompat(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.PatchPrior = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPatchPrior(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.PatchPrior = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetAddNonCompat(value map[string]int32) *MyStructField29Patch1 {
-    x.Add = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetAdd(value map[string]int32) *MyStructField29Patch1 {
-    x.Add = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPatchNonCompat(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.Patch = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPatch(value map[string]*patch.I32Patch) *MyStructField29Patch1 {
-    x.Patch = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetRemoveNonCompat(value []string) *MyStructField29Patch1 {
-    x.Remove = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetRemove(value []string) *MyStructField29Patch1 {
-    x.Remove = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPutNonCompat(value map[string]int32) *MyStructField29Patch1 {
-    x.Put = value
-    return x
-}
-
-func (x *MyStructField29Patch1) SetPut(value map[string]int32) *MyStructField29Patch1 {
-    x.Put = value
-    return x
-}
-
-func (x *MyStructField29Patch1) IsSetAssign() bool {
-    return x.Assign != nil
-}
-
-func (x *MyStructField29Patch1) IsSetPatchPrior() bool {
-    return x.PatchPrior != nil
-}
-
-func (x *MyStructField29Patch1) IsSetAdd() bool {
-    return x.Add != nil
-}
-
-func (x *MyStructField29Patch1) IsSetPatch() bool {
-    return x.Patch != nil
-}
-
-func (x *MyStructField29Patch1) IsSetRemove() bool {
-    return x.Remove != nil
-}
-
-func (x *MyStructField29Patch1) IsSetPut() bool {
-    return x.Put != nil
-}
-
-func (x *MyStructField29Patch1) writeField1(p thrift.Protocol) error {  // Assign
-    if !x.IsSetAssign() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("assign", thrift.MAP, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAssignNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField2(p thrift.Protocol) error {  // Clear
-    if err := p.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetClearNonCompat()
-    if err := p.WriteBool(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField3(p thrift.Protocol) error {  // PatchPrior
-    if !x.IsSetPatchPrior() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("patchPrior", thrift.MAP, 3); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPatchPriorNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := item.Write(p); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField5(p thrift.Protocol) error {  // Add
-    if !x.IsSetAdd() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("add", thrift.MAP, 5); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetAddNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField6(p thrift.Protocol) error {  // Patch
-    if !x.IsSetPatch() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("patch", thrift.MAP, 6); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPatchNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := item.Write(p); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField7(p thrift.Protocol) error {  // Remove
-    if !x.IsSetRemove() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) writeField9(p thrift.Protocol) error {  // Put
-    if !x.IsSetPut() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("put", thrift.MAP, 9); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetPutNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField1(p thrift.Protocol) error {  // Assign
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]int32, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetAssignNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField2(p thrift.Protocol) error {  // Clear
-    result, err := p.ReadBool()
-if err != nil {
-    return err
-}
-
-    x.SetClearNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField3(p thrift.Protocol) error {  // PatchPrior
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]*patch.I32Patch, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value *patch.I32Patch
-    {
-        result := *patch.NewI32Patch()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-        value = &result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetPatchPriorNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField5(p thrift.Protocol) error {  // Add
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]int32, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetAddNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField6(p thrift.Protocol) error {  // Patch
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]*patch.I32Patch, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value *patch.I32Patch
-    {
-        result := *patch.NewI32Patch()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-        value = &result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetPatchNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
-
-    x.SetRemoveNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) readField9(p thrift.Protocol) error {  // Put
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]int32, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-
-    x.SetPutNonCompat(result)
-    return nil
-}
-
-func (x *MyStructField29Patch1) String() string {
-    type MyStructField29Patch1Alias MyStructField29Patch1
-    valueAlias := (*MyStructField29Patch1Alias)(x)
-    return fmt.Sprintf("%+v", valueAlias)
-}
-
-
-// Deprecated: Use MyStructField29Patch1.Set* methods instead or set the fields directly.
-type MyStructField29Patch1Builder struct {
-    obj *MyStructField29Patch1
-}
-
-func NewMyStructField29Patch1Builder() *MyStructField29Patch1Builder {
-    return &MyStructField29Patch1Builder{
-        obj: NewMyStructField29Patch1(),
-    }
-}
-
-func (x *MyStructField29Patch1Builder) Assign(value map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Assign = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Clear(value bool) *MyStructField29Patch1Builder {
-    x.obj.Clear = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) PatchPrior(value map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
-    x.obj.PatchPrior = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Add(value map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Add = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Patch(value map[string]*patch.I32Patch) *MyStructField29Patch1Builder {
-    x.obj.Patch = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Remove(value []string) *MyStructField29Patch1Builder {
-    x.obj.Remove = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Put(value map[string]int32) *MyStructField29Patch1Builder {
-    x.obj.Put = value
-    return x
-}
-
-func (x *MyStructField29Patch1Builder) Emit() *MyStructField29Patch1 {
-    var objCopy MyStructField29Patch1 = *x.obj
-    return &objCopy
-}
-
-func (x *MyStructField29Patch1) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("MyStructField29Patch1"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField2(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField3(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField5(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField6(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField7(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField9(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *MyStructField29Patch1) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, typ, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if typ == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        case 1:  // assign
-            if err := x.readField1(p); err != nil {
-                return err
-            }
-        case 2:  // clear
-            if err := x.readField2(p); err != nil {
-                return err
-            }
-        case 3:  // patchPrior
-            if err := x.readField3(p); err != nil {
-                return err
-            }
-        case 5:  // add
-            if err := x.readField5(p); err != nil {
-                return err
-            }
-        case 6:  // patch
-            if err := x.readField6(p); err != nil {
-                return err
-            }
-        case 7:  // remove
-            if err := x.readField7(p); err != nil {
-                return err
-            }
-        case 9:  // put
             if err := x.readField9(p); err != nil {
                 return err
             }

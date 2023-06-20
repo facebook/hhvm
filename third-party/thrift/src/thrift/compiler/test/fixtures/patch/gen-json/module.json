@@ -1765,21 +1765,6 @@
             }
           }
         },
-        "patch" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.ListPatchIndex" }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I16Patch"} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
         "prepend" : {
           "type_enum" : "LIST",
           "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
@@ -2056,21 +2041,6 @@
             }
           }
         },
-        "patch" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.ListPatchIndex" }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField29Patch1"} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
         "prepend" : {
           "type_enum" : "LIST",
           "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
@@ -2106,128 +2076,6 @@
         "begin" : {
           "line" : 23,
           "column" : 18
-        },
-        "end" : {
-          "line" : 23,
-          "column" : 21
-        }
-      }
-    },
-    "MyStructField29Patch1" : {
-      "lineno" : 23,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "patchPrior" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "add" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "patch" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        },
-        "put" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 23,
-              "column" : 1
-            },
-            "end" : {
-              "line" : 23,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 23,
-          "column" : 19
         },
         "end" : {
           "line" : 23,
@@ -2349,7 +2197,7 @@
       "source_range" : {
         "begin" : {
           "line" : 23,
-          "column" : 20
+          "column" : 19
         },
         "end" : {
           "line" : 23,
@@ -2471,7 +2319,7 @@
       "source_range" : {
         "begin" : {
           "line" : 23,
-          "column" : 21
+          "column" : 20
         },
         "end" : {
           "line" : 23,
@@ -2480,7 +2328,7 @@
       }
     },
     "MyStructFieldPatch" : {
-      "lineno" : 24,
+      "lineno" : 23,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -2982,8 +2830,8 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 24,
-          "column" : 1
+          "line" : 23,
+          "column" : 21
         },
         "end" : {
           "line" : 23,
@@ -3495,7 +3343,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 2
+          "column" : 1
         },
         "end" : {
           "line" : 23,
@@ -3602,7 +3450,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 3
+          "column" : 2
         },
         "end" : {
           "line" : 23,
@@ -3620,7 +3468,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 4
+          "column" : 3
         },
         "end" : {
           "line" : 23,
@@ -3638,7 +3486,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 5
+          "column" : 4
         },
         "end" : {
           "line" : 23,
@@ -3745,7 +3593,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 6
+          "column" : 5
         },
         "end" : {
           "line" : 23,
@@ -3792,7 +3640,7 @@
       "source_range" : {
         "begin" : {
           "line" : 100,
-          "column" : 5
+          "column" : 4
         },
         "end" : {
           "line" : 99,
@@ -3824,7 +3672,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 8
+          "column" : 7
         },
         "end" : {
           "line" : 23,
@@ -3856,7 +3704,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 9
+          "column" : 8
         },
         "end" : {
           "line" : 23,
@@ -3963,7 +3811,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 10
+          "column" : 9
         },
         "end" : {
           "line" : 23,
@@ -3995,7 +3843,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 11
+          "column" : 10
         },
         "end" : {
           "line" : 23,
@@ -4027,7 +3875,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 12
+          "column" : 11
         },
         "end" : {
           "line" : 23,
@@ -4074,7 +3922,7 @@
       "source_range" : {
         "begin" : {
           "line" : 24,
-          "column" : 13
+          "column" : 12
         },
         "end" : {
           "line" : 23,

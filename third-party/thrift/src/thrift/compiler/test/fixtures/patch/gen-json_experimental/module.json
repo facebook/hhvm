@@ -1282,21 +1282,6 @@
             "lineno" : 23,
             "type" : "bool"
                   },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches list values by index. Applies second.\n",
-            "key" : 3,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "I16Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-}
-                  },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepends to the front of a given list.\n",
@@ -1512,20 +1497,6 @@
             "lineno" : 23,
             "type" : "bool"
                   },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches list values by index. Applies second.\n",
-            "key" : 3,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "MyStructField29Patch1"
-}
-}
-                  },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepends to the front of a given list.\n",
@@ -1552,105 +1523,6 @@
   "key_type" : "string",
   "value_type" : "i32"
 }
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "MyStructField29Patch1" : {
-        "name" : "MyStructField29Patch1",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField29Patch1Struct>", "underlyingName": "MyStructField29Patch1Struct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "assign" : {
-            "name" : "assign",
-            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
-            "key" : 1,
-            "lineno" : 23,
-            "required" : "optional",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-                  },
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears a value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 23,
-            "type" : "bool"
-                  },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-}
-                  },
-          "add" : {
-            "name" : "add",
-            "docstring" : "Add the given values, if the keys are not already present. Applies forth.\n",
-            "key" : 5,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-                  },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-}
-                  },
-          "remove" : {
-            "name" : "remove",
-            "docstring" : "Removes entries, if present. Applies third.\n",
-            "key" : 7,
-            "lineno" : 23,
-            "type" : {
-  "type" : "set",
-  "inner_type" : "string"
-}
-                  },
-          "put" : {
-            "name" : "put",
-            "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",
-            "key" : 9,
-            "lineno" : 23,
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
 }
                   }
         },
@@ -2561,7 +2433,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 24
+        "lineno" : 23
       },
       "MyStructEnsureStruct" : {
         "name" : "MyStructEnsureStruct",

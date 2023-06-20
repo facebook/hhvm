@@ -277,18 +277,18 @@ public class RecursiveField1Patch implements TBase, java.io.Serializable, Clonea
         case ASSIGN:
           if (__field.type == TType.MAP) {
             {
-              TMap _map281 = iprot.readMapBegin();
-              this.assign = new HashMap<String,Recursive>(Math.max(0, 2*_map281.size));
-              for (int _i282 = 0; 
-                   (_map281.size < 0) ? iprot.peekMap() : (_i282 < _map281.size); 
-                   ++_i282)
+              TMap _map242 = iprot.readMapBegin();
+              this.assign = new HashMap<String,Recursive>(Math.max(0, 2*_map242.size));
+              for (int _i243 = 0; 
+                   (_map242.size < 0) ? iprot.peekMap() : (_i243 < _map242.size); 
+                   ++_i243)
               {
-                String _key283;
-                Recursive _val284;
-                _key283 = iprot.readString();
-                _val284 = new Recursive();
-                _val284.read(iprot);
-                this.assign.put(_key283, _val284);
+                String _key244;
+                Recursive _val245;
+                _key244 = iprot.readString();
+                _val245 = new Recursive();
+                _val245.read(iprot);
+                this.assign.put(_key244, _val245);
               }
               iprot.readMapEnd();
             }
@@ -326,9 +326,9 @@ public class RecursiveField1Patch implements TBase, java.io.Serializable, Clonea
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.assign.size()));
-          for (Map.Entry<String, Recursive> _iter285 : this.assign.entrySet())          {
-            oprot.writeString(_iter285.getKey());
-            _iter285.getValue().write(oprot);
+          for (Map.Entry<String, Recursive> _iter246 : this.assign.entrySet())          {
+            oprot.writeString(_iter246.getKey());
+            _iter246.getValue().write(oprot);
           }
           oprot.writeMapEnd();
         }

@@ -34,7 +34,6 @@ class MyStructField26PatchStruct;
 class MyStructField27PatchStruct;
 class MyStructField28PatchStruct;
 class MyStructField29PatchStruct;
-class MyStructField29Patch1Struct;
 class MyStructField30PatchStruct;
 class MyStructField30Patch1Struct;
 class MyStructFieldPatchStruct;

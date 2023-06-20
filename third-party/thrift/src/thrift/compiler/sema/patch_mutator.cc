@@ -240,13 +240,6 @@ struct PatchGen : StructGen {
   }
 
   // {kPatchPriorId}: {patch_type} patch;
-  t_field& patchList(t_type_ref patch_type) {
-    return doc(
-        "Patches list values by index. Applies second.",
-        field(kPatchPriorId, patch_type, "patch"));
-  }
-
-  // {kPatchPriorId}: {patch_type} patch;
   t_field& patchPrior(t_type_ref patch_type) {
     return doc(
         "Patches any previously set values. Applies second.",
@@ -587,11 +580,6 @@ t_struct& patch_generator::gen_patch(
   const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {
     // TODO(afuller): support 'replace' op.
-    auto elem_patch_type = find_patch_type(
-        annot, orig, list->elem_type(), field_id, traversal_order + 1);
-    if (const auto* p = program_.scope()->find_type("patch.ListPatchIndex")) {
-      gen.patchList(inst_map(t_type_ref::from_ptr(p), elem_patch_type));
-    }
     gen.prepend(type);
     gen.append(type);
     gen.set_adapter("ListPatchAdapter");

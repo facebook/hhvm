@@ -291,15 +291,15 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
         case REMOVE:
           if (__field.type == TType.SET) {
             {
-              TSet _set273 = iprot.readSetBegin();
-              tmp_remove = new HashSet<Short>(Math.max(0, 2*_set273.size));
-              for (int _i274 = 0; 
-                   (_set273.size < 0) ? iprot.peekSet() : (_i274 < _set273.size); 
-                   ++_i274)
+              TSet _set234 = iprot.readSetBegin();
+              tmp_remove = new HashSet<Short>(Math.max(0, 2*_set234.size));
+              for (int _i235 = 0; 
+                   (_set234.size < 0) ? iprot.peekSet() : (_i235 < _set234.size); 
+                   ++_i235)
               {
-                Short _elem275;
-                _elem275 = iprot.readI16();
-                tmp_remove.add(_elem275);
+                Short _elem236;
+                _elem236 = iprot.readI16();
+                tmp_remove.add(_elem236);
               }
               iprot.readSetEnd();
             }
@@ -363,8 +363,8 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I16, this.remove.size()));
-        for (Short _iter276 : this.remove)        {
-          oprot.writeI16(_iter276);
+        for (Short _iter237 : this.remove)        {
+          oprot.writeI16(_iter237);
         }
         oprot.writeSetEnd();
       }

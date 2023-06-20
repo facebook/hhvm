@@ -60,21 +60,6 @@
           "column" : 27
         }
       }
-    },
-    "ListPatchIndex" : {
-      "lineno" : 340,
-      "type_enum" : "I32",
-      "spec_args" : null,
-      "source_range" : {
-        "begin" : {
-          "line" : 340,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 343,
-          "column" : 27
-        }
-      }
     }
   },
   "structs" : {

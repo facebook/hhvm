@@ -26,13 +26,11 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     public MyStructField29Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Map<String, Integer>> assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.TERSE) final boolean clear,
-        @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE) final Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch,
         @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE) final List<Map<String, Integer>> prepend,
         @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.TERSE) final List<Map<String, Integer>> append
     ) {
         this.assign = assign;
         this.clear = clear;
-        this.patch = patch;
         this.prepend = prepend;
         this.append = append;
     }
@@ -41,7 +39,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     protected MyStructField29Patch() {
       this.assign = null;
       this.clear = false;
-      this.patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
       this.prepend = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
       this.append = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     }
@@ -49,7 +46,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     public static class Builder {
         private List<Map<String, Integer>> assign = null;
         private boolean clear = false;
-        private Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
         private List<Map<String, Integer>> prepend = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
         private List<Map<String, Integer>> append = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     
@@ -68,14 +64,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         }
     
         public boolean isClear() { return clear; }
-    
-            @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE)
-        public Builder setPatch(Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch) {
-            this.patch = patch;
-            return this;
-        }
-    
-        public Map<Integer, test.fixtures.patch.MyStructField29Patch1> getPatch() { return patch; }
     
             @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE)
         public Builder setPrepend(List<Map<String, Integer>> prepend) {
@@ -97,7 +85,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         public Builder(MyStructField29Patch other) {
             this.assign = other.assign;
             this.clear = other.clear;
-            this.patch = other.patch;
             this.prepend = other.prepend;
             this.append = other.append;
         }
@@ -107,7 +94,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
             MyStructField29Patch result = new MyStructField29Patch (
                 this.assign,
                 this.clear,
-                this.patch,
                 this.prepend,
                 this.append
             );
@@ -125,9 +111,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         private final boolean clear;
     public static final int _CLEAR = 2;
     private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-        private final Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch;
-    public static final int _PATCH = 3;
-    private static final TField PATCH_FIELD_DESC = new TField("patch", TType.MAP, (short)3);
         private final List<Map<String, Integer>> prepend;
     public static final int _PREPEND = 8;
     private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
@@ -141,9 +124,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
       NAMES_TO_IDS.put("clear", 2);
       THRIFT_NAMES_TO_IDS.put("clear", 2);
       FIELD_METADATA.put(2, CLEAR_FIELD_DESC);
-      NAMES_TO_IDS.put("patch", 3);
-      THRIFT_NAMES_TO_IDS.put("patch", 3);
-      FIELD_METADATA.put(3, PATCH_FIELD_DESC);
       NAMES_TO_IDS.put("prepend", 8);
       THRIFT_NAMES_TO_IDS.put("prepend", 8);
       FIELD_METADATA.put(8, PREPEND_FIELD_DESC);
@@ -166,11 +146,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="patch", requiredness=Requiredness.TERSE)
-    public Map<Integer, test.fixtures.patch.MyStructField29Patch1> getPatch() { return patch; }
-    
-    
-    @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.TERSE)
     public List<Map<String, Integer>> getPrepend() { return prepend; }
     
@@ -184,7 +159,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         ToStringHelper helper = toStringHelper(this);
         helper.add("assign", assign);
         helper.add("clear", clear);
-        helper.add("patch", patch);
         helper.add("prepend", prepend);
         helper.add("append", append);
         return helper.toString();
@@ -204,7 +178,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         return
             Objects.equals(assign, other.assign) &&
             Objects.equals(clear, other.clear) &&
-            Objects.equals(patch, other.patch) &&
             Objects.equals(prepend, other.prepend) &&
             Objects.equals(append, other.append) &&
             true;
@@ -215,7 +188,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         return Arrays.deepHashCode(new java.lang.Object[] {
             assign,
             clear,
-            patch,
             prepend,
             append
         });
@@ -274,25 +246,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
           if (__field.type == TType.BOOL) {
             boolean clear = oprot.readBool();
             builder.setClear(clear);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _PATCH:
-          if (__field.type == TType.MAP) {
-            Map<Integer, test.fixtures.patch.MyStructField29Patch1> patch;
-            {
-            TMap _map = oprot.readMapBegin();
-            patch = new HashMap<Integer, test.fixtures.patch.MyStructField29Patch1>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                test.fixtures.patch.MyStructField29Patch1 _value1 = test.fixtures.patch.MyStructField29Patch1.read0(oprot);
-                patch.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
-            builder.setPatch(patch);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -404,19 +357,6 @@ public final class MyStructField29Patch implements com.facebook.thrift.payload.T
         oprot.writeBool(this.clear);
         oprot.writeFieldEnd();
       };
-      java.util.Objects.requireNonNull(patch, "patch must not be null");
-      
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(patch)) {
-        oprot.writeFieldBegin(PATCH_FIELD_DESC);
-        Map<Integer, test.fixtures.patch.MyStructField29Patch1> _iter0 = patch;
-        oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter0.size()));
-        for (Map.Entry<Integer, test.fixtures.patch.MyStructField29Patch1> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          _iter1.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
-        oprot.writeFieldEnd();
-      }
       java.util.Objects.requireNonNull(prepend, "prepend must not be null");
       
       if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(prepend)) {

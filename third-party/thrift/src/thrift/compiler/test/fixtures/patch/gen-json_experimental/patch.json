@@ -24,12 +24,6 @@
         "type": "i16",
         "is_exception": false,
         "lineno": 40
-      },
-      "ListPatchIndex": {
-        "name": "ListPatchIndex",
-        "type": "i32",
-        "is_exception": false,
-        "lineno": 340
       }
   },
   "enumerations" :

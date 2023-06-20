@@ -35,7 +35,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'MyDataWithCustomDefault', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'MyDataPatch', 'MyDataFieldPatch', 'MyDataEnsureStruct', 'MyDataWithCustomDefaultPatch', 'MyDataWithCustomDefaultFieldPatch', 'MyDataWithCustomDefaultEnsureStruct', 'InnerUnionPatch', 'InnerUnionFieldPatch', 'MyUnionPatch', 'MyUnionFieldPatch', 'MyStructPatch', 'MyStructField10Patch', 'MyStructField23Patch', 'MyStructField26Patch', 'MyStructField27Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField29Patch1', 'MyStructField30Patch', 'MyStructField30Patch1', 'MyStructFieldPatch', 'MyStructEnsureStruct', 'LateDefStructPatch', 'LateDefStructFieldPatch', 'LateDefStructEnsureStruct', 'RecursivePatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursiveEnsureStruct', 'BarPatch', 'BarFieldPatch', 'BarEnsureStruct', 'LoopPatch']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'MyDataWithCustomDefault', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'MyDataPatch', 'MyDataFieldPatch', 'MyDataEnsureStruct', 'MyDataWithCustomDefaultPatch', 'MyDataWithCustomDefaultFieldPatch', 'MyDataWithCustomDefaultEnsureStruct', 'InnerUnionPatch', 'InnerUnionFieldPatch', 'MyUnionPatch', 'MyUnionFieldPatch', 'MyStructPatch', 'MyStructField10Patch', 'MyStructField23Patch', 'MyStructField26Patch', 'MyStructField27Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField30Patch', 'MyStructField30Patch1', 'MyStructFieldPatch', 'MyStructEnsureStruct', 'LateDefStructPatch', 'LateDefStructFieldPatch', 'LateDefStructEnsureStruct', 'RecursivePatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursiveEnsureStruct', 'BarPatch', 'BarFieldPatch', 'BarEnsureStruct', 'LoopPatch']
 
 class MyEnum:
   MyValue0 = 0
@@ -3974,7 +3974,6 @@ class MyStructField26Patch:
   Note: Optional and union fields must be set before assigned.
   
    - clear: Clears a value. Applies first.
-   - patch: Patches list values by index. Applies second.
    - prepend: Prepends to the front of a given list.
    - append: Appends to the back of a given list.
   """
@@ -4019,52 +4018,33 @@ class MyStructField26Patch:
           self.clear = iprot.readBool()
         else:
           iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.MAP:
-          self.patch = {}
-          (_ktype153, _vtype154, _size152 ) = iprot.readMapBegin() 
-          if _size152 >= 0:
-            for _i156 in range(_size152):
-              _key157 = iprot.readI32()
-              _val158 = thrift.lib.thrift.patch.ttypes.I16Patch()
-              _val158.read(iprot)
-              self.patch[_key157] = _val158
-          else: 
-            while iprot.peekMap():
-              _key159 = iprot.readI32()
-              _val160 = thrift.lib.thrift.patch.ttypes.I16Patch()
-              _val160.read(iprot)
-              self.patch[_key159] = _val160
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.LIST:
           self.prepend = []
-          (_etype164, _size161) = iprot.readListBegin()
-          if _size161 >= 0:
-            for _i165 in range(_size161):
-              _elem166 = iprot.readI16()
-              self.prepend.append(_elem166)
+          (_etype155, _size152) = iprot.readListBegin()
+          if _size152 >= 0:
+            for _i156 in range(_size152):
+              _elem157 = iprot.readI16()
+              self.prepend.append(_elem157)
           else: 
             while iprot.peekList():
-              _elem167 = iprot.readI16()
-              self.prepend.append(_elem167)
+              _elem158 = iprot.readI16()
+              self.prepend.append(_elem158)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.LIST:
           self.append = []
-          (_etype171, _size168) = iprot.readListBegin()
-          if _size168 >= 0:
-            for _i172 in range(_size168):
-              _elem173 = iprot.readI16()
-              self.append.append(_elem173)
+          (_etype162, _size159) = iprot.readListBegin()
+          if _size159 >= 0:
+            for _i163 in range(_size159):
+              _elem164 = iprot.readI16()
+              self.append.append(_elem164)
           else: 
             while iprot.peekList():
-              _elem174 = iprot.readI16()
-              self.append.append(_elem174)
+              _elem165 = iprot.readI16()
+              self.append.append(_elem165)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4084,34 +4064,26 @@ class MyStructField26Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.I16, len(self.assign))
-      for iter175 in self.assign:
-        oprot.writeI16(iter175)
+      for iter166 in self.assign:
+        oprot.writeI16(iter166)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
       oprot.writeFieldBegin('clear', TType.BOOL, 2)
       oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
-    if self.patch != None:
-      oprot.writeFieldBegin('patch', TType.MAP, 3)
-      oprot.writeMapBegin(TType.I32, TType.STRUCT, len(self.patch))
-      for kiter176,viter177 in self.patch.items():
-        oprot.writeI32(kiter176)
-        viter177.write(oprot)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
     if self.prepend != None:
       oprot.writeFieldBegin('prepend', TType.LIST, 8)
       oprot.writeListBegin(TType.I16, len(self.prepend))
-      for iter178 in self.prepend:
-        oprot.writeI16(iter178)
+      for iter167 in self.prepend:
+        oprot.writeI16(iter167)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.append != None:
       oprot.writeFieldBegin('append', TType.LIST, 9)
       oprot.writeListBegin(TType.I16, len(self.append))
-      for iter179 in self.append:
-        oprot.writeI16(iter179)
+      for iter168 in self.append:
+        oprot.writeI16(iter168)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4131,33 +4103,24 @@ class MyStructField26Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = []
-      for _tmp_e180 in json_obj['assign']:
-        if _tmp_e180 > 0x7fff or _tmp_e180 < -0x8000:
+      for _tmp_e169 in json_obj['assign']:
+        if _tmp_e169 > 0x7fff or _tmp_e169 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign.append(_tmp_e180)
+        self.assign.append(_tmp_e169)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
-    if 'patch' in json_obj and json_obj['patch'] is not None:
-      self.patch = dict_cls()
-      for _tmp_k181, _tmp_v182 in json_obj['patch'].items():
-        _tmp_kp183 = int(_tmp_k181)
-        if _tmp_kp183 > 0x7fffffff or _tmp_kp183 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k181)
-        _struct184 = thrift.lib.thrift.patch.ttypes.I16Patch()
-        _struct184.readFromJson(_tmp_v182, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp183] = _struct184
     if 'prepend' in json_obj and json_obj['prepend'] is not None:
       self.prepend = []
-      for _tmp_e185 in json_obj['prepend']:
-        if _tmp_e185 > 0x7fff or _tmp_e185 < -0x8000:
+      for _tmp_e170 in json_obj['prepend']:
+        if _tmp_e170 > 0x7fff or _tmp_e170 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.prepend.append(_tmp_e185)
+        self.prepend.append(_tmp_e170)
     if 'append' in json_obj and json_obj['append'] is not None:
       self.append = []
-      for _tmp_e186 in json_obj['append']:
-        if _tmp_e186 > 0x7fff or _tmp_e186 < -0x8000:
+      for _tmp_e171 in json_obj['append']:
+        if _tmp_e171 > 0x7fff or _tmp_e171 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.append.append(_tmp_e186)
+        self.append.append(_tmp_e171)
 
   def __repr__(self):
     L = []
@@ -4170,10 +4133,6 @@ class MyStructField26Patch:
       value = pprint.pformat(self.clear, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    clear=%s' % (value))
-    if self.patch is not None:
-      value = pprint.pformat(self.patch, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    patch=%s' % (value))
     if self.prepend is not None:
       value = pprint.pformat(self.prepend, indent=0)
       value = padding.join(value.splitlines(True))
@@ -4197,7 +4156,6 @@ class MyStructField26Patch:
     return (
       'assign',
       'clear',
-      'patch',
       'prepend',
       'append',
     )
@@ -4257,15 +4215,15 @@ class MyStructField27Patch:
       if fid == 1:
         if ftype == TType.SET:
           self.assign = set()
-          (_etype190, _size187) = iprot.readSetBegin()
-          if _size187 >= 0:
-            for _i191 in range(_size187):
-              _elem192 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign.add(_elem192)
+          (_etype175, _size172) = iprot.readSetBegin()
+          if _size172 >= 0:
+            for _i176 in range(_size172):
+              _elem177 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign.add(_elem177)
           else: 
             while iprot.peekSet():
-              _elem193 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign.add(_elem193)
+              _elem178 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign.add(_elem178)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -4277,30 +4235,30 @@ class MyStructField27Patch:
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype197, _size194) = iprot.readSetBegin()
-          if _size194 >= 0:
-            for _i198 in range(_size194):
-              _elem199 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem199)
+          (_etype182, _size179) = iprot.readSetBegin()
+          if _size179 >= 0:
+            for _i183 in range(_size179):
+              _elem184 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem184)
           else: 
             while iprot.peekSet():
-              _elem200 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem200)
+              _elem185 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem185)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.SET:
           self.add = set()
-          (_etype204, _size201) = iprot.readSetBegin()
-          if _size201 >= 0:
-            for _i205 in range(_size201):
-              _elem206 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add.add(_elem206)
+          (_etype189, _size186) = iprot.readSetBegin()
+          if _size186 >= 0:
+            for _i190 in range(_size186):
+              _elem191 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add.add(_elem191)
           else: 
             while iprot.peekSet():
-              _elem207 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add.add(_elem207)
+              _elem192 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add.add(_elem192)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -4320,8 +4278,8 @@ class MyStructField27Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.SET, 1)
       oprot.writeSetBegin(TType.STRING, len(self.assign))
-      for iter208 in self.assign:
-        oprot.writeString(iter208.encode('utf-8')) if UTF8STRINGS and not isinstance(iter208, bytes) else oprot.writeString(iter208)
+      for iter193 in self.assign:
+        oprot.writeString(iter193.encode('utf-8')) if UTF8STRINGS and not isinstance(iter193, bytes) else oprot.writeString(iter193)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -4331,15 +4289,15 @@ class MyStructField27Patch:
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter209 in self.remove:
-        oprot.writeString(iter209.encode('utf-8')) if UTF8STRINGS and not isinstance(iter209, bytes) else oprot.writeString(iter209)
+      for iter194 in self.remove:
+        oprot.writeString(iter194.encode('utf-8')) if UTF8STRINGS and not isinstance(iter194, bytes) else oprot.writeString(iter194)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.SET, 8)
       oprot.writeSetBegin(TType.STRING, len(self.add))
-      for iter210 in self.add:
-        oprot.writeString(iter210.encode('utf-8')) if UTF8STRINGS and not isinstance(iter210, bytes) else oprot.writeString(iter210)
+      for iter195 in self.add:
+        oprot.writeString(iter195.encode('utf-8')) if UTF8STRINGS and not isinstance(iter195, bytes) else oprot.writeString(iter195)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4359,18 +4317,18 @@ class MyStructField27Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = set_cls()
-      for _tmp_e211 in json_obj['assign']:
-        self.assign.add(_tmp_e211)
+      for _tmp_e196 in json_obj['assign']:
+        self.assign.add(_tmp_e196)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e212 in json_obj['remove']:
-        self.remove.add(_tmp_e212)
+      for _tmp_e197 in json_obj['remove']:
+        self.remove.add(_tmp_e197)
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = set_cls()
-      for _tmp_e213 in json_obj['add']:
-        self.add.add(_tmp_e213)
+      for _tmp_e198 in json_obj['add']:
+        self.add.add(_tmp_e198)
 
   def __repr__(self):
     L = []
@@ -4468,17 +4426,17 @@ class MyStructField28Patch:
       if fid == 1:
         if ftype == TType.MAP:
           self.assign = {}
-          (_ktype215, _vtype216, _size214 ) = iprot.readMapBegin() 
-          if _size214 >= 0:
-            for _i218 in range(_size214):
-              _key219 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val220 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign[_key219] = _val220
+          (_ktype200, _vtype201, _size199 ) = iprot.readMapBegin() 
+          if _size199 >= 0:
+            for _i203 in range(_size199):
+              _key204 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val205 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign[_key204] = _val205
           else: 
             while iprot.peekMap():
-              _key221 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val222 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign[_key221] = _val222
+              _key206 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val207 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign[_key206] = _val207
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4490,87 +4448,87 @@ class MyStructField28Patch:
       elif fid == 3:
         if ftype == TType.MAP:
           self.patchPrior = {}
-          (_ktype224, _vtype225, _size223 ) = iprot.readMapBegin() 
-          if _size223 >= 0:
-            for _i227 in range(_size223):
-              _key228 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val229 = thrift.lib.thrift.patch.ttypes.StringPatch()
-              _val229.read(iprot)
-              self.patchPrior[_key228] = _val229
+          (_ktype209, _vtype210, _size208 ) = iprot.readMapBegin() 
+          if _size208 >= 0:
+            for _i212 in range(_size208):
+              _key213 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val214 = thrift.lib.thrift.patch.ttypes.StringPatch()
+              _val214.read(iprot)
+              self.patchPrior[_key213] = _val214
           else: 
             while iprot.peekMap():
-              _key230 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val231 = thrift.lib.thrift.patch.ttypes.StringPatch()
-              _val231.read(iprot)
-              self.patchPrior[_key230] = _val231
+              _key215 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val216 = thrift.lib.thrift.patch.ttypes.StringPatch()
+              _val216.read(iprot)
+              self.patchPrior[_key215] = _val216
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.MAP:
           self.add = {}
-          (_ktype233, _vtype234, _size232 ) = iprot.readMapBegin() 
-          if _size232 >= 0:
-            for _i236 in range(_size232):
-              _key237 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val238 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add[_key237] = _val238
+          (_ktype218, _vtype219, _size217 ) = iprot.readMapBegin() 
+          if _size217 >= 0:
+            for _i221 in range(_size217):
+              _key222 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val223 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add[_key222] = _val223
           else: 
             while iprot.peekMap():
-              _key239 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val240 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add[_key239] = _val240
+              _key224 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val225 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add[_key224] = _val225
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.MAP:
           self.patch = {}
-          (_ktype242, _vtype243, _size241 ) = iprot.readMapBegin() 
-          if _size241 >= 0:
-            for _i245 in range(_size241):
-              _key246 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val247 = thrift.lib.thrift.patch.ttypes.StringPatch()
-              _val247.read(iprot)
-              self.patch[_key246] = _val247
+          (_ktype227, _vtype228, _size226 ) = iprot.readMapBegin() 
+          if _size226 >= 0:
+            for _i230 in range(_size226):
+              _key231 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val232 = thrift.lib.thrift.patch.ttypes.StringPatch()
+              _val232.read(iprot)
+              self.patch[_key231] = _val232
           else: 
             while iprot.peekMap():
-              _key248 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val249 = thrift.lib.thrift.patch.ttypes.StringPatch()
-              _val249.read(iprot)
-              self.patch[_key248] = _val249
+              _key233 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val234 = thrift.lib.thrift.patch.ttypes.StringPatch()
+              _val234.read(iprot)
+              self.patch[_key233] = _val234
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype253, _size250) = iprot.readSetBegin()
-          if _size250 >= 0:
-            for _i254 in range(_size250):
-              _elem255 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem255)
+          (_etype238, _size235) = iprot.readSetBegin()
+          if _size235 >= 0:
+            for _i239 in range(_size235):
+              _elem240 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem240)
           else: 
             while iprot.peekSet():
-              _elem256 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem256)
+              _elem241 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem241)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.MAP:
           self.put = {}
-          (_ktype258, _vtype259, _size257 ) = iprot.readMapBegin() 
-          if _size257 >= 0:
-            for _i261 in range(_size257):
-              _key262 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val263 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.put[_key262] = _val263
+          (_ktype243, _vtype244, _size242 ) = iprot.readMapBegin() 
+          if _size242 >= 0:
+            for _i246 in range(_size242):
+              _key247 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val248 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.put[_key247] = _val248
           else: 
             while iprot.peekMap():
-              _key264 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val265 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.put[_key264] = _val265
+              _key249 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val250 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.put[_key249] = _val250
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4590,9 +4548,9 @@ class MyStructField28Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.assign))
-      for kiter266,viter267 in self.assign.items():
-        oprot.writeString(kiter266.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter266, bytes) else oprot.writeString(kiter266)
-        oprot.writeString(viter267.encode('utf-8')) if UTF8STRINGS and not isinstance(viter267, bytes) else oprot.writeString(viter267)
+      for kiter251,viter252 in self.assign.items():
+        oprot.writeString(kiter251.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter251, bytes) else oprot.writeString(kiter251)
+        oprot.writeString(viter252.encode('utf-8')) if UTF8STRINGS and not isinstance(viter252, bytes) else oprot.writeString(viter252)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -4602,40 +4560,40 @@ class MyStructField28Patch:
     if self.patchPrior != None:
       oprot.writeFieldBegin('patchPrior', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patchPrior))
-      for kiter268,viter269 in self.patchPrior.items():
-        oprot.writeString(kiter268.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter268, bytes) else oprot.writeString(kiter268)
-        viter269.write(oprot)
+      for kiter253,viter254 in self.patchPrior.items():
+        oprot.writeString(kiter253.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter253, bytes) else oprot.writeString(kiter253)
+        viter254.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.MAP, 5)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.add))
-      for kiter270,viter271 in self.add.items():
-        oprot.writeString(kiter270.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter270, bytes) else oprot.writeString(kiter270)
-        oprot.writeString(viter271.encode('utf-8')) if UTF8STRINGS and not isinstance(viter271, bytes) else oprot.writeString(viter271)
+      for kiter255,viter256 in self.add.items():
+        oprot.writeString(kiter255.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter255, bytes) else oprot.writeString(kiter255)
+        oprot.writeString(viter256.encode('utf-8')) if UTF8STRINGS and not isinstance(viter256, bytes) else oprot.writeString(viter256)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.patch != None:
       oprot.writeFieldBegin('patch', TType.MAP, 6)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patch))
-      for kiter272,viter273 in self.patch.items():
-        oprot.writeString(kiter272.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter272, bytes) else oprot.writeString(kiter272)
-        viter273.write(oprot)
+      for kiter257,viter258 in self.patch.items():
+        oprot.writeString(kiter257.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter257, bytes) else oprot.writeString(kiter257)
+        viter258.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter274 in self.remove:
-        oprot.writeString(iter274.encode('utf-8')) if UTF8STRINGS and not isinstance(iter274, bytes) else oprot.writeString(iter274)
+      for iter259 in self.remove:
+        oprot.writeString(iter259.encode('utf-8')) if UTF8STRINGS and not isinstance(iter259, bytes) else oprot.writeString(iter259)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.put != None:
       oprot.writeFieldBegin('put', TType.MAP, 9)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.put))
-      for kiter275,viter276 in self.put.items():
-        oprot.writeString(kiter275.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter275, bytes) else oprot.writeString(kiter275)
-        oprot.writeString(viter276.encode('utf-8')) if UTF8STRINGS and not isinstance(viter276, bytes) else oprot.writeString(viter276)
+      for kiter260,viter261 in self.put.items():
+        oprot.writeString(kiter260.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter260, bytes) else oprot.writeString(kiter260)
+        oprot.writeString(viter261.encode('utf-8')) if UTF8STRINGS and not isinstance(viter261, bytes) else oprot.writeString(viter261)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4655,39 +4613,39 @@ class MyStructField28Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = dict_cls()
-      for _tmp_k277, _tmp_v278 in json_obj['assign'].items():
-        _tmp_kp279 = _tmp_k277
-        self.assign[_tmp_kp279] = _tmp_v278
+      for _tmp_k262, _tmp_v263 in json_obj['assign'].items():
+        _tmp_kp264 = _tmp_k262
+        self.assign[_tmp_kp264] = _tmp_v263
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = dict_cls()
-      for _tmp_k280, _tmp_v281 in json_obj['patchPrior'].items():
-        _tmp_kp282 = _tmp_k280
-        _struct283 = thrift.lib.thrift.patch.ttypes.StringPatch()
-        _struct283.readFromJson(_tmp_v281, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patchPrior[_tmp_kp282] = _struct283
+      for _tmp_k265, _tmp_v266 in json_obj['patchPrior'].items():
+        _tmp_kp267 = _tmp_k265
+        _struct268 = thrift.lib.thrift.patch.ttypes.StringPatch()
+        _struct268.readFromJson(_tmp_v266, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patchPrior[_tmp_kp267] = _struct268
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
-      for _tmp_k284, _tmp_v285 in json_obj['add'].items():
-        _tmp_kp286 = _tmp_k284
-        self.add[_tmp_kp286] = _tmp_v285
+      for _tmp_k269, _tmp_v270 in json_obj['add'].items():
+        _tmp_kp271 = _tmp_k269
+        self.add[_tmp_kp271] = _tmp_v270
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = dict_cls()
-      for _tmp_k287, _tmp_v288 in json_obj['patch'].items():
-        _tmp_kp289 = _tmp_k287
-        _struct290 = thrift.lib.thrift.patch.ttypes.StringPatch()
-        _struct290.readFromJson(_tmp_v288, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp289] = _struct290
+      for _tmp_k272, _tmp_v273 in json_obj['patch'].items():
+        _tmp_kp274 = _tmp_k272
+        _struct275 = thrift.lib.thrift.patch.ttypes.StringPatch()
+        _struct275.readFromJson(_tmp_v273, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patch[_tmp_kp274] = _struct275
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e291 in json_obj['remove']:
-        self.remove.add(_tmp_e291)
+      for _tmp_e276 in json_obj['remove']:
+        self.remove.add(_tmp_e276)
     if 'put' in json_obj and json_obj['put'] is not None:
       self.put = dict_cls()
-      for _tmp_k292, _tmp_v293 in json_obj['put'].items():
-        _tmp_kp294 = _tmp_k292
-        self.put[_tmp_kp294] = _tmp_v293
+      for _tmp_k277, _tmp_v278 in json_obj['put'].items():
+        _tmp_kp279 = _tmp_k277
+        self.put[_tmp_kp279] = _tmp_v278
 
   def __repr__(self):
     L = []
@@ -4770,7 +4728,6 @@ class MyStructField29Patch:
   Note: Optional and union fields must be set before assigned.
   
    - clear: Clears a value. Applies first.
-   - patch: Patches list values by index. Applies second.
    - prepend: Prepends to the front of a given list.
    - append: Appends to the back of a given list.
   """
@@ -4798,25 +4755,53 @@ class MyStructField29Patch:
       if fid == 1:
         if ftype == TType.LIST:
           self.assign = []
-          (_etype298, _size295) = iprot.readListBegin()
-          if _size295 >= 0:
-            for _i299 in range(_size295):
-              _elem300 = {}
-              (_ktype302, _vtype303, _size301 ) = iprot.readMapBegin() 
-              if _size301 >= 0:
-                for _i305 in range(_size301):
-                  _key306 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val307 = iprot.readI32()
-                  _elem300[_key306] = _val307
+          (_etype283, _size280) = iprot.readListBegin()
+          if _size280 >= 0:
+            for _i284 in range(_size280):
+              _elem285 = {}
+              (_ktype287, _vtype288, _size286 ) = iprot.readMapBegin() 
+              if _size286 >= 0:
+                for _i290 in range(_size286):
+                  _key291 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val292 = iprot.readI32()
+                  _elem285[_key291] = _val292
               else: 
                 while iprot.peekMap():
-                  _key308 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val309 = iprot.readI32()
-                  _elem300[_key308] = _val309
+                  _key293 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val294 = iprot.readI32()
+                  _elem285[_key293] = _val294
               iprot.readMapEnd()
-              self.assign.append(_elem300)
+              self.assign.append(_elem285)
           else: 
             while iprot.peekList():
+              _elem295 = {}
+              (_ktype297, _vtype298, _size296 ) = iprot.readMapBegin() 
+              if _size296 >= 0:
+                for _i300 in range(_size296):
+                  _key301 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val302 = iprot.readI32()
+                  _elem295[_key301] = _val302
+              else: 
+                while iprot.peekMap():
+                  _key303 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val304 = iprot.readI32()
+                  _elem295[_key303] = _val304
+              iprot.readMapEnd()
+              self.assign.append(_elem295)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.clear = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.LIST:
+          self.prepend = []
+          (_etype308, _size305) = iprot.readListBegin()
+          if _size305 >= 0:
+            for _i309 in range(_size305):
               _elem310 = {}
               (_ktype312, _vtype313, _size311 ) = iprot.readMapBegin() 
               if _size311 >= 0:
@@ -4830,109 +4815,62 @@ class MyStructField29Patch:
                   _val319 = iprot.readI32()
                   _elem310[_key318] = _val319
               iprot.readMapEnd()
-              self.assign.append(_elem310)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.BOOL:
-          self.clear = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.MAP:
-          self.patch = {}
-          (_ktype321, _vtype322, _size320 ) = iprot.readMapBegin() 
-          if _size320 >= 0:
-            for _i324 in range(_size320):
-              _key325 = iprot.readI32()
-              _val326 = MyStructField29Patch1()
-              _val326.read(iprot)
-              self.patch[_key325] = _val326
-          else: 
-            while iprot.peekMap():
-              _key327 = iprot.readI32()
-              _val328 = MyStructField29Patch1()
-              _val328.read(iprot)
-              self.patch[_key327] = _val328
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.LIST:
-          self.prepend = []
-          (_etype332, _size329) = iprot.readListBegin()
-          if _size329 >= 0:
-            for _i333 in range(_size329):
-              _elem334 = {}
-              (_ktype336, _vtype337, _size335 ) = iprot.readMapBegin() 
-              if _size335 >= 0:
-                for _i339 in range(_size335):
-                  _key340 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val341 = iprot.readI32()
-                  _elem334[_key340] = _val341
-              else: 
-                while iprot.peekMap():
-                  _key342 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val343 = iprot.readI32()
-                  _elem334[_key342] = _val343
-              iprot.readMapEnd()
-              self.prepend.append(_elem334)
+              self.prepend.append(_elem310)
           else: 
             while iprot.peekList():
-              _elem344 = {}
-              (_ktype346, _vtype347, _size345 ) = iprot.readMapBegin() 
-              if _size345 >= 0:
-                for _i349 in range(_size345):
-                  _key350 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val351 = iprot.readI32()
-                  _elem344[_key350] = _val351
+              _elem320 = {}
+              (_ktype322, _vtype323, _size321 ) = iprot.readMapBegin() 
+              if _size321 >= 0:
+                for _i325 in range(_size321):
+                  _key326 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val327 = iprot.readI32()
+                  _elem320[_key326] = _val327
               else: 
                 while iprot.peekMap():
-                  _key352 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val353 = iprot.readI32()
-                  _elem344[_key352] = _val353
+                  _key328 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val329 = iprot.readI32()
+                  _elem320[_key328] = _val329
               iprot.readMapEnd()
-              self.prepend.append(_elem344)
+              self.prepend.append(_elem320)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.LIST:
           self.append = []
-          (_etype357, _size354) = iprot.readListBegin()
-          if _size354 >= 0:
-            for _i358 in range(_size354):
-              _elem359 = {}
-              (_ktype361, _vtype362, _size360 ) = iprot.readMapBegin() 
-              if _size360 >= 0:
-                for _i364 in range(_size360):
-                  _key365 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val366 = iprot.readI32()
-                  _elem359[_key365] = _val366
+          (_etype333, _size330) = iprot.readListBegin()
+          if _size330 >= 0:
+            for _i334 in range(_size330):
+              _elem335 = {}
+              (_ktype337, _vtype338, _size336 ) = iprot.readMapBegin() 
+              if _size336 >= 0:
+                for _i340 in range(_size336):
+                  _key341 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val342 = iprot.readI32()
+                  _elem335[_key341] = _val342
               else: 
                 while iprot.peekMap():
-                  _key367 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val368 = iprot.readI32()
-                  _elem359[_key367] = _val368
+                  _key343 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val344 = iprot.readI32()
+                  _elem335[_key343] = _val344
               iprot.readMapEnd()
-              self.append.append(_elem359)
+              self.append.append(_elem335)
           else: 
             while iprot.peekList():
-              _elem369 = {}
-              (_ktype371, _vtype372, _size370 ) = iprot.readMapBegin() 
-              if _size370 >= 0:
-                for _i374 in range(_size370):
-                  _key375 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val376 = iprot.readI32()
-                  _elem369[_key375] = _val376
+              _elem345 = {}
+              (_ktype347, _vtype348, _size346 ) = iprot.readMapBegin() 
+              if _size346 >= 0:
+                for _i350 in range(_size346):
+                  _key351 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val352 = iprot.readI32()
+                  _elem345[_key351] = _val352
               else: 
                 while iprot.peekMap():
-                  _key377 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val378 = iprot.readI32()
-                  _elem369[_key377] = _val378
+                  _key353 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val354 = iprot.readI32()
+                  _elem345[_key353] = _val354
               iprot.readMapEnd()
-              self.append.append(_elem369)
+              self.append.append(_elem345)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4952,11 +4890,11 @@ class MyStructField29Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.MAP, len(self.assign))
-      for iter379 in self.assign:
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter379))
-        for kiter380,viter381 in iter379.items():
-          oprot.writeString(kiter380.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter380, bytes) else oprot.writeString(kiter380)
-          oprot.writeI32(viter381)
+      for iter355 in self.assign:
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter355))
+        for kiter356,viter357 in iter355.items():
+          oprot.writeString(kiter356.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter356, bytes) else oprot.writeString(kiter356)
+          oprot.writeI32(viter357)
         oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -4964,33 +4902,25 @@ class MyStructField29Patch:
       oprot.writeFieldBegin('clear', TType.BOOL, 2)
       oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
-    if self.patch != None:
-      oprot.writeFieldBegin('patch', TType.MAP, 3)
-      oprot.writeMapBegin(TType.I32, TType.STRUCT, len(self.patch))
-      for kiter382,viter383 in self.patch.items():
-        oprot.writeI32(kiter382)
-        viter383.write(oprot)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
     if self.prepend != None:
       oprot.writeFieldBegin('prepend', TType.LIST, 8)
       oprot.writeListBegin(TType.MAP, len(self.prepend))
-      for iter384 in self.prepend:
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter384))
-        for kiter385,viter386 in iter384.items():
-          oprot.writeString(kiter385.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter385, bytes) else oprot.writeString(kiter385)
-          oprot.writeI32(viter386)
+      for iter358 in self.prepend:
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter358))
+        for kiter359,viter360 in iter358.items():
+          oprot.writeString(kiter359.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter359, bytes) else oprot.writeString(kiter359)
+          oprot.writeI32(viter360)
         oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.append != None:
       oprot.writeFieldBegin('append', TType.LIST, 9)
       oprot.writeListBegin(TType.MAP, len(self.append))
-      for iter387 in self.append:
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter387))
-        for kiter388,viter389 in iter387.items():
-          oprot.writeString(kiter388.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter388, bytes) else oprot.writeString(kiter388)
-          oprot.writeI32(viter389)
+      for iter361 in self.append:
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter361))
+        for kiter362,viter363 in iter361.items():
+          oprot.writeString(kiter362.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter362, bytes) else oprot.writeString(kiter362)
+          oprot.writeI32(viter363)
         oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()
@@ -5011,45 +4941,36 @@ class MyStructField29Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = []
-      for _tmp_e390 in json_obj['assign']:
-        _map391 = dict_cls()
-        for _tmp_k392, _tmp_v393 in _tmp_e390.items():
-          _tmp_kp394 = _tmp_k392
-          if _tmp_v393 > 0x7fffffff or _tmp_v393 < -0x80000000:
+      for _tmp_e364 in json_obj['assign']:
+        _map365 = dict_cls()
+        for _tmp_k366, _tmp_v367 in _tmp_e364.items():
+          _tmp_kp368 = _tmp_k366
+          if _tmp_v367 > 0x7fffffff or _tmp_v367 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map391[_tmp_kp394] = _tmp_v393
-        self.assign.append(_map391)
+          _map365[_tmp_kp368] = _tmp_v367
+        self.assign.append(_map365)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
-    if 'patch' in json_obj and json_obj['patch'] is not None:
-      self.patch = dict_cls()
-      for _tmp_k395, _tmp_v396 in json_obj['patch'].items():
-        _tmp_kp397 = int(_tmp_k395)
-        if _tmp_kp397 > 0x7fffffff or _tmp_kp397 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k395)
-        _struct398 = MyStructField29Patch1()
-        _struct398.readFromJson(_tmp_v396, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp397] = _struct398
     if 'prepend' in json_obj and json_obj['prepend'] is not None:
       self.prepend = []
-      for _tmp_e399 in json_obj['prepend']:
-        _map400 = dict_cls()
-        for _tmp_k401, _tmp_v402 in _tmp_e399.items():
-          _tmp_kp403 = _tmp_k401
-          if _tmp_v402 > 0x7fffffff or _tmp_v402 < -0x80000000:
+      for _tmp_e369 in json_obj['prepend']:
+        _map370 = dict_cls()
+        for _tmp_k371, _tmp_v372 in _tmp_e369.items():
+          _tmp_kp373 = _tmp_k371
+          if _tmp_v372 > 0x7fffffff or _tmp_v372 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map400[_tmp_kp403] = _tmp_v402
-        self.prepend.append(_map400)
+          _map370[_tmp_kp373] = _tmp_v372
+        self.prepend.append(_map370)
     if 'append' in json_obj and json_obj['append'] is not None:
       self.append = []
-      for _tmp_e404 in json_obj['append']:
-        _map405 = dict_cls()
-        for _tmp_k406, _tmp_v407 in _tmp_e404.items():
-          _tmp_kp408 = _tmp_k406
-          if _tmp_v407 > 0x7fffffff or _tmp_v407 < -0x80000000:
+      for _tmp_e374 in json_obj['append']:
+        _map375 = dict_cls()
+        for _tmp_k376, _tmp_v377 in _tmp_e374.items():
+          _tmp_kp378 = _tmp_k376
+          if _tmp_v377 > 0x7fffffff or _tmp_v377 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map405[_tmp_kp408] = _tmp_v407
-        self.append.append(_map405)
+          _map375[_tmp_kp378] = _tmp_v377
+        self.append.append(_map375)
 
   def __repr__(self):
     L = []
@@ -5062,10 +4983,6 @@ class MyStructField29Patch:
       value = pprint.pformat(self.clear, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    clear=%s' % (value))
-    if self.patch is not None:
-      value = pprint.pformat(self.patch, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    patch=%s' % (value))
     if self.prepend is not None:
       value = pprint.pformat(self.prepend, indent=0)
       value = padding.join(value.splitlines(True))
@@ -5089,7 +5006,6 @@ class MyStructField29Patch:
     return (
       'assign',
       'clear',
-      'patch',
       'prepend',
       'append',
     )
@@ -5108,344 +5024,6 @@ class MyStructField29Patch:
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyStructField29Patch, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class MyStructField29Patch1:
-  r"""
-  Attributes:
-   - assign: Assigns to a (set) value.
-  
-  If set, all other operations are ignored.
-  
-  Note: Optional and union fields must be set before assigned.
-  
-   - clear: Clears a value. Applies first.
-   - patchPrior: Patches any previously set values. Applies second.
-   - add: Add the given values, if the keys are not already present. Applies forth.
-   - patch: Patches any set value, including newly set values. Applies last.
-   - remove: Removes entries, if present. Applies third.
-   - put: Adds or replaces the given key/value pairs. Applies fifth.
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  __init__ = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.MAP:
-          self.assign = {}
-          (_ktype410, _vtype411, _size409 ) = iprot.readMapBegin() 
-          if _size409 >= 0:
-            for _i413 in range(_size409):
-              _key414 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val415 = iprot.readI32()
-              self.assign[_key414] = _val415
-          else: 
-            while iprot.peekMap():
-              _key416 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val417 = iprot.readI32()
-              self.assign[_key416] = _val417
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.BOOL:
-          self.clear = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.MAP:
-          self.patchPrior = {}
-          (_ktype419, _vtype420, _size418 ) = iprot.readMapBegin() 
-          if _size418 >= 0:
-            for _i422 in range(_size418):
-              _key423 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val424 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val424.read(iprot)
-              self.patchPrior[_key423] = _val424
-          else: 
-            while iprot.peekMap():
-              _key425 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val426 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val426.read(iprot)
-              self.patchPrior[_key425] = _val426
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 5:
-        if ftype == TType.MAP:
-          self.add = {}
-          (_ktype428, _vtype429, _size427 ) = iprot.readMapBegin() 
-          if _size427 >= 0:
-            for _i431 in range(_size427):
-              _key432 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val433 = iprot.readI32()
-              self.add[_key432] = _val433
-          else: 
-            while iprot.peekMap():
-              _key434 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val435 = iprot.readI32()
-              self.add[_key434] = _val435
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.MAP:
-          self.patch = {}
-          (_ktype437, _vtype438, _size436 ) = iprot.readMapBegin() 
-          if _size436 >= 0:
-            for _i440 in range(_size436):
-              _key441 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val442 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val442.read(iprot)
-              self.patch[_key441] = _val442
-          else: 
-            while iprot.peekMap():
-              _key443 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val444 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val444.read(iprot)
-              self.patch[_key443] = _val444
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype448, _size445) = iprot.readSetBegin()
-          if _size445 >= 0:
-            for _i449 in range(_size445):
-              _elem450 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem450)
-          else: 
-            while iprot.peekSet():
-              _elem451 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem451)
-          iprot.readSetEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.MAP:
-          self.put = {}
-          (_ktype453, _vtype454, _size452 ) = iprot.readMapBegin() 
-          if _size452 >= 0:
-            for _i456 in range(_size452):
-              _key457 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val458 = iprot.readI32()
-              self.put[_key457] = _val458
-          else: 
-            while iprot.peekMap():
-              _key459 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val460 = iprot.readI32()
-              self.put[_key459] = _val460
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('MyStructField29Patch1')
-    if self.assign != None:
-      oprot.writeFieldBegin('assign', TType.MAP, 1)
-      oprot.writeMapBegin(TType.STRING, TType.I32, len(self.assign))
-      for kiter461,viter462 in self.assign.items():
-        oprot.writeString(kiter461.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter461, bytes) else oprot.writeString(kiter461)
-        oprot.writeI32(viter462)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    if self.clear != None:
-      oprot.writeFieldBegin('clear', TType.BOOL, 2)
-      oprot.writeBool(self.clear)
-      oprot.writeFieldEnd()
-    if self.patchPrior != None:
-      oprot.writeFieldBegin('patchPrior', TType.MAP, 3)
-      oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patchPrior))
-      for kiter463,viter464 in self.patchPrior.items():
-        oprot.writeString(kiter463.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter463, bytes) else oprot.writeString(kiter463)
-        viter464.write(oprot)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    if self.add != None:
-      oprot.writeFieldBegin('add', TType.MAP, 5)
-      oprot.writeMapBegin(TType.STRING, TType.I32, len(self.add))
-      for kiter465,viter466 in self.add.items():
-        oprot.writeString(kiter465.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter465, bytes) else oprot.writeString(kiter465)
-        oprot.writeI32(viter466)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    if self.patch != None:
-      oprot.writeFieldBegin('patch', TType.MAP, 6)
-      oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patch))
-      for kiter467,viter468 in self.patch.items():
-        oprot.writeString(kiter467.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter467, bytes) else oprot.writeString(kiter467)
-        viter468.write(oprot)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter469 in self.remove:
-        oprot.writeString(iter469.encode('utf-8')) if UTF8STRINGS and not isinstance(iter469, bytes) else oprot.writeString(iter469)
-      oprot.writeSetEnd()
-      oprot.writeFieldEnd()
-    if self.put != None:
-      oprot.writeFieldBegin('put', TType.MAP, 9)
-      oprot.writeMapBegin(TType.STRING, TType.I32, len(self.put))
-      for kiter470,viter471 in self.put.items():
-        oprot.writeString(kiter470.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter470, bytes) else oprot.writeString(kiter470)
-        oprot.writeI32(viter471)
-      oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
-        raise ValueError(
-            'Unexpected keyword arguments: ' + extra_kwargs
-        )
-    json_obj = json
-    if is_text:
-      json_obj = loads(json)
-    if 'assign' in json_obj and json_obj['assign'] is not None:
-      self.assign = dict_cls()
-      for _tmp_k472, _tmp_v473 in json_obj['assign'].items():
-        _tmp_kp474 = _tmp_k472
-        if _tmp_v473 > 0x7fffffff or _tmp_v473 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign[_tmp_kp474] = _tmp_v473
-    if 'clear' in json_obj and json_obj['clear'] is not None:
-      self.clear = json_obj['clear']
-    if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
-      self.patchPrior = dict_cls()
-      for _tmp_k475, _tmp_v476 in json_obj['patchPrior'].items():
-        _tmp_kp477 = _tmp_k475
-        _struct478 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct478.readFromJson(_tmp_v476, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patchPrior[_tmp_kp477] = _struct478
-    if 'add' in json_obj and json_obj['add'] is not None:
-      self.add = dict_cls()
-      for _tmp_k479, _tmp_v480 in json_obj['add'].items():
-        _tmp_kp481 = _tmp_k479
-        if _tmp_v480 > 0x7fffffff or _tmp_v480 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.add[_tmp_kp481] = _tmp_v480
-    if 'patch' in json_obj and json_obj['patch'] is not None:
-      self.patch = dict_cls()
-      for _tmp_k482, _tmp_v483 in json_obj['patch'].items():
-        _tmp_kp484 = _tmp_k482
-        _struct485 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct485.readFromJson(_tmp_v483, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp484] = _struct485
-    if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
-      for _tmp_e486 in json_obj['remove']:
-        self.remove.add(_tmp_e486)
-    if 'put' in json_obj and json_obj['put'] is not None:
-      self.put = dict_cls()
-      for _tmp_k487, _tmp_v488 in json_obj['put'].items():
-        _tmp_kp489 = _tmp_k487
-        if _tmp_v488 > 0x7fffffff or _tmp_v488 < -0x80000000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.put[_tmp_kp489] = _tmp_v488
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    if self.assign is not None:
-      value = pprint.pformat(self.assign, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    assign=%s' % (value))
-    if self.clear is not None:
-      value = pprint.pformat(self.clear, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    clear=%s' % (value))
-    if self.patchPrior is not None:
-      value = pprint.pformat(self.patchPrior, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    patchPrior=%s' % (value))
-    if self.add is not None:
-      value = pprint.pformat(self.add, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    add=%s' % (value))
-    if self.patch is not None:
-      value = pprint.pformat(self.patch, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    patch=%s' % (value))
-    if self.remove is not None:
-      value = pprint.pformat(self.remove, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    remove=%s' % (value))
-    if self.put is not None:
-      value = pprint.pformat(self.put, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    put=%s' % (value))
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-      'assign',
-      'clear',
-      'patchPrior',
-      'add',
-      'patch',
-      'remove',
-      'put',
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField29Patch1, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField29Patch1, self)
 
   def _to_py_deprecated(self):
     return self
@@ -5490,41 +5068,41 @@ class MyStructField30Patch:
       if fid == 1:
         if ftype == TType.MAP:
           self.assign = {}
-          (_ktype491, _vtype492, _size490 ) = iprot.readMapBegin() 
-          if _size490 >= 0:
-            for _i494 in range(_size490):
-              _key495 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val496 = {}
-              (_ktype498, _vtype499, _size497 ) = iprot.readMapBegin() 
-              if _size497 >= 0:
-                for _i501 in range(_size497):
-                  _key502 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val503 = iprot.readI32()
-                  _val496[_key502] = _val503
+          (_ktype380, _vtype381, _size379 ) = iprot.readMapBegin() 
+          if _size379 >= 0:
+            for _i383 in range(_size379):
+              _key384 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val385 = {}
+              (_ktype387, _vtype388, _size386 ) = iprot.readMapBegin() 
+              if _size386 >= 0:
+                for _i390 in range(_size386):
+                  _key391 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val392 = iprot.readI32()
+                  _val385[_key391] = _val392
               else: 
                 while iprot.peekMap():
-                  _key504 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val505 = iprot.readI32()
-                  _val496[_key504] = _val505
+                  _key393 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val394 = iprot.readI32()
+                  _val385[_key393] = _val394
               iprot.readMapEnd()
-              self.assign[_key495] = _val496
+              self.assign[_key384] = _val385
           else: 
             while iprot.peekMap():
-              _key506 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val507 = {}
-              (_ktype509, _vtype510, _size508 ) = iprot.readMapBegin() 
-              if _size508 >= 0:
-                for _i512 in range(_size508):
-                  _key513 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val514 = iprot.readI32()
-                  _val507[_key513] = _val514
+              _key395 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val396 = {}
+              (_ktype398, _vtype399, _size397 ) = iprot.readMapBegin() 
+              if _size397 >= 0:
+                for _i401 in range(_size397):
+                  _key402 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val403 = iprot.readI32()
+                  _val396[_key402] = _val403
               else: 
                 while iprot.peekMap():
-                  _key515 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val516 = iprot.readI32()
-                  _val507[_key515] = _val516
+                  _key404 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val405 = iprot.readI32()
+                  _val396[_key404] = _val405
               iprot.readMapEnd()
-              self.assign[_key506] = _val507
+              self.assign[_key395] = _val396
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5536,135 +5114,135 @@ class MyStructField30Patch:
       elif fid == 3:
         if ftype == TType.MAP:
           self.patchPrior = {}
-          (_ktype518, _vtype519, _size517 ) = iprot.readMapBegin() 
-          if _size517 >= 0:
-            for _i521 in range(_size517):
-              _key522 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val523 = MyStructField30Patch1()
-              _val523.read(iprot)
-              self.patchPrior[_key522] = _val523
+          (_ktype407, _vtype408, _size406 ) = iprot.readMapBegin() 
+          if _size406 >= 0:
+            for _i410 in range(_size406):
+              _key411 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val412 = MyStructField30Patch1()
+              _val412.read(iprot)
+              self.patchPrior[_key411] = _val412
           else: 
             while iprot.peekMap():
-              _key524 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val525 = MyStructField30Patch1()
-              _val525.read(iprot)
-              self.patchPrior[_key524] = _val525
+              _key413 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val414 = MyStructField30Patch1()
+              _val414.read(iprot)
+              self.patchPrior[_key413] = _val414
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.MAP:
           self.add = {}
-          (_ktype527, _vtype528, _size526 ) = iprot.readMapBegin() 
-          if _size526 >= 0:
-            for _i530 in range(_size526):
-              _key531 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val532 = {}
-              (_ktype534, _vtype535, _size533 ) = iprot.readMapBegin() 
-              if _size533 >= 0:
-                for _i537 in range(_size533):
-                  _key538 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val539 = iprot.readI32()
-                  _val532[_key538] = _val539
+          (_ktype416, _vtype417, _size415 ) = iprot.readMapBegin() 
+          if _size415 >= 0:
+            for _i419 in range(_size415):
+              _key420 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val421 = {}
+              (_ktype423, _vtype424, _size422 ) = iprot.readMapBegin() 
+              if _size422 >= 0:
+                for _i426 in range(_size422):
+                  _key427 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val428 = iprot.readI32()
+                  _val421[_key427] = _val428
               else: 
                 while iprot.peekMap():
-                  _key540 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val541 = iprot.readI32()
-                  _val532[_key540] = _val541
+                  _key429 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val430 = iprot.readI32()
+                  _val421[_key429] = _val430
               iprot.readMapEnd()
-              self.add[_key531] = _val532
+              self.add[_key420] = _val421
           else: 
             while iprot.peekMap():
-              _key542 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val543 = {}
-              (_ktype545, _vtype546, _size544 ) = iprot.readMapBegin() 
-              if _size544 >= 0:
-                for _i548 in range(_size544):
-                  _key549 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val550 = iprot.readI32()
-                  _val543[_key549] = _val550
+              _key431 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val432 = {}
+              (_ktype434, _vtype435, _size433 ) = iprot.readMapBegin() 
+              if _size433 >= 0:
+                for _i437 in range(_size433):
+                  _key438 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val439 = iprot.readI32()
+                  _val432[_key438] = _val439
               else: 
                 while iprot.peekMap():
-                  _key551 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val552 = iprot.readI32()
-                  _val543[_key551] = _val552
+                  _key440 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val441 = iprot.readI32()
+                  _val432[_key440] = _val441
               iprot.readMapEnd()
-              self.add[_key542] = _val543
+              self.add[_key431] = _val432
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.MAP:
           self.patch = {}
-          (_ktype554, _vtype555, _size553 ) = iprot.readMapBegin() 
-          if _size553 >= 0:
-            for _i557 in range(_size553):
-              _key558 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val559 = MyStructField30Patch1()
-              _val559.read(iprot)
-              self.patch[_key558] = _val559
+          (_ktype443, _vtype444, _size442 ) = iprot.readMapBegin() 
+          if _size442 >= 0:
+            for _i446 in range(_size442):
+              _key447 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val448 = MyStructField30Patch1()
+              _val448.read(iprot)
+              self.patch[_key447] = _val448
           else: 
             while iprot.peekMap():
-              _key560 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val561 = MyStructField30Patch1()
-              _val561.read(iprot)
-              self.patch[_key560] = _val561
+              _key449 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val450 = MyStructField30Patch1()
+              _val450.read(iprot)
+              self.patch[_key449] = _val450
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype565, _size562) = iprot.readSetBegin()
-          if _size562 >= 0:
-            for _i566 in range(_size562):
-              _elem567 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem567)
+          (_etype454, _size451) = iprot.readSetBegin()
+          if _size451 >= 0:
+            for _i455 in range(_size451):
+              _elem456 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem456)
           else: 
             while iprot.peekSet():
-              _elem568 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem568)
+              _elem457 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem457)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.MAP:
           self.put = {}
-          (_ktype570, _vtype571, _size569 ) = iprot.readMapBegin() 
-          if _size569 >= 0:
-            for _i573 in range(_size569):
-              _key574 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val575 = {}
-              (_ktype577, _vtype578, _size576 ) = iprot.readMapBegin() 
-              if _size576 >= 0:
-                for _i580 in range(_size576):
-                  _key581 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val582 = iprot.readI32()
-                  _val575[_key581] = _val582
+          (_ktype459, _vtype460, _size458 ) = iprot.readMapBegin() 
+          if _size458 >= 0:
+            for _i462 in range(_size458):
+              _key463 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val464 = {}
+              (_ktype466, _vtype467, _size465 ) = iprot.readMapBegin() 
+              if _size465 >= 0:
+                for _i469 in range(_size465):
+                  _key470 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val471 = iprot.readI32()
+                  _val464[_key470] = _val471
               else: 
                 while iprot.peekMap():
-                  _key583 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val584 = iprot.readI32()
-                  _val575[_key583] = _val584
+                  _key472 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val473 = iprot.readI32()
+                  _val464[_key472] = _val473
               iprot.readMapEnd()
-              self.put[_key574] = _val575
+              self.put[_key463] = _val464
           else: 
             while iprot.peekMap():
-              _key585 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val586 = {}
-              (_ktype588, _vtype589, _size587 ) = iprot.readMapBegin() 
-              if _size587 >= 0:
-                for _i591 in range(_size587):
-                  _key592 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val593 = iprot.readI32()
-                  _val586[_key592] = _val593
+              _key474 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val475 = {}
+              (_ktype477, _vtype478, _size476 ) = iprot.readMapBegin() 
+              if _size476 >= 0:
+                for _i480 in range(_size476):
+                  _key481 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val482 = iprot.readI32()
+                  _val475[_key481] = _val482
               else: 
                 while iprot.peekMap():
-                  _key594 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val595 = iprot.readI32()
-                  _val586[_key594] = _val595
+                  _key483 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val484 = iprot.readI32()
+                  _val475[_key483] = _val484
               iprot.readMapEnd()
-              self.put[_key585] = _val586
+              self.put[_key474] = _val475
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5684,12 +5262,12 @@ class MyStructField30Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.assign))
-      for kiter596,viter597 in self.assign.items():
-        oprot.writeString(kiter596.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter596, bytes) else oprot.writeString(kiter596)
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter597))
-        for kiter598,viter599 in viter597.items():
-          oprot.writeString(kiter598.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter598, bytes) else oprot.writeString(kiter598)
-          oprot.writeI32(viter599)
+      for kiter485,viter486 in self.assign.items():
+        oprot.writeString(kiter485.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter485, bytes) else oprot.writeString(kiter485)
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter486))
+        for kiter487,viter488 in viter486.items():
+          oprot.writeString(kiter487.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter487, bytes) else oprot.writeString(kiter487)
+          oprot.writeI32(viter488)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5700,47 +5278,47 @@ class MyStructField30Patch:
     if self.patchPrior != None:
       oprot.writeFieldBegin('patchPrior', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patchPrior))
-      for kiter600,viter601 in self.patchPrior.items():
-        oprot.writeString(kiter600.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter600, bytes) else oprot.writeString(kiter600)
-        viter601.write(oprot)
+      for kiter489,viter490 in self.patchPrior.items():
+        oprot.writeString(kiter489.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter489, bytes) else oprot.writeString(kiter489)
+        viter490.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.MAP, 5)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.add))
-      for kiter602,viter603 in self.add.items():
-        oprot.writeString(kiter602.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter602, bytes) else oprot.writeString(kiter602)
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter603))
-        for kiter604,viter605 in viter603.items():
-          oprot.writeString(kiter604.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter604, bytes) else oprot.writeString(kiter604)
-          oprot.writeI32(viter605)
+      for kiter491,viter492 in self.add.items():
+        oprot.writeString(kiter491.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter491, bytes) else oprot.writeString(kiter491)
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter492))
+        for kiter493,viter494 in viter492.items():
+          oprot.writeString(kiter493.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter493, bytes) else oprot.writeString(kiter493)
+          oprot.writeI32(viter494)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.patch != None:
       oprot.writeFieldBegin('patch', TType.MAP, 6)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patch))
-      for kiter606,viter607 in self.patch.items():
-        oprot.writeString(kiter606.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter606, bytes) else oprot.writeString(kiter606)
-        viter607.write(oprot)
+      for kiter495,viter496 in self.patch.items():
+        oprot.writeString(kiter495.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter495, bytes) else oprot.writeString(kiter495)
+        viter496.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter608 in self.remove:
-        oprot.writeString(iter608.encode('utf-8')) if UTF8STRINGS and not isinstance(iter608, bytes) else oprot.writeString(iter608)
+      for iter497 in self.remove:
+        oprot.writeString(iter497.encode('utf-8')) if UTF8STRINGS and not isinstance(iter497, bytes) else oprot.writeString(iter497)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.put != None:
       oprot.writeFieldBegin('put', TType.MAP, 9)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.put))
-      for kiter609,viter610 in self.put.items():
-        oprot.writeString(kiter609.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter609, bytes) else oprot.writeString(kiter609)
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter610))
-        for kiter611,viter612 in viter610.items():
-          oprot.writeString(kiter611.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter611, bytes) else oprot.writeString(kiter611)
-          oprot.writeI32(viter612)
+      for kiter498,viter499 in self.put.items():
+        oprot.writeString(kiter498.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter498, bytes) else oprot.writeString(kiter498)
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter499))
+        for kiter500,viter501 in viter499.items():
+          oprot.writeString(kiter500.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter500, bytes) else oprot.writeString(kiter500)
+          oprot.writeI32(viter501)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -5761,57 +5339,57 @@ class MyStructField30Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = dict_cls()
-      for _tmp_k613, _tmp_v614 in json_obj['assign'].items():
-        _tmp_kp615 = _tmp_k613
-        _map616 = dict_cls()
-        for _tmp_k617, _tmp_v618 in _tmp_v614.items():
-          _tmp_kp619 = _tmp_k617
-          if _tmp_v618 > 0x7fffffff or _tmp_v618 < -0x80000000:
+      for _tmp_k502, _tmp_v503 in json_obj['assign'].items():
+        _tmp_kp504 = _tmp_k502
+        _map505 = dict_cls()
+        for _tmp_k506, _tmp_v507 in _tmp_v503.items():
+          _tmp_kp508 = _tmp_k506
+          if _tmp_v507 > 0x7fffffff or _tmp_v507 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map616[_tmp_kp619] = _tmp_v618
-        self.assign[_tmp_kp615] = _map616
+          _map505[_tmp_kp508] = _tmp_v507
+        self.assign[_tmp_kp504] = _map505
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = dict_cls()
-      for _tmp_k620, _tmp_v621 in json_obj['patchPrior'].items():
-        _tmp_kp622 = _tmp_k620
-        _struct623 = MyStructField30Patch1()
-        _struct623.readFromJson(_tmp_v621, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patchPrior[_tmp_kp622] = _struct623
+      for _tmp_k509, _tmp_v510 in json_obj['patchPrior'].items():
+        _tmp_kp511 = _tmp_k509
+        _struct512 = MyStructField30Patch1()
+        _struct512.readFromJson(_tmp_v510, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patchPrior[_tmp_kp511] = _struct512
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
-      for _tmp_k624, _tmp_v625 in json_obj['add'].items():
-        _tmp_kp626 = _tmp_k624
-        _map627 = dict_cls()
-        for _tmp_k628, _tmp_v629 in _tmp_v625.items():
-          _tmp_kp630 = _tmp_k628
-          if _tmp_v629 > 0x7fffffff or _tmp_v629 < -0x80000000:
+      for _tmp_k513, _tmp_v514 in json_obj['add'].items():
+        _tmp_kp515 = _tmp_k513
+        _map516 = dict_cls()
+        for _tmp_k517, _tmp_v518 in _tmp_v514.items():
+          _tmp_kp519 = _tmp_k517
+          if _tmp_v518 > 0x7fffffff or _tmp_v518 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map627[_tmp_kp630] = _tmp_v629
-        self.add[_tmp_kp626] = _map627
+          _map516[_tmp_kp519] = _tmp_v518
+        self.add[_tmp_kp515] = _map516
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = dict_cls()
-      for _tmp_k631, _tmp_v632 in json_obj['patch'].items():
-        _tmp_kp633 = _tmp_k631
-        _struct634 = MyStructField30Patch1()
-        _struct634.readFromJson(_tmp_v632, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp633] = _struct634
+      for _tmp_k520, _tmp_v521 in json_obj['patch'].items():
+        _tmp_kp522 = _tmp_k520
+        _struct523 = MyStructField30Patch1()
+        _struct523.readFromJson(_tmp_v521, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patch[_tmp_kp522] = _struct523
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e635 in json_obj['remove']:
-        self.remove.add(_tmp_e635)
+      for _tmp_e524 in json_obj['remove']:
+        self.remove.add(_tmp_e524)
     if 'put' in json_obj and json_obj['put'] is not None:
       self.put = dict_cls()
-      for _tmp_k636, _tmp_v637 in json_obj['put'].items():
-        _tmp_kp638 = _tmp_k636
-        _map639 = dict_cls()
-        for _tmp_k640, _tmp_v641 in _tmp_v637.items():
-          _tmp_kp642 = _tmp_k640
-          if _tmp_v641 > 0x7fffffff or _tmp_v641 < -0x80000000:
+      for _tmp_k525, _tmp_v526 in json_obj['put'].items():
+        _tmp_kp527 = _tmp_k525
+        _map528 = dict_cls()
+        for _tmp_k529, _tmp_v530 in _tmp_v526.items():
+          _tmp_kp531 = _tmp_k529
+          if _tmp_v530 > 0x7fffffff or _tmp_v530 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map639[_tmp_kp642] = _tmp_v641
-        self.put[_tmp_kp638] = _map639
+          _map528[_tmp_kp531] = _tmp_v530
+        self.put[_tmp_kp527] = _map528
 
   def __repr__(self):
     L = []
@@ -5924,17 +5502,17 @@ class MyStructField30Patch1:
       if fid == 1:
         if ftype == TType.MAP:
           self.assign = {}
-          (_ktype644, _vtype645, _size643 ) = iprot.readMapBegin() 
-          if _size643 >= 0:
-            for _i647 in range(_size643):
-              _key648 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val649 = iprot.readI32()
-              self.assign[_key648] = _val649
+          (_ktype533, _vtype534, _size532 ) = iprot.readMapBegin() 
+          if _size532 >= 0:
+            for _i536 in range(_size532):
+              _key537 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val538 = iprot.readI32()
+              self.assign[_key537] = _val538
           else: 
             while iprot.peekMap():
-              _key650 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val651 = iprot.readI32()
-              self.assign[_key650] = _val651
+              _key539 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val540 = iprot.readI32()
+              self.assign[_key539] = _val540
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -5946,87 +5524,87 @@ class MyStructField30Patch1:
       elif fid == 3:
         if ftype == TType.MAP:
           self.patchPrior = {}
-          (_ktype653, _vtype654, _size652 ) = iprot.readMapBegin() 
-          if _size652 >= 0:
-            for _i656 in range(_size652):
-              _key657 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val658 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val658.read(iprot)
-              self.patchPrior[_key657] = _val658
+          (_ktype542, _vtype543, _size541 ) = iprot.readMapBegin() 
+          if _size541 >= 0:
+            for _i545 in range(_size541):
+              _key546 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val547 = thrift.lib.thrift.patch.ttypes.I32Patch()
+              _val547.read(iprot)
+              self.patchPrior[_key546] = _val547
           else: 
             while iprot.peekMap():
-              _key659 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val660 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val660.read(iprot)
-              self.patchPrior[_key659] = _val660
+              _key548 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val549 = thrift.lib.thrift.patch.ttypes.I32Patch()
+              _val549.read(iprot)
+              self.patchPrior[_key548] = _val549
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.MAP:
           self.add = {}
-          (_ktype662, _vtype663, _size661 ) = iprot.readMapBegin() 
-          if _size661 >= 0:
-            for _i665 in range(_size661):
-              _key666 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val667 = iprot.readI32()
-              self.add[_key666] = _val667
+          (_ktype551, _vtype552, _size550 ) = iprot.readMapBegin() 
+          if _size550 >= 0:
+            for _i554 in range(_size550):
+              _key555 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val556 = iprot.readI32()
+              self.add[_key555] = _val556
           else: 
             while iprot.peekMap():
-              _key668 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val669 = iprot.readI32()
-              self.add[_key668] = _val669
+              _key557 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val558 = iprot.readI32()
+              self.add[_key557] = _val558
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.MAP:
           self.patch = {}
-          (_ktype671, _vtype672, _size670 ) = iprot.readMapBegin() 
-          if _size670 >= 0:
-            for _i674 in range(_size670):
-              _key675 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val676 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val676.read(iprot)
-              self.patch[_key675] = _val676
+          (_ktype560, _vtype561, _size559 ) = iprot.readMapBegin() 
+          if _size559 >= 0:
+            for _i563 in range(_size559):
+              _key564 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val565 = thrift.lib.thrift.patch.ttypes.I32Patch()
+              _val565.read(iprot)
+              self.patch[_key564] = _val565
           else: 
             while iprot.peekMap():
-              _key677 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val678 = thrift.lib.thrift.patch.ttypes.I32Patch()
-              _val678.read(iprot)
-              self.patch[_key677] = _val678
+              _key566 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val567 = thrift.lib.thrift.patch.ttypes.I32Patch()
+              _val567.read(iprot)
+              self.patch[_key566] = _val567
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype682, _size679) = iprot.readSetBegin()
-          if _size679 >= 0:
-            for _i683 in range(_size679):
-              _elem684 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem684)
+          (_etype571, _size568) = iprot.readSetBegin()
+          if _size568 >= 0:
+            for _i572 in range(_size568):
+              _elem573 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem573)
           else: 
             while iprot.peekSet():
-              _elem685 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem685)
+              _elem574 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem574)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.MAP:
           self.put = {}
-          (_ktype687, _vtype688, _size686 ) = iprot.readMapBegin() 
-          if _size686 >= 0:
-            for _i690 in range(_size686):
-              _key691 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val692 = iprot.readI32()
-              self.put[_key691] = _val692
+          (_ktype576, _vtype577, _size575 ) = iprot.readMapBegin() 
+          if _size575 >= 0:
+            for _i579 in range(_size575):
+              _key580 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val581 = iprot.readI32()
+              self.put[_key580] = _val581
           else: 
             while iprot.peekMap():
-              _key693 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val694 = iprot.readI32()
-              self.put[_key693] = _val694
+              _key582 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val583 = iprot.readI32()
+              self.put[_key582] = _val583
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -6046,9 +5624,9 @@ class MyStructField30Patch1:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.assign))
-      for kiter695,viter696 in self.assign.items():
-        oprot.writeString(kiter695.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter695, bytes) else oprot.writeString(kiter695)
-        oprot.writeI32(viter696)
+      for kiter584,viter585 in self.assign.items():
+        oprot.writeString(kiter584.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter584, bytes) else oprot.writeString(kiter584)
+        oprot.writeI32(viter585)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -6058,40 +5636,40 @@ class MyStructField30Patch1:
     if self.patchPrior != None:
       oprot.writeFieldBegin('patchPrior', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patchPrior))
-      for kiter697,viter698 in self.patchPrior.items():
-        oprot.writeString(kiter697.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter697, bytes) else oprot.writeString(kiter697)
-        viter698.write(oprot)
+      for kiter586,viter587 in self.patchPrior.items():
+        oprot.writeString(kiter586.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter586, bytes) else oprot.writeString(kiter586)
+        viter587.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.MAP, 5)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.add))
-      for kiter699,viter700 in self.add.items():
-        oprot.writeString(kiter699.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter699, bytes) else oprot.writeString(kiter699)
-        oprot.writeI32(viter700)
+      for kiter588,viter589 in self.add.items():
+        oprot.writeString(kiter588.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter588, bytes) else oprot.writeString(kiter588)
+        oprot.writeI32(viter589)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.patch != None:
       oprot.writeFieldBegin('patch', TType.MAP, 6)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.patch))
-      for kiter701,viter702 in self.patch.items():
-        oprot.writeString(kiter701.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter701, bytes) else oprot.writeString(kiter701)
-        viter702.write(oprot)
+      for kiter590,viter591 in self.patch.items():
+        oprot.writeString(kiter590.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter590, bytes) else oprot.writeString(kiter590)
+        viter591.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter703 in self.remove:
-        oprot.writeString(iter703.encode('utf-8')) if UTF8STRINGS and not isinstance(iter703, bytes) else oprot.writeString(iter703)
+      for iter592 in self.remove:
+        oprot.writeString(iter592.encode('utf-8')) if UTF8STRINGS and not isinstance(iter592, bytes) else oprot.writeString(iter592)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.put != None:
       oprot.writeFieldBegin('put', TType.MAP, 9)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.put))
-      for kiter704,viter705 in self.put.items():
-        oprot.writeString(kiter704.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter704, bytes) else oprot.writeString(kiter704)
-        oprot.writeI32(viter705)
+      for kiter593,viter594 in self.put.items():
+        oprot.writeString(kiter593.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter593, bytes) else oprot.writeString(kiter593)
+        oprot.writeI32(viter594)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -6111,45 +5689,45 @@ class MyStructField30Patch1:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = dict_cls()
-      for _tmp_k706, _tmp_v707 in json_obj['assign'].items():
-        _tmp_kp708 = _tmp_k706
-        if _tmp_v707 > 0x7fffffff or _tmp_v707 < -0x80000000:
+      for _tmp_k595, _tmp_v596 in json_obj['assign'].items():
+        _tmp_kp597 = _tmp_k595
+        if _tmp_v596 > 0x7fffffff or _tmp_v596 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign[_tmp_kp708] = _tmp_v707
+        self.assign[_tmp_kp597] = _tmp_v596
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'patchPrior' in json_obj and json_obj['patchPrior'] is not None:
       self.patchPrior = dict_cls()
-      for _tmp_k709, _tmp_v710 in json_obj['patchPrior'].items():
-        _tmp_kp711 = _tmp_k709
-        _struct712 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct712.readFromJson(_tmp_v710, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patchPrior[_tmp_kp711] = _struct712
+      for _tmp_k598, _tmp_v599 in json_obj['patchPrior'].items():
+        _tmp_kp600 = _tmp_k598
+        _struct601 = thrift.lib.thrift.patch.ttypes.I32Patch()
+        _struct601.readFromJson(_tmp_v599, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patchPrior[_tmp_kp600] = _struct601
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
-      for _tmp_k713, _tmp_v714 in json_obj['add'].items():
-        _tmp_kp715 = _tmp_k713
-        if _tmp_v714 > 0x7fffffff or _tmp_v714 < -0x80000000:
+      for _tmp_k602, _tmp_v603 in json_obj['add'].items():
+        _tmp_kp604 = _tmp_k602
+        if _tmp_v603 > 0x7fffffff or _tmp_v603 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.add[_tmp_kp715] = _tmp_v714
+        self.add[_tmp_kp604] = _tmp_v603
     if 'patch' in json_obj and json_obj['patch'] is not None:
       self.patch = dict_cls()
-      for _tmp_k716, _tmp_v717 in json_obj['patch'].items():
-        _tmp_kp718 = _tmp_k716
-        _struct719 = thrift.lib.thrift.patch.ttypes.I32Patch()
-        _struct719.readFromJson(_tmp_v717, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.patch[_tmp_kp718] = _struct719
+      for _tmp_k605, _tmp_v606 in json_obj['patch'].items():
+        _tmp_kp607 = _tmp_k605
+        _struct608 = thrift.lib.thrift.patch.ttypes.I32Patch()
+        _struct608.readFromJson(_tmp_v606, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.patch[_tmp_kp607] = _struct608
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e720 in json_obj['remove']:
-        self.remove.add(_tmp_e720)
+      for _tmp_e609 in json_obj['remove']:
+        self.remove.add(_tmp_e609)
     if 'put' in json_obj and json_obj['put'] is not None:
       self.put = dict_cls()
-      for _tmp_k721, _tmp_v722 in json_obj['put'].items():
-        _tmp_kp723 = _tmp_k721
-        if _tmp_v722 > 0x7fffffff or _tmp_v722 < -0x80000000:
+      for _tmp_k610, _tmp_v611 in json_obj['put'].items():
+        _tmp_kp612 = _tmp_k610
+        if _tmp_v611 > 0x7fffffff or _tmp_v611 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.put[_tmp_kp723] = _tmp_v722
+        self.put[_tmp_kp612] = _tmp_v611
 
   def __repr__(self):
     L = []
@@ -7011,127 +6589,127 @@ class MyStructEnsureStruct:
       elif fid == -30:
         if ftype == TType.MAP:
           self.mapMap = {}
-          (_ktype725, _vtype726, _size724 ) = iprot.readMapBegin() 
-          if _size724 >= 0:
-            for _i728 in range(_size724):
-              _key729 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val730 = {}
-              (_ktype732, _vtype733, _size731 ) = iprot.readMapBegin() 
-              if _size731 >= 0:
-                for _i735 in range(_size731):
-                  _key736 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val737 = iprot.readI32()
-                  _val730[_key736] = _val737
+          (_ktype614, _vtype615, _size613 ) = iprot.readMapBegin() 
+          if _size613 >= 0:
+            for _i617 in range(_size613):
+              _key618 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val619 = {}
+              (_ktype621, _vtype622, _size620 ) = iprot.readMapBegin() 
+              if _size620 >= 0:
+                for _i624 in range(_size620):
+                  _key625 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val626 = iprot.readI32()
+                  _val619[_key625] = _val626
               else: 
                 while iprot.peekMap():
-                  _key738 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val739 = iprot.readI32()
-                  _val730[_key738] = _val739
+                  _key627 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val628 = iprot.readI32()
+                  _val619[_key627] = _val628
               iprot.readMapEnd()
-              self.mapMap[_key729] = _val730
+              self.mapMap[_key618] = _val619
           else: 
             while iprot.peekMap():
-              _key740 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val741 = {}
-              (_ktype743, _vtype744, _size742 ) = iprot.readMapBegin() 
-              if _size742 >= 0:
-                for _i746 in range(_size742):
-                  _key747 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val748 = iprot.readI32()
-                  _val741[_key747] = _val748
+              _key629 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val630 = {}
+              (_ktype632, _vtype633, _size631 ) = iprot.readMapBegin() 
+              if _size631 >= 0:
+                for _i635 in range(_size631):
+                  _key636 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val637 = iprot.readI32()
+                  _val630[_key636] = _val637
               else: 
                 while iprot.peekMap():
-                  _key749 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val750 = iprot.readI32()
-                  _val741[_key749] = _val750
+                  _key638 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val639 = iprot.readI32()
+                  _val630[_key638] = _val639
               iprot.readMapEnd()
-              self.mapMap[_key740] = _val741
+              self.mapMap[_key629] = _val630
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == -29:
         if ftype == TType.LIST:
           self.listMap = []
-          (_etype754, _size751) = iprot.readListBegin()
-          if _size751 >= 0:
-            for _i755 in range(_size751):
-              _elem756 = {}
-              (_ktype758, _vtype759, _size757 ) = iprot.readMapBegin() 
-              if _size757 >= 0:
-                for _i761 in range(_size757):
-                  _key762 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val763 = iprot.readI32()
-                  _elem756[_key762] = _val763
+          (_etype643, _size640) = iprot.readListBegin()
+          if _size640 >= 0:
+            for _i644 in range(_size640):
+              _elem645 = {}
+              (_ktype647, _vtype648, _size646 ) = iprot.readMapBegin() 
+              if _size646 >= 0:
+                for _i650 in range(_size646):
+                  _key651 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val652 = iprot.readI32()
+                  _elem645[_key651] = _val652
               else: 
                 while iprot.peekMap():
-                  _key764 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val765 = iprot.readI32()
-                  _elem756[_key764] = _val765
+                  _key653 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val654 = iprot.readI32()
+                  _elem645[_key653] = _val654
               iprot.readMapEnd()
-              self.listMap.append(_elem756)
+              self.listMap.append(_elem645)
           else: 
             while iprot.peekList():
-              _elem766 = {}
-              (_ktype768, _vtype769, _size767 ) = iprot.readMapBegin() 
-              if _size767 >= 0:
-                for _i771 in range(_size767):
-                  _key772 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val773 = iprot.readI32()
-                  _elem766[_key772] = _val773
+              _elem655 = {}
+              (_ktype657, _vtype658, _size656 ) = iprot.readMapBegin() 
+              if _size656 >= 0:
+                for _i660 in range(_size656):
+                  _key661 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val662 = iprot.readI32()
+                  _elem655[_key661] = _val662
               else: 
                 while iprot.peekMap():
-                  _key774 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val775 = iprot.readI32()
-                  _elem766[_key774] = _val775
+                  _key663 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val664 = iprot.readI32()
+                  _elem655[_key663] = _val664
               iprot.readMapEnd()
-              self.listMap.append(_elem766)
+              self.listMap.append(_elem655)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == -28:
         if ftype == TType.MAP:
           self.optMapVal = {}
-          (_ktype777, _vtype778, _size776 ) = iprot.readMapBegin() 
-          if _size776 >= 0:
-            for _i780 in range(_size776):
-              _key781 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val782 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.optMapVal[_key781] = _val782
+          (_ktype666, _vtype667, _size665 ) = iprot.readMapBegin() 
+          if _size665 >= 0:
+            for _i669 in range(_size665):
+              _key670 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val671 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.optMapVal[_key670] = _val671
           else: 
             while iprot.peekMap():
-              _key783 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val784 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.optMapVal[_key783] = _val784
+              _key672 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val673 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.optMapVal[_key672] = _val673
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == -27:
         if ftype == TType.SET:
           self.optSetVal = set()
-          (_etype788, _size785) = iprot.readSetBegin()
-          if _size785 >= 0:
-            for _i789 in range(_size785):
-              _elem790 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.optSetVal.add(_elem790)
+          (_etype677, _size674) = iprot.readSetBegin()
+          if _size674 >= 0:
+            for _i678 in range(_size674):
+              _elem679 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.optSetVal.add(_elem679)
           else: 
             while iprot.peekSet():
-              _elem791 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.optSetVal.add(_elem791)
+              _elem680 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.optSetVal.add(_elem680)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == -26:
         if ftype == TType.LIST:
           self.optListVal = []
-          (_etype795, _size792) = iprot.readListBegin()
-          if _size792 >= 0:
-            for _i796 in range(_size792):
-              _elem797 = iprot.readI16()
-              self.optListVal.append(_elem797)
+          (_etype684, _size681) = iprot.readListBegin()
+          if _size681 >= 0:
+            for _i685 in range(_size681):
+              _elem686 = iprot.readI16()
+              self.optListVal.append(_elem686)
           else: 
             while iprot.peekList():
-              _elem798 = iprot.readI16()
-              self.optListVal.append(_elem798)
+              _elem687 = iprot.readI16()
+              self.optListVal.append(_elem687)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -7295,46 +6873,46 @@ class MyStructEnsureStruct:
     if self.mapMap != None:
       oprot.writeFieldBegin('mapMap', TType.MAP, -30)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.mapMap))
-      for kiter799,viter800 in self.mapMap.items():
-        oprot.writeString(kiter799.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter799, bytes) else oprot.writeString(kiter799)
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter800))
-        for kiter801,viter802 in viter800.items():
-          oprot.writeString(kiter801.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter801, bytes) else oprot.writeString(kiter801)
-          oprot.writeI32(viter802)
+      for kiter688,viter689 in self.mapMap.items():
+        oprot.writeString(kiter688.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter688, bytes) else oprot.writeString(kiter688)
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(viter689))
+        for kiter690,viter691 in viter689.items():
+          oprot.writeString(kiter690.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter690, bytes) else oprot.writeString(kiter690)
+          oprot.writeI32(viter691)
         oprot.writeMapEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.listMap != None:
       oprot.writeFieldBegin('listMap', TType.LIST, -29)
       oprot.writeListBegin(TType.MAP, len(self.listMap))
-      for iter803 in self.listMap:
-        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter803))
-        for kiter804,viter805 in iter803.items():
-          oprot.writeString(kiter804.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter804, bytes) else oprot.writeString(kiter804)
-          oprot.writeI32(viter805)
+      for iter692 in self.listMap:
+        oprot.writeMapBegin(TType.STRING, TType.I32, len(iter692))
+        for kiter693,viter694 in iter692.items():
+          oprot.writeString(kiter693.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter693, bytes) else oprot.writeString(kiter693)
+          oprot.writeI32(viter694)
         oprot.writeMapEnd()
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.optMapVal != None:
       oprot.writeFieldBegin('optMapVal', TType.MAP, -28)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.optMapVal))
-      for kiter806,viter807 in self.optMapVal.items():
-        oprot.writeString(kiter806.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter806, bytes) else oprot.writeString(kiter806)
-        oprot.writeString(viter807.encode('utf-8')) if UTF8STRINGS and not isinstance(viter807, bytes) else oprot.writeString(viter807)
+      for kiter695,viter696 in self.optMapVal.items():
+        oprot.writeString(kiter695.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter695, bytes) else oprot.writeString(kiter695)
+        oprot.writeString(viter696.encode('utf-8')) if UTF8STRINGS and not isinstance(viter696, bytes) else oprot.writeString(viter696)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.optSetVal != None:
       oprot.writeFieldBegin('optSetVal', TType.SET, -27)
       oprot.writeSetBegin(TType.STRING, len(self.optSetVal))
-      for iter808 in self.optSetVal:
-        oprot.writeString(iter808.encode('utf-8')) if UTF8STRINGS and not isinstance(iter808, bytes) else oprot.writeString(iter808)
+      for iter697 in self.optSetVal:
+        oprot.writeString(iter697.encode('utf-8')) if UTF8STRINGS and not isinstance(iter697, bytes) else oprot.writeString(iter697)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.optListVal != None:
       oprot.writeFieldBegin('optListVal', TType.LIST, -26)
       oprot.writeListBegin(TType.I16, len(self.optListVal))
-      for iter809 in self.optListVal:
-        oprot.writeI16(iter809)
+      for iter698 in self.optListVal:
+        oprot.writeI16(iter698)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.optLateStructVal != None:
@@ -7465,40 +7043,40 @@ class MyStructEnsureStruct:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
     if 'mapMap' in json_obj and json_obj['mapMap'] is not None:
       self.mapMap = dict_cls()
-      for _tmp_k810, _tmp_v811 in json_obj['mapMap'].items():
-        _tmp_kp812 = _tmp_k810
-        _map813 = dict_cls()
-        for _tmp_k814, _tmp_v815 in _tmp_v811.items():
-          _tmp_kp816 = _tmp_k814
-          if _tmp_v815 > 0x7fffffff or _tmp_v815 < -0x80000000:
+      for _tmp_k699, _tmp_v700 in json_obj['mapMap'].items():
+        _tmp_kp701 = _tmp_k699
+        _map702 = dict_cls()
+        for _tmp_k703, _tmp_v704 in _tmp_v700.items():
+          _tmp_kp705 = _tmp_k703
+          if _tmp_v704 > 0x7fffffff or _tmp_v704 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map813[_tmp_kp816] = _tmp_v815
-        self.mapMap[_tmp_kp812] = _map813
+          _map702[_tmp_kp705] = _tmp_v704
+        self.mapMap[_tmp_kp701] = _map702
     if 'listMap' in json_obj and json_obj['listMap'] is not None:
       self.listMap = []
-      for _tmp_e817 in json_obj['listMap']:
-        _map818 = dict_cls()
-        for _tmp_k819, _tmp_v820 in _tmp_e817.items():
-          _tmp_kp821 = _tmp_k819
-          if _tmp_v820 > 0x7fffffff or _tmp_v820 < -0x80000000:
+      for _tmp_e706 in json_obj['listMap']:
+        _map707 = dict_cls()
+        for _tmp_k708, _tmp_v709 in _tmp_e706.items():
+          _tmp_kp710 = _tmp_k708
+          if _tmp_v709 > 0x7fffffff or _tmp_v709 < -0x80000000:
             raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-          _map818[_tmp_kp821] = _tmp_v820
-        self.listMap.append(_map818)
+          _map707[_tmp_kp710] = _tmp_v709
+        self.listMap.append(_map707)
     if 'optMapVal' in json_obj and json_obj['optMapVal'] is not None:
       self.optMapVal = dict_cls()
-      for _tmp_k822, _tmp_v823 in json_obj['optMapVal'].items():
-        _tmp_kp824 = _tmp_k822
-        self.optMapVal[_tmp_kp824] = _tmp_v823
+      for _tmp_k711, _tmp_v712 in json_obj['optMapVal'].items():
+        _tmp_kp713 = _tmp_k711
+        self.optMapVal[_tmp_kp713] = _tmp_v712
     if 'optSetVal' in json_obj and json_obj['optSetVal'] is not None:
       self.optSetVal = set_cls()
-      for _tmp_e825 in json_obj['optSetVal']:
-        self.optSetVal.add(_tmp_e825)
+      for _tmp_e714 in json_obj['optSetVal']:
+        self.optSetVal.add(_tmp_e714)
     if 'optListVal' in json_obj and json_obj['optListVal'] is not None:
       self.optListVal = []
-      for _tmp_e826 in json_obj['optListVal']:
-        if _tmp_e826 > 0x7fff or _tmp_e826 < -0x8000:
+      for _tmp_e715 in json_obj['optListVal']:
+        if _tmp_e715 > 0x7fff or _tmp_e715 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.optListVal.append(_tmp_e826)
+        self.optListVal.append(_tmp_e715)
     if 'optLateStructVal' in json_obj and json_obj['optLateStructVal'] is not None:
       self.optLateStructVal = LateDefStruct()
       self.optLateStructVal.readFromJson(json_obj['optLateStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -7851,15 +7429,15 @@ class LateDefStructPatch:
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype830, _size827) = iprot.readSetBegin()
-          if _size827 >= 0:
-            for _i831 in range(_size827):
-              _elem832 = iprot.readI16()
-              self.remove.add(_elem832)
+          (_etype719, _size716) = iprot.readSetBegin()
+          if _size716 >= 0:
+            for _i720 in range(_size716):
+              _elem721 = iprot.readI16()
+              self.remove.add(_elem721)
           else: 
             while iprot.peekSet():
-              _elem833 = iprot.readI16()
-              self.remove.add(_elem833)
+              _elem722 = iprot.readI16()
+              self.remove.add(_elem722)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -7899,8 +7477,8 @@ class LateDefStructPatch:
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.I16, len(self.remove))
-      for iter834 in self.remove:
-        oprot.writeI16(iter834)
+      for iter723 in self.remove:
+        oprot.writeI16(iter723)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -7934,10 +7512,10 @@ class LateDefStructPatch:
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e835 in json_obj['remove']:
-        if _tmp_e835 > 0x7fff or _tmp_e835 < -0x8000:
+      for _tmp_e724 in json_obj['remove']:
+        if _tmp_e724 > 0x7fff or _tmp_e724 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e835)
+        self.remove.add(_tmp_e724)
 
   def __repr__(self):
     L = []
@@ -8245,15 +7823,15 @@ class RecursivePatch:
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype839, _size836) = iprot.readSetBegin()
-          if _size836 >= 0:
-            for _i840 in range(_size836):
-              _elem841 = iprot.readI16()
-              self.remove.add(_elem841)
+          (_etype728, _size725) = iprot.readSetBegin()
+          if _size725 >= 0:
+            for _i729 in range(_size725):
+              _elem730 = iprot.readI16()
+              self.remove.add(_elem730)
           else: 
             while iprot.peekSet():
-              _elem842 = iprot.readI16()
-              self.remove.add(_elem842)
+              _elem731 = iprot.readI16()
+              self.remove.add(_elem731)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -8293,8 +7871,8 @@ class RecursivePatch:
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.I16, len(self.remove))
-      for iter843 in self.remove:
-        oprot.writeI16(iter843)
+      for iter732 in self.remove:
+        oprot.writeI16(iter732)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -8328,10 +7906,10 @@ class RecursivePatch:
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e844 in json_obj['remove']:
-        if _tmp_e844 > 0x7fff or _tmp_e844 < -0x8000:
+      for _tmp_e733 in json_obj['remove']:
+        if _tmp_e733 > 0x7fff or _tmp_e733 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e844)
+        self.remove.add(_tmp_e733)
 
   def __repr__(self):
     L = []
@@ -8434,19 +8012,19 @@ class RecursiveField1Patch:
       if fid == 1:
         if ftype == TType.MAP:
           self.assign = {}
-          (_ktype846, _vtype847, _size845 ) = iprot.readMapBegin() 
-          if _size845 >= 0:
-            for _i849 in range(_size845):
-              _key850 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val851 = Recursive()
-              _val851.read(iprot)
-              self.assign[_key850] = _val851
+          (_ktype735, _vtype736, _size734 ) = iprot.readMapBegin() 
+          if _size734 >= 0:
+            for _i738 in range(_size734):
+              _key739 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val740 = Recursive()
+              _val740.read(iprot)
+              self.assign[_key739] = _val740
           else: 
             while iprot.peekMap():
-              _key852 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val853 = Recursive()
-              _val853.read(iprot)
-              self.assign[_key852] = _val853
+              _key741 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val742 = Recursive()
+              _val742.read(iprot)
+              self.assign[_key741] = _val742
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -8471,9 +8049,9 @@ class RecursiveField1Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.assign))
-      for kiter854,viter855 in self.assign.items():
-        oprot.writeString(kiter854.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter854, bytes) else oprot.writeString(kiter854)
-        viter855.write(oprot)
+      for kiter743,viter744 in self.assign.items():
+        oprot.writeString(kiter743.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter743, bytes) else oprot.writeString(kiter743)
+        viter744.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -8497,11 +8075,11 @@ class RecursiveField1Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = dict_cls()
-      for _tmp_k856, _tmp_v857 in json_obj['assign'].items():
-        _tmp_kp858 = _tmp_k856
-        _struct859 = Recursive()
-        _struct859.readFromJson(_tmp_v857, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.assign[_tmp_kp858] = _struct859
+      for _tmp_k745, _tmp_v746 in json_obj['assign'].items():
+        _tmp_kp747 = _tmp_k745
+        _struct748 = Recursive()
+        _struct748.readFromJson(_tmp_v746, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.assign[_tmp_kp747] = _struct748
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
 
@@ -8689,19 +8267,19 @@ class RecursiveEnsureStruct:
       if fid == -1:
         if ftype == TType.MAP:
           self.nodes = {}
-          (_ktype861, _vtype862, _size860 ) = iprot.readMapBegin() 
-          if _size860 >= 0:
-            for _i864 in range(_size860):
-              _key865 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val866 = Recursive()
-              _val866.read(iprot)
-              self.nodes[_key865] = _val866
+          (_ktype750, _vtype751, _size749 ) = iprot.readMapBegin() 
+          if _size749 >= 0:
+            for _i753 in range(_size749):
+              _key754 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val755 = Recursive()
+              _val755.read(iprot)
+              self.nodes[_key754] = _val755
           else: 
             while iprot.peekMap():
-              _key867 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val868 = Recursive()
-              _val868.read(iprot)
-              self.nodes[_key867] = _val868
+              _key756 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val757 = Recursive()
+              _val757.read(iprot)
+              self.nodes[_key756] = _val757
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -8721,9 +8299,9 @@ class RecursiveEnsureStruct:
     if self.nodes != None:
       oprot.writeFieldBegin('nodes', TType.MAP, -1)
       oprot.writeMapBegin(TType.STRING, TType.STRUCT, len(self.nodes))
-      for kiter869,viter870 in self.nodes.items():
-        oprot.writeString(kiter869.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter869, bytes) else oprot.writeString(kiter869)
-        viter870.write(oprot)
+      for kiter758,viter759 in self.nodes.items():
+        oprot.writeString(kiter758.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter758, bytes) else oprot.writeString(kiter758)
+        viter759.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -8743,11 +8321,11 @@ class RecursiveEnsureStruct:
       json_obj = loads(json)
     if 'nodes' in json_obj and json_obj['nodes'] is not None:
       self.nodes = dict_cls()
-      for _tmp_k871, _tmp_v872 in json_obj['nodes'].items():
-        _tmp_kp873 = _tmp_k871
-        _struct874 = Recursive()
-        _struct874.readFromJson(_tmp_v872, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-        self.nodes[_tmp_kp873] = _struct874
+      for _tmp_k760, _tmp_v761 in json_obj['nodes'].items():
+        _tmp_kp762 = _tmp_k760
+        _struct763 = Recursive()
+        _struct763.readFromJson(_tmp_v761, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+        self.nodes[_tmp_kp762] = _struct763
 
   def __repr__(self):
     L = []
@@ -8858,15 +8436,15 @@ class BarPatch:
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype878, _size875) = iprot.readSetBegin()
-          if _size875 >= 0:
-            for _i879 in range(_size875):
-              _elem880 = iprot.readI16()
-              self.remove.add(_elem880)
+          (_etype767, _size764) = iprot.readSetBegin()
+          if _size764 >= 0:
+            for _i768 in range(_size764):
+              _elem769 = iprot.readI16()
+              self.remove.add(_elem769)
           else: 
             while iprot.peekSet():
-              _elem881 = iprot.readI16()
-              self.remove.add(_elem881)
+              _elem770 = iprot.readI16()
+              self.remove.add(_elem770)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -8906,8 +8484,8 @@ class BarPatch:
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.I16, len(self.remove))
-      for iter882 in self.remove:
-        oprot.writeI16(iter882)
+      for iter771 in self.remove:
+        oprot.writeI16(iter771)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -8941,10 +8519,10 @@ class BarPatch:
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e883 in json_obj['remove']:
-        if _tmp_e883 > 0x7fff or _tmp_e883 < -0x8000:
+      for _tmp_e772 in json_obj['remove']:
+        if _tmp_e772 > 0x7fff or _tmp_e772 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e883)
+        self.remove.add(_tmp_e772)
 
   def __repr__(self):
     L = []
@@ -10099,7 +9677,7 @@ MyStructField26Patch.thrift_spec = (
   None, # 0
   (1, TType.LIST, 'assign', (TType.I16,None), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  (3, TType.MAP, 'patch', (TType.I32,None,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False]), None, 3, ), # 3
+  None, # 3
   None, # 4
   None, # 5
   None, # 6
@@ -10113,10 +9691,9 @@ MyStructField26Patch.thrift_struct_annotations = {
 MyStructField26Patch.thrift_field_annotations = {
 }
 
-def MyStructField26Patch__init__(self, assign=None, clear=None, patch=None, prepend=None, append=None,):
+def MyStructField26Patch__init__(self, assign=None, clear=None, prepend=None, append=None,):
   self.assign = assign
   self.clear = clear
-  self.patch = patch
   self.prepend = prepend
   self.append = append
 
@@ -10125,7 +9702,6 @@ MyStructField26Patch.__init__ = MyStructField26Patch__init__
 def MyStructField26Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
-  state.setdefault('patch', None)
   state.setdefault('prepend', None)
   state.setdefault('append', None)
   self.__dict__ = state
@@ -10217,7 +9793,7 @@ MyStructField29Patch.thrift_spec = (
   None, # 0
   (1, TType.LIST, 'assign', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  (3, TType.MAP, 'patch', (TType.I32,None,TType.STRUCT,[MyStructField29Patch1, MyStructField29Patch1.thrift_spec, False]), None, 3, ), # 3
+  None, # 3
   None, # 4
   None, # 5
   None, # 6
@@ -10231,10 +9807,9 @@ MyStructField29Patch.thrift_struct_annotations = {
 MyStructField29Patch.thrift_field_annotations = {
 }
 
-def MyStructField29Patch__init__(self, assign=None, clear=None, patch=None, prepend=None, append=None,):
+def MyStructField29Patch__init__(self, assign=None, clear=None, prepend=None, append=None,):
   self.assign = assign
   self.clear = clear
-  self.patch = patch
   self.prepend = prepend
   self.append = append
 
@@ -10243,56 +9818,12 @@ MyStructField29Patch.__init__ = MyStructField29Patch__init__
 def MyStructField29Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
-  state.setdefault('patch', None)
   state.setdefault('prepend', None)
   state.setdefault('append', None)
   self.__dict__ = state
 
 MyStructField29Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField29Patch.__setstate__ = MyStructField29Patch__setstate__
-
-all_structs.append(MyStructField29Patch1)
-MyStructField29Patch1.thrift_spec = (
-  None, # 0
-  (1, TType.MAP, 'assign', (TType.STRING,True,TType.I32,None), None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 3, ), # 3
-  None, # 4
-  (5, TType.MAP, 'add', (TType.STRING,True,TType.I32,None), None, 3, ), # 5
-  (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.STRING,True), None, 3, ), # 7
-  None, # 8
-  (9, TType.MAP, 'put', (TType.STRING,True,TType.I32,None), None, 3, ), # 9
-)
-
-MyStructField29Patch1.thrift_struct_annotations = {
-}
-MyStructField29Patch1.thrift_field_annotations = {
-}
-
-def MyStructField29Patch1__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
-  self.assign = assign
-  self.clear = clear
-  self.patchPrior = patchPrior
-  self.add = add
-  self.patch = patch
-  self.remove = remove
-  self.put = put
-
-MyStructField29Patch1.__init__ = MyStructField29Patch1__init__
-
-def MyStructField29Patch1__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('patchPrior', None)
-  state.setdefault('add', None)
-  state.setdefault('patch', None)
-  state.setdefault('remove', None)
-  state.setdefault('put', None)
-  self.__dict__ = state
-
-MyStructField29Patch1.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField29Patch1.__setstate__ = MyStructField29Patch1__setstate__
 
 all_structs.append(MyStructField30Patch)
 MyStructField30Patch.thrift_spec = (

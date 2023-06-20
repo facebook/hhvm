@@ -117,10 +117,6 @@ type FieldId = id1.FieldId
 
 func FieldIdPtr(v FieldId) *FieldId { return &v }
 
-type ListPatchIndex = int32
-
-func ListPatchIndexPtr(v ListPatchIndex) *ListPatchIndex { return &v }
-
 // An annotation that indicates a patch representation should be generated for
 // the associated definition.
 type GeneratePatch struct {

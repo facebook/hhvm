@@ -39,27 +39,6 @@ auto single(T&& t) {
   return folly::Range{&t, 1};
 }
 
-class ListPatchIndex
-    : public type::detail::EqWrap<ListPatchIndex, std::int32_t> {
- private:
-  using Base = type::detail::EqWrap<ListPatchIndex, std::int32_t>;
-
- public:
-  ListPatchIndex() = default;
-  explicit ListPatchIndex(size_t pos) : Base(util::toI32ZigZagOrdinal(pos)) {}
-  size_t position() const { return util::fromI32ZigZagOrdinal(toThrift()); }
-
- private:
-  template <class>
-  friend struct ::apache::thrift::InlineAdapter;
-  template <class>
-  friend struct ::std::hash;
-  using Base::Base;
-  using Base::empty;
-  using Base::reset;
-  using Base::toThrift;
-};
-
 template <typename C1, typename C2>
 void erase_all(C1& container, const C2& values) {
   for (auto itr = values.begin(); itr != values.end() && !container.empty();
@@ -93,8 +72,6 @@ template <typename Patch>
 class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, ListPatch>;
   using T = typename Base::value_type;
-  using VPMap = folly::remove_cvref_t<decltype(*std::declval<Patch>().patch())>;
-  using VP = typename VPMap::mapped_type;
 
  public:
   using Base::apply;
@@ -513,5 +490,3 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 } // namespace op
 } // namespace thrift
 } // namespace apache
-
-FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::op::detail::ListPatchIndex)

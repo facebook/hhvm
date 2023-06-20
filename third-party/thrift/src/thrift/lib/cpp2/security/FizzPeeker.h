@@ -56,13 +56,15 @@ class ThriftFizzAcceptorHandshakeHelper
  public:
   ThriftFizzAcceptorHandshakeHelper(
       std::shared_ptr<const fizz::server::FizzServerContext> context,
+      std::shared_ptr<const wangle::SSLContextManager> sslContextManager,
       const folly::SocketAddress& clientAddr,
       std::chrono::steady_clock::time_point acceptTime,
       wangle::TransportInfo& tinfo,
       wangle::FizzHandshakeOptions&& options,
       fizz::AsyncFizzBase::TransportOptions transportOptions)
       : wangle::FizzAcceptorHandshakeHelper::FizzAcceptorHandshakeHelper(
-            context,
+            std::move(context),
+            std::move(sslContextManager),
             clientAddr,
             acceptTime,
             tinfo,

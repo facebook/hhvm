@@ -92,6 +92,7 @@ void Acceptor::init(
           SSLContextManagerSettings().setStrict(accConfig_.strictSSL),
           stats);
     }
+    getFizzPeeker()->setSSLContextManager(sslCtxManager_);
     try {
       // If the default ctx is nullptr, we can assume it hasn't been configured
       // yet.
@@ -224,6 +225,7 @@ void Acceptor::resetSSLContextConfigs(
             cacheProvider_);
       }
     }
+    getFizzPeeker()->setSSLContextManager(sslCtxManager_);
   } catch (const std::runtime_error& ex) {
     LOG(ERROR) << "Failed to re-configure TLS: " << ex.what()
                << "will keep old config";

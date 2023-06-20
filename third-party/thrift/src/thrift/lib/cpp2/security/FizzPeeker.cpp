@@ -30,7 +30,6 @@ void ThriftFizzAcceptorHandshakeHelper::start(
     folly::AsyncSSLSocket::UniquePtr sock,
     wangle::AcceptorHandshakeHelper::Callback* callback) noexcept {
   callback_ = callback;
-  sslContext_ = sock->getSSLContext();
 
   if (thriftParametersContext_) {
     thriftExtension_ =
@@ -119,13 +118,14 @@ FizzPeeker::getThriftHelper(
     const folly::SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
     wangle::TransportInfo& tinfo) {
-  if (!context_) {
+  if (!(context_ && sslContextManager_)) {
     return nullptr;
   }
   auto optionsCopy = options_;
   return folly::DelayedDestructionUniquePtr<ThriftFizzAcceptorHandshakeHelper>(
       new ThriftFizzAcceptorHandshakeHelper(
           context_,
+          sslContextManager_,
           clientAddr,
           acceptTime,
           tinfo,

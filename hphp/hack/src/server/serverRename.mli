@@ -41,7 +41,7 @@ val go_for_single_file :
   find_refs_action:ServerCommandTypes.Find_refs.action ->
   new_name:string ->
   filename:Relative_path.t ->
-  symbol_definition:string SymbolDefinition.t ->
+  symbol_definition:Relative_path.t SymbolDefinition.t ->
   naming_table:Naming_table.t ->
   (ServerRenameTypes.patch list, 'a) result
 
@@ -50,7 +50,7 @@ val go_ide_with_find_refs_action :
   find_refs_action:ServerCommandTypes.Find_refs.action ->
   new_name:string ->
   filename:Relative_path.t ->
-  symbol_definition:string SymbolDefinition.t ->
+  symbol_definition:Relative_path.t SymbolDefinition.t ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ( ServerEnv.env

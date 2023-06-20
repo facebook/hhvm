@@ -330,9 +330,10 @@ let go_from_file_ctx_with_symbol_definition
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) :
-    (string SymbolDefinition.t * ServerCommandTypes.Find_refs.action) option =
+    (Relative_path.t SymbolDefinition.t * ServerCommandTypes.Find_refs.action)
+    option =
   (* Find the symbol at given position *)
-  ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
+  ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   |> (* If there are few, arbitrarily pick the first *)
   List.hd
   >>= fun (occurrence, definition) ->

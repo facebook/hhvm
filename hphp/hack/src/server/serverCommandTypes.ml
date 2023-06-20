@@ -265,7 +265,7 @@ module Rename = struct
       (new_name : string)
       (action : Find_refs.action)
       (filename : string)
-      (symbol_def : string SymbolDefinition.t) : string =
+      (symbol_def : Relative_path.t SymbolDefinition.t) : string =
     let symbol_and_action =
       Find_refs.symbol_and_action_to_string_exn new_name action
     in
@@ -279,7 +279,7 @@ module Rename = struct
    * HackTypecheckerQueryBase::WWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir|foo.php|<byte_string>
   *)
   let string_to_args arg :
-      string * Find_refs.action * string * string SymbolDefinition.t =
+      string * Find_refs.action * string * Relative_path.t SymbolDefinition.t =
     let split_arg = Str.split (Str.regexp "|") arg in
     let (symbol_name, action_arg, filename, marshalled_def) =
       match split_arg with
@@ -292,7 +292,7 @@ module Rename = struct
     let str = Printf.sprintf "%s|%s" symbol_name action_arg in
     let (new_name, action) = Find_refs.string_to_symbol_and_action_exn str in
     let decoded_str = Base64.decode_exn marshalled_def in
-    let symbol_definition : string SymbolDefinition.t =
+    let symbol_definition : Relative_path.t SymbolDefinition.t =
       Marshal.from_string decoded_str 0
     in
     (new_name, action, filename, symbol_definition)
@@ -495,7 +495,10 @@ type _ t =
   | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
   | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | IDE_RENAME_BY_SYMBOL :
-      Find_refs.action * string * Relative_path.t * string SymbolDefinition.t
+      Find_refs.action
+      * string
+      * Relative_path.t
+      * Relative_path.t SymbolDefinition.t
       -> Rename.ide_result_or_retry t
   | CODEMOD_SDT :
       string

@@ -576,16 +576,16 @@ let go_for_single_file
       *)
       Relative_path.equal
         filename
-        (Relative_path.create_detect_prefix
-        @@ Pos.filename symbol_definition.SymbolDefinition.pos)
+        (Pos.filename symbol_definition.SymbolDefinition.pos)
     in
+    let definition = SymbolDefinition.to_absolute symbol_definition in
     let deprecated_wrapper_patch =
       let open ServerCommandTypes.Find_refs in
       match find_refs_action with
       | Function _ ->
         get_deprecated_wrapper_patch
           ~filename:(Some filename)
-          ~definition:(Some symbol_definition)
+          ~definition:(Some definition)
           ~ctx
           new_name
       | Member (class_name, Method old_name) ->
@@ -593,7 +593,7 @@ let go_for_single_file
         then
           get_deprecated_wrapper_patch
             ~filename:(Some filename)
-            ~definition:(Some symbol_definition)
+            ~definition:(Some definition)
             ~ctx
             new_name
         else
@@ -638,13 +638,14 @@ let go_ide_with_find_refs_action
                end
              ~init:[]
          in
+         let definition = SymbolDefinition.to_absolute symbol_definition in
          let deprecated_wrapper_patch =
            let open ServerCommandTypes.Find_refs in
            match find_refs_action with
            | Function _ ->
              get_deprecated_wrapper_patch
                ~filename:(Some filename)
-               ~definition:(Some symbol_definition)
+               ~definition:(Some definition)
                ~ctx
                new_name
            | Member (class_name, Method old_name) ->
@@ -656,7 +657,7 @@ let go_ide_with_find_refs_action
              then
                get_deprecated_wrapper_patch
                  ~filename:(Some filename)
-                 ~definition:(Some symbol_definition)
+                 ~definition:(Some definition)
                  ~ctx
                  new_name
              else

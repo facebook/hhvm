@@ -45,7 +45,9 @@ type rename_result =
   | Not_renameable_position
   | Rename_success of {
       shellout:
-        (string SymbolDefinition.t * ServerCommandTypes.Find_refs.action) option;
+        (Relative_path.t SymbolDefinition.t
+        * ServerCommandTypes.Find_refs.action)
+        option;
       local: ServerRenameTypes.patch list;
     }
 

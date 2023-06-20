@@ -58,7 +58,7 @@ val go_from_file_ctx_with_symbol_definition :
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
-  (string SymbolDefinition.t * action) option
+  (Relative_path.t SymbolDefinition.t * action) option
 
 (**
  * Given a position in a file, returns the name of the symbol

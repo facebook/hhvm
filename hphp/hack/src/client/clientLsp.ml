@@ -244,7 +244,7 @@ module Lost_env = struct
       }
     | GoToImpl of string * int * int (* filename, line, col *)
     | Rename of {
-        symbol_definition: string SymbolDefinition.t;
+        symbol_definition: Relative_path.t SymbolDefinition.t;
         find_refs_action: ServerCommandTypes.Find_refs.action;
         new_name: string;
         filename: string;

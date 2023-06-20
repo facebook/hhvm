@@ -17,11 +17,11 @@
       "name_html": "reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "616",
+        "line": "626",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "616",
-        "bodyend": "620"
+        "bodystart": "626",
+        "bodyend": "630"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void reset()",

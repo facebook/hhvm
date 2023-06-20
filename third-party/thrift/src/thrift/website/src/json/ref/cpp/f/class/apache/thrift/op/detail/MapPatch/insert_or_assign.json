@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "444",
+        "line": "318",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "444",
-        "bodyend": "449"
+        "bodystart": "318",
+        "bodyend": "321"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename V&gt;\nvoid insert_or_assign(K&amp;&amp; key, V&amp;&amp; value)",

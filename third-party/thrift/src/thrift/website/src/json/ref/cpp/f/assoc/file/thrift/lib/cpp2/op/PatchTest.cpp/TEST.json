@@ -29,7 +29,7 @@
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
         "bodystart": "26",
-        "bodyend": "50"
+        "bodyend": "55"
       },
       "definition": {
         "simple_html": "TEST(PatchTest, BoolPatch)",
@@ -64,11 +64,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "line": "72",
+        "line": "84",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "bodystart": "72",
-        "bodyend": "79"
+        "bodystart": "84",
+        "bodyend": "91"
       },
       "definition": {
         "simple_html": "TEST(PatchTest, NumberPatch)",
@@ -103,11 +103,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "line": "81",
+        "line": "93",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "bodystart": "81",
-        "bodyend": "102"
+        "bodystart": "93",
+        "bodyend": "116"
       },
       "definition": {
         "simple_html": "TEST(PatchTest, StringPatch)",
@@ -142,11 +142,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "line": "104",
+        "line": "118",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "bodystart": "104",
-        "bodyend": "135"
+        "bodystart": "118",
+        "bodyend": "151"
       },
       "definition": {
         "simple_html": "TEST(PatchTest, BinaryPatch)",

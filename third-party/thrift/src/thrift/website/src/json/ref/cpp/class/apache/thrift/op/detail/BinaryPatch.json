@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "441",
+        "line": "409",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "441",
+        "bodystart": "409",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -51,10 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "442",
+        "line": "410",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "442",
+        "bodystart": "410",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch"
@@ -108,11 +108,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "451",
+        "line": "419",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "451",
-        "bodyend": "457"
+        "bodystart": "419",
+        "bodyend": "425"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -153,11 +153,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "461",
+        "line": "429",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "461",
-        "bodyend": "467"
+        "bodystart": "429",
+        "bodyend": "435"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -193,11 +193,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "469",
+        "line": "437",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "469",
-        "bodyend": "487"
+        "bodystart": "437",
+        "bodyend": "455"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -213,11 +213,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "line": "440",
+    "line": "408",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-    "bodystart": "440",
-    "bodyend": "492"
+    "bodystart": "408",
+    "bodyend": "460"
   },
   "namespacednames_html": [
     "apache",
@@ -706,11 +706,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "451",
+                "line": "419",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "451",
-                "bodyend": "457"
+                "bodystart": "419",
+                "bodyend": "425"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",
@@ -767,11 +767,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "461",
+                "line": "429",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "461",
-                "bodyend": "467"
+                "bodystart": "429",
+                "bodyend": "435"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",
@@ -823,11 +823,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "469",
+                "line": "437",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "469",
-                "bodyend": "487"
+                "bodystart": "437",
+                "bodyend": "455"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1126,130 +1126,6 @@
         },
         {
           "kind": "overloadset",
-          "name_html": "createPrepend",
-          "compoundname_html": "apache::thrift::op::detail::BinaryPatch::createPrepend",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch_1afd593378347c5bfa0a9f8f69c8ad1d35",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename U"
-                }
-              ],
-              "type_html": "Derived",
-              "definition_html": "static Derived apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::createPrepend",
-              "argsstring_html": "(U &amp;&amp;val)",
-              "name_html": "createPrepend",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "301",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "301",
-                "bodyend": "305"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename U&gt;\nstatic Derived createPrepend(U&amp;&amp; val)",
-                "simple_raw": "template <typename U>\nstatic Derived createPrepend(U&& val)",
-                "detailed_html": "template &lt;typename U&gt;\ninline static Derived createPrepend(U&amp;&amp; val)",
-                "detailed_raw": "template <typename U>\ninline static Derived createPrepend(U&& val)",
-                "original_definition_html": "static Derived apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::createPrepend",
-                "original_argsstring_html": "(U &amp;&amp;val)"
-              },
-              "description": {
-                "brief_html": "<p>Creates a patch that prepends a string. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseStringPatch/createPrepend",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseStringPatch/createPrepend",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch",
-              "compoundname_html": "apache::thrift::op::detail::BinaryPatch::createPrepend"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/createPrepend",
-          "minprot": "public",
-          "displayname_html": "createPrepend",
-          "brief_html": "<p>Creates a patch that prepends a string. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createPrepend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createPrepend"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "createAppend",
-          "compoundname_html": "apache::thrift::op::detail::BinaryPatch::createAppend",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch_1ae2f7ef77f18362177181f2381d178667",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename...",
-                  "declname_html": "Args",
-                  "defname_html": "Args"
-                }
-              ],
-              "type_html": "Derived",
-              "definition_html": "static Derived apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::createAppend",
-              "argsstring_html": "(Args &amp;&amp;... args)",
-              "name_html": "createAppend",
-              "param": [
-                {
-                  "type_html": "Args &amp;&amp;...",
-                  "declname_html": "args"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "309",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "309",
-                "bodyend": "313"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename... Args&gt;\nstatic Derived createAppend(Args&amp;&amp;... args)",
-                "simple_raw": "template <typename... Args>\nstatic Derived createAppend(Args&&... args)",
-                "detailed_html": "template &lt;typename... Args&gt;\ninline static Derived createAppend(Args&amp;&amp;... args)",
-                "detailed_raw": "template <typename... Args>\ninline static Derived createAppend(Args&&... args)",
-                "original_definition_html": "static Derived apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::createAppend",
-                "original_argsstring_html": "(Args &amp;&amp;... args)"
-              },
-              "description": {
-                "brief_html": "<p>Creates a patch that appends a string. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseStringPatch/createAppend",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseStringPatch/createAppend",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch",
-              "compoundname_html": "apache::thrift::op::detail::BinaryPatch::createAppend"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/createAppend",
-          "minprot": "public",
-          "displayname_html": "createAppend",
-          "brief_html": "<p>Creates a patch that appends a string. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createAppend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/createAppend"
-        },
-        {
-          "kind": "overloadset",
           "name_html": "operator+=",
           "compoundname_html": "apache::thrift::op::detail::BinaryPatch::operator+=",
           "functions": [
@@ -1278,11 +1154,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "317",
+                "line": "285",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "317",
-                "bodyend": "320"
+                "bodystart": "285",
+                "bodyend": "288"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
@@ -1339,11 +1215,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "343",
+                "line": "311",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "343",
-                "bodyend": "355"
+                "bodystart": "311",
+                "bodyend": "323"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1355,7 +1231,7 @@
               },
               "description": {
                 "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const String&amp;);\n  void clear();\n  void prepend(const String&amp;);\n  void append(const String&amp;);\n}\n</pre></p><p>For example: <pre>auto patch = StringPatch::createPrepend(\"(\");\npatch += \")\";\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.prepend(\"(\");\nv.append(\")\");  </pre> </p>",
-                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+                "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/BaseStringPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseStringPatch/customVisit",
@@ -1366,7 +1242,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+          "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/customVisit"
@@ -1762,7 +1638,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/operator.assign"

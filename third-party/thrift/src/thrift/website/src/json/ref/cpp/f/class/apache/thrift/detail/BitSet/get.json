@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "139",
+        "line": "146",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "139",
-        "bodyend": "141"
+        "bodystart": "146",
+        "bodyend": "148"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic bool get(U u, std::size_t bit)",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "154",
+        "line": "164",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "154",
-        "bodyend": "156"
+        "bodystart": "164",
+        "bodyend": "166"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic bool get(const std::atomic&lt;U&gt;&amp; u, std::size_t bit)",
@@ -119,11 +119,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "168",
+        "line": "178",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "168",
-        "bodyend": "168"
+        "bodystart": "178",
+        "bodyend": "178"
       },
       "definition": {
         "simple_html": "bool get(std::size_t bit) const",

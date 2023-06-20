@@ -1,0 +1,415 @@
+{
+  "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId",
+  "kind": "class",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId",
+  "includes": {
+    "refid": "Get_8h",
+    "local": "no",
+    "text_html": "Get.h"
+  },
+  "tparams": [
+    {
+      "type_html": "typename T"
+    },
+    {
+      "type_html": "std::size_t",
+      "declname_html": "pos",
+      "defname_html": "pos",
+      "defval_html": "0"
+    }
+  ],
+  "types": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ac43b5df1b160c196139db26979f7901f",
+      "prot": "private",
+      "tparams": [
+        {
+          "type_html": "std::size_t",
+          "declname_html": "Ordinal",
+          "defname_html": "Ordinal"
+        }
+      ],
+      "type_html": "<code>get_field_id</code>&lt;T, field_ordinal&lt;std::min(Ordinal, N)&gt;&gt;",
+      "definition_html": "using apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::OrdToFieldId =  get_field_id&lt;T, field_ordinal&lt;std::min(Ordinal, N)&gt; &gt;",
+      "argsstring_html": "",
+      "name_html": "OrdToFieldId",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "line": "274",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "bodystart": "274",
+        "bodyend": "-1"
+      },
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId"
+    }
+  ],
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a0f39b75fe4ca5cd7d1727da9c3ea27cc",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename F"
+        },
+        {
+          "type_html": "std::enable_if_t&lt; sizeof(F) !=0 &amp;&amp;pos !=N, bool &gt;",
+          "defval_html": "false"
+        }
+      ],
+      "type_html": "decltype(auto) constexpr",
+      "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "argsstring_html": "(FieldId id, F &amp;&amp;f) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<code>FieldId</code>",
+          "declname_html": "id"
+        },
+        {
+          "type_html": "F &amp;&amp;",
+          "declname_html": "f"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "line": "280",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "bodystart": "280",
+        "bodyend": "303"
+      },
+      "definition": {
+        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ndecltype(auto) constexpr operator()(FieldId id, F&amp;&amp; f) const",
+        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ndecltype(auto) constexpr operator()(FieldId id, F&& f) const",
+        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline decltype(auto) constexpr operator()(FieldId id, F&amp;&amp; f) const",
+        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline decltype(auto) constexpr operator()(FieldId id, F&& f) const",
+        "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "original_argsstring_html": "(FieldId id, F &amp;&amp;f) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ac3d6434fba5b1ed0d6070dc3853094e1",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename F"
+        },
+        {
+          "type_html": "std::enable_if_t&lt; sizeof(F) !=0 &amp;&amp;pos==N, bool &gt;",
+          "defval_html": "false"
+        }
+      ],
+      "type_html": "decltype(auto) constexpr",
+      "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "argsstring_html": "(FieldId, F &amp;&amp;f) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<code>FieldId</code>"
+        },
+        {
+          "type_html": "F &amp;&amp;",
+          "declname_html": "f"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "line": "308",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "bodystart": "308",
+        "bodyend": "311"
+      },
+      "definition": {
+        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ndecltype(auto) constexpr operator()(FieldId, F&amp;&amp; f) const",
+        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ndecltype(auto) constexpr operator()(FieldId, F&& f) const",
+        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline decltype(auto) constexpr operator()(FieldId, F&amp;&amp; f) const",
+        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline decltype(auto) constexpr operator()(FieldId, F&& f) const",
+        "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "original_argsstring_html": "(FieldId, F &amp;&amp;f) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a3542aa82131c439aba44acbd6a503998",
+      "prot": "public",
+      "static": "no",
+      "const": "yes",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename...",
+          "declname_html": "F",
+          "defname_html": "F"
+        }
+      ],
+      "type_html": "decltype(auto) constexpr",
+      "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "argsstring_html": "(FieldId id, F &amp;&amp;... f) const",
+      "name_html": "operator()",
+      "param": [
+        {
+          "type_html": "<code>FieldId</code>",
+          "declname_html": "id"
+        },
+        {
+          "type_html": "F &amp;&amp;...",
+          "declname_html": "f"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "line": "314",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "bodystart": "314",
+        "bodyend": "316"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename... F&gt;\ndecltype(auto) constexpr operator()(FieldId id, F&amp;&amp;... f) const",
+        "simple_raw": "template <typename... F>\ndecltype(auto) constexpr operator()(FieldId id, F&&... f) const",
+        "detailed_html": "template &lt;typename... F&gt;\ninline decltype(auto) constexpr operator()(FieldId id, F&amp;&amp;... f) const",
+        "detailed_raw": "template <typename... F>\ninline decltype(auto) constexpr operator()(FieldId id, F&&... f) const",
+        "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "original_argsstring_html": "(FieldId id, F &amp;&amp;... f) const"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+    "line": "269",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+    "bodystart": "269",
+    "bodyend": "317"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "InvokeByFieldId"
+  ],
+  "enums": [],
+  "members": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ad9f250e4c722ae5bd0f77c2be8626644",
+      "prot": "private",
+      "static": "yes",
+      "mutable": "no",
+      "type_html": "constexpr auto",
+      "definition_html": "constexpr auto apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::N",
+      "argsstring_html": "",
+      "name_html": "N",
+      "initializer_html": "= <code>size_v</code>&lt;T&gt;",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "line": "270",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+        "bodystart": "270",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "template <\n  typename T,\n  std::size_t pos = 0\n> class InvokeByFieldId;",
+  "declaration_html": "template &lt;\n  typename T,\n  std::size_t pos = 0\n&gt; class InvokeByFieldId;",
+  "filepath": "class/apache/thrift/op/detail/InvokeByFieldId",
+  "href": "/ref/cpp/class/apache/thrift/op/detail/InvokeByFieldId",
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a0f39b75fe4ca5cd7d1727da9c3ea27cc",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename F"
+                },
+                {
+                  "type_html": "std::enable_if_t&lt; sizeof(F) !=0 &amp;&amp;pos !=N, bool &gt;",
+                  "defval_html": "false"
+                }
+              ],
+              "type_html": "decltype(auto) constexpr",
+              "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "argsstring_html": "(FieldId id, F &amp;&amp;f) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<code>FieldId</code>",
+                  "declname_html": "id"
+                },
+                {
+                  "type_html": "F &amp;&amp;",
+                  "declname_html": "f"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "line": "280",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "bodystart": "280",
+                "bodyend": "303"
+              },
+              "definition": {
+                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ndecltype(auto) constexpr operator()(FieldId id, F&amp;&amp; f) const",
+                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ndecltype(auto) constexpr operator()(FieldId id, F&& f) const",
+                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline decltype(auto) constexpr operator()(FieldId id, F&amp;&amp; f) const",
+                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline decltype(auto) constexpr operator()(FieldId id, F&& f) const",
+                "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "original_argsstring_html": "(FieldId id, F &amp;&amp;f) const"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId",
+              "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ac3d6434fba5b1ed0d6070dc3853094e1",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename F"
+                },
+                {
+                  "type_html": "std::enable_if_t&lt; sizeof(F) !=0 &amp;&amp;pos==N, bool &gt;",
+                  "defval_html": "false"
+                }
+              ],
+              "type_html": "decltype(auto) constexpr",
+              "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "argsstring_html": "(FieldId, F &amp;&amp;f) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<code>FieldId</code>"
+                },
+                {
+                  "type_html": "F &amp;&amp;",
+                  "declname_html": "f"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "line": "308",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "bodystart": "308",
+                "bodyend": "311"
+              },
+              "definition": {
+                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ndecltype(auto) constexpr operator()(FieldId, F&amp;&amp; f) const",
+                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ndecltype(auto) constexpr operator()(FieldId, F&& f) const",
+                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline decltype(auto) constexpr operator()(FieldId, F&amp;&amp; f) const",
+                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline decltype(auto) constexpr operator()(FieldId, F&& f) const",
+                "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "original_argsstring_html": "(FieldId, F &amp;&amp;f) const"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId",
+              "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a3542aa82131c439aba44acbd6a503998",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename...",
+                  "declname_html": "F",
+                  "defname_html": "F"
+                }
+              ],
+              "type_html": "decltype(auto) constexpr",
+              "definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "argsstring_html": "(FieldId id, F &amp;&amp;... f) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "<code>FieldId</code>",
+                  "declname_html": "id"
+                },
+                {
+                  "type_html": "F &amp;&amp;...",
+                  "declname_html": "f"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "line": "314",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
+                "bodystart": "314",
+                "bodyend": "316"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename... F&gt;\ndecltype(auto) constexpr operator()(FieldId id, F&amp;&amp;... f) const",
+                "simple_raw": "template <typename... F>\ndecltype(auto) constexpr operator()(FieldId id, F&&... f) const",
+                "detailed_html": "template &lt;typename... F&gt;\ninline decltype(auto) constexpr operator()(FieldId id, F&amp;&amp;... f) const",
+                "detailed_raw": "template <typename... F>\ninline decltype(auto) constexpr operator()(FieldId id, F&&... f) const",
+                "original_definition_html": "decltype(auto) constexpr apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "original_argsstring_html": "(FieldId id, F &amp;&amp;... f) const"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId",
+              "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

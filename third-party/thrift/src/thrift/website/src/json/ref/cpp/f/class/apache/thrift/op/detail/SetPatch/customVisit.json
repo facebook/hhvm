@@ -28,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "368",
+        "line": "250",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "368",
-        "bodyend": "383"
+        "bodystart": "250",
+        "bodyend": "265"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -44,7 +44,7 @@
       },
       "description": {
         "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const Set&amp;);\n  void clear();\n  void remove(const Set&amp;);\n  void add(const Set&amp;);\n}\n</pre></p><p>For example: <pre>SetPatch&lt;SetI32Patch&gt; patch;\npatch.remove({20, 30});\npatch.add({10, 20});\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.add({10, 20});\nv.remove({30});  </pre> </p>",
-        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+        "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/SetPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/SetPatch/customVisit",
@@ -55,7 +55,7 @@
   "filepath": "f/class/apache/thrift/op/detail/SetPatch/customVisit",
   "minprot": "public",
   "displayname_html": "customVisit",
-  "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+  "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/customVisit"

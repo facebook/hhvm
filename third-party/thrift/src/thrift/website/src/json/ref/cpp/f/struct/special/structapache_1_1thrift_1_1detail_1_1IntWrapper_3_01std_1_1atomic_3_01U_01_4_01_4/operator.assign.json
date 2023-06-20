@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "79",
+        "line": "84",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "79",
-        "bodyend": "82"
+        "bodystart": "84",
+        "bodyend": "88"
       },
       "definition": {
         "simple_html": "IntWrapper&amp; operator=(const IntWrapper&amp; other)",
@@ -62,11 +62,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "84",
+        "line": "90",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "84",
-        "bodyend": "87"
+        "bodystart": "90",
+        "bodyend": "94"
       },
       "definition": {
         "simple_html": "IntWrapper&amp; operator=(IntWrapper&amp;&amp; other)",
@@ -85,7 +85,7 @@
   "filepath": "f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign",
   "minprot": "public",
   "displayname_html": "operator=",
-  "brief_html": "",
+  "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign",
   "refid": "/ref/cpp/f/struct/special/structapache_1_1thrift_1_1detail_1_1IntWrapper_3_01std_1_1atomic_3_01U_01_4_01_4/operator.assign"

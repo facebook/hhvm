@@ -22,11 +22,11 @@
       "name_html": "patch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "177",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "177",
-        "bodyend": "179"
+        "bodystart": "176",
+        "bodyend": "178"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patch()",

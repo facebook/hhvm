@@ -17,11 +17,11 @@
       "name_html": "has_value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1793",
+        "line": "1803",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1793",
-        "bodyend": "1793"
+        "bodystart": "1803",
+        "bodyend": "1803"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool has_value() const",

@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1755",
+        "line": "1765",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1755",
-        "bodyend": "1756"
+        "bodystart": "1765",
+        "bodyend": "1766"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE required_field_ref(reference_type value)",
@@ -72,11 +72,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1759",
+        "line": "1769",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1759",
-        "bodyend": "1761"
+        "bodystart": "1769",
+        "bodyend": "1771"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE required_field_ref(const required_field_ref&lt;U&gt;&amp; other)",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a6be3018971cc29ec55daa9509cf7c35c",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a3026d3756c56da531dc78ff8e768d5a9",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -16,8 +16,8 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
       "location": {
@@ -29,11 +29,11 @@
         "bodyend": "165"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-        "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
+        "simple_raw": "template <typename Id>\nvoid ensure()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline void ensure()",
+        "detailed_raw": "template <typename Id>\ninline void ensure()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "()"
       },
       "description": {
@@ -45,7 +45,7 @@
       "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a75aed8ff324273bcbc8db35360a356f3",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ab275726eca5e189faa3b4d612d4fdae5",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -61,8 +61,8 @@
           "defval_html": "FieldType&lt;Id&gt;"
         }
       ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "(U &amp;&amp;defaultVal)",
       "name_html": "ensure",
       "param": [
@@ -77,14 +77,14 @@
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "bodystart": "168",
-        "bodyend": "173"
+        "bodyend": "172"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nvoid ensure(U&amp;&amp; defaultVal)",
+        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\nvoid ensure(U&& defaultVal)",
+        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline void ensure(U&amp;&amp; defaultVal)",
+        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline void ensure(U&& defaultVal)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "(U &amp;&amp;defaultVal)"
       },
       "description": {

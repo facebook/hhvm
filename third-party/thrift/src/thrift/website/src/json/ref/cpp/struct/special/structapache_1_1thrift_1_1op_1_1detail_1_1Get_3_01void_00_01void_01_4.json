@@ -42,11 +42,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "247",
+        "line": "249",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "247",
-        "bodyend": "249"
+        "bodystart": "249",
+        "bodyend": "251"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\ndecltype(auto) constexpr operator()(Id, U&amp;&amp; obj) const",
@@ -62,11 +62,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "245",
+    "line": "247",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "245",
-    "bodyend": "250"
+    "bodystart": "247",
+    "bodyend": "252"
   },
   "namespacednames_html": [
     "apache",
@@ -124,11 +124,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "247",
+                "line": "249",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "247",
-                "bodyend": "249"
+                "bodystart": "249",
+                "bodyend": "251"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U&gt;\ndecltype(auto) constexpr operator()(Id, U&amp;&amp; obj) const",

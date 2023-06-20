@@ -42,11 +42,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "196",
+        "line": "200",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "196",
-        "bodyend": "198"
+        "bodystart": "200",
+        "bodyend": "202"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename T&gt;\ndecltype(auto) constexpr operator()(Id, T&amp; obj) const",
@@ -62,11 +62,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "line": "194",
+    "line": "198",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "bodystart": "194",
-    "bodyend": "199"
+    "bodystart": "198",
+    "bodyend": "203"
   },
   "namespacednames_html": [
     "apache",
@@ -124,11 +124,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "196",
+                "line": "200",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "196",
-                "bodyend": "198"
+                "bodystart": "200",
+                "bodyend": "202"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename T&gt;\ndecltype(auto) constexpr operator()(Id, T&amp; obj) const",

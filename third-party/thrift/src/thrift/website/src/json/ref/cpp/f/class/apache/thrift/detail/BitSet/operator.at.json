@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "123",
+        "line": "130",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "123",
-        "bodyend": "126"
+        "bodystart": "130",
+        "bodyend": "133"
       },
       "definition": {
         "simple_html": "bool operator[](const uint8_t bit) const",
@@ -62,11 +62,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "128",
+        "line": "135",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "128",
-        "bodyend": "131"
+        "bodystart": "135",
+        "bodyend": "138"
       },
       "definition": {
         "simple_html": "reference operator[](const uint8_t bit)",

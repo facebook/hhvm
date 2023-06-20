@@ -22,11 +22,11 @@
       "name_html": "testNumberPatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "line": "53",
+        "line": "58",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/PatchTest.cpp",
-        "bodystart": "53",
-        "bodyend": "70"
+        "bodystart": "58",
+        "bodyend": "82"
       },
       "definition": {
         "simple_html": "template &lt;typename NPatch&gt;\nvoid testNumberPatch()",

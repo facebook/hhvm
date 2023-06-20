@@ -34,11 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "250",
+        "line": "254",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "250",
-        "bodyend": "252"
+        "bodystart": "254",
+        "bodyend": "256"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\ndecltype(auto) operator()(T&amp;&amp; val, Struct&amp;) const",

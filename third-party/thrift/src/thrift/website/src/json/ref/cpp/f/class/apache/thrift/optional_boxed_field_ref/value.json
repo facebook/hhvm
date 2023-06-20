@@ -17,11 +17,11 @@
       "name_html": "value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "947",
+        "line": "959",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "947",
-        "bodyend": "950"
+        "bodystart": "959",
+        "bodyend": "962"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type value() const",

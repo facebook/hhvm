@@ -17,11 +17,11 @@
       "name_html": "value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "133",
+        "line": "140",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "133",
-        "bodyend": "133"
+        "bodystart": "140",
+        "bodyend": "140"
       },
       "definition": {
         "simple_html": "T&amp; value()",
@@ -50,11 +50,11 @@
       "name_html": "value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "135",
+        "line": "142",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "135",
-        "bodyend": "135"
+        "bodystart": "142",
+        "bodyend": "142"
       },
       "definition": {
         "simple_html": "const T&amp; value() const",

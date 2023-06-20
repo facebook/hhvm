@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "863",
+        "line": "875",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "863",
-        "bodyend": "864"
+        "bodystart": "875",
+        "bodyend": "876"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE optional_boxed_field_ref(T value)",
@@ -72,11 +72,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "868",
+        "line": "880",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "868",
-        "bodyend": "869"
+        "bodystart": "880",
+        "bodyend": "881"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE optional_boxed_field_ref(const optional_boxed_field_ref&lt;U&gt;&amp; other)",
@@ -121,11 +121,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "876",
+        "line": "888",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "876",
-        "bodyend": "878"
+        "bodystart": "888",
+        "bodyend": "890"
       },
       "definition": {
         "simple_html": "template &lt;\n    typename U,\n    std::enable_if_t&lt;\n        std::is_same&lt;T, U&amp;&amp;&gt;{} || std::is_same&lt;T, const U&amp;&amp;&gt;{},\n        int&gt; = 0&gt;\nFOLLY_ERASE optional_boxed_field_ref(const optional_boxed_field_ref&lt;U&amp;&gt;&amp; other)",

@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "498",
+        "line": "372",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "498",
-        "bodyend": "500"
+        "bodystart": "372",
+        "bodyend": "375"
       },
       "definition": {
         "simple_html": "template &lt;typename K = typename T::key_type&gt;\nFOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",

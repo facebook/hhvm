@@ -37,11 +37,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "140",
+        "line": "145",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "140",
-        "bodyend": "144"
+        "bodystart": "145",
+        "bodyend": "149"
       },
       "definition": {
         "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;)",

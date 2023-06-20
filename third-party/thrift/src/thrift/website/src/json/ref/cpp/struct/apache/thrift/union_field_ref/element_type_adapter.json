@@ -14,10 +14,10 @@
       "name_html": "element_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1978",
+        "line": "1988",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1978",
+        "bodystart": "1988",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1union__field__ref_1_1element__type__adapter"
@@ -25,11 +25,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1977",
+    "line": "1987",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1977",
-    "bodyend": "1979"
+    "bodystart": "1987",
+    "bodyend": "1989"
   },
   "namespacednames_html": [
     "apache",

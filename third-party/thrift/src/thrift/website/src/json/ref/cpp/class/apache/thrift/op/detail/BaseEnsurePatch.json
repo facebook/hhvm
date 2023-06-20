@@ -389,7 +389,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/modifies"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a6be3018971cc29ec55daa9509cf7c35c",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a3026d3756c56da531dc78ff8e768d5a9",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -401,8 +401,8 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
       "location": {
@@ -414,11 +414,11 @@
         "bodyend": "165"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-        "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
+        "simple_raw": "template <typename Id>\nvoid ensure()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline void ensure()",
+        "detailed_raw": "template <typename Id>\ninline void ensure()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "()"
       },
       "description": {
@@ -428,7 +428,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a75aed8ff324273bcbc8db35360a356f3",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ab275726eca5e189faa3b4d612d4fdae5",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -444,8 +444,8 @@
           "defval_html": "FieldType&lt;Id&gt;"
         }
       ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "(U &amp;&amp;defaultVal)",
       "name_html": "ensure",
       "param": [
@@ -460,14 +460,14 @@
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "bodystart": "168",
-        "bodyend": "173"
+        "bodyend": "172"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nvoid ensure(U&amp;&amp; defaultVal)",
+        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\nvoid ensure(U&& defaultVal)",
+        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline void ensure(U&amp;&amp; defaultVal)",
+        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline void ensure(U&& defaultVal)",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "(U &amp;&amp;defaultVal)"
       },
       "description": {
@@ -495,11 +495,11 @@
       "name_html": "patch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "177",
+        "line": "176",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "177",
-        "bodyend": "179"
+        "bodystart": "176",
+        "bodyend": "178"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patch()",
@@ -534,11 +534,11 @@
       "name_html": "patchIfSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "183",
+        "line": "182",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "183",
-        "bodyend": "185"
+        "bodystart": "182",
+        "bodyend": "184"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
@@ -579,11 +579,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "219",
+        "line": "218",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "219",
-        "bodyend": "249"
+        "bodystart": "218",
+        "bodyend": "248"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -594,8 +594,8 @@
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
       },
       "description": {
-        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::foo&gt;().append(\"_\");\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
-        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
+        "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit"
@@ -620,11 +620,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "251",
+        "line": "250",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "251",
-        "bodyend": "251"
+        "bodystart": "250",
+        "bodyend": "250"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -651,7 +651,7 @@
       "name_html": "~BaseEnsurePatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "257",
+        "line": "256",
         "column": "1"
       },
       "definition": {
@@ -684,11 +684,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "261",
+        "line": "260",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "261",
-        "bodyend": "269"
+        "bodystart": "260",
+        "bodyend": "268"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -720,11 +720,11 @@
       "name_html": "patchPrior",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "278",
+        "line": "277",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "278",
-        "bodyend": "280"
+        "bodystart": "277",
+        "bodyend": "279"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",
@@ -756,11 +756,11 @@
       "name_html": "patchAfter",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "283",
+        "line": "282",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "283",
-        "bodyend": "285"
+        "bodystart": "282",
+        "bodyend": "284"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchAfter()",
@@ -787,11 +787,11 @@
       "name_html": "ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "287",
+        "line": "286",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "287",
-        "bodyend": "305"
+        "bodystart": "286",
+        "bodyend": "304"
       },
       "definition": {
         "simple_html": "void ensurePatchable()",
@@ -823,11 +823,11 @@
       "name_html": "maybeEnsure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "308",
+        "line": "307",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "308",
-        "bodyend": "324"
+        "bodystart": "307",
+        "bodyend": "323"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nbool maybeEnsure()",
@@ -868,11 +868,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "273",
+        "line": "272",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "273",
-        "bodyend": "275"
+        "bodystart": "272",
+        "bodyend": "274"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",
@@ -913,11 +913,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "328",
+        "line": "327",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "328",
-        "bodyend": "331"
+        "bodystart": "327",
+        "bodyend": "330"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\ndecltype(auto) getRawPatch(U&amp;&amp; patch) const",
@@ -958,11 +958,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "335",
+        "line": "334",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "335",
-        "bodyend": "337"
+        "bodystart": "334",
+        "bodyend": "336"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",
@@ -1010,7 +1010,7 @@
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
     "bodystart": "94",
-    "bodyend": "338"
+    "bodyend": "337"
   },
   "namespacednames_html": [
     "apache",
@@ -1527,7 +1527,7 @@
               "name_html": "~BaseEnsurePatch",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "257",
+                "line": "256",
                 "column": "1"
               },
               "definition": {
@@ -2013,7 +2013,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/operator.assign"
@@ -2177,7 +2177,7 @@
           "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a6be3018971cc29ec55daa9509cf7c35c",
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a3026d3756c56da531dc78ff8e768d5a9",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -2189,8 +2189,8 @@
                   "type_html": "typename Id"
                 }
               ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
               "argsstring_html": "()",
               "name_html": "ensure",
               "location": {
@@ -2202,11 +2202,11 @@
                 "bodyend": "165"
               },
               "definition": {
-                "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-                "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-                "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-                "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+                "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
+                "simple_raw": "template <typename Id>\nvoid ensure()",
+                "detailed_html": "template &lt;typename Id&gt;\ninline void ensure()",
+                "detailed_raw": "template <typename Id>\ninline void ensure()",
+                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
                 "original_argsstring_html": "()"
               },
               "description": {
@@ -2218,7 +2218,7 @@
               "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure"
             },
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a75aed8ff324273bcbc8db35360a356f3",
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ab275726eca5e189faa3b4d612d4fdae5",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -2234,8 +2234,8 @@
                   "defval_html": "FieldType&lt;Id&gt;"
                 }
               ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
               "argsstring_html": "(U &amp;&amp;defaultVal)",
               "name_html": "ensure",
               "param": [
@@ -2250,14 +2250,14 @@
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
                 "bodystart": "168",
-                "bodyend": "173"
+                "bodyend": "172"
               },
               "definition": {
-                "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-                "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+                "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nvoid ensure(U&amp;&amp; defaultVal)",
+                "simple_raw": "template <typename Id, typename U = FieldType<Id>>\nvoid ensure(U&& defaultVal)",
+                "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline void ensure(U&amp;&amp; defaultVal)",
+                "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline void ensure(U&& defaultVal)",
+                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
                 "original_argsstring_html": "(U &amp;&amp;defaultVal)"
               },
               "description": {
@@ -2301,11 +2301,11 @@
               "name_html": "patch",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "177",
+                "line": "176",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "177",
-                "bodyend": "179"
+                "bodystart": "176",
+                "bodyend": "178"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patch()",
@@ -2356,11 +2356,11 @@
               "name_html": "patchIfSet",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "183",
+                "line": "182",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "183",
-                "bodyend": "185"
+                "bodystart": "182",
+                "bodyend": "184"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
@@ -2406,11 +2406,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "335",
+                "line": "334",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "335",
-                "bodyend": "337"
+                "bodystart": "334",
+                "bodyend": "336"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",
@@ -2464,11 +2464,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "219",
+                "line": "218",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "219",
-                "bodyend": "249"
+                "bodystart": "218",
+                "bodyend": "248"
               },
               "definition": {
                 "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -2479,8 +2479,8 @@
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
               },
               "description": {
-                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::foo&gt;().append(\"_\");\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
-                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
+                "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
@@ -2491,7 +2491,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+          "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit"
@@ -2521,11 +2521,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "251",
+                "line": "250",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "251",
-                "bodyend": "251"
+                "bodystart": "250",
+                "bodyend": "250"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2846,11 +2846,11 @@
               "name_html": "clear",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "261",
+                "line": "260",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "261",
-                "bodyend": "269"
+                "bodystart": "260",
+                "bodyend": "268"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -2934,11 +2934,11 @@
               "name_html": "patchPrior",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "278",
+                "line": "277",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "278",
-                "bodyend": "280"
+                "bodystart": "277",
+                "bodyend": "279"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",
@@ -2986,11 +2986,11 @@
               "name_html": "patchAfter",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "283",
+                "line": "282",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "283",
-                "bodyend": "285"
+                "bodystart": "282",
+                "bodyend": "284"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchAfter()",
@@ -3033,11 +3033,11 @@
               "name_html": "ensurePatchable",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "287",
+                "line": "286",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "287",
-                "bodyend": "305"
+                "bodystart": "286",
+                "bodyend": "304"
               },
               "definition": {
                 "simple_html": "void ensurePatchable()",
@@ -3085,11 +3085,11 @@
               "name_html": "maybeEnsure",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "308",
+                "line": "307",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "308",
-                "bodyend": "324"
+                "bodystart": "307",
+                "bodyend": "323"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\nbool maybeEnsure()",
@@ -3146,11 +3146,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "273",
+                "line": "272",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "273",
-                "bodyend": "275"
+                "bodystart": "272",
+                "bodyend": "274"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",
@@ -3207,11 +3207,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "328",
+                "line": "327",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "328",
-                "bodyend": "331"
+                "bodystart": "327",
+                "bodyend": "330"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U&gt;\ndecltype(auto) getRawPatch(U&amp;&amp; patch) const",

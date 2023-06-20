@@ -404,7 +404,7 @@
       "compoundname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a0cdd597ebd8289857562e61fa38a3bd3",
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ApplyPatch_1a6059621fad4baed4c51d37fddab25182",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -413,7 +413,7 @@
       "virtual": "non-virtual",
       "type_html": "void",
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
-      "argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const",
+      "argsstring_html": "(const Object &amp;patch, folly::F14FastSet&lt; Value &gt; &amp;value) const",
       "name_html": "operator()",
       "param": [
         {
@@ -421,7 +421,7 @@
           "declname_html": "patch"
         },
         {
-          "type_html": "std::set&lt; Value &gt; &amp;",
+          "type_html": "folly::F14FastSet&lt; Value &gt; &amp;",
           "declname_html": "value"
         }
       ],
@@ -431,12 +431,12 @@
         "column": "1"
       },
       "definition": {
-        "simple_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
-        "simple_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
-        "detailed_html": "void operator()(const Object&amp; patch, std::set&lt;Value&gt;&amp; value) const",
-        "detailed_raw": "void operator()(const Object& patch, std::set<Value>& value) const",
+        "simple_html": "void operator()(const Object&amp; patch, folly::F14FastSet&lt;Value&gt;&amp; value) const",
+        "simple_raw": "void operator()(const Object& patch, folly::F14FastSet<Value>& value) const",
+        "detailed_html": "void operator()(const Object&amp; patch, folly::F14FastSet&lt;Value&gt;&amp; value) const",
+        "detailed_raw": "void operator()(const Object& patch, folly::F14FastSet<Value>& value) const",
         "original_definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
-        "original_argsstring_html": "(const Object &amp;patch, std::set&lt; Value &gt; &amp;value) const"
+        "original_argsstring_html": "(const Object &amp;patch, folly::F14FastSet&lt; Value &gt; &amp;value) const"
       },
       "filepath": "fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",
       "href": "/ref/cpp/fns/struct/apache/thrift/protocol/detail/ApplyPatch/operator.call",

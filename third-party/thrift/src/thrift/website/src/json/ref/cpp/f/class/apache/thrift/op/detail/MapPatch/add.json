@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "453",
+        "line": "325",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "453",
-        "bodyend": "459"
+        "bodystart": "325",
+        "bodyend": "335"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid add(C&amp;&amp; entries)",
@@ -44,7 +44,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
+        "brief_html": "<p>Inserts entries. Ignore entries that already exist. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/add",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/add",
@@ -55,7 +55,7 @@
   "filepath": "f/class/apache/thrift/op/detail/MapPatch/add",
   "minprot": "public",
   "displayname_html": "add",
-  "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>",
+  "brief_html": "<p>Inserts entries. Ignore entries that already exist. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"

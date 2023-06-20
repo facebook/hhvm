@@ -26,6 +26,10 @@
     },
     {
       "local": "no",
+      "text_html": "folly/Range.h"
+    },
+    {
+      "local": "no",
       "text_html": "folly/Utility.h"
     },
     {
@@ -43,11 +47,6 @@
     }
   ],
   "innerclass": [
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatchIndex",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::ListPatchIndex"
-    },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
       "prot": "public",

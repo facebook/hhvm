@@ -17,11 +17,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "364",
+        "line": "363",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "364",
-        "bodyend": "368"
+        "bodystart": "363",
+        "bodyend": "367"
       },
       "definition": {
         "simple_html": "void clear()",
@@ -55,11 +55,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "370",
+        "line": "369",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "370",
-        "bodyend": "372"
+        "bodystart": "369",
+        "bodyend": "371"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -93,11 +93,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "261",
+        "line": "260",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "261",
-        "bodyend": "269"
+        "bodystart": "260",
+        "bodyend": "268"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",

@@ -41,11 +41,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "145",
+        "line": "150",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "145",
-        "bodyend": "164"
+        "bodystart": "150",
+        "bodyend": "169"
       },
       "definition": {
         "simple_html": "virtual void userExceptionWrapped(\n    void* ctx,\n    const char* fn_name,\n    bool declared,\n    const folly::exception_wrapper&amp; ew_)",

@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "91",
+        "line": "93",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "91",
-        "bodyend": "94"
+        "bodystart": "93",
+        "bodyend": "96"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\ndecltype(auto) find_by_field_id(F&amp;&amp; f)",

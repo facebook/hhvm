@@ -82,40 +82,6 @@
   ],
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1ab42fdd7997d2bba7393aecf1c5d6e5e3",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "<code>BoolPatch</code>",
-      "definition_html": "static BoolPatch apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::createInvert",
-      "argsstring_html": "()",
-      "name_html": "createInvert",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "99",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "99",
-        "bodyend": "99"
-      },
-      "definition": {
-        "simple_html": "static BoolPatch createInvert()",
-        "simple_raw": "static BoolPatch createInvert()",
-        "detailed_html": "inline static BoolPatch createInvert()",
-        "detailed_raw": "inline static BoolPatch createInvert()",
-        "original_definition_html": "static BoolPatch apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::createInvert",
-        "original_argsstring_html": "()"
-      },
-      "description": {
-        "brief_html": "<p>Creates a new patch that invert the bool. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/createInvert",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/createInvert"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1a62d11ea068ca852940015fb48e2dfbd7",
       "prot": "public",
       "static": "no",
@@ -129,11 +95,11 @@
       "name_html": "invert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "102",
+        "line": "100",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "102",
-        "bodyend": "105"
+        "bodystart": "100",
+        "bodyend": "103"
       },
       "definition": {
         "simple_html": "void invert()",
@@ -174,11 +140,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "127",
+        "line": "125",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "127",
-        "bodyend": "137"
+        "bodystart": "125",
+        "bodyend": "135"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -190,7 +156,7 @@
       },
       "description": {
         "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(bool);\n  void clear();\n  void invert();\n}\n</pre></p><p>For example: <pre>auto patch = BoolPatch::createClear();\npatch = !patch;\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.invert();  </pre> </p>",
-        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+        "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/customVisit"
@@ -215,11 +181,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "139",
+        "line": "137",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "139",
-        "bodyend": "148"
+        "bodystart": "137",
+        "bodyend": "146"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -329,6 +295,40 @@
       },
       "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/operator.assign",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/operator.assign"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1af46653854514e1089770c98171077a7e",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+      "argsstring_html": "()",
+      "name_html": "clear",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "97",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "249",
+        "bodyend": "249"
+      },
+      "definition": {
+        "simple_html": "void clear()",
+        "simple_raw": "void clear()",
+        "detailed_html": "inline void clear()",
+        "detailed_raw": "inline void clear()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Clears the value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/clear",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/clear"
     }
   ],
   "friends": [
@@ -352,11 +352,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "154",
+        "line": "152",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "154",
-        "bodyend": "154"
+        "bodystart": "152",
+        "bodyend": "152"
       }
     }
   ],
@@ -366,7 +366,7 @@
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
     "bodystart": "89",
-    "bodyend": "155"
+    "bodyend": "153"
   },
   "namespacednames_html": [
     "apache",
@@ -780,56 +780,6 @@
         },
         {
           "kind": "overloadset",
-          "name_html": "createInvert",
-          "compoundname_html": "apache::thrift::op::detail::BoolPatch::createInvert",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1ab42fdd7997d2bba7393aecf1c5d6e5e3",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "<code>BoolPatch</code>",
-              "definition_html": "static BoolPatch apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::createInvert",
-              "argsstring_html": "()",
-              "name_html": "createInvert",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "99",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "99",
-                "bodyend": "99"
-              },
-              "definition": {
-                "simple_html": "static BoolPatch createInvert()",
-                "simple_raw": "static BoolPatch createInvert()",
-                "detailed_html": "inline static BoolPatch createInvert()",
-                "detailed_raw": "inline static BoolPatch createInvert()",
-                "original_definition_html": "static BoolPatch apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::createInvert",
-                "original_argsstring_html": "()"
-              },
-              "description": {
-                "brief_html": "<p>Creates a new patch that invert the bool. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/createInvert",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/createInvert",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch",
-              "compoundname_html": "apache::thrift::op::detail::BoolPatch::createInvert"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/BoolPatch/createInvert",
-          "minprot": "public",
-          "displayname_html": "createInvert",
-          "brief_html": "<p>Creates a new patch that invert the bool. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/createInvert",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/createInvert"
-        },
-        {
-          "kind": "overloadset",
           "name_html": "invert",
           "compoundname_html": "apache::thrift::op::detail::BoolPatch::invert",
           "functions": [
@@ -847,11 +797,11 @@
               "name_html": "invert",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "102",
+                "line": "100",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "102",
-                "bodyend": "105"
+                "bodystart": "100",
+                "bodyend": "103"
               },
               "definition": {
                 "simple_html": "void invert()",
@@ -908,11 +858,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "127",
+                "line": "125",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "127",
-                "bodyend": "137"
+                "bodystart": "125",
+                "bodyend": "135"
               },
               "definition": {
                 "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -924,7 +874,7 @@
               },
               "description": {
                 "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(bool);\n  void clear();\n  void invert();\n}\n</pre></p><p>For example: <pre>auto patch = BoolPatch::createClear();\npatch = !patch;\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.invert();  </pre> </p>",
-                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+                "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/customVisit",
@@ -935,7 +885,7 @@
           "filepath": "f/class/apache/thrift/op/detail/BoolPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+          "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisit"
@@ -965,11 +915,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "line": "139",
+                "line": "137",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-                "bodystart": "139",
-                "bodyend": "148"
+                "bodystart": "137",
+                "bodyend": "146"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1761,10 +1711,96 @@
           "filepath": "f/class/apache/thrift/op/detail/BoolPatch/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/operator.assign"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "clear",
+          "compoundname_html": "apache::thrift::op::detail::BoolPatch::clear",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch_1af46653854514e1089770c98171077a7e",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+              "argsstring_html": "()",
+              "name_html": "clear",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+                "line": "97",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+                "bodystart": "249",
+                "bodyend": "249"
+              },
+              "definition": {
+                "simple_html": "void clear()",
+                "simple_raw": "void clear()",
+                "detailed_html": "inline void clear()",
+                "detailed_raw": "inline void clear()",
+                "original_definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+                "original_argsstring_html": "()"
+              },
+              "description": {
+                "brief_html": "<p>Clears the value. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/BoolPatch/clear",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BoolPatch/clear",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch",
+              "compoundname_html": "apache::thrift::op::detail::BoolPatch::clear"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1af46653854514e1089770c98171077a7e",
+              "prot": "protected",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+              "argsstring_html": "()",
+              "name_html": "clear",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+                "line": "249",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+                "bodystart": "249",
+                "bodyend": "249"
+              },
+              "definition": {
+                "simple_html": "void clear()",
+                "simple_raw": "void clear()",
+                "detailed_html": "protected inline void clear()",
+                "detailed_raw": "protected inline void clear()",
+                "original_definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+                "original_argsstring_html": "()"
+              },
+              "description": {
+                "brief_html": "<p>Clears the value. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/clear",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/clear",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+              "compoundname_html": "apache::thrift::op::detail::BoolPatch::clear"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/BoolPatch/clear",
+          "minprot": "public",
+          "displayname_html": "clear",
+          "brief_html": "<p>Clears the value. </p>",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/clear",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/clear"
         },
         {
           "kind": "overloadset",
@@ -1873,56 +1909,6 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisitAssignAndClear",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/customVisitAssignAndClear"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "clear",
-          "compoundname_html": "apache::thrift::op::detail::BoolPatch::clear",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1af46653854514e1089770c98171077a7e",
-              "prot": "protected",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
-              "argsstring_html": "()",
-              "name_html": "clear",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-                "line": "249",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-                "bodystart": "249",
-                "bodyend": "249"
-              },
-              "definition": {
-                "simple_html": "void clear()",
-                "simple_raw": "void clear()",
-                "detailed_html": "protected inline void clear()",
-                "detailed_raw": "protected inline void clear()",
-                "original_definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
-                "original_argsstring_html": "()"
-              },
-              "description": {
-                "brief_html": "<p>Clears the value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/clear",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/clear",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
-              "compoundname_html": "apache::thrift::op::detail::BoolPatch::clear"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/BoolPatch/clear",
-          "minprot": "protected",
-          "displayname_html": "clear",
-          "brief_html": "<p>Clears the value. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/clear",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BoolPatch/clear"
         },
         {
           "kind": "overloadset",

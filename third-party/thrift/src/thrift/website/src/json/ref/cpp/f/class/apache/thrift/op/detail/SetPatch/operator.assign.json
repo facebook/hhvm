@@ -389,7 +389,7 @@
   "filepath": "f/class/apache/thrift/op/detail/SetPatch/operator.assign",
   "minprot": "public",
   "displayname_html": "operator=",
-  "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+  "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/operator.assign",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/SetPatch/operator.assign"

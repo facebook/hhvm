@@ -17,7 +17,7 @@
       "name_html": "BitSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "95",
+        "line": "102",
         "column": "1"
       },
       "definition": {
@@ -54,11 +54,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "97",
+        "line": "104",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "97",
-        "bodyend": "97"
+        "bodystart": "104",
+        "bodyend": "104"
       },
       "definition": {
         "simple_html": "BitSet(T value)",
@@ -93,7 +93,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "99",
+        "line": "106",
         "column": "1"
       },
       "definition": {

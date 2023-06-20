@@ -29,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1195",
+        "line": "1206",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1195",
-        "bodyend": "1199"
+        "bodystart": "1206",
+        "bodyend": "1210"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    intern_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
@@ -68,11 +68,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1202",
+        "line": "1213",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1202",
-        "bodyend": "1208"
+        "bodystart": "1213",
+        "bodyend": "1219"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE intern_boxed_field_ref&amp; operator=(value_type&amp;&amp; value)",
@@ -91,7 +91,7 @@
   "filepath": "f/class/apache/thrift/intern_boxed_field_ref/operator.assign",
   "minprot": "public",
   "displayname_html": "operator=",
-  "brief_html": "",
+  "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/intern_boxed_field_ref/operator.assign",
   "refid": "/ref/cpp/f/class/apache/thrift/intern_boxed_field_ref/operator.assign"

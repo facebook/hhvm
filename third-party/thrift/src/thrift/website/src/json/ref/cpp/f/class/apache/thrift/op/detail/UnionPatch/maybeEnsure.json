@@ -22,11 +22,11 @@
       "name_html": "maybeEnsure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "308",
+        "line": "307",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "308",
-        "bodyend": "324"
+        "bodystart": "307",
+        "bodyend": "323"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nbool maybeEnsure()",

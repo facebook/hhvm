@@ -1,0 +1,47 @@
+{
+  "kind": "overloadset",
+  "name_html": "ensurePatchable",
+  "compoundname_html": "apache::thrift::op::detail::MapPatch::ensurePatchable",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a81e9f12685f3d659b65b2b2d0e77fa7e",
+      "prot": "private",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensurePatchable",
+      "argsstring_html": "()",
+      "name_html": "ensurePatchable",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "474",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "474",
+        "bodyend": "480"
+      },
+      "definition": {
+        "simple_html": "void ensurePatchable()",
+        "simple_raw": "void ensurePatchable()",
+        "detailed_html": "private inline void ensurePatchable()",
+        "detailed_raw": "private inline void ensurePatchable()",
+        "original_definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensurePatchable",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+      "compoundname_html": "apache::thrift::op::detail::MapPatch::ensurePatchable"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
+  "minprot": "private",
+  "displayname_html": "ensurePatchable",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensurePatchable",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensurePatchable"
+}

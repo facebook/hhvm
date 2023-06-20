@@ -34,11 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "103",
+        "line": "110",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "103",
-        "bodyend": "103"
+        "bodystart": "110",
+        "bodyend": "110"
       },
       "definition": {
         "simple_html": "reference(BitSet&amp; bitSet, const uint8_t bit)",
@@ -71,11 +71,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "105",
+        "line": "112",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "105",
-        "bodyend": "112"
+        "bodystart": "112",
+        "bodyend": "119"
       },
       "definition": {
         "simple_html": "reference&amp; operator=(bool flag)",
@@ -102,11 +102,11 @@
       "name_html": "operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "114",
+        "line": "121",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "114",
-        "bodyend": "114"
+        "bodystart": "121",
+        "bodyend": "121"
       },
       "definition": {
         "simple_html": "operator bool() const",
@@ -139,11 +139,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "116",
+        "line": "123",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "116",
-        "bodyend": "116"
+        "bodystart": "123",
+        "bodyend": "123"
       },
       "definition": {
         "simple_html": "reference&amp; operator=(reference&amp; other)",
@@ -159,11 +159,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "101",
+    "line": "108",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "101",
-    "bodyend": "121"
+    "bodystart": "108",
+    "bodyend": "128"
   },
   "namespacednames_html": [
     "apache",
@@ -186,10 +186,10 @@
       "name_html": "bitSet_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "119",
+        "line": "126",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "119",
+        "bodystart": "126",
         "bodyend": "-1"
       }
     },
@@ -204,10 +204,10 @@
       "name_html": "bit_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "120",
+        "line": "127",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "120",
+        "bodystart": "127",
         "bodyend": "-1"
       }
     }
@@ -250,11 +250,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "103",
+                "line": "110",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "103",
-                "bodyend": "103"
+                "bodystart": "110",
+                "bodyend": "110"
               },
               "definition": {
                 "simple_html": "reference(BitSet&amp; bitSet, const uint8_t bit)",
@@ -304,11 +304,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "105",
+                "line": "112",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "105",
-                "bodyend": "112"
+                "bodystart": "112",
+                "bodyend": "119"
               },
               "definition": {
                 "simple_html": "reference&amp; operator=(bool flag)",
@@ -343,11 +343,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "116",
+                "line": "123",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "116",
-                "bodyend": "116"
+                "bodystart": "123",
+                "bodyend": "123"
               },
               "definition": {
                 "simple_html": "reference&amp; operator=(reference&amp; other)",
@@ -366,7 +366,7 @@
           "filepath": "f/class/apache/thrift/detail/BitSet/reference/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reference/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/detail/BitSet/reference/operator.assign"
@@ -390,11 +390,11 @@
               "name_html": "operator bool",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "114",
+                "line": "121",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "114",
-                "bodyend": "114"
+                "bodystart": "121",
+                "bodyend": "121"
               },
               "definition": {
                 "simple_html": "operator bool() const",

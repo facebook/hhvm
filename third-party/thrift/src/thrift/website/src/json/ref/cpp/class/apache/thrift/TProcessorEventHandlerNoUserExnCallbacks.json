@@ -53,11 +53,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "180",
+        "line": "185",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "180",
-        "bodyend": "184"
+        "bodystart": "185",
+        "bodyend": "189"
       },
       "definition": {
         "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final",
@@ -106,11 +106,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "186",
+        "line": "191",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "186",
-        "bodyend": "190"
+        "bodystart": "191",
+        "bodyend": "195"
       },
       "definition": {
         "simple_html": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final",
@@ -126,11 +126,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-    "line": "178",
+    "line": "183",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-    "bodystart": "178",
-    "bodyend": "191"
+    "bodystart": "183",
+    "bodyend": "196"
   },
   "namespacednames_html": [
     "apache",
@@ -171,11 +171,11 @@
               "name_html": "TProcessorEventHandler",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "167",
+                "line": "172",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "167",
-                "bodyend": "167"
+                "bodystart": "172",
+                "bodyend": "172"
               },
               "definition": {
                 "simple_html": "TProcessorEventHandler()",
@@ -285,11 +285,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "180",
+                "line": "185",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "180",
-                "bodyend": "184"
+                "bodystart": "185",
+                "bodyend": "189"
               },
               "definition": {
                 "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;) final",
@@ -341,11 +341,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "140",
+                "line": "145",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "140",
-                "bodyend": "144"
+                "bodystart": "145",
+                "bodyend": "149"
               },
               "definition": {
                 "simple_html": "virtual void userException(\n    void*, const char*, const std::string&amp;, const std::string&amp;)",
@@ -410,11 +410,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "186",
+                "line": "191",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "186",
-                "bodyend": "190"
+                "bodystart": "191",
+                "bodyend": "195"
               },
               "definition": {
                 "simple_html": "virtual void userExceptionWrapped(\n    void*, const char*, bool, const folly::exception_wrapper&amp;) final",
@@ -467,11 +467,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "145",
+                "line": "150",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "145",
-                "bodyend": "164"
+                "bodystart": "150",
+                "bodyend": "169"
               },
               "definition": {
                 "simple_html": "virtual void userExceptionWrapped(\n    void* ctx,\n    const char* fn_name,\n    bool declared,\n    const folly::exception_wrapper&amp; ew_)",
@@ -1086,6 +1086,64 @@
         },
         {
           "kind": "overloadset",
+          "name_html": "onInteractionTerminate",
+          "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::onInteractionTerminate",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aefcf058af4f0b093b821b6e20358035d",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "virtual",
+              "type_html": "void",
+              "definition_html": "virtual void apache::thrift::TProcessorEventHandler::onInteractionTerminate",
+              "argsstring_html": "(void *, int64_t)",
+              "name_html": "onInteractionTerminate",
+              "param": [
+                {
+                  "type_html": "void *"
+                },
+                {
+                  "type_html": "int64_t"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "line": "129",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+                "bodystart": "129",
+                "bodyend": "129"
+              },
+              "definition": {
+                "simple_html": "virtual void onInteractionTerminate(void*, int64_t)",
+                "simple_raw": "virtual void onInteractionTerminate(void*, int64_t)",
+                "detailed_html": "inline virtual void onInteractionTerminate(void*, int64_t)",
+                "detailed_raw": "inline virtual void onInteractionTerminate(void*, int64_t)",
+                "original_definition_html": "virtual void apache::thrift::TProcessorEventHandler::onInteractionTerminate",
+                "original_argsstring_html": "(void *, int64_t)"
+              },
+              "description": {
+                "detailed_html": "<p>Called when an interaction is terminated. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+              "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+              "parentid": "classapache_1_1thrift_1_1TProcessorEventHandler",
+              "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::onInteractionTerminate"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
+          "minprot": "public",
+          "displayname_html": "onInteractionTerminate",
+          "brief_html": "<p>Called when an interaction is terminated. </p>",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
+          "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate"
+        },
+        {
+          "kind": "overloadset",
           "name_html": "handlerError",
           "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::handlerError",
           "functions": [
@@ -1111,11 +1169,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "129",
+                "line": "134",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "129",
-                "bodyend": "129"
+                "bodystart": "134",
+                "bodyend": "134"
               },
               "definition": {
                 "simple_html": "virtual void handlerError(void*, const char*)",
@@ -1174,11 +1232,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "line": "130",
+                "line": "135",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-                "bodystart": "130",
-                "bodyend": "133"
+                "bodystart": "135",
+                "bodyend": "138"
               },
               "definition": {
                 "simple_html": "virtual void handlerErrorWrapped(\n    void* ctx, const char* fn_name, const folly::exception_wrapper&amp;)",

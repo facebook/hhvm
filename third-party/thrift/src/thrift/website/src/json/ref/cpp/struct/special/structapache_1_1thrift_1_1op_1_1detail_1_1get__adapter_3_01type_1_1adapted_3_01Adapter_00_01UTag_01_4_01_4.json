@@ -27,10 +27,10 @@
       "name_html": "type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "261",
+        "line": "263",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "261",
+        "bodystart": "263",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1get__adapter_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4"
@@ -38,11 +38,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "260",
+    "line": "262",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "260",
-    "bodyend": "262"
+    "bodystart": "262",
+    "bodyend": "264"
   },
   "namespacednames_html": [
     "apache",

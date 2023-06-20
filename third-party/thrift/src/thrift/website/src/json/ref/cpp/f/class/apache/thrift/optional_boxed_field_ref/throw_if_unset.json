@@ -17,11 +17,11 @@
       "name_html": "throw_if_unset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1010",
+        "line": "1022",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1010",
-        "bodyend": "1014"
+        "bodystart": "1022",
+        "bodyend": "1026"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void throw_if_unset() const",

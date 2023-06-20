@@ -25,11 +25,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "line": "129",
+        "line": "134",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
-        "bodystart": "129",
-        "bodyend": "129"
+        "bodystart": "134",
+        "bodyend": "134"
       },
       "definition": {
         "simple_html": "virtual void handlerError(void*, const char*)",

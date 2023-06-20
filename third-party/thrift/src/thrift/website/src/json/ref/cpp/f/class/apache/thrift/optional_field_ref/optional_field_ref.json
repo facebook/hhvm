@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "505",
+        "line": "515",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "505",
-        "bodyend": "506"
+        "bodystart": "515",
+        "bodyend": "516"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE optional_field_ref(reference_type value, BitRef bitref)",
@@ -76,11 +76,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "509",
+        "line": "519",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "509",
-        "bodyend": "513"
+        "bodystart": "519",
+        "bodyend": "523"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE optional_field_ref(\n    reference_type value,\n    typename BitRef::Isset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -125,11 +125,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "515",
+        "line": "525",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "515",
-        "bodyend": "519"
+        "bodystart": "525",
+        "bodyend": "529"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE optional_field_ref(\n    reference_type value,\n    typename BitRef::AtomicIsset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -174,11 +174,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "522",
+        "line": "532",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "522",
-        "bodyend": "524"
+        "bodystart": "532",
+        "bodyend": "534"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE optional_field_ref(const optional_field_ref&lt;U&gt;&amp; other)",
@@ -223,11 +223,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "531",
+        "line": "541",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "531",
-        "bodyend": "533"
+        "bodystart": "541",
+        "bodyend": "543"
       },
       "definition": {
         "simple_html": "template &lt;\n    typename U,\n    std::enable_if_t&lt;\n        std::is_same&lt;T, U&amp;&amp;&gt;{} || std::is_same&lt;T, const U&amp;&amp;&gt;{},\n        int&gt; = 0&gt;\nFOLLY_ERASE optional_field_ref(const optional_field_ref&lt;U&amp;&gt;&amp; other)",

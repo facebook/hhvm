@@ -39,11 +39,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1678",
+        "line": "1688",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1678",
-        "bodyend": "1683"
+        "bodystart": "1688",
+        "bodyend": "1693"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE void operator()(\n    optional_boxed_field_ref&lt;T&gt; ref,\n    std::unique_ptr&lt;typename folly::remove_cvref_t&lt;T&gt;::element_type&gt; ptr) const",
@@ -59,11 +59,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1676",
+    "line": "1686",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1676",
-    "bodyend": "1684"
+    "bodystart": "1686",
+    "bodyend": "1694"
   },
   "namespacednames_html": [
     "apache",
@@ -117,11 +117,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1678",
+                "line": "1688",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1678",
-                "bodyend": "1683"
+                "bodystart": "1688",
+                "bodyend": "1693"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE void operator()(\n    optional_boxed_field_ref&lt;T&gt; ref,\n    std::unique_ptr&lt;typename folly::remove_cvref_t&lt;T&gt;::element_type&gt; ptr) const",

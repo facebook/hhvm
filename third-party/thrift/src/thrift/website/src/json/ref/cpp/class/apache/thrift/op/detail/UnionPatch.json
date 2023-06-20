@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "400",
+        "line": "399",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "400",
+        "bodystart": "399",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch"
@@ -51,27 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "401",
+        "line": "400",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "401",
-        "bodyend": "-1"
-      },
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a1a118facf8a55ae87ee6eddeb1941106",
-      "prot": "private",
-      "type_html": "typename <code>Base::patch_type</code>",
-      "definition_html": "using apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::P =  typename Base::patch_type",
-      "argsstring_html": "",
-      "name_html": "P",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "402",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "402",
+        "bodystart": "400",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch"
@@ -90,10 +73,10 @@
       "name_html": "F",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "404",
+        "line": "402",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "404",
+        "bodystart": "402",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch"
@@ -163,166 +146,6 @@
   ],
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a58e1ffe9a9203f8a97b7a480fd10db03",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename U",
-          "defval_html": "T"
-        }
-      ],
-      "type_html": "FOLLY_NODISCARD <code>UnionPatch</code>",
-      "definition_html": "static FOLLY_NODISCARD UnionPatch apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::createEnsure",
-      "argsstring_html": "(U &amp;&amp;_default)",
-      "name_html": "createEnsure",
-      "param": [
-        {
-          "type_html": "U &amp;&amp;",
-          "declname_html": "_default"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "416",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "416",
-        "bodyend": "420"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename U = T&gt;\nstatic FOLLY_NODISCARD UnionPatch createEnsure(U&amp;&amp; _default)",
-        "simple_raw": "template <typename U = T>\nstatic FOLLY_NODISCARD UnionPatch createEnsure(U&& _default)",
-        "detailed_html": "template &lt;typename U = T&gt;\ninline static FOLLY_NODISCARD UnionPatch createEnsure(U&amp;&amp; _default)",
-        "detailed_raw": "template <typename U = T>\ninline static FOLLY_NODISCARD UnionPatch createEnsure(U&& _default)",
-        "original_definition_html": "static FOLLY_NODISCARD UnionPatch apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::createEnsure",
-        "original_argsstring_html": "(U &amp;&amp;_default)"
-      },
-      "description": {
-        "brief_html": "<p>Creates a new patch that ensures the union with a given value. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/createEnsure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/createEnsure"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aa53f182bca12930ee62aa7f139588649",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "T &amp;",
-      "definition_html": "T&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-      "argsstring_html": "()",
-      "name_html": "ensure",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "422",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "422",
-        "bodyend": "422"
-      },
-      "definition": {
-        "simple_html": "T&amp; ensure()",
-        "simple_raw": "T& ensure()",
-        "detailed_html": "inline T&amp; ensure()",
-        "detailed_raw": "inline T& ensure()",
-        "original_definition_html": "T&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-        "original_argsstring_html": "()"
-      },
-      "description": {
-        "brief_html": "<p>Returns the union that's used to ensure. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aa8e50525e03e9bcabab466e99fb6416c",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "P &amp;",
-      "definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-      "argsstring_html": "(const T &amp;val)",
-      "name_html": "ensure",
-      "param": [
-        {
-          "type_html": "const T &amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "424",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "424",
-        "bodyend": "424"
-      },
-      "definition": {
-        "simple_html": "P&amp; ensure(const T&amp; val)",
-        "simple_raw": "P& ensure(const T& val)",
-        "detailed_html": "inline P&amp; ensure(const T&amp; val)",
-        "detailed_raw": "inline P& ensure(const T& val)",
-        "original_definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-        "original_argsstring_html": "(const T &amp;val)"
-      },
-      "description": {
-        "brief_html": "<p>Ensures the union with a given value. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aeb6f007552a2a53227a3ee06180f1257",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "P &amp;",
-      "definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-      "argsstring_html": "(T &amp;&amp;val)",
-      "name_html": "ensure",
-      "param": [
-        {
-          "type_html": "T &amp;&amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "426",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "426",
-        "bodyend": "426"
-      },
-      "definition": {
-        "simple_html": "P&amp; ensure(T&amp;&amp; val)",
-        "simple_raw": "P& ensure(T&& val)",
-        "detailed_html": "inline P&amp; ensure(T&amp;&amp; val)",
-        "detailed_raw": "inline P& ensure(T&& val)",
-        "original_definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-        "original_argsstring_html": "(T &amp;&amp;val)"
-      },
-      "description": {
-        "brief_html": "<p>Ensures the union with a given value. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a05286228a854c2dd2ed204512ad291be",
       "prot": "public",
       "static": "no",
@@ -351,11 +174,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "430",
+        "line": "413",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "430",
-        "bodyend": "432"
+        "bodystart": "413",
+        "bodyend": "415"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\nvoid assign(U&amp;&amp; val)",
@@ -385,7 +208,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "408",
+        "line": "406",
         "column": "1"
       },
       "definition": {
@@ -413,7 +236,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "408",
+        "line": "406",
         "column": "1"
       },
       "definition": {
@@ -441,11 +264,11 @@
       "name_html": "apply",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "409",
+        "line": "407",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "251",
-        "bodyend": "251"
+        "bodystart": "250",
+        "bodyend": "250"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -477,11 +300,11 @@
       "name_html": "clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "411",
+        "line": "409",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "261",
-        "bodyend": "269"
+        "bodystart": "260",
+        "bodyend": "268"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -493,177 +316,15 @@
       },
       "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/clear",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/clear"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a6be3018971cc29ec55daa9509cf7c35c",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-      "argsstring_html": "()",
-      "name_html": "ensure",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "412",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "163",
-        "bodyend": "165"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-        "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-        "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-        "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-        "original_argsstring_html": "()"
-      },
-      "description": {
-        "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a75aed8ff324273bcbc8db35360a356f3",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename Id"
-        },
-        {
-          "type_html": "typename U",
-          "defval_html": "FieldType&lt;Id&gt;"
-        }
-      ],
-      "type_html": "decltype(auto)",
-      "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-      "argsstring_html": "(U &amp;&amp;defaultVal)",
-      "name_html": "ensure",
-      "param": [
-        {
-          "type_html": "U &amp;&amp;",
-          "declname_html": "defaultVal"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "412",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "168",
-        "bodyend": "173"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-        "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-        "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-        "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-        "original_argsstring_html": "(U &amp;&amp;defaultVal)"
-      },
-      "description": {
-        "brief_html": "<p>Same as <code><code>ensure()</code></code> method, except uses the provided default value. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a1268d9a7a3e6a37791b51ea4607cf7cf",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename U",
-          "defval_html": "T"
-        }
-      ],
-      "type_html": "Patch &amp;",
-      "definition_html": "Patch&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensureAnd",
-      "argsstring_html": "(U &amp;&amp;_default)",
-      "name_html": "ensureAnd",
-      "param": [
-        {
-          "type_html": "U &amp;&amp;",
-          "declname_html": "_default"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "440",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "440",
-        "bodyend": "447"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename U = T&gt;\nPatch&amp; ensureAnd(U&amp;&amp; _default)",
-        "simple_raw": "template <typename U = T>\nPatch& ensureAnd(U&& _default)",
-        "detailed_html": "template &lt;typename U = T&gt; private inline Patch&amp; ensureAnd(U&amp;&amp; _default)",
-        "detailed_raw": "template <typename U = T> private inline Patch& ensureAnd(U&& _default)",
-        "original_definition_html": "Patch&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensureAnd",
-        "original_argsstring_html": "(U &amp;&amp;_default)"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensureAnd",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensureAnd"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a69e192e5e9c63c134fe13994d3585eaf",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-      "argsstring_html": "()",
-      "name_html": "ensurePatchable",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "436",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "287",
-        "bodyend": "305"
-      },
-      "definition": {
-        "simple_html": "void ensurePatchable()",
-        "simple_raw": "void ensurePatchable()",
-        "detailed_html": "private inline void ensurePatchable()",
-        "detailed_raw": "private inline void ensurePatchable()",
-        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-        "original_argsstring_html": "()"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable"
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-    "line": "399",
+    "line": "398",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-    "bodystart": "399",
-    "bodyend": "448"
+    "bodystart": "398",
+    "bodyend": "416"
   },
   "namespacednames_html": [
     "apache",
@@ -1181,7 +842,7 @@
               "name_html": "~BaseEnsurePatch",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "257",
+                "line": "256",
                 "column": "1"
               },
               "definition": {
@@ -1205,386 +866,6 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch.dtor",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/BaseEnsurePatch.dtor"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "createEnsure",
-          "compoundname_html": "apache::thrift::op::detail::UnionPatch::createEnsure",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a58e1ffe9a9203f8a97b7a480fd10db03",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename U",
-                  "defval_html": "T"
-                }
-              ],
-              "type_html": "FOLLY_NODISCARD <code>UnionPatch</code>",
-              "definition_html": "static FOLLY_NODISCARD UnionPatch apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::createEnsure",
-              "argsstring_html": "(U &amp;&amp;_default)",
-              "name_html": "createEnsure",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "_default"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "416",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "416",
-                "bodyend": "420"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename U = T&gt;\nstatic FOLLY_NODISCARD UnionPatch createEnsure(U&amp;&amp; _default)",
-                "simple_raw": "template <typename U = T>\nstatic FOLLY_NODISCARD UnionPatch createEnsure(U&& _default)",
-                "detailed_html": "template &lt;typename U = T&gt;\ninline static FOLLY_NODISCARD UnionPatch createEnsure(U&amp;&amp; _default)",
-                "detailed_raw": "template <typename U = T>\ninline static FOLLY_NODISCARD UnionPatch createEnsure(U&& _default)",
-                "original_definition_html": "static FOLLY_NODISCARD UnionPatch apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::createEnsure",
-                "original_argsstring_html": "(U &amp;&amp;_default)"
-              },
-              "description": {
-                "brief_html": "<p>Creates a new patch that ensures the union with a given value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/createEnsure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/createEnsure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::createEnsure"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/createEnsure",
-          "minprot": "public",
-          "displayname_html": "createEnsure",
-          "brief_html": "<p>Creates a new patch that ensures the union with a given value. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createEnsure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/createEnsure"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "ensure",
-          "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aa53f182bca12930ee62aa7f139588649",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "T &amp;",
-              "definition_html": "T&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-              "argsstring_html": "()",
-              "name_html": "ensure",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "422",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "422",
-                "bodyend": "422"
-              },
-              "definition": {
-                "simple_html": "T&amp; ensure()",
-                "simple_raw": "T& ensure()",
-                "detailed_html": "inline T&amp; ensure()",
-                "detailed_raw": "inline T& ensure()",
-                "original_definition_html": "T&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-                "original_argsstring_html": "()"
-              },
-              "description": {
-                "brief_html": "<p>Returns the union that's used to ensure. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aa8e50525e03e9bcabab466e99fb6416c",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "P &amp;",
-              "definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-              "argsstring_html": "(const T &amp;val)",
-              "name_html": "ensure",
-              "param": [
-                {
-                  "type_html": "const T &amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "424",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "424",
-                "bodyend": "424"
-              },
-              "definition": {
-                "simple_html": "P&amp; ensure(const T&amp; val)",
-                "simple_raw": "P& ensure(const T& val)",
-                "detailed_html": "inline P&amp; ensure(const T&amp; val)",
-                "detailed_raw": "inline P& ensure(const T& val)",
-                "original_definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-                "original_argsstring_html": "(const T &amp;val)"
-              },
-              "description": {
-                "brief_html": "<p>Ensures the union with a given value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1aeb6f007552a2a53227a3ee06180f1257",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "P &amp;",
-              "definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-              "argsstring_html": "(T &amp;&amp;val)",
-              "name_html": "ensure",
-              "param": [
-                {
-                  "type_html": "T &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "426",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "426",
-                "bodyend": "426"
-              },
-              "definition": {
-                "simple_html": "P&amp; ensure(T&amp;&amp; val)",
-                "simple_raw": "P& ensure(T&& val)",
-                "detailed_html": "inline P&amp; ensure(T&amp;&amp; val)",
-                "detailed_raw": "inline P& ensure(T&& val)",
-                "original_definition_html": "P&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensure",
-                "original_argsstring_html": "(T &amp;&amp;val)"
-              },
-              "description": {
-                "brief_html": "<p>Ensures the union with a given value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a6be3018971cc29ec55daa9509cf7c35c",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename Id"
-                }
-              ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-              "argsstring_html": "()",
-              "name_html": "ensure",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "412",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "163",
-                "bodyend": "165"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-                "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-                "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-                "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-                "original_argsstring_html": "()"
-              },
-              "description": {
-                "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a75aed8ff324273bcbc8db35360a356f3",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename Id"
-                },
-                {
-                  "type_html": "typename U",
-                  "defval_html": "FieldType&lt;Id&gt;"
-                }
-              ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-              "argsstring_html": "(U &amp;&amp;defaultVal)",
-              "name_html": "ensure",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "defaultVal"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "412",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "168",
-                "bodyend": "173"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-                "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-                "original_argsstring_html": "(U &amp;&amp;defaultVal)"
-              },
-              "description": {
-                "brief_html": "<p>Same as <code><code>ensure()</code></code> method, except uses the provided default value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a6be3018971cc29ec55daa9509cf7c35c",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename Id"
-                }
-              ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-              "argsstring_html": "()",
-              "name_html": "ensure",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "163",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "163",
-                "bodyend": "165"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) ensure()",
-                "simple_raw": "template <typename Id>\ndecltype(auto) ensure()",
-                "detailed_html": "template &lt;typename Id&gt;\ninline decltype(auto) ensure()",
-                "detailed_raw": "template <typename Id>\ninline decltype(auto) ensure()",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-                "original_argsstring_html": "()"
-              },
-              "description": {
-                "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a75aed8ff324273bcbc8db35360a356f3",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename Id"
-                },
-                {
-                  "type_html": "typename U",
-                  "defval_html": "FieldType&lt;Id&gt;"
-                }
-              ],
-              "type_html": "decltype(auto)",
-              "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-              "argsstring_html": "(U &amp;&amp;defaultVal)",
-              "name_html": "ensure",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "defaultVal"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "168",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "168",
-                "bodyend": "173"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ndecltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "simple_raw": "template <typename Id, typename U = FieldType<Id>>\ndecltype(auto) ensure(U&& defaultVal)",
-                "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline decltype(auto) ensure(U&amp;&amp; defaultVal)",
-                "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline decltype(auto) ensure(U&& defaultVal)",
-                "original_definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
-                "original_argsstring_html": "(U &amp;&amp;defaultVal)"
-              },
-              "description": {
-                "brief_html": "<p>Same as <code><code>ensure()</code></code> method, except uses the provided default value. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/ensure",
-          "minprot": "public",
-          "displayname_html": "ensure",
-          "brief_html": "<p>Ensures the union with a given value. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure"
         },
         {
           "kind": "overloadset",
@@ -1620,11 +901,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "430",
+                "line": "413",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "430",
-                "bodyend": "432"
+                "bodystart": "413",
+                "bodyend": "415"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U = F&lt;Id&gt;&gt;\nvoid assign(U&amp;&amp; val)",
@@ -1842,7 +1123,7 @@
               "name_html": "operator=",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "408",
+                "line": "406",
                 "column": "1"
               },
               "definition": {
@@ -1872,7 +1153,7 @@
               "name_html": "operator=",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "408",
+                "line": "406",
                 "column": "1"
               },
               "definition": {
@@ -2344,7 +1625,7 @@
           "filepath": "f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/operator.assign"
@@ -2368,11 +1649,11 @@
               "name_html": "apply",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "409",
+                "line": "407",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "251",
-                "bodyend": "251"
+                "bodystart": "250",
+                "bodyend": "250"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2407,11 +1688,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "251",
+                "line": "250",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "251",
-                "bodyend": "251"
+                "bodystart": "250",
+                "bodyend": "250"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2732,11 +2013,11 @@
               "name_html": "clear",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "411",
+                "line": "409",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "261",
-                "bodyend": "269"
+                "bodystart": "260",
+                "bodyend": "268"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -2770,11 +2051,11 @@
               "name_html": "clear",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "261",
+                "line": "260",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "261",
-                "bodyend": "269"
+                "bodystart": "260",
+                "bodyend": "268"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -2833,145 +2114,6 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/clear",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/clear"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "ensureAnd",
-          "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensureAnd",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a1268d9a7a3e6a37791b51ea4607cf7cf",
-              "prot": "private",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename U",
-                  "defval_html": "T"
-                }
-              ],
-              "type_html": "Patch &amp;",
-              "definition_html": "Patch&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensureAnd",
-              "argsstring_html": "(U &amp;&amp;_default)",
-              "name_html": "ensureAnd",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "_default"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "440",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "440",
-                "bodyend": "447"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename U = T&gt;\nPatch&amp; ensureAnd(U&amp;&amp; _default)",
-                "simple_raw": "template <typename U = T>\nPatch& ensureAnd(U&& _default)",
-                "detailed_html": "template &lt;typename U = T&gt; private inline Patch&amp; ensureAnd(U&amp;&amp; _default)",
-                "detailed_raw": "template <typename U = T> private inline Patch& ensureAnd(U&& _default)",
-                "original_definition_html": "Patch&amp; apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::ensureAnd",
-                "original_argsstring_html": "(U &amp;&amp;_default)"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensureAnd",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensureAnd",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensureAnd"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/ensureAnd",
-          "minprot": "private",
-          "displayname_html": "ensureAnd",
-          "brief_html": "",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensureAnd",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensureAnd"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "ensurePatchable",
-          "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a69e192e5e9c63c134fe13994d3585eaf",
-              "prot": "private",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-              "argsstring_html": "()",
-              "name_html": "ensurePatchable",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "436",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "287",
-                "bodyend": "305"
-              },
-              "definition": {
-                "simple_html": "void ensurePatchable()",
-                "simple_raw": "void ensurePatchable()",
-                "detailed_html": "private inline void ensurePatchable()",
-                "detailed_raw": "private inline void ensurePatchable()",
-                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-                "original_argsstring_html": "()"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable"
-            },
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a69e192e5e9c63c134fe13994d3585eaf",
-              "prot": "protected",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-              "argsstring_html": "()",
-              "name_html": "ensurePatchable",
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "287",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "287",
-                "bodyend": "305"
-              },
-              "definition": {
-                "simple_html": "void ensurePatchable()",
-                "simple_raw": "void ensurePatchable()",
-                "detailed_html": "protected inline void ensurePatchable()",
-                "detailed_raw": "protected inline void ensurePatchable()",
-                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-                "original_argsstring_html": "()"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
-              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-          "minprot": "protected",
-          "displayname_html": "ensurePatchable",
-          "brief_html": "",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable"
         },
         {
           "kind": "overloadset",
@@ -3128,6 +2270,112 @@
         },
         {
           "kind": "overloadset",
+          "name_html": "ensure",
+          "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a3026d3756c56da531dc78ff8e768d5a9",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Id"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+              "argsstring_html": "()",
+              "name_html": "ensure",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "line": "163",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "bodystart": "163",
+                "bodyend": "165"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
+                "simple_raw": "template <typename Id>\nvoid ensure()",
+                "detailed_html": "template &lt;typename Id&gt;\ninline void ensure()",
+                "detailed_raw": "template <typename Id>\ninline void ensure()",
+                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+                "original_argsstring_html": "()"
+              },
+              "description": {
+                "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
+            },
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ab275726eca5e189faa3b4d612d4fdae5",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Id"
+                },
+                {
+                  "type_html": "typename U",
+                  "defval_html": "FieldType&lt;Id&gt;"
+                }
+              ],
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+              "argsstring_html": "(U &amp;&amp;defaultVal)",
+              "name_html": "ensure",
+              "param": [
+                {
+                  "type_html": "U &amp;&amp;",
+                  "declname_html": "defaultVal"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "line": "168",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "bodystart": "168",
+                "bodyend": "172"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nvoid ensure(U&amp;&amp; defaultVal)",
+                "simple_raw": "template <typename Id, typename U = FieldType<Id>>\nvoid ensure(U&& defaultVal)",
+                "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline void ensure(U&amp;&amp; defaultVal)",
+                "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline void ensure(U&& defaultVal)",
+                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+                "original_argsstring_html": "(U &amp;&amp;defaultVal)"
+              },
+              "description": {
+                "brief_html": "<p>Same as <code><code>ensure()</code></code> method, except uses the provided default value. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensure",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensure"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/ensure",
+          "minprot": "public",
+          "displayname_html": "ensure",
+          "brief_html": "<p>Ensures the given field is set, and return the associated patch object. </p>",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensure"
+        },
+        {
+          "kind": "overloadset",
           "name_html": "patch",
           "compoundname_html": "apache::thrift::op::detail::UnionPatch::patch",
           "functions": [
@@ -3150,11 +2398,11 @@
               "name_html": "patch",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "177",
+                "line": "176",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "177",
-                "bodyend": "179"
+                "bodystart": "176",
+                "bodyend": "178"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patch()",
@@ -3205,11 +2453,11 @@
               "name_html": "patchIfSet",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "183",
+                "line": "182",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "183",
-                "bodyend": "185"
+                "bodystart": "182",
+                "bodyend": "184"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
@@ -3255,11 +2503,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "335",
+                "line": "334",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "335",
-                "bodyend": "337"
+                "bodystart": "334",
+                "bodyend": "336"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",
@@ -3313,11 +2561,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "219",
+                "line": "218",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "219",
-                "bodyend": "249"
+                "bodystart": "218",
+                "bodyend": "248"
               },
               "definition": {
                 "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -3328,8 +2576,8 @@
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
               },
               "description": {
-                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::foo&gt;().append(\"_\");\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
-                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const MyClass&amp;);\n  void clear();\n  template&lt;class Id&gt; void patchIfSet(const FieldPatch&amp;);\n  template&lt;class Id&gt; void ensure(const FieldPatch&amp;);\n}\n</pre></p><p>For example, let's assume you have the following thrift struct: <pre>struct MyClass {\n  1: string foo;\n  2: bool bar;\n}\n</pre></p><p>and then you created the following patch: <pre>MyClassPatch patch;\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::bar&gt;().invert();\npatch.patch&lt;ident::foo&gt;().append(\"_\");\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.ensure&lt;ident::foo&gt;();\nv.ensure&lt;ident::bar&gt;();\nv.patchIfSet&lt;ident::foo&gt;(StringPatch::createAppend(\"_\"));\nv.patchIfSet&lt;ident::bar&gt;(BoolPatch{});  // no-op since inverted twice  </pre> </p>",
+                "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/customVisit",
@@ -3340,7 +2588,7 @@
           "filepath": "f/class/apache/thrift/op/detail/UnionPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+          "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisit"
@@ -3369,11 +2617,11 @@
               "name_html": "patchPrior",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "278",
+                "line": "277",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "278",
-                "bodyend": "280"
+                "bodystart": "277",
+                "bodyend": "279"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",
@@ -3421,11 +2669,11 @@
               "name_html": "patchAfter",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "283",
+                "line": "282",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "283",
-                "bodyend": "285"
+                "bodystart": "282",
+                "bodyend": "284"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchAfter()",
@@ -3451,6 +2699,53 @@
         },
         {
           "kind": "overloadset",
+          "name_html": "ensurePatchable",
+          "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a69e192e5e9c63c134fe13994d3585eaf",
+              "prot": "protected",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+              "argsstring_html": "()",
+              "name_html": "ensurePatchable",
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "line": "286",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+                "bodystart": "286",
+                "bodyend": "304"
+              },
+              "definition": {
+                "simple_html": "void ensurePatchable()",
+                "simple_raw": "void ensurePatchable()",
+                "detailed_html": "protected inline void ensurePatchable()",
+                "detailed_raw": "protected inline void ensurePatchable()",
+                "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
+                "original_argsstring_html": "()"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/ensurePatchable",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
+              "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
+          "minprot": "protected",
+          "displayname_html": "ensurePatchable",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/ensurePatchable"
+        },
+        {
+          "kind": "overloadset",
           "name_html": "maybeEnsure",
           "compoundname_html": "apache::thrift::op::detail::UnionPatch::maybeEnsure",
           "functions": [
@@ -3473,11 +2768,11 @@
               "name_html": "maybeEnsure",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "308",
+                "line": "307",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "308",
-                "bodyend": "324"
+                "bodystart": "307",
+                "bodyend": "323"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id&gt;\nbool maybeEnsure()",
@@ -3534,11 +2829,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "273",
+                "line": "272",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "273",
-                "bodyend": "275"
+                "bodystart": "272",
+                "bodyend": "274"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",
@@ -3595,11 +2890,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "line": "328",
+                "line": "327",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-                "bodystart": "328",
-                "bodyend": "331"
+                "bodystart": "327",
+                "bodyend": "330"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename U&gt;\ndecltype(auto) getRawPatch(U&amp;&amp; patch) const",

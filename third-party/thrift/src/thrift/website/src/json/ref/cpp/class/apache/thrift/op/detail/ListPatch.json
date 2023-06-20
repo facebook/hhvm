@@ -34,10 +34,10 @@
       "name_html": "Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "87",
+        "line": "73",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "87",
+        "bodystart": "73",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch"
@@ -51,44 +51,10 @@
       "name_html": "T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "88",
+        "line": "74",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "88",
-        "bodyend": "-1"
-      },
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a6dfb879ff7c44c315a2f77198fd905fb",
-      "prot": "private",
-      "type_html": "folly::remove_cvref_t&lt;decltype(*std::declval&lt;Patch&gt;().patch())&gt;",
-      "definition_html": "using apache::thrift::op::detail::ListPatch&lt; Patch &gt;::VPMap =  folly::remove_cvref_t&lt;decltype(*std::declval&lt;Patch&gt;().patch())&gt;",
-      "argsstring_html": "",
-      "name_html": "VPMap",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "89",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "89",
-        "bodyend": "-1"
-      },
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1abb0ba465b6b1970723b47fbf96b5e65e",
-      "prot": "private",
-      "type_html": "typename VPMap::mapped_type",
-      "definition_html": "using apache::thrift::op::detail::ListPatch&lt; Patch &gt;::VP =  typename VPMap::mapped_type",
-      "argsstring_html": "",
-      "name_html": "VP",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "90",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "90",
+        "bodystart": "74",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch"
@@ -116,98 +82,6 @@
   ],
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a160e1513bec20b64f1fdd6f34e1920d2",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename C",
-          "defval_html": "T"
-        }
-      ],
-      "type_html": "<code>ListPatch</code>",
-      "definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createAppend",
-      "argsstring_html": "(C &amp;&amp;values)",
-      "name_html": "createAppend",
-      "param": [
-        {
-          "type_html": "C &amp;&amp;",
-          "declname_html": "values"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "99",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "99",
-        "bodyend": "103"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename C = T&gt;\nstatic ListPatch createAppend(C&amp;&amp; values)",
-        "simple_raw": "template <typename C = T>\nstatic ListPatch createAppend(C&& values)",
-        "detailed_html": "template &lt;typename C = T&gt;\ninline static ListPatch createAppend(C&amp;&amp; values)",
-        "detailed_raw": "template <typename C = T>\ninline static ListPatch createAppend(C&& values)",
-        "original_definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createAppend",
-        "original_argsstring_html": "(C &amp;&amp;values)"
-      },
-      "description": {
-        "brief_html": "<p>Creates a new patch with appended list. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/createAppend",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/createAppend"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a6c51546ed807ddb01640f92408b5ceef",
-      "prot": "public",
-      "static": "yes",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename C",
-          "defval_html": "T"
-        }
-      ],
-      "type_html": "<code>ListPatch</code>",
-      "definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createPrepend",
-      "argsstring_html": "(C &amp;&amp;values)",
-      "name_html": "createPrepend",
-      "param": [
-        {
-          "type_html": "C &amp;&amp;",
-          "declname_html": "values"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "107",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "107",
-        "bodyend": "111"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename C = T&gt;\nstatic ListPatch createPrepend(C&amp;&amp; values)",
-        "simple_raw": "template <typename C = T>\nstatic ListPatch createPrepend(C&& values)",
-        "detailed_html": "template &lt;typename C = T&gt;\ninline static ListPatch createPrepend(C&amp;&amp; values)",
-        "detailed_raw": "template <typename C = T>\ninline static ListPatch createPrepend(C&& values)",
-        "original_definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createPrepend",
-        "original_argsstring_html": "(C &amp;&amp;values)"
-      },
-      "description": {
-        "brief_html": "<p>Creates a new patch with prepended list. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/createPrepend",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/createPrepend"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a5b1604c318636dea065be98b14b5d4c3",
       "prot": "public",
       "static": "no",
@@ -233,11 +107,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "115",
+        "line": "83",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "115",
-        "bodyend": "118"
+        "bodystart": "83",
+        "bodyend": "86"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid append(C&amp;&amp; rhs)",
@@ -280,11 +154,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "121",
+        "line": "89",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "121",
-        "bodyend": "123"
+        "bodystart": "89",
+        "bodyend": "91"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid emplace_back(Args&amp;&amp;... args)",
@@ -326,11 +200,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "126",
+        "line": "94",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "126",
-        "bodyend": "128"
+        "bodystart": "94",
+        "bodyend": "96"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid push_back(U&amp;&amp; val)",
@@ -372,11 +246,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "132",
+        "line": "100",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "132",
-        "bodyend": "135"
+        "bodystart": "100",
+        "bodyend": "103"
       },
       "definition": {
         "simple_html": "template &lt;typename C = T&gt;\nvoid prepend(C&amp;&amp; lhs)",
@@ -419,11 +293,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "138",
+        "line": "106",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "138",
-        "bodyend": "142"
+        "bodystart": "106",
+        "bodyend": "110"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid emplace_front(Args&amp;&amp;... args)",
@@ -465,11 +339,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "145",
+        "line": "113",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "145",
-        "bodyend": "149"
+        "bodystart": "113",
+        "bodyend": "117"
       },
       "definition": {
         "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid push_front(U&amp;&amp; val)",
@@ -484,138 +358,6 @@
       },
       "filepath": "fns/class/apache/thrift/op/detail/ListPatch/push_front",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/push_front"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1aaa4245c92b5ccd7656fb3c4a8ed51c11",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename U",
-          "defval_html": "typename T::value_type"
-        }
-      ],
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::erase",
-      "argsstring_html": "(U &amp;&amp;val)",
-      "name_html": "erase",
-      "param": [
-        {
-          "type_html": "U &amp;&amp;",
-          "declname_html": "val"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "153",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "153",
-        "bodyend": "162"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
-        "simple_raw": "template <typename U = typename T::value_type>\nvoid erase(U&& val)",
-        "detailed_html": "template &lt;typename U = typename T::value_type&gt;\ninline void erase(U&amp;&amp; val)",
-        "detailed_raw": "template <typename U = typename T::value_type>\ninline void erase(U&& val)",
-        "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::erase",
-        "original_argsstring_html": "(U &amp;&amp;val)"
-      },
-      "description": {
-        "brief_html": "<p>Removes an element. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/erase",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/erase"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a322c17f6b444d597ac07216fafb7f935",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "tparams": [
-        {
-          "type_html": "typename C",
-          "defval_html": "std::unordered_set&lt;typename T::value_type&gt;"
-        }
-      ],
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::remove",
-      "argsstring_html": "(C &amp;&amp;entries)",
-      "name_html": "remove",
-      "param": [
-        {
-          "type_html": "C &amp;&amp;",
-          "declname_html": "entries"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "166",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "166",
-        "bodyend": "173"
-      },
-      "definition": {
-        "simple_html": "template &lt;typename C = std::unordered_set&lt;typename T::value_type&gt;&gt;\nvoid remove(C&amp;&amp; entries)",
-        "simple_raw": "template <typename C = std::unordered_set<typename T::value_type>>\nvoid remove(C&& entries)",
-        "detailed_html": "template &lt;typename C = std::unordered_set&lt;typename T::value_type&gt;&gt;\ninline void remove(C&amp;&amp; entries)",
-        "detailed_raw": "template <typename C = std::unordered_set<typename T::value_type>>\ninline void remove(C&& entries)",
-        "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::remove",
-        "original_argsstring_html": "(C &amp;&amp;entries)"
-      },
-      "description": {
-        "brief_html": "<p>Removes all elements in the list. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/remove",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/remove"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a2d5fcc113e05f62567bf0595390a6056",
-      "prot": "public",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "FOLLY_NODISCARD VP &amp;",
-      "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchAt",
-      "argsstring_html": "(size_t pos)",
-      "name_html": "patchAt",
-      "param": [
-        {
-          "type_html": "size_t",
-          "declname_html": "pos"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "176",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "176",
-        "bodyend": "182"
-      },
-      "definition": {
-        "simple_html": "FOLLY_NODISCARD VP&amp; patchAt(size_t pos)",
-        "simple_raw": "FOLLY_NODISCARD VP& patchAt(size_t pos)",
-        "detailed_html": "inline FOLLY_NODISCARD VP&amp; patchAt(size_t pos)",
-        "detailed_raw": "inline FOLLY_NODISCARD VP& patchAt(size_t pos)",
-        "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchAt",
-        "original_argsstring_html": "(size_t pos)"
-      },
-      "description": {
-        "brief_html": "<p>Returns the patch that for the element in a given position. </p>"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/patchAt",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/patchAt"
     },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a92b0873e2a5910be1dde4e0f96ba58a2",
@@ -642,11 +384,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "209",
+        "line": "141",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "209",
-        "bodyend": "228"
+        "bodystart": "141",
+        "bodyend": "156"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -657,8 +399,8 @@
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
       },
       "description": {
-        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void remove(const std::vector&lt;Element&gt;&amp;);\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n  void patchIfSet(const std::unordered_map&lt;ListPatchIndex,\n                                           ElementPatch&gt;&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.patchAt(10).add(20);\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.patchIfSet({{10, I32Patch::createAdd(20)}});\nv.prepend({30});  </pre> </p>",
-        "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.clear();\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.prepend({30});  </pre> </p>",
+        "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/ListPatch/customVisit",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/customVisit"
@@ -683,11 +425,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "230",
+        "line": "158",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "230",
-        "bodyend": "251"
+        "bodystart": "158",
+        "bodyend": "168"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -699,52 +441,15 @@
       },
       "filepath": "fns/class/apache/thrift/op/detail/ListPatch/apply",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/apply"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1ab00788d88b8041725aefc4c52e4056a7",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
-      "argsstring_html": "(const VPMap &amp;patches)",
-      "name_html": "patchIfSet",
-      "param": [
-        {
-          "type_html": "const VPMap &amp;",
-          "declname_html": "patches"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "259",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "259",
-        "bodyend": "263"
-      },
-      "definition": {
-        "simple_html": "void patchIfSet(const VPMap&amp; patches)",
-        "simple_raw": "void patchIfSet(const VPMap& patches)",
-        "detailed_html": "private inline void patchIfSet(const VPMap&amp; patches)",
-        "detailed_raw": "private inline void patchIfSet(const VPMap& patches)",
-        "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
-        "original_argsstring_html": "(const VPMap &amp;patches)"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/ListPatch/patchIfSet",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/patchIfSet"
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "line": "86",
+    "line": "72",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-    "bodystart": "86",
-    "bodyend": "264"
+    "bodystart": "72",
+    "bodyend": "174"
   },
   "namespacednames_html": [
     "apache",
@@ -1203,130 +908,6 @@
         },
         {
           "kind": "overloadset",
-          "name_html": "createAppend",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::createAppend",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a160e1513bec20b64f1fdd6f34e1920d2",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename C",
-                  "defval_html": "T"
-                }
-              ],
-              "type_html": "<code>ListPatch</code>",
-              "definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createAppend",
-              "argsstring_html": "(C &amp;&amp;values)",
-              "name_html": "createAppend",
-              "param": [
-                {
-                  "type_html": "C &amp;&amp;",
-                  "declname_html": "values"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "99",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "99",
-                "bodyend": "103"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename C = T&gt;\nstatic ListPatch createAppend(C&amp;&amp; values)",
-                "simple_raw": "template <typename C = T>\nstatic ListPatch createAppend(C&& values)",
-                "detailed_html": "template &lt;typename C = T&gt;\ninline static ListPatch createAppend(C&amp;&amp; values)",
-                "detailed_raw": "template <typename C = T>\ninline static ListPatch createAppend(C&& values)",
-                "original_definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createAppend",
-                "original_argsstring_html": "(C &amp;&amp;values)"
-              },
-              "description": {
-                "brief_html": "<p>Creates a new patch with appended list. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/createAppend",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/createAppend",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::createAppend"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/createAppend",
-          "minprot": "public",
-          "displayname_html": "createAppend",
-          "brief_html": "<p>Creates a new patch with appended list. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createAppend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createAppend"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "createPrepend",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::createPrepend",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a6c51546ed807ddb01640f92408b5ceef",
-              "prot": "public",
-              "static": "yes",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename C",
-                  "defval_html": "T"
-                }
-              ],
-              "type_html": "<code>ListPatch</code>",
-              "definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createPrepend",
-              "argsstring_html": "(C &amp;&amp;values)",
-              "name_html": "createPrepend",
-              "param": [
-                {
-                  "type_html": "C &amp;&amp;",
-                  "declname_html": "values"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "107",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "107",
-                "bodyend": "111"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename C = T&gt;\nstatic ListPatch createPrepend(C&amp;&amp; values)",
-                "simple_raw": "template <typename C = T>\nstatic ListPatch createPrepend(C&& values)",
-                "detailed_html": "template &lt;typename C = T&gt;\ninline static ListPatch createPrepend(C&amp;&amp; values)",
-                "detailed_raw": "template <typename C = T>\ninline static ListPatch createPrepend(C&& values)",
-                "original_definition_html": "static ListPatch apache::thrift::op::detail::ListPatch&lt; Patch &gt;::createPrepend",
-                "original_argsstring_html": "(C &amp;&amp;values)"
-              },
-              "description": {
-                "brief_html": "<p>Creates a new patch with prepended list. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/createPrepend",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/createPrepend",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::createPrepend"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/createPrepend",
-          "minprot": "public",
-          "displayname_html": "createPrepend",
-          "brief_html": "<p>Creates a new patch with prepended list. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createPrepend",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/createPrepend"
-        },
-        {
-          "kind": "overloadset",
           "name_html": "append",
           "compoundname_html": "apache::thrift::op::detail::ListPatch::append",
           "functions": [
@@ -1356,11 +937,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "115",
+                "line": "83",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "115",
-                "bodyend": "118"
+                "bodystart": "83",
+                "bodyend": "86"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid append(C&amp;&amp; rhs)",
@@ -1419,11 +1000,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "121",
+                "line": "89",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "121",
-                "bodyend": "123"
+                "bodystart": "89",
+                "bodyend": "91"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid emplace_back(Args&amp;&amp;... args)",
@@ -1481,11 +1062,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "126",
+                "line": "94",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "126",
-                "bodyend": "128"
+                "bodystart": "94",
+                "bodyend": "96"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid push_back(U&amp;&amp; val)",
@@ -1543,11 +1124,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "132",
+                "line": "100",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "132",
-                "bodyend": "135"
+                "bodystart": "100",
+                "bodyend": "103"
               },
               "definition": {
                 "simple_html": "template &lt;typename C = T&gt;\nvoid prepend(C&amp;&amp; lhs)",
@@ -1606,11 +1187,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "138",
+                "line": "106",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "138",
-                "bodyend": "142"
+                "bodystart": "106",
+                "bodyend": "110"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nvoid emplace_front(Args&amp;&amp;... args)",
@@ -1668,11 +1249,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "145",
+                "line": "113",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "145",
-                "bodyend": "149"
+                "bodystart": "113",
+                "bodyend": "117"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid push_front(U&amp;&amp; val)",
@@ -1698,186 +1279,6 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/push_front",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/push_front"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "erase",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::erase",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1aaa4245c92b5ccd7656fb3c4a8ed51c11",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename U",
-                  "defval_html": "typename T::value_type"
-                }
-              ],
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::erase",
-              "argsstring_html": "(U &amp;&amp;val)",
-              "name_html": "erase",
-              "param": [
-                {
-                  "type_html": "U &amp;&amp;",
-                  "declname_html": "val"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "153",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "153",
-                "bodyend": "162"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename U = typename T::value_type&gt;\nvoid erase(U&amp;&amp; val)",
-                "simple_raw": "template <typename U = typename T::value_type>\nvoid erase(U&& val)",
-                "detailed_html": "template &lt;typename U = typename T::value_type&gt;\ninline void erase(U&amp;&amp; val)",
-                "detailed_raw": "template <typename U = typename T::value_type>\ninline void erase(U&& val)",
-                "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::erase",
-                "original_argsstring_html": "(U &amp;&amp;val)"
-              },
-              "description": {
-                "brief_html": "<p>Removes an element. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/erase",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/erase",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::erase"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/erase",
-          "minprot": "public",
-          "displayname_html": "erase",
-          "brief_html": "<p>Removes an element. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/erase",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/erase"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "remove",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::remove",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a322c17f6b444d597ac07216fafb7f935",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "tparams": [
-                {
-                  "type_html": "typename C",
-                  "defval_html": "std::unordered_set&lt;typename T::value_type&gt;"
-                }
-              ],
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::remove",
-              "argsstring_html": "(C &amp;&amp;entries)",
-              "name_html": "remove",
-              "param": [
-                {
-                  "type_html": "C &amp;&amp;",
-                  "declname_html": "entries"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "166",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "166",
-                "bodyend": "173"
-              },
-              "definition": {
-                "simple_html": "template &lt;typename C = std::unordered_set&lt;typename T::value_type&gt;&gt;\nvoid remove(C&amp;&amp; entries)",
-                "simple_raw": "template <typename C = std::unordered_set<typename T::value_type>>\nvoid remove(C&& entries)",
-                "detailed_html": "template &lt;typename C = std::unordered_set&lt;typename T::value_type&gt;&gt;\ninline void remove(C&amp;&amp; entries)",
-                "detailed_raw": "template <typename C = std::unordered_set<typename T::value_type>>\ninline void remove(C&& entries)",
-                "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::remove",
-                "original_argsstring_html": "(C &amp;&amp;entries)"
-              },
-              "description": {
-                "brief_html": "<p>Removes all elements in the list. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/remove",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/remove",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::remove"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/remove",
-          "minprot": "public",
-          "displayname_html": "remove",
-          "brief_html": "<p>Removes all elements in the list. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/remove",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/remove"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "patchAt",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::patchAt",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1a2d5fcc113e05f62567bf0595390a6056",
-              "prot": "public",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "FOLLY_NODISCARD VP &amp;",
-              "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchAt",
-              "argsstring_html": "(size_t pos)",
-              "name_html": "patchAt",
-              "param": [
-                {
-                  "type_html": "size_t",
-                  "declname_html": "pos"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "176",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "176",
-                "bodyend": "182"
-              },
-              "definition": {
-                "simple_html": "FOLLY_NODISCARD VP&amp; patchAt(size_t pos)",
-                "simple_raw": "FOLLY_NODISCARD VP& patchAt(size_t pos)",
-                "detailed_html": "inline FOLLY_NODISCARD VP&amp; patchAt(size_t pos)",
-                "detailed_raw": "inline FOLLY_NODISCARD VP& patchAt(size_t pos)",
-                "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchAt",
-                "original_argsstring_html": "(size_t pos)"
-              },
-              "description": {
-                "brief_html": "<p>Returns the patch that for the element in a given position. </p>"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/patchAt",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/patchAt",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::patchAt"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/patchAt",
-          "minprot": "public",
-          "displayname_html": "patchAt",
-          "brief_html": "<p>Returns the patch that for the element in a given position. </p>",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchAt",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchAt"
         },
         {
           "kind": "overloadset",
@@ -1909,11 +1310,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "209",
+                "line": "141",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "209",
-                "bodyend": "228"
+                "bodystart": "141",
+                "bodyend": "156"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
@@ -1924,8 +1325,8 @@
                 "original_argsstring_html": "(Visitor &amp;&amp;v) const"
               },
               "description": {
-                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void remove(const std::vector&lt;Element&gt;&amp;);\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n  void patchIfSet(const std::unordered_map&lt;ListPatchIndex,\n                                           ElementPatch&gt;&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.patchAt(10).add(20);\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.patchIfSet({{10, I32Patch::createAdd(20)}});\nv.prepend({30});  </pre> </p>",
-                "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>"
+                "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const List&amp;);\n  void clear();\n  void prepend(const List&amp;);\n  void append(const List&amp;);\n}\n</pre></p><p>For example: <pre>ListPatch&lt;ListI32Patch&gt; patch;\npatch.clear();\npatch.push_front(30);\n</pre></p><p><code>patch.customVisit(v)</code> will invoke the following methods <pre>v.clear();\nv.prepend({30});  </pre> </p>",
+                "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/ListPatch/customVisit",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/customVisit",
@@ -1936,7 +1337,7 @@
           "filepath": "f/class/apache/thrift/op/detail/ListPatch/customVisit",
           "minprot": "public",
           "displayname_html": "customVisit",
-          "brief_html": "<p>This API uses Visitor pattern to describe how patch will be applied. When a certain operation will be performed by the patch, the corresponding method (that matches the write API) will be called. </p>",
+          "brief_html": "<p>This API uses the Visitor pattern to describe how Patch is applied. For each operation that will be performed by the patch, the corresponding method (that matches the write API) will be invoked. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/customVisit"
@@ -1966,11 +1367,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "230",
+                "line": "158",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "230",
-                "bodyend": "251"
+                "bodystart": "158",
+                "bodyend": "168"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -2266,59 +1667,6 @@
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/apply",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/apply"
-        },
-        {
-          "kind": "overloadset",
-          "name_html": "patchIfSet",
-          "compoundname_html": "apache::thrift::op::detail::ListPatch::patchIfSet",
-          "functions": [
-            {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch_1ab00788d88b8041725aefc4c52e4056a7",
-              "prot": "private",
-              "static": "no",
-              "const": "no",
-              "explicit": "no",
-              "inline": "yes",
-              "virtual": "non-virtual",
-              "type_html": "void",
-              "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
-              "argsstring_html": "(const VPMap &amp;patches)",
-              "name_html": "patchIfSet",
-              "param": [
-                {
-                  "type_html": "const VPMap &amp;",
-                  "declname_html": "patches"
-                }
-              ],
-              "location": {
-                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "259",
-                "column": "1",
-                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "259",
-                "bodyend": "263"
-              },
-              "definition": {
-                "simple_html": "void patchIfSet(const VPMap&amp; patches)",
-                "simple_raw": "void patchIfSet(const VPMap& patches)",
-                "detailed_html": "private inline void patchIfSet(const VPMap&amp; patches)",
-                "detailed_raw": "private inline void patchIfSet(const VPMap& patches)",
-                "original_definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::patchIfSet",
-                "original_argsstring_html": "(const VPMap &amp;patches)"
-              },
-              "filepath": "fns/class/apache/thrift/op/detail/ListPatch/patchIfSet",
-              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/ListPatch/patchIfSet",
-              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1ListPatch",
-              "compoundname_html": "apache::thrift::op::detail::ListPatch::patchIfSet"
-            }
-          ],
-          "filepath": "f/class/apache/thrift/op/detail/ListPatch/patchIfSet",
-          "minprot": "private",
-          "displayname_html": "patchIfSet",
-          "brief_html": "",
-          "groupname_html": "",
-          "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchIfSet",
-          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/patchIfSet"
         },
         {
           "kind": "overloadset",
@@ -2711,7 +2059,7 @@
           "filepath": "f/class/apache/thrift/op/detail/ListPatch/operator.assign",
           "minprot": "public",
           "displayname_html": "operator=",
-          "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+          "brief_html": "Assignment operator.",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/operator.assign",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/ListPatch/operator.assign"

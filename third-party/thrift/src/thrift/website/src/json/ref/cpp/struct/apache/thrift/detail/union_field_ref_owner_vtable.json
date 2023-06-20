@@ -19,10 +19,10 @@
       "name_html": "reset_t",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1940",
+        "line": "1950",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1940",
+        "bodystart": "1950",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1detail_1_1union__field__ref__owner__vtable"
@@ -30,11 +30,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1939",
+    "line": "1949",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1939",
-    "bodyend": "1943"
+    "bodystart": "1949",
+    "bodyend": "1953"
   },
   "namespacednames_html": [
     "apache",
@@ -56,10 +56,10 @@
       "name_html": "reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1942",
+        "line": "1952",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1942",
+        "bodystart": "1952",
         "bodyend": "-1"
       }
     }

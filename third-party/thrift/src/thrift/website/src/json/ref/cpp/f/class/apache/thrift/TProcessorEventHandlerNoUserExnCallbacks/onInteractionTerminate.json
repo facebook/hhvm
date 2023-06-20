@@ -1,0 +1,58 @@
+{
+  "kind": "overloadset",
+  "name_html": "onInteractionTerminate",
+  "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::onInteractionTerminate",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aefcf058af4f0b093b821b6e20358035d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "virtual",
+      "type_html": "void",
+      "definition_html": "virtual void apache::thrift::TProcessorEventHandler::onInteractionTerminate",
+      "argsstring_html": "(void *, int64_t)",
+      "name_html": "onInteractionTerminate",
+      "param": [
+        {
+          "type_html": "void *"
+        },
+        {
+          "type_html": "int64_t"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+        "line": "129",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
+        "bodystart": "129",
+        "bodyend": "129"
+      },
+      "definition": {
+        "simple_html": "virtual void onInteractionTerminate(void*, int64_t)",
+        "simple_raw": "virtual void onInteractionTerminate(void*, int64_t)",
+        "detailed_html": "inline virtual void onInteractionTerminate(void*, int64_t)",
+        "detailed_raw": "inline virtual void onInteractionTerminate(void*, int64_t)",
+        "original_definition_html": "virtual void apache::thrift::TProcessorEventHandler::onInteractionTerminate",
+        "original_argsstring_html": "(void *, int64_t)"
+      },
+      "description": {
+        "detailed_html": "<p>Called when an interaction is terminated. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+      "href": "/ref/cpp/fns/class/apache/thrift/TProcessorEventHandler/onInteractionTerminate",
+      "parentid": "classapache_1_1thrift_1_1TProcessorEventHandler",
+      "compoundname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::onInteractionTerminate"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
+  "minprot": "public",
+  "displayname_html": "onInteractionTerminate",
+  "brief_html": "<p>Called when an interaction is terminated. </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate",
+  "refid": "/ref/cpp/f/class/apache/thrift/TProcessorEventHandlerNoUserExnCallbacks/onInteractionTerminate"
+}

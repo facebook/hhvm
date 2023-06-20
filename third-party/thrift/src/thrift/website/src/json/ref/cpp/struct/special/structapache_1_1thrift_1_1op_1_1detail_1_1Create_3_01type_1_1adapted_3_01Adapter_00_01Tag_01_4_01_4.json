@@ -27,10 +27,10 @@
       "name_html": "adapted_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "203",
+        "line": "207",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "203",
+        "bodystart": "207",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Create_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4"
@@ -57,11 +57,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "line": "207",
+        "line": "211",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-        "bodystart": "207",
-        "bodyend": "212"
+        "bodystart": "211",
+        "bodyend": "216"
       },
       "definition": {
         "simple_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\nconstexpr T operator()() const",
@@ -77,11 +77,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "line": "202",
+    "line": "206",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-    "bodystart": "202",
-    "bodyend": "213"
+    "bodystart": "206",
+    "bodyend": "217"
   },
   "namespacednames_html": [
     "apache",
@@ -127,11 +127,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "line": "207",
+                "line": "211",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
-                "bodystart": "207",
-                "bodyend": "212"
+                "bodystart": "211",
+                "bodyend": "216"
               },
               "definition": {
                 "simple_html": "template &lt;typename T = type::native_type&lt;adapted_tag&gt;&gt;\nconstexpr T operator()() const",

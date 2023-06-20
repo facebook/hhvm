@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "144",
+        "line": "151",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "144",
-        "bodyend": "146"
+        "bodystart": "151",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void set(U&amp; u, std::size_t bit)",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "159",
+        "line": "169",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "159",
-        "bodyend": "161"
+        "bodystart": "169",
+        "bodyend": "171"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void set(std::atomic&lt;U&gt;&amp; u, std::size_t bit)",
@@ -119,11 +119,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "169",
+        "line": "179",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "169",
-        "bodyend": "169"
+        "bodystart": "179",
+        "bodyend": "179"
       },
       "definition": {
         "simple_html": "void set(std::size_t bit)",

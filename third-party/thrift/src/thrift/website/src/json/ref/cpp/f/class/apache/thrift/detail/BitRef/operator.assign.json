@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "206",
+        "line": "216",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "206",
-        "bodyend": "212"
+        "bodystart": "216",
+        "bodyend": "222"
       },
       "definition": {
         "simple_html": "void operator=(bool flag)",
@@ -46,7 +46,7 @@
   "filepath": "f/class/apache/thrift/detail/BitRef/operator.assign",
   "minprot": "public",
   "displayname_html": "operator=",
-  "brief_html": "",
+  "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.assign",
   "refid": "/ref/cpp/f/class/apache/thrift/detail/BitRef/operator.assign"

@@ -4,39 +4,6 @@
   "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a69e192e5e9c63c134fe13994d3585eaf",
-      "prot": "private",
-      "static": "no",
-      "const": "no",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-      "argsstring_html": "()",
-      "name_html": "ensurePatchable",
-      "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "436",
-        "column": "1",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "287",
-        "bodyend": "305"
-      },
-      "definition": {
-        "simple_html": "void ensurePatchable()",
-        "simple_raw": "void ensurePatchable()",
-        "detailed_html": "private inline void ensurePatchable()",
-        "detailed_raw": "private inline void ensurePatchable()",
-        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensurePatchable",
-        "original_argsstring_html": "()"
-      },
-      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/ensurePatchable",
-      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
-      "compoundname_html": "apache::thrift::op::detail::UnionPatch::ensurePatchable"
-    },
-    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a69e192e5e9c63c134fe13994d3585eaf",
       "prot": "protected",
       "static": "no",
@@ -50,11 +17,11 @@
       "name_html": "ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "287",
+        "line": "286",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "287",
-        "bodyend": "305"
+        "bodystart": "286",
+        "bodyend": "304"
       },
       "definition": {
         "simple_html": "void ensurePatchable()",

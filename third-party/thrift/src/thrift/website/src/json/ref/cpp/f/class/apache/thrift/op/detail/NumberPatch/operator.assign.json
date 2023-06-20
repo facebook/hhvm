@@ -17,7 +17,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "173",
+        "line": "171",
         "column": "1"
       },
       "definition": {
@@ -47,7 +47,7 @@
       "name_html": "operator=",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "173",
+        "line": "171",
         "column": "1"
       },
       "definition": {
@@ -449,7 +449,7 @@
   "filepath": "f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
   "minprot": "public",
   "displayname_html": "operator=",
-  "brief_html": "<p>Same as <code>assign(...)</code> method. </p>",
+  "brief_html": "Assignment operator.",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/NumberPatch/operator.assign"

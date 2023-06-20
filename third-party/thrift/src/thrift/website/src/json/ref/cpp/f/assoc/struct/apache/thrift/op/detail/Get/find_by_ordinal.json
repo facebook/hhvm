@@ -35,11 +35,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "58",
+        "line": "60",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "58",
-        "bodyend": "61"
+        "bodystart": "60",
+        "bodyend": "63"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F, std::enable_if_t&lt;size_v&lt;T&gt; != 0&gt;* = nullptr&gt;\ndecltype(auto) find_by_ordinal(F&amp;&amp; f)",
@@ -82,11 +82,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "64",
+        "line": "66",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "64",
-        "bodyend": "66"
+        "bodystart": "66",
+        "bodyend": "68"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",

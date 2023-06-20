@@ -721,8 +721,7 @@ void HiddenTypeFieldsStruct::readNoXfer(Protocol_* iprot) {
 _readField_field1:
   {
     _readState.beforeSubobject(iprot);
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<Adapter, ::py3::simple::AdaptedTypeDef>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<Adapter, ::py3::simple::AdaptedTypeDef>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::py3::simple::SimpleStruct>::readWithContext(*iprot, Adapter::toThrift(this->__fbthrift_field_field1), _readState);
     } else {
       ::py3::simple::SimpleStruct tvalue;

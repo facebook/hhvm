@@ -469,8 +469,7 @@ _readField_cpp_type_annotation:
 _readField_my_union:
   {
     _readState.beforeSubobject(iprot);
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::StaticCast, ::cpp2::YourUnion>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::StaticCast, ::cpp2::YourUnion>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::readWithContext(*iprot, ::StaticCast::toThrift(this->__fbthrift_field_my_union), _readState);
     } else {
       ::cpp2::detail::YourUnion tvalue;

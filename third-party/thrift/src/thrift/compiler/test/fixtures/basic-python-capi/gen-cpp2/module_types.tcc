@@ -801,8 +801,7 @@ _readField_normal:
   }
 _readField_doubled:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::thrift::test::lib::StringDoubler, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::thrift::test::lib::StringDoubler, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair>>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, ::thrift::test::lib::StringDoubler::toThrift(this->__fbthrift_field_doubled), _readState);
     } else {
       ::std::string tvalue;

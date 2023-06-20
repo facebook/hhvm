@@ -3341,8 +3341,7 @@ void AdaptedFields::readNoXfer(Protocol_* iprot) {
   }
 _readField_field1:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::facebook::thrift::test::terse_write::MyInteger>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::facebook::thrift::test::terse_write::MyInteger>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(this->__fbthrift_field_field1), _readState);
     } else {
       ::std::int32_t tvalue;
@@ -3361,8 +3360,7 @@ _readField_field1:
   }
 _readField_field2:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields>>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter::toThrift(this->__fbthrift_field_field2), _readState);
     } else {
       ::std::int32_t tvalue;

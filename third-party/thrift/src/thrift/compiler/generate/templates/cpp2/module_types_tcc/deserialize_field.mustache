@@ -26,8 +26,7 @@ auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_
 <%^field:use_op_encode?%>
 <%#field:cpp_first_adapter%>
 <%#field:cpp_exactly_one_adapter?%>
-constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, <%field:cpp_type%>>::value;
-if constexpr(hasInplaceToThrift) {
+if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, <%field:cpp_type%>>::value) {
   <%^field:cpp_ref?%><%#type:resolves_to_container?%>
   ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(<% > module_types_tcc/member_or_ptr%>, *this);
   <%/type:resolves_to_container?%><%/field:cpp_ref?%>

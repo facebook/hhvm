@@ -609,8 +609,7 @@ _readField_MyMapEnumAndInt:
   }
 _readField_MyCustomField:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField), _readState);
     } else {
       ::folly::IOBuf tvalue;
@@ -630,8 +629,7 @@ _readField_MyCustomField:
   }
 _readField_MyOptCustomField:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField), _readState);
     } else {
       ::folly::IOBuf tvalue;
@@ -1491,8 +1489,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
           this->set_MyCustomField();
-          constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value;
-          if constexpr(hasInplaceToThrift) {
+          if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
             ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(value_.MyCustomField), _readState);
           } else {
             ::folly::IOBuf tvalue;
@@ -2416,8 +2413,7 @@ _readField_a_union_typedef_list:
   }
 _readField_MyCustomField:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyCustomField), _readState);
     } else {
       ::folly::IOBuf tvalue;
@@ -2437,8 +2433,7 @@ _readField_MyCustomField:
   }
 _readField_MyOptCustomField:
   {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value;
-    if constexpr(hasInplaceToThrift) {
+    if constexpr(::apache::thrift::adapt_detail::has_inplace_toThrift<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>::value) {
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, ::CustomProtocolAdapter::toThrift(this->__fbthrift_field_MyOptCustomField), _readState);
     } else {
       ::folly::IOBuf tvalue;

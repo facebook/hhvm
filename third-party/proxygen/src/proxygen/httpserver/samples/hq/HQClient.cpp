@@ -35,7 +35,7 @@ namespace quic::samples {
 HQClient::HQClient(const HQToolClientParams& params) : params_(params) {
   if (params_.transportSettings.pacingEnabled) {
     pacingTimer_ = TimerHighRes::newTimer(
-        &evb_, params_.transportSettings.pacingTimerTickInterval);
+        &evb_, params_.transportSettings.pacingTimerResolution);
   }
 }
 

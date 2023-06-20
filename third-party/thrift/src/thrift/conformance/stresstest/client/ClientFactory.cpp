@@ -143,7 +143,7 @@ folly::AsyncTransport::UniquePtr createQuicSocket(
       .numGROBuffers_ = quic::kMaxNumGROBuffers,
       .connectUDP = true,
       .pacingEnabled = true,
-      .pacingTimerTickInterval = std::chrono::microseconds(200),
+      .pacingTickInterval = std::chrono::microseconds(200),
       .writeConnectionDataPacketsLimit = 50,
       .batchingMode = quic::QuicBatchingMode::BATCHING_MODE_GSO,
       .maxBatchSize = 50,

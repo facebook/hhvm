@@ -230,7 +230,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.numGROBuffers_ = FLAGS_num_gro_buffers;
   hqParams.transportSettings.pacingEnabled = FLAGS_pacing;
   if (hqParams.transportSettings.pacingEnabled) {
-    hqParams.transportSettings.pacingTimerTickInterval =
+    hqParams.transportSettings.pacingTickInterval =
         std::chrono::microseconds(FLAGS_pacing_timer_tick_interval_us);
   }
   hqParams.transportSettings.batchingMode =

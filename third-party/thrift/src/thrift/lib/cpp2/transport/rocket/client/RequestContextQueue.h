@@ -62,7 +62,9 @@ class RequestContextQueue {
 
   template <typename F>
   void markNextSendingBatchAsSent(F&& foreachRequest) noexcept {
+    CHECK(!writeSendingQueue_.empty()) << "empty queue";
     for (bool lastInBatch = false; !lastInBatch;) {
+      CHECK(!writeSendingQueue_.empty()) << "missing end of batch marker";
       auto& req = writeSendingQueue_.front();
       writeSendingQueue_.pop_front();
       DCHECK(req.state() == State::WRITE_SENDING);

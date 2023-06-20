@@ -515,12 +515,10 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> OpenSSLEVPCipher::tryDecrypt(
   const auto& lastBuf = ciphertext->prev();
   if (lastBuf->length() >= tagLength_) {
     // We can directly carve out this buffer from the last IOBuf
-    auto tagBuf = lastBuf->cloneOne();
     // Adjust buffer sizes
     lastBuf->trimEnd(tagLength_);
-    tagBuf->trimStart(lastBuf->length());
 
-    folly::MutableByteRange tagOut{tagBuf->writableData(), tagLength_};
+    folly::MutableByteRange tagOut{lastBuf->writableTail(), tagLength_};
     return evpDecrypt(
         std::move(ciphertext),
         associatedData,

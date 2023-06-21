@@ -35,7 +35,7 @@ namespace thrift {
 namespace op {
 namespace detail {
 template <class T>
-struct RecursiveEncode;
+struct Encode;
 }
 } // namespace op
 
@@ -200,10 +200,8 @@ std::string debugString(
 }
 
 // TODO: Replace `debugString()` with this function
-template <
-    class T,
-    class...,
-    template <class> class Encode = op::detail::RecursiveEncode>
+// TODO: Rename to `debugStringViaEncode`
+template <class T, class..., template <class> class Encode = op::detail::Encode>
 std::string debugStringViaRecursiveEncode(
     const T& obj, DebugProtocolWriter::Options options = {}) {
   folly::IOBufQueue queue;

@@ -23,6 +23,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/FieldRef.h>
+#include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
@@ -31,6 +32,11 @@
 
 namespace apache {
 namespace thrift {
+
+class BinaryProtocolWriter;
+class CompactProtocolWriter;
+class SimpleJSONProtocolWriter;
+
 namespace op {
 namespace detail {
 
@@ -502,18 +508,24 @@ struct StructEncode {
 template <typename T>
 struct Encode<type::struct_t<T>> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& s) const {
-    return s.write(&prot);
+  uint32_t operator()(Protocol& prot, const T& t) const {
+    // Is protocol is pre-compiled, use `write` method since it's faster
+    // than `StructEncode`.
+    constexpr bool useWrite =
+        folly::IsOneOf<Protocol, CompactProtocolWriter, BinaryProtocolWriter>::
+            value ||
+        (std::is_same<Protocol, SimpleJSONProtocolWriter>::value &&
+         decltype(apache::thrift::detail::st::struct_private_access::
+                      __fbthrift_cpp2_gen_json<T>())::value);
+    return folly::if_constexpr<useWrite>(
+        [&](const auto& s) { return s.write(&prot); },
+        [&](const auto& s) { return StructEncode<T>{}(prot, s); })(t);
   }
 };
 
+// TODO: Use `union_match` to optimize union serialization
 template <typename T>
-struct Encode<type::union_t<T>> {
-  template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& s) const {
-    return s.write(&prot);
-  }
-};
+struct Encode<type::union_t<T>> : Encode<type::struct_t<T>> {};
 
 template <typename T>
 struct Encode<type::exception_t<T>> {

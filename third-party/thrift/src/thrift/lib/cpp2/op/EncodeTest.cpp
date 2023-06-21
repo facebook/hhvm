@@ -20,7 +20,9 @@
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 #include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/test/AdapterTest.h>
 #include <thrift/test/testset/Testset.h>
@@ -30,7 +32,7 @@ using namespace ::apache::thrift::conformance;
 using detail::protocol_reader_t;
 using detail::protocol_writer_t;
 
-namespace apache::thrift::op {
+namespace apache::thrift::op::detail {
 namespace {
 using apache::thrift::protocol::asValueStruct;
 using apache::thrift::protocol::TType;
@@ -652,6 +654,63 @@ TEST(DecodeTest, DecodeAdapted) {
   testDecodeAdapted<conformance::StandardProtocol::Binary>();
   testDecodeAdapted<conformance::StandardProtocol::Compact>();
 }
-
 } // namespace
-} // namespace apache::thrift::op
+
+enum { UseWrite, UseStructEncode };
+
+struct MockStruct {
+  static const bool __fbthrift_cpp2_gen_json = false;
+  template <class T>
+  uint32_t write(T&&) const {
+    return UseWrite;
+  }
+};
+
+struct JSONMockStruct {
+  static const bool __fbthrift_cpp2_gen_json = true;
+  template <class T>
+  uint32_t write(T&&) const {
+    return UseWrite;
+  }
+};
+
+template <>
+struct StructEncode<MockStruct> {
+  template <typename T, typename U>
+  uint32_t operator()(T&&, const U&) const {
+    return UseStructEncode;
+  }
+};
+
+template <>
+struct StructEncode<JSONMockStruct> {
+  template <typename T, typename U>
+  uint32_t operator()(T&&, const U&) const {
+    return UseStructEncode;
+  }
+};
+
+TEST(EncodeTest, EncodeMethod) {
+  CompactProtocolWriter compact;
+  BinaryProtocolWriter binary;
+  SimpleJSONProtocolWriter simpleJson;
+  JSONProtocolWriter json;
+  DebugProtocolWriter debug;
+  MockStruct mock;
+  JSONMockStruct jsonMock;
+  auto encodeMockStruct = op::encode<type::struct_t<MockStruct>>;
+  auto encodeJSONMockStruct = op::encode<type::struct_t<JSONMockStruct>>;
+
+  EXPECT_EQ(encodeMockStruct(compact, mock), UseWrite);
+  EXPECT_EQ(encodeMockStruct(binary, mock), UseWrite);
+  EXPECT_EQ(encodeMockStruct(simpleJson, mock), UseStructEncode);
+  EXPECT_EQ(encodeMockStruct(json, mock), UseStructEncode);
+  EXPECT_EQ(encodeMockStruct(debug, mock), UseStructEncode);
+  EXPECT_EQ(encodeJSONMockStruct(compact, jsonMock), UseWrite);
+  EXPECT_EQ(encodeJSONMockStruct(binary, jsonMock), UseWrite);
+  EXPECT_EQ(encodeJSONMockStruct(simpleJson, jsonMock), UseWrite);
+  EXPECT_EQ(encodeJSONMockStruct(json, jsonMock), UseStructEncode);
+  EXPECT_EQ(encodeJSONMockStruct(debug, jsonMock), UseStructEncode);
+}
+
+} // namespace apache::thrift::op::detail

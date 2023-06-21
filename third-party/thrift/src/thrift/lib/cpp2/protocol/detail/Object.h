@@ -330,8 +330,8 @@ struct ValueHelper<TT, type::if_structured<TT>> {
   template <typename T>
   static void set(Value& result, T&& value) {
     ObjectWriter writer(&result);
-    op::detail::RecursiveEncode<type::infer_tag<folly::remove_cvref_t<T>>>{}(
-        writer, value);
+    op::encode<type::infer_tag<folly::remove_cvref_t<T>>>(
+        writer, std::forward<T>(value));
   }
 };
 

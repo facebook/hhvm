@@ -429,6 +429,76 @@ struct Encode<type::binary_t> {
   }
 };
 
+template <class Tag>
+struct ShouldWrite {
+  template <typename T>
+  bool operator()(field_ref<T>) const {
+    return true;
+  }
+  template <typename T>
+  bool operator()(required_field_ref<T>) const {
+    return true;
+  }
+  template <typename T>
+  bool operator()(optional_field_ref<T> opt) const {
+    return opt.has_value();
+  }
+  template <typename T>
+  bool operator()(optional_boxed_field_ref<T> opt) const {
+    return opt.has_value();
+  }
+  template <typename T>
+  bool operator()(union_field_ref<T> opt) const {
+    return opt.has_value();
+  }
+  template <typename T>
+  bool operator()(terse_field_ref<T> val) const {
+    return !isEmpty<Tag>(*val);
+  }
+  template <typename T>
+  bool operator()(terse_intern_boxed_field_ref<T> val) const {
+    return !isEmpty<Tag>(*val);
+  }
+  template <typename T>
+  bool operator()(const std::unique_ptr<T>& ptr) const {
+    return ptr != nullptr;
+  }
+  template <typename T>
+  bool operator()(const std::shared_ptr<T>& ptr) const {
+    return ptr != nullptr;
+  }
+};
+
+template <class Tag>
+FOLLY_INLINE_VARIABLE constexpr ShouldWrite<Tag> should_write{};
+
+template <class T, template <class...> class EncodeImpl = Encode>
+struct StructEncode {
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const T& t) const {
+    uint32_t s = 0;
+    s += prot.writeStructBegin(op::get_class_name_v<T>.data());
+    op::for_each_ordinal<T>([&](auto id) {
+      using Id = decltype(id);
+      using Tag = op::get_type_tag<T, Id>;
+      auto&& field = op::get<Id>(t);
+      if (!should_write<Tag>(field)) {
+        return;
+      }
+
+      s += prot.writeFieldBegin(
+          &*op::get_name_v<T, Id>.begin(),
+          typeTagToTType<Tag>,
+          folly::to_underlying(op::get_field_id<T, Id>::value));
+      s += EncodeImpl<Tag>{}(prot, *field);
+      s += prot.writeFieldEnd();
+    });
+    s += prot.writeFieldStop();
+    s += prot.writeStructEnd();
+    return s;
+  }
+};
+
 template <typename T>
 struct Encode<type::struct_t<T>> {
   template <typename Protocol>
@@ -854,49 +924,6 @@ struct Decode<
   }
 };
 
-template <class Tag>
-struct ShouldWrite {
-  template <typename T>
-  bool operator()(field_ref<T>) const {
-    return true;
-  }
-  template <typename T>
-  bool operator()(required_field_ref<T>) const {
-    return true;
-  }
-  template <typename T>
-  bool operator()(optional_field_ref<T> opt) const {
-    return opt.has_value();
-  }
-  template <typename T>
-  bool operator()(optional_boxed_field_ref<T> opt) const {
-    return opt.has_value();
-  }
-  template <typename T>
-  bool operator()(union_field_ref<T> opt) const {
-    return opt.has_value();
-  }
-  template <typename T>
-  bool operator()(terse_field_ref<T> val) const {
-    return !isEmpty<Tag>(*val);
-  }
-  template <typename T>
-  bool operator()(terse_intern_boxed_field_ref<T> val) const {
-    return !isEmpty<Tag>(*val);
-  }
-  template <typename T>
-  bool operator()(const std::unique_ptr<T>& ptr) const {
-    return ptr != nullptr;
-  }
-  template <typename T>
-  bool operator()(const std::shared_ptr<T>& ptr) const {
-    return ptr != nullptr;
-  }
-};
-
-template <class Tag>
-FOLLY_INLINE_VARIABLE constexpr ShouldWrite<Tag> should_write{};
-
 template <class T>
 struct RecursiveEncode : Encode<T> {};
 
@@ -910,31 +937,7 @@ template <class K, class V>
 struct RecursiveEncode<type::map<K, V>> : MapEncode<K, V, RecursiveEncode> {};
 
 template <class T>
-struct RecursiveEncode<type::struct_t<T>> {
-  template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const T& t) const {
-    uint32_t s = 0;
-    s += prot.writeStructBegin(op::get_class_name_v<T>.data());
-    op::for_each_ordinal<T>([&](auto id) {
-      using Id = decltype(id);
-      using Tag = op::get_type_tag<T, Id>;
-      auto&& field = op::get<Id>(t);
-      if (!should_write<Tag>(field)) {
-        return;
-      }
-
-      s += prot.writeFieldBegin(
-          &*op::get_name_v<T, Id>.begin(),
-          typeTagToTType<Tag>,
-          folly::to_underlying(op::get_field_id<T, Id>::value));
-      s += RecursiveEncode<Tag>{}(prot, *field);
-      s += prot.writeFieldEnd();
-    });
-    s += prot.writeFieldStop();
-    s += prot.writeStructEnd();
-    return s;
-  }
-};
+struct RecursiveEncode<type::struct_t<T>> : StructEncode<T, RecursiveEncode> {};
 
 template <class T>
 struct RecursiveEncode<type::union_t<T>> : RecursiveEncode<type::struct_t<T>> {

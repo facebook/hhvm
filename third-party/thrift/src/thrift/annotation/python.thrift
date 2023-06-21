@@ -78,3 +78,9 @@ struct Adapter {
   // If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
   2: string typeHint;
 } (thrift.uri = "facebook.com/thrift/annotation/python/Adapter")
+
+// Use to opt-in a struct or union to cpp <-> python marshaling instead of serialization.
+@scope.Structured
+struct MarshalCapi {} (
+  thrift.uri = "facebook.com/thrift/annotation/python/MarshalCapi",
+)

@@ -19,6 +19,7 @@ namespace python {
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<IOBuf>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MarshalCapi>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

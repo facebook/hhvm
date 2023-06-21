@@ -23,8 +23,18 @@ namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
 service CarbonThriftTest extends fb303.FacebookService {
-  CarbonThriftTest.CustomReply (cpp.type = "carbon::test::CustomReply") customRequest(1: CarbonThriftTest.CustomRequest (cpp.type = "carbon::test::CustomRequest") request)
-  CarbonThriftTest.DummyThriftReply (cpp.type = "carbon::test::DummyThriftReply") thrift_test(1: CarbonThriftTest.DummyThriftRequest (cpp.type = "carbon::test::DummyThriftRequest") request)
-  CarbonThriftTest.ThriftTestReply (cpp.type = "carbon::test::ThriftTestReply") test(1: CarbonThriftTest.ThriftTestRequest (cpp.type = "carbon::test::ThriftTestRequest") request)
-  Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") mcVersion(1: Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") request)
+  CustomReply_5953 customRequest(1:CustomRequest_7678 request)
+  DummyThriftReply_9518 thrift_test(1:DummyThriftRequest_7786 request)
+  ThriftTestReply_4178 test(1:ThriftTestRequest_4420 request)
+  McVersionReply_3505 mcVersion(1:McVersionRequest_1694 request)
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef CarbonThriftTest.CustomReply (cpp.type = "carbon::test::CustomReply") CustomReply_5953
+typedef CarbonThriftTest.CustomRequest (cpp.type = "carbon::test::CustomRequest") CustomRequest_7678
+typedef CarbonThriftTest.DummyThriftReply (cpp.type = "carbon::test::DummyThriftReply") DummyThriftReply_9518
+typedef CarbonThriftTest.DummyThriftRequest (cpp.type = "carbon::test::DummyThriftRequest") DummyThriftRequest_7786
+typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_3505
+typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_1694
+typedef CarbonThriftTest.ThriftTestReply (cpp.type = "carbon::test::ThriftTestReply") ThriftTestReply_4178
+typedef CarbonThriftTest.ThriftTestRequest (cpp.type = "carbon::test::ThriftTestRequest") ThriftTestRequest_4420

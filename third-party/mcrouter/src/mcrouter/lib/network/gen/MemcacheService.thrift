@@ -21,24 +21,66 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 
 service Memcache {
-  Memcache.McAddReply (cpp.type = "facebook::memcache::McAddReply") mcAdd(1: Memcache.McAddRequest (cpp.type = "facebook::memcache::McAddRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McAppendReply (cpp.type = "facebook::memcache::McAppendReply") mcAppend(1: Memcache.McAppendRequest (cpp.type = "facebook::memcache::McAppendRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McCasReply (cpp.type = "facebook::memcache::McCasReply") mcCas(1: Memcache.McCasRequest (cpp.type = "facebook::memcache::McCasRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McDecrReply (cpp.type = "facebook::memcache::McDecrReply") mcDecr(1: Memcache.McDecrRequest (cpp.type = "facebook::memcache::McDecrRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McDeleteReply (cpp.type = "facebook::memcache::McDeleteReply") mcDelete(1: Memcache.McDeleteRequest (cpp.type = "facebook::memcache::McDeleteRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McFlushAllReply (cpp.type = "facebook::memcache::McFlushAllReply") mcFlushAll(1: Memcache.McFlushAllRequest (cpp.type = "facebook::memcache::McFlushAllRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McFlushReReply (cpp.type = "facebook::memcache::McFlushReReply") mcFlushRe(1: Memcache.McFlushReRequest (cpp.type = "facebook::memcache::McFlushReRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McGatReply (cpp.type = "facebook::memcache::McGatReply") mcGat(1: Memcache.McGatRequest (cpp.type = "facebook::memcache::McGatRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McGatsReply (cpp.type = "facebook::memcache::McGatsReply") mcGats(1: Memcache.McGatsRequest (cpp.type = "facebook::memcache::McGatsRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McGetReply (cpp.type = "facebook::memcache::McGetReply") mcGet(1: Memcache.McGetRequest (cpp.type = "facebook::memcache::McGetRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McGetsReply (cpp.type = "facebook::memcache::McGetsReply") mcGets(1: Memcache.McGetsRequest (cpp.type = "facebook::memcache::McGetsRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McIncrReply (cpp.type = "facebook::memcache::McIncrReply") mcIncr(1: Memcache.McIncrRequest (cpp.type = "facebook::memcache::McIncrRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McLeaseGetReply (cpp.type = "facebook::memcache::McLeaseGetReply") mcLeaseGet(1: Memcache.McLeaseGetRequest (cpp.type = "facebook::memcache::McLeaseGetRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McLeaseSetReply (cpp.type = "facebook::memcache::McLeaseSetReply") mcLeaseSet(1: Memcache.McLeaseSetRequest (cpp.type = "facebook::memcache::McLeaseSetRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McMetagetReply (cpp.type = "facebook::memcache::McMetagetReply") mcMetaget(1: Memcache.McMetagetRequest (cpp.type = "facebook::memcache::McMetagetRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McPrependReply (cpp.type = "facebook::memcache::McPrependReply") mcPrepend(1: Memcache.McPrependRequest (cpp.type = "facebook::memcache::McPrependRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McReplaceReply (cpp.type = "facebook::memcache::McReplaceReply") mcReplace(1: Memcache.McReplaceRequest (cpp.type = "facebook::memcache::McReplaceRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McSetReply (cpp.type = "facebook::memcache::McSetReply") mcSet(1: Memcache.McSetRequest (cpp.type = "facebook::memcache::McSetRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache.McTouchReply (cpp.type = "facebook::memcache::McTouchReply") mcTouch(1: Memcache.McTouchRequest (cpp.type = "facebook::memcache::McTouchRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") mcVersion(1: Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") request) (thread = "eb")
+  McAddReply_8010 mcAdd(1:McAddRequest_5948 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McAppendReply_9961 mcAppend(1:McAppendRequest_2127 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McCasReply_298 mcCas(1:McCasRequest_1618 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McDecrReply_8534 mcDecr(1:McDecrRequest_8306 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McDeleteReply_2292 mcDelete(1:McDeleteRequest_2217 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McFlushAllReply_1951 mcFlushAll(1:McFlushAllRequest_7980 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McFlushReReply_2627 mcFlushRe(1:McFlushReRequest_8242 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McGatReply_6376 mcGat(1:McGatRequest_8371 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McGatsReply_6933 mcGats(1:McGatsRequest_9428 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McGetReply_654 mcGet(1:McGetRequest_4977 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McGetsReply_7110 mcGets(1:McGetsRequest_2399 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McIncrReply_3062 mcIncr(1:McIncrRequest_9940 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McLeaseGetReply_4340 mcLeaseGet(1:McLeaseGetRequest_5944 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McLeaseSetReply_8137 mcLeaseSet(1:McLeaseSetRequest_1690 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McMetagetReply_1132 mcMetaget(1:McMetagetRequest_3444 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McPrependReply_2860 mcPrepend(1:McPrependRequest_6127 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McReplaceReply_3521 mcReplace(1:McReplaceRequest_4175 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McSetReply_8851 mcSet(1:McSetRequest_3699 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McTouchReply_3534 mcTouch(1:McTouchRequest_135 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McVersionReply_5765 mcVersion(1:McVersionRequest_5382 request) (thread = "eb")
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef Memcache.McAddReply (cpp.type = "facebook::memcache::McAddReply") McAddReply_8010
+typedef Memcache.McAddRequest (cpp.type = "facebook::memcache::McAddRequest") McAddRequest_5948
+typedef Memcache.McAppendReply (cpp.type = "facebook::memcache::McAppendReply") McAppendReply_9961
+typedef Memcache.McAppendRequest (cpp.type = "facebook::memcache::McAppendRequest") McAppendRequest_2127
+typedef Memcache.McCasReply (cpp.type = "facebook::memcache::McCasReply") McCasReply_298
+typedef Memcache.McCasRequest (cpp.type = "facebook::memcache::McCasRequest") McCasRequest_1618
+typedef Memcache.McDecrReply (cpp.type = "facebook::memcache::McDecrReply") McDecrReply_8534
+typedef Memcache.McDecrRequest (cpp.type = "facebook::memcache::McDecrRequest") McDecrRequest_8306
+typedef Memcache.McDeleteReply (cpp.type = "facebook::memcache::McDeleteReply") McDeleteReply_2292
+typedef Memcache.McDeleteRequest (cpp.type = "facebook::memcache::McDeleteRequest") McDeleteRequest_2217
+typedef Memcache.McFlushAllReply (cpp.type = "facebook::memcache::McFlushAllReply") McFlushAllReply_1951
+typedef Memcache.McFlushAllRequest (cpp.type = "facebook::memcache::McFlushAllRequest") McFlushAllRequest_7980
+typedef Memcache.McFlushReReply (cpp.type = "facebook::memcache::McFlushReReply") McFlushReReply_2627
+typedef Memcache.McFlushReRequest (cpp.type = "facebook::memcache::McFlushReRequest") McFlushReRequest_8242
+typedef Memcache.McGatReply (cpp.type = "facebook::memcache::McGatReply") McGatReply_6376
+typedef Memcache.McGatRequest (cpp.type = "facebook::memcache::McGatRequest") McGatRequest_8371
+typedef Memcache.McGatsReply (cpp.type = "facebook::memcache::McGatsReply") McGatsReply_6933
+typedef Memcache.McGatsRequest (cpp.type = "facebook::memcache::McGatsRequest") McGatsRequest_9428
+typedef Memcache.McGetReply (cpp.type = "facebook::memcache::McGetReply") McGetReply_654
+typedef Memcache.McGetRequest (cpp.type = "facebook::memcache::McGetRequest") McGetRequest_4977
+typedef Memcache.McGetsReply (cpp.type = "facebook::memcache::McGetsReply") McGetsReply_7110
+typedef Memcache.McGetsRequest (cpp.type = "facebook::memcache::McGetsRequest") McGetsRequest_2399
+typedef Memcache.McIncrReply (cpp.type = "facebook::memcache::McIncrReply") McIncrReply_3062
+typedef Memcache.McIncrRequest (cpp.type = "facebook::memcache::McIncrRequest") McIncrRequest_9940
+typedef Memcache.McLeaseGetReply (cpp.type = "facebook::memcache::McLeaseGetReply") McLeaseGetReply_4340
+typedef Memcache.McLeaseGetRequest (cpp.type = "facebook::memcache::McLeaseGetRequest") McLeaseGetRequest_5944
+typedef Memcache.McLeaseSetReply (cpp.type = "facebook::memcache::McLeaseSetReply") McLeaseSetReply_8137
+typedef Memcache.McLeaseSetRequest (cpp.type = "facebook::memcache::McLeaseSetRequest") McLeaseSetRequest_1690
+typedef Memcache.McMetagetReply (cpp.type = "facebook::memcache::McMetagetReply") McMetagetReply_1132
+typedef Memcache.McMetagetRequest (cpp.type = "facebook::memcache::McMetagetRequest") McMetagetRequest_3444
+typedef Memcache.McPrependReply (cpp.type = "facebook::memcache::McPrependReply") McPrependReply_2860
+typedef Memcache.McPrependRequest (cpp.type = "facebook::memcache::McPrependRequest") McPrependRequest_6127
+typedef Memcache.McReplaceReply (cpp.type = "facebook::memcache::McReplaceReply") McReplaceReply_3521
+typedef Memcache.McReplaceRequest (cpp.type = "facebook::memcache::McReplaceRequest") McReplaceRequest_4175
+typedef Memcache.McSetReply (cpp.type = "facebook::memcache::McSetReply") McSetReply_8851
+typedef Memcache.McSetRequest (cpp.type = "facebook::memcache::McSetRequest") McSetRequest_3699
+typedef Memcache.McTouchReply (cpp.type = "facebook::memcache::McTouchReply") McTouchReply_3534
+typedef Memcache.McTouchRequest (cpp.type = "facebook::memcache::McTouchRequest") McTouchRequest_135
+typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_5765
+typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_5382

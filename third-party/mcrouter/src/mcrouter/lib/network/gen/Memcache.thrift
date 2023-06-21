@@ -138,7 +138,7 @@ struct McDeleteRequest {
   2: i64 (cpp.type = "uint64_t") flags
   3: i32 exptime
   4: binary (cpp.type = "folly::IOBuf") value
-  5: map<string, i64 (cpp.type = "uint64_t")> (cpp.type = "std::unordered_map<std::string, uint64_t>") attributes
+  5: map<string, i64_8073> (cpp.type = "std::unordered_map<std::string, uint64_t>") attributes
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -795,3 +795,6 @@ struct McGatsReply {
 ",
 cpp.virtual
 )
+
+// The following were automatically generated and may benefit from renaming.
+typedef i64 (cpp.type = "uint64_t") i64_8073

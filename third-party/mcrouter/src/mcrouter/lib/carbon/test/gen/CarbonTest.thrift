@@ -44,15 +44,15 @@ struct TestRequest {
   21: optional binary (cpp.type = "folly::IOBuf") testOptionalIobuf
   22: bool dummy22
   23: bool dummy23
-  24: list<list<i64 (cpp.type = "uint64_t")>> testNestedVec
+  24: list<list<i64_8825>> testNestedVec
   25: map<string, string> (cpp.type = "std::unordered_map<std::string, std::string>") testUMap
   26: map<double, double> (cpp.type = "std::map<double, double>") testMap
-  27: map<string, list<i16 (cpp.type = "uint16_t")>> (cpp.type = "std::map<std::string, std::vector<uint16_t>>") testComplexMap
+  27: map<string, list<i16_2823>> (cpp.type = "std::map<std::string, std::vector<uint16_t>>") testComplexMap
   28: set<string> (cpp.type = "std::unordered_set<std::string>") testUSet
-  29: set<i64 (cpp.type = "uint64_t")> (cpp.type = "std::set<uint64_t>") testSet
+  29: set<i64_8825> (cpp.type = "std::set<uint64_t>") testSet
   30: optional bool testOptionalBool
   31: string dummy31
-  32: list<binary (cpp.type = "folly::IOBuf")> testIOBufList
+  32: list<binary_6280> testIOBufList
   33: map<string, string> (cpp.type = "folly::F14FastMap<std::string, std::string>") testF14FastMap
   34: map<string, string> (cpp.type = "folly::F14NodeMap<std::string, std::string>") testF14NodeMap
   35: map<string, string> (cpp.type = "folly::F14ValueMap<std::string, std::string>") testF14ValueMap
@@ -418,3 +418,8 @@ struct StructWithOptionalEnumInt8 {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ")
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (cpp.type = "folly::IOBuf") binary_6280
+typedef i16 (cpp.type = "uint16_t") i16_2823
+typedef i64 (cpp.type = "uint64_t") i64_8825

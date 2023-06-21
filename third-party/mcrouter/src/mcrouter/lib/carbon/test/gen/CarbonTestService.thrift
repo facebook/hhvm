@@ -23,7 +23,15 @@ namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
 service CarbonTest extends fb303.FacebookService {
-  CarbonTest.TestReply (cpp.type = "carbon::test::TestReply") test(1: CarbonTest.TestRequest (cpp.type = "carbon::test::TestRequest") request) (thread = "eb")
-  CarbonTest.TestReplyStringKey (cpp.type = "carbon::test::TestReplyStringKey") testStringKey(1: CarbonTest.TestRequestStringKey (cpp.type = "carbon::test::TestRequestStringKey") request) (thread = "eb")
-  Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") mcVersion(1: Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") request) (thread = "eb")
+  TestReply_472 test(1:TestRequest_3222 request) (thread = "eb")
+  TestReplyStringKey_1518 testStringKey(1:TestRequestStringKey_9666 request) (thread = "eb")
+  McVersionReply_547 mcVersion(1:McVersionRequest_3066 request) (thread = "eb")
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_547
+typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_3066
+typedef CarbonTest.TestReplyStringKey (cpp.type = "carbon::test::TestReplyStringKey") TestReplyStringKey_1518
+typedef CarbonTest.TestReply (cpp.type = "carbon::test::TestReply") TestReply_472
+typedef CarbonTest.TestRequestStringKey (cpp.type = "carbon::test::TestRequestStringKey") TestRequestStringKey_9666
+typedef CarbonTest.TestRequest (cpp.type = "carbon::test::TestRequest") TestRequest_3222

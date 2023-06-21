@@ -23,7 +23,15 @@ namespace cpp2 hellogoodbye.thrift
 namespace py3 hellogoodbye.thrift
 
 service HelloGoodbye extends fb303.FacebookService {
-  HelloGoodbye.GoodbyeReply (cpp.type = "hellogoodbye::GoodbyeReply") goodbye(1: HelloGoodbye.GoodbyeRequest (cpp.type = "hellogoodbye::GoodbyeRequest") request) (thread = "eb")
-  HelloGoodbye.HelloReply (cpp.type = "hellogoodbye::HelloReply") hello(1: HelloGoodbye.HelloRequest (cpp.type = "hellogoodbye::HelloRequest") request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") mcVersion(1: Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") request) (thread = "eb")
+  GoodbyeReply_6815 goodbye(1:GoodbyeRequest_3662 request) (thread = "eb")
+  HelloReply_5168 hello(1:HelloRequest_9600 request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
+  McVersionReply_4344 mcVersion(1:McVersionRequest_7362 request) (thread = "eb")
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef HelloGoodbye.GoodbyeReply (cpp.type = "hellogoodbye::GoodbyeReply") GoodbyeReply_6815
+typedef HelloGoodbye.GoodbyeRequest (cpp.type = "hellogoodbye::GoodbyeRequest") GoodbyeRequest_3662
+typedef HelloGoodbye.HelloReply (cpp.type = "hellogoodbye::HelloReply") HelloReply_5168
+typedef HelloGoodbye.HelloRequest (cpp.type = "hellogoodbye::HelloRequest") HelloRequest_9600
+typedef Common.McVersionReply (cpp.type = "facebook::memcache::McVersionReply") McVersionReply_4344
+typedef Common.McVersionRequest (cpp.type = "facebook::memcache::McVersionRequest") McVersionRequest_7362

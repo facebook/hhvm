@@ -19,6 +19,7 @@ import thrift.python_capi.fixture as fixture
 
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
     DoubledPair,
+    EmptyStruct,
     MyDataItem,
     MyEnum,
     MyStruct,
@@ -81,6 +82,11 @@ class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_type_adapted(self) -> None:
         s = DoubledPair(s="TacosSalad", x=42)
         self.assertEqual(s, fixture.roundtrip_DoubledPair(s))
+
+    def test_roundtrip_marshal_EmptyStruct(self) -> None:
+        self.assertEqual(EmptyStruct(), fixture.roundtrip_EmptyStruct(EmptyStruct()))
+        with self.assertRaises(TypeError):
+            fixture.roundtrip_EmptyStruct(MyStruct())
 
     def test_roundtrip_TypeError(self) -> None:
         with self.assertRaises(TypeError):

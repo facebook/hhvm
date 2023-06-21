@@ -42,6 +42,19 @@ bool ensure_module_imported() {
 {{#program:structs}}
 ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
 Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject* obj) {
+  {{#struct:marshal_capi?}}
+  {{program:cpp_namespaces}}::{{struct:cpp_name}} cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a {{struct:name}}");
+      }
+      return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
+          "Marshal error: {{struct:name}}");
+  }
+  return cpp;
+  {{/struct:marshal_capi?}}
+  {{^struct:marshal_capi?}}
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
@@ -62,6 +75,7 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
   {{^struct:cpp_adapter?}}
   return detail::deserialize_iobuf<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(std::move(val));
   {{/struct:cpp_adapter?}}
+  {{/struct:marshal_capi?}}
 }
 
 int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {

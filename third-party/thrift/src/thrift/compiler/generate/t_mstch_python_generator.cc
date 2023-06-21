@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -66,6 +67,10 @@ const std::string get_annotation_property(
     }
   }
   return "";
+}
+
+bool marshal_capi_override_annotation(const t_named& node) {
+  return node.find_structured_annotation_or_null(kMarshalCapiUri) != nullptr;
 }
 
 const t_const* get_transitive_annotation_of_adapter_or_null(
@@ -756,6 +761,7 @@ class python_mstch_struct : public mstch_struct {
             {"struct:exception_message",
              &python_mstch_struct::exception_message},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
+            {"struct:marshal_capi?", &python_mstch_struct::marshal_capi},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
             {"struct:cpp_name", &python_mstch_struct::cpp_name},
             {"struct:cpp_adapter?", &python_mstch_struct::cpp_adapter},
@@ -777,6 +783,11 @@ class python_mstch_struct : public mstch_struct {
     return struct_->has_annotation("message");
   }
   mstch::node exception_message() { return struct_->get_annotation("message"); }
+
+  mstch::node marshal_capi() {
+    return marshal_capi_override_annotation(*struct_) ||
+        (!struct_->is_union() && struct_->fields().size() == 0);
+  }
 
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);

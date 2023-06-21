@@ -64,6 +64,8 @@ struct StringPair {
   2: string doubled;
 }
 
+struct EmptyStruct {} (cpp.name = "VapidStruct")
+
 union MyUnion {
   1: MyEnum myEnum;
   2: MyStruct myStruct;

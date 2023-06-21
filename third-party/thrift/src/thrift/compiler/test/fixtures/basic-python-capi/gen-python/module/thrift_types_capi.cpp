@@ -73,19 +73,16 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyStruct>::operator()
 
 ExtractorResult<::test::fixtures::basic-python-capi::MyDataItem>
 Extractor<::test::fixtures::basic-python-capi::MyDataItem>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
-      "Module test.fixtures.basic-python-capi.module import error");
+  ::test::fixtures::basic-python-capi::MyDataItem cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyDataItem");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
+          "Marshal error: MyDataItem");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic_python_capi__module__MyDataItem(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
-        "Thrift serialize error: MyDataItem");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyDataItem>(std::move(val));
+  return cpp;
 }
 
 int Extractor<::test::fixtures::basic-python-capi::MyDataItem>::typeCheck(PyObject* obj) {
@@ -119,21 +116,16 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyDataItem>::operator
 
 ExtractorResult<::test::fixtures::basic-python-capi::TransitiveDoubler>
 Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic-python-capi::TransitiveDoubler>(
-      "Module test.fixtures.basic-python-capi.module import error");
+  ::test::fixtures::basic-python-capi::TransitiveDoubler cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a TransitiveDoubler");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::TransitiveDoubler>(
+          "Marshal error: TransitiveDoubler");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic_python_capi__module__TransitiveDoubler(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic-python-capi::TransitiveDoubler>(
-        "Thrift serialize error: TransitiveDoubler");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::test::fixtures::basic-python-capi::TransitiveDoubler, ::thrift::test::lib::StructDoubler
-    >(std::move(val));
+  return cpp;
 }
 
 int Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>::typeCheck(PyObject* obj) {

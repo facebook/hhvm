@@ -16,13 +16,14 @@ from libcpp cimport bool as cbool
 
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "thrift::test::python_capi":
-    cppclass MyStruct
-    cppclass MyStructPatch
     cppclass MyDataItem
     cppclass MyEnum
+    cppclass MyStruct
+    cppclass MyStructPatch
     cppclass OurUnion
     cppclass StringPair
     cppclass DoubledPair
+    cppclass VapidStruct
 
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
     cdef object __shim__roundtrip[T](object)
@@ -40,6 +41,9 @@ def roundtrip_MyUnion(object x):
 
 def roundtrip_MyEnum(object x):
     return __shim__roundtrip[MyEnum](x)
+
+def roundtrip_EmptyStruct(object x):
+    return __shim__roundtrip[VapidStruct](x)
 
 def roundtrip_MyStructPatch(object x):
     return __shim__roundtrip[MyStructPatch](x)

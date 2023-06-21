@@ -374,7 +374,7 @@ Package::parseRun(const std::string& content,
     BatchDeclProvider provider(decls);
     try {
       ue = compile_unit(
-        content.data(),
+        content,
         fileName.c_str(),
         mangled_sha1,
         Native::s_noNativeFuncs,

@@ -146,7 +146,7 @@ extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
 
 // Invoke hackc directly without any caching.
 std::unique_ptr<UnitEmitter> compile_unit(
-  const char* code,
+  folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,

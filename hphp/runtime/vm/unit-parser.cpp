@@ -104,7 +104,7 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
   }
 }
 
-CompilerResult assemble_string_handle_errors(const char* code,
+CompilerResult assemble_string_handle_errors(folly::StringPiece code,
                                              const std::string& hhas,
                                              const char* filename,
                                              const SHA1& sha1,
@@ -170,7 +170,7 @@ std::string displayMismatch(const std::string& assemblerOut,
 }
 
 CompilerResult hackc_compile(
-  const char* code,
+  folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
@@ -233,10 +233,13 @@ CompilerResult hackc_compile(
         [&] {
           return tracing::Props{}
             .add("filename", filename ? filename : "")
-            .add("code_size", strlen(code));
+            .add("code_size", code.size());
         }
       };
-      return hackc::compile_unit_from_text(native_env, code);
+      return hackc::compile_unit_from_text(
+          native_env,
+          {(const uint8_t*)code.data(), code.size()}
+      );
     }();
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
@@ -256,10 +259,13 @@ CompilerResult hackc_compile(
         [&] {
           return tracing::Props{}
             .add("filename", filename ? filename : "")
-            .add("code_size", strlen(code));
+            .add("code_size", code.size());
         }
       };
-      return hackc::compile_from_text(native_env, code);
+      return hackc::compile_from_text(
+          native_env,
+          {(const uint8_t*)code.data(), code.size()}
+      );
     }();
     auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
 
@@ -456,7 +462,7 @@ std::unique_ptr<UnitEmitter> UnitCompiler::compile(
 }
 
 std::unique_ptr<UnitEmitter> compile_unit(
-  const char* code,
+  folly::StringPiece code,
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,

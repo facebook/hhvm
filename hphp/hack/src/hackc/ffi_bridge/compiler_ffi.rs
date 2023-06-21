@@ -192,11 +192,11 @@ pub mod compile_ffi {
         /// Compile Hack source code to a Unit or an error.
         unsafe fn compile_unit_from_text(
             env: &NativeEnv,
-            source_text: &CxxString,
+            source_text: &[u8],
         ) -> Result<Box<UnitWrapper>>;
 
         /// Compile Hack source code to either HHAS or an error.
-        fn compile_from_text(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
+        fn compile_from_text(env: &NativeEnv, source_text: &[u8]) -> Result<Vec<u8>>;
 
         /// Invoke the hackc direct decl parser and return every shallow decl in the file,
         /// as well as a serialized blob holding the same content.
@@ -331,14 +331,11 @@ fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
     hasher.finalize().into()
 }
 
-fn compile_from_text(
-    env: &compile_ffi::NativeEnv,
-    source_text: &CxxString,
-) -> Result<Vec<u8>, String> {
+fn compile_from_text(env: &compile_ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>, String> {
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-        source_text.as_bytes(),
+        source_text,
     );
     let decl_allocator = bumpalo::Bump::new();
 
@@ -444,7 +441,7 @@ fn verify_deserialization(result: &compile_ffi::DeclsAndBlob) -> bool {
 
 fn compile_unit_from_text(
     env: &compile_ffi::NativeEnv,
-    source_text: &CxxString,
+    source_text: &[u8],
 ) -> Result<Box<UnitWrapper>, String> {
     let bump = bumpalo::Bump::new();
     let alloc: &'static bumpalo::Bump =
@@ -452,7 +449,7 @@ fn compile_unit_from_text(
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-        source_text.as_bytes(),
+        source_text,
     );
 
     let decl_allocator = bumpalo::Bump::new();

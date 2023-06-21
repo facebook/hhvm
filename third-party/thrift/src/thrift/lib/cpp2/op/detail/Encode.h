@@ -478,7 +478,7 @@ struct ShouldWrite {
 template <class Tag>
 FOLLY_INLINE_VARIABLE constexpr ShouldWrite<Tag> should_write{};
 
-template <class T, template <class...> class EncodeImpl = Encode>
+template <typename T>
 struct StructEncode {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& t) const {
@@ -496,7 +496,7 @@ struct StructEncode {
           &*op::get_name_v<T, Id>.begin(),
           typeTagToTType<Tag>,
           folly::to_underlying(op::get_field_id<T, Id>::value));
-      s += EncodeImpl<Tag>{}(prot, *field);
+      s += Encode<Tag>{}(prot, *field);
       s += prot.writeFieldEnd();
     });
     s += prot.writeFieldStop();
@@ -544,7 +544,7 @@ struct Encode<type::enum_t<T>> {
 };
 
 // TODO: add optimization used in protocol_methods.h
-template <typename Tag, template <class...> class EncodeImpl = Encode>
+template <typename Tag>
 struct ListEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& list) const {
@@ -552,7 +552,7 @@ struct ListEncode {
     xfer += prot.writeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
     for (const auto& elem : list) {
-      xfer += EncodeImpl<Tag>{}(prot, elem);
+      xfer += Encode<Tag>{}(prot, elem);
     }
     xfer += prot.writeListEnd();
     return xfer;
@@ -562,7 +562,7 @@ struct ListEncode {
 template <typename Tag>
 struct Encode<type::list<Tag>> : ListEncode<Tag> {};
 
-template <typename Tag, template <class...> class EncodeImpl = Encode>
+template <typename Tag>
 struct SetEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& set) const {
@@ -570,7 +570,7 @@ struct SetEncode {
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
     for (const auto& elem : set) {
-      xfer += EncodeImpl<Tag>{}(prot, elem);
+      xfer += Encode<Tag>{}(prot, elem);
     }
     xfer += prot.writeSetEnd();
     return xfer;
@@ -580,10 +580,7 @@ struct SetEncode {
 template <typename Tag>
 struct Encode<type::set<Tag>> : SetEncode<Tag> {};
 
-template <
-    typename Key,
-    typename Value,
-    template <class...> class EncodeImpl = Encode>
+template <typename Key, typename Value>
 struct MapEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& map) const {
@@ -593,8 +590,8 @@ struct MapEncode {
         typeTagToTType<Value>,
         checked_container_size(map.size()));
     for (const auto& kv : map) {
-      xfer += EncodeImpl<Key>{}(prot, kv.first);
-      xfer += EncodeImpl<Value>{}(prot, kv.second);
+      xfer += Encode<Key>{}(prot, kv.first);
+      xfer += Encode<Value>{}(prot, kv.second);
     }
     xfer += prot.writeMapEnd();
     return xfer;
@@ -604,31 +601,25 @@ struct MapEncode {
 template <typename Key, typename Value>
 struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 
-template <
-    typename T,
-    typename Tag,
-    template <class...> class EncodeImpl = Encode>
+template <typename T, typename Tag>
 struct CppTypeEncode {
   template <class Protocol, class U>
   uint32_t operator()(Protocol& prot, const U& m) const {
     auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
         [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
         folly::identity);
-    return EncodeImpl<Tag>{}(prot, f(m));
+    return Encode<Tag>{}(prot, f(m));
   }
 };
 
 template <typename T, typename Tag>
 struct Encode<type::cpp_type<T, Tag>> : CppTypeEncode<T, Tag> {};
 
-template <
-    typename Adapter,
-    typename Tag,
-    template <class...> class EncodeImpl = Encode>
+template <typename Adapter, typename Tag>
 struct AdaptedEncode {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    return EncodeImpl<Tag>{}(prot, Adapter::toThrift(m));
+    return Encode<Tag>{}(prot, Adapter::toThrift(m));
   }
 };
 
@@ -935,41 +926,6 @@ struct Decode<
     m = adapt_detail::fromThriftField<Adapter, FieldId>(std::move(orig), strct);
   }
 };
-
-template <class T>
-struct RecursiveEncode : Encode<T> {};
-
-template <class T>
-struct RecursiveEncode<type::list<T>> : ListEncode<T, RecursiveEncode> {};
-
-template <class T>
-struct RecursiveEncode<type::set<T>> : SetEncode<T, RecursiveEncode> {};
-
-template <class K, class V>
-struct RecursiveEncode<type::map<K, V>> : MapEncode<K, V, RecursiveEncode> {};
-
-template <class T>
-struct RecursiveEncode<type::struct_t<T>> : StructEncode<T, RecursiveEncode> {};
-
-template <class T>
-struct RecursiveEncode<type::union_t<T>> : RecursiveEncode<type::struct_t<T>> {
-};
-
-template <class T>
-struct RecursiveEncode<type::exception_t<T>>
-    : RecursiveEncode<type::struct_t<T>> {};
-
-template <typename T, typename Tag>
-struct RecursiveEncode<type::cpp_type<T, Tag>>
-    : CppTypeEncode<T, Tag, RecursiveEncode> {};
-
-template <typename Adapter, typename Tag>
-struct RecursiveEncode<type::adapted<Adapter, Tag>>
-    : AdaptedEncode<Adapter, Tag, RecursiveEncode> {};
-
-template <typename T>
-FOLLY_INLINE_VARIABLE constexpr RecursiveEncode<type::infer_tag<T>>
-    recursive_encode{};
 
 } // namespace detail
 } // namespace op

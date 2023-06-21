@@ -43,25 +43,10 @@ struct Context {
   SString unit;
   const php::Func* func;
   const php::Class* cls;
+  const Context* dep{nullptr};
 
-  using Hash = ContextHash;
+  const Context& forDep() const { return dep ? *dep : *this; }
 };
-
-struct ContextHash {
-  size_t operator()(const Context& c) const {
-    return pointer_hash<void>{}(c.func ? (void*)c.func :
-                                c.cls ? (void*)c.cls : (void*)c.unit);
-  }
-};
-
-inline bool operator==(Context a, Context b) {
-  return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
-}
-
-inline bool operator<(Context a, Context b) {
-  return std::make_tuple(a.unit, a.func, a.cls) <
-         std::make_tuple(b.unit, b.func, b.cls);
-}
 
 /*
  * Context for a call to a function.  This is the function itself,
@@ -113,8 +98,9 @@ struct AnalysisContext {
   SString unit;
   const php::WideFunc& func;
   const php::Class* cls;
+  const Context* dep{nullptr};
 
-  operator Context() const { return { unit, func, cls }; }
+  operator Context() const { return { unit, func, cls, dep }; }
 };
 
 /*

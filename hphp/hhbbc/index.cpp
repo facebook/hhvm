@@ -4002,7 +4002,8 @@ DependencyContext make_dep(const FuncFamily* family) {
   return DependencyContext{DependencyContextType::FuncFamily, family};
 }
 
-DependencyContext dep_context(IndexData& data, const Context& ctx) {
+DependencyContext dep_context(IndexData& data, const Context& baseCtx) {
+  auto const& ctx = baseCtx.forDep();
   if (!ctx.cls || !data.useClassDependencies) return make_dep(ctx.func);
   auto const cls = ctx.cls->closureContextCls
     ? data.classes.at(ctx.cls->closureContextCls)
@@ -5042,6 +5043,7 @@ Type adjust_closure_context(const Index& index, const CallContext& ctx) {
 }
 
 Type context_sensitive_return_type(IndexData& data,
+                                   const Context& ctx,
                                    CallContext callCtx,
                                    Type returnType) {
   constexpr auto max_interp_nexting_level = 2;
@@ -5114,7 +5116,8 @@ Type context_sensitive_return_type(IndexData& data,
     auto const calleeCtx = AnalysisContext {
       func->unit,
       wf,
-      func->cls
+      func->cls,
+      &ctx.forDep()
     };
     auto const ty = analyze_func_inline(
       *data.m_index,
@@ -14984,7 +14987,6 @@ Type Index::lookup_foldable_return_type(Context ctx,
   auto const func = calleeCtx.callee;
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
-  static __thread Context base_ctx;
 
   auto const ctxType = adjust_closure_context(*this, calleeCtx);
 
@@ -15035,10 +15037,8 @@ Type Index::lookup_foldable_return_type(Context ctx,
     return TInitCell;
   }
 
-  if (!interp_nesting_level) {
-    base_ctx = ctx;
-  } else if (interp_nesting_level > max_interp_nexting_level) {
-    add_dependency(*m_data, func, base_ctx, Dep::InlineDepthLimit);
+  if (interp_nesting_level > max_interp_nexting_level) {
+    add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
     return TInitCell;
   }
 
@@ -15049,7 +15049,7 @@ Type Index::lookup_foldable_return_type(Context ctx,
     auto const wf = php::WideFunc::cns(func);
     auto const fa = analyze_func_inline(
       *this,
-      AnalysisContext { func->unit, wf, func->cls },
+      AnalysisContext { func->unit, wf, func->cls, &ctx.forDep() },
       ctxType,
       calleeCtx.args,
       nullptr,
@@ -15170,6 +15170,7 @@ Type Index::lookup_return_type(Context caller,
 
     return context_sensitive_return_type(
       *m_data,
+      caller,
       { finfo->func, args, context },
       std::move(returnType)
     );
@@ -15187,6 +15188,7 @@ Type Index::lookup_return_type(Context caller,
       add_dependency(*m_data, f.finfo->func, caller, dep);
       return context_sensitive_return_type(
         *m_data,
+        caller,
         { f.finfo->func, args, context },
         f.finfo->returnTy
       );

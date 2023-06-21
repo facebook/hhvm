@@ -73,16 +73,6 @@ struct WorkItem {
     , ctx(ctx)
   {}
 
-  bool operator<(const WorkItem& o) const {
-    return type < o.type ? true :
-           o.type < type ? false :
-           ctx < o.ctx;
-  }
-
-  bool operator==(const WorkItem& o) const {
-    return type == o.type && ctx == o.ctx;
-  }
-
   WorkType type;
   Context ctx;
 };

@@ -2688,6 +2688,8 @@ and simplify_subtype_i
                     ty_int
                     ty_super
             end
+        | (_, Tgeneric _) when subtype_env.require_completeness ->
+          default_subtype env
         | _ ->
           (match Env.get_typedef env name_super with
           | Some { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }

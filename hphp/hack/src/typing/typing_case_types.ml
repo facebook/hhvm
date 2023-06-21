@@ -174,8 +174,42 @@ module DataType = struct
           ~allow_abstract_tconst:true
       in
       fromTy env ty
-    | Tdependent (_, ty)
-    | Tnewtype (_, _, ty) ->
+    | Tdependent (_, ty) -> fromTy env ty
+    | Tnewtype (name, tyl, ty) ->
+      let (env, ty) =
+        match Env.get_typedef env name with
+        (* When determining the datatype associated with a type we should
+         * expand the case type instead of looking at the upper bound.
+         * If we do not expand, then we will over approximate the datatype.
+         * Consider:
+         *
+         *  case type Type1 = bool | int;
+         *  case type Type2 = Type1 | string;
+         *
+         * If we do not expand we will reject the definition of `Type2`
+         * because we will believe the datatype for `Type1` contains `string`.
+         * By expanding we can allow this definition. *)
+        | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+          let ((env, _ty_err_opt), variants) =
+            (* The this_ty does not need to be set because case types cannot
+             * appear within classes thus cannot us the this type.
+             * If we ever change that this could needs to be changed *)
+            Typing_phase.localize
+              ~ety_env:
+                {
+                  empty_expand_env with
+                  substs =
+                    (if List.is_empty tyl then
+                      SMap.empty
+                    else
+                      Decl_subst.make_locl td_tparams tyl);
+                }
+              env
+              variants
+          in
+          (env, variants)
+        | _ -> (env, ty)
+      in
       fromTy env ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <map>
 #include <string>
-
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/ast_visitor.h>
@@ -155,6 +154,61 @@ class structure_annotations {
     }
   }
 
+  void visit_def(const t_named& node) {
+    std::set<std::string> to_add;
+    std::vector<t_annotation> to_remove;
+
+    for (const auto& [name, data] : node.annotations()) {
+      if (name == "hack.attributes") {
+        const char* pos = sm_.get_text(data.src_range.begin);
+        const char* end = sm_.get_text(data.src_range.end);
+        for (; pos != end && *pos != '"' && *pos != '\''; ++pos) {
+        }
+        assert(pos != end);
+        char delim = *pos;
+        ++pos;
+        int depth = 0;
+        std::vector<std::string> attrs;
+        const char* start = pos;
+        for (; pos != end; ++pos) {
+          if (*pos == '(') {
+            ++depth;
+          } else if (*pos == ')') {
+            --depth;
+          } else if (
+              (*pos == ',' && depth == 0) ||
+              (*pos == delim && pos == end - 1)) {
+            attrs.push_back(fmt::format(
+                "{}{}{}", delim, fmt::string_view(start, pos - start), delim));
+            start = pos + 1;
+            for (; start != end && isspace(*start); ++start) {
+            }
+          }
+        }
+
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
+        fm_.add_include("thrift/annotation/hack.thrift");
+      }
+
+      if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {
+        fm_.remove_all_annotations(node);
+      } else {
+        for (const auto& annot : to_remove) {
+          fm_.remove(annot);
+        }
+      }
+    }
+
+    if (!to_add.empty()) {
+      fm_.add(
+          {node.src_range().begin.offset(),
+           node.src_range().begin.offset(),
+           fmt::format("{}\n", fmt::join(to_add, "\n"))});
+    }
+  }
+
   void run() {
     const_ast_visitor visitor;
     visitor.add_typedef_visitor([=](const auto& node) {
@@ -163,6 +217,7 @@ class structure_annotations {
     visitor.add_field_visitor([=](const auto& node) {
       visit_field_or_typedef(node, node.type(), true);
     });
+    visitor.add_definition_visitor([=](const auto& node) { visit_def(node); });
 
     visitor(prog_);
 

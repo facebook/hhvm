@@ -164,34 +164,36 @@ impl Deref for DepGraph {
 }
 
 /// An memory-mapped dependency graph.
-#[ouroboros::self_referencing]
 pub struct NewDepGraph {
-    /// The file holding the storage for this graph. Boxed for ouroboros.
-    storage: Box<Mmap>,
+    /// The file holding the storage for this graph.
+    storage: Mmap,
 
     /// All Deps in the graph. These are NOT sorted -- use `deps_order` if you need sorting.
-    #[borrows(storage)]
-    deps: &'this [Dep],
+    ///
+    /// This holds the byte range in the mmap file for this data -- use `deps()` to access.
+    deps_range: Range<usize>,
 
     /// Indices into `deps` providing sorted order, e.g. deps[deps_order[0]] is first.
     /// One entry per entry in `deps`.
-    #[borrows(storage)]
-    deps_order: &'this [u32],
+    ///
+    /// This holds the byte range in the mmap file for this data -- use `deps_order()` to access.
+    deps_order_range: Range<usize>,
 
     /// Indices in `adjacency_lists` for the serialized edge list for the corresponding `deps`
     /// entry. One entry per entry in `deps`.
     ///
     /// Each entry in this array must be left shifted by `adjacency_list_alignment_shift`
     /// before being used as an index. This is to support `edge_lists` larger than 4GB.
-    #[borrows(storage)]
-    unshifted_edge_list_offset: &'this [u32],
+    ///
+    /// This holds the byte range in the mmap file for this data -- use `unshifted_edge_list_offset_range()` to access.
+    unshifted_edge_list_offset_range: Range<usize>,
 
     /// Amount to left-shift unshifted_edge_list_offset to get a byte index into `adjacency_lists`.
     adjacency_list_alignment_shift: u8,
 
     /// Individually serialized edge lists. `NewHashList` knows how to deserialize.
-    #[borrows(storage)]
-    adjacency_lists: &'this [u8],
+    /// This holds the byte range in the mmap file for this data -- use `unshifted_lists_range()` to access.
+    adjacency_lists_range: Range<usize>,
 }
 
 impl NewDepGraph {
@@ -218,22 +220,17 @@ impl NewDepGraph {
         }
 
         let num_deps = header.num_deps as usize;
-        let adjacency_list_alignment_shift = header.adjacency_list_alignment_shift;
 
-        let builder = NewDepGraphBuilder {
-            storage: Box::new(mmap),
-            deps_builder: |mmap: &Mmap| bytemuck::cast_slice(&mmap[hlen..hlen + num_deps * 8]),
-            deps_order_builder: |mmap: &Mmap| {
-                bytemuck::cast_slice(&mmap[hlen + num_deps * 8..hlen + num_deps * 12])
-            },
-            unshifted_edge_list_offset_builder: |mmap: &Mmap| {
-                bytemuck::cast_slice(&mmap[hlen + num_deps * 12..hlen + num_deps * 16])
-            },
-            adjacency_list_alignment_shift,
-            adjacency_lists_builder: |mmap: &Mmap| &mmap[hlen + num_deps * 16..],
+        let g = NewDepGraph {
+            deps_range: hlen..hlen + num_deps * 8,
+            deps_order_range: hlen + num_deps * 8..hlen + num_deps * 12,
+            unshifted_edge_list_offset_range: hlen + num_deps * 12..hlen + num_deps * 16,
+            adjacency_list_alignment_shift: header.adjacency_list_alignment_shift,
+            adjacency_lists_range: hlen + num_deps * 16..mmap.len(),
+            storage: mmap,
         };
 
-        Ok(builder.build())
+        Ok(g)
     }
 
     /// Return `true` iff the given hash list contains the index for the given hash.
@@ -245,20 +242,35 @@ impl NewDepGraph {
         }
     }
 
+    fn deps(&self) -> &[Dep] {
+        bytemuck::cast_slice(&self.storage[self.deps_range.clone()])
+    }
+
+    fn deps_order(&self) -> &[u32] {
+        bytemuck::cast_slice(&self.storage[self.deps_order_range.clone()])
+    }
+
+    fn unshifted_edge_list_offset(&self) -> &[u32] {
+        bytemuck::cast_slice(&self.storage[self.unshifted_edge_list_offset_range.clone()])
+    }
+
+    fn adjacency_lists(&self) -> &[u8] {
+        &self.storage[self.adjacency_lists_range.clone()]
+    }
+
     /// Implementation helper for `DepGraph::hash_list_hashes`.
     fn hash_list_hashes<'a>(
         &'a self,
         hash_list: NewHashList<'a>,
     ) -> impl Iterator<Item = Dep> + 'a {
-        hash_list
-            .hash_indices()
-            .map(|index| self.borrow_deps()[index as usize])
+        let deps = self.deps();
+        hash_list.hash_indices().map(move |i| deps[i as usize])
     }
 
     /// Returns the internal, physical order for a Dep, or None if not found.
     pub fn get_index(&self, dep: Dep) -> Option<u32> {
-        let deps = self.borrow_deps();
-        let deps_order = self.borrow_deps_order();
+        let deps = self.deps();
+        let deps_order = self.deps_order();
         deps_order
             .binary_search_by_key(&dep, move |&i| deps[i as usize])
             .map_or(None, move |x| Some(deps_order[x]))
@@ -268,25 +280,21 @@ impl NewDepGraph {
     pub fn all_hashes(
         &self,
     ) -> impl DoubleEndedIterator<Item = Dep> + ExactSizeIterator + FusedIterator + '_ {
-        let deps = self.borrow_deps();
-        self.borrow_deps_order()
-            .iter()
-            .map(move |&i| deps[i as usize])
+        let deps = self.deps();
+        self.deps_order().iter().map(move |&i| deps[i as usize])
     }
 
     /// All unique dependency hashes in the graph, in sorted order, in parallel.
     pub fn par_all_hashes(&self) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        let deps = self.borrow_deps();
-        self.borrow_deps_order()
-            .par_iter()
-            .map(move |&i| deps[i as usize])
+        let deps = self.deps();
+        self.deps_order().par_iter().map(move |&i| deps[i as usize])
     }
 
     /// Returns all hashes in internal node order. More efficient than `par_all_hashes`.
     pub fn par_all_hashes_in_physical_order(
         &self,
     ) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        self.borrow_deps().par_iter().copied()
+        self.deps().par_iter().copied()
     }
 }
 
@@ -305,13 +313,13 @@ impl DepGraphTrait for NewDepGraph {
         // It would be crazy to be asking about some random unknown index.
         // Once OldDepGraph is gone, make this infallible.
 
-        let id = HashListId(self.borrow_unshifted_edge_list_offset()[index as usize]);
+        let id = HashListId(self.unshifted_edge_list_offset()[index as usize]);
         Some(id)
     }
 
     fn hash_list_for_id(&self, id: HashListId) -> HashList<'_> {
-        let start = (id.0 as usize) << self.borrow_adjacency_list_alignment_shift();
-        let bytes = &self.borrow_adjacency_lists()[start..];
+        let start = (id.0 as usize) << self.adjacency_list_alignment_shift;
+        let bytes = &self.adjacency_lists()[start..];
         HashList::New(NewHashList::new(bytes))
     }
 

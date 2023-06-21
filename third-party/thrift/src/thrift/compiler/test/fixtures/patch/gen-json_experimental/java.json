@@ -10,7 +10,14 @@
     "js": "thrift.annotation.java",
     "py": "thrift.annotation.java",
     "py.asyncio": "facebook_thrift_asyncio.annotation.java"
-  },  "structs" :
+  },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.annotation.java",
+    "filename": "java"
+  },
+  "structs" :
   {
       "Mutable" : {
         "name" : "Mutable",

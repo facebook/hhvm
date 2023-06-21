@@ -16,6 +16,12 @@
     "py.asyncio": "apache_thrift_asyncio.standard",
     "py3": "apache.thrift.type"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.type",
+    "filename": "standard"
+  },
   "global_docstring": "The **standard** types all Thrift implementations support.\n",
   "typedefs": {
       "ByteString": {

@@ -12,6 +12,13 @@
     "py": "thrift.annotation.cpp",
     "py.asyncio": "facebook_thrift_asyncio.annotation.cpp"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.annotation.cpp",
+    "filename": "cpp"
+  },
+
   "enumerations" :
   {
       "RefType" : {

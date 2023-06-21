@@ -18,6 +18,13 @@
     "py.asyncio": "apache_thrift_asyncio.patch",
     "py3": "apache.thrift.op"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.op",
+    "filename": "patch"
+  },
+
   "typedefs": {
       "FieldId": {
         "name": "FieldId",

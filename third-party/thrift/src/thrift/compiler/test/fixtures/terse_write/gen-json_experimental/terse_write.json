@@ -6,6 +6,13 @@
     "hack": "thrift/annotation/hack.thrift",
     "thrift": "thrift/annotation/thrift.thrift"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.test.terse_write",
+    "filename": "terse_write"
+  },
+
   "typedefs": {
       "MyInteger": {
         "name": "MyInteger",

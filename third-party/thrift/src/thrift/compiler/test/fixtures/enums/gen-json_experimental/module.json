@@ -9,6 +9,13 @@
     "java": "test.fixtures.enums",
     "java.swift": "test.fixtures.enums"
   },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures.enums",
+    "filename": "module"
+  },
+
   "enumerations" :
   {
       "Metasyntactic" : {

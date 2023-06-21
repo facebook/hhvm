@@ -16,6 +16,13 @@
     "py.asyncio": "apache_thrift_asyncio.id",
     "py3": "apache.thrift.type"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.type",
+    "filename": "id"
+  },
+
   "typedefs": {
       "FieldId": {
         "name": "FieldId",

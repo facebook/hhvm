@@ -7,6 +7,8 @@
     "json": "thrift.test.doc",
     "py": "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
   },
+
+
   "typedefs": {
       "UserId": {
         "name": "UserId",

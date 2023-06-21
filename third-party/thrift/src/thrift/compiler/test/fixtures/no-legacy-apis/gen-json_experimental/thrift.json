@@ -10,7 +10,14 @@
     "js": "thrift.annotation.thrift",
     "py": "thrift.annotation.thrift",
     "py.asyncio": "facebook_thrift_asyncio.annotation.thrift"
-  },  "structs" :
+  },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.annotation",
+    "filename": "thrift"
+  },
+  "structs" :
   {
       "Beta" : {
         "name" : "Beta",

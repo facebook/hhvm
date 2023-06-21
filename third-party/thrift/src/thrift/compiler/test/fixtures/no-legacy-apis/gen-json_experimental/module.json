@@ -11,6 +11,13 @@
     "java.swift": "test.fixtures.basic",
     "py3": "test.fixtures.basic"
   },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures.no-legacy-apis",
+    "filename": "module"
+  },
+
   "enumerations" :
   {
       "MyEnum" : {

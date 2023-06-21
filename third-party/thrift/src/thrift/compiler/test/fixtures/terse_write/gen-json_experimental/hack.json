@@ -10,7 +10,14 @@
     "java": "com.facebook.thrift.annotation.hack_deprecated",
     "py": "thrift.annotation.hack",
     "py.asyncio": "facebook_thrift_asyncio.annotation.hack"
-  },  "structs" :
+  },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.annotation.hack",
+    "filename": "hack"
+  },
+  "structs" :
   {
       "FieldWrapper" : {
         "name" : "FieldWrapper",

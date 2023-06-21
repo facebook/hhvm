@@ -7,7 +7,14 @@
     "java": "dev.test.namespace_from_package.module_deprecated",
     "py": "namespace_from_package.module",
     "py.asyncio": "test.namespace_from_package.module"
-  },  "structs" :
+  },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "namespace_from_package.module",
+    "filename": "module"
+  },
+  "structs" :
   {
       "Foo" : {
         "name" : "Foo",

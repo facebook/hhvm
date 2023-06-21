@@ -5,6 +5,8 @@
     "php": "thrift_php_demo",
     "py": "thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs"
   },
+
+
   "enumerations" :
   {
       "WidgetType" : {

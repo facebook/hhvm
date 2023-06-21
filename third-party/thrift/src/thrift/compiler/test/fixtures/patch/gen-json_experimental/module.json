@@ -11,6 +11,13 @@
     "java": "test.fixtures.patch",
     "java.swift": "test.fixtures.patch"
   },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures.patch",
+    "filename": "module"
+  },
+
   "enumerations" :
   {
       "MyEnum" : {

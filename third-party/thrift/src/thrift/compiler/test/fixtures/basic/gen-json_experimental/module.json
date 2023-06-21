@@ -10,6 +10,13 @@
     "java": "test.fixtures.basic",
     "java.swift": "test.fixtures.basic"
   },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures.basic",
+    "filename": "module"
+  },
+
   "enumerations" :
   {
       "MyEnum" : {

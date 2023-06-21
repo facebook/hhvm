@@ -8,6 +8,12 @@
     "py": "thrift.annotation.scope",
     "py.asyncio": "facebook_thrift_asyncio.annotation.scope"
   },
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift.annotation",
+    "filename": "scope"
+  },
   "global_docstring": "Annotations that indicate which IDL definition a structured annotation can\nbe place on.\n\nFor example:\n  include \"thrift/annotation/scope.thrift\"\n\n  @scope.Struct\n  struct MyStructAnnotation {...}\n\n  @MyStructAnnotation // Good.\n  struct Foo{\n    @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not\n                        // allowed on fields.\n    1: i32 my_field;\n  }\n",  "structs" :
   {
       "Transitive" : {

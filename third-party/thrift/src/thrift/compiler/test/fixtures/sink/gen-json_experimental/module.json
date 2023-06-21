@@ -3,7 +3,9 @@
   "thrift_module" : "module",
   "namespaces": {
     "java.swift": "test.fixtures.sink"
-  },  "structs" :
+  },
+
+  "structs" :
   {
       "InitialResponse" : {
         "name" : "InitialResponse",

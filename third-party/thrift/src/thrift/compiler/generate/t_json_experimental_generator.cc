@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <boost/algorithm/string.hpp>
 
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/json.h>
@@ -78,6 +79,8 @@ class json_experimental_program : public mstch_program {
             {"program:includes", &json_experimental_program::includes},
             {"program:namespaces?", &json_experimental_program::has_namespaces},
             {"program:namespaces", &json_experimental_program::namespaces},
+            {"program:package?", &json_experimental_program::has_package},
+            {"program:package", &json_experimental_program::package},
             {"program:docstring?", &json_experimental_program::has_docstring},
             {"program:docstring", &json_experimental_program::get_docstring},
             {"program:normalized_include_prefix",
@@ -105,6 +108,36 @@ class json_experimental_program : public mstch_program {
       result.push_back(mstch::map{
           {"key", it.first}, {"value", it.second}, {"last?", (--last) == 0}});
     }
+    return result;
+  }
+  mstch::node has_package() { return !program_->package().empty(); }
+  mstch::node package() {
+    mstch::array result;
+    auto& package = program_->package();
+    auto domain = package.domain();
+    if (!domain.empty() && domain.size() > 1) {
+      auto domain_prefix = std::vector<std::string>();
+      domain_prefix.insert(
+          domain_prefix.end(), domain.begin(), std::prev(domain.end()));
+      result.push_back(mstch::map{
+          {"key", std::string("domain_prefix")},
+          {"value", boost::join(domain_prefix, ".")},
+          {"last?", false}});
+      result.push_back(mstch::map{
+          {"key", std::string("domain_suffix")},
+          {"value", package.domain()[domain.size() - 1]},
+          {"last?", package.path().empty()}});
+    }
+    if (!package.path().empty()) {
+      result.push_back(mstch::map{
+          {"key", std::string("path")},
+          {"value", boost::join(package.path(), ".")},
+          {"last?", false}});
+    }
+    result.push_back(mstch::map{
+        {"key", std::string("filename")},
+        {"value", program_->name()},
+        {"last?", true}});
     return result;
   }
   mstch::node has_docstring() { return !program_->get_doc().empty(); }

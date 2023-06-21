@@ -3,7 +3,9 @@
   "thrift_module" : "module",
   "namespaces": {
     "java.swift": "test.fixtures.stream"
-  },  "structs" :
+  },
+
+  "structs" :
   {
       "FooStreamEx" : {
         "name" : "FooStreamEx",

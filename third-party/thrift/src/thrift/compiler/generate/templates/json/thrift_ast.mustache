@@ -13,7 +13,14 @@
     {{#program:namespaces}}
     "{{key}}": "{{value}}"{{^last?}},{{/last?}}
     {{/program:namespaces}}
-  },{{/program:namespaces?}}{{#program:docstring?}}
+  },{{/program:namespaces?}}
+  {{#program:package?}}
+  "package": {
+    {{#program:package}}
+    "{{key}}": "{{value}}"{{^last?}},{{/last?}}
+    {{/program:package}}
+  },{{/program:package?}}
+  {{#program:docstring?}}
   "global_docstring": {{program:docstring}},{{/program:docstring?}}{{%!
   %}}{{#program:typedefs?}}
   "typedefs": {

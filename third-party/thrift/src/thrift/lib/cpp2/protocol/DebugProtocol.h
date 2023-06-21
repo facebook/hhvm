@@ -200,9 +200,8 @@ std::string debugString(
 }
 
 // TODO: Replace `debugString()` with this function
-// TODO: Rename to `debugStringViaEncode`
 template <class T, class..., template <class> class Encode = op::detail::Encode>
-std::string debugStringViaRecursiveEncode(
+std::string debugStringViaEncode(
     const T& obj, DebugProtocolWriter::Options options = {}) {
   folly::IOBufQueue queue;
   DebugProtocolWriter proto(

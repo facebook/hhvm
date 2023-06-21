@@ -2421,9 +2421,9 @@ void parse_function(AsmState& as) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  if (as.ue->isASystemLib()) {
-    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
-  }
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent &&
+                                         attrs & AttrBuiltin &&
+                                         attrs & AttrUnique));
 
   int line0;
   int line1;
@@ -2480,7 +2480,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
-  if (as.ue->isASystemLib()) attrs |= AttrBuiltin;
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrBuiltin));
 
   int line0;
   int line1;
@@ -2889,9 +2889,9 @@ void parse_class(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
-  if (as.ue->isASystemLib()) {
-    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
-  }
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent &&
+                                         attrs & AttrBuiltin &&
+                                         attrs & AttrUnique));
 
   std::string name;
   if (!as.in.readname(name)) {
@@ -3129,9 +3129,7 @@ void parse_alias(AsmState& as, bool case_type) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Alias, &userAttrs);
-  if (as.ue->isASystemLib()) {
-    attrs |= AttrPersistent;
-  }
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent));
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".alias must have a name");
@@ -3188,6 +3186,7 @@ void parse_constant(AsmState& as) {
 
   Constant constant;
   Attr attrs = parse_attribute_list(as, AttrContext::Constant);
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent));
 
   std::string name;
   if (!as.in.readword(name)) {

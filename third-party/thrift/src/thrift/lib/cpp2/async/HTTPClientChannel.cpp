@@ -204,6 +204,18 @@ void HTTPClientChannel::sendRequest_(
     return;
   }
 
+  if (!httpSession_->supportsMoreTransactions()) {
+    TTransportException ex(
+        TTransportException::NOT_OPEN, "HTTPSession is saturated");
+
+    // Might be able to create another transaction soon
+    ex.setOptions(TTransportException::CHANNEL_IS_VALID);
+    httpCallback->messageSendError(
+        folly::make_exception_wrapper<TTransportException>(std::move(ex)));
+    delete httpCallback;
+    return;
+  }
+
   auto res = httpSession_->newTransactionWithError(httpCallback);
 
   if (res.hasError()) {

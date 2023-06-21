@@ -115,6 +115,16 @@ HTTPTransaction* H2ClientConnection::newTransaction(H2Channel* channel) {
     throw TTransportException(
         TTransportException::NOT_OPEN, "HTTPSession is not open");
   }
+
+  if (!httpSession_->supportsMoreTransactions()) {
+    TTransportException ex(
+        TTransportException::NOT_OPEN, "HTTPSession is saturated");
+
+    // Might be able to create another transaction soon
+    ex.setOptions(TTransportException::CHANNEL_IS_VALID);
+    throw ex;
+  }
+
   // These objects destroy themselves when done.
   auto handler = new ThriftTransactionHandler();
   auto txn = httpSession_->newTransactionWithError(handler);

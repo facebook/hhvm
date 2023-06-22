@@ -64,7 +64,6 @@ void logSlowQuery(const watchman::QueryResult& res,
 
   // These aren't really watchman specific but it's primarily autoload
   // related queries that we're interested in.
-  ent.setInt("autoload_enabled", RO::AutoloadEnabled);
   ent.setInt("autoload_db_can_create", RO::AutoloadDBCanCreate);
   ent.setStr("autoload_db_path", RO::AutoloadDBPath);
 

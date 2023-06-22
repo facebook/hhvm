@@ -566,7 +566,6 @@ struct RuntimeOption {
    */
   static std::map<std::string, std::string> IncludeRoots;
 
-  static bool AutoloadEnabled;
   static bool AutoloadEnableExternFactExtractor;
   static std::string AutoloadDBPath;
   static bool AutoloadDBCanCreate;

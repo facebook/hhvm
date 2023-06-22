@@ -299,10 +299,6 @@ struct FactsExtension final : Extension {
   FactsExtension() : Extension("facts", "1.0", "hphp_hphpi") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-    if (!RuntimeOption::AutoloadEnabled) {
-      return;
-    }
-
     // Why are we using TRACE/Logger in moduleLoad instead of XLOG?  Because of
     // the HHVM startup process and where moduleLoad happens within it, we can't
     // initialize any async handlers until moduleInit() otherwise HHVM
@@ -803,12 +799,6 @@ void FactsExtension::moduleInit() {
       HHVM_FN(facts_file_attribute_parameters));
 
   loadSystemlib();
-
-  if (!RuntimeOption::AutoloadEnabled) {
-    XLOG(INFO)
-        << "Autoload.Enabled is not true, not enabling native autoloader.";
-    return;
-  }
 
   if (RuntimeOption::AutoloadDBPath.empty()) {
     XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";

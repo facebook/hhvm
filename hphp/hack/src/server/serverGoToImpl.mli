@@ -13,3 +13,12 @@ val go :
   genv:ServerEnv.genv ->
   env:ServerEnv.env ->
   ServerEnv.env * server_result_or_retry
+
+val go_for_single_file :
+  ctx:Provider_context.t ->
+  action:action ->
+  naming_table:Naming_table.t ->
+  filename:Relative_path.t ->
+  server_result
+
+val is_searchable : action:action -> bool

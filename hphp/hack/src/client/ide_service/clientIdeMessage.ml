@@ -51,6 +51,13 @@ type rename_result =
       local: ServerRenameTypes.patch list;
     }
 
+type go_to_impl_result =
+  | Invalid_symbol_impl
+  | Go_to_impl_success of
+      (string
+      * ServerCommandTypes.Find_refs.action
+      * Pos.absolute list Lsp.UriMap.t)
+
 type completion_request = { is_manually_invoked: bool }
 
 type should_calculate_errors = { should_calculate_errors: bool }
@@ -107,6 +114,9 @@ type _ t =
   | Document_symbol : document -> FileOutline.outline t
       (** Handles "textDocument/documentSymbol" LSP messages *)
   | Workspace_symbol : string -> SearchUtils.result t
+  | Go_to_implementation :
+      document * location * document list
+      -> go_to_impl_result t
   | Find_references : document * location * document list -> find_refs_result t
       (** The result of Find_references is one of:
        - Invalid_symbol, indicating find-refs on something that isn't a symbol
@@ -218,6 +228,8 @@ let t_to_string : type a. a t -> string = function
       "Code_action_resolve(%s, %s)"
       (Path.to_string file_path)
       resolve_title
+  | Go_to_implementation ({ file_path; _ }, _, _) ->
+    Printf.sprintf "Go_to_implementation(%s)" (Path.to_string file_path)
   | Find_references ({ file_path; _ }, _, _) ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
   | Rename ({ file_path; _ }, _, _, _) ->

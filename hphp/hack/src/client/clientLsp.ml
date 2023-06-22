@@ -245,7 +245,11 @@ module Lost_env = struct
         find_refs_action: ServerCommandTypes.Find_refs.action;
         ide_calculated_refs: Pos.absolute list UriMap.t;
       }
-    | GoToImpl of string * int * int (* filename, line, col *)
+    | GoToImpl of {
+        symbol: string;
+        action: ServerCommandTypes.Find_refs.action;
+        ide_calculated_positions: Pos.absolute list UriMap.t;
+      }
     | Rename of {
         symbol_definition: Relative_path.t SymbolDefinition.t;
         find_refs_action: ServerCommandTypes.Find_refs.action;
@@ -2798,13 +2802,15 @@ let kickoff_shell_out_and_maybe_cancel
               symbol_action_arg
           in
           cmd
-        | Lost_env.GoToImpl (filename, line, col) ->
-          let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
+        | Lost_env.GoToImpl { symbol; action; _ } ->
+          let symbol_action_arg =
+            Find_refs.symbol_and_action_to_string_exn symbol action
+          in
           let cmd =
             compose_shellout_cmd
-              ~from:"go-to-impl"
-              "--ide-go-to-impl"
-              file_line_col
+              ~from:"go-to-impl-by-symbol"
+              "--ide-go-to-impl-by-symbol"
+              symbol_action_arg
           in
           cmd
         | Lost_env.Rename
@@ -3909,35 +3915,66 @@ let do_findReferences2 ~ide_calculated_refs ~hh_locations : Lsp.lsp_result * int
 
 let do_goToImplementation_local
     (state : state)
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
     (metadata : incoming_metadata)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Implementation.params)
     (id : lsp_id) : (state * result_telemetry) Lwt.t =
-  let start_time_local_handle = Unix.gettimeofday () in
-  let { Ide_api_types.line; column } =
-    lsp_position_to_ide params.TextDocumentPositionParams.position
+  let (document, location) = get_document_location editor_open_files params in
+  let all_open_documents = get_documents_from_open_files editor_open_files in
+  let%lwt response =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Go_to_implementation
+         (document, location, all_open_documents))
   in
-  let filename =
-    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-      params.TextDocumentPositionParams.textDocument
-  in
-  let shellable_type = Lost_env.GoToImpl (filename, line, column) in
-  let%lwt (state, result_telemetry) =
-    kickoff_shell_out_and_maybe_cancel
-      state
-      shellable_type
-      ~triggering_request:
-        {
-          Lost_env.id;
-          metadata;
-          start_time_local_handle;
-          request = ImplementationRequest params;
-        }
-  in
-  Lwt.return (state, result_telemetry)
+  match response with
+  | ClientIdeMessage.Invalid_symbol_impl ->
+    respond_jsonrpc ~powered_by:Serverless_ide id (ImplementationResult []);
+    let result_telemetry = make_result_telemetry 0 in
+    Lwt.return (state, result_telemetry)
+  | ClientIdeMessage.Go_to_impl_success
+      (symbol, action, ide_calculated_positions) ->
+    let shellable_type =
+      Lost_env.GoToImpl { symbol; action; ide_calculated_positions }
+    in
+    let start_time_local_handle = Unix.gettimeofday () in
+    let%lwt (state, result_telemetry) =
+      kickoff_shell_out_and_maybe_cancel
+        state
+        shellable_type
+        ~triggering_request:
+          {
+            Lost_env.id;
+            metadata;
+            start_time_local_handle;
+            request = ImplementationRequest params;
+          }
+    in
+    Lwt.return (state, result_telemetry)
 
 (** This is called when a shellout to "hh --ide-go-to-impl" completes successfully *)
-let do_goToImplementation2 ~hh_locations : Lsp.lsp_result * int =
-  (ImplementationResult hh_locations, List.length hh_locations)
+let do_goToImplementation2 ~ide_calculated_positions ~hh_locations :
+    Lsp.lsp_result * int =
+  (* reject all server-supplied locations for files that we calculated in ClientIdeDaemon, then join the lists *)
+  let filtered_list =
+    List.filter hh_locations ~f:(fun loc ->
+        not @@ UriMap.mem loc.Lsp.Location.uri ide_calculated_positions)
+  in
+  let ide_supplied_positions =
+    UriMap.elements ide_calculated_positions
+    |> List.concat_map ~f:(fun (_uri, pos_list) ->
+           List.map pos_list ~f:(fun pos ->
+               hack_pos_to_lsp_location pos ~default_path:(Pos.filename pos)))
+  in
+  let locations = filtered_list @ ide_supplied_positions in
+  (ImplementationResult locations, List.length locations)
 
 let do_goToImplementation
     (conn : server_conn)
@@ -5151,9 +5188,9 @@ let handle_shell_out_complete
           | Lost_env.FindRefs { ide_calculated_refs; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
             do_findReferences2 ~ide_calculated_refs ~hh_locations
-          | Lost_env.GoToImpl _ ->
+          | Lost_env.GoToImpl { ide_calculated_positions; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
-            do_goToImplementation2 ~hh_locations
+            do_goToImplementation2 ~ide_calculated_positions ~hh_locations
           | Lost_env.Rename { ide_calculated_patches; _ } ->
             let hh_edits = shellout_patch_list_to_lsp_edits_exn stdout in
             do_documentRename2 ~ide_calculated_patches ~hh_edits
@@ -6040,11 +6077,20 @@ let handle_client_message
       state := new_state;
       Lwt.return_some result_telemetry
     (* textDocument/implementation request *)
-    | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
+    | (_, Some ide_service, RequestMessage (id, ImplementationRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt (new_state, result_telemetry) =
-        do_goToImplementation_local !state metadata params id
+        do_goToImplementation_local
+          !state
+          ide_service
+          env
+          metadata
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+          id
       in
       state := new_state;
       Lwt.return_some result_telemetry

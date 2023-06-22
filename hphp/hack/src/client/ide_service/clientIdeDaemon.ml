@@ -845,6 +845,64 @@ let handle_request
           ServerHover.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (Initialized istate, Ok result)
+  | ( Initialized istate,
+      Go_to_implementation (document, { line; column }, document_list) ) ->
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
+    let (istate, result) =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+          | Some (_name, action)
+            when not @@ ServerGoToImpl.is_searchable ~action ->
+            (istate, ClientIdeMessage.Invalid_symbol_impl)
+          | Some (name, action) ->
+            (*
+                 1) For all open files that we know about in ClientIDEDaemon, uesd the
+                 cached TASTs to return positions of implementations
+                 2) Return this list, alongside the name and action
+                 3) ClientLSP, upon receiving, will shellout to hh_server
+                 and reject all server-provided positions for files that ClientIDEDaemon
+                 knew about, under the assumption that our cached TAST provides edited
+                 file info, if applicable.
+            *)
+            let (istate, single_file_positions) =
+              List.fold
+                ~f:(fun (istate, accum) document ->
+                  let (istate, ctx, _entry, _errors) =
+                    update_file_ctx istate document
+                  in
+                  let stringified_path =
+                    Path.to_string document.ClientIdeMessage.file_path
+                  in
+                  let filename =
+                    Relative_path.create_detect_prefix stringified_path
+                  in
+                  let single_file_pos =
+                    ServerGoToImpl.go_for_single_file
+                      ~ctx
+                      ~action
+                      ~naming_table:istate.naming_table
+                      ~filename
+                    |> ServerFindRefs.to_absolute
+                    |> List.map ~f:snd
+                  in
+                  let urikey =
+                    Lsp_helpers.path_to_lsp_uri
+                      stringified_path
+                      ~default_path:stringified_path
+                  in
+                  let updated_map =
+                    Lsp.UriMap.add urikey single_file_pos accum
+                  in
+                  (istate, updated_map))
+                document_list
+                ~init:(istate, Lsp.UriMap.empty)
+            in
+            ( istate,
+              ClientIdeMessage.Go_to_impl_success
+                (name, action, single_file_positions) )
+          | None -> (istate, ClientIdeMessage.Invalid_symbol_impl))
+    in
+    Lwt.return (Initialized istate, Ok result)
     (* textDocument/rename *)
   | ( Initialized istate,
       Rename (document, { line; column }, new_name, document_list) ) ->
@@ -997,9 +1055,6 @@ let handle_request
                and reject all server-provided positions for files that ClientIDEDaemon
                knew about, under the assumption that our cached TAST provides edited
                file info, if applicable.
-
-               We use the result Error constructor to tell clientLsp that not all
-               references are guaranteed to be returned.
             *)
             let (istate, single_file_refs) =
               List.fold

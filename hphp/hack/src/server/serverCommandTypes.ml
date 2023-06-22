@@ -489,6 +489,9 @@ type _ t =
   | IDE_GO_TO_IMPL :
       labelled_file * int * int
       -> Find_refs.ide_result_or_retry t
+  | IDE_GO_TO_IMPL_BY_SYMBOL :
+      Find_refs.action * string
+      -> Find_refs.ide_result_or_retry t
   | IDE_HIGHLIGHT_REFS :
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t

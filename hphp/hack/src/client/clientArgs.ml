@@ -423,6 +423,10 @@ let parse_check_args cmd ~from_default =
       ( "--ide-go-to-impl",
         Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL x)),
         "" );
+      ( "--ide-go-to-impl-by-symbol",
+        Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL_BY_SYMBOL x)),
+        "(mode) similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position"
+      );
       ( "--ide-get-definition",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x)),
         (* alias for --identify-function *) "" );

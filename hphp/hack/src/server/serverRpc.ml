@@ -241,6 +241,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         map_env
           ~f:(ServerFindRefs.to_ide name)
           (ServerGoToImpl.go ~action ~genv ~env)))
+  | IDE_GO_TO_IMPL_BY_SYMBOL (action, name) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
+        map_env
+          ~f:(ServerFindRefs.to_ide name)
+          (ServerGoToImpl.go ~action ~genv ~env))
   | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
     let (ctx, entry) =
       single_ctx env (Relative_path.create_detect_prefix path) file_input

@@ -330,6 +330,14 @@ let main_internal
     in
     ClientFindRefs.go_ide results args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
+  | MODE_IDE_GO_TO_IMPL_BY_SYMBOL arg ->
+    let open ServerCommandTypes in
+    let (symbol_name, action) = Find_refs.string_to_symbol_and_action_exn arg in
+    let%lwt results =
+      rpc_with_retry args @@ Rpc.IDE_GO_TO_IMPL_BY_SYMBOL (action, symbol_name)
+    in
+    ClientFindRefs.go_ide results args.output_json;
+    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | MODE_IDE_GO_TO_IMPL arg ->
     let (filename, pos) = parse_ide_find_refs_arg arg in
     let (line, char) = parse_position_string ~split_on:"," pos in

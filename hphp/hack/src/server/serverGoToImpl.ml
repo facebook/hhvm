@@ -120,6 +120,15 @@ let find_child_classes
   FindRefsService.find_child_classes ctx class_name env.naming_table files
   |> SSet.elements
 
+let find_child_classes_in_file
+    (ctx : Provider_context.t)
+    (class_name : string)
+    (naming_table : Naming_table.t)
+    (filename : Relative_path.t) : string list =
+  let fileset = Relative_path.Set.(add empty filename) in
+  FindRefsService.find_child_classes ctx class_name naming_table fileset
+  |> SSet.elements
+
 let search_class
     (ctx : Provider_context.t)
     (class_name : string)
@@ -136,6 +145,17 @@ let search_class
     find_positions_of_classes ctx [] child_classes
   else
     parallel_find_positions_of_classes ctx child_classes genv.workers
+
+let search_single_file_for_class
+    (ctx : Provider_context.t)
+    (class_name : string)
+    (naming_table : Naming_table.t)
+    (filename : Relative_path.t) : server_result =
+  let class_name = ServerFindRefs.add_ns class_name in
+  let child_classes =
+    find_child_classes_in_file ctx class_name naming_table filename
+  in
+  find_positions_of_classes ctx [] child_classes
 
 let search_member
     (ctx : Provider_context.t)
@@ -172,6 +192,57 @@ let search_member
   | Class_const _
   | Typeconst _ ->
     (env, Done [])
+
+let search_single_file_for_member
+    (ctx : Provider_context.t)
+    (class_name : string)
+    (member : member)
+    (naming_table : Naming_table.t)
+    (filename : Relative_path.t) : server_result =
+  match member with
+  | Method method_name ->
+    let class_name = ServerFindRefs.add_ns class_name in
+    let class_name =
+      FindRefsService.get_origin_class_name ctx class_name member
+    in
+    (* Find all the classes that extend this one *)
+    let child_classes =
+      find_child_classes_in_file ctx class_name naming_table filename
+    in
+    let results = find_positions_of_methods ctx method_name [] child_classes in
+    List.dedup_and_sort results ~compare:(fun (_, pos1) (_, pos2) ->
+        Pos.compare pos1 pos2)
+  | Property _
+  | Class_const _
+  | Typeconst _ ->
+    []
+
+let is_searchable ~action =
+  match action with
+  | Class _
+  | ExplicitClass _
+  | Member (_, _) ->
+    true
+  | Function _
+  | GConst _
+  | LocalVar _ ->
+    false
+
+let go_for_single_file
+    ~(ctx : Provider_context.t)
+    ~(action : action)
+    ~(naming_table : Naming_table.t)
+    ~(filename : Relative_path.t) : server_result =
+  match action with
+  | Class class_name
+  | ExplicitClass class_name ->
+    search_single_file_for_class ctx class_name naming_table filename
+  | Member (class_name, member) ->
+    search_single_file_for_member ctx class_name member naming_table filename
+  | Function _
+  | GConst _
+  | LocalVar _ ->
+    []
 
 let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     ServerEnv.env * server_result_or_retry =

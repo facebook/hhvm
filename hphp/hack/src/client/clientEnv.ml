@@ -39,6 +39,7 @@ type client_mode =
   | MODE_IDE_FIND_REFS of string
   | MODE_IDE_FIND_REFS_BY_SYMBOL of string
   | MODE_IDE_GO_TO_IMPL of string
+  | MODE_IDE_GO_TO_IMPL_BY_SYMBOL of string
   | MODE_IDE_HIGHLIGHT_REFS of string
   | MODE_IDE_RENAME of string
   | MODE_IDE_RENAME_BY_SYMBOL of string

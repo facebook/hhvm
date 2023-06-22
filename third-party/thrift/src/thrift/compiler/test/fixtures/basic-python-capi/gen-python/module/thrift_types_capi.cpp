@@ -9,6 +9,7 @@
 
 #include <folly/python/import.h>
 #include <thrift/lib/python/capi/iobuf.h>
+#include <thrift/lib/python/types.h>
 
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_capi.h>
@@ -244,6 +245,133 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::StringPair>::operator
     return nullptr;
   }
   auto ptr = construct__test__fixtures__basic_python_capi__module__StringPair(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::EmptyStruct>
+Extractor<::test::fixtures::basic-python-capi::EmptyStruct>::operator()(PyObject* obj) {
+  ::test::fixtures::basic-python-capi::EmptyStruct cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a EmptyStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::EmptyStruct>(
+          "Marshal error: EmptyStruct");
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::EmptyStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__EmptyStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: EmptyStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::EmptyStruct>::operator()(
+    ::test::fixtures::basic-python-capi::EmptyStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__EmptyStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::PrimitiveStruct>
+Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(PyObject* obj) {
+  ::test::fixtures::basic-python-capi::PrimitiveStruct cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a PrimitiveStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::PrimitiveStruct>(
+          "Marshal error: PrimitiveStruct");
+  }
+  PyObject* fbThriftData = getThriftData(obj);
+  std::optional<std::string_view> error;
+  Extractor<bool>{}.extractInto(
+      cpp.booly(),
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1), 
+      error);
+  Extractor<int8_t>{}.extractInto(
+      cpp.charry(),
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1), 
+      error);
+  Extractor<int16_t>{}.extractInto(
+      cpp.shortay(),
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1), 
+      error);
+  Extractor<int32_t>{}.extractInto(
+      cpp.inty(),
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1), 
+      error);
+  Extractor<int64_t>{}.extractInto(
+      cpp.longy(),
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1), 
+      error);
+  Extractor<float>{}.extractInto(
+      cpp.floaty(),
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1), 
+      error);
+  Extractor<double>{}.extractInto(
+      cpp.dubby(),
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1), 
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.stringy(),
+      PyTuple_GET_ITEM(fbThriftData, 7 + 1), 
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.bytey(),
+      PyTuple_GET_ITEM(fbThriftData, 8 + 1), 
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: PrimitiveStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(
+    ::test::fixtures::basic-python-capi::PrimitiveStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__PrimitiveStruct(
       detail::serialize_to_iobuf(std::move(val)));
   if (!ptr) {
     CHECK(PyErr_Occurred());

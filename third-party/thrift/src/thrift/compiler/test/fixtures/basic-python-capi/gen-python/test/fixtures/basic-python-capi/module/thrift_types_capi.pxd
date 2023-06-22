@@ -42,6 +42,18 @@ cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__StringPai
 
 cdef api object construct__test__fixtures__basic_python_capi__module__StringPair(__unique_ptr[__cIOBuf])
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__EmptyStruct(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__EmptyStruct(object) except NULL
+
+cdef api object construct__test__fixtures__basic_python_capi__module__EmptyStruct(__unique_ptr[__cIOBuf])
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__PrimitiveStruct(object) except NULL
+
+cdef api object construct__test__fixtures__basic_python_capi__module__PrimitiveStruct(__unique_ptr[__cIOBuf])
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(object) except -1
 
 cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyUnion(object) except NULL

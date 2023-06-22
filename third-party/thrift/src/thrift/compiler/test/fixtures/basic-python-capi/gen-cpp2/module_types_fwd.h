@@ -15,6 +15,8 @@ namespace detail {
 class DoubledPair;
 } // namespace detail
 class StringPair;
+class EmptyStruct;
+class PrimitiveStruct;
 class MyUnion;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare

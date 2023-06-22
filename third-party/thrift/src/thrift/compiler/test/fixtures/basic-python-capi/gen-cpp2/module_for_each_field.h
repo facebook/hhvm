@@ -61,6 +61,29 @@ struct ForEachField<::test::fixtures::basic-python-capi::StringPair> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::basic-python-capi::EmptyStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).booly_ref()...);
+    f(1, static_cast<T&&>(t).charry_ref()...);
+    f(2, static_cast<T&&>(t).shortay_ref()...);
+    f(3, static_cast<T&&>(t).inty_ref()...);
+    f(4, static_cast<T&&>(t).longy_ref()...);
+    f(5, static_cast<T&&>(t).floaty_ref()...);
+    f(6, static_cast<T&&>(t).dubby_ref()...);
+    f(7, static_cast<T&&>(t).stringy_ref()...);
+    f(8, static_cast<T&&>(t).bytey_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic-python-capi::MyUnion> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

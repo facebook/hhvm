@@ -23,6 +23,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass OurUnion
     cppclass StringPair
     cppclass DoubledPair
+    cppclass PrimitiveStruct
     cppclass VapidStruct
 
 cdef extern from "thrift/test/python_capi/fixture.h" namespace "apache::thrift::test":
@@ -54,6 +55,9 @@ def roundtrip_StringPair(object x):
 def roundtrip_DoubledPair(object x):
     return __shim__roundtrip[DoubledPair](x)
 
+def roundtrip_PrimitiveStruct(object x):
+    return __shim__roundtrip[PrimitiveStruct](x)
+
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))
 
@@ -74,3 +78,6 @@ def check_StringPair(object x):
 
 def check_DoubledPair(object x):
     return __shim__typeCheck[DoubledPair](x)
+
+def check_PrimitiveStruct(object x):
+    return bool(__shim__typeCheck[PrimitiveStruct](x))

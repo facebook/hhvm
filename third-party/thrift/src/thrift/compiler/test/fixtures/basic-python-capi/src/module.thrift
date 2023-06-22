@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 
 package "test.dev/fixtures/basic-python-capi"
 
@@ -50,6 +51,28 @@ struct StringPair {
   1: string normal;
   @cpp.Adapter{name = "::thrift::test::lib::StringDoubler"}
   2: string doubled;
+}
+
+struct EmptyStruct {}
+
+typedef byte signed_byte
+
+@python.MarshalCapi
+struct PrimitiveStruct {
+  1: bool booly;
+  2: signed_byte charry;
+  @cpp.Type{name = "uint16_t"}
+  3: i16 shorty (cpp.name = "shortay");
+  5: i32 inty;
+  @cpp.Type{name = "uint64_t"}
+  7: i64 longy;
+  8: optional float floaty;
+  @thrift.Box
+  9: optional double dubby;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  12: optional string stringy;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  13: optional binary bytey;
 }
 
 union MyUnion {

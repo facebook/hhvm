@@ -21,6 +21,7 @@ Generated Cpp2 <-> Python converters for Thrift types
 
 #include <folly/python/import.h>
 #include <thrift/lib/python/capi/iobuf.h>
+#include <thrift/lib/python/types.h>
 
 #include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_api.h>
 #include <{{program:includePrefix}}gen-python/{{program:name}}/thrift_types_capi.h>
@@ -52,6 +53,21 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
       return extractorError<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(
           "Marshal error: {{struct:name}}");
   }
+  {{#struct:fields?}}
+  PyObject* fbThriftData = getThriftData(obj);
+  std::optional<std::string_view> error;
+  {{/struct:fields?}}
+  {{#struct:fields}}
+  Extractor<{{field:marshal_type}}>{}.extractInto(
+      cpp.{{field:cpp_name}}(),
+      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1), {{! 0 records which fields set}}
+      error);
+  {{/struct:fields}}
+  {{#struct:fields?}}
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  {{/struct:fields?}}
   return cpp;
   {{/struct:marshal_capi?}}
   {{^struct:marshal_capi?}}

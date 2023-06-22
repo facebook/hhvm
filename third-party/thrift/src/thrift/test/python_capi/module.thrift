@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
 cpp_include "thrift/test/python_capi/adapter.h"
@@ -65,6 +66,26 @@ struct StringPair {
 }
 
 struct EmptyStruct {} (cpp.name = "VapidStruct")
+
+typedef byte signed_byte
+
+@python.MarshalCapi
+struct PrimitiveStruct {
+  1: bool booly;
+  2: signed_byte charry;
+  @cpp.Type{name = "uint16_t"}
+  3: i16 shorty (cpp.name = "shortay");
+  5: i32 inty;
+  @cpp.Type{name = "uint64_t"}
+  7: i64 longy;
+  8: optional float floaty;
+  @thrift.Box
+  9: optional double dubby;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  12: optional string stringy;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  13: optional binary bytey;
+}
 
 union MyUnion {
   1: MyEnum myEnum;

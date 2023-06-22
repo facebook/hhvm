@@ -47,6 +47,12 @@ bool is_type_iobuf(const std::string& name) {
   return name == "folly::IOBuf" || name == "std::unique_ptr<folly::IOBuf>";
 }
 
+bool is_type_iobuf(const t_type* type) {
+  return type->has_annotation("py3.iobuf") ||
+      is_type_iobuf(type->get_annotation("cpp2.type")) ||
+      is_type_iobuf(type->get_annotation("cpp.type"));
+}
+
 const t_const* find_structured_adapter_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kPythonAdapterUri);
 }
@@ -128,6 +134,34 @@ mstch::node adapter_node(
             &*transitive_adapter_annotation->type());
   }
   return node;
+}
+
+std::string format_marshal_type(const t_type* field_type) {
+  const t_type* type = field_type->get_true_type();
+  if (type->is_bool()) {
+    return "bool";
+  } else if (type->is_byte()) {
+    return "int8_t";
+  } else if (type->is_i16()) {
+    return "int16_t";
+  } else if (type->is_i32()) {
+    return "int32_t";
+  } else if (type->is_i64()) {
+    return "int64_t";
+  } else if (type->is_float()) {
+    return "float";
+  } else if (type->is_double()) {
+    return "double";
+  } else if (is_type_iobuf(type)) {
+    // Will support in follow-on diff
+    return "";
+  } else if (type->is_binary() /* non-IOBuf binary*/ || type->is_string()) {
+    // thrift-python internal representation uses binary regardless;
+    // i.e., unicode encoded to bytes during thrift-python struct creation
+    return "Bytes";
+  }
+  // if not supported, empty string to cause compile error
+  return "";
 }
 
 class python_mstch_program : public mstch_program {
@@ -692,11 +726,7 @@ class python_mstch_type : public mstch_type {
   mstch::node is_integer() { return type_->is_any_int() || type_->is_byte(); }
 
   // Supporting legacy py3 cpp.type iobuf declaration here
-  mstch::node is_iobuf() {
-    return type_->has_annotation("py3.iobuf") ||
-        is_type_iobuf(type_->get_annotation("cpp2.type")) ||
-        is_type_iobuf(type_->get_annotation("cpp.type"));
-  }
+  mstch::node is_iobuf() { return is_type_iobuf(type_); }
 
   mstch::node adapter() {
     return adapter_node(
@@ -836,10 +866,13 @@ class python_mstch_field : public mstch_field {
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
+            {"field:cpp_name", &python_mstch_field::cpp_name},
+            {"field:marshal_type", &python_mstch_field::marshal_type},
         });
   }
 
   mstch::node py_name() { return py_name_; }
+  mstch::node cpp_name() { return cpp2::get_name(field_); }
   mstch::node tablebased_qualifier() {
     const std::string enum_type = "FieldQualifier.";
     switch (field_->qualifier()) {
@@ -876,6 +909,8 @@ class python_mstch_field : public mstch_field {
     return adapter_node(
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
   }
+
+  mstch::node marshal_type() { return format_marshal_type(field_->get_type()); }
 
  private:
   const std::string py_name_;
@@ -924,8 +959,8 @@ class python_mstch_enum_value : public mstch_enum_value {
   mstch::node py_name() { return py3::get_py3_name(*enum_value_); }
 };
 
-// Generator-specific validator that enforces "name" and "value" are not used as
-// enum member or union field names (thrift-py3).
+// Generator-specific validator that enforces "name" and "value" are not used
+// as enum member or union field names (thrift-py3).
 class enum_member_union_field_names_validator : virtual public validator {
  public:
   using validator::visit;

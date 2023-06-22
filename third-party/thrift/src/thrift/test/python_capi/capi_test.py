@@ -25,6 +25,7 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     MyStruct,
     MyStructPatch,  # this import breaks autodeps w/o manual
     MyUnion,
+    PrimitiveStruct,
     StringPair,
 )
 
@@ -44,6 +45,29 @@ class PythonCapiFixture(unittest.TestCase):
 
     def my_union(self) -> MyUnion:
         return MyUnion(myStruct=self.my_struct())
+
+    def primitive(self) -> PrimitiveStruct:
+        return PrimitiveStruct(
+            booly=True,
+            charry=-9,
+            shorty=-1,
+            inty=2**31 - 1,
+            longy=-(2**63),
+            floaty=-1.0,
+            dubby=-1.0,
+            stringy="€ to £ to ₹",
+            bytey=b"bippity boppity boo",
+        )
+
+    def primitive_unset(self) -> PrimitiveStruct:
+        return PrimitiveStruct(
+            booly=True,
+            # charry leave deliberately unset, should be 0
+            shorty=-1,
+            inty=2**31 - 1,
+            longy=-(2**63),
+            # leave optional `floaty` `dubby`, `stringy`, `bytey` unset
+        )
 
     def struct_patch(self) -> MyStructPatch:
         return MyStructPatch(
@@ -96,6 +120,25 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         with self.assertRaises(AttributeError):
             fixture.roundtrip_MyEnum(self.my_struct())
 
+    def test_roundtrip_marshal_PrimitiveStruct(self) -> None:
+        self.assertEqual(
+            PrimitiveStruct(), fixture.roundtrip_PrimitiveStruct(PrimitiveStruct())
+        )
+        self.assertEqual(
+            self.primitive(), fixture.roundtrip_PrimitiveStruct(self.primitive())
+        )
+        self.assertEqual(
+            self.primitive_unset(),
+            fixture.roundtrip_PrimitiveStruct(self.primitive_unset()),
+        )
+        unset_primitive = fixture.roundtrip_PrimitiveStruct(self.primitive_unset())
+        self.assertIsNone(unset_primitive.floaty)
+        self.assertIsNone(unset_primitive.dubby)
+        self.assertIsNone(unset_primitive.stringy)
+        self.assertIsNone(unset_primitive.bytey)
+        with self.assertRaises(TypeError):
+            fixture.roundtrip_PrimitiveStruct(self.my_struct())
+
 
 class PythonCapiTypeCheck(PythonCapiFixture):
     def test_typeCheck_struct(self) -> None:
@@ -131,3 +174,9 @@ class PythonCapiTypeCheck(PythonCapiFixture):
             fixture.check_DoubledPair(DoubledPair(s="TacosSalad" * 2, x=42))
         )
         self.assertFalse(fixture.check_DoubledPair(MyEnum.MyValue1))
+
+    def test_typeCheck_PrimitiveStruct(self) -> None:
+        self.assertTrue(fixture.check_PrimitiveStruct(self.primitive()))
+        self.assertTrue(fixture.check_PrimitiveStruct(PrimitiveStruct()))
+        self.assertFalse(fixture.check_PrimitiveStruct(MyEnum.MyValue1))
+        self.assertFalse(fixture.check_PrimitiveStruct(self.my_struct()))

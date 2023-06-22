@@ -632,6 +632,280 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::EmptyStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::EmptyStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* EmptyStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/EmptyStruct";
+}
+
+const folly::StringPiece EmptyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<EmptyStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece EmptyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<EmptyStruct>::name;
+}
+
+
+EmptyStruct::EmptyStruct(apache::thrift::FragileConstructor) {}
+
+
+void EmptyStruct::__fbthrift_clear() {
+  // clear all fields
+}
+
+void EmptyStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool EmptyStruct::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool EmptyStruct::operator==(FOLLY_MAYBE_UNUSED const EmptyStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool EmptyStruct::operator<(FOLLY_MAYBE_UNUSED const EmptyStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED EmptyStruct& a, FOLLY_MAYBE_UNUSED EmptyStruct& b) {
+  using ::std::swap;
+}
+
+template void EmptyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t EmptyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t EmptyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t EmptyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void EmptyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t EmptyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t EmptyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t EmptyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::PrimitiveStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::PrimitiveStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* PrimitiveStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/PrimitiveStruct";
+}
+
+const folly::StringPiece PrimitiveStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<PrimitiveStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece PrimitiveStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<PrimitiveStruct>::name;
+}
+
+PrimitiveStruct::PrimitiveStruct(const PrimitiveStruct& srcObj) :
+    __fbthrift_field_booly(srcObj.__fbthrift_field_booly),
+    __fbthrift_field_charry(srcObj.__fbthrift_field_charry),
+    __fbthrift_field_shortay(srcObj.__fbthrift_field_shortay),
+    __fbthrift_field_inty(srcObj.__fbthrift_field_inty),
+    __fbthrift_field_longy(srcObj.__fbthrift_field_longy),
+    __fbthrift_field_floaty(srcObj.__fbthrift_field_floaty),
+    __fbthrift_field_dubby(srcObj.__fbthrift_field_dubby),
+    __fbthrift_field_stringy(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_stringy)),
+    __fbthrift_field_bytey(srcObj.__fbthrift_field_bytey),
+    __isset(srcObj.__isset) {
+}
+
+PrimitiveStruct& PrimitiveStruct::operator=(const PrimitiveStruct& other) {
+  PrimitiveStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+PrimitiveStruct::PrimitiveStruct() :
+      __fbthrift_field_booly(),
+      __fbthrift_field_charry(),
+      __fbthrift_field_shortay(),
+      __fbthrift_field_inty(),
+      __fbthrift_field_longy(),
+      __fbthrift_field_floaty() {
+}
+
+
+PrimitiveStruct::~PrimitiveStruct() {}
+
+PrimitiveStruct::PrimitiveStruct(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noexcept :
+    __fbthrift_field_booly(std::move(other.__fbthrift_field_booly)),
+    __fbthrift_field_charry(std::move(other.__fbthrift_field_charry)),
+    __fbthrift_field_shortay(std::move(other.__fbthrift_field_shortay)),
+    __fbthrift_field_inty(std::move(other.__fbthrift_field_inty)),
+    __fbthrift_field_longy(std::move(other.__fbthrift_field_longy)),
+    __fbthrift_field_floaty(std::move(other.__fbthrift_field_floaty)),
+    __fbthrift_field_dubby(std::move(other.__fbthrift_field_dubby)),
+    __fbthrift_field_stringy(std::move(other.__fbthrift_field_stringy)),
+    __fbthrift_field_bytey(std::move(other.__fbthrift_field_bytey)),
+    __isset(other.__isset) {
+}
+
+PrimitiveStruct& PrimitiveStruct::operator=(FOLLY_MAYBE_UNUSED PrimitiveStruct&& other) noexcept {
+    this->__fbthrift_field_booly = std::move(other.__fbthrift_field_booly);
+    this->__fbthrift_field_charry = std::move(other.__fbthrift_field_charry);
+    this->__fbthrift_field_shortay = std::move(other.__fbthrift_field_shortay);
+    this->__fbthrift_field_inty = std::move(other.__fbthrift_field_inty);
+    this->__fbthrift_field_longy = std::move(other.__fbthrift_field_longy);
+    this->__fbthrift_field_floaty = std::move(other.__fbthrift_field_floaty);
+    this->__fbthrift_field_dubby = std::move(other.__fbthrift_field_dubby);
+    this->__fbthrift_field_stringy = std::move(other.__fbthrift_field_stringy);
+    this->__fbthrift_field_bytey = std::move(other.__fbthrift_field_bytey);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+PrimitiveStruct::PrimitiveStruct(apache::thrift::FragileConstructor, bool booly__arg, ::test::fixtures::basic-python-capi::signed_byte charry__arg, uint16_t shortay__arg, ::std::int32_t inty__arg, uint64_t longy__arg, float floaty__arg, ::apache::thrift::detail::boxed_value_ptr<double> dubby__arg, ::std::unique_ptr<::std::string> stringy__arg, ::std::shared_ptr<const ::std::string> bytey__arg) :
+    __fbthrift_field_booly(std::move(booly__arg)),
+    __fbthrift_field_charry(std::move(charry__arg)),
+    __fbthrift_field_shortay(std::move(shortay__arg)),
+    __fbthrift_field_inty(std::move(inty__arg)),
+    __fbthrift_field_longy(std::move(longy__arg)),
+    __fbthrift_field_floaty(std::move(floaty__arg)),
+    __fbthrift_field_dubby(std::move(dubby__arg)),
+    __fbthrift_field_stringy(std::move(stringy__arg)),
+    __fbthrift_field_bytey(std::move(bytey__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+}
+
+
+void PrimitiveStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_booly = bool();
+  this->__fbthrift_field_charry = ::test::fixtures::basic-python-capi::signed_byte();
+  this->__fbthrift_field_shortay = uint16_t();
+  this->__fbthrift_field_inty = ::std::int32_t();
+  this->__fbthrift_field_longy = uint64_t();
+  this->__fbthrift_field_floaty = float();
+  this->__fbthrift_field_dubby.reset();
+  this->__fbthrift_field_stringy.reset();
+  this->__fbthrift_field_bytey.reset();
+  __isset = {};
+}
+
+void PrimitiveStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool PrimitiveStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool PrimitiveStruct::operator==(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.booly_ref() == rhs.booly_ref())) {
+    return false;
+  }
+  if (!(lhs.charry_ref() == rhs.charry_ref())) {
+    return false;
+  }
+  if (!(lhs.shortay_ref() == rhs.shortay_ref())) {
+    return false;
+  }
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
+    return false;
+  }
+  if (!(lhs.longy_ref() == rhs.longy_ref())) {
+    return false;
+  }
+  if (!(lhs.floaty_ref() == rhs.floaty_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.dubby_ref(), rhs.dubby_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.stringy_ref(), rhs.stringy_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.bytey_ref(), rhs.bytey_ref()))) {
+    return false;
+  }
+  return true;
+}
+
+bool PrimitiveStruct::operator<(FOLLY_MAYBE_UNUSED const PrimitiveStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED PrimitiveStruct& a, FOLLY_MAYBE_UNUSED PrimitiveStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_booly, b.__fbthrift_field_booly);
+  swap(a.__fbthrift_field_charry, b.__fbthrift_field_charry);
+  swap(a.__fbthrift_field_shortay, b.__fbthrift_field_shortay);
+  swap(a.__fbthrift_field_inty, b.__fbthrift_field_inty);
+  swap(a.__fbthrift_field_longy, b.__fbthrift_field_longy);
+  swap(a.__fbthrift_field_floaty, b.__fbthrift_field_floaty);
+  swap(a.__fbthrift_field_dubby, b.__fbthrift_field_dubby);
+  swap(a.__fbthrift_field_stringy, b.__fbthrift_field_stringy);
+  swap(a.__fbthrift_field_bytey, b.__fbthrift_field_bytey);
+  swap(a.__isset, b.__isset);
+}
+
+template void PrimitiveStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PrimitiveStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PrimitiveStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PrimitiveStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PrimitiveStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PrimitiveStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PrimitiveStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PrimitiveStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::MyUnion>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

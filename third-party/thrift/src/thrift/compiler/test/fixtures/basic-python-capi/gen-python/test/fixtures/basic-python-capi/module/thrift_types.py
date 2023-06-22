@@ -269,6 +269,142 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StringPair, self)
 
 
+class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.EmptyStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/EmptyStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_EmptyStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.EmptyStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.EmptyStruct, self)
+
+
+class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "booly",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "charry",  # name
+            _fbthrift_python_types.typeinfo_byte,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "shorty",  # name
+            _fbthrift_python_types.typeinfo_i16,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "inty",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "longy",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "floaty",  # name
+            _fbthrift_python_types.typeinfo_float,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "dubby",  # name
+            _fbthrift_python_types.typeinfo_double,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            12,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "stringy",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            13,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "bytey",  # name
+            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.PrimitiveStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/PrimitiveStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_PrimitiveStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.PrimitiveStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.PrimitiveStruct, self)
+
+
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         (
@@ -391,6 +527,10 @@ def _fbthrift_metadata__struct_DoubledPair():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_DoubledPair()
 def _fbthrift_metadata__struct_StringPair():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_StringPair()
+def _fbthrift_metadata__struct_EmptyStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_EmptyStruct()
+def _fbthrift_metadata__struct_PrimitiveStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
 def _fbthrift_metadata__struct_MyUnion():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyUnion()
 
@@ -400,6 +540,10 @@ _fbthrift_all_structs = [
     TransitiveDoubler,
     DoubledPair,
     StringPair,
+    EmptyStruct,
+    PrimitiveStruct,
     MyUnion,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+
+signed_byte = int

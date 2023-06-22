@@ -79,6 +79,30 @@ struct Constructor<::test::fixtures::basic-python-capi::StringPair> {
 };
 
 template <>
+struct Extractor<::test::fixtures::basic-python-capi::EmptyStruct>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::EmptyStruct> {
+  ExtractorResult<::test::fixtures::basic-python-capi::EmptyStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::EmptyStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::EmptyStruct&& val);
+};
+
+template <>
+struct Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+  ExtractorResult<::test::fixtures::basic-python-capi::PrimitiveStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::PrimitiveStruct&& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic-python-capi::MyUnion>
     : public BaseExtractor<::test::fixtures::basic-python-capi::MyUnion> {
   ExtractorResult<::test::fixtures::basic-python-capi::MyUnion> operator()(PyObject* obj);

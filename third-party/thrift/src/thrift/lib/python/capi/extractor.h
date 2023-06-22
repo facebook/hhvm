@@ -21,6 +21,7 @@
 #include <Python.h>
 #include <folly/Expected.h>
 #include <folly/Preprocessor.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 
 namespace apache {
@@ -56,12 +57,17 @@ ExtractorResult<T> extractorSuccess(T&& val) {
 template <typename T>
 struct Extractor;
 
+template <typename R, typename RValue = std::remove_reference_t<R>>
+constexpr bool is_optional_maybe_boxed_field_ref_v =
+    apache::thrift::detail::is_optional_field_ref_v<RValue> ||
+    apache::thrift::detail::is_optional_boxed_field_ref_v<RValue>;
+
 /*
  * Base class provides a conditional extract(PyObject*, bool&). The bool
- * represents whether any python error has occurred. The base extractor calls
- * calls the derived Extractor operator (PyObject*) if no error has occurred;
- * otherwise it returns Unexpected variant to avoid cpython api calls
- * that are undefined behavior.
+ * represents whether any python error has occurred. The base extractor
+ * calls the derived Extractor operator (PyObject*) if no error has
+ * occurred; otherwise it returns Unexpected variant to avoid cpython api
+ * calls that are undefined behavior.
  */
 template <typename T>
 struct BaseExtractor {
@@ -72,6 +78,59 @@ struct BaseExtractor {
     auto res = (*static_cast<Extractor<T>*>(this))(obj);
     extractError = res.hasError();
     return res;
+  }
+
+  template <typename FieldRef>
+  std::enable_if_t<
+      !::apache::thrift::detail::is_shared_or_unique_ptr_v<FieldRef>>
+  extractInto(
+      FieldRef ref, PyObject* obj, std::optional<std::string_view>& error) {
+    if (error) {
+      return;
+    }
+    if constexpr (is_optional_maybe_boxed_field_ref_v<FieldRef>) {
+      if (obj == Py_None) {
+        return;
+      }
+    }
+    auto extractResult = (*static_cast<Extractor<T>*>(this))(obj);
+    if (extractResult.hasError()) {
+      error = extractResult.error();
+    } else {
+      ref = std::move(*extractResult);
+    }
+  }
+  template <typename S>
+  void extractInto(
+      std::unique_ptr<S>& ref, /* RefType.Unique */
+      PyObject* obj,
+      std::optional<std::string_view>& error) {
+    // Ref may be optional so always check if None
+    if (error || obj == Py_None) {
+      return;
+    }
+    auto extractResult = (*static_cast<Extractor<T>*>(this))(obj);
+    if (extractResult.hasError()) {
+      error = extractResult.error();
+    } else {
+      ref = std::make_unique<S>(*extractResult);
+    }
+  }
+  template <typename S>
+  void extractInto(
+      std::shared_ptr<S>& ref, /* RefType.Shared, RefType.SharedMutable */
+      PyObject* obj,
+      std::optional<std::string_view>& error) {
+    // Ref may be optional so always check if None
+    if (error || obj == Py_None) {
+      return;
+    }
+    auto extractResult = (*static_cast<Extractor<T>*>(this))(obj);
+    if (extractResult.hasError()) {
+      error = extractResult.error();
+    } else {
+      ref = std::make_shared<S>(*extractResult);
+    }
   }
 };
 

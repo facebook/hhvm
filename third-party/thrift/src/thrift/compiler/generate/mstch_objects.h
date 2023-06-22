@@ -737,6 +737,7 @@ class mstch_type : public mstch_base {
             {"type:void?", &mstch_type::is_void},
             {"type:string?", &mstch_type::is_string},
             {"type:binary?", &mstch_type::is_binary},
+            {"type:primitive?", &mstch_type::is_primitive},
             {"type:bool?", &mstch_type::is_bool},
             {"type:byte?", &mstch_type::is_byte},
             {"type:i16?", &mstch_type::is_i16},
@@ -792,6 +793,12 @@ class mstch_type : public mstch_base {
   mstch::node is_i64() { return resolved_type_->is_i64(); }
   mstch::node is_double() { return resolved_type_->is_double(); }
   mstch::node is_float() { return resolved_type_->is_float(); }
+  mstch::node is_primitive() {
+    return resolved_type_->is_void() || resolved_type_->is_bool() ||
+        resolved_type_->is_byte() || resolved_type_->is_i16() ||
+        resolved_type_->is_i32() || resolved_type_->is_i64() ||
+        resolved_type_->is_double() || resolved_type_->is_float();
+  }
   mstch::node is_floating_point() {
     return resolved_type_->is_floating_point();
   }

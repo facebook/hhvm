@@ -1179,7 +1179,6 @@ class mstch_java_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:primitive?", &mstch_java_type::is_primitive},
             {"type:isContainer?", &mstch_java_type::is_container_type},
             {"type:javaType", &mstch_java_type::java_type},
             {"type:setIsMapKey", &mstch_java_type::set_is_map_key},
@@ -1227,11 +1226,6 @@ class mstch_java_type : public mstch_type {
     return type_->get_true_type()->is_container();
   }
 
-  mstch::node is_primitive() {
-    return type_->is_void() || type_->is_bool() || type_->is_byte() ||
-        type_->is_i16() || type_->is_i32() || type_->is_i64() ||
-        type_->is_double() || type_->is_float();
-  }
   mstch::node java_type() {
     return type_->get_true_type()->get_annotation("java.swift.type");
   }

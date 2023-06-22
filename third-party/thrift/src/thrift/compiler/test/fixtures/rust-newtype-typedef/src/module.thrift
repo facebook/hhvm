@@ -24,6 +24,8 @@ typedef binary BinType (
   rust.type = "smallvec::SmallVec<[u8; 16]>",
 )
 
+typedef double (rust.type = "OrderedFloat<f64>") Double
+
 typedef binary BytesType (rust.newtype, rust.type = "Bytes")
 
 struct MyStruct {
@@ -32,4 +34,6 @@ struct MyStruct {
   3: binary (rust.type = "smallvec::SmallVec<[u8; 32]>") inline_bin;
   4: BytesType the_bytes;
   5: binary (rust.type = "Bytes") inline_bytes;
-}
+  6: Double floaty;
+  7: double (rust.type = "OrderedFloat<f64>") doublefloaty;
+} (rust.ord)

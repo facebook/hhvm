@@ -12,16 +12,20 @@ pub struct MapType(pub ::sorted_vector_map::SortedVectorMap);
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BinType(pub ::smallvec::SmallVec<[u8; 16]>);
 
+pub type Double = ::fbthrift::builtin_types::OrderedFloat<f64>;
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BytesType(pub ::fbthrift::builtin_types::Bytes);
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStruct {
     pub the_map: crate::types::MapType,
     pub the_bin: crate::types::BinType,
     pub inline_bin: ::smallvec::SmallVec<[u8; 32]>,
     pub the_bytes: crate::types::BytesType,
     pub inline_bytes: ::fbthrift::builtin_types::Bytes,
+    pub floaty: crate::types::Double,
+    pub doublefloaty: ::fbthrift::builtin_types::OrderedFloat<f64>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -103,6 +107,8 @@ impl ::std::default::Default for self::MyStruct {
             inline_bin: ::std::default::Default::default(),
             the_bytes: ::std::default::Default::default(),
             inline_bytes: ::std::default::Default::default(),
+            floaty: ::std::default::Default::default(),
+            doublefloaty: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -117,6 +123,8 @@ impl ::std::fmt::Debug for self::MyStruct {
             .field("inline_bin", &self.inline_bin)
             .field("the_bytes", &self.the_bytes)
             .field("inline_bytes", &self.inline_bytes)
+            .field("floaty", &self.floaty)
+            .field("doublefloaty", &self.doublefloaty)
             .finish()
     }
 }
@@ -150,6 +158,12 @@ where
         p.write_field_begin("inline_bytes", ::fbthrift::TType::String, 5);
         ::fbthrift::Serialize::write(&self.inline_bytes, p);
         p.write_field_end();
+        p.write_field_begin("floaty", ::fbthrift::TType::Double, 6);
+        ::fbthrift::Serialize::write(&self.floaty, p);
+        p.write_field_end();
+        p.write_field_begin("doublefloaty", ::fbthrift::TType::Double, 7);
+        ::fbthrift::Serialize::write(&self.doublefloaty, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -161,6 +175,8 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("doublefloaty", ::fbthrift::TType::Double, 7),
+            ::fbthrift::Field::new("floaty", ::fbthrift::TType::Double, 6),
             ::fbthrift::Field::new("inline_bin", ::fbthrift::TType::String, 3),
             ::fbthrift::Field::new("inline_bytes", ::fbthrift::TType::String, 5),
             ::fbthrift::Field::new("the_bin", ::fbthrift::TType::String, 2),
@@ -172,6 +188,8 @@ where
         let mut field_inline_bin = ::std::option::Option::None;
         let mut field_the_bytes = ::std::option::Option::None;
         let mut field_inline_bytes = ::std::option::Option::None;
+        let mut field_floaty = ::std::option::Option::None;
+        let mut field_doublefloaty = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -182,6 +200,8 @@ where
                 (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(super::r#impl::read(p)?),
                 (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, 7) => field_doublefloaty = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -193,6 +213,8 @@ where
             inline_bin: field_inline_bin.unwrap_or_default(),
             the_bytes: field_the_bytes.unwrap_or_default(),
             inline_bytes: field_inline_bytes.unwrap_or_default(),
+            floaty: field_floaty.unwrap_or_default(),
+            doublefloaty: field_doublefloaty.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -221,6 +243,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
             4 => {
             },
             5 => {
+            },
+            6 => {
+            },
+            7 => {
             },
             _ => {}
         }

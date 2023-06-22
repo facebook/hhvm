@@ -72,18 +72,9 @@ let init_via_lsp
 
 (** We might find a saved-state available for download, and download it. *)
 let init_via_fetch
-    (ctx : Provider_context.t)
-    ~(local_config : ServerLocalConfig.t)
-    ~(root : Path.t)
-    ~(ignore_hh_version : bool) :
+    (ctx : Provider_context.t) ~(root : Path.t) ~(ignore_hh_version : bool) :
     (Path.t * Saved_state_loader.changed_files) outcome Lwt.t =
   let ssopt = TypecheckerOptions.saved_state (Provider_context.get_tcopt ctx) in
-  let saved_state_type =
-    if local_config.ServerLocalConfig.ide_should_use_hack_64_distc then
-      Saved_state_loader.Naming_and_dep_table_distc
-    else
-      Saved_state_loader.Naming_and_dep_table
-  in
   let%lwt load_result =
     State_loader_lwt.load
       ~ssopt
@@ -91,7 +82,7 @@ let init_via_fetch
       ~watchman_opts:
         Saved_state_loader.Watchman_options.{ root; sockname = None }
       ~ignore_hh_version
-      ~saved_state_type
+      ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
   in
   match load_result with
   | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
@@ -162,19 +153,13 @@ let init_via_find
   if not local_config.ServerLocalConfig.ide_load_naming_table_on_disk then begin
     Lwt.return (Skip "ide_load_naming_table_on_disk=false")
   end else begin
-    let saved_state_type =
-      if local_config.ServerLocalConfig.ide_should_use_hack_64_distc then
-        Saved_state_loader.Naming_and_dep_table_distc
-      else
-        Saved_state_loader.Naming_and_dep_table
-    in
     let%lwt get_metadata_result =
       State_loader_lwt.get_project_metadata
         ~opts:(Provider_context.get_tcopt ctx |> TypecheckerOptions.saved_state)
         ~progress_callback:(fun _ -> ())
         ~repo:root
         ~ignore_hh_version
-        ~saved_state_type
+        ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
     in
     match get_metadata_result with
     | Error (load_error, _telemetry) ->
@@ -182,7 +167,7 @@ let init_via_find
     | Ok (project_metadata, _telemetry) -> begin
       let%lwt load_off_disk_result =
         State_loader_lwt.load_arbitrary_naming_table_from_disk
-          ~saved_state_type
+          ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
           ~project_metadata
           ~threshold:
             local_config.ServerLocalConfig.ide_naming_table_update_threshold
@@ -375,7 +360,7 @@ let init
     match result with
     | Ok _ -> Lwt.return result
     | Error prev ->
-      init_via_fetch ctx ~local_config ~root ~ignore_hh_version
+      init_via_fetch ctx ~root ~ignore_hh_version
       |> map_attempt "fetch" ctx ~prev ~f:(fun (path, changed_files) ->
              (path, changed_files, sienv))
   in

@@ -82,26 +82,6 @@ let additional_info_of_json
         saved_state_distance = None;
         saved_state_age = None;
       }
-  | Saved_state_loader.Naming_and_dep_table ->
-    let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
-    let dirty_files = Jget.obj_exn json "dirty_files" in
-    let master_changes =
-      Jget.string_array_exn dirty_files "master_changes"
-      |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
-      |> Relative_path.Set.of_list
-    in
-    let local_changes =
-      Jget.string_array_exn dirty_files "local_changes"
-      |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
-      |> Relative_path.Set.of_list
-    in
-    Saved_state_loader.Naming_and_dep_table_info.
-      {
-        mergebase_global_rev;
-        dirty_files_promise = Future.of_value { master_changes; local_changes };
-        saved_state_distance = None;
-        saved_state_age = None;
-      }
 
 let replay_info_of_json
     (type main_artifacts additional_info)
@@ -157,35 +137,6 @@ let make_replay_token_of_additional_info
   | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
   | Saved_state_loader.Shallow_decls -> Hh_json.JSON_Null
   | Saved_state_loader.Naming_and_dep_table_distc ->
-    let Saved_state_loader.Naming_and_dep_table_info.
-          {
-            mergebase_global_rev;
-            dirty_files_promise;
-            saved_state_distance = _;
-            saved_state_age = _;
-          } =
-      additional_info
-    in
-    let Saved_state_loader.Naming_and_dep_table_info.
-          { master_changes; local_changes } =
-      Future.get_exn dirty_files_promise
-    in
-    let open Hh_json in
-    JSON_Object
-      [
-        ("mergebase_global_rev", opt_int_to_json mergebase_global_rev);
-        ( "dirty_files",
-          JSON_Object
-            [
-              ( "master_changes",
-                changed_files_to_relative_paths_json
-                @@ Relative_path.Set.elements master_changes );
-              ( "local_changes",
-                changed_files_to_relative_paths_json
-                @@ Relative_path.Set.elements local_changes );
-            ] );
-      ]
-  | Saved_state_loader.Naming_and_dep_table ->
     let Saved_state_loader.Naming_and_dep_table_info.
           {
             mergebase_global_rev;
@@ -357,7 +308,7 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
   Relative_path.set_path_prefix Relative_path.Root env.root;
   match env.saved_state_type with
   | Naming_and_dep_table ->
-    let saved_state_type = Saved_state_loader.Naming_and_dep_table in
+    let saved_state_type = Saved_state_loader.Naming_and_dep_table_distc in
     let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
     (match result with
     | Error load_error ->

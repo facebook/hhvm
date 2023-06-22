@@ -299,9 +299,7 @@ struct RuntimeOption {
   static void ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
-    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos,
-    std::string& xboxPassword,
-    std::set<std::string>& xboxPasswords
+    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos
   );
 
   static Optional<std::filesystem::path> GetHomePath(
@@ -552,8 +550,6 @@ struct RuntimeOption {
   static bool XboxServerInfoAlwaysReset;
   static bool XboxServerLogInfo;
   static std::string XboxProcessMessageFunc;
-  static std::string XboxPassword;
-  static std::set<std::string> XboxPasswords;
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;

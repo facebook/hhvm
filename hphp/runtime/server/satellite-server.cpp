@@ -48,8 +48,6 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
                       RuntimeOption::RequestTimeoutSeconds, false));
   m_reqInitFunc = Config::GetString(ini, hdf, "RequestInitFunction", "", false);
   m_reqInitDoc = Config::GetString(ini, hdf, "RequestInitDocument", "", false);
-  m_password = Config::GetString(ini, hdf, "Password", "", false);
-  m_passwords = Config::GetSet(ini, hdf, "Passwords", m_passwords, false);
   m_alwaysReset = Config::GetBool(ini, hdf, "AlwaysReset", false, false);
   m_functions = Config::GetSet(ini, hdf, "Functions", m_functions, false);
 
@@ -73,8 +71,6 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
     if (Config::GetBool(ini, hdf, "BlockMainServer", true, false)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
-  } else if (type == "RPCServer") {
-    m_type = SatelliteServer::Type::KindOfRPCServer;
   } else {
     m_type = SatelliteServer::Type::Unknown;
   }
@@ -188,9 +184,6 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
     switch (info->getType()) {
     case Type::KindOfInternalPageServer:
       satellite.reset(new InternalPageServer(info));
-      break;
-    case Type::KindOfRPCServer:
-      satellite.reset(new RPCServer(info));
       break;
     case Type::KindOfXboxServer:
       satellite.reset(new RPCServer(info));

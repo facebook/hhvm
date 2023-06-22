@@ -857,8 +857,6 @@ std::string RuntimeOption::XboxServerInfoReqInitDoc;
 bool RuntimeOption::XboxServerInfoAlwaysReset = false;
 bool RuntimeOption::XboxServerLogInfo = false;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
-std::string RuntimeOption::XboxPassword;
-std::set<std::string> RuntimeOption::XboxPasswords;
 
 std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
@@ -1513,18 +1511,12 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
 void RuntimeOption::ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
-    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos,
-    std::string& xboxPassword,
-    std::set<std::string>& xboxPasswords) {
+    std::vector<std::shared_ptr<SatelliteServerInfo>>& infos) {
   auto ss_callback = [&] (const IniSettingMap &ini_ss, const Hdf &hdf_ss,
                          const std::string &ini_ss_key) {
     auto satellite = std::make_shared<SatelliteServerInfo>(ini_ss, hdf_ss,
                                                            ini_ss_key);
     infos.push_back(satellite);
-    if (satellite->getType() == SatelliteServer::Type::KindOfRPCServer) {
-      xboxPassword = satellite->getPassword();
-      xboxPasswords = satellite->getPasswords();
-    }
   };
   Config::Iterate(ss_callback, ini, hdf, "Satellites");
 }
@@ -2615,8 +2607,7 @@ void RuntimeOption::Load(
     IpBlocks = std::make_shared<IpBlockMap>(ini, config);
   }
   {
-    ReadSatelliteInfo(ini, config, SatelliteServerInfos,
-                      XboxPassword, XboxPasswords);
+    ReadSatelliteInfo(ini, config, SatelliteServerInfos);
   }
   {
     // Xbox

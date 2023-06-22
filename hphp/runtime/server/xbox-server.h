@@ -28,7 +28,6 @@ namespace HPHP {
 
 struct Array;
 struct XboxServerInfo;
-struct RPCRequestHandler;
 struct XboxTransport;
 
 struct XboxServer {

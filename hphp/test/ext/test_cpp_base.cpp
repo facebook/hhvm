@@ -265,16 +265,6 @@ bool TestCppBase::TestSatelliteServer() {
   Hdf hdf;
   hdf.fromString(
     "Satellites {\n"
-    "  rpc {\n"
-    "    Type = RPCServer\n"
-    "    Port = 9999\n"
-    "    RequestInitDocument = my/rpc/rpc.php\n"
-    "    RequestInitFunction = init_me\n"
-    "    Password = abcd0987\n"
-    "    Passwords {\n"
-    "      * = abcd0987\n"
-    "    }\n"
-    "  }\n"
     "  ips {\n"
     "    Type = InternalPageServer\n"
     "    BlockMainServer = false\n"
@@ -284,46 +274,21 @@ bool TestCppBase::TestSatelliteServer() {
 
 
   std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, hdf, infos,
-                                   RuntimeOption::XboxPassword,
-                                   RuntimeOption::XboxPasswords);
+  RuntimeOption::ReadSatelliteInfo(ini, hdf, infos);
+
   for (auto& info_ptr : infos) {
     auto info = info_ptr.get();
     auto name = info->getName();
-    if (name == "rpc") {
-      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
-      VERIFY(info->getPort() == 9999);
-      VERIFY(info->getThreadCount() == 5);
-      VERIFY(info->getTimeoutSeconds() ==
-        std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-      VERIFY(info->getURLs().size() == 0);
-      VERIFY(info->getMaxRequest() == 500);
-      VERIFY(info->getMaxDuration() == 120);
-      VERIFY(info->getReqInitFunc() == "init_me");
-      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
-      VERIFY(info->getPassword() == "abcd0987");
-      VERIFY(info->getPasswords().size() == 1);
-      VERIFY(info->getPasswords().find("abcd0987") !=
-             info->getPasswords().end());
-      VERIFY(info->alwaysReset() == false);
-      VERIFY(RuntimeOption::XboxPassword == "abcd0987");
-    } else if (name == "ips") {
-      VERIFY(info->getType() ==
-             SatelliteServer::Type::KindOfInternalPageServer);
-      VERIFY(info->getURLs().size() == 0);
-    }
+    VERIFY(name == "ips");
+    VERIFY(info->getType() ==
+           SatelliteServer::Type::KindOfInternalPageServer);
+    VERIFY(info->getURLs().size() == 0);
   }
   return Count(true);
 }
 
 bool TestCppBase::TestSatelliteServerIni() {
   std::string iniStr =
-    "hhvm.satellites[rpc][type] = RPCServer\n"
-    "hhvm.satellites[rpc][port] = 9999\n"
-    "hhvm.satellites[rpc][request_init_document] = my/rpc/rpc.php\n"
-    "hhvm.satellites[rpc][request_init_function] = init_me\n"
-    "hhvm.satellites[rpc][password] = abcd0987\n"
-    "hhvm.satellites[rpc][passwords][] = abcd0987\n"
     "hhvm.satellites[ips][type] = InternalPageServer\n"
     "hhvm.satellites[ips][block_main_server] = false\n";
 
@@ -332,34 +297,15 @@ bool TestCppBase::TestSatelliteServerIni() {
   Config::ParseIniString(iniStr, ini);
 
   std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, empty, infos,
-                                   RuntimeOption::XboxPassword,
-                                   RuntimeOption::XboxPasswords);
+  RuntimeOption::ReadSatelliteInfo(ini, empty, infos);
+
   for (auto& info_ptr : infos) {
     auto info = info_ptr.get();
     auto name = info->getName();
-    if (name == "rpc") {
-      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
-      VERIFY(info->getPort() == 9999);
-      VERIFY(info->getThreadCount() == 5);
-      VERIFY(info->getTimeoutSeconds() ==
-        std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-      VERIFY(info->getURLs().size() == 0);
-      VERIFY(info->getMaxRequest() == 500);
-      VERIFY(info->getMaxDuration() == 120);
-      VERIFY(info->getReqInitFunc() == "init_me");
-      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
-      VERIFY(info->getPassword() == "abcd0987");
-      VERIFY(info->getPasswords().size() == 1);
-      VERIFY(info->getPasswords().find("abcd0987") !=
-             info->getPasswords().end());
-      VERIFY(info->alwaysReset() == false);
-      VERIFY(RuntimeOption::XboxPassword == "abcd0987");
-    } else if (name == "ips") {
-      VERIFY(info->getType() ==
-             SatelliteServer::Type::KindOfInternalPageServer);
-      VERIFY(info->getURLs().size() == 0);
-    }
+    VERIFY(name == "ips");
+    VERIFY(info->getType() ==
+           SatelliteServer::Type::KindOfInternalPageServer);
+    VERIFY(info->getURLs().size() == 0);
   }
   return Count(true);
 }

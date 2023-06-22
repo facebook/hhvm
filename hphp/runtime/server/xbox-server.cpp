@@ -144,8 +144,6 @@ private:
     }
     if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
-    s_xbox_request_handler->setReturnEncodeType(
-      RPCRequestHandler::ReturnEncodeType::Internal);
     return s_xbox_request_handler.get();
   }
 

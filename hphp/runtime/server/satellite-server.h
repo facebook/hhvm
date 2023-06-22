@@ -32,7 +32,6 @@ struct SatelliteServer {
     Unknown,
 
     KindOfInternalPageServer,  // handles restricted URLs
-    KindOfRPCServer,           // invokes one PHP function and returns JSON
     KindOfXboxServer,          // handles internal xbox tasks
   };
 
@@ -91,10 +90,7 @@ public:
   int getMaxDuration() const { return m_maxDuration;}
   const std::string &getReqInitFunc() const { return m_reqInitFunc;}
   const std::string &getReqInitDoc() const { return m_reqInitDoc;}
-  const std::string &getPassword() const { return m_password;}
-  const std::set<std::string> &getPasswords() const { return m_passwords;}
   bool alwaysReset() const { return m_alwaysReset;}
-  const std::set<std::string> &getFunctions() const { return m_functions; }
   Transport::Method getMethod() const { return m_method;}
 
 protected:
@@ -109,8 +105,6 @@ protected:
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;
-  std::string m_password;
-  std::set<std::string> m_passwords;
   bool m_alwaysReset = false;
   std::set<std::string> m_functions;
   Transport::Method m_method;

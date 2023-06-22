@@ -405,6 +405,50 @@ struct NoEncodeAdapter {
   static int64_t toThrift(const Num& num) { return num.val; }
 };
 
+struct EncodeFieldAdapter {
+  template <typename T, typename Struct, int16_t FieldId>
+  static AdaptedWithContext<T, Struct, FieldId> fromThriftField(
+      T value, apache::thrift::FieldContext<Struct, FieldId>&&) {
+    // Adapter::decode should be called instead of deserializing with
+    // fromThriftField.
+    EXPECT_TRUE(false);
+    return {
+        value,
+        apache::thrift::FieldContext<Struct, FieldId>::kFieldId,
+        nullptr,
+    };
+  }
+
+  template <typename T, typename Struct, int16_t FieldId>
+  static T toThrift(const AdaptedWithContext<T, Struct, FieldId>& adapted) {
+    // Adapter::encode should be called instead of serializing with toThrift.
+    EXPECT_TRUE(false);
+    return adapted.value;
+  }
+
+  template <
+      typename Protocol,
+      typename Tag,
+      typename T,
+      typename Struct,
+      int16_t FieldId>
+  static uint32_t encode(
+      Protocol& prot_, const AdaptedWithContext<T, Struct, FieldId>& adapted) {
+    return op::encode<Tag>(prot_, adapted.value);
+  }
+
+  template <
+      typename Protocol,
+      typename Tag,
+      typename T,
+      typename Struct,
+      int16_t FieldId>
+  static void decode(
+      Protocol& prot_, AdaptedWithContext<T, Struct, FieldId>& adapted) {
+    return op::decode<Tag>(prot_, adapted.value);
+  }
+};
+
 template <typename T>
 struct VariableWrapper {
   VariableWrapper(const VariableWrapper&) = delete;

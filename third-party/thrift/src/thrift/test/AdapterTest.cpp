@@ -965,6 +965,18 @@ TEST(AdaptTest, EncodeFallback) {
   EXPECT_EQ(obj, objd);
 }
 
+TEST(AdaptTest, EncodeFieldFallback) {
+  basic::EncodeFieldStruct obj{};
+  obj.num_with_encode().ensure().value = 1;
+  obj.num_without_encode().ensure().value = 2;
+
+  // num_with_encode should not call toThrift/fromThriftField.
+  auto data = CompactSerializer::serialize<std::string>(obj);
+  auto objd = CompactSerializer::deserialize<basic::EncodeFieldStruct>(data);
+
+  EXPECT_EQ(obj, objd);
+}
+
 TEST(AdaptTest, Constants) {
   // const AdaptedBool type_adapted = true;
   EXPECT_EQ(basic::adapter_constants::type_adapted().value, true);

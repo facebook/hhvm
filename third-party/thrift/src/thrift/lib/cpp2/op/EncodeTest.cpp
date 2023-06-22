@@ -626,6 +626,41 @@ void testDecodeCppType() {
   }
 }
 
+template <
+    conformance::StandardProtocol Protocol,
+    typename Struct,
+    typename Tag,
+    typename T>
+void testEncodeAndDecodeFieldAdapted(T value) {
+  SCOPED_TRACE(folly::pretty_name<Tag>());
+  // s is used as a placeholder.
+  Struct s;
+  const test::AdaptedWithContext<T, Struct, 0> adapted{value};
+  using AdaptedTag = type::adapted<test::TemplatedTestFieldAdapter, Tag>;
+  using FieldTag = type::field<AdaptedTag, FieldContext<Struct, 0>>;
+
+  protocol_writer_t<Protocol> writer;
+  folly::IOBufQueue queue;
+  writer.setOutput(&queue);
+  encode<AdaptedTag>(writer, adapted);
+
+  protocol_reader_t<Protocol> reader;
+  auto serialized = queue.move();
+  reader.setInput(serialized.get());
+  test::AdaptedWithContext<T, Struct, 0> result;
+  decode<FieldTag>(reader, result, s);
+  EXPECT_EQ(adapted, result);
+
+  using AdaptedTag2 = type::adapted<test::EncodeFieldAdapter, Tag>;
+  using FieldTag2 = type::field<AdaptedTag2, FieldContext<Struct, 0>>;
+  encode<AdaptedTag2>(writer, adapted);
+
+  auto serialized2 = queue.move();
+  reader.setInput(serialized2.get());
+  decode<FieldTag2>(reader, result, s);
+  EXPECT_EQ(adapted, result);
+}
+
 template <conformance::StandardProtocol Protocol>
 void testDecodeAdapted() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
@@ -638,6 +673,9 @@ void testDecodeAdapted() {
   testDecodeObject<Protocol, Union, type::union_t<Union>, true>(1);
   testDecode<Protocol, type::adapted<test::EncodeAdapter, type::i64_t>>(
       test::Num{1});
+  using Struct64 = test::testset::struct_with<type::i64_t>;
+  testEncodeAndDecodeFieldAdapted<Protocol, Struct64, type::i64_t>(
+      static_cast<int64_t>(42));
 }
 
 TEST(DecodeTest, DecodeBasicTypes) {

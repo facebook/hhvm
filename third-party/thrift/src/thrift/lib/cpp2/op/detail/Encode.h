@@ -885,6 +885,15 @@ struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
   }
 };
 
+template <typename Adapter, typename Tag, typename U>
+void adapter_clear(U& m) {
+  if (typeTagToTType<Tag> == TType::T_LIST ||
+      typeTagToTType<Tag> == TType::T_SET ||
+      typeTagToTType<Tag> == TType::T_MAP) {
+    adapt_detail::clear<Adapter>(m);
+  }
+}
+
 template <typename Adapter, typename Tag>
 struct Decode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
@@ -893,11 +902,7 @@ struct Decode<type::adapted<Adapter, Tag>> {
         [&](auto adapter)
             -> decltype(decltype(adapter)::template decode<Protocol, Tag>(
                 prot, m)) {
-          if (typeTagToTType<Tag> == TType::T_LIST ||
-              typeTagToTType<Tag> == TType::T_SET ||
-              typeTagToTType<Tag> == TType::T_MAP) {
-            adapt_detail::clear<Adapter>(m);
-          }
+          adapter_clear<Adapter, Tag, U>(m);
           decltype(adapter)::template decode<Protocol, Tag>(prot, m);
         },
         [&](...) {
@@ -906,11 +911,7 @@ struct Decode<type::adapted<Adapter, Tag>> {
           folly::if_constexpr<hasInplaceToThrift>(
               [&](auto tag) {
                 using T = decltype(tag);
-                if (typeTagToTType<T> == TType::T_LIST ||
-                    typeTagToTType<T> == TType::T_SET ||
-                    typeTagToTType<T> == TType::T_MAP) {
-                  adapt_detail::clear<Adapter>(m);
-                }
+                adapter_clear<Adapter, Tag, U>(m);
                 Decode<T>{}(prot, Adapter::toThrift(m));
               },
               [&](auto tag) {
@@ -942,9 +943,19 @@ struct Decode<
       if_field_adapter<AdapterT, FieldId, type::native_type<Tag>, Struct, void>
       operator()(Protocol& prot, U& m, Struct& strct) const {
     // TODO(dokwon): in-place deserialization support for field adapter.
-    type::native_type<Tag> orig;
-    Decode<Tag>{}(prot, orig);
-    m = adapt_detail::fromThriftField<Adapter, FieldId>(std::move(orig), strct);
+    folly::overload(
+        [&](auto adapter)
+            -> decltype(decltype(adapter)::template decode<Protocol, Tag>(
+                prot, m)) {
+          adapter_clear<Adapter, Tag, U>(m);
+          decltype(adapter)::template decode<Protocol, Tag>(prot, m);
+        },
+        [&](...) {
+          type::native_type<Tag> orig;
+          Decode<Tag>{}(prot, orig);
+          m = adapt_detail::fromThriftField<Adapter, FieldId>(
+              std::move(orig), strct);
+        })(Adapter{});
   }
 };
 

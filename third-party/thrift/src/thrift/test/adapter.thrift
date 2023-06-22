@@ -268,6 +268,14 @@ struct EncodeStruct {
   3: i64 num_without_encode;
 }
 
+@cpp.UseOpEncode
+struct EncodeFieldStruct {
+  @cpp.Adapter{name = "::apache::thrift::test::EncodeFieldAdapter"}
+  1: i64 num_with_encode;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestFieldAdapter"}
+  2: i64 num_without_encode;
+}
+
 service AdapterService {
   CountingStruct count();
   HeapAllocated adaptedTypes(1: HeapAllocated arg);

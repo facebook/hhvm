@@ -174,6 +174,18 @@ let rec intersect env ~r ty1 ty2 =
               List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
             in
             (env, mk (r, Ttuple inter_tyl))
+          (* Runtime representation of tuples is vec, which can be observed in Hack via refinement.
+           * Therefore it's sound to simplify vec<t> & (t1,...,tn) to (t & t1, ..., t & tn)
+           * but because we don't support subtyping directly between tuples and vecs, we need
+           * to keep the vec conjunct i.e. simplify to vec<t> & (t & t1, ..., t & tn)
+           *)
+          | (((_, Tclass ((_, cn), _, [ty])) as vty), (rt, Ttuple tyl))
+          | ((rt, Ttuple tyl), ((_, Tclass ((_, cn), _, [ty])) as vty))
+            when String.equal cn Naming_special_names.Collections.cVec ->
+            let (env, inter_tyl) =
+              List.map_env env tyl ~f:(fun env ty' -> intersect ~r env ty ty')
+            in
+            make_intersection env r [mk vty; mk (rt, Ttuple inter_tyl)]
           | ( (_, Tshape (_, shape_kind1, fdm1)),
               (_, Tshape (_, shape_kind2, fdm2)) ) ->
             let (env, shape_kind, fdm) =

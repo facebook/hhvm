@@ -258,6 +258,16 @@ struct CountingStruct {
   3: optional string regularString;
 }
 
+@cpp.UseOpEncode
+struct EncodeStruct {
+  @cpp.Adapter{name = "::apache::thrift::test::EncodeAdapter"}
+  1: i64 num_with_encode;
+  @cpp.Adapter{name = "::apache::thrift::test::InPlaceDeserializationAdapter"}
+  2: i64 num_in_place;
+  @cpp.Adapter{name = "::apache::thrift::test::NoEncodeAdapter"}
+  3: i64 num_without_encode;
+}
+
 service AdapterService {
   CountingStruct count();
   HeapAllocated adaptedTypes(1: HeapAllocated arg);

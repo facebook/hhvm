@@ -951,6 +951,20 @@ TEST(AdaptTest, NumAdapterConversions) {
   EXPECT_EQ((CountingAdapter<false, std::string>::count), 2);
 }
 
+TEST(AdaptTest, EncodeFallback) {
+  basic::EncodeStruct obj{};
+  obj.num_with_encode() = Num{1};
+  obj.num_in_place().ensure().value = 2;
+  obj.num_without_encode() = Num{3};
+
+  // num_with_encode should not call to/fromThrift.
+  // num_in_place should not call fromThrift.
+  auto data = CompactSerializer::serialize<std::string>(obj);
+  auto objd = CompactSerializer::deserialize<basic::EncodeStruct>(data);
+
+  EXPECT_EQ(obj, objd);
+}
+
 TEST(AdaptTest, Constants) {
   // const AdaptedBool type_adapted = true;
   EXPECT_EQ(basic::adapter_constants::type_adapted().value, true);

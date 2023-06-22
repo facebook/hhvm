@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include <folly/Overload.h>
 #include <folly/Range.h>
 #include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
@@ -619,7 +620,14 @@ template <typename Adapter, typename Tag>
 struct AdaptedEncode {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    return Encode<Tag>{}(prot, Adapter::toThrift(m));
+    return folly::overload(
+        [&](auto adapter)
+            -> decltype(decltype(adapter)::template encode<Protocol, Tag>(
+                prot, m)) {
+          return decltype(adapter)::template encode<Protocol, Tag>(prot, m);
+        },
+        [&](...) { return Encode<Tag>{}(prot, Adapter::toThrift(m)); })(
+        Adapter{});
   }
 };
 
@@ -881,24 +889,37 @@ template <typename Adapter, typename Tag>
 struct Decode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
   void operator()(Protocol& prot, U& m) const {
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
-        has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
-    folly::if_constexpr<hasInplaceToThrift>(
-        [&](auto tag) {
-          using T = decltype(tag);
-          if (typeTagToTType<T> == TType::T_LIST ||
-              typeTagToTType<T> == TType::T_SET ||
-              typeTagToTType<T> == TType::T_MAP) {
+    return folly::overload(
+        [&](auto adapter)
+            -> decltype(decltype(adapter)::template decode<Protocol, Tag>(
+                prot, m)) {
+          if (typeTagToTType<Tag> == TType::T_LIST ||
+              typeTagToTType<Tag> == TType::T_SET ||
+              typeTagToTType<Tag> == TType::T_MAP) {
             adapt_detail::clear<Adapter>(m);
           }
-          Decode<T>{}(prot, Adapter::toThrift(m));
+          decltype(adapter)::template decode<Protocol, Tag>(prot, m);
         },
-        [&](auto tag) {
-          using T = decltype(tag);
-          type::native_type<T> orig;
-          Decode<T>{}(prot, orig);
-          m = Adapter::fromThrift(std::move(orig));
-        })(Tag{});
+        [&](...) {
+          constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
+              has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
+          folly::if_constexpr<hasInplaceToThrift>(
+              [&](auto tag) {
+                using T = decltype(tag);
+                if (typeTagToTType<T> == TType::T_LIST ||
+                    typeTagToTType<T> == TType::T_SET ||
+                    typeTagToTType<T> == TType::T_MAP) {
+                  adapt_detail::clear<Adapter>(m);
+                }
+                Decode<T>{}(prot, Adapter::toThrift(m));
+              },
+              [&](auto tag) {
+                using T = decltype(tag);
+                type::native_type<T> orig;
+                Decode<T>{}(prot, orig);
+                m = Adapter::fromThrift(std::move(orig));
+              })(Tag{});
+        })(Adapter{});
   }
 };
 

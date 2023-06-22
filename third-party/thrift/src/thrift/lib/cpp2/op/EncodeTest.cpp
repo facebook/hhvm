@@ -435,6 +435,14 @@ void testEncodeAdapted() {
         test::TemplatedTestAdapter::fromThrift(value), TType::T_MAP, false);
     EXPECT_EQ(result, asValueStruct<Tag>(value));
   }
+  {
+    // test op::encode with Adapter::encode optimization
+    using AdaptedTag = type::adapted<test::EncodeAdapter, type::i64_t>;
+    test::Num value{1};
+    auto result =
+        encodeAndParseValue<Protocol, AdaptedTag>(value, TType::T_I64);
+    EXPECT_EQ(result, asValueStruct<type::i64_t>(1));
+  }
 }
 
 TEST(EncodeTest, EncodeBasicTypes) {
@@ -628,6 +636,8 @@ void testDecodeAdapted() {
   testDecodeObject<Protocol, Struct, type::struct_t<Struct>, true>(1);
   using Union = test::testset::union_with<type::i32_t>;
   testDecodeObject<Protocol, Union, type::union_t<Union>, true>(1);
+  testDecode<Protocol, type::adapted<test::EncodeAdapter, type::i64_t>>(
+      test::Num{1});
 }
 
 TEST(DecodeTest, DecodeBasicTypes) {

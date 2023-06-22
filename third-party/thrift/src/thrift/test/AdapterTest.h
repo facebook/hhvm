@@ -17,13 +17,16 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 
 #include <folly/io/IOBuf.h>
+#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 
 namespace apache::thrift::test {
 
@@ -355,6 +358,51 @@ struct CountingAdapter {
   static std::enable_if_t<Enable, uint32_t> serializedSize(Protocol& prot, T) {
     return prot.serializedSizeI64();
   }
+};
+
+struct EncodeAdapter {
+  static Num fromThrift(int64_t val) {
+    // Adapter::decode should be called instead of deserializing with
+    // fromThrift.
+    EXPECT_TRUE(false);
+    return Num{val};
+  }
+
+  static int64_t toThrift(const Num& num) {
+    // Adapter::encode should be called instead of serializing with toThrift.
+    EXPECT_TRUE(false);
+    return num.val;
+  }
+
+  template <typename Protocol, typename Tag>
+  static uint32_t encode(Protocol& prot_, const Num& num) {
+    return op::encode<type::i64_t>(prot_, num.val);
+  }
+
+  template <typename Protocol, typename Tag>
+  static void decode(Protocol& prot_, Num& num) {
+    return op::decode<type::i64_t>(prot_, num.val);
+  }
+};
+
+struct InPlaceDeserializationAdapter {
+  template <typename T>
+  static Wrapper<T> fromThrift(T value) {
+    // Both serialization and in-place deserialization use toThrift.
+    EXPECT_TRUE(false);
+    return {value};
+  }
+
+  template <typename Wrapper>
+  static auto&& toThrift(Wrapper&& wrapper) {
+    return std::forward<Wrapper>(wrapper).value;
+  }
+};
+
+struct NoEncodeAdapter {
+  static Num fromThrift(int64_t val) { return Num{val}; }
+
+  static int64_t toThrift(const Num& num) { return num.val; }
 };
 
 template <typename T>

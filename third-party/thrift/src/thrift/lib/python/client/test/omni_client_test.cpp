@@ -216,7 +216,14 @@ class OmniClientTest : public ::testing::Test {
       auto data = apache::thrift::MethodMetadata::Data(
           function, apache::thrift::FunctionQualifier::Unspecified);
       auto resp = co_await client.semifuture_send(
-          service, function, args, std::move(data), headers, {}, rpcKind);
+          service,
+          function,
+          args,
+          std::move(data),
+          headers,
+          {},
+          co_await folly::coro::co_current_executor,
+          rpcKind);
       testContains<S>(std::move(*resp.buf.value()), expected);
     });
   }
@@ -276,6 +283,7 @@ class OmniClientTest : public ::testing::Test {
               std::move(data),
               {},
               {},
+              co_await folly::coro::co_current_executor,
               RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE));
         });
   }

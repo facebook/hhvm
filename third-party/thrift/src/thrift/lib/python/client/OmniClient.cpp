@@ -185,13 +185,17 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions) {
-  return folly::coro::blockingWait(semifuture_send(
-      serviceName,
-      functionName,
-      std::move(args),
-      std::move(metadata),
-      headers,
-      std::move(rpcOptions)));
+  return folly::coro::blockingWait(folly::makeSemiFuture().deferExTry(
+      [&](folly::Executor::KeepAlive<> executor, auto&&) {
+        return semifuture_send(
+            serviceName,
+            functionName,
+            std::move(args),
+            std::move(metadata),
+            headers,
+            std::move(rpcOptions),
+            executor.get());
+      }));
 }
 
 OmniClientResponseWithHeaders OmniClient::sync_send(
@@ -256,10 +260,26 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions,
+    folly::Executor* executor,
     const apache::thrift::RpcKind rpcKind) {
   for (const auto& entry : headers) {
     rpcOptions.setWriteHeader(entry.first, entry.second);
   }
+
+  struct SemiFutureCallbackWithExecutor : public SemiFutureCallback {
+    folly::Executor::KeepAlive<> executor_;
+
+    explicit SemiFutureCallbackWithExecutor(
+        folly::Promise<ClientReceiveState>&& promise,
+        std::shared_ptr<apache::thrift::RequestChannel> channel,
+        folly::Executor::KeepAlive<> executor)
+        : SemiFutureCallback(std::move(promise), std::move(channel)),
+          executor_(std::move(executor)) {}
+
+    folly::Executor::KeepAlive<> getExecutor() const override {
+      return executor_;
+    }
+  };
 
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
@@ -269,7 +289,8 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
         std::move(args),
         serviceName,
         functionName,
-        std::make_unique<SemiFutureCallback>(std::move(promise), channel_),
+        std::make_unique<SemiFutureCallbackWithExecutor>(
+            std::move(promise), channel_, executor),
         rpcKind,
         std::move(metadata));
   } catch (...) {
@@ -343,6 +364,7 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions,
+    folly::Executor* executor,
     const apache::thrift::RpcKind rpcKind) {
   return semifuture_send(
       serviceName,
@@ -351,6 +373,7 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
       std::move(metadata),
       headers,
       std::move(rpcOptions),
+      executor,
       rpcKind);
 }
 

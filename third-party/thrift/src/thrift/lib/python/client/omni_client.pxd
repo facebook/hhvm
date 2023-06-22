@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from libcpp cimport bool
-from folly cimport cFollyExceptionWrapper, cFollySemiFuture, cFollyFuture
+from folly cimport cFollyExceptionWrapper, cFollyExecutor, cFollySemiFuture, cFollyFuture
 from folly.expected cimport cExpected
 from folly.iobuf cimport cIOBuf
 from libc.stdint cimport uint16_t
@@ -95,6 +95,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             cData&& metadata,
             const unordered_map[string, string] headers,
             cRpcOptions&& options,
+            cFollyExecutor* executor,
             const RpcKind rpcKind,
         )
         shared_ptr[cRequestChannel] getChannelShared()

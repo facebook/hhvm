@@ -178,6 +178,7 @@ cdef class AsyncClient:
                     cmove(cData(function_name, qualifier, uri_or_name, interaction_position, interaction_name)),
                     self._persistent_headers,
                     cmove(c_rpc_options),
+                    self._executor,
                     rpc_kind,
                 ),
                 _async_client_send_request_callback,

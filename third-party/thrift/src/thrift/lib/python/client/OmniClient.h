@@ -103,6 +103,7 @@ class OmniClient : public apache::thrift::TClientBase {
       apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers,
       apache::thrift::RpcOptions&& rpcOptions,
+      folly::Executor* executor,
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
@@ -113,6 +114,7 @@ class OmniClient : public apache::thrift::TClientBase {
       apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers,
       apache::thrift::RpcOptions&& rpcOptions,
+      folly::Executor* executor,
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 

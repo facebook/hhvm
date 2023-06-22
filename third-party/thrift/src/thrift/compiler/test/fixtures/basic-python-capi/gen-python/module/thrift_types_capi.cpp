@@ -480,6 +480,89 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ListStruct>::operator
   return ptr;
 }
 
+ExtractorResult<::test::fixtures::basic-python-capi::SetStruct>
+Extractor<::test::fixtures::basic-python-capi::SetStruct>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a SetStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::SetStruct>(
+          "Marshal error: SetStruct");
+  }
+  PyObject* fbThriftData = getThriftData(obj);
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::SetStruct>>{}(fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::SetStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::SetStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::SetStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<set<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>>>{}.extractInto(
+      cpp.enumz(),
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
+      error);
+  Extractor<set<int32_t>>{}.extractInto(
+      cpp.intz(),
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
+      error);
+  Extractor<set<Bytes>>{}.extractInto(
+      cpp.binnaz(),
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
+      error);
+  Extractor<set<Bytes, std::unordered_set<native_t<Bytes>>>>{}.extractInto(
+      cpp.encoded(),
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
+      error);
+  Extractor<set<int64_t, std::unordered_set<uint64_t>>>{}.extractInto(
+      cpp.uidz(),
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
+      error);
+  Extractor<set<int8_t, folly::F14FastSet<uint8_t>>>{}.extractInto(
+      cpp.charz(),
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
+      error);
+  Extractor<list<set<int64_t>>>{}.extractInto(
+      cpp.setz(),
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::SetStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__SetStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: SetStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::SetStruct>::operator()(
+    ::test::fixtures::basic-python-capi::SetStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__SetStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
 ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct>
 Extractor<::test::fixtures::basic-python-capi::ComposeStruct>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);

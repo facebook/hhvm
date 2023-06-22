@@ -11,6 +11,8 @@
 
 #include "thrift/lib/thrift/gen-cpp2/patch_types.h"
 #include <deque>
+#include <unordered_set>
+#include <folly/container/F14Set.h>
 #include <folly/small_vector.h>
 #include "thrift/test/python_capi/adapter.h"
 
@@ -47,6 +49,13 @@ struct uidz;
 struct matrix;
 struct ucharz;
 struct voxels;
+struct enumz;
+struct intz;
+struct binnaz;
+struct encoded;
+struct uidz;
+struct charz;
+struct setz;
 struct enum_;
 struct renamed_;
 struct primitive;
@@ -225,6 +234,34 @@ APACHE_THRIFT_DEFINE_ACCESSOR(ucharz);
 #ifndef APACHE_THRIFT_ACCESSOR_voxels
 #define APACHE_THRIFT_ACCESSOR_voxels
 APACHE_THRIFT_DEFINE_ACCESSOR(voxels);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_enumz
+#define APACHE_THRIFT_ACCESSOR_enumz
+APACHE_THRIFT_DEFINE_ACCESSOR(enumz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_intz
+#define APACHE_THRIFT_ACCESSOR_intz
+APACHE_THRIFT_DEFINE_ACCESSOR(intz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_binnaz
+#define APACHE_THRIFT_ACCESSOR_binnaz
+APACHE_THRIFT_DEFINE_ACCESSOR(binnaz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_encoded
+#define APACHE_THRIFT_ACCESSOR_encoded
+APACHE_THRIFT_DEFINE_ACCESSOR(encoded);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_uidz
+#define APACHE_THRIFT_ACCESSOR_uidz
+APACHE_THRIFT_DEFINE_ACCESSOR(uidz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_charz
+#define APACHE_THRIFT_ACCESSOR_charz
+APACHE_THRIFT_DEFINE_ACCESSOR(charz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_setz
+#define APACHE_THRIFT_ACCESSOR_setz
+APACHE_THRIFT_DEFINE_ACCESSOR(setz);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_enum_
 #define APACHE_THRIFT_ACCESSOR_enum_
@@ -572,6 +609,7 @@ class StringPair;
 class VapidStruct;
 class PrimitiveStruct;
 class ListStruct;
+class SetStruct;
 class ComposeStruct;
 class OurUnion;
 class MyStructPatchStruct;
@@ -2931,6 +2969,465 @@ class ListStruct final  {
 
 template <class Protocol_>
 unsigned long ListStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class SetStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::enumz,
+    ::apache::thrift::ident::intz,
+    ::apache::thrift::ident::binnaz,
+    ::apache::thrift::ident::encoded,
+    ::apache::thrift::ident::uidz,
+    ::apache::thrift::ident::charz,
+    ::apache::thrift::ident::setz
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::set<::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>>,
+    ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::set<::apache::thrift::type::binary_t>,
+    ::apache::thrift::type::cpp_type<std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::binary_t>>,
+    ::apache::thrift::type::cpp_type<std::unordered_set<uint64_t>, ::apache::thrift::type::set<::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::cpp_type<folly::F14FastSet<uint8_t>, ::apache::thrift::type::set<::apache::thrift::type::byte_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i64_t>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 7;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = SetStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  SetStruct();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  SetStruct(apache::thrift::FragileConstructor, ::std::set<::test::fixtures::basic-python-capi::MyEnum> enumz__arg, ::std::set<::std::int32_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>> binnaz__arg, std::unordered_set<::std::string> encoded__arg, std::unordered_set<uint64_t> uidz__arg, folly::F14FastSet<uint8_t> charz__arg, ::std::vector<::std::set<::std::int64_t>> setz__arg);
+
+  SetStruct(SetStruct&&) noexcept;
+
+  SetStruct(const SetStruct& src);
+
+
+  SetStruct& operator=(SetStruct&&) noexcept;
+  SetStruct& operator=(const SetStruct& src);
+
+  ~SetStruct();
+
+ private:
+  ::std::set<::test::fixtures::basic-python-capi::MyEnum> __fbthrift_field_enumz;
+ private:
+  ::std::set<::std::int32_t> __fbthrift_field_intz;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>> __fbthrift_field_binnaz;
+ private:
+  std::unordered_set<::std::string> __fbthrift_field_encoded;
+ private:
+  std::unordered_set<uint64_t> __fbthrift_field_uidz;
+ private:
+  folly::F14FastSet<uint8_t> __fbthrift_field_charz;
+ private:
+  ::std::vector<::std::set<::std::int64_t>> __fbthrift_field_setz;
+ private:
+  apache::thrift::detail::isset_bitset<6, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const SetStruct&) const;
+  bool operator<(const SetStruct&) const;
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumz_ref() const& {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumz_ref() & {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumz() const& {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumz() & {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz_ref() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz_ref() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> binnaz_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> binnaz_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> binnaz_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> binnaz_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> binnaz() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> binnaz() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> binnaz() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> binnaz() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded_ref() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded_ref() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> uidz_ref() const& {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> uidz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> uidz_ref() & {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> uidz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> uidz() const& {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> uidz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> uidz() & {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_set<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> uidz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> charz_ref() const& {
+    return {this->__fbthrift_field_charz, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> charz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_charz), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> charz_ref() & {
+    return {this->__fbthrift_field_charz, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> charz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_charz), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> charz() const& {
+    return {this->__fbthrift_field_charz, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> charz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_charz), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> charz() & {
+    return {this->__fbthrift_field_charz, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::F14FastSet<uint8_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> charz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_charz), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> setz_ref() const& {
+    return {this->__fbthrift_field_setz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> setz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_setz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> setz_ref() & {
+    return {this->__fbthrift_field_setz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> setz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_setz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> setz() const& {
+    return {this->__fbthrift_field_setz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> setz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_setz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> setz() & {
+    return {this->__fbthrift_field_setz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::set<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> setz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_setz), __isset.at(5), __isset.bit(5)};
+  }
+  const ::std::set<::test::fixtures::basic-python-capi::MyEnum>& get_enumz() const&;
+  ::std::set<::test::fixtures::basic-python-capi::MyEnum> get_enumz() &&;
+
+  template <typename T_SetStruct_enumz_struct_setter = ::std::set<::test::fixtures::basic-python-capi::MyEnum>>
+  [[deprecated("Use `FOO.enumz_ref() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
+  ::std::set<::test::fixtures::basic-python-capi::MyEnum>& set_enumz(T_SetStruct_enumz_struct_setter&& enumz_) {
+    enumz_ref() = std::forward<T_SetStruct_enumz_struct_setter>(enumz_);
+    return __fbthrift_field_enumz;
+  }
+  const ::std::set<::std::int32_t>* get_intz() const&;
+  ::std::set<::std::int32_t>* get_intz() &;
+  ::std::set<::std::int32_t>* get_intz() && = delete;
+
+  template <typename T_SetStruct_intz_struct_setter = ::std::set<::std::int32_t>>
+  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  ::std::set<::std::int32_t>& set_intz(T_SetStruct_intz_struct_setter&& intz_) {
+    intz_ref() = std::forward<T_SetStruct_intz_struct_setter>(intz_);
+    return __fbthrift_field_intz;
+  }
+  const std::unordered_set<::std::string>& get_encoded() const&;
+  std::unordered_set<::std::string> get_encoded() &&;
+
+  template <typename T_SetStruct_encoded_struct_setter = std::unordered_set<::std::string>>
+  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  std::unordered_set<::std::string>& set_encoded(T_SetStruct_encoded_struct_setter&& encoded_) {
+    encoded_ref() = std::forward<T_SetStruct_encoded_struct_setter>(encoded_);
+    return __fbthrift_field_encoded;
+  }
+  const std::unordered_set<uint64_t>& get_uidz() const&;
+  std::unordered_set<uint64_t> get_uidz() &&;
+
+  template <typename T_SetStruct_uidz_struct_setter = std::unordered_set<uint64_t>>
+  [[deprecated("Use `FOO.uidz_ref() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
+  std::unordered_set<uint64_t>& set_uidz(T_SetStruct_uidz_struct_setter&& uidz_) {
+    uidz_ref() = std::forward<T_SetStruct_uidz_struct_setter>(uidz_);
+    return __fbthrift_field_uidz;
+  }
+  const folly::F14FastSet<uint8_t>& get_charz() const&;
+  folly::F14FastSet<uint8_t> get_charz() &&;
+
+  template <typename T_SetStruct_charz_struct_setter = folly::F14FastSet<uint8_t>>
+  [[deprecated("Use `FOO.charz_ref() = BAR;` instead of `FOO.set_charz(BAR);`")]]
+  folly::F14FastSet<uint8_t>& set_charz(T_SetStruct_charz_struct_setter&& charz_) {
+    charz_ref() = std::forward<T_SetStruct_charz_struct_setter>(charz_);
+    return __fbthrift_field_charz;
+  }
+  const ::std::vector<::std::set<::std::int64_t>>& get_setz() const&;
+  ::std::vector<::std::set<::std::int64_t>> get_setz() &&;
+
+  template <typename T_SetStruct_setz_struct_setter = ::std::vector<::std::set<::std::int64_t>>>
+  [[deprecated("Use `FOO.setz_ref() = BAR;` instead of `FOO.set_setz(BAR);`")]]
+  ::std::vector<::std::set<::std::int64_t>>& set_setz(T_SetStruct_setz_struct_setter&& setz_) {
+    setz_ref() = std::forward<T_SetStruct_setz_struct_setter>(setz_);
+    return __fbthrift_field_setz;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<SetStruct>;
+  friend void swap(SetStruct& a, SetStruct& b);
+};
+
+template <class Protocol_>
+unsigned long SetStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

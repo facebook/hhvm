@@ -19,6 +19,8 @@ include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
 cpp_include "<deque>"
+cpp_include "<unordered_set>"
+cpp_include "<folly/container/F14Set.h>"
 cpp_include "<folly/small_vector.h>"
 cpp_include "thrift/test/python_capi/adapter.h"
 
@@ -104,8 +106,20 @@ struct ListStruct {
   @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
   8: list<list<list<signed_byte>>> voxels;
 }
-
 typedef ListStruct ListAlias
+
+@python.MarshalCapi
+struct SetStruct {
+  1: set<MyEnum> enumz;
+  2: optional set<i32> intz;
+  @thrift.Box
+  3: optional set<binary> binnaz;
+  4: set<binary> (cpp.template = "std::unordered_set") encoded;
+  5: set<i64> (cpp.type = "std::unordered_set<uint64_t>") uidz;
+  @cpp.Type{name = "folly::F14FastSet<uint8_t>"}
+  6: set<byte> charz;
+  7: list<set<i64>> setz;
+}
 
 @python.MarshalCapi
 struct ComposeStruct {

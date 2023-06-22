@@ -257,6 +257,58 @@ struct Extractor<list<ElemT, CppT>> : public BaseExtractor<list<ElemT, CppT>> {
   }
 };
 
+template <typename ElemT, typename CppT>
+struct Extractor<set<ElemT, CppT>> : public BaseExtractor<set<ElemT, CppT>> {
+  using set_t = set<ElemT, CppT>;
+  ExtractorResult<set_t> operator()(PyObject* obj) {
+    StrongRef iter(PyObject_GetIter(obj));
+    if (!iter) {
+      return EXTRACTOR_ERROR(set_t, "GetIter failed");
+    }
+    CppT ret;
+    if constexpr (has_reserve_v<CppT>) {
+      Py_ssize_t len = PySet_Size(obj);
+      if (len == -1) {
+        return EXTRACTOR_ERROR(set_t, "len() failed");
+      } else if (len == 0) {
+        return ret;
+      }
+      ret.reserve(static_cast<size_t>(len));
+    }
+    Extractor<ElemT> extractor;
+    while (auto item = StrongRef(PyIter_Next(*iter))) {
+      auto extracted = extractor(*item);
+      if (!extracted.hasValue()) {
+        return EXTRACTOR_ERROR(set_t, "extractor error while iterating");
+      }
+      ret.insert(std::move(*extracted));
+    }
+    return ret;
+  }
+  int typeCheck(PyObject* obj) {
+    if (PySet_Check(obj) != 1) {
+      return 0;
+    }
+    const Py_ssize_t size = PySet_Size(obj);
+    // Just check the first element given type checking inherent in
+    // thrift-python struct construction; thrift consts
+    if (size == 0) {
+      return 1;
+    }
+    StrongRef iter(PyObject_GetIter(obj));
+    if (!iter) {
+      PyErr_Clear();
+      return 0;
+    }
+    StrongRef front_obj(PyIter_Next(*iter));
+    if (!front_obj) {
+      PyErr_Clear();
+      return 0;
+    }
+    return Extractor<ElemT>{}.typeCheck(*front_obj);
+  }
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

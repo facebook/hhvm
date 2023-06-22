@@ -279,6 +279,53 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   6,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::name = "SetStruct";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::fields_names = {{
+  "enumz",
+  "intz",
+  "binnaz",
+  "encoded",
+  "uidz",
+  "charz",
+  "setz",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::fields_types = {{
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_LIST,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::storage_names = {{
+  "__fbthrift_field_enumz",
+  "__fbthrift_field_intz",
+  "__fbthrift_field_binnaz",
+  "__fbthrift_field_encoded",
+  "__fbthrift_field_uidz",
+  "__fbthrift_field_charz",
+  "__fbthrift_field_setz",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>::isset_indexes = {{
+  0,
+  1,
+  -1,
+  2,
+  3,
+  4,
+  5,
+}};
+
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::name = "ComposeStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_names = {{
   "enum_",

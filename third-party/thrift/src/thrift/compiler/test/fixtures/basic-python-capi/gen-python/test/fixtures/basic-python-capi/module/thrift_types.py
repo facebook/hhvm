@@ -511,6 +511,94 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ListStruct, self)
 
 
+class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enumz",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "intz",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "binnaz",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "encoded",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "uidz",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "charz",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_byte),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "setz",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.SetStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/SetStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_SetStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.SetStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.SetStruct, self)
+
+
 class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -1425,6 +1513,8 @@ def _fbthrift_metadata__struct_PrimitiveStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
 def _fbthrift_metadata__struct_ListStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ListStruct()
+def _fbthrift_metadata__struct_SetStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_SetStruct()
 def _fbthrift_metadata__struct_ComposeStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
 def _fbthrift_metadata__struct_MyUnion():
@@ -1459,6 +1549,7 @@ _fbthrift_all_structs = [
     EmptyStruct,
     PrimitiveStruct,
     ListStruct,
+    SetStruct,
     ComposeStruct,
     MyUnion,
     MyStructPatch,

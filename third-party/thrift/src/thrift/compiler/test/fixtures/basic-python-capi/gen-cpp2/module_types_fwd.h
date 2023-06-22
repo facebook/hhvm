@@ -18,6 +18,7 @@ class StringPair;
 class VapidStruct;
 class PrimitiveStruct;
 class ListStruct;
+class SetStruct;
 class ComposeStruct;
 class OurUnion;
 class MyStructPatchStruct;

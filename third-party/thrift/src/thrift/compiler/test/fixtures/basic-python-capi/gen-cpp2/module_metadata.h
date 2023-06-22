@@ -69,6 +69,11 @@ class StructMetadata<::test::fixtures::basic-python-capi::ListStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::basic-python-capi::SetStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

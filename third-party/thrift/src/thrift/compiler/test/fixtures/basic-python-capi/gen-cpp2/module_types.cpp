@@ -1178,6 +1178,212 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::SetStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::SetStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* SetStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/SetStruct";
+}
+
+const folly::StringPiece SetStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<SetStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece SetStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SetStruct>::name;
+}
+
+SetStruct::SetStruct(const SetStruct&) = default;
+SetStruct& SetStruct::operator=(const SetStruct&) = default;
+SetStruct::SetStruct() {
+}
+
+
+SetStruct::~SetStruct() {}
+
+SetStruct::SetStruct(FOLLY_MAYBE_UNUSED SetStruct&& other) noexcept :
+    __fbthrift_field_enumz(std::move(other.__fbthrift_field_enumz)),
+    __fbthrift_field_intz(std::move(other.__fbthrift_field_intz)),
+    __fbthrift_field_binnaz(std::move(other.__fbthrift_field_binnaz)),
+    __fbthrift_field_encoded(std::move(other.__fbthrift_field_encoded)),
+    __fbthrift_field_uidz(std::move(other.__fbthrift_field_uidz)),
+    __fbthrift_field_charz(std::move(other.__fbthrift_field_charz)),
+    __fbthrift_field_setz(std::move(other.__fbthrift_field_setz)),
+    __isset(other.__isset) {
+}
+
+SetStruct& SetStruct::operator=(FOLLY_MAYBE_UNUSED SetStruct&& other) noexcept {
+    this->__fbthrift_field_enumz = std::move(other.__fbthrift_field_enumz);
+    this->__fbthrift_field_intz = std::move(other.__fbthrift_field_intz);
+    this->__fbthrift_field_binnaz = std::move(other.__fbthrift_field_binnaz);
+    this->__fbthrift_field_encoded = std::move(other.__fbthrift_field_encoded);
+    this->__fbthrift_field_uidz = std::move(other.__fbthrift_field_uidz);
+    this->__fbthrift_field_charz = std::move(other.__fbthrift_field_charz);
+    this->__fbthrift_field_setz = std::move(other.__fbthrift_field_setz);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+SetStruct::SetStruct(apache::thrift::FragileConstructor, ::std::set<::test::fixtures::basic-python-capi::MyEnum> enumz__arg, ::std::set<::std::int32_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::set<::std::string>> binnaz__arg, std::unordered_set<::std::string> encoded__arg, std::unordered_set<uint64_t> uidz__arg, folly::F14FastSet<uint8_t> charz__arg, ::std::vector<::std::set<::std::int64_t>> setz__arg) :
+    __fbthrift_field_enumz(std::move(enumz__arg)),
+    __fbthrift_field_intz(std::move(intz__arg)),
+    __fbthrift_field_binnaz(std::move(binnaz__arg)),
+    __fbthrift_field_encoded(std::move(encoded__arg)),
+    __fbthrift_field_uidz(std::move(uidz__arg)),
+    __fbthrift_field_charz(std::move(charz__arg)),
+    __fbthrift_field_setz(std::move(setz__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+}
+
+
+void SetStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_enumz.clear();
+  this->__fbthrift_field_intz.clear();
+  this->__fbthrift_field_binnaz.reset();
+  this->__fbthrift_field_encoded.clear();
+  this->__fbthrift_field_uidz.clear();
+  this->__fbthrift_field_charz.clear();
+  this->__fbthrift_field_setz.clear();
+  __isset = {};
+}
+
+void SetStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool SetStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool SetStruct::operator==(FOLLY_MAYBE_UNUSED const SetStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enumz_ref() == rhs.enumz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.binnaz_ref(), rhs.binnaz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.uidz_ref() == rhs.uidz_ref())) {
+    return false;
+  }
+  if (!(lhs.charz_ref() == rhs.charz_ref())) {
+    return false;
+  }
+  if (!(lhs.setz_ref() == rhs.setz_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool SetStruct::operator<(FOLLY_MAYBE_UNUSED const SetStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::set<::test::fixtures::basic-python-capi::MyEnum>& SetStruct::get_enumz() const& {
+  return __fbthrift_field_enumz;
+}
+
+::std::set<::test::fixtures::basic-python-capi::MyEnum> SetStruct::get_enumz() && {
+  return std::move(__fbthrift_field_enumz);
+}
+
+const ::std::set<::std::int32_t>* SetStruct::get_intz() const& {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+::std::set<::std::int32_t>* SetStruct::get_intz() & {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+const std::unordered_set<::std::string>& SetStruct::get_encoded() const& {
+  return __fbthrift_field_encoded;
+}
+
+std::unordered_set<::std::string> SetStruct::get_encoded() && {
+  return std::move(__fbthrift_field_encoded);
+}
+
+const std::unordered_set<uint64_t>& SetStruct::get_uidz() const& {
+  return __fbthrift_field_uidz;
+}
+
+std::unordered_set<uint64_t> SetStruct::get_uidz() && {
+  return std::move(__fbthrift_field_uidz);
+}
+
+const folly::F14FastSet<uint8_t>& SetStruct::get_charz() const& {
+  return __fbthrift_field_charz;
+}
+
+folly::F14FastSet<uint8_t> SetStruct::get_charz() && {
+  return std::move(__fbthrift_field_charz);
+}
+
+const ::std::vector<::std::set<::std::int64_t>>& SetStruct::get_setz() const& {
+  return __fbthrift_field_setz;
+}
+
+::std::vector<::std::set<::std::int64_t>> SetStruct::get_setz() && {
+  return std::move(__fbthrift_field_setz);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED SetStruct& a, FOLLY_MAYBE_UNUSED SetStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_enumz, b.__fbthrift_field_enumz);
+  swap(a.__fbthrift_field_intz, b.__fbthrift_field_intz);
+  swap(a.__fbthrift_field_binnaz, b.__fbthrift_field_binnaz);
+  swap(a.__fbthrift_field_encoded, b.__fbthrift_field_encoded);
+  swap(a.__fbthrift_field_uidz, b.__fbthrift_field_uidz);
+  swap(a.__fbthrift_field_charz, b.__fbthrift_field_charz);
+  swap(a.__fbthrift_field_setz, b.__fbthrift_field_setz);
+  swap(a.__isset, b.__isset);
+}
+
+template void SetStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t SetStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t SetStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t SetStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SetStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SetStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SetStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SetStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::ComposeStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

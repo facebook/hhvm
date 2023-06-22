@@ -137,6 +137,26 @@ struct Constructor<::test::fixtures::basic-python-capi::ListStruct> {
 };
 
 template <>
+struct Extractor<::test::fixtures::basic-python-capi::SetStruct>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::SetStruct> {
+  ExtractorResult<::test::fixtures::basic-python-capi::SetStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::SetStruct>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::SetStruct>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::SetStruct> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::SetStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::SetStruct&& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic-python-capi::ComposeStruct>
     : public BaseExtractor<::test::fixtures::basic-python-capi::ComposeStruct> {
   ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct> operator()(PyObject* obj);

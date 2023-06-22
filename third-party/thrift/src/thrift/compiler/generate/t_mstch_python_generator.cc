@@ -145,7 +145,38 @@ std::string get_cpp_template(const t_type& type, const char* default_ = "") {
 }
 
 std::string format_marshal_type(
-    const t_type* field_type, std::string type_override = "") {
+    const t_type* field_type, std::string type_override = "");
+
+std::string format_unary_type(
+    const t_type* type,
+    const t_type* elem_type,
+    const char* container,
+    std::string type_override) {
+  if (type_override.empty()) {
+    // gets cpp.type overrides
+    type_override = fmt::to_string(cpp2::get_type(type));
+  }
+  if (!type_override.empty()) {
+    std::string elem_thrift_type = format_marshal_type(
+        elem_type, fmt::format("{}::value_type", type_override));
+    return fmt::format(
+        "{}<{}, {}>", container, elem_thrift_type, type_override);
+  }
+  auto template_override = get_cpp_template(*type);
+  std::string elem_thrift_type = format_marshal_type(elem_type);
+  if (!template_override.empty()) {
+    return fmt::format(
+        "{}<{}, {}<native_t<{}>>>",
+        container,
+        elem_thrift_type,
+        template_override,
+        elem_thrift_type);
+  }
+  return fmt::format("{}<{}>", container, elem_thrift_type);
+}
+
+std::string format_marshal_type(
+    const t_type* field_type, std::string type_override) {
   const t_type* type = field_type->get_true_type();
   if (type->is_bool()) {
     return "bool";
@@ -180,24 +211,10 @@ std::string format_marshal_type(
         cpp2::get_name(type));
   } else if (type->is_list()) {
     const auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-    if (type_override.empty()) {
-      type_override = fmt::to_string(cpp2::get_type(type));
-    }
-    if (!type_override.empty()) {
-      std::string elem_thrift_type = format_marshal_type(
-          elem_type, fmt::format("{}::value_type", type_override));
-      return fmt::format("list<{}, {}>", elem_thrift_type, type_override);
-    }
-    auto template_override = get_cpp_template(*type);
-    std::string elem_thrift_type = format_marshal_type(elem_type);
-    if (!template_override.empty()) {
-      return fmt::format(
-          "list<{}, {}<native_t<{}>>>",
-          elem_thrift_type,
-          template_override,
-          elem_thrift_type);
-    }
-    return fmt::format("list<{}>", elem_thrift_type);
+    return format_unary_type(type, elem_type, "list", std::move(type_override));
+  } else if (type->is_set()) {
+    const auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
+    return format_unary_type(type, elem_type, "set", std::move(type_override));
   }
   // if not supported, empty string to cause compile error
   return "";

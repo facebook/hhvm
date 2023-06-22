@@ -16,9 +16,12 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <Python.h>
 #include <folly/Preprocessor.h>
 
 namespace apache {
@@ -29,6 +32,31 @@ namespace capi {
 #define __CAPI_LOCATED_ERROR_IMPL(MESSAGE, LINE) \
   __FILE__ ":" FOLLY_PP_STRINGIZE(LINE) ": " MESSAGE
 #define CAPI_LOCATED_ERROR(MESSAGE) __CAPI_LOCATED_ERROR_IMPL(MESSAGE, __LINE__)
+
+/*
+ * RAII wrapper around PyObject* representing a strong reference, i.e.,
+ * a PyObject* returned by a C api function that returns a *new* reference.
+ * The StrongRef will decrement when dropped, so it can safely encapsulate a
+ * a temporarily used object or one that may be dropped in an error case.
+ */
+struct StrongRef {
+  PyObject* obj_;
+  // Constructor "steals" a reference so that object, so it should onl be
+  // constructed from "new" reference function returns
+  explicit StrongRef(PyObject* o) : obj_(o) {}
+  // When StrongRef goes out of scope, the contained PyObject* will have
+  // a refcount one less than when it was constructed, unless it is released.
+  ~StrongRef() { Py_XDECREF(obj_); }
+  // Return a borrowed reference to the contained object.
+  PyObject* operator*() const { return obj_; }
+  operator bool() const { return obj_ != nullptr; }
+  // Release ownership to function that "steals" reference
+  PyObject* release() && {
+    PyObject* ptr = obj_;
+    obj_ = nullptr;
+    return ptr;
+  }
+};
 
 template <typename T>
 struct native {
@@ -89,8 +117,17 @@ struct native<ComposedStruct<T>> {
 template <typename T, typename CppT = std::vector<native_t<T>>>
 struct list {};
 
+// T is the element type, CppT is the full type
+template <typename T, typename CppT = std::set<native_t<T>>>
+struct set {};
+
 template <typename T, typename CppT>
 struct native<list<T, CppT>> {
+  using type = CppT;
+};
+
+template <typename T, typename CppT>
+struct native<set<T, CppT>> {
   using type = CppT;
 };
 

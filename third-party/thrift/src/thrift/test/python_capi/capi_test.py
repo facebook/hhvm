@@ -28,6 +28,7 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     MyStructPatch,  # this import breaks autodeps w/o manual
     MyUnion,
     PrimitiveStruct,
+    SetStruct,
     StringPair,
 )
 
@@ -101,6 +102,28 @@ class PythonCapiFixture(unittest.TestCase):
             matrix=[],
             ucharz=[[], [9, 5, 1], []],
             voxels=[[], [[]], [[], [3], []]],
+        )
+
+    def set_struct(self) -> SetStruct:
+        return SetStruct(
+            enumz={MyEnum.MyValue1, MyEnum.MyValue2},
+            intz={1, 1, 2, 3, 5, 8, 13, 23, 42},
+            binnaz={b"abcd", b"efgh", b"ijkl", b"mnop"},
+            encoded={b"abcd", b"bcda", b"cdab", b"dabc"},
+            uidz={0, 10, 100, 1000, 10000},
+            charz={0, 1, 2, 4, 8, 16},
+            setz=[{1, 2, 3}, {}, {2, 3}, {1, 2, 3}],
+        )
+
+    def empty_sets(self) -> SetStruct:
+        return SetStruct(
+            enumz={},
+            intz={},
+            binnaz={},
+            encoded={},
+            uidz={},
+            charz={},
+            setz=[{}],
         )
 
     def composed(self) -> ComposeStruct:
@@ -187,6 +210,17 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).intz)
         self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).stringz)
 
+    def test_roundtrip_marshal_SetStruct(self) -> None:
+        self.assertEqual(SetStruct(), fixture.roundtrip_SetStruct(SetStruct()))
+        self.assertEqual(
+            self.empty_sets(), fixture.roundtrip_SetStruct(self.empty_sets())
+        )
+        expected = self.set_struct()
+        actual = fixture.roundtrip_SetStruct(self.set_struct())
+        # sets are serialized in a non-sorted order, so compare field by field
+        for f in ["enumz", "intz", "binnaz", "encoded", "uidz", "charz", "setz"]:
+            self.assertEqual(getattr(expected, f), getattr(actual, f), f)
+
     def test_roundtrip_marshal_ComposeStruct(self) -> None:
         self.assertEqual(
             ComposeStruct(), fixture.roundtrip_ComposeStruct(ComposeStruct())
@@ -243,6 +277,13 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertTrue(fixture.check_ListStruct(ListStruct()))
         self.assertFalse(fixture.check_ListStruct(MyEnum.MyValue1))
         self.assertFalse(fixture.check_ListStruct(self.my_struct()))
+
+    def test_typeCheck_SetStruct(self) -> None:
+        self.assertTrue(fixture.check_SetStruct(self.set_struct()))
+        self.assertTrue(fixture.check_SetStruct(self.empty_sets()))
+        self.assertTrue(fixture.check_SetStruct(SetStruct()))
+        self.assertFalse(fixture.check_SetStruct(MyEnum.MyValue1))
+        self.assertFalse(fixture.check_SetStruct(self.my_struct()))
 
     def test_typeCheck_ComposeStruct(self) -> None:
         self.assertTrue(fixture.check_ComposeStruct(self.composed()))

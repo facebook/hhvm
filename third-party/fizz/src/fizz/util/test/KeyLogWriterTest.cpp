@@ -20,7 +20,7 @@ TEST(KeyLogWriterTest, WriteLog) {
       random, KeyLogWriter::Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET, secret);
 
   std::vector<std::string> fields;
-  folly::split(" ", logLine, fields);
+  folly::split(' ', logLine, fields);
   EXPECT_EQ(fields.size(), 3);
   EXPECT_EQ(fields[0], "CLIENT_HANDSHAKE_TRAFFIC_SECRET");
   EXPECT_EQ(fields[1], folly::hexlify(random));

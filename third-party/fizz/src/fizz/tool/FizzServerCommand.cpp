@@ -686,7 +686,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     {"-ciphers", {true, [&ciphers](const std::string& arg) {
         ciphers.clear();
         std::vector<std::string> list;
-        folly::split(":", arg, list);
+        folly::split(':', arg, list);
         for (const auto& item : list) {
           try {
             ciphers.push_back(splitParse<CipherSuite>(item, ","));
@@ -720,7 +720,7 @@ int fizzServerCommand(const std::vector<std::string>& args) {
     {"-early", {false, [&early](const std::string&) { early = true; }}},
     {"-alpn", {true, [&alpns](const std::string& arg) {
         alpns.clear();
-        folly::split(":", arg, alpns);
+        folly::split(':', arg, alpns);
     }}},
     {"-certcompression", {true, [&compAlgos](const std::string& arg) {
         try {

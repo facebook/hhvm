@@ -579,7 +579,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     }}},
     {"-alpn", {true, [&alpns](const std::string& arg) {
         alpns.clear();
-        folly::split(",", arg, alpns);
+        folly::split(',', arg, alpns);
     }}},
     {"-certcompression", {true, [&compAlgos](const std::string& arg) {
         try {

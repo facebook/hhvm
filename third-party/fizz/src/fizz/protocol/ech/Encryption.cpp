@@ -91,7 +91,7 @@ bool isValidPublicName(const std::string& publicName) {
   }
 
   std::vector<std::string> parts;
-  folly::split(".", publicName, parts, false);
+  folly::split('.', publicName, parts, false);
 
   // Check that each part is a valid LDH label ([a-z,A-Z,0-9,-])
   for (auto& part : parts) {

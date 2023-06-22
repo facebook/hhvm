@@ -77,8 +77,7 @@ struct FdClientBatchingTest : public testing::Test {
     }
 
     apache::thrift::RpcOptions rpcOptions;
-    rpcOptions.setWriteHeader(
-        "__UNSAFE_FDS_FOR_REQUEST__", commaSeparatedFds(fds));
+    rpcOptions.setFdsToSend(fds);
     return client_->semifuture_echoRequest(rpcOptions, msg)
         .via(&evb_)
         .thenValue([msg](auto&& res) {
@@ -100,7 +99,7 @@ struct FdClientBatchingTest : public testing::Test {
     // Requests are enqueued on EventBase, to be processed as a batch.
     EXPECT_EQ(0, checkQueue_.readCount());
     for (const auto& [_data, fds, _dataRe] : requests) {
-      expectUseCount(2, fds); // `requests` + `checkQueue_`
+      expectUseCount(3, fds); // `RpcOptions` + `requests` + `checkQueue_`
     }
 
     EXPECT_EQ(

@@ -24,12 +24,6 @@ namespace detail {
 template <class Metadata>
 Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data) {
-  DCHECK(
-      !metadata.otherMetadata() ||
-      !metadata.otherMetadata()->contains("__UNSAFE_FDS_FOR_REQUEST__"))
-      << "Not implemented: attaching FDs via "
-      << "otherMetadata[__UNSAFE_FDS_FOR_REQUEST__] on this code path";
-
   CompactProtocolWriter writer;
   // Default is to leave some headroom for rsocket headers
   size_t serSize = metadata.serializedSizeZC(&writer);

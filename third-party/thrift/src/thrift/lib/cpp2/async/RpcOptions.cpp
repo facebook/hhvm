@@ -279,5 +279,17 @@ const std::optional<uint32_t>& RpcOptions::getRequestDeadlineMs() const {
   return requestDeadlineMs_;
 }
 
+RpcOptions& RpcOptions::setFdsToSend(folly::SocketFds::ToSend fdsToSend) {
+  fdsToSend_ = std::move(fdsToSend);
+  return *this;
+}
+
+folly::SocketFds RpcOptions::copySocketFdsToSend() const {
+  if (LIKELY(fdsToSend_.empty())) {
+    return folly::SocketFds{};
+  }
+  return folly::SocketFds{fdsToSend_};
+}
+
 } // namespace thrift
 } // namespace apache

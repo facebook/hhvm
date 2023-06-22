@@ -167,6 +167,9 @@ class RpcOptions {
   RpcOptions& setRequestDeadlineMs(uint32_t deadlineMs);
   const std::optional<uint32_t>& getRequestDeadlineMs() const;
 
+  RpcOptions& setFdsToSend(folly::SocketFds::ToSend);
+  folly::SocketFds copySocketFdsToSend() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -206,6 +209,8 @@ class RpcOptions {
 
   // Pre request deadline.
   std::optional<uint32_t> requestDeadlineMs_;
+
+  folly::SocketFds::ToSend fdsToSend_;
 };
 
 } // namespace thrift

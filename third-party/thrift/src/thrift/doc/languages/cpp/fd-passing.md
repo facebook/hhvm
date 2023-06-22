@@ -19,12 +19,21 @@ Historically, Thrift has focused on communication with remote hosts over TCP con
 
 ## How to pass FDs over Thrift
 
-For a client to pass FDs to a server, we use the following very temporary hack. This will be improved shortly:
+For a client to pass FDs to a server, use `RpcOptions::setFdsToSend`. To read FDs in a server's response, use the `header_semifuture_` client methods, and look on `THeader::fds`.
 
 ```
+SocketFds::ToSend fds;
+fds.emplace_back(std::make_shared(std::move(file1)));
+fds.emplace_back(std::make_shared(std::move(file2)));
 apache::thrift::RpcOptions rpcOptions;
-rpcOptions.setWriteHeader("__UNSAFE_FDS_FOR_REQUEST__", "FD1,FD2");
-client.header_semifuture_METHOD(rpcOptions, ...)...
+rpcOptions.setFdsToSend(std::move(fds));  // Send FDs to server
+client.header_semifuture_METHOD(rpcOptions, ...).thenTry([](auto maybeRet) {
+  ...
+  // Receive FDs from server
+  auto [res, header] = std::move(*maybeRet);
+  CHECK(!header->fds.empty());
+  auto fds = header->fds.releaseReceived();
+});
 ```
 
 On the server handler, FDs can be received and sent via `THeader::fds`:
@@ -32,11 +41,14 @@ On the server handler, FDs can be received and sent via `THeader::fds`:
 ```
 folly::coro::Task<...> co_METHOD(
     apache::thrift::RequestParams params, ...) override {
-  auto inFds = reqCtx->getHeader()->fds.releaseReceived();
+  auto& headerFds = reqCtx->getHeader()->fds;
+  CHECK(!headerFds.empty());
+  auto inFds = headerFds.releaseReceived();
   ...
+  // Send FDs back to client -- remember, you must `releaseReceive` first.
   folly::SocketFds::ToSend outFds;
   ...
-  reqCtx->getHeader()->fds.dcheckEmpty() = folly::SocketFds{std::move(outFds)};
+  headerFds.dcheckEmpty() = folly::SocketFds{std::move(outFds)};
 }
 ```
 

@@ -168,11 +168,13 @@ class RocketClientChannel final : public ClientChannel,
       RequestClientCallback::Ptr cb);
 
   void sendSingleRequestNoResponse(
+      const RpcOptions& rpcOptions,
       RequestRpcMetadata&& metadata,
       std::unique_ptr<folly::IOBuf> buf,
       RequestClientCallback::Ptr cb);
 
   void sendSingleRequestSingleResponse(
+      const RpcOptions& rpcOptions,
       RequestRpcMetadata&& metadata,
       std::chrono::milliseconds timeout,
       std::unique_ptr<folly::IOBuf> buf,

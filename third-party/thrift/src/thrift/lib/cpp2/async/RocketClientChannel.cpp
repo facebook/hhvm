@@ -50,7 +50,6 @@
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
-#include <thrift/lib/cpp2/transport/rocket/FdSocketMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
@@ -847,14 +846,13 @@ void RocketClientChannel::sendRequestStream(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
-  auto payload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rocket::releaseFdsFromMetadata(metadata),
-      getTransportWrapper());
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestStream(
-      std::move(payload),
+      rocket::packWithFds(
+          &metadata,
+          std::move(buf),
+          rpcOptions.copySocketFdsToSend(),
+          getTransportWrapper()),
       firstResponseTimeout,
       rpcOptions.getChunkTimeout(),
       rpcOptions.getChunkBufferSize(),
@@ -892,14 +890,13 @@ void RocketClientChannel::sendRequestSink(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
-  auto payload = rocket::packWithFds(
-      &metadata,
-      std::move(buf),
-      rocket::releaseFdsFromMetadata(metadata),
-      getTransportWrapper());
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestSink(
-      std::move(payload),
+      rocket::packWithFds(
+          &metadata,
+          std::move(buf),
+          rpcOptions.copySocketFdsToSend(),
+          getTransportWrapper()),
       firstResponseTimeout,
       new FirstRequestProcessorSink(
           header->getProtocolId(),
@@ -941,12 +938,16 @@ void RocketClientChannel::sendThriftRequest(
   switch (kind) {
     case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
       sendSingleRequestNoResponse(
-          std::move(metadata), std::move(buf), std::move(cb));
+          rpcOptions, std::move(metadata), std::move(buf), std::move(cb));
       break;
 
     case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
       sendSingleRequestSingleResponse(
-          std::move(metadata), timeout, std::move(buf), std::move(cb));
+          rpcOptions,
+          std::move(metadata),
+          timeout,
+          std::move(buf),
+          std::move(cb));
       break;
 
     case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
@@ -960,13 +961,14 @@ void RocketClientChannel::sendThriftRequest(
 }
 
 void RocketClientChannel::sendSingleRequestNoResponse(
+    const RpcOptions& rpcOptions,
     RequestRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
   auto requestPayload = rocket::packWithFds(
       &metadata,
       std::move(buf),
-      rocket::releaseFdsFromMetadata(metadata),
+      rpcOptions.copySocketFdsToSend(),
       getTransportWrapper());
   const bool isSync = cb->isSync();
   SingleRequestNoResponseCallback callback(std::move(cb));
@@ -982,6 +984,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
 }
 
 void RocketClientChannel::sendSingleRequestSingleResponse(
+    const RpcOptions& rpcOptions,
     RequestRpcMetadata&& metadata,
     std::chrono::milliseconds timeout,
     std::unique_ptr<folly::IOBuf> buf,
@@ -990,7 +993,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
   auto requestPayload = rocket::packWithFds(
       &metadata,
       std::move(buf),
-      rocket::releaseFdsFromMetadata(metadata),
+      rpcOptions.copySocketFdsToSend(),
       getTransportWrapper());
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =

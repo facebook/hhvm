@@ -626,7 +626,7 @@ struct AdaptedEncode {
                 prot, m)) {
           return decltype(adapter)::template encode<Protocol, Tag>(prot, m);
         },
-        [&](...) { return Encode<Tag>{}(prot, Adapter::toThrift(m)); })(
+        [&](auto...) { return Encode<Tag>{}(prot, Adapter::toThrift(m)); })(
         Adapter{});
   }
 };
@@ -905,7 +905,7 @@ struct Decode<type::adapted<Adapter, Tag>> {
           adapter_clear<Adapter, Tag, U>(m);
           decltype(adapter)::template decode<Protocol, Tag>(prot, m);
         },
-        [&](...) {
+        [&](auto...) {
           constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
               has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
           folly::if_constexpr<hasInplaceToThrift>(

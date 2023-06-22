@@ -112,3 +112,16 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       let gconst_tasts = calc_tast check_const constants in
       let module_tasts = calc_tast check_module modules in
       { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts })
+
+let calc_errors_and_tast_for
+    (type def res)
+    (ctx : Provider_context.t)
+    ?(drop_fixmed = true)
+    (fn : Relative_path.t)
+    (typecheck : Provider_context.t -> full_ast:def -> res option)
+    ~(full_ast : def)
+    (id : FileInfo.id) : Errors.t * res SMap.t =
+  Errors.do_with_context ~drop_fixmed fn (fun () ->
+      typecheck ctx ~full_ast
+      |> Option.fold ~init:SMap.empty ~f:(fun acc tast ->
+             SMap.add (FileInfo.id_name id) tast acc))

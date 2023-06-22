@@ -122,3 +122,25 @@ impl rusqlite::ToSql for NameType {
         Ok(rusqlite::types::ToSqlOutput::from(*self as i64))
     }
 }
+
+impl FileInfo {
+    pub fn get_ids(&self) -> Vec<(NameType, Id)> {
+        let FileInfo {
+            hash: _,
+            file_mode: _,
+            comments: _,
+            funs,
+            classes,
+            typedefs,
+            consts,
+            modules,
+        } = self;
+        funs.iter()
+            .map(|id| (NameType::Fun, id.clone()))
+            .chain(classes.iter().map(|id| (NameType::Class, id.clone())))
+            .chain(typedefs.iter().map(|id| (NameType::Typedef, id.clone())))
+            .chain(consts.iter().map(|id| (NameType::Const, id.clone())))
+            .chain(modules.iter().map(|id| (NameType::Module, id.clone())))
+            .collect()
+    }
+}

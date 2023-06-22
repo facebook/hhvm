@@ -149,6 +149,15 @@ type by_names = {
   module_tasts: def SMap.t;
 }
 
+let empty_by_names =
+  {
+    fun_tasts = SMap.empty;
+    class_tasts = SMap.empty;
+    typedef_tasts = SMap.empty;
+    gconst_tasts = SMap.empty;
+    module_tasts = SMap.empty;
+  }
+
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
       by_names) : def list =

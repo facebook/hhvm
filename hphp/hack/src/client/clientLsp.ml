@@ -41,6 +41,9 @@ type env = {
   serverless_ide: serverless_ide;
 }
 
+(** When did this binary start? *)
+let binary_start_time = Unix.gettimeofday ()
+
 (** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
 let from = ref "[init]"
 
@@ -2822,8 +2825,22 @@ let kickoff_shell_out_and_maybe_cancel
           cmd
       end
     in
+    (* Two environment variables FIND_HH_START_TIME and FIND_HH_RETRIED are
+       used in HackEventLogger.ml for telemetry, expected to be set by the
+       caller find_hh.sh, but [Exec_command.Current_executable] bypasses
+       find_hh.sh and hence we need to override them ourselves. There's no
+       need for removing existing definitions from [Unix.environment ()]
+       because glibc putenv/getenv will grab the first one. *)
+    let env =
+      Array.append
+        [|
+          Printf.sprintf "FIND_HH_START_TIME=%0.3f" (Unix.gettimeofday ());
+          "FIND_HH_RETRIED=0";
+        |]
+        (Unix.environment ())
+    in
     let process =
-      Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
+      Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel ~env
     in
     log "kickoff_shell_out: %s" (String.concat ~sep:" " (Array.to_list cmd));
     let state =
@@ -5319,13 +5336,13 @@ let track_edits_if_necessary (state : state) (event : event) : state =
     Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
   | _ -> state
 
-(* cancel_if_stale: If a message is stale, throw the necessary exception to
-   cancel it. A message is considered stale if it's sufficiently old and there
-   are other messages in the queue that are newer than it. *)
 let short_timeout = 2.5
 
 let long_timeout = 15.0
 
+(** If a message is stale, throw the necessary exception to cancel it. A message is
+considered stale if it's sufficiently old and there are other messages in the queue
+that are newer than it. *)
 let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
     unit Lwt.t =
   let time_elapsed = Unix.gettimeofday () -. timestamp in
@@ -5334,13 +5351,15 @@ let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
     && Jsonrpc.has_message client
     && not (Sys_utils.deterministic_behavior_for_tests ())
   then
+    let message =
+      if Float.(timestamp < binary_start_time) then
+        "binary took too long to launch"
+      else
+        "request timed out"
+    in
     raise
       (Error.LspException
-         {
-           Error.code = Error.RequestCancelled;
-           message = "request timed out";
-           data = None;
-         })
+         { Error.code = Error.RequestCancelled; message; data = None })
   else
     Lwt.return_unit
 
@@ -5636,7 +5655,7 @@ let handle_client_message
          before doing anything else it does [cancel_if_has_pending_cancel_request]
          to see if there's a CancelRequestNotification ahead of it in the queue
          and if so just sends a cancellation response rather than handling it.
-         Thus, we'll still get around to picking the CnacelRequestNotification
+         Thus, we'll still get around to picking the CancelRequestNotification
          off the queue right here and now, which is fine!
 
          A few requests are handled asynchronously, though -- those that shell out
@@ -5959,6 +5978,7 @@ let handle_client_message
       Lwt.return_some (make_result_telemetry (List.length result))
     | (_, Some ide_service, RequestMessage (id, WorkspaceSymbolRequest params))
       ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result =
         do_workspaceSymbol_local
           ide_service
@@ -6292,11 +6312,13 @@ let handle_client_message
       Lwt.return_none
     (* workspace/symbol request *)
     | (Main_loop menv, _, RequestMessage (id, WorkspaceSymbolRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result = do_workspaceSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (WorkspaceSymbolResult result);
       Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/documentSymbol request *)
     | (Main_loop menv, _, RequestMessage (id, DocumentSymbolRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_documentSymbol menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (DocumentSymbolResult result);
       Lwt.return_some (make_result_telemetry (List.length result))
@@ -6316,6 +6338,7 @@ let handle_client_message
       Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/rename *)
     | (Main_loop menv, _, RequestMessage (id, RenameRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result = do_documentRename menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (RenameResult result);
       let result_count =
@@ -6342,6 +6365,7 @@ let handle_client_message
       Lwt.return_some (make_result_telemetry (List.length result))
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, _, RequestMessage (id, SignatureHelpRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (SignatureHelpResult result);
       let result_count =

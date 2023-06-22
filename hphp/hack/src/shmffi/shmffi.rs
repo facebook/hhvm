@@ -148,7 +148,7 @@ pub extern "C" fn shmffi_add_raw(hash: u64, ocaml_bytes: usize) -> usize {
 pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
     catch_unwind(|| {
         with(|segment| {
-            let result = match segment.table.get(&hash) {
+            let result = match segment.table.read(&hash).get() {
                 None => None,
                 Some(heap_value) => {
                     // Safety: we are not holding on to unrooted OCaml values.
@@ -183,7 +183,7 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
 pub extern "C" fn shmffi_get_raw(hash: u64) -> usize {
     catch_unwind(|| {
         with(|segment| {
-            let result = segment.table.get(&hash).map(|heap_value| {
+            let result = segment.table.read(&hash).get().map(|heap_value| {
                 // Encode header and data
                 let header_size = HeapValueHeader::RAW_SIZE;
                 let value_slice = heap_value.as_slice();
@@ -285,7 +285,8 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
     let size = with(|segment| {
         segment
             .table
-            .get(&hash)
+            .read(&hash)
+            .get()
             .map(|value| value.header.buffer_size())
     });
     let size = size.unwrap_or(0);

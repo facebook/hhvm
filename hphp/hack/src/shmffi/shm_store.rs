@@ -131,7 +131,8 @@ where
         let val_opt: Option<V> = shmffi::with(|segment| {
             segment
                 .table
-                .get(&hash)
+                .read(&hash)
+                .get()
                 .map(|heap_value| {
                     let bytes = heap_value.as_slice();
                     self.log_deserialize(bytes.len());
@@ -416,7 +417,7 @@ where
             fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
         }
         let bytes_opt = shmffi::with(|segment| {
-            segment.table.get(&hash).map(|heap_value| {
+            segment.table.read(&hash).get().map(|heap_value| {
                 self.decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())
                     .unwrap()
                     .into_owned()
@@ -520,7 +521,8 @@ where
         let bytes_opt = shmffi::with(|segment| {
             segment
                 .table
-                .get(&self.hash_key(&key))
+                .read(&self.hash_key(&key))
+                .get()
                 .map(|heap_value| -> Result<_> {
                     Ok(self
                         .decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())?

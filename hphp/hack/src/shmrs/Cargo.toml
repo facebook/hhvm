@@ -12,7 +12,6 @@ path = "shmrs.rs"
 hashbrown = { version = "0.12.3", features = ["nightly", "raw", "serde"] }
 libc = "0.2.139"
 nohash-hasher = "0.2"
-owning_ref = "0.4"
 static_assertions = "1.1.0"
 
 [dev-dependencies]

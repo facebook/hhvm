@@ -8,8 +8,6 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
 
-use owning_ref::StableAddress;
-
 use crate::error::Errno;
 
 // Some pthread-functions are not exported in the `libc` crate.
@@ -331,10 +329,6 @@ pub struct RwLockReadGuard<'a, T> {
     lock: RwLockRef<'a, T>,
 }
 
-/// The address to the underlying lock referenced by this lock guard is
-/// stable, i.e. it will not move even if you move around the gaurd itself.
-unsafe impl<T> StableAddress for RwLockReadGuard<'_, T> {}
-
 impl<T> Deref for RwLockReadGuard<'_, T> {
     type Target = T;
 
@@ -357,10 +351,6 @@ impl<T> Drop for RwLockReadGuard<'_, T> {
 pub struct RwLockWriteGuard<'a, T> {
     lock: RwLockRef<'a, T>,
 }
-
-/// The address to the underlying lock referenced by this lock guard is
-/// stable, i.e. it will not move even if you move around the gaurd itself.
-unsafe impl<T> StableAddress for RwLockWriteGuard<'_, T> {}
 
 impl<T> Deref for RwLockWriteGuard<'_, T> {
     type Target = T;

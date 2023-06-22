@@ -13,7 +13,6 @@ use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
 use hashbrown::hash_map::DefaultHashBuilder;
-use owning_ref::OwningRef;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
@@ -85,11 +84,28 @@ pub trait CMapValue {
     fn ptr(&self) -> &NonNull<u8>;
 }
 
-/// A reference to a value.
+/// Represents a lookup for a particular key.
 ///
-/// Makes sure the underlying locks are released once the value goes out o
+/// Holds a read lock on the shard for that key and can perform the lookup in
+/// that shard for the value associated with the key. If `.get()` returns
+/// `None`, the map does not contain the key.
+///
+/// Makes sure the underlying locks are released once the value goes out of
 /// scope.
-type CMapValueRef<'shm, 'a, K, V, S> = OwningRef<RwLockReadGuard<'a, Map<'shm, K, V, S>>, V>;
+pub struct CMapValueReader<'shm, 'a, K, V, S> {
+    shard: RwLockReadGuard<'a, Map<'shm, K, V, S>>,
+    key: &'a K,
+}
+
+impl<'shm, 'a, K, V, S> CMapValueReader<'shm, 'a, K, V, S>
+where
+    K: std::cmp::Eq + std::hash::Hash,
+    S: std::hash::BuildHasher,
+{
+    pub fn get(&self) -> Option<&V> {
+        self.shard.get(self.key)
+    }
+}
 
 /// A concurrent hash map implemented as multiple sharded non-concurrent
 /// hash maps.
@@ -409,14 +425,12 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         false
     }
 
-    /// Get a value from the map.
-    pub fn get(&self, key: &K) -> Option<CMapValueRef<'shm, '_, K, V, S>> {
+    /// Acquire a read lock on the shard which may contain the value associated
+    /// with the given key. If the map contains a value for this key,
+    /// `.get()` will return `Some`.
+    pub fn read<'a>(&'a self, key: &'a K) -> CMapValueReader<'shm, '_, K, V, S> {
         let shard = self.shard_for_reading(key);
-        // The OwningRef keeps track of the underlying lock around the table.
-        // It allows us to return a reference to the value, with it's lifetime
-        // bound to this lock.
-        let shard = OwningRef::new(shard);
-        shard.try_map(|m| m.get(key).ok_or(())).ok()
+        CMapValueReader { shard, key }
     }
 
     /// Inspect a value, then remove it from the map.
@@ -600,7 +614,7 @@ mod integration_tests {
         }
 
         for (key, values) in expected {
-            let value = cmap.get(&key).unwrap().0;
+            let value = cmap.read(&key).get().unwrap().0;
             assert!(values.contains(&value));
         }
 

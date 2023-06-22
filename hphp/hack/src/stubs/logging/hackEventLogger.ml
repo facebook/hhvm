@@ -60,7 +60,6 @@ type rollout_flags = {
   override_load_state_natively: bool;
   use_server_revision_tracker_v2: bool;
   rust_provider_backend: bool;
-  load_hack_64_distc_saved_state: bool;
   ide_should_use_hack_64_distc: bool;
   use_hh_distc_instead_of_hulk: bool;
   consume_streaming_errors: bool;

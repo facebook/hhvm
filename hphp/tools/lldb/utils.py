@@ -113,7 +113,6 @@ def Type(name: str, target: lldb.SBTarget) -> lldb.SBType:
     if not ty.IsValid():
         ty = target.FindTypes(name).GetTypeAtIndex(0)
     assert ty.IsValid(), f"couldn't find type '{name}'"
-    assert ty.name == name, f"type names don't match ({name} vs {ty.name})"
     return ty
 
 
@@ -365,6 +364,37 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
         return deref(referenced_value(p))
 
 
+def ptr_add(ptr: lldb.SBValue, n: typing.Union[int, lldb.SBValue], sizeof=True) -> lldb.SBValue:
+    """ Create new a new pointer, pointing to value of ptr+(n*sizeof(*ptr))
+
+    When sizeof=False, just add n, i.e. treating sizeof(*ptr) == 1
+
+    Example:
+        >>> pc
+        (HPHP::PC) bc = 0x00007ffff1c00b00 "\U00000014\U00000003\U00000010"
+        >>> pc1 = utils.ptr_add(pc, 1)
+        >>> pc1
+        (HPHP::PC) pc+1 = 0x00007ffff1c00b01 "\U00000003\U00000010"
+    """
+
+    assert ptr.TypeIsPointerType(), f"Expected ptr type, got {ptr.type.name}"
+
+    if isinstance(n, lldb.SBValue):
+        n = n.unsigned
+    if sizeof:
+        n *= ptr.type.GetPointeeType().size
+
+    # TODO(michristensen) Creating the new pointer using the following two
+    # commented-out lines was adding extraneous MSB bytes in some cases:
+    #data = lldb.SBData.CreateDataFromInt(ptr.unsigned + n)
+    #val = ptr.CreateValueFromData(f"{ptr.name}+{str(n)}", data, ptr.type)
+    val = ptr.CreateValueFromExpression(
+            f"{ptr.name}+{str(n)}"[-10:],
+            f"({ptr.type.name}){ptr.unsigned + n}"
+    )
+    return val
+    
+
 #------------------------------------------------------------------------------
 # Name accessor
 
@@ -470,10 +500,23 @@ def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.
             (char *) varname = 0x0000abcd "string value"
 
         This gets just the "string value" char array.
-        We could probably also just parse the result of str(val) or val.summary.
     """
+    # If it's already a known char *, just parse its default LLDB summary,
+    # which appears to be of the form '"some_str"'.
     if isinstance(addr, lldb.SBValue):
-        addr = addr.load_addr
+        if rawtype(addr.type).name == "char *":
+            s = addr.summary
+            if s and s[0] == '"':
+                s = s[1:]
+            if s and s[-1] == '"':
+                s = s[:-1]
+            if s:
+                return s
+            else:
+                # Empty string, so let's try reading it from memory
+                addr = addr.unsigned
+        else:
+            addr = addr.load_addr
 
     err = None
 
@@ -822,6 +865,25 @@ def reg(name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     """
     name = arch_regs(frame.thread.process.target)[name]
     return frame.register[name]
+
+
+#------------------------------------------------------------------------------
+# General-purpose helpers
+
+def parse_argv(args: str, target: lldb.SBTarget, limit=None) -> typing.List[lldb.SBValue]:
+    """ Explode a LLDB argument string, then evaluate all args up to `limit`.
+    
+        It assumes that each arg is space-separated, meaning e.g. "bc+bclen" is one argument,
+        but "bc + bclen" is three.
+    """
+
+    # I can't figure out a way to successfully catch lldb parse errors using normal
+    # Python exception handling, so this is best effort.
+
+    if limit is None:
+        limit = len(args)
+    return [target.EvaluateExpression(arg) if i < limit else arg
+            for i, arg in enumerate(shlex.split(args))]
 
 
 #------------------------------------------------------------------------------

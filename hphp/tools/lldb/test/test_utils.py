@@ -2,6 +2,8 @@
 
 from . import base
 
+import lldb
+
 import hhvm_lldb.utils as utils
 
 class UtilsGivenTargetTestCase(base.TestHHVMBinary):
@@ -122,7 +124,7 @@ class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
     def setUp(self):
         super().setUp(test_type = "utility")
 
-    def test_strinfo(self):
+    def test_utility_functions(self):
         with self.subTest("HHVMString"):
             self.run_until_breakpoint("takeHHVMString")
             s = self.frame.FindVariable("v")
@@ -150,3 +152,13 @@ class UtilsOnTypesBinaryTestCase(base.TestHHVMTypesBinary):
             info = utils.strinfo(s)
             self.assertEqual(info["data"], "lions and tigers")
             self.assertEqual(info["hash"], 2000936965)
+        
+        with self.subTest("ptr_add"):
+            self.run_until_breakpoint("takeStringData")
+            s = self.frame.FindVariable("v")
+            self.assertTrue(s.TypeIsPointerType())
+
+            s_plus_1 = utils.ptr_add(s, 1)
+            self.assertIsInstance(s_plus_1, lldb.SBValue)
+            self.assertTrue(s_plus_1, lldb.SBValue)
+            self.assertEqual(s_plus_1.unsigned, s.unsigned + 16)

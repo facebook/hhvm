@@ -12,8 +12,14 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
-def at(ptr: lldb.SBValue, idx: int) -> typing.Optional[lldb.SBValue]:
+def at(ptr: lldb.SBValue, idx: typing.Union[int, lldb.SBValue]) -> typing.Optional[lldb.SBValue]:
     """ Access ptr[idx] """
+
+    if isinstance(idx, lldb.SBValue):
+        idx = idx.unsigned
+
+    #utils.debug_print(f"idx.at(ptr={ptr} ({ptr.type.name}), idx={idx})")
+
     val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
     if not val.IsValid():
         return None

@@ -3,7 +3,7 @@ from . import base
 import hhvm_lldb.utils as utils
 import hhvm_lldb.sizeof as sizeof
 
-class IdxCommandTestCase(base.TestHHVMBinary):
+class SizeofCommandHHVMTestCase(base.TestHHVMBinary):
 
     def setUp(self):
         super().setUp(test_file="quick/properties2.php", interp=True)
@@ -27,7 +27,7 @@ class IdxCommandTestCase(base.TestHHVMBinary):
         self.assertEqual(output.strip(), "error: unrecognized container")
 
 
-class SizeofCommandTestCase(base.TestHHVMTypesBinary):
+class SizeofCommandTypesTestCase(base.TestHHVMTypesBinary):
 
     def setUp(self):
         super().setUp(test_type="sizeof-values")

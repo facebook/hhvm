@@ -241,10 +241,12 @@ void takeHHVMString(String UNUSED v) { return; }
 void takeCharPtr(char const* UNUSED v) { return; }
 
 void buildValuesForUtilityTests() {
+  auto sd = StringData::MakeStatic("hello");
   takeHHVMString(String("Most excellent"));
   takeCharPtr("Very excellent");
   takeStaticString(StaticString("cats and dogs"));
   takeStrNR(StrNR(StaticString("lions and tigers")));
+  takeStringData(sd);
 }
 
 // nameof tests

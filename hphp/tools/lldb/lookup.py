@@ -19,6 +19,7 @@ def lookup_func(func_id: lldb.SBValue) -> lldb.SBValue:
     Returns:
         func: A HPHP::Func* wrapped in an lldb.SBValue
     """
+
     target = func_id.target
     assert func_id.type.name == "HPHP::FuncId", f"invalid func_id, type given is {func_id.type.name} but expected HPHP::FuncId"
     func_vec = target.FindFirstGlobalVariable("HPHP::Func::s_funcVec")
@@ -47,6 +48,30 @@ def lookup_func_from_frame_pointer(fp: lldb.SBValue) -> lldb.SBValue:
     """
     func_id = utils.get(fp, 'm_funcId')
     return lookup_func(func_id)
+
+
+def lookup_litstr(str_id: lldb.SBValue) -> lldb.SBValue:
+    """ Find the StringData* corresponding to a given Id
+
+    Args:
+        str_id: A HPHP::Id wrapped in an lldb.SBValue
+
+    Returns:
+        func: A HPHP::StringData* wrapped in an lldb.SBValue
+    """
+    raise NotImplementedError
+
+
+def lookup_array(array_id: lldb.SBValue) -> lldb.SBValue:
+    """ Find the ArrayData* corresponding to a given Id
+
+    Args:
+        array_id: A HPHP::Id wrapped in an lldb.SBValue
+
+    Returns:
+        array: A HPHP::ArrayData* wrapped in an lldb.SBValue
+    """
+    raise NotImplementedError
 
 
 class LookupCommand(utils.Command):
@@ -90,6 +115,21 @@ class LookupCommand(utils.Command):
         )
         litstr_cmd.set_defaults(func=cls._lookup_litstr_prep)
 
+        array_cmd = subparsers.add_parser(
+            "array",
+            help="Look up a ArrayData* by its Id",
+        )
+        array_cmd.add_argument(
+            "arrayid",
+            help="A HPHP::Id (i.e. int) uniquely identifying a HPHP::ArrayData*"
+        )
+        array_cmd.add_argument(
+            "unit",
+            nargs="?",
+            help="The unit to use",
+        )
+        array_cmd.set_defaults(func=cls._lookup_array_prep)
+
         return parser
 
     def __init__(self, debugger, internal_dict):
@@ -118,7 +158,25 @@ class LookupCommand(utils.Command):
 
     @classmethod
     def _lookup_litstr_prep(cls, options):
-        raise NotImplementedError
+        id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
+        id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
+        res = lookup_litstr(id_val)
+        if res is None:
+            options.result.SetError(f"cannot get string identified with Id {id_val}")
+            return
+
+        options.result.write(str(res))
+
+    @classmethod
+    def _lookup_array_prep(cls, options):
+        id_type = utils.Type("HPHP::Id", options.exe_ctx.target)
+        id_val = options.exe_ctx.frame.EvaluateExpression(options.id).Cast(id_type)
+        res = lookup_array(id_val)
+        if res is None:
+            options.result.SetError(f"cannot get array identified with Id {id_val}")
+            return
+
+        options.result.write(str(res))
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):
     """ Register the commands in this file with the LLDB debugger.

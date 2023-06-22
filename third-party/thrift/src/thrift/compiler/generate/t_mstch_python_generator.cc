@@ -136,7 +136,16 @@ mstch::node adapter_node(
   return node;
 }
 
-std::string format_marshal_type(const t_type* field_type) {
+std::string get_cpp_template(const t_type& type, const char* default_ = "") {
+  if (const auto* val =
+          type.find_annotation_or_null({"cpp.template", "cpp2.template"})) {
+    return *val;
+  }
+  return default_;
+}
+
+std::string format_marshal_type(
+    const t_type* field_type, std::string type_override = "") {
   const t_type* type = field_type->get_true_type();
   if (type->is_bool()) {
     return "bool";
@@ -159,6 +168,26 @@ std::string format_marshal_type(const t_type* field_type) {
     // thrift-python internal representation uses binary regardless;
     // i.e., unicode encoded to bytes during thrift-python struct creation
     return "Bytes";
+  } else if (type->is_list()) {
+    const auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+    if (type_override.empty()) {
+      type_override = fmt::to_string(cpp2::get_type(type));
+    }
+    if (!type_override.empty()) {
+      std::string elem_thrift_type = format_marshal_type(
+          elem_type, fmt::format("{}::value_type", type_override));
+      return fmt::format("list<{}, {}>", elem_thrift_type, type_override);
+    }
+    auto template_override = get_cpp_template(*type);
+    std::string elem_thrift_type = format_marshal_type(elem_type);
+    if (!template_override.empty()) {
+      return fmt::format(
+          "list<{}, {}<native_t<{}>>>",
+          elem_thrift_type,
+          template_override,
+          elem_thrift_type);
+    }
+    return fmt::format("list<{}>", elem_thrift_type);
   }
   // if not supported, empty string to cause compile error
   return "";

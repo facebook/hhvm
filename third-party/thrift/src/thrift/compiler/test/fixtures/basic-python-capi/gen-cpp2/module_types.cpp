@@ -906,6 +906,229 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::ListStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::ListStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* ListStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/ListStruct";
+}
+
+const folly::StringPiece ListStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<ListStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece ListStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ListStruct>::name;
+}
+
+ListStruct::ListStruct(const ListStruct&) = default;
+ListStruct& ListStruct::operator=(const ListStruct&) = default;
+ListStruct::ListStruct() {
+}
+
+
+ListStruct::~ListStruct() {}
+
+ListStruct::ListStruct(FOLLY_MAYBE_UNUSED ListStruct&& other) noexcept :
+    __fbthrift_field_boolz(std::move(other.__fbthrift_field_boolz)),
+    __fbthrift_field_intz(std::move(other.__fbthrift_field_intz)),
+    __fbthrift_field_stringz(std::move(other.__fbthrift_field_stringz)),
+    __fbthrift_field_encoded(std::move(other.__fbthrift_field_encoded)),
+    __fbthrift_field_uidz(std::move(other.__fbthrift_field_uidz)),
+    __fbthrift_field_matrix(std::move(other.__fbthrift_field_matrix)),
+    __fbthrift_field_ucharz(std::move(other.__fbthrift_field_ucharz)),
+    __fbthrift_field_voxels(std::move(other.__fbthrift_field_voxels)),
+    __isset(other.__isset) {
+}
+
+ListStruct& ListStruct::operator=(FOLLY_MAYBE_UNUSED ListStruct&& other) noexcept {
+    this->__fbthrift_field_boolz = std::move(other.__fbthrift_field_boolz);
+    this->__fbthrift_field_intz = std::move(other.__fbthrift_field_intz);
+    this->__fbthrift_field_stringz = std::move(other.__fbthrift_field_stringz);
+    this->__fbthrift_field_encoded = std::move(other.__fbthrift_field_encoded);
+    this->__fbthrift_field_uidz = std::move(other.__fbthrift_field_uidz);
+    this->__fbthrift_field_matrix = std::move(other.__fbthrift_field_matrix);
+    this->__fbthrift_field_ucharz = std::move(other.__fbthrift_field_ucharz);
+    this->__fbthrift_field_voxels = std::move(other.__fbthrift_field_voxels);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+ListStruct::ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> boolz__arg, ::std::vector<::std::int64_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>> stringz__arg, std::deque<::std::string> encoded__arg, std::deque<uint64_t> uidz__arg, ::std::vector<::std::vector<double>> matrix__arg, folly::small_vector<folly::small_vector<uint8_t>> ucharz__arg, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> voxels__arg) :
+    __fbthrift_field_boolz(std::move(boolz__arg)),
+    __fbthrift_field_intz(std::move(intz__arg)),
+    __fbthrift_field_stringz(std::move(stringz__arg)),
+    __fbthrift_field_encoded(std::move(encoded__arg)),
+    __fbthrift_field_uidz(std::move(uidz__arg)),
+    __fbthrift_field_matrix(std::move(matrix__arg)),
+    __fbthrift_field_ucharz(std::move(ucharz__arg)),
+    __fbthrift_field_voxels(std::move(voxels__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void ListStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_boolz.clear();
+  this->__fbthrift_field_intz.clear();
+  this->__fbthrift_field_stringz.reset();
+  this->__fbthrift_field_encoded.clear();
+  this->__fbthrift_field_uidz.clear();
+  this->__fbthrift_field_matrix.clear();
+  this->__fbthrift_field_ucharz.clear();
+  this->__fbthrift_field_voxels.clear();
+  __isset = {};
+}
+
+void ListStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool ListStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool ListStruct::operator==(FOLLY_MAYBE_UNUSED const ListStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.boolz_ref() == rhs.boolz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.stringz_ref(), rhs.stringz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.uidz_ref() == rhs.uidz_ref())) {
+    return false;
+  }
+  if (!(lhs.matrix_ref() == rhs.matrix_ref())) {
+    return false;
+  }
+  if (!(lhs.ucharz_ref() == rhs.ucharz_ref())) {
+    return false;
+  }
+  if (!(lhs.voxels_ref() == rhs.voxels_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool ListStruct::operator<(FOLLY_MAYBE_UNUSED const ListStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<bool>& ListStruct::get_boolz() const& {
+  return __fbthrift_field_boolz;
+}
+
+::std::vector<bool> ListStruct::get_boolz() && {
+  return std::move(__fbthrift_field_boolz);
+}
+
+const ::std::vector<::std::int64_t>* ListStruct::get_intz() const& {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+::std::vector<::std::int64_t>* ListStruct::get_intz() & {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+const std::deque<::std::string>& ListStruct::get_encoded() const& {
+  return __fbthrift_field_encoded;
+}
+
+std::deque<::std::string> ListStruct::get_encoded() && {
+  return std::move(__fbthrift_field_encoded);
+}
+
+const std::deque<uint64_t>& ListStruct::get_uidz() const& {
+  return __fbthrift_field_uidz;
+}
+
+std::deque<uint64_t> ListStruct::get_uidz() && {
+  return std::move(__fbthrift_field_uidz);
+}
+
+const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& {
+  return __fbthrift_field_matrix;
+}
+
+::std::vector<::std::vector<double>> ListStruct::get_matrix() && {
+  return std::move(__fbthrift_field_matrix);
+}
+
+const folly::small_vector<folly::small_vector<uint8_t>>& ListStruct::get_ucharz() const& {
+  return __fbthrift_field_ucharz;
+}
+
+folly::small_vector<folly::small_vector<uint8_t>> ListStruct::get_ucharz() && {
+  return std::move(__fbthrift_field_ucharz);
+}
+
+const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& ListStruct::get_voxels() const& {
+  return __fbthrift_field_voxels;
+}
+
+folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> ListStruct::get_voxels() && {
+  return std::move(__fbthrift_field_voxels);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED ListStruct& a, FOLLY_MAYBE_UNUSED ListStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_boolz, b.__fbthrift_field_boolz);
+  swap(a.__fbthrift_field_intz, b.__fbthrift_field_intz);
+  swap(a.__fbthrift_field_stringz, b.__fbthrift_field_stringz);
+  swap(a.__fbthrift_field_encoded, b.__fbthrift_field_encoded);
+  swap(a.__fbthrift_field_uidz, b.__fbthrift_field_uidz);
+  swap(a.__fbthrift_field_matrix, b.__fbthrift_field_matrix);
+  swap(a.__fbthrift_field_ucharz, b.__fbthrift_field_ucharz);
+  swap(a.__fbthrift_field_voxels, b.__fbthrift_field_voxels);
+  swap(a.__isset, b.__isset);
+}
+
+template void ListStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ListStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ListStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ListStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ListStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ListStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ListStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ListStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::MyUnion>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

@@ -17,6 +17,7 @@ class DoubledPair;
 class StringPair;
 class EmptyStruct;
 class PrimitiveStruct;
+class ListStruct;
 class MyUnion;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare

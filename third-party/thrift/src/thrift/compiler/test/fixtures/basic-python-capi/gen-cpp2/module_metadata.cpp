@@ -189,6 +189,38 @@ StructMetadata<::test::fixtures::basic-python-capi::PrimitiveStruct>::gen(Thrift
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::ListStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.ListStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_ListStruct = res.first->second;
+  module_ListStruct.name() = "module.ListStruct";
+  module_ListStruct.is_union() = false;
+  static const auto* const
+  module_ListStruct_fields = new std::array<EncodedThriftField, 8>{{
+    {1, "boolz", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)), std::vector<ThriftConstStruct>{}},
+    {2, "intz", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+    {3, "stringz", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+    {4, "encoded", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}},
+    {5, "uidz", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+    {6, "matrix", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE))), std::vector<ThriftConstStruct>{}},
+    {7, "ucharz", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE))), std::vector<ThriftConstStruct>{}},
+    {8, "voxels", false, std::make_unique<List>(std::make_unique<List>(std::make_unique<List>(std::make_unique<Typedef>("module.signed_byte", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{})))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>")}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_ListStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_ListStruct.fields()->push_back(std::move(field));
+  }
+  module_ListStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic-python-capi::MyUnion>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

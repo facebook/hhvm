@@ -310,39 +310,39 @@ Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(PyOb
   std::optional<std::string_view> error;
   Extractor<bool>{}.extractInto(
       cpp.booly(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
       error);
   Extractor<int8_t>{}.extractInto(
       cpp.charry(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
       error);
   Extractor<int16_t>{}.extractInto(
       cpp.shortay(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
       error);
   Extractor<int32_t>{}.extractInto(
       cpp.inty(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
       error);
   Extractor<int64_t>{}.extractInto(
       cpp.longy(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
       error);
   Extractor<float>{}.extractInto(
       cpp.floaty(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
       error);
   Extractor<double>{}.extractInto(
       cpp.dubby(),
-      PyTuple_GET_ITEM(fbThriftData, 6 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
       error);
   Extractor<Bytes>{}.extractInto(
       cpp.stringy(),
-      PyTuple_GET_ITEM(fbThriftData, 7 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
       error);
   Extractor<Bytes>{}.extractInto(
       cpp.bytey(),
-      PyTuple_GET_ITEM(fbThriftData, 8 + 1), 
+      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -372,6 +372,86 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>::ope
     return nullptr;
   }
   auto ptr = construct__test__fixtures__basic_python_capi__module__PrimitiveStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::ListStruct>
+Extractor<::test::fixtures::basic-python-capi::ListStruct>::operator()(PyObject* obj) {
+  ::test::fixtures::basic-python-capi::ListStruct cpp;
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a ListStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::ListStruct>(
+          "Marshal error: ListStruct");
+  }
+  PyObject* fbThriftData = getThriftData(obj);
+  std::optional<std::string_view> error;
+  Extractor<list<bool>>{}.extractInto(
+      cpp.boolz(),
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
+      error);
+  Extractor<list<int64_t>>{}.extractInto(
+      cpp.intz(),
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
+      error);
+  Extractor<list<Bytes>>{}.extractInto(
+      cpp.stringz(),
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
+      error);
+  Extractor<list<Bytes, std::deque<native_t<Bytes>>>>{}.extractInto(
+      cpp.encoded(),
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
+      error);
+  Extractor<list<int64_t, std::deque<uint64_t>>>{}.extractInto(
+      cpp.uidz(),
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
+      error);
+  Extractor<list<list<double>>>{}.extractInto(
+      cpp.matrix(),
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
+      error);
+  Extractor<list<list<int8_t, folly::small_vector<folly::small_vector<uint8_t>>::value_type>, folly::small_vector<folly::small_vector<uint8_t>>>>{}.extractInto(
+      cpp.ucharz(),
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
+      error);
+  Extractor<list<list<list<int8_t, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>::value_type::value_type>, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>::value_type>, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>>{}.extractInto(
+      cpp.voxels(),
+      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::ListStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__ListStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: ListStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::ListStruct>::operator()(
+    ::test::fixtures::basic-python-capi::ListStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__ListStruct(
       detail::serialize_to_iobuf(std::move(val)));
   if (!ptr) {
     CHECK(PyErr_Occurred());

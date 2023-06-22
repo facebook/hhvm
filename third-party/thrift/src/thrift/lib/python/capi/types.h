@@ -18,6 +18,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 #include <folly/Preprocessor.h>
 
 namespace apache {
@@ -66,6 +67,15 @@ struct native<BytesView> {
 template <>
 struct native<StringView> {
   using type = std::string_view;
+};
+
+// T is the element type, CppT is the full type
+template <typename T, typename CppT = std::vector<native_t<T>>>
+struct list {};
+
+template <typename T, typename CppT>
+struct native<list<T, CppT>> {
+  using type = CppT;
 };
 
 } // namespace capi

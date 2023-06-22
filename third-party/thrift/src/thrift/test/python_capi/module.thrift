@@ -18,6 +18,8 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
+cpp_include "<deque>"
+cpp_include "<folly/small_vector.h>"
 cpp_include "thrift/test/python_capi/adapter.h"
 
 package "thrift.org/test/python_capi"
@@ -85,6 +87,22 @@ struct PrimitiveStruct {
   12: optional string stringy;
   @cpp.Ref{type = cpp.RefType.Shared}
   13: optional binary bytey;
+}
+
+@python.MarshalCapi
+struct ListStruct {
+  1: list<bool> boolz;
+  2: optional list<i64> intz;
+  @thrift.Box
+  3: optional list<string> stringz;
+  4: list<binary> (cpp.template = "std::deque") encoded;
+  5: list<i64> (cpp.type = "std::deque<uint64_t>") uidz;
+  6: list<list<double>> matrix;
+  7: list<list<byte>> (
+    cpp.type = "folly::small_vector<folly::small_vector<uint8_t>>",
+  ) ucharz;
+  @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
+  8: list<list<list<signed_byte>>> voxels;
 }
 
 union MyUnion {

@@ -9,6 +9,9 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
+#include <deque>
+#include <folly/small_vector.h>
+#include "thrift/test/python_capi/adapter.h"
 
 namespace apache {
 namespace thrift {
@@ -34,6 +37,14 @@ struct floaty;
 struct dubby;
 struct stringy;
 struct bytey;
+struct boolz;
+struct intz;
+struct stringz;
+struct encoded;
+struct uidz;
+struct matrix;
+struct ucharz;
+struct voxels;
 struct myEnum;
 struct myStruct;
 struct myDataItem;
@@ -125,6 +136,38 @@ APACHE_THRIFT_DEFINE_ACCESSOR(stringy);
 #ifndef APACHE_THRIFT_ACCESSOR_bytey
 #define APACHE_THRIFT_ACCESSOR_bytey
 APACHE_THRIFT_DEFINE_ACCESSOR(bytey);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_boolz
+#define APACHE_THRIFT_ACCESSOR_boolz
+APACHE_THRIFT_DEFINE_ACCESSOR(boolz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_intz
+#define APACHE_THRIFT_ACCESSOR_intz
+APACHE_THRIFT_DEFINE_ACCESSOR(intz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_stringz
+#define APACHE_THRIFT_ACCESSOR_stringz
+APACHE_THRIFT_DEFINE_ACCESSOR(stringz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_encoded
+#define APACHE_THRIFT_ACCESSOR_encoded
+APACHE_THRIFT_DEFINE_ACCESSOR(encoded);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_uidz
+#define APACHE_THRIFT_ACCESSOR_uidz
+APACHE_THRIFT_DEFINE_ACCESSOR(uidz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_matrix
+#define APACHE_THRIFT_ACCESSOR_matrix
+APACHE_THRIFT_DEFINE_ACCESSOR(matrix);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_ucharz
+#define APACHE_THRIFT_ACCESSOR_ucharz
+APACHE_THRIFT_DEFINE_ACCESSOR(ucharz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_voxels
+#define APACHE_THRIFT_ACCESSOR_voxels
+APACHE_THRIFT_DEFINE_ACCESSOR(voxels);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_myEnum
 #define APACHE_THRIFT_ACCESSOR_myEnum
@@ -225,6 +268,7 @@ class DoubledPair;
 class StringPair;
 class EmptyStruct;
 class PrimitiveStruct;
+class ListStruct;
 class MyUnion;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare
@@ -1998,6 +2042,518 @@ class PrimitiveStruct final  {
 
 template <class Protocol_>
 unsigned long PrimitiveStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class ListStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::boolz,
+    ::apache::thrift::ident::intz,
+    ::apache::thrift::ident::stringz,
+    ::apache::thrift::ident::encoded,
+    ::apache::thrift::ident::uidz,
+    ::apache::thrift::ident::matrix,
+    ::apache::thrift::ident::ucharz,
+    ::apache::thrift::ident::voxels
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::list<::apache::thrift::type::bool_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::string_t>,
+    ::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::binary_t>>,
+    ::apache::thrift::type::cpp_type<std::deque<uint64_t>, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::double_t>>,
+    ::apache::thrift::type::cpp_type<folly::small_vector<folly::small_vector<uint8_t>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::byte_t>>>,
+    ::apache::thrift::type::cpp_type<folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>, ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::byte_t>>>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 8;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = ListStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  ListStruct();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ListStruct(apache::thrift::FragileConstructor, ::std::vector<bool> boolz__arg, ::std::vector<::std::int64_t> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>> stringz__arg, std::deque<::std::string> encoded__arg, std::deque<uint64_t> uidz__arg, ::std::vector<::std::vector<double>> matrix__arg, folly::small_vector<folly::small_vector<uint8_t>> ucharz__arg, folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> voxels__arg);
+
+  ListStruct(ListStruct&&) noexcept;
+
+  ListStruct(const ListStruct& src);
+
+
+  ListStruct& operator=(ListStruct&&) noexcept;
+  ListStruct& operator=(const ListStruct& src);
+
+  ~ListStruct();
+
+ private:
+  ::std::vector<bool> __fbthrift_field_boolz;
+ private:
+  ::std::vector<::std::int64_t> __fbthrift_field_intz;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>> __fbthrift_field_stringz;
+ private:
+  std::deque<::std::string> __fbthrift_field_encoded;
+ private:
+  std::deque<uint64_t> __fbthrift_field_uidz;
+ private:
+  ::std::vector<::std::vector<double>> __fbthrift_field_matrix;
+ private:
+  folly::small_vector<folly::small_vector<uint8_t>> __fbthrift_field_ucharz;
+ private:
+  folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> __fbthrift_field_voxels;
+ private:
+  apache::thrift::detail::isset_bitset<7, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const ListStruct&) const;
+  bool operator<(const ListStruct&) const;
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> boolz_ref() const& {
+    return {this->__fbthrift_field_boolz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> boolz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_boolz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> boolz_ref() & {
+    return {this->__fbthrift_field_boolz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> boolz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_boolz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> boolz() const& {
+    return {this->__fbthrift_field_boolz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> boolz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_boolz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> boolz() & {
+    return {this->__fbthrift_field_boolz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<bool>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> boolz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_boolz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz_ref() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz_ref() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int64_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> stringz_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_stringz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> stringz_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> stringz_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_stringz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> stringz_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> stringz() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_stringz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> stringz() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_stringz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> stringz() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_stringz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::vector<::std::string>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> stringz() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_stringz)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded_ref() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded_ref() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> uidz_ref() const& {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> uidz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> uidz_ref() & {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> uidz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> uidz() const& {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> uidz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> uidz() & {
+    return {this->__fbthrift_field_uidz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::deque<uint64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> uidz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_uidz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> matrix_ref() const& {
+    return {this->__fbthrift_field_matrix, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> matrix_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_matrix), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> matrix_ref() & {
+    return {this->__fbthrift_field_matrix, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> matrix_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_matrix), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> matrix() const& {
+    return {this->__fbthrift_field_matrix, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> matrix() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_matrix), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> matrix() & {
+    return {this->__fbthrift_field_matrix, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::vector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> matrix() && {
+    return {static_cast<T&&>(this->__fbthrift_field_matrix), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> ucharz_ref() const& {
+    return {this->__fbthrift_field_ucharz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ucharz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_ucharz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> ucharz_ref() & {
+    return {this->__fbthrift_field_ucharz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> ucharz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_ucharz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> ucharz() const& {
+    return {this->__fbthrift_field_ucharz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ucharz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_ucharz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> ucharz() & {
+    return {this->__fbthrift_field_ucharz, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::small_vector<folly::small_vector<uint8_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> ucharz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_ucharz), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> voxels_ref() const& {
+    return {this->__fbthrift_field_voxels, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> voxels_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_voxels), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> voxels_ref() & {
+    return {this->__fbthrift_field_voxels, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> voxels_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_voxels), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> voxels() const& {
+    return {this->__fbthrift_field_voxels, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> voxels() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_voxels), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> voxels() & {
+    return {this->__fbthrift_field_voxels, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> voxels() && {
+    return {static_cast<T&&>(this->__fbthrift_field_voxels), __isset.at(6), __isset.bit(6)};
+  }
+  const ::std::vector<bool>& get_boolz() const&;
+  ::std::vector<bool> get_boolz() &&;
+
+  template <typename T_ListStruct_boolz_struct_setter = ::std::vector<bool>>
+  [[deprecated("Use `FOO.boolz_ref() = BAR;` instead of `FOO.set_boolz(BAR);`")]]
+  ::std::vector<bool>& set_boolz(T_ListStruct_boolz_struct_setter&& boolz_) {
+    boolz_ref() = std::forward<T_ListStruct_boolz_struct_setter>(boolz_);
+    return __fbthrift_field_boolz;
+  }
+  const ::std::vector<::std::int64_t>* get_intz() const&;
+  ::std::vector<::std::int64_t>* get_intz() &;
+  ::std::vector<::std::int64_t>* get_intz() && = delete;
+
+  template <typename T_ListStruct_intz_struct_setter = ::std::vector<::std::int64_t>>
+  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  ::std::vector<::std::int64_t>& set_intz(T_ListStruct_intz_struct_setter&& intz_) {
+    intz_ref() = std::forward<T_ListStruct_intz_struct_setter>(intz_);
+    return __fbthrift_field_intz;
+  }
+  const std::deque<::std::string>& get_encoded() const&;
+  std::deque<::std::string> get_encoded() &&;
+
+  template <typename T_ListStruct_encoded_struct_setter = std::deque<::std::string>>
+  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  std::deque<::std::string>& set_encoded(T_ListStruct_encoded_struct_setter&& encoded_) {
+    encoded_ref() = std::forward<T_ListStruct_encoded_struct_setter>(encoded_);
+    return __fbthrift_field_encoded;
+  }
+  const std::deque<uint64_t>& get_uidz() const&;
+  std::deque<uint64_t> get_uidz() &&;
+
+  template <typename T_ListStruct_uidz_struct_setter = std::deque<uint64_t>>
+  [[deprecated("Use `FOO.uidz_ref() = BAR;` instead of `FOO.set_uidz(BAR);`")]]
+  std::deque<uint64_t>& set_uidz(T_ListStruct_uidz_struct_setter&& uidz_) {
+    uidz_ref() = std::forward<T_ListStruct_uidz_struct_setter>(uidz_);
+    return __fbthrift_field_uidz;
+  }
+  const ::std::vector<::std::vector<double>>& get_matrix() const&;
+  ::std::vector<::std::vector<double>> get_matrix() &&;
+
+  template <typename T_ListStruct_matrix_struct_setter = ::std::vector<::std::vector<double>>>
+  [[deprecated("Use `FOO.matrix_ref() = BAR;` instead of `FOO.set_matrix(BAR);`")]]
+  ::std::vector<::std::vector<double>>& set_matrix(T_ListStruct_matrix_struct_setter&& matrix_) {
+    matrix_ref() = std::forward<T_ListStruct_matrix_struct_setter>(matrix_);
+    return __fbthrift_field_matrix;
+  }
+  const folly::small_vector<folly::small_vector<uint8_t>>& get_ucharz() const&;
+  folly::small_vector<folly::small_vector<uint8_t>> get_ucharz() &&;
+
+  template <typename T_ListStruct_ucharz_struct_setter = folly::small_vector<folly::small_vector<uint8_t>>>
+  [[deprecated("Use `FOO.ucharz_ref() = BAR;` instead of `FOO.set_ucharz(BAR);`")]]
+  folly::small_vector<folly::small_vector<uint8_t>>& set_ucharz(T_ListStruct_ucharz_struct_setter&& ucharz_) {
+    ucharz_ref() = std::forward<T_ListStruct_ucharz_struct_setter>(ucharz_);
+    return __fbthrift_field_ucharz;
+  }
+  const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& get_voxels() const&;
+  folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> get_voxels() &&;
+
+  template <typename T_ListStruct_voxels_struct_setter = folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>>
+  [[deprecated("Use `FOO.voxels_ref() = BAR;` instead of `FOO.set_voxels(BAR);`")]]
+  folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& set_voxels(T_ListStruct_voxels_struct_setter&& voxels_) {
+    voxels_ref() = std::forward<T_ListStruct_voxels_struct_setter>(voxels_);
+    return __fbthrift_field_voxels;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<ListStruct>;
+  friend void swap(ListStruct& a, ListStruct& b);
+};
+
+template <class Protocol_>
+unsigned long ListStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

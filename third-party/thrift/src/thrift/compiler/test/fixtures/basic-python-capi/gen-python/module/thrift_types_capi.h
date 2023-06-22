@@ -103,6 +103,18 @@ struct Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct> {
 };
 
 template <>
+struct Extractor<::test::fixtures::basic-python-capi::ListStruct>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::ListStruct> {
+  ExtractorResult<::test::fixtures::basic-python-capi::ListStruct> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::basic-python-capi::ListStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::ListStruct&& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::basic-python-capi::MyUnion>
     : public BaseExtractor<::test::fixtures::basic-python-capi::MyUnion> {
   ExtractorResult<::test::fixtures::basic-python-capi::MyUnion> operator()(PyObject* obj);

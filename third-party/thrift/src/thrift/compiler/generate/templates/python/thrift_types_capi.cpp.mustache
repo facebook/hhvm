@@ -60,7 +60,7 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
   {{#struct:fields}}
   Extractor<{{field:marshal_type}}>{}.extractInto(
       cpp.{{field:cpp_name}}(),
-      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1), {{! 0 records which fields set}}
+      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1),{{! idx=0 records which fields set}}
       error);
   {{/struct:fields}}
   {{#struct:fields?}}

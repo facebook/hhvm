@@ -20,6 +20,7 @@ import thrift.python_capi.fixture as fixture
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
     DoubledPair,
     EmptyStruct,
+    ListStruct,
     MyDataItem,
     MyEnum,
     MyStruct,
@@ -72,6 +73,33 @@ class PythonCapiFixture(unittest.TestCase):
     def struct_patch(self) -> MyStructPatch:
         return MyStructPatch(
             assign=self.my_struct(),
+        )
+
+    def list_struct(self) -> ListStruct:
+        return ListStruct(
+            boolz=[True, True, False, False, False, False, True, True, False, True],
+            intz=[-1, -2, -1, 0, 1, 2, 2, 2, 2, 10],
+            stringz=["wat", "", "-1", "-1", "lol", "loool"],
+            encoded=[b"beep", b"boop", b"bop"],
+            uidz=[-(2**63), -1, 0, 1, 2**63 - 1],
+            matrix=[[4.0, 9.0, 2.0], [3.0, 5.0, 7.0], [8.0, 1.0, 6.0]],
+            ucharz=[[2, 7, 6], [9, 5, 1], [4, 3, 8]],
+            voxels=[
+                [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
+                [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
+                [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
+            ],
+        )
+
+    def empty_lists(self) -> ListStruct:
+        # optional fields left unset
+        return ListStruct(
+            boolz=[],
+            encoded=[],
+            uidz=[],
+            matrix=[],
+            ucharz=[[], [9, 5, 1], []],
+            voxels=[[], [[]], [[], [3], []]],
         )
 
 
@@ -139,6 +167,17 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         with self.assertRaises(TypeError):
             fixture.roundtrip_PrimitiveStruct(self.my_struct())
 
+    def test_roundtrip_marshal_ListStruct(self) -> None:
+        self.assertEqual(ListStruct(), fixture.roundtrip_ListStruct(ListStruct()))
+        self.assertEqual(
+            self.list_struct(), fixture.roundtrip_ListStruct(self.list_struct())
+        )
+        self.assertEqual(
+            self.empty_lists(), fixture.roundtrip_ListStruct(self.empty_lists())
+        )
+        self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).intz)
+        self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).stringz)
+
 
 class PythonCapiTypeCheck(PythonCapiFixture):
     def test_typeCheck_struct(self) -> None:
@@ -180,3 +219,10 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertTrue(fixture.check_PrimitiveStruct(PrimitiveStruct()))
         self.assertFalse(fixture.check_PrimitiveStruct(MyEnum.MyValue1))
         self.assertFalse(fixture.check_PrimitiveStruct(self.my_struct()))
+
+    def test_typeCheck_ListStruct(self) -> None:
+        self.assertTrue(fixture.check_ListStruct(self.list_struct()))
+        self.assertTrue(fixture.check_ListStruct(self.empty_lists()))
+        self.assertTrue(fixture.check_ListStruct(ListStruct()))
+        self.assertFalse(fixture.check_ListStruct(MyEnum.MyValue1))
+        self.assertFalse(fixture.check_ListStruct(self.my_struct()))

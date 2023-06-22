@@ -187,6 +187,64 @@ SPECIALIZE_STR(StringView);
 
 #undef SPECIALIZE_STR
 
+template <typename C>
+using reserve_method_t =
+    decltype(std::declval<C&>().reserve(std::declval<size_t>()));
+template <typename C>
+constexpr bool has_reserve_v =
+    folly::is_detected_v<reserve_method_t, std::remove_reference_t<C>>;
+
+template <typename ElemT, typename CppT>
+struct Extractor<list<ElemT, CppT>> : public BaseExtractor<list<ElemT, CppT>> {
+  using list_t = list<ElemT, CppT>;
+  ExtractorResult<list_t> operator()(PyObject* obj) {
+    if constexpr (folly::kIsDebug) {
+      if (PyTuple_Check(obj) != 1) {
+        PyErr_SetString(PyExc_TypeError, CAPI_LOCATED_ERROR("Not a tuple"));
+        return EXTRACTOR_ERROR(list_t, "Not a tuple");
+      }
+    }
+    CppT ret;
+    Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    if (size == 0) {
+      return ret;
+    }
+
+    if constexpr (has_reserve_v<CppT>) {
+      ret.reserve(size);
+    }
+    Extractor<ElemT> extractor;
+    for (Py_ssize_t i = 0; i < size; ++i) {
+      // Note PyTuple_GET_ITEM returns a borrowed reference
+      auto extracted = extractor(PyTuple_GET_ITEM(obj, i));
+      if (!extracted.hasValue()) {
+        // Extraction failed. Abort
+        return extractorError<list_t>(extracted.error());
+      }
+      ret.push_back(std::move(*extracted));
+    }
+
+    return ret;
+  }
+
+  int typeCheck(PyObject* obj) {
+    if (PyTuple_Check(obj) != 1) {
+      return 0;
+    }
+    const Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    // Just check the first element given type checking inherent in
+    // thrift-python struct construction; thrift consts
+    if (size == 0) {
+      return 1;
+    }
+    PyObject* front_obj = PyTuple_GET_ITEM(obj, 0);
+    if (!front_obj) {
+      return 0;
+    }
+    return Extractor<ElemT>{}.typeCheck(front_obj);
+  }
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

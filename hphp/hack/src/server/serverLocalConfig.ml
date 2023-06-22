@@ -253,8 +253,6 @@ type t = {
       (** Overrides load_state_natively on Sandcastle when true *)
   use_server_revision_tracker_v2: bool;
       (** control serverRevisionTracker.ml watchman subscription event tracking *)
-  ide_should_use_hack_64_distc: bool;
-      (** clientIdeDaemon should load a naming table from hack/64_distc *)
   use_hh_distc_instead_of_hulk: bool;
       (** use hh_distc instead of hulk for remote typechecking *)
   hh_distc_fanout_threshold: int;
@@ -356,7 +354,6 @@ let default =
     use_type_alias_heap = false;
     override_load_state_natively = false;
     use_server_revision_tracker_v2 = false;
-    ide_should_use_hack_64_distc = false;
     use_hh_distc_instead_of_hulk = true;
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
@@ -1053,13 +1050,6 @@ let load_
       ~current_version
       config
   in
-  let ide_should_use_hack_64_distc =
-    bool_if_min_version
-      "ide_should_use_hack_64_distc"
-      ~default:default.ide_should_use_hack_64_distc
-      ~current_version
-      config
-  in
   let use_hh_distc_instead_of_hulk =
     bool_if_min_version
       "use_hh_distc_instead_of_hulk"
@@ -1200,7 +1190,6 @@ let load_
     use_type_alias_heap;
     override_load_state_natively;
     use_server_revision_tracker_v2;
-    ide_should_use_hack_64_distc;
     use_hh_distc_instead_of_hulk;
     hh_distc_fanout_threshold;
     ide_load_naming_table_on_disk;
@@ -1249,7 +1238,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       override_load_state_natively = options.override_load_state_natively;
       use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
       rust_provider_backend = options.rust_provider_backend;
-      ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;

@@ -518,8 +518,8 @@ static void CopyHeaderVariables(Array& server,
         "The header(s) [%s] overwrote other headers which mapped to the same "
         "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
         "and AN-EXAMPLE are equivalent. You should treat this as "
-        "malicious. All headers from this request:\n%s",
-        badNames.c_str(), allHeaders.c_str());
+        "malicious.",
+        badNames.c_str());
     }
   }
 }

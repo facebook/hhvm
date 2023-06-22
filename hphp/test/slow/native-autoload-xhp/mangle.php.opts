@@ -1,3 +1,2 @@
--vAutoload.Enabled=true
 --count 2
 -vHack.Lang.DisableXHPElementMangling=false

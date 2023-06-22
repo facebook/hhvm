@@ -17,7 +17,6 @@ fi
 mkdir -p "${AUTOLOAD_DB_DIR}"
 exec "${HHVM_BIN}" \
   -vEval.HSLSystemlibEnabled=false \
-  -vAutoload.Enabled=true \
   "-vAutoload.DB.Path=${AUTOLOAD_DB_DIR}/autoload.db" \
   "-vEval.CoeffectEnforcementLevels.zoned=0" \
   minitest/main.hack "$@"

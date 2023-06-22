@@ -1,3 +1,2 @@
--vAutoload.Enabled=true
 -vLog.Level=Error
 -vHack.Lang.ReadonlyNonlocalInference=true

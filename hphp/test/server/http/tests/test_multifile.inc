@@ -269,7 +269,6 @@ class TestWebServer implements IDisposable {
   private function serverOptions(): vec<string> {
     return vec[
       '-vwatchman.enable=true',
-      '-vAutoload.Enabled=true',
       '-vAutoload.DB.CanCreate=true',
       '-vAutoload.DB.Path='.$this->home.'/facts_%{schema}.sql3',
       '-vSandbox.ConfFile=sandbox_conf.hdf',

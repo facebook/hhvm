@@ -1,3 +1,2 @@
--vAutoload.Enabled=true
 -vAutoload.MapIdleGCTimeSeconds=0
 --count 2

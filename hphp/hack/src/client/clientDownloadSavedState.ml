@@ -8,9 +8,7 @@
 
 open Hh_prelude
 
-type saved_state_type =
-  | Naming_and_dep_table
-  | Naming_table
+type saved_state_type = Naming_and_dep_table
 
 type env = {
   root: Path.t;
@@ -60,7 +58,6 @@ let additional_info_of_json
     (json : Hh_json.json option) : additional_info =
   let open Hh_json_helpers in
   match saved_state_type with
-  | Saved_state_loader.Naming_table -> ()
   | Saved_state_loader.Shallow_decls -> ()
   | Saved_state_loader.Naming_and_dep_table_distc ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
@@ -134,7 +131,6 @@ let make_replay_token_of_additional_info
        (main_artifacts * additional_info) Saved_state_loader.saved_state_type)
     ~(additional_info : additional_info) : Hh_json.json =
   match saved_state_type with
-  | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
   | Saved_state_loader.Shallow_decls -> Hh_json.JSON_Null
   | Saved_state_loader.Naming_and_dep_table_distc ->
     let Saved_state_loader.Naming_and_dep_table_info.
@@ -353,51 +349,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
             ( "dep_table_path",
               dep_table_path |> Path.to_string |> Hh_json.string_ );
             ("errors_path", errors_path |> Path.to_string |> Hh_json.string_);
-            ( "replay_token",
-              Option.value_map
-                replay_token
-                ~f:Hh_json.string_
-                ~default:Hh_json.JSON_Null );
-          ]
-      in
-      Hh_json.json_to_multiline_output stdout json;
-      Out_channel.output_char stdout '\n';
-      Lwt.return Exit_status.No_error)
-  | Naming_table ->
-    let saved_state_type = Saved_state_loader.Naming_table in
-    let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
-    (match result with
-    | Error load_error ->
-      print_load_error load_error;
-      Lwt.return Exit_status.Failed_to_load_should_abort
-    | Ok
-        {
-          Saved_state_loader.main_artifacts =
-            { Saved_state_loader.Naming_table_info.naming_table_path };
-          additional_info = ();
-          changed_files;
-          manifold_path;
-          corresponding_rev;
-          mergebase_rev;
-          is_cached;
-        } ->
-      let%lwt replay_token =
-        make_replay_token
-          ~env
-          ~saved_state_type
-          ~manifold_path
-          ~changed_files
-          ~corresponding_rev
-          ~mergebase_rev
-          ~is_cached
-          ~additional_info:()
-      in
-      let json =
-        Hh_json.JSON_Object
-          [
-            ("changed_files", changed_files_to_absolute_paths_json changed_files);
-            ( "naming_table_path",
-              naming_table_path |> Path.to_string |> Hh_json.string_ );
             ( "replay_token",
               Option.value_map
                 replay_token

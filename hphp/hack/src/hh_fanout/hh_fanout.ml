@@ -72,33 +72,13 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     genv.ServerEnv.local_config.ServerLocalConfig.saved_state
     |> GlobalOptions.with_log_saved_state_age_and_distance false
   in
-  let%lwt (naming_table_path, naming_table_changed_files) =
-    match env.naming_table_path with
-    | Some naming_table_path -> Lwt.return (naming_table_path, [])
-    | None ->
-      let%lwt naming_table_saved_state =
-        State_loader_lwt.load
-          ~ssopt
-          ~progress_callback:(fun _ -> ())
-          ~watchman_opts:
-            Saved_state_loader.Watchman_options.
-              { root = env.root; sockname = env.watchman_sockname }
-          ~ignore_hh_version:env.ignore_hh_version
-          ~saved_state_type:Saved_state_loader.Naming_table
-      in
-      (match naming_table_saved_state with
-      | Error load_error ->
-        failwith
-          (Printf.sprintf
-             "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
-             (Saved_state_loader.LoadError.debug_details_of_error load_error))
-      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
-        Lwt.return
-          ( main_artifacts.Saved_state_loader.Naming_table_info.naming_table_path,
-            changed_files ))
-  and (dep_table_path, errors_path, dep_table_changed_files) =
-    match env.dep_table_path with
-    | Some dep_table_path ->
+  let%lwt ( naming_table_path,
+            naming_table_changed_files,
+            dep_table_path,
+            errors_path,
+            dep_table_changed_files ) =
+    match (env.naming_table_path, env.dep_table_path) with
+    | (Some naming_table_path, Some dep_table_path) ->
       let errors_path =
         dep_table_path
         |> Path.to_string
@@ -107,8 +87,8 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         |> SaveStateService.get_errors_filename
         |> Path.make
       in
-      Lwt.return (dep_table_path, errors_path, [])
-    | None ->
+      Lwt.return (naming_table_path, [], dep_table_path, errors_path, [])
+    | (Some naming_table_path, None) ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
           ~ssopt
@@ -128,7 +108,68 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
         let open Saved_state_loader.Naming_and_dep_table_info in
         Lwt.return
-          ( main_artifacts.dep_table_path,
+          ( naming_table_path,
+            [],
+            main_artifacts.dep_table_path,
+            main_artifacts.errors_path,
+            changed_files ))
+    | (None, Some dep_table_path) ->
+      let%lwt naming_table_saved_state =
+        State_loader_lwt.load
+          ~ssopt
+          ~progress_callback:(fun _ -> ())
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.
+              { root = env.root; sockname = env.watchman_sockname }
+          ~ignore_hh_version:env.ignore_hh_version
+          ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
+      in
+      (match naming_table_saved_state with
+      | Error load_error ->
+        failwith
+          (Printf.sprintf
+             "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
+             (Saved_state_loader.LoadError.debug_details_of_error load_error))
+      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
+        let errors_path =
+          dep_table_path
+          |> Path.to_string
+          |> Filename.split_extension
+          |> fst
+          |> SaveStateService.get_errors_filename
+          |> Path.make
+        in
+        Lwt.return
+          ( main_artifacts
+              .Saved_state_loader.Naming_and_dep_table_info
+               .naming_sqlite_table_path,
+            changed_files,
+            dep_table_path,
+            errors_path,
+            [] ))
+    | (None, None) ->
+      let%lwt saved_state =
+        State_loader_lwt.load
+          ~ssopt
+          ~progress_callback:(fun _ -> ())
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.
+              { root = env.root; sockname = env.watchman_sockname }
+          ~ignore_hh_version:env.ignore_hh_version
+          ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
+      in
+      (match saved_state with
+      | Error load_error ->
+        failwith
+          (Printf.sprintf
+             "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
+             (Saved_state_loader.LoadError.debug_details_of_error load_error))
+      | Ok { Saved_state_loader.main_artifacts; changed_files; _ } ->
+        let open Saved_state_loader.Naming_and_dep_table_info in
+        Lwt.return
+          ( main_artifacts.naming_sqlite_table_path,
+            changed_files,
+            main_artifacts.dep_table_path,
             main_artifacts.errors_path,
             changed_files ))
   in

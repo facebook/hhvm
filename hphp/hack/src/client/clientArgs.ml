@@ -1227,7 +1227,6 @@ invocations of `hh` faster.|}
       exit 2
     | Some "naming-and-dep-table" ->
       ClientDownloadSavedState.Naming_and_dep_table
-    | Some "naming-table" -> ClientDownloadSavedState.Naming_table
     | Some saved_state_type ->
       Printf.printf
         "Unrecognized value '%s' for '--type'. %s\n"

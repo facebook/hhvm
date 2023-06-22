@@ -44,7 +44,6 @@ bool ensure_module_imported() {
 ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
 Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject* obj) {
   {{#struct:marshal_capi?}}
-  {{program:cpp_namespaces}}::{{struct:cpp_name}} cpp;
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -55,20 +54,12 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
   }
   {{#struct:fields?}}
   PyObject* fbThriftData = getThriftData(obj);
-  std::optional<std::string_view> error;
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      {{program:cpp_namespaces}}::{{struct:cpp_name}}>>{}(fbThriftData);
   {{/struct:fields?}}
-  {{#struct:fields}}
-  Extractor<{{field:marshal_type}}>{}.extractInto(
-      cpp.{{field:cpp_name}}(),
-      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1),{{! idx=0 records which fields set}}
-      error);
-  {{/struct:fields}}
-  {{#struct:fields?}}
-  if (error) {
-    return folly::makeUnexpected(*error);
-  }
+  {{^struct:fields?}}
+  return {{program:cpp_namespaces}}::{{struct:cpp_name}}{};
   {{/struct:fields?}}
-  return cpp;
   {{/struct:marshal_capi?}}
   {{^struct:marshal_capi?}}
   if (!ensure_module_imported()) {
@@ -93,6 +84,27 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
   {{/struct:cpp_adapter?}}
   {{/struct:marshal_capi?}}
 }
+
+{{#struct:marshal_capi?}}
+{{#struct:fields?}}
+ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(PyObject* fbThriftData) {
+  {{program:cpp_namespaces}}::{{struct:cpp_name}} cpp;
+  std::optional<std::string_view> error;
+  {{#struct:fields}}
+  Extractor<{{field:marshal_type}}>{}.extractInto(
+      cpp.{{field:cpp_name}}(),
+      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1),{{! idx=0 records which fields set}}
+      error);
+  {{/struct:fields}}
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+{{/struct:fields?}}
+{{/struct:marshal_capi?}}
 
 int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {

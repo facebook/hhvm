@@ -37,6 +37,31 @@ FOLLY_POP_WARNING
 #endif
 }}} // test::fixtures::basic-python-capi
 
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::size;
+folly::Range<::test::fixtures::basic-python-capi::NormalDecentEnum const*> const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::NormalDecentEnum>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::NormalDecentEnum>::names);
+
+bool TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::findName(type value, folly::StringPiece* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::findValue(folly::StringPiece name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+}} // apache::thrift
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+#ifndef ANDROID
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+const _NormalDecentEnum_EnumMapFactory::ValuesToNamesMapType _NormalDecentEnum_VALUES_TO_NAMES = _NormalDecentEnum_EnumMapFactory::makeValuesToNamesMap();
+FOLLY_POP_WARNING
+#endif
+}}} // test::fixtures::basic-python-capi
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -75,49 +100,49 @@ const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
 MyStruct::MyStruct() :
-      __fbthrift_field_MyIntField(),
-      __fbthrift_field_myEnum(),
-      __fbthrift_field_oneway() {
+      __fbthrift_field_inty(),
+      __fbthrift_field_myEnumy(),
+      __fbthrift_field_boulet() {
 }
 
 
 MyStruct::~MyStruct() {}
 
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
-    __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
-    __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
-    __fbthrift_field_MyDataField(std::move(other.__fbthrift_field_MyDataField)),
-    __fbthrift_field_myEnum(std::move(other.__fbthrift_field_myEnum)),
-    __fbthrift_field_oneway(std::move(other.__fbthrift_field_oneway)),
-    __fbthrift_field_floatList(std::move(other.__fbthrift_field_floatList)),
-    __fbthrift_field_strMap(std::move(other.__fbthrift_field_strMap)),
-    __fbthrift_field_floatSet(std::move(other.__fbthrift_field_floatSet)),
+    __fbthrift_field_inty(std::move(other.__fbthrift_field_inty)),
+    __fbthrift_field_stringy(std::move(other.__fbthrift_field_stringy)),
+    __fbthrift_field_myItemy(std::move(other.__fbthrift_field_myItemy)),
+    __fbthrift_field_myEnumy(std::move(other.__fbthrift_field_myEnumy)),
+    __fbthrift_field_boulet(std::move(other.__fbthrift_field_boulet)),
+    __fbthrift_field_floatListy(std::move(other.__fbthrift_field_floatListy)),
+    __fbthrift_field_strMappy(std::move(other.__fbthrift_field_strMappy)),
+    __fbthrift_field_intSetty(std::move(other.__fbthrift_field_intSetty)),
     __isset(other.__isset) {
 }
 
 MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
-    this->__fbthrift_field_MyIntField = std::move(other.__fbthrift_field_MyIntField);
-    this->__fbthrift_field_MyStringField = std::move(other.__fbthrift_field_MyStringField);
-    this->__fbthrift_field_MyDataField = std::move(other.__fbthrift_field_MyDataField);
-    this->__fbthrift_field_myEnum = std::move(other.__fbthrift_field_myEnum);
-    this->__fbthrift_field_oneway = std::move(other.__fbthrift_field_oneway);
-    this->__fbthrift_field_floatList = std::move(other.__fbthrift_field_floatList);
-    this->__fbthrift_field_strMap = std::move(other.__fbthrift_field_strMap);
-    this->__fbthrift_field_floatSet = std::move(other.__fbthrift_field_floatSet);
+    this->__fbthrift_field_inty = std::move(other.__fbthrift_field_inty);
+    this->__fbthrift_field_stringy = std::move(other.__fbthrift_field_stringy);
+    this->__fbthrift_field_myItemy = std::move(other.__fbthrift_field_myItemy);
+    this->__fbthrift_field_myEnumy = std::move(other.__fbthrift_field_myEnumy);
+    this->__fbthrift_field_boulet = std::move(other.__fbthrift_field_boulet);
+    this->__fbthrift_field_floatListy = std::move(other.__fbthrift_field_floatListy);
+    this->__fbthrift_field_strMappy = std::move(other.__fbthrift_field_strMappy);
+    this->__fbthrift_field_intSetty = std::move(other.__fbthrift_field_intSetty);
     __isset = other.__isset;
     return *this;
 }
 
 
-MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::test::fixtures::basic-python-capi::MyDataItem MyDataField__arg, ::test::fixtures::basic-python-capi::MyEnum myEnum__arg, bool oneway__arg, ::std::vector<float> floatList__arg, ::std::map<::std::string, ::std::string> strMap__arg, ::std::set<::std::int32_t> floatSet__arg) :
-    __fbthrift_field_MyIntField(std::move(MyIntField__arg)),
-    __fbthrift_field_MyStringField(std::move(MyStringField__arg)),
-    __fbthrift_field_MyDataField(std::move(MyDataField__arg)),
-    __fbthrift_field_myEnum(std::move(myEnum__arg)),
-    __fbthrift_field_oneway(std::move(oneway__arg)),
-    __fbthrift_field_floatList(std::move(floatList__arg)),
-    __fbthrift_field_strMap(std::move(strMap__arg)),
-    __fbthrift_field_floatSet(std::move(floatSet__arg)) {
+MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t inty__arg, ::std::string stringy__arg, ::test::fixtures::basic-python-capi::MyDataItem myItemy__arg, ::test::fixtures::basic-python-capi::MyEnum myEnumy__arg, bool boulet__arg, ::std::vector<float> floatListy__arg, ::std::map<::std::string, ::std::string> strMappy__arg, ::std::set<::std::int32_t> intSetty__arg) :
+    __fbthrift_field_inty(std::move(inty__arg)),
+    __fbthrift_field_stringy(std::move(stringy__arg)),
+    __fbthrift_field_myItemy(std::move(myItemy__arg)),
+    __fbthrift_field_myEnumy(std::move(myEnumy__arg)),
+    __fbthrift_field_boulet(std::move(boulet__arg)),
+    __fbthrift_field_floatListy(std::move(floatListy__arg)),
+    __fbthrift_field_strMappy(std::move(strMappy__arg)),
+    __fbthrift_field_intSetty(std::move(intSetty__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -131,13 +156,14 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int64_t MyIntField
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_myEnum = ::test::fixtures::basic-python-capi::MyEnum();
-  this->__fbthrift_field_oneway = bool();
-  this->__fbthrift_field_floatList.clear();
-  this->__fbthrift_field_strMap.clear();
-  this->__fbthrift_field_floatSet.clear();
+  this->__fbthrift_field_inty = ::std::int64_t();
+  this->__fbthrift_field_stringy = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  ::apache::thrift::clear(this->__fbthrift_field_myItemy);
+  this->__fbthrift_field_myEnumy = ::test::fixtures::basic-python-capi::MyEnum();
+  this->__fbthrift_field_boulet = bool();
+  this->__fbthrift_field_floatListy.clear();
+  this->__fbthrift_field_strMappy.clear();
+  this->__fbthrift_field_intSetty.clear();
   __isset = {};
 }
 
@@ -150,28 +176,28 @@ bool MyStruct::__fbthrift_is_empty() const {
 
 bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
     return false;
   }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
+  if (!(lhs.stringy_ref() == rhs.stringy_ref())) {
     return false;
   }
-  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
+  if (!(lhs.myItemy_ref() == rhs.myItemy_ref())) {
     return false;
   }
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
+  if (!(lhs.myEnumy_ref() == rhs.myEnumy_ref())) {
     return false;
   }
-  if (!(lhs.oneway_ref() == rhs.oneway_ref())) {
+  if (!(lhs.boulet_ref() == rhs.boulet_ref())) {
     return false;
   }
-  if (!(lhs.floatList_ref() == rhs.floatList_ref())) {
+  if (!(lhs.floatListy_ref() == rhs.floatListy_ref())) {
     return false;
   }
-  if (!(lhs.strMap_ref() == rhs.strMap_ref())) {
+  if (!(lhs.strMappy_ref() == rhs.strMappy_ref())) {
     return false;
   }
-  if (!(lhs.floatSet_ref() == rhs.floatSet_ref())) {
+  if (!(lhs.intSetty_ref() == rhs.intSetty_ref())) {
     return false;
   }
   return true;
@@ -181,49 +207,49 @@ bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::test::fixtures::basic-python-capi::MyDataItem& MyStruct::get_MyDataField() const& {
-  return __fbthrift_field_MyDataField;
+const ::test::fixtures::basic-python-capi::MyDataItem& MyStruct::get_myItemy() const& {
+  return __fbthrift_field_myItemy;
 }
 
-::test::fixtures::basic-python-capi::MyDataItem MyStruct::get_MyDataField() && {
-  return std::move(__fbthrift_field_MyDataField);
+::test::fixtures::basic-python-capi::MyDataItem MyStruct::get_myItemy() && {
+  return std::move(__fbthrift_field_myItemy);
 }
 
-const ::std::vector<float>& MyStruct::get_floatList() const& {
-  return __fbthrift_field_floatList;
+const ::std::vector<float>& MyStruct::get_floatListy() const& {
+  return __fbthrift_field_floatListy;
 }
 
-::std::vector<float> MyStruct::get_floatList() && {
-  return std::move(__fbthrift_field_floatList);
+::std::vector<float> MyStruct::get_floatListy() && {
+  return std::move(__fbthrift_field_floatListy);
 }
 
-const ::std::map<::std::string, ::std::string>& MyStruct::get_strMap() const& {
-  return __fbthrift_field_strMap;
+const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& {
+  return __fbthrift_field_strMappy;
 }
 
-::std::map<::std::string, ::std::string> MyStruct::get_strMap() && {
-  return std::move(__fbthrift_field_strMap);
+::std::map<::std::string, ::std::string> MyStruct::get_strMappy() && {
+  return std::move(__fbthrift_field_strMappy);
 }
 
-const ::std::set<::std::int32_t>& MyStruct::get_floatSet() const& {
-  return __fbthrift_field_floatSet;
+const ::std::set<::std::int32_t>& MyStruct::get_intSetty() const& {
+  return __fbthrift_field_intSetty;
 }
 
-::std::set<::std::int32_t> MyStruct::get_floatSet() && {
-  return std::move(__fbthrift_field_floatSet);
+::std::set<::std::int32_t> MyStruct::get_intSetty() && {
+  return std::move(__fbthrift_field_intSetty);
 }
 
 
 void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
   using ::std::swap;
-  swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
-  swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
-  swap(a.__fbthrift_field_MyDataField, b.__fbthrift_field_MyDataField);
-  swap(a.__fbthrift_field_myEnum, b.__fbthrift_field_myEnum);
-  swap(a.__fbthrift_field_oneway, b.__fbthrift_field_oneway);
-  swap(a.__fbthrift_field_floatList, b.__fbthrift_field_floatList);
-  swap(a.__fbthrift_field_strMap, b.__fbthrift_field_strMap);
-  swap(a.__fbthrift_field_floatSet, b.__fbthrift_field_floatSet);
+  swap(a.__fbthrift_field_inty, b.__fbthrift_field_inty);
+  swap(a.__fbthrift_field_stringy, b.__fbthrift_field_stringy);
+  swap(a.__fbthrift_field_myItemy, b.__fbthrift_field_myItemy);
+  swap(a.__fbthrift_field_myEnumy, b.__fbthrift_field_myEnumy);
+  swap(a.__fbthrift_field_boulet, b.__fbthrift_field_boulet);
+  swap(a.__fbthrift_field_floatListy, b.__fbthrift_field_floatListy);
+  swap(a.__fbthrift_field_strMappy, b.__fbthrift_field_strMappy);
+  swap(a.__fbthrift_field_intSetty, b.__fbthrift_field_intSetty);
   swap(a.__isset, b.__isset);
 }
 
@@ -280,23 +306,44 @@ const folly::StringPiece MyDataItem::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MyDataItem>::name;
 }
 
+MyDataItem::MyDataItem(const MyDataItem&) = default;
+MyDataItem& MyDataItem::operator=(const MyDataItem&) = default;
+MyDataItem::MyDataItem(FOLLY_MAYBE_UNUSED MyDataItem&& other) noexcept :
+    __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
+    __isset(other.__isset) {
+}
 
-MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
+MyDataItem& MyDataItem::operator=(FOLLY_MAYBE_UNUSED MyDataItem&& other) noexcept {
+    this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyDataItem::MyDataItem(apache::thrift::FragileConstructor, ::std::string s__arg) :
+    __fbthrift_field_s(std::move(s__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
 
 
 void MyDataItem::__fbthrift_clear() {
   // clear all fields
+  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  __isset = {};
 }
 
 void MyDataItem::__fbthrift_clear_terse_fields() {
 }
 
 bool MyDataItem::__fbthrift_is_empty() const {
-  return true;
+  return false;
 }
 
 bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
   return true;
 }
 
@@ -307,6 +354,8 @@ bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
 
 void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
   using ::std::swap;
+  swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
+  swap(a.__isset, b.__isset);
 }
 
 template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -632,11 +681,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::test::fixtures::basic-python-capi::EmptyStruct>::translateFieldName(
+void TccStructTraits<::test::fixtures::basic-python-capi::VapidStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::EmptyStruct>;
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::VapidStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -651,55 +700,55 @@ void TccStructTraits<::test::fixtures::basic-python-capi::EmptyStruct>::translat
 
 namespace test { namespace fixtures { namespace basic-python-capi {
 
-const char* EmptyStruct::__fbthrift_thrift_uri() {
+const char* VapidStruct::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-python-capi/EmptyStruct";
 }
 
-const folly::StringPiece EmptyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece VapidStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<EmptyStruct>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<VapidStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece EmptyStruct::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<EmptyStruct>::name;
+const folly::StringPiece VapidStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<VapidStruct>::name;
 }
 
 
-EmptyStruct::EmptyStruct(apache::thrift::FragileConstructor) {}
+VapidStruct::VapidStruct(apache::thrift::FragileConstructor) {}
 
 
-void EmptyStruct::__fbthrift_clear() {
+void VapidStruct::__fbthrift_clear() {
   // clear all fields
 }
 
-void EmptyStruct::__fbthrift_clear_terse_fields() {
+void VapidStruct::__fbthrift_clear_terse_fields() {
 }
 
-bool EmptyStruct::__fbthrift_is_empty() const {
+bool VapidStruct::__fbthrift_is_empty() const {
   return true;
 }
 
-bool EmptyStruct::operator==(FOLLY_MAYBE_UNUSED const EmptyStruct& rhs) const {
+bool VapidStruct::operator==(FOLLY_MAYBE_UNUSED const VapidStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
   return true;
 }
 
-bool EmptyStruct::operator<(FOLLY_MAYBE_UNUSED const EmptyStruct& rhs) const {
+bool VapidStruct::operator<(FOLLY_MAYBE_UNUSED const VapidStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED EmptyStruct& a, FOLLY_MAYBE_UNUSED EmptyStruct& b) {
+void swap(FOLLY_MAYBE_UNUSED VapidStruct& a, FOLLY_MAYBE_UNUSED VapidStruct& b) {
   using ::std::swap;
 }
 
-template void EmptyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t EmptyStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t EmptyStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t EmptyStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void EmptyStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t EmptyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t EmptyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t EmptyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void VapidStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t VapidStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t VapidStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t VapidStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void VapidStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t VapidStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t VapidStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t VapidStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 }}} // test::fixtures::basic-python-capi
@@ -1129,11 +1178,165 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::test::fixtures::basic-python-capi::MyUnion>::translateFieldName(
+void TccStructTraits<::test::fixtures::basic-python-capi::ComposeStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyUnion>;
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* ComposeStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/ComposeStruct";
+}
+
+const folly::StringPiece ComposeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<ComposeStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece ComposeStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ComposeStruct>::name;
+}
+
+ComposeStruct::ComposeStruct(const ComposeStruct&) = default;
+ComposeStruct& ComposeStruct::operator=(const ComposeStruct&) = default;
+ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept :
+    __fbthrift_field_enum_(std::move(other.__fbthrift_field_enum_)),
+    __fbthrift_field_renamed_(std::move(other.__fbthrift_field_renamed_)),
+    __fbthrift_field_primitive(std::move(other.__fbthrift_field_primitive)),
+    __fbthrift_field_aliased(std::move(other.__fbthrift_field_aliased)),
+    __isset(other.__isset) {
+}
+
+ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept {
+    this->__fbthrift_field_enum_ = std::move(other.__fbthrift_field_enum_);
+    this->__fbthrift_field_renamed_ = std::move(other.__fbthrift_field_renamed_);
+    this->__fbthrift_field_primitive = std::move(other.__fbthrift_field_primitive);
+    this->__fbthrift_field_aliased = std::move(other.__fbthrift_field_aliased);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::test::fixtures::basic-python-capi::ListAlias aliased__arg) :
+    __fbthrift_field_enum_(std::move(enum___arg)),
+    __fbthrift_field_renamed_(std::move(renamed___arg)),
+    __fbthrift_field_primitive(std::move(primitive__arg)),
+    __fbthrift_field_aliased(std::move(aliased__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+
+void ComposeStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_enum_ = ::test::fixtures::basic-python-capi::MyEnum();
+  this->__fbthrift_field_renamed_ = ::test::fixtures::basic-python-capi::NormalDecentEnum();
+  ::apache::thrift::clear(this->__fbthrift_field_primitive);
+  ::apache::thrift::clear(this->__fbthrift_field_aliased);
+  __isset = {};
+}
+
+void ComposeStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool ComposeStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool ComposeStruct::operator==(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enum__ref() == rhs.enum__ref())) {
+    return false;
+  }
+  if (!(lhs.renamed__ref() == rhs.renamed__ref())) {
+    return false;
+  }
+  if (!(lhs.primitive_ref() == rhs.primitive_ref())) {
+    return false;
+  }
+  if (!(lhs.aliased_ref() == rhs.aliased_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool ComposeStruct::operator<(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic-python-capi::PrimitiveStruct& ComposeStruct::get_primitive() const& {
+  return __fbthrift_field_primitive;
+}
+
+::test::fixtures::basic-python-capi::PrimitiveStruct ComposeStruct::get_primitive() && {
+  return std::move(__fbthrift_field_primitive);
+}
+
+const ::test::fixtures::basic-python-capi::ListAlias& ComposeStruct::get_aliased() const& {
+  return __fbthrift_field_aliased;
+}
+
+::test::fixtures::basic-python-capi::ListAlias ComposeStruct::get_aliased() && {
+  return std::move(__fbthrift_field_aliased);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED ComposeStruct& a, FOLLY_MAYBE_UNUSED ComposeStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_enum_, b.__fbthrift_field_enum_);
+  swap(a.__fbthrift_field_renamed_, b.__fbthrift_field_renamed_);
+  swap(a.__fbthrift_field_primitive, b.__fbthrift_field_primitive);
+  swap(a.__fbthrift_field_aliased, b.__fbthrift_field_aliased);
+  swap(a.__isset, b.__isset);
+}
+
+template void ComposeStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ComposeStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ComposeStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ComposeStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ComposeStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ComposeStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ComposeStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ComposeStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComposeStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::PrimitiveStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComposeStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::ListAlias>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::OurUnion>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -1148,33 +1351,33 @@ void TccStructTraits<::test::fixtures::basic-python-capi::MyUnion>::translateFie
 
 namespace apache { namespace thrift {
 
-constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::MyUnion::Type>::size;
-folly::Range<::test::fixtures::basic-python-capi::MyUnion::Type const*> const TEnumTraits<::test::fixtures::basic-python-capi::MyUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::MyUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::MyUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::MyUnion::Type>::names);
+constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::size;
+folly::Range<::test::fixtures::basic-python-capi::OurUnion::Type const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::names);
 
-bool TEnumTraits<::test::fixtures::basic-python-capi::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::basic-python-capi::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
 namespace test { namespace fixtures { namespace basic-python-capi {
 
-const char* MyUnion::__fbthrift_thrift_uri() {
+const char* OurUnion::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/basic-python-capi/MyUnion";
 }
 
-const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece OurUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<OurUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<MyUnion>::name;
+const folly::StringPiece OurUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OurUnion>::name;
 }
 
-void MyUnion::__fbthrift_clear() {
+void OurUnion::__fbthrift_clear() {
   // clear all fields
   if (getType() == Type::__EMPTY__) { return; }
   switch(getType()) {
@@ -1187,8 +1390,8 @@ void MyUnion::__fbthrift_clear() {
     case Type::myDataItem:
       destruct(value_.myDataItem);
       break;
-    case Type::doubleSet:
-      destruct(value_.doubleSet);
+    case Type::intSet:
+      destruct(value_.intSet);
       break;
     case Type::doubleList:
       destruct(value_.doubleList);
@@ -1203,11 +1406,11 @@ void MyUnion::__fbthrift_clear() {
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
-bool MyUnion::__fbthrift_is_empty() const {
+bool OurUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
 
-bool MyUnion::operator==(const MyUnion& rhs) const {
+bool OurUnion::operator==(const OurUnion& rhs) const {
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::myEnum:
@@ -1216,8 +1419,8 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
       return value_.myStruct == rhs.value_.myStruct;
     case Type::myDataItem:
       return value_.myDataItem == rhs.value_.myDataItem;
-    case Type::doubleSet:
-      return value_.doubleSet == rhs.value_.doubleSet;
+    case Type::intSet:
+      return value_.intSet == rhs.value_.intSet;
     case Type::doubleList:
       return value_.doubleList == rhs.value_.doubleList;
     case Type::strMap:
@@ -1227,42 +1430,1789 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
   }
 }
 
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+bool OurUnion::operator<(FOLLY_MAYBE_UNUSED const OurUnion& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-void swap(MyUnion& a, MyUnion& b) {
-  MyUnion temp(std::move(a));
+void swap(OurUnion& a, OurUnion& b) {
+  OurUnion temp(std::move(a));
   a = std::move(b);
   b = std::move(temp);
 }
 
-template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void OurUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t OurUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t OurUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void OurUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t OurUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t OurUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        MyUnion,
+        OurUnion,
         ::apache::thrift::type_class::structure,
         ::test::fixtures::basic-python-capi::MyStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        MyUnion,
+        OurUnion,
         ::apache::thrift::type_class::structure,
         ::test::fixtures::basic-python-capi::MyDataItem>,
     "inconsistent use of json option");
 
 }}} // test::fixtures::basic-python-capi
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructPatch";
+}
+
+const folly::StringPiece MyStructPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructPatchStruct>::name;
+}
+
+MyStructPatchStruct::MyStructPatchStruct(const MyStructPatchStruct& srcObj) :
+    __fbthrift_field_assign(srcObj.__fbthrift_field_assign),
+    __fbthrift_field_clear(srcObj.__fbthrift_field_clear),
+    __fbthrift_field_patchPrior(srcObj.__fbthrift_field_patchPrior),
+    __fbthrift_field_ensure(srcObj.__fbthrift_field_ensure),
+    __fbthrift_field_patch(srcObj.__fbthrift_field_patch),
+    __fbthrift_field_remove(srcObj.__fbthrift_field_remove) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+MyStructPatchStruct& MyStructPatchStruct::operator=(const MyStructPatchStruct& other) {
+  MyStructPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MyStructPatchStruct::MyStructPatchStruct() :
+      __fbthrift_field_clear() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+
+MyStructPatchStruct::~MyStructPatchStruct() {}
+
+MyStructPatchStruct::MyStructPatchStruct(FOLLY_MAYBE_UNUSED MyStructPatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
+    __fbthrift_field_ensure(std::move(other.__fbthrift_field_ensure)),
+    __fbthrift_field_patch(std::move(other.__fbthrift_field_patch)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+MyStructPatchStruct& MyStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructPatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
+    this->__fbthrift_field_ensure = std::move(other.__fbthrift_field_ensure);
+    this->__fbthrift_field_patch = std::move(other.__fbthrift_field_patch);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
+    return *this;
+}
+
+
+MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyStructEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
+    __fbthrift_field_ensure(std::move(ensure__arg)),
+    __fbthrift_field_patch(std::move(patch__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+
+void MyStructPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.reset();
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  this->__fbthrift_field_remove.clear();
+}
+
+void MyStructPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  this->__fbthrift_field_remove.clear();
+}
+
+bool MyStructPatchStruct::__fbthrift_is_empty() const {
+  return !(this->__fbthrift_field_assign) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructEnsureStruct>>(this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>>(this->__fbthrift_field_remove);
+}
+
+bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
+    return false;
+  }
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic-python-capi::MyStructEnsureStruct& MyStructPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::basic-python-capi::MyStructEnsureStruct MyStructPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
+}
+
+const ::std::unordered_set<::apache::thrift::op::FieldId>& MyStructPatchStruct::get_remove() const& {
+  return __fbthrift_field_remove;
+}
+
+::std::unordered_set<::apache::thrift::op::FieldId> MyStructPatchStruct::get_remove() && {
+  return std::move(__fbthrift_field_remove);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructPatchStruct& a, FOLLY_MAYBE_UNUSED MyStructPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_patchPrior, b.__fbthrift_field_patchPrior);
+  swap(a.__fbthrift_field_ensure, b.__fbthrift_field_ensure);
+  swap(a.__fbthrift_field_patch, b.__fbthrift_field_patch);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
+}
+
+template void MyStructPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructEnsureStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructField4PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructField4Patch";
+}
+
+const folly::StringPiece MyStructField4PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructField4PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructField4PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructField4PatchStruct>::name;
+}
+
+
+MyStructField4PatchStruct::MyStructField4PatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum assign__arg, bool clear__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyStructField4PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign = ::test::fixtures::basic-python-capi::MyEnum();
+  this->__fbthrift_field_clear = bool();
+  __isset = {};
+}
+
+void MyStructField4PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+}
+
+bool MyStructField4PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear);
+}
+
+bool MyStructField4PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField4PatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructField4PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField4PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructField4PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField4PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyStructField4PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructField4PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructField4PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructField4PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructField4PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructField4PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructField4PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructField4PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructField6PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructField6Patch";
+}
+
+const folly::StringPiece MyStructField6PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructField6PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructField6PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructField6PatchStruct>::name;
+}
+
+MyStructField6PatchStruct::MyStructField6PatchStruct(const MyStructField6PatchStruct&) = default;
+MyStructField6PatchStruct& MyStructField6PatchStruct::operator=(const MyStructField6PatchStruct&) = default;
+MyStructField6PatchStruct::MyStructField6PatchStruct(FOLLY_MAYBE_UNUSED MyStructField6PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
+    __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
+    __isset(other.__isset) {
+}
+
+MyStructField6PatchStruct& MyStructField6PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField6PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
+    this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyStructField6PatchStruct::MyStructField6PatchStruct(apache::thrift::FragileConstructor, ::std::vector<float> assign__arg, bool clear__arg, ::std::vector<float> prepend__arg, ::std::vector<float> append__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_prepend(std::move(prepend__arg)),
+    __fbthrift_field_append(std::move(append__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyStructField6PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+  __isset = {};
+}
+
+void MyStructField6PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_prepend.clear();
+  this->__fbthrift_field_append.clear();
+}
+
+bool MyStructField6PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::float_t>>(this->__fbthrift_field_prepend) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::float_t>>(this->__fbthrift_field_append);
+}
+
+bool MyStructField6PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField6PatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.prepend_ref() == rhs.prepend_ref())) {
+    return false;
+  }
+  if (!(lhs.append_ref() == rhs.append_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructField6PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField6PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<float>* MyStructField6PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::vector<float>* MyStructField6PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<float>& MyStructField6PatchStruct::get_prepend() const& {
+  return __fbthrift_field_prepend;
+}
+
+::std::vector<float> MyStructField6PatchStruct::get_prepend() && {
+  return std::move(__fbthrift_field_prepend);
+}
+
+const ::std::vector<float>& MyStructField6PatchStruct::get_append() const& {
+  return __fbthrift_field_append;
+}
+
+::std::vector<float> MyStructField6PatchStruct::get_append() && {
+  return std::move(__fbthrift_field_append);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructField6PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField6PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
+  swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyStructField6PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructField6PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructField6PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructField6PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructField6PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructField6PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructField6PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructField6PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructField7PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructField7Patch";
+}
+
+const folly::StringPiece MyStructField7PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructField7PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructField7PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructField7PatchStruct>::name;
+}
+
+MyStructField7PatchStruct::MyStructField7PatchStruct(const MyStructField7PatchStruct&) = default;
+MyStructField7PatchStruct& MyStructField7PatchStruct::operator=(const MyStructField7PatchStruct&) = default;
+MyStructField7PatchStruct::MyStructField7PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+MyStructField7PatchStruct::~MyStructField7PatchStruct() {}
+
+MyStructField7PatchStruct::MyStructField7PatchStruct(FOLLY_MAYBE_UNUSED MyStructField7PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
+    __fbthrift_field_add(std::move(other.__fbthrift_field_add)),
+    __fbthrift_field_patch(std::move(other.__fbthrift_field_patch)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)),
+    __fbthrift_field_put(std::move(other.__fbthrift_field_put)),
+    __isset(other.__isset) {
+}
+
+MyStructField7PatchStruct& MyStructField7PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField7PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
+    this->__fbthrift_field_add = std::move(other.__fbthrift_field_add);
+    this->__fbthrift_field_patch = std::move(other.__fbthrift_field_patch);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
+    this->__fbthrift_field_put = std::move(other.__fbthrift_field_put);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyStructField7PatchStruct::MyStructField7PatchStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> assign__arg, bool clear__arg, ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch> patchPrior__arg, ::std::map<::std::string, ::std::string> add__arg, ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch> patch__arg, ::std::unordered_set<::std::string> remove__arg, ::std::map<::std::string, ::std::string> put__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
+    __fbthrift_field_add(std::move(add__arg)),
+    __fbthrift_field_patch(std::move(patch__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)),
+    __fbthrift_field_put(std::move(put__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyStructField7PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_patchPrior.clear();
+  this->__fbthrift_field_add.clear();
+  this->__fbthrift_field_patch.clear();
+  this->__fbthrift_field_remove.clear();
+  this->__fbthrift_field_put.clear();
+  __isset = {};
+}
+
+void MyStructField7PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_patchPrior.clear();
+  this->__fbthrift_field_add.clear();
+  this->__fbthrift_field_patch.clear();
+  this->__fbthrift_field_remove.clear();
+  this->__fbthrift_field_put.clear();
+}
+
+bool MyStructField7PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>, ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>>>(this->__fbthrift_field_patchPrior) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>>(this->__fbthrift_field_add) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>, ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>>>(this->__fbthrift_field_patch) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::binary_t>>>(this->__fbthrift_field_remove) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>>(this->__fbthrift_field_put);
+}
+
+bool MyStructField7PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField7PatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.patchPrior_ref() == rhs.patchPrior_ref())) {
+    return false;
+  }
+  if (!(lhs.add_ref() == rhs.add_ref())) {
+    return false;
+  }
+  if (!(lhs.patch_ref() == rhs.patch_ref())) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  if (!(lhs.put_ref() == rhs.put_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructField7PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField7PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::map<::std::string, ::std::string>* MyStructField7PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::map<::std::string, ::std::string>* MyStructField7PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>& MyStructField7PatchStruct::get_patchPrior() const& {
+  return __fbthrift_field_patchPrior;
+}
+
+::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch> MyStructField7PatchStruct::get_patchPrior() && {
+  return std::move(__fbthrift_field_patchPrior);
+}
+
+const ::std::map<::std::string, ::std::string>& MyStructField7PatchStruct::get_add() const& {
+  return __fbthrift_field_add;
+}
+
+::std::map<::std::string, ::std::string> MyStructField7PatchStruct::get_add() && {
+  return std::move(__fbthrift_field_add);
+}
+
+const ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>& MyStructField7PatchStruct::get_patch() const& {
+  return __fbthrift_field_patch;
+}
+
+::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch> MyStructField7PatchStruct::get_patch() && {
+  return std::move(__fbthrift_field_patch);
+}
+
+const ::std::unordered_set<::std::string>& MyStructField7PatchStruct::get_remove() const& {
+  return __fbthrift_field_remove;
+}
+
+::std::unordered_set<::std::string> MyStructField7PatchStruct::get_remove() && {
+  return std::move(__fbthrift_field_remove);
+}
+
+const ::std::map<::std::string, ::std::string>& MyStructField7PatchStruct::get_put() const& {
+  return __fbthrift_field_put;
+}
+
+::std::map<::std::string, ::std::string> MyStructField7PatchStruct::get_put() && {
+  return std::move(__fbthrift_field_put);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructField7PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField7PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_patchPrior, b.__fbthrift_field_patchPrior);
+  swap(a.__fbthrift_field_add, b.__fbthrift_field_add);
+  swap(a.__fbthrift_field_patch, b.__fbthrift_field_patch);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
+  swap(a.__fbthrift_field_put, b.__fbthrift_field_put);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyStructField7PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructField7PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructField7PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructField7PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructField7PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructField7PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructField7PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructField7PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructField7PatchStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::structure>,
+        ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructField7PatchStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::structure>,
+        ::std::unordered_map<::std::string, ::apache::thrift::op::StringPatch>>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructField8PatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructField8Patch";
+}
+
+const folly::StringPiece MyStructField8PatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructField8PatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructField8PatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructField8PatchStruct>::name;
+}
+
+MyStructField8PatchStruct::MyStructField8PatchStruct(const MyStructField8PatchStruct&) = default;
+MyStructField8PatchStruct& MyStructField8PatchStruct::operator=(const MyStructField8PatchStruct&) = default;
+MyStructField8PatchStruct::MyStructField8PatchStruct(FOLLY_MAYBE_UNUSED MyStructField8PatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)),
+    __fbthrift_field_add(std::move(other.__fbthrift_field_add)),
+    __isset(other.__isset) {
+}
+
+MyStructField8PatchStruct& MyStructField8PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField8PatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
+    this->__fbthrift_field_add = std::move(other.__fbthrift_field_add);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyStructField8PatchStruct::MyStructField8PatchStruct(apache::thrift::FragileConstructor, ::std::set<::std::int32_t> assign__arg, bool clear__arg, ::std::set<::std::int32_t> remove__arg, ::std::set<::std::int32_t> add__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)),
+    __fbthrift_field_add(std::move(add__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyStructField8PatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.clear();
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_remove.clear();
+  this->__fbthrift_field_add.clear();
+  __isset = {};
+}
+
+void MyStructField8PatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_remove.clear();
+  this->__fbthrift_field_add.clear();
+}
+
+bool MyStructField8PatchStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i32_t>>(this->__fbthrift_field_remove) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i32_t>>(this->__fbthrift_field_add);
+}
+
+bool MyStructField8PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField8PatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  if (!(lhs.add_ref() == rhs.add_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructField8PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField8PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::set<::std::int32_t>* MyStructField8PatchStruct::get_assign() const& {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+::std::set<::std::int32_t>* MyStructField8PatchStruct::get_assign() & {
+  return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::set<::std::int32_t>& MyStructField8PatchStruct::get_remove() const& {
+  return __fbthrift_field_remove;
+}
+
+::std::set<::std::int32_t> MyStructField8PatchStruct::get_remove() && {
+  return std::move(__fbthrift_field_remove);
+}
+
+const ::std::set<::std::int32_t>& MyStructField8PatchStruct::get_add() const& {
+  return __fbthrift_field_add;
+}
+
+::std::set<::std::int32_t> MyStructField8PatchStruct::get_add() && {
+  return std::move(__fbthrift_field_add);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructField8PatchStruct& a, FOLLY_MAYBE_UNUSED MyStructField8PatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
+  swap(a.__fbthrift_field_add, b.__fbthrift_field_add);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyStructField8PatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructField8PatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructField8PatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructField8PatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructField8PatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructField8PatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructField8PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructField8PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructFieldPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructFieldPatch";
+}
+
+const folly::StringPiece MyStructFieldPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructFieldPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructFieldPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructFieldPatchStruct>::name;
+}
+
+MyStructFieldPatchStruct::MyStructFieldPatchStruct(const MyStructFieldPatchStruct& srcObj) :
+    __fbthrift_field_inty(srcObj.__fbthrift_field_inty),
+    __fbthrift_field_stringy(srcObj.__fbthrift_field_stringy),
+    __fbthrift_field_myItemy(srcObj.__fbthrift_field_myItemy),
+    __fbthrift_field_myEnumy(srcObj.__fbthrift_field_myEnumy),
+    __fbthrift_field_booly(srcObj.__fbthrift_field_booly),
+    __fbthrift_field_floatListy(srcObj.__fbthrift_field_floatListy),
+    __fbthrift_field_strMappy(srcObj.__fbthrift_field_strMappy),
+    __fbthrift_field_intSetty(srcObj.__fbthrift_field_intSetty) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, 1>(*__fbthrift_field_inty, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 2>(*__fbthrift_field_stringy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, 3>(*__fbthrift_field_myItemy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, 4>(*__fbthrift_field_myEnumy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, 5>(*__fbthrift_field_booly, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, 6>(*__fbthrift_field_floatListy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, 7>(*__fbthrift_field_strMappy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, 8>(*__fbthrift_field_intSetty, *this);
+}
+
+MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(const MyStructFieldPatchStruct& other) {
+  MyStructFieldPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MyStructFieldPatchStruct::MyStructFieldPatchStruct() :
+      __fbthrift_field_inty(::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>())),
+      __fbthrift_field_stringy(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())),
+      __fbthrift_field_myItemy(::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>())),
+      __fbthrift_field_myEnumy(::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>())),
+      __fbthrift_field_booly(::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>())),
+      __fbthrift_field_floatListy(::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>())),
+      __fbthrift_field_strMappy(::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>())),
+      __fbthrift_field_intSetty(::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>())) {
+}
+
+
+MyStructFieldPatchStruct::~MyStructFieldPatchStruct() {}
+
+MyStructFieldPatchStruct::MyStructFieldPatchStruct(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct&& other) noexcept :
+    __fbthrift_field_inty(std::move(other.__fbthrift_field_inty)),
+    __fbthrift_field_stringy(std::move(other.__fbthrift_field_stringy)),
+    __fbthrift_field_myItemy(std::move(other.__fbthrift_field_myItemy)),
+    __fbthrift_field_myEnumy(std::move(other.__fbthrift_field_myEnumy)),
+    __fbthrift_field_booly(std::move(other.__fbthrift_field_booly)),
+    __fbthrift_field_floatListy(std::move(other.__fbthrift_field_floatListy)),
+    __fbthrift_field_strMappy(std::move(other.__fbthrift_field_strMappy)),
+    __fbthrift_field_intSetty(std::move(other.__fbthrift_field_intSetty)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, 1>(*__fbthrift_field_inty, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 2>(*__fbthrift_field_stringy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, 3>(*__fbthrift_field_myItemy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, 4>(*__fbthrift_field_myEnumy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, 5>(*__fbthrift_field_booly, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, 6>(*__fbthrift_field_floatListy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, 7>(*__fbthrift_field_strMappy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, 8>(*__fbthrift_field_intSetty, *this);
+}
+
+MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct&& other) noexcept {
+    this->__fbthrift_field_inty = std::move(other.__fbthrift_field_inty);
+    this->__fbthrift_field_stringy = std::move(other.__fbthrift_field_stringy);
+    this->__fbthrift_field_myItemy = std::move(other.__fbthrift_field_myItemy);
+    this->__fbthrift_field_myEnumy = std::move(other.__fbthrift_field_myEnumy);
+    this->__fbthrift_field_booly = std::move(other.__fbthrift_field_booly);
+    this->__fbthrift_field_floatListy = std::move(other.__fbthrift_field_floatListy);
+    this->__fbthrift_field_strMappy = std::move(other.__fbthrift_field_strMappy);
+    this->__fbthrift_field_intSetty = std::move(other.__fbthrift_field_intSetty);
+    return *this;
+}
+
+
+MyStructFieldPatchStruct::MyStructFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch> inty__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> stringy__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch> myItemy__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch> myEnumy__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch> booly__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch> floatListy__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch> strMappy__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch> intSetty__arg) :
+    __fbthrift_field_inty(std::move(inty__arg)),
+    __fbthrift_field_stringy(std::move(stringy__arg)),
+    __fbthrift_field_myItemy(std::move(myItemy__arg)),
+    __fbthrift_field_myEnumy(std::move(myEnumy__arg)),
+    __fbthrift_field_booly(std::move(booly__arg)),
+    __fbthrift_field_floatListy(std::move(floatListy__arg)),
+    __fbthrift_field_strMappy(std::move(strMappy__arg)),
+    __fbthrift_field_intSetty(std::move(intSetty__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, 1>(*__fbthrift_field_inty, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 2>(*__fbthrift_field_stringy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, 3>(*__fbthrift_field_myItemy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, 4>(*__fbthrift_field_myEnumy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, 5>(*__fbthrift_field_booly, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, 6>(*__fbthrift_field_floatListy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, 7>(*__fbthrift_field_strMappy, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, 8>(*__fbthrift_field_intSetty, *this);
+}
+
+
+void MyStructFieldPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_inty = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>());
+  this->__fbthrift_field_stringy = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>());
+  this->__fbthrift_field_myItemy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>());
+  this->__fbthrift_field_myEnumy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>());
+  this->__fbthrift_field_booly = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>());
+  this->__fbthrift_field_floatListy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>());
+  this->__fbthrift_field_strMappy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>());
+  this->__fbthrift_field_intSetty = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>());
+}
+
+void MyStructFieldPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_inty = ::apache::thrift::detail::boxed_value<::apache::thrift::op::I64Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>());
+  this->__fbthrift_field_stringy = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>());
+  this->__fbthrift_field_myItemy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyDataItemPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>());
+  this->__fbthrift_field_myEnumy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField4Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>());
+  this->__fbthrift_field_booly = ::apache::thrift::detail::boxed_value<::apache::thrift::op::BoolPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>());
+  this->__fbthrift_field_floatListy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField6Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>());
+  this->__fbthrift_field_strMappy = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField7Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>());
+  this->__fbthrift_field_intSetty = ::apache::thrift::detail::boxed_value<::test::fixtures::basic-python-capi::MyStructField8Patch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>());
+}
+
+bool MyStructFieldPatchStruct::__fbthrift_is_empty() const {
+  return this->__fbthrift_field_inty && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>(*this->__fbthrift_field_inty) &&
+ this->__fbthrift_field_stringy && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*this->__fbthrift_field_stringy) &&
+ this->__fbthrift_field_myItemy && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>(*this->__fbthrift_field_myItemy) &&
+ this->__fbthrift_field_myEnumy && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>(*this->__fbthrift_field_myEnumy) &&
+ this->__fbthrift_field_booly && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>(*this->__fbthrift_field_booly) &&
+ this->__fbthrift_field_floatListy && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>(*this->__fbthrift_field_floatListy) &&
+ this->__fbthrift_field_strMappy && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>(*this->__fbthrift_field_strMappy) &&
+ this->__fbthrift_field_intSetty && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>(*this->__fbthrift_field_intSetty);
+}
+
+bool MyStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I64PatchStruct>>>(*lhs.__fbthrift_field_inty, *rhs.__fbthrift_field_inty)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*lhs.__fbthrift_field_stringy, *rhs.__fbthrift_field_stringy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>>(*lhs.__fbthrift_field_myItemy, *rhs.__fbthrift_field_myItemy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>>(*lhs.__fbthrift_field_myEnumy, *rhs.__fbthrift_field_myEnumy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::BoolPatchStruct>>>(*lhs.__fbthrift_field_booly, *rhs.__fbthrift_field_booly)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>>(*lhs.__fbthrift_field_floatListy, *rhs.__fbthrift_field_floatListy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>>(*lhs.__fbthrift_field_strMappy, *rhs.__fbthrift_field_strMappy)) {
+    return false;
+  }
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>>(*lhs.__fbthrift_field_intSetty, *rhs.__fbthrift_field_intSetty)) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_inty, b.__fbthrift_field_inty);
+  swap(a.__fbthrift_field_stringy, b.__fbthrift_field_stringy);
+  swap(a.__fbthrift_field_myItemy, b.__fbthrift_field_myItemy);
+  swap(a.__fbthrift_field_myEnumy, b.__fbthrift_field_myEnumy);
+  swap(a.__fbthrift_field_booly, b.__fbthrift_field_booly);
+  swap(a.__fbthrift_field_floatListy, b.__fbthrift_field_floatListy);
+  swap(a.__fbthrift_field_strMappy, b.__fbthrift_field_strMappy);
+  swap(a.__fbthrift_field_intSetty, b.__fbthrift_field_intSetty);
+}
+
+template void MyStructFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructFieldPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructFieldPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructFieldPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructFieldPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructFieldPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructFieldPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructFieldPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::op::I64Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::op::StringPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItemPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructField4Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::op::BoolPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructField6Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructField7Patch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyStructField8Patch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyStructEnsureStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyStructEnsureStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyStructEnsureStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyStructEnsureStruct";
+}
+
+const folly::StringPiece MyStructEnsureStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyStructEnsureStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStructEnsureStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructEnsureStruct>::name;
+}
+
+MyStructEnsureStruct::MyStructEnsureStruct(const MyStructEnsureStruct&) = default;
+MyStructEnsureStruct& MyStructEnsureStruct::operator=(const MyStructEnsureStruct&) = default;
+MyStructEnsureStruct::MyStructEnsureStruct() :
+      __fbthrift_field_inty(),
+      __fbthrift_field_myEnumy(),
+      __fbthrift_field_booly() {
+}
+
+
+MyStructEnsureStruct::~MyStructEnsureStruct() {}
+
+MyStructEnsureStruct::MyStructEnsureStruct(FOLLY_MAYBE_UNUSED MyStructEnsureStruct&& other) noexcept :
+    __fbthrift_field_inty(std::move(other.__fbthrift_field_inty)),
+    __fbthrift_field_stringy(std::move(other.__fbthrift_field_stringy)),
+    __fbthrift_field_myItemy(std::move(other.__fbthrift_field_myItemy)),
+    __fbthrift_field_myEnumy(std::move(other.__fbthrift_field_myEnumy)),
+    __fbthrift_field_booly(std::move(other.__fbthrift_field_booly)),
+    __fbthrift_field_floatListy(std::move(other.__fbthrift_field_floatListy)),
+    __fbthrift_field_strMappy(std::move(other.__fbthrift_field_strMappy)),
+    __fbthrift_field_intSetty(std::move(other.__fbthrift_field_intSetty)),
+    __isset(other.__isset) {
+}
+
+MyStructEnsureStruct& MyStructEnsureStruct::operator=(FOLLY_MAYBE_UNUSED MyStructEnsureStruct&& other) noexcept {
+    this->__fbthrift_field_inty = std::move(other.__fbthrift_field_inty);
+    this->__fbthrift_field_stringy = std::move(other.__fbthrift_field_stringy);
+    this->__fbthrift_field_myItemy = std::move(other.__fbthrift_field_myItemy);
+    this->__fbthrift_field_myEnumy = std::move(other.__fbthrift_field_myEnumy);
+    this->__fbthrift_field_booly = std::move(other.__fbthrift_field_booly);
+    this->__fbthrift_field_floatListy = std::move(other.__fbthrift_field_floatListy);
+    this->__fbthrift_field_strMappy = std::move(other.__fbthrift_field_strMappy);
+    this->__fbthrift_field_intSetty = std::move(other.__fbthrift_field_intSetty);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyStructEnsureStruct::MyStructEnsureStruct(apache::thrift::FragileConstructor, ::std::int64_t inty__arg, ::std::string stringy__arg, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> myItemy__arg, ::test::fixtures::basic-python-capi::MyEnum myEnumy__arg, bool booly__arg, ::std::vector<float> floatListy__arg, ::std::map<::std::string, ::std::string> strMappy__arg, ::std::set<::std::int32_t> intSetty__arg) :
+    __fbthrift_field_inty(std::move(inty__arg)),
+    __fbthrift_field_stringy(std::move(stringy__arg)),
+    __fbthrift_field_myItemy(std::move(myItemy__arg)),
+    __fbthrift_field_myEnumy(std::move(myEnumy__arg)),
+    __fbthrift_field_booly(std::move(booly__arg)),
+    __fbthrift_field_floatListy(std::move(floatListy__arg)),
+    __fbthrift_field_strMappy(std::move(strMappy__arg)),
+    __fbthrift_field_intSetty(std::move(intSetty__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void MyStructEnsureStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_inty = ::std::int64_t();
+  this->__fbthrift_field_stringy = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_myItemy.reset();
+  this->__fbthrift_field_myEnumy = ::test::fixtures::basic-python-capi::MyEnum();
+  this->__fbthrift_field_booly = bool();
+  this->__fbthrift_field_floatListy.clear();
+  this->__fbthrift_field_strMappy.clear();
+  this->__fbthrift_field_intSetty.clear();
+  __isset = {};
+}
+
+void MyStructEnsureStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool MyStructEnsureStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0)) &&
+ !(this->__isset.get(1)) &&
+ !(this->__fbthrift_field_myItemy) &&
+ !(this->__isset.get(2)) &&
+ !(this->__isset.get(3)) &&
+ !(this->__isset.get(4)) &&
+ !(this->__isset.get(5)) &&
+ !(this->__isset.get(6));
+}
+
+bool MyStructEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.inty_ref() == rhs.inty_ref())) {
+    return false;
+  }
+  if (!(lhs.stringy_ref() == rhs.stringy_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.myItemy_ref(), rhs.myItemy_ref()))) {
+    return false;
+  }
+  if (!(lhs.myEnumy_ref() == rhs.myEnumy_ref())) {
+    return false;
+  }
+  if (!(lhs.booly_ref() == rhs.booly_ref())) {
+    return false;
+  }
+  if (!(lhs.floatListy_ref() == rhs.floatListy_ref())) {
+    return false;
+  }
+  if (!(lhs.strMappy_ref() == rhs.strMappy_ref())) {
+    return false;
+  }
+  if (!(lhs.intSetty_ref() == rhs.intSetty_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyStructEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructEnsureStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<float>* MyStructEnsureStruct::get_floatListy() const& {
+  return floatListy_ref().has_value() ? std::addressof(__fbthrift_field_floatListy) : nullptr;
+}
+
+::std::vector<float>* MyStructEnsureStruct::get_floatListy() & {
+  return floatListy_ref().has_value() ? std::addressof(__fbthrift_field_floatListy) : nullptr;
+}
+
+const ::std::map<::std::string, ::std::string>* MyStructEnsureStruct::get_strMappy() const& {
+  return strMappy_ref().has_value() ? std::addressof(__fbthrift_field_strMappy) : nullptr;
+}
+
+::std::map<::std::string, ::std::string>* MyStructEnsureStruct::get_strMappy() & {
+  return strMappy_ref().has_value() ? std::addressof(__fbthrift_field_strMappy) : nullptr;
+}
+
+const ::std::set<::std::int32_t>* MyStructEnsureStruct::get_intSetty() const& {
+  return intSetty_ref().has_value() ? std::addressof(__fbthrift_field_intSetty) : nullptr;
+}
+
+::std::set<::std::int32_t>* MyStructEnsureStruct::get_intSetty() & {
+  return intSetty_ref().has_value() ? std::addressof(__fbthrift_field_intSetty) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyStructEnsureStruct& a, FOLLY_MAYBE_UNUSED MyStructEnsureStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_inty, b.__fbthrift_field_inty);
+  swap(a.__fbthrift_field_stringy, b.__fbthrift_field_stringy);
+  swap(a.__fbthrift_field_myItemy, b.__fbthrift_field_myItemy);
+  swap(a.__fbthrift_field_myEnumy, b.__fbthrift_field_myEnumy);
+  swap(a.__fbthrift_field_booly, b.__fbthrift_field_booly);
+  swap(a.__fbthrift_field_floatListy, b.__fbthrift_field_floatListy);
+  swap(a.__fbthrift_field_strMappy, b.__fbthrift_field_strMappy);
+  swap(a.__fbthrift_field_intSetty, b.__fbthrift_field_intSetty);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyStructEnsureStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyStructEnsureStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyStructEnsureStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyStructEnsureStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyStructEnsureStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyStructEnsureStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyStructEnsureStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyStructEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyStructEnsureStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItem>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyDataItemPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyDataItemPatch";
+}
+
+const folly::StringPiece MyDataItemPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItemPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyDataItemPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyDataItemPatchStruct>::name;
+}
+
+MyDataItemPatchStruct::MyDataItemPatchStruct(const MyDataItemPatchStruct& srcObj) :
+    __fbthrift_field_assign(srcObj.__fbthrift_field_assign),
+    __fbthrift_field_clear(srcObj.__fbthrift_field_clear),
+    __fbthrift_field_patchPrior(srcObj.__fbthrift_field_patchPrior),
+    __fbthrift_field_ensure(srcObj.__fbthrift_field_ensure),
+    __fbthrift_field_patch(srcObj.__fbthrift_field_patch),
+    __fbthrift_field_remove(srcObj.__fbthrift_field_remove) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(const MyDataItemPatchStruct& other) {
+  MyDataItemPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MyDataItemPatchStruct::MyDataItemPatchStruct() :
+      __fbthrift_field_clear() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+
+MyDataItemPatchStruct::~MyDataItemPatchStruct() {}
+
+MyDataItemPatchStruct::MyDataItemPatchStruct(FOLLY_MAYBE_UNUSED MyDataItemPatchStruct&& other) noexcept :
+    __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
+    __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_patchPrior(std::move(other.__fbthrift_field_patchPrior)),
+    __fbthrift_field_ensure(std::move(other.__fbthrift_field_ensure)),
+    __fbthrift_field_patch(std::move(other.__fbthrift_field_patch)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataItemPatchStruct&& other) noexcept {
+    this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
+    this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_patchPrior = std::move(other.__fbthrift_field_patchPrior);
+    this->__fbthrift_field_ensure = std::move(other.__fbthrift_field_ensure);
+    this->__fbthrift_field_patch = std::move(other.__fbthrift_field_patch);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
+    return *this;
+}
+
+
+MyDataItemPatchStruct::MyDataItemPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg) :
+    __fbthrift_field_assign(std::move(assign__arg)),
+    __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
+    __fbthrift_field_ensure(std::move(ensure__arg)),
+    __fbthrift_field_patch(std::move(patch__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+}
+
+
+void MyDataItemPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_assign.reset();
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  this->__fbthrift_field_remove.clear();
+}
+
+void MyDataItemPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_clear = bool();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  this->__fbthrift_field_remove.clear();
+}
+
+bool MyDataItemPatchStruct::__fbthrift_is_empty() const {
+  return !(this->__fbthrift_field_assign) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>>(this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>>(this->__fbthrift_field_patch) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>>(this->__fbthrift_field_remove);
+}
+
+bool MyDataItemPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemPatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return false;
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
+    return false;
+  }
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
+    return false;
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyDataItemPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct& MyDataItemPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::basic-python-capi::MyDataItemEnsureStruct MyDataItemPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
+}
+
+const ::std::unordered_set<::apache::thrift::op::FieldId>& MyDataItemPatchStruct::get_remove() const& {
+  return __fbthrift_field_remove;
+}
+
+::std::unordered_set<::apache::thrift::op::FieldId> MyDataItemPatchStruct::get_remove() && {
+  return std::move(__fbthrift_field_remove);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItemPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataItemPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
+  swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_patchPrior, b.__fbthrift_field_patchPrior);
+  swap(a.__fbthrift_field_ensure, b.__fbthrift_field_ensure);
+  swap(a.__fbthrift_field_patch, b.__fbthrift_field_patch);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
+}
+
+template void MyDataItemPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItemPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItemPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItemPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItemPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItemPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItemPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItemPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyDataItemPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItem>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyDataItemPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyDataItemPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyDataItemPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyDataItemFieldPatchStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyDataItemFieldPatch";
+}
+
+const folly::StringPiece MyDataItemFieldPatchStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItemFieldPatchStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyDataItemFieldPatchStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyDataItemFieldPatchStruct>::name;
+}
+
+MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct(const MyDataItemFieldPatchStruct& srcObj) :
+    __fbthrift_field_s(srcObj.__fbthrift_field_s) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_s, *this);
+}
+
+MyDataItemFieldPatchStruct& MyDataItemFieldPatchStruct::operator=(const MyDataItemFieldPatchStruct& other) {
+  MyDataItemFieldPatchStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataItemFieldPatchStruct&& other) noexcept :
+    __fbthrift_field_s(std::move(other.__fbthrift_field_s)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_s, *this);
+}
+
+MyDataItemFieldPatchStruct& MyDataItemFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataItemFieldPatchStruct&& other) noexcept {
+    this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
+    return *this;
+}
+
+
+MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> s__arg) :
+    __fbthrift_field_s(std::move(s__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_s, *this);
+}
+
+
+void MyDataItemFieldPatchStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_s = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>());
+}
+
+void MyDataItemFieldPatchStruct::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_s = ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>());
+}
+
+bool MyDataItemFieldPatchStruct::__fbthrift_is_empty() const {
+  return this->__fbthrift_field_s && ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*this->__fbthrift_field_s);
+}
+
+bool MyDataItemFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemFieldPatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>(*lhs.__fbthrift_field_s, *rhs.__fbthrift_field_s)) {
+    return false;
+  }
+  return true;
+}
+
+bool MyDataItemFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemFieldPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItemFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyDataItemFieldPatchStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
+}
+
+template void MyDataItemFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItemFieldPatchStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItemFieldPatchStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItemFieldPatchStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItemFieldPatchStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItemFieldPatchStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItemFieldPatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItemFieldPatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyDataItemFieldPatchStruct,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::op::StringPatch>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MyDataItemEnsureStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MyDataItemEnsureStruct";
+}
+
+const folly::StringPiece MyDataItemEnsureStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItemEnsureStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyDataItemEnsureStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyDataItemEnsureStruct>::name;
+}
+
+MyDataItemEnsureStruct::MyDataItemEnsureStruct(const MyDataItemEnsureStruct&) = default;
+MyDataItemEnsureStruct& MyDataItemEnsureStruct::operator=(const MyDataItemEnsureStruct&) = default;
+MyDataItemEnsureStruct::MyDataItemEnsureStruct(FOLLY_MAYBE_UNUSED MyDataItemEnsureStruct&& other) noexcept :
+    __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
+    __isset(other.__isset) {
+}
+
+MyDataItemEnsureStruct& MyDataItemEnsureStruct::operator=(FOLLY_MAYBE_UNUSED MyDataItemEnsureStruct&& other) noexcept {
+    this->__fbthrift_field_s = std::move(other.__fbthrift_field_s);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MyDataItemEnsureStruct::MyDataItemEnsureStruct(apache::thrift::FragileConstructor, ::std::string s__arg) :
+    __fbthrift_field_s(std::move(s__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void MyDataItemEnsureStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_s = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void MyDataItemEnsureStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool MyDataItemEnsureStruct::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool MyDataItemEnsureStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemEnsureStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.s_ref() == rhs.s_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MyDataItemEnsureStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataItemEnsureStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItemEnsureStruct& a, FOLLY_MAYBE_UNUSED MyDataItemEnsureStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
+  swap(a.__isset, b.__isset);
+}
+
+template void MyDataItemEnsureStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItemEnsureStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItemEnsureStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItemEnsureStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItemEnsureStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItemEnsureStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItemEnsureStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItemEnsureStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-python-capi
+
 namespace test { namespace fixtures { namespace basic-python-capi { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::thrift::test::lib::StringDoubler, 2, ::std::string, ::test::fixtures::basic-python-capi::StringPair>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, 1, ::apache::thrift::op::I64PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 2, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>, 4, ::test::fixtures::basic-python-capi::MyStructField4PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>, 5, ::apache::thrift::op::BoolPatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>, 6, ::test::fixtures::basic-python-capi::MyStructField6PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>, 7, ::test::fixtures::basic-python-capi::MyStructField7PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, 8, ::test::fixtures::basic-python-capi::MyStructField8PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>();
 }
 }}}} // test::fixtures::basic-python-capi

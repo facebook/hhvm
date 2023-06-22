@@ -131,6 +131,20 @@ cdef api object construct__test__fixtures__basic_python_capi__module__ListStruct
         protocol=__Protocol.BINARY
     )
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__ComposeStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.ComposeStruct) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ComposeStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__ComposeStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.ComposeStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
 
@@ -145,6 +159,146 @@ cdef api object construct__test__fixtures__basic_python_capi__module__MyUnion(__
         protocol=__Protocol.BINARY
     )
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructField4Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructField4Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructField4Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructField4Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructField4Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructField6Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructField6Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructField6Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructField6Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructField6Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructField7Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructField7Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructField7Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructField7Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructField7Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructField8Patch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructField8Patch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructField8Patch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructField8Patch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructField8Patch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructFieldPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructFieldPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructFieldPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructFieldPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructFieldPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyStructEnsureStruct) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructEnsureStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyDataItemPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataItemPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyDataItemPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItemPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataItemPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataItemFieldPatch) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataItemFieldPatch,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.MyDataItemEnsureStruct) else 0
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataItemEnsureStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0
 
@@ -153,4 +307,13 @@ cdef api int64_t extract__test__fixtures__basic_python_capi__module__MyEnum(obje
 
 cdef api object construct__test__fixtures__basic_python_capi__module__MyEnum(int64_t __val):
     return __thrift_types.MyEnum(__val)
+
+cdef api int can_extract__test__fixtures__basic_python_capi__module__AnnoyingEnum(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.AnnoyingEnum) else 0
+
+cdef api int64_t extract__test__fixtures__basic_python_capi__module__AnnoyingEnum(object __obj) except -1:
+    return __obj.value
+
+cdef api object construct__test__fixtures__basic_python_capi__module__AnnoyingEnum(int64_t __val):
+    return __thrift_types.AnnoyingEnum(__val)
 

@@ -168,6 +168,16 @@ std::string format_marshal_type(
     // thrift-python internal representation uses binary regardless;
     // i.e., unicode encoded to bytes during thrift-python struct creation
     return "Bytes";
+  } else if (type->is_enum()) {
+    return fmt::format(
+        "apache::thrift::python::capi::ComposedEnum<{}::{}>",
+        cpp2::get_gen_namespace(*type->program()),
+        cpp2::get_name(type));
+  } else if (type->is_struct()) {
+    return fmt::format(
+        "apache::thrift::python::capi::ComposedStruct<{}::{}>",
+        cpp2::get_gen_namespace(*type->program()),
+        cpp2::get_name(type));
   } else if (type->is_list()) {
     const auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
     if (type_override.empty()) {

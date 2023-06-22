@@ -15,9 +15,20 @@ namespace detail {
 class DoubledPair;
 } // namespace detail
 class StringPair;
-class EmptyStruct;
+class VapidStruct;
 class PrimitiveStruct;
 class ListStruct;
-class MyUnion;
+class ComposeStruct;
+class OurUnion;
+class MyStructPatchStruct;
+class MyStructField4PatchStruct;
+class MyStructField6PatchStruct;
+class MyStructField7PatchStruct;
+class MyStructField8PatchStruct;
+class MyStructFieldPatchStruct;
+class MyStructEnsureStruct;
+class MyDataItemPatchStruct;
+class MyDataItemFieldPatchStruct;
+class MyDataItemEnsureStruct;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare

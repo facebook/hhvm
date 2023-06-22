@@ -187,6 +187,18 @@ SPECIALIZE_STR(StringView);
 
 #undef SPECIALIZE_STR
 
+template <typename T>
+struct Extractor<ComposedEnum<T>> : public BaseExtractor<ComposedEnum<T>> {
+  ExtractorResult<T> operator()(PyObject* obj) {
+    auto fbthrift_value = Extractor<int32_t>{}(obj);
+    if (fbthrift_value.hasError()) {
+      return extractorError<T>(fbthrift_value.error());
+    }
+    return static_cast<T>(*fbthrift_value);
+  }
+  int typeCheck(PyObject* obj) { return Extractor<int32_t>::typeCheck(obj); }
+};
+
 template <typename C>
 using reserve_method_t =
     decltype(std::declval<C&>().reserve(std::declval<size_t>()));

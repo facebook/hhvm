@@ -16,6 +16,7 @@ from libcpp cimport bool as cbool
 
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "thrift::test::python_capi":
+    cppclass ComposeStruct
     cppclass DoubledPair
     cppclass ListStruct
     cppclass MyDataItem
@@ -62,6 +63,9 @@ def roundtrip_PrimitiveStruct(object x):
 def roundtrip_ListStruct(object x):
     return __shim__roundtrip[ListStruct](x)
 
+def roundtrip_ComposeStruct(object x):
+    return __shim__roundtrip[ComposeStruct](x)
+
 def check_MyStruct(object x):
     return bool(__shim__typeCheck[MyStruct](x))
 
@@ -88,3 +92,6 @@ def check_PrimitiveStruct(object x):
 
 def check_ListStruct(object x):
     return bool(__shim__typeCheck[ListStruct](x))
+
+def check_ComposeStruct(object x):
+    return bool(__shim__typeCheck[ComposeStruct](x))

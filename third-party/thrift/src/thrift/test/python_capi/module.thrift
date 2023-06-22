@@ -105,6 +105,16 @@ struct ListStruct {
   8: list<list<list<signed_byte>>> voxels;
 }
 
+typedef ListStruct ListAlias
+
+@python.MarshalCapi
+struct ComposeStruct {
+  1: MyEnum enum_;
+  2: AnnoyingEnum renamed_;
+  3: PrimitiveStruct primitive;
+  4: ListAlias aliased;
+}
+
 union MyUnion {
   1: MyEnum myEnum;
   2: MyStruct myStruct;

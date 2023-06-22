@@ -43,6 +43,7 @@ Extractor<::test::fixtures::basic-python-capi::MyStruct>::operator()(PyObject* o
   return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyStruct>(std::move(val));
 }
 
+
 int Extractor<::test::fixtures::basic-python-capi::MyStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
@@ -74,17 +75,21 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyStruct>::operator()
 
 ExtractorResult<::test::fixtures::basic-python-capi::MyDataItem>
 Extractor<::test::fixtures::basic-python-capi::MyDataItem>::operator()(PyObject* obj) {
-  ::test::fixtures::basic-python-capi::MyDataItem cpp;
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a MyDataItem");
-      }
-      return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
-          "Marshal error: MyDataItem");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
+      "Module test.fixtures.basic-python-capi.module import error");
   }
-  return cpp;
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyDataItem(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItem>(
+        "Thrift serialize error: MyDataItem");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyDataItem>(std::move(val));
 }
+
 
 int Extractor<::test::fixtures::basic-python-capi::MyDataItem>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -117,7 +122,6 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyDataItem>::operator
 
 ExtractorResult<::test::fixtures::basic-python-capi::TransitiveDoubler>
 Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>::operator()(PyObject* obj) {
-  ::test::fixtures::basic-python-capi::TransitiveDoubler cpp;
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -126,8 +130,9 @@ Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>::operator()(Py
       return extractorError<::test::fixtures::basic-python-capi::TransitiveDoubler>(
           "Marshal error: TransitiveDoubler");
   }
-  return cpp;
+  return ::test::fixtures::basic-python-capi::TransitiveDoubler{};
 }
+
 
 int Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -177,6 +182,7 @@ Extractor<::test::fixtures::basic-python-capi::DoubledPair>::operator()(PyObject
     >(std::move(val));
 }
 
+
 int Extractor<::test::fixtures::basic-python-capi::DoubledPair>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
@@ -223,6 +229,7 @@ Extractor<::test::fixtures::basic-python-capi::StringPair>::operator()(PyObject*
   return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::StringPair>(std::move(val));
 }
 
+
 int Extractor<::test::fixtures::basic-python-capi::StringPair>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
@@ -252,21 +259,21 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::StringPair>::operator
   return ptr;
 }
 
-ExtractorResult<::test::fixtures::basic-python-capi::EmptyStruct>
-Extractor<::test::fixtures::basic-python-capi::EmptyStruct>::operator()(PyObject* obj) {
-  ::test::fixtures::basic-python-capi::EmptyStruct cpp;
+ExtractorResult<::test::fixtures::basic-python-capi::VapidStruct>
+Extractor<::test::fixtures::basic-python-capi::VapidStruct>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
         PyErr_SetString(PyExc_TypeError, "Not a EmptyStruct");
       }
-      return extractorError<::test::fixtures::basic-python-capi::EmptyStruct>(
+      return extractorError<::test::fixtures::basic-python-capi::VapidStruct>(
           "Marshal error: EmptyStruct");
   }
-  return cpp;
+  return ::test::fixtures::basic-python-capi::VapidStruct{};
 }
 
-int Extractor<::test::fixtures::basic-python-capi::EmptyStruct>::typeCheck(PyObject* obj) {
+
+int Extractor<::test::fixtures::basic-python-capi::VapidStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic-python-capi.module import error");
@@ -281,8 +288,8 @@ int Extractor<::test::fixtures::basic-python-capi::EmptyStruct>::typeCheck(PyObj
 }
 
 
-PyObject* Constructor<::test::fixtures::basic-python-capi::EmptyStruct>::operator()(
-    ::test::fixtures::basic-python-capi::EmptyStruct&& val) {
+PyObject* Constructor<::test::fixtures::basic-python-capi::VapidStruct>::operator()(
+    ::test::fixtures::basic-python-capi::VapidStruct&& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -297,7 +304,6 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::EmptyStruct>::operato
 
 ExtractorResult<::test::fixtures::basic-python-capi::PrimitiveStruct>
 Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(PyObject* obj) {
-  ::test::fixtures::basic-python-capi::PrimitiveStruct cpp;
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -307,6 +313,14 @@ Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(PyOb
           "Marshal error: PrimitiveStruct");
   }
   PyObject* fbThriftData = getThriftData(obj);
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::PrimitiveStruct>>{}(fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::PrimitiveStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::PrimitiveStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::PrimitiveStruct cpp;
   std::optional<std::string_view> error;
   Extractor<bool>{}.extractInto(
       cpp.booly(),
@@ -381,7 +395,6 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>::ope
 
 ExtractorResult<::test::fixtures::basic-python-capi::ListStruct>
 Extractor<::test::fixtures::basic-python-capi::ListStruct>::operator()(PyObject* obj) {
-  ::test::fixtures::basic-python-capi::ListStruct cpp;
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -391,6 +404,14 @@ Extractor<::test::fixtures::basic-python-capi::ListStruct>::operator()(PyObject*
           "Marshal error: ListStruct");
   }
   PyObject* fbThriftData = getThriftData(obj);
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::ListStruct>>{}(fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::ListStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::ListStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::ListStruct cpp;
   std::optional<std::string_view> error;
   Extractor<list<bool>>{}.extractInto(
       cpp.boolz(),
@@ -459,24 +480,96 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ListStruct>::operator
   return ptr;
 }
 
-ExtractorResult<::test::fixtures::basic-python-capi::MyUnion>
-Extractor<::test::fixtures::basic-python-capi::MyUnion>::operator()(PyObject* obj) {
+ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct>
+Extractor<::test::fixtures::basic-python-capi::ComposeStruct>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a ComposeStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::ComposeStruct>(
+          "Marshal error: ComposeStruct");
+  }
+  PyObject* fbThriftData = getThriftData(obj);
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::ComposeStruct>>{}(fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::ComposeStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::ComposeStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>>{}.extractInto(
+      cpp.enum_(),
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
+      error);
+  Extractor<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::NormalDecentEnum>>{}.extractInto(
+      cpp.renamed_(),
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
+      error);
+  Extractor<apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::PrimitiveStruct>>{}.extractInto(
+      cpp.primitive(),
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
+      error);
+  Extractor<apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::ListStruct>>{}.extractInto(
+      cpp.aliased(),
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::ComposeStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__ComposeStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: ComposeStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::ComposeStruct>::operator()(
+    ::test::fixtures::basic-python-capi::ComposeStruct&& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic-python-capi::MyUnion>(
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__ComposeStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::OurUnion>
+Extractor<::test::fixtures::basic-python-capi::OurUnion>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::OurUnion>(
       "Module test.fixtures.basic-python-capi.module import error");
   }
   std::unique_ptr<folly::IOBuf> val(
       extract__test__fixtures__basic_python_capi__module__MyUnion(obj));
   if (!val) {
     CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic-python-capi::MyUnion>(
+    return extractorError<::test::fixtures::basic-python-capi::OurUnion>(
         "Thrift serialize error: MyUnion");
   }
-  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyUnion>(std::move(val));
+  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::OurUnion>(std::move(val));
 }
 
-int Extractor<::test::fixtures::basic-python-capi::MyUnion>::typeCheck(PyObject* obj) {
+
+int Extractor<::test::fixtures::basic-python-capi::OurUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic-python-capi.module import error");
@@ -491,13 +584,499 @@ int Extractor<::test::fixtures::basic-python-capi::MyUnion>::typeCheck(PyObject*
 }
 
 
-PyObject* Constructor<::test::fixtures::basic-python-capi::MyUnion>::operator()(
-    ::test::fixtures::basic-python-capi::MyUnion&& val) {
+PyObject* Constructor<::test::fixtures::basic-python-capi::OurUnion>::operator()(
+    ::test::fixtures::basic-python-capi::OurUnion&& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   auto ptr = construct__test__fixtures__basic_python_capi__module__MyUnion(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructPatch>
+Extractor<::test::fixtures::basic-python-capi::MyStructPatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructPatch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructPatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructPatch>(
+        "Thrift serialize error: MyStructPatch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructPatch, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyStructPatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructPatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructPatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructPatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructPatch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructPatch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructPatch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyStructPatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructField4Patch>
+Extractor<::test::fixtures::basic-python-capi::MyStructField4Patch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField4Patch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructField4Patch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField4Patch>(
+        "Thrift serialize error: MyStructField4Patch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructField4Patch, ::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructField4Patch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructField4Patch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructField4Patch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructField4Patch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructField4Patch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructField4Patch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::basic-python-capi::MyStructField4PatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructField6Patch>
+Extractor<::test::fixtures::basic-python-capi::MyStructField6Patch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField6Patch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructField6Patch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField6Patch>(
+        "Thrift serialize error: MyStructField6Patch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructField6Patch, ::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructField6Patch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructField6Patch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructField6Patch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructField6Patch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructField6Patch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructField6Patch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::basic-python-capi::MyStructField6PatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructField7Patch>
+Extractor<::test::fixtures::basic-python-capi::MyStructField7Patch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField7Patch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructField7Patch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField7Patch>(
+        "Thrift serialize error: MyStructField7Patch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructField7Patch, ::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructField7Patch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructField7Patch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructField7Patch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructField7Patch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructField7Patch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructField7Patch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::basic-python-capi::MyStructField7PatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructField8Patch>
+Extractor<::test::fixtures::basic-python-capi::MyStructField8Patch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField8Patch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructField8Patch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructField8Patch>(
+        "Thrift serialize error: MyStructField8Patch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructField8Patch, ::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructField8Patch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructField8Patch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructField8Patch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructField8Patch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructField8Patch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructField8Patch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructFieldPatch>
+Extractor<::test::fixtures::basic-python-capi::MyStructFieldPatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructFieldPatch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructFieldPatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructFieldPatch>(
+        "Thrift serialize error: MyStructFieldPatch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyStructFieldPatch, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructFieldPatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructFieldPatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructFieldPatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructFieldPatch>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructFieldPatch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructFieldPatch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyStructEnsureStruct>
+Extractor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyStructEnsureStruct>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyStructEnsureStruct>(
+        "Thrift serialize error: MyStructEnsureStruct");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyStructEnsureStruct>(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyStructEnsureStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>::operator()(
+    ::test::fixtures::basic-python-capi::MyStructEnsureStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyStructEnsureStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemPatch>
+Extractor<::test::fixtures::basic-python-capi::MyDataItemPatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemPatch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyDataItemPatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemPatch>(
+        "Thrift serialize error: MyDataItemPatch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyDataItemPatch, ::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyDataItemPatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyDataItemPatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyDataItemPatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyDataItemPatch>::operator()(
+    ::test::fixtures::basic-python-capi::MyDataItemPatch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyDataItemPatch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>
+Extractor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>(
+        "Thrift serialize error: MyDataItemFieldPatch");
+  }
+  return detail::deserialize_iobuf_to_adapted<
+      ::test::fixtures::basic-python-capi::MyDataItemFieldPatch, ::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>
+    >(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyDataItemFieldPatch");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>::operator()(
+    ::test::fixtures::basic-python-capi::MyDataItemFieldPatch&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyDataItemFieldPatch(
+      detail::serialize_adapted_to_iobuf<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>
+Extractor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>(
+        "Thrift serialize error: MyDataItemEnsureStruct");
+  }
+  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>(std::move(val));
+}
+
+
+int Extractor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MyDataItemEnsureStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>::operator()(
+    ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MyDataItemEnsureStruct(
       detail::serialize_to_iobuf(std::move(val)));
   if (!ptr) {
     CHECK(PyErr_Occurred());
@@ -542,6 +1121,50 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MyEnum>::operator()(
     return nullptr;
   }
   auto ptr = construct__test__fixtures__basic_python_capi__module__MyEnum(
+      static_cast<int64_t>(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::NormalDecentEnum>
+Extractor<::test::fixtures::basic-python-capi::NormalDecentEnum>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::fixtures::basic-python-capi::NormalDecentEnum>(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int64_t val = extract__test__fixtures__basic_python_capi__module__AnnoyingEnum(obj);
+  if (val == -1 && PyErr_Occurred()) {
+    return extractorError<::test::fixtures::basic-python-capi::NormalDecentEnum>(
+        "Error getting python int value: AnnoyingEnum");
+  }
+  return static_cast<::test::fixtures::basic-python-capi::NormalDecentEnum>(val);
+}
+
+int Extractor<::test::fixtures::basic-python-capi::NormalDecentEnum>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__AnnoyingEnum(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: AnnoyingEnum");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::NormalDecentEnum>::operator()(
+    ::test::fixtures::basic-python-capi::NormalDecentEnum&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__AnnoyingEnum(
       static_cast<int64_t>(val));
   if (!ptr) {
     CHECK(PyErr_Occurred());

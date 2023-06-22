@@ -16,6 +16,7 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/lib/thrift/patch.thrift"
 
 cpp_include "<deque>"
 cpp_include "<folly/small_vector.h>"
@@ -28,18 +29,27 @@ enum MyEnum {
   MyValue2 = 1,
 }
 
+enum AnnoyingEnum {
+  FOO = 1 (cpp.name = "l0O1"),
+  BAR = 2 (cpp.name = "FuBaR"),
+} (cpp.name = "NormalDecentEnum")
+
+@patch.GeneratePatch
 struct MyStruct {
-  1: i64 MyIntField;
-  2: string MyStringField;
-  3: MyDataItem MyDataField;
-  4: MyEnum myEnum;
-  5: bool oneway;
-  6: list<float> floatList;
-  7: map<binary, string> strMap;
-  8: set<i32> floatSet;
+  1: i64 inty;
+  2: string stringy;
+  3: MyDataItem myItemy;
+  4: MyEnum myEnumy;
+  5: bool booly (cpp.name = "boulet");
+  6: list<float> floatListy;
+  7: map<binary, string> strMappy;
+  8: set<i32> intSetty;
 }
 
-struct MyDataItem {}
+@patch.GeneratePatch
+struct MyDataItem {
+  1: string s;
+}
 
 @cpp.Adapter{name = "::thrift::test::lib::StructDoubler"}
 @scope.Transitive
@@ -57,7 +67,7 @@ struct StringPair {
   2: string doubled;
 }
 
-struct EmptyStruct {}
+struct EmptyStruct {} (cpp.name = "VapidStruct")
 
 typedef byte signed_byte
 
@@ -95,11 +105,21 @@ struct ListStruct {
   8: list<list<list<signed_byte>>> voxels;
 }
 
+typedef ListStruct ListAlias
+
+@python.MarshalCapi
+struct ComposeStruct {
+  1: MyEnum enum_;
+  2: AnnoyingEnum renamed_;
+  3: PrimitiveStruct primitive;
+  4: ListAlias aliased;
+}
+
 union MyUnion {
   1: MyEnum myEnum;
   2: MyStruct myStruct;
   3: MyDataItem myDataItem;
-  4: set<i64> doubleSet;
+  4: set<i64> intSet;
   5: list<double> doubleList;
   6: map<binary, string> strMap;
-}
+} (cpp.name = "OurUnion")

@@ -14,7 +14,7 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitUnion<::test::fixtures::basic-python-capi::MyUnion> {
+struct VisitUnion<::test::fixtures::basic-python-capi::OurUnion> {
 
   template <typename F, typename T>
   decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
@@ -26,8 +26,8 @@ struct VisitUnion<::test::fixtures::basic-python-capi::MyUnion> {
       return f(1, *static_cast<T&&>(t).myStruct_ref());
     case Union::Type::myDataItem:
       return f(2, *static_cast<T&&>(t).myDataItem_ref());
-    case Union::Type::doubleSet:
-      return f(3, *static_cast<T&&>(t).doubleSet_ref());
+    case Union::Type::intSet:
+      return f(3, *static_cast<T&&>(t).intSet_ref());
     case Union::Type::doubleList:
       return f(4, *static_cast<T&&>(t).doubleList_ref());
     case Union::Type::strMap:

@@ -69,6 +69,22 @@ struct native<StringView> {
   using type = std::string_view;
 };
 
+template <typename T>
+struct ComposedEnum {};
+
+template <typename T>
+struct native<ComposedEnum<T>> {
+  using type = T;
+};
+
+template <typename T>
+struct ComposedStruct {};
+
+template <typename T>
+struct native<ComposedStruct<T>> {
+  using type = T;
+};
+
 // T is the element type, CppT is the full type
 template <typename T, typename CppT = std::vector<native_t<T>>>
 struct list {};

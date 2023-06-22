@@ -12,13 +12,15 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+import apache.thrift.op.patch.thrift_types
+
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "MyIntField",  # name
+            "inty",  # name
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -26,7 +28,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "MyStringField",  # name
+            "stringy",  # name
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -34,7 +36,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             3,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "MyDataField",  # name
+            "myItemy",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -42,7 +44,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "myEnum",  # name
+            "myEnumy",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -50,7 +52,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             5,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "oneway",  # name
+            "booly",  # name
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -58,7 +60,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             6,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "floatList",  # name
+            "floatListy",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -66,7 +68,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "strMap",  # name
+            "strMappy",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -74,7 +76,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         (
             8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "floatSet",  # name
+            "intSetty",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -111,6 +113,14 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "s",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod
@@ -501,6 +511,70 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ListStruct, self)
 
 
+class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enum_",  # name
+            lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "renamed_",  # name
+            lambda: _fbthrift_python_types.EnumTypeInfo(AnnoyingEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "primitive",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(PrimitiveStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "aliased",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(ListStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.ComposeStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/ComposeStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_ComposeStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ComposeStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.ComposeStruct, self)
+
+
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         (
@@ -530,7 +604,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         (
             4,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "doubleSet",  # name
+            "intSet",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -580,6 +654,702 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
 
+
+class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patchPrior",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "ensure",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructEnsureStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patch",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructPatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructPatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructPatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructPatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructPatch, self)
+
+
+class MyStructField4Patch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructField4Patch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructField4Patch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructField4Patch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructField4Patch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField4Patch, self)
+
+
+class MyStructField6Patch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "prepend",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "append",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructField6Patch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructField6Patch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructField6Patch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructField6Patch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField6Patch, self)
+
+
+class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patchPrior",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "add",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patch",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "put",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructField7Patch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructField7Patch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructField7Patch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructField7Patch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField7Patch, self)
+
+
+class MyStructField8Patch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "add",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructField8Patch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructField8Patch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructField8Patch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructField8Patch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructField8Patch, self)
+
+
+class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "inty",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "stringy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "myItemy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "myEnumy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField4Patch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "booly",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "floatListy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField6Patch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "strMappy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField7Patch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "intSetty",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyStructField8Patch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructFieldPatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructFieldPatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructFieldPatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructFieldPatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructFieldPatch, self)
+
+
+class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "inty",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "stringy",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "myItemy",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "myEnumy",  # name
+            lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "booly",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "floatListy",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "strMappy",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "intSetty",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyStructEnsureStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyStructEnsureStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyStructEnsureStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStructEnsureStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructEnsureStruct, self)
+
+
+class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patchPrior",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "ensure",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemEnsureStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "patch",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemFieldPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "remove",  # name
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyDataItemPatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyDataItemPatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyDataItemPatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemPatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemPatch, self)
+
+
+class MyDataItemFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Terse, # qualifier
+            "s",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyDataItemFieldPatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyDataItemFieldPatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyDataItemFieldPatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemFieldPatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemFieldPatch, self)
+
+
+class MyDataItemEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "s",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyDataItemEnsureStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/MyDataItemEnsureStruct"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_MyDataItemEnsureStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyDataItemEnsureStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItemEnsureStruct, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.basic-python-capi.module.thrift_metadata
 
@@ -608,9 +1378,35 @@ class MyEnum(_fbthrift_python_types.Enum, int):
 
     def _to_py_deprecated(self):
         return self.value
+class AnnoyingEnum(_fbthrift_python_types.Enum, int):
+    FOO = 1
+    BAR = 2
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.AnnoyingEnum"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "test.dev/fixtures/basic-python-capi/AnnoyingEnum"
+
+    @staticmethod
+    def __get_metadata__():
+        return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_enum_AnnoyingEnum()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
+        return py3_types.AnnoyingEnum(self.value)
+
+    def _to_py_deprecated(self):
+        return self.value
 
 _fbthrift_all_enums = [
     MyEnum,
+    AnnoyingEnum,
 ]
 
 def _fbthrift_metadata__struct_MyStruct():
@@ -629,8 +1425,30 @@ def _fbthrift_metadata__struct_PrimitiveStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_PrimitiveStruct()
 def _fbthrift_metadata__struct_ListStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ListStruct()
+def _fbthrift_metadata__struct_ComposeStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
 def _fbthrift_metadata__struct_MyUnion():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyUnion()
+def _fbthrift_metadata__struct_MyStructPatch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructPatch()
+def _fbthrift_metadata__struct_MyStructField4Patch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructField4Patch()
+def _fbthrift_metadata__struct_MyStructField6Patch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructField6Patch()
+def _fbthrift_metadata__struct_MyStructField7Patch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructField7Patch()
+def _fbthrift_metadata__struct_MyStructField8Patch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructField8Patch()
+def _fbthrift_metadata__struct_MyStructFieldPatch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructFieldPatch()
+def _fbthrift_metadata__struct_MyStructEnsureStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructEnsureStruct()
+def _fbthrift_metadata__struct_MyDataItemPatch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyDataItemPatch()
+def _fbthrift_metadata__struct_MyDataItemFieldPatch():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyDataItemFieldPatch()
+def _fbthrift_metadata__struct_MyDataItemEnsureStruct():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyDataItemEnsureStruct()
 
 _fbthrift_all_structs = [
     MyStruct,
@@ -641,8 +1459,20 @@ _fbthrift_all_structs = [
     EmptyStruct,
     PrimitiveStruct,
     ListStruct,
+    ComposeStruct,
     MyUnion,
+    MyStructPatch,
+    MyStructField4Patch,
+    MyStructField6Patch,
+    MyStructField7Patch,
+    MyStructField8Patch,
+    MyStructFieldPatch,
+    MyStructEnsureStruct,
+    MyDataItemPatch,
+    MyDataItemFieldPatch,
+    MyDataItemEnsureStruct,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 signed_byte = int
+ListAlias = ListStruct

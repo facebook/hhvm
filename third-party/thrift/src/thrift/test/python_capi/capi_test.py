@@ -16,8 +16,9 @@
 import unittest
 
 import thrift.python_capi.fixture as fixture
-
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
+    AnnoyingEnum,
+    ComposeStruct,
     DoubledPair,
     EmptyStruct,
     ListStruct,
@@ -102,6 +103,14 @@ class PythonCapiFixture(unittest.TestCase):
             voxels=[[], [[]], [[], [3], []]],
         )
 
+    def composed(self) -> ComposeStruct:
+        return ComposeStruct(
+            enum_=MyEnum.MyValue2,
+            renamed_=AnnoyingEnum.FOO,
+            primitive=self.primitive(),
+            aliased=self.list_struct(),
+        )
+
 
 class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_struct(self) -> None:
@@ -178,6 +187,14 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).intz)
         self.assertIsNone(fixture.roundtrip_ListStruct(self.empty_lists()).stringz)
 
+    def test_roundtrip_marshal_ComposeStruct(self) -> None:
+        self.assertEqual(
+            ComposeStruct(), fixture.roundtrip_ComposeStruct(ComposeStruct())
+        )
+        self.assertEqual(
+            self.composed(), fixture.roundtrip_ComposeStruct(self.composed())
+        )
+
 
 class PythonCapiTypeCheck(PythonCapiFixture):
     def test_typeCheck_struct(self) -> None:
@@ -226,3 +243,9 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertTrue(fixture.check_ListStruct(ListStruct()))
         self.assertFalse(fixture.check_ListStruct(MyEnum.MyValue1))
         self.assertFalse(fixture.check_ListStruct(self.my_struct()))
+
+    def test_typeCheck_ComposeStruct(self) -> None:
+        self.assertTrue(fixture.check_ComposeStruct(self.composed()))
+        self.assertTrue(fixture.check_ComposeStruct(ComposeStruct()))
+        self.assertFalse(fixture.check_ComposeStruct(MyEnum.MyValue1))
+        self.assertFalse(fixture.check_ComposeStruct(self.my_struct()))

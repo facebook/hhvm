@@ -17,14 +17,14 @@ template <>
 struct ForEachField<::test::fixtures::basic-python-capi::MyStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).MyIntField_ref()...);
-    f(1, static_cast<T&&>(t).MyStringField_ref()...);
-    f(2, static_cast<T&&>(t).MyDataField_ref()...);
-    f(3, static_cast<T&&>(t).myEnum_ref()...);
-    f(4, static_cast<T&&>(t).oneway_ref()...);
-    f(5, static_cast<T&&>(t).floatList_ref()...);
-    f(6, static_cast<T&&>(t).strMap_ref()...);
-    f(7, static_cast<T&&>(t).floatSet_ref()...);
+    f(0, static_cast<T&&>(t).inty_ref()...);
+    f(1, static_cast<T&&>(t).stringy_ref()...);
+    f(2, static_cast<T&&>(t).myItemy_ref()...);
+    f(3, static_cast<T&&>(t).myEnumy_ref()...);
+    f(4, static_cast<T&&>(t).boulet_ref()...);
+    f(5, static_cast<T&&>(t).floatListy_ref()...);
+    f(6, static_cast<T&&>(t).strMappy_ref()...);
+    f(7, static_cast<T&&>(t).intSetty_ref()...);
   }
 };
 
@@ -32,6 +32,7 @@ template <>
 struct ForEachField<::test::fixtures::basic-python-capi::MyDataItem> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).s_ref()...);
   }
 };
 
@@ -61,7 +62,7 @@ struct ForEachField<::test::fixtures::basic-python-capi::StringPair> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-python-capi::EmptyStruct> {
+struct ForEachField<::test::fixtures::basic-python-capi::VapidStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
@@ -99,15 +100,143 @@ struct ForEachField<::test::fixtures::basic-python-capi::ListStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-python-capi::MyUnion> {
+struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).enum__ref()...);
+    f(1, static_cast<T&&>(t).renamed__ref()...);
+    f(2, static_cast<T&&>(t).primitive_ref()...);
+    f(3, static_cast<T&&>(t).aliased_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::OurUnion> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);
-    f(3, static_cast<T&&>(t).doubleSet_ref()...);
+    f(3, static_cast<T&&>(t).intSet_ref()...);
     f(4, static_cast<T&&>(t).doubleList_ref()...);
     f(5, static_cast<T&&>(t).strMap_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).ensure_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructField4PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructField6PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).prepend_ref()...);
+    f(3, static_cast<T&&>(t).append_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructField7PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).add_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
+    f(6, static_cast<T&&>(t).put_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructField8PatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).remove_ref()...);
+    f(3, static_cast<T&&>(t).add_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).inty_ref()...);
+    f(1, static_cast<T&&>(t).stringy_ref()...);
+    f(2, static_cast<T&&>(t).myItemy_ref()...);
+    f(3, static_cast<T&&>(t).myEnumy_ref()...);
+    f(4, static_cast<T&&>(t).booly_ref()...);
+    f(5, static_cast<T&&>(t).floatListy_ref()...);
+    f(6, static_cast<T&&>(t).strMappy_ref()...);
+    f(7, static_cast<T&&>(t).intSetty_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyStructEnsureStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).inty_ref()...);
+    f(1, static_cast<T&&>(t).stringy_ref()...);
+    f(2, static_cast<T&&>(t).myItemy_ref()...);
+    f(3, static_cast<T&&>(t).myEnumy_ref()...);
+    f(4, static_cast<T&&>(t).booly_ref()...);
+    f(5, static_cast<T&&>(t).floatListy_ref()...);
+    f(6, static_cast<T&&>(t).strMappy_ref()...);
+    f(7, static_cast<T&&>(t).intSetty_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyDataItemPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).ensure_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
+    f(5, static_cast<T&&>(t).remove_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).s_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).s_ref()...);
   }
 };
 } // namespace detail

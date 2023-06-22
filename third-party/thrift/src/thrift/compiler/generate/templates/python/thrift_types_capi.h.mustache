@@ -38,6 +38,18 @@ struct Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
   int typeCheck(PyObject* obj);
 };
 
+{{#struct:marshal_capi?}}
+{{#struct:fields?}}
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> {
+  ExtractorResult<{{program:cpp_namespaces}}::{{struct:cpp_name}}> operator()(PyObject* obj);
+};
+{{/struct:fields?}}
+{{/struct:marshal_capi?}}
+
 template <>
 struct Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
   PyObject* operator()({{program:cpp_namespaces}}::{{struct:cpp_name}}&& val);

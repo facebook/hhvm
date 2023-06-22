@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <fmt/format.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -175,6 +176,38 @@ std::string format_unary_type(
   return fmt::format("{}<{}>", container, elem_thrift_type);
 }
 
+std::string format_map_type(
+    const t_type* type,
+    const t_type* key_type,
+    const t_type* val_type,
+    std::string type_override) {
+  if (type_override.empty()) {
+    // gets cpp.type overrides
+    type_override = fmt::to_string(cpp2::get_type(type));
+  }
+  if (!type_override.empty()) {
+    std::string key_thrift_type = format_marshal_type(
+        key_type, fmt::format("{}::key_type", type_override));
+    std::string val_thrift_type = format_marshal_type(
+        val_type, fmt::format("{}::mapped_type", type_override));
+    return fmt::format(
+        "map<{}, {}, {}>", key_thrift_type, val_thrift_type, type_override);
+  }
+  auto template_override = get_cpp_template(*type);
+  std::string key_thrift_type = format_marshal_type(key_type);
+  std::string val_thrift_type = format_marshal_type(val_type);
+  if (!template_override.empty()) {
+    return fmt::format(
+        "map<{}, {}, {}<native_t<{}>, native_t<{}>>>",
+        key_thrift_type,
+        val_thrift_type,
+        template_override,
+        key_thrift_type,
+        val_thrift_type);
+  }
+  return fmt::format("map<{}, {}>", key_thrift_type, val_thrift_type);
+}
+
 std::string format_marshal_type(
     const t_type* field_type, std::string type_override) {
   const t_type* type = field_type->get_true_type();
@@ -215,6 +248,10 @@ std::string format_marshal_type(
   } else if (type->is_set()) {
     const auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
     return format_unary_type(type, elem_type, "set", std::move(type_override));
+  } else if (type->is_map()) {
+    const auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
+    const auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
+    return format_map_type(type, key_type, val_type, std::move(type_override));
   }
   // if not supported, empty string to cause compile error
   return "";

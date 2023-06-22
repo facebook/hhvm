@@ -114,6 +114,21 @@ struct ForEachField<::test::fixtures::basic-python-capi::SetStruct> {
 };
 
 template <>
+struct ForEachField<::test::fixtures::basic-python-capi::MapStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).enumz_ref()...);
+    f(1, static_cast<T&&>(t).intz_ref()...);
+    f(2, static_cast<T&&>(t).binnaz_ref()...);
+    f(3, static_cast<T&&>(t).encoded_ref()...);
+    f(4, static_cast<T&&>(t).flotz_ref()...);
+    f(5, static_cast<T&&>(t).map_list_ref()...);
+    f(6, static_cast<T&&>(t).list_map_ref()...);
+    f(7, static_cast<T&&>(t).fast_list_map_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

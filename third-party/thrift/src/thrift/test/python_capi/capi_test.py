@@ -22,6 +22,7 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     DoubledPair,
     EmptyStruct,
     ListStruct,
+    MapStruct,
     MyDataItem,
     MyEnum,
     MyStruct,
@@ -126,6 +127,28 @@ class PythonCapiFixture(unittest.TestCase):
             setz=[{}],
         )
 
+    def map_struct(self) -> MapStruct:
+        return MapStruct(
+            enumz={MyEnum.MyValue1: "V1", MyEnum.MyValue2: "V2"},
+            intz={i: str(i) for i in range(-3, 3)},
+            binnaz={b"a": self.primitive(), b"b": self.primitive()},
+            encoded={"wdf": 3.1, "wef": 2.9},
+            flotz={i: float(i) for i in range(5)},
+            map_list=[{i: i**2 for i in range(j)} for j in range(2)],
+            list_map={1: [1, 2, 3, 5], 2: [4, 8, 16]},
+            fast_list_map={1: [-1.0, 1.0], -1: [1.0, -1.0]},
+        )
+
+    def empty_maps(self) -> MapStruct:
+        return MapStruct(
+            enumz={},
+            encoded={},
+            flotz={},
+            map_list=[{}],
+            list_map={},
+            fast_list_map={},
+        )
+
     def composed(self) -> ComposeStruct:
         return ComposeStruct(
             enum_=MyEnum.MyValue2,
@@ -221,6 +244,25 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         for f in ["enumz", "intz", "binnaz", "encoded", "uidz", "charz", "setz"]:
             self.assertEqual(getattr(expected, f), getattr(actual, f), f)
 
+    def test_roundtrip_marshal_MapStruct(self) -> None:
+        self.assertEqual(MapStruct(), fixture.roundtrip_MapStruct(MapStruct()))
+        self.assertEqual(
+            self.empty_maps(), fixture.roundtrip_MapStruct(self.empty_maps())
+        )
+        expected = self.map_struct()
+        actual = fixture.roundtrip_MapStruct(self.map_struct())
+        for f in [
+            "enumz",
+            "intz",
+            "binnaz",
+            "encoded",
+            "flotz",
+            "map_list",
+            "list_map",
+            "fast_list_map",
+        ]:
+            self.assertEqual(getattr(expected, f), getattr(actual, f), f)
+
     def test_roundtrip_marshal_ComposeStruct(self) -> None:
         self.assertEqual(
             ComposeStruct(), fixture.roundtrip_ComposeStruct(ComposeStruct())
@@ -284,6 +326,13 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertTrue(fixture.check_SetStruct(SetStruct()))
         self.assertFalse(fixture.check_SetStruct(MyEnum.MyValue1))
         self.assertFalse(fixture.check_SetStruct(self.my_struct()))
+
+    def test_typeCheck_MapStruct(self) -> None:
+        self.assertTrue(fixture.check_MapStruct(self.map_struct()))
+        self.assertTrue(fixture.check_MapStruct(self.empty_maps()))
+        self.assertTrue(fixture.check_MapStruct(MapStruct()))
+        self.assertFalse(fixture.check_MapStruct(MyEnum.MyValue1))
+        self.assertFalse(fixture.check_MapStruct(self.my_struct()))
 
     def test_typeCheck_ComposeStruct(self) -> None:
         self.assertTrue(fixture.check_ComposeStruct(self.composed()))

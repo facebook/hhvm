@@ -309,6 +309,77 @@ struct Extractor<set<ElemT, CppT>> : public BaseExtractor<set<ElemT, CppT>> {
   }
 };
 
+template <typename M, typename K, typename V>
+using emplace_method_t =
+    decltype(std::declval<M&>().emplace(std::declval<K>(), std::declval<V>()));
+template <typename C, typename K, typename V>
+constexpr bool has_emplace_v =
+    folly::is_detected_v<emplace_method_t, std::remove_reference_t<C>, K, V>;
+
+template <typename KeyT, typename ValT, typename CppT>
+struct Extractor<map<KeyT, ValT, CppT>>
+    : public BaseExtractor<map<KeyT, ValT, CppT>> {
+  using map_t = map<KeyT, ValT, CppT>;
+  ExtractorResult<map_t> operator()(PyObject* obj) {
+    if constexpr (folly::kIsDebug) {
+      if (PyTuple_Check(obj) != 1) {
+        PyErr_SetString(PyExc_TypeError, CAPI_LOCATED_ERROR("Not a tuple"));
+        return EXTRACTOR_ERROR(map_t, "Not a tuple");
+      }
+    }
+    CppT ret;
+    Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    if (size == 0) {
+      return ret;
+    }
+
+    if constexpr (has_reserve_v<CppT>) {
+      ret.reserve(size);
+    }
+    Extractor<KeyT> key_extractor;
+    Extractor<ValT> val_extractor;
+    for (Py_ssize_t i = 0; i < size; ++i) {
+      // Note PyTuple_GET_ITEM returns a borrowed reference
+      auto kv_tuple = PyTuple_GET_ITEM(obj, i);
+      auto key = key_extractor(PyTuple_GET_ITEM(kv_tuple, 0));
+      if (!key.hasValue()) {
+        // Extraction failed. Abort
+        return extractorError<map_t>(key.error());
+      }
+      auto val = val_extractor(PyTuple_GET_ITEM(kv_tuple, 1));
+      if (!val.hasValue()) {
+        // Extraction failed. Abort
+        return extractorError<map_t>(val.error());
+      }
+      if constexpr (has_emplace_v<CppT, KeyT, ValT>) {
+        ret.emplace(std::move(*key), std::move(*val));
+      } else {
+        ret.insert({std::move(*key), std::move(*val)});
+      }
+    }
+
+    return ret;
+  }
+
+  int typeCheck(PyObject* obj) {
+    if (PyTuple_Check(obj) != 1) {
+      return 0;
+    }
+    const Py_ssize_t size = PyTuple_GET_SIZE(obj);
+    // Just check the first element given type checking inherent in
+    // thrift-python struct construction; thrift consts
+    if (size == 0) {
+      return 1;
+    }
+    PyObject* front_kv = PyTuple_GET_ITEM(obj, 0);
+    if (!front_kv) {
+      return 0;
+    }
+    return Extractor<KeyT>{}.typeCheck(PyTuple_GET_ITEM(front_kv, 0)) &&
+        Extractor<ValT>{}.typeCheck(PyTuple_GET_ITEM(front_kv, 1));
+  }
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

@@ -19,6 +19,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass ComposeStruct
     cppclass DoubledPair
     cppclass ListStruct
+    cppclass MapStruct
     cppclass MyDataItem
     cppclass MyEnum
     cppclass MyStruct
@@ -67,6 +68,9 @@ def roundtrip_ListStruct(object x):
 def roundtrip_SetStruct(object x):
     return __shim__roundtrip[SetStruct](x)
 
+def roundtrip_MapStruct(object x):
+    return __shim__roundtrip[MapStruct](x)
+
 def roundtrip_ComposeStruct(object x):
     return __shim__roundtrip[ComposeStruct](x)
 
@@ -99,6 +103,9 @@ def check_ListStruct(object x):
 
 def check_SetStruct(object x):
     return bool(__shim__typeCheck[SetStruct](x))
+
+def check_MapStruct(object x):
+    return bool(__shim__typeCheck[MapStruct](x))
 
 def check_ComposeStruct(object x):
     return bool(__shim__typeCheck[ComposeStruct](x))

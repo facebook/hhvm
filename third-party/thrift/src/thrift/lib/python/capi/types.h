@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <map>
 #include <set>
 #include <string>
 #include <string_view>
@@ -121,6 +122,12 @@ struct list {};
 template <typename T, typename CppT = std::set<native_t<T>>>
 struct set {};
 
+template <
+    typename K,
+    typename V,
+    typename CppT = std::map<native_t<K>, native_t<V>>>
+struct map {};
+
 template <typename T, typename CppT>
 struct native<list<T, CppT>> {
   using type = CppT;
@@ -128,6 +135,11 @@ struct native<list<T, CppT>> {
 
 template <typename T, typename CppT>
 struct native<set<T, CppT>> {
+  using type = CppT;
+};
+
+template <typename K, typename V, typename CppT>
+struct native<map<K, V, CppT>> {
   using type = CppT;
 };
 

@@ -56,6 +56,14 @@ struct encoded;
 struct uidz;
 struct charz;
 struct setz;
+struct enumz;
+struct intz;
+struct binnaz;
+struct encoded;
+struct flotz;
+struct map_list;
+struct list_map;
+struct fast_list_map;
 struct enum_;
 struct renamed_;
 struct primitive;
@@ -262,6 +270,38 @@ APACHE_THRIFT_DEFINE_ACCESSOR(charz);
 #ifndef APACHE_THRIFT_ACCESSOR_setz
 #define APACHE_THRIFT_ACCESSOR_setz
 APACHE_THRIFT_DEFINE_ACCESSOR(setz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_enumz
+#define APACHE_THRIFT_ACCESSOR_enumz
+APACHE_THRIFT_DEFINE_ACCESSOR(enumz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_intz
+#define APACHE_THRIFT_ACCESSOR_intz
+APACHE_THRIFT_DEFINE_ACCESSOR(intz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_binnaz
+#define APACHE_THRIFT_ACCESSOR_binnaz
+APACHE_THRIFT_DEFINE_ACCESSOR(binnaz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_encoded
+#define APACHE_THRIFT_ACCESSOR_encoded
+APACHE_THRIFT_DEFINE_ACCESSOR(encoded);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_flotz
+#define APACHE_THRIFT_ACCESSOR_flotz
+APACHE_THRIFT_DEFINE_ACCESSOR(flotz);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_map_list
+#define APACHE_THRIFT_ACCESSOR_map_list
+APACHE_THRIFT_DEFINE_ACCESSOR(map_list);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_map
+#define APACHE_THRIFT_ACCESSOR_list_map
+APACHE_THRIFT_DEFINE_ACCESSOR(list_map);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fast_list_map
+#define APACHE_THRIFT_ACCESSOR_fast_list_map
+APACHE_THRIFT_DEFINE_ACCESSOR(fast_list_map);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_enum_
 #define APACHE_THRIFT_ACCESSOR_enum_
@@ -610,6 +650,7 @@ class VapidStruct;
 class PrimitiveStruct;
 class ListStruct;
 class SetStruct;
+class MapStruct;
 class ComposeStruct;
 class OurUnion;
 class MyStructPatchStruct;
@@ -3428,6 +3469,518 @@ class SetStruct final  {
 
 template <class Protocol_>
 unsigned long SetStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class MapStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::enumz,
+    ::apache::thrift::ident::intz,
+    ::apache::thrift::ident::binnaz,
+    ::apache::thrift::ident::encoded,
+    ::apache::thrift::ident::flotz,
+    ::apache::thrift::ident::map_list,
+    ::apache::thrift::ident::list_map,
+    ::apache::thrift::ident::fast_list_map
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::map<::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::string_t>,
+    ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::PrimitiveStruct>>,
+    ::apache::thrift::type::cpp_type<std::unordered_map<::std::string, double>, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::double_t>>,
+    ::apache::thrift::type::cpp_type<std::unordered_map<uint64_t, float>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::float_t>>,
+    ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>,
+    ::apache::thrift::type::cpp_type<folly::F14FastMap<int, folly::fbvector<double>>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::double_t>>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 8;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = MapStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  MapStruct();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg);
+
+  MapStruct(MapStruct&&) noexcept;
+
+  MapStruct(const MapStruct& src);
+
+
+  MapStruct& operator=(MapStruct&&) noexcept;
+  MapStruct& operator=(const MapStruct& src);
+
+  ~MapStruct();
+
+ private:
+  ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> __fbthrift_field_enumz;
+ private:
+  ::std::map<::std::int32_t, ::std::string> __fbthrift_field_intz;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> __fbthrift_field_binnaz;
+ private:
+  std::unordered_map<::std::string, double> __fbthrift_field_encoded;
+ private:
+  std::unordered_map<uint64_t, float> __fbthrift_field_flotz;
+ private:
+  ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> __fbthrift_field_map_list;
+ private:
+  ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> __fbthrift_field_list_map;
+ private:
+  folly::F14FastMap<int, folly::fbvector<double>> __fbthrift_field_fast_list_map;
+ private:
+  apache::thrift::detail::isset_bitset<7, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const MapStruct&) const;
+  bool operator<(const MapStruct&) const;
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumz_ref() const& {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumz_ref() & {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> enumz() const& {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> enumz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> enumz() & {
+    return {this->__fbthrift_field_enumz, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> enumz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_enumz), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz_ref() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz_ref() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> intz() const& {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> intz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> intz() & {
+    return {this->__fbthrift_field_intz, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> intz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_intz), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> binnaz_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> binnaz_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> binnaz_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> binnaz_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> binnaz() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> binnaz() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> binnaz() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_binnaz};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> binnaz() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_binnaz)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded_ref() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded_ref() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> encoded() const& {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> encoded() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> encoded() & {
+    return {this->__fbthrift_field_encoded, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, double>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> encoded() && {
+    return {static_cast<T&&>(this->__fbthrift_field_encoded), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> flotz_ref() const& {
+    return {this->__fbthrift_field_flotz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> flotz_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_flotz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> flotz_ref() & {
+    return {this->__fbthrift_field_flotz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> flotz_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_flotz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> flotz() const& {
+    return {this->__fbthrift_field_flotz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> flotz() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_flotz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> flotz() & {
+    return {this->__fbthrift_field_flotz, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = std::unordered_map<uint64_t, float>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> flotz() && {
+    return {static_cast<T&&>(this->__fbthrift_field_flotz), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_list_ref() const& {
+    return {this->__fbthrift_field_map_list, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_list_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_map_list), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> map_list_ref() & {
+    return {this->__fbthrift_field_map_list, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_list_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_map_list), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> map_list() const& {
+    return {this->__fbthrift_field_map_list, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> map_list() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_map_list), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> map_list() & {
+    return {this->__fbthrift_field_map_list, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> map_list() && {
+    return {static_cast<T&&>(this->__fbthrift_field_map_list), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_map_ref() const& {
+    return {this->__fbthrift_field_list_map, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_map_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_map), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_map_ref() & {
+    return {this->__fbthrift_field_list_map, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_map_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_map), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_map() const& {
+    return {this->__fbthrift_field_list_map, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_map() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_list_map), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> list_map() & {
+    return {this->__fbthrift_field_list_map, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_map() && {
+    return {static_cast<T&&>(this->__fbthrift_field_list_map), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fast_list_map_ref() const& {
+    return {this->__fbthrift_field_fast_list_map, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fast_list_map_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fast_list_map), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fast_list_map_ref() & {
+    return {this->__fbthrift_field_fast_list_map, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fast_list_map_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fast_list_map), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fast_list_map() const& {
+    return {this->__fbthrift_field_fast_list_map, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fast_list_map() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fast_list_map), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> fast_list_map() & {
+    return {this->__fbthrift_field_fast_list_map, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = folly::F14FastMap<int, folly::fbvector<double>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fast_list_map() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fast_list_map), __isset.at(6), __isset.bit(6)};
+  }
+  const ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>& get_enumz() const&;
+  ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> get_enumz() &&;
+
+  template <typename T_MapStruct_enumz_struct_setter = ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>>
+  [[deprecated("Use `FOO.enumz_ref() = BAR;` instead of `FOO.set_enumz(BAR);`")]]
+  ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>& set_enumz(T_MapStruct_enumz_struct_setter&& enumz_) {
+    enumz_ref() = std::forward<T_MapStruct_enumz_struct_setter>(enumz_);
+    return __fbthrift_field_enumz;
+  }
+  const ::std::map<::std::int32_t, ::std::string>* get_intz() const&;
+  ::std::map<::std::int32_t, ::std::string>* get_intz() &;
+  ::std::map<::std::int32_t, ::std::string>* get_intz() && = delete;
+
+  template <typename T_MapStruct_intz_struct_setter = ::std::map<::std::int32_t, ::std::string>>
+  [[deprecated("Use `FOO.intz_ref() = BAR;` instead of `FOO.set_intz(BAR);`")]]
+  ::std::map<::std::int32_t, ::std::string>& set_intz(T_MapStruct_intz_struct_setter&& intz_) {
+    intz_ref() = std::forward<T_MapStruct_intz_struct_setter>(intz_);
+    return __fbthrift_field_intz;
+  }
+  const std::unordered_map<::std::string, double>& get_encoded() const&;
+  std::unordered_map<::std::string, double> get_encoded() &&;
+
+  template <typename T_MapStruct_encoded_struct_setter = std::unordered_map<::std::string, double>>
+  [[deprecated("Use `FOO.encoded_ref() = BAR;` instead of `FOO.set_encoded(BAR);`")]]
+  std::unordered_map<::std::string, double>& set_encoded(T_MapStruct_encoded_struct_setter&& encoded_) {
+    encoded_ref() = std::forward<T_MapStruct_encoded_struct_setter>(encoded_);
+    return __fbthrift_field_encoded;
+  }
+  const std::unordered_map<uint64_t, float>& get_flotz() const&;
+  std::unordered_map<uint64_t, float> get_flotz() &&;
+
+  template <typename T_MapStruct_flotz_struct_setter = std::unordered_map<uint64_t, float>>
+  [[deprecated("Use `FOO.flotz_ref() = BAR;` instead of `FOO.set_flotz(BAR);`")]]
+  std::unordered_map<uint64_t, float>& set_flotz(T_MapStruct_flotz_struct_setter&& flotz_) {
+    flotz_ref() = std::forward<T_MapStruct_flotz_struct_setter>(flotz_);
+    return __fbthrift_field_flotz;
+  }
+  const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& get_map_list() const&;
+  ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> get_map_list() &&;
+
+  template <typename T_MapStruct_map_list_struct_setter = ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>>
+  [[deprecated("Use `FOO.map_list_ref() = BAR;` instead of `FOO.set_map_list(BAR);`")]]
+  ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& set_map_list(T_MapStruct_map_list_struct_setter&& map_list_) {
+    map_list_ref() = std::forward<T_MapStruct_map_list_struct_setter>(map_list_);
+    return __fbthrift_field_map_list;
+  }
+  const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& get_list_map() const&;
+  ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> get_list_map() &&;
+
+  template <typename T_MapStruct_list_map_struct_setter = ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>>
+  [[deprecated("Use `FOO.list_map_ref() = BAR;` instead of `FOO.set_list_map(BAR);`")]]
+  ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& set_list_map(T_MapStruct_list_map_struct_setter&& list_map_) {
+    list_map_ref() = std::forward<T_MapStruct_list_map_struct_setter>(list_map_);
+    return __fbthrift_field_list_map;
+  }
+  const folly::F14FastMap<int, folly::fbvector<double>>& get_fast_list_map() const&;
+  folly::F14FastMap<int, folly::fbvector<double>> get_fast_list_map() &&;
+
+  template <typename T_MapStruct_fast_list_map_struct_setter = folly::F14FastMap<int, folly::fbvector<double>>>
+  [[deprecated("Use `FOO.fast_list_map_ref() = BAR;` instead of `FOO.set_fast_list_map(BAR);`")]]
+  folly::F14FastMap<int, folly::fbvector<double>>& set_fast_list_map(T_MapStruct_fast_list_map_struct_setter&& fast_list_map_) {
+    fast_list_map_ref() = std::forward<T_MapStruct_fast_list_map_struct_setter>(fast_list_map_);
+    return __fbthrift_field_fast_list_map;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<MapStruct>;
+  friend void swap(MapStruct& a, MapStruct& b);
+};
+
+template <class Protocol_>
+unsigned long MapStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

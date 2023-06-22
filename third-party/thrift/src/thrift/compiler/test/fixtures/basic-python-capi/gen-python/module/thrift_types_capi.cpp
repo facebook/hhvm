@@ -563,6 +563,93 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::SetStruct>::operator(
   return ptr;
 }
 
+ExtractorResult<::test::fixtures::basic-python-capi::MapStruct>
+Extractor<::test::fixtures::basic-python-capi::MapStruct>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MapStruct");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::MapStruct>(
+          "Marshal error: MapStruct");
+  }
+  PyObject* fbThriftData = getThriftData(obj);
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::MapStruct>>{}(fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::basic-python-capi::MapStruct>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::MapStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::MapStruct cpp;
+  std::optional<std::string_view> error;
+  Extractor<map<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>, Bytes>>{}.extractInto(
+      cpp.enumz(),
+      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
+      error);
+  Extractor<map<int32_t, Bytes>>{}.extractInto(
+      cpp.intz(),
+      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
+      error);
+  Extractor<map<Bytes, apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::PrimitiveStruct>>>{}.extractInto(
+      cpp.binnaz(),
+      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
+      error);
+  Extractor<map<Bytes, double, std::unordered_map<native_t<Bytes>, native_t<double>>>>{}.extractInto(
+      cpp.encoded(),
+      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
+      error);
+  Extractor<map<int64_t, float, std::unordered_map<uint64_t, float>>>{}.extractInto(
+      cpp.flotz(),
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
+      error);
+  Extractor<list<map<int32_t, int64_t>>>{}.extractInto(
+      cpp.map_list(),
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
+      error);
+  Extractor<map<int32_t, list<int64_t>>>{}.extractInto(
+      cpp.list_map(),
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
+      error);
+  Extractor<map<int32_t, list<double, folly::F14FastMap<int, folly::fbvector<double>>::mapped_type>, folly::F14FastMap<int, folly::fbvector<double>>>>{}.extractInto(
+      cpp.fast_list_map(),
+      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+int Extractor<::test::fixtures::basic-python-capi::MapStruct>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.basic-python-capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__basic_python_capi__module__MapStruct(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: MapStruct");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::basic-python-capi::MapStruct>::operator()(
+    ::test::fixtures::basic-python-capi::MapStruct&& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__test__fixtures__basic_python_capi__module__MapStruct(
+      detail::serialize_to_iobuf(std::move(val)));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
 ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct>
 Extractor<::test::fixtures::basic-python-capi::ComposeStruct>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);

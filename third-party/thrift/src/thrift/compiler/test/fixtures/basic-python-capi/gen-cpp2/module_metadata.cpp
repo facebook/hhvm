@@ -279,6 +279,38 @@ StructMetadata<::test::fixtures::basic-python-capi::SetStruct>::gen(ThriftMetada
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-python-capi::MapStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MapStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MapStruct = res.first->second;
+  module_MapStruct.name() = "module.MapStruct";
+  module_MapStruct.is_union() = false;
+  static const auto* const
+  module_MapStruct_fields = new std::array<EncodedThriftField, 8>{{
+    {1, "enumz", false, std::make_unique<Map>(std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {2, "intz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {3, "binnaz", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct")), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+    {4, "encoded", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{}},
+    {5, "flotz", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{}},
+    {6, "map_list", false, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))), std::vector<ThriftConstStruct>{}},
+    {7, "list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE))), std::vector<ThriftConstStruct>{}},
+    {8, "fast_list_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE))), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::F14FastMap<int, folly::fbvector<double>>")}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_MapStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MapStruct.fields()->push_back(std::move(field));
+  }
+  module_MapStruct.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.ComposeStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

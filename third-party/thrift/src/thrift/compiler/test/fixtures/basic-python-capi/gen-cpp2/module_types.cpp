@@ -1384,6 +1384,235 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-python-capi::MapStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::MapStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-python-capi {
+
+const char* MapStruct::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/MapStruct";
+}
+
+const folly::StringPiece MapStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MapStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MapStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MapStruct>::name;
+}
+
+MapStruct::MapStruct(const MapStruct&) = default;
+MapStruct& MapStruct::operator=(const MapStruct&) = default;
+MapStruct::MapStruct() {
+}
+
+
+MapStruct::~MapStruct() {}
+
+MapStruct::MapStruct(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept :
+    __fbthrift_field_enumz(std::move(other.__fbthrift_field_enumz)),
+    __fbthrift_field_intz(std::move(other.__fbthrift_field_intz)),
+    __fbthrift_field_binnaz(std::move(other.__fbthrift_field_binnaz)),
+    __fbthrift_field_encoded(std::move(other.__fbthrift_field_encoded)),
+    __fbthrift_field_flotz(std::move(other.__fbthrift_field_flotz)),
+    __fbthrift_field_map_list(std::move(other.__fbthrift_field_map_list)),
+    __fbthrift_field_list_map(std::move(other.__fbthrift_field_list_map)),
+    __fbthrift_field_fast_list_map(std::move(other.__fbthrift_field_fast_list_map)),
+    __isset(other.__isset) {
+}
+
+MapStruct& MapStruct::operator=(FOLLY_MAYBE_UNUSED MapStruct&& other) noexcept {
+    this->__fbthrift_field_enumz = std::move(other.__fbthrift_field_enumz);
+    this->__fbthrift_field_intz = std::move(other.__fbthrift_field_intz);
+    this->__fbthrift_field_binnaz = std::move(other.__fbthrift_field_binnaz);
+    this->__fbthrift_field_encoded = std::move(other.__fbthrift_field_encoded);
+    this->__fbthrift_field_flotz = std::move(other.__fbthrift_field_flotz);
+    this->__fbthrift_field_map_list = std::move(other.__fbthrift_field_map_list);
+    this->__fbthrift_field_list_map = std::move(other.__fbthrift_field_list_map);
+    this->__fbthrift_field_fast_list_map = std::move(other.__fbthrift_field_fast_list_map);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+MapStruct::MapStruct(apache::thrift::FragileConstructor, ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> enumz__arg, ::std::map<::std::int32_t, ::std::string> intz__arg, ::apache::thrift::detail::boxed_value_ptr<::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>> binnaz__arg, std::unordered_map<::std::string, double> encoded__arg, std::unordered_map<uint64_t, float> flotz__arg, ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> map_list__arg, ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> list_map__arg, folly::F14FastMap<int, folly::fbvector<double>> fast_list_map__arg) :
+    __fbthrift_field_enumz(std::move(enumz__arg)),
+    __fbthrift_field_intz(std::move(intz__arg)),
+    __fbthrift_field_binnaz(std::move(binnaz__arg)),
+    __fbthrift_field_encoded(std::move(encoded__arg)),
+    __fbthrift_field_flotz(std::move(flotz__arg)),
+    __fbthrift_field_map_list(std::move(map_list__arg)),
+    __fbthrift_field_list_map(std::move(list_map__arg)),
+    __fbthrift_field_fast_list_map(std::move(fast_list_map__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void MapStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_enumz.clear();
+  this->__fbthrift_field_intz.clear();
+  this->__fbthrift_field_binnaz.reset();
+  this->__fbthrift_field_encoded.clear();
+  this->__fbthrift_field_flotz.clear();
+  this->__fbthrift_field_map_list.clear();
+  this->__fbthrift_field_list_map.clear();
+  this->__fbthrift_field_fast_list_map.clear();
+  __isset = {};
+}
+
+void MapStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool MapStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool MapStruct::operator==(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.enumz_ref() == rhs.enumz_ref())) {
+    return false;
+  }
+  if (!(lhs.intz_ref() == rhs.intz_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.binnaz_ref(), rhs.binnaz_ref()))) {
+    return false;
+  }
+  if (!(lhs.encoded_ref() == rhs.encoded_ref())) {
+    return false;
+  }
+  if (!(lhs.flotz_ref() == rhs.flotz_ref())) {
+    return false;
+  }
+  if (!(lhs.map_list_ref() == rhs.map_list_ref())) {
+    return false;
+  }
+  if (!(lhs.list_map_ref() == rhs.list_map_ref())) {
+    return false;
+  }
+  if (!(lhs.fast_list_map_ref() == rhs.fast_list_map_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MapStruct::operator<(FOLLY_MAYBE_UNUSED const MapStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string>& MapStruct::get_enumz() const& {
+  return __fbthrift_field_enumz;
+}
+
+::std::map<::test::fixtures::basic-python-capi::MyEnum, ::std::string> MapStruct::get_enumz() && {
+  return std::move(__fbthrift_field_enumz);
+}
+
+const ::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() const& {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() & {
+  return intz_ref().has_value() ? std::addressof(__fbthrift_field_intz) : nullptr;
+}
+
+const std::unordered_map<::std::string, double>& MapStruct::get_encoded() const& {
+  return __fbthrift_field_encoded;
+}
+
+std::unordered_map<::std::string, double> MapStruct::get_encoded() && {
+  return std::move(__fbthrift_field_encoded);
+}
+
+const std::unordered_map<uint64_t, float>& MapStruct::get_flotz() const& {
+  return __fbthrift_field_flotz;
+}
+
+std::unordered_map<uint64_t, float> MapStruct::get_flotz() && {
+  return std::move(__fbthrift_field_flotz);
+}
+
+const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_map_list() const& {
+  return __fbthrift_field_map_list;
+}
+
+::std::vector<::std::map<::std::int32_t, ::std::int64_t>> MapStruct::get_map_list() && {
+  return std::move(__fbthrift_field_map_list);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_list_map() const& {
+  return __fbthrift_field_list_map;
+}
+
+::std::map<::std::int32_t, ::std::vector<::std::int64_t>> MapStruct::get_list_map() && {
+  return std::move(__fbthrift_field_list_map);
+}
+
+const folly::F14FastMap<int, folly::fbvector<double>>& MapStruct::get_fast_list_map() const& {
+  return __fbthrift_field_fast_list_map;
+}
+
+folly::F14FastMap<int, folly::fbvector<double>> MapStruct::get_fast_list_map() && {
+  return std::move(__fbthrift_field_fast_list_map);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MapStruct& a, FOLLY_MAYBE_UNUSED MapStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_enumz, b.__fbthrift_field_enumz);
+  swap(a.__fbthrift_field_intz, b.__fbthrift_field_intz);
+  swap(a.__fbthrift_field_binnaz, b.__fbthrift_field_binnaz);
+  swap(a.__fbthrift_field_encoded, b.__fbthrift_field_encoded);
+  swap(a.__fbthrift_field_flotz, b.__fbthrift_field_flotz);
+  swap(a.__fbthrift_field_map_list, b.__fbthrift_field_map_list);
+  swap(a.__fbthrift_field_list_map, b.__fbthrift_field_list_map);
+  swap(a.__fbthrift_field_fast_list_map, b.__fbthrift_field_fast_list_map);
+  swap(a.__isset, b.__isset);
+}
+
+template void MapStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MapStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MapStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MapStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MapStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MapStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MapStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MapStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MapStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string, ::test::fixtures::basic-python-capi::PrimitiveStruct>>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-python-capi
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-python-capi::ComposeStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

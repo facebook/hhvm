@@ -123,6 +123,20 @@ struct SetStruct {
 }
 
 @python.MarshalCapi
+struct MapStruct {
+  1: map<MyEnum, string> enumz;
+  2: optional map<i32, string> intz;
+  @thrift.Box
+  3: optional map<binary, PrimitiveStruct> binnaz;
+  4: map<string, double> (cpp.template = "std::unordered_map") encoded;
+  5: map<i64, float> (cpp.type = "std::unordered_map<uint64_t, float>") flotz;
+  6: list<map<i32, i64>> map_list;
+  7: map<i32, list<i64>> list_map;
+  @cpp.Type{name = "folly::F14FastMap<int, folly::fbvector<double>>"}
+  8: map<i32, list<double>> fast_list_map;
+}
+
+@python.MarshalCapi
 struct ComposeStruct {
   1: MyEnum enum_;
   2: AnnoyingEnum renamed_;

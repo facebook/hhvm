@@ -19,8 +19,10 @@ include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
 cpp_include "<deque>"
+cpp_include "<unordered_map>"
 cpp_include "<unordered_set>"
 cpp_include "<folly/container/F14Set.h>"
+cpp_include "<folly/container/F14Map.h>"
 cpp_include "<folly/small_vector.h>"
 cpp_include "thrift/test/python_capi/adapter.h"
 
@@ -119,6 +121,20 @@ struct SetStruct {
   @cpp.Type{name = "folly::F14FastSet<uint8_t>"}
   6: set<byte> charz;
   7: list<set<i64>> setz;
+}
+
+@python.MarshalCapi
+struct MapStruct {
+  1: map<MyEnum, string> enumz;
+  2: optional map<i32, string> intz;
+  @thrift.Box
+  3: optional map<binary, PrimitiveStruct> binnaz;
+  4: map<string, double> (cpp.template = "std::unordered_map") encoded;
+  5: map<i64, float> (cpp.type = "std::unordered_map<uint64_t, float>") flotz;
+  6: list<map<i32, i64>> map_list;
+  7: map<i32, list<i64>> list_map;
+  @cpp.Type{name = "folly::F14FastMap<int, folly::fbvector<double>>"}
+  8: map<i32, list<double>> fast_list_map;
 }
 
 @python.MarshalCapi

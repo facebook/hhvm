@@ -19,6 +19,7 @@ class VapidStruct;
 class PrimitiveStruct;
 class ListStruct;
 class SetStruct;
+class MapStruct;
 class ComposeStruct;
 class OurUnion;
 class MyStructPatchStruct;

@@ -66,6 +66,12 @@ cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__SetStruct
 
 cdef api object construct__test__fixtures__basic_python_capi__module__SetStruct(__unique_ptr[__cIOBuf])
 
+cdef api int can_extract__test__fixtures__basic_python_capi__module__MapStruct(object) except -1
+
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MapStruct(object) except NULL
+
+cdef api object construct__test__fixtures__basic_python_capi__module__MapStruct(__unique_ptr[__cIOBuf])
+
 cdef api int can_extract__test__fixtures__basic_python_capi__module__ComposeStruct(object) except -1
 
 cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__ComposeStruct(object) except NULL

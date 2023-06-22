@@ -291,13 +291,6 @@ class FizzAcceptorHandshakeHelper
       std::unique_ptr<folly::IOBuf> unread) noexcept override;
   void fdDetachFail(const folly::AsyncSocketException& ex) noexcept override;
 
-  /**
-   * Handles SSLContext selection for TLS handshake fallback logic.
-   * Returns the default ssl context if no sni or no context match for sni.
-   */
-  std::shared_ptr<folly::SSLContext> selectSSLCtx(
-      const folly::Optional<std::string>& sni) const;
-
   std::shared_ptr<const fizz::server::FizzServerContext> context_;
   std::shared_ptr<const SSLContextManager> sslContextManager_;
   std::shared_ptr<fizz::extensions::TokenBindingContext> tokenBindingContext_;
@@ -313,7 +306,7 @@ class FizzAcceptorHandshakeHelper
   FizzLoggingCallback* loggingCallback_;
   bool handshakeRecordAlignedReads_{false};
 
-  fizz::server::AttemptVersionFallback fallback_;
+  std::unique_ptr<folly::IOBuf> clientHello_;
   bool preferIoUringSocket_{false};
   fizz::AsyncFizzBase::TransportOptions transportOptions_;
 };

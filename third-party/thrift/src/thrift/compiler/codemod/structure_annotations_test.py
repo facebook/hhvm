@@ -228,3 +228,35 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 """
             ),
         )
+
+    def test_java(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct S {}
+                (
+                    java.swift.annotations = "@com.facebook.Foo
+                        @com.facebook.Bar",
+                    java.swift.mutable = "true",
+                )
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/java.thrift"
+
+                @java.Annotation{java_annotation = "@com.facebook.Foo
+                    @com.facebook.Bar"}
+                @java.Mutable
+                struct S {}
+                """
+            ),
+        )

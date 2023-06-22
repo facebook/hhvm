@@ -183,7 +183,6 @@ class structure_annotations {
             }
           }
         }
-
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
@@ -207,6 +206,31 @@ class structure_annotations {
           to_add.insert("@python.Flags");
           fm_.add_include("thrift/annotation/python.thrift");
         }
+      }
+
+      // java
+      if (name == "java.swift.mutable") {
+        to_remove.emplace_back(name, data);
+        if (data.value == "true" &&
+            (dynamic_cast<const t_struct*>(&node) &&
+             !dynamic_cast<const t_union*>(&node))) {
+          to_add.insert("@java.Mutable");
+          fm_.add_include("thrift/annotation/java.thrift");
+        }
+      }
+      if (name == "java.swift.annotations") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format(
+            "@java.Annotation{{java_annotation = \"{}\"}}", data.value));
+        fm_.add_include("thrift/annotation/java.thrift");
+      }
+    }
+
+    if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {
+      fm_.remove_all_annotations(node);
+    } else {
+      for (const auto& annot : to_remove) {
+        fm_.remove(annot);
       }
     }
 

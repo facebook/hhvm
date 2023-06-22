@@ -9,3 +9,7 @@ function expect_scalar(Scalar $scalar): void {
 function f<T as Scalar>(T $scalar): void {
   expect_scalar($scalar);
 }
+
+function ret_scalar():Scalar {
+  return true;
+}

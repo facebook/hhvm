@@ -128,15 +128,12 @@ struct HPHPWorkerThread : proxygen::WorkerThread,
 };
 
 struct ProxygenServer : Server,
-                        folly::AsyncTimeout,
-                        TakeoverAgent::Callback {
+                        folly::AsyncTimeout {
   friend HPHPSessionAcceptor;
   friend HPHPWorkerThread;
   explicit ProxygenServer(const ServerOptions& options);
   ~ProxygenServer() override;
 
-  void addTakeoverListener(TakeoverListener* listener) override;
-  void removeTakeoverListener(TakeoverListener* listener) override;
   void saturateWorkers() override {
     m_dispatcher.saturateWorkers();
   }
@@ -171,13 +168,6 @@ struct ProxygenServer : Server,
   bool canAccept();
 
   void onConnectionsDrained();
-
-  /**
-   * TakeoverAgent::Callback
-   */
-  int onTakeoverRequest(TakeoverAgent::RequestType type) override;
-
-  void takeoverAborted() override;
 
   // Methods invoked by ProxygenTransport, virtual for mocking
   virtual void onRequest(std::shared_ptr<ProxygenTransport> transport);
@@ -286,7 +276,6 @@ struct ProxygenServer : Server,
   std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
-  std::unique_ptr<TakeoverAgent> m_takeover_agent;
   std::unique_ptr<wangle::TLSCredProcessor> m_credProcessor;
 };
 

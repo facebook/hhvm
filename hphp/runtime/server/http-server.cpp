@@ -267,13 +267,6 @@ void HttpServer::onServerShutdown() {
   }
 }
 
-void HttpServer::takeoverShutdown() {
-  // We want to synchronously shut down our satellite servers to free up ports,
-  // then asynchronously shut down everything else.
-  onServerShutdown();
-  stop();
-}
-
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
   assertx(server == m_pageServer.get());
@@ -431,8 +424,7 @@ void HttpServer::runOrExitProcess() {
     if (isJitSerializing() || !RO::RepoAuthoritative) {
       replayExtendedWarmupRequests();
     }
-    // continously running until /stop is received on admin server, or
-    // takeover is requested.
+    // continously running until /stop is received on admin server
     while (!m_stopped) {
       wait();
     }

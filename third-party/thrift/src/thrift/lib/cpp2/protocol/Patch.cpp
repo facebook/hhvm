@@ -569,30 +569,6 @@ void insertFieldsToMask(
         }
       }
     }
-  } else if (const auto* set = patchFields.if_set()) {
-    // set of map keys (Remove)
-    if (view) {
-      for (const auto& key : *set) {
-        auto readId =
-            static_cast<int64_t>(findMapIdByValueAddress(masks.read, key));
-        auto writeId =
-            static_cast<int64_t>(findMapIdByValueAddress(masks.write, key));
-        insertMask(masks.read, readId, allMask(), getIncludesMapRef);
-        insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
-      }
-    } else {
-      for (const auto& key : *set) {
-        if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
-          auto id = static_cast<int64_t>(getMapIdFromValue(key));
-          insertMask(masks.read, id, allMask(), getIncludesMapRef);
-          insertMask(masks.write, id, allMask(), getIncludesMapRef);
-        } else {
-          auto id = getStringFromValue(key);
-          insertMask(masks.read, id, allMask(), getIncludesStringMapRef);
-          insertMask(masks.write, id, allMask(), getIncludesStringMapRef);
-        }
-      }
-    }
   }
 }
 

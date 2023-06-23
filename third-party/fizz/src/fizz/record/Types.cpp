@@ -11,7 +11,9 @@
 
 namespace fizz {
 
+#if __cplusplus < 201703L
 constexpr Random HelloRetryRequest::HrrRandom;
+#endif
 
 ProtocolVersion getRealDraftVersion(ProtocolVersion version) {
   switch (version) {

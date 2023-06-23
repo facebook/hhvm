@@ -8,4 +8,6 @@
 
 #include <fizz/crypto/Sha256.h>
 
+#if __cplusplus < 201703L
 constexpr folly::StringPiece fizz::Sha256::BlankHash;
+#endif

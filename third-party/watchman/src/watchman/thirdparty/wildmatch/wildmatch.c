@@ -87,7 +87,7 @@ static int dowild(const uchar *p, const uchar *text, unsigned int flags)
 				/* Literal match with following character.  Note that the test
 				 * in "default" handles the p[1] == '\0' failure case. */
 				p_ch = *++p;
-			__attribute__((fallthrough));
+			/* FALLTHROUGH */
 		default:
 			if (p_ch == '/') {
 				/* Consume any number of consecutive slashes. */

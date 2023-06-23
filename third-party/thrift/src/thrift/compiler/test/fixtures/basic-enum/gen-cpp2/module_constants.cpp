@@ -15,7 +15,7 @@ namespace test { namespace fixtures { namespace enumstrict {
 constexpr ::test::fixtures::enumstrict::MyEnum const module_constants::kOne_;
 
 ::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string> const& module_constants::enumNames() {
-  static folly::Indestructible<::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string>> const instance{std::initializer_list<std::pair<const ::test::fixtures::enumstrict::MyEnum, ::std::string>>{{ ::test::fixtures::enumstrict::MyEnum::ONE, apache::thrift::StringTraits<std::string>::fromStringLiteral("one")},
+  static folly::Indestructible<::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string>> const instance{std::initializer_list<::std::map<::test::fixtures::enumstrict::MyEnum, ::std::string>::value_type>{{ ::test::fixtures::enumstrict::MyEnum::ONE, apache::thrift::StringTraits<std::string>::fromStringLiteral("one")},
   { ::test::fixtures::enumstrict::MyEnum::TWO, apache::thrift::StringTraits<std::string>::fromStringLiteral("two")}}};
   return *instance;
 }

@@ -49,9 +49,9 @@ constexpr ::std::string const module_constants::SOME_BYTES_;
 }
 
 ::std::vector<::std::map<::std::int32_t, double>> const& module_constants::SOME_MAP() {
-  static folly::Indestructible<::std::vector<::std::map<::std::int32_t, double>>> const instance{std::initializer_list<::std::map<::std::int32_t, double>>{std::initializer_list<std::pair<const ::std::int32_t, double>>{{static_cast<::std::int32_t>(1), static_cast<double>(1.1)},
+  static folly::Indestructible<::std::vector<::std::map<::std::int32_t, double>>> const instance{std::initializer_list<::std::map<::std::int32_t, double>>{std::initializer_list<::std::map<::std::int32_t, double>::value_type>{{static_cast<::std::int32_t>(1), static_cast<double>(1.1)},
   {static_cast<::std::int32_t>(2), static_cast<double>(2.2)}},
-  std::initializer_list<std::pair<const ::std::int32_t, double>>{{static_cast<::std::int32_t>(3), static_cast<double>(3.3)}}}};
+  std::initializer_list<::std::map<::std::int32_t, double>::value_type>{{static_cast<::std::int32_t>(3), static_cast<double>(3.3)}}}};
   return *instance;
 }
 
@@ -65,12 +65,12 @@ constexpr ::std::string const module_constants::SOME_BYTES_;
 }
 
 ::std::map<::std::string, ::py3::simple::SimpleStruct> const& module_constants::A_CONST_MAP() {
-  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance{std::initializer_list<std::pair<const ::std::string, ::py3::simple::SimpleStruct>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(false), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9)))}}};
+  static folly::Indestructible<::std::map<::std::string, ::py3::simple::SimpleStruct>> const instance{std::initializer_list<::std::map<::std::string, ::py3::simple::SimpleStruct>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("simple"), ::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(false), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(50)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(61)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(72)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(83)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(99.9)))}}};
   return *instance;
 }
 
 ::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t> const& module_constants::ANOTHER_CONST_MAP() {
-  static folly::Indestructible<::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::py3::simple::AnEnumRenamed, ::std::int32_t>>{{ ::py3::simple::AnEnumRenamed::name, static_cast<::std::int32_t>(0)},
+  static folly::Indestructible<::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t>> const instance{std::initializer_list<::std::map<::py3::simple::AnEnumRenamed, ::std::int32_t>::value_type>{{ ::py3::simple::AnEnumRenamed::name, static_cast<::std::int32_t>(0)},
   { ::py3::simple::AnEnumRenamed::value, static_cast<::std::int32_t>(1)},
   { ::py3::simple::AnEnumRenamed::normal, static_cast<::std::int32_t>(2)}}};
   return *instance;

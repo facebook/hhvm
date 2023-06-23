@@ -31,16 +31,4 @@ Containers:
 %><%/type:set_elem_type%><%/type:set?%><%!
 
 Map
-Form:`std::pair<const Type, Type>`
-E.g.:`std::pair<const int16_t, std::string>`
-%><%#type:map?%><%!
-  %>std::pair<const <%!
-    %><%#type:key_type%><%!
-      %><% > common/const_type_recursive%><%!
-    %><%/type:key_type%><%!
-    %>, <%!
-    %><%#type:value_type%><%!
-      %><% > common/const_type_recursive%><%!
-    %><%/type:value_type%><%!
-  %>><%!
-%><%/type:map?%>
+%><%#type:map?%><#type:cpp_type%>::value_type<%/type:map?%>

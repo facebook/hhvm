@@ -63,6 +63,9 @@ TEST(constants, examples) {
       (std::map<std::string, std::int32_t>{
           {"'", 39}, {"\"", 34}, {"\\", 92}, {"a", 97}}),
       test_constants::m_3());
+  EXPECT_EQ(
+      (folly::sorted_vector_map<std::int32_t, std::int32_t>{{1, 2}}),
+      test_constants::m_4());
 
   EXPECT_EQ(struct1(), test_constants::pod_0());
 

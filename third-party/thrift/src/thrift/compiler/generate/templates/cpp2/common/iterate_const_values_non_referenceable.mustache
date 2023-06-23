@@ -47,10 +47,7 @@ Set:
 
 Map:
 %><%#value:map?%><%#type:map?%><%!
-  %>std::initializer_list<std::pair<<%!
-    %><%#type:key_type%>const <%type:cpp_type%><%/type:key_type%>, <%!
-    %><%#type:value_type%><%type:cpp_type%><%/type:value_type%><%!
-  %>>>{<%!
+  %>std::initializer_list<<%type:cpp_type%>::value_type>{<%!
   %><%#value:map_elements%><%!
     %>{<%!
       %><%#element:key%><%#type:key_type%><%!

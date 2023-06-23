@@ -19,10 +19,10 @@ constexpr char const * const module_constants::name_;
 constexpr char const * const module_constants::multi_line_string_;
 
 ::std::vector<::std::map<::std::string, ::std::int32_t>> const& module_constants::states() {
-  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>>{std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000)},
+  static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>>{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("Sacramento"), static_cast<::std::int32_t>(479600)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("SF"), static_cast<::std::int32_t>(837400)}},
-  std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000)},
+  std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("New York"), static_cast<::std::int32_t>(8406000)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("Albany"), static_cast<::std::int32_t>(98400)}}}};
   return *instance;
 }
@@ -44,7 +44,7 @@ constexpr char const * const module_constants::foo_;
 constexpr ::cpp2::MyIntIdentifier const module_constants::bar_;
 
 ::cpp2::MyMapIdentifier const& module_constants::mymap() {
-  static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{std::initializer_list<std::pair<const ::std::string, ::std::string>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<std::string>::fromStringLiteral("values")}}};
+  static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{std::initializer_list<::cpp2::MyMapIdentifier::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<std::string>::fromStringLiteral("values")}}};
   return *instance;
 }
 
@@ -186,7 +186,7 @@ constexpr char const * const module_constants::backslash_;
 constexpr char const * const module_constants::escaped_a_;
 
 ::std::map<::std::string, ::std::int32_t> const& module_constants::char2ascii() {
-  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39)},
+  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("\""), static_cast<::std::int32_t>(34)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("\\"), static_cast<::std::int32_t>(92)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(97)}}};
@@ -258,22 +258,22 @@ constexpr char const * const module_constants::empty_string_;
 }
 
 ::std::map<::std::int32_t, ::std::int32_t> const& module_constants::empty_int_int_map() {
-  static folly::Indestructible<::std::map<::std::int32_t, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::std::int32_t, ::std::int32_t>>{}};
+  static folly::Indestructible<::std::map<::std::int32_t, ::std::int32_t>> const instance{std::initializer_list<::std::map<::std::int32_t, ::std::int32_t>::value_type>{}};
   return *instance;
 }
 
 ::std::map<::std::int32_t, ::std::string> const& module_constants::empty_int_string_map() {
-  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{std::initializer_list<std::pair<const ::std::int32_t, ::std::string>>{}};
+  static folly::Indestructible<::std::map<::std::int32_t, ::std::string>> const instance{std::initializer_list<::std::map<::std::int32_t, ::std::string>::value_type>{}};
   return *instance;
 }
 
 ::std::map<::std::string, ::std::int32_t> const& module_constants::empty_string_int_map() {
-  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{}};
+  static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{}};
   return *instance;
 }
 
 ::std::map<::std::string, ::std::string> const& module_constants::empty_string_string_map() {
-  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{std::initializer_list<std::pair<const ::std::string, ::std::string>>{}};
+  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{}};
   return *instance;
 }
 

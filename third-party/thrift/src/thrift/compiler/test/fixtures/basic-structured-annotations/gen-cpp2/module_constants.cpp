@@ -13,7 +13,7 @@
 namespace test { namespace fixtures { namespace basic-structured-annotations {
 
 ::std::map<::std::string, ::std::string> const& module_constants::MyConst() {
-  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{std::initializer_list<std::pair<const ::std::string, ::std::string>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("ENUMERATOR"), apache::thrift::StringTraits<std::string>::fromStringLiteral("enum")},
+  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("ENUMERATOR"), apache::thrift::StringTraits<std::string>::fromStringLiteral("enum")},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("CONST"), apache::thrift::StringTraits<std::string>::fromStringLiteral("const")}}};
   return *instance;
 }

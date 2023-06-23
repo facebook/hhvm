@@ -83,7 +83,7 @@ StructWithDefaultStruct::StructWithDefaultStruct() :
       __fbthrift_field_enum_field( ::apache::thrift::test::MyEnum::ME1),
       __fbthrift_field_list_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
       __fbthrift_field_set_field(std::initializer_list<::std::int16_t>{static_cast<::std::int16_t>(1)}),
-      __fbthrift_field_map_field(std::initializer_list<std::pair<const ::std::int16_t, ::std::int16_t>>{{static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1)}}) {
+      __fbthrift_field_map_field(std::initializer_list<::std::map<::std::int16_t, ::std::int16_t>::value_type>{{static_cast<::std::int16_t>(1), static_cast<::std::int16_t>(1)}}) {
 }
 
 

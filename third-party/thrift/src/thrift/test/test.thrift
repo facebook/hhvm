@@ -16,6 +16,8 @@
 
 namespace cpp2 apache.thrift.test
 
+cpp_include "folly/sorted_vector_types.h"
+
 enum enum1 {
   field0 = 0,
   field1 = 1,
@@ -70,6 +72,7 @@ const map<string, string> m_e = {};
 const map<i32, i32> m_1 = {23: 97, 42: 37, 56: 11};
 const map<string, string> m_2 = {"foo": "bar", "baz": "gaz"};
 const map<string, i32> m_3 = {'"': 34, "'": 39, "\\": 92, "\x61": 97};
+const map<i32, i32> (cpp.template = "folly::sorted_vector_map") m_4 = {1: 2};
 
 struct struct1 {
   1: i32 a = 1234567;

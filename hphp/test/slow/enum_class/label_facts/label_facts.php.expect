@@ -1,0 +1,15 @@
+vec(3) {
+  string(9) "afunction"
+  string(11) "my_function"
+  string(13) "main_hashbang"
+}
+vec(1) {
+  string(9) "Something"
+}
+string(4) "enum"
+vec(1) {
+  string(19) "HH\BuiltinEnumClass"
+}
+bool(false)
+bool(false)
+Hello, world.

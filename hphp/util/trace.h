@@ -218,7 +218,6 @@ namespace Trace {
       TM(xls)           \
       TM(xls_stats)     \
       TM(clisrv)        \
-      TM(factparse)     \
       TM(bccache)       \
       TM(idx)           \
       /* Stress categories, to exercise rare paths */ \

@@ -31,8 +31,7 @@ function main() {
   var_dump($attrs);
 
   try {
-    $facts = HH\facts_parse("/",varray[__FILE__],true,false);
-    var_dump(vec($facts[__FILE__]['functions']));
+    var_dump(HH\Facts\path_to_functions(__FILE__));
   } catch (InvalidOperationException $e) {}
 
   var_dump($decode(HH\ffp_parse_string_native(file_get_contents(__FILE__))));

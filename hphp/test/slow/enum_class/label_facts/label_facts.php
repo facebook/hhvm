@@ -16,6 +16,11 @@ function my_function(
 
 <<__EntryPoint>>
 function main_hashbang() {
-  var_dump(HH\facts_parse(NULL, vec[__FILE__], true, true));
+  var_dump(HH\Facts\path_to_functions(__FILE__));
+  var_dump(HH\Facts\path_to_types(__FILE__));
+  var_dump(HH\Facts\kind("Something"));
+  var_dump(HH\Facts\supertypes("Something"));
+  var_dump(HH\Facts\is_abstract("Something"));
+  var_dump(HH\Facts\is_final("Something"));
   afunction();
 }

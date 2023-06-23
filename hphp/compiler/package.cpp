@@ -1127,7 +1127,11 @@ Package::UnitDecls IndexJob::run(
 
   hackc::DeclParserConfig decl_config;
   repoOptions.initDeclConfig(decl_config);
-  auto decls = hackc::direct_decl_parse_and_serialize(decl_config, fileName, content);
+  auto decls = hackc::direct_decl_parse_and_serialize(
+      decl_config,
+      fileName,
+      {(const uint8_t*)content.data(), content.size()}
+  );
   if (decls.has_errors) {
     return bail("decl parser error");
   }

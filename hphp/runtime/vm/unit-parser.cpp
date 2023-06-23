@@ -379,7 +379,8 @@ ParseFactsResult extract_facts(
   const auto f = w->open(StrNR(filename), "r", 0, nullptr);
   if (!f) throwErrno("Failed to extract facts: Could not read source code.");
   auto const str = f->read();
-  auto actual_sha1 = string_sha1(str.get()->slice());
+  auto const source_text = str.get()->slice();
+  auto actual_sha1 = string_sha1(source_text);
   if (!expect_sha1.empty()) {
     if (actual_sha1 != expect_sha1) {
       return folly::sformat(
@@ -390,8 +391,11 @@ ParseFactsResult extract_facts(
   try {
     hackc::DeclParserConfig config;
     options.initDeclConfig(config);
-    auto const source_text = str.get()->toCppString();
-    auto const decls = hackc::parse_decls(config, filename, source_text);
+    auto const decls = hackc::parse_decls(
+      config,
+      filename,
+      {(const uint8_t*)source_text.data(), source_text.size()}
+    );
     rust::String json = hackc::decls_to_facts_json(*decls, actual_sha1);
     return FactsJSONString { std::string(json) };
   } catch (const std::exception& e) {

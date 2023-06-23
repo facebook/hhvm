@@ -111,7 +111,11 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
     };
 
     try {
-      auto holder = hackc::parse_decls(m_config, filename, text);
+      auto holder = hackc::parse_decls(
+          m_config,
+          filename,
+          {(const uint8_t*)text.data(), text.size()}
+      );
       ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
       auto const norm_filename =

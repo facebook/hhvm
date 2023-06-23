@@ -203,7 +203,7 @@ pub mod compile_ffi {
         fn direct_decl_parse_and_serialize(
             config: &DeclParserConfig,
             filename: &CxxString,
-            text: &CxxString,
+            text: &[u8],
         ) -> DeclsAndBlob;
 
         /// Invoke the hackc direct decl parser and return every shallow decl in the file.
@@ -212,7 +212,7 @@ pub mod compile_ffi {
         fn parse_decls(
             config: &DeclParserConfig,
             filename: &CxxString,
-            text: &CxxString,
+            text: &[u8],
         ) -> Result<Box<DeclsHolder>>;
 
         fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
@@ -379,7 +379,7 @@ fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
 pub fn direct_decl_parse_and_serialize(
     config: &compile_ffi::DeclParserConfig,
     filename: &CxxString,
-    text: &CxxString,
+    text: &[u8],
 ) -> compile_ffi::DeclsAndBlob {
     match parse_decls(config, filename, text) {
         Ok(decls) | Err(DeclsError(decls, _)) => compile_ffi::DeclsAndBlob {
@@ -393,7 +393,7 @@ pub fn direct_decl_parse_and_serialize(
 pub fn parse_decls(
     config: &compile_ffi::DeclParserConfig,
     filename: &CxxString,
-    text: &CxxString,
+    text: &[u8],
 ) -> Result<Box<DeclsHolder>, DeclsError> {
     let decl_opts = DeclParserOptions {
         auto_namespace_map: (config.aliased_namespaces.iter())
@@ -408,7 +408,6 @@ pub fn parse_decls(
         keep_user_attributes: true,
         ..Default::default()
     };
-    let text = text.as_bytes();
     let path = PathBuf::from(OsStr::from_bytes(filename.as_bytes()));
     let relpath = RelativePath::make(Prefix::Root, path);
     let arena = bumpalo::Bump::new();

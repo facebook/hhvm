@@ -18,8 +18,9 @@ target_link_libraries(
   libdeelevate
   INTERFACE
   rust_deelevate
-  Userenv.lib
-  Bcrypt.lib
+  userenv.lib
+  bcrypt.lib
+  ntdll.lib
 )
 
 install(

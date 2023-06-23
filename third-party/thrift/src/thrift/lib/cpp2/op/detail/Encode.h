@@ -621,10 +621,9 @@ struct AdaptedEncode {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
     return folly::overload(
-        [&](auto adapter)
-            -> decltype(decltype(adapter)::template encode<Protocol, Tag>(
-                prot, m)) {
-          return decltype(adapter)::template encode<Protocol, Tag>(prot, m);
+        [&](auto adapter) -> decltype(decltype(adapter)::template encode<Tag>(
+                              prot, m)) {
+          return decltype(adapter)::template encode<Tag>(prot, m);
         },
         [&](auto...) { return Encode<Tag>{}(prot, Adapter::toThrift(m)); })(
         Adapter{});
@@ -899,11 +898,10 @@ struct Decode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
   void operator()(Protocol& prot, U& m) const {
     return folly::overload(
-        [&](auto adapter)
-            -> decltype(decltype(adapter)::template decode<Protocol, Tag>(
-                prot, m)) {
+        [&](auto adapter) -> decltype(decltype(adapter)::template decode<Tag>(
+                              prot, m)) {
           adapter_clear<Adapter, Tag, U>(m);
-          decltype(adapter)::template decode<Protocol, Tag>(prot, m);
+          decltype(adapter)::template decode<Tag>(prot, m);
         },
         [&](auto...) {
           constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
@@ -944,11 +942,10 @@ struct Decode<
       operator()(Protocol& prot, U& m, Struct& strct) const {
     // TODO(dokwon): in-place deserialization support for field adapter.
     folly::overload(
-        [&](auto adapter)
-            -> decltype(decltype(adapter)::template decode<Protocol, Tag>(
-                prot, m)) {
+        [&](auto adapter) -> decltype(decltype(adapter)::template decode<Tag>(
+                              prot, m)) {
           adapter_clear<Adapter, Tag, U>(m);
-          decltype(adapter)::template decode<Protocol, Tag>(prot, m);
+          decltype(adapter)::template decode<Tag>(prot, m);
         },
         [&](...) {
           type::native_type<Tag> orig;

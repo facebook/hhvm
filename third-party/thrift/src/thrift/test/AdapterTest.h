@@ -374,12 +374,12 @@ struct EncodeAdapter {
     return num.val;
   }
 
-  template <typename Protocol, typename Tag>
+  template <typename Tag, typename Protocol>
   static uint32_t encode(Protocol& prot_, const Num& num) {
     return op::encode<type::i64_t>(prot_, num.val);
   }
 
-  template <typename Protocol, typename Tag>
+  template <typename Tag, typename Protocol>
   static void decode(Protocol& prot_, Num& num) {
     return op::decode<type::i64_t>(prot_, num.val);
   }
@@ -427,8 +427,8 @@ struct EncodeFieldAdapter {
   }
 
   template <
-      typename Protocol,
       typename Tag,
+      typename Protocol,
       typename T,
       typename Struct,
       int16_t FieldId>
@@ -438,8 +438,8 @@ struct EncodeFieldAdapter {
   }
 
   template <
-      typename Protocol,
       typename Tag,
+      typename Protocol,
       typename T,
       typename Struct,
       int16_t FieldId>

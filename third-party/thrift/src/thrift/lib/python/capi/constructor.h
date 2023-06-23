@@ -139,6 +139,56 @@ struct Constructor<set<ElemT, CppT>> {
   }
 };
 
+template <typename KeyT, typename ValT, typename CppT>
+struct Constructor<map<KeyT, ValT, CppT>> {
+  PyObject* FOLLY_NULLABLE operator()(CppT&& cpp_map) {
+    StrongRef dict(PyTuple_New(cpp_map.size()));
+    if (!dict) {
+      return nullptr;
+    }
+    Constructor<KeyT> key_ctor{};
+    Constructor<ValT> val_ctor{};
+    auto it = cpp_map.begin();
+    size_t idx = 0;
+    while (it != cpp_map.end()) {
+      StrongRef key;
+      StrongRef val;
+      if constexpr (has_extract_v<CppT>) {
+        auto node_handle = cpp_map.extract(it++);
+        key = StrongRef(key_ctor(std::move(node_handle.key())));
+        if (!key) {
+          // StrongRef DECREFs the dict on scope exit
+          return nullptr;
+        }
+        val = StrongRef(val_ctor(std::move(node_handle.mapped())));
+      } else {
+        // If the container doesn't support extract, have to copy
+        // because set iterator is const :(
+        key = StrongRef(key_ctor(folly::copy(it->first)));
+        if (!key) {
+          // StrongRef DECREFs the dict on scope exit
+          return nullptr;
+        }
+        val = StrongRef(val_ctor(std::move(it->second)));
+        ++it;
+      }
+      if (!val) {
+        // StrongRef DECREFs the dict and key on scope exit
+        return nullptr;
+      }
+      PyObject* kv_tuple = PyTuple_New(2);
+      if (kv_tuple == nullptr) {
+        return nullptr;
+      }
+      // PyTuple_SET_ITEM steals, so have to release StrongRefs
+      PyTuple_SET_ITEM(kv_tuple, 0, std::move(key).release());
+      PyTuple_SET_ITEM(kv_tuple, 1, std::move(val).release());
+      PyTuple_SET_ITEM(*dict, idx++, kv_tuple);
+    }
+    return std::move(dict).release();
+  }
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

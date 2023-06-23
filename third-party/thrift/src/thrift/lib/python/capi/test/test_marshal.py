@@ -26,6 +26,8 @@ from thrift.python.marshal.marshal_fixture import (
     INT32_MIN,
     INT64_MAX,
     INT64_MIN,
+    INT8_MAX,
+    INT8_MIN,
     UINT32_MAX,
     UINT64_MAX,
 )
@@ -238,4 +240,128 @@ class TestMarshalSet(MarshalFixture):
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode_set(frozenset((b"", b"a", b"c", b"e", b"\xE2\x82")))
         # The empty str created before error are not leaked
+        self.assertEqual(empty_refcount, getrefcount(""))
+
+
+class TestMarshalMap(MarshalFixture):
+    # Use the internal representation, which is tuple of (k, v) tuples.
+    def test_int32_bool_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        true_refcount = getrefcount(True)
+        false_refcount = getrefcount(False)
+
+        def make_dict():
+            return tuple((x, x % 2 == 0) for x in [INT32_MIN, -1, 0, INT32_MAX])
+
+        self.assertEqual(make_dict(), fixture.roundtrip_int32_bool_map(make_dict()))
+        self.assertEqual((), fixture.roundtrip_int32_bool_map(()))
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(true_refcount, getrefcount(True))
+        self.assertEqual(false_refcount, getrefcount(False))
+
+    def test_byte_float_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        ace_refcount = getrefcount(1)
+
+        def make_dict():
+            return tuple((x, x / 13.0) for x in [INT8_MIN, -1, 0, 1, INT8_MAX])
+
+        self.assertEqual(make_dict(), fixture.roundtrip_byte_float_map(make_dict()))
+        self.assertEqual((), fixture.roundtrip_byte_float_map(()))
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
+
+    def test_bytes_key_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        ace_refcount = getrefcount(1)
+
+        def make_dict():
+            return ((b"", -1), (b"asdfwe", 0), (b"wdfwe", 1))
+
+        # This fixture uses F14FastMap to exercise the path for containers that don't
+        # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
+        # and speed, thereby reversing the ordering
+        self.assertEqual(
+            make_dict(), tuple(reversed(fixture.roundtrip_bytes_key_map(make_dict())))
+        )
+        self.assertEqual((), fixture.roundtrip_bytes_key_map(()))
+
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
+
+    def test_bytes_val_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        ace_refcount = getrefcount(1)
+
+        def make_dict():
+            return ((-1, b""), (0, b"asdfwe"), (1, b"wdfwe"))
+
+        self.assertEqual(make_dict(), fixture.roundtrip_bytes_val_map(make_dict()))
+        self.assertEqual((), fixture.roundtrip_bytes_val_map(()))
+
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
+
+    def test_unicode_key_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        ace_refcount = getrefcount(1)
+
+        def make_dict():
+            return (("", -1), ("asdfwe", 0), ("wdfwe", 1))
+
+        self.assertEqual(make_dict(), fixture.roundtrip_unicode_key_map(make_dict()))
+        self.assertEqual((), fixture.roundtrip_unicode_key_map(()))
+
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
+
+    def test_unicode_val_map(self) -> None:
+        # store refcounts of singletons for leak checks
+        nil_refcount = getrefcount(0)
+        int_refcount = getrefcount(-1)
+        ace_refcount = getrefcount(1)
+        empty_refcount = getrefcount("")
+
+        def make_dict():
+            return ((-1, ""), (0, "asdfwe"), (1, "wdfwe"))
+
+        # This fixture uses F14FastMap to exercise the path for containers that don't
+        # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
+        # and speed, thereby reversing the ordering
+        self.assertEqual(
+            make_dict(), tuple(reversed(fixture.roundtrip_unicode_val_map(make_dict())))
+        )
+        self.assertEqual((), fixture.roundtrip_unicode_val_map(()))
+
+        # no leaks!
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
+
+        with self.assertRaises(UnicodeDecodeError):
+            fixture.make_unicode_val_map(((-1, b""), (0, b"a"), (1, b"\xE2\x82")))
+
+        self.assertEqual(nil_refcount, getrefcount(0))
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(ace_refcount, getrefcount(1))
         self.assertEqual(empty_refcount, getrefcount(""))

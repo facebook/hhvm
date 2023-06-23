@@ -16,6 +16,8 @@ from libc cimport stdint
 from libcpp cimport bool as cbool
 from libcpp.string cimport string
 
+INT8_MIN = stdint.INT8_MIN
+INT8_MAX = stdint.INT8_MAX
 INT32_MIN = stdint.INT32_MIN
 INT32_MAX = stdint.INT32_MAX
 UINT32_MAX = stdint.UINT32_MAX
@@ -37,6 +39,12 @@ cdef extern from "thrift/lib/python/capi/test/marshal_fixture.h" namespace "apac
     cdef object __roundtrip_set[T](object)
     cdef object __roundtrip_unicode_set(object)
     cdef object __roundtrip_bytes_set(object)
+    cdef object __roundtrip_map[K, V](object)
+    cdef object __roundtrip_bytes_key_map[V](object)
+    cdef object __roundtrip_unicode_key_map[V](object)
+    cdef object __roundtrip_bytes_val_map[K](object)
+    cdef object __roundtrip_unicode_val_map[K](object)
+    cdef object __make_unicode_val_map(object)
 
 
 def roundtrip_int32(object x):
@@ -106,3 +114,25 @@ def roundtrip_unicode_set(object x):
 
 def make_unicode_set(object x):
     return __make_unicode_set(x)
+
+# Maps
+def roundtrip_int32_bool_map(object x):
+    return __roundtrip_map[stdint.int32_t, cbool](x)
+
+def roundtrip_byte_float_map(object x):
+    return __roundtrip_map[stdint.int8_t, double](x)
+
+def roundtrip_bytes_key_map(object x):
+    return __roundtrip_bytes_key_map[stdint.int64_t](x)
+
+def roundtrip_unicode_key_map(object x):
+    return __roundtrip_unicode_key_map[stdint.int64_t](x)
+
+def roundtrip_bytes_val_map(object x):
+    return __roundtrip_bytes_val_map[stdint.int64_t](x)
+
+def roundtrip_unicode_val_map(object x):
+    return __roundtrip_unicode_val_map[stdint.int64_t](x)
+
+def make_unicode_val_map(object x):
+    return __make_unicode_val_map(x)

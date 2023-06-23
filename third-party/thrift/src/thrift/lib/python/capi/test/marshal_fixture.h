@@ -18,6 +18,7 @@
 
 #include <type_traits>
 #include <folly/Expected.h>
+#include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
@@ -29,6 +30,7 @@ namespace python {
 
 using capi::Bytes;
 using capi::list;
+using capi::map;
 using capi::set;
 using capi::String;
 
@@ -112,6 +114,49 @@ inline PyObject* __make_unicode_set(PyObject* obj) {
   auto cpp = capi::Extractor<set<Bytes>>{}(obj);
   if (cpp.hasValue()) {
     return capi::Constructor<set<String>>{}(std::move(*cpp));
+  }
+  return nullptr;
+}
+
+template <typename K, typename V>
+inline PyObject* __roundtrip_map(PyObject* obj) {
+  return __roundtrip_pyobject<map<K, V>>(obj);
+}
+
+template <typename V>
+inline PyObject* __roundtrip_bytes_key_map(PyObject* obj) {
+  return __roundtrip_pyobject<map<Bytes, V, folly::F14FastMap<std::string, V>>>(
+      obj);
+}
+
+template <typename K>
+inline PyObject* __roundtrip_bytes_val_map(PyObject* obj) {
+  return __roundtrip_pyobject<map<K, Bytes>>(obj);
+}
+
+template <typename V>
+inline PyObject* __roundtrip_unicode_key_map(PyObject* obj) {
+  return __roundtrip_pyobject<map<String, V>>(obj);
+}
+
+template <typename K>
+inline PyObject* __roundtrip_unicode_val_map(PyObject* obj) {
+  return __roundtrip_pyobject<
+      map<K, String, folly::F14FastMap<K, std::string>>>(obj);
+}
+
+inline PyObject* __make_unicode_key_map(PyObject* obj) {
+  auto cpp = capi::Extractor<map<Bytes, int64_t>>{}(obj);
+  if (cpp.hasValue()) {
+    return capi::Constructor<map<String, int64_t>>{}(std::move(*cpp));
+  }
+  return nullptr;
+}
+
+inline PyObject* __make_unicode_val_map(PyObject* obj) {
+  auto cpp = capi::Extractor<map<int64_t, Bytes>>{}(obj);
+  if (cpp.hasValue()) {
+    return capi::Constructor<map<int64_t, String>>{}(std::move(*cpp));
   }
   return nullptr;
 }

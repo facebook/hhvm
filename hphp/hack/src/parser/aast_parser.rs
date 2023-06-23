@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Borrow;
+use std::sync::Arc;
 use std::time::Instant;
 
 use bumpalo::Bump;
@@ -13,7 +14,6 @@ use lowerer::ScourComment;
 use mode_parser::parse_mode;
 use mode_parser::Language;
 use namespaces_rust as namespaces;
-use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
@@ -70,12 +70,12 @@ impl<'src> AastParser {
             env.codegen,
             env.parser_options.po_disable_xhp_element_mangling,
         );
-        Self::from_text_with_namespace_env(env, RcOc::new(ns), indexed_source_text)
+        Self::from_text_with_namespace_env(env, Arc::new(ns), indexed_source_text)
     }
 
     pub fn from_text_with_namespace_env(
         env: &Env,
-        ns: RcOc<NamespaceEnv>,
+        ns: Arc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
     ) -> Result<ParserResult> {
         let start_t = Instant::now();
@@ -115,7 +115,7 @@ impl<'src> AastParser {
         );
         Self::from_tree_with_namespace_env(
             env,
-            RcOc::new(ns),
+            Arc::new(ns),
             indexed_source_text,
             arena,
             language,
@@ -126,7 +126,7 @@ impl<'src> AastParser {
 
     fn from_tree_with_namespace_env<'arena>(
         env: &Env,
-        ns: RcOc<NamespaceEnv>,
+        ns: Arc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
         arena: &'arena Bump,
         language: Language,
@@ -148,7 +148,7 @@ impl<'src> AastParser {
             mode,
             indexed_source_text,
             &env.parser_options,
-            RcOc::clone(&ns),
+            Arc::clone(&ns),
             TokenFactory::new(arena),
             arena,
         );

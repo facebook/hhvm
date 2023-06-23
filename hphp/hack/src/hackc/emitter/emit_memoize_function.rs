@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::sync::Arc;
+
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bstr::ByteSlice;
@@ -29,7 +31,6 @@ use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
-use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::pos::Pos;
 
@@ -108,7 +109,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         } else {
             None
         };
-    let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
+    let mut env = Env::default(alloc, Arc::clone(&fd.namespace)).with_scope(scope);
     let (body_instrs, decl_vars) = make_memoize_function_code(
         emitter,
         &mut env,

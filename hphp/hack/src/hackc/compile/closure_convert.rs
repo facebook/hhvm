@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use env::emitter::Emitter;
 use error::Error;
@@ -21,7 +22,6 @@ use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
-use ocamlrep::rc::RcOc;
 use options::Options;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::visit_mut;
@@ -277,7 +277,7 @@ impl<'b, 'arena> Scope<'b, 'arena> {
         unreachable!();
     }
 
-    fn make_scope_name(&self, ns: &RcOc<namespace_env::Env>) -> String {
+    fn make_scope_name(&self, ns: &Arc<namespace_env::Env>) -> String {
         let mut parts = Vec::new();
         let mut iter = self.walk_scope();
         while let Some(scope) = iter.next() {
@@ -439,7 +439,7 @@ struct CaptureState {
 /// ClosureVisitor.
 struct ReadOnlyState<'a> {
     // Empty namespace as constructed by parser
-    empty_namespace: RcOc<namespace_env::Env>,
+    empty_namespace: Arc<namespace_env::Env>,
     /// For debugger eval
     for_debugger_eval: bool,
     /// Global compiler/hack options
@@ -457,11 +457,11 @@ struct State<'arena> {
     /// Hoisted meth_caller functions
     named_hoisted_functions: SMap<FunDef>,
     // The current namespace environment
-    namespace: RcOc<namespace_env::Env>,
+    namespace: Arc<namespace_env::Env>,
 }
 
 impl<'arena> State<'arena> {
-    fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
+    fn initial_state(empty_namespace: Arc<namespace_env::Env>) -> Self {
         Self {
             capture_state: Default::default(),
             closures: vec![],
@@ -486,7 +486,7 @@ impl<'arena> State<'arena> {
         self.capture_state.generics = Default::default();
     }
 
-    fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
+    fn set_namespace(&mut self, namespace: Arc<namespace_env::Env>) {
         self.namespace = namespace;
     }
 
@@ -636,7 +636,7 @@ fn make_closure(
         methods: vec![md],
         xhp_children: vec![],
         xhp_attrs: vec![],
-        namespace: RcOc::clone(&ro_state.empty_namespace),
+        namespace: Arc::clone(&ro_state.empty_namespace),
         enum_: None,
         doc_comment: None,
         emit_id: Some(EmitId::Anonymous),
@@ -1577,7 +1577,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         };
         let fd = FunDef {
             file_attributes: vec![],
-            namespace: RcOc::clone(&self.ro_state.empty_namespace),
+            namespace: Arc::clone(&self.ro_state.empty_namespace),
             mode: scope.scope_fmode(),
             name: Id(pos(), mangle_name.clone()),
             fun: f,
@@ -1717,13 +1717,13 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
 pub fn convert_toplevel_prog<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     defs: &mut Vec<Def>,
-    namespace_env: RcOc<namespace_env::Env>,
+    namespace_env: Arc<namespace_env::Env>,
 ) -> Result<()> {
     prepare_defs(defs);
 
     let mut scope = Scope::toplevel(defs.as_slice())?;
     let ro_state = ReadOnlyState {
-        empty_namespace: RcOc::clone(&namespace_env),
+        empty_namespace: Arc::clone(&namespace_env),
         for_debugger_eval: e.for_debugger_eval,
         options: e.options(),
     };
@@ -1740,7 +1740,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         visitor.visit_def(&mut scope, def)?;
         match def {
             Def::SetNamespaceEnv(x) => {
-                visitor.state_mut().set_namespace(RcOc::clone(&*x));
+                visitor.state_mut().set_namespace(Arc::clone(&*x));
             }
             Def::Class(_)
             | Def::Constant(_)

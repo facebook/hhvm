@@ -177,7 +177,6 @@ mod impls {
         <T: (?Sized)> Box<T>,
         <T: (?Sized)> std::rc::Rc<T>,
         <T: (?Sized)> std::sync::Arc<T>,
-        <T> ocamlrep::rc::RcOc<T>,
     }
 
     macro_rules! impl_with_iter {

@@ -341,7 +341,7 @@ impl<Hi> TypeHint<Hi> {
 // This wrapper constructor can avoid other crates (HackNative, etc)
 // depends on ocamlrep.
 pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {
-    ocamlrep::rc::RcOc::new(env)
+    std::sync::Arc::new(env)
 }
 
 impl<Ex, En> Afield<Ex, En> {

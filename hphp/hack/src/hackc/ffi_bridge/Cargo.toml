@@ -22,7 +22,6 @@ hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
 itertools = "0.10.3"
 libc = "0.2.139"
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 options = { version = "0.0.0", path = "../compile/cargo/options" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }

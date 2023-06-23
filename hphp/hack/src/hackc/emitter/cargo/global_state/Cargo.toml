@@ -10,6 +10,5 @@ path = "../../global_state.rs"
 
 [dependencies]
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 unique_id_builder = { version = "0.0.0", path = "../../../utils/cargo/unique_id_builder" }

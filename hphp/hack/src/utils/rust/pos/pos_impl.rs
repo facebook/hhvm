@@ -6,9 +6,9 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::ops::Range;
+use std::sync::Arc;
 
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use relative_path::RelativePath;
@@ -25,19 +25,19 @@ use crate::pos_span_tiny::PosSpanTiny;
 #[derive(Clone, Deserialize, Hash, Serialize)]
 enum PosImpl {
     Small {
-        file: RcOc<RelativePath>,
+        file: Arc<RelativePath>,
         start: FilePosSmall,
         end: FilePosSmall,
     },
     Large {
-        file: RcOc<RelativePath>,
+        file: Arc<RelativePath>,
         start: Box<FilePosLarge>,
         end: Box<FilePosLarge>,
     },
     Tiny {
         /// Representation invariant: `RelativePath::EMPTY` is always encoded as
         /// `None`. This allows us to construct `Pos` in `const` contexts.
-        file: Option<RcOc<RelativePath>>,
+        file: Option<Arc<RelativePath>>,
         span: PosSpanTiny,
     },
     FromReason(Box<PosImpl>),
@@ -67,7 +67,7 @@ impl Pos {
         line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1
     }
 
-    pub fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
+    pub fn from_raw_span(file: Arc<RelativePath>, span: PosSpanRaw) -> Self {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
             return Pos(PosImpl::Tiny {
                 file: if file.is_empty() { None } else { Some(file) },
@@ -115,26 +115,26 @@ impl Pos {
         }
     }
 
-    pub fn filename_rc(&self) -> RcOc<RelativePath> {
+    pub fn filename_rc(&self) -> Arc<RelativePath> {
         match &self.0 {
             PosImpl::Small { file, .. }
             | PosImpl::Large { file, .. }
             | PosImpl::Tiny {
                 file: Some(file), ..
-            } => RcOc::clone(file),
-            PosImpl::Tiny { file: None, .. } => RcOc::new(RelativePath::EMPTY),
+            } => Arc::clone(file),
+            PosImpl::Tiny { file: None, .. } => Arc::new(RelativePath::EMPTY),
             PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
-    fn into_filename(self) -> RcOc<RelativePath> {
+    fn into_filename(self) -> Arc<RelativePath> {
         match self.0 {
             PosImpl::Small { file, .. }
             | PosImpl::Large { file, .. }
             | PosImpl::Tiny {
                 file: Some(file), ..
             } => file,
-            PosImpl::Tiny { file: None, .. } => RcOc::new(RelativePath::EMPTY),
+            PosImpl::Tiny { file: None, .. } => Arc::new(RelativePath::EMPTY),
             PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
@@ -192,7 +192,7 @@ impl Pos {
     }
 
     pub fn from_lnum_bol_offset(
-        file: RcOc<RelativePath>,
+        file: Arc<RelativePath>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
     ) -> Self {
@@ -219,7 +219,7 @@ impl Pos {
 
     /// For single-line spans only.
     pub fn from_line_cols_offset(
-        file: RcOc<RelativePath>,
+        file: Arc<RelativePath>,
         line: usize,
         cols: Range<usize>,
         start_offset: usize,
@@ -483,7 +483,7 @@ impl FromOcamlRep for PosImpl {
                     file: if file.is_empty() {
                         None
                     } else {
-                        Some(RcOc::new(file))
+                        Some(Arc::new(file))
                     },
                     span: from::field(block, 1)?,
                 })
@@ -561,7 +561,7 @@ mod tests {
 
     fn make_pos(name: &str, start: (usize, usize, usize), end: (usize, usize, usize)) -> Pos {
         Pos::from_lnum_bol_offset(
-            RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(name))),
+            Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(name))),
             start,
             end,
         )
@@ -572,7 +572,7 @@ mod tests {
         assert!(Pos::NONE.is_none());
         assert!(
             !Pos::from_lnum_bol_offset(
-                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
+                Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
                 (0, 0, 0),
                 (0, 0, 0)
             )
@@ -580,7 +580,7 @@ mod tests {
         );
         assert!(
             !Pos::from_lnum_bol_offset(
-                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
+                Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
                 (1, 0, 0),
                 (0, 0, 0)
             )
@@ -598,7 +598,7 @@ mod tests {
             Pos::NONE.absolute(&ctx).to_string(),
             r#"File "dummy/", line 0, characters 0-0:"#
         );
-        let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
+        let path = Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
         assert_eq!(
             Pos::from_lnum_bol_offset(path, (5, 100, 117), (5, 100, 142))
                 .absolute(&ctx)
@@ -613,7 +613,7 @@ mod tests {
             Pos::NONE.string().to_string(),
             r#"File "", line 0, characters 0-0:"#
         );
-        let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
+        let path = Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
         assert_eq!(
             Pos::from_lnum_bol_offset(path, (5, 100, 117), (5, 100, 142))
                 .string()

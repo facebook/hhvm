@@ -32,7 +32,6 @@ itertools = "0.10.3"
 label_rewriter = { version = "0.0.0", path = "../label_rewriter" }
 lazy_static = "1.4"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }

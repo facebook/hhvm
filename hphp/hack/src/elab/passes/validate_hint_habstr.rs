@@ -292,6 +292,8 @@ impl Pass for ValidateHintHabstrPass {
 #[cfg(test)]
 mod tests {
 
+    use std::sync::Arc;
+
     use nast::Abstraction;
     use nast::Block;
     use nast::ClassishKind;
@@ -299,7 +301,6 @@ mod tests {
     use nast::Id;
     use nast::TypeHint;
     use nast::Variance;
-    use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
 
     use super::*;
@@ -328,7 +329,7 @@ mod tests {
             methods,
             xhp_children: Default::default(),
             xhp_attrs: Default::default(),
-            namespace: RcOc::new(namespace_env::Env::empty(vec![], false, false)),
+            namespace: Arc::new(namespace_env::Env::empty(vec![], false, false)),
             user_attributes: Default::default(),
             file_attributes: Default::default(),
             docs_url: Default::default(),

@@ -7,12 +7,12 @@ use std::fs;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Args;
 use compile::Profile;
 use decl_provider::SelfProvider;
-use ocamlrep::rc::RcOc;
 use parking_lot::Mutex;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
@@ -123,7 +123,7 @@ fn build_ir<'a, 'arena>(
     single_file_opts: &'a SingleFileOpts,
 ) -> Result<ir::Unit<'arena>> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
-    let source_text = SourceText::make(RcOc::new(filepath.clone()), content);
+    let source_text = SourceText::make(Arc::new(filepath.clone()), content);
     let env = crate::compile::native_env(filepath, single_file_opts)?;
     let mut profile = Profile::default();
     let decl_arena = bumpalo::Bump::new();

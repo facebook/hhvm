@@ -55,9 +55,10 @@ fn error_if_pseudo_constant(env: &Env, gconst: &Gconst) {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use nast::Hint;
     use nast::Pos;
-    use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
     use oxidized::typechecker_options::TypecheckerOptions;
 
@@ -76,7 +77,7 @@ mod tests {
             name: Id(Pos::NONE, name),
             value,
             type_: r#type,
-            namespace: RcOc::new(namespace_env::Env {
+            namespace: Arc::new(namespace_env::Env {
                 name: namespace,
                 ..namespace_env::Env::empty(vec![], false, false)
             }),

@@ -8,13 +8,13 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Write;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use aast_parser::AastParser;
 use anyhow::Context;
 use anyhow::Result;
 use clap::builder::TypedValueParser;
 use clap::Args;
-use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
@@ -58,7 +58,7 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
             let content = std::fs::read(&path)?;
             let env = ParserEnv::default();
             let filepath = RelativePath::make(Prefix::Dummy, path);
-            let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
+            let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
             match bench_opts.parser {
                 ParserKind::PositionedWithFullTrivia => {
                     let stdout = std::io::stdout();
@@ -115,7 +115,7 @@ fn parse(path: PathBuf, w: &mut impl Write, pretty: bool) -> Result<()> {
         ..Default::default()
     };
     let filepath = RelativePath::make(Prefix::Dummy, path);
-    let source_text = SourceText::make(RcOc::new(filepath), &source_text);
+    let source_text = SourceText::make(Arc::new(filepath), &source_text);
     let indexed_source = IndexedSourceText::new(source_text);
     let arena = bumpalo::Bump::new();
     let json = if pretty {

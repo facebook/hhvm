@@ -26,7 +26,6 @@ use error::Error;
 use error::ErrorKind;
 use hhbc::FatalOp;
 use hhbc::Unit;
-use ocamlrep::rc::RcOc;
 use options::HhbcFlags;
 use options::Hhvm;
 use options::Options;
@@ -212,13 +211,13 @@ pub fn from_text<'decl>(
 
 fn rewrite_and_emit<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    namespace_env: RcOc<NamespaceEnv>,
+    namespace_env: Arc<NamespaceEnv>,
     ast: &'p mut ast::Program,
     profile: &'p mut Profile,
 ) -> Result<Unit<'arena>, Error> {
     // First rewrite and modify `ast` in place.
     stack_limit::reset();
-    let result = rewrite_program::rewrite_program(emitter, ast, RcOc::clone(&namespace_env));
+    let result = rewrite_program::rewrite_program(emitter, ast, Arc::clone(&namespace_env));
     profile.rewrite_peak = stack_limit::peak() as u64;
     stack_limit::reset();
     let unit = match result {
@@ -285,7 +284,7 @@ pub fn unit_to_string(
 
 fn emit_unit_from_ast<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    namespace: RcOc<NamespaceEnv>,
+    namespace: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
 ) -> Result<Unit<'arena>, Error> {
     emit_unit(emitter, namespace, ast)
@@ -293,7 +292,7 @@ fn emit_unit_from_ast<'arena, 'decl>(
 
 fn check_readonly_and_emit<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    namespace_env: RcOc<NamespaceEnv>,
+    namespace_env: Arc<NamespaceEnv>,
     ast: &mut ast::Program,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>, Error> {
@@ -324,7 +323,7 @@ fn emit_unit_from_text<'arena, 'decl>(
     profile.log_enabled = emitter.options().log_extern_compiler_perf();
     let type_directed = emitter.decl_provider.is_some();
 
-    let namespace_env = RcOc::new(NamespaceEnv::empty(
+    let namespace_env = Arc::new(NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
         true, /* is_codegen */
         emitter
@@ -339,7 +338,7 @@ fn emit_unit_from_text<'arena, 'decl>(
         emitter.options(),
         source_text,
         !flags.disable_toplevel_elaboration,
-        RcOc::clone(&namespace_env),
+        Arc::clone(&namespace_env),
         flags.is_systemlib,
         emitter.for_debugger_eval,
         type_directed,
@@ -348,7 +347,7 @@ fn emit_unit_from_text<'arena, 'decl>(
 
     let ((unit, profile), codegen_t) = match parse_result {
         Ok(mut ast) => {
-            elab::elaborate_program_for_codegen(RcOc::clone(&namespace_env), &path, &mut ast);
+            elab::elaborate_program_for_codegen(Arc::clone(&namespace_env), &path, &mut ast);
             profile_rust::time(move || {
                 (
                     check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),
@@ -409,7 +408,7 @@ fn parse_file(
     opts: &Options,
     source_text: SourceText<'_>,
     elaborate_namespaces: bool,
-    namespace_env: RcOc<NamespaceEnv>,
+    namespace_env: Arc<NamespaceEnv>,
     is_systemlib: bool,
     for_debugger_eval: bool,
     type_directed: bool,

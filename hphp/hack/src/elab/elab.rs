@@ -47,9 +47,10 @@ mod prelude {
     pub use crate::transform::Transform;
 }
 
+use std::sync::Arc;
+
 use env::Env;
 use env::ProgramSpecificOptions;
-use ocamlrep::rc::RcOc;
 use oxidized::namespace_env;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
@@ -62,7 +63,7 @@ use transform::Transform;
 /// Expected to behave the same as `elaborate_program` when `po_codegen` is
 /// `true`.
 pub fn elaborate_program_for_codegen(
-    ns_env: RcOc<namespace_env::Env>,
+    ns_env: Arc<namespace_env::Env>,
     path: &RelativePath,
     program: &mut nast::Program,
 ) {
@@ -171,8 +172,8 @@ pub fn elaborate_typedef(
     elaborate_for_typechecking(env, t)
 }
 
-fn ns_env(tco: &TypecheckerOptions) -> RcOc<namespace_env::Env> {
-    RcOc::new(namespace_env::Env::empty(
+fn ns_env(tco: &TypecheckerOptions) -> Arc<namespace_env::Env> {
+    Arc::new(namespace_env::Env::empty(
         tco.po_auto_namespace_map.clone(),
         tco.po_codegen,
         tco.po_disable_xhp_element_mangling,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<133ccdcaff5ae57493ed9481e8e801f8>>
+// @generated SignedSource<<e67a0492281a559893647d012cebaf63>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1981,7 +1981,7 @@ pub struct Method_<Ex, En> {
 
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "transform.opaque")]
-pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
+pub type Nsenv = std::sync::Arc<namespace_env::Env>;
 
 #[derive(
     Clone,

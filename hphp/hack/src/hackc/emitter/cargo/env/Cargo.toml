@@ -22,7 +22,6 @@ hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_strin
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 print_expr = { version = "0.0.0", path = "../../../print_expr" }

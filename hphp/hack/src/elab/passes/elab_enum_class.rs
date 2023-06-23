@@ -108,10 +108,11 @@ impl Pass for ElabEnumClassPass {
 #[cfg(test)]
 mod tests {
 
+    use std::sync::Arc;
+
     use nast::Enum_;
     use nast::Pos;
     use nast::UserAttributes;
-    use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
     use oxidized::s_map::SMap;
 
@@ -141,7 +142,7 @@ mod tests {
             methods: vec![],
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(namespace_env::Env {
+            namespace: Arc::new(namespace_env::Env {
                 ns_uses: SMap::default(),
                 class_uses: SMap::default(),
                 fun_uses: SMap::default(),

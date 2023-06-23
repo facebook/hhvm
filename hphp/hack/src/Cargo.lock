@@ -423,7 +423,6 @@ dependencies = [
  "criterion",
  "cst_and_decl_parser",
  "direct_decl_parser",
- "ocamlrep",
  "parser_core_types",
  "relative_path",
 ]
@@ -786,7 +785,6 @@ dependencies = [
  "hhbc_string_utils",
  "itertools 0.10.5",
  "naming_special_names_rust",
- "ocamlrep",
  "options",
  "oxidized",
  "stack_limit",
@@ -828,7 +826,6 @@ dependencies = [
  "hhbc",
  "ir",
  "ir_to_bc",
- "ocamlrep",
  "options",
  "oxidized",
  "parser_core_types",
@@ -859,7 +856,6 @@ dependencies = [
  "hhbc",
  "itertools 0.10.5",
  "libc",
- "ocamlrep",
  "options",
  "parser_core_types",
  "relative_path",
@@ -1464,7 +1460,6 @@ dependencies = [
  "bumpalo",
  "direct_decl_smart_constructors",
  "mode_parser",
- "ocamlrep",
  "oxidized",
  "oxidized_by_ref",
  "parser",
@@ -1550,7 +1545,6 @@ dependencies = [
  "hash",
  "itertools 0.10.5",
  "naming_special_names_rust",
- "ocamlrep",
  "oxidized",
  "relative_path",
 ]
@@ -1574,7 +1568,6 @@ dependencies = [
  "lazy_static",
  "namespaces_rust",
  "naming_special_names_rust",
- "ocamlrep",
  "oxidized",
 ]
 
@@ -1658,7 +1651,6 @@ dependencies = [
  "label_rewriter",
  "lazy_static",
  "naming_special_names_rust",
- "ocamlrep",
  "options",
  "oxidized",
  "oxidized_by_ref",
@@ -1714,7 +1706,6 @@ dependencies = [
  "indexmap",
  "instruction_sequence",
  "naming_special_names_rust",
- "ocamlrep",
  "options",
  "oxidized",
  "print_expr",
@@ -2083,7 +2074,6 @@ name = "generate_hhi_lib"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "ocamlrep",
  "parser_core_types",
  "positioned_parser",
  "relative_path",
@@ -2142,7 +2132,6 @@ name = "global_state"
 version = "0.0.0"
 dependencies = [
  "hhbc",
- "ocamlrep",
  "oxidized",
  "unique_id_builder",
 ]
@@ -2161,7 +2150,6 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "macro_test_util",
- "ocamlrep",
  "once_cell",
  "oxidized",
  "parser_core_types",
@@ -2211,7 +2199,6 @@ dependencies = [
  "multifile_rust",
  "naming_provider",
  "naming_special_names_rust",
- "ocamlrep",
  "once_cell",
  "options",
  "oxidized",
@@ -3053,7 +3040,6 @@ dependencies = [
  "lint_rust",
  "naming_special_names_rust",
  "ocaml_helper",
- "ocamlrep",
  "oxidized",
  "parser_core_types",
  "regex",
@@ -3320,7 +3306,6 @@ dependencies = [
  "bumpalo",
  "core_utils_rust",
  "naming_special_names_rust",
- "ocamlrep",
  "oxidized",
  "oxidized_by_ref",
 ]
@@ -3446,7 +3431,6 @@ dependencies = [
  "bstr 1.4.0",
  "fnv",
  "no_pos_hash_derive",
- "ocamlrep",
  "ocamlrep_caml_builtins",
 ]
 
@@ -3841,7 +3825,6 @@ dependencies = [
  "bumpalo",
  "cxx",
  "cxx-build",
- "ocamlrep",
  "parser_core_types",
  "positioned_full_trivia_parser",
  "relative_path",
@@ -4383,7 +4366,6 @@ dependencies = [
  "error",
  "hack_macros",
  "hhbc",
- "ocamlrep",
  "oxidized",
  "relative_path",
  "rewrite_xml",

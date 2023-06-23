@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::sync::Arc;
+
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bitflags::bitflags;
@@ -32,7 +34,6 @@ use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
-use ocamlrep::rc::RcOc;
 use oxidized::aast;
 use oxidized::aast_defs::DocComment;
 use oxidized::ast;
@@ -80,7 +81,7 @@ bitflags! {
 pub fn emit_body<'b, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    namespace: RcOc<namespace_env::Env>,
+    namespace: Arc<namespace_env::Env>,
     body: &'b [ast::Stmt],
     return_value: InstrSeq<'arena>,
     scope: Scope<'_, 'arena>,
@@ -337,7 +338,7 @@ fn make_return_type_info<'arena>(
 
 pub fn make_env<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
-    namespace: RcOc<namespace_env::Env>,
+    namespace: Arc<namespace_env::Env>,
     scope: Scope<'a, 'arena>,
     call_context: Option<String>,
 ) -> Env<'a, 'arena> {

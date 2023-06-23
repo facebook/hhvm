@@ -19,7 +19,6 @@ lazy_static = "1.4"
 lint_rust = { version = "0.0.0", path = "../../utils/lint" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../utils/ocaml_helper" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
 regex = "1.6.0"

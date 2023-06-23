@@ -84,7 +84,7 @@ fn type_test() -> Result<()> {
         &(
             oxidized::file_info::Pos::File(
                 oxidized::file_info::NameType::Class,
-                ocamlrep::rc::RcOc::new(a_relative_path.into()),
+                std::sync::Arc::new(a_relative_path.into()),
             ),
             naming_types::KindOfType::TClass,
         ),
@@ -131,7 +131,7 @@ fn fun_test() -> Result<()> {
         a_fun,
         &oxidized::file_info::Pos::File(
             oxidized::file_info::NameType::Fun,
-            ocamlrep::rc::RcOc::new(a_relative_path.into()),
+            std::sync::Arc::new(a_relative_path.into()),
         ),
     )?;
 
@@ -175,7 +175,7 @@ fn const_test() -> Result<()> {
         a_const,
         &oxidized::file_info::Pos::File(
             oxidized::file_info::NameType::Const,
-            ocamlrep::rc::RcOc::new(a_relative_path.into()),
+            std::sync::Arc::new(a_relative_path.into()),
         ),
     )?;
 

@@ -12,6 +12,7 @@ use std::mem;
 use std::rc::Rc;
 use std::slice::Iter;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use bstr::BString;
 use bstr::B;
@@ -32,7 +33,6 @@ use naming_special_names_rust::user_attributes as special_attrs;
 use ocaml_helper::int_of_string_opt;
 use ocaml_helper::parse_int;
 use ocaml_helper::ParseIntError;
-use ocamlrep::rc::RcOc;
 use oxidized::aast;
 use oxidized::aast::Binop;
 use oxidized::aast_defs::ClassReq;
@@ -192,7 +192,7 @@ pub struct Env<'a> {
 
     // Cache none pos, lazy_static doesn't allow Rc.
     pos_none: Pos,
-    pub empty_ns_env: RcOc<NamespaceEnv>,
+    pub empty_ns_env: Arc<NamespaceEnv>,
 
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
@@ -215,7 +215,7 @@ impl<'a> Env<'a> {
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
-        namespace_env: RcOc<NamespaceEnv>,
+        namespace_env: Arc<NamespaceEnv>,
         token_factory: PositionedTokenFactory<'a>,
         arena: &'a Bump,
     ) -> Self {
@@ -4605,8 +4605,8 @@ where
     Ok((r?, saw_yield))
 }
 
-fn mk_empty_ns_env(env: &Env<'_>) -> RcOc<NamespaceEnv> {
-    RcOc::clone(&env.empty_ns_env)
+fn mk_empty_ns_env(env: &Env<'_>) -> Arc<NamespaceEnv> {
+    Arc::clone(&env.empty_ns_env)
 }
 
 fn extract_docblock<'a>(node: S<'a>, env: &Env<'_>) -> Option<DocComment> {

@@ -39,6 +39,8 @@ fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use nast::Abstraction;
     use nast::ClassConcreteTypeconst;
     use nast::ClassConst;
@@ -49,7 +51,6 @@ mod tests {
     use nast::Id;
     use nast::Pos;
     use nast::UserAttributes;
-    use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
     use oxidized::typechecker_options::TypecheckerOptions;
 
@@ -108,7 +109,7 @@ mod tests {
             methods: vec![],
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(namespace_env::Env::empty(vec![], false, false)),
+            namespace: Arc::new(namespace_env::Env::empty(vec![], false, false)),
             user_attributes: Default::default(),
             file_attributes: vec![],
             docs_url: None,

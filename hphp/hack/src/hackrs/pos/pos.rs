@@ -226,7 +226,7 @@ impl EqModuloPos for BPos {
 
 impl From<BPos> for oxidized::pos::Pos {
     fn from(pos: BPos) -> Self {
-        let file = ocamlrep::rc::RcOc::new(pos.file().into());
+        let file = std::sync::Arc::new(pos.file().into());
         Self::from_raw_span(
             file,
             match &pos.0 {

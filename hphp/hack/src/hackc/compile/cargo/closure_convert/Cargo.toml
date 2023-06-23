@@ -19,7 +19,6 @@ hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 itertools = "0.10.3"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 options = { version = "0.0.0", path = "../options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }

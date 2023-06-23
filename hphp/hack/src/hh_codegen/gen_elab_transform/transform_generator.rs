@@ -243,8 +243,8 @@ fn gen_manual_impls() -> Vec<TokenStream> {
                 x.#transform;
             }
         }),
-        (vec!["T"], quote!(ocamlrep::rc::RcOc<T>), quote! {
-            if let Some(x) = ocamlrep::rc::RcOc::get_mut(self) {
+        (vec!["T"], quote!(std::sync::Arc<T>), quote! {
+            if let Some(x) = std::sync::Arc::get_mut(self) {
                 x.#transform;
             }
         }),

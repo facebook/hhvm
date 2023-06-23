@@ -50,7 +50,7 @@ impl<'a> IndexedSourceText<'a> {
 }
 
 pub struct Pos {
-    pub path: ocamlrep::rc::RcOc<relative_path::RelativePath>,
+    pub path: std::sync::Arc<relative_path::RelativePath>,
     /// The three usizes represent (lnum, bol, offset):
     /// - lnum: Line number. Starts at 1.
     /// - bol: Byte offset from beginning of file to the beginning of the line

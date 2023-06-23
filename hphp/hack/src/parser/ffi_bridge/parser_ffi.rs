@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
 /**
  * Copyright (c) 2016, Facebook, Inc.
@@ -10,7 +11,6 @@ use std::path::PathBuf;
  *
  */
 use cxx::CxxString;
-use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
@@ -43,10 +43,8 @@ pub fn hackc_parse_positioned_full_trivia(
 ) -> Vec<u8> {
     let filepath = RelativePath::make(Prefix::Dummy, PathBuf::new());
     let env: parser_core_types::parser_env::ParserEnv = ffi::ParserEnv::to_parser_env(env);
-    let indexed_source = IndexedSourceText::new(SourceText::make(
-        RcOc::new(filepath),
-        source_text.as_bytes(),
-    ));
+    let indexed_source =
+        IndexedSourceText::new(SourceText::make(Arc::new(filepath), source_text.as_bytes()));
     let alloc = bumpalo::Bump::new();
     let mut serializer = serde_json::Serializer::new(vec![]);
     match positioned_full_trivia_parser::parse_script_to_json(

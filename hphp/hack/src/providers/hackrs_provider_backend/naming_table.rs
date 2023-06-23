@@ -15,7 +15,6 @@ use hh24_types::ToplevelSymbolHash;
 use naming_provider::NamingProvider;
 use naming_types::KindOfType;
 use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep::rc::RcOc;
 use oxidized::file_info::NameType;
 use oxidized::naming_types;
 use parking_lot::Mutex;
@@ -307,7 +306,7 @@ impl From<Pos> for file_info::Pos {
     fn from(pos: Pos) -> Self {
         match pos {
             Pos::Full(pos) => Self::Full(pos.into()),
-            Pos::File(name_type, path) => Self::File(name_type, RcOc::new(path.into())),
+            Pos::File(name_type, path) => Self::File(name_type, Arc::new(path.into())),
         }
     }
 }

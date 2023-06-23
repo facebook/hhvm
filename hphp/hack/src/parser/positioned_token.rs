@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::rc::RcOc;
+use std::sync::Arc;
 
 use crate::lexable_token::LexablePositionedToken;
 use crate::lexable_token::LexableToken;
@@ -34,7 +34,7 @@ pub struct PositionedTokenImpl {
 // subtree to describe span covered by it - see PositionedSyntaxValue for details).
 // We don't want to have to clone and store multiple copies of the token, so we define it as ref
 // counted pointer to the actual shared struct
-pub type PositionedToken = RcOc<PositionedTokenImpl>;
+pub type PositionedToken = Arc<PositionedTokenImpl>;
 
 pub fn new(
     kind: TokenKind,
@@ -45,7 +45,7 @@ pub fn new(
 ) -> PositionedToken {
     let leading_width = leading.iter().map(|x| x.width).sum();
     let trailing_width = trailing.iter().map(|x| x.width).sum();
-    RcOc::new(PositionedTokenImpl {
+    Arc::new(PositionedTokenImpl {
         kind,
         offset,
         leading_width,
@@ -72,7 +72,7 @@ impl SimpleTokenFactory for PositionedToken {
     // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
     // before any sharing occurs
     fn with_leading(mut self, leading: PositionedTrivia) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
+        let mut token = Arc::make_mut(&mut self);
         let token_start_offset = token.offset + token.leading_width;
         let leading_width = leading.iter().map(|x| x.width).sum();
         token.offset = token_start_offset - leading_width;
@@ -82,7 +82,7 @@ impl SimpleTokenFactory for PositionedToken {
     }
 
     fn with_trailing(mut self, trailing: PositionedTrivia) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
+        let mut token = Arc::make_mut(&mut self);
         let trailing_width = trailing.iter().map(|x| x.width).sum();
         token.trailing_width = trailing_width;
         token.trailing = trailing;
@@ -90,7 +90,7 @@ impl SimpleTokenFactory for PositionedToken {
     }
 
     fn with_kind(mut self, kind: TokenKind) -> Self {
-        let mut token = RcOc::make_mut(&mut self);
+        let mut token = Arc::make_mut(&mut self);
         token.kind = kind;
         self
     }
@@ -148,7 +148,7 @@ impl LexableToken for PositionedToken {
     }
 
     fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia) {
-        match RcOc::try_unwrap(self) {
+        match Arc::try_unwrap(self) {
             Ok(t) => (t.leading, t.width, t.trailing),
             Err(t_ptr) => (t_ptr.leading.clone(), t_ptr.width, t_ptr.trailing.clone()),
         }
@@ -194,7 +194,7 @@ impl LexablePositionedToken for PositionedToken {
 
     fn clone_value(&self) -> Self {
         let inner = self.as_ref().clone();
-        RcOc::new(inner)
+        Arc::new(inner)
     }
 
     fn positioned_leading(&self) -> &[PositionedTrivium] {

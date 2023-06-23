@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use hhbc::Coeffects;
-use ocamlrep::rc::RcOc;
 use oxidized::ast_defs::Abstraction;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::namespace_env::Env as NamespaceEnv;
@@ -32,7 +33,7 @@ impl Default for ClosureEnclosingClassInfo {
 #[derive(Default, Debug)]
 pub struct GlobalState<'arena> {
     pub explicit_use_set: SSet,
-    pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
+    pub closure_namespaces: SMap<Arc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub lambda_coeffects_of_scope: SMap<Coeffects<'arena>>,
 }

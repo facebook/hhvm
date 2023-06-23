@@ -790,7 +790,7 @@ let type_declaration ~mutual_rec name td =
         let ty = Convert_type.core_type ty in
         if should_add_rcoc name then
           sprintf
-            "%s%spub type %s = ocamlrep::rc::RcOc<%s>;"
+            "%s%spub type %s = std::sync::Arc<%s>;"
             doc
             attr
             (rust_type name lifetime tparams |> rust_type_to_string)

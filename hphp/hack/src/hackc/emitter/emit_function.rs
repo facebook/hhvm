@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::sync::Arc;
+
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use env::emitter::Emitter;
@@ -16,7 +18,6 @@ use hhbc::FunctionName;
 use hhbc::Span;
 use instruction_sequence::instr;
 use naming_special_names_rust::user_attributes as ua;
-use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::ast_defs;
 
@@ -133,7 +134,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         emit_body::emit_body(
             alloc,
             e,
-            RcOc::clone(&fd.namespace),
+            Arc::clone(&fd.namespace),
             ast_body,
             instr::null(),
             scope,

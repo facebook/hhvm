@@ -193,7 +193,7 @@ let rec core_type ?(seen_indirection = false) (ct : core_type) : Rust_type.t =
     let args = List.map args ~f:(core_type ~seen_indirection) in
 
     if should_add_rcoc id then
-      rust_type "ocamlrep::rc::RcOc" [] [rust_type id lifetime args]
+      rust_type "std::sync::Arc" [] [rust_type id lifetime args]
     (* Direct or indirect recursion *)
     else if should_add_indirection ~seen_indirection (rust_type id [] args) then
       match Configuration.mode () with

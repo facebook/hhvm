@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fs;
-
 // use crate::compile_rust as compile;
-use ocamlrep::rc::RcOc;
+use std::sync::Arc;
+
 use options::Options;
 use oxidized::aast;
 use oxidized::aast_visitor::AstParams;
@@ -99,8 +99,8 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let type_directed = false;
     let opts = Options::default();
     let content = fs::read(filepath.path()).unwrap(); // consider: also show prefix?
-    let source_text = SourceText::make(RcOc::new(filepath), &content);
-    let ns = RcOc::new(NamespaceEnv::empty(
+    let source_text = SourceText::make(Arc::new(filepath), &content);
+    let ns = Arc::new(NamespaceEnv::empty(
         opts.hhvm.aliased_namespaces_cloned().collect(),
         true,
         opts.hhvm.parser_options.po_disable_xhp_element_mangling,

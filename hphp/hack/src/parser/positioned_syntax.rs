@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::rc::RcOc;
+use std::sync::Arc;
 
 use crate::lexable_token::LexableToken;
 use crate::positioned_token::PositionedToken;
@@ -99,12 +99,12 @@ impl PositionedValue {
             | (TokenSpan(_), TokenSpan(_)) => {
                 let l = first.leading_token().unwrap();
                 let r = last.trailing_token().unwrap();
-                if RcOc::ptr_eq(l, r) {
-                    TokenValue(RcOc::clone(l))
+                if Arc::ptr_eq(l, r) {
+                    TokenValue(Arc::clone(l))
                 } else {
                     TokenSpan(Box::new(Span {
-                        left: RcOc::clone(l),
-                        right: RcOc::clone(r),
+                        left: Arc::clone(l),
+                        right: Arc::clone(r),
                     }))
                 }
             }

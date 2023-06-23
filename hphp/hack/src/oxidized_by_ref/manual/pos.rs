@@ -312,7 +312,7 @@ impl<'a> Pos<'a> {
         let file = self.filename();
         let PosSpanRaw { start, end } = self.to_raw_span();
         oxidized::pos::Pos::from_lnum_bol_offset(
-            ocamlrep::rc::RcOc::new(file.to_oxidized()),
+            std::sync::Arc::new(file.to_oxidized()),
             start.line_beg_offset(),
             end.line_beg_offset(),
         )

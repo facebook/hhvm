@@ -24,7 +24,6 @@ error = { version = "0.0.0", path = "../../../error/cargo/error" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 ir = { version = "0.0.0", path = "../../../ir" }
 ir_to_bc = { version = "0.0.0", path = "../../../ir/conversions/ir_to_bc" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 options = { version = "0.0.0", path = "../options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }

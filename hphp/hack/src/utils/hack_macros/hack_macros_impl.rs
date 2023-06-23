@@ -6,10 +6,10 @@
 mod ast_writer;
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::Error as AastError;
-use ocamlrep::rc::RcOc;
 use once_cell::sync::OnceCell;
 use oxidized::ast;
 use oxidized::ast::Def;
@@ -457,7 +457,7 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     };
 
     let rel_path = RelativePath::make(Prefix::Dummy, "".into());
-    let source_text = SourceText::make(RcOc::new(rel_path), input.as_bytes());
+    let source_text = SourceText::make(Arc::new(rel_path), input.as_bytes());
     let indexed_source_text = IndexedSourceText::new(source_text);
 
     let aast = aast_parser::AastParser::from_text(&env, &indexed_source_text)

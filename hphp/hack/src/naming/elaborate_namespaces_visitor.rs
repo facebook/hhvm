@@ -5,11 +5,12 @@
 
 #![feature(box_patterns)]
 
+use std::sync::Arc;
+
 use core_utils_rust as core_utils;
 use hash::HashSet;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as sn;
-use ocamlrep::rc::RcOc;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
@@ -40,12 +41,12 @@ fn is_special_identifier(name: &str) -> bool {
 struct Env {
     // TODO(hrust) I wanted to make namespace and type_params str's references but couldn't
     // find a way to specify that the lifetimes of these outlived the node I was taking them from
-    namespace: ocamlrep::rc::RcOc<namespace_env::Env>,
+    namespace: std::sync::Arc<namespace_env::Env>,
     type_params: HashSet<String>,
 }
 
 impl Env {
-    fn make(namespace: ocamlrep::rc::RcOc<namespace_env::Env>) -> Self {
+    fn make(namespace: std::sync::Arc<namespace_env::Env>) -> Self {
         Self {
             namespace,
             type_params: HashSet::default(),
@@ -94,7 +95,7 @@ impl Env {
         }
     }
 
-    fn with_ns(&self, namespace: RcOc<namespace_env::Env>) -> Self {
+    fn with_ns(&self, namespace: Arc<namespace_env::Env>) -> Self {
         Self {
             namespace,
             type_params: self.type_params.clone(),
@@ -102,8 +103,8 @@ impl Env {
     }
 }
 
-fn contexts_ns() -> RcOc<namespace_env::Env> {
-    RcOc::new(namespace_env::Env {
+fn contexts_ns() -> Arc<namespace_env::Env> {
+    Arc::new(namespace_env::Env {
         name: Some(sn::coeffects::CONTEXTS.to_owned()),
         ..namespace_env::Env::empty(
             vec![],
@@ -117,8 +118,8 @@ fn contexts_ns() -> RcOc<namespace_env::Env> {
     })
 }
 
-fn unsafe_contexts_ns() -> RcOc<namespace_env::Env> {
-    RcOc::new(namespace_env::Env {
+fn unsafe_contexts_ns() -> Arc<namespace_env::Env> {
+    Arc::new(namespace_env::Env {
         name: Some(sn::coeffects::UNSAFE_CONTEXTS.to_owned()),
         ..namespace_env::Env::empty(
             vec![],
@@ -164,7 +165,7 @@ impl ElaborateNamespacesVisitor {
 
     fn on_contexts_ns(
         &mut self,
-        ctx_ns: &RcOc<namespace_env::Env>,
+        ctx_ns: &Arc<namespace_env::Env>,
         env: &mut Env,
         ctxs: &mut Contexts,
     ) -> Result<(), ()> {
@@ -176,11 +177,11 @@ impl ElaborateNamespacesVisitor {
 
     fn on_ctx_hint_ns(
         &mut self,
-        ctx_ns: &RcOc<namespace_env::Env>,
+        ctx_ns: &Arc<namespace_env::Env>,
         env: &mut Env,
         h: &mut Context,
     ) -> Result<(), ()> {
-        let ctx_env = &mut env.with_ns(RcOc::clone(ctx_ns));
+        let ctx_env = &mut env.with_ns(Arc::clone(ctx_ns));
         fn is_ctx_user_defined(ctx: &str) -> bool {
             match ctx.rsplit('\\').next() {
                 Some(ctx_name) if !ctx_name.is_empty() => {
@@ -221,7 +222,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     // The following functions just set the namespace env correctly
     fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.namespace = RcOc::clone(&cd.namespace);
+        env.namespace = Arc::clone(&cd.namespace);
         env.extend_tparams(&cd.tparams);
         cd.recurse(env, self.object())
     }
@@ -258,7 +259,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_typedef(&mut self, env: &mut Env, td: &mut Typedef) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.namespace = RcOc::clone(&td.namespace);
+        env.namespace = Arc::clone(&td.namespace);
         env.extend_tparams(&td.tparams);
         if !env.in_codegen() && td.is_ctx {
             let ctx_ns = &contexts_ns();
@@ -275,7 +276,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_def(&mut self, env: &mut Env, def: &mut Def) -> Result<(), ()> {
         if let Def::SetNamespaceEnv(nsenv) = def {
-            env.namespace = RcOc::clone(nsenv);
+            env.namespace = Arc::clone(nsenv);
         }
         def.recurse(env, self.object())
     }
@@ -283,7 +284,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     // Difference between FunDef and Fun_ is that Fun_ is also lambdas
     fn visit_fun_def(&mut self, env: &mut Env, fd: &mut FunDef) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.namespace = RcOc::clone(&fd.namespace);
+        env.namespace = Arc::clone(&fd.namespace);
         env.extend_tparams(&fd.tparams);
         fd.recurse(env, self.object())
     }
@@ -318,13 +319,13 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_gconst(&mut self, env: &mut Env, gc: &mut Gconst) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.namespace = RcOc::clone(&gc.namespace);
+        env.namespace = Arc::clone(&gc.namespace);
         gc.recurse(env, self.object())
     }
 
     fn visit_file_attribute(&mut self, env: &mut Env, fa: &mut FileAttribute) -> Result<(), ()> {
         let env = &mut env.clone();
-        env.namespace = RcOc::clone(&fa.namespace);
+        env.namespace = Arc::clone(&fa.namespace);
         fa.recurse(env, self.object())
     }
 
@@ -513,7 +514,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     }
 }
 
-pub fn elaborate_program(e: ocamlrep::rc::RcOc<namespace_env::Env>, defs: &mut Program) {
+pub fn elaborate_program(e: std::sync::Arc<namespace_env::Env>, defs: &mut Program) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     for def in defs {
@@ -521,31 +522,31 @@ pub fn elaborate_program(e: ocamlrep::rc::RcOc<namespace_env::Env>, defs: &mut P
     }
 }
 
-pub fn elaborate_fun_def(e: ocamlrep::rc::RcOc<namespace_env::Env>, fd: &mut FunDef) {
+pub fn elaborate_fun_def(e: std::sync::Arc<namespace_env::Env>, fd: &mut FunDef) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_fun_def(&mut env, fd).unwrap();
 }
 
-pub fn elaborate_class_(e: ocamlrep::rc::RcOc<namespace_env::Env>, c: &mut Class_) {
+pub fn elaborate_class_(e: std::sync::Arc<namespace_env::Env>, c: &mut Class_) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_class_(&mut env, c).unwrap();
 }
 
-pub fn elaborate_module_def(e: ocamlrep::rc::RcOc<namespace_env::Env>, m: &mut ModuleDef) {
+pub fn elaborate_module_def(e: std::sync::Arc<namespace_env::Env>, m: &mut ModuleDef) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_module_def(&mut env, m).unwrap();
 }
 
-pub fn elaborate_gconst(e: ocamlrep::rc::RcOc<namespace_env::Env>, cst: &mut Gconst) {
+pub fn elaborate_gconst(e: std::sync::Arc<namespace_env::Env>, cst: &mut Gconst) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_gconst(&mut env, cst).unwrap();
 }
 
-pub fn elaborate_typedef(e: ocamlrep::rc::RcOc<namespace_env::Env>, td: &mut Typedef) {
+pub fn elaborate_typedef(e: std::sync::Arc<namespace_env::Env>, td: &mut Typedef) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_typedef(&mut env, td).unwrap();

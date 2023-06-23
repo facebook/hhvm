@@ -19,7 +19,6 @@ use hash::HashMap;
 use hash::HashSet;
 use itertools::Itertools;
 use multifile_rust as multifile;
-use ocamlrep::rc::RcOc;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use regex::Regex;
@@ -337,7 +336,7 @@ fn compile_php_file<'a, 'arena>(
     profile: &mut compile::Profile,
 ) -> Result<(compile::NativeEnv, hhbc::Unit<'arena>)> {
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
-    let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
+    let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
     let env = crate::compile::native_env(filepath, single_file_opts)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     let decl_arena = bumpalo::Bump::new();

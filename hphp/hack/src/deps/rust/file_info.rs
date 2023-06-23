@@ -100,7 +100,7 @@ arena_deserializer::impl_deserialize_in_arena!(NameType);
 #[repr(C, u8)]
 pub enum Pos {
     Full(pos::Pos),
-    File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
+    File(NameType, std::sync::Arc<relative_path::RelativePath>),
 }
 
 /// An id contains a pos, name and a optional decl hash. The decl hash is None

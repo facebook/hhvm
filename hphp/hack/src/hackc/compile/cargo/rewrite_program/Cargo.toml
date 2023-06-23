@@ -15,7 +15,6 @@ env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
 hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
 rewrite_xml = { version = "0.0.0", path = "../rewrite_xml" }

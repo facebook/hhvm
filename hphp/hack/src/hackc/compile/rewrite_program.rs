@@ -5,6 +5,7 @@
 #![feature(box_patterns)]
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use env::emitter::Emitter;
 use error::Error;
@@ -12,7 +13,6 @@ use error::Result;
 use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
 use hhbc::decl_vars;
-use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::ast::Def;
 use oxidized::ast::Expr;
@@ -63,7 +63,7 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
 pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
-    namespace_env: RcOc<namespace_env::Env>,
+    namespace_env: Arc<namespace_env::Env>,
 ) -> Result<()> {
     let for_debugger_eval =
         emitter.for_debugger_eval && debugger_eval_should_modify(prog.as_slice())?;
@@ -112,7 +112,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
 /// of these variables as a vector, placing the result of executing this function
 /// as the 0th index of this vector.
 fn extract_debugger_main(
-    empty_namespace: &RcOc<namespace_env::Env>,
+    empty_namespace: &Arc<namespace_env::Env>,
     all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
     let (mut stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
@@ -245,7 +245,7 @@ fn extract_debugger_main(
     unsets.push(catch);
     let body = unsets;
     let pos = Pos::from_line_cols_offset(
-        RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
+        Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
         1,
         0..0,
         0,
@@ -269,7 +269,7 @@ fn extract_debugger_main(
         doc_comment: None,
     };
     let fd = FunDef {
-        namespace: RcOc::clone(empty_namespace),
+        namespace: Arc::clone(empty_namespace),
         file_attributes: vec![],
         mode: Mode::Mstrict,
         name: Id(Pos::NONE, "include".into()),

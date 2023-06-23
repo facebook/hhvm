@@ -10,7 +10,6 @@ path = "../../generate_hhi_lib.rs"
 
 [dependencies]
 anyhow = "1.0.65"
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parser_core_types = { version = "0.0.0", path = "../../../parser/cargo/core_types" }
 positioned_parser = { version = "0.0.0", path = "../../../parser/api/cargo/positioned_parser" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

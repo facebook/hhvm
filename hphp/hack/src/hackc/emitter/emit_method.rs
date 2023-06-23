@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use ast_scope::Lambda;
 use ast_scope::Scope;
@@ -24,7 +25,6 @@ use instruction_sequence::instr;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::members;
 use naming_special_names_rust::user_attributes;
-use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::ast_defs;
 
@@ -184,7 +184,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             pos: method.span.clone(),
         }))
     };
-    let namespace = RcOc::clone(
+    let namespace = Arc::clone(
         emitter
             .global_state()
             .closure_namespaces

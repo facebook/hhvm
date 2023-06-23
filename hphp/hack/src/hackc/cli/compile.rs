@@ -33,7 +33,6 @@ use hackrs_test_utils::store::make_shallow_decl_store;
 use hhvm_options::HhvmOptions;
 use multifile_rust as multifile;
 use naming_provider::SqliteNamingTable;
-use ocamlrep::rc::RcOc;
 use options::Hhvm;
 use options::ParserOptions;
 use parking_lot::Mutex;
@@ -171,7 +170,7 @@ pub(crate) fn process_single_file(
         eprintln!("processing file: {}", filepath.display());
     }
     let filepath = RelativePath::make(Prefix::Dummy, filepath);
-    let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
+    let source_text = SourceText::make(Arc::new(filepath.clone()), &content);
     let env = native_env(filepath, opts)?;
     let mut output = Vec::new();
     let decl_arena = bumpalo::Bump::new();
@@ -195,7 +194,7 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
             .with_context(|| format!("Unable to read file '{}'", path.display()))?;
         let env = hackc_opts.native_env(path)?;
         let decl_arena = bumpalo::Bump::new();
-        let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
+        let text = SourceText::make(Arc::new(env.filepath.clone()), &source_text);
         let decl_provider = SelfProvider::wrap_existing_provider(
             None,
             env.to_decl_parser_options(),
@@ -213,7 +212,7 @@ fn compile_impl<'d>(
     source_text: Vec<u8>,
     decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
 ) -> Result<Vec<u8>> {
-    let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
+    let text = SourceText::make(Arc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
     compile::from_text(
         &mut hhas,

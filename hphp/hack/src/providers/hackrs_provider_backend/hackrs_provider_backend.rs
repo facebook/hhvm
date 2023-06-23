@@ -748,7 +748,7 @@ impl NamingProvider for NamingTableWithContext {
 /// only in the case when we didn't compute it for performance reasons
 ///
 /// We can't use oxidized::file_info::Id here because that data structure
-/// contains an RcOc, which can't be used in a multi-threading context.
+/// contains an Arc, which can't be used in a multi-threading context.
 #[derive(Clone, Debug)]
 pub struct Id(naming_table::Pos, String, Option<Int64>);
 

@@ -259,7 +259,8 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// through Happly in hints -- we rely on the idempotence of elaborate_id to
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
-    use ocamlrep::rc::RcOc;
+    use std::sync::Arc;
+
     use oxidized::ast::*;
     use oxidized::namespace_env;
 
@@ -292,7 +293,7 @@ pub mod toplevel_elaborator {
         }
     }
 
-    fn on_def(nsenv: &mut RcOc<namespace_env::Env>, acc: &mut Vec<Def>, def: Def) {
+    fn on_def(nsenv: &mut Arc<namespace_env::Env>, acc: &mut Vec<Def>, def: Def) {
         use oxidized::ast::Def as D;
         match def {
             // The default namespace in php is the global namespace specified by
@@ -313,9 +314,9 @@ pub mod toplevel_elaborator {
                 };
                 let mut new_nsenv = nsenv.as_ref().clone();
                 new_nsenv.name = nsname;
-                let new_nsenv = RcOc::new(new_nsenv);
+                let new_nsenv = Arc::new(new_nsenv);
 
-                acc.push(Def::mk_set_namespace_env(RcOc::clone(&new_nsenv)));
+                acc.push(Def::mk_set_namespace_env(Arc::clone(&new_nsenv)));
                 on_program_(new_nsenv, defs, acc);
             }
             D::NamespaceUse(nsu) => {
@@ -334,8 +335,8 @@ pub mod toplevel_elaborator {
                     };
                 }
 
-                let new_nsenv = RcOc::new(new_nsenv);
-                *nsenv = RcOc::clone(&new_nsenv);
+                let new_nsenv = Arc::new(new_nsenv);
+                *nsenv = Arc::clone(&new_nsenv);
                 acc.push(Def::mk_set_namespace_env(new_nsenv));
             }
             D::Class(mut x) => {
@@ -352,29 +353,29 @@ pub mod toplevel_elaborator {
                 c.xhp_attr_uses
                     .iter_mut()
                     .for_each(|ref mut x| on_hint(nsenv, x));
-                c.namespace = RcOc::clone(nsenv);
+                c.namespace = Arc::clone(nsenv);
                 acc.push(Def::Class(x));
             }
             D::Fun(mut x) => {
                 let f = x.as_mut();
                 elaborate_defined_id(nsenv, &mut f.name);
-                f.namespace = RcOc::clone(nsenv);
+                f.namespace = Arc::clone(nsenv);
                 acc.push(Def::Fun(x));
             }
             D::Typedef(mut x) => {
                 let t = x.as_mut();
                 elaborate_defined_id(nsenv, &mut t.name);
-                t.namespace = RcOc::clone(nsenv);
+                t.namespace = Arc::clone(nsenv);
                 acc.push(Def::Typedef(x));
             }
             D::Constant(mut x) => {
                 let c = x.as_mut();
                 elaborate_defined_id(nsenv, &mut c.name);
-                c.namespace = RcOc::clone(nsenv);
+                c.namespace = Arc::clone(nsenv);
                 acc.push(Def::Constant(x));
             }
             D::FileAttributes(mut f) => {
-                f.as_mut().namespace = RcOc::clone(nsenv);
+                f.as_mut().namespace = Arc::clone(nsenv);
                 acc.push(Def::FileAttributes(f));
             }
             x => acc.push(x),
@@ -416,7 +417,7 @@ pub mod toplevel_elaborator {
         });
     }
 
-    fn on_program_(mut nsenv: RcOc<namespace_env::Env>, p: Vec<Def>, acc: &mut Vec<Def>) {
+    fn on_program_(mut nsenv: Arc<namespace_env::Env>, p: Vec<Def>, acc: &mut Vec<Def>) {
         let mut new_acc = vec![];
         for def in p.into_iter() {
             on_def(&mut nsenv, &mut new_acc, def)
@@ -426,7 +427,7 @@ pub mod toplevel_elaborator {
         acc.append(&mut new_acc);
     }
 
-    fn on_program(nsenv: RcOc<namespace_env::Env>, p: Program) -> Program {
+    fn on_program(nsenv: Arc<namespace_env::Env>, p: Program) -> Program {
         let mut acc = vec![];
         on_program_(nsenv, p.0, &mut acc);
         Program(acc)
@@ -437,7 +438,7 @@ pub mod toplevel_elaborator {
     /// incur a perf hit that everybody will have to pay. For codegen purposed
     /// namespaces are propagated to inline declarations
     /// during closure conversion process
-    pub fn elaborate_toplevel_defs(ns: RcOc<namespace_env::Env>, defs: Program) -> Program {
+    pub fn elaborate_toplevel_defs(ns: Arc<namespace_env::Env>, defs: Program) -> Program {
         on_program(ns, defs)
     }
 }

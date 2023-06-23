@@ -5,9 +5,9 @@
 
 use std::ops::Range;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep::rc::RcOc;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::to_ocaml;
@@ -43,7 +43,7 @@ ocaml_ffi! {
                     let end_bol = info.beginning_of_line(end_lnum);
 
                     Pos::from_lnum_bol_offset(
-                        RcOc::new(RelativePath::make(
+                        Arc::new(RelativePath::make(
                             Prefix::Dummy,
                             PathBuf::from(filename.clone()),
                         )),

@@ -14,7 +14,6 @@ doctest = false
 bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_smart_constructors = { version = "0.0.0", path = "../../../../decl/direct_decl_smart_constructors" }
 mode_parser = { version = "0.0.0", path = "../../../cargo/mode_parser" }
-ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 parser = { version = "0.0.0", path = "../../../core" }

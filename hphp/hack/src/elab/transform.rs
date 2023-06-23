@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a4948e8e316260a25c049a811e254b12>>
+// @generated SignedSource<<b89cb02499eb4fdc6bc01887b665f872>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -102,12 +102,12 @@ where
         }
     }
 }
-impl<T> Transform for ocamlrep::rc::RcOc<T>
+impl<T> Transform for std::sync::Arc<T>
 where
     T: Transform,
 {
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
-        if let Some(x) = ocamlrep::rc::RcOc::get_mut(self) {
+        if let Some(x) = std::sync::Arc::get_mut(self) {
             x.transform(env, &mut pass.clone());
         }
     }

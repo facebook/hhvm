@@ -5,8 +5,8 @@
 
 use std::ops::ControlFlow;
 use std::path::Path;
+use std::sync::Arc;
 
-use ocamlrep::rc::RcOc;
 use parser_core_types::positioned_token::PositionedToken as Token;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax::Syntax;
@@ -20,7 +20,7 @@ use relative_path::RelativePath;
 pub fn run(out: &mut impl std::io::Write, filename: &Path) -> anyhow::Result<()> {
     let text = std::fs::read(filename)?;
     let source_text = SourceText::make(
-        RcOc::new(RelativePath::make(Prefix::Dummy, filename.to_path_buf())),
+        Arc::new(RelativePath::make(Prefix::Dummy, filename.to_path_buf())),
         &text,
     );
     let (mut root, _, state) = positioned_parser::parse_script(&source_text, Default::default());

@@ -4,9 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 use itertools::Either;
-use ocamlrep::rc::RcOc;
 
 use super::node::Node;
 use super::node_mut::NodeMut;
@@ -223,7 +223,7 @@ where
     }
 }
 
-impl<P: Params, T> Node<P> for RcOc<T>
+impl<P: Params, T> Node<P> for Arc<T>
 where
     T: Node<P>,
 {
@@ -236,7 +236,7 @@ where
     }
 }
 
-impl<P: Params, T> NodeMut<P> for RcOc<T>
+impl<P: Params, T> NodeMut<P> for Arc<T>
 where
     T: NodeMut<P>,
 {
@@ -245,7 +245,7 @@ where
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        Ok(if let Some(x) = RcOc::get_mut(self) {
+        Ok(if let Some(x) = Arc::get_mut(self) {
             x.accept(c, v)?;
         })
     }

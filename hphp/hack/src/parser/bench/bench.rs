@@ -6,13 +6,13 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 
 use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
 use bumpalo::Bump;
 use clap::Parser;
 use criterion::Criterion;
-use ocamlrep::rc::RcOc;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
@@ -42,7 +42,7 @@ fn main() {
     let filenames_and_contents = get_contents(&opts.files);
     let files = filenames_and_contents
         .iter()
-        .map(|(path, text)| (RcOc::clone(path), text.as_bytes()))
+        .map(|(path, text)| (Arc::clone(path), text.as_bytes()))
         .collect::<Vec<_>>();
 
     if opts.direct_decl_only {
@@ -58,12 +58,12 @@ fn main() {
     criterion.final_summary();
 }
 
-fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
+fn get_contents(filenames: &[PathBuf]) -> Vec<(Arc<RelativePath>, String)> {
     filenames
         .iter()
         .map(|file| {
             (
-                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(file))),
+                Arc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(file))),
                 fs::read_to_string(file)
                     .unwrap_or_else(|_| panic!("Could not read file {}", file.display())),
             )
@@ -71,7 +71,7 @@ fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
         .collect()
 }
 
-fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+fn bench_direct_decl_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]) {
     let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
     let opts = Default::default();
     c.bench_function("direct_decl_parse", |b| {
@@ -89,13 +89,13 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
     });
 }
 
-fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]) {
     let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
     let opts = Default::default();
     c.bench_function("cst_and_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
+                let text = SourceText::make(Arc::clone(filename), text);
                 let _ = cst_and_decl_parser::parse_script(
                     &opts,
                     Default::default(),
@@ -109,12 +109,12 @@ fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u
     });
 }
 
-fn bench_ast_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+fn bench_ast_and_decl_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]) {
     let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
     c.bench_function("ast_and_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
+                let text = SourceText::make(Arc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 let _ = ast_and_decl_parser::from_text(
                     &Default::default(),
@@ -127,11 +127,11 @@ fn bench_ast_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u
     });
 }
 
-fn bench_aast_full_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+fn bench_aast_full_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]) {
     c.bench_function("aast_full_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
+                let text = SourceText::make(Arc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(&AastParserEnv::default(), &indexed_source_text)
                     .unwrap();
@@ -140,11 +140,11 @@ fn bench_aast_full_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])
     });
 }
 
-fn bench_aast_quick_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+fn bench_aast_quick_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]) {
     c.bench_function("aast_quick_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
+                let text = SourceText::make(Arc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
                     &AastParserEnv {

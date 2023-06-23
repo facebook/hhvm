@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use bumpalo::Bump;
 use direct_decl_smart_constructors::ArenaSourceTextAllocator;
 use direct_decl_smart_constructors::DirectDeclSmartConstructors;
 use direct_decl_smart_constructors::NoSourceTextAllocator;
 use direct_decl_smart_constructors::SourceTextAllocator;
 use mode_parser::parse_mode;
-use ocamlrep::rc::RcOc;
 pub use oxidized::decl_parser_options::DeclParserOptions;
 pub use oxidized_by_ref::direct_decl_parser::Decls;
 pub use oxidized_by_ref::direct_decl_parser::ParsedFile;
@@ -113,7 +114,7 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
     source_text_allocator: S,
     elaborate_xhp_namespaces_for_facts: bool,
 ) -> ParsedFile<'a> {
-    let source = SourceText::make(RcOc::new(filename), text);
+    let source = SourceText::make(Arc::new(filename), text);
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(&source);
     let mode_opt = mode_opt.map(file_info::Mode::from);

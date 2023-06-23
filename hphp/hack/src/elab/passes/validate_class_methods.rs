@@ -47,6 +47,8 @@ impl Pass for ValidateClassMethodsPass {
 #[cfg(test)]
 mod tests {
 
+    use std::sync::Arc;
+
     use nast::Abstraction;
     use nast::Block;
     use nast::ClassishKind;
@@ -58,7 +60,6 @@ mod tests {
     use nast::UserAttribute;
     use nast::UserAttributes;
     use nast::Visibility;
-    use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
     use oxidized::typechecker_options::TypecheckerOptions;
 
@@ -116,7 +117,7 @@ mod tests {
             methods,
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(namespace_env::Env::empty(vec![], false, false)),
+            namespace: Arc::new(namespace_env::Env::empty(vec![], false, false)),
             user_attributes: Default::default(),
             file_attributes: vec![],
             docs_url: None,

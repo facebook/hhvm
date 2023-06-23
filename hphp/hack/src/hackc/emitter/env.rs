@@ -11,6 +11,8 @@ pub mod jump_targets;
 mod label;
 mod local;
 
+use std::sync::Arc;
+
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
 use bitflags::bitflags;
@@ -22,7 +24,6 @@ use hhbc::Local;
 pub use iterator::*;
 pub use label::*;
 pub use local::*;
-use ocamlrep::rc::RcOc;
 use oxidized::ast;
 use oxidized::namespace_env::Env as NamespaceEnv;
 
@@ -43,13 +44,13 @@ pub struct Env<'a, 'arena> {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a, 'arena>,
-    pub namespace: RcOc<NamespaceEnv>,
+    pub namespace: Arc<NamespaceEnv>,
     pub call_context: Option<String>,
     pub pipe_var: Option<Local>,
 }
 
 impl<'a, 'arena> Env<'a, 'arena> {
-    pub fn default(arena: &'arena bumpalo::Bump, namespace: RcOc<NamespaceEnv>) -> Self {
+    pub fn default(arena: &'arena bumpalo::Bump, namespace: Arc<NamespaceEnv>) -> Self {
         Env {
             arena,
             namespace,
@@ -89,7 +90,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
 
     pub fn make_class_env(arena: &'arena bumpalo::Bump, class: &'a ast::Class_) -> Env<'a, 'arena> {
         let scope = Scope::with_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
-        Env::default(arena, RcOc::clone(&class.namespace)).with_scope(scope)
+        Env::default(arena, Arc::clone(&class.namespace)).with_scope(scope)
     }
 
     pub fn do_in_loop_body<'decl, R, F>(
@@ -217,7 +218,7 @@ mod tests {
     fn make_env() {
         let a = bumpalo::Bump::new();
         let alloc: &bumpalo::Bump = &a;
-        let namespace = RcOc::new(NamespaceEnv::empty(vec![], false, false));
+        let namespace = Arc::new(NamespaceEnv::empty(vec![], false, false));
         let _: Env<'_, '_> = Env::default(alloc, namespace);
     }
 }

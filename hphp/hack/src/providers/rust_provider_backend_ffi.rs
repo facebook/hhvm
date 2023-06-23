@@ -12,7 +12,6 @@ use hackrs_provider_backend::Config;
 use hackrs_provider_backend::FileType;
 use hackrs_provider_backend::HhServerProviderBackend;
 use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_custom::Custom;
@@ -547,7 +546,7 @@ ocaml_ffi! {
             .get_type_path_and_kind(name).unwrap()
             .map(|(path, kind)| {
                 (
-                    file_info::Pos::File(kind.into(), RcOc::new(path.into())),
+                    file_info::Pos::File(kind.into(), Arc::new(path.into())),
                     kind,
                 )
             });
@@ -603,7 +602,7 @@ ocaml_ffi! {
         let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
         let res: Option<file_info::Pos> = backend.naming_provider()
             .get_fun_path(name).unwrap()
-            .map(|path| file_info::Pos::File(file_info::NameType::Fun, RcOc::new(path.into())));
+            .map(|path| file_info::Pos::File(file_info::NameType::Fun, Arc::new(path.into())));
         to_ocaml(&res)
     }
 
@@ -656,7 +655,7 @@ ocaml_ffi! {
         let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
         let res: Option<file_info::Pos> = backend.naming_provider()
             .get_const_path(name).unwrap()
-            .map(|path| file_info::Pos::File(file_info::NameType::Const, RcOc::new(path.into())));
+            .map(|path| file_info::Pos::File(file_info::NameType::Const, Arc::new(path.into())));
         to_ocaml(&res)
     }
 
@@ -702,7 +701,7 @@ ocaml_ffi! {
         let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
         let res: Option<file_info::Pos> = backend.naming_provider()
             .get_module_path(name).unwrap()
-            .map(|path| file_info::Pos::File(file_info::NameType::Module, RcOc::new(path.into())));
+            .map(|path| file_info::Pos::File(file_info::NameType::Module, Arc::new(path.into())));
         to_ocaml(&res)
     }
 

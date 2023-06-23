@@ -334,7 +334,7 @@ fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
 fn compile_from_text(env: &compile_ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>, String> {
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
-        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+        std::sync::Arc::new(native_env.filepath.clone()),
         source_text,
     );
     let decl_allocator = bumpalo::Bump::new();
@@ -447,7 +447,7 @@ fn compile_unit_from_text(
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
-        ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+        std::sync::Arc::new(native_env.filepath.clone()),
         source_text,
     );
 

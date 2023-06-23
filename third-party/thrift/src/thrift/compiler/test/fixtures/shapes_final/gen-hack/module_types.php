@@ -2059,67 +2059,115 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     return new static(
       Shapes::idx($shape, 'just_an_A') === null ? null : (\test\fixtures\A::__fromShape($shape['just_an_A'])),
       new Set(Keyset\keys($shape['set_of_i32'])),
-      (new Vector($shape['list_of_i32'])),
-      (new Vector($shape['list_of_string'])),
-      (new Map($shape['map_of_string_to_i32'])),
-      (new Map($shape['map_of_string_to_A']))->map(
-        $val0 ==> \test\fixtures\A::__fromShape($val0),
-      ),
-      (new Map($shape['map_of_string_to_list_of_i32']))->map(
-        $val1 ==> (new Vector($val1)),
-      ),
-      (new Map($shape['map_of_string_to_list_of_A']))->map(
-        $val2 ==> (new Vector($val2))->map(
-          $val3 ==> \test\fixtures\A::__fromShape($val3),
-        ),
-      ),
-      (new Map($shape['map_of_string_to_set_of_i32']))->map(
-        $val4 ==> new Set(Keyset\keys($val4)),
-      ),
-      (new Map($shape['map_of_string_to_map_of_string_to_i32']))->map(
-        $val5 ==> (new Map($val5)),
-      ),
-      (new Map($shape['map_of_string_to_map_of_string_to_A']))->map(
-        $val6 ==> (new Map($val6))->map(
-          $val7 ==> \test\fixtures\A::__fromShape($val7),
-        ),
-      ),
-      (new Vector($shape['list_of_set_of_i32']))->map(
-        $val8 ==> new Set(Keyset\keys($val8)),
-      ),
-      (new Vector($shape['list_of_map_of_string_to_list_of_A']))->map(
-        $val9 ==> (new Map($val9))->map(
-          $val10 ==> (new Vector($val10))->map(
-            $val11 ==> \test\fixtures\A::__fromShape($val11),
-          ),
-        ),
-      ),
-      (new Vector($shape['list_of_map_of_string_to_A']))->map(
-        $val12 ==> (new Map($val12))->map(
-          $val13 ==> \test\fixtures\A::__fromShape($val13),
-        ),
-      ),
+      $shape['list_of_i32'] |> new Vector($$),
+      $shape['list_of_string'] |> new Vector($$),
+      $shape['map_of_string_to_i32'] |> new Map($$),
+      $shape['map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0
+            |> \test\fixtures\A::__fromShape($$),
+        ) |> new Map($$),
+      $shape['map_of_string_to_list_of_i32']
+        |> Dict\map(
+          $$,
+          $_val1 ==> $_val1 |> new Vector($$),
+        ) |> new Map($$),
+      $shape['map_of_string_to_list_of_A']
+        |> Dict\map(
+          $$,
+          $_val3 ==> $_val3
+            |> Vec\map(
+              $$,
+              $_val2 ==> $_val2
+                |> \test\fixtures\A::__fromShape($$),
+            ) |> new Vector($$),
+        ) |> new Map($$),
+      $shape['map_of_string_to_set_of_i32']
+        |> Dict\map(
+          $$,
+          $_val4 ==> $_val4
+            |> new Set(Keyset\keys($$)),
+        ) |> new Map($$),
+      $shape['map_of_string_to_map_of_string_to_i32']
+        |> Dict\map(
+          $$,
+          $_val5 ==> $_val5 |> new Map($$),
+        ) |> new Map($$),
+      $shape['map_of_string_to_map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val7 ==> $_val7
+            |> Dict\map(
+              $$,
+              $_val6 ==> $_val6
+                |> \test\fixtures\A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Map($$),
+      $shape['list_of_set_of_i32']
+        |> Vec\map(
+          $$,
+          $_val8 ==> $_val8
+            |> new Set(Keyset\keys($$)),
+        ) |> new Vector($$),
+      $shape['list_of_map_of_string_to_list_of_A']
+        |> Vec\map(
+          $$,
+          $_val11 ==> $_val11
+            |> Dict\map(
+              $$,
+              $_val10 ==> $_val10
+                |> Vec\map(
+                  $$,
+                  $_val9 ==> $_val9
+                    |> \test\fixtures\A::__fromShape($$),
+                ) |> new Vector($$),
+            ) |> new Map($$),
+        ) |> new Vector($$),
+      $shape['list_of_map_of_string_to_A']
+        |> Vec\map(
+          $$,
+          $_val13 ==> $_val13
+            |> Dict\map(
+              $$,
+              $_val12 ==> $_val12
+                |> \test\fixtures\A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Vector($$),
       Shapes::idx($shape, 'just_an_enum'),
       Shapes::idx($shape, 'just_a_union') === null ? null : (\test\fixtures\Union::__fromShape($shape['just_a_union'])),
       Shapes::idx($shape, 'optional_just_an_A') === null ? null : (\test\fixtures\A::__fromShape($shape['optional_just_an_A'])),
       Shapes::idx($shape, 'optional_set_of_i32') === null ? null : (new Set(Keyset\keys($shape['optional_set_of_i32']))),
-      Shapes::idx($shape, 'optional_list_of_i32') === null ? null : ((new Vector($shape['optional_list_of_i32']))),
-      Shapes::idx($shape, 'optional_list_of_string') === null ? null : ((new Vector($shape['optional_list_of_string']))),
-      Shapes::idx($shape, 'optional_map_of_string_to_i32') === null ? null : ((new Map($shape['optional_map_of_string_to_i32']))),
-      Shapes::idx($shape, 'optional_map_of_string_to_A') === null ? null : ((new Map($shape['optional_map_of_string_to_A']))->map(
-        $val14 ==> \test\fixtures\A::__fromShape($val14),
-      )),
-      Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32') === null ? null : ((new Map($shape['optional_map_of_string_to_list_of_i32']))->map(
-        $val15 ==> (new Vector($val15)),
-      )),
-      Shapes::idx($shape, 'optional_map_of_string_to_list_of_A') === null ? null : ((new Map($shape['optional_map_of_string_to_list_of_A']))->map(
-        $val16 ==> (new Vector($val16))->map(
-          $val17 ==> \test\fixtures\A::__fromShape($val17),
-        ),
-      )),
-      Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32') === null ? null : ((new Map($shape['optional_map_of_string_to_set_of_i32']))->map(
-        $val18 ==> new Set(Keyset\keys($val18)),
-      )),
+      Shapes::idx($shape, 'optional_list_of_i32') === null ? null : ($shape['optional_list_of_i32'] |> new Vector($$)),
+      Shapes::idx($shape, 'optional_list_of_string') === null ? null : ($shape['optional_list_of_string'] |> new Vector($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_i32') === null ? null : ($shape['optional_map_of_string_to_i32'] |> new Map($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_A') === null ? null : ($shape['optional_map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val14 ==> $_val14
+            |> \test\fixtures\A::__fromShape($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32') === null ? null : ($shape['optional_map_of_string_to_list_of_i32']
+        |> Dict\map(
+          $$,
+          $_val15 ==> $_val15 |> new Vector($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_list_of_A') === null ? null : ($shape['optional_map_of_string_to_list_of_A']
+        |> Dict\map(
+          $$,
+          $_val17 ==> $_val17
+            |> Vec\map(
+              $$,
+              $_val16 ==> $_val16
+                |> \test\fixtures\A::__fromShape($$),
+            ) |> new Vector($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32') === null ? null : ($shape['optional_map_of_string_to_set_of_i32']
+        |> Dict\map(
+          $$,
+          $_val18 ==> $_val18
+            |> new Set(Keyset\keys($$)),
+        ) |> new Map($$)),
       Shapes::idx($shape, 'optional_enum'),
       $shape['required_enum_with_default'],
       $shape['string_with_default_value'],
@@ -2128,11 +2176,13 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       Shapes::idx($shape, 'enum_with_default_value'),
       Shapes::idx($shape, 'A_with_default_value') === null ? null : (\test\fixtures\A::__fromShape($shape['A_with_default_value'])),
       new Set(Keyset\keys($shape['set_of_i32_with_default_value'])),
-      (new Map($shape['map_of_i32_to_string_with_default_value'])),
-      (new Vector($shape['list_of_string_with_default_value'])),
-      (new Map($shape['map_of_string_to_list_of_i32_with_default_value']))->map(
-        $val19 ==> (new Vector($val19)),
-      ),
+      $shape['map_of_i32_to_string_with_default_value'] |> new Map($$),
+      $shape['list_of_string_with_default_value'] |> new Vector($$),
+      $shape['map_of_string_to_list_of_i32_with_default_value']
+        |> Dict\map(
+          $$,
+          $_val19 ==> $_val19 |> new Vector($$),
+        ) |> new Map($$),
     );
   }
 

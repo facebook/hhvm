@@ -599,8 +599,8 @@ class ReserveIds implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['ids'])),
-      (new Map($shape['id_ranges'])),
+      $shape['ids'] |> new Vector($$),
+      $shape['id_ranges'] |> new Map($$),
     );
   }
 

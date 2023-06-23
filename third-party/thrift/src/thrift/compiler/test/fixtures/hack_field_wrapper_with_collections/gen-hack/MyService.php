@@ -305,12 +305,8 @@ class MyService_func_args implements \IThriftSyncStruct, \IThriftStructMetadata,
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static async function __genFromShape(self::TShape $shape): Awaitable<this> {
@@ -557,12 +553,8 @@ class MyService_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static async function __genFromShape(self::TShape $shape): Awaitable<this> {

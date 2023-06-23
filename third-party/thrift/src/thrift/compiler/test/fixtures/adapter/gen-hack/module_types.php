@@ -2394,12 +2394,18 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     return new static(
       Shapes::idx($shape, 'structField'),
       Shapes::idx($shape, 'optionalStructField'),
-      (new Vector($shape['structListField']))->map(
-        $val0 ==> \facebook\thrift\test\Foo::__fromShape($val0),
-      ),
-      Shapes::idx($shape, 'optionalStructListField') === null ? null : ((new Vector($shape['optionalStructListField']))->map(
-        $val1 ==> \facebook\thrift\test\Foo::__fromShape($val1),
-      )),
+      $shape['structListField']
+        |> Vec\map(
+          $$,
+          $_val0 ==> $_val0
+            |> \facebook\thrift\test\Foo::__fromShape($$),
+        ) |> new Vector($$),
+      Shapes::idx($shape, 'optionalStructListField') === null ? null : ($shape['optionalStructListField']
+        |> Vec\map(
+          $$,
+          $_val1 ==> $_val1
+            |> \facebook\thrift\test\Foo::__fromShape($$),
+        ) |> new Vector($$)),
       Shapes::idx($shape, 'unionField'),
       Shapes::idx($shape, 'optionalUnionField'),
       Shapes::idx($shape, 'adaptedStructField') === null ? null : (\facebook\thrift\test\DirectlyAdapted::__fromShape($shape['adaptedStructField'])),
@@ -5504,9 +5510,9 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       $shape['adaptedLong'],
       $shape['adaptedDouble'],
       $shape['adaptedString'],
-      (new Vector($shape['adaptedList'])),
+      $shape['adaptedList'] |> new Vector($$),
       new Set(Keyset\keys($shape['adaptedSet'])),
-      (new Map($shape['adaptedMap'])),
+      $shape['adaptedMap'] |> new Map($$),
       $shape['adaptedBoolDefault'],
       $shape['adaptedByteDefault'],
       $shape['adaptedShortDefault'],
@@ -5515,9 +5521,9 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
       $shape['adaptedDoubleDefault'],
       $shape['adaptedStringDefault'],
       Shapes::idx($shape, 'adaptedEnum'),
-      (new Vector($shape['adaptedListDefault'])),
+      $shape['adaptedListDefault'] |> new Vector($$),
       new Set(Keyset\keys($shape['adaptedSetDefault'])),
-      (new Map($shape['adaptedMapDefault'])),
+      $shape['adaptedMapDefault'] |> new Map($$),
       $shape['doubleTypedefBool'],
     );
   }

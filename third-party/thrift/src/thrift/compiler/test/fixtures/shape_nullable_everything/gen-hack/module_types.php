@@ -139,7 +139,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'a'),
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ((new Map($shape['map_of_string_to_string']))),
+      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
     );
   }
 
@@ -751,37 +751,64 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ((new Map($shape['map_of_string_to_string']))),
-      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ((new Map($shape['map_of_string_to_i32']))),
-      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ((new Map($shape['map_of_string_to_A']))->map(
-        $val0 ==> A::__fromShape($val0),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ((new Map($shape['map_of_string_to_list_of_A']))->map(
-        $val1 ==> (new Vector($val1))->map(
-          $val2 ==> A::__fromShape($val2),
-        ),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ((new Map($shape['map_of_string_to_map_of_string_to_i32']))->map(
-        $val3 ==> (new Map($val3)),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ((new Map($shape['map_of_string_to_map_of_string_to_A']))->map(
-        $val4 ==> (new Map($val4))->map(
-          $val5 ==> A::__fromShape($val5),
-        ),
-      )),
-      Shapes::idx($shape, 'list_of_string') === null ? null : ((new Vector($shape['list_of_string']))),
-      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ((new Vector($shape['list_of_map_of_string_to_A']))->map(
-        $val6 ==> (new Map($val6))->map(
-          $val7 ==> A::__fromShape($val7),
-        ),
-      )),
-      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ((new Vector($shape['list_of_map_of_string_to_list_of_A']))->map(
-        $val8 ==> (new Map($val8))->map(
-          $val9 ==> (new Vector($val9))->map(
-            $val10 ==> A::__fromShape($val10),
-          ),
-        ),
-      )),
+      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_i32'] |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ($shape['map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0
+            |> A::__fromShape($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
+        |> Dict\map(
+          $$,
+          $_val2 ==> $_val2
+            |> Vec\map(
+              $$,
+              $_val1 ==> $_val1
+                |> A::__fromShape($$),
+            ) |> new Vector($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_map_of_string_to_i32']
+        |> Dict\map(
+          $$,
+          $_val3 ==> $_val3 |> new Map($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val5 ==> $_val5
+            |> Dict\map(
+              $$,
+              $_val4 ==> $_val4
+                |> A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'list_of_string') === null ? null : ($shape['list_of_string'] |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
+        |> Vec\map(
+          $$,
+          $_val7 ==> $_val7
+            |> Dict\map(
+              $$,
+              $_val6 ==> $_val6
+                |> A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
+        |> Vec\map(
+          $$,
+          $_val10 ==> $_val10
+            |> Dict\map(
+              $$,
+              $_val9 ==> $_val9
+                |> Vec\map(
+                  $$,
+                  $_val8 ==> $_val8
+                    |> A::__fromShape($$),
+                ) |> new Vector($$),
+            ) |> new Map($$),
+        ) |> new Vector($$)),
     );
   }
 
@@ -1444,37 +1471,64 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ((new Map($shape['map_of_string_to_string']))),
-      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ((new Map($shape['map_of_string_to_i32']))),
-      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ((new Map($shape['map_of_string_to_A']))->map(
-        $val0 ==> A::__fromShape($val0),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ((new Map($shape['map_of_string_to_list_of_A']))->map(
-        $val1 ==> (new Vector($val1))->map(
-          $val2 ==> A::__fromShape($val2),
-        ),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ((new Map($shape['map_of_string_to_map_of_string_to_i32']))->map(
-        $val3 ==> (new Map($val3)),
-      )),
-      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ((new Map($shape['map_of_string_to_map_of_string_to_A']))->map(
-        $val4 ==> (new Map($val4))->map(
-          $val5 ==> A::__fromShape($val5),
-        ),
-      )),
-      Shapes::idx($shape, 'list_of_string') === null ? null : ((new Vector($shape['list_of_string']))),
-      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ((new Vector($shape['list_of_map_of_string_to_A']))->map(
-        $val6 ==> (new Map($val6))->map(
-          $val7 ==> A::__fromShape($val7),
-        ),
-      )),
-      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ((new Vector($shape['list_of_map_of_string_to_list_of_A']))->map(
-        $val8 ==> (new Map($val8))->map(
-          $val9 ==> (new Vector($val9))->map(
-            $val10 ==> A::__fromShape($val10),
-          ),
-        ),
-      )),
+      Shapes::idx($shape, 'map_of_string_to_string') === null ? null : ($shape['map_of_string_to_string'] |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_i32'] |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_A') === null ? null : ($shape['map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0
+            |> A::__fromShape($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
+        |> Dict\map(
+          $$,
+          $_val2 ==> $_val2
+            |> Vec\map(
+              $$,
+              $_val1 ==> $_val1
+                |> A::__fromShape($$),
+            ) |> new Vector($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_i32') === null ? null : ($shape['map_of_string_to_map_of_string_to_i32']
+        |> Dict\map(
+          $$,
+          $_val3 ==> $_val3 |> new Map($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
+        |> Dict\map(
+          $$,
+          $_val5 ==> $_val5
+            |> Dict\map(
+              $$,
+              $_val4 ==> $_val4
+                |> A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Map($$)),
+      Shapes::idx($shape, 'list_of_string') === null ? null : ($shape['list_of_string'] |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
+        |> Vec\map(
+          $$,
+          $_val7 ==> $_val7
+            |> Dict\map(
+              $$,
+              $_val6 ==> $_val6
+                |> A::__fromShape($$),
+            ) |> new Map($$),
+        ) |> new Vector($$)),
+      Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
+        |> Vec\map(
+          $$,
+          $_val10 ==> $_val10
+            |> Dict\map(
+              $$,
+              $_val9 ==> $_val9
+                |> Vec\map(
+                  $$,
+                  $_val8 ==> $_val8
+                    |> A::__fromShape($$),
+                ) |> new Vector($$),
+            ) |> new Map($$),
+        ) |> new Vector($$)),
     );
   }
 

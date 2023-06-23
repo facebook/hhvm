@@ -71,12 +71,8 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -199,12 +195,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static async function __genFromShape(self::TShape $shape): Awaitable<this> {
@@ -430,12 +422,8 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static async function __genFromShape(self::TShape $shape): Awaitable<this> {
@@ -977,12 +965,8 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static async function __genFromShape(self::TShape $shape): Awaitable<this> {

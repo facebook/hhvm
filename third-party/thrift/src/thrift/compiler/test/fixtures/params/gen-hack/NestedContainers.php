@@ -1067,9 +1067,11 @@ class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftStruc
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Map($shape['foo']))->map(
-        $val0 ==> (new Vector($val0)),
-      ),
+      $shape['foo']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0 |> new Vector($$),
+        ) |> new Map($$),
     );
   }
 
@@ -1254,9 +1256,12 @@ class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftStruct
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Map($shape['foo']))->map(
-        $val0 ==> new Set(Keyset\keys($val0)),
-      ),
+      $shape['foo']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0
+            |> new Set(Keyset\keys($$)),
+        ) |> new Map($$),
     );
   }
 
@@ -1441,9 +1446,11 @@ class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftStruc
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['foo']))->map(
-        $val0 ==> (new Map($val0)),
-      ),
+      $shape['foo']
+        |> Vec\map(
+          $$,
+          $_val0 ==> $_val0 |> new Map($$),
+        ) |> new Vector($$),
     );
   }
 
@@ -1619,9 +1626,12 @@ class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftStruc
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['foo']))->map(
-        $val0 ==> new Set(Keyset\keys($val0)),
-      ),
+      $shape['foo']
+        |> Vec\map(
+          $$,
+          $_val0 ==> $_val0
+            |> new Set(Keyset\keys($$)),
+        ) |> new Vector($$),
     );
   }
 
@@ -1854,15 +1864,24 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStruc
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['foo']))->map(
-        $val0 ==> (new Vector($val0))->map(
-          $val1 ==> (new Map($val1))->map(
-            $val2 ==> (new Map($val2))->map(
-              $val3 ==> new Set(Keyset\keys($val3)),
-            ),
-          ),
-        ),
-      ),
+      $shape['foo']
+        |> Vec\map(
+          $$,
+          $_val3 ==> $_val3
+            |> Vec\map(
+              $$,
+              $_val2 ==> $_val2
+                |> Dict\map(
+                  $$,
+                  $_val1 ==> $_val1
+                    |> Dict\map(
+                      $$,
+                      $_val0 ==> $_val0
+                        |> new Set(Keyset\keys($$)),
+                    ) |> new Map($$),
+                ) |> new Map($$),
+            ) |> new Vector($$),
+        ) |> new Vector($$),
     );
   }
 

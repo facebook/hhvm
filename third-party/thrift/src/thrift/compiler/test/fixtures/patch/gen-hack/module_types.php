@@ -1955,15 +1955,19 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       Shapes::idx($shape, 'optEnumVal'),
       Shapes::idx($shape, 'optStructVal') === null ? null : (\test\fixtures\patch\MyData::__fromShape($shape['optStructVal'])),
       Shapes::idx($shape, 'optLateStructVal') === null ? null : (\test\fixtures\patch\LateDefStruct::__fromShape($shape['optLateStructVal'])),
-      Shapes::idx($shape, 'optListVal') === null ? null : ((new Vector($shape['optListVal']))),
+      Shapes::idx($shape, 'optListVal') === null ? null : ($shape['optListVal'] |> new Vector($$)),
       Shapes::idx($shape, 'optSetVal') === null ? null : (new Set(Keyset\keys($shape['optSetVal']))),
-      Shapes::idx($shape, 'optMapVal') === null ? null : ((new Map($shape['optMapVal']))),
-      (new Vector($shape['listMap']))->map(
-        $val0 ==> (new Map($val0)),
-      ),
-      (new Map($shape['mapMap']))->map(
-        $val1 ==> (new Map($val1)),
-      ),
+      Shapes::idx($shape, 'optMapVal') === null ? null : ($shape['optMapVal'] |> new Map($$)),
+      $shape['listMap']
+        |> Vec\map(
+          $$,
+          $_val0 ==> $_val0 |> new Map($$),
+        ) |> new Vector($$),
+      $shape['mapMap']
+        |> Dict\map(
+          $$,
+          $_val1 ==> $_val1 |> new Map($$),
+        ) |> new Map($$),
       $shape['i32WithCustomDefault'],
       Shapes::idx($shape, 'structWithCustomDefault') === null ? null : (\test\fixtures\patch\MyDataWithCustomDefault::__fromShape($shape['structWithCustomDefault'])),
       Shapes::idx($shape, 'structWithFieldCustomDefault') === null ? null : (\test\fixtures\patch\MyData::__fromShape($shape['structWithFieldCustomDefault'])),
@@ -2464,9 +2468,12 @@ class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Map($shape['nodes']))->map(
-        $val0 ==> \test\fixtures\patch\Recursive::__fromShape($val0),
-      ),
+      $shape['nodes']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0
+            |> \test\fixtures\patch\Recursive::__fromShape($$),
+        ) |> new Map($$),
     );
   }
 

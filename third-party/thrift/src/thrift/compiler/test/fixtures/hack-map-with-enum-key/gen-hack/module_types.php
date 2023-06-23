@@ -197,7 +197,7 @@ class BarStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Map($shape['e'])),
+      $shape['e'] |> new Map($$),
       new Set(Keyset\keys($shape['s'])),
     );
   }

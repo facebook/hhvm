@@ -807,7 +807,7 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata,
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['attributes'])),
+      $shape['attributes'] |> new Vector($$),
     );
   }
 
@@ -1066,7 +1066,7 @@ class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['attributes'])),
+      $shape['attributes'] |> new Vector($$),
     );
   }
 

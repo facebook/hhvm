@@ -236,7 +236,7 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      (new Vector($shape['derives'])),
+      $shape['derives'] |> new Vector($$),
     );
   }
 

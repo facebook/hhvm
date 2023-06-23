@@ -88,12 +88,8 @@ class Transitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -180,12 +176,8 @@ class Schema implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -273,12 +265,8 @@ class Program implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -363,12 +351,8 @@ class Struct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -453,12 +437,8 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -543,12 +523,8 @@ class Exception implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -633,12 +609,8 @@ class Field implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -723,12 +695,8 @@ class Typedef implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -813,12 +781,8 @@ class Service implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -903,12 +867,8 @@ class Interaction implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -993,12 +953,8 @@ class TFunction implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1083,12 +1039,8 @@ class EnumValue implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1173,12 +1125,8 @@ class TConst implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1261,12 +1209,8 @@ class Enum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1368,12 +1312,8 @@ class Structured implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1471,12 +1411,8 @@ class TInterface implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1586,12 +1522,8 @@ class RootDefinition implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {
@@ -1697,12 +1629,8 @@ class Definition implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     );
   }
 
-  public static function __stringifyMapKeys<T>(Map<arraykey, T> $m)[]: Map<string, T> {
-    $new = dict[];
-    foreach ($m as $k => $v) {
-      $new[(string)$k] = $v;
-    }
-    return new Map($new);
+  public static function __stringifyMapKeys<T>(dict<arraykey, T> $m)[]: dict<string, T> {
+    return Dict\map_keys($m, $key ==> (string)$key);
   }
 
   public static function __fromShape(self::TShape $shape)[]: this {

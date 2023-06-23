@@ -343,6 +343,8 @@ class t_hack_generator : public t_concat_generator {
   void generate_hack_array_from_shape_lambda(
       std::ostream& out, t_name_generator& namer, const t_list* t);
   void generate_hack_array_from_shape_lambda(
+      std::ostream& out, t_name_generator& namer, const t_set* t);
+  void generate_hack_array_from_shape_lambda(
       std::ostream& out, t_name_generator& namer, const t_struct* t);
   void generate_shape_from_hack_array_lambda(
       std::ostream& out, t_name_generator& namer, const t_type* t);
@@ -3244,6 +3246,9 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     indent(out) << ")";
     indent_down();
   }
+  if (!arrays_ && !no_use_hack_collections_) {
+    out << " |> new Map($$)";
+  }
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
@@ -3271,6 +3276,19 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     indent(out) << ")";
     indent_down();
   }
+  if (!arrays_ && !no_use_hack_collections_) {
+    out << " |> new Vector($$)";
+  }
+}
+
+void t_hack_generator::generate_hack_array_from_shape_lambda(
+    std::ostream& out, t_name_generator&, const t_set*) {
+  if (!arrays_ && !no_use_hack_collections_ && !arraysets_) {
+    out << "\n";
+    indent_up();
+    indent(out) << "|> new Set(Keyset\\keys($$))";
+    indent_down();
+  }
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
@@ -3294,6 +3312,9 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
   } else if (t->is_struct()) {
     generate_hack_array_from_shape_lambda(
         out, namer, static_cast<const t_struct*>(t));
+  } else if (t->is_set()) {
+    generate_hack_array_from_shape_lambda(
+        out, namer, static_cast<const t_set*>(t));
   }
 }
 
@@ -3381,29 +3402,12 @@ void t_hack_generator::generate_php_struct_stringifyMapKeys_method(
   if (!shape_arraykeys_) {
     return;
   }
-  std::string arg_return_type;
-  if (arrays_ || no_use_hack_collections_) {
-    arg_return_type = "dict";
-  } else if (const_collections_) {
-    arg_return_type = "\\ConstMap";
-  } else {
-    arg_return_type = "Map";
-  }
+
   indent(out) << "public static function __stringifyMapKeys<T>("
-              << arg_return_type << "<arraykey, T> $m)[]: " << arg_return_type
-              << "<string, T> {\n";
+              << "dict<arraykey, T> $m)[]: "
+              << "dict<string, T> {\n";
   indent_up();
-  if (arrays_ || no_use_hack_collections_) {
-    indent(out) << "return Dict\\map_keys($m, $key ==> (string)$key);\n";
-  } else {
-    indent(out) << "$new = dict[];\n";
-    indent(out) << "foreach ($m as $k => $v) {\n";
-    indent_up();
-    indent(out) << "$new[(string)$k] = $v;\n";
-    indent_down();
-    indent(out) << "}\n";
-    indent(out) << "return new Map($new);\n";
-  }
+  indent(out) << "return Dict\\map_keys($m, $key ==> (string)$key);\n";
   indent_down();
   indent(out) << "}\n\n";
 }
@@ -3442,100 +3446,13 @@ void t_hack_generator::generate_php_struct_shape_methods(
         inner << "new Set(Keyset\\keys(" << source.str() << "))";
       }
     } else if (t->is_map() || t->is_list()) {
-      if (arrays_ || no_use_hack_collections_) {
-        inner << source.str();
-        std::stringstream inner_;
-        generate_hack_array_from_shape_lambda(inner_, namer, t);
-        auto str = inner_.str();
-        if (!str.empty()) {
-          inner << str;
-          is_simple_shape_index = false;
-        }
-
-      } else {
+      inner << source.str();
+      std::stringstream inner_;
+      generate_hack_array_from_shape_lambda(inner_, namer, t);
+      auto str = inner_.str();
+      if (!str.empty()) {
+        inner << str;
         is_simple_shape_index = false;
-        if (t->is_map() && shape_arraykeys_) {
-          const t_type* key_type = static_cast<const t_map*>(t)->get_key_type();
-          if (key_type->is_base_type() && key_type->is_string_or_binary()) {
-            inner << "self::__stringifyMapKeys";
-          }
-        }
-        inner << "(";
-        if (t->is_map()) {
-          inner << "new Map(";
-        } else {
-          inner << "new Vector(";
-        }
-
-        inner << source.str() << "))";
-
-        int nest = 0;
-        while (true) {
-          const t_type* val_type;
-          if (t->is_map()) {
-            val_type = static_cast<const t_map*>(t)->get_val_type();
-          } else {
-            val_type = static_cast<const t_list*>(t)->get_elem_type();
-          }
-          val_type = val_type->get_true_type();
-
-          if ((val_type->is_set() && !arraysets_) || val_type->is_map() ||
-              val_type->is_list() || val_type->is_struct()) {
-            indent_up();
-            nest++;
-            inner << "->map(\n";
-
-            if (val_type->is_set()) {
-              std::string tmp = namer("val");
-              indent(inner) << "$" << tmp << " ==> new Set(Keyset\\keys($"
-                            << tmp << ")),\n";
-              break;
-            } else if (val_type->is_map() || val_type->is_list()) {
-              std::string tmp = namer("val");
-
-              bool stringify_map_keys = false;
-              if (val_type->is_map() && shape_arraykeys_) {
-                const t_type* key_type =
-                    static_cast<const t_map*>(val_type)->get_key_type();
-                if (key_type->is_base_type() &&
-                    key_type->is_string_or_binary()) {
-                  stringify_map_keys = true;
-                }
-              }
-
-              indent(inner)
-                  << "$" << tmp << " ==> "
-                  << (stringify_map_keys ? "self::__stringifyMapKeys" : "")
-                  << "(new ";
-              if (val_type->is_map()) {
-                inner << "Map";
-              } else {
-                inner << "Vector";
-              }
-              inner << "($" << tmp << "))";
-              t = val_type;
-            } else if (val_type->is_struct()) {
-              std::string tmp = namer("val");
-              std::string type = hack_name(val_type);
-              indent(inner) << "$" << tmp << " ==> " << type << "::__fromShape("
-
-                            << "$" << tmp << "),\n";
-              break;
-            }
-          } else {
-            if (nest > 0) {
-              inner << ",\n";
-            }
-            break;
-          }
-        }
-        while (nest-- > 0) {
-          indent_down();
-          indent(inner) << ")";
-          if (nest > 0) {
-            inner << ",\n";
-          }
-        }
       }
     } else if (t->is_struct()) {
       is_simple_shape_index = false;

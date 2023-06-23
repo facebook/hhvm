@@ -662,7 +662,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       $shape['annotation_with_trailing_comma'],
       $shape['empty_annotations'],
       Shapes::idx($shape, 'my_enum'),
-      (new Vector($shape['cpp_type_annotation'])),
+      $shape['cpp_type_annotation'] |> new Vector($$),
       Shapes::idx($shape, 'my_union') === null ? null : (MyUnion::__fromShape($shape['my_union'])),
     );
   }

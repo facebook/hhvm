@@ -440,18 +440,24 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['just_int'],
-      (new Vector($shape['list_of_strings'])),
+      $shape['list_of_strings'] |> new Vector($$),
       $shape['set_of_ints'],
-      (new Map($shape['map_of_list_of_strings']))->map(
-        $val0 ==> (new Vector($val0)),
-      ),
-      (new Map($shape['map_of_set_of_strings'])),
-      (new Map($shape['map_of_strings_to_map_of_string_ints']))->map(
-        $val1 ==> (new Map($val1)),
-      ),
-      Shapes::idx($shape, 'optional_map_of_map_of_sets') === null ? null : ((new Map($shape['optional_map_of_map_of_sets']))->map(
-        $val2 ==> (new Map($val2)),
-      )),
+      $shape['map_of_list_of_strings']
+        |> Dict\map(
+          $$,
+          $_val0 ==> $_val0 |> new Vector($$),
+        ) |> new Map($$),
+      $shape['map_of_set_of_strings'] |> new Map($$),
+      $shape['map_of_strings_to_map_of_string_ints']
+        |> Dict\map(
+          $$,
+          $_val1 ==> $_val1 |> new Map($$),
+        ) |> new Map($$),
+      Shapes::idx($shape, 'optional_map_of_map_of_sets') === null ? null : ($shape['optional_map_of_map_of_sets']
+        |> Dict\map(
+          $$,
+          $_val2 ==> $_val2 |> new Map($$),
+        ) |> new Map($$)),
     );
   }
 

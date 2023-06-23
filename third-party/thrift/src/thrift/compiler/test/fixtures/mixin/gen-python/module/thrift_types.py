@@ -64,14 +64,6 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "field1",  # name
-            _fbthrift_python_types.typeinfo_string,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "field2",  # name
@@ -160,42 +152,10 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "m1",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(Mixin1),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "field1",  # name
-            _fbthrift_python_types.typeinfo_string,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "field3",  # name
-            _fbthrift_python_types.typeinfo_string,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "m2",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin2),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            2,  # id
-            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
-            "field2",  # name
-            _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

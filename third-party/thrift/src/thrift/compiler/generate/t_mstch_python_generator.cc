@@ -877,8 +877,8 @@ class python_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:fields_and_mixin_fields",
-             &python_mstch_struct::fields_and_mixin_fields},
+            {"struct:fields_ordered_by_id",
+             &python_mstch_struct::fields_ordered_by_id},
             {"struct:exception_message?",
              &python_mstch_struct::has_exception_message},
             {"struct:exception_message",
@@ -891,11 +891,8 @@ class python_mstch_struct : public mstch_struct {
         });
   }
 
-  mstch::node fields_and_mixin_fields() {
+  mstch::node fields_ordered_by_id() {
     std::vector<const t_field*> fields = struct_->fields().copy();
-    for (auto m : cpp2::get_mixins_and_members(*struct_)) {
-      fields.push_back(m.member);
-    }
     std::sort(fields.begin(), fields.end(), [](const auto* m, const auto* n) {
       return m->id() < n->id();
     });

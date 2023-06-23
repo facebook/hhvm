@@ -62,29 +62,29 @@ class {{> structs/unadapted_name}}({{!
         }}{{^struct:exception?}}_fbthrift_python_types.Struct{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}):
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:fields_ordered_by_id}}
     {{field:py_name}}: _typing.Final[{{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
             }}{{> fields/adapted_type}}{{!
             }}{{#field:optional?}}]{{/field:optional?}}] = ...
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:fields_ordered_by_id}}
     def __init__(
-        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_and_mixin_fields}},
-        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_and_mixin_fields}}
+        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
+        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_ordered_by_id}}
     ) -> None: ...
 
     {{#struct:plain?}}
     def __call__(
-        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_and_mixin_fields}},
-        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_and_mixin_fields}}
+        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
+        {{field:py_name}}: _typing.Optional[{{> fields/adapted_type}}]=...{{/struct:fields_ordered_by_id}}
     ) -> {{> structs/unadapted_name}}: ...
     {{/struct:plain?}}
     {{#struct:union?}}
 
     class Type(enum.Enum):
         EMPTY: {{> structs/unadapted_name}}.Type = ...
-    {{#struct:fields_and_mixin_fields}}
+    {{#struct:fields_ordered_by_id}}
         {{field:py_name}}: {{> structs/unadapted_name}}.Type = ...
-    {{/struct:fields_and_mixin_fields}}
+    {{/struct:fields_ordered_by_id}}
 
     @classmethod
     def fromValue(cls, value: {{ > types/field_value_pep484_union_type}}) -> {{> structs/unadapted_name}}: ...
@@ -93,9 +93,9 @@ class {{> structs/unadapted_name}}({{!
     def get_type(self) -> Type:...
     {{/struct:union?}}
     {{^struct:union?}}
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_and_mixin_fields}}None{{/struct:fields_and_mixin_fields}}{{!
-        }}{{#struct:fields_and_mixin_fields}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
-        }}{{/struct:fields_and_mixin_fields}}]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
+        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
+        }}{{/struct:fields_ordered_by_id}}]]]: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
     def _to_python(self) -> {{> structs/unadapted_name}}: ...

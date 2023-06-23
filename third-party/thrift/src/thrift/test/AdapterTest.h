@@ -362,15 +362,14 @@ struct CountingAdapter {
 
 struct EncodeAdapter {
   static Num fromThrift(int64_t val) {
-    // Adapter::decode should be called instead of deserializing with
-    // fromThrift.
-    EXPECT_TRUE(false);
+    ADD_FAILURE()
+        << "Adapter::decode should be called instead of deserializing with fromThrift.";
     return Num{val};
   }
 
   static int64_t toThrift(const Num& num) {
-    // Adapter::encode should be called instead of serializing with toThrift.
-    EXPECT_TRUE(false);
+    ADD_FAILURE()
+        << "Adapter::encode should be called instead of serializing with toThrift.";
     return num.val;
   }
 
@@ -388,8 +387,8 @@ struct EncodeAdapter {
 struct InPlaceDeserializationAdapter {
   template <typename T>
   static Wrapper<T> fromThrift(T value) {
-    // Both serialization and in-place deserialization use toThrift.
-    EXPECT_TRUE(false);
+    ADD_FAILURE()
+        << "Both serialization and in-place deserialization use toThrift instead.";
     return {value};
   }
 
@@ -409,9 +408,8 @@ struct EncodeFieldAdapter {
   template <typename T, typename Struct, int16_t FieldId>
   static AdaptedWithContext<T, Struct, FieldId> fromThriftField(
       T value, apache::thrift::FieldContext<Struct, FieldId>&&) {
-    // Adapter::decode should be called instead of deserializing with
-    // fromThriftField.
-    EXPECT_TRUE(false);
+    ADD_FAILURE()
+        << "Adapter::decode should be called instead of deserializing with fromThriftField.";
     return {
         value,
         apache::thrift::FieldContext<Struct, FieldId>::kFieldId,
@@ -421,8 +419,8 @@ struct EncodeFieldAdapter {
 
   template <typename T, typename Struct, int16_t FieldId>
   static T toThrift(const AdaptedWithContext<T, Struct, FieldId>& adapted) {
-    // Adapter::encode should be called instead of serializing with toThrift.
-    EXPECT_TRUE(false);
+    ADD_FAILURE()
+        << "Adapter::encode should be called instead of serializing with toThrift.";
     return adapted.value;
   }
 
@@ -445,6 +443,32 @@ struct EncodeFieldAdapter {
       int16_t FieldId>
   static void decode(
       Protocol& prot_, AdaptedWithContext<T, Struct, FieldId>& adapted) {
+    return op::decode<Tag>(prot_, adapted.value);
+  }
+};
+
+struct EncodeTemplatedTestAdapter {
+  template <typename T>
+  static Wrapper<T> fromThrift(T value) {
+    ADD_FAILURE()
+        << "Adapter::decode should be called instead of deserializing with fromThrift.";
+    return {value};
+  }
+
+  template <typename Wrapper>
+  static auto&& toThrift(Wrapper&& wrapper) {
+    ADD_FAILURE()
+        << "Adapter::encode should be called instead of serializing with toThrift.";
+    return std::forward<Wrapper>(wrapper).value;
+  }
+
+  template <typename Tag, typename Protocol, typename T>
+  static uint32_t encode(Protocol& prot_, const Wrapper<T>& adapted) {
+    return op::encode<Tag>(prot_, adapted.value);
+  }
+
+  template <typename Tag, typename Protocol, typename T>
+  static void decode(Protocol& prot_, Wrapper<T>& adapted) {
     return op::decode<Tag>(prot_, adapted.value);
   }
 };

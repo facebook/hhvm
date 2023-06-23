@@ -977,6 +977,23 @@ TEST(AdaptTest, EncodeFieldFallback) {
   EXPECT_EQ(obj, objd);
 }
 
+TEST(AdaptTest, EncodeComposedAdapter) {
+  auto obj = basic::EncodeComposedStruct();
+
+  obj.double_wrapped_type_encode()->value = Wrapper<int64_t>{42};
+  obj.double_wrapped_no_encode()->value = Wrapper<int64_t>{1};
+  obj.double_wrapped_both_encode()->value = Wrapper<int64_t>{2};
+  obj.double_wrapped_field_encode()->value = Wrapper<int64_t>{3};
+
+  // No toThrift/fromThrift should be called at any adapter with an
+  // encode/decode implementation.
+  auto serialized = CompactSerializer::serialize<std::string>(obj);
+  auto obj2 = basic::EncodeComposedStruct();
+  CompactSerializer::deserialize(serialized, obj2);
+
+  EXPECT_EQ(obj, obj2);
+}
+
 TEST(AdaptTest, Constants) {
   // const AdaptedBool type_adapted = true;
   EXPECT_EQ(basic::adapter_constants::type_adapted().value, true);

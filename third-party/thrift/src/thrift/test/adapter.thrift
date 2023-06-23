@@ -276,6 +276,23 @@ struct EncodeFieldStruct {
   2: i64 num_without_encode;
 }
 
+@cpp.Adapter{name = "::apache::thrift::test::EncodeTemplatedTestAdapter"}
+typedef i64 EncodeInt
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef i64 NoEncodeInt
+
+@cpp.UseOpEncode
+struct EncodeComposedStruct {
+  @cpp.Adapter{name = "::apache::thrift::test::EncodeTemplatedTestAdapter"}
+  1: EncodeInt double_wrapped_both_encode;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  2: EncodeInt double_wrapped_type_encode;
+  @cpp.Adapter{name = "::apache::thrift::test::EncodeTemplatedTestAdapter"}
+  3: NoEncodeInt double_wrapped_field_encode;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  4: NoEncodeInt double_wrapped_no_encode;
+}
+
 service AdapterService {
   CountingStruct count();
   HeapAllocated adaptedTypes(1: HeapAllocated arg);

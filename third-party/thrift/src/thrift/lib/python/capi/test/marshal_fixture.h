@@ -18,6 +18,7 @@
 
 #include <type_traits>
 #include <folly/Expected.h>
+#include <folly/container/F14Set.h>
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 #include <thrift/lib/python/capi/types.h>
@@ -28,6 +29,7 @@ namespace python {
 
 using capi::Bytes;
 using capi::list;
+using capi::set;
 using capi::String;
 
 template <typename T>
@@ -89,6 +91,27 @@ inline PyObject* __make_unicode_list(PyObject* obj) {
   auto cpp = capi::Extractor<list<Bytes>>{}(obj);
   if (cpp.hasValue()) {
     return capi::Constructor<list<String>>{}(std::move(*cpp));
+  }
+  return nullptr;
+}
+
+template <typename T>
+inline PyObject* __roundtrip_set(PyObject* obj) {
+  return __roundtrip_pyobject<set<T>>(obj);
+}
+
+inline PyObject* __roundtrip_bytes_set(PyObject* obj) {
+  return __roundtrip_pyobject<set<Bytes, folly::F14FastSet<std::string>>>(obj);
+}
+
+inline PyObject* __roundtrip_unicode_set(PyObject* obj) {
+  return __roundtrip_pyobject<set<String>>(obj);
+}
+
+inline PyObject* __make_unicode_set(PyObject* obj) {
+  auto cpp = capi::Extractor<set<Bytes>>{}(obj);
+  if (cpp.hasValue()) {
+    return capi::Constructor<set<String>>{}(std::move(*cpp));
   }
   return nullptr;
 }

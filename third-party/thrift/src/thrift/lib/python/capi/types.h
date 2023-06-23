@@ -41,6 +41,16 @@ namespace capi {
  * a temporarily used object or one that may be dropped in an error case.
  */
 struct StrongRef {
+  StrongRef() : obj_(nullptr) {}
+  StrongRef(StrongRef&& other) : obj_(nullptr) { std::swap(obj_, other.obj_); }
+  StrongRef& operator=(StrongRef&& other) {
+    if (this != &other) {
+      obj_ = nullptr;
+      std::swap(obj_, other.obj_);
+    }
+    return *this;
+  }
+
   PyObject* obj_;
   // Constructor "steals" a reference so that object, so it should onl be
   // constructed from "new" reference function returns

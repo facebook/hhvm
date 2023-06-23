@@ -27,12 +27,16 @@ UINT64_MAX = stdint.UINT64_MAX
 cdef extern from "thrift/lib/python/capi/test/marshal_fixture.h" namespace "apache::thrift::python":
     cdef object __make_unicode(object)
     cdef object __make_unicode_list(object)
+    cdef object __make_unicode_set(object)
     cdef object __roundtrip_pyobject[T](object)
     cdef object __roundtrip_unicode(object)
     cdef object __roundtrip_bytes(object)
     cdef object __roundtrip_list[T](object)
     cdef object __roundtrip_unicode_list(object)
     cdef object __roundtrip_bytes_list(object)
+    cdef object __roundtrip_set[T](object)
+    cdef object __roundtrip_unicode_set(object)
+    cdef object __roundtrip_bytes_set(object)
 
 
 def roundtrip_int32(object x):
@@ -83,3 +87,22 @@ def roundtrip_unicode_list(object x):
 
 def make_unicode_list(object x):
     return __make_unicode_list(x)
+
+# Sets
+def roundtrip_int32_set(object x):
+    return __roundtrip_set[stdint.int32_t](x)
+
+def roundtrip_bool_set(object x):
+    return __roundtrip_set[cbool](x)
+
+def roundtrip_double_set(object x):
+    return __roundtrip_set[double](x)
+
+def roundtrip_bytes_set(object x):
+    return __roundtrip_bytes_set(x)
+
+def roundtrip_unicode_set(object x):
+    return __roundtrip_unicode_set(x)
+
+def make_unicode_set(object x):
+    return __make_unicode_set(x)

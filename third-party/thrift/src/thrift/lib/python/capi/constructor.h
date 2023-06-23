@@ -20,6 +20,8 @@
 
 #include <Python.h>
 #include <folly/CppAttributes.h>
+#include <folly/Traits.h>
+#include <folly/Utility.h>
 #include <thrift/lib/python/capi/types.h>
 
 namespace apache {
@@ -91,6 +93,49 @@ struct Constructor<list<ElemT, CppT>> {
       PyTuple_SET_ITEM(*list, i, elem);
     }
     return std::move(list).release();
+  }
+};
+
+template <typename C>
+using iter_t = decltype(std::declval<C&>().begin());
+template <typename C>
+using extract_method_t =
+    decltype(std::declval<C&>().extract(std::declval<iter_t<C>>()));
+template <typename C>
+constexpr bool has_extract_v =
+    folly::is_detected_v<extract_method_t, std::remove_reference_t<C>>;
+
+template <typename ElemT, typename CppT>
+struct Constructor<set<ElemT, CppT>> {
+  PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
+    StrongRef set_obj(PyFrozenSet_New(nullptr));
+    if (!set_obj) {
+      return nullptr;
+    }
+    Constructor<ElemT> ctor{};
+    auto it = val.begin();
+    while (it != val.end()) {
+      StrongRef elem;
+      if constexpr (has_extract_v<CppT>) {
+        auto node_handle = val.extract(it++);
+        elem = StrongRef(ctor(std::move(node_handle.value())));
+      } else {
+        // If the container doesn't support extract, have to copy
+        // because set iterator is const :(
+        elem = StrongRef(ctor(folly::copy(*it)));
+        ++it;
+      }
+      if (*elem == nullptr) {
+        // StrongRef DECREFs the frozenset on scope exit
+        return nullptr;
+      }
+      // Not stolen, so let StrongRef DECREF on exit
+      if (PySet_Add(*set_obj, *elem) == -1) {
+        // Should only fail for MemoryError (OOM)
+        return nullptr;
+      }
+    }
+    return std::move(set_obj).release();
   }
 };
 

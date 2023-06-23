@@ -176,3 +176,66 @@ class TestMarshalList(MarshalFixture):
             fixture.make_unicode_list((b"", b"", b"", b"", b"\xE2\x82"))
         # The empty str created before error are not leaked
         self.assertEqual(empty_refcount, getrefcount(""))
+
+
+class TestMarshalSet(MarshalFixture):
+    # Use the internal representation, which is frozenset
+    def test_int32_set(self) -> None:
+        # store refcounts of singletons for leak checks
+        int_refcount = getrefcount(-1)
+
+        def make_set():
+            return frozenset({0, -1, INT32_MIN, INT32_MAX})
+
+        self.assertEqual(make_set(), fixture.roundtrip_int32_set(make_set()))
+        self.assertEqual(frozenset(), fixture.roundtrip_int32_set(frozenset()))
+        # no leaks!
+        self.assertEqual(int_refcount, getrefcount(-1))
+
+    def test_bool_set(self) -> None:
+        # store refcounts of singletons for leak checks
+        false_refcount = getrefcount(False)
+
+        def make_set():
+            return frozenset({True, False})
+
+        self.assertEqual(make_set(), fixture.roundtrip_bool_set(make_set()))
+        self.assertEqual(frozenset(), fixture.roundtrip_bool_set(frozenset()))
+        # no leaks!
+        self.assertEqual(false_refcount, getrefcount(False))
+
+    def test_double_set(self) -> None:
+        def make_set():
+            return frozenset({-1.0, 0.0, -float_info.max, float_info.max})
+
+        self.assertEqual(make_set(), fixture.roundtrip_double_set(make_set()))
+        self.assertEqual(frozenset(), fixture.roundtrip_double_set(frozenset()))
+
+    def test_bytes_set(self) -> None:
+        # empty bytes is a singleton like empty tuple
+        empty_refcount = getrefcount(b"")
+
+        def make_set():
+            return frozenset({b"", b"-1", b"wef2", b"\xE2\x82\xAC"})
+
+        self.assertEqual(make_set(), fixture.roundtrip_bytes_set(make_set()))
+        self.assertEqual(frozenset(), fixture.roundtrip_bytes_set(frozenset()))
+        # no leaks!
+        self.assertEqual(empty_refcount, getrefcount(b""))
+
+    def test_unicode_set(self) -> None:
+        # empty str is a singleton like empty tuple
+        empty_refcount = getrefcount("")
+
+        def make_set():
+            return frozenset({"", "-1", "€", b"\xE2\x82\xAC".decode()})
+
+        self.assertEqual(make_set(), fixture.roundtrip_unicode_set(make_set()))
+        self.assertEqual(frozenset(), fixture.roundtrip_unicode_set(frozenset()))
+        # no leaks!
+        self.assertEqual(empty_refcount, getrefcount(""))
+
+        with self.assertRaises(UnicodeDecodeError):
+            fixture.make_unicode_set(frozenset((b"", b"a", b"c", b"e", b"\xE2\x82")))
+        # The empty str created before error are not leaked
+        self.assertEqual(empty_refcount, getrefcount(""))

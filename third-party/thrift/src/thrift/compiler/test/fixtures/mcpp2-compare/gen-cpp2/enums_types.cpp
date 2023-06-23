@@ -28,14 +28,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumA>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumA_EnumMapFactory::ValuesToNamesMapType _AnEnumA_VALUES_TO_NAMES = _AnEnumA_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::ns::qwerty
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumB>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumB_EnumMapFactory::ValuesToNamesMapType _AnEnumB_VALUES_TO_NAMES = _AnEnumB_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::ns::qwerty
 
 namespace apache { namespace thrift {
 
@@ -78,14 +62,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumC>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumC_EnumMapFactory::ValuesToNamesMapType _AnEnumC_VALUES_TO_NAMES = _AnEnumC_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::ns::qwerty
 
 namespace apache { namespace thrift {
 
@@ -103,14 +79,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumD>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumD_EnumMapFactory::ValuesToNamesMapType _AnEnumD_VALUES_TO_NAMES = _AnEnumD_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::ns::qwerty
 
 namespace apache { namespace thrift {
 
@@ -128,14 +96,6 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumE>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumE_EnumMapFactory::ValuesToNamesMapType _AnEnumE_VALUES_TO_NAMES = _AnEnumE_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::ns::qwerty
 
 namespace apache {
 namespace thrift {

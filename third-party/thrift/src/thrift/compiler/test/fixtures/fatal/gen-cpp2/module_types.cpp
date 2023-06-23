@@ -28,14 +28,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(folly::StringPie
 
 }} // apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _enum1_EnumMapFactory::ValuesToNamesMapType _enum1_VALUES_TO_NAMES = _enum1_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // test_cpp2::cpp_reflection
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(folly::StringPie
 
 }} // apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _enum2_EnumMapFactory::ValuesToNamesMapType _enum2_VALUES_TO_NAMES = _enum2_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // test_cpp2::cpp_reflection
 
 namespace apache { namespace thrift {
 
@@ -78,14 +62,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(folly::StringPie
 
 }} // apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _enum3_EnumMapFactory::ValuesToNamesMapType _enum3_VALUES_TO_NAMES = _enum3_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // test_cpp2::cpp_reflection
 
 namespace apache { namespace thrift {
 
@@ -103,14 +79,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::findValu
 
 }} // apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _enum_with_special_names_EnumMapFactory::ValuesToNamesMapType _enum_with_special_names_VALUES_TO_NAMES = _enum_with_special_names_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // test_cpp2::cpp_reflection
 
 namespace apache {
 namespace thrift {

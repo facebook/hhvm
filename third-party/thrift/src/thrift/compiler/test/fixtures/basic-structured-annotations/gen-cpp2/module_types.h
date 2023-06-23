@@ -154,10 +154,6 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
 namespace test { namespace fixtures { namespace basic-structured-annotations {
 
 using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES;
-#endif
 }}} // test::fixtures::basic-structured-annotations
 
 // END declare_enums

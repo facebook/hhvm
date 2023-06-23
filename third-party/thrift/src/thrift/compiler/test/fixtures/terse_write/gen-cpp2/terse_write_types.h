@@ -467,10 +467,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyEnum> {
 namespace facebook { namespace thrift { namespace test { namespace terse_write {
 
 using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES;
-#endif
 }}}} // facebook::thrift::test::terse_write
 
 // END declare_enums

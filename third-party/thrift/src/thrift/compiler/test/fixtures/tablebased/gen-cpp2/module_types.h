@@ -147,10 +147,6 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
 namespace test { namespace fixtures { namespace tablebased {
 
 using _ExampleEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ExampleEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _ExampleEnum_EnumMapFactory::ValuesToNamesMapType _ExampleEnum_VALUES_TO_NAMES;
-#endif
 }}} // test::fixtures::tablebased
 
 // END declare_enums

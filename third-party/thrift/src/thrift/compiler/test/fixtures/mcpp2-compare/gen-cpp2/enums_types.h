@@ -221,30 +221,10 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
 namespace facebook { namespace ns { namespace qwerty {
 
 using _AnEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumA>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumA_EnumMapFactory::ValuesToNamesMapType _AnEnumA_VALUES_TO_NAMES;
-#endif
 using _AnEnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumB>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumB_EnumMapFactory::ValuesToNamesMapType _AnEnumB_VALUES_TO_NAMES;
-#endif
 using _AnEnumC_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumC>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumC_EnumMapFactory::ValuesToNamesMapType _AnEnumC_VALUES_TO_NAMES;
-#endif
 using _AnEnumD_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumD>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumD_EnumMapFactory::ValuesToNamesMapType _AnEnumD_VALUES_TO_NAMES;
-#endif
 using _AnEnumE_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumE>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumE_EnumMapFactory::ValuesToNamesMapType _AnEnumE_VALUES_TO_NAMES;
-#endif
 }}} // facebook::ns::qwerty
 
 // END declare_enums

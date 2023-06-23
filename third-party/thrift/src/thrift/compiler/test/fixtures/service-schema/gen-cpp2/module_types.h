@@ -79,10 +79,6 @@ template <> struct TEnumTraits<::cpp2::Result> {
 namespace cpp2 {
 
 using _Result_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Result>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _Result_EnumMapFactory::ValuesToNamesMapType _Result_VALUES_TO_NAMES;
-#endif
 } // cpp2
 
 // END declare_enums

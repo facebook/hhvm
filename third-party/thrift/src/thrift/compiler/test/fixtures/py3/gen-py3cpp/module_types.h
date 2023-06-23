@@ -282,20 +282,8 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
 namespace py3 { namespace simple {
 
 using _AnEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnum_EnumMapFactory::ValuesToNamesMapType _AnEnum_VALUES_TO_NAMES;
-#endif
 using _AnEnumRenamed_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumRenamed>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _AnEnumRenamed_EnumMapFactory::ValuesToNamesMapType _AnEnumRenamed_VALUES_TO_NAMES;
-#endif
 using _Flags_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Flags>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _Flags_EnumMapFactory::ValuesToNamesMapType _Flags_VALUES_TO_NAMES;
-#endif
 }} // py3::simple
 
 // END declare_enums

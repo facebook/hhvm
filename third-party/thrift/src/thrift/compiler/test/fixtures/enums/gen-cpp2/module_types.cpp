@@ -28,14 +28,6 @@ bool TEnumTraits<::test::fixtures::enums::Metasyntactic>::findValue(folly::Strin
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _Metasyntactic_EnumMapFactory::ValuesToNamesMapType _Metasyntactic_VALUES_TO_NAMES = _Metasyntactic_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum1>::findValue(folly::StringPiece
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum1_EnumMapFactory::ValuesToNamesMapType _MyEnum1_VALUES_TO_NAMES = _MyEnum1_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -78,14 +62,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum2>::findValue(folly::StringPiece
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum2_EnumMapFactory::ValuesToNamesMapType _MyEnum2_VALUES_TO_NAMES = _MyEnum2_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -103,14 +79,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum3>::findValue(folly::StringPiece
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum3_EnumMapFactory::ValuesToNamesMapType _MyEnum3_VALUES_TO_NAMES = _MyEnum3_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -128,14 +96,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum4>::findValue(folly::StringPiece
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum4_EnumMapFactory::ValuesToNamesMapType _MyEnum4_VALUES_TO_NAMES = _MyEnum4_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -153,14 +113,6 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::findValue(folly::Stri
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyBitmaskEnum1_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum1_VALUES_TO_NAMES = _MyBitmaskEnum1_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache { namespace thrift {
 
@@ -178,14 +130,6 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::findValue(folly::Stri
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyBitmaskEnum2_EnumMapFactory::ValuesToNamesMapType _MyBitmaskEnum2_VALUES_TO_NAMES = _MyBitmaskEnum2_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::enums
 
 namespace apache {
 namespace thrift {

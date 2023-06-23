@@ -28,14 +28,6 @@ bool TEnumTraits<::py3::simple::AnEnum>::findValue(folly::StringPiece name, type
 
 }} // apache::thrift
 
-namespace py3 { namespace simple {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnum_EnumMapFactory::ValuesToNamesMapType _AnEnum_VALUES_TO_NAMES = _AnEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // py3::simple
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(folly::StringPiece nam
 
 }} // apache::thrift
 
-namespace py3 { namespace simple {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnumRenamed_EnumMapFactory::ValuesToNamesMapType _AnEnumRenamed_VALUES_TO_NAMES = _AnEnumRenamed_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // py3::simple
 
 namespace apache { namespace thrift {
 
@@ -78,14 +62,6 @@ bool TEnumTraits<::py3::simple::Flags>::findValue(folly::StringPiece name, type*
 
 }} // apache::thrift
 
-namespace py3 { namespace simple {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _Flags_EnumMapFactory::ValuesToNamesMapType _Flags_VALUES_TO_NAMES = _Flags_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}} // py3::simple
 
 namespace apache {
 namespace thrift {

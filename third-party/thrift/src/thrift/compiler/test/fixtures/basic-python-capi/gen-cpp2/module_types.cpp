@@ -28,14 +28,6 @@ bool TEnumTraits<::test::fixtures::basic-python-capi::MyEnum>::findValue(folly::
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic-python-capi {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES = _MyEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::basic-python-capi
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::findVal
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic-python-capi {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _NormalDecentEnum_EnumMapFactory::ValuesToNamesMapType _NormalDecentEnum_VALUES_TO_NAMES = _NormalDecentEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::basic-python-capi
 
 namespace apache {
 namespace thrift {

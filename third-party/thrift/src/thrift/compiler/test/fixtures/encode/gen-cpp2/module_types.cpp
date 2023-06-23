@@ -28,14 +28,6 @@ bool TEnumTraits<::facebook::thrift::test::Enum>::findValue(folly::StringPiece n
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _Enum_EnumMapFactory::ValuesToNamesMapType _Enum_VALUES_TO_NAMES = _Enum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::thrift::test
 
 namespace apache {
 namespace thrift {

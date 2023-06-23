@@ -143,10 +143,6 @@ template <> struct TEnumTraits<::some::ns::EnumB> {
 namespace some { namespace ns {
 
 using _EnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<EnumB>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _EnumB_EnumMapFactory::ValuesToNamesMapType _EnumB_VALUES_TO_NAMES;
-#endif
 }} // some::ns
 
 // END declare_enums

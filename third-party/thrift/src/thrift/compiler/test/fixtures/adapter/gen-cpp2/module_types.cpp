@@ -28,14 +28,6 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _Color_EnumMapFactory::ValuesToNamesMapType _Color_VALUES_TO_NAMES = _Color_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::thrift::test
 
 namespace apache { namespace thrift {
 
@@ -53,14 +45,6 @@ bool TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::findValue(folly::
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _ThriftAdaptedEnum_EnumMapFactory::ValuesToNamesMapType _ThriftAdaptedEnum_VALUES_TO_NAMES = _ThriftAdaptedEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // facebook::thrift::test
 
 namespace apache {
 namespace thrift {

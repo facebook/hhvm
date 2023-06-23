@@ -44,14 +44,4 @@ bool TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::findValue(folly
 
 }} // apache::thrift
 
-<% > common/namespace_cpp2_begin%>
-
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _<%enum:cpp_name%>_EnumMapFactory::ValuesToNamesMapType _<%enum:cpp_name%>_VALUES_TO_NAMES = _<%enum:cpp_name%>_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-<% > common/namespace_cpp2_end%>
-
 <%/program:split_enums%>

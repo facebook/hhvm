@@ -28,14 +28,6 @@ bool TEnumTraits<::a::different::ns::AnEnum>::findValue(folly::StringPiece name,
 
 }} // apache::thrift
 
-namespace a { namespace different { namespace ns {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _AnEnum_EnumMapFactory::ValuesToNamesMapType _AnEnum_VALUES_TO_NAMES = _AnEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // a::different::ns
 
 namespace apache {
 namespace thrift {

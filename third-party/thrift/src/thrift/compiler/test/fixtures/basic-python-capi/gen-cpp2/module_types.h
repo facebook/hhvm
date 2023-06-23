@@ -625,15 +625,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-python-capi::NormalDecent
 namespace test { namespace fixtures { namespace basic-python-capi {
 
 using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES;
-#endif
 using _NormalDecentEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<NormalDecentEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _NormalDecentEnum_EnumMapFactory::ValuesToNamesMapType _NormalDecentEnum_VALUES_TO_NAMES;
-#endif
 }}} // test::fixtures::basic-python-capi
 
 // END declare_enums

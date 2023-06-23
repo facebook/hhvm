@@ -28,14 +28,6 @@ bool TEnumTraits<::test::fixtures::basic::MyEnum>::findValue(folly::StringPiece 
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnum_EnumMapFactory::ValuesToNamesMapType _MyEnum_VALUES_TO_NAMES = _MyEnum_EnumMapFactory::makeValuesToNamesMap();
-FOLLY_POP_WARNING
-#endif
-}}} // test::fixtures::basic
 
 namespace apache {
 namespace thrift {

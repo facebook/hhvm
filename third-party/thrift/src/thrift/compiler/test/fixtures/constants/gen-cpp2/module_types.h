@@ -271,20 +271,8 @@ template <> struct TEnumTraits<::cpp2::Company> {
 namespace cpp2 {
 
 using _EmptyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<EmptyEnum>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _EmptyEnum_EnumMapFactory::ValuesToNamesMapType _EmptyEnum_VALUES_TO_NAMES;
-#endif
 using _City_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<City>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _City_EnumMapFactory::ValuesToNamesMapType _City_VALUES_TO_NAMES;
-#endif
 using _Company_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Company>;
-#ifndef ANDROID
-[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
-extern const _Company_EnumMapFactory::ValuesToNamesMapType _Company_VALUES_TO_NAMES;
-#endif
 } // cpp2
 
 // END declare_enums

@@ -644,9 +644,7 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
   }
 
   // If PatchPrior or PatchAfter, recursively constructs the mask for the
-  // fields. Note that list also supports Patch, but since it is
-  // indistinguishable from map (both uses a map), we just treat it as a map
-  // patch.
+  // fields.
   for (auto op : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
     if (auto* patchFields = findOp(patch, op)) {
       insertFieldsToMask(masks, *patchFields, true, view);

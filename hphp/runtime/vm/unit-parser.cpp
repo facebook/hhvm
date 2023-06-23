@@ -369,41 +369,33 @@ CompilerAbort::CompilerAbort(const std::string& filename,
 
 ParseFactsResult extract_facts(
   const std::string& filename,
-  const std::string& code,
   const RepoOptionsFlags& options,
   folly::StringPiece expect_sha1
 ) {
-  auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
-    auto actual_sha1 = string_sha1(source_text);
-    if (!expect_sha1.empty()) {
-      if (actual_sha1 != expect_sha1) {
-        return folly::sformat(
-            "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
-        );
-      }
+  auto w = Stream::getWrapperFromURI(StrNR(filename));
+  if (!(w && dynamic_cast<FileStreamWrapper*>(w))) {
+    throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
+  }
+  const auto f = w->open(StrNR(filename), "r", 0, nullptr);
+  if (!f) throwErrno("Failed to extract facts: Could not read source code.");
+  auto const str = f->read();
+  auto actual_sha1 = string_sha1(str.get()->slice());
+  if (!expect_sha1.empty()) {
+    if (actual_sha1 != expect_sha1) {
+      return folly::sformat(
+          "Unexpected SHA1: {} != {}", actual_sha1, expect_sha1
+      );
     }
-    try {
-      hackc::DeclParserConfig config;
-      options.initDeclConfig(config);
-      auto const decls = hackc::parse_decls(config, filename, source_text);
-      rust::String json = hackc::decls_to_facts_json(*decls, actual_sha1);
-      return FactsJSONString { std::string(json) };
-    } catch (const std::exception& e) {
-      return FactsJSONString { "" }; // Swallow errors from HackC
-    }
-  };
-
-  if (!code.empty()) {
-    return get_facts(code);
-  } else {
-    auto w = Stream::getWrapperFromURI(StrNR(filename));
-    if (!(w && dynamic_cast<FileStreamWrapper*>(w))) {
-      throwErrno("Failed to extract facts: Could not get FileStreamWrapper.");
-    }
-    const auto f = w->open(StrNR(filename), "r", 0, nullptr);
-    if (!f) throwErrno("Failed to extract facts: Could not read source code.");
-    auto const str = f->read();
-    return get_facts(str.get()->toCppString());
+  }
+  try {
+    hackc::DeclParserConfig config;
+    options.initDeclConfig(config);
+    auto const source_text = str.get()->toCppString();
+    auto const decls = hackc::parse_decls(config, filename, source_text);
+    rust::String json = hackc::decls_to_facts_json(*decls, actual_sha1);
+    return FactsJSONString { std::string(json) };
+  } catch (const std::exception& e) {
+    return FactsJSONString { "" }; // Swallow errors from HackC
   }
 }
 

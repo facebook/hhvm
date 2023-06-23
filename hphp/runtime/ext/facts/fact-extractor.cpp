@@ -193,7 +193,6 @@ std::string facts_json_from_path(const PathAndOptionalHash& path) {
 
   auto const result = extract_facts(
       path.m_path.native(),
-      "", // ask extract_facts() to load the file.
       RepoOptions::forFile(path.m_path.c_str()).flags(),
       path.m_hash ? *path.m_hash : "");
   return match<std::string>(

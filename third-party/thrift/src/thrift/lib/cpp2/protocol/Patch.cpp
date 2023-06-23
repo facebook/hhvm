@@ -625,10 +625,12 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch, bool view) {
       return {allMask(), allMask()};
     }
   }
-  // Remove always adds keys to map mask. All types (list, set, and map) use
-  // a set for Remove, so they are indistinguishable.
+  // All types (set, map, and struct) use a set for Remove, so they are
+  // indistinguishable. It is a read-write operation if not intristic default.
   if (auto* value = findOp(patch, PatchOp::Remove)) {
-    insertFieldsToMask(masks, *value, false, view);
+    if (!isIntrinsicDefault(*value)) {
+      return {allMask(), allMask()};
+    }
   }
 
   // If EnsureStruct, add the fields/ keys to mask

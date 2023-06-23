@@ -543,22 +543,17 @@ TEST_F(PatchTest, Set) {
         op::PatchOp::Remove,
         asValueStruct<type::set<type::binary_t>>({"test"}));
     EXPECT_TRUE(applyContainerPatch(patchObj, value).setValue_ref()->empty());
-    // It is a map mask as Remove can't distinguish between list, set, and
+    // Both read and write mask are allMask, as RemovePatch can't be
+    // distinguished between set, map, and struct.
     {
       auto masks = extractMaskViewFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      isBinaryEqual(*((Value*)mask.begin()->first), "test");
-      EXPECT_EQ(mask.begin()->second, allMask());
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
     }
     {
       auto masks = extractMaskFromPatch(patchObj);
-      EXPECT_EQ(masks.read, masks.write);
-      auto mask = masks.read.includes_string_map_ref().value();
-      EXPECT_EQ(mask.size(), 1);
-      EXPECT_EQ(mask.begin()->first, "test");
-      EXPECT_EQ(mask.begin()->second, allMask());
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
     }
   }
   {
@@ -711,7 +706,16 @@ TEST_F(PatchTest, Map) {
     Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::binary_t>>({"key"}));
     EXPECT_EQ(emptyMap, *applyContainerPatch(patchObj, value).mapValue_ref());
-    checkMapMask(patchObj, {"key"});
+    {
+      auto masks = extractMaskViewFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
+    {
+      auto masks = extractMaskFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
   }
   {
     Object patchObj = makePatch(op::PatchOp::Remove, emptySet);
@@ -783,7 +787,6 @@ TEST_F(PatchTest, Map) {
     EXPECT_EQ(
         *expected.mapValue_ref(),
         *applyContainerPatch(patchObj, value).mapValue_ref());
-    checkMapMask(patchObj, {"key", "new key", "added key"});
   }
 
   // PatchPrior
@@ -1067,6 +1070,29 @@ TEST_F(PatchTest, Struct) {
     expectNoop(makePatch(op::PatchOp::PatchPrior, fieldPatch));
     expectNoop(makePatch(op::PatchOp::EnsureStruct, fieldPatch));
     expectNoop(makePatch(op::PatchOp::PatchAfter, fieldPatch));
+  }
+  // Remove
+  {
+    Object patchObj = makePatch(
+        op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({1}));
+    EXPECT_EQ(
+        protocol::Object{},
+        *applyContainerPatch(patchObj, value).objectValue_ref());
+    {
+      auto masks = extractMaskViewFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
+    {
+      auto masks = extractMaskFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
+  }
+  {
+    Object patchObj = makePatch(
+        op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({}));
+    expectNoop(patchObj);
   }
 }
 

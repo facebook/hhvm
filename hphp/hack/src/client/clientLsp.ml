@@ -5515,8 +5515,9 @@ let handle_editor_buffer_message
     ~(ref_unblocked_time : float ref)
     ~(message : lsp_message) : unit Lwt.t =
   let uri_to_path uri = uri |> lsp_uri_to_path |> Path.make in
-  let ref_hh_unblocked_time = ref 0. in
-  let ref_ide_unblocked_time = ref 0. in
+  let now = Unix.gettimeofday () in
+  let ref_hh_unblocked_time = ref now in
+  let ref_ide_unblocked_time = ref now in
 
   (* send to hh_server as necessary *)
   let (hh_server_promise : unit Lwt.t) =

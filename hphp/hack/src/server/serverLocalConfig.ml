@@ -357,7 +357,7 @@ let default =
     use_hh_distc_instead_of_hulk = true;
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
-    ide_load_naming_table_on_disk = false;
+    ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 0;
     ide_batch_process_changes = false;
     dump_tast_hashes = false;

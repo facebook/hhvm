@@ -178,10 +178,6 @@ inline bool FuncEmitter::isMethod() const {
   return pce();
 }
 
-inline bool FuncEmitter::isVariadic() const {
-  return params.size() && params[(params.size() - 1)].isVariadic();
-}
-
 inline std::pair<int,int> FuncEmitter::getLocation() const {
   return std::make_pair(line1, line2);
 }

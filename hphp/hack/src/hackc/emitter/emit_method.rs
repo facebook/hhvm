@@ -33,6 +33,7 @@ use crate::emit_body;
 use crate::emit_fatal;
 use crate::emit_memoize_helpers;
 use crate::emit_native_opcode;
+use crate::emit_param;
 
 pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
@@ -52,6 +53,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     visibility: &'a ast::Visibility,
     class: &'a ast::Class_,
     is_memoize_impl: bool,
+    has_variadic: bool,
 ) -> Attr {
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_systemlib = emitter.systemlib();
@@ -76,6 +78,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrReadonlyThis, method.readonly_this);
     attrs.set(Attr::AttrStatic, method.static_);
     attrs.set(Attr::AttrUnique, is_systemlib);
+    attrs.set(Attr::AttrVariadicParam, has_variadic);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs
 }
@@ -308,7 +311,16 @@ pub fn from_ast<'a, 'arena, 'decl>(
     flags.set(MethodFlags::IS_PAIR_GENERATOR, is_pair_generator);
     flags.set(MethodFlags::IS_CLOSURE_BODY, is_closure_body);
 
-    let attrs = get_attrs_for_method(emitter, method, &attributes, &visibility, class, is_memoize);
+    let has_variadic = emit_param::has_variadic(&body.params);
+    let attrs = get_attrs_for_method(
+        emitter,
+        method,
+        &attributes,
+        &visibility,
+        class,
+        is_memoize,
+        has_variadic,
+    );
     Ok(Method {
         attributes: Slice::fill_iter(emitter.alloc, attributes.into_iter()),
         visibility: Visibility::from(visibility),

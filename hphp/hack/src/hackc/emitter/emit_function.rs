@@ -25,6 +25,7 @@ use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_memoize_function;
 use crate::emit_memoize_helpers;
+use crate::emit_param;
 
 pub fn emit_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -165,7 +166,9 @@ pub fn emit_function<'a, 'arena, 'decl>(
     } else {
         None
     };
-    let attrs = emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized);
+    let has_variadic = emit_param::has_variadic(&body.params);
+    let attrs =
+        emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized, has_variadic);
     let normal_function = Function {
         attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
         name: FunctionName::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),

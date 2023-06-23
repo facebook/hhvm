@@ -1010,7 +1010,7 @@ void translateParameter(TranslationState& ts,
   FuncEmitter::ParamInfo param;
   translateUserAttributes(p.user_attributes, param.userAttributes);
   if (p.is_variadic) {
-    ts.fe->attrs |= AttrVariadicParam;
+    assertx(ts.fe->attrs & AttrVariadicParam);
     param.setFlag(Func::ParamInfo::Flags::Variadic);
   }
   if (p.is_inout) param.setFlag(Func::ParamInfo::Flags::InOut);

@@ -135,6 +135,7 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrStatic, "static"),
                 get_bit(&mut attr, Attr::AttrSystemInitialValue, "system_initial_value"),
                 get_bit(&mut attr, Attr::AttrTrait, "trait"),
+                get_bit(&mut attr, Attr::AttrVariadicParam, "variadic_param"),
             ]
             .into_iter()
             .flatten(),

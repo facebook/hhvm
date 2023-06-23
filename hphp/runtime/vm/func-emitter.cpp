@@ -214,9 +214,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
 
   auto attrs = fix_attrs(this->attrs);
-  if (preClass && preClass->attrs() & AttrInterface) {
-    attrs |= AttrAbstract;
-  }
   if (attrs & AttrIsMethCaller && RuntimeOption::RepoAuthoritative) {
     attrs |= AttrPersistent | AttrUnique;
   }
@@ -231,9 +228,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
   } else {
     assertx(preClass || !(attrs & AttrBuiltin) || (attrs & AttrIsMethCaller));
-  }
-  if (isVariadic()) {
-    attrs |= AttrVariadicParam;
   }
   if (isAsync && !isGenerator) {
     // Async functions can return results directly.

@@ -44,6 +44,7 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     fd: &'a ast::FunDef,
     user_attrs: &'a [Attribute<'arena>],
     is_memoize_impl: bool,
+    has_variadic: bool,
 ) -> Attr {
     let f = &fd.fun;
     let is_systemlib = emitter.systemlib();
@@ -67,6 +68,7 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
     attrs.set(Attr::AttrUnique, is_systemlib);
     attrs.set(Attr::AttrInternal, fd.internal);
+    attrs.set(Attr::AttrVariadicParam, has_variadic);
     attrs
 }
 
@@ -135,7 +137,8 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 
     let mut flags = FunctionFlags::empty();
     flags.set(FunctionFlags::ASYNC, f.fun_kind.is_fasync());
-    let attrs = get_attrs_for_fun(emitter, fd, &attributes, false);
+    let has_variadic = emit_param::has_variadic(&body.params);
+    let attrs = get_attrs_for_fun(emitter, fd, &attributes, false, has_variadic);
 
     Ok(Function {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),

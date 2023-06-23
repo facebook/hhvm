@@ -187,6 +187,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     let mut flags = MethodFlags::empty();
     flags.set(MethodFlags::IS_ASYNC, is_async);
 
+    let has_variadic = emit_param::has_variadic(&body.params);
     let attrs = get_attrs_for_method(
         emitter,
         method,
@@ -194,6 +195,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         &method.visibility,
         class,
         false,
+        has_variadic,
     );
 
     Ok(Method {

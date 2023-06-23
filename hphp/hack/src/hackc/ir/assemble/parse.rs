@@ -125,6 +125,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
             "static" => Attr::AttrStatic,
             "system_initial_value" => Attr::AttrSystemInitialValue,
             "trait" => Attr::AttrTrait,
+            "variadic_param" => Attr::AttrVariadicParam,
             _ => return None,
         })
     }

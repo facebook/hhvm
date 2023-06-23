@@ -80,7 +80,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
   X(AttrIsClosureClass,           C,       "is_closure_class");     \
-  X(AttrEnumClass,                C,       "enum_class");
+  X(AttrEnumClass,                C,       "enum_class");           \
+  X(AttrVariadicParam,            F,       "variadic_param");
   /* */
 
   #define HHAS_TYPE_FLAGS                                   \

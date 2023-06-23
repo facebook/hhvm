@@ -37,6 +37,10 @@ use oxidized::pos::Pos;
 use crate::emit_attribute;
 use crate::emit_expression;
 
+pub fn has_variadic(params: &[Param<'_>]) -> bool {
+    params.iter().any(|v| v.is_variadic)
+}
+
 pub fn from_asts<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,

@@ -2271,7 +2271,7 @@ void parse_parameter_list(AsmState& as,
 
       seenVariadic = true;
       param.setFlag(Func::ParamInfo::Flags::Variadic);
-      as.fe->attrs |= AttrVariadicParam;
+      assertx(as.fe->attrs & AttrVariadicParam);
     }
 
     if (as.in.tryConsume("inout")) {

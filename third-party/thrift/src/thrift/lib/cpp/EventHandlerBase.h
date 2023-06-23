@@ -98,6 +98,19 @@ class TProcessorBase : public EventHandlerBase {
  * handlers to clients at creation time.
  */
 class TClientBase : public EventHandlerBase {
+ protected:
+  struct Options {
+    /**
+     * If set to true (default), newly constructed objects automatically include
+     * all event handlers returned by getHandlers() and getFactories().
+     *
+     * If set to false, the initial list of handlers is empty but new handlers
+     * may be added by calling addEventHandler.
+     */
+    bool includeGlobalEventHandlers = true;
+  };
+  explicit TClientBase(Options options);
+
  public:
   TClientBase();
   virtual ~TClientBase() = default;

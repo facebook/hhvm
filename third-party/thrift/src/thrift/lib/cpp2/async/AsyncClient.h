@@ -30,7 +30,28 @@ class GeneratedAsyncClient : public TClientBase {
   using channel_ptr =
       std::unique_ptr<RequestChannel, folly::DelayedDestruction::Destructor>;
 
+  struct Options {
+   public:
+    Options() {}
+
+    Options& includeGlobalEventHandlers(bool include) {
+      clientBaseOptions_.includeGlobalEventHandlers = include;
+      return *this;
+    }
+
+    static Options zeroDependency() {
+      return Options().includeGlobalEventHandlers(false);
+    }
+
+   private:
+    TClientBase::Options clientBaseOptions_;
+
+    friend class GeneratedAsyncClient;
+  };
+
   GeneratedAsyncClient(std::shared_ptr<RequestChannel> channel);
+  GeneratedAsyncClient(
+      std::shared_ptr<RequestChannel> channel, Options options);
 
   virtual const char* getServiceName() const noexcept = 0;
 

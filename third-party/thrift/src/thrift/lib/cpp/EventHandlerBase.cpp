@@ -130,7 +130,13 @@ TProcessorBase::getHandlers() {
   return handlers;
 }
 
-TClientBase::TClientBase() {
+TClientBase::TClientBase() : TClientBase(Options()) {}
+
+TClientBase::TClientBase(Options options) {
+  if (!options.includeGlobalEventHandlers) {
+    return;
+  }
+
   // Automatically ask all registered factories to produce an event
   // handler, and attach the handlers
   RLock lock{getRWMutex()};

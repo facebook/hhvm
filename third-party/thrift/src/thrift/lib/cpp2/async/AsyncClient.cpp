@@ -31,7 +31,11 @@ static InteractionId createInteraction(
 
 GeneratedAsyncClient::GeneratedAsyncClient(
     std::shared_ptr<RequestChannel> channel)
-    : channel_(std::move(channel)) {}
+    : GeneratedAsyncClient(std::move(channel), Options()) {}
+
+GeneratedAsyncClient::GeneratedAsyncClient(
+    std::shared_ptr<RequestChannel> channel, Options options)
+    : TClientBase(options.clientBaseOptions_), channel_(std::move(channel)) {}
 
 void GeneratedAsyncClient::setInteraction(
     const InteractionHandle& handle, RpcOptions& rpcOptions) {

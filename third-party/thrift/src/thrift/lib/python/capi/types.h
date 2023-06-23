@@ -50,6 +50,7 @@ struct StrongRef {
   ~StrongRef() { Py_XDECREF(obj_); }
   // Return a borrowed reference to the contained object.
   PyObject* operator*() const { return obj_; }
+  PyObject* operator->() const { return obj_; }
   operator bool() const { return obj_ != nullptr; }
   // Release ownership to function that "steals" reference
   PyObject* release() && {

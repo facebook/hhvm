@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import unittest
-from sys import float_info
+from sys import float_info, getrefcount
 from typing import Callable
 
 # @manual=//thrift/lib/python/capi/test:marshal_fixture
@@ -88,7 +88,7 @@ class TestMarshalPrimitives(MarshalFixture):
         self.assert_type_error(fixture.roundtrip_bool, None, "oops", 1, 1.0)
 
     def test_bytes(self) -> None:
-        for x in (b"", b"bytes", b"\xE2\x82\xAC"):
+        for x in (b"", b"bytes", b""):
             self.assertEqual(x, fixture.roundtrip_bytes(x))
         self.assert_type_error(fixture.roundtrip_bytes, None, "oops", 1, 1.0)
 
@@ -100,3 +100,79 @@ class TestMarshalPrimitives(MarshalFixture):
         self.assertEqual("€", fixture.make_unicode(b"\xE2\x82\xAC"))
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode(b"\xE2\x82")
+
+
+class TestMarshalList(MarshalFixture):
+    # Use the internal representation, which is tuple for lists
+    def test_int32_list(self) -> None:
+        # store refcounts of singletons for leak checks
+        int_refcount = getrefcount(-1)
+        empty_tuple_refcount = getrefcount(())
+
+        def make_list():
+            return (0, -1, INT32_MIN, INT32_MAX)
+
+        self.assertEqual(make_list(), fixture.roundtrip_int32_list(make_list()))
+        self.assertEqual((), fixture.roundtrip_int32_list(()))
+        # no leaks!
+        self.assertEqual(int_refcount, getrefcount(-1))
+        self.assertEqual(empty_tuple_refcount, getrefcount(()))
+
+    def test_bool_list(self) -> None:
+        # store refcounts of singletons for leak checks
+        false_refcount = getrefcount(False)
+        empty_tuple_refcount = getrefcount(())
+
+        def make_list():
+            return (True, False, False, False, True, False)
+
+        self.assertEqual(make_list(), fixture.roundtrip_bool_list(make_list()))
+        self.assertEqual((), fixture.roundtrip_bool_list(()))
+        # no leaks!
+        self.assertEqual(false_refcount, getrefcount(False))
+        self.assertEqual(empty_tuple_refcount, getrefcount(()))
+
+    def test_double_list(self) -> None:
+        # no float singletons afaik
+        empty_tuple_refcount = getrefcount(())
+
+        def make_list():
+            return (-1.0, 0.0, -float_info.max, float_info.max)
+
+        self.assertEqual(make_list(), fixture.roundtrip_double_list(make_list()))
+        self.assertEqual((), fixture.roundtrip_double_list(()))
+        # no leaks!
+        self.assertEqual(empty_tuple_refcount, getrefcount(()))
+
+    def test_bytes_list(self) -> None:
+        # empty bytes is a singleton like empty tuple
+        empty_refcount = getrefcount(b"")
+        empty_tuple_refcount = getrefcount(())
+
+        def make_list():
+            return (b"", b"-1", b"wef2", b"\xE2\x82\xAC")
+
+        self.assertEqual(make_list(), fixture.roundtrip_bytes_list(make_list()))
+        self.assertEqual((), fixture.roundtrip_bytes_list(()))
+        # no leaks!
+        self.assertEqual(empty_refcount, getrefcount(b""))
+        self.assertEqual(empty_tuple_refcount, getrefcount(()))
+
+    def test_unicode_list(self) -> None:
+        # empty str is a singleton like empty tuple
+        empty_refcount = getrefcount("")
+        empty_tuple_refcount = getrefcount(())
+
+        def make_list():
+            return ("", "-1", "€", "", b"\xE2\x82\xAC".decode())
+
+        self.assertEqual(make_list(), fixture.roundtrip_unicode_list(make_list()))
+        self.assertEqual((), fixture.roundtrip_unicode_list(()))
+        # no leaks!
+        self.assertEqual(empty_refcount, getrefcount(""))
+        self.assertEqual(empty_tuple_refcount, getrefcount(()))
+
+        with self.assertRaises(UnicodeDecodeError):
+            fixture.make_unicode_list((b"", b"", b"", b"", b"\xE2\x82"))
+        # The empty str created before error are not leaked
+        self.assertEqual(empty_refcount, getrefcount(""))

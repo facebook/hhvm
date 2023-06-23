@@ -71,6 +71,29 @@ SPECIALIZE_STR(std::string, Bytes);
 SPECIALIZE_STR(std::string, String);
 
 #undef SPECIALIZE_STR
+
+template <typename ElemT, typename CppT>
+struct Constructor<list<ElemT, CppT>> {
+  PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
+    const size_t size = val.size();
+    StrongRef list(PyTuple_New(size));
+    if (!list) {
+      return nullptr;
+    }
+    Constructor<ElemT> ctor{};
+    for (size_t i = 0; i < size; ++i) {
+      // PyTuple_SET_ITEM steals, so don't use StrongRef
+      PyObject* elem(ctor(std::move(val[i])));
+      if (elem == nullptr) {
+        // StrongRef DECREFs the list tuple on scope exit
+        return nullptr;
+      }
+      PyTuple_SET_ITEM(*list, i, elem);
+    }
+    return std::move(list).release();
+  }
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

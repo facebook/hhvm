@@ -953,9 +953,7 @@ struct RuntimeOption {
   F(bool,     JitLayoutPruneCatchArcs, true)                            \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
-  /* despite the unfortunate name, this enables function renaming and
-   * interception in the interpreter as well as the jit, and also
-   * implies all functions may be used with fb_intercept2
+  /* This controls function renaming.
    * 0 - Renaming not allowed
    * 1 - All functions can be renamed
    * 2 - Functions in RenamableFunctions config list can be renamed

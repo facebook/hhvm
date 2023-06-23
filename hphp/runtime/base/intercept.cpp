@@ -146,16 +146,9 @@ void rename_function(const String& old_name, const String& new_name) {
     not_reached();
   }
 
-  // Interceptable functions can be renamed even when
-  // JitEnableRenameFunction is false.
-  if (!(func->attrs() & AttrInterceptable)) {
-    if (!RuntimeOption::EvalJitEnableRenameFunction) {
-      // When EvalJitEnableRenameFunction is false, the translator may
-      // wire non-AttrInterceptable Func*'s into the TC. Don't rename
-      // functions.
-      raise_error("fb_rename_function must be explicitly enabled"
-                  "(-v Eval.JitEnableRenameFunction=1)");
-    }
+  if (!RuntimeOption::EvalJitEnableRenameFunction) {
+    raise_error("fb_rename_function must be explicitly enabled"
+                "(-v Eval.JitEnableRenameFunction=1)");
   }
 
   auto const fnew = Func::lookup(newNe);

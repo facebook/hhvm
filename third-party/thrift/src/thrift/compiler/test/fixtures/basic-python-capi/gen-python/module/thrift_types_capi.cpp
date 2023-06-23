@@ -312,9 +312,9 @@ Extractor<::test::fixtures::basic-python-capi::PrimitiveStruct>::operator()(PyOb
       return extractorError<::test::fixtures::basic-python-capi::PrimitiveStruct>(
           "Marshal error: PrimitiveStruct");
   }
-  PyObject* fbThriftData = getThriftData(obj);
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic-python-capi::PrimitiveStruct>>{}(fbThriftData);
+      ::test::fixtures::basic-python-capi::PrimitiveStruct>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic-python-capi::PrimitiveStruct>
@@ -403,9 +403,9 @@ Extractor<::test::fixtures::basic-python-capi::ListStruct>::operator()(PyObject*
       return extractorError<::test::fixtures::basic-python-capi::ListStruct>(
           "Marshal error: ListStruct");
   }
-  PyObject* fbThriftData = getThriftData(obj);
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic-python-capi::ListStruct>>{}(fbThriftData);
+      ::test::fixtures::basic-python-capi::ListStruct>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic-python-capi::ListStruct>
@@ -490,9 +490,9 @@ Extractor<::test::fixtures::basic-python-capi::SetStruct>::operator()(PyObject* 
       return extractorError<::test::fixtures::basic-python-capi::SetStruct>(
           "Marshal error: SetStruct");
   }
-  PyObject* fbThriftData = getThriftData(obj);
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic-python-capi::SetStruct>>{}(fbThriftData);
+      ::test::fixtures::basic-python-capi::SetStruct>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic-python-capi::SetStruct>
@@ -573,9 +573,9 @@ Extractor<::test::fixtures::basic-python-capi::MapStruct>::operator()(PyObject* 
       return extractorError<::test::fixtures::basic-python-capi::MapStruct>(
           "Marshal error: MapStruct");
   }
-  PyObject* fbThriftData = getThriftData(obj);
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic-python-capi::MapStruct>>{}(fbThriftData);
+      ::test::fixtures::basic-python-capi::MapStruct>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic-python-capi::MapStruct>
@@ -660,9 +660,9 @@ Extractor<::test::fixtures::basic-python-capi::ComposeStruct>::operator()(PyObje
       return extractorError<::test::fixtures::basic-python-capi::ComposeStruct>(
           "Marshal error: ComposeStruct");
   }
-  PyObject* fbThriftData = getThriftData(obj);
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic-python-capi::ComposeStruct>>{}(fbThriftData);
+      ::test::fixtures::basic-python-capi::ComposeStruct>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic-python-capi::ComposeStruct>

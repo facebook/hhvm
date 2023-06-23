@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import unittest
+from sys import getrefcount
 
 import thrift.python_capi.fixture as fixture
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
@@ -221,6 +222,45 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertIsNone(unset_primitive.bytey)
         with self.assertRaises(TypeError):
             fixture.roundtrip_PrimitiveStruct(self.my_struct())
+
+    def test_memleak_primitive(self) -> None:
+        # Use non-singleton objects to avoid noise from runtime
+        short = 9001
+        f = 9001.0
+        bytes_ = b"bippity boppity boo"
+
+        def make_primitive():
+            return PrimitiveStruct(
+                shorty=short,
+                inty=short,
+                longy=short,
+                floaty=f,
+                dubby=f,
+                bytey=bytes_,
+            )
+
+        primitive = make_primitive()
+        # This test works to detect leaks of primitives only because they are
+        # placed directly into struct internal data without conversion.
+        # Non-primitives can be leaked, but not detectable by this test.
+        self.assertIs(primitive.shorty, short)
+        self.assertIs(primitive.inty, short)
+        self.assertIs(primitive.longy, short)
+        self.assertIs(primitive.floaty, f)
+        self.assertIs(primitive.dubby, f)
+        self.assertIs(primitive.bytey, bytes_)
+
+        short_refcount = getrefcount(short)
+        f_refcount = getrefcount(f)
+        bytes_refcount = getrefcount(bytes_)
+
+        for _ in range(10):
+            fixture.roundtrip_PrimitiveStruct(make_primitive())
+
+        # These all fail if there is a leak in Extractor<PrimitiveStruct>
+        self.assertEqual(bytes_refcount, getrefcount(bytes_))
+        self.assertEqual(f_refcount, getrefcount(f))
+        self.assertEqual(short_refcount, getrefcount(short))
 
     def test_roundtrip_marshal_ListStruct(self) -> None:
         self.assertEqual(ListStruct(), fixture.roundtrip_ListStruct(ListStruct()))

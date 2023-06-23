@@ -53,9 +53,10 @@ Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(PyObject*
           "Marshal error: {{struct:name}}");
   }
   {{#struct:fields?}}
-  PyObject* fbThriftData = getThriftData(obj);
+  {{! getThriftData increments tuple struct refcnt}}
+  StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      {{program:cpp_namespaces}}::{{struct:cpp_name}}>>{}(fbThriftData);
+      {{program:cpp_namespaces}}::{{struct:cpp_name}}>>{}(*fbThriftData);
   {{/struct:fields?}}
   {{^struct:fields?}}
   return {{program:cpp_namespaces}}::{{struct:cpp_name}}{};

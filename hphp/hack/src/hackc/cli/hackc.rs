@@ -244,8 +244,11 @@ impl Opts {
 #[cfg(fbcode_build)]
 #[cli::main("hackc", error_logging)]
 fn main(_fb: fbinit::FacebookInit, opts: Opts) -> Result<()> {
-    // In FB-mode we convert logs into tracing.
-    tracing_log::LogTracer::init()?;
+    // tracing-log is EXTREMELY SLOW. Running a verify over www is about 10x
+    // slower using tracing-log vs env_logger!
+    // tracing_log::LogTracer::init()?;
+    env_logger::init();
+
     hackc_main(opts)
 }
 

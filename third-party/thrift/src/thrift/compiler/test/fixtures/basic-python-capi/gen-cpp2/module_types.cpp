@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::MyEnum>::size;
+#endif
 folly::Range<::test::fixtures::basic-python-capi::MyEnum const*> const TEnumTraits<::test::fixtures::basic-python-capi::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::MyEnum>::names);
 
@@ -31,7 +33,9 @@ bool TEnumTraits<::test::fixtures::basic-python-capi::MyEnum>::findValue(folly::
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::size;
+#endif
 folly::Range<::test::fixtures::basic-python-capi::NormalDecentEnum const*> const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::NormalDecentEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::NormalDecentEnum>::names);
 
@@ -1770,7 +1774,9 @@ void TccStructTraits<::test::fixtures::basic-python-capi::OurUnion>::translateFi
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::size;
+#endif
 folly::Range<::test::fixtures::basic-python-capi::OurUnion::Type const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::names);
 

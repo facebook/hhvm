@@ -12,8 +12,12 @@
 
 namespace apache { namespace thrift { namespace test {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr ::std::int32_t const simple_constants::kSizeId_;
+#endif
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr ::std::int32_t const simple_constants::kIndexId_;
+#endif
 
 }}} // apache::thrift::test

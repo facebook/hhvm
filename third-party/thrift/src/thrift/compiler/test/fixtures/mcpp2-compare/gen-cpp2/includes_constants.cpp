@@ -12,6 +12,8 @@
 
 namespace a { namespace different { namespace ns {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr ::std::int64_t const includes_constants::IncludedConstant_;
+#endif
 
 }}} // a::different::ns

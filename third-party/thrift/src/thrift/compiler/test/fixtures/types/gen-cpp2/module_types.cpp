@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::size;
+#endif
 folly::Range<::apache::thrift::fixtures::types::has_bitwise_ops const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names);
 
@@ -31,7 +33,9 @@ bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::size;
+#endif
 folly::Range<::apache::thrift::fixtures::types::is_unscoped const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names);
 
@@ -48,7 +52,9 @@ bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(foll
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::size;
+#endif
 folly::Range<::apache::thrift::fixtures::types::MyForwardRefEnum const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names);
 

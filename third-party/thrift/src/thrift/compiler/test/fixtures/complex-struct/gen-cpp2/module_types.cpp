@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::cpp2::MyEnum>::size;
+#endif
 folly::Range<::cpp2::MyEnum const*> const TEnumTraits<::cpp2::MyEnum>::values = folly::range(TEnumDataStorage<::cpp2::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyEnum>::names = folly::range(TEnumDataStorage<::cpp2::MyEnum>::names);
 
@@ -1842,7 +1844,9 @@ void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::cpp2::MyUnion::Type>::size;
+#endif
 folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
 
@@ -1999,7 +2003,9 @@ void TccStructTraits<::cpp2::MyUnionFloatFieldThrowExp>::translateFieldName(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::size;
+#endif
 folly::Range<::cpp2::MyUnionFloatFieldThrowExp::Type const*> const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnionFloatFieldThrowExp::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::names);
 

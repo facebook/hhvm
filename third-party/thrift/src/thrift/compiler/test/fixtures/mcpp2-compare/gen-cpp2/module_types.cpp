@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::MyEnumA>::size;
+#endif
 folly::Range<::some::valid::ns::MyEnumA const*> const TEnumTraits<::some::valid::ns::MyEnumA>::values = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumA>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::MyEnumA>::names = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumA>::names);
 
@@ -31,7 +33,9 @@ bool TEnumTraits<::some::valid::ns::MyEnumA>::findValue(folly::StringPiece name,
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::AnnotatedEnum>::size;
+#endif
 folly::Range<::some::valid::ns::AnnotatedEnum const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum>::values = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum>::names = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::names);
 
@@ -48,7 +52,9 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum>::findValue(folly::StringPiece
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::AnnotatedEnum2>::size;
+#endif
 folly::Range<::some::valid::ns::AnnotatedEnum2 const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum2>::values = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum2>::names = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::names);
 
@@ -65,7 +71,9 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum2>::findValue(folly::StringPiec
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::MyEnumB>::size;
+#endif
 folly::Range<::some::valid::ns::MyEnumB const*> const TEnumTraits<::some::valid::ns::MyEnumB>::values = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumB>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::MyEnumB>::names = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumB>::names);
 
@@ -629,7 +637,9 @@ void TccStructTraits<::some::valid::ns::SimpleUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::SimpleUnion::Type>::size;
+#endif
 folly::Range<::some::valid::ns::SimpleUnion::Type const*> const TEnumTraits<::some::valid::ns::SimpleUnion::Type>::values = folly::range(TEnumDataStorage<::some::valid::ns::SimpleUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::SimpleUnion::Type>::names = folly::range(TEnumDataStorage<::some::valid::ns::SimpleUnion::Type>::names);
 
@@ -744,7 +754,9 @@ void TccStructTraits<::some::valid::ns::ComplexUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::ComplexUnion::Type>::size;
+#endif
 folly::Range<::some::valid::ns::ComplexUnion::Type const*> const TEnumTraits<::some::valid::ns::ComplexUnion::Type>::values = folly::range(TEnumDataStorage<::some::valid::ns::ComplexUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::ComplexUnion::Type>::names = folly::range(TEnumDataStorage<::some::valid::ns::ComplexUnion::Type>::names);
 
@@ -3589,7 +3601,9 @@ void TccStructTraits<::some::valid::ns::FloatUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::some::valid::ns::FloatUnion::Type>::size;
+#endif
 folly::Range<::some::valid::ns::FloatUnion::Type const*> const TEnumTraits<::some::valid::ns::FloatUnion::Type>::values = folly::range(TEnumDataStorage<::some::valid::ns::FloatUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::some::valid::ns::FloatUnion::Type>::names = folly::range(TEnumDataStorage<::some::valid::ns::FloatUnion::Type>::names);
 

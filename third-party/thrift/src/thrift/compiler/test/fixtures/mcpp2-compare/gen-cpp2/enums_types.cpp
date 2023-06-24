@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::facebook::ns::qwerty::AnEnumA>::size;
+#endif
 folly::Range<::facebook::ns::qwerty::AnEnumA const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumA>::values = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumA>::names = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::names);
 
@@ -31,7 +33,9 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumA>::findValue(folly::StringPiece 
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::facebook::ns::qwerty::AnEnumB>::size;
+#endif
 folly::Range<::facebook::ns::qwerty::AnEnumB const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumB>::values = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumB>::names = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::names);
 
@@ -48,7 +52,9 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumB>::findValue(folly::StringPiece 
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::facebook::ns::qwerty::AnEnumC>::size;
+#endif
 folly::Range<::facebook::ns::qwerty::AnEnumC const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumC>::values = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumC>::names = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::names);
 
@@ -65,7 +71,9 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumC>::findValue(folly::StringPiece 
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::facebook::ns::qwerty::AnEnumD>::size;
+#endif
 folly::Range<::facebook::ns::qwerty::AnEnumD const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumD>::values = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumD>::names = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::names);
 
@@ -82,7 +90,9 @@ bool TEnumTraits<::facebook::ns::qwerty::AnEnumD>::findValue(folly::StringPiece 
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::facebook::ns::qwerty::AnEnumE>::size;
+#endif
 folly::Range<::facebook::ns::qwerty::AnEnumE const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumE>::values = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::ns::qwerty::AnEnumE>::names = folly::range(TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::names);
 

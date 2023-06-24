@@ -14,7 +14,9 @@
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::size;
+#endif
 folly::Range<::test::fixtures::basic-structured-annotations::MyEnum const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::names);
 
@@ -846,7 +848,9 @@ void TccStructTraits<::test::fixtures::basic-structured-annotations::MyUnion>::t
 
 namespace apache { namespace thrift {
 
+#if FOLLY_CPLUSPLUS < 201703L
 constexpr std::size_t const TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::size;
+#endif
 folly::Range<::test::fixtures::basic-structured-annotations::MyUnion::Type const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names);
 

@@ -39,10 +39,14 @@ struct StructA {
 }
 
 struct StructWithRef {
-  1: optional StructB shared_struct_field (cpp.ref_type = "shared_const");
-  2: optional list<string> shared_list_field (cpp.ref_type = "shared_const");
-  3: optional i16 shared_i16_field (cpp.ref_type = "shared_const");
-  4: optional i32 unique_i32_field (cpp.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Shared}
+  1: optional StructB shared_struct_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: optional list<string> shared_list_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: optional i16 shared_i16_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: optional i32 unique_i32_field;
 }
 
 struct StructWithCppType {
@@ -54,7 +58,8 @@ struct StructB {
   1: string str_field;
   2: optional i64 i64_field;
   3: optional IOBufPtr iobufptr_field;
-  5: optional list<i64> list_field (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: optional list<i64> list_field;
   6: i32 i32_field;
   7: i16 i16_field;
   8: byte byte_field;
@@ -77,9 +82,12 @@ union Union {
 
 union UnionWithRef {
   1: StructB simple_field;
-  2: StructA unique_field (cpp.ref_type = "unique");
-  4: StructA shared_field (cpp2.ref_type = "shared");
-  3: StructA shared_const_field (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: StructA unique_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  4: StructA shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  3: StructA shared_const_field;
 }
 
 union TestUnion {

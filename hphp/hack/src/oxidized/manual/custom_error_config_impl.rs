@@ -14,6 +14,8 @@ use hash::HashSet;
 use serde_json;
 
 use crate::custom_error::CustomError;
+use crate::custom_error::VersionedErrorMessage;
+use crate::custom_error::VersionedPattError;
 use crate::custom_error_config::CustomErrorConfig;
 use crate::error_message::Elem;
 use crate::error_message::ErrorMessage;
@@ -128,6 +130,22 @@ impl ValidationEnv {
 }
 
 // -- Individual errors --------------------------------------------------------
+
+impl Validatable for VersionedErrorMessage {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::MessageV1(msg) => msg.validate(env),
+        }
+    }
+}
+
+impl Validatable for VersionedPattError {
+    fn validate(&mut self, env: &mut ValidationEnv) -> bool {
+        match self {
+            Self::ErrorV1(msg) => msg.validate(env),
+        }
+    }
+}
 
 impl Validatable for CustomError {
     fn validate(&mut self, env: &mut ValidationEnv) -> bool {

@@ -6,9 +6,14 @@
  *
  *)
 
+type versioned_patt_error = Error_v1 of Patt_error.t [@@deriving eq, show]
+
+type versioned_error_message = Message_v1 of Error_message.t
+[@@deriving eq, show]
+
 type t = {
   name: string;
-  patt: Patt_error.t;
-  error_message: Error_message.t;
+  patt: versioned_patt_error;
+  error_message: versioned_error_message;
 }
 [@@deriving eq, show]

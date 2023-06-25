@@ -35,19 +35,22 @@ let%test_unit "patt string exactly" =
   (* Matches [Apply_reasons] error with any callback, applied to
      [Violated_constraint] secondary error with contrained tparam `Tviolated` *)
   let patt =
-    Apply_reasons
-      {
-        patt_rsns_cb = Any_reasons_callback;
-        patt_secondary =
-          Violated_constraint
-            {
-              patt_cstr = Patt_string.Exactly name;
-              patt_ty_sub = Any;
-              patt_ty_sup = Any;
-            };
-      }
+    Custom_error.Error_v1
+      (Apply_reasons
+         {
+           patt_rsns_cb = Any_reasons_callback;
+           patt_secondary =
+             Violated_constraint
+               {
+                 patt_cstr = Patt_string.Exactly name;
+                 patt_ty_sub = Any;
+                 patt_ty_sup = Any;
+               };
+         })
   in
-  let error_message = Error_message.{ message = [Lit "Ok"] } in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Ok"] }
+  in
   let custom_err = Custom_error.{ name; patt; error_message } in
   let custom_config =
     Custom_error_config.{ valid = [custom_err]; invalid = [] }
@@ -131,19 +134,22 @@ let%test_unit "patt tysub" =
   in
   (* Match the subtype in our error message *)
   let patt =
-    Apply_reasons
-      {
-        patt_rsns_cb = Any_reasons_callback;
-        patt_secondary =
-          Violated_constraint
-            {
-              patt_cstr = Patt_string.Exactly param_name;
-              patt_ty_sub;
-              patt_ty_sup = Any;
-            };
-      }
+    Custom_error.Error_v1
+      (Apply_reasons
+         {
+           patt_rsns_cb = Any_reasons_callback;
+           patt_secondary =
+             Violated_constraint
+               {
+                 patt_cstr = Patt_string.Exactly param_name;
+                 patt_ty_sub;
+                 patt_ty_sup = Any;
+               };
+         })
   in
-  let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Ok:"; Ty_var "x"] }
+  in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
   let custom_config =
     Custom_error_config.{ valid = [custom_err]; invalid = [] }
@@ -233,19 +239,22 @@ let%test_unit "patt tysub or pattern" =
   in
   (* Match the subtype in our error message *)
   let patt =
-    Apply_reasons
-      {
-        patt_rsns_cb = Any_reasons_callback;
-        patt_secondary =
-          Violated_constraint
-            {
-              patt_cstr = Patt_string.Exactly param_name;
-              patt_ty_sub;
-              patt_ty_sup = Any;
-            };
-      }
+    Custom_error.Error_v1
+      (Apply_reasons
+         {
+           patt_rsns_cb = Any_reasons_callback;
+           patt_secondary =
+             Violated_constraint
+               {
+                 patt_cstr = Patt_string.Exactly param_name;
+                 patt_ty_sub;
+                 patt_ty_sup = Any;
+               };
+         })
   in
-  let error_message = Error_message.{ message = [Lit "Ok:"; Ty_var "x"] } in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Ok:"; Ty_var "x"] }
+  in
   let custom_err = Custom_error.{ name = "patt tysub"; patt; error_message } in
   let custom_config =
     Custom_error_config.{ valid = [custom_err]; invalid = [] }
@@ -279,18 +288,19 @@ let%test_unit "test namespace" =
         })
   in
   let patt =
-    Patt_error.(
-      Apply_reasons
-        {
-          patt_rsns_cb = Any_reasons_callback;
-          patt_secondary =
-            Violated_constraint
-              {
-                patt_cstr = Patt_string.Exactly param_name;
-                patt_ty_sub;
-                patt_ty_sup = Any;
-              };
-        })
+    Custom_error.Error_v1
+      Patt_error.(
+        Apply_reasons
+          {
+            patt_rsns_cb = Any_reasons_callback;
+            patt_secondary =
+              Violated_constraint
+                {
+                  patt_cstr = Patt_string.Exactly param_name;
+                  patt_ty_sub;
+                  patt_ty_sup = Any;
+                };
+          })
   in
   let snd_err =
     Typing_error.Secondary.Violated_constraint
@@ -305,7 +315,9 @@ let%test_unit "test namespace" =
     Typing_error.(
       apply_reasons ~on_error:(Reasons_callback.unify_error_at Pos.none) snd_err)
   in
-  let error_message = Error_message.{ message = [Lit "Ok"] } in
+  let error_message =
+    Custom_error.Message_v1 Error_message.{ message = [Lit "Ok"] }
+  in
   let custom_err = Custom_error.{ name = "namespaced"; patt; error_message } in
   let custom_config =
     Custom_error_config.{ valid = [custom_err]; invalid = [] }

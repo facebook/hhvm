@@ -395,7 +395,10 @@ let eval_error_message Error_message.{ message } ~env =
   in
   List.map ~f message
 
-let eval_custom_error Custom_error.{ patt; error_message; _ } ~err =
+let eval_custom_error
+    Custom_error.
+      { patt = Error_v1 patt; error_message = Message_v1 error_message; _ }
+    ~err =
   match matches_error patt ~scrut:err with
   | Match.Matched env -> Some (eval_error_message error_message ~env)
   | _ -> None

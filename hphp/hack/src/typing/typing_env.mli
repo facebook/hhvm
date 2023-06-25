@@ -273,6 +273,8 @@ val set_support_dynamic_type : env -> bool -> env
 
 val set_everything_sdt : env -> bool -> env
 
+val set_no_auto_likes : env -> bool -> env
+
 val get_module : env -> module_key -> module_decl option
 
 val get_current_module : env -> string option
@@ -280,6 +282,8 @@ val get_current_module : env -> string option
 val get_internal : env -> bool
 
 val get_support_dynamic_type : env -> bool
+
+val get_no_auto_likes : env -> bool
 
 val set_self : env -> string -> locl_ty -> env
 

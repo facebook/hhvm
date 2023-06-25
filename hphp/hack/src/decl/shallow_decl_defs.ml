@@ -33,6 +33,7 @@ module PropFlags = struct
   let php_std_lib_bit = 1 lsl 5
   let readonly_bit    = 1 lsl 6
   let safe_global_variable_bit = 1 lsl 7
+  let no_auto_likes_bit = 1 lsl 8
 
   let get_abstract    = is_set abstract_bit
   let get_const       = is_set const_bit
@@ -42,6 +43,7 @@ module PropFlags = struct
   let get_php_std_lib = is_set php_std_lib_bit
   let get_readonly = is_set readonly_bit
   let get_safe_global_variable = is_set safe_global_variable_bit
+  let get_no_auto_likes = is_set no_auto_likes_bit
 
   let set_abstract    = set_bit abstract_bit
   let set_const       = set_bit const_bit
@@ -51,6 +53,7 @@ module PropFlags = struct
   let set_php_std_lib = set_bit php_std_lib_bit
   let set_readonly    = set_bit readonly_bit
   let set_safe_global_variable = set_bit safe_global_variable_bit
+  let set_no_auto_likes = set_bit no_auto_likes_bit
 
   let make
       ~abstract
@@ -61,6 +64,7 @@ module PropFlags = struct
       ~php_std_lib
       ~readonly
       ~safe_global_variable
+      ~no_auto_likes
       =
     empty
     |> set_abstract abstract
@@ -71,6 +75,7 @@ module PropFlags = struct
     |> set_php_std_lib php_std_lib
     |> set_readonly readonly
     |> set_safe_global_variable safe_global_variable
+    |> set_no_auto_likes no_auto_likes
 
   let pp fmt t =
     if t = empty then
@@ -91,6 +96,7 @@ module PropFlags = struct
       if get_php_std_lib t then print "php_std_lib";
       if get_readonly t then print "readonly";
       if get_safe_global_variable t then print "safe_global_variable";
+      if get_no_auto_likes t then print "no_auto_likes";
       Format.fprintf fmt "@,@]"
     )
 

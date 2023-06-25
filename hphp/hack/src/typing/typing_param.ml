@@ -81,7 +81,7 @@ let check_param_has_hint env param =
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty ~dynamic_mode env decl_hint param =
+let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
   (* Don't check (again) for existence of hint in dynamic mode *)
   if not dynamic_mode then check_param_has_hint env param;
   match decl_hint with
@@ -125,9 +125,10 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
                 ty
             | _ -> ty
           in
-          (* For implicit pessimisation, wrap like around non-enforced inout parameters *)
+          (* For implicit pessimisation, without <<__NoAutoLikes>>, wrap like around non-enforced inout parameters *)
           match (et_enforced, param.param_callconv) with
-          | (Unenforced, Ast_defs.Pinout _) -> MakeType.like (get_reason ty) ty
+          | (Unenforced, Ast_defs.Pinout _) when not no_auto_likes ->
+            MakeType.like (get_reason ty) ty
           | _ -> ty
         else
           ty
@@ -151,7 +152,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
         Typing_error_utils.add_typing_error ~env @@ Typing_error.primary err);
     (env, Some ty)
 
-let make_param_local_tys ~dynamic_mode env decl_tys params =
+let make_param_local_tys ~dynamic_mode ~no_auto_likes env decl_tys params =
   List.zip_exn params decl_tys
   |> List.map_env env ~f:(fun env (param, hint) ->
          let ty =
@@ -175,4 +176,4 @@ let make_param_local_tys ~dynamic_mode env decl_tys params =
            else
              hint
          in
-         make_param_local_ty ~dynamic_mode env ty param)
+         make_param_local_ty ~dynamic_mode ~no_auto_likes env ty param)

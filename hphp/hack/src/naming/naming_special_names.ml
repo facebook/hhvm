@@ -336,6 +336,8 @@ module UserAttributes = struct
 
   let uaNoAutoDynamic = "__NoAutoDynamic"
 
+  let uaNoAutoLikes = "__NoAutoLikes"
+
   let uaRequireDynamic = "__RequireDynamic"
 
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
@@ -688,6 +690,13 @@ module UserAttributes = struct
               contexts = [fn; cls; mthd; typealias];
               autocomplete = false;
               doc = "Locally disable implicit pessimisation.";
+            } );
+          ( uaNoAutoLikes,
+            {
+              contexts =
+                [fn; mthd; staticProperty; instProperty; parameter; lambda];
+              autocomplete = false;
+              doc = "Locally disable addition of ~ types.";
             } );
           ( uaRequireDynamic,
             {

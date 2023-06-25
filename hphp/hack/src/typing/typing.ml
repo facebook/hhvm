@@ -2310,7 +2310,11 @@ let is_lvalue = function
  * it is a subtype of the parameter type (if present).
  * Set the type of the parameter in the locals environment *)
 let rec bind_param
-    env ?(immutable = false) ?(can_read_globals = false) (opt_ty1, param) =
+    env
+    ?(immutable = false)
+    ?(can_read_globals = false)
+    ?(no_auto_likes = false)
+    (opt_ty1, param) =
   let (env, param_te, ty1) =
     match param.param_expr with
     | None -> begin
@@ -2383,7 +2387,7 @@ let rec bind_param
             && Env.get_support_dynamic_type env
           in
           let like_ty1 =
-            if support_dynamic then
+            if support_dynamic && not no_auto_likes then
               TUtils.make_like env ty1
             else
               ty1
@@ -2452,8 +2456,8 @@ let rec bind_param
                && Env.get_support_dynamic_type env ->
           Some (TUtils.make_like env ty1)
         | _ ->
-          (* In implicit SD mode, all inout parameters are pessimised *)
-          if TCO.everything_sdt env.genv.tcopt then
+          (* In implicit SD mode, all inout parameters are pessimised, unless marked <<__NoAutoLikes>> *)
+          if TCO.everything_sdt env.genv.tcopt && not no_auto_likes then
             Some (TUtils.make_like env ty1)
           else
             Some ty1
@@ -2474,14 +2478,15 @@ let rec bind_param
   in
   (env, tparam)
 
-and bind_params env ?(can_read_globals = false) ctxs param_tys params =
+and bind_params
+    env ?(can_read_globals = false) ~no_auto_likes ctxs param_tys params =
   let params_need_immutable = Typing_coeffects.get_ctx_vars ctxs in
   let bind_param_and_check env lty_and_param =
     let (_ty, param) = lty_and_param in
     let name = param.param_name in
     let immutable = List.exists ~f:(String.equal name) params_need_immutable in
     let (env, fun_param) =
-      bind_param ~immutable ~can_read_globals env lty_and_param
+      bind_param ~immutable ~can_read_globals ~no_auto_likes env lty_and_param
     in
     (env, fun_param)
   in
@@ -5348,11 +5353,14 @@ and check_function_dynamically_callable
   let (env, param_tys) =
     Typing_param.make_param_local_tys
       ~dynamic_mode:true
+      ~no_auto_likes:false
       env
       params_decl_ty
       f.f_params
   in
-  let (env, dynamic_params) = bind_params env f.f_ctxs param_tys f.f_params in
+  let (env, dynamic_params) =
+    bind_params ~no_auto_likes:false env f.f_ctxs param_tys f.f_params
+  in
   let (pos, name) =
     match f_name with
     | Some n -> n
@@ -5905,6 +5913,10 @@ and closure_make
     || Env.get_support_dynamic_type env
     || supportdyn
   in
+  let no_auto_likes =
+    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes user_attributes
+    || Env.get_no_auto_likes env
+  in
   (* A closure typed in env with parameters p1..pn and captured variables c1..cn
    * roughly compiles to
    *
@@ -5941,7 +5953,11 @@ and closure_make
   in
   (* Inout parameters should be pessimised in implicit pessimisation mode *)
   let ft =
-    if support_dynamic_type && TCO.everything_sdt env.genv.tcopt then
+    if
+      support_dynamic_type
+      && (not no_auto_likes)
+      && TCO.everything_sdt env.genv.tcopt
+    then
       {
         ft with
         ft_params =

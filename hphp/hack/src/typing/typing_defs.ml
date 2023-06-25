@@ -99,9 +99,11 @@ type fun_elt = {
   fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
+  (* TODO: ideally these should be packed flags *)
   fe_php_std_lib: bool;
   fe_support_dynamic_type: bool;
   fe_no_auto_dynamic: bool;
+  fe_no_auto_likes: bool;
 }
 [@@deriving show]
 

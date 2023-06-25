@@ -131,6 +131,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<SSet<'a>>>,
     under_no_auto_dynamic: bool,
+    under_no_auto_likes: bool,
     inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
     module: Option<Id<'a>>,
@@ -170,6 +171,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 type_parameters: Rc::new(Vec::new()),
                 source_text_allocator,
                 under_no_auto_dynamic: false,
+                under_no_auto_likes: false,
                 inside_no_auto_dynamic_class: false,
                 module: None,
             }),
@@ -475,6 +477,10 @@ fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
 
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
     name.trim_start_matches('$')
+}
+
+fn is_no_auto_attribute(name: &str) -> bool {
+    name == "__NoAutoDynamic" || name == "__NoAutoLikes"
 }
 
 const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
@@ -1159,6 +1165,7 @@ struct Attributes<'a> {
     can_call: bool,
     soft: bool,
     support_dynamic_type: bool,
+    no_auto_likes: bool,
     safe_global_variable: bool,
     cross_package: Option<&'a str>,
 }
@@ -1166,23 +1173,28 @@ struct Attributes<'a> {
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
     fn add_class(&mut self, name: &'a str, decl: &'a shallow_decl_defs::ShallowClass<'a>) {
         self.under_no_auto_dynamic = false;
+        self.under_no_auto_likes = false;
         self.inside_no_auto_dynamic_class = false;
         self.decls.add(name, Decl::Class(decl), self.arena);
     }
     fn add_fun(&mut self, name: &'a str, decl: &'a typing_defs::FunElt<'a>) {
         self.under_no_auto_dynamic = false;
+        self.under_no_auto_likes = false;
         self.decls.add(name, Decl::Fun(decl), self.arena);
     }
     fn add_typedef(&mut self, name: &'a str, decl: &'a typing_defs::TypedefType<'a>) {
         self.under_no_auto_dynamic = false;
+        self.under_no_auto_likes = false;
         self.decls.add(name, Decl::Typedef(decl), self.arena);
     }
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
         self.under_no_auto_dynamic = false;
+        self.under_no_auto_likes = false;
         self.decls.add(name, Decl::Const(decl), self.arena);
     }
     fn add_module(&mut self, name: &'a str, decl: &'a typing_defs::ModuleDefType<'a>) {
         self.under_no_auto_dynamic = false;
+        self.under_no_auto_likes = false;
         self.decls.add(name, Decl::Module(decl), self.arena)
     }
 
@@ -1356,6 +1368,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn implicit_sdt(&self) -> bool {
         self.opts.everything_sdt && !self.under_no_auto_dynamic
+    }
+
+    fn no_auto_likes(&self) -> bool {
+        self.under_no_auto_likes
     }
 
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
@@ -1640,6 +1656,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             can_call: false,
             soft: false,
             support_dynamic_type: false,
+            no_auto_likes: false,
             safe_global_variable: false,
             cross_package: None,
         };
@@ -1723,6 +1740,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
+                    }
+                    "__NoAutoLikes" => {
+                        attributes.no_auto_likes = true;
                     }
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
@@ -1841,7 +1861,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             (false, _) => self.elaborate_defined_id(header.name),
         };
         let id = id_opt.unwrap_or_else(|| Id(self.get_pos(header.name), ""));
-        let (params, properties, variadic) = self.as_fun_params(header.param_list)?;
+        let attributes = self.to_attributes(attributes);
+        let (params, properties, variadic) =
+            self.as_fun_params(attributes.no_auto_likes, header.param_list)?;
         let f_pos = self.get_pos(header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
 
@@ -1885,7 +1907,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         } else {
             type_
         };
-        let attributes = self.to_attributes(attributes);
         // TODO(hrust) Put this in a helper. Possibly do this for all flags.
         let mut flags = match fun_kind {
             FunKind::FSync => FunTypeFlags::empty(),
@@ -1952,6 +1973,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn as_fun_params(
         &self,
+        no_auto_likes: bool,
         list: Node<'a>,
     ) -> Option<(&'a FunParams<'a>, &'a [ShallowProp<'a>], bool)> {
         match list {
@@ -1988,6 +2010,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                 flags.set(PropFlags::NEEDS_INIT, self.file_mode != Mode::Mhhi);
                                 flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
                                 flags.set(PropFlags::READONLY, readonly);
+                                // Promoted property either marked <<__NoAutoLikes>> on the parameter or on the constructor
+                                flags.set(
+                                    PropFlags::NO_AUTO_LIKES,
+                                    attributes.no_auto_likes || no_auto_likes,
+                                );
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
@@ -3366,10 +3393,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let tparams = self.pop_type_params(generic_params);
 
         // Parse the user attributes
-        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attributes.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
+                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -3550,10 +3577,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let tparams = self.pop_type_params(generic_parameter);
 
         // Parse the user attributes
-        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attribute_spec.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
+                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -3864,6 +3891,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     support_dynamic_type: self.implicit_sdt()
                         || parsed_attributes.support_dynamic_type,
                     no_auto_dynamic: self.under_no_auto_dynamic,
+                    no_auto_likes: parsed_attributes.no_auto_likes,
                 });
                 let this = Rc::make_mut(&mut self.state);
                 this.add_fun(name, fun_elt);
@@ -4610,6 +4638,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         PropFlags::SAFE_GLOBAL_VARIABLE,
                         attributes.safe_global_variable,
                     );
+                    flags.set(PropFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
                     Some(ShallowProp {
                         xhp_attr: None,
                         name: (pos, name),
@@ -4848,10 +4877,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         );
 
         // Parse the user attributes
-        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is
         let user_attributes = self.slice(attrs.iter().rev().filter_map(|attribute| {
             if let Node::Attribute(attr) = attribute {
-                if self.opts.keep_user_attributes || attr.name.1 == "__NoAutoDynamic" {
+                if self.opts.keep_user_attributes || is_no_auto_attribute(attr.name.1) {
                     Some(self.user_attribute_to_decl(attr))
                 } else {
                     None
@@ -5521,6 +5550,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let this = Rc::make_mut(&mut self.state);
             this.under_no_auto_dynamic = true;
         }
+        if attrs.contains_marker_attribute("__NoAutoLikes") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_likes = true;
+        }
         match attrs {
             Node::List(nodes) => {
                 Node::BracketedList(self.alloc((self.get_pos(ltlt), nodes, self.get_pos(gtgt))))
@@ -5682,7 +5715,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             if let ParamMode::FPinout = fp.kind {
                 flags |= FunParamFlags::INOUT;
                 // Pessimise type for inout
-                param_type = if self.implicit_sdt() {
+                param_type = if self.implicit_sdt() && !self.no_auto_likes() {
                     self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(param_type)))
                 } else {
                     param_type
@@ -5730,7 +5763,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             flags |= FunTypeFlags::VARIADIC
         }
 
-        let pess_return_type = if self.implicit_sdt() {
+        let pess_return_type = if self.implicit_sdt() && !self.no_auto_likes() {
             self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
         } else {
             ret
@@ -6085,6 +6118,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         if attributes.contains_marker_attribute("__NoAutoDynamic") {
             let this = Rc::make_mut(&mut self.state);
             this.under_no_auto_dynamic = true;
+        }
+        if attributes.contains_marker_attribute("__NoAutoLikes") {
+            let this = Rc::make_mut(&mut self.state);
+            this.under_no_auto_likes = true;
         }
         if self.opts.keep_user_attributes {
             attributes

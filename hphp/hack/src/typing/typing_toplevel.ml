@@ -113,6 +113,15 @@ let fun_def ctx fd : Tast.fun_def list option =
     else
       env
   in
+  let no_auto_likes =
+    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes f.f_user_attributes
+  in
+  let env =
+    if no_auto_likes then
+      Env.set_no_auto_likes env true
+    else
+      env
+  in
   let env =
     match
       Naming_attributes.find
@@ -195,6 +204,7 @@ let fun_def ctx fd : Tast.fun_def list option =
   let (env, param_tys) =
     Typing_param.make_param_local_tys
       ~dynamic_mode:false
+      ~no_auto_likes
       env
       params_decl_ty
       f.f_params
@@ -206,7 +216,13 @@ let fun_def ctx fd : Tast.fun_def list option =
       (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
   in
   let (env, typed_params) =
-    Typing.bind_params env ~can_read_globals f.f_ctxs param_tys f.f_params
+    Typing.bind_params
+      env
+      ~can_read_globals
+      ~no_auto_likes
+      f.f_ctxs
+      param_tys
+      f.f_params
   in
   let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
   let local_tpenv = Env.get_tpenv env in

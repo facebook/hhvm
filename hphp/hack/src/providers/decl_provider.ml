@@ -130,7 +130,7 @@ let get_class
   end
 
 let maybe_pessimise_fun_decl ctx fun_decl =
-  if Provider_context.implicit_sdt_for_fun ctx fun_decl then
+  if Provider_context.implicit_likes_for_fun ctx fun_decl then
     Typing_defs.
       {
         fun_decl with

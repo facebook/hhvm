@@ -157,10 +157,6 @@ let make_return_type
     in
     let localize ~wrap (env : env) (dty : decl_ty) =
       if TypecheckerOptions.everything_sdt env.genv.tcopt then (
-        (* Under implicit pessimisation, all unenforceable return types get pessimised to a like type,
-           and all enforceable ones for the purpose of checking the function body also get a like type
-           when the function is __SupportDynamicType, which all functions are during implicit pessimisation.
-           Hence we don't need to check enforcement here. Don't pessimise void. *)
         let dty =
           match get_node dty with
           | Tfun _ ->
@@ -179,10 +175,28 @@ let make_return_type
           else
             (env, ty)
         in
+        (* If <<__NoAutoLikes>> is specified, then add a like- to enforced returns
+         * so that we can return an expression of like-type.
+         * If <<__NoAutoLikes>> is not specified, then add a like- for the same reason,
+         * but add a like type even for non-enforced returns because these we pessimise anyway.
+         * Never pessimise void.
+         *)
+        let add_like =
+          if Env.get_no_auto_likes env then
+            match Typing_enforceability.get_enforcement ~this_class env dty with
+            | Unenforced -> false
+            | Enforced -> true
+          else
+            true
+        in
         let et_type =
           match get_node ty with
           | Tprim Aast.Tvoid when not wrap -> ty
-          | _ -> TUtils.make_like env ty
+          | _ ->
+            if add_like then
+              TUtils.make_like env ty
+            else
+              ty
         in
         let et_type =
           if wrap then

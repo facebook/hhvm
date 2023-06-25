@@ -1062,12 +1062,17 @@ let set_fn_kind env fn_type =
 let set_support_dynamic_type env b =
   { env with genv = { env.genv with this_support_dynamic_type = b } }
 
+let set_no_auto_likes env b =
+  { env with genv = { env.genv with no_auto_likes = b } }
+
 let set_everything_sdt env b =
   map_tcopt
     ~f:(fun tcopt -> { tcopt with GlobalOptions.tco_everything_sdt = b })
     env
 
 let get_support_dynamic_type env = env.genv.this_support_dynamic_type
+
+let get_no_auto_likes env = env.genv.no_auto_likes
 
 let set_self env self_id self_ty =
   let genv = env.genv in

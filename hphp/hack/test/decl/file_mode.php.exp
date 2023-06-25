@@ -30,7 +30,8 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [5:10-29]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }));
   ("\\MyPartialType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [7:6-19];

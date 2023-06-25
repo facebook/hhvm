@@ -8,6 +8,7 @@
 
 val make_param_local_tys :
   dynamic_mode:bool ->
+  no_auto_likes:bool ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option list ->
   Nast.fun_param list ->

@@ -44,6 +44,14 @@ module Env = struct
             { t.elab_everything_sdt with under_no_auto_dynamic };
       }
 
+  let set_under_no_auto_likes t ~under_no_auto_likes =
+    Naming_phase_env.
+      {
+        t with
+        elab_everything_sdt =
+          Elab_everything_sdt.{ t.elab_everything_sdt with under_no_auto_likes };
+      }
+
   let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 
   let under_no_auto_dynamic
@@ -54,15 +62,32 @@ module Env = struct
         } =
     under_no_auto_dynamic
 
+  let under_no_auto_likes
+      Naming_phase_env.
+        {
+          elab_everything_sdt = Elab_everything_sdt.{ under_no_auto_likes; _ };
+          _;
+        } =
+    under_no_auto_likes
+
   let implicit_sdt env = everything_sdt env && not (under_no_auto_dynamic env)
+
+  let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
 let no_auto_dynamic_attr ua =
   Naming_attributes.mem SN.UserAttributes.uaNoAutoDynamic ua
 
+let no_auto_likes_attr ua =
+  Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes ua
+
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
-let wrap_like ((pos, _) as hint) = (pos, Aast.Hlike hint)
+let possibly_wrap_like env ((pos, _) as hint) =
+  if Env.under_no_auto_likes env then
+    hint
+  else
+    (pos, Aast.Hlike hint)
 
 let on_expr_ expr_ ~ctx =
   let ctx =
@@ -93,7 +118,7 @@ let on_hint hint ~ctx =
               ~f:(fun p ty ->
                 match p with
                 | Some { Aast.hfparam_kind = Ast_defs.Pinout _; _ } ->
-                  wrap_like ty
+                  possibly_wrap_like ctx ty
                 | _ -> ty)
           with
           | List.Or_unequal_lengths.Ok res -> res
@@ -101,7 +126,7 @@ let on_hint hint ~ctx =
           | List.Or_unequal_lengths.Unequal_lengths ->
             hint_fun.Aast.hf_param_tys
         in
-        let hf_return_ty = wrap_like hint_fun.Aast.hf_return_ty in
+        let hf_return_ty = possibly_wrap_like ctx hint_fun.Aast.hf_return_ty in
         let hint_ = Aast.(Hfun { hint_fun with hf_return_ty; hf_param_tys }) in
         (pos, wrap_supportdyn pos hint_)
       | _ -> hint
@@ -117,6 +142,12 @@ let on_fun_def_top_down fd ~ctx =
       ~under_no_auto_dynamic:
         (no_auto_dynamic_attr Aast.(fd.fd_fun.f_user_attributes))
   in
+  let ctx =
+    Env.set_under_no_auto_likes
+      ctx
+      ~under_no_auto_likes:
+        (no_auto_likes_attr Aast.(fd.fd_fun.f_user_attributes))
+  in
   (ctx, Ok fd)
 
 let on_fun_def fd ~ctx =
@@ -125,6 +156,12 @@ let on_fun_def fd ~ctx =
       ctx
       ~under_no_auto_dynamic:
         (no_auto_dynamic_attr Aast.(fd.fd_fun.f_user_attributes))
+  in
+  let ctx =
+    Env.set_under_no_auto_likes
+      ctx
+      ~under_no_auto_likes:
+        (no_auto_likes_attr Aast.(fd.fd_fun.f_user_attributes))
   in
   let fd_fun = fd.Aast.fd_fun in
   let fd_fun =
@@ -165,6 +202,11 @@ let on_typedef_top_down t ~ctx =
       ctx
       ~under_no_auto_dynamic:(no_auto_dynamic_attr t.Aast.t_user_attributes)
   in
+  let ctx =
+    Env.set_under_no_auto_likes
+      ctx
+      ~under_no_auto_likes:(no_auto_likes_attr t.Aast.t_user_attributes)
+  in
   (ctx, Ok t)
 
 let on_typedef t ~ctx =
@@ -172,6 +214,11 @@ let on_typedef t ~ctx =
     Env.set_under_no_auto_dynamic
       ctx
       ~under_no_auto_dynamic:(no_auto_dynamic_attr t.Aast.t_user_attributes)
+  in
+  let ctx =
+    Env.set_under_no_auto_likes
+      ctx
+      ~under_no_auto_likes:(no_auto_likes_attr t.Aast.t_user_attributes)
   in
   Aast_defs.(
     let (pos, _) = t.Aast.t_name in
@@ -255,7 +302,7 @@ let on_class_c_consts c_consts ~ctx =
 let on_enum_ e ~ctx =
   let e =
     if Env.everything_sdt ctx && Env.in_enum_class ctx then
-      let e_base = wrap_like e.Aast.e_base in
+      let e_base = possibly_wrap_like ctx e.Aast.e_base in
       Aast.{ e with e_base }
     else
       e
@@ -269,6 +316,11 @@ let on_method_top_down m ~ctx =
       ~under_no_auto_dynamic:
         (no_auto_dynamic_attr m.Aast.m_user_attributes
         || Env.under_no_auto_dynamic ctx)
+  in
+  let ctx =
+    Env.set_under_no_auto_likes
+      ctx
+      ~under_no_auto_likes:(no_auto_likes_attr m.Aast.m_user_attributes)
   in
   (ctx, Ok m)
 

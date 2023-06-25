@@ -91,4 +91,5 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     fe_php_std_lib;
     fe_support_dynamic_type;
     fe_no_auto_dynamic = false;
+    fe_no_auto_likes = false;
   }

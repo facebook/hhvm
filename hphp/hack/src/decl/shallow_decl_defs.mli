@@ -22,6 +22,7 @@ module PropFlags : sig
   val get_php_std_lib : t -> bool
   val get_readonly    : t -> bool
   val get_safe_global_variable: t -> bool
+  val get_no_auto_likes : t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
@@ -31,6 +32,7 @@ module PropFlags : sig
   val set_php_std_lib : bool -> t -> t
   val set_readonly    : bool -> t -> t
   val set_safe_global_variable: bool -> t -> t
+  val set_no_auto_likes : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -41,6 +43,7 @@ module PropFlags : sig
     php_std_lib:bool ->
     readonly: bool ->
     safe_global_variable: bool ->
+    no_auto_likes: bool ->
     t
 end
 [@@ocamlformat "disable"]

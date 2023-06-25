@@ -33,7 +33,8 @@
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
        fe_pos = [31:10-12]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false }));
   ("\\other_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -69,7 +70,8 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [35:10-18]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }));
   ("\\braced_id",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -106,5 +108,6 @@
                 ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [39:10-19]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }))
   ]

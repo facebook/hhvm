@@ -616,6 +616,7 @@ pub struct FunElt<R: Reason> {
     pub php_std_lib: bool,
     pub support_dynamic_type: bool,
     pub no_auto_dynamic: bool,
+    pub no_auto_likes: bool,
 }
 
 walkable!(FunElt<R> => [ty]);

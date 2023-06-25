@@ -93,10 +93,16 @@ module Elab_everything_sdt = struct
     in_is_as: bool;
     in_enum_class: bool;
     under_no_auto_dynamic: bool;
+    under_no_auto_likes: bool;
   }
 
   let empty =
-    { in_is_as = false; in_enum_class = false; under_no_auto_dynamic = false }
+    {
+      in_is_as = false;
+      in_enum_class = false;
+      under_no_auto_dynamic = false;
+      under_no_auto_likes = false;
+    }
 end
 
 module Elab_wildcard_hint = struct

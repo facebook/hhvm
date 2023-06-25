@@ -60,12 +60,13 @@ let method_dynamically_callable env cls m params_decl_ty return =
   let (env, param_tys) =
     Typing_param.make_param_local_tys
       ~dynamic_mode:true
+      ~no_auto_likes:false
       env
       params_decl_ty
       m.m_params
   in
   let (env, dynamic_params) =
-    Typing.bind_params env m.m_ctxs param_tys m.m_params
+    Typing.bind_params ~no_auto_likes:false env m.m_ctxs param_tys m.m_params
   in
   let pos = fst m.m_name in
   let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
@@ -192,6 +193,15 @@ let method_def ~is_disposable env cls m =
     else
       env
   in
+  let no_auto_likes =
+    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes m.m_user_attributes
+  in
+  let env =
+    if no_auto_likes then
+      Env.set_no_auto_likes env true
+    else
+      env
+  in
   let (env, cap_ty, unsafe_cap_ty) =
     Typing_coeffects.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
   in
@@ -262,9 +272,13 @@ let method_def ~is_disposable env cls m =
       ret_decl_ty
   in
   let sound_dynamic_check_saved_env = env in
+  let no_auto_likes =
+    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes m.m_user_attributes
+  in
   let (env, param_tys) =
     Typing_param.make_param_local_tys
       ~dynamic_mode:false
+      ~no_auto_likes
       env
       params_decl_ty
       m.m_params
@@ -277,7 +291,13 @@ let method_def ~is_disposable env cls m =
       (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
   in
   let (env, typed_params) =
-    Typing.bind_params env ~can_read_globals m.m_ctxs param_tys m.m_params
+    Typing.bind_params
+      env
+      ~can_read_globals
+      ~no_auto_likes
+      m.m_ctxs
+      param_tys
+      m.m_params
   in
   let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
   let env = set_tyvars_variance_in_callable env ret_locl_ty param_tys in
@@ -1084,6 +1104,9 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       (hint_of_type_hint cv.cv_type)
       (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
   in
+  let no_auto_likes =
+    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes cv.cv_user_attributes
+  in
   let (env, expected) =
     match decl_cty with
     | None -> (env, None)
@@ -1104,7 +1127,11 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
         match cty.et_enforced with
         | Enforced when is_none cv.cv_xhp_attr -> cty
         | _ ->
-          if TCO.everything_sdt env.genv.tcopt && not is_noautodynamic then
+          if
+            TCO.everything_sdt env.genv.tcopt
+            && (not is_noautodynamic)
+            && not no_auto_likes
+          then
             { cty with et_type = TUtils.make_like env cty.et_type }
           else (
             Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);

@@ -128,6 +128,7 @@ let get_occurrence_info
                  fe_support_dynamic_type =
                    Typing_defs.get_ce_support_dynamic_type class_elt;
                  fe_no_auto_dynamic = false;
+                 fe_no_auto_likes = false;
                })
       in
       (ft, occurrence)

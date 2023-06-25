@@ -89,6 +89,7 @@ and genv = {
   this_internal: bool;
   this_support_dynamic_type: bool;
   package_info: PackageInfo.t;
+  no_auto_likes: bool;
 }
 
 let initial_local tpenv =
@@ -137,6 +138,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         current_module = None;
         this_internal = false;
         this_support_dynamic_type = false;
+        no_auto_likes = false;
         package_info = Provider_context.get_package_info ctx;
       };
     tpenv = Type_parameter_env.empty;

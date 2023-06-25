@@ -26,6 +26,7 @@ val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt
 val bind_params :
   Typing_env_types.env ->
   ?can_read_globals:bool ->
+  no_auto_likes:bool ->
   Aast_defs.contexts option ->
   Typing_defs.locl_ty option list ->
   Nast.fun_param list ->

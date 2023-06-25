@@ -65,6 +65,7 @@ type fun_elt = {
   fe_php_std_lib: bool;
   fe_support_dynamic_type: bool;
   fe_no_auto_dynamic: bool;
+  fe_no_auto_likes: bool;
 }
 [@@deriving show]
 

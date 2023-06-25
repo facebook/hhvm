@@ -32,7 +32,8 @@ File root|module_attr.php--here.php
                ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
        fe_pos = [5:10-13]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false }));
   ("\\Talias",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([3:8-12], "here")); td_pos = [7:6-12];

@@ -1580,6 +1580,7 @@ and simplify_subtype_i
         match stripped_dynamic with
         | Some tyl ->
           let ty = MakeType.union r tyl in
+          let (env, ty) = Env.expand_type env ty in
           let delay_push =
             is_sub_type_for_union_i
               env
@@ -1609,6 +1610,29 @@ and simplify_subtype_i
             if delay_push then
               dyn_finish ty env
             else
+              (* "Solve" type variables that are bounded from above and below by the same type.
+               * Push this through nullables. This addresses common completeness issues that
+               * bedevil like-pushing because of the disjunction that is generated.
+               *)
+              let rec solve_eq_tyvar env ty =
+                let (env, ty) = Env.expand_type env ty in
+                match get_node ty with
+                | Tvar v ->
+                  let lower_bounds = Env.get_tyvar_lower_bounds env v in
+                  let upper_bounds = Env.get_tyvar_upper_bounds env v in
+                  let bounds = ITySet.inter lower_bounds upper_bounds in
+                  let bounds_list = ITySet.elements bounds in
+                  begin
+                    match bounds_list with
+                    | [LoclType lty] -> (env, lty)
+                    | _ -> (env, ty)
+                  end
+                | Toption ty1 ->
+                  let (env, ty1) = solve_eq_tyvar env ty1 in
+                  (env, mk (get_reason ty, Toption ty1))
+                | _ -> (env, ty)
+              in
+              let (env, ty) = solve_eq_tyvar env ty in
               (* For generic parameters with lower bounds, try like-pushing wrt
                * these lower bounds. For example, we want
                * vec<~int> <: ~T if vec<int> <: T
@@ -1623,7 +1647,15 @@ and simplify_subtype_i
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
               match opt_ty with
               | None ->
-                if is_tyvar ty then
+                let istyvar =
+                  match get_node ty with
+                  | Tvar _ -> true
+                  | Toption ty ->
+                    let (_, ty) = Env.expand_type env ty in
+                    is_tyvar ty
+                  | _ -> false
+                in
+                if istyvar then
                   env
                   |> simplify_subtype_i
                        ~subtype_env
@@ -1653,7 +1685,6 @@ and simplify_subtype_i
                 in
                 env |> simplify_pushed_like ||| dyn_finish ty
           in
-
           simplify_subtype_i
             ~subtype_env
             ~sub_supportdyn

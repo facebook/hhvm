@@ -89,6 +89,7 @@ type t =
   | Failed_to_load_should_abort
   | Server_non_opt_build_mode
   | Not_restarting_server_with_precomputed_saved_state
+  | Config_error
 [@@deriving show]
 
 and finale_data = {
@@ -191,6 +192,7 @@ let exit_code = function
     220
   | Server_non_opt_build_mode -> 222
   | Not_restarting_server_with_precomputed_saved_state -> 223
+  | Config_error -> 224
 
 let exit_code_to_string (code : int) : string =
   (* We will return the string "See Exit_status.ml for meaning of this code".

@@ -207,7 +207,8 @@
    parser_options
    procs_bucket
    server_local_config_knobs_stubs
-   utils_config_file)
+   utils_config_file
+   )
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -451,7 +452,8 @@
   symbol
   tast_provider
   typing
-  utils_core)
+  utils_core
+ )
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -556,6 +558,7 @@
     custom_error_types
     relative_path
     sys_utils
+    utils_exit
   )
 )
 

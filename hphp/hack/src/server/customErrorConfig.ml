@@ -24,4 +24,8 @@ let load_and_parse ?(path = repo_config_path) () =
     cfg
   | Error msg ->
     log_debug "CustomErrorConfig: %s" msg;
-    Custom_error_config.empty
+    Hh_logger.log
+      ~lvl:Hh_logger.Level.Fatal
+      "Custom errors config malformed: %s"
+      msg;
+    Exit.exit Exit_status.Config_error

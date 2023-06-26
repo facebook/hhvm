@@ -165,6 +165,8 @@ class structure_annotations {
         assert(pos != end);
         char delim = *pos;
         ++pos;
+        for (; pos != end && isspace(*pos); ++pos) {
+        }
         int depth = 0;
         std::vector<std::string> attrs;
         const char* start = pos;
@@ -176,8 +178,16 @@ class structure_annotations {
           } else if (
               (*pos == ',' && depth == 0) ||
               (*pos == delim && pos == end - 1)) {
+            int trailing_spaces = 0;
+            for (; pos - trailing_spaces - 1 > start &&
+                 isspace(*(pos - trailing_spaces - 1));
+                 ++trailing_spaces) {
+            }
             attrs.push_back(fmt::format(
-                "{}{}{}", delim, fmt::string_view(start, pos - start), delim));
+                "{}{}{}",
+                delim,
+                fmt::string_view(start, pos - start - trailing_spaces),
+                delim));
             start = pos + 1;
             for (; start != end && isspace(*start); ++start) {
             }

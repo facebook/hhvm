@@ -177,6 +177,16 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct F {} (
   hack.attributes = '\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon"), \\Oncalls("ig_rc_de")',
 )
+struct G {} (
+  hack.attributes = "
+  JSEnum,
+  GraphQLLegacyNamingScheme, GraphQLEnum(
+    'ServiceTagCategory',
+    'The possible category types that a Service Tag can belong to',
+  )
+",
+)
+
                 """
             ),
         )
@@ -193,7 +203,12 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 @hack.Attributes{attributes = ["JSEnum", "GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.')", "GraphQLLegacyNamingScheme", "Oncalls('srt_core')", "WarehouseEnum(shape('hive_enum_map' => true))"]}
                 enum E {}
                 @hack.Attributes{attributes = ['\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon")', '\\Oncalls("ig_rc_de")']}
-                struct F {} \
+                struct F {}
+                @hack.Attributes{attributes = ["JSEnum", "GraphQLLegacyNamingScheme", "GraphQLEnum(
+                'ServiceTagCategory',
+                'The possible category types that a Service Tag can belong to',
+                )"]}
+                struct G {}
                 """
             ),
         )

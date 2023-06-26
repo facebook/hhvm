@@ -105,10 +105,11 @@ let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
       add_dependency_edge env (Dep.Type ancestor))
 
 let make_depend_on_parent env ~skip_constructor_dep name class_ =
-  if not skip_constructor_dep then make_depend_on_constructor_name env name;
   match class_ with
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
-  | _ -> add_dependency_edge env (Dep.Extends name)
+  | _ ->
+    if not skip_constructor_dep then make_depend_on_constructor_name env name;
+    add_dependency_edge env (Dep.Extends name)
 
 let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
     =

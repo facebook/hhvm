@@ -184,12 +184,12 @@ class MockAsyncSocketLifecycleObserver : public AsyncSocket::LifecycleObserver {
   MOCK_METHOD(void, observerAttach, (AsyncTransport*), (noexcept));
   MOCK_METHOD(void, observerDetach, (AsyncTransport*), (noexcept));
   MOCK_METHOD(void, destroy, (AsyncTransport*), (noexcept));
-  MOCK_METHOD(void, close, (AsyncTransport*), (noexcept));
-  MOCK_METHOD(void, connect, (AsyncTransport*), (noexcept));
+  MOCK_METHOD(void, close, (AsyncSocket*), (noexcept));
+  MOCK_METHOD(void, connect, (AsyncSocket*), (noexcept));
   MOCK_METHOD(void, fdDetach, (AsyncSocket*), (noexcept));
   MOCK_METHOD(void, move, (AsyncSocket*, AsyncSocket*), (noexcept));
-  MOCK_METHOD(void, evbAttach, (AsyncTransport*, EventBase*), (noexcept));
-  MOCK_METHOD(void, evbDetach, (AsyncTransport*, EventBase*), (noexcept));
+  MOCK_METHOD(void, evbAttach, (AsyncSocket*, EventBase*), (noexcept));
+  MOCK_METHOD(void, evbDetach, (AsyncSocket*, EventBase*), (noexcept));
 };
 
 class MockFizzLoggingCallback : public FizzLoggingCallback {

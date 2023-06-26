@@ -1986,7 +1986,7 @@ struct NewConnectionContextHolder
   void observerAttach(folly::AsyncTransport*) noexcept override {}
   void observerDetach(folly::AsyncTransport*) noexcept override { delete this; }
   void destroy(folly::AsyncTransport*) noexcept override { delete this; }
-  void close(folly::AsyncTransport*) noexcept override {}
+  void close(folly::AsyncSocket*) noexcept override {}
 
   ThriftServer::NewConnectionContext ctx;
 };

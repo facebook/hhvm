@@ -1979,13 +1979,13 @@ ThriftServer::createIOThreadPool() {
 
 namespace {
 struct NewConnectionContextHolder
-    : public folly::AsyncTransport::LegacyLifecycleObserver {
+    : public folly::AsyncSocket::LegacyLifecycleObserver {
   explicit NewConnectionContextHolder(ThriftServer::NewConnectionContext c)
       : ctx(std::move(c)) {}
 
-  void observerAttach(folly::AsyncTransport*) noexcept override {}
-  void observerDetach(folly::AsyncTransport*) noexcept override { delete this; }
-  void destroy(folly::AsyncTransport*) noexcept override { delete this; }
+  void observerAttach(folly::AsyncSocket*) noexcept override {}
+  void observerDetach(folly::AsyncSocket*) noexcept override { delete this; }
+  void destroy(folly::AsyncSocket*) noexcept override { delete this; }
   void close(folly::AsyncSocket*) noexcept override {}
 
   ThriftServer::NewConnectionContext ctx;

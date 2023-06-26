@@ -182,9 +182,9 @@ class MockAcceptObserver : public AcceptObserver {
 class MockAsyncSocketLifecycleObserver
     : public AsyncSocket::LegacyLifecycleObserver {
  public:
-  MOCK_METHOD(void, observerAttach, (AsyncTransport*), (noexcept));
-  MOCK_METHOD(void, observerDetach, (AsyncTransport*), (noexcept));
-  MOCK_METHOD(void, destroy, (AsyncTransport*), (noexcept));
+  MOCK_METHOD(void, observerAttach, (AsyncSocket*), (noexcept));
+  MOCK_METHOD(void, observerDetach, (AsyncSocket*), (noexcept));
+  MOCK_METHOD(void, destroy, (AsyncSocket*), (noexcept));
   MOCK_METHOD(void, close, (AsyncSocket*), (noexcept));
   MOCK_METHOD(void, connect, (AsyncSocket*), (noexcept));
   MOCK_METHOD(void, fdDetach, (AsyncSocket*), (noexcept));
@@ -491,8 +491,12 @@ TEST_P(
       .InSequence(s1)
       .WillOnce(Invoke([&lifecycleCb, &remoteSocket](auto socket) {
         remoteSocket = socket;
-        EXPECT_CALL(*lifecycleCb, observerAttach(socket));
-        socket->addLifecycleObserver(lifecycleCb.get());
+        if (auto asyncSocket =
+                socket->template getUnderlyingTransport<folly::AsyncSocket>()) {
+          EXPECT_CALL(*lifecycleCb, observerAttach(asyncSocket));
+          const_cast<folly::AsyncSocket*>(asyncSocket)
+              ->addLifecycleObserver(lifecycleCb.get());
+        }
       }));
 
   if (testConfig == TestSSLConfig::SSL ||
@@ -586,13 +590,16 @@ TEST_P(
   // the socket will be ready, and then immediately close
   EXPECT_CALL(*onAcceptCb, ready(_))
       .InSequence(s1)
-      .WillOnce(
-          Invoke([&lifecycleCb, &remoteSocket](const auto* const& socket) {
-            EXPECT_EQ(remoteSocket, socket);
-            EXPECT_THAT(
-                socket->getLifecycleObservers(),
-                UnorderedElementsAre(lifecycleCb.get()));
-          }));
+      .WillOnce(Invoke([&lifecycleCb,
+                        &remoteSocket](const auto* const& socket) {
+        EXPECT_EQ(remoteSocket, socket);
+        if (auto asyncSocket =
+                socket->template getUnderlyingTransport<folly::AsyncSocket>()) {
+          EXPECT_THAT(
+              asyncSocket->getLifecycleObservers(),
+              UnorderedElementsAre(lifecycleCb.get()));
+        }
+      }));
   EXPECT_CALL(*lifecycleCb, close(_))
       .InSequence(s1)
       .WillOnce(Invoke([&remoteSocket](const auto* const& socket) {

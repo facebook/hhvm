@@ -590,16 +590,7 @@ let check_is_tapply_add_constructor_extends_dep
   List.iter deps ~f:(fun ((p, _dep_hint), dep) ->
       match get_node dep with
       | Tapply ((_, class_name), _) ->
-        if not skip_constructor_dep then
-          Env.make_depend_on_constructor env class_name;
-        let is_hhi =
-          let open Option.Monad_infix in
-          Env.get_class env class_name
-          >>| Cls.pos
-          >>| Pos_or_decl.is_hhi
-          |> Option.value ~default:false
-        in
-        if not is_hhi then Env.add_extends_dependency env class_name
+        Env.add_parent_dep env ~skip_constructor_dep class_name
       | Tgeneric _ ->
         Typing_error_utils.add_typing_error
           ~env

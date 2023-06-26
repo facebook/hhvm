@@ -13,7 +13,6 @@ open Decl_env
 open Typing_env_types
 open Typing_defs
 open Aast
-module Dep = Typing_deps.Dep
 module Inf = Typing_inference_env
 module LID = Local_id
 module LEnvC = Typing_per_cont_env
@@ -47,11 +46,8 @@ let get_ctx env = env.decl_env.Decl_env.ctx
 
 let get_file env = env.genv.file
 
-let get_current_decl env =
-  Option.map env.decl_env.Decl_env.droot ~f:Dep.to_decl_reference
-
 let get_current_decl_and_file env : Pos_or_decl.ctx =
-  { Pos_or_decl.file = get_file env; decl = get_current_decl env }
+  { Pos_or_decl.file = get_file env; decl = Deps.get_current_decl env }
 
 let fill_in_pos_filename_if_in_current_decl env pos =
   Pos_or_decl.fill_in_filename_if_in_current_decl
@@ -575,78 +571,6 @@ let fun_is_constructor env = env.genv.fun_is_ctor
 let set_fun_is_constructor env is_ctor =
   { env with genv = { env.genv with fun_is_ctor = is_ctor } }
 
-let add_fine_dep_if_enabled env dependency =
-  let open Option.Let_syntax in
-  let ctx = get_ctx env in
-  (* We resolve the dependency to its origin. See
-   * [Typing_extends.add_pessimisation_dependency] for details. *)
-  let dependency_on_origin () =
-    match dependency with
-    | Dep.Method (class_name, method_name) ->
-      let origin_name =
-        let* cls = Decl_provider.get_class ctx class_name in
-        let* elt = Cls.get_method cls method_name in
-        Some elt.Typing_defs.ce_origin
-      in
-      let origin_name = Option.value origin_name ~default:class_name in
-      Dep.Method (origin_name, method_name)
-    | Dep.SMethod (class_name, method_name) ->
-      let origin_name =
-        let* cls = Decl_provider.get_class ctx class_name in
-        let* elt = Cls.get_smethod cls method_name in
-        Some elt.Typing_defs.ce_origin
-      in
-      let origin_name = Option.value origin_name ~default:class_name in
-      Dep.SMethod (origin_name, method_name)
-    | _ -> dependency
-  in
-
-  let denv = env.decl_env in
-  if TypecheckerOptions.record_fine_grained_dependencies @@ get_tcopt env then
-    let dependency = dependency_on_origin () in
-    Typing_pessimisation_deps.try_add_fine_dep
-      (get_deps_mode env)
-      denv.droot
-      denv.droot_member
-      dependency
-
-let add_dependency_edge (env : Typing_env_types.env) dep : unit =
-  Option.iter env.decl_env.droot ~f:(fun root ->
-      Typing_deps.add_idep (get_deps_mode env) root dep);
-  add_fine_dep_if_enabled env dep
-
-let make_depend_on_class env class_name =
-  add_dependency_edge env (Dep.Type class_name)
-
-let make_depend_on_constructor env class_name =
-  make_depend_on_class env class_name;
-  add_dependency_edge env (Dep.Constructor class_name);
-  ()
-
-let make_depend_on_class_def env x cd =
-  match cd with
-  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
-  | _ -> make_depend_on_class env x
-
-let make_depend_on_module env module_name =
-  add_dependency_edge env (Dep.Module module_name)
-
-let make_depend_on_module_def env x md =
-  match md with
-  | Some md when Pos_or_decl.is_hhi md.mdt_pos -> ()
-  | _ -> make_depend_on_module env x
-
-let make_depend_on_current_module env =
-  Option.iter env.genv.current_module ~f:(fun (_, mid) ->
-      make_depend_on_module env mid)
-
-let make_depend_on_ancestors (env : Typing_env_types.env) (cls : Cls.t) : unit =
-  List.iter (Cls.all_ancestor_names cls) ~f:(fun ancestor ->
-      add_dependency_edge env (Dep.Type ancestor))
-
-let add_extends_dependency (env : Typing_env_types.env) x =
-  add_dependency_edge env (Dep.Extends x)
-
 let env_with_method_droot_member env m ~static =
   let child =
     if static then
@@ -670,13 +594,20 @@ let get_module (env : env) (name : Decl_provider.module_key) :
       (get_ctx env)
       name
   in
-  make_depend_on_module_def env name res;
+  Deps.make_depend_on_module env name res;
   res
 
 let set_current_module env m =
   { env with genv = { env.genv with current_module = m } }
 
 let get_current_module env = Option.map env.genv.current_module ~f:snd
+
+let make_depend_on_current_module env =
+  Option.iter
+    Typing_env_types.(env.genv.current_module)
+    ~f:(fun (_, mid) -> Deps.make_depend_on_module_name env mid)
+
+let make_depend_on_ancestors = Deps.make_depend_on_ancestors
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 
@@ -703,17 +634,14 @@ let with_packages env packages f =
   (env, result)
 
 let get_typedef env x =
-  let res =
+  let td =
     Decl_provider.get_typedef
       ?tracing_info:(get_tracing_info env)
       (get_ctx env)
       x
   in
-  match res with
-  | Some td when Pos_or_decl.is_hhi td.td_pos -> res
-  | _ ->
-    make_depend_on_class env x;
-    res
+  Deps.make_depend_on_typedef env x td;
+  td
 
 let is_typedef env x =
   match Naming_provider.get_type_kind (get_ctx env) x with
@@ -746,8 +674,17 @@ let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
       (get_ctx env)
       name
   in
-  make_depend_on_class_def env name res;
+  Deps.make_depend_on_class env name res;
   res
+
+let get_parent env ~skip_constructor_dep name : Cls.t option =
+  let res = get_class env name in
+  Deps.make_depend_on_parent env ~skip_constructor_dep name res;
+  res
+
+let add_parent_dep env ~skip_constructor_dep name : unit =
+  let _ = get_parent env ~skip_constructor_dep name in
+  ()
 
 let get_class_or_typedef env x =
   if is_typedef env x then
@@ -763,11 +700,8 @@ let get_fun env x =
   let res =
     Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x
   in
-  match res with
-  | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res
-  | _ ->
-    add_dependency_edge env (Dep.Fun x);
-    res
+  Deps.make_depend_on_fun env x res;
+  res
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -794,23 +728,16 @@ let is_enum_class env x =
   | None -> false
 
 let get_typeconst env class_ mid =
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_class env (Cls.name class_);
-    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
-  end;
+  Deps.make_depend_on_class_const env class_ mid;
   Cls.get_typeconst class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_class env (Cls.name class_);
-    add_dependency_edge env (Dep.Const (Cls.name class_, mid))
-  end;
+  Deps.make_depend_on_class_const env class_ mid;
   Cls.get_const class_ mid
 
 let consts env class_ =
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then
-    make_depend_on_class env (Cls.name class_);
+  Deps.make_depend_on_class env (Cls.name class_) (Some class_);
   Cls.consts class_
 
 (* Used to access "global constants". That is constants that were
@@ -823,30 +750,8 @@ let get_gconst env cst_name =
       (get_ctx env)
       cst_name
   in
-  match res with
-  | Some cst when Pos_or_decl.is_hhi cst.cd_pos -> res
-  | _ ->
-    add_dependency_edge env (Dep.GConst cst_name);
-    res
-
-let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
-    =
-  let add_dep cid =
-    let dep =
-      match (is_method, is_static) with
-      | (true, true) -> Dep.SMethod (cid, mid)
-      | (true, false) -> Dep.Method (cid, mid)
-      | (false, true) -> Dep.SProp (cid, mid)
-      | (false, false) -> Dep.Prop (cid, mid)
-    in
-    add_dependency_edge env dep
-  in
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
-    make_depend_on_class env (Cls.name class_);
-    add_dep (Cls.name class_);
-    Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.ce_origin)
-  );
-  ()
+  Deps.make_depend_on_gconst env cst_name res;
+  res
 
 let get_static_member is_method env class_ mid =
   (* The type of a member is stored separately in the heap. This means that
@@ -859,7 +764,7 @@ let get_static_member is_method env class_ mid =
     else
       Cls.get_sprop class_ mid
   in
-  add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
+  Deps.add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
   ce_opt
 
 (* Given a list of [possibilities] whose name we can extract with [f], return
@@ -921,7 +826,7 @@ let get_member is_method env (class_ : Cls.t) mid =
     else
       Cls.get_prop class_ mid
   in
-  add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
+  Deps.add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
   ce_opt
 
 let suggest_member is_method class_ mid =
@@ -935,12 +840,7 @@ let suggest_member is_method class_ mid =
   suggest_member members mid
 
 let get_construct env class_ =
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_constructor env (Cls.name class_);
-    Option.iter
-      (fst (Cls.construct class_))
-      ~f:(fun ce -> make_depend_on_constructor env ce.ce_origin)
-  end;
+  Deps.make_depend_on_constructor env class_;
   Cls.construct class_
 
 let get_return env = env.genv.return

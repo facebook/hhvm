@@ -113,29 +113,14 @@ val is_enum_class : env -> type_key -> bool
 
 val get_enum_constraint : env -> type_key -> decl_ty option
 
-(** Register the constructor of the class with the given name as a dependency
-    of the class being checked. *)
-val make_depend_on_constructor : env -> type_key -> unit
-
-(** Register the current top-level structure as being dependent on the current
-    module *)
-val make_depend_on_current_module : env -> unit
-
-(** Register the droot as being dependent on all of the ancestor classes,
-    interfaces, and traits of the given class (i.e., the recursive ancestors
-    returned by [Typing_classes_heap.Api.all_ancestor_names] and stored in
-    [Decl_defs.dc_ancestors]). Should be invoked once when typechecking the
-    given class (after [droot] has been set to correspond to the given class). *)
-val make_depend_on_ancestors : env -> Cls.t -> unit
-
-val add_extends_dependency : env -> string -> unit
-
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
 val env_with_constructor_droot_member : env -> env
 
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
+
+val add_parent_dep : env -> skip_constructor_dep:bool -> string -> unit
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
@@ -278,6 +263,18 @@ val set_no_auto_likes : env -> bool -> env
 val get_module : env -> module_key -> module_decl option
 
 val get_current_module : env -> string option
+
+(** Register the current top-level structure as being dependent on the current
+    module *)
+val make_depend_on_current_module : Typing_env_types.env -> unit
+
+(** Register the droot as being dependent on all of the ancestor classes,
+    interfaces, and traits of the given class (i.e., the recursive ancestors
+    returned by [Typing_classes_heap.Api.all_ancestor_names] and stored in
+    [Decl_defs.dc_ancestors]). Should be invoked once when typechecking the
+    given class (after [droot] has been set to correspond to the given class). *)
+val make_depend_on_ancestors :
+  Typing_env_types.env -> Decl_provider.Class.t -> unit
 
 val get_internal : env -> bool
 

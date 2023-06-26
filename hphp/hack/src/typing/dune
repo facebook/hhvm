@@ -414,19 +414,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name typing_env)
- (wrapped false)
- (modules typing_env)
- (libraries
-  decl_provider
-  provider_context
-  typing_env_types
-  typing_log
-  typing_pessimisation_deps)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name typing_env_types)
  (wrapped false)
  (modules

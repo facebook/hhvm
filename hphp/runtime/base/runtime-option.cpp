@@ -906,6 +906,7 @@ bool RuntimeOption::UnserializationWhitelistCheck = false;
 bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
+std::string RuntimeOption::TakeoverFilename;
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
@@ -2361,6 +2362,7 @@ void RuntimeOption::Load(
     MaxPostSize <<= 20;
     Config::Bind(AlwaysPopulateRawPostData, ini, config,
                  "Server.AlwaysPopulateRawPostData", false);
+    Config::Bind(TakeoverFilename, ini, config, "Server.TakeoverFilename");
     Config::Bind(ExpiresActive, ini, config, "Server.ExpiresActive", true);
     Config::Bind(ExpiresDefault, ini, config, "Server.ExpiresDefault", 2592000);
     if (ExpiresDefault < 0) ExpiresDefault = 2592000;

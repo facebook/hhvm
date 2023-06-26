@@ -309,6 +309,28 @@ function stopServer($adminPort, $serverProc) {
   }
 }
 
+// Start a new server to takeover the old one, we want to assign a new
+// server id in order to distinguish between the two servers.
+function takeoverOldServer($serverPort, $adminPort, $home, $root,
+                           $socketFile, $oldServerProc, $customArgs,
+                           $serverId) {
+  $status = proc_get_status($oldServerProc);
+  if ($status === false || !$status['running']) {
+    tlog('Old server is not running');
+    return;
+  }
+  $customArgs .= " -vServer.TakeoverFilename={$socketFile}";
+  $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
+                      $customArgs, $serverId);
+  $pipes = darray[];
+  $serverProc = proc_open($cmd, darray[], inout $pipes);
+  if (!is_resource($serverProc)) {
+    tlog('Failed to start a shell process for the server');
+    return;
+  }
+  return $serverProc;
+}
+
 <<__DynamicallyCallable>>
 function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '',
                       $host_prefix = 'hphpd.debugger') {

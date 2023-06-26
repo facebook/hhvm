@@ -8,9 +8,14 @@
  *)
 
 val type_fun :
-  Provider_context.t -> full_ast:Nast.fun_def -> Tast.def list option
+  Provider_context.t ->
+  full_ast:Nast.fun_def ->
+  Tast.def Tast_with_dynamic.t option
 
-val type_class : Provider_context.t -> full_ast:Nast.class_ -> Tast.def option
+val type_class :
+  Provider_context.t ->
+  full_ast:Nast.class_ ->
+  Tast.def Tast_with_dynamic.t option
 
 val check_typedef :
   Provider_context.t -> full_ast:Nast.typedef -> Tast.def option

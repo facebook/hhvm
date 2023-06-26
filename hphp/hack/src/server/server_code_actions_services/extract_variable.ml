@@ -193,6 +193,8 @@ let find ~entry ~(range : Lsp.range) ctx =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (top_visitor selection ~source_text)#go ctx tast
+  (top_visitor selection ~source_text)#go
+    ctx
+    tast.Tast_with_dynamic.under_normal_assumptions
   |> Option.map ~f:(refactor_of_candidate ~source_text ~path)
   |> Option.to_list

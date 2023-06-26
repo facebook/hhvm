@@ -248,11 +248,13 @@ let range_visitor startl startc endl endc =
   end
 
 let type_at_pos
-    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
-    (Tast_env.env * Tast.ty) option =
+    (ctx : Provider_context.t)
+    (tast : Tast.program Tast_with_dynamic.t)
+    (line : int)
+    (char : int) : (Tast_env.env * Tast.ty) option =
   (base_visitor ~human_friendly:false ~under_dynamic:false line char)#go
     ctx
-    tast
+    tast.Tast_with_dynamic.under_normal_assumptions
   >>| fun (_, env, ty) -> (env, ty)
 
 (* Return the expanded type of smallest expression at this
@@ -267,20 +269,28 @@ let type_at_pos
 let human_friendly_type_at_pos
     ~under_dynamic
     (ctx : Provider_context.t)
-    (tast : Tast.program)
+    (tast : Tast.program Tast_with_dynamic.t)
     (line : int)
     (char : int) : (Tast_env.env * Tast.ty) option =
+  let tast =
+    if under_dynamic then
+      Option.value ~default:[] tast.Tast_with_dynamic.under_dynamic_assumptions
+    else
+      tast.Tast_with_dynamic.under_normal_assumptions
+  in
   (base_visitor ~human_friendly:true ~under_dynamic line char)#go ctx tast
   |> Option.map ~f:(fun (_, env, ty) -> (env, Tast_expand.expand_ty env ty))
 
 let type_at_range
     (ctx : Provider_context.t)
-    (tast : Tast.program)
+    (tast : Tast.program Tast_with_dynamic.t)
     (start_line : int)
     (start_char : int)
     (end_line : int)
     (end_char : int) : (Tast_env.env * Tast.ty) option =
-  (range_visitor start_line start_char end_line end_char)#go ctx tast
+  (range_visitor start_line start_char end_line end_char)#go
+    ctx
+    tast.Tast_with_dynamic.under_normal_assumptions
 
 let go_ctx
     ~(ctx : Provider_context.t)

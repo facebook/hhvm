@@ -19,7 +19,7 @@ let find_candidate ~(selection : Pos.t) (entry : Provider_context.entry) ctx :
   in
 
   List.find_map
-    tast
+    tast.Tast_with_dynamic.under_normal_assumptions
     ~f:
       Aast_defs.(
         function

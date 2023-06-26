@@ -121,7 +121,9 @@ let find ~entry ~(range : Lsp.range) ctx =
   in
 
   let override_method_refactorings =
-    (override_method_refactorings_at ~start_line ~start_col)#go ctx tast
+    (override_method_refactorings_at ~start_line ~start_col)#go
+      ctx
+      tast.Tast_with_dynamic.under_normal_assumptions
   in
   List.map
     override_method_refactorings

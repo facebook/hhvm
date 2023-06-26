@@ -27,6 +27,10 @@ Interprocedural Constraints for (ClassLike "\\SdMe1"):
    { classish_kind_opt = (Some (Cclass Concrete));
      hierarchy_for_final_item = None;
      path_opt = (Some (Relative_path.Dummy, "extends1.php")) })
+     7: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None;
+     path_opt = (Some (Relative_path.Dummy, "extends1.php")) })
 
 Interprocedural Constraints for (ClassLike "\\SdMe2"):
     10: (CustomInterConstraint

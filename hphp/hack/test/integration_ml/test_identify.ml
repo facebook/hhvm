@@ -43,7 +43,11 @@ let test () =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  let symbols =
+    IdentifySymbolService.all_symbols
+      ctx
+      tast.Tast_with_dynamic.under_normal_assumptions
+  in
   Asserter.Int_asserter.assert_equals
     7
     (List.length symbols)

@@ -8,7 +8,7 @@
 
 val type_at_pos :
   Provider_context.t ->
-  Tast.program ->
+  Tast.program Tast_with_dynamic.t ->
   int ->
   int ->
   (Tast_env.env * Tast.ty) option
@@ -16,14 +16,14 @@ val type_at_pos :
 val human_friendly_type_at_pos :
   under_dynamic:bool ->
   Provider_context.t ->
-  Tast.program ->
+  Tast.program Tast_with_dynamic.t ->
   int ->
   int ->
   (Tast_env.env * Tast.ty) option
 
 val type_at_range :
   Provider_context.t ->
-  Tast.program ->
+  Tast.program Tast_with_dynamic.t ->
   int ->
   int ->
   int ->

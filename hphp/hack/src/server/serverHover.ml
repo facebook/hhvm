@@ -177,7 +177,7 @@ let nth_param ctx recv i : string option =
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
-
+    let tast = tast.Tast_with_dynamic.under_normal_assumptions in
     SymbolOccurrence.(
       (match recv with
       | FunctionReceiver fun_name -> nth_fun_param tast fun_name i

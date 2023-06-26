@@ -73,7 +73,7 @@ let check_if_this_def_is_the_winner ctx name_type (pos, name) : bool =
         ~pos:(Pos.to_relative_string pos |> Pos.string);
       false
 
-let fun_def ctx fd : Tast.fun_def list option =
+let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   let f = fd.fd_fun in
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None fd.fd_name @@ fun () ->
@@ -272,7 +272,7 @@ let fun_def ctx fd : Tast.fun_def list option =
       Aast.f_doc_comment = f.f_doc_comment;
     }
   in
-  let fundef =
+  let under_normal_assumptions =
     {
       Aast.fd_mode = fd.fd_mode;
       Aast.fd_name = fd.fd_name;
@@ -285,31 +285,35 @@ let fun_def ctx fd : Tast.fun_def list option =
       Aast.fd_where_constraints = fd.fd_where_constraints;
     }
   in
-  let fundefs =
-    let fundef_of_dynamic
-        (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
-      let open Aast in
-      {
-        fundef with
-        fd_fun =
-          {
-            fundef.fd_fun with
-            f_annotation = Env.save local_tpenv dynamic_env;
-            f_ret = (dynamic_return_ty, ret_hint);
-            f_params = dynamic_params;
-            f_body = { fb_ast = dynamic_body };
-          };
-      }
-    in
+  let fundef_of_dynamic
+      (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
+    let open Aast in
+    {
+      under_normal_assumptions with
+      fd_fun =
+        {
+          under_normal_assumptions.fd_fun with
+          f_annotation = Env.save local_tpenv dynamic_env;
+          f_ret = (dynamic_return_ty, ret_hint);
+          f_params = dynamic_params;
+          f_body = { fb_ast = dynamic_body };
+        };
+    }
+  in
+  let (under_normal_assumptions, under_dynamic_assumptions) =
     if
       sdt_dynamic_check_required
       && (not had_errors)
       && not (TCO.skip_check_under_dynamic tcopt)
     then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in
-      let fundef =
+      let under_normal_assumptions =
         let f_annotation = Env.save local_tpenv env in
-        Aast.{ fundef with fd_fun = { fundef.fd_fun with f_annotation } }
+        Aast.
+          {
+            under_normal_assumptions with
+            fd_fun = { under_normal_assumptions.fd_fun with f_annotation };
+          }
       in
       let dynamic_components =
         Typing.check_function_dynamically_callable
@@ -320,19 +324,13 @@ let fun_def ctx fd : Tast.fun_def list option =
           params_decl_ty
           return_ty.et_type
       in
-      let fundefs =
-        if TCO.tast_under_dynamic tcopt then
-          [fundef_of_dynamic dynamic_components]
-        else
-          []
-      in
-      fundef :: fundefs
+      (under_normal_assumptions, Some (fundef_of_dynamic dynamic_components))
     else
-      [fundef]
+      (under_normal_assumptions, None)
   in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  fundefs
+  { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
 let class_def ctx class_ =
   Counters.count Counters.Category.Typecheck @@ fun () ->
@@ -446,21 +444,28 @@ let module_def ctx md =
     Aast.md_file_attributes = file_attributes;
   }
 
-let nast_to_tast ~(do_tast_checks : bool) ctx nast : Tast.program =
+let nast_to_tast ~(do_tast_checks : bool) ctx nast :
+    Tast.program Tast_with_dynamic.t =
   let convert_def = function
     (* Sometimes typing will just return `None` but that should only be the case
      * if an error had already been registered e.g. in naming
      *)
     | Fun f -> begin
       match fun_def ctx f with
-      | Some fs -> Some (List.map ~f:(fun f -> Aast.Fun f) fs)
+      | Some fs -> Some (Tast_with_dynamic.map ~f:(fun f -> Aast.Fun f) fs)
       | None -> None
     end
-    | Constant gc -> Some [Aast.Constant (gconst_def ctx gc)]
-    | Typedef td -> Some [Aast.Typedef (typedef_def ctx td)]
+    | Constant gc ->
+      Some
+        (Tast_with_dynamic.mk_without_dynamic
+        @@ Aast.Constant (gconst_def ctx gc))
+    | Typedef td ->
+      Some
+        (Tast_with_dynamic.mk_without_dynamic
+        @@ Aast.Typedef (typedef_def ctx td))
     | Class c -> begin
       match class_def ctx c with
-      | Some c -> Some [Aast.Class c]
+      | Some cs -> Some (Tast_with_dynamic.map ~f:(fun c -> Aast.Class c) cs)
       | None -> None
     end
     (* We don't typecheck top level statements:
@@ -469,9 +474,14 @@ let nast_to_tast ~(do_tast_checks : bool) ctx nast : Tast.program =
      *)
     | Stmt s ->
       let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-      Some [Aast.Stmt (snd (Typing.stmt env s))]
-    | Module md -> Some [Aast.Module (module_def ctx md)]
-    | SetModule sm -> Some [Aast.SetModule sm]
+      Some
+        (Tast_with_dynamic.mk_without_dynamic
+        @@ Aast.Stmt (snd (Typing.stmt env s)))
+    | Module md ->
+      Some
+        (Tast_with_dynamic.mk_without_dynamic @@ Aast.Module (module_def ctx md))
+    | SetModule sm ->
+      Some (Tast_with_dynamic.mk_without_dynamic @@ Aast.SetModule sm)
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -480,6 +490,8 @@ let nast_to_tast ~(do_tast_checks : bool) ctx nast : Tast.program =
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   if do_tast_checks then Nast_check.program ctx nast;
-  let tast = List.filter_map nast ~f:convert_def |> List.concat in
-  if do_tast_checks then Tast_check.program ctx tast;
+  let tast = List.filter_map nast ~f:convert_def |> Tast_with_dynamic.collect in
+  (* We only do TAST checks for non-dynamic components *)
+  if do_tast_checks then
+    Tast_check.program ctx tast.Tast_with_dynamic.under_normal_assumptions;
   tast

@@ -27,8 +27,8 @@ let hash_tasts
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
     by_names =
   {
-    fun_tast_hashes = SMap.map Tast.hash_def_list fun_tasts;
-    class_tast_hashes = SMap.map Tast.hash_def class_tasts;
+    fun_tast_hashes = SMap.map Tast.hash_def_with_dynamic fun_tasts;
+    class_tast_hashes = SMap.map Tast.hash_def_with_dynamic class_tasts;
     typedef_tast_hashes = SMap.map Tast.hash_def typedef_tasts;
     gconst_tast_hashes = SMap.map Tast.hash_def gconst_tasts;
     module_tast_hashes = SMap.map Tast.hash_def module_tasts;

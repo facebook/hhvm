@@ -2330,6 +2330,7 @@ let go_ctx
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
+  let tast = tast.Tast_with_dynamic.under_normal_assumptions in
   (visitor ctx autocomplete_context sienv naming_table tast)#go ctx tast;
 
   Errors.ignore_ (fun () ->

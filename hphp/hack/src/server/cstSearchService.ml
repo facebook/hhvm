@@ -185,7 +185,11 @@ let collect_types (env : env) : env * collected_type_map =
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_unquarantined ~ctx ~entry
     in
-    let collected_types = Tast_type_collector.collect_types env.ctx tast in
+    let collected_types =
+      Tast_type_collector.collect_types
+        env.ctx
+        tast.Tast_with_dynamic.under_normal_assumptions
+    in
     let env = { env with collected_types = Some collected_types } in
     (env, collected_types)
 

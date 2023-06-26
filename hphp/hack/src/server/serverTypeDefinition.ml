@@ -12,7 +12,7 @@ open Typing_defs
 
 let go_common
     (ctx : Provider_context.t)
-    (tast : Tast.program)
+    (tast : Tast.program Tast_with_dynamic.t)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
   let env_and_ty =

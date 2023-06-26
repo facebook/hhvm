@@ -22,7 +22,9 @@ let do_ opts files_info ctx =
       let { Tast_provider.Compute_tast.tast; _ } =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
       in
-      let check () = Ifc.check opts tast ctx in
+      let check () =
+        Ifc.check opts tast.Tast_with_dynamic.under_normal_assumptions ctx
+      in
       let (new_errors, _) = Errors.do_with_context path check in
       errors @ Errors.get_error_list new_errors
     | _ -> errors

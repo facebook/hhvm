@@ -123,7 +123,9 @@ let get_patches ctx file =
       ctx
       (Naming.program ctx nast)
   in
-  let type_map = collect_types ctx tast in
+  let type_map =
+    collect_types ctx tast.Tast_with_dynamic.under_normal_assumptions
+  in
   let source_text = Full_fidelity_source_text.from_file file in
   let positioned_tree = PositionedTree.make source_text in
   let root =

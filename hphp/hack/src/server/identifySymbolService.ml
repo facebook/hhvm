@@ -1310,7 +1310,11 @@ let all_symbols_ctx
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
 
-    let symbols = fixme_symbols @ keyword_symbols @ all_symbols ctx tast in
+    let symbols =
+      fixme_symbols
+      @ keyword_symbols
+      @ all_symbols ctx tast.Tast_with_dynamic.under_normal_assumptions
+    in
     entry.Provider_context.symbols <- Some symbols;
     symbols
   | Some symbols -> symbols

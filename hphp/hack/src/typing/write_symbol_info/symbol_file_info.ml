@@ -56,6 +56,7 @@ let create
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_unquarantined ~ctx ~entry
   in
+  let tast = tast.Tast_with_dynamic.under_normal_assumptions in
   let cst =
     Provider_context.PositionedSyntaxTree.root
       (Ast_provider.compute_cst ~ctx ~entry)

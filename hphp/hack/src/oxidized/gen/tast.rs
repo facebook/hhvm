@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a677ac9f560f5396bc3380935fc83242>>
+// @generated SignedSource<<2537c375f61a4ae9338b381b0392ceb7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -111,7 +111,7 @@ pub type Program = aast::Program<Ty, SavedEnv>;
 pub type Def = aast::Def<Ty, SavedEnv>;
 
 #[rust_to_ocaml(attr = "deriving hash")]
-pub type DefList = Vec<Def>;
+pub type DefWithDynamic = tast_with_dynamic::TastWithDynamic<Def>;
 
 pub type Expr = aast::Expr<Ty, SavedEnv>;
 
@@ -181,8 +181,8 @@ pub type CallExpr = aast::CallExpr<Ty, SavedEnv>;
 )]
 #[repr(C)]
 pub struct ByNames {
-    pub fun_tasts: s_map::SMap<Vec<Def>>,
-    pub class_tasts: s_map::SMap<Def>,
+    pub fun_tasts: s_map::SMap<tast_with_dynamic::TastWithDynamic<Def>>,
+    pub class_tasts: s_map::SMap<tast_with_dynamic::TastWithDynamic<Def>>,
     pub typedef_tasts: s_map::SMap<Def>,
     pub gconst_tasts: s_map::SMap<Def>,
     pub module_tasts: s_map::SMap<Def>,

@@ -110,5 +110,13 @@ let lint ctx fn content =
         let (_, tast) =
           Typing_check_job.calc_errors_and_tast ctx fn ~full_ast
         in
-        lint_tast ctx (Tast.tasts_as_list tast));
+        (* collect both the dynamic TAST and non-dynamic TAST in a big list,
+           that's what linting expects! *)
+        let tasts =
+          Tast.tasts_as_list tast
+          |> Tast_with_dynamic.collect
+          |> Tast_with_dynamic.all
+          |> List.concat
+        in
+        lint_tast ctx tasts);
   Typing_deps.trace := orig_trace

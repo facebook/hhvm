@@ -11,7 +11,7 @@ type pos = Relative_path.t * int * int * (int * int) option
 val get_tast_map :
   Provider_context.t ->
   Relative_path.t list ->
-  Provider_context.t * Tast.program Relative_path.Map.t
+  Provider_context.t * Tast.program Tast_with_dynamic.t Relative_path.Map.t
 
 val go :
   MultiWorker.worker list option ->

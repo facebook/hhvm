@@ -8,7 +8,7 @@
 open Hh_prelude
 
 let invalidate_tast_cache_of_entry (entry : Provider_context.entry) : unit =
-  entry.Provider_context.tast <- Provider_context.entry_tast_missing;
+  entry.Provider_context.tast <- None;
   entry.Provider_context.all_errors <- None;
   ()
 

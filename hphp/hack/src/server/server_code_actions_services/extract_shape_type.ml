@@ -75,7 +75,7 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
           super#on_expr env expr
     end
   in
-  match visitor#go ctx tast with
+  match visitor#go ctx tast.Tast_with_dynamic.under_normal_assumptions with
   | Searching (Some (_, candidate)) -> Some candidate
   | Searching _
   | Selected_non_shape_type _ ->

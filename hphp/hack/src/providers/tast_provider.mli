@@ -8,14 +8,14 @@
 
 module Compute_tast : sig
   type t = {
-    tast: Tast.program;
+    tast: Tast.program Tast_with_dynamic.t;
     telemetry: Telemetry.t;
   }
 end
 
 module Compute_tast_and_errors : sig
   type t = {
-    tast: Tast.program;
+    tast: Tast.program Tast_with_dynamic.t;
     errors: Errors.t;
     telemetry: Telemetry.t;
   }

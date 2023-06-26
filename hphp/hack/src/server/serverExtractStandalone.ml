@@ -925,7 +925,7 @@ end = struct
           let full_ast =
             Ast_provider.find_fun_in_file ctx filename func ~full:true
           in
-          let (_ : Tast.def list option) =
+          let (_ : Tast.def Tast_with_dynamic.t option) =
             Option.bind full_ast ~f:(fun full_ast ->
                 Typing_check_job.type_fun ctx ~full_ast)
           in
@@ -935,7 +935,7 @@ end = struct
           let full_ast =
             Ast_provider.find_class_in_file ctx filename cls ~full:true
           in
-          let (_ : Tast.def option) =
+          let (_ : Tast.def Tast_with_dynamic.t option) =
             Option.bind full_ast ~f:(fun full_ast ->
                 Typing_check_job.type_class ctx ~full_ast)
           in

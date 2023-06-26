@@ -311,7 +311,7 @@ let find ~entry ~(range : Lsp.range) ctx =
   in
   let path = entry.Provider_context.path in
   let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-  (visitor ~selection)#go ctx tast
+  (visitor ~selection)#go ctx tast.Tast_with_dynamic.under_normal_assumptions
   |> Var_info.to_candidate_opt ~selection
   |> Option.map ~f:(refactor_of_candidate ~path ~source_text)
   |> Option.to_list

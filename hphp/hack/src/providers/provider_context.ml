@@ -17,14 +17,6 @@ type entry_contents =
   | Read_contents_from_disk_failed of Exception.t
   | Raise_exn_on_attempt_to_read
 
-type entry_tast = {
-  entry_tast_under_normal: Tast.program option;
-  entry_tast_under_dynamic: Tast.program option;
-}
-
-let entry_tast_missing =
-  { entry_tast_under_normal = None; entry_tast_under_dynamic = None }
-
 type entry = {
   path: Relative_path.t;
   mutable contents: entry_contents;
@@ -32,7 +24,7 @@ type entry = {
   mutable parser_return: Parser_return.t option;
   mutable ast_errors: Errors.t option;
   mutable cst: PositionedSyntaxTree.t option;
-  mutable tast: entry_tast;
+  mutable tast: Tast.program Tast_with_dynamic.t option;
   mutable all_errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
@@ -96,7 +88,7 @@ let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
     parser_return = None;
     ast_errors = None;
     cst = None;
-    tast = entry_tast_missing;
+    tast = None;
     all_errors = None;
     symbols = None;
   }

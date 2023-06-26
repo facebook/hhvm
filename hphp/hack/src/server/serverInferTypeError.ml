@@ -62,7 +62,12 @@ let go_ctx
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   Option.(
-    type_error_at_pos ctx tast line column >>| fun (env, from_ty, to_ty) ->
+    type_error_at_pos
+      ctx
+      tast.Tast_with_dynamic.under_normal_assumptions
+      line
+      column
+    >>| fun (env, from_ty, to_ty) ->
     Tast_env.(
       InferErrorAtPosService.
         {

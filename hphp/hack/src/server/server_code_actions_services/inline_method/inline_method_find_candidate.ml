@@ -181,7 +181,7 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  visitor#go ctx tast;
+  visitor#go ctx tast.Tast_with_dynamic.under_normal_assumptions;
   let open Option.Let_syntax in
   let* call = !call_info in
   let* (T.

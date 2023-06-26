@@ -35,28 +35,32 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     None
 
 let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
-    Tast.def list option =
+    Tast.def Tast_with_dynamic.t option =
   let f = full_ast.Aast.fd_fun in
   handle_exn_as_error f.Aast.f_span (fun () ->
       let fun_ = Naming.fun_def ctx full_ast in
       Nast_check.def ctx (Aast.Fun fun_);
       let def_opt =
         Typing_toplevel.fun_def ctx fun_
-        |> Option.map ~f:(fun fs -> List.map ~f:(fun f -> Aast.Fun f) fs)
+        |> Option.map ~f:(Tast_with_dynamic.map ~f:(fun f -> Aast.Fun f))
       in
-      Option.iter def_opt ~f:(fun fs -> List.iter fs ~f:(Tast_check.def ctx));
+      (* Only do TAST check on normal TAST *)
+      Option.iter def_opt ~f:(fun fs ->
+          Tast_check.def ctx fs.Tast_with_dynamic.under_normal_assumptions);
       def_opt)
 
 let type_class (ctx : Provider_context.t) ~(full_ast : Nast.class_) :
-    Tast.def option =
+    Tast.def Tast_with_dynamic.t option =
   handle_exn_as_error full_ast.Aast.c_span (fun () ->
       let class_ = Naming.class_ ctx full_ast in
       Nast_check.def ctx (Aast.Class class_);
       let def_opt =
         Typing_toplevel.class_def ctx class_
-        |> Option.map ~f:(fun c -> Aast.Class c)
+        |> Option.map ~f:(Tast_with_dynamic.map ~f:(fun c -> Aast.Class c))
       in
-      Option.iter def_opt ~f:(fun f -> Tast_check.def ctx f);
+      (* Only do TAST check on normal TAST *)
+      Option.iter def_opt ~f:(fun c ->
+          Tast_check.def ctx c.Tast_with_dynamic.under_normal_assumptions);
       def_opt)
 
 let check_typedef (ctx : Provider_context.t) ~(full_ast : Nast.typedef) :

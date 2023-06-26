@@ -83,7 +83,7 @@ type program = (ty, saved_env) Aast.program [@@deriving show]
 
 type def = (ty, (saved_env[@hash.ignore])) Aast.def [@@deriving hash]
 
-type def_list = def list [@@deriving hash]
+type def_with_dynamic = def Tast_with_dynamic.t [@@deriving hash]
 
 type expr = (ty, saved_env) Aast.expr
 
@@ -142,8 +142,8 @@ type module_def = (ty, saved_env) Aast.module_def
 type call_expr = (ty, saved_env) Aast.call_expr
 
 type by_names = {
-  fun_tasts: def list SMap.t;
-  class_tasts: def SMap.t;
+  fun_tasts: def Tast_with_dynamic.t SMap.t;
+  class_tasts: def Tast_with_dynamic.t SMap.t;
   typedef_tasts: def SMap.t;
   gconst_tasts: def SMap.t;
   module_tasts: def SMap.t;
@@ -160,12 +160,12 @@ let empty_by_names =
 
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
-      by_names) : def list =
-  (SMap.values fun_tasts |> List.concat)
+      by_names) : def Tast_with_dynamic.t list =
+  SMap.values fun_tasts
   @ SMap.values class_tasts
-  @ SMap.values typedef_tasts
-  @ SMap.values gconst_tasts
-  @ SMap.values module_tasts
+  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values typedef_tasts)
+  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values gconst_tasts)
+  @ List.map ~f:Tast_with_dynamic.mk_without_dynamic (SMap.values module_tasts)
 
 let empty_saved_env tcopt : saved_env =
   {

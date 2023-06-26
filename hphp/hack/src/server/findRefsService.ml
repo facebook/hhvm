@@ -299,7 +299,7 @@ let find_refs
           let { Tast_provider.Compute_tast.tast; _ } =
             Tast_provider.compute_tast_unquarantined ~ctx ~entry
           in
-          Some (path, tast)
+          Some (path, tast.Tast_with_dynamic.under_normal_assumptions)
         with
         | _ when not (is_entry_valid entry) -> None)
   in

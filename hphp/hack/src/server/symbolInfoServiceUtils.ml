@@ -32,7 +32,7 @@ let helper ctx acc filename_l =
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        tast)
+        tast.Tast_with_dynamic.under_normal_assumptions)
   in
   let fun_calls = SymbolFunCallService.find_fun_calls ctx tasts in
   let symbol_types = SymbolTypeService.generate_types ctx tasts in

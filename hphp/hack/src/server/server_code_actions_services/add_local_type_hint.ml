@@ -65,7 +65,7 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
           None
     end
   in
-  visitor#go ctx tast
+  visitor#go ctx tast.Tast_with_dynamic.under_normal_assumptions
 
 let edit_of_candidate ~path { lhs_var; lhs_type; lhs_pos } : Lsp.WorkspaceEdit.t
     =

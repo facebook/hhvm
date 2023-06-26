@@ -55,4 +55,4 @@ let go_ctx
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  tast_holes ctx tast hole_filter
+  tast_holes ctx tast.Tast_with_dynamic.under_normal_assumptions hole_filter

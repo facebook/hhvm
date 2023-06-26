@@ -434,6 +434,7 @@
  (modules
   internal_type_set
   tast
+  tast_with_dynamic
   typing_kinding_defs
   type_parameter_env
   typing_set

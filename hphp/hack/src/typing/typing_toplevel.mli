@@ -18,13 +18,15 @@ if this definition isn't the winner.
 
 If any method within the class took longer than `--config timeout=<secs>`
 to typecheck (default infinite) then it's omitted from the resulting Tast. *)
-val class_def : Provider_context.t -> Nast.class_ -> Tast.class_ option
+val class_def :
+  Provider_context.t -> Nast.class_ -> Tast.class_ Tast_with_dynamic.t option
 
 val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
 
 (** If it takes longer than `--config timeout=<secs>` then produces None.
 Otherwise, it returns either 1 or 2 tasts, depending on whether sound-dynamic is enabled. *)
-val fun_def : Provider_context.t -> Nast.fun_def -> Tast.fun_def list option
+val fun_def :
+  Provider_context.t -> Nast.fun_def -> Tast.fun_def Tast_with_dynamic.t option
 
 val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
@@ -41,4 +43,7 @@ It is unfortunate that this routine exists alongside [Typing_check_job.calc_erro
 which does almost exactly the same thing, except it also does [Naming], and
 there are minor differences in treatment of some toplevel nodes. *)
 val nast_to_tast :
-  do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program
+  do_tast_checks:bool ->
+  Provider_context.t ->
+  Nast.program ->
+  Tast.program Tast_with_dynamic.t

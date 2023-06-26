@@ -336,7 +336,7 @@ let method_def ~is_disposable env cls m =
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
 
   let return_hint = hint_of_type_hint m.m_ret in
-  let method_def =
+  let under_normal_assumptions =
     {
       Aast.m_annotation = Env.save local_tpenv env;
       Aast.m_span = m.m_span;
@@ -377,23 +377,27 @@ let method_def ~is_disposable env cls m =
          params_decl_ty
          return.Typing_env_return_info.return_type.et_type
   in
-  let (env, method_defs) =
-    let method_def_of_dynamic
-        (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
-      let open Aast in
-      {
-        method_def with
-        m_annotation = Env.save local_tpenv dynamic_env;
-        m_params = dynamic_params;
-        m_body = { Aast.fb_ast = dynamic_body };
-        m_ret = (dynamic_return_ty, return_hint);
-      }
-    in
+  let method_def_of_dynamic
+      (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
+    let open Aast in
+    {
+      under_normal_assumptions with
+      m_annotation = Env.save local_tpenv dynamic_env;
+      m_params = dynamic_params;
+      m_body = { Aast.fb_ast = dynamic_body };
+      m_ret = (dynamic_return_ty, return_hint);
+    }
+  in
+  let (env, under_normal_assumptions, under_dynamic_assumptions) =
     if sdt_dynamic_check_required && not (TCO.skip_check_under_dynamic tcopt)
     then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in
-      let method_def =
-        Aast.{ method_def with m_annotation = Env.save local_tpenv env }
+      let under_normal_assumptions =
+        Aast.
+          {
+            under_normal_assumptions with
+            m_annotation = Env.save local_tpenv env;
+          }
       in
       let dynamic_components =
         method_dynamically_callable
@@ -403,21 +407,18 @@ let method_def ~is_disposable env cls m =
           params_decl_ty
           return
       in
-      let method_defs =
-        if TCO.tast_under_dynamic tcopt then
-          [method_def_of_dynamic dynamic_components]
-        else
-          []
-      in
-      (env, method_def :: method_defs)
+      ( env,
+        under_normal_assumptions,
+        Some (method_def_of_dynamic dynamic_components) )
     else
-      (env, [method_def])
+      (env, under_normal_assumptions, None)
   in
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let _env = Env.log_env_change "method_def" initial_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  (method_defs, (pos, global_inference_env))
+  ( { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions },
+    (pos, global_inference_env) )
 
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
 let check_parent env class_def class_type =
@@ -1723,7 +1724,7 @@ let check_class_members env c tc =
   let (typed_methods, methods_global_inference_envs) =
     List.filter_map methods ~f:(method_def ~is_disposable env tc) |> List.unzip
   in
-  let typed_methods = List.concat typed_methods in
+  let typed_methods = Tast_with_dynamic.collect typed_methods in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts ~f:(typeconst_def c)
   in
@@ -1748,12 +1749,15 @@ let check_class_members env c tc =
     List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
     |> List.unzip
   in
-  let typed_static_methods = List.concat typed_static_methods in
+  let typed_static_methods = Tast_with_dynamic.collect typed_static_methods in
   let (typed_methods, constr_global_inference_env) =
     match typed_constructor with
-    | None -> (typed_static_methods @ typed_methods, [])
+    | None -> (Tast_with_dynamic.append typed_static_methods typed_methods, [])
     | Some (ms, global_inference_env) ->
-      (ms @ typed_static_methods @ typed_methods, [global_inference_env])
+      ( Tast_with_dynamic.append
+          (Tast_with_dynamic.cons ms typed_static_methods)
+          typed_methods,
+        [global_inference_env] )
   in
   let typed_members =
     ( typed_consts,
@@ -1790,38 +1794,48 @@ let class_def_ env c tc =
   let (env, e1) = Typing_solver.solve_all_unsolved_tyvars env in
   check_SupportDynamicType env c tc;
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) e1;
+  let mk_class_ typed_methods =
+    {
+      Aast.c_span = c.c_span;
+      Aast.c_annotation = Env.save (Env.get_tpenv env) env;
+      Aast.c_mode = c.c_mode;
+      Aast.c_final = c.c_final;
+      Aast.c_is_xhp = c.c_is_xhp;
+      Aast.c_has_xhp_keyword = c.c_has_xhp_keyword;
+      Aast.c_kind = c.c_kind;
+      Aast.c_name = c.c_name;
+      Aast.c_tparams = tparams;
+      Aast.c_extends = c.c_extends;
+      Aast.c_uses = c.c_uses;
+      Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
+      Aast.c_xhp_category = c.c_xhp_category;
+      Aast.c_reqs = c.c_reqs;
+      Aast.c_implements = c.c_implements;
+      Aast.c_where_constraints = c.c_where_constraints;
+      Aast.c_consts = typed_consts;
+      Aast.c_typeconsts = typed_typeconsts;
+      Aast.c_vars = typed_static_vars @ typed_vars;
+      Aast.c_methods = typed_methods;
+      Aast.c_file_attributes = file_attrs;
+      Aast.c_user_attributes = user_attributes;
+      Aast.c_namespace = c.c_namespace;
+      Aast.c_enum = c.c_enum;
+      Aast.c_doc_comment = c.c_doc_comment;
+      Aast.c_xhp_children = c.c_xhp_children;
+      Aast.c_xhp_attrs = [];
+      Aast.c_emit_id = c.c_emit_id;
+      Aast.c_internal = c.c_internal;
+      Aast.c_module = c.c_module;
+      Aast.c_docs_url = c.c_docs_url;
+    }
+  in
   {
-    Aast.c_span = c.c_span;
-    Aast.c_annotation = Env.save (Env.get_tpenv env) env;
-    Aast.c_mode = c.c_mode;
-    Aast.c_final = c.c_final;
-    Aast.c_is_xhp = c.c_is_xhp;
-    Aast.c_has_xhp_keyword = c.c_has_xhp_keyword;
-    Aast.c_kind = c.c_kind;
-    Aast.c_name = c.c_name;
-    Aast.c_tparams = tparams;
-    Aast.c_extends = c.c_extends;
-    Aast.c_uses = c.c_uses;
-    Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
-    Aast.c_xhp_category = c.c_xhp_category;
-    Aast.c_reqs = c.c_reqs;
-    Aast.c_implements = c.c_implements;
-    Aast.c_where_constraints = c.c_where_constraints;
-    Aast.c_consts = typed_consts;
-    Aast.c_typeconsts = typed_typeconsts;
-    Aast.c_vars = typed_static_vars @ typed_vars;
-    Aast.c_methods = typed_methods;
-    Aast.c_file_attributes = file_attrs;
-    Aast.c_user_attributes = user_attributes;
-    Aast.c_namespace = c.c_namespace;
-    Aast.c_enum = c.c_enum;
-    Aast.c_doc_comment = c.c_doc_comment;
-    Aast.c_xhp_children = c.c_xhp_children;
-    Aast.c_xhp_attrs = [];
-    Aast.c_emit_id = c.c_emit_id;
-    Aast.c_internal = c.c_internal;
-    Aast.c_module = c.c_module;
-    Aast.c_docs_url = c.c_docs_url;
+    Tast_with_dynamic.under_normal_assumptions =
+      mk_class_ typed_methods.Tast_with_dynamic.under_normal_assumptions;
+    under_dynamic_assumptions =
+      Option.map
+        typed_methods.Tast_with_dynamic.under_dynamic_assumptions
+        ~f:mk_class_;
   }
 
 let setup_env_for_class_def_check ctx c =

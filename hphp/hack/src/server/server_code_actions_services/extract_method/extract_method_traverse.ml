@@ -365,4 +365,6 @@ let find_candidate ~selection ~entry ctx =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (top_visitor ~selection)#go ctx tast
+  (top_visitor ~selection)#go
+    ctx
+    tast.Tast_with_dynamic.under_normal_assumptions

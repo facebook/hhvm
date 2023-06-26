@@ -16,7 +16,7 @@ let helper ctx acc path_list =
         let tast = Relative_path.Map.find tasts path in
         ServerCollectTastHoles.tast_holes
           ctx
-          tast
+          tast.Tast_with_dynamic.under_normal_assumptions
           ServerCommandTypes.Tast_hole.Typing)
   in
   holes @ acc

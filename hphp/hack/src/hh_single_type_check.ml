@@ -1467,9 +1467,17 @@ let compute_tasts ?(drop_fixmed = true) ctx files_info interesting_files :
       in
       let nasts = filter_non_interesting nasts in
       let tasts =
-        Relative_path.Map.map
-          nasts
-          ~f:(Typing_toplevel.nast_to_tast ~do_tast_checks:true ctx)
+        Relative_path.Map.map nasts ~f:(fun nast ->
+            let tast =
+              Typing_toplevel.nast_to_tast ~do_tast_checks:true ctx nast
+            in
+            if
+              TypecheckerOptions.enable_sound_dynamic
+                (Provider_context.get_tcopt ctx)
+            then
+              List.concat (Tast_with_dynamic.all tast)
+            else
+              tast.Tast_with_dynamic.under_normal_assumptions)
       in
       tasts)
 
@@ -1635,6 +1643,7 @@ let handle_constraint_mode
       let { Tast_provider.Compute_tast.tast; _ } =
         Tast_provider.compute_tast_unquarantined ~ctx ~entry
       in
+      let tast = List.concat (Tast_with_dynamic.all tast) in
       do_ opts ctx tast
     | _ ->
       (* We are not interested in partial files and there is nothing in HHI

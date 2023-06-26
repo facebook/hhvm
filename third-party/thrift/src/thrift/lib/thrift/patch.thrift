@@ -313,8 +313,8 @@ enum PatchOp {
   /**
    * Remove if present.
    *
-   * A key/value-based remove for set/list, 'saturating subtract' for
-   * numeric/'counting' types, and 'remove by key' for maps.
+   * A key/value-based remove for set, 'saturating subtract' for
+   * numeric/'counting' types, 'remove by key' for map, and `remove by field id` for struct.
    */
   Remove = 7,
 
@@ -328,7 +328,6 @@ enum PatchOp {
 
   /**
    * Put/append/invert a value, with the following semantics:
-   * - Identical to 'add' for set;
    * - 'update or insert' for maps;
    * - 'append' for list, string or binary; and
    * - 'invert' for boolean.

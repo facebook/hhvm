@@ -38,6 +38,24 @@ void X25519KeyExchange::setKeyPair(
   pubKey_ = pubKey;
 }
 
+void X25519KeyExchange::setPrivateKey(
+    std::unique_ptr<folly::IOBuf> gotPrivKey) {
+  if (!gotPrivKey ||
+      gotPrivKey->computeChainDataLength() != kCurve25519PrivBytes) {
+    throw std::runtime_error("Invalid Private Key.");
+  }
+
+  std::array<uint8_t, kCurve25519PrivBytes> privKey;
+  auto privKeyRange = gotPrivKey->coalesce();
+  std::copy(privKeyRange.begin(), privKeyRange.end(), privKey.begin());
+
+  std::array<uint8_t, kCurve25519PubBytes> pubKey;
+  crypto_scalarmult_curve25519_base(pubKey.data(), privKeyRange.data());
+
+  privKey_ = privKey;
+  pubKey_ = pubKey;
+}
+
 void X25519KeyExchange::generateKeyPair() {
   auto privKey = PrivKey();
   auto pubKey = PubKey();

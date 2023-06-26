@@ -52,5 +52,21 @@ TEST(X25519KeyExchange, KeyExchangeClone) {
   EXPECT_TRUE(folly::IOBufEqualTo()(sharedSecret, sharedSecretOfCopy));
 }
 
+TEST(X25519KeyExchange, setPrivateKeyTest) {
+  auto privKeyHex =
+      "4d649ccc95beabba04637a4c14bcca98069511754a38807460a675f784dc3d75";
+
+  auto privKey = folly::IOBuf::copyBuffer(folly::unhexlify(privKeyHex));
+  X25519KeyExchange kex;
+  kex.setPrivateKey(std::move(privKey));
+
+  auto gotKeyShare = kex.getKeyShare();
+
+  auto expectedKeyShare = folly::IOBuf::copyBuffer(folly::unhexlify(
+      "2c908774a108700951a233e9efad4788f5fd42247e0978b84e96e0a6eb33716c"));
+
+  EXPECT_TRUE(folly::IOBufEqualTo()(expectedKeyShare, gotKeyShare));
+}
+
 } // namespace test
 } // namespace fizz

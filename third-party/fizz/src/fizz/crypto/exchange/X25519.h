@@ -34,6 +34,8 @@ class X25519KeyExchange : public KeyExchange {
       std::unique_ptr<folly::IOBuf> privKey,
       std::unique_ptr<folly::IOBuf> pubKey);
 
+  void setPrivateKey(std::unique_ptr<folly::IOBuf> gotPrivKey);
+
  private:
   constexpr static size_t kCurve25519PubBytes = 32;
   constexpr static size_t kCurve25519PrivBytes = 32;

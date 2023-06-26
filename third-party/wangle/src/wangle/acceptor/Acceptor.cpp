@@ -274,7 +274,7 @@ void Acceptor::acceptConnection(
     folly::NetworkSocket fdNetworkSocket,
     const SocketAddress& clientAddr,
     AcceptInfo info,
-    folly::AsyncTransport::LifecycleObserver* observer) noexcept {
+    folly::AsyncTransport::LegacyLifecycleObserver* observer) noexcept {
   int fd = fdNetworkSocket.toFd();
 
   namespace fsp = folly::portability::sockets;
@@ -301,7 +301,7 @@ void Acceptor::onDoneAcceptingConnection(
     const SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
     const AcceptInfo& info,
-    folly::AsyncTransport::LifecycleObserver* observer) noexcept {
+    folly::AsyncTransport::LegacyLifecycleObserver* observer) noexcept {
   TransportInfo tinfo;
   tinfo.timeBeforeEnqueue = info.timeBeforeEnqueue;
   processEstablishedConnection(fd, clientAddr, acceptTime, tinfo, observer);
@@ -312,7 +312,7 @@ void Acceptor::processEstablishedConnection(
     const SocketAddress& clientAddr,
     std::chrono::steady_clock::time_point acceptTime,
     TransportInfo& tinfo,
-    folly::AsyncTransport::LifecycleObserver* observer) noexcept {
+    folly::AsyncTransport::LegacyLifecycleObserver* observer) noexcept {
   bool shouldDoSSL = false;
   if (accConfig_.isSSL()) {
     CHECK(sslCtxManager_);

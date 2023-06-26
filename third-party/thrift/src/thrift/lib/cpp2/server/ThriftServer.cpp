@@ -1979,7 +1979,7 @@ ThriftServer::createIOThreadPool() {
 
 namespace {
 struct NewConnectionContextHolder
-    : public folly::AsyncTransport::LifecycleObserver {
+    : public folly::AsyncTransport::LegacyLifecycleObserver {
   explicit NewConnectionContextHolder(ThriftServer::NewConnectionContext c)
       : ctx(std::move(c)) {}
 

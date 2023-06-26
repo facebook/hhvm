@@ -179,7 +179,8 @@ class MockAcceptObserver : public AcceptObserver {
   MOCK_METHOD(void, observerDetach, (Acceptor* const), (noexcept));
 };
 
-class MockAsyncSocketLifecycleObserver : public AsyncSocket::LifecycleObserver {
+class MockAsyncSocketLifecycleObserver
+    : public AsyncSocket::LegacyLifecycleObserver {
  public:
   MOCK_METHOD(void, observerAttach, (AsyncTransport*), (noexcept));
   MOCK_METHOD(void, observerDetach, (AsyncTransport*), (noexcept));
@@ -432,17 +433,18 @@ TEST_P(AcceptorTest, AcceptObserverStopAcceptorThenRemoveCallback) {
 }
 
 /**
- * Test if AsyncSocket::LifecycleObserver can track socket during SSL accept.
+ * Test if AsyncSocket::LegacyLifecycleObserver can track socket during SSL
+ * accept.
  *
  * With Fizz support, the accept process involves transforming the AsyncSocket
  * to an AsyncFizzServer. Then, if Fizz falls back to OpenSSL, the
  * AsyncFizzServer will be transformed into an AsyncSSLSocket.
  *
- * During each transformation, the LifecycleObserver::move callback must be
- * triggered so that the observer can unsubscribe from events on the old socket
- * and subscribe to events on the new socket. This requires Wangle and Fizz to
- * use the AsyncSocket(AsyncSocket* oldSocket) constructor when performing the
- * transformation.
+ * During each transformation, the LegacyLifecycleObserver::move callback must
+ * be triggered so that the observer can unsubscribe from events on the old
+ * socket and subscribe to events on the new socket. This requires Wangle and
+ * Fizz to use the AsyncSocket(AsyncSocket* oldSocket) constructor when
+ * performing the transformation.
  *
  * This test ensures that even in the worst case, where two transformations
  * occur, that the observer will be able to track the socket through to the

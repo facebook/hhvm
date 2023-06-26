@@ -351,7 +351,7 @@ class ServerBootstrap {
       folly::NetworkSocket fd,
       const folly::SocketAddress& clientAddr,
       folly::AsyncServerSocket::AcceptCallback::AcceptInfo info,
-      folly::AsyncTransport::LifecycleObserver* observer) {
+      folly::AsyncTransport::LegacyLifecycleObserver* observer) {
     workerFactory_->forRandomWorker([&](Acceptor* acceptor) {
       acceptor->getEventBase()->runInEventBaseThread(
           [=] { acceptor->acceptConnection(fd, clientAddr, info, observer); });

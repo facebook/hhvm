@@ -27,10 +27,10 @@ class Acceptor;
 /**
  * Observer of events related to connection acceptance.
  *
- * This observer can be combined with AsyncTransport::LifecycleObserver and
- * other observers to enable instrumentation to be installed when a connection
- * is accepted. For instance, a sampling algorithm can be executed in accept()
- * to sample and install instrumentation on a subset of connections.
+ * This observer can be combined with AsyncSocket::Observer
+ * and other observers to enable instrumentation to be installed when a
+ * connection is accepted. For instance, a sampling algorithm can be executed in
+ * accept() to sample and install instrumentation on a subset of connections.
  */
 class AcceptObserver {
  public:

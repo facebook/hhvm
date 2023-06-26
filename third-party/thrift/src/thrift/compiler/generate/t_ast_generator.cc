@@ -28,7 +28,6 @@
 #include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
 
-#include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
@@ -69,9 +68,10 @@ class t_ast_generator : public t_generator {
   void process_options(
       const std::map<std::string, std::string>& options) override {
     out_dir_base_ = "gen-ast";
-    protocol_ = ast_protocol::json;
+    bool protocol_set = false;
     for (auto& pair : options) {
       if (pair.first == "protocol") {
+        protocol_set = true;
         if (pair.second == "json") {
           protocol_ = ast_protocol::json;
         } else if (pair.second == "debug") {
@@ -82,13 +82,15 @@ class t_ast_generator : public t_generator {
           throw std::runtime_error(
               fmt::format("Unknown protocol `{}`", pair.second));
         }
-      } else if (pair.first == "zigzag") {
-        useZigzag_ = pair.second != "0";
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
             fmt::format("Unknown option `{}`", pair.first));
       }
+    }
+    if (!protocol_set) {
+      throw std::runtime_error(
+          "Missing required argument protocol=json|debug|compact");
     }
   }
 
@@ -97,17 +99,15 @@ class t_ast_generator : public t_generator {
  private:
   template <typename Id>
   Id positionToId(size_t pos) {
-    return Id{useZigzag_ ? util::zigzagToI64(pos + 1) : int64_t(pos + 1)};
+    return Id{int64_t(pos + 1)};
   }
   template <typename Id>
   size_t idToPosition(Id id) {
-    return useZigzag_ ? util::i64ToZigzag(folly::to_underlying(id)) - 1
-                      : size_t(id) - 1;
+    return size_t(id) - 1;
   }
 
   std::ofstream f_out_;
   ast_protocol protocol_;
-  bool useZigzag_{false};
 };
 
 void t_ast_generator::generate_program() {
@@ -224,7 +224,6 @@ void t_ast_generator::generate_program() {
 
   switch (protocol_) {
     case ast_protocol::json:
-      // TODO: use new json serializer when available.
       f_out_ << serialize<SimpleJSONProtocolWriter>(ast);
       break;
     case ast_protocol::debug:

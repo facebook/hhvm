@@ -347,6 +347,13 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("page server started");
   }
 
+  // If we haven't already, start the admin server.
+  // We can't start the admin server early when hotswap is enabled because
+  // it might result in killing ourself instead of the old server.
+  if (RuntimeOption::StopOldServer) {
+    runAdminServerOrExitProcess();
+  }
+
   StartTime = time(nullptr);
 
   for (unsigned int i = 0; i < m_satellites.size(); i++) {

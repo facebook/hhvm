@@ -77,11 +77,6 @@ let load_saved_state_exn
   in
   (old_naming_table, old_errors)
 
-let get_hot_classes_filename () =
-  let prefix = Relative_path.(path_of_prefix Root) in
-  let ( / ) = Filename.concat in
-  prefix / "hack" / "hh_hot_classes.json"
-
 let get_hot_classes (filename : string) : SSet.t =
   if not (Disk.file_exists filename) then (
     Hh_logger.log "Hot classes file '%s' was not found" filename;

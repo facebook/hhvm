@@ -134,10 +134,12 @@ HttpServer::HttpServer() {
   options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
+  options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
   options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
   options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
   options.m_loop_sample_rate = RuntimeOption::ServerLoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
+  m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
   if (startingThreadCount != RuntimeOption::ServerThreadCount) {

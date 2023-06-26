@@ -304,8 +304,8 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
-    ide_serverless = false;
-    ide_standalone = false;
+    ide_serverless = true;
+    ide_standalone = true;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     predeclare_ide = false;
@@ -359,7 +359,7 @@ let default =
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 0;
-    ide_batch_process_changes = false;
+    ide_batch_process_changes = true;
     dump_tast_hashes = false;
   }
 
@@ -685,7 +685,7 @@ let load_
   in
   (* ide_standalone CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
   let ide_standalone =
-    bool_ "ide_standalone" ~default:default.ide_serverless config
+    bool_ "ide_standalone" ~default:default.ide_standalone config
   in
   let ide_max_num_decls =
     int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config

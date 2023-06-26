@@ -335,7 +335,6 @@ type t = {
   tco_load_hack_64_distc_saved_state: bool;
   (* Produce variations of methods and functions in TASTs that are cheked under
      dynamic assumptions. *)
-  tco_tast_under_dynamic: bool;
   (* Use the Rust implementation of naming elaboration and NAST checks. *)
   tco_rust_elab: bool;
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
@@ -466,7 +465,6 @@ val set :
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_load_hack_64_distc_saved_state:bool ->
-  ?tco_tast_under_dynamic:bool ->
   ?tco_rust_elab:bool ->
   ?dump_tast_hashes:bool ->
   ?tco_autocomplete_mode:bool ->

@@ -289,8 +289,6 @@ let populate_dead_unsafe_cast_heap t =
 let load_hack_64_distc_saved_state t =
   t.GlobalOptions.tco_load_hack_64_distc_saved_state
 
-let tast_under_dynamic t = t.GlobalOptions.tco_tast_under_dynamic
-
 let rust_elab t = t.GlobalOptions.tco_rust_elab
 
 let locl_cache_capacity t = t.GlobalOptions.tco_locl_cache_capacity

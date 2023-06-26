@@ -19,19 +19,15 @@ let default_db_dir = "/tmp/sdt_analysis_constraints"
 let exit_if_incorrect_tcopt ctx : unit =
   let tcopt = Provider_context.get_tcopt ctx in
   let has_correct_options =
-    TypecheckerOptions.(
-      enable_sound_dynamic tcopt
-      && tast_under_dynamic tcopt
-      && everything_sdt tcopt)
+    TypecheckerOptions.(enable_sound_dynamic tcopt && everything_sdt tcopt)
   in
   if not has_correct_options then (
     Out_channel.output_string
       stderr
       {|sdt analysis can only be used with certain options.
-    If running with hh_single_type_check, pass flags `--implicit-pess --tast_under_dynamic.
+    If running with hh_single_type_check, pass flags `--implicit-pess.
     If running with hh, pass these flags or set the corresponding .hhconfig options:
         --config enable_sound_dynamic_type=true \
-        --config tast_under_dynamic=true \
         --config everything_sdt=true \
 |};
     exit 2

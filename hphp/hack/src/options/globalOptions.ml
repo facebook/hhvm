@@ -187,7 +187,6 @@ type t = {
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
-  tco_tast_under_dynamic: bool;
   tco_rust_elab: bool;
   dump_tast_hashes: bool;
   tco_autocomplete_mode: bool;
@@ -318,7 +317,6 @@ let default =
     tco_populate_dead_unsafe_cast_heap = false;
     po_disallow_static_constants_in_default_func_args = false;
     tco_load_hack_64_distc_saved_state = false;
-    tco_tast_under_dynamic = false;
     tco_rust_elab = false;
     dump_tast_hashes = false;
     tco_autocomplete_mode = false;
@@ -447,7 +445,6 @@ let set
     ?tco_populate_dead_unsafe_cast_heap
     ?po_disallow_static_constants_in_default_func_args
     ?tco_load_hack_64_distc_saved_state
-    ?tco_tast_under_dynamic
     ?tco_rust_elab
     ?dump_tast_hashes
     ?tco_autocomplete_mode
@@ -780,8 +777,6 @@ let set
       setting
         tco_load_hack_64_distc_saved_state
         options.tco_load_hack_64_distc_saved_state;
-    tco_tast_under_dynamic =
-      setting tco_tast_under_dynamic options.tco_tast_under_dynamic;
     tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
     tco_autocomplete_mode =

@@ -328,7 +328,6 @@ let parse_options () =
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let substitution_mutation = ref false in
-  let tast_under_dynamic = ref false in
   let options =
     [
       ( "--config",
@@ -834,10 +833,6 @@ let parse_options () =
       ( "--count-imprecise-types",
         Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
         " Counts the number of mixed, dynamic, and nonnull types in a file" );
-      ( "--tast-under-dynamic",
-        Arg.Set tast_under_dynamic,
-        " Produce variations of definitions as they are checked under dynamic assumptions"
-      );
       ( "--sdt-analysis",
         Arg.String
           (fun command ->
@@ -1019,7 +1014,6 @@ let parse_options () =
       ~tco_expression_tree_virtualize_functions:
         !expression_tree_virtualize_functions
       ~tco_substitution_mutation:!substitution_mutation
-      ~tco_tast_under_dynamic:!tast_under_dynamic
       ~tco_rust_elab:!rust_elab
       GlobalOptions.default
   in

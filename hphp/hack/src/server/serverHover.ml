@@ -534,13 +534,6 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : HoverService.result =
-  let ctx =
-    Provider_context.map_tcopt ctx ~f:(fun tcopt ->
-        if TypecheckerOptions.enable_sound_dynamic tcopt then
-          GlobalOptions.{ tcopt with tco_tast_under_dynamic = true }
-        else
-          tcopt)
-  in
   let identities =
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in

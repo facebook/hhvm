@@ -392,7 +392,6 @@ let load_config config options =
       (bool_opt "populate_dead_unsafe_cast_heap" config)
     ?po_disallow_static_constants_in_default_func_args:
       (bool_opt "disallow_static_constants_in_default_func_args" config)
-    ?tco_tast_under_dynamic:(bool_opt "tast_under_dynamic" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

@@ -124,9 +124,10 @@ const Func* lookupMethodCtx(const Class* cls,
   if (RO::EvalEnforceDeployment &&
       raise != MethodLookupErrorOptions::NoErrorOnModule &&
       !method->unit()->isSystemLib() &&
-      will_symbol_raise_deployment_boundary_violation(g_context->getPackageInfo(), *cls)) {
-    if (!shouldRaise(raise)) return nullptr;
-    raiseDeploymentBoundaryViolation(cls);
+      will_symbol_raise_deployment_boundary_violation(
+        g_context->getPackageInfo(), *cls) &&
+      !shouldRaise(raise)) {
+    return nullptr;
   }
 
   // If we found a protected or private method, we need to do some

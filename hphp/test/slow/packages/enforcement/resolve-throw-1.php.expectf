@@ -4,5 +4,5 @@ Calling function foo outside the active deployment is not allowed @ %s/resolve-1
 Accessing class Foo outside the active deployment is not allowed @ %s/resolve-1.inc:19
 Accessing class Foo outside the active deployment is not allowed @ %s/resolve-throw-1.php:35
 in Foo constructor
-Accessing class Foo outside the active deployment is not allowed @ %s/resolve-throw-1.php:43
+string(3) "foo"
 Accessing class Foo outside the active deployment is not allowed @ %s/resolve-throw-1.php:50

@@ -1,0 +1,20 @@
+Warning: Accessing enum SoftEnumFoo outside the active deployment is not allowed in %s/enum-soft-1.php on line 11
+string(3) "foo"
+
+Warning: Accessing enum class SoftEnumClsFoo outside the active deployment is not allowed in %s/enum-soft-1.php on line 12
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/soft_foo.inc on line 26
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/soft_foo.inc on line 26
+in SoftFoo constructor
+object(SoftFoo) (0) {
+}
+
+Dynamic>>
+
+Warning: Accessing enum SoftEnumFoo outside the active deployment is not allowed in %s/enum-soft-1.php on line 6
+string(3) "foo"
+
+Warning: Accessing enum class SoftEnumClsFoo outside the active deployment is not allowed in %s/enum-soft-1.php on line 6
+object(SoftFoo) (0) {
+}

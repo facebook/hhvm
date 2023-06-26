@@ -30,6 +30,12 @@ struct Class;
 struct Func;
 struct StringData;
 
+enum class DeployKind {
+  Hard,
+  Soft,
+  HardOrSoft,
+};
+
 struct PackageInfo {
   struct Package {
     hphp_vector_string_set m_uses;
@@ -44,9 +50,11 @@ struct PackageInfo {
     }
   };
 
+  using PackageSet = hphp_vector_string_set;
+
   struct Deployment {
-    hphp_vector_string_set m_packages;
-    hphp_vector_string_set m_soft_packages;
+    PackageSet m_packages;
+    PackageSet m_soft_packages;
     std::vector<std::shared_ptr<re2::RE2>> m_domains;
 
     template <typename SerDe> void serde(SerDe& sd) {
@@ -81,7 +89,9 @@ struct PackageInfo {
 
   bool moduleInDeployment(const StringData* module,
                           const Deployment& deployment,
-                          bool allowSoft = true) const;
+                          DeployKind deployKind) const;
+
+  bool moduleInASoftPackage(const StringData* module) const;
 
   std::string mangleForCacheKey() const;
 
@@ -96,6 +106,10 @@ struct PackageInfo {
 
   PackageMap m_packages;
   DeploymentMap m_deployments;
+
+  private:
+    bool moduleInPackages(const StringData* module,
+                          const PackageSet& packageSet) const;
 };
 
 bool will_symbol_raise_deployment_boundary_violation(

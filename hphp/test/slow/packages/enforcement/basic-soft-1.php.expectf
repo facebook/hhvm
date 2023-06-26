@@ -1,0 +1,29 @@
+Warning: Calling function soft_foo outside the active deployment is not allowed in %s/basic-soft-1.php on line 7
+in soft_foo
+
+Warning: Calling function soft_foo outside the active deployment is not allowed in %s/basic-soft-1.php on line 9
+in soft_foo
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 11
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 11
+in SoftFoo constructor
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 14
+in SoftFoo constructor
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 16
+string(3) "foo"
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 18
+string(3) "foo"
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 20
+string(3) "foo"
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 21
+string(3) "foo"
+
+Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/basic-soft-1.php on line 23
+string(3) "foo"
+in SoftFoo constructor

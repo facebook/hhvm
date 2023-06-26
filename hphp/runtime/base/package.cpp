@@ -185,20 +185,35 @@ bool PackageInfo::moduleInPackage(const StringData* module,
   return false;
 }
 
-bool PackageInfo::moduleInDeployment(const StringData* module,
-                                     const Deployment& deployment,
-                                     bool allow_soft /* = true */) const {
-  assertx(module && !module->empty());
-  for (auto const& package : deployment.m_packages) {
+bool PackageInfo::moduleInPackages(const StringData* module,
+                                   const PackageSet& packageSet) const {
+  for (auto const& package : packageSet) {
     auto const it = packages().find(package);
     if (it == end(packages())) continue;
     if (moduleInPackage(module, it->second)) return true;
   }
-  if (allow_soft) {
-    for (auto const& package : deployment.m_soft_packages) {
-      auto const it = packages().find(package);
-      if (it == end(packages())) continue;
-      if (moduleInPackage(module, it->second)) return true;
+  return false;
+}
+
+bool PackageInfo::moduleInDeployment(const StringData* module,
+                                     const Deployment& deployment,
+                                     DeployKind deployKind) const {
+  assertx(module && !module->empty());
+  if (deployKind == DeployKind::Hard) {
+    return moduleInPackages(module, deployment.m_packages);
+  }
+  if (deployKind == DeployKind::Soft) {
+    return moduleInPackages(module, deployment.m_soft_packages);
+  }
+  return moduleInPackages(module, deployment.m_packages) ||
+         moduleInPackages(module, deployment.m_soft_packages);
+}
+
+bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
+  if (!module  || module->empty()) return false;
+  for (auto& [_, deployment] : deployments()) {
+    if (moduleInDeployment(module, deployment, DeployKind::Soft)) {
+      return true;
     }
   }
   return false;
@@ -211,7 +226,7 @@ bool is_module_outside_active_deployment(const PackageInfo& packageInfo,
   if (!RO::EvalEnforceDeployment) return false;
   if (auto const activeDeployment = packageInfo.getActiveDeployment()) {
     if (!module) return true;
-    return !packageInfo.moduleInDeployment(module, *activeDeployment);
+    return !packageInfo.moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
   }
   return false;
 }

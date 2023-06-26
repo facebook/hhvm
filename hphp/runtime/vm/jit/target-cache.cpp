@@ -404,13 +404,6 @@ handleStaticCall(const Class* cls, const StringData* name,
         raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
         return cand;
       }
-      if (RO::EvalEnforceDeployment) {
-        auto const packageInfo = g_context->getPackageInfo();
-        if (will_symbol_raise_deployment_boundary_violation(packageInfo, *cls)) {
-          raiseDeploymentBoundaryViolation(cls);
-          return cand;
-        }
-      }
 
       mce = Entry { cls, cand };
       return cand;
@@ -433,13 +426,6 @@ handleStaticCall(const Class* cls, const StringData* name,
       }
       mce = Entry { cls, cand };
       return cand;
-    }
-    if (RO::EvalEnforceDeployment) {
-      auto const packageInfo = g_context->getPackageInfo();
-      if (will_symbol_raise_deployment_boundary_violation(packageInfo, *cls)) {
-        raiseDeploymentBoundaryViolation(cls);
-        return cand;
-      }
     }
   }
 

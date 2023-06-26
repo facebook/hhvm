@@ -509,20 +509,23 @@ void raiseModuleBoundaryViolation(const Class* cls,
   );
 }
 
-
 void raiseDeploymentBoundaryViolation(const Func* callee) {
   if (!RO::EvalEnforceDeployment) return;
+  auto const packageInfo = g_context->getPackageInfo();
   assertx(callee && !callee->isMethod());
+  auto const soft = packageInfo.moduleInASoftPackage(callee->moduleName());
   auto const calleeName = folly::sformat("function {}", callee->name());
   auto const errMsg = folly::sformat(
     "Calling {} outside the active deployment is not allowed",
     calleeName);
-  SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+  if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+  raise_warning(errMsg);
 }
 
 void raiseDeploymentBoundaryViolation(const Class* cls) {
   if (!RO::EvalEnforceDeployment) return;
-  assertx(cls);
+  auto const packageInfo = g_context->getPackageInfo();
+  auto const soft = packageInfo.moduleInASoftPackage(cls->moduleName());
   auto const symbolType =
     isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");
   auto const clsName = folly::sformat("{}", cls->name());
@@ -530,7 +533,8 @@ void raiseDeploymentBoundaryViolation(const Class* cls) {
     "Accessing {} {} outside the active deployment is not allowed",
     symbolType,
     clsName);
-  SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+  if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
+  raise_warning(errMsg);
 }
 
 void raiseImplicitContextStateInvalid(const Func* func,

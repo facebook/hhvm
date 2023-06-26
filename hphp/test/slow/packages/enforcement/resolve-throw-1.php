@@ -52,5 +52,5 @@ function main_resolve_throw_1() {
     echo pp_exn($e);
   }
 
-  cbaz2();
+  cbaz3();
 }

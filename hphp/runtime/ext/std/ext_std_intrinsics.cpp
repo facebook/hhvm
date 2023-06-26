@@ -467,7 +467,7 @@ bool HHVM_FUNCTION(is_module_in_deployment, StringArg module,
   auto const it =
     packageInfo.deployments().find(deployment.get()->toCppString());
   if (it == end(packageInfo.deployments())) return false;
-  return packageInfo.moduleInDeployment(module.get(), it->second);
+  return packageInfo.moduleInDeployment(module.get(), it->second, DeployKind::HardOrSoft);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

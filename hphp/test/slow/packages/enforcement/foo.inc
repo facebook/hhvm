@@ -14,7 +14,7 @@ class Foo {
   }
 
   static function foo() {
-    var_dump($x);
+    var_dump(self::$x);
   }
 }
 

@@ -1155,7 +1155,9 @@ bool process(CompilerOptions &po) {
     moduleInDeployment.reserve(index->modules.size());
     for (auto const& [module, _] : index->modules) {
       assertx(!moduleInDeployment.contains(module));
-      if (packageInfo.moduleInDeployment(module, it->second)) {
+      if (packageInfo.moduleInDeployment(module,
+                                         it->second,
+                                         DeployKind::HardOrSoft)) {
         moduleInDeployment.insert(module);
       }
     }

@@ -1562,6 +1562,14 @@ struct MatchFileSystemRequest {
   2: list<PathString> paths;
 }
 
+struct ChangeOwnershipRequest {
+  1: PathString mountPoint;
+  2: i64 uid;
+  3: i64 gid;
+}
+
+struct ChangeOwnershipResponse {}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -1878,8 +1886,19 @@ service EdenService extends fb303_core.BaseService {
 
   /**
    * Chowns all files in the requested mount to the requested uid and gid
+   *
+   * DEPRECATED: Prefer using ChangeOwnership in new code.  Callers may still
+   * need to fall back to chown() if talking to an older edenfs daemon
+   * that does not support ChangeOwnership() yet.
    */
   void chown(1: PathString mountPoint, 2: i32 uid, 3: i32 gid);
+
+  /**
+   * Changes ownership all files in the requested mount to the requested uid and gid
+   */
+  ChangeOwnershipResponse changeOwnership(
+    1: ChangeOwnershipRequest request,
+  ) throws (1: EdenError ex);
 
   /**
    * Return the list of files that are different from the specified source

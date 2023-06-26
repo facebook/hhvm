@@ -276,6 +276,9 @@ ProxygenServer::ProxygenServer(
     m_httpConfig.receiveSessionWindowSize = kConnFlowControl;
   }
 
+  if (!options.m_takeoverFilename.empty()) {
+    m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
+  }
   const std::vector<std::chrono::seconds> levels {
     std::chrono::seconds(10), std::chrono::seconds(120)};
   ProxygenTransport::s_requestErrorCount =
@@ -292,6 +295,36 @@ ProxygenServer::~ProxygenServer() {
   Logger::Verbose("%p: destroying ProxygenServer", this);
   waitForEnd();
   Logger::Info("%p: ProxygenServer destroyed", this);
+}
+
+int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
+  if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
+    // Subsequent calls to ProxygenServer::stop() won't do anything.
+    // The server continues accepting until RequestType::TERMINATE is
+    // seen.
+    setStatus(RunStatus::STOPPING);
+  } else if (type == TakeoverAgent::RequestType::TERMINATE) {
+    stopListening(true /*hard*/);
+    // No need to do m_takeover_agent->stop(), as the afdt server is
+    // going to be closed when this returns.
+  }
+  return 0;
+}
+
+void ProxygenServer::takeoverAborted() {
+  m_httpServerSocket.reset();
+}
+
+void ProxygenServer::addTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->addTakeoverListener(listener);
+  }
+}
+
+void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
+  if (m_takeover_agent) {
+    m_takeover_agent->removeTakeoverListener(listener);
+  }
 }
 
 std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
@@ -314,7 +347,8 @@ void ProxygenServer::start() {
    * including admin server, etc.).
    * (1) Try to use RuntimeOption::ServerPortFd (the inherited socket should
    * have already been bound to a proper port, but isn't listening yet).
-   * (2) If (1) fails, try to bind to RuntimeOption::ServerPort.
+   * (2) If (1) fails, and try to take over the socket of an old server.
+   * (3) If both (1) and (2) fail, try to bind to RuntimeOption::ServerPort.
    */
   bool socketSetupSucceeded = false;
   if (m_accept_sock >= 0) {
@@ -329,16 +363,38 @@ void ProxygenServer::start() {
                       m_accept_sock);
     }
   }
+  if (!socketSetupSucceeded && m_takeover_agent) {
+    m_accept_sock = m_takeover_agent->takeover();
+    if (m_accept_sock >= 0) {
+      try {
+        m_httpServerSocket->useExistingSocket(
+          folly::NetworkSocket::fromFd(m_accept_sock));
+        needListen = false;
+        m_takeover_agent->requestShutdown();
+        socketSetupSucceeded = true;
+        Logger::Info("takeover: using takeover fd %d for server",
+                     m_accept_sock);
+      } catch (const std::exception& ex) {
+        Logger::Warning("takeover: failed to takeover fd %d for server",
+                        m_accept_sock);
+      }
+    }
+  }
   if (!socketSetupSucceeded) {
     // make it possible to quickly reuse the port when needed.
     auto const allowReuse =
-      RuntimeOption::StopOldServer;
+      RuntimeOption::StopOldServer || m_takeover_agent;
     m_httpServerSocket->setReusePortEnabled(allowReuse);
     try {
       m_httpServerSocket->bind(m_httpConfig.bindAddress);
     } catch (const std::exception& ex) {
       failedToListen(ex, m_httpConfig.bindAddress);
     }
+  }
+
+  if (m_takeover_agent) {
+    m_takeover_agent->setupFdServer(m_workers[0]->getEventBase()->getLibeventBase(),
+                                    m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
   for (int i = 0; i < m_workers.size(); i++) {
@@ -492,6 +548,12 @@ void ProxygenServer::stop() {
 
   if (m_filePoller) {
     m_filePoller->stop();
+  }
+
+  if (m_takeover_agent) {
+    m_workers[0]->getEventBase()->runInEventBaseThread([this] {
+        m_takeover_agent->stop();
+      });
   }
 
   // close listening sockets, this will initiate draining, including closing

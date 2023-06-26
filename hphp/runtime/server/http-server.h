@@ -29,7 +29,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct HttpServer : Synchronizable, Server::ServerEventListener {
+struct HttpServer : Synchronizable, TakeoverListener,
+                    Server::ServerEventListener {
  public:
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
@@ -64,6 +65,8 @@ struct HttpServer : Synchronizable, Server::ServerEventListener {
   bool isStopped() const { return m_stopped;}
 
   void flushLog();
+
+  void takeoverShutdown() override;
 
   void serverStopped(HPHP::Server* server) override;
 

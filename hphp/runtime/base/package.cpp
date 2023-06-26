@@ -127,7 +127,11 @@ std::string PackageInfo::mangleForCacheKey() const {
     result[name] = entry;
   }
 
-  return folly::toJson(result);
+  // By default the ordering of keys in dynamic objects is unspecified, and
+  // in dbg builds we randomize the order to ensure no one is depending on it.
+  folly::json::serialization_opts opts;
+  opts.sort_keys = true;
+  return folly::json::serialize(std::move(result), std::move(opts));
 }
 
 const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {

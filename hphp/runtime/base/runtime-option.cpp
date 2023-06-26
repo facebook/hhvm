@@ -370,12 +370,7 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
 const RepoOptions& RepoOptions::forFile(const std::string& path) {
   tracing::BlockNoTrace _{"repo-options"};
 
-  std::string fpath{path};
-  if (boost::starts_with(fpath, "/:")) return defaults();
-
-  auto const isParentOf = [] (const std::filesystem::path& p1, const std::string& p2) {
-    return boost::starts_with(std::filesystem::path{p2}, p1.parent_path());
-  };
+  if (boost::starts_with(path, "/:")) return defaults();
 
   // Fast path: we have an active request and it has cached a RepoOptions
   // which has not been modified. It can cause us to miss out on
@@ -390,9 +385,15 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
       // Don't bother checking if the file is changed. This cache is request
       // local and within any given request we want to use a consistent version
       // of the RepoOptions anyway.
-      if (isParentOf(opts->path(), fpath)) return *opts;
+      if (boost::starts_with(std::filesystem::path{path}, opts->dir())) {
+        return *opts;
+      }
     }
   }
+
+  auto const isParentOf = [] (const std::filesystem::path& p1, const std::string& p2) {
+    return boost::starts_with(std::filesystem::path{p2}, p1.parent_path());
+  };
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
@@ -412,7 +413,6 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
     if (fd < 0) return std::nullopt;
     auto file = req::make<PlainFile>(fd);
     return file->read();
-
   };
 
   auto const set = [&] (
@@ -454,21 +454,21 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
   //          optimization.
   if (RuntimeOption::EvalCachePerRepoOptionsPath) {
     if (!s_lastSeenRepoConfig->empty() &&
-        isParentOf(*s_lastSeenRepoConfig, fpath)) {
+        isParentOf(*s_lastSeenRepoConfig, path)) {
       if (auto const r = test(*s_lastSeenRepoConfig)) return *r;
       s_lastSeenRepoConfig->clear();
     }
 
     // If the last seen path isn't set yet or is no longer accurate try checking
     // other cached paths before falling back to the filesystem.
-    walkDirTree(fpath, [&] (const std::string& path) {
+    walkDirTree(path, [&] (const std::string& path) {
       return (ret = test(path)) != nullptr;
     });
   }
 
   if (ret) return *ret;
 
-  walkDirTree(fpath, [&] (const std::string& path) {
+  walkDirTree(path, [&] (const std::string& path) {
     RepoOptionStats st(path, wrapper);
     if (st.missing()) return false;
     RepoOptionCache::const_accessor rpathAcc;

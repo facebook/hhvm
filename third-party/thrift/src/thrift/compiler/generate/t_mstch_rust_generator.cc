@@ -1403,7 +1403,6 @@ class mstch_rust_value : public mstch_base {
   mstch::node is_struct() {
     return (type_->is_struct() || type_->is_exception()) &&
         !type_->is_union() && const_value_->get_type() == value_type::CV_MAP;
-
   }
   mstch::node struct_fields();
   mstch::node is_exhaustive();

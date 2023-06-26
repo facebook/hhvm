@@ -333,6 +333,20 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
   SSLContextConfig ctxConfig3Default = ctxConfig3;
   ctxConfig3Default.isDefault = true;
 
+  SSLContextConfig ctxConfig4;
+  ctxConfig4.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig4.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+
+  SNIConfig sniConfig;
+  SSLContextConfig ctxConfig4Override;
+  ctxConfig4Override.domains = {"www.test4.com"};
+  ctxConfig4Override.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
+  ctxConfig4Override.clientVerification =
+      folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  sniConfig.snis = {"www.test4.com"};
+  sniConfig.contextConfig = ctxConfig4Override;
+
   // Helper function that verifies seeds are what we expect.
   auto checkSeeds = [](std::shared_ptr<folly::SSLContext> ctx,
                        TLSTicketKeySeeds& seeds) {
@@ -350,7 +364,7 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
 
   // Reset with just one default
   sslCtxMgr.resetSSLContextConfigs(
-      {ctxConfig1Default}, cacheOptions, &seeds1, addr, nullptr);
+      {ctxConfig1Default}, {}, cacheOptions, &seeds1, addr, nullptr);
   EXPECT_EQ(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")),
       sslCtxMgr.getDefaultSSLCtx());
@@ -362,29 +376,45 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
 
   // Reset with a different set of contexts, no new seeds.
   sslCtxMgr.resetSSLContextConfigs(
-      {ctxConfig2Default, ctxConfig3}, cacheOptions, nullptr, addr, nullptr);
+      {ctxConfig2Default, ctxConfig3},
+      {sniConfig},
+      cacheOptions,
+      nullptr,
+      addr,
+      nullptr);
   EXPECT_FALSE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")));
   EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test2.com")));
   EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test3.com")));
+  EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com")));
   checkSeeds(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test2.com")), seeds1);
   checkSeeds(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test3.com")), seeds1);
+  checkSeeds(
+      sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com")), seeds1);
 
   // New set of contexts, new seeds.
   sslCtxMgr.resetSSLContextConfigs(
-      {ctxConfig1Default, ctxConfig3}, cacheOptions, &seeds2, addr, nullptr);
+      {ctxConfig1Default, ctxConfig3},
+      {sniConfig},
+      cacheOptions,
+      &seeds2,
+      addr,
+      nullptr);
   EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")));
   EXPECT_FALSE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test2.com")));
   EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test3.com")));
+  EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com")));
   checkSeeds(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")), seeds2);
   checkSeeds(
       sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test3.com")), seeds2);
+  checkSeeds(
+      sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com")), seeds2);
 
   // Back to one context, no new seeds.
   sslCtxMgr.resetSSLContextConfigs(
-      {ctxConfig1Default}, cacheOptions, nullptr, addr, nullptr);
+      {ctxConfig1Default}, {}, cacheOptions, nullptr, addr, nullptr);
   EXPECT_TRUE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test.com")));
   EXPECT_FALSE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test2.com")));
   EXPECT_FALSE(sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("test3.com")));
@@ -397,6 +427,7 @@ TEST(SSLContextManagerTest, TestResetSSLContextConfigs) {
   EXPECT_THROW(
       sslCtxMgr.resetSSLContextConfigs(
           {ctxConfig1Default, ctxConfig2Default, ctxConfig3},
+          {},
           cacheOptions,
           &seeds3,
           addr,
@@ -730,21 +761,22 @@ TEST(
   ctxConfig4.clientVerification =
       folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
 
-  std::vector<std::string> domains = {"www.test4.com"};
+  SNIConfig sniConfig;
   SSLContextConfig ctxConfig4Override;
-  ctxConfig4Override.domains = domains;
+  ctxConfig4Override.domains = {"www.test4.com"};
   ctxConfig4Override.setCertificateBuf(kTestCert4PEM, kTestCert4Key);
   ctxConfig4Override.clientVerification =
       folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
+  sniConfig.snis = {"www.test4.com"};
+  sniConfig.contextConfig = ctxConfig4Override;
 
   sslCtxMgr.resetSSLContextConfigs(
       {ctxConfig1, ctxConfig2, ctxConfig3, ctxConfig4},
+      {sniConfig},
       cacheOptions,
       &seeds,
       addr,
       nullptr);
-  sslCtxMgr.addSSLContextConfig(
-      domains, ctxConfig4Override, cacheOptions, &seeds, addr, nullptr);
 
   auto ctx = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.test4.com"));
   EXPECT_NE(ctx, sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey(".test4.com")));

@@ -105,6 +105,15 @@ void Acceptor::init(
               accConfig_.bindAddress,
               cacheProvider_);
         }
+        for (const auto& sniConfig : accConfig_.sniConfigs) {
+          sslCtxManager_->addSSLContextConfig(
+              sniConfig.snis,
+              sniConfig.contextConfig,
+              accConfig_.sslCacheOptions,
+              &accConfig_.initialTicketSeeds,
+              accConfig_.bindAddress,
+              cacheProvider_);
+        }
       }
       CHECK(sslCtxManager_->getDefaultSSLCtx());
     } catch (const std::runtime_error& ex) {
@@ -211,19 +220,11 @@ void Acceptor::resetSSLContextConfigs(
     } else if (sslCtxManager_) {
       sslCtxManager_->resetSSLContextConfigs(
           accConfig_.sslContextConfigs,
+          accConfig_.sniConfigs,
           accConfig_.sslCacheOptions,
           nullptr,
           accConfig_.bindAddress,
           cacheProvider_);
-      for (const auto& sniConfig : accConfig_.sniConfigs) {
-        sslCtxManager_->addSSLContextConfig(
-            sniConfig.snis,
-            sniConfig.contextConfig,
-            accConfig_.sslCacheOptions,
-            nullptr,
-            accConfig_.bindAddress,
-            cacheProvider_);
-      }
     }
     getFizzPeeker()->setSSLContextManager(sslCtxManager_);
   } catch (const std::runtime_error& ex) {

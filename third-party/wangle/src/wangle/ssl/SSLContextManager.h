@@ -23,6 +23,7 @@
 #include <glog/logging.h>
 #include <wangle/acceptor/SSLContextSelectionMisc.h>
 #include <wangle/ssl/PasswordInFileFactory.h>
+#include <wangle/ssl/SNIConfig.h>
 #include <wangle/ssl/SSLContextConfig.h>
 #include <wangle/ssl/SSLSessionCacheManager.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>
@@ -177,6 +178,7 @@ class SSLContextManager {
    */
   void resetSSLContextConfigs(
       const std::vector<SSLContextConfig>& ctxConfigs,
+      const std::vector<SNIConfig>& sniConfigs,
       const SSLCacheOptions& cacheOptions,
       const TLSTicketKeySeeds* ticketSeeds,
       const folly::SocketAddress& vipAddress,

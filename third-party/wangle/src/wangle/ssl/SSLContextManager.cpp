@@ -421,6 +421,7 @@ TLSTicketKeySeeds SSLContextManager::SslContexts::getTicketKeys() const {
 
 void SSLContextManager::resetSSLContextConfigs(
     const std::vector<SSLContextConfig>& ctxConfigs,
+    const std::vector<SNIConfig>& sniConfigs,
     const SSLCacheOptions& cacheOptions,
     const TLSTicketKeySeeds* ticketSeeds,
     const folly::SocketAddress& vipAddress,
@@ -445,6 +446,18 @@ void SSLContextManager::resetSSLContextConfigs(
     contexts->addSSLContextConfig(
         {},
         ctxConfig,
+        cacheOptions,
+        ticketSeeds ? ticketSeeds : &oldTicketSeeds,
+        vipAddress,
+        externalCache,
+        this,
+        defaultCtx);
+  }
+
+  for (const auto& sniConfig : sniConfigs) {
+    contexts->addSSLContextConfig(
+        sniConfig.snis,
+        sniConfig.contextConfig,
         cacheOptions,
         ticketSeeds ? ticketSeeds : &oldTicketSeeds,
         vipAddress,

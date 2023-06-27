@@ -9,7 +9,9 @@
 
 #include "soft/aead_aegis128l_soft.h"
 
-#if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
+#include <fizz/third-party/libsodium-aegis/private/config.h>
+
+#if FIZZ_LIBSODIUM_HAS_AESNI
 #include "aesni/aead_aegis128l_aesni.h"
 #endif
 
@@ -118,11 +120,11 @@ fizz_aegis128l_decrypt_detached(unsigned char *m, unsigned char *nsec,
 }
 
 int
-_fizz_aegis128l_pick_best_implementation(void)
+fizz_aegis128l_pick_best_implementation(void)
 {
     implementation = &fizz_crypto_aead_aegis128l_soft_implementation;
 
-#if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
+#if FIZZ_LIBSODIUM_HAS_AESNI
     if (sodium_runtime_has_aesni()) {
         implementation = &fizz_crypto_aead_aegis128l_aesni_implementation;
         return 0;

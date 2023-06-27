@@ -153,6 +153,12 @@ foreach(dir ${FIZZ_TEST_HEADER_DIRS})
     ${headers})
 endforeach()
 
+option(FIZZ_BUILD_AEGIS "Compiles Fizz with AEGIS support (experimental)" OFF)
+
+set(FIZZ_AESNI_SOURCES
+  third-party/libsodium-aegis/aegis128l/aesni/aead_aegis128l_aesni.c
+  third-party/libsodium-aegis/aegis256/aesni/aead_aegis256_aesni.c
+)
 set(FIZZ_SOURCES
   crypto/Utils.cpp
   crypto/exchange/X25519.cpp
@@ -226,13 +232,15 @@ set(FIZZ_SOURCES
   util/FizzUtil.cpp
   util/Tracing.cpp
   third-party/libsodium-aegis/aegis128l/aead_aegis128l.c
-  third-party/libsodium-aegis/aegis128l/aesni/aead_aegis128l_aesni.c
   third-party/libsodium-aegis/aegis128l/soft/aead_aegis128l_soft.c
   third-party/libsodium-aegis/aegis256/aead_aegis256.c
-  third-party/libsodium-aegis/aegis256/aesni/aead_aegis256_aesni.c
   third-party/libsodium-aegis/aegis256/soft/aead_aegis256_soft.c
   third-party/libsodium-aegis/private/softaes.c
+  ${FIZZ_AESNI_SOURCES}
 )
+
+set_source_files_properties(${FIZZ_AESNI_SOURCES} PROPERTIES COMPILE_OPTIONS "-maes;-mssse3")
+
 
 add_library(fizz
   ${FIZZ_HEADERS}

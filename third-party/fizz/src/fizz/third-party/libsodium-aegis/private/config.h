@@ -82,4 +82,12 @@
 #    endif
 #  endif
 #endif
+
+#if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
+#define FIZZ_LIBSODIUM_HAS_AESNI 1
+#else
+#define FIZZ_LIBSODIUM_HAS_AESNI 0
+#endif
+
+
 // clang-format on

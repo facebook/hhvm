@@ -388,6 +388,11 @@ module Initialize : sig
     delayUntilDoneInit: bool;
         (** used for test scenarios where we want clientLsp to delay receiving any
     further LSP requests until clientIdeDaemon has done its init. *)
+    skipLspServerOnTypeFormatting: bool;
+        (** `true` iff formatting is to be done on the LSP client,
+          * rather than provided by the LSP server.
+          * TODO(T155870670): remove this field
+        *)
   }
 
   and client_capabilities = {

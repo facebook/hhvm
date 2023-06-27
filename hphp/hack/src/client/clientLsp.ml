@@ -5233,6 +5233,7 @@ let handle_shell_out_complete
   | _ -> Some (make_result_telemetry result_count ?result_extra_data)
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
+  let initialize_params = initialize_params_exc () in
   Initialize.
     {
       server_capabilities =
@@ -5268,7 +5269,12 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           documentFormattingProvider = true;
           documentRangeFormattingProvider = true;
           documentOnTypeFormattingProvider =
-            Some { firstTriggerCharacter = ";"; moreTriggerCharacter = ["}"] };
+            (* TODO(T155870670) always set to `None` *)
+            Option.some_if
+              (not
+                 initialize_params.initializationOptions
+                   .skipLspServerOnTypeFormatting)
+              { firstTriggerCharacter = ";"; moreTriggerCharacter = ["}"] };
           renameProvider = true;
           documentLinkProvider = None;
           executeCommandProvider = None;
@@ -6214,7 +6220,7 @@ let handle_client_message
         id
         (DocumentRangeFormattingResult result);
       Lwt.return_some (make_result_telemetry (List.length result))
-    (* textDocument/onTypeFormatting *)
+    (* textDocument/onTypeFormatting. TODO(T155870670): remove this *)
     | (_, _, RequestMessage (id, DocumentOnTypeFormattingRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let result = do_documentOnTypeFormatting editor_open_files params in

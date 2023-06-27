@@ -291,6 +291,7 @@ module Initialize = struct
     namingTableSavedStatePath: string option;
     namingTableSavedStateTestDelay: float;
     delayUntilDoneInit: bool;
+    skipLspServerOnTypeFormatting: bool;
   }
 
   and client_capabilities = {

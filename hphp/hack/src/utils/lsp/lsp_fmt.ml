@@ -1068,6 +1068,8 @@ let parse_initialize (params : json option) : Initialize.params =
           Jget.float_d json "namingTableSavedStateTestDelay" ~default:0.0;
         delayUntilDoneInit =
           Jget.bool_d json "delayUntilDoneInit" ~default:false;
+        skipLspServerOnTypeFormatting =
+          Jget.bool_d json "skipLspServerOnTypeFormatting" ~default:false;
       }
     and parse_capabilities json =
       {

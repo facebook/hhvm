@@ -16,6 +16,7 @@ type ide_action =
   | Document
   | Range of Ide_api_types.range
   | Position of Ide_api_types.position
+      (** TODO(T155870670): remove [Position] *)
 
 type ide_response = {
   new_text: string;

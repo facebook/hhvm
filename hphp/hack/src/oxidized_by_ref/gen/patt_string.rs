@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<69e6920db38f194f2868efccd25e2f87>>
+// @generated SignedSource<<b482705793fe914788b26dded209874f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -51,13 +51,11 @@ pub enum PattString<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Contains(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "One_of")]
-    OneOf(&'a [PattString<'a>]),
+    Or(&'a [PattString<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     And(&'a [PattString<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Is_not")]
-    IsNot(&'a PattString<'a>),
+    Not(&'a PattString<'a>),
 }
 impl<'a> TrivialDrop for PattString<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(PattString<'arena>);

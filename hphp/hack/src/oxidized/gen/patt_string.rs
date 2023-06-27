@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fd6c351069d5d4b276595aeeb22de555>>
+// @generated SignedSource<<1c17c1fbe87ff8f8cb78f33d532a98d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,9 +44,7 @@ pub enum PattString {
     #[rust_to_ocaml(name = "Ends_with")]
     EndsWith(String),
     Contains(String),
-    #[rust_to_ocaml(name = "One_of")]
-    OneOf(Vec<PattString>),
+    Or(Vec<PattString>),
     And(Vec<PattString>),
-    #[rust_to_ocaml(name = "Is_not")]
-    IsNot(Box<PattString>),
+    Not(Box<PattString>),
 }

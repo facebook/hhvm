@@ -96,9 +96,9 @@ let matches_patt_string_help t ~scrut =
     | Starts_with prefix -> String.is_prefix scrut ~prefix
     | Ends_with suffix -> String.is_suffix scrut ~suffix
     | Contains substring -> String.is_substring scrut ~substring
-    | One_of ts -> List.exists ~f:aux ts
+    | Or ts -> List.exists ~f:aux ts
     | And ts -> List.for_all ~f:aux ts
-    | Is_not t -> not @@ aux t
+    | Not t -> not @@ aux t
   in
   aux t
 

@@ -11,7 +11,7 @@ type t =
   | Starts_with of string
   | Ends_with of string
   | Contains of string
-  | One_of of t list
+  | Or of t list
   | And of t list
-  | Is_not of t
+  | Not of t
 [@@deriving compare, eq, sexp, show]

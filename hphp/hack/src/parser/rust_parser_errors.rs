@@ -128,7 +128,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypeRefinements => OngoingRelease,
             UnstableFeatures::MethodTraitDiamond => OngoingRelease,
             UnstableFeatures::UpcastExpression => Unstable,
-            UnstableFeatures::RequireClass => Preview,
+            UnstableFeatures::RequireClass => OngoingRelease,
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => Unstable,

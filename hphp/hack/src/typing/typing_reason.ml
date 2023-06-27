@@ -911,6 +911,7 @@ type ureason =
   | URusing
   | URstr_concat
   | URstr_interp
+  | URdynamic_prop
 [@@deriving show]
 
 let index_array = URindex "array"
@@ -969,6 +970,7 @@ let string_of_ureason = function
     "String concatenation can only be performed on string and int arguments"
   | URstr_interp ->
     "Only string and int values can be used in string interpolation"
+  | URdynamic_prop -> "Dynamic access of property"
 
 let compare : type phase. phase t_ -> phase t_ -> int =
  fun r1 r2 ->

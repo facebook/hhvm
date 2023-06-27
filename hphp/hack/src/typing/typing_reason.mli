@@ -231,6 +231,7 @@ type ureason =
   | URusing
   | URstr_concat
   | URstr_interp
+  | URdynamic_prop
 [@@deriving show]
 
 val index_array : ureason

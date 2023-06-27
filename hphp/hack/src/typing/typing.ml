@@ -4864,13 +4864,20 @@ and expr_
   (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor, prop_or_method) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
-    let (env, te2, _) = expr env e2 in
-    let (env, ty) =
-      if TUtils.is_dynamic env ty1 then
-        (env, MakeType.dynamic (Reason.Rwitness p))
-      else
-        Env.fresh_type_error env p
+    let (env, ty_err_opt) =
+      (* Under Sound Dynamic, check that e1 supports dynamic *)
+      Typing_coercion.coerce_type
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        p
+        Reason.URdynamic_prop
+        env
+        ty1
+        (MakeType.unenforced (MakeType.dynamic (Reason.Rwitness p)))
+        Typing_error.Callback.unify_error
     in
+    Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+    let (env, te2, _) = expr env e2 in
+    let (env, ty) = (env, MakeType.dynamic (Reason.Rdynamic_prop p)) in
     let (_, pos, te2) = te2 in
     let env = might_throw ~join_pos:p env in
     let (env, te2) = TUtils.make_simplify_typed_expr env pos ty te2 in

@@ -14966,9 +14966,7 @@ Index::lookup_class_type_constant(
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
   auto iter = m_data->constants.find(cnsName);
-  if (iter == end(m_data->constants)) {
-    return TInitCell;
-  }
+  if (iter == end(m_data->constants)) return TBottom;
 
   auto constant = iter->second;
   if (type(constant->val) != KindOfUninit) {

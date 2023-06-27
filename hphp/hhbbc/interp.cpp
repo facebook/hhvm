@@ -903,6 +903,7 @@ void in(ISS& env, const bc::ColFromArray& op) {
 
 void in(ISS& env, const bc::CnsE& op) {
   auto t = env.index.lookup_constant(env.ctx, op.str1);
+  if (t.subtypeOf(BBottom)) unreachable(env);
   constprop(env);
   push(env, std::move(t));
 }

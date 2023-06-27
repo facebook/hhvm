@@ -1,7 +1,0 @@
-<?hh
-
-class Three extends Two {
-  public function foo() : <<__Soft>> int {
-    return 3;
-  }
-}

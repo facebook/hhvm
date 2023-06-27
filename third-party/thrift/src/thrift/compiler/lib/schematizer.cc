@@ -42,11 +42,18 @@ std::unique_ptr<t_const_value> mapval() {
   ret->set_map();
   return ret;
 }
-std::unique_ptr<t_const_value> typeUri(const t_type& type) {
+std::unique_ptr<t_const_value> typeUri(
+    const t_type& type, const t_program* program) {
   auto ret = mapval();
   if (!type.uri().empty()) {
     ret->add_map(val("uri"), val(type.uri()));
+  } else {
+    ret->add_map(val("scopedName"), val(type.get_scoped_name()));
   }
+  static const std::string kTypeUriUri = "facebook.com/thrift/type/TypeUri";
+  auto typeUri_ttype = t_type_ref::from_ptr(
+      dynamic_cast<const t_type*>(program->scope()->find_def(kTypeUriUri)));
+  ret->set_ttype(typeUri_ttype);
   return ret;
 }
 
@@ -77,10 +84,7 @@ void add_definition(
               program->scope()->find_def(kStructuredAnnotationSchemaUri)));
       annot->set_ttype(structured_annotation_ttype);
       annot->set_map();
-      annot->add_map(val("name"), val(item->type()->name()));
-      if (!item->type()->uri().empty()) {
-        annot->add_map(val("uri"), val(item->type()->uri()));
-      }
+      annot->add_map(val("type"), typeUri(*item->type(), program));
       if (!item->value()->is_empty()) {
         static const std::string kProtocolValueUri =
             "facebook.com/thrift/protocol/Value";
@@ -151,7 +155,7 @@ std::unique_ptr<t_const_value> gen_type(
       continue;
     }
 
-    type_name->add_map(val("typedefType"), typeUri(*resolved_type));
+    type_name->add_map(val("typedefType"), typeUri(*resolved_type, program));
     schema->add_map(val("name"), std::move(type_name));
     return schema;
   }
@@ -224,7 +228,7 @@ std::unique_ptr<t_const_value> gen_type(
             generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
         add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
-      type_name->add_map(val("enumType"), typeUri(*resolved_type));
+      type_name->add_map(val("enumType"), typeUri(*resolved_type, program));
       break;
     }
     case t_type::type::t_struct: {
@@ -255,7 +259,7 @@ std::unique_ptr<t_const_value> gen_type(
               return "structType";
             }
           }()),
-          typeUri(*resolved_type));
+          typeUri(*resolved_type, program));
       break;
     }
     default:
@@ -268,8 +272,9 @@ std::unique_ptr<t_const_value> gen_type(
   return schema;
 }
 
-std::unique_ptr<t_const_value> gen_type(const t_type& type) {
-  return gen_type(nullptr, nullptr, nullptr, type);
+std::unique_ptr<t_const_value> gen_type(
+    const t_type& type, const t_program* program) {
+  return gen_type(nullptr, program, nullptr, type);
 }
 
 void schematize_recursively(
@@ -514,7 +519,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         auto return_type_schema = val();
         return_type_schema->set_map();
         return_type_schema->add_map(
-            val("thriftType"), gen_type(*ret->get_true_type()));
+            val("thriftType"), gen_type(*ret->get_true_type(), node.program()));
         return_types_schema->add_list(std::move(return_type_schema));
       }
     }
@@ -560,7 +565,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
   schema->set_map();
   add_definition(*schema, node, program, intern_value_);
 
-  schema->add_map(val("type"), gen_type(*node.type()));
+  schema->add_map(val("type"), gen_type(*node.type(), program));
 
   auto id = intern_value_(
       node.value()->clone(), node.type(), const_cast<t_program*>(program));
@@ -604,7 +609,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   auto schema = mapval();
   add_definition(*schema, node, node.program(), intern_value_);
-  schema->add_map(val("type"), gen_type(*node.type()));
+  schema->add_map(val("type"), gen_type(*node.type(), node.program()));
   return schema;
 }
 

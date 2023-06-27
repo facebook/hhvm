@@ -17,6 +17,7 @@ import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 class TypeUri_Builder(thrift.py3.builder.StructBuilder):
     uri: _typing.Optional[str]
     typeHashPrefixSha2_256: _typing.Optional[bytes]
+    scopedName: _typing.Optional[str]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

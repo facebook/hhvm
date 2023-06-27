@@ -89,6 +89,7 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         cTypeUri__type___EMPTY__ "::apache::thrift::type::TypeUri::Type::__EMPTY__",
         cTypeUri__type_uri "::apache::thrift::type::TypeUri::Type::uri",
         cTypeUri__type_typeHashPrefixSha2_256 "::apache::thrift::type::TypeUri::Type::typeHashPrefixSha2_256",
+        cTypeUri__type_scopedName "::apache::thrift::type::TypeUri::Type::scopedName",
 
     cdef cppclass cTypeUri "::apache::thrift::type::TypeUri":
         cTypeUri() except +
@@ -104,6 +105,8 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         string& set_uri "set_uri" (const string&)
         const folly_fbstring& get_typeHashPrefixSha2_256 "get_typeHashPrefixSha2_256" () const
         folly_fbstring& set_typeHashPrefixSha2_256 "set_typeHashPrefixSha2_256" (const folly_fbstring&)
+        const string& get_scopedName "get_scopedName" () const
+        string& set_scopedName "set_scopedName" (const string&)
 
     cdef enum cTypeName__type "::apache::thrift::type::TypeName::Type":
         cTypeName__type___EMPTY__ "::apache::thrift::type::TypeName::Type::__EMPTY__",
@@ -187,7 +190,8 @@ cdef class TypeUri(thrift.py3.types.Union):
     cdef unique_ptr[cTypeUri] _make_instance(
         cTypeUri* base_instance,
         str uri,
-        bytes typeHashPrefixSha2_256
+        bytes typeHashPrefixSha2_256,
+        str scopedName
     ) except *
 
     @staticmethod

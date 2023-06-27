@@ -246,12 +246,14 @@ cdef class TypeUri(thrift.py3.types.Union):
     def __init__(
         self, *,
         str uri=None,
-        bytes typeHashPrefixSha2_256=None
+        bytes typeHashPrefixSha2_256=None,
+        str scopedName=None
     ):
         self._cpp_obj = __to_shared_ptr(cmove(TypeUri._make_instance(
           NULL,
           uri,
           typeHashPrefixSha2_256,
+          scopedName,
         )))
         self._load_cache()
 
@@ -263,13 +265,16 @@ cdef class TypeUri(thrift.py3.types.Union):
             return TypeUri(uri=value)
         if isinstance(value, bytes):
             return TypeUri(typeHashPrefixSha2_256=value)
+        if isinstance(value, str):
+            return TypeUri(scopedName=value)
         raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @staticmethod
     cdef unique_ptr[cTypeUri] _make_instance(
         cTypeUri* base_instance,
         str uri,
-        bytes typeHashPrefixSha2_256
+        bytes typeHashPrefixSha2_256,
+        str scopedName
     ) except *:
         cdef unique_ptr[cTypeUri] c_inst = make_unique[cTypeUri]()
         cdef bint any_set = False
@@ -282,6 +287,11 @@ cdef class TypeUri(thrift.py3.types.Union):
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
             deref(c_inst).set_typeHashPrefixSha2_256(typeHashPrefixSha2_256)
+            any_set = True
+        if scopedName is not None:
+            if any_set:
+                raise TypeError("At most one field may be set when initializing a union")
+            deref(c_inst).set_scopedName(scopedName.encode('UTF-8'))
             any_set = True
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
@@ -306,6 +316,12 @@ cdef class TypeUri(thrift.py3.types.Union):
             raise AttributeError(f'Union contains a value of type {self.type.name}, not typeHashPrefixSha2_256')
         return self.value
 
+    @property
+    def scopedName(self):
+        if self.type.value != 3:
+            raise AttributeError(f'Union contains a value of type {self.type.name}, not scopedName')
+        return self.value
+
 
     def __hash__(TypeUri self):
         return  super().__hash__()
@@ -319,6 +335,8 @@ cdef class TypeUri(thrift.py3.types.Union):
             self.value = bytes(deref(self._cpp_obj).get_uri()).decode('UTF-8')
         elif type == 2:
             self.value = deref(self._cpp_obj).get_typeHashPrefixSha2_256()
+        elif type == 3:
+            self.value = bytes(deref(self._cpp_obj).get_scopedName()).decode('UTF-8')
 
     def __copy__(TypeUri self):
         cdef shared_ptr[cTypeUri] cpp_obj = make_shared[cTypeUri](
@@ -354,7 +372,7 @@ cdef class TypeUri(thrift.py3.types.Union):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 2
+        return 3
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(TypeUri self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

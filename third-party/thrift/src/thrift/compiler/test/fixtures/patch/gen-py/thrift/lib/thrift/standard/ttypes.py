@@ -78,6 +78,10 @@ class TypeUri(object):
   Attributes:
    - uri: The unique Thrift URI for this type.
    - typeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the URI.
+   - scopedName: The (potentially not unique) scoped name of this type.
+  Format is `filename.typename`, e.g. `standard.TypeUri`.
+  This is a fallback for types that do not have URIs yet.
+  Must be prepared for the active field to switch to `uri` as package statements are rolled out!
   """
 
   thrift_spec = None
@@ -86,6 +90,7 @@ class TypeUri(object):
   __EMPTY__ = 0
   URI = 1
   TYPEHASHPREFIXSHA2_256 = 2
+  SCOPEDNAME = 3
   
   @staticmethod
   def isUnion():
@@ -99,12 +104,20 @@ class TypeUri(object):
     assert self.field == 2
     return self.value
 
+  def get_scopedName(self):
+    assert self.field == 3
+    return self.value
+
   def set_uri(self, value):
     self.field = 1
     self.value = value
 
   def set_typeHashPrefixSha2_256(self, value):
     self.field = 2
+    self.value = value
+
+  def set_scopedName(self, value):
+    self.field = 3
     self.value = value
 
   def getType(self):
@@ -121,6 +134,10 @@ class TypeUri(object):
       padding = ' ' * 23
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('typeHashPrefixSha2_256', value)
+    if self.field == 3:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('scopedName', value)
     return "%s(%s)" % (self.__class__.__name__, member)
 
   def read(self, iprot):
@@ -152,6 +169,13 @@ class TypeUri(object):
           self.set_typeHashPrefixSha2_256(_fbthrift_typeHashPrefixSha2_256)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          _fbthrift_scopedName = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          assert self.field == 0 and self.value is None
+          self.set_scopedName(_fbthrift_scopedName)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -174,6 +198,11 @@ class TypeUri(object):
       oprot.writeFieldBegin('typeHashPrefixSha2_256', TType.STRING, 2)
       typeHashPrefixSha2_256 = self.value
       oprot.writeString(typeHashPrefixSha2_256)
+      oprot.writeFieldEnd()
+    if self.field == 3:
+      oprot.writeFieldBegin('scopedName', TType.STRING, 3)
+      scopedName = self.value
+      oprot.writeString(scopedName.encode('utf-8')) if UTF8STRINGS and not isinstance(scopedName, bytes) else oprot.writeString(scopedName)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeUnionEnd()
@@ -201,6 +230,9 @@ class TypeUri(object):
     if 'typeHashPrefixSha2_256' in obj:
       _fbthrift_typeHashPrefixSha2_256 = obj['typeHashPrefixSha2_256']
       self.set_typeHashPrefixSha2_256(_fbthrift_typeHashPrefixSha2_256)
+    if 'scopedName' in obj:
+      _fbthrift_scopedName = obj['scopedName']
+      self.set_scopedName(_fbthrift_scopedName)
 
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
@@ -906,6 +938,7 @@ TypeUri.thrift_spec = (
   None, # 0
   (1, TType.STRING, 'uri', True, None, 2, ), # 1
   (2, TType.STRING, 'typeHashPrefixSha2_256', False, None, 2, ), # 2
+  (3, TType.STRING, 'scopedName', True, None, 2, ), # 3
 )
 
 TypeUri.thrift_struct_annotations = {
@@ -913,7 +946,7 @@ TypeUri.thrift_struct_annotations = {
 TypeUri.thrift_field_annotations = {
 }
 
-def TypeUri__init__(self, uri=None, typeHashPrefixSha2_256=None,):
+def TypeUri__init__(self, uri=None, typeHashPrefixSha2_256=None, scopedName=None,):
   self.field = 0
   self.value = None
   if uri is not None:
@@ -924,6 +957,10 @@ def TypeUri__init__(self, uri=None, typeHashPrefixSha2_256=None,):
     assert self.field == 0 and self.value is None
     self.field = 2
     self.value = typeHashPrefixSha2_256
+  if scopedName is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 3
+    self.value = scopedName
 
 TypeUri.__init__ = TypeUri__init__
 

@@ -29,9 +29,11 @@ public class TypeUri extends TUnion<TypeUri> {
   private static final TStruct STRUCT_DESC = new TStruct("TypeUri");
   private static final TField URI_FIELD_DESC = new TField("uri", TType.STRING, (short)1);
   private static final TField TYPE_HASH_PREFIX_SHA2_256_FIELD_DESC = new TField("typeHashPrefixSha2_256", TType.STRING, (short)2);
+  private static final TField SCOPED_NAME_FIELD_DESC = new TField("scopedName", TType.STRING, (short)3);
 
   public static final int URI = 1;
   public static final int TYPEHASHPREFIXSHA2_256 = 2;
+  public static final int SCOPEDNAME = 3;
 
   public static final Map<Integer, FieldMetaData> metaDataMap = new HashMap<>();
 
@@ -63,6 +65,12 @@ public class TypeUri extends TUnion<TypeUri> {
     return x;
   }
 
+  public static TypeUri scopedName(String __value) {
+    TypeUri x = new TypeUri();
+    x.setScopedName(__value);
+    return x;
+  }
+
 
   @Override
   protected Object readValue(TProtocol iprot, TField __field) throws TException {
@@ -81,6 +89,13 @@ public class TypeUri extends TUnion<TypeUri> {
           return typeHashPrefixSha2_256;
         }
         break;
+      case SCOPEDNAME:
+        if (__field.type == SCOPED_NAME_FIELD_DESC.type) {
+          String scopedName;
+          scopedName = iprot.readString();
+          return scopedName;
+        }
+        break;
     }
     TProtocolUtil.skip(iprot, __field.type);
     return null;
@@ -97,6 +112,10 @@ public class TypeUri extends TUnion<TypeUri> {
         byte[] typeHashPrefixSha2_256 = (byte[])getFieldValue();
         oprot.writeBinary(typeHashPrefixSha2_256);
         return;
+      case SCOPEDNAME:
+        String scopedName = (String)getFieldValue();
+        oprot.writeString(scopedName);
+        return;
       default:
         throw new IllegalStateException("Cannot write union with unknown field " + setField);
     }
@@ -109,6 +128,8 @@ public class TypeUri extends TUnion<TypeUri> {
         return URI_FIELD_DESC;
       case TYPEHASHPREFIXSHA2_256:
         return TYPE_HASH_PREFIX_SHA2_256_FIELD_DESC;
+      case SCOPEDNAME:
+        return SCOPED_NAME_FIELD_DESC;
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }
@@ -162,6 +183,26 @@ public class TypeUri extends TUnion<TypeUri> {
    */
   public void setTypeHashPrefixSha2_256(byte[] __value) {
     __setValue(TYPEHASHPREFIXSHA2_256, __value);
+  }
+
+  /**
+   * The (potentially not unique) scoped name of this type.
+   * Format is `filename.typename`, e.g. `standard.TypeUri`.
+   * This is a fallback for types that do not have URIs yet.
+   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   */
+  public String getScopedName() {
+    return (String) __getValue(SCOPEDNAME);
+  }
+
+  /**
+   * The (potentially not unique) scoped name of this type.
+   * Format is `filename.typename`, e.g. `standard.TypeUri`.
+   * This is a fallback for types that do not have URIs yet.
+   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   */
+  public void setScopedName(String __value) {
+    __setValue(SCOPEDNAME, __value);
   }
 
   public boolean equals(Object other) {

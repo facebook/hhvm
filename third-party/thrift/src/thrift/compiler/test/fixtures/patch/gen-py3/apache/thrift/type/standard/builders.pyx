@@ -10,6 +10,7 @@ cdef class TypeUri_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "uri", self.uri
         yield "typeHashPrefixSha2_256", self.typeHashPrefixSha2_256
+        yield "scopedName", self.scopedName
 
 cdef class TypeName_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_type_standard_types.TypeName

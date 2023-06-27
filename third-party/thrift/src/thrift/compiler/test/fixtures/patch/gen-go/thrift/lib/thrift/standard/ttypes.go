@@ -145,9 +145,14 @@ func UriPtr(v Uri) *Uri { return &v }
 // Attributes:
 //  - Uri: The unique Thrift URI for this type.
 //  - TypeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the URI.
+//  - ScopedName: The (potentially not unique) scoped name of this type.
+// Format is `filename.typename`, e.g. `standard.TypeUri`.
+// This is a fallback for types that do not have URIs yet.
+// Must be prepared for the active field to switch to `uri` as package statements are rolled out!
 type TypeUri struct {
   Uri *Uri `thrift:"uri,1,optional" db:"uri" json:"uri,omitempty"`
   TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2,optional" db:"typeHashPrefixSha2_256" json:"typeHashPrefixSha2_256,omitempty"`
+  ScopedName *string `thrift:"scopedName,3,optional" db:"scopedName" json:"scopedName,omitempty"`
 }
 
 func NewTypeUri() *TypeUri {
@@ -166,12 +171,22 @@ var TypeUri_TypeHashPrefixSha2_256_DEFAULT ByteString
 func (p *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
   return p.TypeHashPrefixSha2_256
 }
+var TypeUri_ScopedName_DEFAULT string
+func (p *TypeUri) GetScopedName() string {
+  if !p.IsSetScopedName() {
+    return TypeUri_ScopedName_DEFAULT
+  }
+  return *p.ScopedName
+}
 func (p *TypeUri) CountSetFieldsTypeUri() int {
   count := 0
   if (p.IsSetUri()) {
     count++
   }
   if (p.IsSetTypeHashPrefixSha2_256()) {
+    count++
+  }
+  if (p.IsSetScopedName()) {
     count++
   }
   return count
@@ -184,6 +199,10 @@ func (p *TypeUri) IsSetUri() bool {
 
 func (p *TypeUri) IsSetTypeHashPrefixSha2_256() bool {
   return p != nil && p.TypeHashPrefixSha2_256 != nil
+}
+
+func (p *TypeUri) IsSetScopedName() bool {
+  return p != nil && p.ScopedName != nil
 }
 
 type TypeUriBuilder struct {
@@ -200,6 +219,7 @@ func (p TypeUriBuilder) Emit() *TypeUri{
   return &TypeUri{
     Uri: p.obj.Uri,
     TypeHashPrefixSha2_256: p.obj.TypeHashPrefixSha2_256,
+    ScopedName: p.obj.ScopedName,
   }
 }
 
@@ -213,6 +233,11 @@ func (t *TypeUriBuilder) TypeHashPrefixSha2_256(typeHashPrefixSha2_256 ByteStrin
   return t
 }
 
+func (t *TypeUriBuilder) ScopedName(scopedName *string) *TypeUriBuilder {
+  t.obj.ScopedName = scopedName
+  return t
+}
+
 func (t *TypeUri) SetUri(uri *Uri) *TypeUri {
   t.Uri = uri
   return t
@@ -220,6 +245,11 @@ func (t *TypeUri) SetUri(uri *Uri) *TypeUri {
 
 func (t *TypeUri) SetTypeHashPrefixSha2_256(typeHashPrefixSha2_256 ByteString) *TypeUri {
   t.TypeHashPrefixSha2_256 = typeHashPrefixSha2_256
+  return t
+}
+
+func (t *TypeUri) SetScopedName(scopedName *string) *TypeUri {
+  t.ScopedName = scopedName
   return t
 }
 
@@ -242,6 +272,10 @@ func (p *TypeUri) Read(iprot thrift.Protocol) error {
       }
     case 2:
       if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
         return err
       }
     default:
@@ -279,6 +313,15 @@ func (p *TypeUri)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *TypeUri)  ReadField3(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 3: ", err)
+  } else {
+    p.ScopedName = &v
+  }
+  return nil
+}
+
 func (p *TypeUri) Write(oprot thrift.Protocol) error {
   if c := p.CountSetFieldsTypeUri(); c > 1 {
     return fmt.Errorf("%T write union: no more than one field must be set (%d set).", p, c)
@@ -287,6 +330,7 @@ func (p *TypeUri) Write(oprot thrift.Protocol) error {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -318,6 +362,18 @@ func (p *TypeUri) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *TypeUri) writeField3(oprot thrift.Protocol) (err error) {
+  if p.IsSetScopedName() {
+    if err := oprot.WriteFieldBegin("scopedName", thrift.STRING, 3); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:scopedName: ", p), err) }
+    if err := oprot.WriteString(string(*p.ScopedName)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.scopedName (3) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 3:scopedName: ", p), err) }
+  }
+  return err
+}
+
 func (p *TypeUri) String() string {
   if p == nil {
     return "<nil>"
@@ -330,7 +386,13 @@ func (p *TypeUri) String() string {
     uriVal = fmt.Sprintf("%v", *p.Uri)
   }
   typeHashPrefixSha2_256Val := fmt.Sprintf("%v", p.TypeHashPrefixSha2_256)
-  return fmt.Sprintf("TypeUri({Uri:%s TypeHashPrefixSha2_256:%s})", uriVal, typeHashPrefixSha2_256Val)
+  var scopedNameVal string
+  if p.ScopedName == nil {
+    scopedNameVal = "<nil>"
+  } else {
+    scopedNameVal = fmt.Sprintf("%v", *p.ScopedName)
+  }
+  return fmt.Sprintf("TypeUri({Uri:%s TypeHashPrefixSha2_256:%s ScopedName:%s})", uriVal, typeHashPrefixSha2_256Val, scopedNameVal)
 }
 
 // Uniquely identifies a Thrift type.

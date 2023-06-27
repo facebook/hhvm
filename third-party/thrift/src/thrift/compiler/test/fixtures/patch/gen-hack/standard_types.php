@@ -80,6 +80,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
   _EMPTY_ = 0;
   uri = 1;
   typeHashPrefixSha2_256 = 2;
+  scopedName = 3;
 }
 
 /**
@@ -104,23 +105,31 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       'type' => \TType::STRING,
       'is_binary' => true,
     ),
+    3 => shape(
+      'var' => 'scopedName',
+      'union' => true,
+      'type' => \TType::STRING,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'uri' => 1,
     'typeHashPrefixSha2_256' => 2,
+    'scopedName' => 3,
   ];
 
   const type TConstructorShape = shape(
     ?'uri' => ?string,
     ?'typeHashPrefixSha2_256' => ?string,
+    ?'scopedName' => ?string,
   );
 
   const type TShape = shape(
     ?'uri' => ?string,
     ?'typeHashPrefixSha2_256' => ?string,
+    ?'scopedName' => ?string,
     ...
   );
-  const int STRUCTURAL_ID = 7962094030226147444;
+  const int STRUCTURAL_ID = 2998943141803441214;
   /**
    * The unique Thrift URI for this type.
    * 
@@ -135,9 +144,19 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
    * 2: standard.ByteString typeHashPrefixSha2_256
    */
   public ?string $typeHashPrefixSha2_256;
+  /**
+   * The (potentially not unique) scoped name of this type.
+   * Format is `filename.typename`, e.g. `standard.TypeUri`.
+   * This is a fallback for types that do not have URIs yet.
+   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   * 
+   * Original thrift field:-
+   * 3: string scopedName
+   */
+  public ?string $scopedName;
   protected apache_thrift_type_standard_TypeUriEnum $_type = apache_thrift_type_standard_TypeUriEnum::_EMPTY_;
 
-  public function __construct(?string $uri = null, ?string $typeHashPrefixSha2_256 = null)[] {
+  public function __construct(?string $uri = null, ?string $typeHashPrefixSha2_256 = null, ?string $scopedName = null)[] {
     $this->_type = apache_thrift_type_standard_TypeUriEnum::_EMPTY_;
     if ($uri !== null) {
       $this->uri = $uri;
@@ -146,6 +165,10 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     if ($typeHashPrefixSha2_256 !== null) {
       $this->typeHashPrefixSha2_256 = $typeHashPrefixSha2_256;
       $this->_type = apache_thrift_type_standard_TypeUriEnum::typeHashPrefixSha2_256;
+    }
+    if ($scopedName !== null) {
+      $this->scopedName = $scopedName;
+      $this->_type = apache_thrift_type_standard_TypeUriEnum::scopedName;
     }
   }
 
@@ -157,6 +180,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     return new static(
       Shapes::idx($shape, 'uri'),
       Shapes::idx($shape, 'typeHashPrefixSha2_256'),
+      Shapes::idx($shape, 'scopedName'),
     );
   }
 
@@ -175,6 +199,9 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         break;
       case apache_thrift_type_standard_TypeUriEnum::typeHashPrefixSha2_256:
         $this->typeHashPrefixSha2_256 = null;
+        break;
+      case apache_thrift_type_standard_TypeUriEnum::scopedName:
+        $this->scopedName = null;
         break;
       case apache_thrift_type_standard_TypeUriEnum::_EMPTY_:
         break;
@@ -220,6 +247,26 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       (string)$this->_type,
     );
     return $this->typeHashPrefixSha2_256 as nonnull;
+  }
+
+  public function set_scopedName(string $scopedName)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_TypeUriEnum::scopedName;
+    $this->scopedName = $scopedName;
+    return $this;
+  }
+
+  public function get_scopedName()[]: ?string {
+    return $this->scopedName;
+  }
+
+  public function getx_scopedName()[]: string {
+    invariant(
+      $this->_type === apache_thrift_type_standard_TypeUriEnum::scopedName,
+      'get_scopedName called on an instance of TypeUri whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->scopedName as nonnull;
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -270,6 +317,17 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
               "name" => "typeHashPrefixSha2_256",
             )
           ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "scopedName",
+            )
+          ),
         ],
         "is_union" => true,
       )
@@ -308,6 +366,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     return new static(
       Shapes::idx($shape, 'uri'),
       Shapes::idx($shape, 'typeHashPrefixSha2_256'),
+      Shapes::idx($shape, 'scopedName'),
     );
   }
 
@@ -315,6 +374,7 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     return shape(
       'uri' => $this->uri,
       'typeHashPrefixSha2_256' => $this->typeHashPrefixSha2_256,
+      'scopedName' => $this->scopedName,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -336,6 +396,10 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
     if (idx($parsed, 'typeHashPrefixSha2_256') !== null) {
       $this->typeHashPrefixSha2_256 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['typeHashPrefixSha2_256']);
       $this->_type = apache_thrift_type_standard_TypeUriEnum::typeHashPrefixSha2_256;
+    }
+    if (idx($parsed, 'scopedName') !== null) {
+      $this->scopedName = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['scopedName']);
+      $this->_type = apache_thrift_type_standard_TypeUriEnum::scopedName;
     }
   }
 

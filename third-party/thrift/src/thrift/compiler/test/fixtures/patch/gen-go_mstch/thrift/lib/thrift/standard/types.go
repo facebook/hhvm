@@ -216,6 +216,7 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
 type TypeUri struct {
     Uri *Uri `thrift:"uri,1" json:"uri" db:"uri"`
     TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256" db:"typeHashPrefixSha2_256"`
+    ScopedName *string `thrift:"scopedName,3" json:"scopedName" db:"scopedName"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeUri{}
@@ -248,6 +249,18 @@ func (x *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
     return x.TypeHashPrefixSha2_256
 }
 
+func (x *TypeUri) GetScopedNameNonCompat() *string {
+    return x.ScopedName
+}
+
+func (x *TypeUri) GetScopedName() string {
+    if !x.IsSetScopedName() {
+        return ""
+    }
+
+    return *x.ScopedName
+}
+
 func (x *TypeUri) SetUriNonCompat(value Uri) *TypeUri {
     x.Uri = &value
     return x
@@ -268,12 +281,26 @@ func (x *TypeUri) SetTypeHashPrefixSha2_256(value ByteString) *TypeUri {
     return x
 }
 
+func (x *TypeUri) SetScopedNameNonCompat(value string) *TypeUri {
+    x.ScopedName = &value
+    return x
+}
+
+func (x *TypeUri) SetScopedName(value *string) *TypeUri {
+    x.ScopedName = value
+    return x
+}
+
 func (x *TypeUri) IsSetUri() bool {
     return x.Uri != nil
 }
 
 func (x *TypeUri) IsSetTypeHashPrefixSha2_256() bool {
     return x.TypeHashPrefixSha2_256 != nil
+}
+
+func (x *TypeUri) IsSetScopedName() bool {
+    return x.ScopedName != nil
 }
 
 func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
@@ -318,6 +345,26 @@ if err != nil {
     return nil
 }
 
+func (x *TypeUri) writeField3(p thrift.Protocol) error {  // ScopedName
+    if !x.IsSetScopedName() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("scopedName", thrift.STRING, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.GetScopedNameNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *TypeUri) readField1(p thrift.Protocol) error {  // Uri
     result, err := ReadUri(p)
 if err != nil {
@@ -338,8 +385,21 @@ if err != nil {
     return nil
 }
 
+func (x *TypeUri) readField3(p thrift.Protocol) error {  // ScopedName
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetScopedNameNonCompat(result)
+    return nil
+}
+
 // Deprecated: Use NewTypeUri().GetUri() instead.
 var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
+
+// Deprecated: Use NewTypeUri().GetScopedName() instead.
+var TypeUri_ScopedName_DEFAULT = NewTypeUri().GetScopedName()
 
 func (x *TypeUri) String() string {
     type TypeUriAlias TypeUri
@@ -353,6 +413,9 @@ func (x *TypeUri) countSetFields() int {
         count++
     }
     if (x.IsSetTypeHashPrefixSha2_256()) {
+        count++
+    }
+    if (x.IsSetScopedName()) {
         count++
     }
     return count
@@ -384,6 +447,11 @@ func (x *TypeUriBuilder) TypeHashPrefixSha2_256(value ByteString) *TypeUriBuilde
     return x
 }
 
+func (x *TypeUriBuilder) ScopedName(value *string) *TypeUriBuilder {
+    x.obj.ScopedName = value
+    return x
+}
+
 func (x *TypeUriBuilder) Emit() *TypeUri {
     var objCopy TypeUri = *x.obj
     return &objCopy
@@ -402,6 +470,10 @@ func (x *TypeUri) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField3(p); err != nil {
         return err
     }
 
@@ -437,6 +509,10 @@ func (x *TypeUri) Read(p thrift.Protocol) error {
             }
         case 2:  // typeHashPrefixSha2_256
             if err := x.readField2(p); err != nil {
+                return err
+            }
+        case 3:  // scopedName
+            if err := x.readField3(p); err != nil {
                 return err
             }
         default:

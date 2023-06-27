@@ -55,9 +55,8 @@ typedef set<id.ValueId> AnnotationIds (py3.hidden)
  * An instance of an annotation, applied to some definition.
  */
 struct StructuredAnnotation {
-  1: string name;
-  2: string uri;
-  3: map<string, protocol.Value> fields;
+  1: standard.TypeUri type;
+  2: map<string, protocol.Value> fields;
 } (py3.hidden)
 
 /**

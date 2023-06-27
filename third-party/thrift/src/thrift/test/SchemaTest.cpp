@@ -380,7 +380,7 @@ TEST(SchemaTest, Annotations) {
     const auto& annot = schema_constants::getValue(id)
                             .as<apache::thrift::type::struct_t<
                                 apache::thrift::type::StructuredAnnotation>>();
-    if (*annot.name() == "Annot") {
+    if (*annot.type()->uri_ref() == "facebook.com/thrift/test/schema/Annot") {
       found = true;
       EXPECT_EQ(annot.fields()->at("val").as_i64(), 42);
     }

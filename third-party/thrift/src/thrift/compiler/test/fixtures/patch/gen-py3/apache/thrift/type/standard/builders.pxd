@@ -16,6 +16,7 @@ cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 cdef class TypeUri_Builder(thrift.py3.builder.StructBuilder):
     cdef public str uri
     cdef public bytes typeHashPrefixSha2_256
+    cdef public str scopedName
 
 
 cdef class TypeName_Builder(thrift.py3.builder.StructBuilder):

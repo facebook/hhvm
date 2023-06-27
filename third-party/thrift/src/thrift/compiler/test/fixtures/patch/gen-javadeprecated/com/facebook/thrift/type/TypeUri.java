@@ -31,9 +31,11 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
   private static final TStruct STRUCT_DESC = new TStruct("TypeUri");
   private static final TField URI_FIELD_DESC = new TField("uri", TType.STRING, (short)1);
   private static final TField TYPE_HASH_PREFIX_SHA2_256_FIELD_DESC = new TField("typeHashPrefixSha2_256", TType.STRING, (short)2);
+  private static final TField SCOPED_NAME_FIELD_DESC = new TField("scopedName", TType.STRING, (short)3);
 
   public static final int URI = 1;
   public static final int TYPEHASHPREFIXSHA2_256 = 2;
+  public static final int SCOPEDNAME = 3;
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -42,6 +44,8 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
     tmpMetaDataMap.put(URI, new FieldMetaData("uri", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     tmpMetaDataMap.put(TYPEHASHPREFIXSHA2_256, new FieldMetaData("typeHashPrefixSha2_256", TFieldRequirementType.DEFAULT, 
+        new FieldValueMetaData(TType.STRING)));
+    tmpMetaDataMap.put(SCOPEDNAME, new FieldMetaData("scopedName", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -74,6 +78,12 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
     return x;
   }
 
+  public static TypeUri scopedName(String __value) {
+    TypeUri x = new TypeUri();
+    x.setScopedName(__value);
+    return x;
+  }
+
 
   @Override
   protected void checkType(short setField, Object __value) throws ClassCastException {
@@ -88,6 +98,11 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
           break;
         }
         throw new ClassCastException("Was expecting value of type byte[] for field 'typeHashPrefixSha2_256', but got " + __value.getClass().getSimpleName());
+      case SCOPEDNAME:
+        if (__value instanceof String) {
+          break;
+        }
+        throw new ClassCastException("Was expecting value of type String for field 'scopedName', but got " + __value.getClass().getSimpleName());
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }
@@ -112,6 +127,11 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
             break;
           case TYPEHASHPREFIXSHA2_256:
             if (__field.type == TYPE_HASH_PREFIX_SHA2_256_FIELD_DESC.type) {
+              setField_ = __field.id;
+            }
+            break;
+          case SCOPEDNAME:
+            if (__field.type == SCOPED_NAME_FIELD_DESC.type) {
               setField_ = __field.id;
             }
             break;
@@ -143,6 +163,13 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
           return typeHashPrefixSha2_256;
         }
         break;
+      case SCOPEDNAME:
+        if (__field.type == SCOPED_NAME_FIELD_DESC.type) {
+          String scopedName;
+          scopedName = iprot.readString();
+          return scopedName;
+        }
+        break;
     }
     TProtocolUtil.skip(iprot, __field.type);
     return null;
@@ -159,6 +186,10 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
         byte[] typeHashPrefixSha2_256 = (byte[])getFieldValue();
         oprot.writeBinary(typeHashPrefixSha2_256);
         return;
+      case SCOPEDNAME:
+        String scopedName = (String)getFieldValue();
+        oprot.writeString(scopedName);
+        return;
       default:
         throw new IllegalStateException("Cannot write union with unknown field " + setField);
     }
@@ -171,6 +202,8 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
         return URI_FIELD_DESC;
       case TYPEHASHPREFIXSHA2_256:
         return TYPE_HASH_PREFIX_SHA2_256_FIELD_DESC;
+      case SCOPEDNAME:
+        return SCOPED_NAME_FIELD_DESC;
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }
@@ -224,6 +257,26 @@ public class TypeUri extends TUnion<TypeUri> implements Comparable<TypeUri> {
    */
   public void setTypeHashPrefixSha2_256(byte[] __value) {
     __setValue(TYPEHASHPREFIXSHA2_256, __value);
+  }
+
+  /**
+   * The (potentially not unique) scoped name of this type.
+   * Format is `filename.typename`, e.g. `standard.TypeUri`.
+   * This is a fallback for types that do not have URIs yet.
+   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   */
+  public String getScopedName() {
+    return (String) __getValue(SCOPEDNAME);
+  }
+
+  /**
+   * The (potentially not unique) scoped name of this type.
+   * Format is `filename.typename`, e.g. `standard.TypeUri`.
+   * This is a fallback for types that do not have URIs yet.
+   * Must be prepared for the active field to switch to `uri` as package statements are rolled out!
+   */
+  public void setScopedName(String __value) {
+    __setValue(SCOPEDNAME, __value);
   }
 
   public boolean equals(Object other) {

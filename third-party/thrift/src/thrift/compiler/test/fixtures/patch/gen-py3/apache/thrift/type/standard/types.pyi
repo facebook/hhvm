@@ -37,22 +37,26 @@ class StandardProtocol(thrift.py3.types.Enum):
     def _to_py_deprecated(self) -> int: ...
 
 
-_TypeUriValueType = _typing.Union[None, str, bytes]
+_TypeUriValueType = _typing.Union[None, str, bytes, str]
 
 class TypeUri(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         uri: bool
         typeHashPrefixSha2_256: bool
+        scopedName: bool
         pass
 
     uri: Final[str] = ...
 
     typeHashPrefixSha2_256: Final[bytes] = ...
 
+    scopedName: Final[str] = ...
+
     def __init__(
         self, *,
         uri: _typing.Optional[str]=None,
-        typeHashPrefixSha2_256: _typing.Optional[bytes]=None
+        typeHashPrefixSha2_256: _typing.Optional[bytes]=None,
+        scopedName: _typing.Optional[str]=None
     ) -> None: ...
 
     def __hash__(self) -> int: ...
@@ -67,6 +71,7 @@ class TypeUri(thrift.py3.types.Union, _typing.Hashable):
         EMPTY: TypeUri.Type = ...
         uri: TypeUri.Type = ...
         typeHashPrefixSha2_256: TypeUri.Type = ...
+        scopedName: TypeUri.Type = ...
 
     @staticmethod
     def fromValue(value: _TypeUriValueType) -> TypeUri: ...

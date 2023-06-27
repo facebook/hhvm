@@ -143,22 +143,24 @@ void validate_test_struct(
 TEST(SchematizerTest, Service) {
   std::string service_name("Service");
   std::string service_uri("path/to/Service");
+  std::string program_path("path/to/Program.thrift");
+  t_program program(program_path);
 
-  t_service svc(nullptr, service_name);
+  t_service svc(&program, service_name);
   svc.set_uri(service_uri);
   std::string struct_name("Struct");
   std::string struct_uri("path/to/Struct");
 
-  t_struct return_type(nullptr, struct_name);
+  t_struct return_type(&program, struct_name);
   return_type.set_uri(struct_uri);
 
-  auto func0 = std::make_unique<t_function>(nullptr, return_type, "my_rpc");
+  auto func0 = std::make_unique<t_function>(&program, return_type, "my_rpc");
 
-  t_struct param0(nullptr, struct_name);
+  t_struct param0(&program, struct_name);
   param0.set_uri(struct_uri);
   func0->params().create_field(param0, "param0");
 
-  t_exception ex0(nullptr, "MyException");
+  t_exception ex0(&program, "MyException");
   auto ex = std::make_unique<t_throws>();
   ex->create_field(ex0, "ex0");
   func0->set_exceptions(std::move(ex));
@@ -197,8 +199,10 @@ TEST(SchematizerTest, Service) {
 TEST(SchematizerTest, Structured) {
   std::string struct_name("Struct");
   std::string struct_uri("path/to/Struct");
+  std::string program_path("path/to/Program.thrift");
+  t_program program(program_path);
 
-  t_struct s(nullptr, struct_name);
+  t_struct s(&program, struct_name);
   s.set_uri(struct_uri);
   s.create_field(t_base_type::t_i16(), "i16", 1);
   s.create_field(s, "Struct", 2).set_qualifier(t_field_qualifier::optional);

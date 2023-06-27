@@ -54,6 +54,18 @@ cdef __StructSpec get_reflection__TypeUri():
             },
         ),
     )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="scopedName",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
     return spec
 cdef __StructSpec get_reflection__TypeName():
     cdef __StructSpec spec = __StructSpec._fbthrift_create(

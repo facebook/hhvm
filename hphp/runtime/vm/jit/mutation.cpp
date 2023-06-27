@@ -237,23 +237,23 @@ struct RefineTmps {
             }
 
             // Merge together the remaps between the current state and
-            // this pred. If there's any mismatch, we produce a phi at
-            // this block.
+            // this pred. If one of the remaps is equal to the least common
+            // ancestor of both remaps, we use it, otherwise we produce a phi.
+            // A missing remap is equivalent to the canonical value, which is
+            // always the LCA, so we remove them.
+            jit::vector<SSATmp*> toRemove;
             for (auto& remap : *ret) {
               assertx(RemapTo{remap.first} != remap.second);
-              auto const o = [&] {
-                auto const it = predState->find(remap.first);
-                if (it == predState->end()) return RemapTo{remap.first};
-                return it->second;
-              }();
-              remap.second.merge(o, block);
+              auto const it = predState->find(remap.first);
+              if (it == predState->end()) {
+                toRemove.emplace_back(remap.first);
+              } else {
+                remap.second.merge(it->second, block);
+              }
             }
 
-            for (auto const& remap : *predState) {
-              assertx(RemapTo{remap.first} != remap.second);
-              auto const it = ret->find(remap.first);
-              if (it != ret->end()) continue;
-              ret->emplace(remap.first, RemapTo{block});
+            for (auto remove : toRemove) {
+              ret->erase(remove);
             }
           }
         );
@@ -285,14 +285,14 @@ struct RefineTmps {
               // edge (so just taken), and has no sources, we can move
               // the state and not process the instruction.
               state.outTaken = std::move(remaps);
-              continue;
+              break;
             } else {
               // Otherwise we need to copy it, since we might need to
               // use it.
               state.outTaken = remaps;
             }
           } else if (!inst.next() && inst.numSrcs() == 0) {
-            continue;
+            break;
           }
         }
 
@@ -725,7 +725,17 @@ struct RefineTmps {
     void merge(const RemapTo& o, Block* current) {
       assertx(!to.isNull());
       assertx(!o.to.isNull());
-      if (to != o.to) to = current;
+      if (to == o.to) return;
+
+      // If one of the remaps is the LCA of both remaps, just use it. There's
+      // no value in creating a phi.
+      if (ssatmp() && o.ssatmp()) {
+        auto const base = least_common_ancestor(ssatmp(), o.ssatmp());
+        if (base == o.ssatmp()) to = o.to;  // next if () will always return
+        if (base == ssatmp()) return;
+      }
+
+      to = current;
     }
 
     std::string toString() const {

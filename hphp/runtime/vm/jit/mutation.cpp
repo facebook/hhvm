@@ -318,7 +318,7 @@ struct RefineTmps {
               auto const phi = it->second.block();
               assertx(phi);
               usedPhis.emplace(Phi{phi, from}, nullptr);
-              phiUses.emplace(PhiUse{&inst, i}, Phi{phi, from});
+              phiUses.insert_or_assign(PhiUse{&inst, i}, Phi{phi, from});
               ITRACE(2, "Would rewrite {} to phi B{} in {}\n",
                      *inst.src(i), phi->id(), inst.toString());
             }

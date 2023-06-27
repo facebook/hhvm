@@ -1826,9 +1826,13 @@ let safely_refine_class_type
    * We only wish to do this if the types are in a possible subtype relationship.
    *)
   let (env, supertypes) =
-    TUtils.get_concrete_supertypes ~abstract_enum:true env ivar_ty
+    TUtils.get_concrete_supertypes
+      ~abstract_enum:true
+      ~include_case_types:true
+      env
+      ivar_ty
   in
-  let rec might_be_supertype ty =
+  let rec might_be_supertype env ty =
     let (_env, ty) = Env.expand_type env ty in
     match get_node ty with
     | Tclass ((_, name), _, _)
@@ -1836,13 +1840,37 @@ let safely_refine_class_type
            || Cls.has_ancestor class_info name
            || Cls.requires_ancestor class_info name ->
       true
-    | Toption ty -> might_be_supertype ty
-    | Tunion tyl -> List.for_all tyl ~f:might_be_supertype
+    | Tnewtype (name, tyl, _) ->
+      (match Env.get_typedef env name with
+      (* For case types we want to open the union, filtering it to only the
+       * variant types that share the same data type as [obj_ty] *)
+      | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+        let ((env, _ty_err_opt), variants) =
+          Typing_phase.localize
+            ~ety_env:
+              {
+                empty_expand_env with
+                substs =
+                  (if List.is_empty tyl then
+                    SMap.empty
+                  else
+                    Decl_subst.make_locl td_tparams tyl);
+              }
+            env
+            variants
+        in
+        let (env, ty) =
+          Typing_case_types.filter_variants_using_datatype env variants obj_ty
+        in
+        might_be_supertype env ty
+      | _ -> false)
+    | Toption ty -> might_be_supertype env ty
+    | Tunion tyl -> List.for_all tyl ~f:(might_be_supertype env)
     | _ -> false
   in
   let env =
     List.fold_left supertypes ~init:env ~f:(fun env ty ->
-        if might_be_supertype ty then
+        if might_be_supertype env ty then
           SubType.add_constraint env Ast_defs.Constraint_as obj_ty ty
           @@ Some (Typing_error.Reasons_callback.unify_error_at p)
         else

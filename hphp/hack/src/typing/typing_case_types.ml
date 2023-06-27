@@ -246,3 +246,36 @@ let mk_data_type_mapping env variants =
       map
   in
   List.fold variants ~init:DataType.Map.empty ~f
+
+(**
+ * Given the variants of a case type (encoded as a locl_ty) and another locl_ty [intersecting_ty]
+ * produce a new locl_ty containing only the types in the variant that map to an intersecting
+ * data type. For example:
+ *  Given
+ *   [variants] = int | vec<int> | Vector<int>
+ *   [intersecting_ty] = Container<string>
+ *
+ *  This function will return the type `vec<int> | Vector<int>` because both `vec<int>` and
+ * `Vector<int>` overlap with the tag associated with `Container<string>`.
+ *
+ * Note that this function only considers the data type associated to each type and not
+ * the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
+ * the type level, they do intersect when considering only the runtime data types.
+ *)
+let filter_variants_using_datatype env variants intersecting_ty =
+  let tags = DataType.fromTy env intersecting_ty in
+  let (env, variants) = Env.expand_type env variants in
+  let tyl =
+    match get_node variants with
+    | Tunion tyl -> tyl
+    | _ -> [variants]
+  in
+  let tyl =
+    List.filter
+      ~f:(fun ty ->
+        let variant_tags = DataType.fromTy env ty in
+        let refined_tags = DataType.intersect variant_tags tags in
+        not @@ DataType.Set.is_empty refined_tags)
+      tyl
+  in
+  Typing_utils.union_list env (get_reason variants) tyl

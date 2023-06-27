@@ -158,7 +158,8 @@ let get_class_ids env ty =
 
 let non_null = Typing_solver.non_null
 
-let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
+let get_concrete_supertypes =
+  Typing_utils.get_concrete_supertypes ~include_case_types:false
 
 let is_visible = Typing_visibility.is_visible
 

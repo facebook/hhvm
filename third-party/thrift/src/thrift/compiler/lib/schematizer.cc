@@ -42,6 +42,13 @@ std::unique_ptr<t_const_value> mapval() {
   ret->set_map();
   return ret;
 }
+std::unique_ptr<t_const_value> typeUri(const t_type& type) {
+  auto ret = mapval();
+  if (!type.uri().empty()) {
+    ret->add_map(val("uri"), val(type.uri()));
+  }
+  return ret;
+}
 
 void add_definition(
     t_const_value& schema,
@@ -144,11 +151,7 @@ std::unique_ptr<t_const_value> gen_type(
       continue;
     }
 
-    auto td = mapval();
-    if (!resolved_type->uri().empty()) {
-      td->add_map(val("uri"), val(resolved_type->uri()));
-    }
-    type_name->add_map(val("typedefType"), std::move(td));
+    type_name->add_map(val("typedefType"), typeUri(*resolved_type));
     schema->add_map(val("name"), std::move(type_name));
     return schema;
   }
@@ -221,12 +224,7 @@ std::unique_ptr<t_const_value> gen_type(
             generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
         add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
-      auto enm = val();
-      enm->set_map();
-      if (!resolved_type->uri().empty()) {
-        enm->add_map(val("uri"), val(resolved_type->uri()));
-      }
-      type_name->add_map(val("enumType"), std::move(enm));
+      type_name->add_map(val("enumType"), typeUri(*resolved_type));
       break;
     }
     case t_type::type::t_struct: {
@@ -247,11 +245,6 @@ std::unique_ptr<t_const_value> gen_type(
               *defns_schema, "structDef", std::move(struct_schema));
         }
       }
-      auto structured = val();
-      structured->set_map();
-      if (!resolved_type->uri().empty()) {
-        structured->add_map(val("uri"), val(resolved_type->uri()));
-      }
       type_name->add_map(
           val([&] {
             if (dynamic_cast<const t_union*>(resolved_type)) {
@@ -262,7 +255,7 @@ std::unique_ptr<t_const_value> gen_type(
               return "structType";
             }
           }()),
-          std::move(structured));
+          typeUri(*resolved_type));
       break;
     }
     default:
@@ -609,20 +602,9 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
-  auto schema = val();
-  schema->set_map();
+  auto schema = mapval();
   add_definition(*schema, node, node.program(), intern_value_);
-
   schema->add_map(val("type"), gen_type(*node.type()));
-
-  auto attrs = val();
-  attrs->set_map();
-  attrs->add_map(val("name"), val(node.get_name()));
-  if (!node.uri().empty()) {
-    attrs->add_map(val("uri"), val(node.uri()));
-  }
-  schema->add_map(val("attrs"), std::move(attrs));
-
   return schema;
 }
 

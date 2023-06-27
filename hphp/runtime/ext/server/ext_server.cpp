@@ -25,7 +25,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/util/boot-stats.h"

@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
@@ -139,16 +139,16 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// RPCServer: Server + RPCRequestHandler
+// XboxServer: Server + RPCRequestHandler
 
-struct RPCServer : SatelliteServer {
-  explicit RPCServer(std::shared_ptr<SatelliteServerInfo> info) {
+struct XboxServer : SatelliteServer {
+  explicit XboxServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
       (RuntimeOption::ServerType, info->getServerIP(), info->getPort(),
        info->getThreadCount());
     m_server->setRequestHandlerFactory([info] {
-        auto handler = make_unique<RPCRequestHandler>(
-          info->getTimeoutSeconds().count(), true);
+        auto handler = make_unique<XboxRequestHandler>();
+        handler->setLogInfo(true);
       handler->setServerInfo(info);
       return handler;
     });
@@ -186,7 +186,7 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
       satellite.reset(new InternalPageServer(info));
       break;
     case Type::KindOfXboxServer:
-      satellite.reset(new RPCServer(info));
+      satellite.reset(new XboxServer(info));
       break;
     default:
       assertx(false);

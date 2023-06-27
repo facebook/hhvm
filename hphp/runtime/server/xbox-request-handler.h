@@ -27,15 +27,17 @@ struct RequestURI;
 struct Transport;
 ///////////////////////////////////////////////////////////////////////////////
 
-struct RPCRequestHandler : RequestHandler {
+struct XboxRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
-  RPCRequestHandler(int timeout, bool info);
-  ~RPCRequestHandler() override;
+  XboxRequestHandler();
+  ~XboxRequestHandler() override;
 
   void setServerInfo(std::shared_ptr<SatelliteServerInfo> info) {
     m_serverInfo = info;
   }
+
+  void setLogInfo(bool logInfo);
 
   // implementing RequestHandler
   void handleRequest(Transport* transport) override;

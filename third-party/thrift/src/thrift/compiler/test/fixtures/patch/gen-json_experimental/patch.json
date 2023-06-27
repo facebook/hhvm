@@ -81,7 +81,7 @@
           },
           "Remove" : {
             "name" : "Remove",
-            "docstring" : "Remove if present.\n\nA key/value-based remove for set/list, 'saturating subtract' for\nnumeric/'counting' types, and 'remove by key' for maps.\n",
+            "docstring" : "Remove if present.\n\nA key/value-based remove for set, 'saturating subtract' for\nnumeric/'counting' types, 'remove by key' for map, and `remove by field id` for struct.\n",
             "lineno" : 319,
             "value" : 7
           },
@@ -93,8 +93,8 @@
           },
           "Put" : {
             "name" : "Put",
-            "docstring" : "Put/append/invert a value, with the following semantics:\n- Identical to 'add' for set;\n- 'update or insert' for maps;\n- 'append' for list, string or binary; and\n- 'invert' for boolean.\n",
-            "lineno" : 336,
+            "docstring" : "Put/append/invert a value, with the following semantics:\n- 'update or insert' for maps;\n- 'append' for list, string or binary; and\n- 'invert' for boolean.\n",
+            "lineno" : 335,
             "value" : 9
           }
         },

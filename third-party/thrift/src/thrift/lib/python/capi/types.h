@@ -24,6 +24,7 @@
 
 #include <Python.h>
 #include <folly/Preprocessor.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 
 namespace apache {
 namespace thrift {
@@ -33,6 +34,11 @@ namespace capi {
 #define __CAPI_LOCATED_ERROR_IMPL(MESSAGE, LINE) \
   __FILE__ ":" FOLLY_PP_STRINGIZE(LINE) ": " MESSAGE
 #define CAPI_LOCATED_ERROR(MESSAGE) __CAPI_LOCATED_ERROR_IMPL(MESSAGE, __LINE__)
+
+template <typename R, typename RValue = std::remove_reference_t<R>>
+constexpr bool is_optional_maybe_boxed_field_ref_v =
+    apache::thrift::detail::is_optional_field_ref_v<RValue> ||
+    apache::thrift::detail::is_optional_boxed_field_ref_v<RValue>;
 
 /*
  * RAII wrapper around PyObject* representing a strong reference, i.e.,

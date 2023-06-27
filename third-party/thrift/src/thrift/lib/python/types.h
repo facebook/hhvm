@@ -433,6 +433,14 @@ namespace capi {
  * Do not use externally; use capi interface instead.
  */
 PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion);
+
+/**
+ * Sets index + 1 field of struct_tuple to `value` and records that is set
+ * in the isset array at field 0. Returns 0 on success and -1 on failure.
+ * PyErr_Occurred() must be checked on failure case.
+ */
+int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
+
 } // namespace capi
 
 } // namespace python

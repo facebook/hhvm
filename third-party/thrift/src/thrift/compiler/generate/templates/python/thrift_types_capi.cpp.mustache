@@ -128,6 +128,13 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
+  {{#struct:marshal_capi?}}
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> ctor;
+  StrongRef fbthrift_data(ctor(std::forward<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(val)));
+  return init__{{program:capi_module_prefix}}__{{struct:name}}(*fbthrift_data);
+  {{/struct:marshal_capi?}}
+  {{^struct:marshal_capi?}}
   auto ptr = construct__{{program:capi_module_prefix}}__{{struct:name}}(
   {{#struct:cpp_adapter?}}
       detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(std::move(val)));
@@ -139,7 +146,24 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
     CHECK(PyErr_Occurred());
   }
   return ptr;
+  {{/struct:marshal_capi?}}
 }
+
+{{#struct:marshal_capi?}}
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(
+    FOLLY_MAYBE_UNUSED {{program:cpp_namespaces}}::{{struct:cpp_name}}&& val) {
+  StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
+  {{#struct:fields}}
+  StrongRef __{{field:name}}(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}()));
+  if (!__{{field:name}} || setStructField(*fbthrift_data, {{field:index}}, *__{{field:name}}) == -1) {
+    {{! struct and previous fields auto-decref'd by StrongRef}}
+    return nullptr;
+  }
+  {{/struct:fields}}
+  return std::move(fbthrift_data).release();
+}
+{{/struct:marshal_capi?}}
 
 {{/program:structs}}
 {{#program:enums}}

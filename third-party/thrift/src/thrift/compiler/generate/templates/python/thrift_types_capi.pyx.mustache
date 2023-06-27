@@ -47,6 +47,9 @@ cdef api object construct__{{program:capi_module_prefix}}__{{struct:name}}(__uni
         protocol=__Protocol.BINARY
     )
 
+cdef api object init__{{program:capi_module_prefix}}__{{struct:name}}(object data):
+    return __thrift_types.{{struct:name}}._fbthrift_create(data)
+
 {{/program:structs}}
 {{#program:enums}}
 cdef api int can_extract__{{program:capi_module_prefix}}__{{enum:name}}(object __obj) except -1:

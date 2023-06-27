@@ -27,7 +27,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStruct>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStruct&& val);
 };
 
@@ -40,7 +49,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItem>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyDataItem> {
+struct Constructor<::test::fixtures::basic-python-capi::MyDataItem>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyDataItem> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItem&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItem>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItem>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItem&& val);
 };
 
@@ -53,7 +71,16 @@ struct Extractor<::test::fixtures::basic-python-capi::TransitiveDoubler>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+struct Constructor<::test::fixtures::basic-python-capi::TransitiveDoubler>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::TransitiveDoubler> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::TransitiveDoubler&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::TransitiveDoubler>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::TransitiveDoubler>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::TransitiveDoubler&& val);
 };
 
@@ -66,7 +93,16 @@ struct Extractor<::test::fixtures::basic-python-capi::DoubledPair>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::DoubledPair> {
+struct Constructor<::test::fixtures::basic-python-capi::DoubledPair>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::DoubledPair> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::DoubledPair&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::DoubledPair>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::DoubledPair>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::DoubledPair&& val);
 };
 
@@ -79,7 +115,16 @@ struct Extractor<::test::fixtures::basic-python-capi::StringPair>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::StringPair> {
+struct Constructor<::test::fixtures::basic-python-capi::StringPair>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::StringPair> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::StringPair&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::StringPair>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::StringPair>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::StringPair&& val);
 };
 
@@ -92,7 +137,16 @@ struct Extractor<::test::fixtures::basic-python-capi::VapidStruct>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::VapidStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::VapidStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::VapidStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::VapidStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::VapidStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::VapidStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::VapidStruct&& val);
 };
 
@@ -112,7 +166,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::PrimitiveStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::PrimitiveStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::PrimitiveStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::PrimitiveStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::PrimitiveStruct&& val);
 };
 
@@ -132,7 +195,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::ListStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::ListStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::ListStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::ListStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::ListStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::ListStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::ListStruct&& val);
 };
 
@@ -152,7 +224,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::SetStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::SetStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::SetStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::SetStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::SetStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::SetStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::SetStruct&& val);
 };
 
@@ -172,7 +253,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MapStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::MapStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MapStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MapStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MapStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MapStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MapStruct&& val);
 };
 
@@ -192,7 +282,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::ComposeStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::ComposeStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::ComposeStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::ComposeStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::ComposeStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::ComposeStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::ComposeStruct&& val);
 };
 
@@ -205,7 +304,16 @@ struct Extractor<::test::fixtures::basic-python-capi::OurUnion>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::OurUnion> {
+struct Constructor<::test::fixtures::basic-python-capi::OurUnion>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::OurUnion> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::OurUnion&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::OurUnion>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::OurUnion>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::OurUnion&& val);
 };
 
@@ -218,7 +326,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructPatch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructPatch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructPatch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructPatch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructPatch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructPatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructPatch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructPatch&& val);
 };
 
@@ -231,7 +348,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField4Patch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructField4Patch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructField4Patch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructField4Patch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField4Patch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField4Patch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField4Patch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField4Patch&& val);
 };
 
@@ -244,7 +370,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField6Patch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructField6Patch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructField6Patch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructField6Patch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField6Patch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField6Patch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField6Patch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField6Patch&& val);
 };
 
@@ -257,7 +392,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField7Patch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructField7Patch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructField7Patch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructField7Patch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField7Patch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField7Patch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField7Patch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField7Patch&& val);
 };
 
@@ -270,7 +414,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructField8Patch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructField8Patch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructField8Patch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructField8Patch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField8Patch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField8Patch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructField8Patch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructField8Patch&& val);
 };
 
@@ -283,7 +436,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructFieldPatch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructFieldPatch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructFieldPatch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructFieldPatch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructFieldPatch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructFieldPatch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructFieldPatch&& val);
 };
 
@@ -296,7 +458,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyStructEnsureStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::MyStructEnsureStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyStructEnsureStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyStructEnsureStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructEnsureStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyStructEnsureStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyStructEnsureStruct&& val);
 };
 
@@ -309,7 +480,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemPatch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyDataItemPatch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyDataItemPatch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyDataItemPatch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemPatch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemPatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemPatch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemPatch&& val);
 };
 
@@ -322,7 +502,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch> {
+struct Constructor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyDataItemFieldPatch> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemFieldPatch&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemFieldPatch>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemFieldPatch&& val);
 };
 
@@ -335,7 +524,16 @@ struct Extractor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>
 
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct> {
+struct Constructor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct> {
+  PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemEnsureStruct&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>> {
   PyObject* operator()(::test::fixtures::basic-python-capi::MyDataItemEnsureStruct&& val);
 };
 

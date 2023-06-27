@@ -640,6 +640,31 @@ PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion) {
   }
   return _get_fbthrift_data(structOrUnion);
 }
+
+/**
+ * This is a cpp version is set_struct_field in .pyx, but it saves overhead
+ * of checking PyErr_Occurred() that would be necessary with every capi call
+ * because the cython version is `except *`.
+ *
+ * Also, this assumes that struct_tuple has been created from PyTuple_New
+ * without setting any fields. If this is used with a struct_tuple created
+ * from python, it will leak the old value at index + 1.
+ */
+int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value) {
+  try {
+    setStructIsset(struct_tuple, index, 1);
+  } catch (std::runtime_error& e) {
+    // In error case, folly::handlePythonError clears error indicator
+    // and throws std::runtime_error with message fetched from PyErr.
+    //
+    PyErr_SetString(PyExc_TypeError, e.what());
+    return -1;
+  }
+  Py_INCREF(value);
+  PyTuple_SET_ITEM(struct_tuple, index + 1, value);
+  return 0;
+}
+
 } // namespace capi
 
 } // namespace python

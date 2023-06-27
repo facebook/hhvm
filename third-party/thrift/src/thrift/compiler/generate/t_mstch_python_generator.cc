@@ -888,6 +888,7 @@ class python_mstch_struct : public mstch_struct {
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
             {"struct:cpp_name", &python_mstch_struct::cpp_name},
             {"struct:cpp_adapter?", &python_mstch_struct::cpp_adapter},
+            {"struct:fields_size", &python_mstch_struct::fields_size},
         });
   }
 
@@ -930,6 +931,7 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node cpp_name() { return cpp2::get_name(struct_); }
+  mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
 
  private:
   const t_const* adapter_annotation_;

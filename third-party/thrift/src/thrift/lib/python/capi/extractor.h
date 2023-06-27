@@ -57,11 +57,6 @@ ExtractorResult<T> extractorSuccess(T&& val) {
 template <typename T>
 struct Extractor;
 
-template <typename R, typename RValue = std::remove_reference_t<R>>
-constexpr bool is_optional_maybe_boxed_field_ref_v =
-    apache::thrift::detail::is_optional_field_ref_v<RValue> ||
-    apache::thrift::detail::is_optional_boxed_field_ref_v<RValue>;
-
 /*
  * Base class provides a conditional extract(PyObject*, bool&). The bool
  * represents whether any python error has occurred. The base extractor

@@ -51,7 +51,16 @@ struct Extractor<::apache::thrift::python::capi::ComposedStruct<
 {{/struct:marshal_capi?}}
 
 template <>
-struct Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
+struct Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>
+    : public BaseConstructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}> {
+  PyObject* operator()({{program:cpp_namespaces}}::{{struct:cpp_name}}&& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        {{program:cpp_namespaces}}::{{struct:cpp_name}}>> {
   PyObject* operator()({{program:cpp_namespaces}}::{{struct:cpp_name}}&& val);
 };
 

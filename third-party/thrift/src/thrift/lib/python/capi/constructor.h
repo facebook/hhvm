@@ -22,7 +22,9 @@
 #include <folly/CppAttributes.h>
 #include <folly/Traits.h>
 #include <folly/Utility.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
+#include <thrift/lib/python/types.h>
 
 namespace apache {
 namespace thrift {
@@ -46,10 +48,52 @@ struct Constructor {
   /* Target */ PyObject* operator()(T&&);
 };
 
-#define SPECIALIZE_SCALAR(type)                  \
-  template <>                                    \
-  struct Constructor<type> {                     \
-    PyObject* FOLLY_NULLABLE operator()(type&&); \
+/**
+ * CRTP helper to handle FieldRef appropriately and call `Constructor` from
+ * the field's cpp value. Returns nullptr to signal python error. Otherwise
+ * returns a new reference.
+ */
+template <typename T>
+struct BaseConstructor {
+  template <typename FieldRef>
+  std::enable_if_t<
+      !::apache::thrift::detail::is_shared_or_unique_ptr_v<FieldRef>,
+      PyObject*>
+  constructFrom(FieldRef ref) {
+    if constexpr (is_optional_maybe_boxed_field_ref_v<FieldRef>) {
+      if (!ref.has_value()) {
+        Py_RETURN_NONE;
+      }
+    }
+    return (*static_cast<Constructor<T>*>(this))(std::move(*ref));
+  }
+  template <typename S>
+  PyObject* constructFrom(std::unique_ptr<S>& ref /* RefType.Unique */
+  ) {
+    // Ref may be optional so always check if None
+    if (!ref) {
+      Py_RETURN_NONE;
+    }
+    return (*static_cast<Constructor<T>*>(this))(std::move(*ref));
+  }
+  template <typename S>
+  PyObject* constructFrom(
+      std::shared_ptr<S>& ref /* RefType.Shared, RefType.SharedMutable */
+  ) {
+    // Ref may be optional so always check if None
+    if (!ref) {
+      Py_RETURN_NONE;
+    }
+    // have to copy because we can't guarantee shared_ptr is unique in general
+    // multi-threaded case.
+    return (*static_cast<Constructor<T>*>(this))(folly::copy(*ref));
+  }
+};
+
+#define SPECIALIZE_SCALAR(type)                             \
+  template <>                                               \
+  struct Constructor<type> : public BaseConstructor<type> { \
+    PyObject* FOLLY_NULLABLE operator()(type&&);            \
   }
 
 SPECIALIZE_SCALAR(int8_t);
@@ -63,10 +107,10 @@ SPECIALIZE_SCALAR(float);
 SPECIALIZE_SCALAR(double);
 
 #undef SPECIALIZE_SCALAR
-#define SPECIALIZE_STR(cpp_type, py_type)            \
-  template <>                                        \
-  struct Constructor<py_type> {                      \
-    PyObject* FOLLY_NULLABLE operator()(cpp_type&&); \
+#define SPECIALIZE_STR(cpp_type, py_type)                         \
+  template <>                                                     \
+  struct Constructor<py_type> : public BaseConstructor<py_type> { \
+    PyObject* FOLLY_NULLABLE operator()(cpp_type&&);              \
   }
 
 SPECIALIZE_STR(std::string, Bytes);
@@ -74,8 +118,17 @@ SPECIALIZE_STR(std::string, String);
 
 #undef SPECIALIZE_STR
 
+template <typename T>
+struct Constructor<ComposedEnum<T>> : public BaseConstructor<ComposedEnum<T>> {
+  // The internal python representation of enum is integer value.
+  PyObject* FOLLY_NULLABLE operator()(T&& val) {
+    return Constructor<int32_t>{}(static_cast<int32_t>(val));
+  }
+};
+
 template <typename ElemT, typename CppT>
-struct Constructor<list<ElemT, CppT>> {
+struct Constructor<list<ElemT, CppT>>
+    : public BaseConstructor<list<ElemT, CppT>> {
   PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
     const size_t size = val.size();
     StrongRef list(PyTuple_New(size));
@@ -106,7 +159,8 @@ constexpr bool has_extract_v =
     folly::is_detected_v<extract_method_t, std::remove_reference_t<C>>;
 
 template <typename ElemT, typename CppT>
-struct Constructor<set<ElemT, CppT>> {
+struct Constructor<set<ElemT, CppT>>
+    : public BaseConstructor<set<ElemT, CppT>> {
   PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
     StrongRef set_obj(PyFrozenSet_New(nullptr));
     if (!set_obj) {
@@ -140,7 +194,8 @@ struct Constructor<set<ElemT, CppT>> {
 };
 
 template <typename KeyT, typename ValT, typename CppT>
-struct Constructor<map<KeyT, ValT, CppT>> {
+struct Constructor<map<KeyT, ValT, CppT>>
+    : public BaseConstructor<map<KeyT, ValT, CppT>> {
   PyObject* FOLLY_NULLABLE operator()(CppT&& cpp_map) {
     StrongRef dict(PyTuple_New(cpp_map.size()));
     if (!dict) {

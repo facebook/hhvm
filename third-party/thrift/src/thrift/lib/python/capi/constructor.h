@@ -21,7 +21,6 @@
 #include <Python.h>
 #include <folly/CppAttributes.h>
 #include <folly/Traits.h>
-#include <folly/Utility.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 #include <thrift/lib/python/types.h>
@@ -65,20 +64,20 @@ struct BaseConstructor {
         Py_RETURN_NONE;
       }
     }
-    return (*static_cast<Constructor<T>*>(this))(std::move(*ref));
+    return (*static_cast<Constructor<T>*>(this))(*ref);
   }
   template <typename S>
-  PyObject* constructFrom(std::unique_ptr<S>& ref /* RefType.Unique */
+  PyObject* constructFrom(const std::unique_ptr<S>& ref /* RefType.Unique */
   ) {
     // Ref may be optional so always check if None
     if (!ref) {
       Py_RETURN_NONE;
     }
-    return (*static_cast<Constructor<T>*>(this))(std::move(*ref));
+    return (*static_cast<Constructor<T>*>(this))(*ref);
   }
   template <typename S>
   PyObject* constructFrom(
-      std::shared_ptr<S>& ref /* RefType.Shared, RefType.SharedMutable */
+      const std::shared_ptr<S>& ref /* RefType.Shared, RefType.SharedMutable */
   ) {
     // Ref may be optional so always check if None
     if (!ref) {
@@ -86,14 +85,14 @@ struct BaseConstructor {
     }
     // have to copy because we can't guarantee shared_ptr is unique in general
     // multi-threaded case.
-    return (*static_cast<Constructor<T>*>(this))(folly::copy(*ref));
+    return (*static_cast<Constructor<T>*>(this))(*ref);
   }
 };
 
 #define SPECIALIZE_SCALAR(type)                             \
   template <>                                               \
   struct Constructor<type> : public BaseConstructor<type> { \
-    PyObject* FOLLY_NULLABLE operator()(type&&);            \
+    PyObject* FOLLY_NULLABLE operator()(type);              \
   }
 
 SPECIALIZE_SCALAR(int8_t);
@@ -110,7 +109,7 @@ SPECIALIZE_SCALAR(double);
 #define SPECIALIZE_STR(cpp_type, py_type)                         \
   template <>                                                     \
   struct Constructor<py_type> : public BaseConstructor<py_type> { \
-    PyObject* FOLLY_NULLABLE operator()(cpp_type&&);              \
+    PyObject* FOLLY_NULLABLE operator()(const cpp_type&);         \
   }
 
 SPECIALIZE_STR(std::string, Bytes);
@@ -121,7 +120,7 @@ SPECIALIZE_STR(std::string, String);
 template <typename T>
 struct Constructor<ComposedEnum<T>> : public BaseConstructor<ComposedEnum<T>> {
   // The internal python representation of enum is integer value.
-  PyObject* FOLLY_NULLABLE operator()(T&& val) {
+  PyObject* FOLLY_NULLABLE operator()(T val) {
     return Constructor<int32_t>{}(static_cast<int32_t>(val));
   }
 };
@@ -129,7 +128,7 @@ struct Constructor<ComposedEnum<T>> : public BaseConstructor<ComposedEnum<T>> {
 template <typename ElemT, typename CppT>
 struct Constructor<list<ElemT, CppT>>
     : public BaseConstructor<list<ElemT, CppT>> {
-  PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
+  PyObject* FOLLY_NULLABLE operator()(const CppT& val) {
     const size_t size = val.size();
     StrongRef list(PyTuple_New(size));
     if (!list) {
@@ -138,7 +137,7 @@ struct Constructor<list<ElemT, CppT>>
     Constructor<ElemT> ctor{};
     for (size_t i = 0; i < size; ++i) {
       // PyTuple_SET_ITEM steals, so don't use StrongRef
-      PyObject* elem(ctor(std::move(val[i])));
+      PyObject* elem(ctor(val[i]));
       if (elem == nullptr) {
         // StrongRef DECREFs the list tuple on scope exit
         return nullptr;
@@ -149,19 +148,10 @@ struct Constructor<list<ElemT, CppT>>
   }
 };
 
-template <typename C>
-using iter_t = decltype(std::declval<C&>().begin());
-template <typename C>
-using extract_method_t =
-    decltype(std::declval<C&>().extract(std::declval<iter_t<C>>()));
-template <typename C>
-constexpr bool has_extract_v =
-    folly::is_detected_v<extract_method_t, std::remove_reference_t<C>>;
-
 template <typename ElemT, typename CppT>
 struct Constructor<set<ElemT, CppT>>
     : public BaseConstructor<set<ElemT, CppT>> {
-  PyObject* FOLLY_NULLABLE operator()(CppT&& val) {
+  PyObject* FOLLY_NULLABLE operator()(const CppT& val) {
     StrongRef set_obj(PyFrozenSet_New(nullptr));
     if (!set_obj) {
       return nullptr;
@@ -169,16 +159,8 @@ struct Constructor<set<ElemT, CppT>>
     Constructor<ElemT> ctor{};
     auto it = val.begin();
     while (it != val.end()) {
-      StrongRef elem;
-      if constexpr (has_extract_v<CppT>) {
-        auto node_handle = val.extract(it++);
-        elem = StrongRef(ctor(std::move(node_handle.value())));
-      } else {
-        // If the container doesn't support extract, have to copy
-        // because set iterator is const :(
-        elem = StrongRef(ctor(folly::copy(*it)));
-        ++it;
-      }
+      StrongRef elem(ctor(*it));
+      ++it;
       if (*elem == nullptr) {
         // StrongRef DECREFs the frozenset on scope exit
         return nullptr;
@@ -196,7 +178,7 @@ struct Constructor<set<ElemT, CppT>>
 template <typename KeyT, typename ValT, typename CppT>
 struct Constructor<map<KeyT, ValT, CppT>>
     : public BaseConstructor<map<KeyT, ValT, CppT>> {
-  PyObject* FOLLY_NULLABLE operator()(CppT&& cpp_map) {
+  PyObject* FOLLY_NULLABLE operator()(const CppT& cpp_map) {
     StrongRef dict(PyTuple_New(cpp_map.size()));
     if (!dict) {
       return nullptr;
@@ -206,27 +188,13 @@ struct Constructor<map<KeyT, ValT, CppT>>
     auto it = cpp_map.begin();
     size_t idx = 0;
     while (it != cpp_map.end()) {
-      StrongRef key;
-      StrongRef val;
-      if constexpr (has_extract_v<CppT>) {
-        auto node_handle = cpp_map.extract(it++);
-        key = StrongRef(key_ctor(std::move(node_handle.key())));
-        if (!key) {
-          // StrongRef DECREFs the dict on scope exit
-          return nullptr;
-        }
-        val = StrongRef(val_ctor(std::move(node_handle.mapped())));
-      } else {
-        // If the container doesn't support extract, have to copy
-        // because set iterator is const :(
-        key = StrongRef(key_ctor(folly::copy(it->first)));
-        if (!key) {
-          // StrongRef DECREFs the dict on scope exit
-          return nullptr;
-        }
-        val = StrongRef(val_ctor(std::move(it->second)));
-        ++it;
+      StrongRef key(key_ctor(it->first));
+      if (!key) {
+        // StrongRef DECREFs the dict on scope exit
+        return nullptr;
       }
+      StrongRef val(val_ctor(it->second));
+      ++it;
       if (!val) {
         // StrongRef DECREFs the dict and key on scope exit
         return nullptr;

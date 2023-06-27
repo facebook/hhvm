@@ -123,7 +123,7 @@ int Extractor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::typeCheck(PyObje
 
 
 PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator()(
-    {{program:cpp_namespaces}}::{{struct:cpp_name}}&& val) {
+    const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
@@ -131,16 +131,16 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
   {{#struct:marshal_capi?}}
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{program:cpp_namespaces}}::{{struct:cpp_name}}>> ctor;
-  StrongRef fbthrift_data(ctor(std::forward<{{program:cpp_namespaces}}::{{struct:cpp_name}}>(val)));
+  StrongRef fbthrift_data(ctor(val));
   return init__{{program:capi_module_prefix}}__{{struct:name}}(*fbthrift_data);
   {{/struct:marshal_capi?}}
   {{^struct:marshal_capi?}}
   auto ptr = construct__{{program:capi_module_prefix}}__{{struct:name}}(
   {{#struct:cpp_adapter?}}
-      detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(std::move(val)));
+      detail::serialize_adapted_to_iobuf<{{cpp_adapter:name}}>(val));
   {{/struct:cpp_adapter?}}
   {{^struct:cpp_adapter?}}
-      detail::serialize_to_iobuf(std::move(val)));
+      detail::serialize_to_iobuf(val));
   {{/struct:cpp_adapter?}}
   if (!ptr) {
     CHECK(PyErr_Occurred());
@@ -152,7 +152,7 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{struct:cpp_name}}>::operator
 {{#struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         {{program:cpp_namespaces}}::{{struct:cpp_name}}>>::operator()(
-    FOLLY_MAYBE_UNUSED {{program:cpp_namespaces}}::{{struct:cpp_name}}&& val) {
+    FOLLY_MAYBE_UNUSED const {{program:cpp_namespaces}}::{{struct:cpp_name}}& val) {
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
   {{#struct:fields}}
   StrongRef __{{field:name}}(Constructor<{{field:marshal_type}}>{}.constructFrom(val.{{field:cpp_name}}()));
@@ -198,7 +198,7 @@ int Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::typeCheck(PyObject
 
 
 PyObject* Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(
-    {{program:cpp_namespaces}}::{{enum:cpp_name}}&& val) {
+    {{program:cpp_namespaces}}::{{enum:cpp_name}} val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;

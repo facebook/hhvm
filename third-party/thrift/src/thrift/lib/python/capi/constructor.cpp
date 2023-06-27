@@ -37,9 +37,9 @@ PyObject* PyUnicode_FromCppString(const std::string& str) {
 // need to check capi for error in cpp.
 // If this is called from another Constructor, that caller is responsible
 // for checking error before calling other capi functions.
-#define SPECIALIZE_CAPI(type, capi_fn)                                 \
-  PyObject* FOLLY_NULLABLE Constructor<type>::operator()(type&& val) { \
-    return capi_fn(std::move(val));                                    \
+#define SPECIALIZE_CAPI(type, capi_fn)                               \
+  PyObject* FOLLY_NULLABLE Constructor<type>::operator()(type val) { \
+    return capi_fn(val);                                             \
   }
 
 SPECIALIZE_CAPI(int8_t, PyLong_FromLong)
@@ -53,9 +53,10 @@ SPECIALIZE_CAPI(float, PyFloat_FromDouble)
 SPECIALIZE_CAPI(double, PyFloat_FromDouble)
 #undef SPECIALIZE_CAPI
 
-#define SPECIALIZE_CAPI_STR(cpp_type, py_type, capi_fn)                       \
-  PyObject* FOLLY_NULLABLE Constructor<py_type>::operator()(cpp_type&& val) { \
-    return capi_fn(std::move(val));                                           \
+#define SPECIALIZE_CAPI_STR(cpp_type, py_type, capi_fn)      \
+  PyObject* FOLLY_NULLABLE Constructor<py_type>::operator()( \
+      const cpp_type& val) {                                 \
+    return capi_fn(val);                                     \
   }
 SPECIALIZE_CAPI_STR(std::string, Bytes, PyBytes_FromCppString)
 SPECIALIZE_CAPI_STR(std::string, String, PyUnicode_FromCppString)

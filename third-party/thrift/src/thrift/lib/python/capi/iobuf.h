@@ -43,7 +43,7 @@ constexpr bool is_wrap_v = folly::is_detected_v<to_thrift_wrap_method_t, W>;
  * If `S` is a wrapped C++ struct, convert to thrift before serializing.
  */
 template <typename S>
-std::unique_ptr<folly::IOBuf> serialize_to_iobuf(S&& s) {
+std::unique_ptr<folly::IOBuf> serialize_to_iobuf(const S& s) {
   if constexpr (apache::thrift::is_thrift_class_v<S>) {
     folly::IOBufQueue queue;
     apache::thrift::BinaryProtocolWriter protocol;
@@ -52,7 +52,7 @@ std::unique_ptr<folly::IOBuf> serialize_to_iobuf(S&& s) {
     s.write(&protocol);
     return queue.move();
   } else if constexpr (is_wrap_v<S>) {
-    return serialize_to_iobuf(std::forward<S>(s).toThrift());
+    return serialize_to_iobuf(s.toThrift());
   } else {
     static_assert(
         folly::always_false<S>,
@@ -91,11 +91,11 @@ S deserialize_iobuf(std::unique_ptr<folly::IOBuf>&& buf) {
  * struct S annotated with cpp.Adapter and cpp.Transitive annotations.
  */
 template <typename Adapter, typename T>
-std::unique_ptr<folly::IOBuf> serialize_adapted_to_iobuf(T&& s) {
+std::unique_ptr<folly::IOBuf> serialize_adapted_to_iobuf(const T& s) {
   if constexpr (apache::thrift::is_thrift_class_v<T>) {
-    return serialize_to_iobuf(std::forward<T>(s));
+    return serialize_to_iobuf(s);
   } else {
-    return serialize_to_iobuf(Adapter::toThrift(std::forward<T>(s)));
+    return serialize_to_iobuf(Adapter::toThrift(s));
   }
 }
 

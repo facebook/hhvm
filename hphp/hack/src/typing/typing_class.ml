@@ -25,22 +25,6 @@ module Cls = Decl_provider.Class
 module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 
-(* The following function enables us to retrieve the class header from the
-   shared mem. Note that it only returns a non None value if
-   global inference is on *)
-let get_decl_method_header tcopt cls method_id ~is_static =
-  let is_global_inference_on = TCO.global_inference tcopt in
-  if is_global_inference_on then
-    match Cls.get_any_method ~is_static cls method_id with
-    | Some { ce_type = (lazy ty); _ } -> begin
-      match get_node ty with
-      | Tfun fun_type -> Some fun_type
-      | _ -> None
-    end
-    | _ -> None
-  else
-    None
-
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
@@ -169,13 +153,6 @@ let method_def ~is_disposable env cls m =
   let initial_env = env in
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
-  let decl_header =
-    get_decl_method_header
-      (Env.get_tcopt env)
-      cls
-      method_name
-      ~is_static:m.m_static
-  in
   let pos = fst m.m_name in
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
@@ -238,7 +215,7 @@ let method_def ~is_disposable env cls m =
   in
   let env = Env.clear_params env in
   let (ret_decl_ty, params_decl_ty) =
-    merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret decl_header env
+    merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret env
   in
   (* Is sound dynamic enabled, and the function not a constructor
    * and marked <<__SupportDynamicType>> explicitly or implicitly? *)

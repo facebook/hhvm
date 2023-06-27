@@ -66,6 +66,5 @@ val merge_hint_with_decl_hint :
 val merge_decl_header_with_hints :
   params:Nast.fun_param list ->
   ret:Nast.type_hint ->
-  Typing_defs.decl_ty Typing_defs_core.fun_type option ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option * Typing_defs.decl_ty option list

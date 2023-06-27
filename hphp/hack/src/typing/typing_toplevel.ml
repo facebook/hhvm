@@ -27,22 +27,6 @@ module TCO = TypecheckerOptions
 module SN = Naming_special_names
 module Profile = Typing_toplevel_profile
 
-(* The two following functions enable us to retrieve the function (or class)
-   header from the shared mem. Note that they only return a non None value if
-   global inference is on *)
-let get_decl_function_header env function_id =
-  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
-  if is_global_inference_on then
-    match Decl_provider.get_fun (Env.get_ctx env) function_id with
-    | Some { fe_type; _ } -> begin
-      match get_node fe_type with
-      | Tfun fun_type -> Some fun_type
-      | _ -> None
-    end
-    | _ -> None
-  else
-    None
-
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
@@ -87,7 +71,6 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst fd.fd_name in
-  let decl_header = get_decl_function_header env (snd fd.fd_name) in
   let env = Env.open_tyvars env (fst fd.fd_name) in
   let env = Env.set_env_callable_pos env pos in
   let (env, user_attributes) =
@@ -159,7 +142,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   let env = Env.set_fn_kind env f.f_fun_kind in
   let (return_decl_ty, params_decl_ty) =
-    merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret decl_header env
+    merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret env
   in
   let hint_pos =
     match f.f_ret with

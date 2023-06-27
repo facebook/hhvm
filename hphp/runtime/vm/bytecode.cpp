@@ -397,14 +397,12 @@ void Stack::requestInit() {
   // log(RuntimeOption::EvalVMStackElms)) bits.
   m_top = m_base = m_elms + RuntimeOption::EvalVMStackElms - 1;
 
-  rds::header()->stackLimitAndSurprise.store(
-    reinterpret_cast<uintptr_t>(
-      reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
-        stackCheckPadding() * sizeof(TypedValue)
-    ),
-    std::memory_order_release
+  auto const limit = reinterpret_cast<uintptr_t>(
+    reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
+      stackCheckPadding() * sizeof(TypedValue)
   );
-  assertx(!(rds::header()->stackLimitAndSurprise.load() & kSurpriseFlagMask));
+  assertx(!(limit & kSurpriseFlagMask));
+  rds::header()->stackLimitAndSurprise.store(limit, std::memory_order_release);
 
   // Because of the surprise page at the bottom of the stack we lose an
   // additional 256 elements which must be taken into account when checking for

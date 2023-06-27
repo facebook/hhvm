@@ -82,15 +82,4 @@
 #    endif
 #  endif
 #endif
-
-
-#ifndef HAVE_ARMCRYPTO
-#  if defined __has_include
-#    if __has_include(<arm_neon.h>)
-#      define HAVE_ARMCRYPTO 1
-#    endif
-#  endif
-#endif
-
-
 // clang-format on

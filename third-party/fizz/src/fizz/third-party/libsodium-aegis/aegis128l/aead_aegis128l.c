@@ -9,10 +9,6 @@
 
 #include "soft/aead_aegis128l_soft.h"
 
-#if defined(HAVE_ARMCRYPTO) && defined(NATIVE_LITTLE_ENDIAN)
-#include "armcrypto/aead_aegis128l_armcrypto.h"
-#endif
-
 #if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
 #include "aesni/aead_aegis128l_aesni.h"
 #endif
@@ -125,13 +121,6 @@ int
 _fizz_aegis128l_pick_best_implementation(void)
 {
     implementation = &fizz_crypto_aead_aegis128l_soft_implementation;
-
-#if defined(HAVE_ARMCRYPTO) && defined(NATIVE_LITTLE_ENDIAN)
-    if (sodium_runtime_has_armcrypto()) {
-        implementation = &fizz_crypto_aead_aegis128l_armcrypto_implementation;
-        return 0;
-    }
-#endif
 
 #if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
     if (sodium_runtime_has_aesni()) {

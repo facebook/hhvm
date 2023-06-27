@@ -41,7 +41,6 @@ void testMessage(
   if (binary) {
     header.setProtocolId(T_BINARY_PROTOCOL);
   }
-  THeader::StringToStringMap strMap;
   size_t neaded;
 
   for (int i = 0; i < iters; i++) {
@@ -57,8 +56,9 @@ void testMessage(
       CompactSerializer::serialize(b, &out);
     }
 
-    auto withHeader = header.addHeader(out.move(), strMap);
+    auto withHeader = header.addHeader(out.move());
     out.append(std::move(withHeader));
+    THeader::StringToStringMap strMap;
     auto buf = header.removeHeader(&out, neaded, strMap);
 
     if (binary) {
@@ -87,7 +87,7 @@ void testChainedCompression(uint8_t flag, int iters) {
 
   auto cloned = head->clone();
 
-  auto compressed = header.addHeader(std::move(head), persistentHeaders);
+  auto compressed = header.addHeader(std::move(head));
   EXPECT_NE(compressed, nullptr);
   printf("%i\n", (int)compressed->length());
 
@@ -162,16 +162,15 @@ TEST(sdf, sdfsd) {
   }
 
   THeader header;
-  THeader::StringToStringMap strMap;
   folly::IOBufQueue out;
   CompactSerializer::serialize(b, &out);
   auto serialized = out.move();
 
   auto uncompressedSize =
-      header.addHeader(serialized->clone(), strMap)->computeChainDataLength();
+      header.addHeader(serialized->clone())->computeChainDataLength();
 
   header.setTransform(THeader::ZLIB_TRANSFORM);
-  auto compressed = header.addHeader(serialized->clone(), strMap);
+  auto compressed = header.addHeader(serialized->clone());
   auto compressedSize = compressed->computeChainDataLength();
 
   // Should compress.

@@ -70,7 +70,6 @@ class THttpParser {
       std::unique_ptr<folly::IOBuf> buf) = 0;
   virtual std::unique_ptr<folly::IOBuf> constructHeader(
       std::unique_ptr<folly::IOBuf> buf,
-      const folly::F14NodeMap<std::string, std::string>& persistentWriteHeaders,
       const folly::F14NodeMap<std::string, std::string>& writeHeaders,
       const folly::F14NodeMap<std::string, std::string>* extraWriteHeaders) = 0;
 
@@ -131,7 +130,6 @@ class THttpClientParser : public THttpParser {
       std::unique_ptr<folly::IOBuf> buf) override;
   std::unique_ptr<folly::IOBuf> constructHeader(
       std::unique_ptr<folly::IOBuf> buf,
-      const folly::F14NodeMap<std::string, std::string>& persistentWriteHeaders,
       const folly::F14NodeMap<std::string, std::string>& writeHeaders,
       const folly::F14NodeMap<std::string, std::string>* extraWriteHeaders)
       override;

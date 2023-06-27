@@ -337,8 +337,7 @@ std::unique_ptr<folly::IOBuf>
 HeaderClientChannel::ClientFramingHandler::addFrame(
     unique_ptr<IOBuf> buf, THeader* header) {
   header->setSequenceNumber(channel_.sendSeqId_);
-  THeader::StringToStringMap persistentWriteHeaders;
-  return header->addHeader(std::move(buf), persistentWriteHeaders);
+  return header->addHeader(std::move(buf));
 }
 
 std::tuple<std::unique_ptr<IOBuf>, size_t, std::unique_ptr<THeader>>

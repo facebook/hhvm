@@ -47,8 +47,7 @@ TEST(THeaderTest, largetransform) {
   }
   buf->append(buf_size);
 
-  THeader::StringToStringMap persistentHeaders;
-  buf = header.addHeader(std::move(buf), persistentHeaders);
+  buf = header.addHeader(std::move(buf));
   buf_size = buf->computeChainDataLength();
   buf->gather(buf_size);
   std::unique_ptr<IOBufQueue> queue(new IOBufQueue);
@@ -62,6 +61,7 @@ TEST(THeaderTest, largetransform) {
 
   size_t needed;
 
+  THeader::StringToStringMap persistentHeaders;
   buf = header.removeHeader(queue2.get(), needed, persistentHeaders);
   EXPECT_EQ(buf->computeChainDataLength(), 10000000);
 }
@@ -76,8 +76,7 @@ TEST(THeaderTest, http_clear_header) {
 
   size_t buf_size = 1000000;
   std::unique_ptr<IOBuf> buf(IOBuf::create(buf_size));
-  THeader::StringToStringMap persistentHeaders;
-  buf = header.addHeader(std::move(buf), persistentHeaders);
+  buf = header.addHeader(std::move(buf));
 
   EXPECT_TRUE(header.isWriteHeadersEmpty());
 }

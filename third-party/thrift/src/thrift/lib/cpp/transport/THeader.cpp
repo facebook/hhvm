@@ -746,10 +746,8 @@ static size_t getInfoHeaderSize(const THeader::StringToStringMap& headers) {
   return maxWriteHeadersSize;
 }
 
-size_t THeader::getMaxWriteHeadersSize(
-    const StringToStringMap& persistentWriteHeaders) const {
+size_t THeader::getMaxWriteHeadersSize() const {
   size_t maxWriteHeadersSize = 0;
-  maxWriteHeadersSize += getInfoHeaderSize(persistentWriteHeaders);
   maxWriteHeadersSize +=
       c_.writeHeaders_ ? getInfoHeaderSize(*c_.writeHeaders_) : 0;
   if (c_.extraWriteHeaders_) {
@@ -831,12 +829,8 @@ void THeader::setIdentity(const string& identity) {
   this->c_.identity_ = identity;
 }
 
-unique_ptr<IOBuf> THeader::addHeader(
-    unique_ptr<IOBuf> buf,
-    StringToStringMap& persistentWriteHeaders,
-    bool transform) {
-  // We may need to modify some transforms before send.  Make
-  // a copy here
+unique_ptr<IOBuf> THeader::addHeader(unique_ptr<IOBuf> buf, bool transform) {
+  // We may need to modify some transforms before send.  Make a copy here
   std::vector<uint16_t> writeTrans = c_.writeTrans_;
 
   if (c_.clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
@@ -873,7 +867,7 @@ unique_ptr<IOBuf> THeader::addHeader(
     int headerSize =
         (2 + getNumTransforms(writeTrans) * 2 /* transform data */) * 5 + 4;
     // add approximate size of info headers
-    headerSize += getMaxWriteHeadersSize(persistentWriteHeaders);
+    headerSize += getMaxWriteHeadersSize();
 
     // Pkt size
     unique_ptr<IOBuf> header = IOBuf::create(22 + headerSize);
@@ -913,9 +907,6 @@ unique_ptr<IOBuf> THeader::addHeader(
     }
 
     // write info headers
-
-    // write persistent kv-headers
-    flushInfoHeaders(pkt, persistentWriteHeaders, infoIdType::PKEYVALUE);
 
     // write non-persistent kv-headers
     if (c_.writeHeaders_) {
@@ -987,7 +978,6 @@ unique_ptr<IOBuf> THeader::addHeader(
     CHECK(c_.httpClientParser_.get() != nullptr);
     buf = c_.httpClientParser_->constructHeader(
         std::move(buf),
-        persistentWriteHeaders,
         c_.writeHeaders_ ? *c_.writeHeaders_ : kEmptyMap(),
         c_.extraWriteHeaders_);
     c_.writeHeaders_.reset();

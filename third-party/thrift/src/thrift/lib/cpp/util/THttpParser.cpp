@@ -383,12 +383,11 @@ bool THttpClientParser::isConnectClosedByServer() {
 
 unique_ptr<IOBuf> THttpClientParser::constructHeader(unique_ptr<IOBuf> buf) {
   folly::F14NodeMap<std::string, std::string> empty;
-  return constructHeader(std::move(buf), empty, empty, &empty);
+  return constructHeader(std::move(buf), empty, &empty);
 }
 
 unique_ptr<IOBuf> THttpClientParser::constructHeader(
     unique_ptr<IOBuf> buf,
-    const folly::F14NodeMap<std::string, std::string>& persistentWriteHeaders,
     const folly::F14NodeMap<std::string, std::string>& writeHeaders,
     const folly::F14NodeMap<std::string, std::string>* extraWriteHeaders) {
   IOBufQueue queue;
@@ -411,7 +410,6 @@ unique_ptr<IOBuf> THttpClientParser::constructHeader(
   queue.append(contentLen);
   queue.append(CRLF);
 
-  THttpClientParser::appendHeadersToQueue(queue, persistentWriteHeaders);
   THttpClientParser::appendHeadersToQueue(queue, writeHeaders);
   if (extraWriteHeaders) {
     THttpClientParser::appendHeadersToQueue(queue, *extraWriteHeaders);

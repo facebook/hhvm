@@ -304,9 +304,7 @@ class THeader final {
    * @return IOBuf chain with header _and_ data.  Data is not copied
    */
   std::unique_ptr<folly::IOBuf> addHeader(
-      std::unique_ptr<folly::IOBuf>,
-      StringToStringMap& persistentWriteHeaders,
-      bool transform = true);
+      std::unique_ptr<folly::IOBuf>, bool transform = true);
   /**
    * Given an IOBuf Chain, remove the header.  Supports unframed (sync
    * only), framed, header, and http (sync case only).  This doesn't
@@ -448,8 +446,7 @@ class THeader final {
   /**
    * Returns the maximum number of bytes that write k/v headers can take
    */
-  size_t getMaxWriteHeadersSize(
-      const StringToStringMap& persistentWriteHeaders) const;
+  size_t getMaxWriteHeadersSize() const;
 
   /**
    * Returns whether the 1st byte of the protocol payload should be hadled

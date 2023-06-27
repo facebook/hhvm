@@ -59,12 +59,11 @@ def serialize_with_header(tstruct, protocol=Protocol.COMPACT, transform=Transfor
 
 def serialize_with_header_iobuf(StructOrError tstruct, protocol=Protocol.COMPACT, Transform transform=Transform.NONE):
     cdef cTHeader header
-    cdef F14NodeMap[string, string] pheaders
     cdef IOBuf buf = <IOBuf>serialize_iobuf(tstruct, protocol)
     header.setProtocolId(protocol)
     if transform is not Transform.NONE:
         header.setTransform(transform)
-    return _fbthrift_iobuf.from_unique_ptr(header.addHeader(_fbthrift_iobuf.move(buf._ours), pheaders))
+    return _fbthrift_iobuf.from_unique_ptr(header.addHeader(_fbthrift_iobuf.move(buf._ours)))
 
 
 def deserialize_from_header(structKlass, buf not None):

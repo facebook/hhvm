@@ -14597,7 +14597,7 @@ res::Func Index::resolve_ctor(const Type& obj) const {
 res::Func Index::resolve_func(SString name) const {
   name = normalizeNS(name);
   auto const it = m_data->funcs.find(name);
-  if (it == end(m_data->funcs)) return res::Func { res::Func::Missing {} };
+  if (it == end(m_data->funcs)) return res::Func { res::Func::Missing { name } };
   auto const func = it->second;
   assertx(func->attrs & AttrUnique);
   return res::Func { res::Func::Fun { func_info(*m_data, func) } };
@@ -14977,6 +14977,9 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
   assertx(func_name && "func_name will never be nullptr");
 
   auto rfunc = resolve_func(func_name);
+  // "Dynamic" constants like STDOUT will be KindOfUninit, but won't
+  // have an associated initializer.
+  if (!rfunc.exactFunc()) return TInitCell;
   return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
 }
 

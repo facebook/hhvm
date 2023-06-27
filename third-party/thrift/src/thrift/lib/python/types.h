@@ -73,6 +73,7 @@ inline T convInt(V v) {
 
 PyObject* createUnionTuple();
 
+PyObject* createStructTuple(int16_t numFields);
 PyObject* createStructTuple(const detail::StructInfo& structInfo);
 
 void setStructIsset(void* object, int16_t index, bool set);

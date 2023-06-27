@@ -143,27 +143,34 @@ UniquePyObjectPtr getDefaultValue(
   return value;
 }
 
-PyObject* createStructTuple(const detail::StructInfo& structInfo) {
-  auto numFields = structInfo.numFields;
+PyObject* createStructTuple(int16_t numFields) {
   UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
   if (!issetArr) {
-    THRIFT_PY3_CHECK_ERROR();
+    return nullptr;
   }
   char* flags = PyBytes_AsString(issetArr.get());
   if (!flags) {
-    THRIFT_PY3_CHECK_ERROR();
+    return nullptr;
   }
   for (Py_ssize_t i = 0; i < numFields; ++i) {
     flags[i] = '\0';
   }
   // create a tuple with the first element as a bytearray for isset flags, and
   // the rest numFields for struct fields.
+  PyObject* tuple{PyTuple_New(numFields + 1)};
+  if (tuple == nullptr) {
+    return nullptr;
+  }
+  PyTuple_SET_ITEM(tuple, 0, issetArr.release());
+  return tuple;
+}
 
-  UniquePyObjectPtr tuple{PyTuple_New(numFields + 1)};
+PyObject* createStructTuple(const detail::StructInfo& structInfo) {
+  auto numFields = structInfo.numFields;
+  UniquePyObjectPtr tuple{createStructTuple(numFields)};
   if (!tuple) {
     THRIFT_PY3_CHECK_ERROR();
   }
-  PyTuple_SET_ITEM(tuple.get(), 0, issetArr.release());
   const auto& defaultValues =
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int i = 0; i < numFields; ++i) {

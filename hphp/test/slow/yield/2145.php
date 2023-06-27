@@ -1,6 +1,6 @@
 <?hh
 
-function fruit() {
+function fruit(): Iterator<string> {
  echo "sadpanda, no fruit";
  yield break;
  }

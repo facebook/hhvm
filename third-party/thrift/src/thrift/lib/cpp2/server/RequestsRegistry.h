@@ -21,6 +21,7 @@
 #include <fmt/core.h>
 #include <folly/IntrusiveList.h>
 #include <folly/SocketAddress.h>
+#include <folly/executors/QueueObserver.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/Request.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>

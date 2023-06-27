@@ -21,6 +21,7 @@
 #include <folly/experimental/observer/SimpleObservable.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>

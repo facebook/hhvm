@@ -17,37 +17,29 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 
-#include <folly/io/async/EventBase.h>
-#include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
-#include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
+#include <folly/Optional.h>
+#include <folly/Portability.h>
+
+namespace folly {
+class EventBase;
+}
 
 namespace apache {
 namespace thrift {
 
 class AdaptiveConcurrencyController;
+class CPUConcurrencyController;
 
 class RequestStateMachine {
  public:
   RequestStateMachine(
       bool includeInRecentRequests,
       AdaptiveConcurrencyController& controller,
-      CPUConcurrencyController& cpuController)
-      : includeInRecentRequests_(includeInRecentRequests),
-        adaptiveConcurrencyController_(controller),
-        cpuController_(cpuController) {
-    if (includeInRecentRequests_) {
-      adaptiveConcurrencyController_.requestStarted(started());
-      cpuController_.requestStarted();
-    }
-  }
+      CPUConcurrencyController& cpuController);
 
-  ~RequestStateMachine() {
-    if (includeInRecentRequests_ && getStartedProcessing()) {
-      adaptiveConcurrencyController_.requestFinished(
-          started(), std::chrono::steady_clock::now());
-    }
-  }
+  ~RequestStateMachine();
 
   // Returns true if the request has not been cancelled (via tryCancel())
   //
@@ -65,45 +57,19 @@ class RequestStateMachine {
   // * queue/task timeout has sent load shedding response, and no further
   //   response is needed
   // * client has closed its connection and does not expect a response
-  [[nodiscard]] bool tryCancel(folly::EventBase* eb) {
-    eb->dcheckIsInEventBaseThread();
-    if (cancelled_.load(std::memory_order_relaxed)) {
-      return false;
-    }
-    cancelled_.store(true, std::memory_order_relaxed);
-    return true;
-  }
+  [[nodiscard]] bool tryCancel(folly::EventBase* eb);
 
   // The tryStartProcessing() API is used to mark the request as started
   // processing. This method is ultimately called by request processors. A
   // return value of true indicates that request processing can begin. A return
   // value of false indicates that request processing should be aborted.
-  [[nodiscard]] bool tryStartProcessing() {
-    if (cancelled_.load(std::memory_order_relaxed) ||
-        startProcessingOrQueueTimeout_.exchange(
-            true, std::memory_order_relaxed)) {
-      return false;
-    }
-    infoStartedProcessing_.store(true, std::memory_order_relaxed);
-    dequeued_.store(
-        std::chrono::steady_clock::now(), std::memory_order_relaxed);
-    return true;
-  }
+  [[nodiscard]] bool tryStartProcessing();
 
   // The tryStopProcessing() API is used to mark the request as stopped by queue
   // timeout callbacks. A return value of true indicates that queue timeout
   // handling can begin. A return value of false indicates that queue timeout
   // handling should be aborted.
-  [[nodiscard]] bool tryStopProcessing() {
-    if (!startProcessingOrQueueTimeout_.exchange(
-            true, std::memory_order_relaxed)) {
-      cpuController_.requestShed();
-      dequeued_.store(
-          std::chrono::steady_clock::now(), std::memory_order_relaxed);
-      return true;
-    }
-    return false;
-  }
+  [[nodiscard]] bool tryStopProcessing();
 
   bool getStartedProcessing() const {
     return infoStartedProcessing_.load(std::memory_order_relaxed);
@@ -119,14 +85,7 @@ class RequestStateMachine {
     return dequeued_.load(std::memory_order_relaxed);
   }
 
-  folly::Optional<std::chrono::milliseconds> queueingTime() const {
-    using namespace std::chrono;
-    if (auto dequeuedTime = dequeued();
-        dequeuedTime != steady_clock::time_point::min()) {
-      return duration_cast<milliseconds>(dequeuedTime - started());
-    }
-    return folly::none;
-  }
+  folly::Optional<std::chrono::milliseconds> queueingTime() const;
 
  private:
   std::atomic<bool> startProcessingOrQueueTimeout_{false};

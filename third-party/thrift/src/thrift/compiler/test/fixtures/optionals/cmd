@@ -1,4 +1,3 @@
-android:annotate src/module.thrift
 go src/module.thrift
 java_deprecated src/module.thrift
 php src/module.thrift

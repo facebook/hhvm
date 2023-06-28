@@ -224,6 +224,18 @@ create<thrift::benchmark::OpLargeSetInt>() {
   return createSet<thrift::benchmark::OpLargeSetInt>(1000000);
 }
 
+template <>
+inline thrift::benchmark::UnorderedSetInt
+create<thrift::benchmark::UnorderedSetInt>() {
+  return createSet<thrift::benchmark::UnorderedSetInt>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpUnorderedSetInt
+create<thrift::benchmark::OpUnorderedSetInt>() {
+  return createSet<thrift::benchmark::OpUnorderedSetInt>(1000000);
+}
+
 template <class T>
 inline T createMap(int size) {
   std::mt19937 rng;
@@ -243,6 +255,18 @@ template <>
 inline thrift::benchmark::OpLargeMapInt
 create<thrift::benchmark::OpLargeMapInt>() {
   return createMap<thrift::benchmark::OpLargeMapInt>(1000000);
+}
+
+template <>
+inline thrift::benchmark::UnorderedMapInt
+create<thrift::benchmark::UnorderedMapInt>() {
+  return createMap<thrift::benchmark::UnorderedMapInt>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpUnorderedMapInt
+create<thrift::benchmark::OpUnorderedMapInt>() {
+  return createMap<thrift::benchmark::OpUnorderedMapInt>(1000000);
 }
 
 template <>

@@ -172,7 +172,9 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   X2(Prefix, proto, BigListMixedInt) \
   X2(Prefix, proto, LargeListMixed)  \
   X2(Prefix, proto, LargeSetInt)     \
+  X2(Prefix, proto, UnorderedSetInt) \
   X2(Prefix, proto, LargeMapInt)     \
+  X2(Prefix, proto, UnorderedMapInt) \
   X2(Prefix, proto, NestedMap)       \
   X2(Prefix, proto, ComplexStruct)
 
@@ -190,7 +192,9 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   OpEncodeX2(Prefix, proto, BigListMixedInt) \
   OpEncodeX2(Prefix, proto, LargeListMixed)  \
   OpEncodeX2(Prefix, proto, LargeSetInt)     \
+  OpEncodeX2(Prefix, proto, UnorderedSetInt) \
   OpEncodeX2(Prefix, proto, LargeMapInt)     \
+  OpEncodeX2(Prefix, proto, UnorderedMapInt) \
   OpEncodeX2(Prefix, proto, NestedMap)       \
   OpEncodeX2(Prefix, proto, ComplexStruct)
 

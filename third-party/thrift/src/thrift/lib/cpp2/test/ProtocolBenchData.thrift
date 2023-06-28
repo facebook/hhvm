@@ -76,6 +76,11 @@ struct LargeSetInt {
   1: set<i32> s;
 }
 
+struct UnorderedSetInt {
+  @cpp.Type{template = "std::unordered_set"}
+  1: set<i32> s;
+}
+
 struct LargeMapInt {
   1: map<i32, i32> m;
 }
@@ -142,6 +147,11 @@ struct SortedVecNestedMap4 {
 struct SortedVecNestedMap {
   @cpp.Type{template = "folly::sorted_vector_map"}
   1: map<i32, NestedMap4> m;
+}
+
+struct UnorderedMapInt {
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i32, i32> m;
 }
 
 struct LargeMixed {
@@ -338,6 +348,12 @@ struct OpLargeSetInt {
 }
 
 @cpp.UseOpEncode
+struct OpUnorderedSetInt {
+  @cpp.Type{template = "std::unordered_set"}
+  1: set<i32> s;
+}
+
+@cpp.UseOpEncode
 struct OpLargeMapInt {
   1: map<i32, i32> m;
 }
@@ -365,6 +381,12 @@ struct OpNestedMap4 {
 @cpp.UseOpEncode
 struct OpNestedMap {
   1: map<i32, OpNestedMap4> m;
+}
+
+@cpp.UseOpEncode
+struct OpUnorderedMapInt {
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i32, i32> m;
 }
 
 @cpp.UseOpEncode

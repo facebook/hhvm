@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![feature(const_option)]
-#![cfg_attr(test, feature(build_hasher_simple_hash_one))]
 
 //! # The HackC IR
 //!

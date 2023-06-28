@@ -85,7 +85,7 @@ fn main() -> ::anyhow::Result<()> {
                 },
             );
         } else {
-            let mut agg = m.get_mut(p.provider).unwrap();
+            let agg = m.get_mut(p.provider).unwrap();
             agg.se_in_ns += p.se_in_ns;
             agg.de_in_ns += p.de_in_ns;
             agg.data_size_in_bytes += p.data_size_in_bytes;

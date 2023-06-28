@@ -72,7 +72,7 @@ impl SimpleTokenFactory for PositionedToken {
     // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
     // before any sharing occurs
     fn with_leading(mut self, leading: PositionedTrivia) -> Self {
-        let mut token = Arc::make_mut(&mut self);
+        let token = Arc::make_mut(&mut self);
         let token_start_offset = token.offset + token.leading_width;
         let leading_width = leading.iter().map(|x| x.width).sum();
         token.offset = token_start_offset - leading_width;
@@ -82,7 +82,7 @@ impl SimpleTokenFactory for PositionedToken {
     }
 
     fn with_trailing(mut self, trailing: PositionedTrivia) -> Self {
-        let mut token = Arc::make_mut(&mut self);
+        let token = Arc::make_mut(&mut self);
         let trailing_width = trailing.iter().map(|x| x.width).sum();
         token.trailing_width = trailing_width;
         token.trailing = trailing;
@@ -90,7 +90,7 @@ impl SimpleTokenFactory for PositionedToken {
     }
 
     fn with_kind(mut self, kind: TokenKind) -> Self {
-        let mut token = Arc::make_mut(&mut self);
+        let token = Arc::make_mut(&mut self);
         token.kind = kind;
         self
     }

@@ -262,7 +262,6 @@ let parse_options () =
   let disable_legacy_soft_typehints = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
-  let global_inference = ref false in
   let ordered_solving = ref false in
   let reinfer_types = ref [] in
   let const_static_props = ref false in
@@ -951,7 +950,6 @@ let parse_options () =
       ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
       ~tco_const_static_props:!const_static_props
-      ~tco_global_inference:!global_inference
       ~tco_ordered_solving:!ordered_solving
       ~tco_gi_reinfer_types:!reinfer_types
       ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax

@@ -153,14 +153,9 @@ let custom_error_config t = t.GlobalOptions.tco_custom_error_config
 
 let const_static_props t = t.GlobalOptions.tco_const_static_props
 
-let global_inference t = t.GlobalOptions.tco_global_inference
-
 let gi_reinfer_types t = t.GlobalOptions.tco_gi_reinfer_types
 
 let const_attribute t = t.GlobalOptions.tco_const_attribute
-
-let set_global_inference t =
-  GlobalOptions.{ t with tco_global_inference = true }
 
 let check_attribute_locations t = t.GlobalOptions.tco_check_attribute_locations
 

@@ -24,7 +24,6 @@ impl DeclParserOptions {
             allow_new_attribute_syntax: opts.po_allow_new_attribute_syntax,
             enable_xhp_class_modifier: opts.po_enable_xhp_class_modifier,
             everything_sdt: opts.tco_everything_sdt,
-            global_inference: opts.tco_global_inference,
             php5_compat_mode: false,
             hhvm_compat_mode: false,
             keep_user_attributes: false,

@@ -300,7 +300,6 @@ let load_config config options =
     ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
     ?po_const_default_lambda_args:(bool_opt "const_default_lambda_args" config)
     ?po_disallow_silence:(bool_opt "disallow_silence" config)
-    ?tco_global_inference:(bool_opt "global_inference" config)
     ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)
     ?tco_const_static_props:(bool_opt "const_static_props" config)
     ?po_abstract_static_props:(bool_opt "abstract_static_props" config)

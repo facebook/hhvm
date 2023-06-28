@@ -50,8 +50,6 @@ val solve_to_equal_bound_or_wrt_variance :
 
 val close_tyvars_and_solve : env -> env * Typing_error.t option
 
-val solve_all_unsolved_tyvars_gi : env -> env * Typing_error.t option
-
 val bind : env -> Ident.t -> locl_ty -> env * Typing_error.t option
 
 val try_bind_to_equal_bound : env -> Ident.t -> env * Typing_error.t option

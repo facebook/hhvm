@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<155a1cebe197f96eb522d2d8ea9dd62e>>
+// @generated SignedSource<<7e30b48c6321cc7a9ecf7d8b02840b26>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -123,7 +123,6 @@ pub struct TypingInferenceEnv {
     pub tyvars_stack: Vec<(pos::Pos, Vec<Identifier>)>,
     pub subtype_prop: t_l::SubtypeProp,
     pub tyvar_occurrences: typing_tyvar_occurrences::TypingTyvarOccurrences,
-    pub allow_solve_globals: bool,
 }
 
 #[derive(

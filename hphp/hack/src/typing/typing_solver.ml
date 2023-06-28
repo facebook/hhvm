@@ -376,7 +376,7 @@ let ty_equal_shallow env ty1 ty2 =
     | _ -> false
 
 let try_bind_to_equal_bound ~freshen env r var =
-  if Env.tyvar_is_solved_or_skip_global env var then
+  if Env.tyvar_is_solved env var then
     (env, None)
   else
     let old_env = env in
@@ -485,7 +485,7 @@ let rec always_solve_tyvar_down ~freshen env r var =
   in
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let (env, ty_err_opt1) = try_bind_to_equal_bound ~freshen env r var in
-  if Env.tyvar_is_solved_or_skip_global env var then
+  if Env.tyvar_is_solved env var then
     (env, ty_err_opt1)
   else
     let r =
@@ -560,7 +560,7 @@ let rec always_solve_tyvar_down ~freshen env r var =
  *   us to set v := ti.
  *)
 let solve_tyvar_wrt_variance env r var =
-  if Env.tyvar_is_solved_or_skip_global env var then
+  if Env.tyvar_is_solved env var then
     (env, None)
   else
     let r =
@@ -643,12 +643,6 @@ let always_solve_tyvar env r var =
   let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
   (env, ty_err_opt)
 
-let always_solve_tyvar_wrt_variance_or_down env r var =
-  let (env, ty_err_opt1) = solve_tyvar_wrt_variance env r var in
-  let (env, ty_err_opt2) = always_solve_tyvar_down ~freshen:false env r var in
-  let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
-  (env, ty_err_opt)
-
 (* Force solve all type variables in the environment *)
 let solve_all_unsolved_tyvars env =
   let old_env = env in
@@ -666,24 +660,6 @@ let solve_all_unsolved_tyvars env =
   in
   let env = Env.log_env_change "solve_all_unsolved_tyvars" old_env env in
   log_remaining_prop env;
-  let ty_err_opt = Typing_error.multiple_opt ty_errs in
-  (env, ty_err_opt)
-
-let solve_all_unsolved_tyvars_gi env =
-  let old_allow_solve_globals = Env.get_allow_solve_globals env in
-  let env = Env.set_allow_solve_globals env true in
-  let (env, ty_errs) =
-    List.fold
-      (Env.get_all_tyvars env)
-      ~init:(env, [])
-      ~f:(fun (env, ty_errs) tyvar ->
-        match
-          always_solve_tyvar_wrt_variance_or_down env Reason.Rnone tyvar
-        with
-        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-        | (env, _) -> (env, ty_errs))
-  in
-  let env = Env.set_allow_solve_globals env old_allow_solve_globals in
   let ty_err_opt = Typing_error.multiple_opt ty_errs in
   (env, ty_err_opt)
 

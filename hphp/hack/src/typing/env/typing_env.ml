@@ -148,8 +148,7 @@ let get_global_tyvar_reason env var =
 
 let empty_bounds = TySet.empty
 
-let tyvar_is_solved_or_skip_global env var =
-  Inf.tyvar_is_solved_or_skip_global env.inference_env var
+let tyvar_is_solved env var = Inf.tyvar_is_solved env.inference_env var
 
 let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
   {
@@ -999,14 +998,6 @@ let get_mode env = env.decl_env.mode
 let is_strict env = FileInfo.is_strict (get_mode env)
 
 let is_hhi env = FileInfo.is_hhi (get_mode env)
-
-let get_allow_solve_globals env = Inf.get_allow_solve_globals env.inference_env
-
-let set_allow_solve_globals env flag =
-  {
-    env with
-    inference_env = Inf.set_allow_solve_globals env.inference_env flag;
-  }
 
 (*****************************************************************************)
 (* Locals *)

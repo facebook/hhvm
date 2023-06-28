@@ -87,7 +87,7 @@ val add : env -> ?tyvar_pos:Pos.t -> int -> locl_ty -> env
 
 val make_tyvar_no_more_occur_in_tyvar : env -> int -> no_more_in:int -> env
 
-val tyvar_is_solved_or_skip_global : env -> int -> bool
+val tyvar_is_solved : env -> int -> bool
 
 val wrap_ty_in_var :
   env -> Reason.t -> locl_ty -> Typing_env_types.env * locl_ty
@@ -303,10 +303,6 @@ val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 
 val is_hhi : env -> bool
-
-val get_allow_solve_globals : env -> bool
-
-val set_allow_solve_globals : env -> bool -> env
 
 val forget_members : env -> Reason.blame -> env
 

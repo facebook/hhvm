@@ -188,14 +188,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name typing_global_inference)
- (wrapped false)
- (modules typing_ordered_solver typing_global_inference)
- (libraries tast_env typing_algebra)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name tast_type_collector)
  (wrapped false)
  (modules tast_type_collector)
@@ -505,8 +497,7 @@
   typing_defs
   typing_deps
   typing_pessimisation_deps
-  typing_check_job
-  typing_global_inference)
+  typing_check_job)
  (preprocess
   (pps ppx_deriving.std)))
 

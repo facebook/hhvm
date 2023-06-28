@@ -97,8 +97,6 @@ let monitor_daemon_main
       Exit.exit Exit_status.Input_error
     ));
 
-  Typing_global_inference.set_path ();
-
   (* Now that we've got an exclusive lock and all globals have been initialized: *)
   ServerProgress.write "monitor initializing...";
   Exit.add_hook_upon_clean_exit (fun _finale_data ->

@@ -198,13 +198,6 @@ let init
   );
   let lazy_lev = get_lazy_level genv in
   let root = ServerArgs.root genv.options in
-  let (lazy_lev, init_approach) =
-    if TypecheckerOptions.global_inference env.tcopt then (
-      Typing_global_inference.init ();
-      (Off, Full_init)
-    ) else
-      (lazy_lev, init_approach)
-  in
   let (init_method, init_method_name) =
     Hh_logger.log "ServerInit: lazy_lev=%s" (show_lazy_level lazy_lev);
     Hh_logger.log

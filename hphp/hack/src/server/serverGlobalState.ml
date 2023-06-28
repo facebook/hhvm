@@ -11,7 +11,6 @@ type t = {
   saved_root: Path.t;
   saved_hhi: Path.t;
   saved_tmp: Path.t;
-  saved_gi_tmp: string;
   trace: bool;
   allowed_fixme_codes_strict: ISet.t;
   code_agnostic_fixme: bool;
@@ -26,7 +25,6 @@ let save ~logging_init =
     saved_root = Path.make Relative_path.(path_of_prefix Root);
     saved_hhi = Path.make Relative_path.(path_of_prefix Hhi);
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
-    saved_gi_tmp = Typing_global_inference.get_path ();
     trace = !Typing_deps.trace;
     allowed_fixme_codes_strict = !Errors.allowed_fixme_codes_strict;
     code_agnostic_fixme = !Errors.code_agnostic_fixme;
@@ -47,7 +45,6 @@ let restore
       saved_root;
       saved_hhi;
       saved_tmp;
-      saved_gi_tmp;
       trace;
       allowed_fixme_codes_strict;
       code_agnostic_fixme;
@@ -61,7 +58,6 @@ let restore
   Relative_path.(set_path_prefix Root saved_root);
   Relative_path.(set_path_prefix Hhi saved_hhi);
   Relative_path.(set_path_prefix Tmp saved_tmp);
-  Typing_global_inference.restore_path saved_gi_tmp;
   Typing_deps.trace := trace;
   Typing_deps.worker_id := Some worker_id;
   Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
@@ -77,7 +73,6 @@ let to_string
       saved_root;
       saved_hhi;
       saved_tmp;
-      saved_gi_tmp;
       trace;
       allowed_fixme_codes_strict = _;
       code_agnostic_fixme = _;
@@ -101,7 +96,6 @@ let to_string
     ("saved_root", saved_root);
     ("saved_hhi", saved_hhi);
     ("saved_tmp", saved_tmp);
-    ("saved_gi_tmp", saved_gi_tmp);
     ("trace", trace);
     ("paths_to_ignore", paths_to_ignore);
   ]

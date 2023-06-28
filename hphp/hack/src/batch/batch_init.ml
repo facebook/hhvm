@@ -43,7 +43,6 @@ let init_state
   Relative_path.(set_path_prefix Root root);
   make_tmp_dir ();
   make_hhi_dir ();
-  Typing_global_inference.set_path ();
   let ctx =
     Provider_context.empty_for_tool
       ~popt

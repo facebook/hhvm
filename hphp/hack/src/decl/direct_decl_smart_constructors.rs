@@ -1497,93 +1497,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         }
     }
 
-    fn rewrite_ty_for_global_inference(
-        &self,
-        ty: Option<&'a Ty<'a>>,
-        reason: Reason<'a>,
-    ) -> Option<&'a Ty<'a>> {
-        if !self.opts.global_inference {
-            return ty;
-        }
-        let tvar = self.alloc(Ty(self.alloc(reason), Ty_::Tvar(0)));
-        let ty = match ty {
-            None => tvar,
-            Some(ty) => {
-                fn cut_namespace<'a>(id: &'a str) -> &'a str {
-                    id.rsplit_terminator('\\').next().unwrap()
-                }
-                fn reinfer_type_to_string_opt<'a>(arena: &'a Bump, ty: Ty_<'a>) -> Option<&'a str> {
-                    match ty {
-                        Ty_::Tmixed => Some("mixed"),
-                        Ty_::Tnonnull => Some("nonnull"),
-                        Ty_::Tdynamic => Some("dynamic"),
-                        Ty_::Tunion([]) => Some("nothing"),
-                        Ty_::Tthis => Some("this"),
-                        Ty_::Tprim(prim) => Some(match prim {
-                            aast::Tprim::Tnull => "null",
-                            aast::Tprim::Tvoid => "void",
-                            aast::Tprim::Tint => "int",
-                            aast::Tprim::Tnum => "num",
-                            aast::Tprim::Tfloat => "float",
-                            aast::Tprim::Tstring => "string",
-                            aast::Tprim::Tarraykey => "arraykey",
-                            aast::Tprim::Tresource => "resource",
-                            aast::Tprim::Tnoreturn => "noreturn",
-                            aast::Tprim::Tbool => "bool",
-                        }),
-                        Ty_::Tapply(((_p, id), _tyl)) => Some(cut_namespace(id)),
-                        Ty_::Taccess(TaccessType(ty, id)) => {
-                            reinfer_type_to_string_opt(arena, ty.1).map(|s| {
-                                bumpalo::format!(in arena, "{}::{}", s, id.1).into_bump_str()
-                            })
-                        }
-                        _ => None,
-                    }
-                }
-                fn create_vars_for_reinfer_types<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
-                    this: &DirectDeclSmartConstructors<'a, 'o, 't, S>,
-                    ty: &'a Ty<'a>,
-                    tvar: &'a Ty<'a>,
-                ) -> &'a Ty<'a> {
-                    let mk = |r, ty_| this.alloc(Ty(r, ty_));
-                    let must_reinfer_type = |ty| match reinfer_type_to_string_opt(this.arena, ty) {
-                        None => false,
-                        Some(ty_str) => this.opts.gi_reinfer_types.iter().any(|t| t == ty_str),
-                    };
-                    match *ty {
-                        Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
-                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, ty1, tvar));
-                            mk(r, Ty_::Tapply(this.alloc((id, std::slice::from_ref(ty1)))))
-                        }
-                        Ty(r, Ty_::Toption(ty1)) => {
-                            let ty1 = create_vars_for_reinfer_types(this, ty1, tvar);
-                            mk(r, Ty_::Toption(ty1))
-                        }
-                        Ty(r, Ty_::Tapply(((_p, id), [])))
-                            if cut_namespace(id) == "PHPism_FIXME_Array" =>
-                        {
-                            if must_reinfer_type(ty.1) {
-                                let tvar = mk(r, Ty_::Tvar(0));
-                                mk(r, Ty_::TvecOrDict(this.alloc((tvar, tvar))))
-                            } else {
-                                ty
-                            }
-                        }
-                        Ty(_r, ty_) => {
-                            if must_reinfer_type(ty_) {
-                                tvar
-                            } else {
-                                ty
-                            }
-                        }
-                    }
-                }
-                create_vars_for_reinfer_types(self, ty, tvar)
-            }
-        };
-        Some(ty)
-    }
-
     fn partition_bounds_into_lower_and_upper(
         &self,
         constraints: Node<'a>,
@@ -1876,10 +1789,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 ))
             }
             _ => self
-                .rewrite_ty_for_global_inference(
-                    self.node_to_ty(header.ret_hint),
-                    Reason::RglobalFunRet(f_pos),
-                )
+                .node_to_ty(header.ret_hint)
                 .unwrap_or_else(|| self.tany_with_pos(f_pos)),
         };
         let async_ = header
@@ -1997,10 +1907,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let attributes = self.to_attributes(attributes);
 
                             let type_ = self
-                                .rewrite_ty_for_global_inference(
-                                    self.node_to_ty(hint),
-                                    Reason::RglobalFunParam(pos),
-                                )
+                                .node_to_ty(hint)
                                 .unwrap_or_else(|| self.tany_with_pos(pos));
                             if let Some(visibility) = visibility.as_visibility() {
                                 let name = name.unwrap_or("");
@@ -4604,10 +4511,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     } else {
                         strip_dollar_prefix(name)
                     };
-                    let ty = self.rewrite_ty_for_global_inference(
-                        self.node_to_non_ret_ty(hint),
-                        Reason::RglobalClassProp(pos),
-                    );
+                    let ty = self.node_to_non_ret_ty(hint);
                     let ty = ty.unwrap_or_else(|| self.tany_with_pos(pos));
                     let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {

@@ -322,8 +322,6 @@ let get_global_tyvar_reason env v =
   | None -> None
   | Some tvinfo -> tvinfo.global_reason
 
-let is_global_tyvar env v = Option.is_some (get_global_tyvar_reason env v)
-
 let tyvar_is_solved env var =
   match get_solving_info_opt env var with
   | None -> false

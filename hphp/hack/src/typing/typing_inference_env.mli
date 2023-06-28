@@ -137,8 +137,6 @@ val get_tyvar_appears_contravariantly : t -> Ident.t -> bool
 
 val get_tyvar_appears_invariantly : t -> Ident.t -> bool
 
-val is_global_tyvar : t -> Ident.t -> bool
-
 val get_global_tyvar_reason : t -> Ident.t -> Reason.t option
 
 val wrap_ty_in_var : t -> Typing_reason.t -> locl_ty -> t * locl_ty

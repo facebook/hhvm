@@ -272,8 +272,7 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
           (fun ty env ->
             let (env, ty) = Env.expand_type env ty in
             match get_node ty with
-            | Tvar v when not (Env.is_global_tyvar env v) ->
-              Env.remove_tyvar_upper_bound env v var
+            | Tvar v -> Env.remove_tyvar_upper_bound env v var
             | _ -> env)
           lower_bounds
           env
@@ -321,8 +320,7 @@ let bind_to_upper_bound env r var upper_bounds =
       let (env, ty) = Env.expand_type env ty in
       let env =
         match get_node ty with
-        | Tvar v when not (Env.is_global_tyvar env v) ->
-          Env.remove_tyvar_lower_bound env v var
+        | Tvar v -> Env.remove_tyvar_lower_bound env v var
         | _ -> env
       in
       bind env var ty
@@ -651,12 +649,9 @@ let solve_all_unsolved_tyvars env =
       (Env.get_all_tyvars env)
       ~init:(env, [])
       ~f:(fun (env, ty_errs) var ->
-        if Env.is_global_tyvar env var then
-          (env, ty_errs)
-        else
-          match always_solve_tyvar env Reason.Rnone var with
-          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-          | (env, _) -> (env, ty_errs))
+        match always_solve_tyvar env Reason.Rnone var with
+        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+        | (env, _) -> (env, ty_errs))
   in
   let env = Env.log_env_change "solve_all_unsolved_tyvars" old_env env in
   log_remaining_prop env;

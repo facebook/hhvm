@@ -141,8 +141,6 @@ let add_subtype_prop env prop =
   log_env_change "add_subtype_prop" env
   @@ { env with inference_env = Inf.add_subtype_prop env.inference_env prop }
 
-let is_global_tyvar env var = Inf.is_global_tyvar env.inference_env var
-
 let get_global_tyvar_reason env var =
   Inf.get_global_tyvar_reason env.inference_env var
 

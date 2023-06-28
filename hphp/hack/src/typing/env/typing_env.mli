@@ -480,8 +480,6 @@ val get_tyvar_appears_contravariantly : env -> Ident.t -> bool
 
 val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
-val is_global_tyvar : env -> Ident.t -> bool
-
 val get_global_tyvar_reason : env -> Ident.t -> Reason.t option
 
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool

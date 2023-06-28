@@ -86,9 +86,6 @@ SODIUM_EXPORT
 void fizz_aegis256_keygen(unsigned char k[fizz_aegis256_KEYBYTES])
             __attribute__ ((nonnull));
 
-SODIUM_EXPORT
-int fizz_aegis256_pick_best_implementation(void);
-
 #ifdef __cplusplus
 }
 #endif

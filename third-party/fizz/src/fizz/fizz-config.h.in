@@ -3,4 +3,4 @@
  */
 #pragma once
 
-#cmakedefine01 FIZZ_BUILD_AEGIS
+#define FIZZ_BUILD_AEGIS 0

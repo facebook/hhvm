@@ -5,12 +5,14 @@
 
 #include "aead_aegis256_aesni.h"
 
-#include <fizz/third-party/libsodium-aegis/private/common.h>
-#include <fizz/third-party/libsodium-aegis/private/config.h>
+#if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
 
-#if FIZZ_LIBSODIUM_HAS_AESNI
+#ifdef __GNUC__
+#pragma GCC target("ssse3")
+#pragma GCC target("aes")
+#endif
 
-#include <fizz/third-party/libsodium-aegis/private/sse2_64_32.h>
+#include "private/sse2_64_32.h"
 #include <tmmintrin.h>
 #include <wmmintrin.h>
 
@@ -22,7 +24,7 @@ typedef __m128i aes_block_t;
 #define AES_BLOCK_STORE(A, B)     _mm_storeu_si128((aes_block_t *) (void *) (A), (B))
 #define AES_ENC(A, B)             _mm_aesenc_si128((A), (B))
 
-static AESNI_TARGET_SPEC inline void
+static inline void
 aegis256_update(aes_block_t *const state, const aes_block_t data)
 {
     aes_block_t tmp;
@@ -36,7 +38,7 @@ aegis256_update(aes_block_t *const state, const aes_block_t data)
     state[0] = AES_BLOCK_XOR(tmp, data);
 }
 
-static AESNI_TARGET_SPEC void
+static void
 aegis256_init(const unsigned char *key, const unsigned char *nonce, aes_block_t *const state)
 {
     static CRYPTO_ALIGN(16)
@@ -71,7 +73,7 @@ aegis256_init(const unsigned char *key, const unsigned char *nonce, aes_block_t 
     }
 }
 
-static AESNI_TARGET_SPEC void
+static void
 aegis256_mac(unsigned char *mac, unsigned long long adlen, unsigned long long mlen,
              aes_block_t *const state)
 {
@@ -92,7 +94,7 @@ aegis256_mac(unsigned char *mac, unsigned long long adlen, unsigned long long ml
     AES_BLOCK_STORE(mac, tmp);
 }
 
-static AESNI_TARGET_SPEC inline void
+static inline void
 aegis256_absorb(const unsigned char *const src, aes_block_t *const state)
 {
     aes_block_t msg;
@@ -101,7 +103,7 @@ aegis256_absorb(const unsigned char *const src, aes_block_t *const state)
     aegis256_update(state, msg);
 }
 
-static AESNI_TARGET_SPEC void
+static void
 aegis256_enc(unsigned char *const dst, const unsigned char *const src, aes_block_t *const state)
 {
     aes_block_t msg;
@@ -117,7 +119,7 @@ aegis256_enc(unsigned char *const dst, const unsigned char *const src, aes_block
     aegis256_update(state, msg);
 }
 
-static AESNI_TARGET_SPEC void
+static void
 aegis256_dec(unsigned char *const dst, const unsigned char *const src, aes_block_t *const state)
 {
     aes_block_t msg;
@@ -132,7 +134,7 @@ aegis256_dec(unsigned char *const dst, const unsigned char *const src, aes_block
     aegis256_update(state, msg);
 }
 
-static AESNI_TARGET_SPEC int
+static int
 aegis256_encrypt_detached(unsigned char *c, unsigned char *mac, unsigned long long *maclen_p,
                           const unsigned char *m, unsigned long long mlen, const unsigned char *ad,
                           unsigned long long adlen, const unsigned char *nsec,
@@ -175,7 +177,7 @@ aegis256_encrypt_detached(unsigned char *c, unsigned char *mac, unsigned long lo
     return 0;
 }
 
-static AESNI_TARGET_SPEC int
+static int
 aegis256_decrypt_detached(unsigned char *m, unsigned char *nsec, const unsigned char *c,
                           unsigned long long clen, const unsigned char *mac,
                           const unsigned char *ad, unsigned long long adlen,

@@ -246,6 +246,3 @@ extern void ct_unpoison(const void *, size_t);
 #endif
 
 #endif
-
-#define TARGET_SPEC(x) __attribute__((target(x)))
-#define AESNI_TARGET_SPEC TARGET_SPEC("aes") TARGET_SPEC("ssse3")

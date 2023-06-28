@@ -127,20 +127,7 @@ AEGISCipher::AEGISCipher(
       decrypt_(decrypt),
       keyLength_(keyLength),
       ivLength_(ivLength),
-      tagLength_(tagLength) {
-  static int dummy = []() -> int {
-    // The application should be doing this, sodium_init is safe to call
-    // multiple times, and `fizz_aegis*_pick_best_implementation` relies on
-    // sodium's cpu feature vector being populated (which is done in init)
-    if (sodium_init() == -1) {
-      throw std::runtime_error("failed to initialize libsodium");
-    }
-    (void)fizz_aegis128l_pick_best_implementation();
-    (void)fizz_aegis256_pick_best_implementation();
-    return 0;
-  }();
-  (void)dummy;
-}
+      tagLength_(tagLength) {}
 
 std::unique_ptr<Aead> AEGISCipher::make128L() {
   return std::unique_ptr<Aead>(new AEGISCipher(

@@ -781,22 +781,6 @@ let check_no_generic_static_property env tc =
                      @@ Primary.Static_prop_type_generic_param
                           { class_pos; var_ty_pos; pos = generic_pos })))
 
-let get_decl_prop_ty env cls ~is_static prop_id =
-  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
-  if is_global_inference_on then
-    let prop_opt =
-      if is_static then
-        (* this is very ad-hoc, but this is how we do it in the decl-heap *)
-        Cls.get_sprop cls ("$" ^ prop_id)
-      else
-        Cls.get_prop cls prop_id
-    in
-    match prop_opt with
-    | None -> failwith "error: could not find property in decl heap"
-    | Some { ce_type; _ } -> Some (Lazy.force ce_type)
-  else
-    None
-
 let typeconst_def
     cls
     env
@@ -1071,7 +1055,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
     Typing_helpers.merge_hint_with_decl_hint
       env
       (hint_of_type_hint cv.cv_type)
-      (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
+      None
   in
   let no_auto_likes =
     Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes cv.cv_user_attributes

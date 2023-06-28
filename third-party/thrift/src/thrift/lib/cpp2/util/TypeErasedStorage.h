@@ -224,6 +224,8 @@ class TypeErasedValue final
     return value;
   }
 
+  static TypeErasedValue makeEmpty() { return make<std::monostate>(); }
+
   using detail::TypeErasedStorageImpl<Size, Align>::emplace;
   using detail::TypeErasedStorageImpl<Size, Align>::holds_alternative;
   using detail::TypeErasedStorageImpl<Size, Align>::value;

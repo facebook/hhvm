@@ -150,15 +150,16 @@ let reify_kind = function
   | SoftReified -> Aast.SoftReified
   | Reified -> Aast.Reified
 
-let merge_hint_with_decl_hint env type_hint =
-  Option.map type_hint ~f:(Decl_hint.hint env.decl_env)
-
 let merge_decl_header_with_hints ~params ~ret env =
-  let ret_decl_ty = merge_hint_with_decl_hint env (hint_of_type_hint ret) in
+  let ret_decl_ty =
+    Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint ret)
+  in
   let params_decl_ty =
     List.map
       ~f:(fun h ->
-        merge_hint_with_decl_hint env (hint_of_type_hint h.param_type_hint))
+        Option.map
+          ~f:(Decl_hint.hint env.decl_env)
+          (hint_of_type_hint h.param_type_hint))
       params
   in
   (ret_decl_ty, params_decl_ty)

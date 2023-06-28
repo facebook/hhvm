@@ -51,11 +51,6 @@ val with_timeout :
 
 val reify_kind : Aast.reify_kind -> Aast.reify_kind
 
-val merge_hint_with_decl_hint :
-  Typing_env_types.env ->
-  Nast.xhp_attr_hint option ->
-  Typing_defs.decl_ty option
-
 (** During the decl phase we can, for global inference, add "improved type hints".
    That is we can say that some missing type hints are in fact global tyvars.
    In that case to get the real type hint we must merge the type hint present

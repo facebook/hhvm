@@ -12446,6 +12446,13 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
 
 //////////////////////////////////////////////////////////////////////
 
+Index::Input::UnitMeta make_native_unit_meta(IndexData& index) {
+  auto unit = make_native_unit();
+  auto const name = unit->filename;
+  auto unitRef = coro::wait(index.client->store(std::move(unit)));
+  return Index::Input::UnitMeta { std::move(unitRef), name };
+}
+
 // Set up the async state, populate the (initial) table of
 // extern-worker refs in the Index, and build some metadata needed for
 // class flattening.
@@ -12473,6 +12480,10 @@ IndexFlattenMetadata make_remote(IndexData& index,
     },
     index.executor->sticky()
   );
+
+  // Create a fake unit to store native constants and add it as an
+  // input.
+  input.units.emplace_back(make_native_unit_meta(index));
 
   IndexFlattenMetadata flattenMeta;
   SStringToOneT<SString> methCallerUnits;
@@ -13633,6 +13644,9 @@ void make_local(IndexData& index) {
     {
       std::scoped_lock<std::mutex> _{lock};
       for (auto& unit : chunk.units) {
+        // Local execution doesn't need the native unit, so strip it
+        // out.
+        if (is_native_unit(*unit)) continue;
         program->units.emplace_back(std::move(unit));
       }
       for (auto& cls : chunk.classes) {

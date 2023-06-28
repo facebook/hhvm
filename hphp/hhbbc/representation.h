@@ -700,7 +700,7 @@ struct FatalInfo {
  * Representation of a php file (normal compilation unit).
  */
 struct Unit {
-  LSString filename;
+  LSString filename{nullptr};
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<SString> funcs;
   CompactVector<SString> classes;

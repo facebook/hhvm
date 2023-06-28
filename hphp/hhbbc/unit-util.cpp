@@ -18,8 +18,15 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP::HHBBC {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+const StaticString s_nativeUnitName("/!native");
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,6 +36,42 @@ bool is_systemlib_part(SString filename) {
 
 bool is_systemlib_part(const php::Unit& unit) {
   return is_systemlib_part(unit.filename);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool is_native_unit(SString unit) {
+  return unit == s_nativeUnitName.get();
+}
+
+bool is_native_unit(const php::Unit& unit) {
+  return is_native_unit(unit.filename);
+}
+
+std::unique_ptr<php::Unit> make_native_unit() {
+  auto unit = std::make_unique<php::Unit>();
+  unit->filename = s_nativeUnitName.get();
+
+  for (auto const& [name, val] : Native::getConstants()) {
+    assertx(type(val) != KindOfUninit || val.dynamic());
+    auto cns = std::make_unique<php::Constant>();
+    cns->name = name;
+    cns->val = val;
+    cns->attrs = AttrUnique | AttrPersistent;
+    unit->constants.emplace_back(std::move(cns));
+  }
+
+  // Keep a consistent ordering of the constants.
+  std::sort(
+    begin(unit->constants),
+    end(unit->constants),
+    [] (const std::unique_ptr<php::Constant>& a,
+        const std::unique_ptr<php::Constant>& b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+
+  return unit;
 }
 
 //////////////////////////////////////////////////////////////////////

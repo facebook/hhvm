@@ -133,6 +133,19 @@ class KTLSNetworkSocket : public folly::NetworkSocket {
   }
 #endif
 
+  static folly::Expected<KTLSNetworkSocket, folly::exception_wrapper>
+  tryEnableKTLS(
+      NetworkSocket fd,
+      const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx)
+#if FIZZ_PLATFORM_CAPABLE_KTLS
+      ;
+#else
+  {
+    return folly::makeUnexpected<folly::exception_wrapper>(
+        std::runtime_error("platform not capable of ktls"));
+  }
+#endif
+
   /**
    * unsafeFromExistingKTLSSocket constructs a KTLSNetworkSocket from a socket
    * that has already been configured with kTLS.

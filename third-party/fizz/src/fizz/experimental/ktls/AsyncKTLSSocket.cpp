@@ -15,7 +15,6 @@
  */
 
 #include <fizz/experimental/ktls/AsyncKTLSSocket.h>
-#include <fizz/record/RecordLayer.h>
 #include <glog/logging.h>
 #include <system_error>
 
@@ -277,4 +276,149 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::processHandshakeData(
   return ReadResult(READ_BLOCKING);
 }
 
+// AsyncKTLSRxSocket
+AsyncKTLSRxSocket::~AsyncKTLSRxSocket() {}
+
+AsyncKTLSRxSocket::QueuedWriteRequest::QueuedWriteRequest(
+    AsyncKTLSRxSocket* sock,
+    folly::AsyncTransportWrapper::WriteCallback* callback,
+    std::unique_ptr<folly::IOBuf> data,
+    folly::WriteFlags flags)
+    : sock_(sock), callback_(callback), flags_(flags) {
+  data_.append(std::move(data));
+  entireChainBytesBuffered = data_.chainLength();
+}
+
+/**
+ * Buffer size above which we should break up shared writes, to avoid storing
+ * entire unencrypted and encrypted buffer simultaneously.
+ */
+static const uint32_t kPartialWriteThreshold = 128 * 1024;
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::startWriting() {
+  auto buf = data_.splitAtMost(kPartialWriteThreshold);
+
+  auto flags = flags_;
+  if (!data_.empty()) {
+    flags |= folly::WriteFlags::CORK;
+  }
+  size_t len = buf->computeChainDataLength();
+  dataWritten_ += len;
+
+  CHECK(sock_);
+  CHECK(sock_->tailWriteRequest_);
+  sock_->tailWriteRequest_->entireChainBytesBuffered -= len;
+  sock_->writeAppData(this, std::move(buf), flags);
+}
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::append(
+    QueuedWriteRequest* request) {
+  DCHECK(!next_);
+  next_ = request;
+  next_->entireChainBytesBuffered += entireChainBytesBuffered;
+  entireChainBytesBuffered = 0;
+}
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::unlinkFromBase() {
+  sock_ = nullptr;
+}
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::writeSuccess() noexcept {
+  if (!data_.empty()) {
+    startWriting();
+  } else {
+    advanceOnBase();
+    auto callback = callback_;
+    auto next = next_;
+    auto sock = sock_;
+    delete this;
+
+    DelayedDestruction::DestructorGuard dg(sock);
+
+    if (callback) {
+      callback->writeSuccess();
+    }
+    if (next) {
+      next->startWriting();
+    }
+  }
+}
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::writeErr(
+    size_t /* written */,
+    const folly::AsyncSocketException& ex) noexcept {
+  // Deliver the error to all queued writes, starting with this one. We avoid
+  // recursively calling writeErr as that can cause excesssive stack usage if
+  // there are a large number of queued writes.
+  QueuedWriteRequest* errorToDeliver = this;
+  while (errorToDeliver) {
+    errorToDeliver = errorToDeliver->deliverSingleWriteErr(ex);
+  }
+}
+
+AsyncKTLSRxSocket::QueuedWriteRequest*
+AsyncKTLSRxSocket::QueuedWriteRequest::deliverSingleWriteErr(
+    const folly::AsyncSocketException& ex) {
+  advanceOnBase();
+  auto callback = callback_;
+  auto next = next_;
+  auto dataWritten = dataWritten_;
+  delete this;
+
+  if (callback) {
+    callback->writeErr(dataWritten, ex);
+  }
+
+  return next;
+}
+
+void AsyncKTLSRxSocket::QueuedWriteRequest::advanceOnBase() {
+  if (!next_ && sock_) {
+    CHECK_EQ(sock_->tailWriteRequest_, this);
+    sock_->tailWriteRequest_ = nullptr;
+  }
+}
+
+void AsyncKTLSRxSocket::writeChain(
+    folly::AsyncTransportWrapper::WriteCallback* callback,
+    std::unique_ptr<folly::IOBuf>&& buf,
+    folly::WriteFlags flags) {
+  auto writeSize = buf->computeChainDataLength();
+  appBytesWritten_ += writeSize;
+
+  // We want to split up and queue large writes to avoid simultaneously storing
+  // unencrypted and encrypted large buffer in memory. We can skip this if the
+  // buffer is unshared (because we can encrypt in-place). We also skip this
+  // when sending early data to avoid the possibility of splitting writes
+  // between early data and normal data.
+  bool largeWrite = writeSize > kPartialWriteThreshold;
+  bool transportBuffering = this->getRawBytesBuffered() > 0;
+  bool needsToQueue = (largeWrite || transportBuffering) && buf->isShared() &&
+      !connecting() && isReplaySafe();
+  if (tailWriteRequest_ || needsToQueue) {
+    auto newWriteRequest =
+        new QueuedWriteRequest(this, callback, std::move(buf), flags);
+
+    if (tailWriteRequest_) {
+      tailWriteRequest_->append(newWriteRequest);
+      tailWriteRequest_ = newWriteRequest;
+    } else {
+      tailWriteRequest_ = newWriteRequest;
+      newWriteRequest->startWriting();
+    }
+  } else {
+    writeAppData(callback, std::move(buf), flags);
+  }
+}
+
+void AsyncKTLSRxSocket::writeAppData(
+    folly::AsyncTransportWrapper::WriteCallback* callback,
+    std::unique_ptr<folly::IOBuf>&& buf,
+    folly::WriteFlags flags) {
+  auto data = writeRecordLayer_->writeAppData(std::move(buf), aeadOptions_);
+
+  if (data.data && data.data->computeChainDataLength() > 0) {
+    folly::AsyncSocket::writeChain(callback, std::move(data.data), flags);
+  }
+}
 } // namespace fizz

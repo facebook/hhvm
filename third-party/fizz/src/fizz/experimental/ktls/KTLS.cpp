@@ -323,6 +323,43 @@ KTLSNetworkSocket::tryEnableKTLS(
 
   return folly::makeExpected<folly::exception_wrapper>(KTLSNetworkSocket(fd));
 }
+
+folly::Expected<KTLSNetworkSocket, folly::exception_wrapper>
+KTLSNetworkSocket::tryEnableKTLS(
+    NetworkSocket fd,
+    const KTLSDirectionalCryptoParams<TrafficDirection::Receive>& rx) {
+  if (!platformSupportsKTLS()) {
+    return folly::makeUnexpected<folly::exception_wrapper>(
+        std::runtime_error("platform does not support ktls"));
+  }
+
+  auto rxs = rx.toSockoptFormat();
+  if (!rxs) {
+    return folly::makeUnexpected<folly::exception_wrapper>(
+        std::runtime_error("invalid ktls cryptographic parameters"));
+  }
+
+  // Unrevertable side effect: install the TLS ULP on the socket.
+  //
+  // Given that we check that TCP_ULP, TLS_RX, and TLS_TX are supported on
+  // a dummy socket (platformSupportsKTLS()), this is unlikely to fail.
+  // However, even if it does, as long as we don't set TLS keys on the socket,
+  // the socket behaves normally.
+  if (folly::netops::setsockopt(fd, SOL_TCP, TCP_ULP, "tls", sizeof("tls")) <
+      0) {
+    return folly::makeUnexpected<folly::exception_wrapper>(std::system_error(
+        errno, std::system_category(), "failed to enable tls ulp"));
+  }
+
+  // Unrevertable side effect: install the TLS_RX parameters.
+  if (folly::netops::setsockopt(
+          fd, SOL_TLS, TLS_RX, rxs->data(), rxs->length()) < 0) {
+    return folly::makeUnexpected<folly::exception_wrapper>(std::system_error(
+        errno, std::system_category(), "could not configure ktls rx"));
+  }
+
+  return folly::makeExpected<folly::exception_wrapper>(KTLSNetworkSocket(fd));
+}
 } // namespace fizz
 
 #endif

@@ -396,27 +396,54 @@ AsyncTransport::UniquePtr Acceptor::transformTransport(
     AsyncTransport::UniquePtr sock) {
   if constexpr (fizz::platformCapableOfKTLS) {
     if (accConfig_.fizzConfig.preferKTLS) {
-      std::string sockLogContext;
-      if (VLOG_IS_ON(5)) {
-        sockLogContext = logContext(*sock);
-      }
+      if (accConfig_.fizzConfig.preferKTLSRx) {
+        std::string sockLogContext;
+        if (VLOG_IS_ON(5)) {
+          sockLogContext = logContext(*sock);
+        }
 
-      auto fizzSocket =
-          sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
-      if (!fizzSocket) {
-        VLOG(5) << "Acceptor configured to prefer kTLS, but peer is not fizz. "
-                << sockLogContext;
-        return sock;
-      }
-      auto ktlsSockResult = fizz::tryConvertKTLS(*fizzSocket);
-      if (ktlsSockResult.hasValue()) {
-        VLOG(5) << "Upgraded socket to kTLS. " << sockLogContext;
-        return std::move(ktlsSockResult).value();
+        auto fizzSocket =
+            sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
+        if (!fizzSocket) {
+          VLOG(5)
+              << "Acceptor configured to prefer kTLS Rx, but peer is not fizz. "
+              << sockLogContext;
+          return sock;
+        }
+        auto ktlsRxSockResult = fizz::tryConvertKTLSRx(*fizzSocket);
+        if (ktlsRxSockResult.hasValue()) {
+          VLOG(5) << "Upgraded socket to kTLS Rx. " << sockLogContext;
+          return std::move(ktlsRxSockResult).value();
+        } else {
+          VLOG(5) << "Failed to upgrade to kTLS Rx. ex="
+                  << folly::exceptionStr(ktlsRxSockResult.error()) << " "
+                  << sockLogContext;
+          return sock;
+        }
       } else {
-        VLOG(5) << "Failed to upgrade to kTLS. ex="
-                << folly::exceptionStr(ktlsSockResult.error()) << " "
-                << sockLogContext;
-        return sock;
+        std::string sockLogContext;
+        if (VLOG_IS_ON(5)) {
+          sockLogContext = logContext(*sock);
+        }
+
+        auto fizzSocket =
+            sock->getUnderlyingTransport<fizz::server::AsyncFizzServer>();
+        if (!fizzSocket) {
+          VLOG(5)
+              << "Acceptor configured to prefer kTLS, but peer is not fizz. "
+              << sockLogContext;
+          return sock;
+        }
+        auto ktlsSockResult = fizz::tryConvertKTLS(*fizzSocket);
+        if (ktlsSockResult.hasValue()) {
+          VLOG(5) << "Upgraded socket to kTLS. " << sockLogContext;
+          return std::move(ktlsSockResult).value();
+        } else {
+          VLOG(5) << "Failed to upgrade to kTLS. ex="
+                  << folly::exceptionStr(ktlsSockResult.error()) << " "
+                  << sockLogContext;
+          return sock;
+        }
       }
     }
   }

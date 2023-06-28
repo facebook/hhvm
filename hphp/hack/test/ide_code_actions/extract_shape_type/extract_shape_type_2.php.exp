@@ -12,7 +12,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"type placeholder_ = shape('a' => int, 'b' => A)\n\n",
+          "newText":"type placeholder_ = shape('a' => int, 'b' => A);\n\n",
           "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
         }
       ]
@@ -28,7 +28,7 @@ Applied edit for code action:
 
 class A {}
 
-type placeholder_ = shape('a' => int, 'b' => A)
+type placeholder_ = shape('a' => int, 'b' => A);
 
 class C {
   public function foo(): void {

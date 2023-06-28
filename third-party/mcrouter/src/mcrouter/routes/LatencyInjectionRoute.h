@@ -13,6 +13,7 @@
 #include <folly/Format.h>
 #include <folly/fibers/Baton.h>
 
+#include <folly/experimental/ReadMostlySharedPtr.h>
 #include <folly/experimental/ThreadWheelTimekeeperHighRes.h>
 
 #include "mcrouter/config.h"

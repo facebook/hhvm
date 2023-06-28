@@ -125,7 +125,7 @@ let mk_hole ?(source = Aast.Typing) ((_, pos, _) as expr) ~ty_have ~ty_expect =
     in
     make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
 
-let hole_on_ty_mismatch (te : Tast.expr) ~ty_mismatch_opt =
+let hole_on_ty_mismatch (te : Tast.expr) ~ty_mismatch_opt : Tast.expr =
   Option.value_map ty_mismatch_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
       mk_hole te ~ty_have ~ty_expect)
 
@@ -9216,30 +9216,7 @@ and call
         in
         let (env, tel) =
           List.map_env env el ~f:(fun env (pk, elt) ->
-              let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
-              let (env, ty_mismatch_opt) =
-                if TCO.global_inference (Env.get_tcopt env) then
-                  match get_node efty with
-                  | Tany _
-                  | Tdynamic ->
-                    let (env, ty_err_opt) =
-                      Typing_coercion.coerce_type
-                        expr_pos
-                        Reason.URparam
-                        env
-                        ty
-                        (MakeType.unenforced efty)
-                        Typing_error.Callback.unify_error
-                    in
-                    Option.iter
-                      ty_err_opt
-                      ~f:(Typing_error_utils.add_typing_error ~env);
-                    let ty_mismatch = mk_ty_mismatch_opt ty efty ty_err_opt in
-                    (env, ty_mismatch)
-                  | _ -> (env, None)
-                else
-                  (env, None)
-              in
+              let (env, te, _ty) = expr ~expected:expected_arg_ty env elt in
               let env =
                 match pk with
                 | Ast_defs.Pinout _ ->
@@ -9250,7 +9227,7 @@ and call
                   env
                 | Ast_defs.Pnormal -> env
               in
-              (env, (pk, hole_on_ty_mismatch ~ty_mismatch_opt te)))
+              (env, (pk, te)))
         in
         let (env, ty_err_opt) =
           call_untyped_unpack env (Reason.to_pos r) unpacked_element

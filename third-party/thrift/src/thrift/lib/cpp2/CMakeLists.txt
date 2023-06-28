@@ -270,6 +270,7 @@ add_library(
   server/ThriftServerConfig.cpp
   server/TMConcurrencyController.cpp
   server/peeking/TLSHelper.cpp
+  transport/core/RequestStateMachine.cpp
   transport/core/RpcMetadataUtil.cpp
   transport/core/RpcMetadataPlugins.cpp
   transport/core/ThriftClient.cpp

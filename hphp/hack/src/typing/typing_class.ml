@@ -215,7 +215,7 @@ let method_def ~is_disposable env cls m =
   in
   let env = Env.clear_params env in
   let (ret_decl_ty, params_decl_ty) =
-    merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret env
+    hint_fun_decl ~params:m.m_params ~ret:m.m_ret env
   in
   (* Is sound dynamic enabled, and the function not a constructor
    * and marked <<__SupportDynamicType>> explicitly or implicitly? *)

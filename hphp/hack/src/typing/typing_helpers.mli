@@ -51,13 +51,9 @@ val with_timeout :
 
 val reify_kind : Aast.reify_kind -> Aast.reify_kind
 
-(** During the decl phase we can, for global inference, add "improved type hints".
-   That is we can say that some missing type hints are in fact global tyvars.
-   In that case to get the real type hint we must merge the type hint present
-   in the ast with the one we created during the decl phase. This function does
-   exactly this for the return type, the parameters and the variadic parameters.
-  *)
-val merge_decl_header_with_hints :
+(** Convert a function signature hint (method or toplevel function) into a bunch
+    of decl_tys. *)
+val hint_fun_decl :
   params:Nast.fun_param list ->
   ret:Nast.type_hint ->
   Typing_env_types.env ->

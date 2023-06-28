@@ -142,7 +142,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   let env = Env.set_fn_kind env f.f_fun_kind in
   let (return_decl_ty, params_decl_ty) =
-    merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret env
+    hint_fun_decl ~params:f.f_params ~ret:f.f_ret env
   in
   let hint_pos =
     match f.f_ret with

@@ -13,7 +13,6 @@ type t = {
   allow_new_attribute_syntax: bool;
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
-  gi_reinfer_types: string list;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;
@@ -30,7 +29,6 @@ let from_parser_options popt =
     allow_new_attribute_syntax = popt.po_allow_new_attribute_syntax;
     enable_xhp_class_modifier = popt.po_enable_xhp_class_modifier;
     everything_sdt = popt.tco_everything_sdt;
-    gi_reinfer_types = popt.tco_gi_reinfer_types;
     php5_compat_mode = false;
     hhvm_compat_mode = false;
     keep_user_attributes = popt.po_keep_user_attributes;

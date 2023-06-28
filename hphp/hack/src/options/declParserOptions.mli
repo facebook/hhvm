@@ -13,7 +13,6 @@ type t = {
   allow_new_attribute_syntax: bool;
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
-  gi_reinfer_types: string list;
   php5_compat_mode: bool;
   hhvm_compat_mode: bool;
   keep_user_attributes: bool;

@@ -110,7 +110,6 @@ type t = {
   po_disable_legacy_soft_typehints: bool;
   po_allowed_decl_fixme_codes: ISet.t;
   po_allow_new_attribute_syntax: bool;
-  tco_gi_reinfer_types: string list;
   tco_ordered_solving: bool;
   tco_const_static_props: bool;
   po_disable_legacy_attribute_syntax: bool;
@@ -239,7 +238,6 @@ let default =
     po_disable_legacy_soft_typehints = true;
     po_allowed_decl_fixme_codes = ISet.empty;
     po_allow_new_attribute_syntax = false;
-    tco_gi_reinfer_types = [];
     tco_ordered_solving = false;
     tco_const_static_props = false;
     po_disable_legacy_attribute_syntax = false;
@@ -365,7 +363,6 @@ let set
     ?po_disable_legacy_soft_typehints
     ?po_allowed_decl_fixme_codes
     ?po_allow_new_attribute_syntax
-    ?tco_gi_reinfer_types
     ?tco_ordered_solving
     ?tco_const_static_props
     ?po_disable_legacy_attribute_syntax
@@ -571,8 +568,6 @@ let set
       setting
         po_allow_new_attribute_syntax
         options.po_allow_new_attribute_syntax;
-    tco_gi_reinfer_types =
-      setting tco_gi_reinfer_types options.tco_gi_reinfer_types;
     tco_ordered_solving =
       setting tco_ordered_solving options.tco_ordered_solving;
     tco_const_static_props =

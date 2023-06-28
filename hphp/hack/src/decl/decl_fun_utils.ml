@@ -46,85 +46,18 @@ let has_memoize_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
   || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
 
-exception Gi_reinfer_type_not_supported
+let hint_to_type_opt env hint = Option.map hint ~f:(Decl_hint.hint env)
 
-let cut_namespace id =
-  let ids = String.split id ~on:'\\' in
-  List.last_exn ids
+let hint_to_type ~default env hint =
+  Option.value (hint_to_type_opt env hint) ~default
 
-let rec reinfer_type_to_string_exn ty =
-  match ty with
-  | Tmixed -> "mixed"
-  | Tnonnull -> "nonnull"
-  | Tdynamic -> "dynamic"
-  | Tunion [] -> "nothing"
-  | Tthis -> "this"
-  | Tprim prim -> string_of_tprim prim
-  | Tapply ((_p, id), _tyl) -> cut_namespace id
-  | Taccess (ty, id) ->
-    let s = reinfer_type_to_string_exn (get_node ty) in
-    Printf.sprintf "%s::%s" s (snd id)
-  | _ -> raise Gi_reinfer_type_not_supported
-
-let reinfer_type_to_string_opt ty =
-  try Some (reinfer_type_to_string_exn ty) with
-  | Gi_reinfer_type_not_supported -> None
-
-let must_reinfer_type tcopt (ty : decl_phase ty_) =
-  let reinfer_types = TypecheckerOptions.gi_reinfer_types tcopt in
-  match reinfer_type_to_string_opt ty with
-  | None -> false
-  | Some ty_str -> List.mem reinfer_types ty_str ~equal:String.equal
-
-let hint_to_type_opt ~is_lambda env reason hint =
-  let ty = Option.map hint ~f:(Decl_hint.hint env) in
-  let tcopt = Provider_context.get_tcopt env.Decl_env.ctx in
-  if TypecheckerOptions.global_inference tcopt && not is_lambda then
-    let tvar = mk (reason, Tvar 0) in
-    let ty =
-      match ty with
-      | None -> tvar
-      | Some ty ->
-        let rec create_vars_for_reinfer_types ty =
-          match deref ty with
-          | (r, Tapply (id, [ty']))
-            when String.equal (snd id) SN.Classes.cAwaitable ->
-            let ty' = create_vars_for_reinfer_types ty' in
-            mk (r, Tapply (id, [ty']))
-          | (r, Toption ty') ->
-            let ty' = create_vars_for_reinfer_types ty' in
-            mk (r, Toption ty')
-          | (r, Tapply ((_p, id), []))
-            when String.equal (cut_namespace id) "PHPism_FIXME_Array" ->
-            if must_reinfer_type tcopt (get_node ty) then
-              let tvar = mk (r, Tvar 0) in
-              mk (r, Tvec_or_dict (tvar, tvar))
-            else
-              ty
-          | (_r, ty_) ->
-            if must_reinfer_type tcopt ty_ then
-              tvar
-            else
-              ty
-        in
-        create_vars_for_reinfer_types ty
-    in
-    Some ty
-  else
-    ty
-
-let hint_to_type ~is_lambda ~default env reason hint =
-  Option.value (hint_to_type_opt ~is_lambda env reason hint) ~default
-
-let make_param_ty env ~is_lambda param =
+let make_param_ty env param =
   let param_pos = Decl_env.make_decl_pos env param.param_pos in
   let ty =
     let r = Reason.Rwitness_from_decl param_pos in
     hint_to_type
-      ~is_lambda
       ~default:(mk (r, Typing_defs.make_tany ()))
       env
-      (Reason.Rglobal_fun_param param_pos)
       (hint_of_type_hint param.param_type_hint)
   in
   let ty =
@@ -156,15 +89,14 @@ let make_param_ty env ~is_lambda param =
         ~readonly:(Option.is_some param.param_readonly);
   }
 
-let ret_from_fun_kind
-    ?(is_constructor = false) ~is_lambda env (pos : pos) kind hint =
+let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =
   let pos = Decl_env.make_decl_pos env pos in
   let default = mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       mk (Reason.Rwitness_from_decl pos, Tprim Tvoid)
     else
-      hint_to_type ~is_lambda ~default env (Reason.Rglobal_fun_ret pos) hint
+      hint_to_type ~default env hint
   in
   match hint with
   | None ->
@@ -222,5 +154,4 @@ let check_params paraml =
   in
   loop false paraml
 
-let make_params env ~is_lambda paraml =
-  List.map paraml ~f:(make_param_ty env ~is_lambda)
+let make_params env paraml = List.map paraml ~f:(make_param_ty env)

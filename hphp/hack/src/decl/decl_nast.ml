@@ -22,20 +22,18 @@ module SN = Naming_special_names
 
 let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  let is_lambda = true in
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute f.f_user_attributes
   in
   let ft_readonly_this = Option.is_some f.f_readonly_this in
   let ft_is_memoized = FunUtils.has_memoize_attribute f.f_user_attributes in
-  let params = FunUtils.make_params env ~is_lambda f.f_params in
+  let params = FunUtils.make_params env f.f_params in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs f.f_span
   in
   let ret_ty =
     FunUtils.ret_from_fun_kind
-      ~is_lambda
       env
       f.f_span
       f.f_fun_kind

@@ -846,13 +846,14 @@ void RocketClientChannel::sendRequestStream(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
+  auto payload = rocket::packWithFds(
+      &metadata,
+      std::move(buf),
+      rpcOptions.copySocketFdsToSend(),
+      getTransportWrapper());
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestStream(
-      rocket::packWithFds(
-          &metadata,
-          std::move(buf),
-          rpcOptions.copySocketFdsToSend(),
-          getTransportWrapper()),
+      std::move(payload),
       firstResponseTimeout,
       rpcOptions.getChunkTimeout(),
       rpcOptions.getChunkBufferSize(),
@@ -890,13 +891,14 @@ void RocketClientChannel::sendRequestSink(
   auto buf = std::move(request.buffer);
   setCompression(metadata, buf->computeChainDataLength());
 
+  auto payload = rocket::packWithFds(
+      &metadata,
+      std::move(buf),
+      rpcOptions.copySocketFdsToSend(),
+      getTransportWrapper());
   assert(metadata.name_ref());
   return rocket::RocketClient::sendRequestSink(
-      rocket::packWithFds(
-          &metadata,
-          std::move(buf),
-          rpcOptions.copySocketFdsToSend(),
-          getTransportWrapper()),
+      std::move(payload),
       firstResponseTimeout,
       new FirstRequestProcessorSink(
           header->getProtocolId(),

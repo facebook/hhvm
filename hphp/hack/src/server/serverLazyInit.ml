@@ -660,16 +660,13 @@ let calculate_fanout_and_defer_or_do_type_check
           log_fanout_information deps files;
           files
       in
-      ( ServerPrecheckedFiles.set
+      let env =
+        ServerPrecheckedFiles.init
           env
-          (Initial_typechecking
-             {
-               rechecked_files = Relative_path.Set.empty;
-               dirty_local_deps = local_deps;
-               dirty_master_deps = master_deps;
-               clean_local_deps = Typing_deps.(DepSet.make ());
-             }),
-        to_recheck )
+          ~dirty_local_deps:local_deps
+          ~dirty_master_deps:master_deps
+      in
+      (env, to_recheck)
     else
       (* Start with full fan-out immediately *)
       let to_recheck =

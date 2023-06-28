@@ -11,7 +11,11 @@ val should_use : ServerArgs.options -> ServerLocalConfig.t -> bool
 
 val expand_all : ServerEnv.env -> ServerEnv.env
 
-val set : ServerEnv.env -> ServerEnv.prechecked_files_status -> ServerEnv.env
+val init :
+  ServerEnv.env ->
+  dirty_local_deps:Typing_deps.DepSet.t ->
+  dirty_master_deps:Typing_deps.DepSet.t ->
+  ServerEnv.env
 
 val update_after_recheck :
   ServerEnv.genv ->

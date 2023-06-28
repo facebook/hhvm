@@ -17,6 +17,22 @@ let should_use options local_config =
 
 let set env prechecked_files = { env with prechecked_files }
 
+let init env ~dirty_local_deps ~dirty_master_deps =
+  set
+    env
+    (Initial_typechecking
+       {
+         rechecked_files = Relative_path.Set.empty;
+         dirty_local_deps;
+         dirty_master_deps;
+         clean_local_deps = Typing_deps.(DepSet.make ());
+       })
+
+(** Update env.needs_recheck and return new value for [dirty_master_deps]
+    using the following pseudo-code:
+        needs_recheck = files(fanout(fanout(deps) /\ dirty_master_deps)) \ rechecked_files
+        dirty_master_deps = dirty_master_deps \ fanout(deps)
+  *)
 let intersect_with_master_deps
     ~ctx ~deps ~dirty_master_deps ~rechecked_files genv env =
   let t0 = Unix.gettimeofday () in
@@ -84,16 +100,15 @@ let intersect_with_master_deps
   in
   (env, dirty_master_deps, size, telemetry)
 
+(** Update env.prechecked_files by adding to the recheck_files field of each variant *)
 let update_rechecked_files env rechecked =
   let t = Unix.gettimeofday () in
-  let add_rechecked dirty_deps =
-    let rechecked_files =
-      Relative_path.Set.fold
-        rechecked
-        ~init:dirty_deps.rechecked_files
-        ~f:(fun path acc -> Relative_path.Set.add acc path)
-    in
-    { dirty_deps with rechecked_files }
+  let add_rechecked (dirty_deps : dirty_deps) : dirty_deps =
+    {
+      dirty_deps with
+      rechecked_files =
+        Relative_path.Set.union rechecked dirty_deps.rechecked_files;
+    }
   in
   let env =
     set env
@@ -108,6 +123,13 @@ let update_rechecked_files env rechecked =
   HackEventLogger.prechecked_update_rechecked t;
   env
 
+(** Update:
+      - env.needs_recheck,
+      - env.full_check_status,
+      - env.prechecked_files,
+      - env.init_env.why_needed_full_check
+    in esoteric ways
+  *)
 let update_after_recheck genv env rechecked ~start_time =
   let ctx = Provider_utils.ctx_from_server_env env in
   let telemetry =
@@ -188,6 +210,12 @@ let update_after_recheck genv env rechecked ~start_time =
     (env, telemetry)
   | _ -> (env, telemetry)
 
+(** Update:
+      - env.needs_recheck,
+      - env.full_check_status,
+      - env.prechecked_files,
+    in esoteric ways
+  *)
 let update_after_local_changes genv env changes ~start_time =
   let ctx = Provider_utils.ctx_from_server_env env in
   let telemetry =
@@ -205,14 +233,19 @@ let update_after_local_changes genv env changes ~start_time =
       in
       (env, telemetry)
     | Initial_typechecking dirty_deps ->
-      let dirty_local_deps =
-        Typing_deps.DepSet.union changes dirty_deps.dirty_local_deps
+      (* Add [changes] dep set to [dirty_local_deps] *)
+      let env =
+        set
+          env
+          (Initial_typechecking
+             {
+               dirty_deps with
+               dirty_local_deps =
+                 Typing_deps.DepSet.union changes dirty_deps.dirty_local_deps;
+             })
       in
       let telemetry =
         telemetry |> Telemetry.string_ ~key:"mode" ~value:"initial"
-      in
-      let env =
-        set env (Initial_typechecking { dirty_deps with dirty_local_deps })
       in
       (env, telemetry)
     | Prechecked_files_ready dirty_deps ->

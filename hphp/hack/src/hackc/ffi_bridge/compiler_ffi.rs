@@ -131,58 +131,53 @@ pub mod compile_ffi {
     #[derive(Debug, PartialEq)]
     struct Attribute {
         name: String,
+
+        /// Values are Hack values encoded as JSON
         args: Vec<String>,
     }
 
     #[derive(Debug, PartialEq)]
-    struct MethodFacts {
+    struct MethodDetails {
+        name: String,
         attributes: Vec<Attribute>,
     }
 
     #[derive(Debug, PartialEq)]
-    struct Method {
+    pub struct TypeDetails {
         name: String,
-        methfacts: MethodFacts,
+        kind: TypeKind,
+        flags: u8,
+
+        /// List of types which this `extends`, `implements`, or `use`s
+        base_types: Vec<String>,
+
+        // List of attributes and their arguments
+        attributes: Vec<Attribute>,
+
+        /// List of classes which this `require class`
+        require_class: Vec<String>,
+
+        /// List of classes or interfaces which this `require extends`
+        require_extends: Vec<String>,
+
+        /// List of interfaces which this `require implements`
+        require_implements: Vec<String>,
+        methods: Vec<MethodDetails>,
     }
 
     #[derive(Debug, PartialEq)]
-    pub struct TypeFacts {
-        pub base_types: Vec<String>,
-        pub kind: TypeKind,
-        pub attributes: Vec<Attribute>,
-        pub flags: isize,
-        pub require_extends: Vec<String>,
-        pub require_implements: Vec<String>,
-        pub require_class: Vec<String>,
-        pub methods: Vec<Method>,
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct TypeFactsByName {
+    struct ModuleDetails {
         name: String,
-        typefacts: TypeFacts,
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct ModuleFactsByName {
-        name: String,
-        // Currently does not have modulefacts, since it would be an empty struct
-        // modulefacts
     }
 
     #[derive(Debug, Default, PartialEq)]
-    struct Facts {
-        pub types: Vec<TypeFactsByName>,
-        pub functions: Vec<String>,
-        pub constants: Vec<String>,
-        pub file_attributes: Vec<Attribute>,
-        pub modules: Vec<ModuleFactsByName>,
-    }
-
-    #[derive(Debug, Default)]
-    pub struct FactsResult {
-        facts: Facts,
-        sha1sum: String,
+    pub struct FileFacts {
+        types: Vec<TypeDetails>,
+        functions: Vec<String>,
+        constants: Vec<String>,
+        modules: Vec<ModuleDetails>,
+        attributes: Vec<Attribute>,
+        sha1hex: String,
     }
 
     extern "Rust" {
@@ -224,7 +219,7 @@ pub mod compile_ffi {
         fn verify_deserialization(decls: &DeclsAndBlob) -> bool;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts(decls: &DeclsHolder, sha1sum: &CxxString) -> FactsResult;
+        fn decls_to_facts(decls: &DeclsHolder, sha1sum: &CxxString) -> FileFacts;
 
         /// Extract Facts in condensed JSON format from Decls, including the source text hash.
         fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String;
@@ -479,11 +474,11 @@ fn compile_unit_from_text(
     .map_err(|e| e.to_string())
 }
 
-fn decls_to_facts(holder: &DeclsHolder, sha1sum: &CxxString) -> compile_ffi::FactsResult {
+fn decls_to_facts(holder: &DeclsHolder, sha1sum: &CxxString) -> compile_ffi::FileFacts {
     let facts = facts::Facts::from_decls(&holder.parsed_file);
-    compile_ffi::FactsResult {
-        facts: compile_ffi::Facts::from(facts),
-        sha1sum: sha1sum.to_string_lossy().to_string(),
+    compile_ffi::FileFacts {
+        sha1hex: sha1sum.to_string_lossy().into_owned(),
+        ..facts.into()
     }
 }
 

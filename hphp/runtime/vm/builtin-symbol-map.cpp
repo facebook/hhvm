@@ -72,25 +72,25 @@ void registerBuiltinSymbols(
     "" // This is *meant* to be the hash of the source file, but it's not used
   );
   auto const decls_ptr = std::make_shared<hackc::DeclsAndBlob>(std::move(decls));
-  for (auto const& e : facts.facts.types) {
+  for (auto const& e : facts.types) {
     s_types.emplace(
       makeStaticString(std::string(e.name)),
       decls_ptr
     );
   }
-  for (auto const& e : facts.facts.functions) {
+  for (auto const& e : facts.functions) {
     s_functions.emplace(
       makeStaticString(std::string(e)),
       decls_ptr
     );
   }
-  for (auto const& e : facts.facts.constants) {
+  for (auto const& e : facts.constants) {
     s_constants.emplace(
       makeStaticString(std::string(e)),
       decls_ptr
     );
   }
-  for (auto const& e : facts.facts.modules) {
+  for (auto const& e : facts.modules) {
     s_modules.emplace(
       makeStaticString(std::string(e.name)),
       decls_ptr

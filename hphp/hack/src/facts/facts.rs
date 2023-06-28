@@ -71,7 +71,7 @@ pub struct TypeFacts {
     #[serde(default)]
     pub attributes: Attributes,
 
-    pub flags: isize,
+    pub flags: u8,
 
     #[serde(default, skip_serializing_if = "StringSet::is_empty")]
     pub require_extends: StringSet,
@@ -200,7 +200,7 @@ impl Facts {
     }
 }
 
-pub type Flags = isize;
+pub type Flags = u8;
 #[derive(Clone, Copy)]
 pub enum Flag {
     Abstract = 1,
@@ -210,9 +210,9 @@ pub enum Flag {
 
 impl Flag {
     pub fn as_flags(&self) -> Flags {
-        *self as isize
+        *self as Flags
     }
-    pub fn default() -> Flags {
+    pub fn zero() -> Flags {
         0
     }
     pub fn is_set(&self, flags: Flags) -> bool {
@@ -555,7 +555,7 @@ fn format(original_name: &str) -> String {
     }
 }
 
-fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: Abstraction) -> isize {
+fn modifiers_to_flags(flags: Flags, is_final: bool, abstraction: Abstraction) -> Flags {
     let flags = match abstraction {
         Abstraction::Abstract => Flag::Abstract.set(flags),
         Abstraction::Concrete => flags,
@@ -833,7 +833,7 @@ mod tests {
 
     #[test]
     fn test_flags() {
-        let flags = Flag::default();
+        let flags = Flag::zero();
         assert!(!Flag::Final.is_set(flags));
         let flags = Flag::Final.set(flags);
         let flags = Flag::Abstract.set(flags);

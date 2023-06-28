@@ -10,29 +10,30 @@ use itertools::Itertools;
 use super::*;
 
 impl From<compile_ffi::TypeKind> for facts::TypeKind {
-    fn from(type_kind: compile_ffi::TypeKind) -> facts::TypeKind {
+    fn from(type_kind: compile_ffi::TypeKind) -> Self {
         match type_kind {
-            compile_ffi::TypeKind::Class => facts::TypeKind::Class,
-            compile_ffi::TypeKind::Interface => facts::TypeKind::Interface,
-            compile_ffi::TypeKind::Enum => facts::TypeKind::Enum,
-            compile_ffi::TypeKind::Trait => facts::TypeKind::Trait,
-            compile_ffi::TypeKind::TypeAlias => facts::TypeKind::TypeAlias,
-            compile_ffi::TypeKind::Unknown => facts::TypeKind::Unknown,
-            compile_ffi::TypeKind::Mixed => facts::TypeKind::Mixed,
+            compile_ffi::TypeKind::Class => Self::Class,
+            compile_ffi::TypeKind::Interface => Self::Interface,
+            compile_ffi::TypeKind::Enum => Self::Enum,
+            compile_ffi::TypeKind::Trait => Self::Trait,
+            compile_ffi::TypeKind::TypeAlias => Self::TypeAlias,
+            compile_ffi::TypeKind::Unknown => Self::Unknown,
+            compile_ffi::TypeKind::Mixed => Self::Mixed,
             _ => panic!("impossible"),
         }
     }
 }
+
 impl From<facts::TypeKind> for compile_ffi::TypeKind {
-    fn from(typekind: facts::TypeKind) -> compile_ffi::TypeKind {
+    fn from(typekind: facts::TypeKind) -> Self {
         match typekind {
-            facts::TypeKind::Class => compile_ffi::TypeKind::Class,
-            facts::TypeKind::Interface => compile_ffi::TypeKind::Interface,
-            facts::TypeKind::Enum => compile_ffi::TypeKind::Enum,
-            facts::TypeKind::Trait => compile_ffi::TypeKind::Trait,
-            facts::TypeKind::TypeAlias => compile_ffi::TypeKind::TypeAlias,
-            facts::TypeKind::Unknown => compile_ffi::TypeKind::Unknown,
-            facts::TypeKind::Mixed => compile_ffi::TypeKind::Mixed,
+            facts::TypeKind::Class => Self::Class,
+            facts::TypeKind::Interface => Self::Interface,
+            facts::TypeKind::Enum => Self::Enum,
+            facts::TypeKind::Trait => Self::Trait,
+            facts::TypeKind::TypeAlias => Self::TypeAlias,
+            facts::TypeKind::Unknown => Self::Unknown,
+            facts::TypeKind::Mixed => Self::Mixed,
         }
     }
 }
@@ -45,47 +46,52 @@ impl IntoKeyValue<String, Vec<serde_json::Value>> for compile_ffi::Attribute {
         (self.name, args)
     }
 }
+
 impl FromKeyValue<String, Vec<serde_json::Value>> for compile_ffi::Attribute {
-    fn from_key_value(name: String, args: Vec<serde_json::Value>) -> compile_ffi::Attribute {
+    fn from_key_value(name: String, args: Vec<serde_json::Value>) -> Self {
         let args = (args.into_iter())
             .map(|v| serde_json::to_string(&v).unwrap())
             .collect();
-        compile_ffi::Attribute { name, args }
+        Self { name, args }
     }
 }
 
-impl IntoKeyValue<String, facts::MethodFacts> for compile_ffi::Method {
-    fn into_key_value(self) -> (String, facts::MethodFacts) {
-        let compile_ffi::Method { name, methfacts } = self;
-        (name, methfacts.into())
-    }
-}
-impl FromKeyValue<String, facts::MethodFacts> for compile_ffi::Method {
-    fn from_key_value(name: String, methfacts: facts::MethodFacts) -> compile_ffi::Method {
-        let methfacts = methfacts.into();
-        compile_ffi::Method { name, methfacts }
+impl IntoKeyValue<String, facts::MethodFacts> for compile_ffi::MethodDetails {
+    fn into_key_value(mut self) -> (String, facts::MethodFacts) {
+        let name = std::mem::take(&mut self.name);
+        (name, self.into())
     }
 }
 
-impl From<compile_ffi::MethodFacts> for facts::MethodFacts {
-    fn from(methodfacts: compile_ffi::MethodFacts) -> facts::MethodFacts {
-        facts::MethodFacts {
-            attributes: vec_to_map(methodfacts.attributes),
+impl FromKeyValue<String, facts::MethodFacts> for compile_ffi::MethodDetails {
+    fn from_key_value(name: String, methfacts: facts::MethodFacts) -> Self {
+        Self {
+            name,
+            ..methfacts.into()
         }
     }
 }
 
-impl From<facts::MethodFacts> for compile_ffi::MethodFacts {
-    fn from(method_facts: facts::MethodFacts) -> compile_ffi::MethodFacts {
-        compile_ffi::MethodFacts {
+impl From<compile_ffi::MethodDetails> for facts::MethodFacts {
+    fn from(md: compile_ffi::MethodDetails) -> Self {
+        Self {
+            attributes: vec_to_map(md.attributes),
+        }
+    }
+}
+
+impl From<facts::MethodFacts> for compile_ffi::MethodDetails {
+    fn from(method_facts: facts::MethodFacts) -> Self {
+        Self {
+            name: String::default(),
             attributes: map_to_vec(method_facts.attributes),
         }
     }
 }
 
-impl From<compile_ffi::TypeFacts> for facts::TypeFacts {
-    fn from(facts: compile_ffi::TypeFacts) -> facts::TypeFacts {
-        facts::TypeFacts {
+impl From<compile_ffi::TypeDetails> for facts::TypeFacts {
+    fn from(facts: compile_ffi::TypeDetails) -> Self {
+        Self {
             base_types: vec_to_set(facts.base_types),
             kind: facts.kind.into(),
             attributes: vec_to_map(facts.attributes),
@@ -97,9 +103,11 @@ impl From<compile_ffi::TypeFacts> for facts::TypeFacts {
         }
     }
 }
-impl From<facts::TypeFacts> for compile_ffi::TypeFacts {
-    fn from(facts: facts::TypeFacts) -> compile_ffi::TypeFacts {
-        compile_ffi::TypeFacts {
+
+impl From<facts::TypeFacts> for compile_ffi::TypeDetails {
+    fn from(facts: facts::TypeFacts) -> Self {
+        Self {
+            name: String::default(),
             base_types: set_to_vec(facts.base_types),
             kind: facts.kind.into(),
             attributes: map_to_vec(facts.attributes),
@@ -112,22 +120,25 @@ impl From<facts::TypeFacts> for compile_ffi::TypeFacts {
     }
 }
 
-impl IntoKeyValue<String, facts::TypeFacts> for compile_ffi::TypeFactsByName {
-    fn into_key_value(self) -> (String, facts::TypeFacts) {
-        let compile_ffi::TypeFactsByName { name, typefacts } = self;
-        (name, typefacts.into())
-    }
-}
-impl FromKeyValue<String, facts::TypeFacts> for compile_ffi::TypeFactsByName {
-    fn from_key_value(name: String, typefacts: facts::TypeFacts) -> compile_ffi::TypeFactsByName {
-        let typefacts = typefacts.into();
-        compile_ffi::TypeFactsByName { name, typefacts }
+impl IntoKeyValue<String, facts::TypeFacts> for compile_ffi::TypeDetails {
+    fn into_key_value(mut self) -> (String, facts::TypeFacts) {
+        let name = std::mem::take(&mut self.name);
+        (name, self.into())
     }
 }
 
-impl From<compile_ffi::Facts> for facts::Facts {
-    fn from(facts: compile_ffi::Facts) -> facts::Facts {
-        facts::Facts {
+impl FromKeyValue<String, facts::TypeFacts> for compile_ffi::TypeDetails {
+    fn from_key_value(name: String, typefacts: facts::TypeFacts) -> Self {
+        Self {
+            name,
+            ..typefacts.into()
+        }
+    }
+}
+
+impl From<compile_ffi::FileFacts> for facts::Facts {
+    fn from(facts: compile_ffi::FileFacts) -> Self {
+        Self {
             types: vec_to_map(facts.types),
             functions: facts.functions,
             constants: facts.constants,
@@ -136,22 +147,24 @@ impl From<compile_ffi::Facts> for facts::Facts {
                 .into_iter()
                 .map(|x| (x.name, facts::ModuleFacts {}))
                 .collect(),
-            file_attributes: vec_to_map(facts.file_attributes),
+            file_attributes: vec_to_map(facts.attributes),
         }
     }
 }
-impl From<facts::Facts> for compile_ffi::Facts {
-    fn from(facts: facts::Facts) -> compile_ffi::Facts {
-        compile_ffi::Facts {
+
+impl From<facts::Facts> for compile_ffi::FileFacts {
+    fn from(facts: facts::Facts) -> Self {
+        Self {
             types: map_to_vec(facts.types),
             functions: facts.functions,
             constants: facts.constants,
             modules: facts
                 .modules
                 .into_keys()
-                .map(|name| compile_ffi::ModuleFactsByName { name })
+                .map(|name| compile_ffi::ModuleDetails { name })
                 .collect(),
-            file_attributes: map_to_vec(facts.file_attributes),
+            attributes: map_to_vec(facts.file_attributes),
+            sha1hex: String::default(),
         }
     }
 }
@@ -209,7 +222,7 @@ mod tests {
         let (ffi_method_facts, mut rust_method_facts) = create_method_facts();
         rust_method_facts.attributes.remove_entry("MyAttribute2");
         assert_ne!(
-            compile_ffi::MethodFacts::from(rust_method_facts),
+            compile_ffi::MethodDetails::from(rust_method_facts),
             ffi_method_facts
         )
     }
@@ -218,7 +231,7 @@ mod tests {
     fn test_methods_1() {
         let (ffi_methods, rust_methods) = create_methods();
         assert_eq!(
-            map_to_vec::<String, facts::MethodFacts, compile_ffi::Method>(rust_methods),
+            map_to_vec::<String, facts::MethodFacts, compile_ffi::MethodDetails>(rust_methods),
             ffi_methods
         )
     }
@@ -234,7 +247,7 @@ mod tests {
     fn test_type_facts() {
         let (ffi_type_facts, rust_type_facts) = create_type_facts();
         assert_eq!(
-            compile_ffi::TypeFacts::from(rust_type_facts),
+            compile_ffi::TypeDetails::from(rust_type_facts),
             ffi_type_facts
         )
     }
@@ -243,7 +256,7 @@ mod tests {
     fn test_type_facts_by_name() {
         let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
         assert_eq!(
-            map_to_vec::<String, facts::TypeFacts, compile_ffi::TypeFactsByName>(
+            map_to_vec::<String, facts::TypeFacts, compile_ffi::TypeDetails>(
                 rust_type_facts_by_name
             ),
             ffi_type_facts_by_name
@@ -255,12 +268,13 @@ mod tests {
         let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
         let (ffi_module_facts_by_name, rust_module_facts_by_name) = create_module_facts_by_name();
         let (ffi_attributes, rust_attributes) = create_attributes();
-        let ffi_facts = compile_ffi::Facts {
+        let ffi_facts = compile_ffi::FileFacts {
             types: ffi_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
             modules: ffi_module_facts_by_name,
-            file_attributes: ffi_attributes,
+            attributes: ffi_attributes,
+            sha1hex: String::default(),
         };
         let rust_facts = facts::Facts {
             types: rust_type_facts_by_name,
@@ -294,10 +308,11 @@ mod tests {
         (ffi_attributes, rust_attributes)
     }
 
-    fn create_method_facts() -> (compile_ffi::MethodFacts, facts::MethodFacts) {
+    fn create_method_facts() -> (compile_ffi::MethodDetails, facts::MethodFacts) {
         let (ffi_attributes, rust_attributes) = create_attributes();
 
-        let ffi_method_facts = compile_ffi::MethodFacts {
+        let ffi_method_facts = compile_ffi::MethodDetails {
+            name: String::default(),
             attributes: ffi_attributes,
         };
         let rust_method_facts = facts::MethodFacts {
@@ -307,11 +322,11 @@ mod tests {
         (ffi_method_facts, rust_method_facts)
     }
 
-    fn create_methods() -> (Vec<compile_ffi::Method>, facts::Methods) {
+    fn create_methods() -> (Vec<compile_ffi::MethodDetails>, facts::Methods) {
         let (ffi_method_facts, rust_method_facts) = create_method_facts();
-        let ffi_methods = vec![compile_ffi::Method {
+        let ffi_methods = vec![compile_ffi::MethodDetails {
             name: "m".to_string(),
-            methfacts: ffi_method_facts,
+            ..ffi_method_facts
         }];
         let mut rust_methods = BTreeMap::new();
         rust_methods.insert("m".to_string(), rust_method_facts);
@@ -319,7 +334,7 @@ mod tests {
         (ffi_methods, rust_methods)
     }
 
-    fn create_type_facts() -> (compile_ffi::TypeFacts, facts::TypeFacts) {
+    fn create_type_facts() -> (compile_ffi::TypeDetails, facts::TypeFacts) {
         let (ffi_attributes, rust_attributes) = create_attributes();
         let (ffi_methods, rust_methods) = create_methods();
         let base_types = vec!["int".to_string(), "string".to_string()];
@@ -338,7 +353,8 @@ mod tests {
             methods: rust_methods,
         };
 
-        let ffi_type_facts = compile_ffi::TypeFacts {
+        let ffi_type_facts = compile_ffi::TypeDetails {
+            name: String::default(),
             base_types,
             kind: compile_ffi::TypeKind::Class,
             attributes: ffi_attributes,
@@ -352,12 +368,12 @@ mod tests {
         (ffi_type_facts, rust_type_facts)
     }
 
-    fn create_type_facts_by_name() -> (Vec<compile_ffi::TypeFactsByName>, facts::TypeFactsByName) {
+    fn create_type_facts_by_name() -> (Vec<compile_ffi::TypeDetails>, facts::TypeFactsByName) {
         let (ffi_type_facts, rust_type_facts) = create_type_facts();
 
-        let ffi_type_facts_by_name = vec![compile_ffi::TypeFactsByName {
-            name: "C".to_string(),
-            typefacts: ffi_type_facts,
+        let ffi_type_facts_by_name = vec![compile_ffi::TypeDetails {
+            name: "C".into(),
+            ..ffi_type_facts
         }];
 
         let mut rust_type_facts_by_name = BTreeMap::new();
@@ -366,11 +382,9 @@ mod tests {
         (ffi_type_facts_by_name, rust_type_facts_by_name)
     }
 
-    fn create_module_facts_by_name() -> (
-        Vec<compile_ffi::ModuleFactsByName>,
-        facts::ModuleFactsByName,
-    ) {
-        let ffi_module_facts_by_name = vec![compile_ffi::ModuleFactsByName {
+    fn create_module_facts_by_name() -> (Vec<compile_ffi::ModuleDetails>, facts::ModuleFactsByName)
+    {
+        let ffi_module_facts_by_name = vec![compile_ffi::ModuleDetails {
             name: "mfoo".to_string(),
         }];
 

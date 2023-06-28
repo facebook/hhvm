@@ -1643,18 +1643,18 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
   HPHP_CORO_RETURN(OndemandInfo{});
 }
 
-Package::IndexMeta HPHP::summary_of_facts(const hackc::FactsResult& facts) {
+Package::IndexMeta HPHP::summary_of_facts(const hackc::FileFacts& facts) {
   Package::IndexMeta summary;
-  for (auto& e : facts.facts.types) {
+  for (auto& e : facts.types) {
     summary.types.emplace_back(makeStaticString(std::string(e.name)));
   }
-  for (auto& e : facts.facts.functions) {
+  for (auto& e : facts.functions) {
     summary.funcs.emplace_back(makeStaticString(std::string(e)));
   }
-  for (auto& e : facts.facts.constants) {
+  for (auto& e : facts.constants) {
     summary.constants.emplace_back(makeStaticString(std::string(e)));
   }
-  for (auto& e : facts.facts.modules) {
+  for (auto& e : facts.modules) {
     summary.modules.emplace_back(makeStaticString(std::string(e.name)));
   }
   return summary;

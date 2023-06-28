@@ -2823,11 +2823,12 @@ _readField_primitive:
 _readField_aliased:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::readWithContext(*iprot, this->__fbthrift_field_aliased, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_aliased = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(3, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2913,7 +2914,12 @@ uint32_t ComposeStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("aliased", apache::thrift::protocol::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::serializedSize<false>(*prot_, this->__fbthrift_field_aliased);
+    if (this->__fbthrift_field_aliased) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::serializedSize<false>(*prot_, *this->__fbthrift_field_aliased);
+    } else {
+      xfer += prot_->serializedStructSize("ListAlias");
+      xfer += prot_->serializedSizeStop();
+    }
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2937,7 +2943,12 @@ uint32_t ComposeStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("aliased", apache::thrift::protocol::T_STRUCT, 4);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::serializedSize<true>(*prot_, this->__fbthrift_field_aliased);
+    if (this->__fbthrift_field_aliased) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::serializedSize<true>(*prot_, *this->__fbthrift_field_aliased);
+    } else {
+      xfer += prot_->serializedStructSize("ListAlias");
+      xfer += prot_->serializedSizeStop();
+    }
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2973,7 +2984,13 @@ uint32_t ComposeStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 4, kPrevFieldId>(*prot_, "aliased", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::write(*prot_, this->__fbthrift_field_aliased);
+    if (this->__fbthrift_field_aliased) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::ListAlias>::write(*prot_, *this->__fbthrift_field_aliased);
+    } else {
+      xfer += prot_->writeStructBegin("ListAlias");
+      xfer += prot_->writeStructEnd();
+      xfer += prot_->writeFieldStop();
+    }
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

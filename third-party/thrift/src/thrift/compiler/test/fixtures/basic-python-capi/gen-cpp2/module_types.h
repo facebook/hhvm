@@ -11,8 +11,10 @@
 
 #include "thrift/lib/thrift/gen-cpp2/patch_types.h"
 #include <deque>
+#include <unordered_map>
 #include <unordered_set>
 #include <folly/container/F14Set.h>
+#include <folly/container/F14Map.h>
 #include <folly/small_vector.h>
 #include "thrift/test/python_capi/adapter.h"
 
@@ -2562,11 +2564,8 @@ class ListStruct final  {
 
   ListStruct(ListStruct&&) noexcept;
 
-  ListStruct(const ListStruct& src);
-
 
   ListStruct& operator=(ListStruct&&) noexcept;
-  ListStruct& operator=(const ListStruct& src);
 
   ~ListStruct();
 
@@ -4031,19 +4030,17 @@ class ComposeStruct final  {
 
   ComposeStruct() :
       __fbthrift_field_enum_(),
-      __fbthrift_field_renamed_() {
+      __fbthrift_field_renamed_(),
+      __fbthrift_field_aliased(std::make_shared<::test::fixtures::basic-python-capi::ListAlias>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::test::fixtures::basic-python-capi::ListAlias aliased__arg);
+  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg);
 
   ComposeStruct(ComposeStruct&&) noexcept;
 
-  ComposeStruct(const ComposeStruct& src);
-
 
   ComposeStruct& operator=(ComposeStruct&&) noexcept;
-  ComposeStruct& operator=(const ComposeStruct& src);
  private:
   ::test::fixtures::basic-python-capi::MyEnum __fbthrift_field_enum_;
  private:
@@ -4051,9 +4048,9 @@ class ComposeStruct final  {
  private:
   ::test::fixtures::basic-python-capi::PrimitiveStruct __fbthrift_field_primitive;
  private:
-  ::test::fixtures::basic-python-capi::ListAlias __fbthrift_field_aliased;
+  ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> __fbthrift_field_aliased;
  private:
-  apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -4179,45 +4176,44 @@ class ComposeStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> primitive() && {
     return {static_cast<T&&>(this->__fbthrift_field_primitive), __isset.at(2), __isset.bit(2)};
   }
-
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> aliased_ref() const& {
-    return {this->__fbthrift_field_aliased, __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE T& aliased_ref() & {
+    return __fbthrift_field_aliased;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aliased_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_aliased), __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE const T& aliased_ref() const& {
+    return __fbthrift_field_aliased;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> aliased_ref() & {
-    return {this->__fbthrift_field_aliased, __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE T&& aliased_ref() && {
+    return static_cast<T&&>(__fbthrift_field_aliased);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> aliased_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_aliased), __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE const T&& aliased_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_aliased);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> aliased() const& {
-    return {this->__fbthrift_field_aliased, __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE T& aliased() & {
+    return __fbthrift_field_aliased;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aliased() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_aliased), __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE const T& aliased() const& {
+    return __fbthrift_field_aliased;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> aliased() & {
-    return {this->__fbthrift_field_aliased, __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE T&& aliased() && {
+    return static_cast<T&&>(__fbthrift_field_aliased);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::ListAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> aliased() && {
-    return {static_cast<T&&>(this->__fbthrift_field_aliased), __isset.at(3), __isset.bit(3)};
+  template <typename ..., typename T = ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>
+  FOLLY_ERASE const T&& aliased() const&& {
+    return static_cast<const T&&>(__fbthrift_field_aliased);
   }
 
   ::test::fixtures::basic-python-capi::MyEnum get_enum_() const {
@@ -4247,15 +4243,6 @@ class ComposeStruct final  {
   ::test::fixtures::basic-python-capi::PrimitiveStruct& set_primitive(T_ComposeStruct_primitive_struct_setter&& primitive_) {
     primitive_ref() = std::forward<T_ComposeStruct_primitive_struct_setter>(primitive_);
     return __fbthrift_field_primitive;
-  }
-  const ::test::fixtures::basic-python-capi::ListAlias& get_aliased() const&;
-  ::test::fixtures::basic-python-capi::ListAlias get_aliased() &&;
-
-  template <typename T_ComposeStruct_aliased_struct_setter = ::test::fixtures::basic-python-capi::ListAlias>
-  [[deprecated("Use `FOO.aliased_ref() = BAR;` instead of `FOO.set_aliased(BAR);`")]]
-  ::test::fixtures::basic-python-capi::ListAlias& set_aliased(T_ComposeStruct_aliased_struct_setter&& aliased_) {
-    aliased_ref() = std::forward<T_ComposeStruct_aliased_struct_setter>(aliased_);
-    return __fbthrift_field_aliased;
   }
 
   template <class Protocol_>

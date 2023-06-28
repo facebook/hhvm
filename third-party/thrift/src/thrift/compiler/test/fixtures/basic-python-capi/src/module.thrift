@@ -19,8 +19,10 @@ include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
 
 cpp_include "<deque>"
+cpp_include "<unordered_map>"
 cpp_include "<unordered_set>"
 cpp_include "<folly/container/F14Set.h>"
+cpp_include "<folly/container/F14Map.h>"
 cpp_include "<folly/small_vector.h>"
 cpp_include "thrift/test/python_capi/adapter.h"
 
@@ -97,16 +99,16 @@ struct ListStruct {
   2: optional list<i64> intz;
   @thrift.Box
   3: optional list<string> stringz;
-  4: list<binary> (cpp.template = "std::deque") encoded;
-  5: list<i64> (cpp.type = "std::deque<uint64_t>") uidz;
+  @cpp.Type{template = "std::deque"}
+  4: list<binary> encoded;
+  @cpp.Type{name = "std::deque<uint64_t>"}
+  5: list<i64> uidz;
   6: list<list<double>> matrix;
-  7: list<list<byte>> (
-    cpp.type = "folly::small_vector<folly::small_vector<uint8_t>>",
-  ) ucharz;
+  @cpp.Type{name = "folly::small_vector<folly::small_vector<uint8_t>>"}
+  7: list<list<byte>> ucharz;
   @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
   8: list<list<list<signed_byte>>> voxels;
-}
-
+} (cpp.noncopyable)
 typedef ListStruct ListAlias
 
 @python.MarshalCapi
@@ -115,8 +117,10 @@ struct SetStruct {
   2: optional set<i32> intz;
   @thrift.Box
   3: optional set<binary> binnaz;
-  4: set<binary> (cpp.template = "std::unordered_set") encoded;
-  5: set<i64> (cpp.type = "std::unordered_set<uint64_t>") uidz;
+  @cpp.Type{template = "std::unordered_set"}
+  4: set<binary> encoded;
+  @cpp.Type{name = "std::unordered_set<uint64_t>"}
+  5: set<i64> uidz;
   @cpp.Type{name = "folly::F14FastSet<uint8_t>"}
   6: set<byte> charz;
   7: list<set<i64>> setz;
@@ -128,8 +132,10 @@ struct MapStruct {
   2: optional map<i32, string> intz;
   @thrift.Box
   3: optional map<binary, PrimitiveStruct> binnaz;
-  4: map<string, double> (cpp.template = "std::unordered_map") encoded;
-  5: map<i64, float> (cpp.type = "std::unordered_map<uint64_t, float>") flotz;
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<string, double> encoded;
+  @cpp.Type{name = "std::unordered_map<uint64_t, float>"}
+  5: map<i64, float> flotz;
   6: list<map<i32, i64>> map_list;
   7: map<i32, list<i64>> list_map;
   @cpp.Type{name = "folly::F14FastMap<int, folly::fbvector<double>>"}
@@ -141,8 +147,9 @@ struct ComposeStruct {
   1: MyEnum enum_;
   2: AnnoyingEnum renamed_;
   3: PrimitiveStruct primitive;
+  @cpp.Ref{type = cpp.RefType.Shared}
   4: ListAlias aliased;
-}
+} (cpp.noncopyable)
 
 union MyUnion {
   1: MyEnum myEnum;

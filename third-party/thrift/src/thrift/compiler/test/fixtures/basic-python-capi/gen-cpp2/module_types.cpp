@@ -974,8 +974,6 @@ const folly::StringPiece ListStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ListStruct>::name;
 }
 
-ListStruct::ListStruct(const ListStruct&) = default;
-ListStruct& ListStruct::operator=(const ListStruct&) = default;
 ListStruct::ListStruct() {
 }
 
@@ -1632,8 +1630,6 @@ const folly::StringPiece ComposeStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ComposeStruct>::name;
 }
 
-ComposeStruct::ComposeStruct(const ComposeStruct&) = default;
-ComposeStruct& ComposeStruct::operator=(const ComposeStruct&) = default;
 ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept :
     __fbthrift_field_enum_(std::move(other.__fbthrift_field_enum_)),
     __fbthrift_field_renamed_(std::move(other.__fbthrift_field_renamed_)),
@@ -1652,7 +1648,7 @@ ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other
 }
 
 
-ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::test::fixtures::basic-python-capi::ListAlias aliased__arg) :
+ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg) :
     __fbthrift_field_enum_(std::move(enum___arg)),
     __fbthrift_field_renamed_(std::move(renamed___arg)),
     __fbthrift_field_primitive(std::move(primitive__arg)),
@@ -1660,7 +1656,6 @@ ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixture
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
-  __isset.set(folly::index_constant<3>(), true);
 }
 
 
@@ -1669,7 +1664,7 @@ void ComposeStruct::__fbthrift_clear() {
   this->__fbthrift_field_enum_ = ::test::fixtures::basic-python-capi::MyEnum();
   this->__fbthrift_field_renamed_ = ::test::fixtures::basic-python-capi::NormalDecentEnum();
   ::apache::thrift::clear(this->__fbthrift_field_primitive);
-  ::apache::thrift::clear(this->__fbthrift_field_aliased);
+  if (this->__fbthrift_field_aliased) this->__fbthrift_field_aliased = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias>>();
   __isset = {};
 }
 
@@ -1691,7 +1686,7 @@ bool ComposeStruct::operator==(FOLLY_MAYBE_UNUSED const ComposeStruct& rhs) cons
   if (!(lhs.primitive_ref() == rhs.primitive_ref())) {
     return false;
   }
-  if (!(lhs.aliased_ref() == rhs.aliased_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.aliased_ref(), rhs.aliased_ref()))) {
     return false;
   }
   return true;
@@ -1707,14 +1702,6 @@ const ::test::fixtures::basic-python-capi::PrimitiveStruct& ComposeStruct::get_p
 
 ::test::fixtures::basic-python-capi::PrimitiveStruct ComposeStruct::get_primitive() && {
   return std::move(__fbthrift_field_primitive);
-}
-
-const ::test::fixtures::basic-python-capi::ListAlias& ComposeStruct::get_aliased() const& {
-  return __fbthrift_field_aliased;
-}
-
-::test::fixtures::basic-python-capi::ListAlias ComposeStruct::get_aliased() && {
-  return std::move(__fbthrift_field_aliased);
 }
 
 

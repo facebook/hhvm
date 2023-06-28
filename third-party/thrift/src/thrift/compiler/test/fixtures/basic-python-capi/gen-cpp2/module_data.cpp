@@ -407,7 +407,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   0,
   1,
   2,
-  3,
+  -1,
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::name = "MyUnion";

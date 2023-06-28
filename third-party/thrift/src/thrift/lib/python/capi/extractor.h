@@ -108,7 +108,7 @@ struct BaseExtractor {
     if (extractResult.hasError()) {
       error = extractResult.error();
     } else {
-      ref = std::make_unique<S>(*extractResult);
+      ref = std::make_unique<S>(std::move(*extractResult));
     }
   }
   template <typename S>
@@ -124,7 +124,7 @@ struct BaseExtractor {
     if (extractResult.hasError()) {
       error = extractResult.error();
     } else {
-      ref = std::make_shared<S>(*extractResult);
+      ref = std::make_shared<S>(std::move(*extractResult));
     }
   }
 };

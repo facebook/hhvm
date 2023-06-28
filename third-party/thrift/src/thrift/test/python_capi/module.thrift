@@ -108,7 +108,7 @@ struct ListStruct {
   7: list<list<byte>> ucharz;
   @cpp.Type{name = "folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>"}
   8: list<list<list<signed_byte>>> voxels;
-}
+} (cpp.noncopyable)
 typedef ListStruct ListAlias
 
 @python.MarshalCapi
@@ -147,8 +147,9 @@ struct ComposeStruct {
   1: MyEnum enum_;
   2: AnnoyingEnum renamed_;
   3: PrimitiveStruct primitive;
+  @cpp.Ref{type = cpp.RefType.Shared}
   4: ListAlias aliased;
-}
+} (cpp.noncopyable)
 
 union MyUnion {
   1: MyEnum myEnum;

@@ -81,6 +81,9 @@ let no_auto_dynamic_attr ua =
 let no_auto_likes_attr ua =
   Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes ua
 
+let no_auto_bound_attr ua =
+  Naming_attributes.mem SN.UserAttributes.uaNoAutoBound ua
+
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
 let possibly_wrap_like env ((pos, _) as hint) =
@@ -184,7 +187,9 @@ let on_fun_def fd ~ctx =
 
 let on_tparam t ~ctx =
   let t =
-    if Env.implicit_sdt ctx then
+    if
+      Env.implicit_sdt ctx && not (no_auto_bound_attr t.Aast.tp_user_attributes)
+    then
       let (pos, _) = t.Aast.tp_name in
       let tp_constraints =
         (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos Aast.Hmixed))

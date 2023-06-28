@@ -313,6 +313,8 @@ pub mod user_attributes {
 
     pub const NO_AUTO_LIKES: &str = "__NoAutoLikes";
 
+    pub const NO_AUTO_BOUND: &str = "__NoAutoBound";
+
     pub const REQUIRE_DYNAMIC: &str = "__RequireDynamic";
 
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";

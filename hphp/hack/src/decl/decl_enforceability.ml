@@ -520,6 +520,9 @@ let add_supportdyn_constraints p tparams =
   List.map tparams ~f:(fun tparam ->
       if
         Naming_special_names.Coeffects.is_generated_generic (snd tparam.tp_name)
+        || Typing_defs.Attributes.mem
+             Naming_special_names.UserAttributes.uaNoAutoBound
+             tparam.tp_user_attributes
       then
         tparam
       else

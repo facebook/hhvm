@@ -24,7 +24,7 @@ fn make_supportdyn_type<R: Reason>(pos: R::Pos, reason: R, ty: Ty<R>) -> Ty<R> {
 /// Add `as supportdyn<mixed>` constraints to the type parameters
 pub fn add_supportdyn_constraints<R: Reason>(pos: &R::Pos, tparams: &mut [decl::Tparam<R, Ty<R>>]) {
     for tparam in tparams {
-        if !sn::coeffects::is_generated_generic(tparam.name.id()) {
+        if !sn::coeffects::is_generated_generic(tparam.name.id()) && !noautobound(tparam) {
             let mut constraints = Vec::with_capacity(1 + tparam.constraints.len());
             constraints.push((
                 decl::ty::ConstraintKind::ConstraintAs,
@@ -57,6 +57,12 @@ fn noautodynamic<R: Reason>(this_class: Option<&decl::ShallowClass<R>>) -> bool 
             .iter()
             .any(|ua| ua.name.id() == *sn::user_attributes::uaNoAutoDynamic),
     }
+}
+
+fn noautobound<R: Reason>(tp: &decl::Tparam<R, Ty<R>>) -> bool {
+    tp.user_attributes
+        .iter()
+        .any(|ua| ua.name.id() == *sn::user_attributes::uaNoAutoBound)
 }
 
 fn implicit_sdt_for_class<R: Reason>(

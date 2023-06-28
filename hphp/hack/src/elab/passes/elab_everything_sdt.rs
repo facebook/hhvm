@@ -52,6 +52,12 @@ fn no_auto_likes(user_attributes: &UserAttributes) -> bool {
         .any(|ua| ua.name.name() == sn::user_attributes::NO_AUTO_LIKES)
 }
 
+fn no_auto_bound(user_attributes: &UserAttributes) -> bool {
+    user_attributes
+        .iter()
+        .any(|ua| ua.name.name() == sn::user_attributes::NO_AUTO_BOUND)
+}
+
 fn wrap_like(hint: Hint) -> Hint {
     let Hint(ref p, _) = hint;
     Hint(p.clone(), Box::new(Hint_::Hlike(hint)))
@@ -177,7 +183,7 @@ impl Pass for ElabEverythingSdtPass {
     }
 
     fn on_ty_tparam_bottom_up(&mut self, env: &Env, tp: &mut Tparam) -> ControlFlow<()> {
-        if !self.implicit_sdt(env) {
+        if !self.implicit_sdt(env) || no_auto_bound(&tp.user_attributes) {
             return Continue(());
         }
 

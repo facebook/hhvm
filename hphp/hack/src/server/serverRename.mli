@@ -14,9 +14,6 @@ val get_dead_unsafe_cast_patches : ServerEnv.env -> ServerRenameTypes.patch list
 val get_lambda_parameter_rewrite_patches :
   Provider_context.t -> string list -> ServerRenameTypes.patch list
 
-val get_type_params_type_rewrite_patches :
-  Provider_context.t -> string list -> ServerRenameTypes.patch list
-
 val go :
   Provider_context.t ->
   ServerRenameTypes.action ->

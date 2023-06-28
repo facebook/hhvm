@@ -947,17 +947,6 @@ let main_internal
     else
       apply_patches patches;
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_REWRITE_TYPE_PARAMS_TYPE files ->
-    let%lwt conn = connect args in
-    let%lwt (patches, telemetry) =
-      ClientConnect.rpc conn ~desc:args.desc
-      @@ Rpc.REWRITE_TYPE_PARAMS_TYPE files
-    in
-    if args.output_json then
-      print_patches_json patches
-    else
-      apply_patches patches;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_FORMAT (from, to_) ->
     let content = Sys_utils.read_stdin_to_string () in
     let%lwt (result, telemetry) = rpc args @@ Rpc.FORMAT (content, from, to_) in

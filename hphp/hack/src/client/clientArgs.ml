@@ -634,21 +634,6 @@ let parse_check_args cmd ~from_default =
           end,
         " (mode) rewrite lambdas in the files from the given list"
         ^ " with suggested parameter types" );
-      ( "--rewrite-partial-parameters-type-hints",
-        Arg.Rest
-          begin
-            fun fn ->
-              set_mode
-                ~validate:false
-                (match !mode with
-                | None -> MODE_REWRITE_TYPE_PARAMS_TYPE [fn]
-                | Some (MODE_REWRITE_TYPE_PARAMS_TYPE fnl) ->
-                  MODE_REWRITE_TYPE_PARAMS_TYPE (fn :: fnl)
-                | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) add missing type parameters in the type hints for function"
-        ^ " parameters (e.g.: C $x -> C<int> $x) in the files from the given list"
-      );
       ( "--save-naming",
         Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x)),
         " (mode) Save the naming table to the given file."

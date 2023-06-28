@@ -26,7 +26,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | CODEMOD_SDT _ ->
     true (* need same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
-  | REWRITE_TYPE_PARAMS_TYPE _ -> true
   (* Finding references/implementations uses global dependency table *)
   | FIND_REFS _ -> true
   | GO_TO_IMPL _ -> true

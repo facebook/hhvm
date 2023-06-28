@@ -475,7 +475,6 @@
   serverRage
   serverRename
   serverRewriteLambdaParameters
-  serverRewriteTypeParamsType
   serverSignatureHelp
   serverStamp
   serverStatusSingle

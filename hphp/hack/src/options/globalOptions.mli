@@ -157,8 +157,6 @@ type t = {
   po_allowed_decl_fixme_codes: ISet.t;
   (* Enable @ attribute syntax *)
   po_allow_new_attribute_syntax: bool;
-  tco_ordered_solving: bool;
-      (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)
   tco_const_static_props: bool;
   (* Disable <<...>> attribute syntax *)
@@ -383,7 +381,6 @@ val set :
   ?po_disable_legacy_soft_typehints:bool ->
   ?po_allowed_decl_fixme_codes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
-  ?tco_ordered_solving:bool ->
   ?tco_const_static_props:bool ->
   ?po_disable_legacy_attribute_syntax:bool ->
   ?tco_const_attribute:bool ->

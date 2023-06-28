@@ -261,10 +261,6 @@ let record_fine_grained_dependencies t =
 let loop_iteration_upper_bound t =
   t.GlobalOptions.tco_loop_iteration_upper_bound
 
-let set_ordered_solving t b = GlobalOptions.{ t with tco_ordered_solving = b }
-
-let ordered_solving t = t.GlobalOptions.tco_ordered_solving
-
 let typecheck_sample_rate t = t.GlobalOptions.tco_typecheck_sample_rate
 
 let log_fanout t ~fanout_cardinal =

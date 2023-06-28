@@ -7,7 +7,7 @@ class Test implements IteratorAggregate {
         $this->data = $data;
     }
 
-    public function getIterator() {
+    public function getIterator() :AsyncGenerator<mixed,mixed,void>{
         foreach ($this->data as $value) {
             yield $value;
         }

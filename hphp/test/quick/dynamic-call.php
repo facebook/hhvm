@@ -1,13 +1,13 @@
 <?hh
 
-function f17() {}
+function f17() :mixed{}
 
-function test($n) {
+function test($n) :mixed{
   $fn = "f$n";
   $fn();
 }
 
 <<__EntryPoint>>
-function main_entry() {
+function main_entry() :mixed{
   test(17);
 }

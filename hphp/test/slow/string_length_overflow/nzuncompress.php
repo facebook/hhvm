@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_nzuncompress() {
+function main_nzuncompress() :mixed{
 mt_srand(0);
 $s = '';
 for ( $i = 0; $i < 1000; $i++ ) {

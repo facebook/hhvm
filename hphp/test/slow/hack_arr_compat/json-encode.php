@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function literals() {
+function literals() :mixed{
   echo "================== literals ==================\n";
   json_encode(
     darray[],
@@ -55,7 +55,7 @@ function literals() {
   );
 }
 
-function test($name, $options) {
+function test($name, $options) :mixed{
   echo "==================== $name =========================\n";
   var_dump(json_encode(darray[], $options));
   var_dump(json_encode(darray(vec[1, 2, 3, 4]), $options));
@@ -100,7 +100,7 @@ class LateInitClass {
 }
 
 <<__EntryPoint>>
-function main_json_encode() {
+function main_json_encode() :mixed{
 literals();
 
 test("normal", 0);

@@ -1,9 +1,9 @@
 <?hh
 
-class C { static function f() {} }
+class C { static function f() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   apc_store('mainf', C::f<>);
   apc_store('maina', varray[1, C::f<>, 'foo']);
 

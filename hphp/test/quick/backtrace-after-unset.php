@@ -1,5 +1,5 @@
 <?hh
-function f($x) {
+function f($x) :mixed{
   include __FILE__;
 }
 <<__EntryPoint>>

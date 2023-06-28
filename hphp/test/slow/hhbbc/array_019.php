@@ -1,9 +1,9 @@
 <?hh
 
-function two() { return 2; }
-function bar(bool $x) { return $x ? darray['y' => two()] : darray['y' => new stdClass()]; }
-function foo(bool $x) { return darray['x' => bar($x)]; }
-function main(bool $x) {
+function two() :mixed{ return 2; }
+function bar(bool $x) :mixed{ return $x ? darray['y' => two()] : darray['y' => new stdClass()]; }
+function foo(bool $x) :mixed{ return darray['x' => bar($x)]; }
+function main(bool $x) :mixed{
   $ar = foo($x);
   $ar['x']['y']->x = 42;
   $k = $ar['x']['y']->x;
@@ -11,7 +11,7 @@ function main(bool $x) {
 }
 
 <<__EntryPoint>>
-function main_array_019() {
+function main_array_019() :mixed{
 main(true);
 main(false);
 }

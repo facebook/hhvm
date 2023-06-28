@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_draw_vector_graphics() {
+function main_draw_vector_graphics() :mixed{
 $draw = new ImagickDraw;
 
 $svg = <<<SVG

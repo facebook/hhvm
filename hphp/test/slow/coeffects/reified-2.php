@@ -1,8 +1,8 @@
 <?hh
 
-function f<reify T>()[T::C] {}
+function f<reify T>()[T::C] :mixed{}
 
 <<__EntryPoint>>
-function main()[] {
+function main()[] :mixed{
   f<int>();
 }

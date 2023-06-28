@@ -1,6 +1,6 @@
 <?hh
 
-function error_handler() {
+function error_handler() :mixed{
   throw new Exception('nooo');
 }
 

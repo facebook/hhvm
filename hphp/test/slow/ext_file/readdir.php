@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_readdir() {
+function main_readdir() :mixed{
 $d = dir(__DIR__);
 while ($ent = readdir($d->handle)) {
   if ($ent == 'test_ext_file.txt') {

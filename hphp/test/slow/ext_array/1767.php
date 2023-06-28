@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1767() {
+function main_1767() :mixed{
 var_dump(array_fill(-2, -2, 'pear'));
 var_dump(array_combine(varray[1, 2], varray[3]));
 var_dump(array_combine(varray[], varray[]));

@@ -1,5 +1,5 @@
 <?hh
-function octal_inc($s) {
+function octal_inc($s) :mixed{
     $len = strlen($s);
     while ($len > 0) {
         $len--;

@@ -1,19 +1,19 @@
 <?hh
 
 trait A {
-   public function smallTalk() {
+   public function smallTalk() :mixed{
      echo 'a';
    }
-   public function bigTalk() {
+   public function bigTalk() :mixed{
      echo 'A';
    }
 }
 
 trait B {
-   public function smallTalk() {
+   public function smallTalk() :mixed{
      echo 'b';
    }
-   public function bigTalk() {
+   public function bigTalk() :mixed{
      echo 'B';
    }
 }

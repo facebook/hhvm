@@ -2,13 +2,13 @@
 <?hh
 
 trait bar {
-  public function call() {
+  public function call() :mixed{
     var_dump(self::class);
     var_dump(__CLASS__);
     var_dump(darray[__CLASS__ => __CLASS__]);
   }
 }
-function a() {
+function a() :mixed{
   var_dump(__CLASS__);
 }
 
@@ -17,7 +17,7 @@ class baz extends foo {}
 
 
 <<__EntryPoint>>
-function main_class() {
+function main_class() :mixed{
 var_dump(__CLASS__);
 a();
 (new foo)->call();

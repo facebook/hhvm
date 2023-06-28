@@ -1,13 +1,13 @@
 <?hh
 
-function block() {
+function block() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
 <<__EntryPoint>>
-function main_closure_use() {
+function main_closure_use() :mixed{
 ;
 
 // closure in use param

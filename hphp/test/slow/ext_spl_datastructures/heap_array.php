@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_heap_array() {
+function main_heap_array() :mixed{
 $heap = new SplMinHeap();
 $heap->insert(varray[1, 1]);
 $heap->insert(varray[2, 2]);

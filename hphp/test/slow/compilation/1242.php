@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_1242() {
+function main_1242() :mixed{
 print '??/';
 }

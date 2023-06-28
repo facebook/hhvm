@@ -2,7 +2,7 @@
 
 class Foo {
 
-function x(Throwable $i, $spl = 1.7e+319) {
+function x(Throwable $i, $spl = 1.7e+319) :mixed{
  print 0;
 }
 }

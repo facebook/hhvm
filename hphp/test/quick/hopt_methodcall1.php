@@ -4,13 +4,13 @@
 
 // tests FCallFuncD
 <<__DynamicallyCallable>>
-function hello() {
+function hello() :mixed{
   echo "hello";
   return 1;
 }
 
 // tests FCallFunc
-function doCall($f) {
+function doCall($f) :mixed{
   echo "doCall(";
   if ($f()) {
     echo ") -- doCall got true\n";
@@ -20,7 +20,7 @@ function doCall($f) {
 }
 
 class C {
-  public function method1() {
+  public function method1() :mixed{
     $x = 1;
     echo "method1\n";
     if ($x) {
@@ -29,7 +29,7 @@ class C {
     }
     return 0;
   }
-  public function doPr($x) {
+  public function doPr($x) :mixed{
     echo $x;
     echo "\n";
     if ($x) {
@@ -37,7 +37,7 @@ class C {
     }
     return 2;
   }
-  public function foo() {
+  public function foo() :mixed{
     echo "foo\n";
     if ($this->method1()) {
       if ($this->doPr(true)) {

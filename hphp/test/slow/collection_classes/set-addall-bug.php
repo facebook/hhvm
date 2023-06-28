@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   // This Set will have an initial capacity of 3
   $x = HH\Set {205};
   // This array has 25 elements, but only 3 unique values
@@ -20,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_addall_bug() {
+function main_set_addall_bug() :mixed{
 main();
 }

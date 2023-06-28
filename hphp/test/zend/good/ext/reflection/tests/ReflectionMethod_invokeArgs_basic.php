@@ -3,17 +3,17 @@
 class TestClass {
     public $prop = 2;
 
-    <<__DynamicallyCallable>> public function foo() {
+    <<__DynamicallyCallable>> public function foo() :mixed{
         echo "Called foo(), property = $this->prop\n";
         var_dump($this);
         return "Return Val";
     }
 
-    <<__DynamicallyCallable>> public function willThrow() {
+    <<__DynamicallyCallable>> public function willThrow() :mixed{
         throw new Exception("Called willThrow()");
     }
 
-    <<__DynamicallyCallable>> public function methodWithArgs($a, $b) {
+    <<__DynamicallyCallable>> public function methodWithArgs($a, $b) :mixed{
         echo "Called methodWithArgs($a, $b)\n";
     }
 }

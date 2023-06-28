@@ -7,11 +7,11 @@ class Foo {
     $this->foo = $f;
     $this->bar = $b;
   }
-  public function __sleep() {
+  public function __sleep() :mixed{
     echo "I'm going to sleep\n";
     return varray['foo'];
   }
-  public function __wakeup() {
+  public function __wakeup() :mixed{
     echo "I'm waking up\n";
   }
 }

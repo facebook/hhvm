@@ -13,7 +13,7 @@ function stringAndTupleProvider(
 
 
 <<__EntryPoint>>
-function main_lambdas_variadic_multiple() {
+function main_lambdas_variadic_multiple() :mixed{
 print "String and int provider string \$str, int ...\$x\n";
 stringAndIntProvider((string $str, int ...$x) ==> {
   var_dump($str);

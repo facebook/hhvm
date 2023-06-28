@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     // Array with data for testing
     $long_str = str_repeat('blah', 100);
     $attributes = darray[

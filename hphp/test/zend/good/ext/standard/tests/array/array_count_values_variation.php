@@ -10,7 +10,7 @@
  */
 
 class A {
-    static function hello() {
+    static function hello() :mixed{
       echo "Hello\n";
     }
 }

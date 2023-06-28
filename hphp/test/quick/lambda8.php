@@ -3,16 +3,16 @@ class C {
 
   private static $barK = 0;
 
-  private function bar() {
+  private function bar() :mixed{
     ++self::$barK;
     $k = self::$barK;
     echo "$k\n";
     var_dump($this);
   }
-  public function foo1() {
+  public function foo1() :mixed{
     return () ==> () ==> $this->bar();
   }
-  public function foo2() {
+  public function foo2() :mixed{
     $x = $this;
     return () ==> () ==> $x->bar();
   }

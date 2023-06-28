@@ -2,7 +2,7 @@
 
 <<__NoFlatten>>
 trait T {
-  public function f1() {
+  public function f1() :mixed{
     return () ==> $this->x;
   }
 }
@@ -23,7 +23,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = new A();
   $b = new B();
   $c = new C();

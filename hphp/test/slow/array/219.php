@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_219() {
+function main_219() :mixed{
 $a = varray[1, 2];
  foreach ($a as $item) {
    print 'A['.$item.']';

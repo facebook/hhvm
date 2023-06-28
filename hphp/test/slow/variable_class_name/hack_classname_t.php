@@ -20,6 +20,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_hack_classname_t() {
+function main_hack_classname_t() :mixed{
 main();
 }

@@ -23,7 +23,7 @@ async function gen_not_enforced(Awaitable<C::T> $x): Awaitable<C::T> {
 
 
 <<__EntryPoint>>
-function main_type_constant4() {
+function main_type_constant4() :mixed{
 C::not_enforced(null);
 not_enforced(null);
 

@@ -6,7 +6,7 @@ class Asd {
   public static $SOMETHING = 'Something';
 }
 
-function foo($y) {
+function foo($y) :mixed{
   if (is_a($y, Asd::$SOMETHING)) {
     echo "was an instance\n";
   } else {
@@ -16,7 +16,7 @@ function foo($y) {
 
 
 <<__EntryPoint>>
-function main_public_static_props_018() {
+function main_public_static_props_018() :mixed{
 foo(new Something);
 foo(2);
 }

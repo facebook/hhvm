@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main() {
+function main() :mixed{
   var_dump(keyset[123] == keyset['123']);
   var_dump(keyset[123] != keyset['123']);
   var_dump(keyset[123] === keyset['123']);
@@ -68,6 +68,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_hphpc_literal() {
+function main_hphpc_literal() :mixed{
 main();
 }

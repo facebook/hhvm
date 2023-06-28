@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   ini_set('memory_limit', '20M');
   // Prevent folding, so that we don't set surprise flag at jit time.
   $inf = __hhvm_intrinsics\launder_value(-INF);

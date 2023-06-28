@@ -4,7 +4,7 @@ class C {
   public static int $x = 0;
 }
 
-function handler($what, $fun) {
+function handler($what, $fun) :mixed{
   if ($fun == 'foo' && $what == 'exit') {
     if (C::$x == 1) {
       exit(1);
@@ -13,7 +13,7 @@ function handler($what, $fun) {
   }
 }
 
-async function foo() {
+async function foo() :AsyncGenerator<mixed,mixed,void>{
   echo "enter\n";
   $x = RescheduleWaitHandle::create(0, 0);
   await $x;
@@ -21,7 +21,7 @@ async function foo() {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   fb_setprofile(handler<>);
   foreach (foo() await as $_) {}
   echo "NOOOOO!\n";

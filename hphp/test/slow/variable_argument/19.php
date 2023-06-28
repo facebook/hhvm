@@ -9,7 +9,7 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_19() {
+function main_19() :mixed{
 $obj = new A(1, 2, 3);
  $obj = new A('test');
 }

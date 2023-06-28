@@ -1,6 +1,6 @@
 <?hh
 
-function a() {
+function a() :mixed{
   $array1 = darray[
     "a" => "green",
     "b" => "brown",
@@ -17,7 +17,7 @@ function a() {
   var_dump($result);
 }
 
-function b() {
+function b() :mixed{
   $array1 = varray[0, 1, 2];
   $array2 = varray["00", "01", "2"];
   $result = array_diff_assoc($array1, $array2);
@@ -26,7 +26,7 @@ function b() {
 
 
 <<__EntryPoint>>
-function main_array_diff_assoc() {
+function main_array_diff_assoc() :mixed{
 a();
 b();
 }

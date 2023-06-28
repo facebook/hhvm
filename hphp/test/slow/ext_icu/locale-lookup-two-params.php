@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_locale_lookup_two_params() {
+function main_locale_lookup_two_params() :mixed{
 $arr = varray[
     'de-DEVA',
     'de-DE-1996',

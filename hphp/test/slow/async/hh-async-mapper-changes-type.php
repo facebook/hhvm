@@ -7,7 +7,7 @@ async function gen_with_key_to_string(int $k, int $v): Awaitable<string> {
   return $k.' => '.$v;
 }
 
-function main() {
+function main() :mixed{
   $v = Vector { 1, 2, 3 };
   $m = Map {
     10 => 100,
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_hh_async_mapper_changes_type() {
+function main_hh_async_mapper_changes_type() :mixed{
 main();
 }

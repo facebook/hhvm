@@ -1,7 +1,7 @@
 <?hh
 
 
-function doAThing($followable, $comment_settings) {
+function doAThing($followable, $comment_settings) :mixed{
   $interaction_settings = 0;
   if ($followable) {
     $interaction_settings |= 0x100;

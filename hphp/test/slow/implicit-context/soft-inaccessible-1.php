@@ -1,6 +1,6 @@
 <?hh
 
-function dump_ctx_data() {
+function dump_ctx_data() :mixed{
   try {
     echo ClassContext::getContext()->name() . "\n";
   } catch (Exception $e) {
@@ -8,7 +8,7 @@ function dump_ctx_data() {
   }
 }
 
-function dump_hash() {
+function dump_hash() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo "Hash: " . quoted_printable_encode($hash) . "\n";
 }
@@ -19,7 +19,7 @@ class Counter {
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function memoNoArg() {
+function memoNoArg() :mixed{
   dump_ctx_data();
   dump_hash();
   Counter::$noArg++;
@@ -27,14 +27,14 @@ function memoNoArg() {
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function memoWithArg($x) {
+function memoWithArg($x) :mixed{
   dump_ctx_data();
   dump_hash();
   Counter::$withArg++;
   return 1;
 }
 
-function f() {
+function f() :mixed{
   $v = vec[
     tuple('memoNoArg', () ==> memoNoArg()),
     tuple('memoWithArg', () ==> memoWithArg(1)),
@@ -53,21 +53,21 @@ function f() {
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function ic_inaccessible() {
+function ic_inaccessible() :mixed{
   f();
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function soft_ic_inaccessible() {
+function soft_ic_inaccessible() :mixed{
   f();
 }
 
-function p($text) {
+function p($text) :mixed{
   echo ">>>>> " . $text . "\n";
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   p("from null");
   f();

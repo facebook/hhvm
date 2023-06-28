@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1671() {
+function main_1671() :mixed{
 $xml = '<?xml version="1.0"?><dependencies><dependency dependency_id="0" dependent_id="1"/><dependency dependency_id="4" dependent_id="5"/><dependency dependency_id="5" dependent_id="6"/><dependency dependency_id="9" dependent_id="8"/><dependency dependency_id="10" dependent_id="8"/><dependency dependency_id="12" dependent_id="13"/><dependency dependency_id="12" dependent_id="14"/></dependencies>';
 $dom = new DOMDocument;
 $dom->loadXML($xml);

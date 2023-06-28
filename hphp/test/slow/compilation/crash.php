@@ -7,7 +7,7 @@ function crash(vec<int> $a): void {
 }
 
 <<__EntryPoint>>
-function main_crash() {
+function main_crash() :mixed{
 $a = vec[];
 $a[] = 42;
 crash($a);

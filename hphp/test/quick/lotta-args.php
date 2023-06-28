@@ -76,7 +76,7 @@ function f($a0,
            $a73,
            $a74,
            $a75,
-           $a76) {
+           $a76) :mixed{
   echo $a1 . "\n";
   echo $a2 . "\n";
   echo $a3 . "\n";

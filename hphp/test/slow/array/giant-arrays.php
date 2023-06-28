@@ -5,11 +5,11 @@ abstract final class FStatics {
   public static $counter = 0;
 }
 
-function f() {
+function f() :mixed{
   return FStatics::$counter++;
 }
 
-function big_keyset() {
+function big_keyset() :mixed{
   return keyset[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -342,7 +342,7 @@ function big_keyset() {
   ];
 }
 
-function big_vec() {
+function big_vec() :mixed{
   return vec[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -675,7 +675,7 @@ function big_vec() {
   ];
 }
 
-function big_packed() {
+function big_packed() :mixed{
   return varray[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -1010,7 +1010,7 @@ function big_packed() {
 
 
 <<__EntryPoint>>
-function main_giant_arrays() {
+function main_giant_arrays() :mixed{
 var_dump(big_keyset());
 var_dump(big_vec());
 var_dump(big_packed());

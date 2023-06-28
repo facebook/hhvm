@@ -1,10 +1,10 @@
 <?hh
 
-function f() {
+function f() :mixed{
 	throw new Exception();
 }
 
-function g($x) {
+function g($x) :mixed{
 	return "'".$x[0]."'";
 }
 <<__EntryPoint>>

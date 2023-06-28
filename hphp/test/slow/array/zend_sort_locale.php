@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_zend_sort_locale() {
+function main_zend_sort_locale() :mixed{
 setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
 $table = darray["AB" => "Alberta",
 "BC" => "Colombie-Britannique",

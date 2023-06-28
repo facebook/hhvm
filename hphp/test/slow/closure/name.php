@@ -1,16 +1,16 @@
 <?hh
 
 // Inside a function
-function testOne() {
+function testOne() :mixed{
   return () ==> debug_backtrace();
 }
 
-function testTwo() {
+function testTwo() :mixed{
   () ==> 2;
   return () ==> debug_backtrace();
 }
 
-function testNested() {
+function testNested() :mixed{
   $c1 = () ==> {
     $c2 = () ==> debug_backtrace();
     return $c2();
@@ -18,7 +18,7 @@ function testNested() {
   return $c1;
 }
 
-function testTwoNested() {
+function testTwoNested() :mixed{
   () ==> 2;
   $c1 = () ==> {
     () ==> 1;
@@ -29,10 +29,10 @@ function testTwoNested() {
 }
 
 class Test {
-  public static function testStatic() {
+  public static function testStatic() :mixed{
     return () ==> debug_backtrace();
   }
-  public function testMethod() {
+  public function testMethod() :mixed{
     return () ==> debug_backtrace();
   }
 }

@@ -13,7 +13,7 @@
  * top-level item, so we can't destroy any values until the end.
  */
 
-function test_overwritten_array_element($i) {
+function test_overwritten_array_element($i) :mixed{
   var_dump(unserialize(
     'D:3:{' .
       's:1:"a";a:1:{' .
@@ -27,7 +27,7 @@ function test_overwritten_array_element($i) {
   ));
 }
 
-function test_overwritten_property_value($i) {
+function test_overwritten_property_value($i) :mixed{
   var_dump(unserialize(
     'O:8:"stdClass":3:{' .
       's:1:"a";a:1:{' .
@@ -42,7 +42,7 @@ function test_overwritten_property_value($i) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 1; $i < 6; $i++) {
     print("\n=================================\n");
     print("Iteration $i\n");

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_mcrypt_return_types() {
+function main_ext_mcrypt_return_types() :mixed{
 $td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
 mcrypt_generic_init($td, '', 'a');
 

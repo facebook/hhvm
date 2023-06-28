@@ -50,7 +50,7 @@ class OuterStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function getStruct() {
+function getStruct() :mixed{
   $v = new OuterStruct();
   $v->value = "foo";
   $v->nested = new InnerStruct(42);
@@ -58,7 +58,7 @@ function getStruct() {
   return $v;
 }
 
-function testBinary() {
+function testBinary() :mixed{
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
@@ -67,7 +67,7 @@ function testBinary() {
   var_dump(thrift_protocol_read_binary($p, 'OuterStruct', true));
 }
 
-function testCompact() {
+function testCompact() :mixed{
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
@@ -77,7 +77,7 @@ function testCompact() {
 }
 
 <<__EntryPoint>>
-function main_forward_compatibility() {
+function main_forward_compatibility() :mixed{
   require 'common.inc';
   echo "--- binary ---\n";
   testBinary();

@@ -5,7 +5,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_1106() {
+function main_1106() :mixed{
   $a = 'A';
   unset($a::$foo[0]);
   unset(A::$foo[0]);

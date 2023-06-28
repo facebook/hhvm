@@ -8,11 +8,11 @@ class cr {
     function __construct($val) {
         $this->priv_member = $val;
     }
-    <<__DynamicallyCallable>> static function comp_func_cr($a, $b) {
+    <<__DynamicallyCallable>> static function comp_func_cr($a, $b) :mixed{
         if ($a->priv_member === $b->priv_member) return 0;
         return ($a->priv_member > $b->priv_member) ? 1 : -1;
     }
-    <<__DynamicallyCallable>> static function comp_func_key($a, $b) {
+    <<__DynamicallyCallable>> static function comp_func_key($a, $b) :mixed{
         if ($a === $b) return 0;
         return (HH\Lib\Legacy_FIXME\gt($a, $b)) ? 1 : -1;
     }

@@ -1,6 +1,6 @@
 <?hh
 
-function myfunc() {
+function myfunc() :mixed{
   return 'quux';
 }
 <<__EntryPoint>>

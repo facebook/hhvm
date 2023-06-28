@@ -1,7 +1,7 @@
 <?hh
 
 
-function main($a, $i) {
+function main($a, $i) :mixed{
   var_dump(isset($a[1 << 32]));
   var_dump(isset($a[$i]));
 }

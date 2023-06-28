@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   throw new Exception();
 }
 

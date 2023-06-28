@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_test_curl_empty_post() {
+function main_test_curl_empty_post() :mixed{
   $port = $_ENV['SERVERPORT'];
   $host = php_uname('n');
   $url = "http://$host:$port/hello.php";
@@ -10,7 +10,7 @@ function main_test_curl_empty_post() {
   multi_curl_empty_post($url);
 }
 
-function regular_curl_empty_post($url) {
+function regular_curl_empty_post($url) :mixed{
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_POST, 1);
@@ -18,7 +18,7 @@ function regular_curl_empty_post($url) {
   curl_close($ch);
 }
 
-function multi_curl_empty_post($url) {
+function multi_curl_empty_post($url) :mixed{
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_POST, 1);

@@ -12,7 +12,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_reflection_property_get_attributes() {
+function main_reflection_property_get_attributes() :mixed{
 var_dump((new ReflectionProperty(C::class, 'p'))->getAttributes());
 var_dump((new ReflectionProperty(C::class, 'sp'))->getAttributes());
 var_dump((new ReflectionProperty(C::class, 'pp'))->getAttributes());

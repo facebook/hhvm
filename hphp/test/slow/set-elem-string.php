@@ -3,7 +3,7 @@
 
 class C {
   private string $str = 'abcdef';
-  public function add($k, $c) {
+  public function add($k, $c) :mixed{
     $this->str[$k] = $c;
   }
 }

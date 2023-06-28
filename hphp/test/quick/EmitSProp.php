@@ -1,6 +1,6 @@
 <?hh
 
-function g() {
+function g() :mixed{
   $c::$x;
   $c::$x[0];
   $c::$x->prop[0];

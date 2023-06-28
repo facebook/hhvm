@@ -8,7 +8,7 @@
 /* Testing with unexpected argument types */
 
 class classA {
-  public function __toString() { return "Class A object"; }
+  public function __toString() :mixed{ return "Class A object"; }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";

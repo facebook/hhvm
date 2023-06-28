@@ -5,7 +5,7 @@ class Root {
 
 interface MyInterface
 {
-	static function MyInterfaceFunc();
+	static function MyInterfaceFunc():mixed;
 }
 
 abstract class Derived extends Root implements MyInterface {
@@ -13,7 +13,7 @@ abstract class Derived extends Root implements MyInterface {
 
 class Leaf extends Derived
 {
-	static function MyInterfaceFunc() {}
+	static function MyInterfaceFunc() :mixed{}
 }
 
 <<__EntryPoint>>

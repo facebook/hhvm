@@ -1,6 +1,6 @@
 <?hh
 
-function rain() {
+function rain() :mixed{
   $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
@@ -10,7 +10,7 @@ function rain() {
   }
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   rain();
   print("not_reached\n");
 }

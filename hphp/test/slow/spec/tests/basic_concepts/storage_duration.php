@@ -12,19 +12,19 @@ class Point
   }
 
   public function move($x, $y)
-  {
+:mixed  {
     $this->x = $x;
     $this->y = $y;
   }
 
   public function translate($x, $y)
-  {
+:mixed  {
     $this->x += $x;
     $this->y += $y;
   }
 
   public function __toString()
-  {
+:mixed  {
     return '(' . $this->x . ',' . $this->y . ')';
   }
 }
@@ -32,7 +32,7 @@ class Point
 class State { public static $sv1 = TRUE; public static $sv2 = 0; public static $sv3 = NULL; }
 
 function doit($p1)
-{
+:mixed{
   echo "---------------- Inside function_A -------------------\n";
 
   $av2 = new Point(1, 1);
@@ -68,7 +68,7 @@ function doit($p1)
 }
 
 function factorial($i)
-{
+:mixed{
   if ($i > 1) return $i * factorial($i - 1);
   else if ($i == 1) return $i;
   else return 0;

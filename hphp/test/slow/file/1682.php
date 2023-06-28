@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $name = tempnam(sys_get_temp_dir(), '1682');
   file_put_contents($name,
                     "put this in the txt file\n");
@@ -19,6 +19,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_1682() {
+function main_1682() :mixed{
 main();
 }

@@ -1,19 +1,19 @@
 <?hh
 
 class APure implements JsonSerializable {
-  public function jsonSerialize()[] {
+  public function jsonSerialize()[] :mixed{
     return 'a_pure';
   }
 }
 
 class ANonPure implements JsonSerializable {
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return 'a_non_pure';
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $pure = new APure();
   $non_pure = new ANonPure();
   json_encode($pure);

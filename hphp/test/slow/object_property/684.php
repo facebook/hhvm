@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   return false;
 }
 class B {
@@ -9,7 +9,7 @@ class B {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   if (f()) {
     include '684-1.inc';
   } else {

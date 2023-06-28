@@ -15,7 +15,7 @@ function my_function(
 }
 
 <<__EntryPoint>>
-function main_hashbang() {
+function main_hashbang() :mixed{
   var_dump(HH\Facts\path_to_functions(__FILE__));
   var_dump(HH\Facts\path_to_types(__FILE__));
   var_dump(HH\Facts\kind("Something"));

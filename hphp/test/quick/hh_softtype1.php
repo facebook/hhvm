@@ -1,9 +1,9 @@
 <?hh
 
-class Bar { public function frob() { echo "frob\n"; } }
+class Bar { public function frob() :mixed{ echo "frob\n"; } }
 class Foo {}
 
-function foo(<<__Soft>> Bar $x) {
+function foo(<<__Soft>> Bar $x) :mixed{
   if ($x) {
     $x->frob();
   }

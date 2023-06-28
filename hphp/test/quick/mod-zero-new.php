@@ -1,6 +1,6 @@
 <?hh
 
-function main($num,$zero) {
+function main($num,$zero) :mixed{
   try {
     $z = (int)($num) % (int)($zero);
     var_dump($z);

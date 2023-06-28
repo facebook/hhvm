@@ -10,7 +10,7 @@
  */
 
 <<__EntryPoint>>
-function main_hh_async_matrix() {
+function main_hh_async_matrix() :mixed{
 $vals = varray[
   NULL,
   true,

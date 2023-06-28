@@ -3,13 +3,13 @@ namespace A {
   // SORT_REGULAR is a global constant
   const SORT_NUMERIC = 42;
 
-  function c($k = \SORT_REGULAR) { \var_dump($k); }
-  function d($k = \SORT_NUMERIC) { \var_dump($k); }
+  function c($k = \SORT_REGULAR) :mixed{ \var_dump($k); }
+  function d($k = \SORT_NUMERIC) :mixed{ \var_dump($k); }
 
   // A\B\SORT_NUMERIC
-  function e($k = B\SORT_NUMERIC) { \var_dump($k); }
+  function e($k = B\SORT_NUMERIC) :mixed{ \var_dump($k); }
 
-  function f($k = \B\SORT_NUMERIC) { \var_dump($k); }
+  function f($k = \B\SORT_NUMERIC) :mixed{ \var_dump($k); }
 }
 
 namespace B {

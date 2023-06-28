@@ -4,7 +4,7 @@ class B {
 }
 class C extends B {
   public $w=3;
-  function dump_vars() {
+  function dump_vars() :mixed{
     var_dump(get_class_vars('C'));
   }
 }
@@ -15,7 +15,7 @@ class D {
 class E extends D {
   public $x = 123;
 }
-function main() {
+function main() :mixed{
   $d = new E();
   echo "Done\n";
 }
@@ -28,7 +28,7 @@ class H extends G {
   public static $x = F::FOO;
 }
 
-function main2() {
+function main2() :mixed{
   $d = new H();
   echo "Done\n";
 }

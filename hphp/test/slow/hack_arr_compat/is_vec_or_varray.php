@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function check(mixed $arg, string $descr) {
+function check(mixed $arg, string $descr) :mixed{
   printf(
     "is_vec_or_varray(%s) = %s\n",
     $descr,

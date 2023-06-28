@@ -1,7 +1,7 @@
 <?hh
 
 function make_exception()
-{
+:mixed{
     @$blah;
     str_replace();
     error_reporting(0);

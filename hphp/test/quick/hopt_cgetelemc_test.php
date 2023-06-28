@@ -1,7 +1,7 @@
 <?hh
 
-function val() { return 0; }
-function foo($k) {
+function val() :mixed{ return 0; }
+function foo($k) :mixed{
   $array = varray[0, 1];
   $idx = val();
   for ($ik = 0; $ik < 10; ++$ik) {

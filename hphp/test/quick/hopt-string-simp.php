@@ -1,5 +1,5 @@
 <?hh
-function foo1() {
+function foo1() :mixed{
   $x = "";
 
   if ($x)
@@ -7,57 +7,57 @@ function foo1() {
   return 4;
 }
 
-function foo2() {
+function foo2() :mixed{
   $x = "5";
   return (int)($x);
 }
 
-function foo3() {
+function foo3() :mixed{
   $x = "3";
   return $x == "3";
 }
 
-function foo4() {
+function foo4() :mixed{
   $x = 33;
   return HH\Lib\Legacy_FIXME\gte($x, "3");
 }
 
-function foo5() {
+function foo5() :mixed{
   $x = "33";
   return HH\Lib\Legacy_FIXME\gte($x, 3);
 }
 
-function foo6() {
+function foo6() :mixed{
   $x = "2";
   return HH\Lib\Legacy_FIXME\neq(2, $x);
 }
 
-function foo7() {
+function foo7() :mixed{
   $x = "00";
   return $x > "0";
 }
 
-function foo8() {
+function foo8() :mixed{
   $x = "";
   return HH\Lib\Legacy_FIXME\eq($x, null);
 }
 
-function foo9() {
+function foo9() :mixed{
   $x = "-1";
   return HH\Lib\Legacy_FIXME\lt($x, null);
 }
 
-function foo10() {
+function foo10() :mixed{
   $x = "-1";
   return HH\Lib\Legacy_FIXME\gt($x, null);
 }
 
-function foo11() {
+function foo11() :mixed{
   $x = "-1";
   return $x < "1";
 }
 
-function foo12() {
+function foo12() :mixed{
   $x = varray[];
   try {
     return strlen($x);
@@ -68,7 +68,7 @@ function foo12() {
 
 class A {}
 
-function foo13() {
+function foo13() :mixed{
   $x = new A();
   try {
     return strlen($x);
@@ -77,9 +77,9 @@ function foo13() {
   }
 }
 
-class B { public function __toString() { return "B"; } }
+class B { public function __toString() :mixed{ return "B"; } }
 
-function foo14() {
+function foo14() :mixed{
   $x = new B();
   try {
     return strlen($x);

@@ -1,6 +1,6 @@
 <?hh
 
-async function generator($mode) {
+async function generator($mode) :AsyncGenerator<mixed,mixed,void>{
   switch ($mode) {
     case 0:
       return;
@@ -30,14 +30,14 @@ async function generator($mode) {
       await reschedule();
       throw new Exception('bad 7');
   }
-}function reschedule() {
+}function reschedule() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_DEFAULT,
     1,
   );
 }
 
-async function test() {
+async function test() :Awaitable<mixed>{
   await reschedule(); // avoid polluting the first test
   for ($mode = 0; $mode < 8; $mode++) {
     printf("mode: %s\n", $mode);
@@ -51,7 +51,7 @@ async function test() {
 
 
 <<__EntryPoint>>
-function main_async_generator_callback() {
+function main_async_generator_callback() :mixed{
 ResumableWaitHandle::setOnCreateCallback(
   ($a, $b) ==> printf(
     "onCreate(%s, %s)...\n",

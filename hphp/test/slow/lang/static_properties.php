@@ -11,7 +11,7 @@ class A {
   static protected $e = A::CE;
   static private $f = A::CF;
 
-  function aFunc() {
+  function aFunc() :mixed{
     print "In A::aFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -46,7 +46,7 @@ class B extends A {
   static private $c = "B::c";
   public static $d = B::CD;
   static protected $g = "B::g";
-  function bFunc() {
+  function bFunc() :mixed{
     print "In B::bFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -79,7 +79,7 @@ class C extends B {
   static protected $b = "C::b";
   public static $h = "C::h";
   public $i = C::CG;
-  function cFunc() {
+  function cFunc() :mixed{
     print "In C::cFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -107,7 +107,7 @@ class C extends B {
   }
 }
 
-function main() {
+function main() :mixed{
   $a = new A;
   $a->aFunc();
 
@@ -149,7 +149,7 @@ function main() {
 }
 
 class D {
-  static function main() {
+  static function main() :mixed{
     $a = new A;
     $a->aFunc();
 
@@ -193,7 +193,7 @@ class D {
 
 // disable array -> "Array" conversion notice
 <<__EntryPoint>>
-function main_static_properties() {
+function main_static_properties() :mixed{
 error_reporting(error_reporting() & ~E_NOTICE);
 
 print "Test begin\n";

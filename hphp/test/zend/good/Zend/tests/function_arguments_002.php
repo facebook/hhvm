@@ -1,3 +1,3 @@
 <?hh
-function foo($arg1/) {}
+function foo($arg1/) :mixed{}
 

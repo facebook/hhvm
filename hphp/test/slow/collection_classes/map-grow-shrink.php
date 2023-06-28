@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $m = Map {};
   $m[1] = 1;
   unset($m[1]);
@@ -21,6 +21,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_map_grow_shrink() {
+function main_map_grow_shrink() :mixed{
 main();
 }

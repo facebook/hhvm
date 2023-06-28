@@ -2,12 +2,12 @@
 
 class Baz {
   <<__NEVER_INLINE>>
-  private function bar($options) {
+  private function bar($options) :mixed{
     var_dump(debug_backtrace($options));
   }
 
   <<__NEVER_INLINE>>
-  public function foo($options) {
+  public function foo($options) :mixed{
     HH\set_frame_metadata('I am foo');
     $this->bar($options);
   }

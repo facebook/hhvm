@@ -1,39 +1,39 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
 // TODO(#2512714): if you comment out the function hello and you'll SEGV :)
-function hello() {
+function hello() :mixed{
   return 'Hello World';
 }
 
-function add($a, $b) {
+function add($a, $b) :mixed{
   return (int)$a + (int)$b;
 }
-function sub($a, $b) {
+function sub($a, $b) :mixed{
   return (int)$a - (int)$b;
 }
-function sum($a) {
+function sum($a) :mixed{
   $sum = 0;
   foreach ($a as $v) {
     $sum += (int)$v;
   }
   return $sum;
 }
-function fault() {
+function fault() :mixed{
  return new SoapFault('MyFault', 'My fault string');
 }
 
 //////////////////////////////////////////////////////////////////////
 
-function verify_response($req, $expected) {
+function verify_response($req, $expected) :mixed{
 
 
   ob_start();
@@ -43,7 +43,7 @@ function verify_response($req, $expected) {
   VS($res, $expected);
 }
 
-function VSOAPEX($request, $response) {
+function VSOAPEX($request, $response) :mixed{
   verify_response
       ("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>".
        "<SOAP-ENV:Envelope SOAP-ENV:encodingStyle=".
@@ -61,7 +61,7 @@ function VSOAPEX($request, $response) {
   ;
 }
 
-function VSOAPNS($request, $expected, $ns) {
+function VSOAPNS($request, $expected, $ns) :mixed{
   VSOAPEX($request,
           "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".
           "<SOAP-ENV:Envelope xmlns:SOAP-ENV=".
@@ -79,7 +79,7 @@ function VSOAPNS($request, $expected, $ns) {
           );
 }
 
-function VSOAP($request, $expected) {
+function VSOAP($request, $expected) :mixed{
   VSOAPNS($request, $expected, "http://testuri.org");
 }
 

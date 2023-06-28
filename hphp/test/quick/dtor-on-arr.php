@@ -3,7 +3,7 @@
 class C {
 }
 
-<<__EntryPoint>> function f() {
+<<__EntryPoint>> function f() :mixed{
   if (varray[new C()]) {
     echo "branch works\n";
   } else {

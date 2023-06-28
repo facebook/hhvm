@@ -14,7 +14,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_annotation_alias2() {
+function main_type_annotation_alias2() :mixed{
 $x = new ReflectionTypeConstant(C::class, 'T');
 var_dump($x->getAssignedTypeText());
 

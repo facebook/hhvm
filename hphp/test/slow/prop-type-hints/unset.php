@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function err($errno, $errmsg, $errfile, $errline) {
+function err($errno, $errmsg, $errfile, $errline) :mixed{
   echo "$errmsg in $errfile on line $errline\n";
   throw new Exception();
 }
@@ -24,7 +24,7 @@ class A {
 
 class B extends A {
   public function __construct() { $this->y = new C(); }
-  public function test() {
+  public function test() :mixed{
     try { unset($this->y->x); } catch (Exception $e) {}
     try { unset($this->x); } catch (Exception $e) {}
     try { unset($this->z1); } catch (Exception $e) {}

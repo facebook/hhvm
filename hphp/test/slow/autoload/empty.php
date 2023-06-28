@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_empty() {
+function main_empty() :mixed{
 var_dump(method_exists('', 'foo'));
 }

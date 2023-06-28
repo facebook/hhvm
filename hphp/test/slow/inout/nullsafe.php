@@ -1,23 +1,23 @@
 <?hh
 
 class A {
-  public function foo(inout $a, inout $b, $c, inout $d) {
+  public function foo(inout $a, inout $b, $c, inout $d) :mixed{
     $a = 1;
     $b = 2;
     $d = 3;
     return 4;
   }
 
-  public function foo2(inout $a, inout $b, $c, inout $d) {
+  public function foo2(inout $a, inout $b, $c, inout $d) :mixed{
     throw new Exception("exception!");
   }
 
-  public function foo3($a, $b, $c, $d) {
+  public function foo3($a, $b, $c, $d) :mixed{
     return 123;
   }
 };
 
-function test1() {
+function test1() :mixed{
   $a = 'a';
   $b = 'b';
   $c = 'c';
@@ -26,7 +26,7 @@ function test1() {
   var_dump($a, $b, $c, $d, $e);
 }
 
-function test2() {
+function test2() :mixed{
   $a = 'a';
   $b = 'b';
   $c = 'c';
@@ -35,7 +35,7 @@ function test2() {
   var_dump($a, $b, $c, $d, $e);
 }
 
-function test3() {
+function test3() :mixed{
   $o = new A();
   if (__hhvm_intrinsics\launder_value(true)) $o = null;
   $a = 'a';
@@ -46,7 +46,7 @@ function test3() {
   var_dump($a, $b, $c, $d, $e);
 }
 
-function test4() {
+function test4() :mixed{
   $o = new A();
   if (__hhvm_intrinsics\launder_value(true)) $o = null;
   $a = 'a';
@@ -57,7 +57,7 @@ function test4() {
   var_dump($a, $b, $c, $d, $e);
 }
 
-function test5() {
+function test5() :mixed{
   $o = new A();
   if (__hhvm_intrinsics\launder_value(true)) $o = null;
   $a = 'a';
@@ -68,7 +68,7 @@ function test5() {
   var_dump($a, $b, $c, $d, $e);
 }
 
-function test6() {
+function test6() :mixed{
   $o = new A();
   if (__hhvm_intrinsics\launder_value(true)) $o = null;
   $a = 'a';
@@ -80,7 +80,7 @@ function test6() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test1();
   test2();
   test3();

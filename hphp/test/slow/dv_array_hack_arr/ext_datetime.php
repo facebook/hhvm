@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = new DateTimeZone("America/New_York");
   var_dump($d->getLocation());
   $invalid_date = "2OO9-02--27 10:00?00.5";

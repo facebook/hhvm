@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $doc = new DOMDocument();
   $root = $doc->createElement('root');
   var_dump($doc);
@@ -10,6 +10,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_owner_document() {
+function main_owner_document() :mixed{
 main();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_getsockname() {
+function main_getsockname() :mixed{
 $s = socket_create(AF_UNIX, SOCK_STREAM, 0);
 var_dump($s);
 

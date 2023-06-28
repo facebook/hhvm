@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $rv = 0;
   system(
     HH\__internal\hhvm_binary()." -m eval 'echo \"Hello, World!\\n\";'",

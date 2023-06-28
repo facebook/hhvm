@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_varray() {
+function test_varray() :mixed{
   var_dump(varray[]);
   var_dump(varray[1, 2, 3, 4]);
   var_dump(varray['a', 'b', 'c']);
@@ -12,7 +12,7 @@ function test_varray() {
   var_dump(varray[darray[], darray[100 => 'a', 'b' => 200]]);
 }
 
-function test_darray() {
+function test_darray() :mixed{
   var_dump(darray[]);
   var_dump(darray[100 => 1, 200 => 2, 300 => 3, 400 => 4]);
   var_dump(darray['key1' => 'a', 'key2' => 'b', 'key3' => 'c']);
@@ -39,7 +39,7 @@ function test_darray() {
 
 
 <<__EntryPoint>>
-function main_literal() {
+function main_literal() :mixed{
 test_varray();
 test_darray();
 }

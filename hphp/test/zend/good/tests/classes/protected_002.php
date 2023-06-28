@@ -1,17 +1,17 @@
 <?hh
 
 class pass {
-    protected static function show() {
+    protected static function show() :mixed{
         echo "Call pass::show()\n";
     }
 
-    public static function do_show() {
+    public static function do_show() :mixed{
         pass::show();
     }
 }
 
 class fail {
-    public static function show() {
+    public static function show() :mixed{
         echo "Call fail::show()\n";
         pass::show();
     }

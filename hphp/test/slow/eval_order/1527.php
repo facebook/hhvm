@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   EvalOrder1527::$a ??=0;
   EvalOrder1527::$a += 1;
   return EvalOrder1527::$a;

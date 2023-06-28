@@ -1,17 +1,17 @@
 <?hh
 
-function f1($x) {
+function f1($x) :mixed{
   return isset($x[0]) && $x[0];
 }
 
-function f2($x) {
+function f2($x) :mixed{
   try {
     if (!is_null($x[0])) var_dump($x[0]);
     var_dump($x[0]);
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
-function f3($x) {
+function f3($x) :mixed{
   foreach ($x['foo'] as $k => $v) {
     try {
       if ($v) unset($x['foo'][$k]);
@@ -20,7 +20,7 @@ function f3($x) {
   var_dump($x);
 }
 
-function f4($x) {
+function f4($x) :mixed{
   try {
     var_dump($x[0][1]);
     unset($x[0][1]);
@@ -28,13 +28,13 @@ function f4($x) {
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
-function f5($x) {
+function f5($x) :mixed{
   var_dump(md5($x[0]), $x[0]);
 }
 
 
 <<__EntryPoint>>
-function main_537() {
+function main_537() :mixed{
 error_reporting(0);
 var_dump(f1(null));
 var_dump(f1(varray[]));

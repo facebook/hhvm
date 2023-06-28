@@ -3,7 +3,7 @@
 module a.b;
 
 <<__EntryPoint>>
-function main_resolve_throw_1() {
+function main_resolve_throw_1() :mixed{
   try {
     baz1();
   } catch (Exception $e) {

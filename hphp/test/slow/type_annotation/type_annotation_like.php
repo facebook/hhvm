@@ -22,7 +22,7 @@ function f(string $const_name): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f('A');
   f('B');
   f('C');

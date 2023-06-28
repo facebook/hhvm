@@ -2,7 +2,7 @@
 
 class X {
   private $priv = 'X';
-  function foo() {
+  function foo() :mixed{
     return function ($x) {
       yield $x->priv;
     };
@@ -12,7 +12,7 @@ class X {
 class Y extends X { private $priv = 'Y'; }
 class Z extends X { private $priv = 'Z'; }
 
-function test($x) {
+function test($x) :mixed{
   $f = $x->foo();
   foreach ($f($x) as $v) var_dump($v);
 }

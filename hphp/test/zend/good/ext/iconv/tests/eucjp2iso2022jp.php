@@ -2,7 +2,7 @@
 /* include('test.inc'); */
 /* charset=EUC-JP */
 
-function hexdump($str) {
+function hexdump($str) :mixed{
 	$len = strlen($str);
 	for ($i = 0; $i < $len; ++$i) {
 		printf("%02x", ord($str{$i}));

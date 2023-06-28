@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_get_resource_type() {
+function main_get_resource_type() :mixed{
 $types = varray[
   'php://stdin',
   'php://stdout',

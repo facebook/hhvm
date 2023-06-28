@@ -4,7 +4,7 @@
  *
  * @param array $regs
  */
-function base64_encode_var_dump($regs) {
+function base64_encode_var_dump($regs) :mixed{
 	if ($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   switch (30) {
     case 30.0:
       echo "case 30.0\n";

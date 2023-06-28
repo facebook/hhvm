@@ -1,6 +1,6 @@
 <?hh
 class B {
-  public function foo() {
+  public function foo() :mixed{
     echo isset($this);
     echo "#\n";
   }

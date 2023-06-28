@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 echo("\n*** string serialize-and-unserialize ***\n");
 $ret = null;
 var_dump(fb_unserialize(fb_serialize("test"), inout $ret));

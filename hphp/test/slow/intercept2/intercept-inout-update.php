@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, inout $args) {
+function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
@@ -8,7 +8,7 @@ function handler($name, $obj, inout $args) {
   return shape('value' => 7);
 }
 
-function foo($arg, inout $a) {
+function foo($arg, inout $a) :mixed{
   echo "In foo!\n";
   echo "Arg is: " . $arg . "\n";
   $a = 10;
@@ -16,7 +16,7 @@ function foo($arg, inout $a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   fb_intercept2('foo', 'handler');
   $a = 1;
   var_dump(foo("Hey!", inout $a));

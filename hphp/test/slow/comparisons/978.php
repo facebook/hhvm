@@ -1,9 +1,9 @@
 <?hh
 
-<<__NEVER_INLINE>> function P(bool $v) { print $v ? 'Y' : 'N'; }
+<<__NEVER_INLINE>> function P(bool $v) :mixed{ print $v ? 'Y' : 'N'; }
 
 <<__EntryPoint>>
-function main_978() {
+function main_978() :mixed{
 $i = 0;
  print ++$i;
  print "\t";

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f1("");
   f1(null);
   f1(false);
@@ -45,7 +45,7 @@ function main() {
 
 class Derp {}
 
-function f1($x) {
+function f1($x) :mixed{
   var_dump($x);
   print "goes to:\n";
   switch ($x) {
@@ -71,7 +71,7 @@ function f1($x) {
   echo "\n";
 }
 
-function f2($x) {
+function f2($x) :mixed{
   var_dump($x);
   print "goes to:\n";
   switch ($x) {
@@ -103,7 +103,7 @@ function f2($x) {
   echo "\n";
 }
 
-function g($x) {
+function g($x) :mixed{
   var_dump($x);
   print "goes to:\n";
   switch ($x) {
@@ -120,7 +120,7 @@ function g($x) {
   echo "\n";
 }
 
-function h($x) {
+function h($x) :mixed{
   var_dump($x);
   print "goes to:\n";
   switch ($x) {

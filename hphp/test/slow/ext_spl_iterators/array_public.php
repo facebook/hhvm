@@ -9,7 +9,7 @@ class test {
 
 
 <<__EntryPoint>>
-function main_array_public() {
+function main_array_public() :mixed{
 $ai = new ArrayIterator(new test());
 
 foreach ($ai as $key=>$val) {

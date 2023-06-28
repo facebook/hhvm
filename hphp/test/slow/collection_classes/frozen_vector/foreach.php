@@ -2,7 +2,7 @@
 
 // Test iterating over a ImmVector with a "foreach".
 
-function main() {
+function main() :mixed{
 
   $fv = ImmVector {1, 2, 3};
 
@@ -13,6 +13,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_foreach() {
+function main_foreach() :mixed{
 main();
 }

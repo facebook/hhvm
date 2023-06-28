@@ -10,7 +10,7 @@ class Item {
 
 class handlerClass {
     public function getItems()
-    {
+:mixed    {
         return varray[
                 new Item(0),
                 new Item(1),

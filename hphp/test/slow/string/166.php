@@ -1,11 +1,11 @@
 <?hh
 
-function f() {
+function f() :mixed{
  return 'x';
  }
-function g() {
+function g() :mixed{
 }
-function test1($a) {
+function test1($a) :mixed{
   $buf = '';
   foreach ($a as $s) {
      $buf .= (string)(f()) . (string)(g()) . 'h' . (string)(f()) . 'h' . (string)(g());
@@ -15,27 +15,27 @@ function test1($a) {
   }
   return $buf;
 }
-function test2() {
+function test2() :mixed{
   return (string)(f()) . (string)(g()) . (string)(f()) . (string)(g());
 }
-function test3() {
+function test3() :mixed{
   return (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f()) . (string)(g()) . (string)(f());
 }
-function test4() {
+function test4() :mixed{
   $s = f();
   $s .=    ('foo'.    'bar'.    f().    'foo'.    'baz'.    f().    'fuz'.    'boo'.    f().    'fiz'.     'faz');
   $s .= f();
   return $s;
 }
-function test5() {
+function test5() :mixed{
   return (string)(g()).(string)(g()).(string)(g()).(string)(g());
 }
-function test6() {
+function test6() :mixed{
   return (string)(g()).(string)(f()).(string)(g());
 }
 
 <<__EntryPoint>>
-function main_166() {
+function main_166() :mixed{
 var_dump(test1(varray[1]));
 var_dump(test2());
 var_dump(test3());

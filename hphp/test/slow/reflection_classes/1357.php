@@ -8,7 +8,7 @@ class c {
 }
 
 <<__EntryPoint>>
-function main_1357() {
+function main_1357() :mixed{
 var_dump(c::bar);
 $r = new ReflectionClass('c');
 var_dump($r->getConstant("bar"));

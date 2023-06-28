@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = readonly new P();
   $y = new P();
   $y->prop = new P(); // ok, mutable to mutable property

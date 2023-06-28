@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_var_export_arrays() {
+function main_var_export_arrays() :mixed{
 echo("** array **\n");
 var_export(varray[]);
 echo("\n\n");

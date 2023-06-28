@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_typecheck() {
+function main_typecheck() :mixed{
 $not_ready = \HH\Client\typecheck(__DIR__.'/hh_client_notready');
 apc_delete('__systemlib__hh_client_time');
 var_dump($not_ready);

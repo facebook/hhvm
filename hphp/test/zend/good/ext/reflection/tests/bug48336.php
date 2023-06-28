@@ -20,7 +20,7 @@ class F extends E {
   static protected $prop;
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for($i = ord('A'); $i <= ord('F'); $i++) {
     $class = chr($i);
     print($class.' => ');

@@ -3,11 +3,11 @@
 class X {
 }
 
-function test($x) {
+function test($x) :mixed{
   call_user_func(varray[$x, "FOO"]);
 }
 
-function main() {
+function main() :mixed{
   try {
     test(new X);
   } catch (Exception $e) {
@@ -17,7 +17,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cuf_throw() {
+function main_cuf_throw() :mixed{
 set_error_handler(function() { throw new Exception; });
 
 main();

@@ -3,16 +3,16 @@
 newtype Foo = int;
 newtype Foo2 = int;
 
-function foo(Foo $x, Foo2 $y) {}
+function foo(Foo $x, Foo2 $y) :mixed{}
 
 newtype Bar = float;
 
-function bar(Bar $k) {}
+function bar(Bar $k) :mixed{}
 
 class bazcls {}
 newtype Baz = BazCls;
-function baz(Baz $k) {}
-function baz2(Bazcls $k) {}
+function baz(Baz $k) :mixed{}
+function baz2(Bazcls $k) :mixed{}
 
 type A = varray;
 type B = int;
@@ -32,7 +32,7 @@ function lots(A $x,
               G $xxxxxxx,
               H $xxxxxxxx,
               I $xxxxxxxxx)
-{}
+:mixed{}
 
 type A_ = a;
 type B_ = b;
@@ -53,7 +53,7 @@ function lots2(A_ $x,
                G_ $xxxxxxx,
                H_ $xxxxxxxx,
                I_ $xxxxxxxxx)
-{}
+:mixed{}
 
 function lots3(a_ $x,
                b_ $xx,
@@ -64,9 +64,9 @@ function lots3(a_ $x,
                g_ $xxxxxxx,
                h_ $xxxxxxxx,
                i_ $xxxxxxxxx)
-{}
+:mixed{}
 
-function main() {
+function main() :mixed{
   foo(12, 13);
   bar(1.0);
   baz(new Bazcls());
@@ -102,6 +102,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_typedef_mixed_case() {
+function main_typedef_mixed_case() :mixed{
 main();
 }

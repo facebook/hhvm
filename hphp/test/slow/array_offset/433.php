@@ -1,6 +1,6 @@
 <?hh
 
-function foo($p) { return $p; }
+function foo($p) :mixed{ return $p; }
 
 <<__EntryPoint>> function main(): void {
 $a = darray(varray[1, 2, 3, 4]);

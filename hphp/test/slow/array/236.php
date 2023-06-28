@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $a = varray[];
   $a[] = '1.1';
   $a[] = '2.2';
@@ -10,6 +10,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_236() {
+function main_236() :mixed{
 foo();
 }

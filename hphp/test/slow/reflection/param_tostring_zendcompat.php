@@ -18,13 +18,13 @@ class Foo {
     $opt_untyped = null,
     mixed $opt_m = null,
     MyObject $opt_o = null
-  ) {
+  ) :mixed{
   }
 }
 
 
 <<__EntryPoint>>
-function main_param_tostring_zendcompat() {
+function main_param_tostring_zendcompat() :mixed{
 $method = (new ReflectionClass('Foo'))->getMethod('bar');
 
 var_dump(

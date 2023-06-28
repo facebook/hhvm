@@ -1,7 +1,7 @@
 <?hh
 
 function resolve_to_constant($code)
-{
+:mixed{
     $refl = new ReflectionClass('Memcached');
     $c = $refl->getConstants();
 
@@ -13,7 +13,7 @@ function resolve_to_constant($code)
 }
 
 function status_print($op, $mem, $expected)
-{
+:mixed{
     $code = $mem->getResultcode();
 
     if ($code == $expected) {

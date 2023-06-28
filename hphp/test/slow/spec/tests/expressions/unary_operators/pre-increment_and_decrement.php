@@ -8,7 +8,7 @@
 
 // decrements twice before incrementing
 function incdec($a)
-{
+:mixed{
     echo "--------------------------------------- start incdec ---\n";
     $b = $a;
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
@@ -37,7 +37,7 @@ function incdec($a)
 
 // increments twice before decrementing
 function incdecrev($a)
-{
+:mixed{
     echo "--------------------------------------- start incdecrev ---\n";
     $b = $a;
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
@@ -64,7 +64,7 @@ function incdecrev($a)
     echo "--------------------------------------- end incdecrev ---\n";
 }
 
-function error_boundary(inout $x, $fn) {
+function error_boundary(inout $x, $fn) :mixed{
   try {
     return $fn(inout $x);
   } catch (Exception $e) {

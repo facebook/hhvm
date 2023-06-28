@@ -1,15 +1,15 @@
 <?hh
 
 class Bar {
-    public function pub() {
+    public function pub() :mixed{
         $this->priv();
     }
-    private function priv()    {
+    private function priv()    :mixed{
         echo "Bar::priv()\n";
     }
 }
 class Foo extends Bar {
-    public function priv()    {
+    public function priv()    :mixed{
         echo "Foo::priv()\n";
     }
 }

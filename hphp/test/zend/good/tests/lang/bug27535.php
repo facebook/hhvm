@@ -10,7 +10,7 @@ class Class2
     public $storage = '';
 
     function Class2()
-    {
+:mixed    {
         $this->storage = new Class1();
 
         $this->storage->_Class2_obj = $this;

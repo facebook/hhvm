@@ -14,6 +14,6 @@ abstract class C {
 
 
 <<__EntryPoint>>
-function main_is_expression_tc_abstract() {
+function main_is_expression_tc_abstract() :mixed{
 C::isT('foo');
 }

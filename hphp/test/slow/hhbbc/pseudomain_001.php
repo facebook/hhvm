@@ -1,12 +1,12 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
 
   HhbbcPseudomain001::$x = 'yep';
   return 'hehehe';
 }
 
-function al() { return 2; }
+function al() :mixed{ return 2; }
 
 abstract final class HhbbcPseudomain001 {
   public static $x;

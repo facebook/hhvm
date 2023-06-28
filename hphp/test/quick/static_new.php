@@ -1,16 +1,16 @@
 <?hh
 class C {
   public $cls = 'C';
-  public function foo() {
+  public function foo() :mixed{
     var_dump(isset($this));
     $obj = new static;
     var_dump($obj->cls);
   }
-  public static function bar() {
+  public static function bar() :mixed{
     $obj = new static;
     var_dump($obj->cls);
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     $obj = new static;
     var_dump($obj->cls);
@@ -19,7 +19,7 @@ class C {
 
 class D extends C {
   public $cls = 'D';
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     $obj = new static;
     var_dump($obj->cls);

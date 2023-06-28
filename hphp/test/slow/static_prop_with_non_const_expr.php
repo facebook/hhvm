@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  static function f($x) {
+  static function f($x) :mixed{
     return $x;
   }
 

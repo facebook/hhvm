@@ -1,7 +1,7 @@
 <?hh
 
 function has_all_keys($keys, $array, $check_true = false)
-{
+:mixed{
     foreach ($keys as $key) {
         if (!isset($array[$key]))
             return false;

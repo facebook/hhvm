@@ -11,7 +11,7 @@ class TestHeader2 extends SoapHeader {
 	}
 }
 
-function test() {
+function test() :mixed{
 
 	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader1("Hello Header!"));
 	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader2("Hello Header!"));

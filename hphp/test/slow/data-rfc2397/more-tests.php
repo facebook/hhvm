@@ -4,7 +4,7 @@
 // originally based on ext/standard/tests/file/stream_rfc2397_005.phpt
 
 <<__EntryPoint>>
-function main_more_tests() {
+function main_more_tests() :mixed{
 $streams = varray[
   'data://,;test',
   'data://text/plain,test',

@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  public function foo($offset) {
+  public function foo($offset) :mixed{
     if (isset($this->__array[$offset])) {
       return $this->initializeOffset($offset);
     }

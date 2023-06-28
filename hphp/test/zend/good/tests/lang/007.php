@@ -1,7 +1,7 @@
 <?hh
 
 function Test()
-{
+:mixed{
     $c = 1;
     Lang007::$b = 5;
     echo TestStatics::$a." ".Lang007::$b." ";

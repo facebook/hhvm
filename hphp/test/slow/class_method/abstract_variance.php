@@ -21,6 +21,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_abstract_variance() {
+function main_abstract_variance() :mixed{
 main();
 }

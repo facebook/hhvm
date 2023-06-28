@@ -3,7 +3,7 @@
 namespace Animal;
 
 <<Dog(3)>>
-function f(<<Hippo(7)>> $p) {}
+function f(<<Hippo(7)>> $p) :mixed{}
 
 <<Cat(4)>>
 type Bear = shape(...);
@@ -18,7 +18,7 @@ class Lion {
 class Zebra extends Lion {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $rf = new \ReflectionFunction("Animal\\f");
   \var_dump($rf->getAttributes());
   \var_dump($rf->getAttribute("Dog"));

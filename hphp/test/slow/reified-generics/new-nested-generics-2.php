@@ -1,12 +1,12 @@
 <?hh // strict
 
 class C<reify T> {
-  function g() {
+  function g() :mixed{
     echo "yes\n";
   }
 }
 
-function f<reify T>() {
+function f<reify T>() :mixed{
   $x = new T();
   $x->g();
   $y = new T();
@@ -14,6 +14,6 @@ function f<reify T>() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f<C<int>>();
 }

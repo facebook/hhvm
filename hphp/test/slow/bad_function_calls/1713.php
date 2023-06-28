@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $a = varray[];
   $a[] = 1;
   try { array_push(inout $a, ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -8,6 +8,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_1713() {
+function main_1713() :mixed{
 f();
 }

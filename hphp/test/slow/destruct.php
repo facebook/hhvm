@@ -5,7 +5,7 @@ class C {
 };
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $v = null;
   $d = null;
   $o = null;

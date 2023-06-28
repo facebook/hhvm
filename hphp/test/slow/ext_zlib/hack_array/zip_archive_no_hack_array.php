@@ -23,7 +23,7 @@ function stat_targets(ZipArchive $zip): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $zip = new ZipArchive();
   $zip->open(sys_get_temp_dir().'/'.ZIP_NAME, ZipArchive::CREATE);
   $zip->addGlob(__DIR__ . '/test_files/foo*', 0, OPTS);

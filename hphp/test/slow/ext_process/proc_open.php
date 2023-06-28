@@ -1,6 +1,6 @@
 <?hh
 
-function test_me($desc) {
+function test_me($desc) :mixed{
   $pipes = null;
   $child_status = null;
   $process = proc_open(__DIR__."/test_proc_open.sh", darray($desc), inout $pipes);
@@ -10,7 +10,7 @@ function test_me($desc) {
 
 
 <<__EntryPoint>>
-function main_proc_open() {
+function main_proc_open() :mixed{
 $desc = varray[varray["file", "php://stdin", "r"]];
 test_me($desc);
 

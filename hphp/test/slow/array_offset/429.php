@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_429() {
+function main_429() :mixed{
 $a = darray[];
 $a[0] = 1;
 $a[01] = 2;

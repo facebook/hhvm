@@ -5,7 +5,7 @@ class CGetMTest {
     $this->uniqueVar = "a string";
   }
 
-  public function getX() {
+  public function getX() :mixed{
     // TODO test something that will throw, make sure stack
     // materialization worked.
     return $this->uniqueVar;
@@ -14,13 +14,13 @@ class CGetMTest {
   private $uniqueVar;
 }
 
-function test5() {
+function test5() :mixed{
   $obj = new CGetMTest();
   echo $obj->getX();
   echo "\n";
 }
 
-function test9() {
+function test9() :mixed{
   // $this is on the stack; can we still handle incref / decref
   // elimination (not right now).
   echo (new CGetMTest())->getX();
@@ -29,7 +29,7 @@ function test9() {
 
 
 <<__EntryPoint>>
-function main_cgetm() {
+function main_cgetm() :mixed{
 test5();
 test9();
 }

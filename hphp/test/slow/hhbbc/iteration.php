@@ -1,24 +1,24 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function get_int() {
+function get_int() :mixed{
   return (int)__hhvm_intrinsics\launder_value(1);
 }
 
-function get_sarr() {
+function get_sarr() :mixed{
   return varray[1, 2, 3];
 }
-function get_arrn() {
+function get_arrn() :mixed{
   return varray[get_int(), get_int(), get_int()];
 }
-function get_arre() {
+function get_arre() :mixed{
   return varray[];
 }
-function get_single_arr() {
+function get_single_arr() :mixed{
   return varray[10];
 }
 
-function get_packedn() {
+function get_packedn() :mixed{
   $a = varray[1];
   for ($i = 0; $i < __hhvm_intrinsics\launder_value(3); $i++) {
     $a[] = get_int();
@@ -26,11 +26,11 @@ function get_packedn() {
   return $a;
 }
 
-function get_map() {
+function get_map() :mixed{
   return darray['a' => get_int(), 'b' => get_int(), 'c' => get_int()];
 }
 
-function get_mapn() {
+function get_mapn() :mixed{
   $a = darray[
     __hhvm_intrinsics\launder_value('a') => get_int(),
     __hhvm_intrinsics\launder_value('b') => get_int(),
@@ -39,31 +39,31 @@ function get_mapn() {
   return $a;
 }
 
-function get_arr() {
+function get_arr() :mixed{
   return __hhvm_intrinsics\launder_value(true) ? get_arre() : get_arrn();
 }
-function get_nullable_arr() {
+function get_nullable_arr() :mixed{
   return __hhvm_intrinsics\launder_value(true) ? null : get_arrn();
 }
-function get_nullable_single_arr() {
+function get_nullable_single_arr() :mixed{
   return __hhvm_intrinsics\launder_value(true) ? null : get_single_arr();
 }
-function get_empty_single_arr() {
+function get_empty_single_arr() :mixed{
   return __hhvm_intrinsics\launder_value(true) ? get_arre() : get_single_arr();
 }
 
-function get_null() {
+function get_null() :mixed{
   return null;
 }
-function get_obj() {
+function get_obj() :mixed{
   return new stdClass;
 }
 
-function get_anything() {
+function get_anything() :mixed{
   return __hhvm_intrinsics\launder_value(varray[1, 2, 3]);
 }
 
-function fun1() {
+function fun1() :mixed{
   $sum = 0;
   foreach (get_sarr() as $v) {
     $sum += $v;
@@ -71,7 +71,7 @@ function fun1() {
   return $sum;
 }
 
-function fun2() {
+function fun2() :mixed{
   $sum = 0;
   foreach (get_arrn() as $v) {
     $sum += $v;
@@ -79,7 +79,7 @@ function fun2() {
   return $sum;
 }
 
-function fun3() {
+function fun3() :mixed{
   $sum = 0;
   foreach (get_arre() as $v) {
     $sum += $v;
@@ -87,7 +87,7 @@ function fun3() {
   return $sum;
 }
 
-function fun4() {
+function fun4() :mixed{
   $sum = 0;
   foreach (get_packedn() as $v) {
     $sum += $v;
@@ -95,7 +95,7 @@ function fun4() {
   return $sum;
 }
 
-function fun5() {
+function fun5() :mixed{
   $sum = 0;
   foreach (get_map() as $v) {
     $sum += $v;
@@ -103,7 +103,7 @@ function fun5() {
   return $sum;
 }
 
-function fun6() {
+function fun6() :mixed{
   $sum = 0;
   foreach (get_mapn() as $v) {
     $sum += $v;
@@ -111,7 +111,7 @@ function fun6() {
   return $sum;
 }
 
-function fun7() {
+function fun7() :mixed{
   $sum = 0;
   foreach (get_arr() as $v) {
     $sum += $v;
@@ -119,7 +119,7 @@ function fun7() {
   return $sum;
 }
 
-function fun8() {
+function fun8() :mixed{
   $sum = 0;
   try {
     foreach (get_nullable_arr() as $v) {
@@ -130,7 +130,7 @@ function fun8() {
   }
 }
 
-function fun9() {
+function fun9() :mixed{
   $sum = 0;
   foreach (get_single_arr() as $v) {
     $sum += $v;
@@ -138,7 +138,7 @@ function fun9() {
   return $sum;
 }
 
-function fun10() {
+function fun10() :mixed{
   $sum = 0;
   try {
     foreach (get_nullable_single_arr() as $v) {
@@ -149,7 +149,7 @@ function fun10() {
   }
 }
 
-function fun11() {
+function fun11() :mixed{
   $sum = 0;
   foreach (get_empty_single_arr() as $v) {
     $sum += $v;
@@ -157,7 +157,7 @@ function fun11() {
   return $sum;
 }
 
-function fun12() {
+function fun12() :mixed{
   $sum = 0;
   try {
     foreach (get_null() as $v) {
@@ -168,7 +168,7 @@ function fun12() {
   }
 }
 
-function fun13() {
+function fun13() :mixed{
   $sum = 0;
   foreach (get_obj() as $v) {
     $sum += $v;
@@ -176,7 +176,7 @@ function fun13() {
   return $sum;
 }
 
-function fun14() {
+function fun14() :mixed{
   $sum = 0;
   foreach (get_anything() as $v) {
     $sum += $v;
@@ -186,7 +186,7 @@ function fun14() {
 
 
 <<__EntryPoint>>
-function main_iteration() {
+function main_iteration() :mixed{
   var_dump(fun1());
   var_dump(fun2());
   var_dump(fun3());

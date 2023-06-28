@@ -2,23 +2,23 @@
 
 class Foo {
 
-  static function bar() {
+  static function bar() :mixed{
     var_dump(10);
   }
 
 
-  static function rbar<reify T>(T $x) {
+  static function rbar<reify T>(T $x) :mixed{
     var_dump($x);
   }
 
   <<__DynamicallyCallable>>
-  static function baz() {
+  static function baz() :mixed{
     var_dump(20);
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = Foo::class;
   $x::bar(); // no warning
   $x::rbar<int>(10); // no warning

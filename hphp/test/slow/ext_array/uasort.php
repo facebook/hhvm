@@ -1,12 +1,12 @@
 <?hh
 
-function reverse_strcasecmp($s1,$s2) {
+function reverse_strcasecmp($s1,$s2) :mixed{
   return strcasecmp($s2,$s1);
 }
 
 
 <<__EntryPoint>>
-function main_uasort() {
+function main_uasort() :mixed{
 $fruits = darray[
   "d" => "lemon",
   "a" => "orange",

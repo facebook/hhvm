@@ -1,5 +1,5 @@
 <?hh
-function Add($x,$y) {
+function Add($x,$y) :mixed{
   return $x+$y;
 }
 <<__EntryPoint>> function main(): void {

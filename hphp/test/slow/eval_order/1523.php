@@ -1,33 +1,33 @@
 <?hh
 
-function f(inout $a, $v = 5) {
+function f(inout $a, $v = 5) :mixed{
   $a = $v;
   return 0;
 }
 
 
 
-function g(inout $a) {
+function g(inout $a) :mixed{
   $a[0] = 5;
   return 0;
 }
-function h(inout $a) {
+function h(inout $a) :mixed{
   $a = 5;
   return 0;
 }
-function k($a) {
+function k($a) :mixed{
   $a->prop = 5;
   return 0;
 }
-function foo() {
+function foo() :mixed{
   return 'foo';
 }
-function dump($a, $b) {
+function dump($a, $b) :mixed{
   var_dump($a, $b);
 }
 
 <<__EntryPoint>>
-function main_1523() {
+function main_1523() :mixed{
 $a = 2;
 var_dump($a . f(inout $a));
 $a = 2;

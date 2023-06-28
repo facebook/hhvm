@@ -13,10 +13,10 @@
  */
 class ParentClass {
   public $var1 = 10;
-  <<__DynamicallyCallable>> public static function staticParent1($n) {
+  <<__DynamicallyCallable>> public static function staticParent1($n) :mixed{
     return $n;
   }
-  <<__DynamicallyCallable>> private static function staticParent2($n) {
+  <<__DynamicallyCallable>> private static function staticParent2($n) :mixed{
     return $n;
   }
 }
@@ -27,10 +27,10 @@ class ChildClass extends ParentClass {
     $this->parent_obj = new ParentClass();
   }
   public $var2 = 5;
-  <<__DynamicallyCallable>> public static function staticChild($n) {
+  <<__DynamicallyCallable>> public static function staticChild($n) :mixed{
     return $n;
   }
-  <<__DynamicallyCallable>> public function nonstaticChild($n) {
+  <<__DynamicallyCallable>> public function nonstaticChild($n) :mixed{
     return $n;
   }
 }

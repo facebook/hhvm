@@ -2,7 +2,7 @@
 
 
 <<__Memoize>>
-function varargFn($a, ...$_) { return 1; }
+function varargFn($a, ...$_) :mixed{ return 1; }
 
 <<__EntryPoint>>
 function main(): void {

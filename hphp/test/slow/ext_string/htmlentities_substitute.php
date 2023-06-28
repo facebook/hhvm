@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_htmlentities_substitute() {
+function main_htmlentities_substitute() :mixed{
 $foo = varray[
   varray['41efbfbd2667743b42', "\x41\xC2\x3E\x42", null],
   varray['41efbfbd2667743b42', "\x41\xC2\x3E\x42", ENT_NOQUOTES],

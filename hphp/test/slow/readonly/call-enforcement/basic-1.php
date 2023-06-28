@@ -4,12 +4,12 @@
 
 class C {}
 
-function f($x) { echo "in f\n"; }
-function g(readonly $x, $y) { echo "in g\n"; }
-function h(...$x) { echo "in h\n"; }
+function f($x) :mixed{ echo "in f\n"; }
+function g(readonly $x, $y) :mixed{ echo "in g\n"; }
+function h(...$x) :mixed{ echo "in h\n"; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $mut = new C();
   $ro = readonly new C();
 

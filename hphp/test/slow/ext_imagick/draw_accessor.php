@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_draw_accessor() {
+function main_draw_accessor() :mixed{
 $draw = new ImagickDraw;
 
 // clip

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_builtin() {
+function main_builtin() :mixed{
 $f = new ReflectionFunction("json_encode");
 var_dump($f->getStartLine(), $f->getEndLine(), $f->getFileName());
 

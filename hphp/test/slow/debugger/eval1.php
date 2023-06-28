@@ -7,7 +7,7 @@ class cls {
     $this->pub = 11;
     $this->pri = 12;
   }
-  public function meth($x) {
+  public function meth($x) :mixed{
     $a = $this->pub.':'.$this->pri;
     $b = $this->pub.':'.$this->pri;
     $c = $this->pub.':'.$this->pri;
@@ -15,6 +15,6 @@ class cls {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   error_log('eval1.php loaded');
 }

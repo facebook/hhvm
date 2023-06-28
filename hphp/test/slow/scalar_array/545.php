@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_545() {
+function main_545() :mixed{
 $a1 = varray[];
 $a2 = varray[null];
 $a3 = varray[true];

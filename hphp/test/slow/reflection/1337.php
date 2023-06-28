@@ -6,7 +6,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_1337() {
+function main_1337() :mixed{
 $obj = new A();
  var_dump(get_object_vars($obj));
 }

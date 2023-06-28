@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_incomplete_class() {
+function main_incomplete_class() :mixed{
 $str = 'O:7:"invalid":0:{}';
 $obj = unserialize($str);
 var_dump($obj);

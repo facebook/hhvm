@@ -10,7 +10,7 @@
 
 class my
 {
-  function __toString() {
+  function __toString() :mixed{
     return "myString";
   }
 }

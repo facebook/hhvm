@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function return_values() {
+function return_values() :mixed{
   $x = __hhvm_intrinsics\dummy_varray_builtin(varray[1,2,3]);
   var_dump(HH\is_php_array($x));
   var_dump(is_varray($x));
@@ -32,7 +32,7 @@ function return_values() {
   echo "====================================================\n";
 }
 
-function parameters() {
+function parameters() :mixed{
   __hhvm_intrinsics\dummy_varray_builtin(varray[1,2,3]);
   try { __hhvm_intrinsics\dummy_varray_builtin(darray['a'=>1,'b'=>2,'c'=>3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo "====================================================\n";
@@ -48,7 +48,7 @@ function parameters() {
 
 
 <<__EntryPoint>>
-function main_builtin_annotations() {
+function main_builtin_annotations() :mixed{
 return_values();
 parameters();
 }

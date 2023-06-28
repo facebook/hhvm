@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $y = 1;
   $foo = () ==> $x + $y;
   $x = 2;
@@ -11,6 +11,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_lambda_uninit_capture() {
+function main_lambda_uninit_capture() :mixed{
 test();
 }

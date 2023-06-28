@@ -1,7 +1,7 @@
 <?hh
 
 namespace {
-    function bar() {}
+    function bar() :mixed{}
 
     use function foo\bar;
 }

@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function f() { new self(); }
+  function f() :mixed{ new self(); }
 }
 
 class C<reify T> {
@@ -10,7 +10,7 @@ class C<reify T> {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     (new C)->f();
   } catch (Exception $e) {

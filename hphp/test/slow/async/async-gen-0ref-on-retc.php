@@ -1,6 +1,6 @@
 <?hh // decl
 
-async function foo() {
+async function foo() :AsyncGenerator<mixed,mixed,void>{
   yield 42;
   echo "waiting for clearing ref\n";
   await RescheduleWaitHandle::create(0, 0);
@@ -8,7 +8,7 @@ async function foo() {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(0, 0);
   $gen = foo();
   $next = await $gen->next();

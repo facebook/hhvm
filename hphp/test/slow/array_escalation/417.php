@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $a = varray[];
   for ($i = 0;
  $i < 17;
@@ -14,6 +14,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_417() {
+function main_417() :mixed{
 test();
 }

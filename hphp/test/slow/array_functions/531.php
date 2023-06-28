@@ -1,13 +1,13 @@
 <?hh
 
-function f($x, $y) {
+function f($x, $y) :mixed{
   var_dump($x, $y);
   return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($y) + 1;
 }
 
 
 <<__EntryPoint>>
-function main_531() {
+function main_531() :mixed{
 var_dump(array_reduce(varray[], f<>));
 var_dump(array_reduce(varray[], f<>, null));
 var_dump(array_reduce(varray[], f<>, 0));

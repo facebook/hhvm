@@ -9,7 +9,7 @@
  * Check if the second copy remains unsorted.
  */
 function test_COW( $locale, $test_array )
-{
+:mixed{
     $res_str = '';
 
     $coll = ut_coll_create( $locale );
@@ -32,7 +32,7 @@ function test_COW( $locale, $test_array )
 }
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     $a1 = varray[ 'b', 'a', 'c' ];

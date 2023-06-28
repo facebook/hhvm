@@ -1,6 +1,6 @@
 <?hh
 
-function test($input, $compressed, $decompressor) {
+function test($input, $compressed, $decompressor) :mixed{
   $output = '';
   $i = $j = 0;
   $chunks = str_split($compressed, 512 /* bytes */);
@@ -25,7 +25,7 @@ function test($input, $compressed, $decompressor) {
   );
 }
 
-function test_potential_exception($input, $compressed, $decompressor) {
+function test_potential_exception($input, $compressed, $decompressor) :mixed{
   $output = '';
   $i = $j = 0;
   $chunks = str_split($compressed, 16384);
@@ -51,7 +51,7 @@ function test_potential_exception($input, $compressed, $decompressor) {
   );
 }
 
-function bzencode($input) {
+function bzencode($input) :mixed{
   $filename = tempnam(sys_get_temp_dir(), '');
   try {
     $bz = bzopen($filename, "w");
@@ -71,7 +71,7 @@ function bzencode($input) {
   return $result;
 }
 
-function test_random_string() {
+function test_random_string() :mixed{
   $input = 'herp derp';
   // need a bigger string, with big output
   for ($i = 0; $i <= 1024; ++$i) {
@@ -88,7 +88,7 @@ function test_random_string() {
   test($input, bzencode($input), new __SystemLib\ChunkedBunzipper());
 }
 
-function test_highly_compressed_string() {
+function test_highly_compressed_string() :mixed{
   // 32MB of zeroes
   $input = 'a';
   for ($i = 0; $i <= 24; ++$i) {
@@ -105,7 +105,7 @@ function test_highly_compressed_string() {
   test_potential_exception($input, bzencode($input), new __SystemLib\ChunkedBunzipper());
 }
 
-function test_error_on_invalid_input() {
+function test_error_on_invalid_input() :mixed{
   try {
     printf("-----\nTesting inflator exception\n");
     $decompressor = new __SystemLib\ChunkedInflator();
@@ -132,7 +132,7 @@ function test_error_on_invalid_input() {
   }
 }
 
-function test_multiple_gzstream() {
+function test_multiple_gzstream() :mixed{
   $filename = tempnam(sys_get_temp_dir(), '');
   $s = "";
   for($i = 0; $i < 256; $i++) {
@@ -177,7 +177,7 @@ function test_multiple_gzstream() {
   printf("Uncompressed length: %d, totaling %d streams\n", $uncompressed_len, $stream_count);
 }
 
-function main() {
+function main() :mixed{
   test_random_string();
   test_highly_compressed_string();
   test_error_on_invalid_input();
@@ -185,6 +185,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_inflate_chunked() {
+function main_inflate_chunked() :mixed{
 main();
 }

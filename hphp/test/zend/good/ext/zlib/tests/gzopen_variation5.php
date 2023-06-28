@@ -1,6 +1,6 @@
 <?hh
 
-function runtest() {
+function runtest() :mixed{
 	$tmpfile = 'gzopen_variation5.tmp';
 	$h = gzopen($tmpfile, "w", 1);
 	fwrite($h, "This is the test file");

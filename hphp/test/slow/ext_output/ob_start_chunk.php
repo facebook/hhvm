@@ -3,7 +3,7 @@
 
 // chunk size of 2
 <<__EntryPoint>>
-function main_ob_start_chunk() {
+function main_ob_start_chunk() :mixed{
 ob_start(function ($s) { return 'ob: ' . $s; }, 2);
 
 for ($i = 1; $i <= 5; $i++) {

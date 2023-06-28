@@ -11,7 +11,7 @@ case type C3 = B | C2;
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $values = vec[1, "asd", 1.2, null, true, new A, new B];
 
   echo "C1\n";

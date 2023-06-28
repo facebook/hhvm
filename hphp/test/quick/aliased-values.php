@@ -1,7 +1,7 @@
 <?hh
 
 <<__NEVER_INLINE>>
-function test($x) {
+function test($x) :mixed{
   $arr = dict["bar" => 17];
   $y = idx($arr, HH\array_key_cast($x), $x);
   if ($y === "bar") return true;
@@ -9,6 +9,6 @@ function test($x) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(test(json_decode('"foo"')));
 }

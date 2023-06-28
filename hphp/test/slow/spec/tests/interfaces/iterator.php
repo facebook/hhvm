@@ -10,11 +10,11 @@
 
 interface XIterator extends Traversable
 {
-    function current();
-    function key();
-    function next();
-    function rewind();
-    function valid();
+    function current():mixed;
+    function key():mixed;
+    function next():mixed;
+    function rewind():mixed;
+    function valid():mixed;
 }
 
 <<__EntryPoint>> function main(): void {

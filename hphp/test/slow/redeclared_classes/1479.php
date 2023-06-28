@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1479() {
+function main_1479() :mixed{
 if (!isset($g2)) {
   include '1479-1.inc';
 }

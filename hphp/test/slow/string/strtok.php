@@ -1,6 +1,6 @@
 <?hh
 
-function tokenize($str, $token) {
+function tokenize($str, $token) :mixed{
     $tokenizedStrArr = varray[];
     $tokStr = strtok($str, $token);
 
@@ -15,7 +15,7 @@ function tokenize($str, $token) {
 
 
 <<__EntryPoint>>
-function main_strtok() {
+function main_strtok() :mixed{
 var_dump(tokenize('foobarbaz', 'foo'));
 var_dump(tokenize('foobarbaz', 'bar'));
 var_dump(tokenize('foobarbaz', 'baz'));

@@ -13,7 +13,7 @@ class sizeof_class implements Countable
   protected $member3;
 
   public function count()
-  {
+:mixed  {
     return 3; // return the count of member variables in the object
   }
 }

@@ -4,7 +4,7 @@ class A {
  }
 
 <<__EntryPoint>>
-function main_687() {
+function main_687() :mixed{
 $a = new A();
 $f = 20;
 $a->$f = 100;

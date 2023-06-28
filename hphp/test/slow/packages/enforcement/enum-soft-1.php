@@ -2,12 +2,12 @@
 
 module a.b;
 
-function dyn_get($x) {
+function dyn_get($x) :mixed{
   var_dump($x::FOO);
 }
 
 <<__EntryPoint>>
-function main_enum_soft_1() {
+function main_enum_soft_1() :mixed{
   var_dump(SoftEnumFoo::FOO);
   var_dump(SoftEnumClsFoo::FOO);
 

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $alloc = memory_get_usage();
   $usage = memory_get_usage(true);
   $total_alloc = memory_get_allocation();
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_memory_basic() {
+function main_memory_basic() :mixed{
 main();
 }

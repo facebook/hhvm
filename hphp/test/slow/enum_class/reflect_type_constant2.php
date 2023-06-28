@@ -12,7 +12,7 @@ abstract enum class C : mixed extends I {
 
 
 <<__EntryPoint>>
-function main_reflect_type_constant2() {
+function main_reflect_type_constant2() :mixed{
 $rc = new ReflectionClass(C::class);
 
 echo "=== ReflectionClass::getTypeConstant('T') ===" . PHP_EOL;

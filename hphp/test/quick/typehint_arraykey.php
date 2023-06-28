@@ -1,10 +1,10 @@
 <?hh
 
-function my_handler($errno, $errstr, $file, $line) {
+function my_handler($errno, $errstr, $file, $line) :mixed{
   throw new Exception($errstr);
 }
 
-function try_takes_arraykey($a) {
+function try_takes_arraykey($a) :mixed{
   try {
     takes_arraykey($a);
   } catch (Exception $e) {
@@ -12,11 +12,11 @@ function try_takes_arraykey($a) {
   }
 }
 
-function takes_arraykey(arraykey $a) {
+function takes_arraykey(arraykey $a) :mixed{
   var_dump($a);
 }
 
-function main() {
+function main() :mixed{
   try_takes_arraykey(10);
   try_takes_arraykey('abc');
   try_takes_arraykey('100');

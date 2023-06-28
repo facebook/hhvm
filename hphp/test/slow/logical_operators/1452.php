@@ -1,12 +1,12 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
  echo "foo";
  return $a;
  }
 
 <<__EntryPoint>>
-function main_1452() {
+function main_1452() :mixed{
 $x = true;
 ($x = $x) && foo(false);
 var_dump($x);

@@ -12,27 +12,27 @@
 // callback functions
 // int as return value
 function callback1($input)
-{
+:mixed{
   return 5;
 }
 // float as return value
 function callback2($input)
-{
+:mixed{
   return 3.4;
 }
 // string as return value
 function callback3($input)
-{
+:mixed{
   return 'value';
 }
 // null as return value
 function callback4($input)
-{
+:mixed{
   return null;
 }
 // array as return value
 function callback5($input)
-{
+:mixed{
   return varray[8];
 }
 <<__EntryPoint>> function main(): void {

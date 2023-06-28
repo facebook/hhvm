@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_preg_match_literal() {
+function main_preg_match_literal() :mixed{
 $subject = "Quick brown fox";
 var_dump(preg_match("#^Quick#", $subject));
 var_dump(preg_match("/fox\$/", $subject));

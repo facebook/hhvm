@@ -1,14 +1,14 @@
 <?hh
 class ColumnKeyClass {
-    function __toString() { return 'first_name'; }
+    function __toString() :mixed{ return 'first_name'; }
 }
 
 class IndexKeyClass {
-    function __toString() { return 'id'; }
+    function __toString() :mixed{ return 'id'; }
 }
 
 class ValueClass {
-    function __toString() { return '2135'; }
+    function __toString() :mixed{ return '2135'; }
 }
 
 <<__EntryPoint>> function main(): void {

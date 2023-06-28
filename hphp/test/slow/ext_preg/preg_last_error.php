@@ -4,7 +4,7 @@ const TPATTERN = "/pattern/";
 const TBACKTRACK_PATTERN = "/.*\p{N}/";
 const TINPUT = '0123456789';
 
-function test_fn($name, $base, $with_error) {
+function test_fn($name, $base, $with_error) :mixed{
   echo "=== $name ===\n";
 
   echo "- no error -\n";
@@ -20,7 +20,7 @@ function test_fn($name, $base, $with_error) {
   var_dump($error === PREG_BACKTRACK_LIMIT_ERROR);
 }
 
-function test_preg_grep() {
+function test_preg_grep() :mixed{
   test_fn(
     'preg_grep',
     $p ==> preg_grep($p, varray[TINPUT]),
@@ -28,7 +28,7 @@ function test_preg_grep() {
   );
 }
 
-function test_preg_match() {
+function test_preg_match() :mixed{
   test_fn(
     'preg_match',
     $p ==> preg_match($p, TINPUT),
@@ -36,7 +36,7 @@ function test_preg_match() {
   );
 }
 
-function test_preg_match_with_matches() {
+function test_preg_match_with_matches() :mixed{
   $_m = null;
   test_fn(
     'preg_match_with_matches',
@@ -46,7 +46,7 @@ function test_preg_match_with_matches() {
   );
 }
 
-function test_preg_match_all() {
+function test_preg_match_all() :mixed{
   test_fn(
     'preg_match_all',
     $p ==> preg_match_all($p, TINPUT),
@@ -54,7 +54,7 @@ function test_preg_match_all() {
   );
 }
 
-function test_preg_match_all_with_matches() {
+function test_preg_match_all_with_matches() :mixed{
   $_m = null;
   test_fn(
     'preg_match_all_with_matches',
@@ -64,7 +64,7 @@ function test_preg_match_all_with_matches() {
   );
 }
 
-function test_preg_replace() {
+function test_preg_replace() :mixed{
   test_fn(
     'preg_replace',
     $p ==> preg_replace($p, 'asdf', TINPUT),
@@ -72,7 +72,7 @@ function test_preg_replace() {
   );
 }
 
-function test_preg_replace_with_count() {
+function test_preg_replace_with_count() :mixed{
   $_c = null;
   test_fn(
     'preg_replace_with_count',
@@ -88,7 +88,7 @@ function test_preg_replace_with_count() {
   );
 }
 
-function test_preg_split() {
+function test_preg_split() :mixed{
   test_fn(
     'preg_split',
     $p ==> preg_split($p, TINPUT),
@@ -96,7 +96,7 @@ function test_preg_split() {
   );
 }
 
-function test_preg_replace_callback() {
+function test_preg_replace_callback() :mixed{
   $_c = null;
   test_fn(
     'preg_replace_callback',
@@ -112,7 +112,7 @@ function test_preg_replace_callback() {
   );
 }
 
-function test_preg_replace_callback_array() {
+function test_preg_replace_callback_array() :mixed{
   $_c = null;
   test_fn(
     'preg_replace_callback_array',
@@ -133,7 +133,7 @@ function test_preg_replace_callback_array() {
 }
 
 <<__EntryPoint>>
-function main_preg_last_error() {
+function main_preg_last_error() :mixed{
   // Set low backtrack limit to trigger PREG_BACKTRACK_LIMIT_ERROR
   ini_set('pcre.backtrack_limit', 1);
 

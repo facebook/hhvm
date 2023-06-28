@@ -9,7 +9,7 @@ class A {
   }
 }
 
-function doStuff ($limit) {
+function doStuff ($limit) :mixed{
 
   $a = new A;
 

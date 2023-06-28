@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $e = new Exception();
   try {
     throw new Exception2();

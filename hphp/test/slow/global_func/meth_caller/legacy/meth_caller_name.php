@@ -1,7 +1,7 @@
 <?hh
 
 namespace {
-function afunc() {
+function afunc() :mixed{
   $x = \HH\meth_caller(C::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -9,7 +9,7 @@ function afunc() {
 }
 
 class Acls {
-  function bfunc() {
+  function bfunc() :mixed{
     $x = \HH\meth_caller(D::class, "f");
     \var_dump(
       $x, \HH\is_meth_caller($x),
@@ -17,7 +17,7 @@ class Acls {
   }
 }
 
-function test() {
+function test() :mixed{
   $x = \HH\meth_caller(A::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -35,7 +35,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \test();
   \Ans\test();
 }
@@ -43,7 +43,7 @@ function main() {
 
 namespace Ans {
 
-function afunc() {
+function afunc() :mixed{
   $x = \HH\meth_caller(C::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -51,7 +51,7 @@ function afunc() {
 }
 
 class Acls {
-  function bfunc() {
+  function bfunc() :mixed{
     $x = \HH\meth_caller(D::class, "f");
     \var_dump(
       $x, \HH\is_meth_caller($x),
@@ -70,7 +70,7 @@ final abstract class MethCallerStrWrap {
     }
 }
 
-function testFunction(mixed $fun_meth_or_string) {
+function testFunction(mixed $fun_meth_or_string) :mixed{
   $function_name = MethCallerStrWrap::get($fun_meth_or_string);
   return $function_name;
 }
@@ -81,12 +81,12 @@ function testFunction(mixed $fun_meth_or_string) {
 
 class A {
   private $map = darray[];
-  function set($k, $v) {
+  function set($k, $v) :mixed{
     $this->map[$k] = $v;
   }
 }
 
-function test() {
+function test() :mixed{
 $x = \HH\meth_caller(A::class, "f");
 \var_dump(
   $x, \HH\is_meth_caller($x),

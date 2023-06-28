@@ -1,12 +1,12 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   $e = yield null;
   throw $e;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $g = gen();
   $g->next();
   try {

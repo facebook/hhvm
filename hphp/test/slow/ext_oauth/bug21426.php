@@ -5,7 +5,7 @@ class Foo extends OAuth
     protected $foo = 'bar';
 
     public function getFoo()
-    {
+:mixed    {
         return $this->foo;
     }
 }

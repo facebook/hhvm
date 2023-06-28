@@ -8,7 +8,7 @@ class B extends A {
   public $y;
 }
 
-function f($a) {
+function f($a) :mixed{
   return $a;
 }
 
@@ -20,7 +20,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction("f");
   }
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -30,7 +30,7 @@ class LocalSoapClient extends SoapClient {
 }
 
 <<__EntryPoint>>
-function main_classmap_extension_crash() {
+function main_classmap_extension_crash() :mixed{
 ini_set("soap.wsdl_cache_enabled", 0);
 
 $client = new LocalSoapClient(

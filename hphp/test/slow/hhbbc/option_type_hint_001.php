@@ -8,6 +8,6 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_option_type_hint_001() {
+function main_option_type_hint_001() :mixed{
 new Foo(1);
 }

@@ -10,7 +10,7 @@
 
 class Lol {}
 
-function breakThings(Foo $x) { $x->nullOther(); }
+function breakThings(Foo $x) :mixed{ $x->nullOther(); }
 
 class Foo {
   private $other;
@@ -25,17 +25,17 @@ class Foo {
     }
   }
 
-  public function nullOther() {
+  public function nullOther() :mixed{
     $this->other = null;
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new Foo();
 }
 
 
 <<__EntryPoint>>
-function main_private_props_001() {
+function main_private_props_001() :mixed{
 main();
 }

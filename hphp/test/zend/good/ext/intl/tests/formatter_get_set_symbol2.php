@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $longstr = str_repeat("blah", 10);
     $symbols = darray[
         'DECIMAL_SEPARATOR_SYMBOL' => varray[ NumberFormatter::DECIMAL_SEPARATOR_SYMBOL, '_._', 12345.123456, NumberFormatter::DECIMAL ],

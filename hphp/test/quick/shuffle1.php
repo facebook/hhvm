@@ -1,6 +1,6 @@
 <?hh
 
-function get($a, $idx) {
+function get($a, $idx) :mixed{
   $max = 10;
   for ($i = 0; $i < $max; $i++) {
     $r = $a[$idx];

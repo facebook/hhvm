@@ -24,12 +24,12 @@ class Foo<X> implements Face<X> {
 }
 
 function right_shift_hack(Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo>,Foo>>,Foo>>>,Foo>>>> $bonk,
-         (function(Foo,Bar):C) $d) {
+         (function(Foo,Bar):C) $d) :mixed{
 }
 
 
 <<__EntryPoint>>
-function main_2213() {
+function main_2213() :mixed{
 $blork = pair('c', '-');
 
 $a = blarg('a','aa','aaa');

@@ -2,7 +2,7 @@
 class X {
   public $foo;
 
-  function test() {
+  function test() :mixed{
     $a = darray[
       'null' => $this->foo,
     ];
@@ -11,7 +11,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_add_elem_c_interp() {
+function main_add_elem_c_interp() :mixed{
 ;
 
 $x = new X;

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = new X();
   $x->bar(new stdClass);
   $x->bar($x);
@@ -9,7 +9,7 @@ function main() {
 }
 
 class X {
-  function bar($arg) {
+  function bar($arg) :mixed{
     switch ($this) {
       case $arg:
         echo "arg\n";

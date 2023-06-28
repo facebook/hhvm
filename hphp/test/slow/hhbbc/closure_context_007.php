@@ -3,7 +3,7 @@
 class A {
   private $foo = 2;
 
-  public async function genthings() {
+  public async function genthings() :Awaitable<mixed>{
     return () ==> () ==> () ==> () ==> () ==> () ==> {
       yield () ==> $this->foo = "2";
       yield () ==> $this->foo = "3";
@@ -12,10 +12,10 @@ class A {
     };
   }
 
-  public function get() { return $this->foo; }
+  public function get() :mixed{ return $this->foo; }
 }
 
-async function main() {
+async function main() :Awaitable<mixed>{
   $obj = new A();
   $x = await $obj->genthings();
 
@@ -32,6 +32,6 @@ async function main() {
 }
 
 <<__EntryPoint>>
-function main_closure_context_007() {
+function main_closure_context_007() :mixed{
 main();
 }

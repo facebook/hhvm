@@ -1,6 +1,6 @@
 <?hh
 
-function test($tr_data) {
+function test($tr_data) :mixed{
   $temp_tr = null;
   foreach ($tr_data as $tr_id => $tr_row) {
     if ($tr_row == 45) $temp_tr = $tr_id;
@@ -18,6 +18,6 @@ function test($tr_data) {
 }
 
 <<__EntryPoint>>
-function main_1845() {
+function main_1845() :mixed{
 var_dump(test(darray['a' => 1, 'b' => 45]));
 }

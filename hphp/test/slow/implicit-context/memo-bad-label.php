@@ -1,5 +1,5 @@
 <?hh
 
 <<__Memoize(#NoSuchLabel)>>
-function memo(int $a)[zoned] {
+function memo(int $a)[zoned] :mixed{
 }

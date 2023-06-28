@@ -8,7 +8,7 @@ class strclass {
 }
 
 
-function foo() {
+function foo() :mixed{
   \HH\global_set('a', 'good');
   return \HH\global_get('a');
 }

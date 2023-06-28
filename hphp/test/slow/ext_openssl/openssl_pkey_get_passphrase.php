@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_openssl_pkey_get_passphrase() {
+function main_openssl_pkey_get_passphrase() :mixed{
 $_privateKeyString = <<<PK
 -----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED

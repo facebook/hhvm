@@ -1,10 +1,10 @@
 <?hh
 
-function my_handler($errno, $errstr, $file, $line) {
+function my_handler($errno, $errstr, $file, $line) :mixed{
   throw new Exception($errstr);
 }
 
-function try_takes_null($x) {
+function try_takes_null($x) :mixed{
   try {
     takes_null($x);
   } catch (Exception $e) {
@@ -12,11 +12,11 @@ function try_takes_null($x) {
   }
 }
 
-function takes_null(null $x) {
+function takes_null(null $x) :mixed{
   var_dump($x);
 }
 
-function main() {
+function main() :mixed{
   try_takes_null(null);
   try_takes_null(42);
   try_takes_null(3.14);

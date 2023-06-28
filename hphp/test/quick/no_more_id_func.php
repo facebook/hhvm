@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function b() {
+  public function b() :mixed{
     return 'id';
   }
 }

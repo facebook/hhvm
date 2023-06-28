@@ -2,11 +2,11 @@
 
 trait MyTrait {}
 
-function f<reify T>(T $x) { echo "done\n"; }
-function g(MyTrait $x) { echo "done\n"; }
+function f<reify T>(T $x) :mixed{ echo "done\n"; }
+function g(MyTrait $x) :mixed{ echo "done\n"; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(
     (int $errno,
     string $errstr,

@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $x = 204; // 11001100 in binary
   $y = 170; // 10101010 in binary
   echo ($x ^ $y); // 01100110 in binary
@@ -14,7 +14,7 @@ function f() {
 }
 
 // Pairwise probe.
-function probe($l, $r) {
+function probe($l, $r) :mixed{
   echo "-------\n";
   echo "left: ";  var_dump($l);
   echo "right: "; var_dump($r);
@@ -30,7 +30,7 @@ function probe($l, $r) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f();
   $i = 0x3;
   $data = varray[15, "7", "not an int. at all."];

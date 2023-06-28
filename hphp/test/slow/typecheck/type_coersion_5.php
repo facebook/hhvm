@@ -1,12 +1,12 @@
 <?hh
 
-function errHandler($errno, $errmsg, $file, $line) {
+function errHandler($errno, $errmsg, $file, $line) :mixed{
   $errmsg = str_replace('long', 'integer', $errmsg);
   printf("WARNING: ".fix_err($errmsg, false)."\n");
   return true;
 }
 
-function check($kind, $builtin_fn, $user_fn) {
+function check($kind, $builtin_fn, $user_fn) :mixed{
   echo "\n$kind\n";
   foreach (varray[True, 1, 3.14, "abc", varray[1, 2, 3], null] as $k => $v) {
     printf("Builtin:\n");
@@ -18,7 +18,7 @@ function check($kind, $builtin_fn, $user_fn) {
 
 
 <<__EntryPoint>>
-function main_type_coersion_5() {
+function main_type_coersion_5() :mixed{
 require_once('fix_exceptions.inc');
 
 set_error_handler(errHandler<>, E_ALL);

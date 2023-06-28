@@ -13,7 +13,7 @@ class A {
 const VCONST1 = varray[1, 2, 3];
 const DCONST1 = darray[100 => 'abc', 'def' => 200];
 <<__EntryPoint>>
-function main_constants() {
+function main_constants() :mixed{
 
 var_dump(VCONST1);
 var_dump(VCONST2);

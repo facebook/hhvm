@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_duplicate_keys_no_leak() {
+function main_duplicate_keys_no_leak() :mixed{
   // Prime the JSON engine.
   json_decode('{"a":"1","a":"2"}', true, 512, JSON_FB_LOOSE);
 

@@ -1,6 +1,6 @@
 <?hh
 
-function getInfo($sym) {
+function getInfo($sym) :mixed{
   $command = darray[
     "command" => "info",
     "type" => "request",

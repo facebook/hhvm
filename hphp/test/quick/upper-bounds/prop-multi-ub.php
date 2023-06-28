@@ -16,7 +16,7 @@ class Foo <T1 as int, T2 as Fooable as Barable> {
   public function __construct() {
     $this->z = 1;
   }
-  public function setW(mixed $p) {
+  public function setW(mixed $p) :mixed{
     $this->w = $p;
   }
 }
@@ -25,7 +25,7 @@ class Bar <reify T as int> {
   public T $x = 1;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $o = new Foo;
   $o->y = 'a';
   $o->y = new Nobar;

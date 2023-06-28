@@ -7,31 +7,31 @@ class CGetM {
     $this->x = "asdasd";
   }
 
-  function getX() {
+  function getX() :mixed{
     return $this->x;
   }
 
-  public function genVarious() {
+  public function genVarious() :AsyncGenerator<mixed,mixed,void>{
     $local = $this->getX();
     yield "a";
     yield $local;
     yield "c";
   }
 
-  public function genInts($x) {
+  public function genInts($x) :AsyncGenerator<mixed,mixed,void>{
     yield $x;
     yield $x + 1;
   }
 }
 
-function foo() {
+function foo() :AsyncGenerator<mixed,mixed,void>{
   $k = new CGetM();
   $z = $k->getX();
   yield $z;
   yield "\n";
 }
 
-function main() {
+function main() :mixed{
   foreach (foo() as $x) {
     echo $x;
   }
@@ -49,7 +49,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_generator_body() {
+function main_generator_body() :mixed{
 main();
 echo "\n";
 }

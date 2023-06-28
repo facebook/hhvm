@@ -15,7 +15,7 @@ class Bar<T as int> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo1('a'));
   var_dump(foo2(vec[1, 2]));
   var_dump(Bar::foo3('a'));

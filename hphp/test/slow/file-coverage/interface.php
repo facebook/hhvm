@@ -1,6 +1,6 @@
 <?hh
 
-function print_cover_maps(dict<string, vec<int>> $map) {
+function print_cover_maps(dict<string, vec<int>> $map) :mixed{
   print("\nPrinting coverage:\n");
   foreach ($map as $path => $lines) {
     sort(inout $lines);
@@ -9,7 +9,7 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   HH\enable_per_file_coverage(keyset[
     __DIR__.'/interface-definition.inc',
   ]);

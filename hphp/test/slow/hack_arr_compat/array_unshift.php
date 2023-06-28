@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Unshift dict\n";
   $a = dict["1" => 42];
   var_dump(array_unshift(inout $a, 2));

@@ -14,7 +14,7 @@ class B extends A {
 
 
 <<__EntryPoint>>
-function main_child_parent_property_ordering() {
+function main_child_parent_property_ordering() :mixed{
 $class = new ReflectionClass("B");
 var_dump($class->getProperties());
 }

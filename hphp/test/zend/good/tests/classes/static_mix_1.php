@@ -1,13 +1,13 @@
 <?hh
 
 class pass {
-    static function show() {
+    static function show() :mixed{
         echo "Call to function pass::show()\n";
     }
 }
 
 class fail extends pass {
-    function show() {
+    function show() :mixed{
         echo "Call to function fail::show()\n";
     }
 }

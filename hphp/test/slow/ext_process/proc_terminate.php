@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_proc_terminate() {
+function main_proc_terminate() :mixed{
 $cmd = 'sleep 3';
 $descriptors = darray[];
 

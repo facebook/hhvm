@@ -4,6 +4,6 @@
 class :my:xhp-class {}
 
 <<__EntryPoint>>
-function test_xhp() {
+function test_xhp() :mixed{
   var_dump(HH\Facts\path_to_types(__FILE__));
 }

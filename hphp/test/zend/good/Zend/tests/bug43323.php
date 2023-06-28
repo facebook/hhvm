@@ -1,6 +1,6 @@
 <?hh
 abstract class bar {
-    abstract public function bar();
+    abstract public function bar():mixed;
 }
 
 class foo extends bar {

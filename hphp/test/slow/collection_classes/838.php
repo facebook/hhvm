@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_838() {
+function main_838() :mixed{
 $s1 = Set {
 }
 ;

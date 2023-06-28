@@ -1,7 +1,7 @@
 <?hh
 
 class Info { public static bool $SawError = false; }
-function handle_error($_errno, $msg, ...) {
+function handle_error($_errno, $msg, ...) :mixed{
   //if (!Info::$SawError && $msg === "Class to string conversion") {
   if ($msg === "Class to string conversion") {
     Info::$SawError = true;
@@ -22,31 +22,31 @@ class StrObj {
 }
 class Wrapper { public function __construct(private mixed $w)[] {} }
 
-function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
-function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
+function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
+function CLS($c) :mixed{ return __hhvm_intrinsics\create_class_pointer($c); }
 
-function WRAPA($x) { return LV(varray[$x]); }
-function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
+function WRAPA($x) :mixed{ return LV(varray[$x]); }
+function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
+function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
-<<__NEVER_INLINE>> function print_header($title) {
+<<__NEVER_INLINE>> function print_header($title) :mixed{
   echo "$title\n";
   echo "+------------+------+------+------+------+------+------+\n";
   echo "| VAR        | <    | <=   | >    | >=   | ==   | ===  |\n";
   echo "+============+======+======+======+======+======+======+";
 }
-<<__NEVER_INLINE>> function begin_row($var, $wrap = null) {
+<<__NEVER_INLINE>> function begin_row($var, $wrap = null) :mixed{
   printf("\n| %-10s |", $wrap !== null ? $wrap."(\$$var)" : "\$$var");
 }
-<<__NEVER_INLINE>> function C(bool $v) {
+<<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %-4s |", ($v ? 'T' : 'F').(Info::$SawError ? '*' : ''));
   Info::$SawError = false;
 }
-<<__NEVER_INLINE>> function print_footer() {
+<<__NEVER_INLINE>> function print_footer() :mixed{
   echo "\n+------------+------+------+------+------+------+------+\n\n";
 }
 
-<<__NEVER_INLINE>> function static_compare() {
+<<__NEVER_INLINE>> function static_compare() :mixed{
   $cm = foobar::class;
   $va = 'foobar';
   $oa = new StrObj('foobar');
@@ -121,7 +121,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function dynamic_compare() {
+<<__NEVER_INLINE>> function dynamic_compare() :mixed{
   $cm = LV(foobar::class);
   $va = LV('foobar');
   $oa = LV(new StrObj('foobar'));
@@ -195,7 +195,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   static_compare();

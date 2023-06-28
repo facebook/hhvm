@@ -4,7 +4,7 @@ class foo {
   protected $protected = 'protected';
   public $public = 'public';
 
-  public function __sleep() {
+  public function __sleep() :mixed{
     return varray['private', 'protected', 'public', 'no_such'];
   }
 }

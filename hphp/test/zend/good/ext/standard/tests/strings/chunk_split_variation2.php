@@ -7,7 +7,7 @@
 //Class to get object variable
 class MyClass
 {
-   public function __toString() {
+   public function __toString() :mixed{
      return "object";
    }
 }

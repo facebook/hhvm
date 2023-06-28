@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $iter = (int)__hhvm_intrinsics\apc_fetch_no_check('iter_id');
   apc_store('iter_id', $iter + 1);
 

@@ -3,26 +3,26 @@
 class ErrorHandling
 {
     <<__DynamicallyCallable>> public function errorHandler1($errno, $errstr)
-    {
+:mixed    {
         echo "Caught on first level: '$errstr'\n";
         return true;
     }
 
     <<__DynamicallyCallable>> public function errorHandler2($errno, $errstr)
-    {
+:mixed    {
         echo "Caught on second level: '$errstr'\n";
         return true;
     }
 }
 
 function errorHandler1($errno, $errstr)
-{
+:mixed{
     echo "Caught on first level: '$errstr'\n";
     return true;
 }
 
 function errorHandler2($errno, $errstr)
-{
+:mixed{
     echo "Caught on second level: '$errstr'\n";
     return true;
 }

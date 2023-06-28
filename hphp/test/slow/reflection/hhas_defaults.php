@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $x = new ReflectionFunction('array_filter');
   $params = $x->getParameters();
   $p1 = $params[1];
@@ -9,6 +9,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_hhas_defaults() {
+function main_hhas_defaults() :mixed{
 test();
 }

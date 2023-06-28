@@ -1,11 +1,11 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-function foo($a, $b){
+function foo($a, $b):mixed{
   return (int)$a & (int)$b;
 }
 
-function test($a, $b) {
+function test($a, $b) :mixed{
   $a__str = (string)($a);
   $b__str = (string)($b);
   echo "test foo($a__str, $b__str)\n";

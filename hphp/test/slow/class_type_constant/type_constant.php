@@ -27,7 +27,7 @@ final class D {
 const type = 123;
 
 <<__EntryPoint>>
-function main_type_constant() {
+function main_type_constant() :mixed{
 var_dump(type + 123);
 var_dump(type - 123);
 var_dump(C::type + D::type);

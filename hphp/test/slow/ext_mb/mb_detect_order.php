@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_detect_order() {
+function main_mb_detect_order() :mixed{
 $str = "Pr\xC3\x9C\xC3\x9D"."fung";
 
 /* Set detection order by enumerated list */

@@ -1,10 +1,10 @@
 <?hh
 
-function foo() { }
+function foo() :mixed{ }
 
 
 <<__EntryPoint>>
-function main_readline_completion_function() {
+function main_readline_completion_function() :mixed{
 $data = varray[
   foo<>,
   strtolower<>,

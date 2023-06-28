@@ -4,7 +4,7 @@ async function foobar1<T as Bar>(?T $b): Awaitable<?T> {
   return $b + 1;
 }
 
-async function await_float() {
+async function await_float() :Awaitable<mixed>{
   return 0.0;
 }
 
@@ -13,7 +13,7 @@ function foobar2<T as Bar>(): Awaitable<T> {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   var_dump(await foobar1(1.2));
   var_dump(await foobar2()); // No runtime error, checking Awaitable
 }

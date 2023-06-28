@@ -2,13 +2,13 @@
 
 class Callbacks {
   public $count = 0;
-  <<__DynamicallyCallable>> public function filter($n) {
+  <<__DynamicallyCallable>> public function filter($n) :mixed{
     $this->count++;
     return $n % 2;
   }
 
   public static $scount = 0;
-  <<__DynamicallyCallable>> public static function sfilter($n) {
+  <<__DynamicallyCallable>> public static function sfilter($n) :mixed{
     self::$scount++;
     return $n % 3;
   }

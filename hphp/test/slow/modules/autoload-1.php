@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m = new ReflectionModule('a');
   var_dump($m->getName());
   try {

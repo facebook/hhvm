@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $arrs = vec[
     shape('x' => 1),
     darray['x' => 1],

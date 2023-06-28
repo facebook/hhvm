@@ -2,12 +2,12 @@
 
 class A_DateTime extends DateTime {
   public $___x = 0;
-  public function __clone() {
+  public function __clone() :mixed{
     $this->___x++;
   }
 }
 
-function test($cls, $args = varray[]) {
+function test($cls, $args = varray[]) :mixed{
   echo $cls . "\n";
   $a = (new ReflectionClass($cls))->newInstanceArgs($args);
   var_dump($a);
@@ -42,7 +42,7 @@ function test($cls, $args = varray[]) {
   var_dump(get_class_methods($a));
 }
 
-function main() {
+function main() :mixed{
   echo "================\n";
 
   $y = new A_DateTime("2012-06-23T11:00:00");
@@ -57,7 +57,7 @@ function main() {
   var_dump($y2->format('Y-m-d'));
 }
 
-function DataTimeFromString() {
+function DataTimeFromString() :mixed{
   echo "================\n";
   $num_tests = 10;
   $count_fill_error = 0;

@@ -1,6 +1,6 @@
 <?hh
 
-function basic() {
+function basic() :mixed{
   echo '=== ', __FUNCTION__, " ===\n";
   $os = Map { 'osx' => 'Mac', 'win' => 'NT',
               'irx' => 'Irix', 'lnx' => 'Linux' };
@@ -10,7 +10,7 @@ function basic() {
   var_dump(array_search('osx', $os));
 }
 
-function strict() {
+function strict() :mixed{
   echo '=== ', __FUNCTION__, " ===\n";
   $s = Set { '110', 124, 113 };
   var_dump(in_array('124', $s));
@@ -21,7 +21,7 @@ function strict() {
   var_dump(array_search(113, $s, true));
 }
 
-function nested() {
+function nested() :mixed{
   echo '=== ', __FUNCTION__, " ===\n";
   $a = Vector { varray['p', 'h'], varray['p', 'r'], 'o' };
   var_dump(in_array(varray['p', 'h'], $a));
@@ -34,7 +34,7 @@ function nested() {
 
 
 <<__EntryPoint>>
-function main_array_search_funcs() {
+function main_array_search_funcs() :mixed{
 basic();
 strict();
 nested();

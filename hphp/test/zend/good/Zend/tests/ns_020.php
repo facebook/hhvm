@@ -1,7 +1,7 @@
 <?hh
 namespace X;
 use X as Y;
-function foo() {
+function foo() :mixed{
     echo __FUNCTION__,"\n";
 }
 <<__EntryPoint>> function main(): void {

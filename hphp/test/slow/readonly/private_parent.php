@@ -17,6 +17,6 @@ final class B extends A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(B::get(readonly D::get()));
 }

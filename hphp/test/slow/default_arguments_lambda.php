@@ -10,6 +10,6 @@ async function f(
     yield break; },
 
   $wrong = await 3,
-) {}
+) :Awaitable<mixed>{}
 
-function g($x) {}
+function g($x) :mixed{}

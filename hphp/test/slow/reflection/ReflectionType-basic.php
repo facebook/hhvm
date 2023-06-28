@@ -4,7 +4,7 @@ function foo(int $a): ?bool {}
 
 
 <<__EntryPoint>>
-function main_reflection_type_basic() {
+function main_reflection_type_basic() :mixed{
 $rf = new ReflectionFunction('foo');
 
 echo "--Parameter--\n\n";

@@ -1,7 +1,7 @@
 <?hh
 
 
-function fn1() {
+function fn1() :mixed{
 
 
     $a="rows";
@@ -18,7 +18,7 @@ function fn1() {
     }
 }
 
-function fn2() {
+function fn2() :mixed{
     $row = ArrayForEachVariableVariableForeach::$row;
     echo "row={$row}\n";
 }

@@ -12,7 +12,7 @@ namespace {
   use const Foo\ANTI_NULL as null;
 
   <<__EntryPoint>>
-  function main() {
+  function main() :mixed{
     var_dump(true);
     var_dump(false);
     var_dump(null);

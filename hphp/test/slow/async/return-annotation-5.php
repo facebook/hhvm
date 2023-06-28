@@ -1,5 +1,5 @@
 <?hh
 class C {
-  public function test() { async function (): Blah<Foo> {}; }
+  public function test() :mixed{ async function (): Blah<Foo> {}; }
 }
 

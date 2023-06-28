@@ -1,10 +1,10 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function func() {}
+function func() :mixed{}
 
 <<__DynamicallyCallable>>
-function dyn_func() {}
+function dyn_func() :mixed{}
 <<__EntryPoint>> function main(): void {
 $dyn_func = 'dyn_func';
 var_dump(HH\fun_get_function(func<>));

@@ -4,7 +4,7 @@
 // originally based on ext/standard/tests/file/stream_rfc2397_001.phpt
 
 <<__EntryPoint>>
-function main_simple() {
+function main_simple() :mixed{
 $data = 'data://,hello world';
 
 var_dump(file_get_contents($data));

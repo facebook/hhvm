@@ -6,7 +6,7 @@
 
 class foo
 {
-  function __toString() {
+  function __toString() :mixed{
     return "Object";
   }
 }

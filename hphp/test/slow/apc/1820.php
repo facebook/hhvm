@@ -52,7 +52,7 @@ class D extends C {
   public $bb = 400;
   private $cc = 1.3333;
 }
-function foo() {
+function foo() :mixed{
   $obj = new A(111, 222, 333);
   apc_store('foobar', $obj);
   $obj = __hhvm_intrinsics\apc_fetch_no_check('foobar');
@@ -76,6 +76,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1820() {
+function main_1820() :mixed{
 foo();
 }

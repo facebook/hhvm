@@ -9,7 +9,7 @@ class C {
     var_dump($res->getName());
   }
 
-  public static function s_fn() {
+  public static function s_fn() :mixed{
     $fn = function () { throw new Exception('not reached'); };
     $res = (new ReflectionFunction($fn))->getClosureScopeClass();
 
@@ -26,7 +26,7 @@ class D extends C {
 
 
 <<__EntryPoint>>
-function main_get_closure_scope_class() {
+function main_get_closure_scope_class() :mixed{
 $fn = function () { throw new Exception('not reached'); };
 var_dump((new ReflectionFunction($fn))->getClosureScopeClass());
 

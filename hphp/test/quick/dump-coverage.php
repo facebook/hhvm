@@ -9,7 +9,7 @@ main
 (
 
 )
-{
+:mixed{
   $x
 
 

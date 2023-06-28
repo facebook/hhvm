@@ -2,17 +2,17 @@
 
 class C<reify T> {
 
-  static function foo() {
+  static function foo() :mixed{
     return new static();
   }
 
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
 }
 
 class B<reify T> extends C<T> {
-  static function bar() {
+  static function bar() :mixed{
     return parent::foo();
   }
 }

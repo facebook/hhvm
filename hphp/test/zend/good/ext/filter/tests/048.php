@@ -1,5 +1,5 @@
 <?hh
-function hex_inc($s) {
+function hex_inc($s) :mixed{
     $len = strlen($s);
     while ($len > 0) {
         $len--;

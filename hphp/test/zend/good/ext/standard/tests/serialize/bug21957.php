@@ -10,7 +10,7 @@ class test
     }
 
     function __sleep()
-    {
+:mixed    {
         $this->b = 0;
     }
 }

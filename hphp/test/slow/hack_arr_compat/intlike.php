@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($a, $k) {
+function test($a, $k) :mixed{
   echo "=============== get ================================\n";
   try { var_dump($a[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
@@ -17,7 +17,7 @@ function test($a, $k) {
   return $a;
 }
 
-function test_const_key($a) {
+function test_const_key($a) :mixed{
   echo "=============== get ================================\n";
   try { var_dump($a['2']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
@@ -33,12 +33,12 @@ function test_const_key($a) {
   return $a;
 }
 
-function test_casting($a) {
+function test_casting($a) :mixed{
   echo "======================= darray cast ================\n";
   var_dump(darray($a));
 }
 
-function run_tests() {
+function run_tests() :mixed{
   test(darray[], '10');
   test(darray(vec[1, 2, 3, 4]), '2');
   test(darray(dict[10 => 'abc']), '10');
@@ -56,6 +56,6 @@ function run_tests() {
 }
 
 <<__EntryPoint>>
-function main_intlike() {
+function main_intlike() :mixed{
 run_tests();
 }

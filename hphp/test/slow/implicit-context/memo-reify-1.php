@@ -6,7 +6,7 @@ function soft_inaccessible<reify T>($x): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   soft_inaccessible<int>(1);
   soft_inaccessible<int>(true);
 }

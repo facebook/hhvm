@@ -9,6 +9,6 @@ class C3 {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C3::CONST1);
 }

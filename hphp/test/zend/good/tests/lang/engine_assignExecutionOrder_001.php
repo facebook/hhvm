@@ -1,11 +1,11 @@
 <?hh
 
-function f() {
+function f() :mixed{
     echo "in f()\n";
     return "name";
 }
 
-function g() {
+function g() :mixed{
     echo "in g()\n";
     return "assigned value";
 }
@@ -16,11 +16,11 @@ class C {
     public static $string = "hello";
 }
 
-function getOffset() {
+function getOffset() :mixed{
     echo "in getOffset()\n";
     return 0;
 }
-function newChar() {
+function newChar() :mixed{
     echo "in newChar()\n";
     return 'j';
 }

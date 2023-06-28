@@ -12,7 +12,7 @@
 class MyClass
 {
   public function __toString()
-  {
+:mixed  {
     return "object";
   }
 }

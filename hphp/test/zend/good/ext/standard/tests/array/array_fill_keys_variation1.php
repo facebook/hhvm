@@ -7,7 +7,7 @@
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "*** Testing array_fill_keys() : parameter variations ***\n";
 
   $nullVal = null;

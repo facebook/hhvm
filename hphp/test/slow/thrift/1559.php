@@ -86,7 +86,7 @@ class TestStruct {
   }
   public function clearTerseFields()[write_props]: void {}
 }
-function test() {
+function test() :mixed{
   $p = new DummyProtocol();
   $v1 = new TestStruct();
   $v1->aBool = true;
@@ -106,7 +106,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1559() {
+function main_1559() :mixed{
   require 'common.inc';
   test();
 }

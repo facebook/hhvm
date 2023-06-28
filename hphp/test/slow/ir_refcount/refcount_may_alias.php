@@ -6,7 +6,7 @@ class X {
 
   function __construct(varray $x) { $this->someArrayMember = $x; }
 
-  final function myfunc() {
+  final function myfunc() :mixed{
     /*
      * At the time of this test's creation, this sequence of code generated
      * redundant loads from the property for the CGetM and the SetM.  These two
@@ -22,13 +22,13 @@ class X {
   }
 }
 
-function go(X $x) {
+function go(X $x) :mixed{
   var_dump($x->myfunc());
 }
 
 
 <<__EntryPoint>>
-function main_refcount_may_alias() {
+function main_refcount_may_alias() :mixed{
 for ($i = 0; $i < 30; ++$i) {
   go(new X(varray[1,2,new stdClass]));
 }

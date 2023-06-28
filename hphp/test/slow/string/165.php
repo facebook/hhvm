@@ -1,6 +1,6 @@
 <?hh
 
-function test($a, $b) {
+function test($a, $b) :mixed{
   $buf = 'hello';
   foreach ($a as $v) {
     $buf .= $v . ';';
@@ -10,7 +10,7 @@ function test($a, $b) {
   }
   var_dump($buf);
 }
-function test2($a, $b) {
+function test2($a, $b) :mixed{
   $buf = 'hello';
   foreach ($a as $v) {
     $buf .= $v . ';';
@@ -21,7 +21,7 @@ function test2($a, $b) {
   }
   var_dump($buf);
 }
-function test3($a, $b) {
+function test3($a, $b) :mixed{
   $buf = 'hello';
   foreach ($a as $v) {
     $buf .= $v . ';';
@@ -33,7 +33,7 @@ function test3($a, $b) {
 }
 
 <<__EntryPoint>>
-function main_165() {
+function main_165() :mixed{
 test(varray['a', 'b', 'c'], varray['u', 'v']);
 test2(varray['a', 'b', 'c'], varray['u', 'v']);
 test3(varray['a', 'b', 'c'], varray['u', 'v']);

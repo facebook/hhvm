@@ -10,7 +10,7 @@ abstract final class FStatics {
 //===============================================================================
 // ReflectionFunction.
 <<__DynamicallyCallable>>
-function f($a, inout $b, $c=null) {
+function f($a, inout $b, $c=null) :mixed{
   print "In f()\n";
   FStatics::$staticX++;
   $x = FStatics::$staticX;
@@ -19,13 +19,13 @@ function f($a, inout $b, $c=null) {
 
 class Test {
   <<__DynamicallyCallable>>
-  public function test() {
+  public function test() :mixed{
   }
 }
 
 
 <<__EntryPoint>>
-function main_reflection_function_get_short_name() {
+function main_reflection_function_get_short_name() :mixed{
 $rf = new \ReflectionFunction('\foo\bar\f');
 print "--- getShortName(\"\\foo\\bar\\f\") ---\n";
 \var_dump($rf->getShortName());

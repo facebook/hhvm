@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_118() {
+function main_118() :mixed{
 print 'test
 ok';
 }

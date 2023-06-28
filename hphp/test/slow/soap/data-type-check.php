@@ -7,7 +7,7 @@ class MySoapClient extends SoapClient {
     $action,
     $version,
     $one_way = null
-  ) {
+  ) :mixed{
     $dom = new DOMDocument('1.0');
 
     // loads the SOAP request to the Document
@@ -27,7 +27,7 @@ class BodyType {}
 
 
 <<__EntryPoint>>
-function main_data_type_check() {
+function main_data_type_check() :mixed{
 $client = new MySoapClient(
   __DIR__ . '/data-type-check.wdsl',
   darray[

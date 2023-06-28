@@ -3,20 +3,20 @@ class test implements itestable {
   public $foo;
   protected $prop;
   private $bar;
-  public function foo() {}
-  protected function func() {}
-  function bar() {}
+  public function foo() :mixed{}
+  protected function func() :mixed{}
+  function bar() :mixed{}
   const const_foo = 'f';
 }
 
 interface itestable {
-  function foo();
-  function bar();
+  function foo():mixed;
+  function bar():mixed;
 }
 
 
 <<__EntryPoint>>
-function main_ext_class() {
+function main_ext_class() :mixed{
 $classes = get_declared_classes();
 var_dump(in_array("test", $classes, true));
 

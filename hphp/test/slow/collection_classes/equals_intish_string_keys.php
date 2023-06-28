@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   // intish string key should not == integer keys
   var_dump(   Set {42}   ==    Set {'42'});
   var_dump(   Set {42}   == ImmSet {'42'});
@@ -32,6 +32,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_equals_intish_string_keys() {
+function main_equals_intish_string_keys() :mixed{
 main();
 }

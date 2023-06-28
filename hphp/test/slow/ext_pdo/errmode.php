@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_errmode() {
+function main_errmode() :mixed{
 $db = sys_get_temp_dir().'/'.'errmode.php.sq3';
 
 $pdo = new PDO("sqlite:$db");

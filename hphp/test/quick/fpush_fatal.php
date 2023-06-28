@@ -1,7 +1,7 @@
 <?hh
 abstract final class FpushFatal { public static $x; }
-function blah() {}
-function foo() {
+function blah() :mixed{}
+function foo() :mixed{
   $x = FpushFatal::$x;
   blah(blah(), $x());
 }

@@ -1,16 +1,16 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
 //////////////////////////////////////////////////////////////////////
 
 // Php doesn't support \u escapes.
-function u($x) { return json_decode("\"" . $x . "\""); }
+function u($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
 function test_SpoofChecker_issuspicious(): void {
   $issues = null;
@@ -183,7 +183,7 @@ function test_SpoofChecker_setAllowedLocales(): void {
 }
 
 <<__EntryPoint>>
-function main_uspoof() {
+function main_uspoof() :mixed{
 test_SpoofChecker_issuspicious();
 test_SpoofChecker_areconfusable();
 test_SpoofChecker_issuesfound();

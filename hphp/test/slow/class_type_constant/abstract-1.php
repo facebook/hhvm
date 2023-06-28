@@ -14,7 +14,7 @@ abstract class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = new ReflectionClass('A');
   foreach ($a->getTypeConstants() as $tc) {
     echo $tc->getName()

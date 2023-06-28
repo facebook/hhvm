@@ -13,7 +13,7 @@
  */
 
 function cmp_function($value1, $value2)
-{
+:mixed{
   if($value1 == $value2) {
     return 0;
   }
@@ -42,14 +42,14 @@ class StaticClass
 abstract class AbstractClass
 {
   public $pub_value;
-  public abstract function abstractMethod();
+  public abstract function abstractMethod():mixed;
 }
 
 // Child class extending abstract class
 class ChildClass extends AbstractClass
 {
   public $child_value = 100;
-  public function abstractMethod() {
+  public function abstractMethod() :mixed{
     $pub_value = 5;
   }
   public function __construct($value) {

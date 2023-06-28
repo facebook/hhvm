@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $timezone = 'GMT+05:00';
 
     $locale_arr = varray [

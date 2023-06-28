@@ -1,3 +1,3 @@
 <?hh
-<<__EntryPoint>> function main() { include "syntax-error.php"; }
+<<__EntryPoint>> function main() :mixed{ include "syntax-error.php"; }
 

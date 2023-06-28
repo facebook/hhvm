@@ -10,7 +10,7 @@ class D {
 }
 
 <<__NEVER_INLINE>>
-function set(D $d) {
+function set(D $d) :mixed{
   $result = vec[];
   $result[] = $d->x;
   $result[] = $d->y;
@@ -18,7 +18,7 @@ function set(D $d) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $arrays = vec[vec[new C()], dict[17 => new C()]];
   foreach ($arrays as $x) {
     var_dump(set(new D($x, true)));

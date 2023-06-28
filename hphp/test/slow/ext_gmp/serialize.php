@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 $x = gmp_init(99);
 $x->foo = 'lol';
 $x->bar = 'wut';

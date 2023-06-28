@@ -4,7 +4,7 @@ class test {}
 
 
 <<__EntryPoint>>
-function main_reflection_class_get_static_property_value() {
+function main_reflection_class_get_static_property_value() :mixed{
 $c = new ReflectionClass('test');
 try {
   var_dump($c->getStaticPropertyValue('notfound', 'default'));

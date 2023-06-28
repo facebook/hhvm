@@ -7,7 +7,7 @@ class MyException extends Exception
 
 
 <<__EntryPoint>>
-function main_shadow_prop() {
+function main_shadow_prop() :mixed{
 $exception = new MyException('Error', 1234);
 echo "DONE\n";
 }

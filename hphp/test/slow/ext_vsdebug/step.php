@@ -2,7 +2,7 @@
 abstract final class ExtVsdebugStep {
   public static $path;
 }
-function verifyStopLine($frames, $line) {
+function verifyStopLine($frames, $line) :mixed{
 
 
   $msg = json_decode(getNextVsDebugMessage(), true);
@@ -38,7 +38,7 @@ function verifyStopLine($frames, $line) {
     ]);
 }
 
-function stepCommand($cmd) {
+function stepCommand($cmd) :mixed{
   $seq = sendVsCommand(darray[
     "command" => $cmd,
     "type" => "request",
@@ -58,7 +58,7 @@ function stepCommand($cmd) {
         "threadId" => 1
     ]]);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
 require(__DIR__ . '/common.inc');
 
 ExtVsdebugStep::$path = __FILE__ . ".test";

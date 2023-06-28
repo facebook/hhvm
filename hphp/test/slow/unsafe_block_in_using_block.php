@@ -14,6 +14,6 @@ function foo(): void {
 
 
 <<__EntryPoint>>
-function main_unsafe_block_in_using_block() {
+function main_unsafe_block_in_using_block() :mixed{
 foo();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1688() {
+function main_1688() :mixed{
 $src = tmpfile();
 $dst = tmpfile();
 fwrite($src, 'a');

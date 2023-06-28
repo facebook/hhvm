@@ -30,7 +30,7 @@ class thing {
     ];
   }
 
-  public function teleport() {
+  public function teleport() :mixed{
     $arr = darray[];
     $location = $this->location;
 
@@ -51,7 +51,7 @@ class thing {
 
 
 <<__EntryPoint>>
-function main_pgo_loadelim() {
+function main_pgo_loadelim() :mixed{
 $t = new thing;
 for ($i = 0; $i < 10; ++$i) {
   var_dump($t->teleport());

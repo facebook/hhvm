@@ -1,13 +1,13 @@
 <?hh
 
-function test(inout $some_ref) {
+function test(inout $some_ref) :mixed{
   $some_ref = 42;
 }
-function test2($some_ref) {
+function test2($some_ref) :mixed{
   $some_ref = 42;
 }
 
-function run(inout $var, inout $some_ref) {
+function run(inout $var, inout $some_ref) :mixed{
   $var = null;
   test(inout $var);
   var_dump($var);
@@ -25,7 +25,7 @@ function run(inout $var, inout $some_ref) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = null;
   run(inout $a, inout $a);
 }

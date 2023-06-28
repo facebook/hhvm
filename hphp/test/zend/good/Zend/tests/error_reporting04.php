@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
     echo $undef;
     error_reporting(E_ALL|E_STRICT);
 }

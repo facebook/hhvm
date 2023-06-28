@@ -1,5 +1,5 @@
 <?hh
-function separate_zval(inout $var) { }
+function separate_zval(inout $var) :mixed{ }
 <<__EntryPoint>> function main(): void {
 $s = fopen(__FILE__, "rb"); $s2 = $s;
 separate_zval(inout $s2);

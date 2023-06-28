@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main() {
+function main() :mixed{
   var_dump(HH\Lib\Legacy_FIXME\eq(vec[123], vec['123']));
   var_dump(HH\Lib\Legacy_FIXME\neq(vec[123], vec['123']));
   var_dump(vec[123] === vec['123']);
@@ -64,6 +64,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_hphpc_literal() {
+function main_hphpc_literal() :mixed{
 main();
 }

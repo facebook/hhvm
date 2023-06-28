@@ -1,11 +1,11 @@
 <?hh
 
 class MyClass {
-  private function getKeyPrefix() {
+  private function getKeyPrefix() :mixed{
     return 'foo:';
   }
 
-  public function makeArray() {
+  public function makeArray() :mixed{
     $data = darray[];
     $p = $this->getKeyPrefix();
 
@@ -20,6 +20,6 @@ class MyClass {
 
 
 <<__EntryPoint>>
-function main_array_058() {
+function main_array_058() :mixed{
 var_dump((new MyClass)->makeArray());
 }

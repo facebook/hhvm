@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_getelementbyid_class() {
+function main_getelementbyid_class() :mixed{
 $xml =
 '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE books [

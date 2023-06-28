@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static function test() {
+  static function test() :mixed{
     var_dump(__FUNCTION__);
     var_dump(__CLASS__);
     var_dump(__METHOD__);

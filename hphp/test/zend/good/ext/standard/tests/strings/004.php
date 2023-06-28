@@ -1,5 +1,5 @@
 <?hh
-function stats($f, $a) {
+function stats($f, $a) :mixed{
     $times = 90000;
     print "$f\n";
     ksort(inout $a);

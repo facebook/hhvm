@@ -17,7 +17,7 @@ class C3 {
  }
 
 <<__EntryPoint>>
-function main_2002() {
+function main_2002() :mixed{
 var_dump(class_uses(new C1));
 var_dump(class_uses(new C2));
 var_dump(class_uses(new C3));

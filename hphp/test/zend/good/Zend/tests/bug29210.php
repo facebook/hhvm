@@ -1,18 +1,18 @@
 <?hh
 class test_class {
-   private function test_func1() {
+   private function test_func1() :mixed{
         echo "test_func1\n";
    }
-   protected function test_func2() {
+   protected function test_func2() :mixed{
         echo "test_func2\n";
    }
-   static private function test_func3() {
+   static private function test_func3() :mixed{
         echo "test_func3\n";
    }
-   static protected function test_func4() {
+   static protected function test_func4() :mixed{
         echo "test_func4\n";
    }
-   function test() {
+   function test() :mixed{
      if (is_callable(varray[$this,'test_func1'])) {
          $this->test_func1();
      } else {
@@ -37,7 +37,7 @@ class test_class {
 }
 
 class foo extends test_class {
-   function test() {
+   function test() :mixed{
      if (is_callable(varray[$this,'test_func1'])) {
          $this->test_func1();
      } else {

@@ -3,7 +3,7 @@
 /** I's doc comment */
 interface I {
   /** @idx herp derp */
-  public function meth($idx);
+  public function meth($idx):mixed;
 }
 
 /** C's doc comment */
@@ -14,12 +14,12 @@ class C {
   private $p2;
 
   /** more doc comment */
-  public function okay() { }
+  public function okay() :mixed{ }
 }
 
 
 <<__EntryPoint>>
-function main_get_doc_comment_builtins() {
+function main_get_doc_comment_builtins() :mixed{
 $meths = varray[
   varray['ArrayAccess', 'offsetExists'],
   varray['ReflectionMethod', 'getDocComment'],

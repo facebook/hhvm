@@ -5,7 +5,7 @@ class c {
 }
 
 <<__EntryPoint>>
-function main_1050() {
+function main_1050() :mixed{
 $x = new c;
 $x->x = 1;
 $y = new c;

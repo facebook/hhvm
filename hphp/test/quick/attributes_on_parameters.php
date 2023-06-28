@@ -9,16 +9,16 @@ class A {
 function f(
     <<A1>> $p1,
     <<A2>> $p2
-) {
+) :mixed{
 
 }
 
-function test($caption, $parameters, $i, $attribute) {
+function test($caption, $parameters, $i, $attribute) :mixed{
     $p = $parameters[$i]->hasAttribute($attribute);
     print $caption . ":" . ($p ? "SET" : "NOTSET") . "\n";
 }
 
-function run() {
+function run() :mixed{
     $cls = new ReflectionClass("A");
     $ctor = $cls->getConstructor();
     test('1. existing attribute', $ctor->getParameters(), 0, "Annotation");

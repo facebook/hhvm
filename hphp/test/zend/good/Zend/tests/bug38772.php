@@ -5,25 +5,25 @@ class A {
         $this -> foo();
     }
 
-    private function foo() {
+    private function foo() :mixed{
         echo __METHOD__ . "\r\n";
     }
 }
 
 class B extends A {
-    public function foo() {
+    public function foo() :mixed{
         echo __METHOD__ . "\r\n";
     }
 }
 
 class C extends A {
-    protected function foo() {
+    protected function foo() :mixed{
         echo __METHOD__ . "\r\n";
     }
 }
 
 class D extends A {
-        private function foo() {
+        private function foo() :mixed{
                 echo __METHOD__ . "\r\n";
         }
 }

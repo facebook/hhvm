@@ -1,7 +1,7 @@
 <?hh
 
 // Test equality of ImmMaps.
-function main() {
+function main() :mixed{
   echo '= literal / variable equality =', "\n";
   $fm1 = ImmMap {};
   var_dump($fm1 == $fm1);
@@ -49,6 +49,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_equals() {
+function main_equals() :mixed{
 main();
 }

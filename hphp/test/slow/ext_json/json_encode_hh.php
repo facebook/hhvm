@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_json_encode_hh() {
+function main_json_encode_hh() :mixed{
 echo("** array string keys**\n");
 var_dump(json_encode(varray[]));
 var_dump(json_encode(varray['foo']));

@@ -1,14 +1,14 @@
 <?hh
 
 class C {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     echo "__toString called\n";
     return "string";
   }
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C();
 
   echo "==== explicit call ====\n";

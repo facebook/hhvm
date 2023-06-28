@@ -8,19 +8,19 @@ class cls1 implements i1, i2 {
    const CLS_CONST = 2;
   protected $prop1;
   public static $prop2 = 23;
-  function method1($param1) {
+  function method1($param1) :mixed{
  print $param1;
 }
  }
- function func1(cls1 $p1, inout $p2, $p3='def') {
+ function func1(cls1 $p1, inout $p2, $p3='def') :mixed{
  var_dump($p1);
 }
- function func2($a) {
+ function func2($a) :mixed{
  var_dump($a);
 }
  class cls2 extends cls1 {
 }
-function dump_func($func) {
+function dump_func($func) :mixed{
   var_dump($func->getName());
    var_dump($func->isInternal());
    var_dump($func->isUserDefined());
@@ -32,7 +32,7 @@ function dump_func($func) {
      dump_param($param);
    }
 }
- function verify_class($cls) {
+ function verify_class($cls) :mixed{
   if ($cls) {
     var_dump($cls->getName());
    }
@@ -40,13 +40,13 @@ function dump_func($func) {
     var_dump(null);
   }
 }
-function verify_classes($classes) {
+function verify_classes($classes) :mixed{
   ksort(inout $classes);
   foreach ($classes as $cls) {
     verify_class($cls);
    }
 }
-function dump_param($param) {
+function dump_param($param) :mixed{
   var_dump($param->getName());
    var_dump($param->isPassedByReference());
    verify_class($param->getDeclaringClass());
@@ -59,7 +59,7 @@ function dump_param($param) {
    }
    var_dump($param->getPosition());
  }
- function dump_prop($prop, $obj) {
+ function dump_prop($prop, $obj) :mixed{
   var_dump($prop->getName());
    var_dump($prop->isPublic());
    var_dump($prop->isPrivate());
@@ -75,7 +75,7 @@ function dump_param($param) {
    }
    verify_class($prop->getDeclaringClass());
  }
- function dump_class($cls, $obj) {
+ function dump_class($cls, $obj) :mixed{
   var_dump($cls->isInstance($obj));
    var_dump($cls->getName());
    var_dump($cls->isInternal());
@@ -120,7 +120,7 @@ function dump_param($param) {
 }
 
 <<__EntryPoint>>
-function main_1354() {
+function main_1354() :mixed{
 $func = new ReflectionFunction('func1');
  dump_func($func);
  $func = new ReflectionFunction('func2');

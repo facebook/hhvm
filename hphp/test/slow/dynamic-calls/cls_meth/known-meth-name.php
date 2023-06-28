@@ -2,20 +2,20 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  public static function pub_stat() {}
+  public static function pub_stat() :mixed{}
   <<__DynamicallyCallable>>
-  public static function pub_stat_dyn() {}
+  public static function pub_stat_dyn() :mixed{}
 
-  public function pub() {}
+  public function pub() :mixed{}
   <<__DynamicallyCallable>>
-  public function pub_dyn() {}
+  public function pub_dyn() :mixed{}
 
-  private static function priv_stat() {}
+  private static function priv_stat() :mixed{}
 
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = 'A';
   $pub_stat = 'pub_stat';
   $pub_stat_dyn = 'pub_stat_dyn';

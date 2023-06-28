@@ -1,10 +1,10 @@
 <?hh
 
-async function bar($options) {
+async function bar($options) :Awaitable<mixed>{
   var_dump(debug_backtrace($options));
 }
 
-async function foo($options) {
+async function foo($options) :Awaitable<mixed>{
   HH\set_frame_metadata('I am foo');
   await bar($options);
 }

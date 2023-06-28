@@ -1,28 +1,28 @@
 <?hh
 
 trait my_trait {
-  function my_trait_method() {}
+  function my_trait_method() :mixed{}
 }
 
 class my_base {
-  function my_base_method() {}
-  function my_override_method() {}
+  function my_base_method() :mixed{}
+  function my_override_method() :mixed{}
 }
 
 class my_class extends my_base {
-  function my_method() {}
+  function my_method() :mixed{}
   use my_trait;
-  function my_override_method() {}
-  function my_other_override() {}
+  function my_override_method() :mixed{}
+  function my_other_override() :mixed{}
 }
 
 class my_child extends my_class {
-  function my_other_override() {}
-  function my_child_method() {}
+  function my_other_override() :mixed{}
+  function my_child_method() :mixed{}
 }
 
 interface I {
-  function f(MyClass $c);
+  function f(MyClass $c):mixed;
 }
 <<__EntryPoint>>
 function entrypoint_reflection2(): void {

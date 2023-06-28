@@ -1,6 +1,6 @@
 <?hh
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -8,7 +8,7 @@ function wrap($fun) {
   }
 }
 
-function comp($x, $y) {
+function comp($x, $y) :mixed{
   wrap(() ==> var_dump($x < $y));
   wrap(() ==> var_dump($x <= $y));
   wrap(() ==> var_dump($x > $y));

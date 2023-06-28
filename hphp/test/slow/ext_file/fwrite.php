@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_fwrite() {
+function main_fwrite() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');

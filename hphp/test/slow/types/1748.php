@@ -1,6 +1,6 @@
 <?hh
 
-function foo($p) {
+function foo($p) :mixed{
   if ($p) {
     $a = varray[];
   }
@@ -12,6 +12,6 @@ function foo($p) {
 }
 
 <<__EntryPoint>>
-function main_1748() {
+function main_1748() :mixed{
   foo(false);
 }

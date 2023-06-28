@@ -1,6 +1,6 @@
 <?hh
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   $a = 123;
   $x = await $a();
   var_dump($x);

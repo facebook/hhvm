@@ -16,7 +16,7 @@ function test_basic_new_clsref(classname<C0> $c, $v): void {
   var_dump($x);
 }
 
-function test_apc_str($key, $clsname, $v, $isDynamic) {
+function test_apc_str($key, $clsname, $v, $isDynamic) :mixed{
   apc_store($key, $clsname);
   if ($isDynamic) {
     eval(
@@ -28,7 +28,7 @@ function test_apc_str($key, $clsname, $v, $isDynamic) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_clsname(C0::class);
   test_clsname('C0');
   test_basic_new_clsref(C0::class, 1);

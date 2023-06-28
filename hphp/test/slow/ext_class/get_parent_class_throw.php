@@ -16,6 +16,6 @@ class GetClassTest extends GetClassTestBase {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   GetClassTest::test();
 }

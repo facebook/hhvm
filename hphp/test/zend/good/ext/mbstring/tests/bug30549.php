@@ -1,6 +1,6 @@
 <?hh
 
-function test($enc, $map) {
+function test($enc, $map) :mixed{
 	print "$enc\n";
 
 	foreach($map as $fromc => $toc) {

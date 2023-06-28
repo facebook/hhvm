@@ -10,7 +10,7 @@ newtype MyNewType = int;
 
 
 <<__EntryPoint>>
-function main_reflection_type_alias_attrs() {
+function main_reflection_type_alias_attrs() :mixed{
 $x = new ReflectionTypeAlias('MyTypeNoAttrs');
 echo $x->__toString();
 var_dump($x->getAttributes());

@@ -4,7 +4,7 @@
  */
 
 function sort_using_locale( $locale, $test_array )
-{
+:mixed{
     $coll = ut_coll_create( $locale );
 
     // Sort array.
@@ -15,7 +15,7 @@ function sort_using_locale( $locale, $test_array )
 }
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     // Define a couple of arrays.

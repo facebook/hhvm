@@ -1,10 +1,10 @@
 <?hh
 
 trait t {
-  public static function f($o) {
+  public static function f($o) :mixed{
     var_dump($o->prop);
   }
-  public static function set($o, $v) {
+  public static function set($o, $v) :mixed{
     $o->prop = $v;
     var_dump($o);
   }

@@ -2,14 +2,14 @@
 
 // Test the KeyedIterable interface.
 
-function printFv($fv) {
+function printFv($fv) :mixed{
   var_dump(get_class($fv));
   foreach ($fv as $e) {
     var_dump($e);
   }
 }
 
-function foo(KeyedIterable $fv) {
+function foo(KeyedIterable $fv) :mixed{
   echo "\nmap...\n";
   printFv($fv->map(function ($v) { return 2 * $v; }));
 
@@ -39,13 +39,13 @@ function foo(KeyedIterable $fv) {
   }
 }
 
-function main() {
+function main() :mixed{
   $v = Vector {1, 2, 3};
   foo(new ImmVector($v));
 }
 
 
 <<__EntryPoint>>
-function main_keyed_iterable() {
+function main_keyed_iterable() :mixed{
 main();
 }

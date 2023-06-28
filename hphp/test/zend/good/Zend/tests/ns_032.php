@@ -1,13 +1,13 @@
 <?hh
 class Test {
   <<__DynamicallyCallable>>
-    static function foo() {
+    static function foo() :mixed{
         echo __CLASS__,"::",__FUNCTION__,"\n";
     }
 }
 
 <<__DynamicallyCallable>>
-function foo() {
+function foo() :mixed{
     echo __FUNCTION__,"\n";
 }
 <<__EntryPoint>> function main(): void {

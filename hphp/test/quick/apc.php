@@ -1,8 +1,8 @@
 <?hh
 
-function nop($unused) { /* value sink */ }
+function nop($unused) :mixed{ /* value sink */ }
 
-function testApc($before) {
+function testApc($before) :mixed{
   apc_delete("indep");
   if (!apc_add("indep", $before)) {
     echo "add failure. weird.\n";
@@ -60,7 +60,7 @@ function testApc($before) {
   var_dump($after);
 }
 
-function testKeyTypes() {
+function testKeyTypes() :mixed{
   apc_add("keysarray", darray[2 => 'two', '3' => 'three']);
   $arr = __hhvm_intrinsics\apc_fetch_no_check("keysarray");
   foreach (varray[2, 3, '2', '3'] as $k) {
@@ -68,7 +68,7 @@ function testKeyTypes() {
   }
 }
 
-function testInvalidKeys() {
+function testInvalidKeys() :mixed{
     // Reject keys with null bytes
     apc_add("bar\x00baz", 10);
     apc_store("test\x00xyz", "hello");

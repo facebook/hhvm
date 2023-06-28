@@ -3,7 +3,7 @@
 
 // See utf8ize.php
 <<__EntryPoint>>
-function main_utf8_substr() {
+function main_utf8_substr() :mixed{
 $INVALID_UTF_8_STRING = "\xe2\x82\x28";
 
 // Falsey inputs

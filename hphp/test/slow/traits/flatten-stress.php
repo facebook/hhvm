@@ -1,7 +1,7 @@
 <?hh
 
 trait T3 {
-  public function bar3() {
+  public function bar3() :mixed{
     $x = () ==> {
       echo "bar3 lambda\n";
       $y = () ==> { echo "inner bar3 lambda\n"; };
@@ -15,7 +15,7 @@ trait T2 {
   use T3;
   use T3;
 
-  public function bar2() {
+  public function bar2() :mixed{
     $x = () ==> {
       echo "bar2 lambda\n";
       $y = () ==> { echo "inner bar2 lambda\n"; };
@@ -30,7 +30,7 @@ trait T {
   use T2;
   use T2;
 
-  public function bar() {
+  public function bar() :mixed{
     try {
       $x = () ==> {
         echo "bar lambda\n";
@@ -54,7 +54,7 @@ class A {
   use T;
   use T;
 
-  public function foo() {
+  public function foo() :mixed{
     $x = () ==> {
       echo "lambda1\n";
       $y = () ==> { echo "inner lambda1\n"; };
@@ -73,7 +73,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = new A();
   $a->foo();
 }

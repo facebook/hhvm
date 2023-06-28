@@ -1,7 +1,7 @@
 <?hh
 const C = "const ok\n";
 
-function foo() {
+function foo() :mixed{
     return "func ok\n";
 }
 
@@ -12,19 +12,19 @@ class foo {
     function __construct() {
         echo "class ok\n";
     }
-    static function bar() {
+    static function bar() :mixed{
         return "method ok\n";
     }
 }
 
-function f1($x=namespace\C) {
+function f1($x=namespace\C) :mixed{
     return $x;
 }
-function f2($x=namespace\foo::C) {
+function f2($x=namespace\foo::C) :mixed{
     return $x;
 }
 
-function f3(namespace\foo $x) {
+function f3(namespace\foo $x) :mixed{
     return "ok\n";
 }
 <<__EntryPoint>> function main(): void {

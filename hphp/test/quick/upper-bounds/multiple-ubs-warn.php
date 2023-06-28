@@ -51,12 +51,12 @@ function baz<T as Fooable as Barable>(inout T $x, int $c): void {
   else if ($c == 2) $x = new Meh;
 }
 
-function foobaz<T as Fooable as Barable>(T $x, ?T $y) {
+function foobaz<T as Fooable as Barable>(T $x, ?T $y) :mixed{
   if($x) $x->foo();
   if($y) $y->bar();
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $o = foo();
   example($o);
   $p = new FooBar;

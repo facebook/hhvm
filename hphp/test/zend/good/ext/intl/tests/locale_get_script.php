@@ -6,7 +6,7 @@
  */
 
 function ut_main()
-{
+:mixed{
 
     $locales = varray[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',

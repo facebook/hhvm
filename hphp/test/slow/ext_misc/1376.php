@@ -4,7 +4,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_1376() {
+function main_1376() :mixed{
 ;
 $x = new X;
 $x->a = 1;

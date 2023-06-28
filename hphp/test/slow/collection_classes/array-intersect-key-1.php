@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $a1 = darray["1" => 11, 1 => 22, "2" => 33, 3 => 44, 4 => 55, "a" => 66,
               "7" => 77];
   $v1 = Vector {"1", 1, "2", 3, 4, "a", "7"};
@@ -52,6 +52,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_intersect_key_1() {
+function main_array_intersect_key_1() :mixed{
 main();
 }

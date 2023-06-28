@@ -8,7 +8,7 @@
 
 // declaring class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "object";
   }
 }

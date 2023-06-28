@@ -5,7 +5,7 @@ class TestClass
     /** const comment */
     const C = 0;
 
-    function x() {}
+    function x() :mixed{}
 }
 
 class TestClass2

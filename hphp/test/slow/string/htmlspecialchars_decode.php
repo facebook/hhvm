@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars_decode() {
+function main_htmlspecialchars_decode() :mixed{
 $test = varray[
   '&#34;&#x32;',
   '&#9829;&#x2665;',

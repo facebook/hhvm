@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_103() {
+function main_103() :mixed{
 $a = 10;
  $b = 9;
  $a <<= 2;

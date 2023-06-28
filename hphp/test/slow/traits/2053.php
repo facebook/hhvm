@@ -1,7 +1,7 @@
 <?hh
 
 trait MyTrait {
-  public static function callNew() {
+  public static function callNew() :mixed{
     new self("called via SELF");
     new parent("called via PARENT");
   }
@@ -19,6 +19,6 @@ class MyDerivedClass extends MyBaseClass {
 }
 
 <<__EntryPoint>>
-function main_2053() {
+function main_2053() :mixed{
 $o= MyDerivedClass::callNew();
 }

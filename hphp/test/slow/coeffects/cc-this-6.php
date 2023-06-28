@@ -15,12 +15,12 @@ interface I1 {
 class TestCls1 {
   const type T1 = A1;
   const type T2 = I1;
-  function f()[this::T1::C1, this::T1::C2, this::T1::C3] {}
-  function g()[this::T2::C1, this::T2::C2, this::T2::C3] {}
+  function f()[this::T1::C1, this::T1::C2, this::T1::C3] :mixed{}
+  function g()[this::T2::C1, this::T2::C2, this::T2::C3] :mixed{}
 }
 
 <<__EntryPoint>>
-function main()[] {
+function main()[] :mixed{
   $c = new TestCls1();
   $c->f();
   $c->g();

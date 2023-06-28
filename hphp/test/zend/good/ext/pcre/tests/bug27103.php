@@ -1,6 +1,6 @@
 <?hh
 function iter($ar)
-{
+:mixed{
     foreach ($ar as $c) {
         echo htmlentities($c, 0, "UTF-8"), ": ", strlen($c), "\n";
     }

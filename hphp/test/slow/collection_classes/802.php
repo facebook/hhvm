@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $arr = varray[null, false, true, 0, 1, 0.0, 1.0, '', '0', '1',
                '0.0', '1.0', '0 ', 'foo'];
   $vec = Vector::fromArray($arr);
@@ -31,6 +31,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_802() {
+function main_802() :mixed{
 main();
 }

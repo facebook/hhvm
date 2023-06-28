@@ -36,7 +36,7 @@ class CatWrapper {
   }
 }
 
-function reschedule($priority = 0) {
+function reschedule($priority = 0) :mixed{
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }
@@ -119,6 +119,6 @@ async function testBacktrace(): Awaitable<void> {
 
 
 <<__EntryPoint>>
-function main_backtrace() {
+function main_backtrace() :mixed{
 HH\Asio\join(testBacktrace());
 }

@@ -13,12 +13,12 @@ class Foo {
              ));
   }
 
-  <<__DynamicallyCallable>> function bar() {
+  <<__DynamicallyCallable>> function bar() :mixed{
     return 'working';
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o = new Foo;
 }

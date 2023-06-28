@@ -29,7 +29,7 @@ function main(): void {
   HH\Asio\join(AwaitAllWaitHandle::fromVec($a));
 }
 
-function test(int $it) {
+function test(int $it) :mixed{
   $ok = false;
   switch ($it) {
     case 0:

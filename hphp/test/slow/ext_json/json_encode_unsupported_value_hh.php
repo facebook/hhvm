@@ -5,7 +5,7 @@
 // -----------------------------------------
 
 <<__EntryPoint>>
-function main_json_encode_unsupported_value_hh() {
+function main_json_encode_unsupported_value_hh() :mixed{
   var_dump(json_encode(function() {}));
   var_dump(json_encode(() ==> {}));
   var_dump(json_encode(varray[1, 2, () ==> {}]));

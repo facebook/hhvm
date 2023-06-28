@@ -3,7 +3,7 @@
 module a.b;
 
 <<__EntryPoint>>
-function main_resolve_soft_1() {
+function main_resolve_soft_1() :mixed{
   soft_baz1();
 
   $f = soft_baz2();

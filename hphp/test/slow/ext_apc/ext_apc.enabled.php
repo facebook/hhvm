@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_ext_apc_enabled() {
+function main_ext_apc_enabled() :mixed{
 var_dump(extension_loaded('apc'));
 }

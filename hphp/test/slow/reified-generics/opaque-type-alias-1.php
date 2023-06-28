@@ -7,7 +7,7 @@ type A2 = (A, A);
 class C<reify T> {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(new C<int>() is C<A>);
   var_dump(new C<A>() is C<int>);
 

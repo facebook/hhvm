@@ -1,12 +1,12 @@
 <?hh
 
 class A {
-  static public function f1() {
+  static public function f1() :mixed{
     return 1;
   }
 }
 
-function test_eval($name, $f) {
+function test_eval($name, $f) :mixed{
   var_export($f);
   echo "\n";
   var_dump($f);
@@ -14,7 +14,7 @@ function test_eval($name, $f) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_eval('varray', varray[A::class, 'f1']);
   test_eval('class_meth', A::f1<>);
 }

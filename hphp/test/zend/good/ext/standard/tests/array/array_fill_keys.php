@@ -1,6 +1,6 @@
 <?hh
 
-function _try($fn) {
+function _try($fn) :mixed{
   try {
     return $fn();
   } catch (Exception $e) {

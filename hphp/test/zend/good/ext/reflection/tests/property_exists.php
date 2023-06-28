@@ -10,12 +10,12 @@ class A
     public    $init = 1;
 
     function __toString()
-    {
+:mixed    {
         return 'obj(' . get_class($this) . ')';
     }
 
     static function test($oc, $props)
-    {
+:mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
             echo $oc, '::$' , $p2, "\n";
@@ -29,7 +29,7 @@ class B extends A
     private   $c = 4;
 
     static function test($oc, $props)
-    {
+:mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
             echo $oc, '::$' , $p2, "\n";
@@ -43,7 +43,7 @@ class C extends B
     private   $d = 5;
 
     static function test($oc, $props)
-    {
+:mixed    {
         echo '===' . __CLASS__ . "===\n";
         foreach($props as $p2) {
             echo $oc, '::$' , $p2, "\n";

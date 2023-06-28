@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_bad_call_8() {
+function main_bad_call_8() :mixed{
 foo(inout Foo::$a);
 }

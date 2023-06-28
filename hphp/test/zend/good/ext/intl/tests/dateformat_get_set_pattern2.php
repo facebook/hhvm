@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
         $pattern_arr = varray [
                 'DD-MM-YYYY hh:mm:ss',
         'yyyy-DDD.hh:mm:ss z',

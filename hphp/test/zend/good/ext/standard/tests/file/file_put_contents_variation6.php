@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
 
    //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists

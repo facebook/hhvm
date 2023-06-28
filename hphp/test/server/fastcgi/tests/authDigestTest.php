@@ -1,6 +1,6 @@
 <?hh
 
-function BadAuthDigestTestController($serverPort) {
+function BadAuthDigestTestController($serverPort) :mixed{
   $args = darray['Authorization' => 'Digest "username="admin", ' .
     'realm="Restricted area", nonce="564a12f5c065e", ' .
     'uri="/test_auth_digest.php", cnonce="MjIyMTg2", nc=00000001, ' .
@@ -10,7 +10,7 @@ function BadAuthDigestTestController($serverPort) {
                   darray[], darray[], $args));
 }
 
-function GoodAuthDigestTestController($serverPort) {
+function GoodAuthDigestTestController($serverPort) :mixed{
   $args = darray['Authorization' => 'Digest username="admin", ' .
     'realm="Restricted area", nonce="564a12611dae8", ' .
     'uri="/test_auth_digest.php", cnonce="MjIyMTg1", nc=00000001, ' .

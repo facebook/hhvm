@@ -2,12 +2,12 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class StrlenTest {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     return 'StrlenTest__toString!';
   }
 }
 
-function main() {
+function main() :mixed{
   try { var_dump(strlen()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   try { var_dump(strlen(null)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -41,6 +41,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_strlen() {
+function main_strlen() :mixed{
 main();
 }

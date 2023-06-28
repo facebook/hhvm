@@ -1,6 +1,6 @@
 <?hh
 
-function iss($a, $i) {
+function iss($a, $i) :mixed{
   $max = 10;
   for ($i = 0; $i < $max; $i++) {
     isset($a[$i]);

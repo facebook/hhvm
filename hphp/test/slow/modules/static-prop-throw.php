@@ -1,5 +1,5 @@
 <?hh
-function pp_exn(Exception $e) {
+function pp_exn(Exception $e) :mixed{
   echo $e->getMessage() . " @ " . $e->getFile() . ":" . $e->getLine() . "\n";
 }
 

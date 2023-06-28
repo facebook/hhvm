@@ -5,7 +5,7 @@
 
 
 function check( $err_code )
-{
+:mixed{
     var_export( intl_is_failure( $err_code ) );
     echo "\n";
 }

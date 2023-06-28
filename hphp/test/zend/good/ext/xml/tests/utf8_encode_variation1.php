@@ -1,7 +1,7 @@
 <?hh
 
 class aClass {
-   function __toString() {
+   function __toString() :mixed{
        return "Some Ascii Data";
    }
 }

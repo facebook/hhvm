@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_eval() {
+function main_eval() :mixed{
 eval('echo "Test";');
 }

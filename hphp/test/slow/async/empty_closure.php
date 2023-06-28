@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x = async function() {};
 
   $y = $x();
@@ -8,6 +8,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_empty_closure() {
+function main_empty_closure() :mixed{
 main();
 }

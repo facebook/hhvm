@@ -5,7 +5,7 @@ enum TestEnum : int {
   BAR = 1;
 }
 
-function reflection_class() {
+function reflection_class() :mixed{
   echo '= ', __FUNCTION__, ' =', "\n";
   $rc = new ReflectionClass(TestEnum::class);
   echo (string) $rc, "\n";
@@ -18,7 +18,7 @@ function reflection_class() {
   var_dump($rc->getConstants());
 }
 
-function reflection_funcs() {
+function reflection_funcs() :mixed{
   echo '= ', __FUNCTION__, ' =', "\n";
   var_dump(enum_exists(TestEnum::class));
   var_dump(class_exists(TestEnum::class)); // true, similar to 'abstract class'

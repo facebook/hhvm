@@ -1,11 +1,11 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   if ($a) {
     include '1224-1.inc';
   }
 }
-function bar() {
+function bar() :mixed{
   if (class_exists('A')) {
     include '1224-2.inc';
     $obj = new C;
@@ -17,7 +17,7 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_1224() {
+function main_1224() :mixed{
 foo(true);
 bar();
 }

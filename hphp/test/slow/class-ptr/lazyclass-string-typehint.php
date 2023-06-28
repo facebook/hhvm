@@ -39,7 +39,7 @@ function foo3(T $x) : T {
   return Foo::class;
 }
 
-function foo4(inout HH\classname $x) {
+function foo4(inout HH\classname $x) :mixed{
   var_dump($x);
   $x = Baz::class;
 }
@@ -62,7 +62,7 @@ function foo7(HH\classname $a, inout arraykey $b) : string {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo1(Foo::class));
   var_dump(foo2(Foo::class));
   var_dump(foo3(Foo::class));

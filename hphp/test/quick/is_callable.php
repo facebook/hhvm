@@ -1,24 +1,24 @@
 <?hh
 
-function f() {}
+function f() :mixed{}
 
 class C {
-  public static function foo() {}
-  private static function bar() {}
+  public static function foo() :mixed{}
+  private static function bar() :mixed{}
 }
 
 class D {
-  public function foo() {}
-  private function bar() {}
+  public function foo() :mixed{}
+  private function bar() :mixed{}
 }
 
 interface I {
-  public function foo();
+  public function foo():mixed;
 }
 
 abstract class A {
-  public function foo() {}
-  abstract public function bar();
+  public function foo() :mixed{}
+  abstract public function bar():mixed;
 }
 
 <<__EntryPoint>> function main(): void {

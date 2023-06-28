@@ -1,21 +1,21 @@
 <?hh
 
 class b {
-  function z() {
+  function z() :mixed{
     $this->x();
   }
-  function y() {
+  function y() :mixed{
     echo 'y';
   }
 }
 class c extends b {
-  function x() {
+  function x() :mixed{
     $this->y();
   }
 }
 
 <<__EntryPoint>>
-function main_1481() {
+function main_1481() :mixed{
   if (__hhvm_intrinsics\launder_value(false)) {
     include '1481.inc';
   }

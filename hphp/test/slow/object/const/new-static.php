@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function foo() {
+  public function foo() :mixed{
     return new static();
   }
 }
@@ -17,7 +17,7 @@ class D extends C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $d = new D();
   $d2 = $d->foo();
   echo "-- after constructor completes --\n";

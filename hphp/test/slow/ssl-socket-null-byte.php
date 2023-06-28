@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ssl_socket_null_byte() {
+function main_ssl_socket_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 $opt_choices = varray[

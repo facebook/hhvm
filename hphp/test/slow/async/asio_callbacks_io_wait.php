@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_asio_callbacks_io_wait() {
+function main_asio_callbacks_io_wait() :mixed{
 Awaitable::setOnIOWaitEnterCallback(function() {
   echo "io wait enter\n";
 });

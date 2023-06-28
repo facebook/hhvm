@@ -1,5 +1,5 @@
 <?hh
-function test($group) {
+function test($group) :mixed{
   $children = $group['children'];
   $count = count($children);
   $show_num = min($count, 25);
@@ -8,6 +8,6 @@ function test($group) {
 }
 
 <<__EntryPoint>>
-function main_same_001() {
+function main_same_001() :mixed{
 var_dump(test(darray['children' => varray[1,2,3], 'limit_hit' => false]));
 }

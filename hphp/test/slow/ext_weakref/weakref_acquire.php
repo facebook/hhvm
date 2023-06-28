@@ -2,7 +2,7 @@
 
 // Source php weakref extension
 <<__EntryPoint>>
-function main_weakref_acquire() {
+function main_weakref_acquire() :mixed{
 $r = new stdClass;
 $wr1 = new WeakRef($r);
 var_dump($wr1->acquire());

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1762() {
+function main_1762() :mixed{
 var_dump(explode('', ''));
 $str = 'Hello Friend';
 var_dump(str_split($str, -3));

@@ -1,15 +1,15 @@
 <?hh
 
-<<__DynamicallyCallable(0)>> function foo() {}
-<<__DynamicallyCallable(0)>> function bar() { echo "bar\n"; }
+<<__DynamicallyCallable(0)>> function foo() :mixed{}
+<<__DynamicallyCallable(0)>> function bar() :mixed{ echo "bar\n"; }
 
-class Klass { <<__DynamicallyCallable(0)>> static function funktion() {} }
+class Klass { <<__DynamicallyCallable(0)>> static function funktion() :mixed{} }
 <<__DynamicallyConstructible(0)>> class Alpha {
-  <<__DynamicallyCallable(0)>> function beta() { echo "Beta\n"; }
+  <<__DynamicallyCallable(0)>> function beta() :mixed{ echo "Beta\n"; }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Raw function call\n";
   foo(); bar();
 

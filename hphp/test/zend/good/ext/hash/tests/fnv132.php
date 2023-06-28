@@ -1,10 +1,10 @@
 <?hh
 
-function R10($t) {
+function R10($t) :mixed{
     return str_repeat($t, 10);
 }
 
-function R500($t) {
+function R500($t) :mixed{
     return str_repeat($t, 500);
 }
 <<__EntryPoint>> function main(): void {

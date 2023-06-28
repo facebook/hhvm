@@ -1,6 +1,6 @@
 <?hh
 
-function test($a, $b) {
+function test($a, $b) :mixed{
   $a++;
   var_dump($a,$b);
   }

@@ -1,5 +1,5 @@
 <?hh
-function f($x) {
+function f($x) :mixed{
   $arr = darray($x);
   uasort(inout $arr, function($a,$b) {
     if (is_int($a) != is_int($b)) {
@@ -12,7 +12,7 @@ function f($x) {
   });
   var_dump($arr);
 }
-function main() {
+function main() :mixed{
   $a1 = darray[42 => "0", 73 => 0, 2 => "2", 3 => 3, 4 => 4, 5 => "a", 6 => "7"];
   $m1 = Map {42 => "0", 73 => 0, 2 => "2", 3 => 3, 4 => 4, 5 => "a", 6 => "7"};
   $s1 = Set {0, "0", "2", 3, 4, "a", "7"};
@@ -64,6 +64,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_intersect_2() {
+function main_array_intersect_2() :mixed{
 main();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_unshift() {
+function main_array_unshift() :mixed{
 $q = varray["orange", "banana"];
 array_unshift(inout $q, "apple", "raspberry");
 var_dump($q);

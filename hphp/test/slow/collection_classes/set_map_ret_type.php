@@ -3,7 +3,7 @@
 // Test that Set::map() throws if the return type of its callback is invalid.
 // Only int and string are currently allowed.
 
-function main() {
+function main() :mixed{
 
   $s = Set {1, 2, 3};
 
@@ -21,6 +21,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_set_map_ret_type() {
+function main_set_map_ret_type() :mixed{
 main();
 }

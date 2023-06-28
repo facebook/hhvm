@@ -5,19 +5,19 @@
 class bar {
   private $x = "asd";
 
-  public function foo() {
+  public function foo() :mixed{
     return array_map(
       $y ==> $this->x,
       varray[1,2,3,4]
     );
   }
 
-  public function getClos() {
+  public function getClos() :mixed{
     // Doesn't capture $this
     return $x ==> $x;
   }
 
-  public function grabThis() {
+  public function grabThis() :mixed{
     return () ==> $this->x;
   }
 }

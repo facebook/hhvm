@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_strtotime() {
+function main_strtotime() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 var_dump(strtotime("now") > 0);

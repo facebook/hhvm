@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_2131() {
+function main_2131() :mixed{
 var_dump(UConverter::transcode("This is an ascii string", 'utf-8', 'latin1'));
 var_dump(urlencode(UConverter::transcode("Espa\xF1ol", 'utf-8', 'latin1')));
 var_dump(urlencode(UConverter::transcode("Stra\xDFa",  'utf-8', 'latin1')));

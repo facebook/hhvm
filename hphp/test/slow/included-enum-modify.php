@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $b = null;
   $val = apc_fetch('val', inout $b) ?: 42;
   apc_store('val', $val + 1);

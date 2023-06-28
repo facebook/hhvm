@@ -1,6 +1,6 @@
 <?hh
 
-function test($a, ...$more_args) {
+function test($a, ...$more_args) :mixed{
   $args = varray[$a];
   $args = array_merge($args, $more_args);
   $n = count($args);
@@ -9,7 +9,7 @@ function test($a, ...$more_args) {
 }
 
  <<__EntryPoint>>
-function main_13() {
+function main_13() :mixed{
 test(1);
  test(1, 2);
  test(1, 2, 3);

@@ -1,5 +1,5 @@
 <?hh
-function f() {
+function f() :mixed{
   var_dump(Vector {
 }
 );
@@ -28,6 +28,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_815() {
+function main_815() :mixed{
 f();
 }

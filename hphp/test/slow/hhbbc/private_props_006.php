@@ -3,7 +3,7 @@
 class Testing86Pinit {
   private $x = Bar::A;
 
-  public function asd() {
+  public function asd() :mixed{
     if ($this->x) {
       echo "this should happen\n";
     } else {
@@ -12,7 +12,7 @@ class Testing86Pinit {
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new Testing86Pinit();
   $x->asd();
 }
@@ -23,7 +23,7 @@ function main() {
  */
 
 <<__EntryPoint>>
-function main_private_props_006() {
+function main_private_props_006() :mixed{
 if (mt_rand()) {
   include 'private_props_006-1.inc';
 } else {

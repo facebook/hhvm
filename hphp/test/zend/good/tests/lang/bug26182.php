@@ -2,7 +2,7 @@
 
 class A {
     function NotAConstructor ()
-    {
+:mixed    {
         if (isset($this->x)) {
             //just for demo
         }

@@ -4,7 +4,7 @@ class Foo {
 }
 
 class Bar {
-  function demo(Foo $f) {
+  function demo(Foo $f) :mixed{
   }
 }
 <<__EntryPoint>> function main(): void {

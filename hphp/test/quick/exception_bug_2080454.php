@@ -6,13 +6,13 @@ const AR = varray[1,3,2];
 // Exception test cases with fault funclets and nested FPI regions of
 // various complexity.
 
-function func() {
+function func() :mixed{
 }
-function blar() {
+function blar() :mixed{
   throw new Exception("Hi");
 }
 
-function foo() {
+function foo() :mixed{
 
   foreach (AR as $y) {
     func(blar($y));
@@ -21,9 +21,9 @@ function foo() {
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
 
-function case1() { foo(); }
+function case1() :mixed{ foo(); }
 
-function foo2() {
+function foo2() :mixed{
 
   foreach (AR as $y) {
     func(12, new stdClass(), mt_rand(), blar($y) ? 1024 : -1);
@@ -31,9 +31,9 @@ function foo2() {
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
 
-function case2() { foo2(); }
+function case2() :mixed{ foo2(); }
 
-function foo3() {
+function foo3() :mixed{
 
   foreach (AR as $y) {
     func(12, new stdClass(), mt_rand(), func(blar($y)));
@@ -41,10 +41,10 @@ function foo3() {
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
 
-function case3() { foo3(); }
+function case3() :mixed{ foo3(); }
 
 
-function foo4() {
+function foo4() :mixed{
 
   foreach (AR as $y) {
     func(12, new stdClass(), mt_rand(), func(mt_rand(), blar($y)));
@@ -52,7 +52,7 @@ function foo4() {
   try {} catch (Exception $x) { echo "Bad\n"; }
 }
 
-function case4() { foo3(); }
+function case4() :mixed{ foo3(); }
 <<__EntryPoint>> function main(): void {
 try { case1(); } catch (Exception $x) { echo "Good1\n"; }
 try { case2(); } catch (Exception $x) { echo "Good2\n"; }

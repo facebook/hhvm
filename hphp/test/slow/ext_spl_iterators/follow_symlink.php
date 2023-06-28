@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_follow_symlink() {
+function main_follow_symlink() :mixed{
 $p = sys_get_temp_dir() . '/recursivedirectoryiterator_followsymlink_test/';
 
 mkdir($p . "test/dir1", 0777, true);

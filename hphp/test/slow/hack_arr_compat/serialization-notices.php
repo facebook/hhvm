@@ -8,11 +8,11 @@ function hexdump(string $s): string {
   return $out;
 }
 
-function call_fbcs($value) {
+function call_fbcs($value) :mixed{
   return hexdump(fb_compact_serialize($value));
 }
 
-function call_fbs($value, $flag) {
+function call_fbs($value, $flag) :mixed{
   try {
     return hexdump(fb_serialize($value, $flag));
   } catch (InvalidArgumentException $e) {
@@ -21,7 +21,7 @@ function call_fbs($value, $flag) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $arrays = dict[
     'varray[]' => varray[],
     'darray[]' => darray[],

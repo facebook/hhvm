@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_804() {
+function main_804() :mixed{
 try {
   $v = new Vector();
   $v->containsKey(1);

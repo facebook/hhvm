@@ -1,19 +1,19 @@
 <?hh
 class foo {
-        private function bar() {
+        private function bar() :mixed{
                 echo "private!\n";
         }
 }
 
 class fooson extends foo {
-        function barson() {
+        function barson() :mixed{
                 $this->bar();
         }
 }
 
 class foo2son extends fooson {
 
-        function bar() {
+        function bar() :mixed{
                 echo "public!\n";
         }
 }

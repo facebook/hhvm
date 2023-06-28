@@ -1,9 +1,9 @@
 <?hh
-function EUC_JP($utf8str) {
+function EUC_JP($utf8str) :mixed{
 	return mb_convert_encoding($utf8str, "EUC-JP", "UTF-8");
 }
 
-function FROM_EUC_JP($eucjpstr) {
+function FROM_EUC_JP($eucjpstr) :mixed{
 	return mb_convert_encoding($eucjpstr, "UTF-8", "EUC-JP");
 }
 <<__EntryPoint>>

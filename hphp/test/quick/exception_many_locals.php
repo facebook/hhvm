@@ -3,13 +3,13 @@
 class c {
 }
 
-function my_handler() {
+function my_handler() :mixed{
   throw new Exception('whoops');
 }
 
 
 
-function main() {
+function main() :mixed{
   echo "Entering try\n";
   try {
     echo "Creating first c\n";
@@ -25,7 +25,7 @@ function main() {
   }
   echo "Returning from main\n";
 }
-<<__EntryPoint>> function main_entry() {
+<<__EntryPoint>> function main_entry() :mixed{
 set_error_handler(my_handler<>);
 echo "Calling main()\n";
 main();

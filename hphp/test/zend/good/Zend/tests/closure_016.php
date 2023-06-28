@@ -1,11 +1,11 @@
 <?hh
 class Foo {
-    function __invoke() {
+    function __invoke() :mixed{
         echo "Hello World!\n";
     }
 }
 
-function foo() {
+function foo() :mixed{
     return function() {
         echo "Hello World!\n";
     };

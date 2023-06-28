@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_number_formatter_rounding() {
+function main_number_formatter_rounding() :mixed{
 include (__DIR__ . '/NumberFormatter_rounding.inc');
 
 echo "Testing en_US, default rounding mode, 3 digits\n";

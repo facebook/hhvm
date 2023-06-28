@@ -15,6 +15,6 @@ final class TestCloneWhat extends TestCloneWhatBase {
 
 
 <<__EntryPoint>>
-function main_method_override() {
+function main_method_override() :mixed{
 echo "Hello\n";
 }

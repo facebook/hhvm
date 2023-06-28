@@ -7,14 +7,14 @@ class MyCloneable {
     $this->id = self::$id++;
   }
 
-  function __clone() {
+  function __clone() :mixed{
     $this->address = "New York";
     $this->id = self::$id++;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $original = new MyCloneable();
 
   $original->name = "Hello";

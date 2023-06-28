@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars_utf8_flags() {
+function main_htmlspecialchars_utf8_flags() :mixed{
 $s = "\xc3\xa8\xc3\xa9\xc3\xa6\xc3\x83\xc2\xb3";
 var_dump($s);
 var_dump(htmlspecialchars($s, ENT_COMPAT, 'UTF-8'));

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_classimpl_error() {
+function main_classimpl_error() :mixed{
 class_implements("bbb", false);
 class_implements("bbb");
 

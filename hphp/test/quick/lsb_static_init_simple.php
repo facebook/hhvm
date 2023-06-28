@@ -5,7 +5,7 @@ class A {
   <<__LSB>> protected static $y = 123;
   <<__LSB>> public static $z = varray[1,2,3];
 
-  static function dump() {
+  static function dump() :mixed{
     var_dump(static::$x);
     var_dump(static::$y);
     var_dump(static::$z);

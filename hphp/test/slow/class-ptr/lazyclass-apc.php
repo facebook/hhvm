@@ -5,7 +5,7 @@ class foobar {}
 class fizz {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   apc_store('mainf', bar::class);
   apc_store('maina', varray[1, bar::class, 'foo']);
 

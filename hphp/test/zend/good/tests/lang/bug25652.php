@@ -1,12 +1,12 @@
 <?hh
 <<__DynamicallyCallable>>
-function testfunc ($var) {
+function testfunc ($var) :mixed{
     echo "testfunc $var\n";
 }
 
 class foo {
     public $arr = varray['testfunc'];
-    function bar () {
+    function bar () :mixed{
         $this->arr[0]('testvalue');
     }
 }

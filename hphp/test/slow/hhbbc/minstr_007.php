@@ -1,22 +1,22 @@
 <?hh
 
-class A { public function go($x) {} }
-class B { public function go(inout $x) {} }
+class A { public function go($x) :mixed{} }
+class B { public function go(inout $x) :mixed{} }
 
 class Foo {
   private $foo = "asd";
   private $bar = 2;
 
-  public function heh($obj, string $heh) {
+  public function heh($obj, string $heh) :mixed{
     $obj->go($this->bar);
     return $heh;
   }
 
-  public function getter() { return $this->foo; }
+  public function getter() :mixed{ return $this->foo; }
 }
 
 <<__EntryPoint>>
-function main_minstr_007() {
+function main_minstr_007() :mixed{
   $foo = new Foo;
   $a = new A;
   var_dump($foo->getter());

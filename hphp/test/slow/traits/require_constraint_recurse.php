@@ -1,13 +1,13 @@
 <?hh
 
 interface I1 {
-  public function baz();
+  public function baz():mixed;
 }
 
 interface I2 {}
 
 class Super {
-  protected function foo() {
+  protected function foo() :mixed{
     echo "Super::foo\n";
   }
 }
@@ -17,7 +17,7 @@ trait T1 {
 
   require implements I1;
 
-  public function bar() {
+  public function bar() :mixed{
     return $this->foo();
   }
 }
@@ -33,12 +33,12 @@ class C extends Super {
   use T3; // fails the requirements of T1
 }
 
-function main() {
+function main() :mixed{
   $c = new C();
   $c->bar();
 }
 
 <<__EntryPoint>>
-function main_require_constraint_recurse() {
+function main_require_constraint_recurse() :mixed{
 main();
 }

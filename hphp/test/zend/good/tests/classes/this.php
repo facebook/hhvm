@@ -6,7 +6,7 @@
 class Foo
 {
     function replace($other)
-    {
+:mixed    {
         echo __METHOD__ . "\n";
         $this = $other;
         print $this->prop;
@@ -14,7 +14,7 @@ class Foo
     }
 
     function indirect($other)
-    {
+:mixed    {
         echo __METHOD__ . "\n";
         $this = $other;
         $result = $this = $other;
@@ -23,7 +23,7 @@ class Foo
     }
 
     function retrieve(inout $other)
-    {
+:mixed    {
         echo __METHOD__ . "\n";
         $other = $this;
     }

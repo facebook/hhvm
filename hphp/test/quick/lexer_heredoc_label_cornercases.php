@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() :mixed{
 $total_size = 0;
 $x = <<<"EOD"
 \\EOD

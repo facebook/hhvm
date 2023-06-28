@@ -1,24 +1,24 @@
 <?hh
 
-function randint() {
+function randint() :mixed{
   if (mt_rand() < 100) return 12;
   if (mt_rand() < 1000) return 120;
   return 53;
 }
 
-function pt2d() {
+function pt2d() :mixed{
   return darray['x' => randint(), 'y' => randint()];
 }
-function pt3d() {
+function pt3d() :mixed{
   return darray['x' => randint(), 'y' => randint(), 'z' => randint()];
 }
 
-function test(bool $x) {
+function test(bool $x) :mixed{
   $z = $x ? pt2d() : pt3d();
   return $z['y'];
 }
 
-function main() {
+function main() :mixed{
   $x = test(true);
   var_dump(is_int($x));
   $x = test(false);
@@ -27,6 +27,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_006() {
+function main_array_006() :mixed{
 main();
 }

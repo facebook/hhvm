@@ -7,7 +7,7 @@
 /*
  * Pass readdir() a directory handle pointing to an empty directory to test behaviour
  */
-function mysort($a,$b) {
+function mysort($a,$b) :mixed{
     return strlen($a) > strlen($b) ? 1 : -1;
 }
 <<__EntryPoint>> function main(): void {

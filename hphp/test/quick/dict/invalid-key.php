@@ -18,7 +18,7 @@ function set(dict $d, mixed $k, mixed $v): dict {
   return $d;
 }
 
-function run(inout $ref, inout $badref) {
+function run(inout $ref, inout $badref) :mixed{
   set(dict[], "1", "hello")
     |> set($$, 1, "goodbye")
     |> set($$, null, "null")
@@ -41,7 +41,7 @@ function run(inout $ref, inout $badref) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = 12;
   $bar = darray[];
   run(inout $foo, inout $bar);

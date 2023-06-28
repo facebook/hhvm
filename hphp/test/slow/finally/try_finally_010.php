@@ -1,8 +1,8 @@
 <?hh
-function foo() {
+function foo() :mixed{
   echo "4";
 }
-function bar() {
+function bar() :mixed{
   try {
     echo "2";
     throw new Exception();
@@ -17,7 +17,7 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_try_finally_010() {
+function main_try_finally_010() :mixed{
 try {
   echo "1";
   bar();

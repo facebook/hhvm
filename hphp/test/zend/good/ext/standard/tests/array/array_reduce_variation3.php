@@ -6,8 +6,8 @@
  */
 
 class A {
-  <<__DynamicallyCallable>> static function adder($a, $b) {return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);}
-  <<__DynamicallyCallable>> public function adder2($a, $b) {return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);}
+  <<__DynamicallyCallable>> static function adder($a, $b) :mixed{return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);}
+  <<__DynamicallyCallable>> public function adder2($a, $b) :mixed{return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);}
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation - object callbacks ***\n";

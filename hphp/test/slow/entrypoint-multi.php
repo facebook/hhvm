@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function first() {}
+function first() :mixed{}
 
 <<__EntryPoint>>
-function second() {}
+function second() :mixed{}

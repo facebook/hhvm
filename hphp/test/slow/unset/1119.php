@@ -1,6 +1,6 @@
 <?hh
 
-function run(inout $a, inout $c) {
+function run(inout $a, inout $c) :mixed{
   $b = varray[0, 1];
   $a = varray[$b, 1];
   unset($a[0][1]);
@@ -8,7 +8,7 @@ function run(inout $a, inout $c) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = null;
   run(inout $a, inout $a);
 }

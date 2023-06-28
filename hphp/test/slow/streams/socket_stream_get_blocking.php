@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_socket_stream_get_blocking() {
+function main_socket_stream_get_blocking() :mixed{
 $errno = null;
 $errstr = null;
 $stream = stream_socket_server('tcp://127.0.0.1:32000', inout $errno, inout $errstr);

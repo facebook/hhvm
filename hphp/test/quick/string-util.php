@@ -1,7 +1,7 @@
 <?hh
 
 
-function strtobin($str) {
+function strtobin($str) :mixed{
   $ret = '';
   $sep = '';
   for ($i = 0; $i < strlen($str); ++$i) {
@@ -12,7 +12,7 @@ function strtobin($str) {
   return $ret;
 }
 
-function do_string($str) {
+function do_string($str) :mixed{
   var_dump(strtobin($str),
            strtobin(stripcslashes($str)));
 }

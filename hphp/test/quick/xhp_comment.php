@@ -5,7 +5,7 @@ class :node {
   public function __construct($_, $children) {
     $this->children = $children;
   }
-  public function __toString() {
+  public function __toString() :mixed{
     $o = '';
     foreach ($this->children as $child) {
       $o .= (string)$child;

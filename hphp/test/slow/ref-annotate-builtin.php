@@ -7,7 +7,7 @@ class X {
   private stdClass $d;
 }
 
-function foo($value) {
+function foo($value) :mixed{
   $className = get_class($value);
   $ref_obj = new ReflectionObject($value);
   $property_keys = $ref_obj->getProperties();
@@ -16,6 +16,6 @@ function foo($value) {
 
 
 <<__EntryPoint>>
-function main_ref_annotate_builtin() {
+function main_ref_annotate_builtin() :mixed{
 foo(new X);
 }

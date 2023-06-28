@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_filter_var_url_chars() {
+function main_filter_var_url_chars() :mixed{
 $out = '';
 foreach (range(0, 255) as $n)
 {

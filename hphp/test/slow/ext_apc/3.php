@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_3() {
+function main_3() :mixed{
 $complexMap = darray[
   "f" => "facebook",
   "a" => darray["b" => 1,

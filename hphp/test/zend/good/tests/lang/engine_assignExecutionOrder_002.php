@@ -1,7 +1,7 @@
 <?hh
 
 // expect the inner array to be defined
-function f() {
+function f() :mixed{
   LangEngineAssignexecutionorder002::$ee = varray["array created in f()"];
   return 1;
 }

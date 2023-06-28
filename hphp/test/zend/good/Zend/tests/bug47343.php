@@ -2,7 +2,7 @@
 class A
 {
     public function getB()
-    {
+:mixed    {
         $this->data = darray[];
         $this->data['foo'] = new B($this);
         $this->data['bar'] = new B($this);
@@ -14,7 +14,7 @@ class A
 class B
 {
     public function B($A)
-    {
+:mixed    {
         $this->A = $A;
     }
 }

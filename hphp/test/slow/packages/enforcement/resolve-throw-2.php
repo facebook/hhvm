@@ -3,7 +3,7 @@
 module a.b;
 
 <<__EntryPoint>>
-function main_resolve_throw_2() {
+function main_resolve_throw_2() :mixed{
   try {
     $f = bar1();
     $f();

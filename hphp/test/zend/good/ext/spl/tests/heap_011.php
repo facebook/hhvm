@@ -1,12 +1,12 @@
 <?hh
 class SplMinHeap2 extends SplMinHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b) :mixed{
         return -parent::compare($a,$b);
     }
 }
 
 class SplMaxHeap2 extends SplMaxHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b) :mixed{
         return -parent::compare($a,$b);
     }
 }

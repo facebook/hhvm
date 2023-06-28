@@ -5,7 +5,7 @@ class W {
 }
 class X extends W {
   const FOO = 1;
-  static function foo() {
+  static function foo() :mixed{
     var_dump(constant('self::FOO'));
     var_dump(constant('parent::FOO'));
     var_dump(constant('static::FOO'));
@@ -23,7 +23,7 @@ class Y extends X {
 }
 
 <<__EntryPoint>>
-function main_1620() {
+function main_1620() :mixed{
 X::foo();
 Y::foo();
 }

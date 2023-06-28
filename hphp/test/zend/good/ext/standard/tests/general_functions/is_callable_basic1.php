@@ -8,7 +8,7 @@
    Description: use iscallable() on given string to check for valid function name
                 returns true if valid function name, false otherwise
 */
-function check_iscallable( $functions ) {
+function check_iscallable( $functions ) :mixed{
   $counter = 1;
   foreach($functions as $func) {
     echo "-- Iteration  $counter --\n";
@@ -25,23 +25,23 @@ function check_iscallable( $functions ) {
 }
 
 /* function name with simple string */
-function someFunction() {
+function someFunction() :mixed{
 }
 
 /* function name with mixed string and integer */
-function x123() {
+function x123() :mixed{
 }
 
 /* function name as NULL */
-function NULL() {
+function NULL() :mixed{
 }
 
 /* function name with boolean name */
-function false() {
+function false() :mixed{
 }
 
 /* function name with string and special character */
-function Hello_World() {
+function Hello_World() :mixed{
 }
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing is_callable() on defined functions ***\n";

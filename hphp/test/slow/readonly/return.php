@@ -15,7 +15,7 @@ function return_readonly() : readonly P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   return_readonly();
   return_mutable_error();
 }

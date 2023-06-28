@@ -1,10 +1,10 @@
 <?hh
 
-function err($x, $y) { throw new Exception('heh'); }
+function err($x, $y) :mixed{ throw new Exception('heh'); }
 
 class bar {}
 
-function foo() {
+function foo() :mixed{
   $bar = new bar;
   echo "----\n";
   $lol = new stdClass;
@@ -23,7 +23,7 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_promote_exn_002() {
+function main_promote_exn_002() :mixed{
 foo();
 set_error_handler(err<>);
 foo();

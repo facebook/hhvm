@@ -1,7 +1,7 @@
 <?hh
 
 function findValue($table, $v)  // where $table is 2x3 array
-{
+:mixed{
         for ($row = 0; $row <= 1; ++$row)
         {
                 for ($colm = 0; $colm <= 2; ++$colm)

@@ -26,12 +26,12 @@ function while_loop(): void {
 }
 
 <<__NEVER_INLINE>>
-function outer() { while_loop(); }
+function outer() :mixed{ while_loop(); }
 
 <<__NEVER_INLINE>>
-function go() {
+function go() :mixed{
   try { outer(); } catch (Exception $e) { var_dump("CATCH"); }
 }
 
 <<__EntryPoint>>
-function main() { go(); go(); go(); go(); go(); go(); go(); go(); go(); go(); }
+function main() :mixed{ go(); go(); go(); go(); go(); go(); go(); go(); go(); go(); }

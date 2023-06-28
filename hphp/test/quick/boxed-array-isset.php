@@ -1,7 +1,7 @@
 <?hh
 
 
-function main($o, inout $x) {
+function main($o, inout $x) :mixed{
   $x = $o->prop;
   return isset($x[23]) ? true : false;
 }

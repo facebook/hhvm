@@ -1,23 +1,23 @@
 <?hh
 
 trait P {
-  static public function trait_meth() {
+  static public function trait_meth() :mixed{
     return "trait_meth";
   }
 }
 
 class C {
   use P;
-  static private function private_meth($s) {
+  static private function private_meth($s) :mixed{
     echo "private: $s\n";
   }
-  static public function caller($f, $a) {
+  static public function caller($f, $a) :mixed{
     $f($a);
   }
-  static public function getCallable() {
+  static public function getCallable() :mixed{
     return self::private_meth<>;
   }
-  static public function mth() {
+  static public function mth() :mixed{
     return 1;
   }
 }

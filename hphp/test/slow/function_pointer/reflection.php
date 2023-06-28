@@ -26,15 +26,15 @@ function baz_with_generics<T, Ta, Tb, Tc>(): int {
   return 1;
 }
 
-function func1($p0 = Foo::bar<>) {}
-function func2($p0 = Foo::bar_with_generic<int>) {}
-function func3($p0 = Foo::bar_with_generics<int, string, int, string>) {}
-function func4($p0 = baz<>) {}
-function func5($p0 = baz_with_generic<int>) {}
-function func6($p0 = baz_with_generics<int, string, int, string>) {}
+function func1($p0 = Foo::bar<>) :mixed{}
+function func2($p0 = Foo::bar_with_generic<int>) :mixed{}
+function func3($p0 = Foo::bar_with_generics<int, string, int, string>) :mixed{}
+function func4($p0 = baz<>) :mixed{}
+function func5($p0 = baz_with_generic<int>) :mixed{}
+function func6($p0 = baz_with_generics<int, string, int, string>) :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $funcs = vec[
     'func1',
     'func2',

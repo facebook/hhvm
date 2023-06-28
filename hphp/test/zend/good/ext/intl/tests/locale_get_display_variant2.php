@@ -6,7 +6,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     $disp_locales=varray['en','fr','de'];

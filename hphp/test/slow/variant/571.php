@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_571() {
+function main_571() :mixed{
 $a = 't';
  $a = 1;
  print $a - 2;

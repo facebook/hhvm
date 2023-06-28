@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $m = Map {
 1 => 'a', '2' => 'b'}
 ;
@@ -22,6 +22,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_841() {
+function main_841() :mixed{
 f();
 }

@@ -8,11 +8,11 @@ class man {
     $this->bars = varray[];
   }
 
-  function getdrunk($where) {
+  function getdrunk($where) :mixed{
     $this->bars[] = new bar($where);
   }
 
-  function getName() {
+  function getName() :mixed{
     return $this->name;
   }
 }
@@ -24,11 +24,11 @@ class bar extends man {
     $this->name = $w;
   }
 
-  function getName() {
+  function getName() :mixed{
     return $this->name;
   }
 
-  function whosdrunk() {
+  function whosdrunk() :mixed{
     $who = get_parent_class($this);
     if($who == NULL) {
       return 'nobody';
@@ -38,7 +38,7 @@ class bar extends man {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = new man;
   $x->getdrunk('The old Tavern');
   var_dump($x->bars[0]->whosdrunk());

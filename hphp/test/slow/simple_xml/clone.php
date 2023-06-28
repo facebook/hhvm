@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_clone() {
+function main_clone() :mixed{
 $node = simplexml_load_string(<<<EOF
 <root one="1" two="2">
   <hello>world</hello>

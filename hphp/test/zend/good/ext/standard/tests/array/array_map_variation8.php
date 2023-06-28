@@ -9,12 +9,12 @@
  */
 
 function callback1($a)
-{
+:mixed{
   return ($a);
 }
 
 function callback_cat($a, $b)
-{
+:mixed{
   return ($a . $b);
 }
 <<__EntryPoint>> function main(): void {

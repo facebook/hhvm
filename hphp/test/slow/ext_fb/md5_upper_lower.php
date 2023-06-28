@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_md5_upper_lower() {
+function main_md5_upper_lower() :mixed{
   // MD5 of "foo" is acbd18db4cc2f85cedef654fccc4a4d8
   var_dump(HH\non_crypto_md5_upper("foo"));
   var_dump((0xacbd18db << 32) + 0x4cc2f85c);

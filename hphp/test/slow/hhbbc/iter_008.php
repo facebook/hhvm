@@ -1,9 +1,9 @@
 <?hh
 
-function heh($x) { echo $x . "\n"; }
+function heh($x) :mixed{ echo $x . "\n"; }
 
 class C {
-  public static function x($string) {
+  public static function x($string) :mixed{
     foreach (self::$static_arr as $result) {
       $result = 'wat' . $result . 'asd';
       heh($result);
@@ -19,11 +19,11 @@ class C {
   ];
 }
 
-function main() {
+function main() :mixed{
   var_dump(C::x("foobarkjh1k2j3nn"));
 }
 
 <<__EntryPoint>>
-function main_iter_008() {
+function main_iter_008() :mixed{
 main();
 }

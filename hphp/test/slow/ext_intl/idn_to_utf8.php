@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_idn_to_utf8() {
+function main_idn_to_utf8() :mixed{
 var_dump(idn_to_utf8("www.xn--mnsjonasson-x8a.se") ===
     "www.m\xc3\xa5nsjonasson.se");
 var_dump(idn_to_utf8("www.facebook.com"));

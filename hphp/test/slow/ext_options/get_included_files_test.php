@@ -1,6 +1,6 @@
 <?hh
 
-function foo($files) {
+function foo($files) :mixed{
   // Zend and HHVM output in different orders; level the field
   sort(inout $files);
   foreach ($files as $filename) {
@@ -15,7 +15,7 @@ function foo($files) {
 // This file is included in the output.
 
 <<__EntryPoint>>
-function main_get_included_files_test() {
+function main_get_included_files_test() :mixed{
 require 'test3.inc';
 include 'test1.inc';
 include_once 'test2.inc';

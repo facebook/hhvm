@@ -5,7 +5,7 @@ class cccc {}
 interface iiii {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(class_exists('fooo'));
   var_dump(class_exists('tttt'));
   var_dump(class_exists('cccc'));

@@ -1,11 +1,11 @@
 <?hh
 
 <<__Memoize(#KeyedByIC)>>
-function memo()[zoned] {
+function memo()[zoned] :mixed{
   echo "memo called\n";
 }
 
-function f()[zoned] {
+function f()[zoned] :mixed{
   $key = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($key) . "\n";
   memo();
@@ -13,12 +13,12 @@ function f()[zoned] {
 
 final class ArraykeyContext extends HH\ImplicitContext {
   const type T = arraykey;
-  public static function set($value, $fun) { parent::runWith($value, $fun); }
+  public static function set($value, $fun) :mixed{ parent::runWith($value, $fun); }
 }
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   ArraykeyContext::set(123, f<>);
   ArraykeyContext::set("123", f<>);
 }

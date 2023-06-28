@@ -1,10 +1,10 @@
 <?hh
 
-async function f() {
+async function f() :Awaitable<mixed>{
   print "this takes soooo looong...\n";
 }
 
-async function g() {
+async function g() :Awaitable<mixed>{
   await f();
   await f();
   await f();
@@ -14,7 +14,7 @@ async function g() {
 
 
 <<__EntryPoint>>
-function main_await_statement() {
+function main_await_statement() :mixed{
 $r = HH\Asio\join(g());
 var_dump($r);
 }

@@ -1,19 +1,19 @@
 <?hh
 
 namespace M {
-  function call(callable $fn) { $fn(); }
+  function call(callable $fn) :mixed{ $fn(); }
 }
 
 namespace N {
   use M;
   <<__DynamicallyCallable>>
-  function sayHi() { echo "Hi\n"; }
+  function sayHi() :mixed{ echo "Hi\n"; }
 
   class C {
     <<__DynamicallyCallable>>
-    public static function sm() { echo "Hello\n"; }
+    public static function sm() :mixed{ echo "Hello\n"; }
     <<__DynamicallyCallable>>
-    public function m() { echo "Salutations\n"; }
+    public function m() :mixed{ echo "Salutations\n"; }
   }
 
   class D extends C { }

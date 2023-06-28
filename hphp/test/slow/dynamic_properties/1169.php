@@ -8,7 +8,7 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1169() {
+function main_1169() :mixed{
 $obj = 1;
  $obj = new A();
  var_dump($obj->a);

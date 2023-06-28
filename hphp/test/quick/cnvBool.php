@@ -1,12 +1,12 @@
 <?hh
 
-function foo($v) {
+function foo($v) :mixed{
   return (bool)$v;
 }
 
 class C{}
 
-function bar($i) {
+function bar($i) :mixed{
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";

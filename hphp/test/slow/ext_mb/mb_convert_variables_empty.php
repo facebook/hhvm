@@ -9,7 +9,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_mb_convert_variables_empty() {
+function main_mb_convert_variables_empty() :mixed{
 $a = new A();
 mb_convert_variables('utf-8', 'windows-1251', inout $a);
 var_dump($a);

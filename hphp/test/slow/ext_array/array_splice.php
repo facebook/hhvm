@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_array_splice() {
+function main_array_splice() :mixed{
 $params = darray["a" => "aaa", 0 => "apple"];
 unset($params['a']);
 array_splice(inout $params, 0, 0, darray[123 => "test"]);

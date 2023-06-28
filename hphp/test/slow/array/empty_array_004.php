@@ -1,13 +1,13 @@
 <?hh
 
-function a() { return darray[]; }
-function main() {
+function a() :mixed{ return darray[]; }
+function main() :mixed{
   $x = a();
   $x[12] = 2;
   return $x;
 }
 
 <<__EntryPoint>>
-function main_empty_array_004() {
+function main_empty_array_004() :mixed{
 var_dump(main());
 }

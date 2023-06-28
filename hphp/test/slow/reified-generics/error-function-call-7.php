@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function f<reify T>() {
+  public function f<reify T>() :mixed{
     var_dump("hi");
   }
 }

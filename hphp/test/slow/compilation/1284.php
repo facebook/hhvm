@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1284() {
+function main_1284() :mixed{
   try {
     if ($a) $a == 0;
     print "done\n";

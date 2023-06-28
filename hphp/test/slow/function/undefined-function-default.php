@@ -1,12 +1,12 @@
 <?hh
 
-function f($val = g()) {
+function f($val = g()) :mixed{
   echo "val = ";
   var_dump($val);
 }
 
 
 <<__EntryPoint>>
-function main_undefined_function_default() {
+function main_undefined_function_default() :mixed{
 f();
 }

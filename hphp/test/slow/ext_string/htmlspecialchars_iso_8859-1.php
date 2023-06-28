@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars_iso_8859_1() {
+function main_htmlspecialchars_iso_8859_1() :mixed{
 $s = chr(0xAE);
 echo 'Original: '.bin2hex($s)."\n";
 

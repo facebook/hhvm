@@ -3,16 +3,16 @@ abstract class base {
   public $a = 'base';
 
   // disallow cloning
-  private function __clone() {}
+  private function __clone() :mixed{}
 }
 
 class test extends base {
   public $b = 'test';
 
   // reenable cloning
-  public function __clone() {}
+  public function __clone() :mixed{}
 
-  public function show() {
+  public function show() :mixed{
     var_dump($this);
   }
 }

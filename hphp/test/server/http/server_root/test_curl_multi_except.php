@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_test_curl_multi_except() {
+function main_test_curl_multi_except() :mixed{
   $port = $_ENV['SERVERPORT'];
   $host = php_uname('n');
   $url = "http://$host:$port/hello.php";
@@ -42,6 +42,6 @@ function main_test_curl_multi_except() {
   echo $ret;
 }
 
-function except() {
+function except() :mixed{
   throw new Exception("oops");
 }

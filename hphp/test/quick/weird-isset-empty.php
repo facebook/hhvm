@@ -1,5 +1,5 @@
 <?hh
-function tst1(inout $abc) {
+function tst1(inout $abc) :mixed{
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));
   var_dump(isset($abc->foo));
@@ -13,7 +13,7 @@ function tst1(inout $abc) {
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
 }
-function tst2(inout $abc) {
+function tst2(inout $abc) :mixed{
   $abc->foo = darray['bar' => 'baz'];
   var_dump(isset($abc->foo));
   var_dump(!($abc->foo ?? false));
@@ -22,7 +22,7 @@ function tst2(inout $abc) {
   var_dump(isset($abc->foo->bar));
   var_dump(!($abc->foo->bar ?? false));
 }
-function tst3(inout $abc) {
+function tst3(inout $abc) :mixed{
   $abc['foo']->bar = 'baz';
   var_dump(isset($abc['foo']));
   var_dump(!($abc['foo'] ?? false));

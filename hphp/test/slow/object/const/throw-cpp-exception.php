@@ -20,7 +20,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   register_postsend_function(() ==> {
     echo "-- after constructor completes --\n";
     $c = C::$c;

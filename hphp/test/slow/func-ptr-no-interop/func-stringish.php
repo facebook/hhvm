@@ -1,11 +1,11 @@
 <?hh
 
-function foo(Stringish $s) {
+function foo(Stringish $s) :mixed{
   var_dump($s);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo('hello');
   foo(main<>);
 }

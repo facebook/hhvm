@@ -1,6 +1,6 @@
 <?hh
 
-function b($s) {
+function b($s) :mixed{
   if ($s === 'floo') {
     return 12;
   }
@@ -8,7 +8,7 @@ function b($s) {
   return 8;
 }
 
-function a($b) {
+function a($b) :mixed{
   if ($b) {
     $x = 'floo';
   } else {
@@ -17,7 +17,7 @@ function a($b) {
   b($x);
 }
 
-function f() {
+function f() :mixed{
   for ($i = 0; $i < 4; ++$i) {
     a($i < 3);
     \HH\global_set('tmp', $i);
@@ -25,20 +25,20 @@ function f() {
   }
 }
 
-function enable() {
+function enable() :mixed{
   echo "Going to enable\n";
   fb_enable_code_coverage();
   echo "Enabled\n";
   \HH\global_set('z', 3);
 }
 
-function doenable() {
+function doenable() :mixed{
 
   enable();
   Coverage::$y += 43;
 }
 
-function main() {
+function main() :mixed{
   echo "About to enable\n";
   doenable();
   echo "Done enabling\n";

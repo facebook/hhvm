@@ -8,12 +8,12 @@
  * Test array_map() by passing array having binary values for $arr1 argument
  */
 function callback1($a)
-{
+:mixed{
   return ($a);
 }
 <<__DynamicallyCallable>>
 function callback2($a, $b)
-{
+:mixed{
   return darray[$a => $b];
 }
 <<__EntryPoint>> function main(): void {

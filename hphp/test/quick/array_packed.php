@@ -1,6 +1,6 @@
 <?hh
 
-function test($x) {
+function test($x) :mixed{
   // each of these should "just work" but stresses NewVArray/NewDArray logic.
   $a = varray[$x, 1, 2]; var_dump($a);
   $a = varray[$x,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]; var_dump($a);

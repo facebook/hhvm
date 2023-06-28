@@ -8,7 +8,7 @@ trait MY_TRAIT {
 }
 class MY_CLASS extends MY_BASE {
   use MY_TRAIT;
-  public function printX() {
+  public function printX() :mixed{
     var_dump(self::$x);
     self::$x = 4;
   }

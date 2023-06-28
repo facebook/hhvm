@@ -7,11 +7,11 @@ class X {
     $ret = self::foo();
     return $ret;
   }
-  static function foo() { return new X; }
+  static function foo() :mixed{ return new X; }
 }
 
 
 <<__EntryPoint>>
-function main_refcount_bug() {
+function main_refcount_bug() :mixed{
 var_dump(X::test());
 }

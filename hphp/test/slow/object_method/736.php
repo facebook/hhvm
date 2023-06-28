@@ -1,28 +1,28 @@
 <?hh
-function f2 ($a) {
+function f2 ($a) :mixed{
   return $a+200;
 }
-function f4 ($a) {
+function f4 ($a) :mixed{
   return $a+400;
 }
 class B {
   public $id;
   public $x;
 
-  function f1($a) {
+  function f1($a) :mixed{
     return $x=$a+11;
   }
-  function f2($a) {
+  function f2($a) :mixed{
     return $x=$a+12;
   }
-  function f4($a) {
+  function f4($a) :mixed{
     return $x=$a+12;
   }
-  function trace($s) {
+  function trace($s) :mixed{
 
     ObjectMethod736::$trace = "<$s(".$this->id.")>";
   }
-  private function f4helper($a) {
+  private function f4helper($a) :mixed{
     return $x=$a+12;
   }
 }
@@ -32,21 +32,21 @@ class G extends B {
   function __construct($i) {
     $this->id=$i;
   }
-  function f($a) {
+  function f($a) :mixed{
     $this->trace("G::f");
     return $a;
   }
-  function f1($a) {
+  function f1($a) :mixed{
     return $a;
   }
-  static function sf1($a) {
+  static function sf1($a) :mixed{
     return $a;
   }
   // override
-  function flongerthan8($a,$b,$c) {
+  function flongerthan8($a,$b,$c) :mixed{
     return $a+$b+$c+1;
   }
-  function f4($a) {
+  function f4($a) :mixed{
     return B::f4($a);
   }
 
@@ -54,7 +54,7 @@ class G extends B {
   /// !m_valid, !m_className.empty() case
   // called method must not exist anywhere even though it
   // looks like it might
-  function f4missing($a) {
+  function f4missing($a) :mixed{
 
     // check SimpleFunctionCall::outputCPPParamOrderControlled
     // !m_valid, !m_className.empty() cases
@@ -73,29 +73,29 @@ class G extends B {
     // should work
   }
 
-  function f5($a) {
+  function f5($a) :mixed{
     return H::f4($a);
   }
   // static call
 }
 class H {
-  static function f($a) {
+  static function f($a) :mixed{
 
     ObjectMethod736::$trace="H::f,";
     return "";
   }
-  function f3($a) {
+  function f3($a) :mixed{
     return "";
   }
-  function f4($a) {
+  function f4($a) :mixed{
     return $a+12;
   }
-  function f7($a) {
+  function f7($a) :mixed{
     return "";
   }
 }
 
-function error_handler ($errnor, $errstr, $errfile, $errline) {
+function error_handler ($errnor, $errstr, $errfile, $errline) :mixed{
   // Should catch these undefined methods here, but task 333319
   // is blocking their being caught.  For now, suppress the PHP error
   // so as to match the missing HPHP one.
@@ -112,7 +112,7 @@ function error_handler ($errnor, $errstr, $errfile, $errline) {
 */
 
 <<__EntryPoint>>
-function main_736() {
+function main_736() :mixed{
 $fix249639=0;
 
 // test invoke_builtin_static_method

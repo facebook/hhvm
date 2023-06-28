@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_is_file_null() {
+function main_is_file_null() :mixed{
 var_dump(is_dir(""));
 var_dump(is_executable(""));
 var_dump(is_file(""));

@@ -1,10 +1,10 @@
 <?hh
 
 interface IParent {
-  function f();
+  function f():mixed;
 }
 interface IChild {
-  function g();
+  function g():mixed;
 }
 
 trait TrParent implements IParent {}
@@ -13,7 +13,7 @@ trait TrChild implements IChild {
   use TrParent;
 }
 
-function main() {
+function main() :mixed{
   $rc = new ReflectionClass(TrChild::class);
   var_dump($rc->getInterfaceNames());
 
@@ -25,6 +25,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_traits_and_interfaces8() {
+function main_traits_and_interfaces8() :mixed{
 main();
 }

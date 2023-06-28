@@ -16,7 +16,7 @@ class classA {
     $this->dir_path = $dir;
   }
 
-  public function __toString() {
+  public function __toString() :mixed{
     return "$this->dir_path";
   }
 }

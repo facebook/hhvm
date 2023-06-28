@@ -2,10 +2,10 @@
 
 class X {
   public $propX;
-  function baz() {
+  function baz() :mixed{
     echo 'X';
   }
-  function foo() {
+  function foo() :mixed{
     if ($this is Y) {
       $this->bar();
       $this->baz();
@@ -17,16 +17,16 @@ class X {
 }
 class Y extends X {
   public $propY;
-  function bar(){
+  function bar():mixed{
     echo 'Y';
   }
 }
 class A1 {
   public $a1prop;
-  function a1method() {
+  function a1method() :mixed{
     return 0;
   }
-  function doStuff() {
+  function doStuff() :mixed{
     if ($this is D1) {
       var_dump($this->d1prop);
       var_dump($this->d1method());
@@ -47,7 +47,7 @@ class A1 {
 }
 class B1 extends A1 {
   public $b1prop;
-  function b1method() {
+  function b1method() :mixed{
     return 1;
   }
 }

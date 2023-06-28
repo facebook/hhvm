@@ -1,10 +1,10 @@
 <?hh
 
 class hello_world {
-  public function hello($to) {
+  public function hello($to) :mixed{
     return 'Hello ' . $to;
   }
-  private function bye($to) {
+  private function bye($to) :mixed{
     return 'Bye ' . $to;
   }
 }

@@ -2,7 +2,7 @@
 
 <<__DynamicallyCallable>>
 function f1()
-{
+:mixed{
     echo "Inside function " . __FUNCTION__ . "\n";
 }
 //'\\NS1\\f2'();    // can't be a literal

@@ -1,11 +1,11 @@
 <?hh
 
-function get() {
+function get() :mixed{
  return true;
  }
 
 <<__EntryPoint>>
-function main_2166() {
+function main_2166() :mixed{
 if (get()) {
   $gen = function ($i) {
     yield $i;

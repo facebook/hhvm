@@ -1,10 +1,10 @@
 <?hh
 function foo(string $a, int $b, float $c, bool $d, inout Exception $e,
-             ?callable $f = null, ?resource $g = null, $noType = 'whatever') {}
+             ?callable $f = null, ?resource $g = null, $noType = 'whatever') :mixed{}
 
 
 <<__EntryPoint>>
-function main_reflection_parameter_basic() {
+function main_reflection_parameter_basic() :mixed{
 $reflectionFunction = new ReflectionFunction('foo');
 foreach ($reflectionFunction->getParameters() as $parameter) {
   echo 'name: ';

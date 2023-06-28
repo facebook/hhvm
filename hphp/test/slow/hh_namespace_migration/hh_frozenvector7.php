@@ -12,7 +12,7 @@ namespace Test {
     }
   }
 
-  function foo() {
+  function foo() :mixed{
     $custom_set = new ImmVector();
     \var_dump($custom_set is \HH\ImmVector); // False
   }
@@ -21,7 +21,7 @@ namespace Test {
 
 namespace {
 
-  function bar() {
+  function bar() :mixed{
     $builtin_set = new ImmVector();
     \var_dump($builtin_set is HH\ImmVector); // True
   }

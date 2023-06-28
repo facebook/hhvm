@@ -2,13 +2,13 @@
 
 // Stems from https://github.com/facebook/hhvm/issues/4892
 
-function elementOpen( $parser, $name, darray $attribs ) {
+function elementOpen( $parser, $name, darray $attribs ) :mixed{
     print "<$name>";
 }
 
 
 <<__EntryPoint>>
-function main_xml_callback_closure() {
+function main_xml_callback_closure() :mixed{
 var_dump( is_callable( 'elementOpen' ) );
 $closure = function ( $parser, $name ) {
             print "</$name>";

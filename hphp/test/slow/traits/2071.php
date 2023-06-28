@@ -1,10 +1,10 @@
 <?hh
 
-function f($x) {
+function f($x) :AsyncGenerator<mixed,mixed,void>{
   yield $x;
 }
 trait T {
-  function f($x) {
+  function f($x) :AsyncGenerator<mixed,mixed,void>{
  yield static::class;
  }
 }
@@ -13,7 +13,7 @@ class X {
  }
 
 <<__EntryPoint>>
-function main_2071() {
+function main_2071() :mixed{
 $c = f(32);
 var_dump($c->getOrigFuncName());
 var_dump($c->getCalledClass());

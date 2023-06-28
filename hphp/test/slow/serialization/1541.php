@@ -17,7 +17,7 @@ class Big {
   public $wacky;
   public $nothing;
   public $unrelated = varray[];
-  function add() {
+  function add() :mixed{
     $s = new Small();
     $this->groupAll[] = $s;
     if ($s->num % 2 == 0) {
@@ -27,7 +27,7 @@ class Big {
       $this->group2[]=varray[$s->name, $s];
     }
   }
-  function finish() {
+  function finish() :mixed{
     $x = 10;
     $this->wacky = varray[$x, $x];
     $s = new Small();
@@ -36,7 +36,7 @@ class Big {
     $this->unrelated[] = $s;
   }
 }
-function t() {
+function t() :mixed{
   $b = new Big;
   for ($i = 0;
  $i < 10;
@@ -52,6 +52,6 @@ function t() {
 }
 
 <<__EntryPoint>>
-function main_1541() {
+function main_1541() :mixed{
 t();
 }

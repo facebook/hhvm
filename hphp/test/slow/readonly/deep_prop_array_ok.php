@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $p = readonly vec[new P(5)];
   $p[0] = new P(5); // ok
   echo "Done\n";

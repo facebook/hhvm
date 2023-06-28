@@ -1,6 +1,6 @@
 <?hh
 
 interface if_a {
-    function err() {};
+    function err() :mixed{};
 }
 

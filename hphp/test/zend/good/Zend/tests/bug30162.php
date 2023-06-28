@@ -22,7 +22,7 @@ class hariCow extends FIIFO {
         }
     }
 
-    public function __toString() {
+    public function __toString() :mixed{
         return "Rusticus in asino sedet.";
     }
 

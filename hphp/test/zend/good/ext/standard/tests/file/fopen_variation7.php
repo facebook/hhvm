@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
     $tmpfile =  basename(__FILE__, ".php") . ".tmp";
     $h = fopen($tmpfile, "w", true);

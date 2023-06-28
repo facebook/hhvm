@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-    public function __invoke() {
+    public function __invoke() :mixed{
       var_dump('called');
       return $this;
     }
@@ -9,6 +9,6 @@ class MyClass {
 
 
 <<__EntryPoint>>
-function main_chained() {
+function main_chained() :mixed{
 (new MyClass())()();
 }

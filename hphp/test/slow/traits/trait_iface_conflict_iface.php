@@ -16,6 +16,6 @@ class A implements I {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(A::FOO);
 }

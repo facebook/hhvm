@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
 
 	ZendGoodExtSoapTestsServer023::$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));
 	ZendGoodExtSoapTestsServer023::$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test2", "Hello Header!"));

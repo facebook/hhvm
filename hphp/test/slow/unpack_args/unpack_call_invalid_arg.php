@@ -1,11 +1,11 @@
 <?hh
 
-function f($a, $b, ...$c) {
+function f($a, $b, ...$c) :mixed{
   echo __FUNCTION__, "\n";
   var_dump($a, $b, $c);
 }
 
-function test($a, $b, $c) {
+function test($a, $b, $c) :mixed{
   try {
     f($a, $b, ...$c);
   } catch (Exception $e) {
@@ -15,7 +15,7 @@ function test($a, $b, $c) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test('a', 'b', null);
   test('a', 'b', new stdClass());
   // FIXME(t4599379): This is a Traversable

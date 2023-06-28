@@ -3,25 +3,25 @@ class A {
 
   private static $oneArgMethI = 10;
   <<__Memoize>>
-  public function oneArgMeth($a) {
+  public function oneArgMeth($a) :mixed{
     return self::$oneArgMethI++;
   }
 
   private static $multiArgMethI = 20;
   <<__Memoize>>
-  public function multiArgMeth($a, $b, $c) {
+  public function multiArgMeth($a, $b, $c) :mixed{
     return self::$multiArgMethI++;
   }
 
   private static $oneArgStaticI = 30;
   <<__Memoize>>
-  public static function oneArgStatic($a) {
+  public static function oneArgStatic($a) :mixed{
     return self::$oneArgStaticI++;
   }
 
   private static $multiArgStaticI = 40;
   <<__Memoize>>
-  public static function multiArgStatic($a, $b, $c) {
+  public static function multiArgStatic($a, $b, $c) :mixed{
     return self::$multiArgStaticI++;
   }
 }
@@ -31,15 +31,15 @@ abstract final class OneargtoplevelStatics {
 }
 
 <<__Memoize>>
-function oneArgTopLevel($a) {return OneargtoplevelStatics::$i++;}
+function oneArgTopLevel($a) :mixed{return OneargtoplevelStatics::$i++;}
 
 abstract final class MultiargtoplevelStatics {
   public static $i = 60;
 }
 <<__Memoize>>
-function multiArgTopLevel($a, $b, $c) {return MultiargtoplevelStatics::$i++;}
+function multiArgTopLevel($a, $b, $c) :mixed{return MultiargtoplevelStatics::$i++;}
 <<__Memoize>>
-function passthrough($a) {return $a;}
+function passthrough($a) :mixed{return $a;}
 
 class O implements HH\IMemoizeParam {
   public function __construct(public string $a)[] {}
@@ -48,7 +48,7 @@ class O implements HH\IMemoizeParam {
 
 
 <<__EntryPoint>>
-function main_untyped() {
+function main_untyped() :mixed{
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';

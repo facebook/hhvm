@@ -8,7 +8,7 @@ class C {
 class Foo {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   C::$x[] = 17;
   C::$y[] = new Foo();
 

@@ -1,5 +1,5 @@
 <?hh
-function dummy($msg) {
+function dummy($msg) :mixed{
    var_dump($msg);
 }
 <<__EntryPoint>> function main(): void {

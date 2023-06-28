@@ -1,6 +1,6 @@
 <?hh
 
-function test($x) {
+function test($x) :mixed{
   $a = $x;
   $b = $a;
   $a[0] = new stdClass();
@@ -14,7 +14,7 @@ function test($x) {
   }
 
 <<__EntryPoint>>
-function main_438() {
+function main_438() :mixed{
 test(varray[false]);
 var_dump(varray[false]);
 }

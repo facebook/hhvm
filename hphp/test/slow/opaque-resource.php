@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o1 = __SystemLib\create_opaque_value(42, vec[1, 2, 3]);
   $o2 = __SystemLib\create_opaque_value(1337, vec[1, 2, 3]);
 

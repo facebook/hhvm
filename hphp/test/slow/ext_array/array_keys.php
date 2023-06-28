@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_array_keys() {
+function main_array_keys() :mixed{
 var_dump(array_keys(darray[0 => 100, "color" => "red"]));
 var_dump(array_keys(
   darray["color" => varray["blue", "red", "green"],

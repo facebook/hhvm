@@ -1,6 +1,6 @@
 <?hh
 class TestSoapClient extends SoapClient{
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
           echo $request;
           exit;
     }
@@ -12,7 +12,7 @@ class book{
 
 }
 
-function book_to_xml($book) {
+function book_to_xml($book) :mixed{
     throw new SoapFault("Client", "Conversion Error");
 }
 <<__EntryPoint>> function main(): void {

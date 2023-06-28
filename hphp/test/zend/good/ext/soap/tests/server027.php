@@ -1,10 +1,10 @@
 <?hh
 class Foo {
 
-  function Foo() {
+  function Foo() :mixed{
   }
 
-  function test() {
+  function test() :mixed{
     return $this->str;
   }
 }

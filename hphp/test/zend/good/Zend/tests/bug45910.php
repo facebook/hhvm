@@ -12,7 +12,7 @@ class foo {
         self::DDD    =>  self::AAA
     ];
 
-    public static function test() {
+    public static function test() :mixed{
         self::$foo;
     }
 }

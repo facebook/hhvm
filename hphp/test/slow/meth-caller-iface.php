@@ -1,20 +1,20 @@
 <?hh
 
-interface I1 { function f1(); }
-interface I2 extends I1 { function f2(); }
-abstract class C1 implements I1 { abstract function f3(); };
-abstract class C2 extends C1 implements I2 { abstract function f4(); }
+interface I1 { function f1():mixed; }
+interface I2 extends I1 { function f2():mixed; }
+abstract class C1 implements I1 { abstract function f3():mixed; };
+abstract class C2 extends C1 implements I2 { abstract function f4():mixed; }
 
 class C3 extends C2 {
-  function f1() { echo __FUNCTION__."\n"; }
-  function f2() { echo __FUNCTION__."\n"; }
-  function f3() { echo __FUNCTION__."\n"; }
-  function f4() { echo __FUNCTION__."\n"; }
-  function f5() { echo __FUNCTION__."\n"; }
+  function f1() :mixed{ echo __FUNCTION__."\n"; }
+  function f2() :mixed{ echo __FUNCTION__."\n"; }
+  function f3() :mixed{ echo __FUNCTION__."\n"; }
+  function f4() :mixed{ echo __FUNCTION__."\n"; }
+  function f5() :mixed{ echo __FUNCTION__."\n"; }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m1 = meth_caller(I1::class, 'f1');
   $m2a = meth_caller(I2::class, 'f1');
   $m2b = meth_caller(I2::class, 'f2');

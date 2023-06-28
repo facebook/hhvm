@@ -1,10 +1,10 @@
 <?hh
 
-function test() {
+function test() :mixed{
   (new X)->foo();
 }
 
-function setup() {
+function setup() :mixed{
   $res = null;
   $i = apc_inc('foo', 1, inout $res);
   var_dump($i);
@@ -27,7 +27,7 @@ function setup() {
 
 
 <<__EntryPoint>>
-function main_func_guards() {
+function main_func_guards() :mixed{
 apc_add('foo', 0);
 
 setup();

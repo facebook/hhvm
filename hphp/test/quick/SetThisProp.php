@@ -2,7 +2,7 @@
 class C {
   public $a;
   public $b;
-  public function f() {
+  public function f() :mixed{
     $this->a = new stdClass();
     $this->b = 1;
     $this->a = 2;

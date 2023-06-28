@@ -1,5 +1,5 @@
 <?hh
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; }
 }
@@ -8,7 +8,7 @@ function VS($x, $y) {
 
 
 <<__EntryPoint>>
-function main_xml() {
+function main_xml() :mixed{
 VS(utf8_decode("abc \xc3\x80 def"), "abc \xc0 def");
 VS(utf8_encode("abc \xc0 def"), "abc \xc3\x80 def");
 

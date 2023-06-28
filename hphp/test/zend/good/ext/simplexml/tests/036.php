@@ -1,6 +1,6 @@
 <?hh
 class SXE extends SimpleXMLElement {
-    public function count() {
+    public function count() :mixed{
         echo "Called Count!\n";
         return parent::count();
     }

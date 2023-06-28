@@ -13,7 +13,7 @@ function nullthrows<T>(?T $x, ?string $message = null, ...$sprintf_args): T {
 }
 
 
-function main($obj) {
+function main($obj) :mixed{
   var_dump(nullthrows($obj));
 }
 
@@ -21,7 +21,7 @@ class C { }
 
 
 <<__EntryPoint>>
-function main_nullthrows1() {
+function main_nullthrows1() :mixed{
 $obj = new C;
 
 main($obj);

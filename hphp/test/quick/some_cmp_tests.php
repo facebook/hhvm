@@ -1,10 +1,10 @@
 <?hh
 
-function eq($x, $y) {
+function eq($x, $y) :mixed{
   var_dump(HH\Lib\Legacy_FIXME\eq($x, $y));
 }
 
-function lt($x, $y) {
+function lt($x, $y) :mixed{
   try {
     var_dump(HH\Lib\Legacy_FIXME\lt($x, $y));
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function lt($x, $y) {
   }
 }
 
-function gt($x, $y) {
+function gt($x, $y) :mixed{
   try {
     var_dump(HH\Lib\Legacy_FIXME\gt($x, $y));
   } catch (Exception $e) {

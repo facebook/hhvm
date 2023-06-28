@@ -1,7 +1,7 @@
 <?hh
 
 class B {
- public function f($a) {
+ public function f($a) :mixed{
  return 'ok'.$a;
 }
 }
@@ -10,7 +10,7 @@ class B {
 }
 
  <<__EntryPoint>>
-function main_1331() {
+function main_1331() :mixed{
 $obj = new A();
  var_dump(get_class($obj));
  var_dump(get_parent_class($obj));

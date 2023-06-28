@@ -3,7 +3,7 @@
 abstract class A {
   const WHAT = 'A';
 
-  <<__DynamicallyCallable>> public static function call() {
+  <<__DynamicallyCallable>> public static function call() :mixed{
     echo static::WHAT;
   }
 }

@@ -5,7 +5,7 @@ class Ref {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   $join_it = new Ref(0);
 
   ExternalThreadEventWaitHandle::setOnCreateCallback($ete ==> {

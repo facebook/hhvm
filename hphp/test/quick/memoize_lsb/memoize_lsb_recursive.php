@@ -22,13 +22,13 @@ class B extends A {
 }
 
 
-function doA(int $n) {
+function doA(int $n) :mixed{
   A::$side_effects = vec[];
   var_dump(A::fibonacci($n));
   var_dump(A::$side_effects);
 }
 
-function doB(int $n) {
+function doB(int $n) :mixed{
   B::$side_effects = vec[];
   var_dump(B::fibonacci($n));
   var_dump(B::$side_effects);

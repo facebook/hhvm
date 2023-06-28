@@ -1,7 +1,7 @@
 <?hh
 
 namespace A {
-  function f() { return 'A/f'; }
+  function f() :mixed{ return 'A/f'; }
 }
 
 namespace C {

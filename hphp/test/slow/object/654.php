@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function t() {
+  public function t() :mixed{
     var_dump(Object654::$a);
   }
 }

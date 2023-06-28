@@ -6,7 +6,7 @@
  */
 
 class C {
-    function __toString() {
+    function __toString() :mixed{
         return "C Instance";
     }
 }

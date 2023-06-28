@@ -11,7 +11,7 @@ class TokenStream {
 }
 
 <<__EntryPoint>>
-function main_preg_replace_callback_array_use_tokens() {
+function main_preg_replace_callback_array_use_tokens() :mixed{
   $tokenStream = new TokenStream();
 
 $input = <<<'end'

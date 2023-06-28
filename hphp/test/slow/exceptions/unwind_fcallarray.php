@@ -1,10 +1,10 @@
 <?hh
 
-function handle_error() {
+function handle_error() :mixed{
   throw new Exception("die rebel scum");
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
   date_default_timezone_set(...varray['America/Gotham_City']);
 }

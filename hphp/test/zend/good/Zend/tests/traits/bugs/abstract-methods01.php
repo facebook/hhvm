@@ -1,7 +1,7 @@
 <?hh
 
 trait THello {
-  public abstract function hello();
+  public abstract function hello():mixed;
 }
 
 class TraitsTest {

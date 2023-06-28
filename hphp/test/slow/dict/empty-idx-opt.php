@@ -1,7 +1,7 @@
 <?hh
 
 <<__NEVER_INLINE>>
-function f(dict<string, int> $d) {
+function f(dict<string, int> $d) :mixed{
   try {
     return $d['a'];
   } catch (Exception $e) {
@@ -10,7 +10,7 @@ function f(dict<string, int> $d) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = \__hhvm_intrinsics\launder_value(dict[]);
   f($d);
   f($d);

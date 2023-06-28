@@ -20,6 +20,6 @@ class B2 extends B {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(type_structure('B2', 'T'));
 }

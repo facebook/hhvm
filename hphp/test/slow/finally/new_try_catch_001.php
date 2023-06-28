@@ -1,6 +1,6 @@
 <?hh
 
-function blah() {
+function blah() :mixed{
   $xs = varray[1, 2, 3];
   $ys = varray[1, 2, 3];
   $zs = varray[1, 2, 3];
@@ -31,6 +31,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_new_try_catch_001() {
+function main_new_try_catch_001() :mixed{
 var_dump(blah());
 }

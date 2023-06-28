@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_316() {
+function main_316() :mixed{
 $a = varray[varray[0]];
  $a[] = varray[0];
       var_dump($a);

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_globiterator() {
+function main_globiterator() :mixed{
 $iter = new GlobIterator(__DIR__ . "/../../sample_dir/*");
 
 var_dump($iter->count());

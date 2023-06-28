@@ -1,6 +1,6 @@
 <?hh
 
-function addToMap(dict $d, int $a, int $b, int $c) {
+function addToMap(dict $d, int $a, int $b, int $c) :mixed{
   __hhvm_intrinsics\launder_value(false);
   if (array_key_exists($a, $d)) {
     $d[$a]['k1'][] = $b;
@@ -14,7 +14,7 @@ function addToMap(dict $d, int $a, int $b, int $c) {
   return $d;
 }
 
-function makeMap($b) {
+function makeMap($b) :mixed{
   $d = dict[];
   $d = addToMap($d, 310, 207, 1301);
   if ($b) $d = addToMap($d, 315, 204, 1305);
@@ -22,7 +22,7 @@ function makeMap($b) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = makeMap(__hhvm_intrinsics\launder_value(false));
   var_dump($d[__hhvm_intrinsics\launder_value(310)]);
 }

@@ -1,14 +1,14 @@
 <?hh
 
 class Base {
-  public function f() {
+  public function f() :mixed{
     var_dump('Base::f');
   }
 }
-function get() {
+function get() :mixed{
  return true;
 }
-function f($x) {
+function f($x) :mixed{
   if ($x is Base) {
     $x->f();
   }

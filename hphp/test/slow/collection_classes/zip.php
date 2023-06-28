@@ -2,19 +2,19 @@
 
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new ArrayIterator(varray[11, 22, 33]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new ArrayIterator(varray[44, 55, 66]);
   }
 }
 
-function test($name, $a, $b) {
+function test($name, $a, $b) :mixed{
   echo "---- $name\n";
   $got = $a->zip($b);
   echo get_class($got) . "\n";
@@ -29,7 +29,7 @@ function test($name, $a, $b) {
   }
 }
 
-function main() {
+function main() :mixed{
   $zippable = darray[
     'empty Vector'    => Vector    {},
     'short Vector'    => Vector    {1, 2},
@@ -61,6 +61,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_zip() {
+function main_zip() :mixed{
 main();
 }

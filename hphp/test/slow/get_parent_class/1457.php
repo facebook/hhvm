@@ -17,7 +17,7 @@ class child2 extends dad {
 }
 
 <<__EntryPoint>>
-function main_1457() {
+function main_1457() :mixed{
 $foo = new child();
 $bar = new child2();
 }

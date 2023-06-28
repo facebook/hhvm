@@ -1,6 +1,6 @@
 <?hh
 
-function test($x) {
+function test($x) :mixed{
   $s_path = serialize($x);
   $filter = function ($rel) use ($s_path) {
     return $s_path;
@@ -10,7 +10,7 @@ function test($x) {
 }
 
 <<__EntryPoint>>
-function main_1936() {
+function main_1936() :mixed{
 test('hello');
 test(darray[0 => 1, 1 => 2,'foo'=>'bar']);
 }

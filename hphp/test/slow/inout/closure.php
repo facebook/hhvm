@@ -1,6 +1,6 @@
 <?hh
 
-function main($cl1) {
+function main($cl1) :mixed{
   $cl2 = (inout $x) ==> {
     $x = 5;
     return 6;
@@ -16,7 +16,7 @@ function main($cl1) {
 
 
 <<__EntryPoint>>
-function main_closure() {
+function main_closure() :mixed{
 main((inout $x) ==> {
   $x = 4;
   return 5;

@@ -1,7 +1,7 @@
 <?hh
 
 <<__DynamicallyCallable>>
-function handle_error($errno, $errstr, ...$args) {
+function handle_error($errno, $errstr, ...$args) :mixed{
   print("(Notice: $errstr) ");
   return true;
 }
@@ -11,7 +11,7 @@ function check<reify T>($x): T {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   print("\n===================================\nTesting tuple:\n");

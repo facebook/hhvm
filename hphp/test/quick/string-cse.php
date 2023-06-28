@@ -5,19 +5,19 @@ class c {
   private static $thing;
   private static $otherthing;
 
-  public static function doit($id, $value) {
+  public static function doit($id, $value) :mixed{
     self::$thing = darray[];
     self::$thing[(string)$id] = $value;
     self::$otherthing = darray[];
     self::$otherthing[(string)$id] = $value;
   }
 
-  public static function dump() {
+  public static function dump() :mixed{
     var_dump(self::$thing, self::$otherthing);
   }
 }
 
-function main() {
+function main() :mixed{
   c::doit(0, 'hello');
   c::dump();
 }

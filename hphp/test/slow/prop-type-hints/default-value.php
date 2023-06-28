@@ -156,7 +156,7 @@ class A {
   public static ?CondAlias $sopt31;
 }
 
-function test($x) {
+function test($x) :mixed{
   var_dump($x->p1);
   var_dump($x->p2);
   var_dump($x->p3);

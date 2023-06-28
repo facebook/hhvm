@@ -17,12 +17,12 @@ class A {
     self::C6 => bool,
   );
 
-  public static function foo() {
+  public static function foo() :mixed{
     return type_structure(self::class, 'T');
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(A::foo());
 }

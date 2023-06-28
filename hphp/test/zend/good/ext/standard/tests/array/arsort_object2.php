@@ -40,7 +40,7 @@ class for_string_arsort
   }
 
   // return string value
-  function __toString() {
+  function __toString() :mixed{
    return (string)$this->value;
   }
 }

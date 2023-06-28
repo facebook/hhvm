@@ -1,11 +1,11 @@
 <?hh
 
 class first {
-    private static function show() {
+    private static function show() :mixed{
         echo "Call show()\n";
     }
 
-    public static function do_show() {
+    public static function do_show() :mixed{
         first::show();
     }
 }
@@ -18,7 +18,7 @@ class third extends second {
 
 class fail extends third {
     // cannot be redeclared
-    static function show() {
+    static function show() :mixed{
         echo "Call show()\n";
     }
 }

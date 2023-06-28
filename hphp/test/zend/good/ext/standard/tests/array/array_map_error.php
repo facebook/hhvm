@@ -3,7 +3,7 @@
  * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
-function callback2($p, $q) {
+function callback2($p, $q) :mixed{
   return $p * $q;
 }
 <<__EntryPoint>> function main(): void {

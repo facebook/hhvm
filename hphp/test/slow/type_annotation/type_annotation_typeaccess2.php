@@ -19,7 +19,7 @@ class E {
 
 
 <<__EntryPoint>>
-function main_type_annotation_typeaccess2() {
+function main_type_annotation_typeaccess2() :mixed{
 var_dump(type_structure(C::class, 'U'));
 var_dump(type_structure(C::class, 'V'));
 var_dump(type_structure(D::class, 'U'));

@@ -6,7 +6,7 @@
 new module A {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include "reflection-2.inc";
 
   // Same file

@@ -1,21 +1,21 @@
 <?hh
 
-function i1() {
+function i1() :mixed{
         echo "i1\n";
         return 1;
 }
 
-function i2() {
+function i2() :mixed{
         echo "i2\n";
         return 1;
 }
 
-function i3() {
+function i3() :mixed{
         echo "i3\n";
         return 3;
 }
 
-function i4() {
+function i4() :mixed{
 
         LangEngineAssignexecutionorder004::$a = varray[10, 11, 12, 13, 14];
         echo "i4\n";

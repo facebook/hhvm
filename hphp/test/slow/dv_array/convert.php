@@ -4,49 +4,49 @@
 class IterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() { ++$this->position; }
-  public function valid() { return $this->position < 3; }
+  public function next() :mixed{ ++$this->position; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class ThrowIterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() {
+  public function next() :mixed{
     ++$this->position;
     if ($this->position == 2) throw new Exception("ThrowIterableObj");
   }
-  public function valid() { return $this->position < 3; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class AggregateObj implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new IterableObj();
   }
 }
 
-function test_varray($v) {
+function test_varray($v) :mixed{
   echo "============== test_varray =========================\n";
   try {
     $v2 = varray($v);
@@ -58,7 +58,7 @@ function test_varray($v) {
   }
 }
 
-function test_darray($v) {
+function test_darray($v) :mixed{
   echo "============== test_darray =========================\n";
   try {
     $v2 = darray($v);
@@ -70,7 +70,7 @@ function test_darray($v) {
   }
 }
 
-function test_indirect($c, $v) {
+function test_indirect($c, $v) :mixed{
   echo "============== test_indirect ($c) ==================\n";
   try {
     $v2 = $c($v);
@@ -84,7 +84,7 @@ function test_indirect($c, $v) {
 
 
 <<__EntryPoint>>
-function main_convert() {
+function main_convert() :mixed{
 $values = vec[
   null,
   false,

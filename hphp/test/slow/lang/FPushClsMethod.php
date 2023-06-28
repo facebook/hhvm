@@ -12,7 +12,7 @@ class I extends F {
   function __construct() {
     print "In I::__construct()\n";
   }
-  function test() {
+  function test() :mixed{
     C::__construct();
     $X = "C";
     $m = "__construct"; C::$m(); $X::$m();
@@ -26,7 +26,7 @@ class I extends F {
 }
 
 <<__EntryPoint>>
-function main_fpush_cls_method() {
+function main_fpush_cls_method() :mixed{
   print "Test begin\n";
   (new I)->test();
   print "Test end\n";

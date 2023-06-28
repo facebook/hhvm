@@ -22,7 +22,7 @@ function foo4<T as int as num>(T $x): T {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(
     (int $errno, string $errstr) ==> {
       throw new Exception($errstr);

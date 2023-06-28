@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_constants() {
+function main_constants() :mixed{
 $refl = new ReflectionClass("Memcached");
 $constants = $refl->getConstants();
 var_dump($constants["RES_SERVER_MARKED_DEAD"]);

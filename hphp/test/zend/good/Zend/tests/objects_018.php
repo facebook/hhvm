@@ -1,11 +1,11 @@
 <?hh
 
 interface Itest {
-    function a();
+    function a():mixed;
 }
 
 interface Itest2 {
-    function a();
+    function a():mixed;
 }
 
 interface Itest3 extends Itest, Itest2 {

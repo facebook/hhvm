@@ -31,7 +31,7 @@ function OOM_leak_test(): void {
 
 
 <<__EntryPoint>>
-function main_apc_oom() {
+function main_apc_oom() :mixed{
 $length = 10000000;
 $prefixKey = str_repeat("a",$length);
 $prefixValue = str_repeat("b",$length);

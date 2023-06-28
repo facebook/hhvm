@@ -1,6 +1,6 @@
 <?hh
 
-function x() {
+function x() :mixed{
   $y1 = new stdClass;
   $y = new stdClass;
   $y->dyn = $y1;
@@ -11,6 +11,6 @@ function x() {
 }
 
 <<__EntryPoint>>
-function main_oid_order() {
+function main_oid_order() :mixed{
 x();
 }

@@ -1,9 +1,9 @@
 <?hh
 
-function foo($arg) {
+function foo($arg) :mixed{
 }
 
-function bar() {
+function bar() :mixed{
     error_reporting(E_ALL|E_STRICT);
     throw new Exception("test");
 }

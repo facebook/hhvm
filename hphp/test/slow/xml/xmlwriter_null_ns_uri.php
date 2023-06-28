@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x = new XMLWriter();
   $x->openMemory();
   $x->setIndent(true);
@@ -16,6 +16,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_xmlwriter_null_ns_uri() {
+function main_xmlwriter_null_ns_uri() :mixed{
 main();
 }

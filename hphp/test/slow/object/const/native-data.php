@@ -19,7 +19,7 @@ class C extends __hhvm_intrinsics\ExtensibleNewableClassWithNativeData {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C();
   echo "-- after constructor completes --\n";
   var_dump($c);

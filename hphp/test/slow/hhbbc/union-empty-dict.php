@@ -11,7 +11,7 @@ class D {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   new D(new C());
   echo "OK\n";
 }

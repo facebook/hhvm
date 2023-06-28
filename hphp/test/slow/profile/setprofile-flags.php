@@ -1,11 +1,11 @@
 <?hh
 
 class SomeClass {
-  function some_method() {}
+  function some_method() :mixed{}
 }
 
 <<__NEVER_INLINE>>
-function some_function() { new SomeClass(); }
+function some_function() :mixed{ new SomeClass(); }
 
 <<__EntryPoint>>
 function entrypoint_setprofileflags(): void {

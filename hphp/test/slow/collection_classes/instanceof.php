@@ -1,12 +1,12 @@
 <?hh
-function test($v, $m, $s) {
+function test($v, $m, $s) :mixed{
   if ($v is MutableVector) var_dump($v == 1);
   if ($m is MutableMap) var_dump($m == 1);
   if ($s is MutableSet) var_dump($s == 1);
 }
 
 <<__EntryPoint>>
-function main_instanceof() {
+function main_instanceof() :mixed{
 $vector = Vector {};
 $map = Map {};
 $set = Set {};

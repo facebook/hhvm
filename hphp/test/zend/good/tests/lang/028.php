@@ -1,13 +1,13 @@
 <?hh
 
 function print_stuff($stuff)
-{
+:mixed{
     print $stuff;
 }
 
 
 function still_working()
-{
+:mixed{
     return "I'm still alive";
 }
 
@@ -16,7 +16,7 @@ abstract final class DafnaStatics {
 }
 
 function dafna()
-{
+:mixed{
 
     print "Dafna!\n";
     print call_user_func(still_working<>)."\n";
@@ -29,10 +29,10 @@ class dafna_class {
     function __construct() {
         $this->myname = "Dafna";
     }
-    function GetMyName() {
+    function GetMyName() :mixed{
         return $this->myname;
     }
-    function SetMyName($name) {
+    function SetMyName($name) :mixed{
         $this->myname = $name;
     }
 }

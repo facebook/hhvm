@@ -3,7 +3,7 @@
 //error_reporting(0);
 
 function leak_test($output)
-{
+:mixed{
     $a = memory_get_usage(true);
     for ($i = 0; $i < 1000; $i++) {
         $data=parse_ini_file('./ini_parse_memory_leak_test.ini', true);
@@ -36,7 +36,7 @@ function leak_test($output)
 
 
 <<__EntryPoint>>
-function main_ini_parse_memory_leak() {
+function main_ini_parse_memory_leak() :mixed{
 leak_test(false);
 leak_test(false);
 leak_test(true);

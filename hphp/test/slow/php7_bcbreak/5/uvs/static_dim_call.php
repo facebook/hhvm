@@ -4,7 +4,7 @@ class Foo {
   public static $bar = darray['baz' => myfunc<>];
 }
 
-function myfunc() {
+function myfunc() :mixed{
   return 'quux';
 }
 <<__EntryPoint>>

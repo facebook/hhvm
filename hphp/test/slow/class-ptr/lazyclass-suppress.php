@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require 'lazyclass-suppress.inc';
 
   // type_structure Methods

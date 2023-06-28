@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_json_null_value() {
+function main_json_null_value() :mixed{
 $a = json_decode('{"key":""}');
 $b = json_encode($a);
 

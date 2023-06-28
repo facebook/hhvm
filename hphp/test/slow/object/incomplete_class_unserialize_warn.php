@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // normal serialization format
   var_dump(unserialize('O:1:"X":1:{s:1:"p";i:0;}'));
   // Serializable format

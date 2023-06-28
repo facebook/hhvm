@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $datetype_arr = varray [
         IntlDateFormatter::FULL,
         IntlDateFormatter::LONG,

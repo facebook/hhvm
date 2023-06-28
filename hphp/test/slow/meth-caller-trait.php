@@ -1,11 +1,11 @@
 <?hh
 
 interface I {
-  function foo();
+  function foo():mixed;
 }
 
 trait T implements I {
-  function foo() { echo "Hello, ".static::class."!\n"; }
+  function foo() :mixed{ echo "Hello, ".static::class."!\n"; }
 }
 
 abstract class G implements I {}
@@ -13,7 +13,7 @@ class P extends G { use T; }
 class C extends P {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m1 = meth_caller(I::class, "foo");
   $m2 = meth_caller(P::class, "foo");
   $m3 = meth_caller(C::class, "foo");

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   date_default_timezone_set('UTC');
   $tz = new DateTimeZone(date_default_timezone_get());
   $now = new DateTime('', $tz);
@@ -31,6 +31,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_compare() {
+function main_compare() :mixed{
 main();
 }

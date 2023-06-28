@@ -35,7 +35,7 @@ class C5 extends C4 {
   private int $f6 = 1;
 }
 
-function test($obj) {
+function test($obj) :mixed{
   $serialized = serialize($obj);
   print $serialized;
   print "\n";
@@ -45,7 +45,7 @@ function test($obj) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print "--- C1 ---\n";
   test(new C1());
   print "--- C2 ---\n";

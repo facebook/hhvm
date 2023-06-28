@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $containers = Vector {
     ImmVector {Vector {}, Vector {}},
     ImmMap {0 => Vector {}, 1 => Vector {}},

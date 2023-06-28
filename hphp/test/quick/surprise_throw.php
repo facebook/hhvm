@@ -1,7 +1,7 @@
 <?hh
 
 // bug #2088495
-function asd($x, $y) {
+function asd($x, $y) :mixed{
   if ($x == 'exit' && $y == 'foo') {
     echo "yep\n";
     throw new Exception ('yo');
@@ -9,7 +9,7 @@ function asd($x, $y) {
   echo "hi $x $y\n";
 }
 
-function foo() {
+function foo() :mixed{
   $x = new stdClass;
   $y = new stdClass;
   $z = new stdClass;

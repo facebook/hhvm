@@ -11,7 +11,7 @@ class :foo {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = <foo e={'bar'} />;
   echo "Done";
 }

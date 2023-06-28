@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1262() {
+function main_1262() :mixed{
 $a = 1;
  $a = darray[];
  $a['a'] = $a['b'] = 'test';

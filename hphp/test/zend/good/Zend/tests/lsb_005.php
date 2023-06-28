@@ -1,7 +1,7 @@
 <?hh
 
 class TestA {
-    public static function test() {
+    public static function test() :mixed{
         echo get_class(new static()) . "\n";
         TestB::test();
         echo get_class(new static()) . "\n";
@@ -13,7 +13,7 @@ class TestA {
 }
 
 class TestB {
-    public static function test() {
+    public static function test() :mixed{
         echo get_class(new static()) . "\n";
         TestC::test();
         echo get_class(new static()) . "\n";
@@ -21,7 +21,7 @@ class TestB {
 }
 
 class TestC {
-    public static function test() {
+    public static function test() :mixed{
         echo get_class(new static()) . "\n";
     }
 }

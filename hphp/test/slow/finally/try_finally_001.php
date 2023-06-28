@@ -1,5 +1,5 @@
 <?hh
-function foo ($a) {
+function foo ($a) :mixed{
    try {
      throw new Exception("ex");
    } finally {

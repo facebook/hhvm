@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1437() {
+function main_1437() :mixed{
 
 var_dump(darray["\0" => 1]);
 var_dump(darray["\0" => "\0"]);

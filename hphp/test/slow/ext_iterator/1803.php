@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1803() {
+function main_1803() :mixed{
 $directory = __DIR__."/../../sample_dir";
 $fileSPLObjects = new RecursiveIteratorIterator(
   new RecursiveDirectoryIterator($directory),

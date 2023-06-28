@@ -1,18 +1,18 @@
 <?hh
 
 class Circle {
-    function draw() {
+    function draw() :mixed{
         echo "Circle\n";
     }
 }
 
 class Square {
-    function draw() {
+    function draw() :mixed{
         print "Square\n";
     }
 }
 
-function ShapeFactoryMethod($shape) {
+function ShapeFactoryMethod($shape) :mixed{
     switch ($shape) {
         case "Circle":
             return new Circle();

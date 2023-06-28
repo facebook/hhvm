@@ -6,7 +6,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_reflection_property_default_value() {
+function main_reflection_property_default_value() :mixed{
 $x = new C;
 $x->foo = 456;
 $x->bar = 'baz';

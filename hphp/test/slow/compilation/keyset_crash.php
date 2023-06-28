@@ -1,6 +1,6 @@
 <?hh
 
-function foo($f) {
+function foo($f) :mixed{
   $x = keyset[];
   if ($f) $x[] = 0;
   $x[] = 0;
@@ -9,6 +9,6 @@ function foo($f) {
 
 
 <<__EntryPoint>>
-function main_keyset_crash() {
+function main_keyset_crash() :mixed{
 var_dump(foo(false), foo(true));
 }

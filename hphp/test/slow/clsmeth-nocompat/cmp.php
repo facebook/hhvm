@@ -1,10 +1,10 @@
 <?hh
 
-class A { public static function meth() {} }
+class A { public static function meth() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function wrap($fun) {
   }
 }
 
-function getTestcase(int $num) {
+function getTestcase(int $num) :mixed{
   $test_cases = varray[
     null,
     false, true,

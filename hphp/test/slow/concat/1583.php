@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1583() {
+function main_1583() :mixed{
 $a = varray[1, varray[1, varray[1]]];
 $a[1][1][] = 3;
 var_dump($a);

@@ -1,6 +1,6 @@
 <?hh
 
-    function testrun($im, $fontfile) {
+    function testrun($im, $fontfile) :mixed{
         $sx = imagesx($im);
         $sy = imagesy($im);
 

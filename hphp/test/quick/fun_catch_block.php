@@ -3,7 +3,7 @@
 class FunCatchBlock {
   public static function setMuteUnmuteState($jumbo_shrimp,
                                             $robot_car,
-                                            $is_add) {
+                                            $is_add) :mixed{
     try {
       $tagger = new ControllerObject(
                       $jumbo_shrimp,
@@ -26,7 +26,7 @@ class FunCatchBlock {
 }
 
 class FunFunclet {
-  protected async function genPayload() {
+  protected async function genPayload() :Awaitable<mixed>{
     // This will generate a unreachable funclet-protected code.
     switch ($this->getAction()) {
       case 0:

@@ -1,12 +1,12 @@
 <?hh
 
 function make_exception()
-{
+:mixed{
     throw new Exception();
 }
 
 function make_exception_and_change_err_reporting()
-{
+:mixed{
     error_reporting(E_ALL & ~E_STRICT);
     throw new Exception();
 }

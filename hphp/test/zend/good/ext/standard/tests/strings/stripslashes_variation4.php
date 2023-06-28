@@ -8,7 +8,7 @@
  * Test stripslashes() with double dimensional arrays
 */
 
-function stripslashes_deep($value)  {
+function stripslashes_deep($value)  :mixed{
   $value = is_array($value) ? array_map(stripslashes_deep<>, $value) : stripslashes($value);
   return $value;
 }

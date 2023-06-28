@@ -1,10 +1,10 @@
 <?hh
 
-function test($bar) {
+function test($bar) :mixed{
   var_dump(isset(__hhvm_intrinsics\launder_value($foo)));
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test("bar");
 }

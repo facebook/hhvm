@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "Entering main\n";
   foreach (darray[1 => 1] as $k => $v) {
     break;
@@ -9,6 +9,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_501() {
+function main_501() :mixed{
 main();
 }

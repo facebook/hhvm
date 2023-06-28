@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_multisort() {
+function main_array_multisort() :mixed{
   $asc = SORT_ASC;
   $desc = SORT_DESC;
   $natural = SORT_NATURAL;

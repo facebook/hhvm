@@ -1,13 +1,13 @@
 <?hh
 
-function fatal_handler() {
+function fatal_handler() :mixed{
     chmod(\HH\global_get('file'), 0600);
     @unlink(\HH\global_get('file'));
 }
 
 
 <<__EntryPoint>>
-function main_open_rc_check() {
+function main_open_rc_check() :mixed{
 register_shutdown_function(fatal_handler<>);
 
 $file = tempnam(sys_get_temp_dir(), 'cannotopen');

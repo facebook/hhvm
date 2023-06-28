@@ -35,13 +35,13 @@ class D {
   const type V = bool;
 }
 
-function dump($x) {
+function dump($x) :mixed{
   var_dump(
     __hhvm_intrinsics\serialize_keep_dvarrays($x)
   );
 }
 
-function main() {
+function main() :mixed{
   dump(type_structure(T1::class));
   dump(type_structure(T2::class));
   dump(type_structure(T3::class));
@@ -74,6 +74,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_type_structure() {
+function main_type_structure() :mixed{
 main();
 }

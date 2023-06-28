@@ -6,7 +6,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $loc_parts_arr1 = darray[
         Locale::LANG_TAG =>'sl' ,
         Locale::SCRIPT_TAG =>'Latn' ,

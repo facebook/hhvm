@@ -14,6 +14,6 @@ interface I3 extends I2 {
 
 abstract class C implements I3 {}
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   var_dump(C::class);
 }

@@ -1,13 +1,13 @@
 <?hh
 
-function foo() {}
+function foo() :mixed{}
 
 // mixed case function
-function HelloWorld() {}
+function HelloWorld() :mixed{}
 
 class C {
-	function f1() {}
-	static function f2() {}
+	function f1() :mixed{}
+	static function f2() :mixed{}
 }
 <<__EntryPoint>>
 function entrypoint_get_defined_functions_basic(): void {

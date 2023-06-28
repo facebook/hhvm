@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_include_empty_files() {
+function main_include_empty_files() :mixed{
 $empty = tempnam(sys_get_temp_dir(), 'Empty');
 $empty_php = tempnam(sys_get_temp_dir(), 'EmptyPHP');
 

@@ -1,9 +1,9 @@
 <?hh
-function handler(...$args) { var_dump($args); }
+function handler(...$args) :mixed{ var_dump($args); }
 class X {
   public static $s = Z::BAR;
 }
-function test() {
+function test() :mixed{
   var_dump(X::$s);
 }
 <<__EntryPoint>>

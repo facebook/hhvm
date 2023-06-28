@@ -3,13 +3,13 @@
 class something {
 
   private static $get_objectObject = NULL;
-  public static function get_object() {
+  public static function get_object() :mixed{
     if (self::$get_objectObject === NULL)
       self::$get_objectObject = new something;
     return self::$get_objectObject;
   }
 
-  public static function do_something() {
+  public static function do_something() :mixed{
     self::get_object()->vars = varray[];
     self::get_object()->vars[] = 1;
     self::get_object()->vars[] = 2;

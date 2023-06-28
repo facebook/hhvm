@@ -1,12 +1,12 @@
 <?hh
 
 class ToString {
-  function __toString() {
+  function __toString() :mixed{
     return "foobaz";
   }
 }
 
-function create($a, $b, $c, $d) {
+function create($a, $b, $c, $d) :mixed{
   try {
     var_dump(dict[$a => $b, $c => $d]);
   } catch (Exception $e) {

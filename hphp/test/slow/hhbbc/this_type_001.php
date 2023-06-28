@@ -3,9 +3,9 @@
 class Foo {
   private $x = "string";
 
-  public function getStr() { return $this->x; }
+  public function getStr() :mixed{ return $this->x; }
 
-  public function heh() {
+  public function heh() :mixed{
     $y = $this;
     for ($i = 0; $i < 10; ++$i) { $y = $this; }
     if (!$y) throw new Exception('x');
@@ -13,12 +13,12 @@ class Foo {
   }
 }
 
-function main() {
+function main() :mixed{
   $foo = new Foo;
   return $foo->heh();
 }
 
 <<__EntryPoint>>
-function main_this_type_001() {
+function main_this_type_001() :mixed{
 echo main() . "\n";
 }

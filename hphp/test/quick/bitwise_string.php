@@ -1,6 +1,6 @@
 <?hh
 
-function VS($a, $b) {
+function VS($a, $b) :mixed{
   if ($a === $b) var_dump("ok");
   else {
     var_dump($a);

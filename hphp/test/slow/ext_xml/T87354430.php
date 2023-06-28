@@ -1,6 +1,6 @@
 <?hh
 
-function test1() {
+function test1() :mixed{
   $a = new XMLReader();
   $a->expand(new stdClass);
 }

@@ -4,7 +4,7 @@ class A<T> {}
 class B<T> {}
 
 class C<T> {
-  function f() {
+  function f() :mixed{
     return new A<B<T>>();
   }
 }

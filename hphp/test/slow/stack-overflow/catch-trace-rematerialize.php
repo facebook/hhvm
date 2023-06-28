@@ -14,23 +14,23 @@
  * tc_unwind_resume() or discardStackTemps(), or a callee of one of those.
  */
 
-function foo($a) {
+function foo($a) :mixed{
   return bar($a);
 }
 
-function bar($a) {
+function bar($a) :mixed{
   return baz($a, 'garbanzo');
 }
 
-function baz($a, $b) {
+function baz($a, $b) :mixed{
   return quux($b, $a);
 }
 
-function chwrap($x) {
+function chwrap($x) :mixed{
   return choose($x);
 }
 
-function choose($a) {
+function choose($a) :mixed{
   $arr = varray['banana', $a, 'apple'];
   $dict = darray[
     'banana' => 'banana',
@@ -50,7 +50,7 @@ function choose($a) {
   return $arr[0] === 'bananaboop';
 }
 
-function quux($b, $a) {
+function quux($b, $a) :mixed{
   $arr = varray[$b, 'banana', $a, 'apple'];
   $dict = darray[
     $b => $b,
@@ -72,11 +72,11 @@ function quux($b, $a) {
   return $out;
 }
 
-function main() {
+function main() :mixed{
   foo('tofu');
 }
 
 <<__EntryPoint>>
-function main_catch_trace_rematerialize() {
+function main_catch_trace_rematerialize() :mixed{
 main();
 }

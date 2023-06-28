@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     echo "__toString called\n";
     return "string";
   }
@@ -12,7 +12,7 @@ class Box {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   echo "==== arrays ====\n";
   var_dump(HH\Lib\Legacy_FIXME\lte(vec[new C()], vec["a"]));
   var_dump(HH\Lib\Legacy_FIXME\gte(vec[new C()], vec["a"]));

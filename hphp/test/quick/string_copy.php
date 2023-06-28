@@ -1,6 +1,6 @@
 <?hh
 
-function main($str) {
+function main($str) :mixed{
   $arr = varray[];
   for ($i = 0; $i < 3; ++$i) {
     $str[2] = (string)$i;

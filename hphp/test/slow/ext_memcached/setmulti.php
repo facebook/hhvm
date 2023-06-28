@@ -1,7 +1,7 @@
 <?hh
 
 function matches_results($original, $compare)
-{
+:mixed{
     // get rid of $original keys that aren't in result
     $order = array_intersect_key($original, $compare);
 

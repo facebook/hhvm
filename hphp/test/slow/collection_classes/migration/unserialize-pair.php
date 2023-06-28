@@ -3,7 +3,7 @@
 // Test that we can handle unserialization of Pairs with
 // and without namespaces.
 
-function main() {
+function main() :mixed{
   $p = Pair {1, 2};
 
   // unserialize o serialize == id
@@ -32,6 +32,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unserialize_pair() {
+function main_unserialize_pair() :mixed{
 main();
 }

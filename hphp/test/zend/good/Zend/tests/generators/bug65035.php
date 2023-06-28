@@ -1,11 +1,11 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     fn();
     yield;
 }
 
-function fn() {
+function fn() :mixed{
     exit('Done');
 }
 <<__EntryPoint>> function main(): void {

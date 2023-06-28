@@ -9,13 +9,13 @@ class Child extends Base{
   public    $ddd = 4;
 }
 class Unrelated{
-  function foo($obj) {
+  function foo($obj) :mixed{
     var_dump(get_object_vars($obj));
   }
 }
 
 <<__EntryPoint>>
-function main_1534() {
+function main_1534() :mixed{
 $base_obj = new Base();
 $child_obj = new Child();
 $unrelated_obj = new Unrelated();

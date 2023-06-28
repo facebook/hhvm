@@ -1,7 +1,7 @@
 <?hh
 
 trait A {
-  function b() {
+  function b() :mixed{
     $c = function() {
       return 'd';
     };

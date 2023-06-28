@@ -1,11 +1,11 @@
 <?hh
 
 class first {
-    private function show() {
+    private function show() :mixed{
         echo "Call show()\n";
     }
 
-    public function do_show() {
+    public function do_show() :mixed{
         $this->show();
     }
 }
@@ -14,7 +14,7 @@ class second extends first {
 }
 
 class third extends second {
-    private function show() {
+    private function show() :mixed{
         echo "Call show()\n";
     }
 }

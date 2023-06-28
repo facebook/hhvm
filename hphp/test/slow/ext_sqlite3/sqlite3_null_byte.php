@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_sqlite3_null_byte() {
+function main_sqlite3_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 $db = sys_get_temp_dir().'/'.'example.db';

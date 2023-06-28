@@ -1,7 +1,7 @@
 <?hh
 
 function backtrace_print($opt = null)
-{
+:mixed{
 	if(is_null($opt)) {
 		print_r(debug_backtrace());
 	} else {
@@ -11,7 +11,7 @@ function backtrace_print($opt = null)
 }
 
 function doit($a, $b, $how)
-{
+:mixed{
 	echo "==default\n";
 	$how();
 	echo "==1\n";
@@ -29,12 +29,12 @@ function doit($a, $b, $how)
 class foo {
   <<__NEVER_INLINE>>
 	protected function doCall($dowhat, $how)
-	{
+:mixed	{
 	   $dowhat('a','b', $how);
 	}
 	<<__NEVER_INLINE>>
 	static function statCall($dowhat, $how)
-	{
+:mixed	{
 		$obj = new self();
 		$obj->doCall($dowhat, $how);
 	}

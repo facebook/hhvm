@@ -6,6 +6,6 @@ class C extends B {}
 class D extends C {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Shouldn't run\n";
 }

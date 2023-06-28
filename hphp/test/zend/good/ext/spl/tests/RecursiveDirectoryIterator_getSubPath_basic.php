@@ -1,5 +1,5 @@
 <?hh
-function rrmdir($dir) {
+function rrmdir($dir) :mixed{
     foreach(glob($dir . '/*') as $file) {
         if(is_dir($file)) {
             rrmdir($file);

@@ -1,6 +1,6 @@
 <?hh
 
-function test($a) {
+function test($a) :mixed{
   $ret = varray[];
   $s = varray[];
   foreach ($a as $v) {
@@ -17,7 +17,7 @@ function test($a) {
 
 
 <<__EntryPoint>>
-function main_cgetquietl_uninit() {
+function main_cgetquietl_uninit() :mixed{
 for ($i = 0; $i < 50; $i++) {
   test(varray[
          varray[1,2,3],

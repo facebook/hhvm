@@ -3,7 +3,7 @@
 //without an array->string conversion notice
 
 function myErrorHandler($errno, $errstr, $errfile, $errline)
-{
+:mixed{
         echo "Notice: $errstr\n";
 }
 <<__EntryPoint>> function main(): void {

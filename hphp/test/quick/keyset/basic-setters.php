@@ -1,11 +1,11 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function append_via_ref(inout $ks, $val) {
+function append_via_ref(inout $ks, $val) :mixed{
   $ks[] = $val;
 }
 
-function do_append($ks, $val, $s, $via_ref) {
+function do_append($ks, $val, $s, $via_ref) :mixed{
   try {
     if ($via_ref) {
       append_via_ref(inout $ks, $val);
@@ -19,7 +19,7 @@ function do_append($ks, $val, $s, $via_ref) {
   return $ks;
 }
 
-function test_append($orig, $via_ref) {
+function test_append($orig, $via_ref) :mixed{
   echo "Testing append".($via_ref ? " via ref" : "")."....\n";
   $v = do_append($orig, 0, "0 integer", $via_ref)
     |> do_append($$, 2, "2 integer", $via_ref)
@@ -43,7 +43,7 @@ function test_append($orig, $via_ref) {
   var_dump($v);
 }
 
-function do_set($ks, $key, $val) {
+function do_set($ks, $key, $val) :mixed{
   try {
     $ks[$key] = $val;
     echo "Set to $val succeeded\n";
@@ -53,7 +53,7 @@ function do_set($ks, $key, $val) {
   return $ks;
 }
 
-function test_set($orig) {
+function test_set($orig) :mixed{
   echo "Testing set....\n";
   $v = do_set($orig, 0, "0 key value")
     |> do_set($$, 3, "3 key value")
@@ -76,7 +76,7 @@ function test_set($orig) {
   var_dump($v);
 }
 
-function do_setop($ks, $key, $val) {
+function do_setop($ks, $key, $val) :mixed{
   try {
     $ks[$key] .= $val;
     echo "Set-Op with \"$val\" succeeded\n";
@@ -86,7 +86,7 @@ function do_setop($ks, $key, $val) {
   return $ks;
 }
 
-function test_setop($orig) {
+function test_setop($orig) :mixed{
   echo "Test set-op....\n";
   $v = do_setop($orig, 0, " + 0 key value")
     |> do_setop($$, 3, " + 3 key value")
@@ -109,7 +109,7 @@ function test_setop($orig) {
   var_dump($v);
 }
 
-function do_new_setop($ks, $val, $s) {
+function do_new_setop($ks, $val, $s) :mixed{
   try {
     $ks[] .= $val;
     echo "New set-op with \"$s\" succeeded\n";
@@ -119,7 +119,7 @@ function do_new_setop($ks, $val, $s) {
   return $ks;
 }
 
-function test_new_setop($orig) {
+function test_new_setop($orig) :mixed{
   echo "Test new set-op....\n";
   $v = do_new_setop($orig, 0, " + 0 value")
     |> do_new_setop($$, 3, " + 3 value")
@@ -142,7 +142,7 @@ function test_new_setop($orig) {
   var_dump($v);
 }
 
-function do_unset($ks, $key, $str) {
+function do_unset($ks, $key, $str) :mixed{
   try {
     unset($ks[$key]);
     echo "Unset of $str succeeded\n";
@@ -152,7 +152,7 @@ function do_unset($ks, $key, $str) {
   return $ks;
 }
 
-function test_unset($orig) {
+function test_unset($orig) :mixed{
   echo "Test unset....\n";
   $ks1 = do_unset($orig, 2, "2 key value");
   var_dump($orig);
@@ -188,7 +188,7 @@ function test_unset($orig) {
   var_dump($ks5);
 }
 
-function test($v) {
+function test($v) :mixed{
   echo "Testing: ";
   var_dump($v);
   test_append($v, false);

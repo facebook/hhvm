@@ -11,7 +11,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_annotation2() {
+function main_type_annotation2() :mixed{
 $info1 = type_structure(C::class, 'T');
 $info2 = type_structure(new C, 'T');
 

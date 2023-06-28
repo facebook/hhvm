@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_merge_recursive() {
+function main_array_merge_recursive() :mixed{
 $a1 = varray[];
 $a2 = darray["key1" => null];
 $a1 = array_merge_recursive($a1, $a2);

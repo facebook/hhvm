@@ -1,8 +1,8 @@
 <?hh
-function foo($a = A) {
+function foo($a = A) :mixed{
     echo "$a\n";
 }
-function bar($a = darray[A => B]) {
+function bar($a = darray[A => B]) :mixed{
     foreach ($a as $key => $val) {
         echo "$key\n";
         echo "$val\n";

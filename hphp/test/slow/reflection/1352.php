@@ -1,13 +1,13 @@
 <?hh
 
-function show_params($params) {
+function show_params($params) :mixed{
   echo 'parameters => array(' . count($params) . ") {\n";
   foreach ($params as $p) {
     echo "  name => {$p->getName()}\n";
   }
   echo "}\n";
 }
-function show($rf) {
+function show($rf) :mixed{
   var_dump($rf->getName());
   var_dump($rf->isUserDefined());
   var_dump($rf->getStartLine());

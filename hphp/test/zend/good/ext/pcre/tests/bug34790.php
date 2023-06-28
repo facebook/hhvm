@@ -1,5 +1,5 @@
 <?hh
-function func1(){
+function func1():mixed{
         $string = 'what the word and the other word the';
   $matches = null;
   preg_match_all_with_matches('/(?P<word>the)/', $string, inout $matches);

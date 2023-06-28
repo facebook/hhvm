@@ -13,7 +13,7 @@
  * Description : compares value1 and value2
  */
 function cmp($value1, $value2)
-{
+:mixed{
   if($value1 == $value2) {
     return 0;
   }

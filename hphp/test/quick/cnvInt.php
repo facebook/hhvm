@@ -1,6 +1,6 @@
 <?hh
 
-function foo($v) {
+function foo($v) :mixed{
   return (int)$v;
 }
 function foo2(): void {
@@ -14,7 +14,7 @@ function foo2(): void {
 }
 class C { public $foo = "bar"; }
 
-function bar($i) {
+function bar($i) :mixed{
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";
@@ -58,7 +58,7 @@ function bar($i) {
 
 
 
-function baz($i) {
+function baz($i) :mixed{
   if ($i >= 1) {
     $s1 = '5.3xxx';
     $s2 = '7yyy';

@@ -2,11 +2,11 @@
 /* Prototype: array array_reduce(array $array, mixed $callback, mixed $initial);
  * Description: Iteratively reduce the array to a single value via the callback
  */
-function reduce_int($w, $v) { return $w + strlen($v); }
-function reduce_float($w, $v) { return $w + strlen($v) / 10; }
-function reduce_string($w, $v) { return $w . $v; }
-function reduce_array($w, $v) { $w[$v]++; return $w; }
-function reduce_null($w, $v) { return (string)($w) . (string)($v); }
+function reduce_int($w, $v) :mixed{ return $w + strlen($v); }
+function reduce_float($w, $v) :mixed{ return $w + strlen($v) / 10; }
+function reduce_string($w, $v) :mixed{ return $w . $v; }
+function reduce_array($w, $v) :mixed{ $w[$v]++; return $w; }
+function reduce_null($w, $v) :mixed{ return (string)($w) . (string)($v); }
 <<__EntryPoint>> function main(): void {
 $array = varray['foo', 'foo', 'bar', 'qux', 'qux', 'quux'];
 

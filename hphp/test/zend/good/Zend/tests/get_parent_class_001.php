@@ -1,11 +1,11 @@
 <?hh
 
 interface ITest {
-    function foo();
+    function foo():mixed;
 }
 
 abstract class bar implements ITest {
-    public function foo() {
+    public function foo() :mixed{
         var_dump(get_parent_class());
     }
 }

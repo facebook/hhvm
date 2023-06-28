@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_glob() {
+function main_glob() :mixed{
 $path = 'glob://' . __DIR__ . '/../../sample_dir/*';
 
 $iters = varray[

@@ -1,10 +1,10 @@
 <?hh
-function f() { $a = varray[]; $a[] = 1; return $a; }
-function nonHphpArray( ) {
+function f() :mixed{ $a = varray[]; $a[] = 1; return $a; }
+function nonHphpArray( ) :mixed{
   apc_add('foo', varray[1, 2, 3]);
   return __hhvm_intrinsics\apc_fetch_no_check('foo');
 }
-function test1() {
+function test1() :mixed{
   return f()[0];
 }
 <<__EntryPoint>> function main(): void {

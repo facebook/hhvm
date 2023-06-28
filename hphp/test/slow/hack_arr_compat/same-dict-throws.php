@@ -1,10 +1,10 @@
 <?hh
 
-function d(dict $a, dict $d) {
+function d(dict $a, dict $d) :mixed{
   return $a === $d;
 }
 
-function v(vec $a, vec $d) {
+function v(vec $a, vec $d) :mixed{
   return $a === $d;
 }
 

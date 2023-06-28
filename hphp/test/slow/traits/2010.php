@@ -3,7 +3,7 @@
 trait Singleton {
   protected static $instances=darray[];
   abstract protected function __construct($config);
-  public static function getInstance($config) {
+  public static function getInstance($config) :mixed{
     if (!isset(self::$instances[$serialize = serialize($config)])) {
       self::$instances[$serialize] = new self($config);
     }

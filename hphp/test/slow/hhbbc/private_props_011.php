@@ -4,15 +4,15 @@ class A {
   private $x = darray[];
   private $y = "string";
 
-  public function heh(int $i) {
+  public function heh(int $i) :mixed{
     $this->x[$i] = $i;
     return $this;
   }
-  public function getY() { return $this->y; }
-  public function getX() { return $this->x; }
+  public function getY() :mixed{ return $this->y; }
+  public function getX() :mixed{ return $this->x; }
 }
 
-function main() {
+function main() :mixed{
   $a = new A;
   var_dump($a->heh(0));
   var_dump($a->getY());
@@ -20,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_private_props_011() {
+function main_private_props_011() :mixed{
 main();
 }

@@ -18,11 +18,11 @@ includes = ["foo"]
 
 // FILE: a.php
 
-function foo() { return 1; }
+function foo() :mixed{ return 1; }
 
 // FILE: a.php VERSION: 1
 
-function foo() { return 2; }
+function foo() :mixed{ return 2; }
 
 // FILE: main.php
 

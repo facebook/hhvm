@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1640() {
+function main_1640() :mixed{
 $sxe = new SimpleXMLElement('<image-definition />');
 $sxe->addChild('path', 'some/path/to/my.file');
 $sxe->addChild('options');

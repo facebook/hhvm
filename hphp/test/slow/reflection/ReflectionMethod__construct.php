@@ -2,13 +2,13 @@
 
 class Foo {
   public function __construct()[] {}
-  public function method() {}
-  public function __toString() { throw new Exception('No string casts');}
+  public function method() :mixed{}
+  public function __toString() :mixed{ throw new Exception('No string casts');}
 }
 
 
 <<__EntryPoint>>
-function main_reflection_method_construct() {
+function main_reflection_method_construct() :mixed{
 $instance = new Foo();
 
 try {

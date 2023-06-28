@@ -1,6 +1,6 @@
 <?hh
 
-function report($msg, $obj1, $obj2) {
+function report($msg, $obj1, $obj2) :mixed{
   echo "$msg\nShould be\n";
   var_dump($obj1);
   echo "But found\n";
@@ -10,7 +10,7 @@ function report($msg, $obj1, $obj2) {
 
 // Works only when objects consist of
 // hack collections and primitive types.
-function is_equal($obj1, $obj2) {
+function is_equal($obj1, $obj2) :mixed{
   if ($obj1 === null && $obj2 === null) {
     return true;
   }
@@ -57,7 +57,7 @@ function is_equal($obj1, $obj2) {
   return true;
 }
 
-function main() {
+function main() :mixed{
   $tests = varray[
     // Scalar types tests from HHJsonDecodeTest.php
     darray[
@@ -211,6 +211,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_json_decode_collections() {
+function main_json_decode_collections() :mixed{
 main();
 }

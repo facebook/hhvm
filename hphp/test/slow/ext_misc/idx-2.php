@@ -1,12 +1,12 @@
 <?hh
-function try_idx($c, $k, $d) {
+function try_idx($c, $k, $d) :mixed{
   try {
     var_dump(idx($c, $k, $d));
   } catch (Exception $e) {
     echo $e->getMessage(), "\n";
   }
 }
-function test($a) {
+function test($a) :mixed{
   echo "== ", (is_array($a) ? "array" : substr(get_class($a), 3)), " ==\n";
   try_idx($a, '0', 3);
   try_idx($a, '1', 4);
@@ -20,7 +20,7 @@ function test($a) {
   try_idx($a, 1.01, 12);
   try_idx($a, null, 13);
 }
-function main() {
+function main() :mixed{
   //test(array('1' => '2', 1 => 2, 'hello' => 'world', '' => 'empty'));
   test(Vector {'2', 2, 'world', 'empty'});
   test(ImmVector {'2', 2, 'world', 'empty'});
@@ -32,6 +32,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_idx_2() {
+function main_idx_2() :mixed{
 main();
 }

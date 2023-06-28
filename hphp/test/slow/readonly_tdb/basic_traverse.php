@@ -1,7 +1,7 @@
 <?hh
 namespace ROTB\BasicTraverse;
 class DisposeMe {
-  public function __dispose() {}
+  public function __dispose() :mixed{}
 }
 
 class :el {
@@ -13,10 +13,10 @@ class Foo {
 }
 
 class Bar {
-  public function foo() {
+  public function foo() :mixed{
     $_ = ro();
   }
-  public static function bar() {
+  public static function bar() :mixed{
     $_ = ro();
   }
   public function __construct(public mixed $m, public mixed ...$rest) {}

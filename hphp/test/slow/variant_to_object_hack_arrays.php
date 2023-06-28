@@ -6,7 +6,7 @@
 // recipies below are using that. The extensions themselves are not to blame.
 
 <<__EntryPoint>>
-function main_variant_to_object_hack_arrays() {
+function main_variant_to_object_hack_arrays() :mixed{
 $hackArrays = vec[
   vec[],
   dict[],

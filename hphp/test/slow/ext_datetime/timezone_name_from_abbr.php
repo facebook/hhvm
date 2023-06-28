@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_timezone_name_from_abbr() {
+function main_timezone_name_from_abbr() :mixed{
 var_dump(timezone_name_from_abbr('', -18000, -2));
 var_dump(timezone_name_from_abbr('', -18000, -1));
 var_dump(timezone_name_from_abbr('', -18000, 0));

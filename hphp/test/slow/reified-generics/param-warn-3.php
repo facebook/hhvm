@@ -3,8 +3,8 @@
 class B<reify T> {}
 class C<reify T> {}
 
-function f(B<<<__Soft>> C<<<__Soft>> int>> $_) { echo "done\n"; }
-function g(B<C<<<__Soft>> int>> $_) { echo "done\n"; }
+function f(B<<<__Soft>> C<<<__Soft>> int>> $_) :mixed{ echo "done\n"; }
+function g(B<C<<<__Soft>> int>> $_) :mixed{ echo "done\n"; }
 <<__EntryPoint>> function main(): void {
 f(new B<C<int>>());     // correct
 f(new B<C<string>>());  // warn

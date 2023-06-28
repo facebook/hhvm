@@ -1,33 +1,33 @@
 <?hh
 
 <<__Memoize>>
-function func0() {
+function func0() :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func0()\n";
   return json_encode(varray[]);
 }
 <<__Memoize>>
-function func1($p1) {
+function func1($p1) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo) echo "func1(".(string)$p1.")\n";
   return json_encode(varray[$p1]);
 }
 <<__Memoize>>
-function func2($p1, $p2) {
+function func2($p1, $p2) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func2(".(string)$p1.", ".(string)$p2.")\n";
   return json_encode(varray[$p1, $p2]);
 }
 <<__Memoize>>
-function func3($p1, $p2, $p3) {
+function func3($p1, $p2, $p3) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func3(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
   return json_encode(varray[$p1, $p2, $p3]);
 }
 <<__Memoize>>
-function func4($p1, $p2, $p3, $p4) {
+function func4($p1, $p2, $p3, $p4) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func4(".
@@ -42,7 +42,7 @@ function func4($p1, $p2, $p3, $p4) {
   return json_encode(varray[$p1, $p2, $p3, $p4]);
 }
 <<__Memoize>>
-function func5($p1, $p2, $p3, $p4, $p5) {
+function func5($p1, $p2, $p3, $p4, $p5) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func5(".
@@ -59,7 +59,7 @@ function func5($p1, $p2, $p3, $p4, $p5) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
 }
 <<__Memoize>>
-function func6($p1, $p2, $p3, $p4, $p5, $p6) {
+function func6($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func6(".
@@ -78,7 +78,7 @@ function func6($p1, $p2, $p3, $p4, $p5, $p6) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
 }
 <<__Memoize>>
-function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
+function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func7(".
@@ -99,7 +99,7 @@ function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
 }
 <<__Memoize>>
-function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
+function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func8(".
@@ -122,7 +122,7 @@ function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
 }
 <<__Memoize>>
-function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
+function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func9(".
@@ -147,7 +147,7 @@ function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
 }
 <<__Memoize>>
-function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
+function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func10(".
@@ -174,7 +174,7 @@ function func10($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
   return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10]);
 }
 <<__Memoize>>
-function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) {
+function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func11(".
@@ -205,7 +205,7 @@ function func11($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11) {
   );
 }
 <<__Memoize>>
-function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) {
+function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) :mixed{
 
   if (MemoizeKeyCountsFuncPhp::$do_echo)
     echo "func12(".
@@ -238,7 +238,7 @@ function func12($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10, $p11, $p12) {
   );
 }
 
-function test() {
+function test() :mixed{
 
 
   var_dump(func0());

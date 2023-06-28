@@ -2,16 +2,16 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls1 implements HH\IMemoizeParam {
-  public function getInstanceKey() { return "Cls1 memo key"; }
+  public function getInstanceKey() :mixed{ return "Cls1 memo key"; }
 }
 
 class Cls2 implements HH\IMemoizeParam {
-  public function getInstanceKey() { throw new Exception("clowntown"); }
+  public function getInstanceKey() :mixed{ throw new Exception("clowntown"); }
 }
 
 class Cls3 {}
 
-function escaped_print_serialized($x) {
+function escaped_print_serialized($x) :mixed{
   $x = HH\serialize_memoize_param($x);
   if (!is_string($x)) {
     var_dump($x);
@@ -20,14 +20,14 @@ function escaped_print_serialized($x) {
   var_dump(quoted_printable_encode($x));
 }
 
-function test_group($name, $inputs) {
+function test_group($name, $inputs) :mixed{
   echo "==== $name ====\n";
   foreach ($inputs as $input) {
     escaped_print_serialized($input);
   }
 }
 
-function test_exception($name, $input) {
+function test_exception($name, $input) :mixed{
   echo "==== $name ====\n";
   try {
     escaped_print_serialized($input);
@@ -40,7 +40,7 @@ function test_exception($name, $input) {
   }
 }
 
-function test() {
+function test() :mixed{
   test_group(
     "ints and most strings pass through unchanged",
     varray[
@@ -183,6 +183,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_serialize_memoize_param() {
+function main_serialize_memoize_param() :mixed{
 test();
 }

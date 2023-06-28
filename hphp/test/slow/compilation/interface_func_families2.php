@@ -31,12 +31,12 @@ function foo2(): I1 {
   return new C2();
 }
 
-function foo1() {
+function foo1() :mixed{
   $x = foo2();
   return $x->f1();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo1());
 }

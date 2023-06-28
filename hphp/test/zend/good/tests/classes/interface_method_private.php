@@ -1,5 +1,5 @@
 <?hh
 
 interface if_a {
-    private function err();
+    private function err():mixed;
 }

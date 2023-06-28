@@ -2,7 +2,7 @@
 
 class Test {
   <<__DynamicallyCallable>>
-  public function normal($args) {
+  public function normal($args) :mixed{
     var_dump($args);
   }
 

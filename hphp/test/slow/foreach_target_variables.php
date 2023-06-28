@@ -11,7 +11,7 @@ class Test2 {
 
 // Target: Integer array keys
 <<__EntryPoint>>
-function main_foreach_target_variables() {
+function main_foreach_target_variables() :mixed{
 $array = varray[1, 2, 3];
 
 $a = darray[];

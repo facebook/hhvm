@@ -1,9 +1,9 @@
 <?hh
 
-class Foo { <<__DynamicallyCallable>> function bar() {} }
+class Foo { <<__DynamicallyCallable>> function bar() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $mc = meth_caller(Foo::class, 'bar');
   $dmc = HH\dynamic_meth_caller(__hhvm_intrinsics\launder_value(Foo::class), __hhvm_intrinsics\launder_value('bar'));
 

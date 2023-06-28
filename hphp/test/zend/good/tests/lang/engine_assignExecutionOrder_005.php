@@ -1,31 +1,31 @@
 <?hh
 
-function i1() {
+function i1() :mixed{
         echo "i1\n";
         return 0;
 }
 
-function i2() {
+function i2() :mixed{
         echo "i2\n";
         return 0;
 }
 
-function i3() {
+function i3() :mixed{
         echo "i3\n";
         return 0;
 }
 
-function i4() {
+function i4() :mixed{
         echo "i4\n";
         return 0;
 }
 
-function i5() {
+function i5() :mixed{
         echo "i5\n";
         return 0;
 }
 
-function i6() {
+function i6() :mixed{
         echo "i6\n";
         return 0;
 }

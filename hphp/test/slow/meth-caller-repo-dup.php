@@ -1,9 +1,9 @@
 <?hh
 
-class Foo { function bar() { echo "bar\n"; } }
+class Foo { function bar() :mixed{ echo "bar\n"; } }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $mc = meth_caller(Foo::class, 'bar');
   $mc2 = __hhvm_intrinsics\launder_value(meth_caller(Foo::class, 'bar'));
 

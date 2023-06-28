@@ -4,7 +4,7 @@
 // testing. It has been removed in the meantime, but should be added back in
 // when HHVM adds support for this feature.
 
-function gen2() {
+function gen2() :AsyncGenerator<mixed,mixed,void>{
     try {
         return 42;
     } finally {
@@ -15,7 +15,7 @@ function gen2() {
 
 
 <<__EntryPoint>>
-function main_get_return_and_finally() {
+function main_get_return_and_finally() :mixed{
 $gen = gen2();
 try {
     // This will throw an exception (from the finally)

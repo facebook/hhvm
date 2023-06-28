@@ -5,7 +5,7 @@ class Name {
     $this->name = $_name;
   }
 
-  function display() {
+  function display() :mixed{
     echo $this->name . "\n";
   }
 }
@@ -17,13 +17,13 @@ class Person {
     $this->name = new Name($_name);
   }
 
-  function getName() {
+  function getName() :mixed{
     return $this->name;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $person = new Person("John", "New York");
   $person->getName()->display();
 }

@@ -8,6 +8,6 @@ function test(): void {
 
 
 <<__EntryPoint>>
-function main_namespace_void() {
+function main_namespace_void() :mixed{
 \var_dump(test());
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1684() {
+function main_1684() :mixed{
 $file = __DIR__."/../../sample_dir/symlink";
 
 var_dump(filetype($file));

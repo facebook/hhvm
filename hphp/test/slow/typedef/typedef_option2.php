@@ -3,7 +3,7 @@
 type foo = int;
 type bar = ?foo;
 
-function wat(bar $x) {
+function wat(bar $x) :mixed{
   var_dump($x);
 }
 <<__EntryPoint>> function main(): void {

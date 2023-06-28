@@ -1,6 +1,6 @@
 <?hh
 
-async function f()[zoned] {
+async function f()[zoned] :Awaitable<mixed>{
   echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
   HH\Coeffects\backdoor(()[defaults] ==> set_time_limit(1));
   // throw C++ exception so that the context does not get unset
@@ -8,7 +8,7 @@ async function f()[zoned] {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
   register_postsend_function(() ==> {

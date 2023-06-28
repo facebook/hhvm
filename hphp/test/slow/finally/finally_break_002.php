@@ -1,6 +1,6 @@
 <?hh
 
-function blah() {
+function blah() :mixed{
   $xs = varray[1, 2, 3, 4, 5];
 
   foreach ($xs as $x) {
@@ -18,6 +18,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_finally_break_002() {
+function main_finally_break_002() :mixed{
 blah();
 }

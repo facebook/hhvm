@@ -28,7 +28,7 @@ async function cache(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   concurrent {
     await foo();
     await bar();

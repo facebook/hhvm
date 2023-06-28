@@ -18,6 +18,6 @@ class A2 {
 
 
 <<__EntryPoint>>
-function main_nullsafe_sprop() {
+function main_nullsafe_sprop() :mixed{
 echo (new A2())->baz()."\n";
 }

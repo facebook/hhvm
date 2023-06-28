@@ -3,7 +3,7 @@ class ancester
 {
 public $ancester = 0;
 	function ancester()
-	{
+:mixed	{
 		return $this->ancester;
 	}
 }
@@ -11,7 +11,7 @@ class foo extends ancester
 {
 public $bar = "1";
 	function foo()
-	{
+:mixed	{
 		return $this->bar;
 	}
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function f($x) {
+function f($x) :AsyncGenerator<mixed,mixed,void>{
   switch ($x++ + ++$x) {
   case 1:
     yield 1;
@@ -14,7 +14,7 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main_2159() {
+function main_2159() :mixed{
 foreach (f(0) as $x) {
  var_dump($x);
  }

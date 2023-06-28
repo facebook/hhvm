@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require __DIR__.'/test_multifile.inc';
   runDefaultSandboxTest(1, '-vEval.EnableDecl=1');
 }

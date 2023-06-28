@@ -1,6 +1,6 @@
 <?hh
 
-function genA() {
+function genA() :AsyncGenerator<mixed,mixed,void>{
   echo 'genA:' . (string)IntContext::getContext() . "\n";
   yield 1;
   echo 'genA:' . (string)IntContext::getContext() . "\n";
@@ -9,7 +9,7 @@ function genA() {
   yield 3;
 }
 
-function genB() {
+function genB() :AsyncGenerator<mixed,mixed,void>{
   echo 'genB:' . (string)IntContext::getContext() . "\n";
   yield 1;
   echo 'genB:' . (string)IntContext::getContext() . "\n";
@@ -17,7 +17,7 @@ function genB() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
   IntContext::start(1, () ==> {

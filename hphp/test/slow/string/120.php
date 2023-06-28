@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_120() {
+function main_120() :mixed{
 print "test\n\r\t\v\f\\\$\"";
 }

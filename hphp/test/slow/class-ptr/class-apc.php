@@ -3,7 +3,7 @@
 class main {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   apc_store('mainf', __hhvm_intrinsics\create_class_pointer('main'));
   apc_store('maina', varray[1, __hhvm_intrinsics\create_class_pointer('main'), 'foo']);
 

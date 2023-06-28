@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x1 = varray[];
   var_dump(array_unshift(inout $x1, 1));
   var_dump(array_unshift(inout $x1, 'b', 'c'));
@@ -29,6 +29,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_unshift() {
+function main_array_unshift() :mixed{
 main();
 }

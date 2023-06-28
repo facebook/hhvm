@@ -1,20 +1,20 @@
 <?hh
-function foo($a, $b, $c) {
+function foo($a, $b, $c) :mixed{
   var_dump('foo');
   return 1;
 }
-function bar($a, $b, $c) {
+function bar($a, $b, $c) :mixed{
   var_dump('bar');
   return 2;
 }
-function buz($x,$y) {
+function buz($x,$y) :mixed{
  if ($y) return $x;
  return 1;
  }
 
 
 <<__EntryPoint>>
-function main_499() {
+function main_499() :mixed{
 $a = varray[1,2,3,4,5];
 $s = buz('hello',1);
 foreach ($a as $s[3]) {

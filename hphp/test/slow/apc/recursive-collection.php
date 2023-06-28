@@ -3,7 +3,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__EntryPoint>>
-function main_recursive_collection() {
+function main_recursive_collection() :mixed{
 $obj = Map{'1' => 123, 1 => 123};
 $obj['1'] = $obj;
 

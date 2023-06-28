@@ -1,15 +1,15 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   print "foo $a\n";
 }
 
-function bar(inout $a) {
+function bar(inout $a) :mixed{
   $a = 2;
   return $a;
 }
 
-function baz($a) {
+function baz($a) :mixed{
   return 2;
 }
 <<__EntryPoint>> function main(): void {

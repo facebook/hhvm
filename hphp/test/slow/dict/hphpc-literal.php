@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main() {
+function main() :mixed{
   var_dump(dict[123 => 'abc'] == dict['123' => 'abc']);
   var_dump(dict[123 => 'abc'] != dict['123' => 'abc']);
   var_dump(dict[123 => 'abc'] === dict['123' => 'abc']);
@@ -68,6 +68,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_hphpc_literal() {
+function main_hphpc_literal() :mixed{
 main();
 }

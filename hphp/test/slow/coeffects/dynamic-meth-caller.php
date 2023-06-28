@@ -3,10 +3,10 @@
 class A {
   const ctx C = [write_props];
   <<__DynamicallyCallable>>
-  function f()[write_props] { echo "in A::f\n"; }
+  function f()[write_props] :mixed{ echo "in A::f\n"; }
 }
 
-function static_fn()[write_props] {
+function static_fn()[write_props] :mixed{
   $f1 = meth_caller('A', 'f');
   $f1(new A);
 
@@ -14,7 +14,7 @@ function static_fn()[write_props] {
   $f2(new A);
 }
 
-function poly_fn(mixed $x)[$x::C] {
+function poly_fn(mixed $x)[$x::C] :mixed{
   $f1 = meth_caller('A', 'f');
   $f1(new A);
 
@@ -24,7 +24,7 @@ function poly_fn(mixed $x)[$x::C] {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   static_fn();
   poly_fn(new A);
 }

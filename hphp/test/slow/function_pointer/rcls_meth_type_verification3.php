@@ -9,7 +9,7 @@ final class Test {
   }
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Throwable $e) {

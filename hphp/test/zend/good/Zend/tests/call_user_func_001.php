@@ -1,17 +1,17 @@
 <?hh
 
 namespace testing {
-    function foobar($str) {
+    function foobar($str) :mixed{
         \var_dump($str);
     }
 
     abstract class bar {
-        protected function prot($str) {
+        protected function prot($str) :mixed{
             print "Shouldn't be called!\n";
         }
     }
     class foo extends bar {
-        private function priv($str) {
+        private function priv($str) :mixed{
             print "Shouldn't be called!\n";
         }
     }

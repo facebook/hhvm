@@ -10,7 +10,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $locales = darray[
         'en_UK' => 'GBP',
         'en_US' => 'USD',

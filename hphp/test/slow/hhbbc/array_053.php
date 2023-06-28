@@ -1,21 +1,21 @@
 <?hh
 
-class A { public function yo() { echo "hi\n"; } }
+class A { public function yo() :mixed{ echo "hi\n"; } }
 
-function foo() {
+function foo() :mixed{
   $x = darray['x' => varray[new A]];
   for ($i = 0; $i < 10; ++$i) {
     $x['x'][] = new A;
   }
   return $x;
 }
-function main() {
+function main() :mixed{
   $val = foo()['x'][0];
   var_dump($val);
   $val->yo();
 }
 
 <<__EntryPoint>>
-function main_array_053() {
+function main_array_053() :mixed{
 main();
 }

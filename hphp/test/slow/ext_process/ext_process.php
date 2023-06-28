@@ -1,18 +1,18 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x !== false, true); }
+function VERIFY($x) :mixed{ VS($x !== false, true); }
 
 
 
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_process() {
+function main_ext_process() :mixed{
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(123);

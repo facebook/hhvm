@@ -9,6 +9,6 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1272() {
+function main_1272() :mixed{
 $a = new B('test');
 }

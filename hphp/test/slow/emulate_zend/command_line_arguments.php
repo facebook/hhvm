@@ -4,7 +4,7 @@ const SCRIPT_NAME = __DIR__.'/command_line_arguments.inc';
 
 
 <<__EntryPoint>>
-function main_command_line_arguments() {
+function main_command_line_arguments() :mixed{
 $cmd = HH\__internal\hhvm_binary().' --php -n -d foo=bar '.SCRIPT_NAME;
 var_dump($cmd);
 $return_var = -1;

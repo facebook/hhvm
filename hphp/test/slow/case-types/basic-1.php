@@ -12,7 +12,7 @@ case type C3 = B | C2;
 
 case type C4 = (C2, (C2, C3));
 
-function pp(string $type, string $name) {
+function pp(string $type, string $name) :mixed{
   echo ">>>> " . $type . " <<<<\n\n";
   var_export(type_structure_for_alias($name));
   echo "\n\n";
@@ -21,7 +21,7 @@ function pp(string $type, string $name) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   pp("Basic", 'C1');
   pp("Class", 'C2');
   pp("Nested", 'C3');

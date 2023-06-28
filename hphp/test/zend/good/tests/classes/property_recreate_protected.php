@@ -1,16 +1,16 @@
 <?hh
 class C {
     protected $p = 'test';
-    function unsetProtected() {
+    function unsetProtected() :mixed{
         unset($this->p);
     }
-    function setProtected() {
+    function setProtected() :mixed{
         $this->p = 'changed';
     }
 }
 
 class D extends C {
-    function setP() {
+    function setP() :mixed{
         $this->p = 'changed in D';
     }
 }

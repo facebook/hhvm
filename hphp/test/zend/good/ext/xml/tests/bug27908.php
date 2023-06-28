@@ -1,7 +1,7 @@
 <?hh
 
 function x_default_handler($xp,$data)
-{
+:mixed{
     echo "x_default_handler $data\n";
 }
 <<__EntryPoint>> function main(): void {

@@ -1,17 +1,17 @@
 <?hh
 
 interface i {
-    function test();
+    function test():mixed;
 }
 
 class foo implements i {
-    function test() {
+    function test() :mixed{
         var_dump(get_parent_class());
     }
 }
 
 class bar extends foo {
-    function test_bar() {
+    function test_bar() :mixed{
         var_dump(get_parent_class());
     }
 }

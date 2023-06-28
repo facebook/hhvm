@@ -2,7 +2,7 @@
 
 namespace A {
   class Vector {
-    function foo() {
+    function foo() :mixed{
       echo "foo\n";
     }
   }

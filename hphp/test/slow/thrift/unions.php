@@ -26,24 +26,24 @@ class DummyProtocol {
   function __construct()[] {
     $this->t = new DummyTransport();
   }
-  function getTransport() {
+  function getTransport() :mixed{
     return $this->t;
   }
 }
 class DummyTransport {
   public $buff = '';
   public $pos = 0;
-  function flush() {
+  function flush() :mixed{
  }
-  function write($buff) {
+  function write($buff) :mixed{
     $this->buff .= $buff;
   }
-  function read($n) {
+  function read($n) :mixed{
     $r = substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;
   }
-  function putBack($data) {
+  function putBack($data) :mixed{
     $this->buff = ($data . $this->buff);
   }
 }

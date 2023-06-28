@@ -1,18 +1,18 @@
 <?hh
 class MyClass {
   public static AnyArray $a = varray[];
-  public function doSomethin($str) {
+  public function doSomethin($str) :mixed{
     for ($j = 0; $j < 200; $j++) {
       self::$a[] = $str.$j;
     }
   }
 }
 
-function mem_threshold_callback_as_func2() {
+function mem_threshold_callback_as_func2() :mixed{
   echo "Threshold crossed again (2), peak: ".memory_get_peak_usage(true)."\n";
 }
 
-function mem_threshold_callback_as_func() {
+function mem_threshold_callback_as_func() :mixed{
   echo "Threshold crossed again, peak: ".memory_get_peak_usage(true)."\n";
   HH\set_mem_threshold_callback(70 * 1024 * 1024, mem_threshold_callback_as_func2<>);
 }
@@ -27,7 +27,7 @@ function mem_threshold_callback_as_func() {
  * Memory reaches 90 -> OOM Error (never happens)
  */
 <<__EntryPoint>>
-function main_mem_threshold() {
+function main_mem_threshold() :mixed{
 ini_set('memory_limit', 90 * 1024 * 1024);
 
 HH\set_mem_threshold_callback(40 * 1024 * 1024, ()==> {

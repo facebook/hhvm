@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_reflection_type_alias9() {
+function main_reflection_type_alias9() :mixed{
 require_once 'ReflectionTypeAlias.inc';
 
 $x = new ReflectionTypeAlias('MyType');

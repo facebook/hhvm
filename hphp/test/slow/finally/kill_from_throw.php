@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   try {
     try {
       return 0;
@@ -14,6 +14,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_kill_from_throw() {
+function main_kill_from_throw() :mixed{
 var_dump(foo());
 }

@@ -1,13 +1,13 @@
 <?hh
 
-function show_without_extra_vardump_nonsense($arr) {
+function show_without_extra_vardump_nonsense($arr) :mixed{
   echo 'array (' . count($arr) . ") {\n";
   foreach ($arr as $val) {
     echo "  $val\n";
   }
   echo "}\n";
 }
-function do_wonderful_things_with($r) {
+function do_wonderful_things_with($r) :mixed{
   echo "yall know what time it is. time to show you some properties\n";
   $props = varray[];
   foreach ($r->getProperties() as $prop) {
@@ -33,18 +33,18 @@ trait T {
   protected static $prot_st;
   public static $pub_st;
 
-  private function fpriv() {
+  private function fpriv() :mixed{
 }
-  protected function fprot() {
+  protected function fprot() :mixed{
 }
-  public function fpub() {
+  public function fpub() :mixed{
 }
 
-  private static function fpriv_st() {
+  private static function fpriv_st() :mixed{
 }
-  protected static function fprot_st() {
+  protected static function fprot_st() :mixed{
 }
-  public static function fpub_st() {
+  public static function fpub_st() :mixed{
 }
 }
 
@@ -52,9 +52,9 @@ trait U {
   public $foo;
   public static $static;
 
-  public function ffoo() {
+  public function ffoo() :mixed{
 }
-  public static function fstatic() {
+  public static function fstatic() :mixed{
 }
 }
 
@@ -68,14 +68,14 @@ class D extends C {
   use U;
 
   public $class_prop;
-  public function class_method() {
+  public function class_method() :mixed{
 }
 
 }
 
 
 <<__EntryPoint>>
-function main_2129() {
+function main_2129() :mixed{
 $r = new ReflectionClass('C');
 do_wonderful_things_with($r);
 

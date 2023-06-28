@@ -11,11 +11,11 @@ interface iX
     const C1 = 123;
 //  const C2 = "green";
 
-    function f0 ();                 // implicitly public
-    public function f1 ($p1);       // explicitly public
+    function f0 ():mixed;                 // implicitly public
+    public function f1 ($p1):mixed;       // explicitly public
 //  private function f1 ($p1);      // private not permitted
 //  protected function f1 ($p1);    // protected not permitted
-    public static function f3 ();
+    public static function f3 ():mixed;
 }
 
 interface iY
@@ -24,8 +24,8 @@ interface iY
     const C2 = "green";
 
 //  function f0 ($p1);      // Declaration of iX::f0() must be compatible with iY::f0($p1)
-    function f1 ($p1);      // implicitly public
-    function f2 ($p1, $p2);
+    function f1 ($p1):mixed;      // implicitly public
+    function f2 ($p1, $p2):mixed;
 }
 
 interface iZ extends iX, iY
@@ -33,7 +33,7 @@ interface iZ extends iX, iY
 //  const C1 = 123;         // can't override inherited constants
 //  const C2 = "green";     // can't override inherited constants
 
-    function f2 ($p1, $p2);
+    function f2 ($p1, $p2):mixed;
 }
 
 abstract class C implements iZ // being abstract, it need not implement any of the methods
@@ -43,14 +43,14 @@ abstract class C implements iZ // being abstract, it need not implement any of t
 class D implements iZ
 {
 //  function f0 ($p1) {}    // Declaration of D::f0() must be compatible with iX::f0()
-    function f0 () {}
-    public function f1 ($p1) {}
-    function f2 ($p1, $p2) {}
-    public static function f3 () {}
+    function f0 () :mixed{}
+    public function f1 ($p1) :mixed{}
+    function f2 ($p1, $p2) :mixed{}
+    public static function f3 () :mixed{}
 }
 
 function processCollection(MyCollection $p1)
-{
+:mixed{
     var_dump($p1);
 }
 <<__EntryPoint>> function main(): void {

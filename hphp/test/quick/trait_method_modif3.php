@@ -1,17 +1,17 @@
 <?hh
 class Foo {
-  protected function f() {
+  protected function f() :mixed{
     return 'Foo';
   }
 }
 trait T {
-  private function f() {
+  private function f() :mixed{
     return 'Bar';
   }
 }
 class Bar extends Foo {
   use T;
-  function inv() {
+  function inv() :mixed{
     return $this->f();
   }
 }

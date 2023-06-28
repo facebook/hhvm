@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1416() {
+function main_1416() :mixed{
   for ($i = 0; $i < 3; $i++) {
     echo "Start Of I loop\n";
     $continue_after_inner_loop = false;

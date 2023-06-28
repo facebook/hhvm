@@ -1,7 +1,7 @@
 <?hh
 class A {
     public static $x = "A";
-    function testit() {
+    function testit() :mixed{
         $this->v1 = new self;
         $this->v2 = new self;
     }
@@ -9,7 +9,7 @@ class A {
 
 class B extends A {
     public static $x = "B";
-    function testit() {
+    function testit() :mixed{
         parent::testit();
         $this->v3 = new self;
         $this->v4 = new parent;

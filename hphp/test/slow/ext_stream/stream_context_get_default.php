@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_stream_context_get_default() {
+function main_stream_context_get_default() :mixed{
 var_dump(stream_context_get_options(stream_context_get_default()));
 var_dump(stream_context_get_options(stream_context_get_default(
   darray["http" => darray["header" => "X-Hello: world"]])));

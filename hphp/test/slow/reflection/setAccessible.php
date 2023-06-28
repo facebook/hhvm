@@ -11,7 +11,7 @@ class E {
   static public $h = 'h';
 }
 
-function getProps($class, $obj) {
+function getProps($class, $obj) :mixed{
   $ret = darray[];
   foreach ((new ReflectionClass($class))->getProperties() as $key => $prop) {
     $values = varray[];
@@ -31,7 +31,7 @@ function getProps($class, $obj) {
 
 
 <<__EntryPoint>>
-function main_set_accessible() {
+function main_set_accessible() :mixed{
 $ret = array_merge(getProps('A', new A), getProps('E', 'E'));
 ksort(inout $ret);
 var_dump($ret);

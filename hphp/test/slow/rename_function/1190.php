@@ -1,8 +1,8 @@
 <?hh
-function test1() {
+function test1() :mixed{
   print __FUNCTION__;
 }
-function test2() {
+function test2() :mixed{
   print __FUNCTION__;
 }
 <<__EntryPoint>> function main(): void {

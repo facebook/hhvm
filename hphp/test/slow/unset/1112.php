@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
 $a=varray[1,2,3];
  unset($a[0]);
 }

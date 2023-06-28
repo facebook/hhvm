@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1683() {
+function main_1683() :mixed{
 $fh = fopen('php://output', 'w');
 if (!$fh) {
   throw new Exception('foo');

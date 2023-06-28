@@ -1,14 +1,14 @@
 <?hh
 
-abstract class something { abstract function go(); }
+abstract class something { abstract function go():mixed; }
 
-class asd extends something { function go() { echo "asd\n"; } }
-class bsd extends something { function go() { echo "bsd\n"; } }
+class asd extends something { function go() :mixed{ echo "asd\n"; } }
+class bsd extends something { function go() :mixed{ echo "bsd\n"; } }
 
-function call_something($x) { for ($i = 0; $i < 10; ++$i) { mt_rand(); } }
-function call_something_else($x) { for ($i = 0; $i < 10; ++$i) {mt_rand(); } }
+function call_something($x) :mixed{ for ($i = 0; $i < 10; ++$i) { mt_rand(); } }
+function call_something_else($x) :mixed{ for ($i = 0; $i < 10; ++$i) {mt_rand(); } }
 
-function diamond(something $state) {
+function diamond(something $state) :mixed{
   if ($state is asd) {
     call_something($state);
     for ($i = 0; $i < 10; ++$i) { mt_rand(); }
@@ -22,7 +22,7 @@ function diamond(something $state) {
 
 
 <<__EntryPoint>>
-function main_diamond_call() {
+function main_diamond_call() :mixed{
 diamond(new bsd);
 diamond(new bsd);
 diamond(new bsd);

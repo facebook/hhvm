@@ -19,7 +19,7 @@ class Test {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 99; $i >= 0; $i--) {
     $weakref = Test::get($i);
     var_dump($weakref->valid());

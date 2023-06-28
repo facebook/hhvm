@@ -1,18 +1,18 @@
 <?hh
 
-class A { function afunc($x) { return $x; } }
-class B { function bfunc($x) { return $x * 2; } }
-class C extends B { function cfunc($x, $y) { return $x + $y; } }
+class A { function afunc($x) :mixed{ return $x; } }
+class B { function bfunc($x) :mixed{ return $x * 2; } }
+class C extends B { function cfunc($x, $y) :mixed{ return $x + $y; } }
 
 // test in function scope
-function test_duplicate_meth_caller() {
+function test_duplicate_meth_caller() :mixed{
   var_dump(HH\meth_caller("B", "bfunc")(new B(), 2));
   var_dump(HH\meth_caller(B::class, "bfunc")(new B(), 3));
 }
 
 // test in class method scope
 class D {
-  function dfunc($x) {
+  function dfunc($x) :mixed{
     var_dump(HH\meth_caller(B::class, "bfunc")(new B(), $x));
   }
 }

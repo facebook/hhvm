@@ -10,7 +10,7 @@ class C extends B {
   }
 }
 
-<<__EntryPoint>> function ordertest() {
+<<__EntryPoint>> function ordertest() :mixed{
   $c = new C();
   $c->A();
   $c->a();

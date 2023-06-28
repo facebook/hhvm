@@ -22,18 +22,18 @@ abstract class C5 implements I3 {
   public function f1(): string { return "5"; }
 }
 
-function func1() {
+function func1() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) return new C1();
   return new C2();
 }
 
-function func2() {
+function func2() :mixed{
   $x = func1();
   if ($x is I1) return $x->f1();
   return 0;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(func2());
 }

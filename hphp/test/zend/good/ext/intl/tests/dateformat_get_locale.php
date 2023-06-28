@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $locale_arr = varray [
         'de-DE',
         'sl-IT-nedis',

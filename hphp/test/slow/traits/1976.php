@@ -3,7 +3,7 @@
 trait Counter {
 
   private static $incC = 0;
-  public function inc() {
+  public function inc() :mixed{
     self::$incC = self::$incC + 1;
     $c = self::$incC;
     echo "$c\n";

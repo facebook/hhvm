@@ -1,6 +1,6 @@
 <?hh
 
-function handler($signo) {
+function handler($signo) :mixed{
   switch ($signo) {
     case SIGUSR1:
       echo "received SIGUSR1\n";

@@ -1,6 +1,6 @@
 <?hh
 
-function test($string) {
+function test($string) :mixed{
     $stream = fopen('php://memory', 'r+');
     fwrite($stream, $string);
     rewind($stream);
@@ -14,7 +14,7 @@ function test($string) {
 }
 
 <<__EntryPoint>>
-function main_stream_get_line_returnvalue() {
+function main_stream_get_line_returnvalue() :mixed{
 echo "<pre>";
 test("one\n\nthree\nfour");
 test("one\n\nthree\nfour\n");

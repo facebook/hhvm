@@ -6,7 +6,7 @@ class Foo {
     $this->str = $str . " World";
   }
 
-  function test() {
+  function test() :mixed{
     return $this->str;
   }
 }

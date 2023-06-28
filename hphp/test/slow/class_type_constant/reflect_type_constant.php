@@ -11,7 +11,7 @@ abstract class C implements I {
 }
 
 <<__EntryPoint>>
-function main_reflect_type_constant() {
+function main_reflect_type_constant() :mixed{
 echo '=== get_class_constants ===' . PHP_EOL;
 var_dump(get_class_constants(C::class));
 

@@ -1,10 +1,10 @@
 <?hh
 
-function test(){
+function test():mixed{
     trigger_error("error", E_USER_ERROR);
 }
 
-function errorHandler($errno, $errstr, $errfile, $errline) {
+function errorHandler($errno, $errstr, $errfile, $errline) :mixed{
     throw new Exception();
 }
 <<__EntryPoint>> function main(): void {

@@ -10,6 +10,6 @@ function f(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_function() {
+function main_function() :mixed{
 f(() ==> 1);
 }

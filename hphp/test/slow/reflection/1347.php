@@ -8,7 +8,7 @@ class C extends B {
 }
 
 <<__EntryPoint>>
-function main_1347() {
+function main_1347() :mixed{
   $a = new A;
   $b = new B;
   var_dump(is_a('A', 'A', true));

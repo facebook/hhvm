@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   if (__hhvm_intrinsics\launder_value(1)) {
     include 'bug63976-1.inc';
   }

@@ -1,5 +1,5 @@
 <?hh
-function show_eq($x,$y) {
+function show_eq($x,$y) :mixed{
     echo "$x ". ($x==$y ? "==" : "!=") ." $y\n";
 }
 <<__EntryPoint>> function main(): void {

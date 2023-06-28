@@ -1,13 +1,13 @@
 <?hh
 
 trait foo {
-    public function __clone() {
+    public function __clone() :mixed{
         var_dump(__FUNCTION__);
     }
 }
 
 trait baz {
-    public function __clone() {
+    public function __clone() :mixed{
         var_dump(__FUNCTION__);
     }
 }

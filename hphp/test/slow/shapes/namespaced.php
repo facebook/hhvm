@@ -11,6 +11,6 @@ function do_stuff(Foo $shape): void {
 
 
 <<__EntryPoint>>
-function main_namespaced() {
+function main_namespaced() :mixed{
 do_stuff(shape('herp' => 'derp'));
 }

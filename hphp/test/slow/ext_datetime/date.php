@@ -1,12 +1,12 @@
 <?hh
 
-function format($dt) {
+function format($dt) :mixed{
   var_dump(date_format($dt, "Y-m-d H:i:s"));
 }
 
 
 <<__EntryPoint>>
-function main_date() {
+function main_date() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 format(date_create("2006-12-12"), "2006-12-12 00:00:00");

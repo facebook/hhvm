@@ -19,7 +19,7 @@ function f(
   varray $p6 = varray[varray[], vec[varray[1, C::A, 3], vec[]], vec[1, 2, 3]],
   varray $p7 = tuple(1, 2, 3),
   varray $p8 = tuple(C::A, 1, 2)
-) {}
+) :mixed{}
 
 function g(
   darray $p0 = darray[1 => C::A, 2 => 1],
@@ -31,9 +31,9 @@ function g(
   darray $p6 = darray[1 => darray[], "hi" => dict[2 => darray["key1" => C::A, "key2" => dict[]], 3 => 456], 5 => dict[]],
   darray $p7 = shape('a' => 1, 'b' => 2),
   darray $p8 = shape('a' => C::A, 'b' => 2)
-) {}
+) :mixed{}
 
-function test($func) {
+function test($func) :mixed{
   foreach ((new ReflectionFunction($func))->getParameters() as $p) {
     var_dump($p->getDefaultValueText());
   }
@@ -66,7 +66,7 @@ function test($func) {
 
 
 <<__EntryPoint>>
-function main_reflection() {
+function main_reflection() :mixed{
 test('f');
 test('g');
 

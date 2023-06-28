@@ -1,22 +1,22 @@
 <?hh
 
 interface I {
-  function foo($x, $y=0);
+  function foo($x, $y=0):mixed;
 }
 interface J {
-  function foo($x, $y);
+  function foo($x, $y):mixed;
 }
 interface K {
-  function foo($x, $y=0, varray $z);
+  function foo($x, $y=0, varray $z):mixed;
 }
 interface L {
-  function foo($x, $y, ?varray $z=null);
+  function foo($x, $y, ?varray $z=null):mixed;
 }
 interface M {
-  function foo($x, $y=0, varray $z=varray[]);
+  function foo($x, $y=0, varray $z=varray[]):mixed;
 }
 class C implements I, J, K, L, M {
-  public function foo($x, $y=0, ?varray $z=null, ?AnyArray $a=null) {
+  public function foo($x, $y=0, ?varray $z=null, ?AnyArray $a=null) :mixed{
     $x = HH\is_any_array($x) ? 'Array' : $x;
     $y = HH\is_any_array($y) ? 'Array' : $y;
     $z = HH\is_any_array($z) ? 'Array' : $z;

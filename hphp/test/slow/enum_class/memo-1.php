@@ -1,22 +1,22 @@
 <?hh
 
 <<__Memoize(#KeyedByIC)>>
-function memo1() {
+function memo1() :mixed{
   return $x;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memo2() {
+function memo2() :mixed{
   return $x;
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function memo3() {
+function memo3() :mixed{
   return $x;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = HH\MemoizeOption#KeyedByIC;
   var_dump($x);
   var_dump(\__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $x));

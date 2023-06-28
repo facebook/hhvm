@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_htmlentities_specialchars() {
+function main_htmlentities_specialchars() :mixed{
 $s = chr(0xAE); // this is an ISO-8859-1 circle R
 var_dump(htmlentities( $s, ENT_QUOTES | ENT_IGNORE, 'ISO-8859-1'));
 var_dump(htmlentities( $s, ENT_QUOTES | ENT_IGNORE)); // UTF-8

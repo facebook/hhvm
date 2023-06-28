@@ -13,7 +13,7 @@
 class classA
 {
   public $var;
-  public function init() {
+  public function init() :mixed{
     $this->var = 10;
   }
 }

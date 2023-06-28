@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = __hhvm_intrinsics\launder_value(123);
   $b = __hhvm_intrinsics\launder_value(456);
   $c = __hhvm_intrinsics\launder_value(789);

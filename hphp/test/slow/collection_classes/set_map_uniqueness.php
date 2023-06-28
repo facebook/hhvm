@@ -2,7 +2,7 @@
 
 // Check that Set::map() removes duplicates from the resulting set.
 
-function main() {
+function main() :mixed{
   $s1 = Set {1, 2, 3};
   $s2 = $s1->map(function ($v) { return 42; });
 
@@ -14,6 +14,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_set_map_uniqueness() {
+function main_set_map_uniqueness() :mixed{
 main();
 }

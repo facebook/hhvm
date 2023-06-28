@@ -20,6 +20,6 @@ async function exn2_async(): Awaitable<int> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo __FILE__." loaded\n";
 }

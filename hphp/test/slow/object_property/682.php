@@ -4,7 +4,7 @@ class c {
   public $d = 'd';
   private $e = 'e';
   protected $f = 'f';
-  function t1($y) {
+  function t1($y) :mixed{
     foreach ($y as $k => $v) {
       var_dump($v);
     }
@@ -14,7 +14,7 @@ class d extends c {
   public $a = 'a';
   private $b = 'b';
   protected $c = 'c';
-  function t2($y) {
+  function t2($y) :mixed{
     foreach ($this as $k => $v) {
       var_dump($v);
     }
@@ -28,7 +28,7 @@ class d extends c {
 }
 
 <<__EntryPoint>>
-function main_682() {
+function main_682() :mixed{
 $x = new d;
 $x->surprise = 1;
 $y = new d;

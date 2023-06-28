@@ -1,6 +1,6 @@
 <?hh
 
-function neg_zero() {
+function neg_zero() :mixed{
   $zero = -1.0;
   while ($zero != 0.0) {
     $zero /= 2.0;
@@ -8,7 +8,7 @@ function neg_zero() {
   return $zero;
 }
 
-function main($f) {
+function main($f) :mixed{
   var_dump(sqrt(0.0));
   var_dump(sqrt(neg_zero()));
   var_dump(sqrt(5.0));

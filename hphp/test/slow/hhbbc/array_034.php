@@ -1,9 +1,9 @@
 <?hh
 
-function a() { return 4; }
-function junk() { return darray['z' => a()]; }
+function a() :mixed{ return 4; }
+function junk() :mixed{ return darray['z' => a()]; }
 <<__EntryPoint>>
-function bar() {
+function bar() :mixed{
   $y = null;
   $x = darray['z' => junk()];
   unset($x['z']['z']);

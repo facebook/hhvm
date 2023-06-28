@@ -2,7 +2,7 @@
 trait T { public $z; }
 class A { use T; }
 class B { use T; }
-function main() {
+function main() :mixed{
   foreach (varray[varray[1,1], varray[1,2], varray[2,1]] as list($x, $y)) {
     $a = new A;
     $a->z = $x;
@@ -25,6 +25,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_object_compare_bug() {
+function main_object_compare_bug() :mixed{
 main();
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = varray[];
   $b = varray[];
   $res = xml_parse_into_struct(
@@ -13,6 +13,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_depth_limit() {
+function main_depth_limit() :mixed{
 main();
 }

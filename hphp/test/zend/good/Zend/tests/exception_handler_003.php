@@ -2,11 +2,11 @@
 
 class test {
 
-    function foo () {
+    function foo () :mixed{
         set_exception_handler(varray[$this, "bar"]);
     }
 
-    <<__DynamicallyCallable>> function bar($e) {
+    <<__DynamicallyCallable>> function bar($e) :mixed{
         var_dump(get_class($e)." thrown!");
     }
 }

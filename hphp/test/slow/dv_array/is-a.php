@@ -1,9 +1,9 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function boolstr($b) { return $b ? "TRUE" : "FALSE"; }
+function boolstr($b) :mixed{ return $b ? "TRUE" : "FALSE"; }
 
-function direct_test_dv_arrays($v) {
+function direct_test_dv_arrays($v) :mixed{
   echo "============= direct_test_dv_arrays ================\n";
   echo "value => ";
   var_dump($v);
@@ -13,7 +13,7 @@ function direct_test_dv_arrays($v) {
   echo "gettype => " . gettype($v2) . "\n";
 }
 
-function indirect_test_dv_arrays($v, $tests) {
+function indirect_test_dv_arrays($v, $tests) :mixed{
   echo "============= indirect_test_dv_arrays ==============\n";
   echo "value => ";
   var_dump($v);
@@ -26,7 +26,7 @@ function indirect_test_dv_arrays($v, $tests) {
   }
 }
 
-function direct_test_others($v) {
+function direct_test_others($v) :mixed{
   echo "============= direct_test_others ===================\n";
   echo "value => ";
   var_dump($v);
@@ -45,7 +45,7 @@ function direct_test_others($v) {
   echo "is_scalar => " . boolstr(is_scalar($v2)) . "\n";
 }
 
-function indirect_test_others($v, $tests) {
+function indirect_test_others($v, $tests) :mixed{
   echo "============= indirect_test_others =================\n";
   echo "value => ";
   var_dump($v);
@@ -56,7 +56,7 @@ function indirect_test_others($v, $tests) {
   }
 }
 
-function test1() {
+function test1() :mixed{
   $values = vec[
     null,
     false,
@@ -109,7 +109,7 @@ function test1() {
   foreach ($values as $v) { indirect_test_dv_arrays($v, $tests); }
 }
 
-function test2() {
+function test2() :mixed{
   $values = vec[
     varray[],
     varray[1, 2, 3],
@@ -157,7 +157,7 @@ function test2() {
   foreach ($values as $v) { indirect_test_others($v, $tests); }
 }
 
-function test3() {
+function test3() :mixed{
   echo "============= constant-folding ===================\n";
   var_dump(is_varray(123));
   var_dump(is_darray(123));
@@ -199,7 +199,7 @@ function test3() {
 
 
 <<__EntryPoint>>
-function main_is_a() {
+function main_is_a() :mixed{
 test1();
 test2();
 test3();

@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
-function f_exists($file) {
+function f_exists($file) :mixed{
    if (file_exists($file) == true) {
       echo "$file exists\n";
    }

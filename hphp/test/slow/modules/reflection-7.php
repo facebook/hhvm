@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'reflection-7.inc';
 
   $m = new ReflectionModule('a');

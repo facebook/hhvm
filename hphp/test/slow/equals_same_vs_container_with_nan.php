@@ -1,6 +1,6 @@
 <?hh
 
-function compare($type, $c, $d) {
+function compare($type, $c, $d) :mixed{
   echo "--- $type ----\n";
   var_dump($c === $c);
   var_dump($c == $c);
@@ -8,7 +8,7 @@ function compare($type, $c, $d) {
   var_dump($c == $d);
 }
 
-function test_veclike($name, $c, $d) {
+function test_veclike($name, $c, $d) :mixed{
   // we take partly filled containers as an arguments and mutate them before
   // passing them to compare, so that interning and hhbbc can't make them be
   // backed by the same underlying storage; if that happened the assumptions
@@ -18,7 +18,7 @@ function test_veclike($name, $c, $d) {
   compare($name, $c, $d);
 }
 
-function test_dictlike($name, $c, $d) {
+function test_dictlike($name, $c, $d) :mixed{
   // we take partly filled containers as an arguments and mutate them before
   // passing them to compare, so that interning and hhbbc can't make them be
   // backed by the same underlying storage; if that happened the assumptions
@@ -28,7 +28,7 @@ function test_dictlike($name, $c, $d) {
   compare($name, $c, $d);
 }
 
-function test() {
+function test() :mixed{
   test_veclike('Packed Array', varray[1], varray[1]);
   test_dictlike('Mixed Array', darray['a' => 1], darray['a' => 1]);
 
@@ -41,6 +41,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_equals_same_vs_container_with_nan() {
+function main_equals_same_vs_container_with_nan() :mixed{
 test();
 }

@@ -6,12 +6,12 @@
 
 /* VS prints out comparisons and source locations in case of failure */
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "FAILED: $y\n"; var_dump(debug_backtrace()); }
 }
 
-function n_dump($x) {
+function n_dump($x) :mixed{
   $d = debug_backtrace();
   $n = $d[0]['line'];
   echo("n_dump from line $n:\n");
@@ -25,7 +25,7 @@ class CounterArray
   private $container = varray[];
   public $counter = 0;
 
-  public function incrementCounter () {
+  public function incrementCounter () :mixed{
     $this->counter++;
     return $this->counter;
   }

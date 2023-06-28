@@ -1,13 +1,13 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; }
 }
 
 
 <<__EntryPoint>>
-function main_mktime() {
+function main_mktime() :mixed{
 $lastday = mktime(0, 0, 0, 3, 0, 2000);
 var_dump(strftime("Last day in Feb 2000 is: %d", $lastday));
 

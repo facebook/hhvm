@@ -1,6 +1,6 @@
 <?hh
 
-function f<reify T>(mixed $x) {
+function f<reify T>(mixed $x) :mixed{
  var_dump($x is T);
 }
 <<__EntryPoint>> function main(): void {

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dateformat_accepts_datetime_objects() {
+function main_dateformat_accepts_datetime_objects() :mixed{
 $formatter = new IntlDateFormatter('en', IntlDateFormatter::FULL,
                                    IntlDateFormatter::FULL);
 $now = new DateTime();

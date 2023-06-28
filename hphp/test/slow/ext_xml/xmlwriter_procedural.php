@@ -1,17 +1,17 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "got: $x\n"; }
 }
 
-function VERIFY($x) {
+function VERIFY($x) :mixed{
   VS($x, true);
 }
 
 
 <<__EntryPoint>>
-function main_xmlwriter_procedural() {
+function main_xmlwriter_procedural() :mixed{
 $xml = xmlwriter_open_memory();
 var_dump($xml);
 VERIFY(xmlwriter_set_indent($xml, true));

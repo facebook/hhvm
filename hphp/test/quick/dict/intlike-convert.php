@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function convert($d) {
+function convert($d) :mixed{
   var_dump(darray($d));
 }
 

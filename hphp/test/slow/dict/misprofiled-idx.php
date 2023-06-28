@@ -1,16 +1,16 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-function test($dict) {
+function test($dict) :mixed{
   return idx($dict, rand() % 2);
 }
 
-function rand_dict() {
+function rand_dict() :mixed{
   return dict[0 => rand(), 1 => rand()];
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 100; ++$i) {
     test(rand_dict());
   }

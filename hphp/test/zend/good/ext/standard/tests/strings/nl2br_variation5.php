@@ -11,7 +11,7 @@
 
 //defining class
 class Sample {
-  public function __toString() {
+  public function __toString() :mixed{
     return "My String";
   }
 }

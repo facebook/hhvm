@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_lookup_namespace_uri() {
+function main_lookup_namespace_uri() :mixed{
 $xml =
  '<?xml version="1.0" encoding="UTF-8"?>
   <rootElement xmlns="http://www.website.org/somens">

@@ -1,11 +1,11 @@
 <?hh
 
-function add($a, $b) {
+function add($a, $b) :mixed{
  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
  }
 
 <<__EntryPoint>>
-function main_headers_sent_no_warn() {
+function main_headers_sent_no_warn() :mixed{
 var_dump(headers_sent()); // false
 var_dump(headers_sent()); //true
 $server = new SoapServer(NULL, darray['uri' => 'http://test-uri']);

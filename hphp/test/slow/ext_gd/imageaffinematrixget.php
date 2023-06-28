@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_imageaffinematrixget() {
+function main_imageaffinematrixget() :mixed{
 var_dump(imageaffinematrixget(IMG_AFFINE_TRANSLATE,
                               darray["x" => "a", "y" => 0]));
 var_dump(imageaffinematrixget(IMG_AFFINE_TRANSLATE,

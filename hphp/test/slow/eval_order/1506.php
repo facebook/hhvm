@@ -1,8 +1,8 @@
 <?hh
 <<__DynamicallyCallable>>
-function x($a, $b, $c, $d) {
+function x($a, $b, $c, $d) :mixed{
 }
-function p($x) {
+function p($x) :mixed{
   echo $x.
     "
 ";
@@ -11,24 +11,24 @@ function p($x) {
 class c {
   function __construct($a, $b, $c, $d) {
   }
-  function f($a, $b, $c, $d) {
+  function f($a, $b, $c, $d) :mixed{
   }
   <<__DynamicallyCallable>>
-  static function g($a, $b, $c, $d) {
+  static function g($a, $b, $c, $d) :mixed{
   }
 }
-function rt(inout $a, $v) {
+function rt(inout $a, $v) :mixed{
   $a = $v;
 }
-function id($x) {
+function id($x) :mixed{
   return $x;
 }
-function dump($a, $b) {
+function dump($a, $b) :mixed{
   var_dump($a, $b);
 }
 
 <<__EntryPoint>>
-function main_1506() {
+function main_1506() :mixed{
   echo "sfc
 ";
   x(p(1), p(2), p(3), 4);

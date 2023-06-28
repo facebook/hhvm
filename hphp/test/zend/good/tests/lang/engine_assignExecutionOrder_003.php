@@ -1,26 +1,26 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   echo "Bad call\n";
 }
 
-function baa() {
+function baa() :mixed{
   echo "Good call\n";
 }
 
-function live() {
+function live() :mixed{
   echo "Good call\n";
 }
 
-function dead() {
+function dead() :mixed{
   echo "Bad call\n";
 }
 
-function foo1() {
+function foo1() :mixed{
   return ++LangEngineAssignexecutionorder003::$a;
 }
 
-function mod($b) {
+function mod($b) :mixed{
   LangEngineAssignexecutionorder003::$x = $b;
   return 0;
 }

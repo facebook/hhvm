@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-  <<__DynamicallyCallable>> static public function a() {
+  <<__DynamicallyCallable>> static public function a() :mixed{
     print "ok\n";
   }
 }

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_gc_enabled() {
+function main_gc_enabled() :mixed{
 var_dump(gc_enabled());
 gc_disable();
 var_dump(gc_enabled());

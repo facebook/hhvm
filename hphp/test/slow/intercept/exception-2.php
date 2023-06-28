@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo($a, $b) {
+function foo($a, $b) :mixed{
   try {
     throw new Exception('wtf');
   } catch (Exception $e) {
@@ -9,7 +9,7 @@ function foo($a, $b) {
   }
 }
 
-async function bar($a, $b) {
+async function bar($a, $b) :Awaitable<mixed>{
   try {
     throw new Exception('wtf');
   } catch (Exception $e) {
@@ -17,7 +17,7 @@ async function bar($a, $b) {
   }
 }
 
-function handler($name, $obj_or_cls, inout $args) {
+function handler($name, $obj_or_cls, inout $args) :mixed{
   throw new Exception('yep');
 }
 

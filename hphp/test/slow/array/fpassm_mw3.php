@@ -1,9 +1,9 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function byval($a) {}
+function byval($a) :mixed{}
 
-function not_even_main() {
+function not_even_main() :mixed{
   byval($a[][0]);
 }
 

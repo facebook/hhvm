@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout dict<int, int> $arr) {
+function foo(inout dict<int, int> $arr) :mixed{
   foreach ($arr as $val) {
     if ($arr[$val]) {
       $arr = varray[];
@@ -10,7 +10,7 @@ function foo(inout dict<int, int> $arr) {
   return false;
 }
 
-function main() {
+function main() :mixed{
   $d = dict[0=>0];
   foo(inout $d);
   $d = dict[1=>1];
@@ -20,7 +20,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_inout_loop_1() {
+function main_inout_loop_1() :mixed{
 set_error_handler(() ==> { throw new Exception; });
 
 try {

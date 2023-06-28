@@ -6,6 +6,6 @@ namespace SealedClass13;
 interface MyInterface { const FOO = 42; }
 
 <<__EntryPoint>>
-function main_sealed_classes13() {
+function main_sealed_classes13() :mixed{
   var_dump(SomeInterface2::FOO);
 }

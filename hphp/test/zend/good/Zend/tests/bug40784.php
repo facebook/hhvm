@@ -12,7 +12,7 @@ class B extends A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $b = new B;
   echo "Done\n";
 }

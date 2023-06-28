@@ -1,6 +1,6 @@
 <?hh
 class someClass1 {
-  protected static function someMethod() {
+  protected static function someMethod() :mixed{
     //do things
   }
 }

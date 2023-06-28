@@ -1,31 +1,31 @@
 <?hh
 
 class A {
-  function t($a, $arr) {
+  function t($a, $arr) :mixed{
   }
 }
 class B extends A {
-  function t($a, $arr) {
+  function t($a, $arr) :mixed{
     var_dump($a);
     $arr['hello'] = $a;
     var_dump($a);
   }
 }
-function f() {
+function f() :mixed{
   return new B();
 }
-function test() {
+function test() :mixed{
   $v = 100;
   $arr = darray['hello' => $v];
   $a = new B();
   $a->t($arr['hello'], $arr);
 }
-function test2(inout $a, $b) {
+function test2(inout $a, $b) :mixed{
   $a = $b;
 }
 
 <<__EntryPoint>>
-function main_1090() {
+function main_1090() :mixed{
   test();
   $v = 10;
   test2(inout $v, $v);

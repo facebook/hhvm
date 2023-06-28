@@ -7,7 +7,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   A::$a += 1;
   var_dump(A::$a);
 

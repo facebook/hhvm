@@ -2,7 +2,7 @@
 
 class A {}
 
-function serde($val) {
+function serde($val) :mixed{
   print "* serialize result:\n";
   $ser = serialize($val);
   var_dump($ser);
@@ -12,7 +12,7 @@ function serde($val) {
   var_dump($unser);
 }
 
-function fb_serde($val) {
+function fb_serde($val) :mixed{
   print "* fb_serialize result:\n";
   $ser = fb_serialize($val);
   var_dump($ser);
@@ -23,7 +23,7 @@ function fb_serde($val) {
   var_dump($ret, $unser);
 }
 
-function json_serde($val) {
+function json_serde($val) :mixed{
   print "* json_encode result:\n";
   $encode = json_encode($val);
   var_dump($encode);
@@ -34,7 +34,7 @@ function json_serde($val) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $cls = __hhvm_intrinsics\create_class_pointer('A');
 
   print_r($cls);

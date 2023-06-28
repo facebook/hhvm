@@ -28,10 +28,10 @@ class D6 extends D1 {
  if ($a) f();
  }
  }
-function f() {
+function f() :mixed{
  throw new Exception('throw');
  }
-function foo($a,$b) {
+function foo($a,$b) :mixed{
   try {
     $x = new D6($b?f():$a);
   }
@@ -39,7 +39,7 @@ function foo($a,$b) {
     var_dump('caught');
   }
 }
-function bar($x, $a, $b) {
+function bar($x, $a, $b) :mixed{
   try {
     $x = new $x($b?f():$a);
   }
@@ -47,10 +47,10 @@ function bar($x, $a, $b) {
     var_dump('caught');
   }
 }
-function n($x, ...$args) {
+function n($x, ...$args) :mixed{
  return new $x(...$args);
  }
-function baz($d) {
+function baz($d) :mixed{
   $x = new D1;
   $x = new D2;
   $x = new D3;
@@ -68,7 +68,7 @@ function baz($d) {
 
 
 <<__EntryPoint>>
-function main_1570() {
+function main_1570() :mixed{
 ;
 foo(false,false);
 foo(false,true);

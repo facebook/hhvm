@@ -3,7 +3,7 @@
 class Ref { public function __construct(public $v)[] {} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m = Map{1 => 'c', 2 => 'b', 3 => 'a'};
   $calls = new Ref(0);
   try {

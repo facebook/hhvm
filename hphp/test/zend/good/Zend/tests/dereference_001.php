@@ -1,31 +1,31 @@
 <?hh
 
-function a() {
+function a() :mixed{
     return varray[1,varray[5]];
 }
 
-function b() {
+function b() :mixed{
     return varray[];
 }
 
 class foo {
     public $y = 1;
 
-    public function test() {
+    public function test() :mixed{
         return varray[varray[varray['foobar']]];
     }
 }
 
-function c() {
+function c() :mixed{
     return varray[new foo];
 }
 
-function d() {
+function d() :mixed{
     $obj = new foo;
     return $obj->test();
 }
 
-function e() {
+function e() :mixed{
     $y = 'bar';
     $x = darray['a' => 'foo', 'b' => $y];
     return $x;

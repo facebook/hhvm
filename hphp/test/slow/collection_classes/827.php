@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $mp1 = Map { 'a' => 1, 2 => 'b', 'c' => varray[]};
   $mp2 = Map {};
   $mp3 = Map {} ;
@@ -15,6 +15,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_827() {
+function main_827() :mixed{
 f();
 }

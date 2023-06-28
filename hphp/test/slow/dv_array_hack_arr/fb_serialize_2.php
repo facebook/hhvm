@@ -1,6 +1,6 @@
 <?hh
 
-function test($label, $value) {
+function test($label, $value) :mixed{
   print("\n===============================================================\n");
   print("$label:\n");
 
@@ -23,7 +23,7 @@ function test($label, $value) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $examples = vec[
     vec['Empty varray', varray[]],
     vec['Empty darray', darray[]],

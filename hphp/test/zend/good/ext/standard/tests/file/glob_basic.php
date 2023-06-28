@@ -3,7 +3,7 @@
    Description: Find pathnames matching a pattern
 */
 
-function sort_var_dump($results) {
+function sort_var_dump($results) :mixed{
    sort(inout $results);
    var_dump($results);
 }

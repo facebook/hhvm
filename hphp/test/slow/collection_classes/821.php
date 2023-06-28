@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $s1 = Map {'a' => 1, 'b' => 2};
   $s2 = Map {'b' => 2, 'a' => 1};
   var_dump($s1 == $s2);
@@ -38,6 +38,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_821() {
+function main_821() :mixed{
 main();
 }

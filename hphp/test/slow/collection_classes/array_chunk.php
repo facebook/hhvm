@@ -1,6 +1,6 @@
 <?hh
 
-function test_chunk($input, $chunk_size) {
+function test_chunk($input, $chunk_size) :mixed{
   echo '====================', "\n";
   var_dump($input);
   $chunked_without_keys = array_chunk($input, $chunk_size);
@@ -12,7 +12,7 @@ function test_chunk($input, $chunk_size) {
            === array_chunk(darray($input), $chunk_size, true));
 }
 
-function main() {
+function main() :mixed{
   test_chunk(Vector {"a", "b", "c", "d", "e"}, 2);
   test_chunk(Set {"a", "b", "c", "d", "e"}, 2);
   test_chunk(Map {1 => "a", 2 => "b", 3 => "c", 4 => "d", 5 => "e"}, 2);
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_chunk() {
+function main_array_chunk() :mixed{
 main();
 }

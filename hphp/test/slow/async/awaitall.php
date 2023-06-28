@@ -1,11 +1,11 @@
 <?hh
 
-async function answer() {
+async function answer() :Awaitable<mixed>{
   await reschedule();
   return 42;
 }
 
-function reschedule() {
+function reschedule() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
@@ -26,7 +26,7 @@ function t(Awaitable $wh, $a): void {
 }
 
 
-function get_handles() {
+function get_handles() :mixed{
   $vecs = Vector {};
   $dicts = Vector {};
 
@@ -61,7 +61,7 @@ function get_handles() {
   return tuple($vecs, $dicts);
 }
 
-function get_wrapped_handles() {
+function get_wrapped_handles() :mixed{
   list($vecs, $dicts) = get_handles();
   return tuple(
     $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
@@ -70,7 +70,7 @@ function get_wrapped_handles() {
 }
 
 <<__EntryPoint>>
-function main_awaitall() {
+function main_awaitall() :mixed{
   echo "children only\n";
   list($vecs, $dicts) = get_handles();
 

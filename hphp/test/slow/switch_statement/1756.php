@@ -1,6 +1,6 @@
 <?hh
 
-function f($x) {
+function f($x) :mixed{
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "foo", "foo", null, dict[
   "3" => 3,
 ], dict[
@@ -20,7 +20,7 @@ function f($x) {
   }
   print "\n";
 }
-function g($x) {
+function g($x) :mixed{
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, 'x', 'x', '0', dict[
   '0' => 0,
 ], dict[
@@ -33,7 +33,7 @@ function g($x) {
 }
 
 <<__EntryPoint>>
-function main_1756() {
+function main_1756() :mixed{
 f("foo");
 f("3");
 f("bar");

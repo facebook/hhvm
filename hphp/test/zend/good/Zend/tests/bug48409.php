@@ -5,7 +5,7 @@ class ABCException extends Exception {}
 class BBB
 {
     public function xyz($d, $x)
-    {
+:mixed    {
         if ($x == 34) {
             throw new ABCException;
         }
@@ -16,7 +16,7 @@ class BBB
 class CCC
 {
     public function process($p)
-    {
+:mixed    {
         return $p;
     }
 }
@@ -24,7 +24,7 @@ class CCC
 class AAA
 {
     public function func()
-    {
+:mixed    {
         $b = new BBB;
         $c = new CCC;
         $i = 34;
@@ -41,7 +41,7 @@ class AAA
 class Runner
 {
     public function run($x)
-    {
+:mixed    {
         try {
             $x->func();
         }

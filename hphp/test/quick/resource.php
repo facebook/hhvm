@@ -2,7 +2,7 @@
 
 class Foo{}
 
-function f(resource $r) {
+function f(resource $r) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $r = HH\stdin();

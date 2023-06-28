@@ -1,7 +1,7 @@
 <?hh
 
 class :foo {
-  public function bar() { return 'baz'; }
+  public function bar() :mixed{ return 'baz'; }
 }
 <<__EntryPoint>> function main(): void {
 var_dump((<foo />)->bar());

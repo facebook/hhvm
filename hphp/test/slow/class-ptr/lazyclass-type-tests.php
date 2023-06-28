@@ -2,7 +2,7 @@
 
 class Bar {}
 
-function bar() {
+function bar() :mixed{
   // Tests HHBBC type system
   var_dump(is_string(Bar::class));
   var_dump(Bar::class is string);
@@ -10,7 +10,7 @@ function bar() {
   var_dump(HH\is_class(Bar::class));
 }
 
-function foo($c) {
+function foo($c) :mixed{
   var_dump(is_string($c));
   $a = $c is string;
   var_dump($a);
@@ -20,7 +20,7 @@ function foo($c) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo(Bar::class);
   foo(__hhvm_intrinsics\launder_value(Bar::class));
   bar();

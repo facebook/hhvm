@@ -3,6 +3,6 @@
 class C<reify T> {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
    new C();
 }

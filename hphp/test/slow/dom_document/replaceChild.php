@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_replace_child() {
+function main_replace_child() :mixed{
 $n = 32;
 while ( $n-- ) {
   $doc = new DOMDocument();

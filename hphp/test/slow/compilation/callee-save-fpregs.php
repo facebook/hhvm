@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function __toString() {
+  function __toString() :mixed{
 
     $a0 = (float)CompilationCalleeSaveFpregs::$g[0];
     $a1 = (float)CompilationCalleeSaveFpregs::$g[1];
@@ -24,7 +24,7 @@ class X {
   }
 }
 
-function test($a, $x) {
+function test($a, $x) :mixed{
   return HH\Lib\Legacy_FIXME\eq($a, $x);
 }
 

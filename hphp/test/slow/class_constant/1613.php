@@ -8,6 +8,6 @@ class B extends A {
  }
 
 <<__EntryPoint>>
-function main_1613() {
+function main_1613() :mixed{
 var_dump(get_class_constants('B'));
 }

@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function run_test($file) {
+function run_test($file) :mixed{
     $data = "Here is some data";
     $extra = ", more data";
     var_dump(file_put_contents($file, $data));

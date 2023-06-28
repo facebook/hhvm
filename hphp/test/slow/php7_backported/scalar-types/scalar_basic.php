@@ -1,7 +1,7 @@
 <?hh
 
 class Stringable {
-    public function __toString()[] {
+    public function __toString()[] :mixed{
         return "foobar";
     }
 }

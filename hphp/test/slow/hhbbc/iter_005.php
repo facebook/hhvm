@@ -1,7 +1,7 @@
 <?hh
 
-function asd() { return varray[]; }
-function foo() {
+function asd() :mixed{ return varray[]; }
+function foo() :mixed{
   $x = asd();
   foreach ($x as $v) {
     echo "unreachable code: $v\n";
@@ -10,6 +10,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_iter_005() {
+function main_iter_005() :mixed{
 foo();
 }

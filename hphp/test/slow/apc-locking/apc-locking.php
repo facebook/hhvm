@@ -1,6 +1,6 @@
 <?hh
 
-function thread_main() {
+function thread_main() :mixed{
   echo "In thread_main\n";
   $res = false;
   var_dump(apc_cas  ('whoops', 1, 2));
@@ -10,7 +10,7 @@ function thread_main() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   if (HH\execution_context() === "xbox") return;
   echo "In main\n";
 

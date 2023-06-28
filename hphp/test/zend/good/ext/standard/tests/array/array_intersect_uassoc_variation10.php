@@ -7,11 +7,11 @@
 // define some class with method
 class MyClass
 {
-    <<__DynamicallyCallable>> static function static_compare_func($a, $b) {
+    <<__DynamicallyCallable>> static function static_compare_func($a, $b) :mixed{
         return strcasecmp((string)$a, (string)$b);
     }
 
-    <<__DynamicallyCallable>> public function class_compare_func($a, $b) {
+    <<__DynamicallyCallable>> public function class_compare_func($a, $b) :mixed{
         return strcasecmp((string)$a, (string)$b);
     }
 }

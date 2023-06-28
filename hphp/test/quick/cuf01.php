@@ -2,12 +2,12 @@
 
 class C {
   <<__DynamicallyCallable>>
-  public function foo($x, $y) {
+  public function foo($x, $y) :mixed{
     var_dump(isset($this));
     return $x + $y;
   }
   <<__DynamicallyCallable>>
-  public static function bar($x, $y) {
+  public static function bar($x, $y) :mixed{
     return $x + $y;
   }
 }

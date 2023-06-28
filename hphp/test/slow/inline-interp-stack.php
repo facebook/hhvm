@@ -1,32 +1,32 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-function junk() {
+function junk() :mixed{
   junk2();
 }
 
 <<__ALWAYS_INLINE>>
-function red() {
+function red() :mixed{
   junk();
   trigger_error('test_error');
 }
 
 <<__ALWAYS_INLINE>>
-function green() {
+function green() :mixed{
   junk();
   trigger_error('test_error');
   red();
 }
 
 <<__ALWAYS_INLINE>>
-function blue() {
+function blue() :mixed{
   junk();
   trigger_error('test_error');
   green();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(($errno, $errstr, $errfile, $errline, $errctx) ==> {
     if ($errno !== E_USER_NOTICE || strpos($errstr, 'test_error') === false) return;
     $bfile = basename($errfile);
@@ -45,11 +45,11 @@ function main() {
 }
 
 <<__ALWAYS_INLINE>>
-function junk2() {
+function junk2() :mixed{
   junk3();
 }
 
 <<__ALWAYS_INLINE>>
-function junk3() {
+function junk3() :mixed{
   hphp_array_idx(varray[0], '0', 0);
 }

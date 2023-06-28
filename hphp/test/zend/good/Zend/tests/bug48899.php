@@ -3,10 +3,10 @@
 class ParentClass { }
 
 class ChildClass extends ParentClass {
-    public function testIsCallable() {
+    public function testIsCallable() :mixed{
         var_dump(is_callable(varray[$this, 'parent::testIsCallable']));
     }
-    public function testIsCallable2() {
+    public function testIsCallable2() :mixed{
         var_dump(is_callable(varray[$this, 'static::testIsCallable2']));
     }
 }

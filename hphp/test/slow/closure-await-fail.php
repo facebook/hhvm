@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x) {
+function foo($x) :mixed{
   return () ==> await $x;
 }
 

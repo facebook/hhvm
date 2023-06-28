@@ -1,12 +1,12 @@
 <?hh
 
 trait foo {
-    public function a() {
+    public function a() :mixed{
     }
 }
 
 interface baz {
-    public function abc();
+    public function abc():mixed;
 }
 
 class bar implements baz {

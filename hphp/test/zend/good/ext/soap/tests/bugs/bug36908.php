@@ -1,6 +1,6 @@
 <?hh
 class PublisherService {
-  function add($publisher) {
+  function add($publisher) :mixed{
     return $publisher->region_id;
   }
 }

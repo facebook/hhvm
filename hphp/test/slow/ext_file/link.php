@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_link() {
+function main_link() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 $tempfile2 = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 

@@ -2,22 +2,22 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls {
-  function func() { echo "func called\n"; }
-  static function intercept1($_1, $_2, inout $_3) {
+  function func() :mixed{ echo "func called\n"; }
+  static function intercept1($_1, $_2, inout $_3) :mixed{
     return shape('value' => null);
   }
-  static function intercept2($_1, $_2, inout $_3) {
+  static function intercept2($_1, $_2, inout $_3) :mixed{
     var_dump(debug_backtrace());
     return shape('value' => null);
   }
-  static function intercept3($_1, $_2, inout $_3) {
+  static function intercept3($_1, $_2, inout $_3) :mixed{
     throw new Exception("intercept3");
   }
 }
 
-function getCls() { return new Cls; }
+function getCls() :mixed{ return new Cls; }
 
-function test($s) {
+function test($s) :mixed{
   fb_intercept2('Cls::func', "Cls::$s");
   try {
     getCls()->func();

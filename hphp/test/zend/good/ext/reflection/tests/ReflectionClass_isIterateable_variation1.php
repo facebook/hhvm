@@ -3,7 +3,7 @@
 class BasicClass {}
 
 function dump_iterateable($obj)
-{
+:mixed{
     $reflection = new ReflectionClass($obj);
     var_dump($reflection->isIterateable());
 }

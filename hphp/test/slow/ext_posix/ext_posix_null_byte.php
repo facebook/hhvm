@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_posix_null_byte() {
+function main_ext_posix_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 var_dump(posix_access($file));

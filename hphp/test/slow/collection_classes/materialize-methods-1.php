@@ -1,9 +1,9 @@
 <?hh
-function dump($x) {
+function dump($x) :mixed{
   var_dump(get_class($x));
   var_dump(darray($x));
 }
-function dump_unordered($x) {
+function dump_unordered($x) :mixed{
   var_dump(get_class($x));
   $arr = darray($x);
   ksort(inout $arr, SORT_STRING);
@@ -11,7 +11,7 @@ function dump_unordered($x) {
   sort(inout $arr, SORT_STRING);
   var_dump($arr);
 }
-function main() {
+function main() :mixed{
   $x = Vector {
     Vector {'a', 2},
     Map {'A' => 'a', 1 => 2},
@@ -36,6 +36,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_materialize_methods_1() {
+function main_materialize_methods_1() :mixed{
 main();
 }

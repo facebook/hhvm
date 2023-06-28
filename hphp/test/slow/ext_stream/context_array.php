@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_context_array() {
+function main_context_array() :mixed{
 $opts = darray[
   'http' => darray[
     'header' => varray[

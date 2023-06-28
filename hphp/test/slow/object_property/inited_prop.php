@@ -4,14 +4,14 @@
 class Thing {
   private static $thingsArray;
 
-  public static function doStuff($k, $v) {
+  public static function doStuff($k, $v) :mixed{
     self::ensureInit();
     var_dump(self::$thingsArray);
     self::$thingsArray[$k] = $v;
     var_dump(self::$thingsArray);
   }
 
-  private static function ensureInit() {
+  private static function ensureInit() :mixed{
     if (self::$thingsArray !== null) {
       return;
     }
@@ -20,12 +20,12 @@ class Thing {
   }
 }
 
-function main() {
+function main() :mixed{
   Thing::doStuff(11, 22);
 }
 
 
 <<__EntryPoint>>
-function main_inited_prop() {
+function main_inited_prop() :mixed{
 main();
 }

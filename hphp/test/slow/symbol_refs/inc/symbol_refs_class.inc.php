@@ -3,5 +3,5 @@
 
 class SomeClass {
   function __construct()[] {}
-  public function foo() { return __hhvm_intrinsics\launder_value(true); }
+  public function foo() :mixed{ return __hhvm_intrinsics\launder_value(true); }
 }

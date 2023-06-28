@@ -1,12 +1,12 @@
 <?hh
 
-function test_is_nan($v) {
+function test_is_nan($v) :mixed{
   try { var_dump(is_nan($v)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 
 <<__EntryPoint>>
-function main_bad_coercion() {
+function main_bad_coercion() :mixed{
 $values = varray[
   0,
   '0',

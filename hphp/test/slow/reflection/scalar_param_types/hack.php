@@ -1,12 +1,12 @@
 <?hh
 
-function foo(int $bar, AnyArray $baz) {
+function foo(int $bar, AnyArray $baz) :mixed{
 }
-function herp(\HH\int $derp) {
+function herp(\HH\int $derp) :mixed{
 }
 
 <<__EntryPoint>>
-function main_hack() {
+function main_hack() :mixed{
 ;
 
 $rp = new ReflectionParameter('foo', 'bar');

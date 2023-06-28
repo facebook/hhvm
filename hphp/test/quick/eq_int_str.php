@@ -1,6 +1,6 @@
 <?hh
 
-function ci($x) {
+function ci($x) :mixed{
   print "----------\nx == 0\n";
   var_dump($x);
   var_dump(HH\Lib\Legacy_FIXME\eq($x, 0));
@@ -22,7 +22,7 @@ function ci($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq($x, 90000000000));
 }
 
-function cs($x) {
+function cs($x) :mixed{
   print "----------\nx == ''\n";
   var_dump($x);
   var_dump(HH\Lib\Legacy_FIXME\eq($x, ""));
@@ -64,7 +64,7 @@ function cs($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq($x, "9e10"));
 }
 
-function is($x, $y) {
+function is($x, $y) :mixed{
   print("----------\nx == y\n");
   var_dump($x);
   var_dump($y);

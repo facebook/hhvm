@@ -12,7 +12,7 @@ function is_tuple(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_tuple() {
+function main_is_expression_ta_tuple() :mixed{
 is_tuple(null);
 is_tuple(new stdClass());
 is_tuple(darray[

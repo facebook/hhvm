@@ -2,7 +2,7 @@
 
 use namespace HH\Lib\_Private\{_Locale, _Str};
 
-function do_test(_Locale\Locale $loc, vec<(string, ?string)> $inputs) {
+function do_test(_Locale\Locale $loc, vec<(string, ?string)> $inputs) :mixed{
   foreach ($inputs as list($str, $what)) {
     var_dump(dict[
       'input' => $str,

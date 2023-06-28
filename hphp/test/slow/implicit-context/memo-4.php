@@ -1,7 +1,7 @@
 <?hh
 
 <<__Memoize(#KeyedByIC)>>
-function memo<reify T>()[zoned] {
+function memo<reify T>()[zoned] :mixed{
   $hash = quoted_printable_encode(
     HH\ImplicitContext\_Private\get_implicit_context_memo_key()
   );
@@ -9,14 +9,14 @@ function memo<reify T>()[zoned] {
   echo "hash: $hash, kind: $kind\n";
 }
 
-function g()[zoned] {
+function g()[zoned] :mixed{
   memo<int>();
   memo<int>();
   memo<string>();
   memo<string>();
 }
 
-function f()[zoned] {
+function f()[zoned] :mixed{
   memo<int>();
   memo<int>();
   memo<string>();
@@ -29,7 +29,7 @@ function f()[zoned] {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   ClassContext::start(new A, f<>);
 }

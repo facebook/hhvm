@@ -1,6 +1,6 @@
 <?hh
 
-function xsort(inout $a) {
+function xsort(inout $a) :mixed{
   $b = darray[];
   $b[0] = $a;
   uksort(inout $a, function ($i, $j) use($b) {
@@ -9,13 +9,13 @@ function xsort(inout $a) {
     }
 );
 }
-function test($x) {
+function test($x) :mixed{
   $a = varray[220,250,240,$x];
   xsort(inout $a);
   var_dump($a);
 }
 
 <<__EntryPoint>>
-function main_1773() {
+function main_1773() :mixed{
 test(230);
 }

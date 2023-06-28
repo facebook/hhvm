@@ -1,7 +1,7 @@
 <?hh
 
 class MyConverter extends UConverter {
-  public function toUCallback($reason, $source, $codeUnits, inout $error) {
+  public function toUCallback($reason, $source, $codeUnits, inout $error) :mixed{
     $error = U_ZERO_ERROR;
     switch ($codeUnits) {
       case "\x80": return NULL;
@@ -11,7 +11,7 @@ class MyConverter extends UConverter {
       default: break;
     }
   }
-  public function fromUCallback($reason, $source, $codePoint, inout $error) {
+  public function fromUCallback($reason, $source, $codePoint, inout $error) :mixed{
     $error = U_ZERO_ERROR;
     switch ($codePoint) {
       case 0x00F1: return "A";
@@ -24,7 +24,7 @@ class MyConverter extends UConverter {
 }
 
 <<__EntryPoint>>
-function main_2136() {
+function main_2136() :mixed{
 $c = new MyConverter('ascii', 'utf-8');
 var_dump($c->convert("\x80\x81\x82\x83"));
 var_dump($c->convert("\xC3\xB1\xC3\xB2\xC3\xB3\xC3\xB4"));

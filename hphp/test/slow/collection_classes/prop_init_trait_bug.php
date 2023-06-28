@@ -12,7 +12,7 @@ trait T {
 
 
 <<__EntryPoint>>
-function main_prop_init_trait_bug() {
+function main_prop_init_trait_bug() :mixed{
 $a = new C();
 $b = new C();
 $a->x->add(5);

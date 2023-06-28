@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $p = readonly new P(1, new P(2));
   $p->inner->i = 10;
 }

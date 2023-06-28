@@ -8,14 +8,14 @@
 class Foo
 {
     public function __toString()
-    {
+:mixed    {
         return 'last_name';
     }
 }
 class Bar
 {
     public function __toString()
-    {
+:mixed    {
         return 'first_name';
     }
 }

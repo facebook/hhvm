@@ -18,7 +18,7 @@
  * Description : compares value1 and value2
  */
 function simple_cmp($value1, $value2)
-{
+:mixed{
   if($value1 == $value2) {
     return 0;
   }
@@ -31,7 +31,7 @@ function simple_cmp($value1, $value2)
 
 // comparison function for SimpleClass2 objects which has more than one members
 function multiple_cmp($value1, $value2)
-{
+:mixed{
   if($value1->getValue() == $value2->getValue())
     return 0;
   else if($value1->getValue() > $value2->getValue())
@@ -61,7 +61,7 @@ class SimpleClass2
     $this->float_value = $float;
     $this->string_value = $str;
   }
-  public function getValue() {
+  public function getValue() :mixed{
     return $this->int_value;
   }
 }

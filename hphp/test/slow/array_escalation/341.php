@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_341() {
+function main_341() :mixed{
 $a = darray['a' => 'va'];
  $a[0] = 1;
              var_dump($a);

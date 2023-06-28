@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_predicates() {
+function main_predicates() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 var_dump(is_file($tempfile));
 var_dump(is_dir($tempfile));

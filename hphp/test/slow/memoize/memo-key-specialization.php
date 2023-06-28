@@ -12,32 +12,32 @@ class Cls1 implements IMemoizeParam {
   }
 }class Cls3 implements IMemoizeParam {
   public function __construct(public $x)[] {}
-  public function getInstanceKey() {
+  public function getInstanceKey() :mixed{
     echo "Cls3::getInstanceKey\n"; return $this->x;
   }
 }class Cls4 {}
-<<__Memoize>> function takes_int(int $x)          { echo "takes_int\n"; return $x; }
-<<__Memoize>> function takes_bool(bool $x)        { echo "takes_bool\n"; return $x; }
-<<__Memoize>> function takes_str(string $x)       { echo "takes_str\n"; return $x; }
-<<__Memoize>> function takes_double(float $x)    { echo "takes_double\n"; return $x; }
-<<__Memoize>> function takes_arrkey(arraykey $x)  { echo "takes_arrkey\n"; return $x; }
-<<__Memoize>> function takes_vector(Vector $x)    { echo "takes_vector\n"; return $x; }
-<<__Memoize>> function takes_cls1(Cls1 $x)        { echo "takes_cls1\n"; return $x; }
-<<__Memoize>> function takes_cls2(Cls2 $x)        { echo "takes_cls2\n"; return $x; }
-<<__Memoize>> function takes_cls3(Cls3 $x)        { echo "takes_cls3\n"; return $x; }
-<<__Memoize>> function takes_cls4(Cls4 $x)        { echo "takes_cls4\n"; return $x; }
-<<__Memoize>> function takes_opt_int(?int $x)     { echo "takes_opt_int\n"; return $x; }
-<<__Memoize>> function takes_opt_bool(?bool $x)   { echo "takes_opt_bool\n"; return $x; }
-<<__Memoize>> function takes_opt_str(?string $x)  { echo "takes_opt_str\n"; return $x; }
-<<__Memoize>> function takes_opt_dbl(?float $x)  { echo "takes_opt_dbl\n"; return $x; }
-<<__Memoize>> function takes_opt_vector(?Vector $x) { echo "takes_opt_vector\n"; return $x; }
-<<__Memoize>> function takes_opt_cls1(?Cls1 $x)   { echo "takes_opt_cls1\n"; return $x; }
-<<__Memoize>> function takes_opt_cls2(?Cls2 $x)   { echo "takes_opt_cls2\n"; return $x; }
-<<__Memoize>> function takes_opt_cls3(?Cls3 $x)   { echo "takes_opt_cls3\n"; return $x; }
-<<__Memoize>> function takes_opt_cls4(?Cls4 $x)   { echo "takes_opt_cls4\n"; return $x; }
-<<__Memoize>> function takes_anything($x)         { echo "takes_anything\n"; return $x; }
+<<__Memoize>> function takes_int(int $x)          :mixed{ echo "takes_int\n"; return $x; }
+<<__Memoize>> function takes_bool(bool $x)        :mixed{ echo "takes_bool\n"; return $x; }
+<<__Memoize>> function takes_str(string $x)       :mixed{ echo "takes_str\n"; return $x; }
+<<__Memoize>> function takes_double(float $x)    :mixed{ echo "takes_double\n"; return $x; }
+<<__Memoize>> function takes_arrkey(arraykey $x)  :mixed{ echo "takes_arrkey\n"; return $x; }
+<<__Memoize>> function takes_vector(Vector $x)    :mixed{ echo "takes_vector\n"; return $x; }
+<<__Memoize>> function takes_cls1(Cls1 $x)        :mixed{ echo "takes_cls1\n"; return $x; }
+<<__Memoize>> function takes_cls2(Cls2 $x)        :mixed{ echo "takes_cls2\n"; return $x; }
+<<__Memoize>> function takes_cls3(Cls3 $x)        :mixed{ echo "takes_cls3\n"; return $x; }
+<<__Memoize>> function takes_cls4(Cls4 $x)        :mixed{ echo "takes_cls4\n"; return $x; }
+<<__Memoize>> function takes_opt_int(?int $x)     :mixed{ echo "takes_opt_int\n"; return $x; }
+<<__Memoize>> function takes_opt_bool(?bool $x)   :mixed{ echo "takes_opt_bool\n"; return $x; }
+<<__Memoize>> function takes_opt_str(?string $x)  :mixed{ echo "takes_opt_str\n"; return $x; }
+<<__Memoize>> function takes_opt_dbl(?float $x)  :mixed{ echo "takes_opt_dbl\n"; return $x; }
+<<__Memoize>> function takes_opt_vector(?Vector $x) :mixed{ echo "takes_opt_vector\n"; return $x; }
+<<__Memoize>> function takes_opt_cls1(?Cls1 $x)   :mixed{ echo "takes_opt_cls1\n"; return $x; }
+<<__Memoize>> function takes_opt_cls2(?Cls2 $x)   :mixed{ echo "takes_opt_cls2\n"; return $x; }
+<<__Memoize>> function takes_opt_cls3(?Cls3 $x)   :mixed{ echo "takes_opt_cls3\n"; return $x; }
+<<__Memoize>> function takes_opt_cls4(?Cls4 $x)   :mixed{ echo "takes_opt_cls4\n"; return $x; }
+<<__Memoize>> function takes_anything($x)         :mixed{ echo "takes_anything\n"; return $x; }
 
-function test() {
+function test() :mixed{
   var_dump(takes_int(__hhvm_intrinsics\launder_value(123)));
   var_dump(takes_bool(__hhvm_intrinsics\launder_value(true)));
   var_dump(takes_str(__hhvm_intrinsics\launder_value('abc')));
@@ -127,7 +127,7 @@ function test() {
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__EntryPoint>>
-function main_memo_key_specialization() {
+function main_memo_key_specialization() :mixed{
 set_error_handler(
   function($errno, $errstr) { echo "ERROR: " . $errstr . "\n"; }
 );

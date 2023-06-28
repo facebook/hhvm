@@ -24,6 +24,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_resource() {
+function main_is_expression_resource() :mixed{
 main();
 }

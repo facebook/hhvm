@@ -5,7 +5,7 @@
 
 // False
 <<__EntryPoint>>
-function main_param_coerce_mode() {
+function main_param_coerce_mode() :mixed{
 try { fclose(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump('pclose', @pclose(false));
 try { fseek(false, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -1,6 +1,6 @@
 <?hh
 class foo {
-  <<__DynamicallyCallable>> function cb($param) {
+  <<__DynamicallyCallable>> function cb($param) :mixed{
     var_dump($param);
     return "yes!";
   }

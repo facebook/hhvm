@@ -2,31 +2,31 @@
 
 class Foo {}
 
-function getClass() {
+function getClass() :mixed{
   return __hhvm_intrinsics\launder_value(Foo::class);
 }
 
-function getStr() {
+function getStr() :mixed{
   return __hhvm_intrinsics\launder_value('Foo');
 }
 
-function stringCast($x) {
+function stringCast($x) :mixed{
   return (string) $x;
 }
 
-function boolCast($x) {
+function boolCast($x) :mixed{
     return (bool) $x;
 }
 
-function doubleCast($x) {
+function doubleCast($x) :mixed{
     return (float)$x;
 }
 
-function intCast($x) {
+function intCast($x) :mixed{
     return (int) $x;
 }
 
-function varrayCast($x) {
+function varrayCast($x) :mixed{
   return varray($x);
 }
 

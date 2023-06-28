@@ -1,20 +1,20 @@
 <?hh
 class Rep {
-  public function __invoke() {
+  public function __invoke() :mixed{
     return "d";
   }
 }
 class Foo {
-  public static function rep($rep) {
+  public static function rep($rep) :mixed{
     return "ok";
   }
 }
-function b() {
+function b() :mixed{
   return "b";
 }
 
 <<__EntryPoint>>
-function main_preg_replace_callback_array_basic() {
+function main_preg_replace_callback_array_basic() :mixed{
 $count = -1;
 var_dump(preg_replace_callback_array(
   darray[

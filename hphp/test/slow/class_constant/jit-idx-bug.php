@@ -9,16 +9,16 @@ class C1 extends B {
   public static $prop = 'S2';
 }
 
-function test_clscns(dict $x, $c) {
+function test_clscns(dict $x, $c) :mixed{
   return idx($x, $c::NAME, "");
 }
 
-function test_cgets(dict $x, $c) {
+function test_cgets(dict $x, $c) :mixed{
   return idx($x, $c::$prop, "");
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = dict['a' => 1, 'S1' => 2, 'S2' => 3];
   $c1 = new C1();
   for ($i = 0; $i < 10; $i++) {

@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function generate($arr) {
+function generate($arr) :mixed{
   for ($i = 0; $i < 2000; $i++) {
     $arr = vec[$arr];
   }
@@ -13,7 +13,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $arr = generate(vec[null]);
   $obj = new C;
   $obj->m_arr = $arr;

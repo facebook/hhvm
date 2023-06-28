@@ -18,19 +18,19 @@ class Point implements Serializable
     }
 
     public function __toString()
-    {
+:mixed    {
         return 'ID:' . $this->id . '(' . $this->x . ',' . $this->y . ')';
     }
 
     public function serialize()
-    {
+:mixed    {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
         return serialize(darray['y' => $this->y, 'x' => $this->x]);
     }
 
     public function unserialize($data)
-    {
+:mixed    {
         $data = unserialize($data);
         $this->x = $data['x'];
         $this->y = $data['y'];
@@ -56,12 +56,12 @@ class ColoredPoint extends Point implements Serializable
     }
 
     public function __toString()
-    {
+:mixed    {
         return (string)(parent::__toString()) . (string)($this->color);
     }
 
     public function serialize()
-    {
+:mixed    {
         echo "\nInside " . __METHOD__ . ", $this\n\n";
 
         return serialize(darray[
@@ -71,7 +71,7 @@ class ColoredPoint extends Point implements Serializable
     }
 
     public function unserialize($data)
-    {
+:mixed    {
         $data = unserialize($data);
         $this->color = $data['color'];
         parent::unserialize($data['baseData']);

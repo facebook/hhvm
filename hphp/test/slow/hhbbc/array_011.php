@@ -1,6 +1,6 @@
 <?hh
 
-function bar(bool $k) {
+function bar(bool $k) :mixed{
   $x = null;
   for (;;) {
     $x = darray['x' => $x];

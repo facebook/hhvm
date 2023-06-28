@@ -2,7 +2,7 @@
 
 // Test that ImmMap correctly handled magic methods.
 
-function main() {
+function main() :mixed{
   echo "\n__toString...\n";
   echo (new ImmMap(Vector {1, 2, 3})) . "\n";
 
@@ -39,6 +39,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_magic_methods() {
+function main_magic_methods() :mixed{
 main();
 }

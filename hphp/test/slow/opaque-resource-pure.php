@@ -21,7 +21,7 @@ function fun_with_write_props()[]: void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   fun_with_write_props();
   print("Success");
 }

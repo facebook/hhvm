@@ -3,28 +3,28 @@ namespace X;
 use X as Y;
 const A = "ok\n";
 const B = A;
-function f1($x=A) {
+function f1($x=A) :mixed{
     echo $x;
 }
-function f2($x=\X\A) {
+function f2($x=\X\A) :mixed{
     echo $x;
 }
-function f3($x=Y\A) {
+function f3($x=Y\A) :mixed{
     echo $x;
 }
-function f4($x=\X\A) {
+function f4($x=\X\A) :mixed{
     echo $x;
 }
-function f5($x=B) {
+function f5($x=B) :mixed{
     echo $x;
 }
-function f6($x=varray[A]) {
+function f6($x=varray[A]) :mixed{
     echo $x[0];
 }
-function f7($x=darray["aaa"=>A]) {
+function f7($x=darray["aaa"=>A]) :mixed{
     echo $x["aaa"];
 }
-function f8($x=darray[A=>"aaa\n"]) {
+function f8($x=darray[A=>"aaa\n"]) :mixed{
     echo $x["ok\n"];
 }
 <<__EntryPoint>> function main(): void {

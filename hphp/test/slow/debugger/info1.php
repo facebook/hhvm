@@ -1,6 +1,6 @@
 <?hh
 
-function myfunc($a, $b) {
+function myfunc($a, $b) :mixed{
   error_log($a.$b);
 }
 

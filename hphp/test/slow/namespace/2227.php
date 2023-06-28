@@ -6,16 +6,16 @@ class Foo {
   function __construct(varray $a) {
     \var_dump($a);
   }
-  function callUnknownClassMethod($method) {
+  function callUnknownClassMethod($method) :mixed{
     return SomeUnknownClass::$method();
   }
-  function unsetStaticProperty() {
+  function unsetStaticProperty() :mixed{
     unset(Foo::$baz);
   }
 }
 
 <<__EntryPoint>>
-function main_2227() {
+function main_2227() :mixed{
   if (\rand(0, 1)) {
     include '2227-1.inc';
   } else {

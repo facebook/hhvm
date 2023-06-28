@@ -2,6 +2,6 @@
 
 module b;
 
-function aaa() {
+function aaa() :mixed{
   echo "In aaa\n";
 }

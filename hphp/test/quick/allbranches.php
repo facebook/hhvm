@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  public function binary($la, $ra) {
+  public function binary($la, $ra) :mixed{
     // Stick this in a trait, so we get different copies for different
     // data.
     for ($i = 0; $i < 3; $i++) {
@@ -21,7 +21,7 @@ trait T {
       }
     }
   }
-  public function unary($la) {
+  public function unary($la) :mixed{
     for ($i = 0; $i < 3; $i++) {
       foreach($la as $l) {
         $text = HH\is_any_array($l) ? 'Array' : $l;
@@ -37,7 +37,7 @@ trait T {
   }
 }
 
-function banner($s) {
+function banner($s) :mixed{
   printf("---- %40s\n", $s);
 }
 
@@ -89,7 +89,7 @@ class Bools {
 }
 
 class C {
-  public function __toString() { return "snee!"; }
+  public function __toString() :mixed{ return "snee!"; }
 }
 
 class DifferentTypes {
@@ -102,7 +102,7 @@ class DifferentTypes {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $asc = new Ascending();
   $desc = new Descending();
   $eq = new Equal();

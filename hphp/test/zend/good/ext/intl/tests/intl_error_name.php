@@ -6,7 +6,7 @@
 
 
 function check( $err_code )
-{
+:mixed{
     echo intl_error_name( $err_code ) . "\n";
 }
 <<__EntryPoint>> function main(): void {

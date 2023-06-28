@@ -2,7 +2,7 @@
 // define some classes
 class classWithToString
 {
-        public function __toString() {
+        public function __toString() :mixed{
                 return "Class A object";
         }
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function test($thing) {
+function test($thing) :mixed{
   echo "==== " . get_class($thing) . " may notice ====\n";
 
   echo "== read ==\n";
@@ -83,13 +83,13 @@ function test($thing) {
   unset($thing->dynprop);
 }
 
-function by_ref(inout $ref) {}
+function by_ref(inout $ref) :mixed{}
 
 class C {}
 class D { public $x = 1; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test(new C());
   test(new D());
   test(gmp_init(0));

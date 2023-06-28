@@ -9,7 +9,7 @@ class c {
 
 
 <<__EntryPoint>>
-function main_1222() {
+function main_1222() :mixed{
 class_exists('c');
 var_dump(c::$S);
 }

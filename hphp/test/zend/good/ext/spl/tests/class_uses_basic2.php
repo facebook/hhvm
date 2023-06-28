@@ -17,7 +17,7 @@ class fooViaBarUser extends barUser { use foo; }
 class fooExtended extends fooUser {}
 
 
-function s_var_dump($arr) {
+function s_var_dump($arr) :mixed{
    krsort(inout $arr);
    var_dump($arr);
 }

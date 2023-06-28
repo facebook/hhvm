@@ -1,14 +1,14 @@
 <?hh
 
 trait T1 {
-  abstract function bar();
-  public function foo() {
+  abstract function bar():mixed;
+  public function foo() :mixed{
     $this->bar();
   }
 }
 
 trait T2 {
-  public function bar() {
+  public function bar() :mixed{
     echo "Hello from bar()\n";
   }
 }
@@ -21,7 +21,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_2057() {
+function main_2057() :mixed{
 $o = new C;
 $o->foo();
 }

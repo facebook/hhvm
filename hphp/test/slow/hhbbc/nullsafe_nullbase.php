@@ -1,12 +1,12 @@
 <?hh
 
-function err() { throw new Exception; }
+function err() :mixed{ throw new Exception; }
 
 class somecls {
- public function x(inout $k) {}
+ public function x(inout $k) :mixed{}
 }
 
-function foo(somecls $z) {
+function foo(somecls $z) :mixed{
  try {
  $z->x(inout $y?->z);
  } catch (Exception $e) {
@@ -16,7 +16,7 @@ function foo(somecls $z) {
 }
 
 <<__EntryPoint>>
-function main_nullsafe_nullbase() {
+function main_nullsafe_nullbase() :mixed{
 set_error_handler(err<>);
 
 foo(new somecls);

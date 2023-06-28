@@ -1,5 +1,5 @@
 <?hh
-function hexdump($str) {
+function hexdump($str) :mixed{
 	$len = strlen($str);
 	for ($i = 0; $i < $len; ++$i) {
 		printf("%02x", ord($str[$i]));
@@ -7,12 +7,12 @@ function hexdump($str) {
 	print "\n";
 }
 
-function foo($str, $offset, $len, $charset) {
+function foo($str, $offset, $len, $charset) :mixed{
 	hexdump(substr($str, $offset, $len));
 	hexdump(iconv_substr($str, $offset, $len, $charset));
 }
 
-function bar($str, $offset, $len = false) {
+function bar($str, $offset, $len = false) :mixed{
 	if (is_bool($len)) {
 		var_dump(substr($str, $offset));
 		var_dump(iconv_substr($str, $offset));

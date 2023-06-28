@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_diff() {
+function main_array_diff() :mixed{
 $array1 = darray[
   "a" => "green",
   0 => "red",

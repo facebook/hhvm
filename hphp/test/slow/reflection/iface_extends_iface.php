@@ -1,14 +1,14 @@
 <?hh
 
 interface A {
-  public function get($x);
+  public function get($x):mixed;
 }
 
 interface B extends A { }
 
 
 <<__EntryPoint>>
-function main_iface_extends_iface() {
+function main_iface_extends_iface() :mixed{
 $refl = new ReflectionMethod('A', 'get');
 var_dump($refl->getDeclaringClass()->getName());
 var_dump($refl->getName());

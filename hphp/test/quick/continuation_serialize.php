@@ -1,11 +1,11 @@
 <?hh
 
 
-async function static_result_create($result) {
+async function static_result_create($result) :Awaitable<mixed>{
   return $result;
 }
 
-async function static_exception_create($exception) {
+async function static_exception_create($exception) :Awaitable<mixed>{
   throw $exception;
 }
 

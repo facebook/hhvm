@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $r = pagelet_server_task_start("pagelet.php");
   var_dump($r);
   do {

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_subclass() {
+function main_subclass() :mixed{
 $exec_class = varray['Exception', 'RuntimeException', 'InvalidArgumentException',
                'BadMethodCallException', 'OutOfBoundsException',
                'DOMException', 'PDOException'];

@@ -34,6 +34,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_loops_exn_to_string() {
+function main_loops_exn_to_string() :mixed{
 main();
 }

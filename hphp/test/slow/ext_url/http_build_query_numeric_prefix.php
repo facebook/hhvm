@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_http_build_query_numeric_prefix() {
+function main_http_build_query_numeric_prefix() :mixed{
 $query = darray[
     0                    => "4.6.1",
     'php'                => "7.0.99-hhvm",

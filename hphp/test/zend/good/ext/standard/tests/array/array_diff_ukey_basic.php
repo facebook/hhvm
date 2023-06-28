@@ -3,7 +3,7 @@
 * proto array array_diff_ukey ( array $array1, array $array2 [, array $ ..., callback $key_compare_func] )
 * Function is implemented in ext/standard/array.c
 */
-function key_compare_func($key1, $key2) {
+function key_compare_func($key1, $key2) :mixed{
     if ($key1 == $key2) return 0;
     else if ($key1 > $key2) return 1;
     else return -1;

@@ -2,23 +2,23 @@
 
 class C {
   <<__DynamicallyCallable>>
-  public function foo() { echo "C::foo\n"; var_dump(static::class); }
+  public function foo() :mixed{ echo "C::foo\n"; var_dump(static::class); }
   <<__DynamicallyCallable>>
-  public static function bar() { echo "C::bar\n"; var_dump(static::class); }
+  public static function bar() :mixed{ echo "C::bar\n"; var_dump(static::class); }
 }
 
 class D extends C {
   <<__DynamicallyCallable>>
-  public function foo() { echo "D::foo\n"; var_dump(static::class); }
+  public function foo() :mixed{ echo "D::foo\n"; var_dump(static::class); }
   <<__DynamicallyCallable>>
-  public static function bar() { echo "D::bar\n"; var_dump(static::class); }
+  public static function bar() :mixed{ echo "D::bar\n"; var_dump(static::class); }
 }
 
 class E {
   <<__DynamicallyCallable>>
-  public function foo() { echo "E::foo\n"; var_dump(static::class); }
+  public function foo() :mixed{ echo "E::foo\n"; var_dump(static::class); }
   <<__DynamicallyCallable>>
-  public static function bar() { echo "E::bar\n"; var_dump(static::class); }
+  public static function bar() :mixed{ echo "E::bar\n"; var_dump(static::class); }
 }
 
 <<__EntryPoint>>

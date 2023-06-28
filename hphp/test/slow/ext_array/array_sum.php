@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_sum() {
+function main_array_sum() :mixed{
 $a = varray[2, 4, 6, 8];
 var_dump(array_sum($a));
 $b = darray["a" => 1.2, "b" => 2.3, "c" => 3.4];

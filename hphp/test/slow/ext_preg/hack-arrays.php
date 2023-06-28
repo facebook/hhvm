@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_preg_match() {
+function test_preg_match() :mixed{
   echo "====================== preg_match ============================\n";
 
   $m = null;
@@ -62,7 +62,7 @@ function test_preg_match() {
   var_dump($m);
 }
 
-function test_preg_grep() {
+function test_preg_grep() :mixed{
   echo "====================== preg_grep =============================\n";
   $strs1 = varray['a', '1', 'q6', 'h20'];
   $strs2 = darray['key1' => 'a', 'key2' =>'1', 'key3' => 'q6', 'key4' => 'h20'];
@@ -72,7 +72,7 @@ function test_preg_grep() {
   var_dump(preg_grep('/^(\d|.\d)$/', $strs2, PREG_GREP_INVERT));
 }
 
-function test_preg_split() {
+function test_preg_split() :mixed{
   echo "====================== preg_split =============================\n";
   var_dump(preg_split("//", "string", -1, 0));
   var_dump(preg_split("//", "string", 3, 0));
@@ -84,7 +84,7 @@ function test_preg_split() {
 
 
 <<__EntryPoint>>
-function main_hack_arrays() {
+function main_hack_arrays() :mixed{
 test_preg_match();
 test_preg_grep();
 test_preg_split();

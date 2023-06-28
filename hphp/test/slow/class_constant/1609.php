@@ -7,7 +7,7 @@ class Y {
   const B = 2;
 }
 class Z extends Y implements X {
-  function x() {
+  function x() :mixed{
     print self::A;
     print self::B;
     print Z::A;
@@ -18,7 +18,7 @@ class Z extends Y implements X {
 }
 
 <<__EntryPoint>>
-function main_1609() {
+function main_1609() :mixed{
 $z = new Z;
 $z->x();
 }

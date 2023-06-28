@@ -1,6 +1,6 @@
 <?hh
 
-function bassCall() {
+function bassCall() :mixed{
   return "ok";
 }
 <<__EntryPoint>>

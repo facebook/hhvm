@@ -8,29 +8,29 @@ class A {
   }
 
   <<__DynamicallyCallable>>
-  public function M1() {
+  public function M1() :mixed{
     return $this->data;
   }
 
   <<__DynamicallyCallable>>
-  protected function M2() {
+  protected function M2() :mixed{
     return $this->data;
   }
 
   <<__DynamicallyCallable>>
-  private function M3() {
+  private function M3() :mixed{
     return $this->data;
   }
 
   <<__DynamicallyCallable>>
-  static function M4() {
+  static function M4() :mixed{
     return 'static';
   }
 }
 
 class B { }
 
-function execute($class_name, $method_name, $instance) {
+function execute($class_name, $method_name, $instance) :mixed{
   try {
     $ref = new ReflectionMethod($class_name, $method_name);
     $ref->setAccessible(true);
@@ -44,7 +44,7 @@ function execute($class_name, $method_name, $instance) {
 
 
 <<__EntryPoint>>
-function main_get_closure_instance() {
+function main_get_closure_instance() :mixed{
 execute('A', 'M1', new A(true));
 execute('A', 'M2', new A(42));
 execute('A', 'M3', new A(varray[]));

@@ -1,13 +1,13 @@
 <?hh
-function a() {
+function a() :mixed{
     b();
 }
 
-function b() {
+function b() :mixed{
     c();
 }
 
-function c() {
+function c() :mixed{
     print_r(debug_backtrace(0, 1));
     print_r(debug_backtrace(0, 2));
     print_r(debug_backtrace(0, 0));

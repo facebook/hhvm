@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   try {
     try {
       throw new Exception("foo");
@@ -13,6 +13,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_catch_outside() {
+function main_catch_outside() :mixed{
 foo();
 }

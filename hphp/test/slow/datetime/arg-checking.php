@@ -2,7 +2,7 @@
 
 class X{}
 <<__EntryPoint>>
-function main_arg_checking() {
+function main_arg_checking() :mixed{
 ;
 
 $utc = new \DateTimeZone('UTC');

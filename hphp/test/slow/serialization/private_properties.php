@@ -3,19 +3,19 @@
 
 class A {
   private $a = 1;
-  public function __sleep() {
+  public function __sleep() :mixed{
     return SerializationPrivateProperties::$g;
   }
-  public function seta($a) {
+  public function seta($a) :mixed{
     $this->a = $a;
   }
 }
 class B extends A {
-  public function __sleep() {
+  public function __sleep() :mixed{
     return SerializationPrivateProperties::$g;
   }
 
-  static function test($a, $elems, $p = null) {
+  static function test($a, $elems, $p = null) :mixed{
 
     $a->seta(42);
     SerializationPrivateProperties::$g = $elems;

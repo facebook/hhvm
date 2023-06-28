@@ -1,11 +1,11 @@
 <?hh
 class B implements Serializable {
-    public function serialize() {
+    public function serialize() :mixed{
         throw new Exception("serialize");
         return NULL;
     }
 
-    public function unserialize($data) {
+    public function unserialize($data) :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

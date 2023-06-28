@@ -1,6 +1,6 @@
 <?hh
 
-function makeNonStatic($n) {
+function makeNonStatic($n) :mixed{
   $s = 'foobar';
   for ($i = 0; $i < $n; $i += 1) {
     $s .= $i;
@@ -11,7 +11,7 @@ function makeNonStatic($n) {
 
 // Runs twice with Treadmill in between (see .opts)
 <<__EntryPoint>>
-function main_uncounted_array_copy() {
+function main_uncounted_array_copy() :mixed{
 if (apc_exists('minefield')) {
   // Second run: verify array was correctly copied.
   var_dump(__hhvm_intrinsics\apc_fetch_no_check('minefield'));

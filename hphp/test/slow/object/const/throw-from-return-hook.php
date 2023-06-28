@@ -19,7 +19,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   fb_setprofile(($case, $fn) ==> {
     if ($case === 'exit' && $fn === 'C::__construct') {
       throw new Exception('sneaky');

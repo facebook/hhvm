@@ -21,7 +21,7 @@ class C5 { use T3; }
 <<__NoFlatten>> trait T4 { static public $x = 1; }
 class C6 { use T4; }
 
-function test1() {
+function test1() :mixed{
   echo "================= test1 ================\n";
   var_dump(B::$x);
   var_dump(T::$x);
@@ -32,7 +32,7 @@ function test1() {
   var_dump(C::$x);
 }
 
-function test2() {
+function test2() :mixed{
   echo "================= test2 ================\n";
   var_dump(B::$x);
   var_dump(T2::$x);
@@ -43,7 +43,7 @@ function test2() {
   var_dump(C2::$x);
 }
 
-function test3() {
+function test3() :mixed{
   echo "================= test3 ================\n";
   var_dump(B::$x);
   var_dump(T::$x);
@@ -54,7 +54,7 @@ function test3() {
   var_dump(C3::$x);
 }
 
-function test4() {
+function test4() :mixed{
   echo "================= test4 ================\n";
   var_dump(B2::$x);
   var_dump(C4::$x);
@@ -63,7 +63,7 @@ function test4() {
   var_dump(C4::$x);
 }
 
-function test5() {
+function test5() :mixed{
   echo "================= test5 ================\n";
   var_dump(T3::$x);
   var_dump(C5::$x);
@@ -72,7 +72,7 @@ function test5() {
   var_dump(C5::$x);
 }
 
-function test6() {
+function test6() :mixed{
   echo "================= test6 ================\n";
   var_dump(T4::$x);
   var_dump(C6::$x);
@@ -82,7 +82,7 @@ function test6() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test1();
   test2();
   test3();

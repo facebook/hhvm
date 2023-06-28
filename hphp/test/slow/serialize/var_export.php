@@ -8,6 +8,6 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_var_export() {
+function main_var_export() :mixed{
 var_export(new A);
 }

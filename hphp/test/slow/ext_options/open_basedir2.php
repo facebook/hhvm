@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_open_basedir2() {
+function main_open_basedir2() :mixed{
 $temp_file = tempnam(sys_get_temp_dir(), "obd_test");
 file_put_contents($temp_file, "This is data");
 // delimiter :

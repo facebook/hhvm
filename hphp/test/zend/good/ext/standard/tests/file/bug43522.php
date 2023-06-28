@@ -1,6 +1,6 @@
 <?hh // 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
-function DoTest($fp, $delim) {
+function DoTest($fp, $delim) :mixed{
 	echo "Delimiter:  " . $delim . "\n";
 	rewind($fp);
 	echo "\t" . stream_get_line($fp, 9, $delim) . "\n";

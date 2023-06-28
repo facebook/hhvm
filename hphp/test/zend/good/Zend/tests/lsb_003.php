@@ -1,7 +1,7 @@
 <?hh
 
 class TestClass {
-    public static function createInstance() {
+    public static function createInstance() :mixed{
         return new static();
     }
 }

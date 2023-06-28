@@ -2,10 +2,10 @@
 
 class box {
   public function __construct(private $x) {}
-  public function get() { return $this->x; }
+  public function get() :mixed{ return $this->x; }
 }
 
-function mappers() {
+function mappers() :mixed{
   $dump = ($ar, $fn) ==> {
     var_dump(array_map($fn, $ar));
   };
@@ -21,7 +21,7 @@ function mappers() {
   );
 }
 
-function filters() {
+function filters() :mixed{
   $dump = ($ar,$fn) ==> {
     var_dump(array_filter($ar, $fn));
   };
@@ -31,7 +31,7 @@ function filters() {
   $dump(varray["asd", new box(123)], $x ==> is_string($x));
 }
 
-function collection() {
+function collection() :mixed{
   $blah = Vector {
     new box(1),
     new box(2),

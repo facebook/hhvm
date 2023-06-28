@@ -16,6 +16,6 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C::X);
 }

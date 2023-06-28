@@ -1,10 +1,10 @@
 <?hh
 <<__Memoize>>
-function f<reify Ta, Tb, reify Tc>($x, $y, $z) {
+function f<reify Ta, Tb, reify Tc>($x, $y, $z) :mixed{
   var_dump("hi");
 }
 <<__Memoize>>
-function g<reify Ta, Tb, reify Tc>() {
+function g<reify Ta, Tb, reify Tc>() :mixed{
   var_dump("hi");
 }
 <<__EntryPoint>>

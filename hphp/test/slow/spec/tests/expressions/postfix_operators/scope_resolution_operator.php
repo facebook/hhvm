@@ -4,7 +4,7 @@ class M
 {
 // The following members are overridden in class P
 
-    public static function psf() { return "red"; }
+    public static function psf() :mixed{ return "red"; }
     public static $psProp = -333;
     const MYPI = 3.14;
     const CON1 = -222;
@@ -12,7 +12,7 @@ class M
 // method b1 demostrates self vs. static
 
     public function b1()
-    {
+:mixed    {
         echo "  self::\$psf returns " . self::psf() . "\n";
         echo "static::\$psf returns " . static::psf() . "\n";
         echo "  self::\$psProp is   " . self::$psProp . "\n";
@@ -25,7 +25,7 @@ class M
     }
 
     public function b2()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
     }
 
@@ -35,7 +35,7 @@ class M
 class N extends M
 {
     public function b2()    // overrides base::b2()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
     }
 }
@@ -71,20 +71,20 @@ class P extends N
     }
 
     public function gi()
-    {
+:mixed    {
         echo "Inside instance " . __METHOD__ . "\n";
         var_dump($this);
     }
 
     public static function gs()
-    {
+:mixed    {
         echo "Inside static " . __METHOD__ . "\n";
     }
 
 // method f1 demostrates self and parent
 
     public static function f1()
-    {
+:mixed    {
         echo "Accessing self:\n";
         echo "psf returns " . self::psf() . "\n";
         echo "psProp = " . self::$psProp . "\n";
@@ -97,13 +97,13 @@ class P extends N
     }
 
     public function b2()    // overrides base::b2()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
     }
 
 // The following 3 members override those in class M
 
-    public static function psf() { return 123; }
+    public static function psf() :mixed{ return 123; }
     public static $psProp = 999;
     const MYPI = 3.14159;
 }
@@ -113,14 +113,14 @@ class P extends N
 class Base
 {
     public function b()
-    {
+:mixed    {
 //      echo "Inside " . __METHOD__ . "\n";
         static::f();
         echo "The static context here is " . static::class . "\n";
     }
 
     public function f()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
     }
 }
@@ -128,7 +128,7 @@ class Base
 class Derived extends Base
 {
     public function f()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
     }
 }
@@ -140,7 +140,7 @@ interface I1
     const CON1 = 123;
     const CON2 = I1::CON1;
     const CON3 = self::CON1;
-    function f();
+    function f():mixed;
 }
 
 interface I2 extends I1
@@ -150,7 +150,7 @@ interface I2 extends I1
 
 //var_dump(I2::CON4);
 
-class X implements I2 { function f() {} }
+class X implements I2 { function f() :mixed{} }
 
 // see about ...::class
 
@@ -161,7 +161,7 @@ class W2 extends W1
     private $prop1 = 123;
 
     public function M()
-    {
+:mixed    {
         echo "inside " . __METHOD__ . "\n";
         var_dump($this);
 

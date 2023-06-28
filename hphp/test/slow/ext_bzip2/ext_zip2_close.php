@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_zip2_close() {
+function main_ext_zip2_close() :mixed{
 ini_set( 'display_errors', 'stderr' );
 $reader = new XMLReader();
 $url = "compress.bzip2://".dirname(__FILE__)."/book.xml.bz2";

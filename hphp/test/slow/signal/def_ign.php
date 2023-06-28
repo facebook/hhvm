@@ -1,6 +1,6 @@
 <?hh
 
-function handler($signo) {
+function handler($signo) :mixed{
   echo "handler received signal $signo, will do SIG_IGN later\n";
   pcntl_signal($signo, SIG_IGN);
 }

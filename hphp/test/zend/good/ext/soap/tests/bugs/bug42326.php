@@ -17,7 +17,7 @@ class SOAP_GetProductsResponse {
 }
 
 class SOAP_Admin {
-    public function GetProducts($time){
+    public function GetProducts($time):mixed{
         return new SOAP_GetProductsResponse();
     }
 }

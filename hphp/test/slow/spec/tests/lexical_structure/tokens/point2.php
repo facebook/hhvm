@@ -14,7 +14,7 @@ class Point2
     }
 
     public function __toString()
-    {
+:mixed    {
         return '(' . $this->x . ',' . $this->y . ')';
     }
 }

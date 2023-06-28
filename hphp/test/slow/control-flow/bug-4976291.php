@@ -10,7 +10,7 @@ class Dlgt extends E {
 }
 
 class Dlgr {
-  static function getDlgtObject($blah) {
+  static function getDlgtObject($blah) :mixed{
     return $blah ? new Dlgt($blah) : nullptr;
   }
 }
@@ -18,7 +18,7 @@ class Dlgr {
 class X {
   private static $classCache = darray[];
 
-  static function getuirc(E $blah) {
+  static function getuirc(E $blah) :mixed{
     $blah_class = get_class($blah);
     if (!array_key_exists($blah_class, self::$classCache)) {
       $blah_uric = null;
@@ -51,7 +51,7 @@ class D1 extends Dlgt {}
 class D1URILoader {}
 class F extends E {}
 class FURILoader extends Dlgr {
-  static function getDlgtObject($blah) {
+  static function getDlgtObject($blah) :mixed{
     return new D1($blah);
   }
 }
@@ -60,19 +60,19 @@ class D2 extends Dlgt {}
 class D2URILoader {}
 class G extends E {}
 class GURILoader extends Dlgr {
-  static function getDlgtObject($blah) {
+  static function getDlgtObject($blah) :mixed{
     return new D2($blah);
   }
 }
 class H extends G {}
 
-function main($x) {
+function main($x) :mixed{
   X::getuirc($x);
 }
 
 
 <<__EntryPoint>>
-function main_bug_4976291() {
+function main_bug_4976291() :mixed{
 for ($i=0; $i < 20; $i++) {
   main(new F);
   main(new H);

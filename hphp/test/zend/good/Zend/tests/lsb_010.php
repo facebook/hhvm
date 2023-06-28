@@ -2,7 +2,7 @@
 
 class Foo {
     protected static $className = 'Foo';
-    <<__DynamicallyCallable>> public static function bar() {
+    <<__DynamicallyCallable>> public static function bar() :mixed{
         echo static::$className . "::bar\n";
     }
     public function __construct() {

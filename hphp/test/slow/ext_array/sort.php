@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_sort() {
+function main_sort() :mixed{
 $fruits = varray["lemon", "orange", "banana", "apple"];
 sort(inout $fruits);
 var_dump($fruits);

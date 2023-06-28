@@ -8,6 +8,6 @@ class :foo {
 
 
 <<__EntryPoint>>
-function main_attr_with_colons() {
+function main_attr_with_colons() :mixed{
 <foo xlink:href="test" opacity={0.25} />;
 }

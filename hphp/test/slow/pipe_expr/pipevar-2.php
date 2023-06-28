@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_pipevar_2() {
+function main_pipevar_2() :mixed{
 $foo = "Hello!";
 varray[1, 2, 3]
   |> array_map($x ==> $x + 1, $$)

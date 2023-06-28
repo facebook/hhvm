@@ -1,6 +1,6 @@
 <?hh
 
-function test1() {
+function test1() :mixed{
   $x = __hhvm_intrinsics\launder_value(varray[1, 2, 3]);
   $x[] = 4;
   $v = new Vector($x);
@@ -11,7 +11,7 @@ function test1() {
 }
 
 
-function test2() {
+function test2() :mixed{
   $x = __hhvm_intrinsics\launder_value(darray["yes" => "no"]);
   $x["zing"] = 4;
   $v = new Map($x);
@@ -22,7 +22,7 @@ function test2() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test1();
   test2();
 }

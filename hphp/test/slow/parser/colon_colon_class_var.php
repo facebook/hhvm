@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_colon_colon_class_var() {
+function main_colon_colon_class_var() :mixed{
 var_dump($a::CLASS);
 }

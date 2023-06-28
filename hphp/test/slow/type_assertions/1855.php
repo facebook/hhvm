@@ -1,6 +1,6 @@
 <?hh
 
-function f($x) {
+function f($x) :mixed{
   try {
     $r = is_array($x) ? $x[0] : false;
     var_dump($r);
@@ -12,7 +12,7 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main_1855() {
+function main_1855() :mixed{
 f('');
 f('foo');
 f('f');

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_child_attribute_match() {
+function main_child_attribute_match() :mixed{
 $p = new SimpleXMLElement('<parent/>');
 $c = $p->addChild('child', '123');
 $c->addAttribute('attr', 'hi');

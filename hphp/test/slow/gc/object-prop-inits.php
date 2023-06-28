@@ -6,7 +6,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   new C();
   gc_collect_cycles();
   $obj = new C();

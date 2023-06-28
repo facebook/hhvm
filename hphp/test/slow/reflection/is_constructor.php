@@ -19,7 +19,7 @@ trait TestTrait {
   abstract public function __construct();
 }
 
-function main() {
+function main() :mixed{
   $classes = varray[
     'TestClassImplementingInterface', // false
     'TestInterface', // false
@@ -40,6 +40,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_is_constructor() {
+function main_is_constructor() :mixed{
 main();
 }

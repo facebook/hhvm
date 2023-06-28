@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_str_repeat() {
+function main_str_repeat() :mixed{
   try {
     $var = str_repeat('A', -1);
     var_dump($var);

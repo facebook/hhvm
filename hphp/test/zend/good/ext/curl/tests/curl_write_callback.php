@@ -1,7 +1,7 @@
 <?hh
 
 function curl_callback($curl_handle, $received_data)
-{
+:mixed{
     echo $received_data;
     return strlen($received_data);
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_file_put_contents() {
+function main_file_put_contents() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 file_put_contents($tempfile, 'testing file_put_contents');

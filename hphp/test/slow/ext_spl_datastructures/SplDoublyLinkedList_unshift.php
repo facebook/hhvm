@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_spl_doubly_linked_list_unshift() {
+function main_spl_doubly_linked_list_unshift() :mixed{
 $dll = new SplDoublyLinkedList();
 
 $dll->unshift('foo');

@@ -1,19 +1,19 @@
 <?hh
 
-function func1() {
+function func1() :mixed{
 	return 'func1';
 }
 
-function func2() {
+function func2() :AsyncGenerator<mixed,mixed,void>{
 	yield 'func2';
 }
 
 
 class Foo {
-	public function f1() {
+	public function f1() :mixed{
 	}
 
-	public function f2() {
+	public function f2() :AsyncGenerator<mixed,mixed,void>{
 		yield;
 	}
 }

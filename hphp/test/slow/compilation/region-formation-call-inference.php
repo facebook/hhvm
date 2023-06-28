@@ -4,7 +4,7 @@ class Bar {
   public function baz(): this { return $this; }
 }
 
-function foo($bar) {
+function foo($bar) :mixed{
   // When forming a region, clone will propagate the type of $bar as observed
   // at runtime. If we don't stop the inference, this type will then be used to
   // infer the result of each baz() call, forming a region that contains all
@@ -22,7 +22,7 @@ function foo($bar) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo(new Bar());
   echo "ok\n";
 }

@@ -13,12 +13,12 @@ class Point
     }
 
     public function __toString()
-    {
+:mixed    {
         return '(' . $this->x . ',' . $this->y . ')';
     }
 }
 
-function f() { return 10; }
+function f() :mixed{ return 10; }
 
 class X
 {

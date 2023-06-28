@@ -13,7 +13,7 @@ class WithStuff extends ParentClass {
   protected $prot = 'blorp';
 
   <<__Memoize>>
-  function add($a, $b) {
+  function add($a, $b) :mixed{
     echo "Adding $a and $b\n";
     return $a + $b;
   }

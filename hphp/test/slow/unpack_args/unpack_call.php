@@ -1,18 +1,18 @@
 <?hh // decl
 
-function regular($a, $b, $c) {
+function regular($a, $b, $c) :mixed{
   echo '* ', __FUNCTION__, "\n";
   var_dump($a, $b, $c);
 }
 
-function variadic($a, ...$args) {
+function variadic($a, ...$args) :mixed{
   echo '* ', __FUNCTION__, "\n";
   var_dump($a, $args);
 }
 
 interface I {
-  public function regular($a, $b, $c);
-  public function variadic($a, ...$args);
+  public function regular($a, $b, $c):mixed;
+  public function variadic($a, ...$args):mixed;
 }
 
 class C implements I {
@@ -21,33 +21,33 @@ class C implements I {
     var_dump($a, $b, $c);
   }
 
-  public static function stRegular($a, $b, $c) {
+  public static function stRegular($a, $b, $c) :mixed{
     echo '* ', __METHOD__, "\n";
     var_dump($a, $b, $c);
   }
 
-  public function regular($a, $b, $c) {
+  public function regular($a, $b, $c) :mixed{
     echo '* ', __METHOD__, "\n";
     var_dump($a, $b, $c);
   }
 
-  public static function stVariadic($a, ...$args) {
+  public static function stVariadic($a, ...$args) :mixed{
     echo '* ', __METHOD__, "\n";
     var_dump($a, $args);
   }
 
-  public function variadic($a, ...$args) {
+  public function variadic($a, ...$args) :mixed{
     echo '* ', __METHOD__, "\n";
     var_dump($a, $args);
   }
 }
 
 class D implements I {
-  public function regular($a, $b, $c) {}
-  public function variadic($a, ...$args) {}
+  public function regular($a, $b, $c) :mixed{}
+  public function variadic($a, ...$args) :mixed{}
 }
 
-function test_call_array_equivalent($args) {
+function test_call_array_equivalent($args) :mixed{
   echo "= ", __FUNCTION__, " =", "\n";
   var_dump($args);
   echo "\n";
@@ -62,7 +62,7 @@ function test_call_array_equivalent($args) {
   echo "\n";
 }
 
-function variadic_with_func_get_args(...$args) {
+function variadic_with_func_get_args(...$args) :mixed{
   echo '* ', __FUNCTION__, "\n";
   var_dump($args);
 }
@@ -83,7 +83,7 @@ function test_call_array_equivalent_multi($args) {
   echo "\n";
 } */
 
-function test_param_mix($args) {
+function test_param_mix($args) :mixed{
   echo "= ", __FUNCTION__, " =", "\n";
   var_dump($args);
   echo "\n";
@@ -113,7 +113,7 @@ function test_param_mix($args) {
   echo "\n";
 }
 
-function test_param_mix_typed(varray $args, I $iface) {
+function test_param_mix_typed(varray $args, I $iface) :mixed{
   echo "= ", __FUNCTION__, " =", "\n";
   var_dump($args);
   echo "\n";
@@ -147,7 +147,7 @@ function test_param_mix_typed(varray $args, I $iface) {
   echo "\n";
 }
 
-function main() {
+function main() :mixed{
   $a = varray['a', 'b', 'c'];
   $v = Vector {'a', 'b', 'c'};
   // TODO(t4599379): arbitrary traversables
@@ -172,6 +172,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unpack_call() {
+function main_unpack_call() :mixed{
 main();
 }

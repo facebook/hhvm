@@ -2,8 +2,8 @@
 
 
 trait T {
-  private function bar() {}
-  public function foo() {}
+  private function bar() :mixed{}
+  public function foo() :mixed{}
 }
 
 class A {

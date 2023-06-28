@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function foo(T $t) {
+  public function foo(T $t) :mixed{
     try {
       $this->bar($t);
     } catch (Exception $e) {
@@ -9,11 +9,11 @@ class A {
     }
   }
 
-  public function bar($x) { __hhvm_intrinsics\launder_value($x); }
+  public function bar($x) :mixed{ __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = new A();
   $a->foo(__hhvm_intrinsics\launder_value(true));
 }

@@ -11,6 +11,6 @@ class A {
 
 
  <<__EntryPoint>>
-function main_675() {
+function main_675() :mixed{
 var_dump(C::$foo);
 }

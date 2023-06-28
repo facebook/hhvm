@@ -8,7 +8,7 @@
 // get a class
 class classA
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "UTF-8";
   }
 }

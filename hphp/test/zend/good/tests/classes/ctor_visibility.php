@@ -17,7 +17,7 @@ class Derived extends Test
     }
 
     static function f()
-    {
+:mixed    {
         new Derived;
     }
 }
@@ -30,7 +30,7 @@ class TestPriv
     }
 
     static function f()
-    {
+:mixed    {
         new TestPriv;
     }
 }
@@ -44,7 +44,7 @@ class DerivedPriv extends TestPriv
     }
 
     static function f()
-    {
+:mixed    {
         new DerivedPriv;
     }
 }

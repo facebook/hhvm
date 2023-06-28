@@ -1,12 +1,12 @@
 <?hh
 
-function block() {
+function block() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
-async function test() {
+async function test() :Awaitable<mixed>{
   $closure = function ($a) {
     echo "closure\n";
     return $a + 1;
@@ -25,7 +25,7 @@ async function test() {
 }
 
 <<__EntryPoint>>
-function main_closure_in_async() {
+function main_closure_in_async() :mixed{
 ;
 
 HH\Asio\join(test());

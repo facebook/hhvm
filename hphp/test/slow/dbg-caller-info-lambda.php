@@ -1,16 +1,16 @@
 <?hh
 
-function dump_info() {
+function dump_info() :mixed{
   return hphp_debug_caller_info();
 }
 
 class Foo {
-  function bar() { return () ==> var_dump(dump_info()); }
-  static function sbar() { return () ==> var_dump(dump_info()); }
+  function bar() :mixed{ return () ==> var_dump(dump_info()); }
+  static function sbar() :mixed{ return () ==> var_dump(dump_info()); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(dump_info());
   var_dump(() ==> { return dump_info(); }());
   var_dump(() ==> { return dump_info(); }());

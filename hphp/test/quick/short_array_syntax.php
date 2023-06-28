@@ -1,5 +1,5 @@
 <?hh
-function f($x = varray[1]) {
+function f($x = varray[1]) :mixed{
   return $x;
 }
 class C {

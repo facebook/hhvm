@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
     $test_value = 12345.123456;
     $fmt = ut_nfmt_create( "en_US", NumberFormatter::PATTERN_DECIMAL );

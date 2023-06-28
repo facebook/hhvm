@@ -1,5 +1,5 @@
 <?hh
-function f($a) {
+function f($a) :mixed{
   $a["four"] = 4;
   return $a;
 }

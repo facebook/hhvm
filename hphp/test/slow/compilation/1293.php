@@ -2,7 +2,7 @@
 class X {
   public static $foo;
 }
-function test() {
+function test() :mixed{
   $x = new X;
   $foo = 'foo';
   if (isset($x->$foo) || !($x->$foo ?? false) ||      isset($x->{
@@ -18,7 +18,7 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_1293() {
+function main_1293() :mixed{
 $data = new stdClass;
 $type = 'OCI-Lob';
 if (is_a($data, $type)) {

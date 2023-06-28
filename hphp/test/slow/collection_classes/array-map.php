@@ -1,13 +1,13 @@
 <?hh
 
-function plusOne($x) { return $x + 1; }
-function multiply($x, $y) {
+function plusOne($x) :mixed{ return $x + 1; }
+function multiply($x, $y) :mixed{
   if (is_null($x)) $x = -1;
   if (is_null($y)) $y = -1;
   return $x * $y;
 }
 
-function test_mapping() {
+function test_mapping() :mixed{
   echo "* ", __FUNCTION__, " *\n";
   var_dump(array_map(plusOne<>, Vector {3, 5, 7}));
   var_dump(array_map(plusOne<>, Map {2 => 0, 5 => 2, 6 => 4}));
@@ -31,7 +31,7 @@ function test_mapping() {
   echo "\n";
 }
 
-function map_for_key_conversion($collection) {
+function map_for_key_conversion($collection) :mixed{
   echo "========\n";
   // serialization and not var_dump preserves whether keys are ints or strings
   var_dump($collection);
@@ -42,7 +42,7 @@ function map_for_key_conversion($collection) {
   var_dump(count($arr) === count($collection));
 }
 
-function test_key_conversion() {
+function test_key_conversion() :mixed{
   map_for_key_conversion(Vector {'3', '5', '7'});
   map_for_key_conversion(Map {'2' => '0', '5' => '2', '6' => '4'});
   map_for_key_conversion(ImmMap {'1' => 'a', 1 => 'b'});
@@ -51,13 +51,13 @@ function test_key_conversion() {
   map_for_key_conversion(Pair {'11', '22'});
 }
 
-function main() {
+function main() :mixed{
   test_mapping();
   test_key_conversion();
 }
 
 <<__EntryPoint>>
-function main_array_map() {
+function main_array_map() :mixed{
 error_reporting(0);
 main();
 }

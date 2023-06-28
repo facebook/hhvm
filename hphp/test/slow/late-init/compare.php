@@ -6,7 +6,7 @@ class A {
   public $z = 'abc';
 }
 
-function test($name, $a, $b) {
+function test($name, $a, $b) :mixed{
   echo "==== $name ====\n";
   try {
     var_dump($a === $b);

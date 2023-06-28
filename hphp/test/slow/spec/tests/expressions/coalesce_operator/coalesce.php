@@ -1,11 +1,11 @@
 <?hh
 
-function foobar() {
+function foobar() :mixed{
     echo "called\n";
     return varray['a'];
 }
 function f($x)
-{
+:mixed{
     printf("%s(%d)\n", __FUNCTION__, $x);
     return $x;
 }

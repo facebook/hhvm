@@ -1,7 +1,7 @@
 <?hh
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
 	if ($err_no & error_reporting()) {
 		// report non-silenced errors
 		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -11,7 +11,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 // define some classes
 class classWithToString
 {
-	public function __toString() {
+	public function __toString() :mixed{
 		return "Class A object";
 	}
 }

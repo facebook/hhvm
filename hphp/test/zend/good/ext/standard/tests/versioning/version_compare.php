@@ -1,6 +1,6 @@
 <?hh
 
-function test($v1, $v2) {
+function test($v1, $v2) :mixed{
     $compare = version_compare($v1, $v2);
     switch ($compare) {
     case -1:

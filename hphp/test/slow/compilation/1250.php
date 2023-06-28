@@ -8,7 +8,7 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1250() {
+function main_1250() :mixed{
 $a = 1;
  $a = new A();
  $a->a['t'] = true;

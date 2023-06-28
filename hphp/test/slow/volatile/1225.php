@@ -1,11 +1,11 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   if ($a) {
     include '1225-1.inc';
   }
 }
-function bar() {
+function bar() :mixed{
   if (interface_exists('A')) {
     include '1225-2.inc';
     $obj = new C;
@@ -17,7 +17,7 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_1225() {
+function main_1225() :mixed{
 foo(true);
 bar();
 }

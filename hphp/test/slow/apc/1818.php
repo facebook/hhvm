@@ -5,7 +5,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = varray[new A];
   apc_store('key1', $a);
   $b = __hhvm_intrinsics\apc_fetch_no_check('key1');

@@ -1,10 +1,10 @@
 <?hh
 
 class one {
-  public function foo() { echo "foo\n"; }
+  public function foo() :mixed{ echo "foo\n"; }
 }
 class doer {
-  public function junk($x) {
+  public function junk($x) :mixed{
     $x->foo();
   }
 }

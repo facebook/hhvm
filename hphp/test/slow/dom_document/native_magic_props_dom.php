@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_native_magic_props_dom() {
+function main_native_magic_props_dom() :mixed{
 $doc = new DOMDocument();
 var_dump($doc->version); // native
 

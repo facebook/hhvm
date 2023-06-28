@@ -34,6 +34,6 @@ function f8(): Vector<(function(int): int)> {
 
 
 <<__EntryPoint>>
-function main_type_list_trailing_comma() {
+function main_type_list_trailing_comma() :mixed{
 echo 'Done';
 }

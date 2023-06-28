@@ -7,7 +7,7 @@ class base
     private $c=3;
 
     function f()
-    {
+:mixed    {
         foreach($this as $k=>$v) {
             echo "$k=>$v\n";
         }

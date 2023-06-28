@@ -13,7 +13,7 @@ enum Bar: string {
 type TFoo = Foo;
 type TBar = Bar;
 
-function is_foo(mixed $x) {
+function is_foo(mixed $x) :mixed{
   if ($x is TFoo) {
     echo "Foo\n";
   } else {
@@ -21,7 +21,7 @@ function is_foo(mixed $x) {
   }
 }
 
-function is_bar(mixed $x) {
+function is_bar(mixed $x) :mixed{
   if ($x is TBar) {
     echo "Bar\n";
   } else {

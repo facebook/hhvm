@@ -1,10 +1,10 @@
 <?hh
 
-function heh($ar) {
+function heh($ar) :mixed{
   if (!$ar) throw new Exception('a');
   return 42;
 }
-function bar($ar) {
+function bar($ar) :mixed{
   $tmp = 54;
   try {
     $tmp = heh($ar);
@@ -16,7 +16,7 @@ function bar($ar) {
 
 
 <<__EntryPoint>>
-function main_dce_003() {
+function main_dce_003() :mixed{
 bar(varray['a']);
 bar(varray[]);
 }

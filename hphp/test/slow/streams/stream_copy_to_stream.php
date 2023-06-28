@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_copy_to_stream() {
+function main_stream_copy_to_stream() :mixed{
 $input = fopen('php://memory','r+');
 fwrite($input,'123456');
 

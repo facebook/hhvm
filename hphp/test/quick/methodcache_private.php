@@ -1,19 +1,19 @@
 <?hh
 
 class one {
-  public function lol() {}
+  public function lol() :mixed{}
 
-  public function doit($o) {
+  public function doit($o) :mixed{
     $o->heh();
   }
 
-  private function heh() {
+  private function heh() :mixed{
     echo "one\n";
   }
 }
 
 class two extends one {
-  private function heh() {
+  private function heh() :mixed{
     echo "two\n";
   }
 }

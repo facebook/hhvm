@@ -3,7 +3,7 @@
 abstract class Foo {
   abstract const type TCls;
 
-  function hello() {
+  function hello() :mixed{
     echo type_structure(static::class, 'TCls')['classname'];
   }
 }
@@ -21,7 +21,7 @@ class Buz extends Foo {
   const type TCls = Awaitable;
 }
 
-function main() {
+function main() :mixed{
   (new Bar)->hello(); echo ", ";
   (new Baz)->hello(); echo ", ";
   (new Biz)->hello(); echo ", ";
@@ -30,6 +30,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_opt_type_structure() {
+function main_opt_type_structure() :mixed{
 for ($i = 0; $i < 10; $i++) main();
 }

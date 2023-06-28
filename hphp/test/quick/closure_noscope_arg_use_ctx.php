@@ -3,7 +3,7 @@
 class foo {
   private $test = 3;
 
-  public function x($fn) {
+  public function x($fn) :mixed{
     $this->a = $fn;
     var_dump($this->a->__invoke());
     var_dump(is_a($this->a, 'Closure'));

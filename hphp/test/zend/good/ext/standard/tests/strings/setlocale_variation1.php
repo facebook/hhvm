@@ -13,7 +13,7 @@
    Arguments  : Nil
    Returns    : set of locale as array
 */
-function list_system_locales() {
+function list_system_locales() :mixed{
   // start the buffering of next command to internal output buffer
   ob_start();
 

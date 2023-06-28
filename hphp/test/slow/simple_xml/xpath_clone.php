@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_xpath_clone() {
+function main_xpath_clone() :mixed{
 $doc1 = new SimpleXMLElement('<test><a>content</a></test>');
 var_dump($doc1->xpath("a"));
 

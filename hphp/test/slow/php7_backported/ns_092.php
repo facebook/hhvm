@@ -2,9 +2,9 @@
 namespace Foo\Bar {
     class A { function __construct() {echo __METHOD__,"\n";} }
     class B { function __construct() {echo __METHOD__,"\n";} }
-    function fiz(){ echo __FUNCTION__,"\n"; }
-    function biz(){ echo __FUNCTION__,"\n"; }
-    function buz(){ echo __FUNCTION__,"\n"; }
+    function fiz():mixed{ echo __FUNCTION__,"\n"; }
+    function biz():mixed{ echo __FUNCTION__,"\n"; }
+    function buz():mixed{ echo __FUNCTION__,"\n"; }
     const FOO = 1;
     const BAR = 2;
 }
@@ -24,7 +24,7 @@ namespace Fiz\Biz\Buz {
 
     use Foo\Bar\{ A, B, const BAR as BOZ };
 
-    function buz(){ echo __FUNCTION__,"\n"; }
+    function buz():mixed{ echo __FUNCTION__,"\n"; }
     const FOO = 100;
 
     <<__EntryPoint>> function main(): void {

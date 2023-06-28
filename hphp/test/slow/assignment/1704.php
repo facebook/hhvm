@@ -1,18 +1,18 @@
 <?hh
 
-function f($a) {
+function f($a) :mixed{
   var_dump($a);
 }
 class ClassA {
   public static $val = 1;
-  function foo() {
+  function foo() :mixed{
     f($val = 'val');
     f($this->$val = 2);
   }
-  function foo2() {
+  function foo2() :mixed{
     f($this->val = 3);
   }
-  function bar() {
+  function bar() :mixed{
     try {
       var_dump($val);
     } catch (UndefinedVariableException $e) {
@@ -23,7 +23,7 @@ class ClassA {
 }
 
 <<__EntryPoint>>
-function main_1704() {
+function main_1704() :mixed{
   $obj = new ClassA();
   var_dump($obj);
   $obj->foo();

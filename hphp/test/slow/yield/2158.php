@@ -1,6 +1,6 @@
 <?hh
 
-function foo($t) {
+function foo($t) :mixed{
   $x = function() use ($t) {
     var_dump($t);
     yield 1;
@@ -12,6 +12,6 @@ function foo($t) {
 }
 
 <<__EntryPoint>>
-function main_2158() {
+function main_2158() :mixed{
 foo(42);
 }

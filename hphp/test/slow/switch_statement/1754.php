@@ -1,6 +1,6 @@
 <?hh
 
-function f_str($x) {
+function f_str($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, -1)) {
@@ -18,7 +18,7 @@ function f_str($x) {
     break;
   }
 }
-function f_bool($x) {
+function f_bool($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, -10)) {
@@ -36,7 +36,7 @@ function f_bool($x) {
     break;
   }
 }
-function f_dbl($x) {
+function f_dbl($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5000000)) {
@@ -54,7 +54,7 @@ function f_dbl($x) {
     break;
   }
 }
-function f_dbl_notpe($x) {
+function f_dbl_notpe($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5000000)) {
@@ -72,7 +72,7 @@ function f_dbl_notpe($x) {
     break;
   }
 }
-function f_int($x) {
+function f_int($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch ($x) {
@@ -93,7 +93,7 @@ function f_int($x) {
     break;
   }
 }
-function f($x) {
+function f($x) :mixed{
   var_dump($x);
   print ' goes to: ';
   switch (HH\Lib\Legacy_FIXME\int_cast_for_switch($x, 5)) {
@@ -111,11 +111,11 @@ function f($x) {
     break;
   }
 }
-function fcn($x) {
+function fcn($x) :mixed{
  if ($x) return 5;
  return 'bar';
  }
-function st($x) {
+function st($x) :mixed{
   switch ($y = $x) {
   case 0:
     print '0';
@@ -152,7 +152,7 @@ class M{
 }
 
 <<__EntryPoint>>
-function main_1754() {
+function main_1754() :mixed{
 f(0);
 f(-1);
 f(1);

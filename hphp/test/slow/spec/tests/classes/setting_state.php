@@ -16,24 +16,24 @@ class Point
     }
 
     public function move($x, $y)
-    {
+:mixed    {
         $this->x = $x;
         $this->y = $y;
     }
 
     public function translate($x, $y)
-    {
+:mixed    {
         $this->x += $x;
         $this->y += $y;
     }
 
     public function __toString()
-    {
+:mixed    {
         return '(' . $this->x . ',' . $this->y . ')';
     }
 ///*
     static public function __set_state(darray $properties)
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);
 
@@ -56,7 +56,7 @@ class B
     }
 
     static public function __set_state(darray $properties)
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);
 
@@ -79,7 +79,7 @@ class D extends B
     }
 ///*
     static public function __set_state(darray $properties)
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);
 

@@ -2,6 +2,6 @@
 
 module b;
 
-function bar() {
+function bar() :mixed{
   echo "In bar\n";
 }

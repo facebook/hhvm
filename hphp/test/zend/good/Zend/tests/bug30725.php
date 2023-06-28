@@ -3,7 +3,7 @@
 class Test implements IteratorAggregate
 {
     function getIterator()
-    {
+:mixed    {
         throw new Exception();
     }
 }

@@ -5,19 +5,19 @@ class MyElement extends DOMElement {
   public $id;
   public static $next = 0;
 
-  function init() {
+  function init() :mixed{
     $this->id = MyElement::$next++;
     echo "Initializing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
 
     return $this;
   }
 
-  function info() {
+  function info() :mixed{
     echo "Querying DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
   }
 }
 
-function foo() {
+function foo() :mixed{
   echo "Enter foo()\n";
   $dom = new DOMDocument;
   $dom->registerNodeClass('DOMElement', 'MyElement');
@@ -30,7 +30,7 @@ function foo() {
   return varray[$dom, $child];
 }
 
-function bar() {
+function bar() :mixed{
   echo "Enter bar()\n";
   list($d, $c) = foo();
 
@@ -44,7 +44,7 @@ function bar() {
 
 
 <<__EntryPoint>>
-function main_dom_node_destruction_v1() {
+function main_dom_node_destruction_v1() :mixed{
 echo "Enter main()\n";
 bar();
 echo "Leave main()\n";

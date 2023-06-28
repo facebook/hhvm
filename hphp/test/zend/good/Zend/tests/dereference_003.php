@@ -2,20 +2,20 @@
 
 class  foo {
 	public $x = 2;
-	public function a() {
+	public function a() :mixed{
 		$x = varray[];
 		$x[] = new foo;
 		return $x;
 	}
-	public function b() {
+	public function b() :mixed{
 		return varray[1.2, varray[new self]];
 	}
-	public function c(inout $a, inout $b) {
+	public function c(inout $a, inout $b) :mixed{
 		$a = varray[];
 		$a[] = true;
 		return $a;
 	}
-	public function d() {
+	public function d() :mixed{
 		return $this->b();
 	}
 }

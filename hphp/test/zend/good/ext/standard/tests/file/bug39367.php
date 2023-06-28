@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
   $f1 = sys_get_temp_dir() . '/1link';
   $f2 = sys_get_temp_dir() . '/1tmp';
   $f3 = sys_get_temp_dir() . '/testfile1';

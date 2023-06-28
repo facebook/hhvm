@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = keyset[0, 1];
   array_unshift(inout $x, 0);
   var_dump($x);

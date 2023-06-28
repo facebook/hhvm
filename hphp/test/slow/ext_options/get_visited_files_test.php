@@ -1,6 +1,6 @@
 <?hh
 
-function foo($files) {
+function foo($files) :mixed{
   if (!$files) {
     echo "Empty\n";
     return;
@@ -19,7 +19,7 @@ function foo($files) {
 // This file is not included in the output.
 
 <<__EntryPoint>>
-function main_get_included_files_test() {
+function main_get_included_files_test() :mixed{
 // Test when it's not turned on
 include 'test1.inc';
 foo(get_visited_files());

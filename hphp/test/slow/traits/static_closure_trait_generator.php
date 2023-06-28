@@ -6,7 +6,7 @@ class Ref {
 
 class Foo { const Bar = 12; }
 trait Yoyo {
-  function cl($k) {
+  function cl($k) :mixed{
     $ref = new Ref(42);
     return function() use ($k, $ref) {
       yield $ref->val++ . "2\n";
@@ -20,7 +20,7 @@ class Blah {
   use Yoyo;
 }
 
-function main() {
+function main() :mixed{
   $k = (new Blah)->cl(1);
   foreach ($k() as $x) {
     echo $x . "\n";
@@ -35,7 +35,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_static_closure_trait_generator() {
+function main_static_closure_trait_generator() :mixed{
 ;
 
 main();

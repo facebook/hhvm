@@ -11,12 +11,12 @@ class ImmSet {
   }
 }
 
-function main() {
+function main() :mixed{
   $custom_set = new ImmSet();
 }
 
 
 <<__EntryPoint>>
-function main_hh_frozenset4() {
+function main_hh_frozenset4() :mixed{
 main();
 }

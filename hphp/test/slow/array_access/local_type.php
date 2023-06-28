@@ -3,7 +3,7 @@
 class thing {
   private $prop;
 
-  function go() {
+  function go() :mixed{
     $idx = 'five';
     $instances = darray[];
     $instances[(string)$this->prop] = false;
@@ -13,7 +13,7 @@ class thing {
 
 
 <<__EntryPoint>>
-function main_local_type() {
+function main_local_type() :mixed{
 $t = new thing;
 var_dump($t->go());
 }

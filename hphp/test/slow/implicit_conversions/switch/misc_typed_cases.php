@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f(true);
   f(false);
   f(null);
@@ -35,7 +35,7 @@ class Herp {
   public function __construct(public $x)[] {}
 }
 
-function f($arg) {
+function f($arg) :mixed{
   var_dump($arg);
   print "goes to:\n";
   switch ($arg) {

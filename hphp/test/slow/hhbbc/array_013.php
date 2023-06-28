@@ -1,9 +1,9 @@
 <?hh
 
-function foo(bool $x) {
+function foo(bool $x) :mixed{
   return darray['flag' => darray['flag2' => $x]];
 }
-function bar() {
+function bar() :mixed{
   $x = foo(true);
   $y = foo(false);
   $z = $x['flag']['flag2'];
@@ -12,6 +12,6 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_array_013() {
+function main_array_013() :mixed{
 bar();
 }

@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x = Vector {1};
   $y = $x->toImmVector();
   $x[0] += 2;
@@ -99,6 +99,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_vector_buffer_sharing() {
+function main_vector_buffer_sharing() :mixed{
 main();
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function MyAverage($nodelist) {
+function MyAverage($nodelist) :mixed{
     $count = 0;
     $val = 0;
     foreach ($nodelist as $node) {

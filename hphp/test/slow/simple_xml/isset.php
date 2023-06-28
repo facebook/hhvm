@@ -1,5 +1,5 @@
 <?hh
-function test_isset($str) {
+function test_isset($str) :mixed{
   $xml = '<field Default="' . $str . '"/>';
   $field = new SimpleXMLElement($xml);
   var_dump(isset($field));
@@ -9,7 +9,7 @@ function test_isset($str) {
 
 
 <<__EntryPoint>>
-function main_isset() {
+function main_isset() :mixed{
 test_isset("");
 test_isset("No");
 test_isset("Yes");

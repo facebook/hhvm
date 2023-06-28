@@ -7,7 +7,7 @@ function default_param(readonly int $v = readonly(foo()))[]: void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   default_param();
   echo "done.\n";
 }

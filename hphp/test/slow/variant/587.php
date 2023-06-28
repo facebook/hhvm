@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_587() {
+function main_587() :mixed{
 $a = 't';
  $a = 10;
  $a /= HH\Lib\Legacy_FIXME\cast_for_arithmetic('5');

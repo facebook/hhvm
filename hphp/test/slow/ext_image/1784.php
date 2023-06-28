@@ -3,7 +3,7 @@
 
 // Create a new image instance
 <<__EntryPoint>>
-function main_1784() {
+function main_1784() :mixed{
 $im = imagecreatetruecolor(100, 100);
 // Make the background white
 imagefilledrectangle($im, 0, 0, 99, 99, 0xFFFFFF);

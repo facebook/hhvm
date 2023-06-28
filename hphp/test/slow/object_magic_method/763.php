@@ -1,5 +1,5 @@
 <?hh
-function test($t) {
+function test($t) :mixed{
   var_dump('test:'.$t);
   (new $t(1,2))->foo();
 }

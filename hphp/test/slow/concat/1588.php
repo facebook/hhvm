@@ -1,10 +1,10 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   echo " FOO ";
   return " foo ";
 }
-function bar() {
+function bar() :mixed{
   echo " hello " . foo() . "
 ";
   echo " hello " , foo() , "
@@ -12,6 +12,6 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_1588() {
+function main_1588() :mixed{
 bar();
 }

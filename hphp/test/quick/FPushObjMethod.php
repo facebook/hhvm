@@ -4,7 +4,7 @@ class C {
   function __construct() {
     print "In C::__construct()\n";
   }
-  static function sMeth() {
+  static function sMeth() :mixed{
     print "In C::sMeth()\n";
   }
 }
@@ -17,14 +17,14 @@ class I extends F {
   }
 }
 
-function anon($o) {
+function anon($o) :mixed{
   print "In anon()\n";
 //  $o->fPrivate();
 //  $o->fProtected();
   $o->fPublic();
 }
 class W {
-  static public function fW($o) {
+  static public function fW($o) :mixed{
     print "In W::fW()\n";
 //    $o->fPrivate();
 //    $o->fProtected();
@@ -32,19 +32,19 @@ class W {
   }
 }
 class X {
-  private function fPrivateX() {
+  private function fPrivateX() :mixed{
     print "  In X::fPrivateX()\n";
   }
-  private function fPrivate() {
+  private function fPrivate() :mixed{
     print "  In X::fPrivate()\n";
   }
-  protected function fProtected() {
+  protected function fProtected() :mixed{
     print "  In X::fProtected()\n";
   }
-  public function fPublic() {
+  public function fPublic() :mixed{
     print "  In X::fPublic()\n";
   }
-  public function fX() {
+  public function fX() :mixed{
     print "In X::fX()\n";
     $this->fPrivateX();
     $this->fPrivate();
@@ -53,19 +53,19 @@ class X {
   }
 }
 class Y extends X {
-  private function fPrivateY() {
+  private function fPrivateY() :mixed{
     print "  In Y::fPrivateY()\n";
   }
-  private function fPrivate() {
+  private function fPrivate() :mixed{
     print "  In Y::fPrivate()\n";
   }
-  protected function fProtected() {
+  protected function fProtected() :mixed{
     print "  In Y::fProtected()\n";
   }
-  public function fPublic() {
+  public function fPublic() :mixed{
     print "  In Y::fPublic()\n";
   }
-  public function fY() {
+  public function fY() :mixed{
     print "In Y::fY()\n";
     $this->fPrivateY();
     $this->fPrivate();
@@ -74,19 +74,19 @@ class Y extends X {
   }
 }
 class Z extends Y {
-  private function fPrivateZ() {
+  private function fPrivateZ() :mixed{
     print "  In Z::fPrivateZ()\n";
   }
-  private function fPrivate() {
+  private function fPrivate() :mixed{
     print "  In Z::fPrivate()\n";
   }
-  protected function fProtected() {
+  protected function fProtected() :mixed{
     print "  In Z::fProtected()\n";
   }
-  public function fPublic() {
+  public function fPublic() :mixed{
     print "  In Z::fPublic()\n";
   }
-  public function fZ() {
+  public function fZ() :mixed{
     print "In Z::fZ()\n";
     $this->fPrivateZ();
     $this->fPrivate();

@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...) :mixed{
   $matches = null;
   $pat1 = '/Argument ([0-9]+) passed to ([^(]+)\(\) must be an instance of ([^,]+), clsmeth given/';
   if (preg_match_with_matches($pat1, $msg, inout $matches)) {
@@ -21,9 +21,9 @@ function handle_error($_no, $msg, ...) {
   return false;
 }
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
 class R<reify Tarr, reify Tvar, reify Ttrav, reify Tcont> {
   function args(
@@ -55,7 +55,7 @@ class R<reify Tarr, reify Tvar, reify Ttrav, reify Tcont> {
     inout Tvar $varr,
     inout Ttrav $trav,
     inout Tcont $cont,
-  ) {
+  ) :mixed{
     var_dump(
       $arr,
       $varr,
@@ -69,7 +69,7 @@ class R<reify Tarr, reify Tvar, reify Ttrav, reify Tcont> {
   }
 }
 
-function test_static() {
+function test_static() :mixed{
   $R = new R<AnyArray, varray, Traversable, Container>();
 
   try {
@@ -107,7 +107,7 @@ function test_static() {
   } catch (Exception $_) {}
 }
 
-function test_dynamic() {
+function test_dynamic() :mixed{
   $R = new R<AnyArray, varray, Traversable, Container>();
 
   try {
@@ -146,7 +146,7 @@ function test_dynamic() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   test_static();  test_static();  test_static();

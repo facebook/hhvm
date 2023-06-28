@@ -1,9 +1,9 @@
 <?hh
 class test {
-  function extend_zend_ptr_stack($count,$a,$b,$c,$d,$e) {
+  function extend_zend_ptr_stack($count,$a,$b,$c,$d,$e) :mixed{
     if ($count>0) $this->extend_zend_ptr_stack($count - 1,$a,$b,$c,$d,$e);
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     $this->extend_zend_ptr_stack(10,'a','b','c','d','e');
   }
 }

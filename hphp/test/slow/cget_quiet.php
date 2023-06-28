@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $var1 = 'no_var';
   $var2 = 'var1';
   var_dump($no_var ?? 0);

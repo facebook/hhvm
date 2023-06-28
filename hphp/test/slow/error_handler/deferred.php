@@ -1,12 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function make_error() {
+function make_error() :mixed{
   $a = darray['x' => 2];
   $a->foo;
 }
 
-function error_handler1() {
+function error_handler1() :mixed{
   echo "===================== error_handler1 =========================\n";
   var_dump(HH\deferred_errors());
   make_error();
@@ -15,7 +15,7 @@ function error_handler1() {
   echo "==============================================================\n";
 }
 
-function error_handler2() {
+function error_handler2() :mixed{
   echo "===================== error_handler2 =========================\n";
   var_dump(count(HH\deferred_errors()));
   for ($i = 0; $i < 100; $i++) {
@@ -28,7 +28,7 @@ function error_handler2() {
   echo "==============================================================\n";
 }
 
-function error_handler3() {
+function error_handler3() :mixed{
   echo "===================== error_handler3 =========================\n";
   make_error();
   make_error();

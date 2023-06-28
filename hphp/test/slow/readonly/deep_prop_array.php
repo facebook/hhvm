@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $p = readonly new P(5);
   $p->inner[] = 5; // error, $p is readonly
 }

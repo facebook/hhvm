@@ -6,19 +6,19 @@
 // the output to change, inspect the results carefully to ensure we
 // have a balanced enter/exit for every call.
 
-async function genList(...$args) {
+async function genList(...$args) :Awaitable<mixed>{
   await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
-async function gen1($a) {
+async function gen1($a) :Awaitable<mixed>{
   error_log('In gen1');
   error_log('Finished in gen1');
   await RescheduleWaitHandle::create(0, 0); // simulate blocking I/O
   return $a + 1;
 }
 
-async function gen2($a) {
+async function gen2($a) :Awaitable<mixed>{
   error_log('In gen2');
   await RescheduleWaitHandle::create(0, $a); // simulate blocking I/O
   $x = HH\Asio\join(gen1($a));
@@ -26,7 +26,7 @@ async function gen2($a) {
   return $x;
 }
 
-async function genBar($a) {
+async function genBar($a) :Awaitable<mixed>{
   error_log('In genBar');
   var_dump($a);
   await RescheduleWaitHandle::create(0, $a); // simulate blocking I/O
@@ -34,7 +34,7 @@ async function genBar($a) {
   return $a + 2;
 }
 
-async function genFoo($a) {
+async function genFoo($a) :Awaitable<mixed>{
   error_log('In genFoo');
   var_dump($a);
   $a++;
@@ -49,11 +49,11 @@ async function genFoo($a) {
   return $x + $y;
 }
 
-function proffunc($event, $name, $info) {
+function proffunc($event, $name, $info) :mixed{
   echo "** $event $name\n";
 }
 
-function main($a) {
+function main($a) :mixed{
   fb_setprofile(
     proffunc<>,
     SETPROFILE_FLAGS_RESUME_AWARE | SETPROFILE_FLAGS_DEFAULT,

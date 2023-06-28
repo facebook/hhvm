@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_syntaxerror_string() {
+function main_syntaxerror_string() :mixed{
 print "Before error\n";
 $result = eval("function foo() { echo foo }");
 if ($result === false) {

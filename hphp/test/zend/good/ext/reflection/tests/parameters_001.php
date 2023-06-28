@@ -1,7 +1,7 @@
 <?hh
 
 class Test {
-    function func($x, $y = NULL){
+    function func($x, $y = NULL):mixed{
     }
 }
 

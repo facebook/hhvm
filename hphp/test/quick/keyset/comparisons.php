@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function single_compare($a, $b) {
+function single_compare($a, $b) :mixed{
   echo "Comparing:\n";
   var_dump($a);
   var_dump($b);
@@ -70,7 +70,7 @@ function single_compare($a, $b) {
   }
 }
 
-function compare($a, $b) {
+function compare($a, $b) :mixed{
   single_compare($a, $b);
   single_compare($b, $a);
 }

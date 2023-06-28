@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\global_set('n', 10);
   $vals = varray[];
   for ($i = 0; $i < 10; $i++) {

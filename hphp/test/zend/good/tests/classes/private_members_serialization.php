@@ -9,7 +9,7 @@ class foo
 class bar extends foo
 {
     public function __sleep()
-    {
+:mixed    {
         return varray["\0foo\0private", 'protected', 'public'];
     }
 }

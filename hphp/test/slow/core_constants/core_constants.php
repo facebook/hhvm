@@ -6,7 +6,7 @@
 // This may work on FreeBSD but has not been
 // tested.
 <<__EntryPoint>>
-function main_core_constants() {
+function main_core_constants() :mixed{
 $pid = posix_getpid();
 $output = null;
 $return_var = -1;

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   invariant(HH\jumpstart_source_host() !== null, "");
   var_dump(HH\get_request_health()["jit_maturity"]);
   var_dump(HH\jit_jumpstarted());

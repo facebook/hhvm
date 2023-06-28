@@ -18,7 +18,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_hhbbc3() {
+function main_hhbbc3() :mixed{
 var_dump(
   A::foo(
     __hhvm_intrinsics\launder_value(darray(vec['a', 'b', 'c'])),

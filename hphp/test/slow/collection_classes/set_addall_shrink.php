@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $s = Set {};
   $s->addAll(Vector{1});
   $s->reserve(23);
@@ -8,6 +8,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_addall_shrink() {
+function main_set_addall_shrink() :mixed{
 main();
 }

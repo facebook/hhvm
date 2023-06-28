@@ -13,14 +13,14 @@ class Bar {
   public static $prop9;
   public static $prop10;
 
-  static function set($f) {
+  static function set($f) :mixed{
     self::$prop1 = self::$prop2 = self::$prop3 =
     self::$prop4 = self::$prop5 = self::$prop6 =
     self::$prop7 = self::$prop8 = self::$prop9 =
     self::$prop10 = $f();
   }
 
-  static function dump() {
+  static function dump() :mixed{
     var_dump(self::$prop1);
     var_dump(self::$prop2);
     var_dump(self::$prop3);
@@ -34,7 +34,7 @@ class Bar {
   }
 }
 
-function main() {
+function main() :mixed{
   Bar::set(() ==> 123);
   Bar::dump();
 }

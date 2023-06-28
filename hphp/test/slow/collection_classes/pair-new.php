@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   try {
     var_dump(new Pair());
   } catch (Exception $e) {
@@ -13,6 +13,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_pair_new() {
+function main_pair_new() :mixed{
 main();
 }

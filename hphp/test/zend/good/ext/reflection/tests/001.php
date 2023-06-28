@@ -5,7 +5,7 @@ class ReflectionClassEx extends ReflectionClass
     public $bla;
 
     function getMethodNames()
-    {
+:mixed    {
         $res = varray[];
         foreach($this->getMethods() as $m)
         {

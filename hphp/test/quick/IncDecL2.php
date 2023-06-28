@@ -1,18 +1,18 @@
 <?hh
 
-function postInc(inout $x) {
+function postInc(inout $x) :mixed{
   return $x++;
 }
 
-function preInc(inout $x) {
+function preInc(inout $x) :mixed{
   return ++$x;
 }
 
-function postDec(inout $x) {
+function postDec(inout $x) :mixed{
   return $x--;
 }
 
-function preDec(inout $x) {
+function preDec(inout $x) :mixed{
   return --$x;
 }
 <<__EntryPoint>> function main(): void {

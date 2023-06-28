@@ -3,9 +3,9 @@
 class B<reify T> {}
 class C<reify T> {}
 
-function f(C<<<__Soft>> int> $_) { echo "done\n"; }
+function f(C<<<__Soft>> int> $_) :mixed{ echo "done\n"; }
 
-function g(B<C<<<__Soft>> int>> $_) { echo "done\n"; }
+function g(B<C<<<__Soft>> int>> $_) :mixed{ echo "done\n"; }
 <<__EntryPoint>>
 function entrypoint_paramwarn2(): void {
 

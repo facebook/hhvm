@@ -2,7 +2,7 @@
 
 class A {}
 
-function a() {
+function a() :mixed{
   $b = new A;
   $c = function() use ($b) {
     return $b;

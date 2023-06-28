@@ -7,20 +7,20 @@ class SomethingUnrelated {
 class Foo {
   private $name = "Foo";
 
-  public function blah(SomethingUnrelated $heh) {
+  public function blah(SomethingUnrelated $heh) :mixed{
     $heh->name = 1024;
   }
 
-  public function getName() { return $this->name; }
+  public function getName() :mixed{ return $this->name; }
 }
 
-function main() {
+function main() :mixed{
   $x = new Foo();
   $x->blah(new SomethingUnrelated);
   var_dump($x->getName());
 }
 
 <<__EntryPoint>>
-function main_minstr_005() {
+function main_minstr_005() :mixed{
 main();
 }

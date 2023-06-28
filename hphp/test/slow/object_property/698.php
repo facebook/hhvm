@@ -5,17 +5,17 @@ class X {
   private $i = 0;
   private $a = varray[];
   private $s = 'hello';
-  function set() {
+  function set() :mixed{
     $this->b = true;
     $this->i = 5;
     $this->a = varray[1,2,3];
     $this->s = 'goodbye';
   }
-  function foo() {
+  function foo() :mixed{
     var_dump($this->b, $this->i, $this->a, $this->s);
   }
 }
-function test() {
+function test() :mixed{
   $x = new X;
   $x->set();
   $s = serialize($x);
@@ -25,6 +25,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_698() {
+function main_698() :mixed{
 test();
 }

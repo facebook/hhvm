@@ -1,10 +1,10 @@
 <?hh
 
-function ob_handler($str) {
+function ob_handler($str) :mixed{
   return $str.'???';
 }
 
-function main() {
+function main() :mixed{
   $handler = function($str) {
     ob_start(ob_handler<>);
     echo $str.'!!!';
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_handler_recurse() {
+function main_handler_recurse() :mixed{
 main();
 }

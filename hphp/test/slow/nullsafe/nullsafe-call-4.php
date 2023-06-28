@@ -18,7 +18,7 @@ class F {}
 function test(C $c, bool $b): ?F {
   return $c->blah($b)?->bar()->baz();
 }
-function main() {
+function main() :mixed{
   $c = new C();
   var_dump(test($c, true));
   try {
@@ -29,6 +29,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_nullsafe_call_4() {
+function main_nullsafe_call_4() :mixed{
 main();
 }

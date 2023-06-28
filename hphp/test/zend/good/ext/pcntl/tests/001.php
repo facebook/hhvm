@@ -1,6 +1,6 @@
 <?hh
 
-function test_exit_waits(){
+function test_exit_waits():mixed{
   print "\n\nTesting pcntl_wifexited and wexitstatus....";
 
   $pid=pcntl_fork();
@@ -25,7 +25,7 @@ function test_exit_waits(){
   }
 }
 
-function test_exit_signal(){
+function test_exit_signal():mixed{
   print "\n\nTesting pcntl_wifsignaled....";
 
   $pid=pcntl_fork();
@@ -58,7 +58,7 @@ function test_exit_signal(){
   }
 }
 
-function test_stop_signal(){
+function test_stop_signal():mixed{
   print "\n\nTesting pcntl_wifstopped and pcntl_wstopsig....";
 
   $pid=pcntl_fork();

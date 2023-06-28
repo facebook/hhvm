@@ -7,7 +7,7 @@ class foo {
         $h[] = new stdClass;
         $this->x = $h;
     }
-    public function __invoke() {
+    public function __invoke() :mixed{
         return $this->x;
     }
 }

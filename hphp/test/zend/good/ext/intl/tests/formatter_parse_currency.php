@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     $fmt = ut_nfmt_create( "en_US", NumberFormatter::CURRENCY );

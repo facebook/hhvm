@@ -3,11 +3,11 @@
 class base {
     static protected $prop = 2;
 
-    static function show() {
+    static function show() :mixed{
         echo __METHOD__ . '(' . self::$prop . ")\n";
     }
 
-    static function inc() {
+    static function inc() :mixed{
         base::$prop++;
         echo __METHOD__ . "()\n";
     }
@@ -16,11 +16,11 @@ class base {
 class derived extends base {
     static public $prop = 2;
 
-    static function show() {
+    static function show() :mixed{
         echo __METHOD__ . '(' . self::$prop . ")\n";
     }
 
-    static function inc() {
+    static function inc() :mixed{
         derived::$prop++;
         echo __METHOD__ . "()\n";
     }

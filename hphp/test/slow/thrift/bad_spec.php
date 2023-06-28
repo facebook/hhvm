@@ -1,7 +1,7 @@
 <?hh
 
 interface IThriftStruct {
-  public function getName();
+  public function getName():mixed;
 }
 
 class NodeObject {
@@ -53,11 +53,11 @@ class NodeObject {
 
   public function clearTerseFields()[write_props]: void {}
 
-  public function getName() {
+  public function getName() :mixed{
     return 'NodeObject';
   }
 
-  public static function __set_state($vals) {
+  public static function __set_state($vals) :mixed{
     return new NodeObject($vals);
   }
 }
@@ -151,11 +151,11 @@ class EdgeObject {
 
   public function clearTerseFields()[write_props]: void {}
 
-  public function getName() {
+  public function getName() :mixed{
     return 'EdgeObject';
   }
 
-  public static function __set_state($vals) {
+  public static function __set_state($vals) :mixed{
     return new EdgeObject($vals);
   }
 }
@@ -207,7 +207,7 @@ class EdgeObjectWithBadSpec4 extends EdgeObject {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function testBadSpec($bad) {
+function testBadSpec($bad) :mixed{
   $p = new DummyProtocol();
   $v1 = new EdgeObject();
   $v1->appId = 1234;
@@ -229,7 +229,7 @@ function testBadSpec($bad) {
 }
 
 <<__EntryPoint>>
-function main_bad_spec() {
+function main_bad_spec() :mixed{
   require 'common.inc';
   testBadSpec('EdgeObjectWithBadSpec1');
   testBadSpec('EdgeObjectWithBadSpec2');

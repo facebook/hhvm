@@ -1,6 +1,6 @@
 <?hh
 
-function fib() {
+function fib() :AsyncGenerator<mixed,mixed,void>{
     list($a, $b) = varray[1, 1];
     while (true) {
         yield $b;

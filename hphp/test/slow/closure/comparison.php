@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_comparison() {
+function main_comparison() :mixed{
 $ca = function() {};
 $cb = function($a) { return $a; };
 

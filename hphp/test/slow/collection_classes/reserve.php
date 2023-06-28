@@ -1,6 +1,6 @@
 <?hh
 
-function try_reserve(Collection $c, int $sz) {
+function try_reserve(Collection $c, int $sz) :mixed{
   try {
     $c->reserve($sz);
     echo 'Reserved at least ', $sz, ' for a ',
@@ -10,7 +10,7 @@ function try_reserve(Collection $c, int $sz) {
   }
 }
 
-function reserve_cases(Collection $c) {
+function reserve_cases(Collection $c) :mixed{
   echo '------------------------------------------------------------', "\n";
   try_reserve($c, -1);
   try_reserve($c, 3);
@@ -19,7 +19,7 @@ function reserve_cases(Collection $c) {
   try_reserve($c, 15);
 }
 
-function main() {
+function main() :mixed{
   reserve_cases(Set {});
   reserve_cases(Map {});
   reserve_cases(Vector {});
@@ -33,6 +33,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reserve() {
+function main_reserve() :mixed{
 main();
 }

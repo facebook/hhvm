@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x1 = $x2 = $x3 = varray[32, 8, 19, 17, 23];
   $y1 = $y2 = $y3 = darray['orange' => 12, 'apple' => 0, 'banana' => 2];
 
@@ -17,6 +17,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_builtin_interop() {
+function main_builtin_interop() :mixed{
 main();
 }

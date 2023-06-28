@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_parse_ini_string() {
+function main_parse_ini_string() :mixed{
 $inis = darray[
   'general_ini_with_sections' =>
     ';;; Created on Tuesday, October 27, 2009 at 12:01 PM GMT'."\n".

@@ -1,6 +1,6 @@
 <?hh
 
-function f($x) {
+function f($x) :mixed{
   if (!is_array($x)) {
     var_dump($x[0]);
   }
@@ -14,11 +14,11 @@ function f($x) {
     var_dump($x[0]);
   }
 }
-function g($x) {
+function g($x) :mixed{
   if (!is_array($x)) return;
   var_dump($x[0]);
 }
-function h($x) {
+function h($x) :mixed{
   if (!is_array($x) && !is_string($x)) {
     var_dump('1');
   }
@@ -26,12 +26,12 @@ function h($x) {
     var_dump($x[0]);
   }
 }
-function i($x) {
+function i($x) :mixed{
   return !is_array($x) ? $x[0] : $x[0];
 }
 
 <<__EntryPoint>>
-function main_1859() {
+function main_1859() :mixed{
 f(varray[0, 1, 2]);
 g(varray[0, 1, 2]);
 h(varray[0, 1, 2]);

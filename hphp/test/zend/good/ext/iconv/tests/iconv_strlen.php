@@ -1,5 +1,5 @@
 <?hh
-function foo($str, $charset) {
+function foo($str, $charset) :mixed{
 	var_dump(strlen($str));
 	var_dump(iconv_strlen($str, $charset));
 }

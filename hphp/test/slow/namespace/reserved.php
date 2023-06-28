@@ -2,11 +2,11 @@
 
 namespace FOO;
 
-function int() {
+function int() :mixed{
   return function () {};
 }
 
 <<__EntryPoint>>
-function main_reserved() {
+function main_reserved() :mixed{
 \var_dump(\FOO\int());
 }

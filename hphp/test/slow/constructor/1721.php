@@ -27,7 +27,7 @@ class D extends C {
 }
 
 <<__EntryPoint>>
-function main_1721() {
+function main_1721() :mixed{
 $obj = new B();
 $obj = new B2();
 $obj = new D;

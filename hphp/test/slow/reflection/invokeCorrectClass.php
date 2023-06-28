@@ -1,10 +1,10 @@
 <?hh
 
 class Foo {
-  public static function bar() {
+  public static function bar() :mixed{
     echo static::class."\n";
   }
-  public function boo($var) {
+  public function boo($var) :mixed{
     var_dump($var);
     echo static::class."\n";
  }
@@ -13,7 +13,7 @@ class Baz extends Foo { }
 
 
 <<__EntryPoint>>
-function main_invoke_correct_class() {
+function main_invoke_correct_class() :mixed{
 $class = new ReflectionClass('Baz');
 $bar_method = $class->getMethod('bar');
 $bar_method->invoke(null); // the correct answer is 'Baz'

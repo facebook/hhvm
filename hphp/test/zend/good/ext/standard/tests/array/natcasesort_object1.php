@@ -18,7 +18,7 @@ class for_string_natcasesort
   }
 
   // return string value
-  function __toString() {
+  function __toString() :mixed{
    return (string)$this->class_value;
   }
 

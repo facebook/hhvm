@@ -1,6 +1,6 @@
 <?hh
 class C {
-  <<__DynamicallyCallable>> static public function func1() {
+  <<__DynamicallyCallable>> static public function func1() :mixed{
     return 1;
   }
 }
@@ -8,11 +8,11 @@ class C {
 class D extends C {
 }
 
-function typehint(callable $m) {
+function typehint(callable $m) :mixed{
   \var_dump($m, $m());
 }
 
-function check($m) {
+function check($m) :mixed{
   $n = null;
   \var_dump($m, is_callable($m));
   \var_dump(is_callable($m, true));
@@ -27,7 +27,7 @@ function check($m) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   typehint(vec[D::class, 'func1']);
   check(vec[D::class, 'func1']);
   typehint(D::func1<>);

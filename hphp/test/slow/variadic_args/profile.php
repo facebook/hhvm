@@ -1,17 +1,17 @@
 <?hh
 
-<<__NEVER_INLINE>> function test(...$x) {
+<<__NEVER_INLINE>> function test(...$x) :mixed{
   echo "not folding\n";
 }
 
-function main() {
+function main() :mixed{
   $a = varray[4, 5, 6];
   fb_setprofile(prof<>);
   test(1,2,3);
   test(...$a);
 }
 
-function prof($a, $b, $args) {
+function prof($a, $b, $args) :mixed{
   if ($a == 'enter') {
     var_dump($args);
   }
@@ -19,6 +19,6 @@ function prof($a, $b, $args) {
 
 
 <<__EntryPoint>>
-function main_profile() {
+function main_profile() :mixed{
 main();
 }

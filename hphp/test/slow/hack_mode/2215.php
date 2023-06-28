@@ -27,6 +27,6 @@ abstract class Foo {
 }
 
 <<__EntryPoint>>
-function main_2215() {
+function main_2215() :mixed{
 echo "Done\n";
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function run () {
+function run () :mixed{
     $x = 4;
 
     $lambda1 = function () use ($x) {

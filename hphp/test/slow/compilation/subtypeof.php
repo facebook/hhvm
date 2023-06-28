@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   $result = darray[];
 
 
@@ -24,12 +24,12 @@ function foo($a) {
   return $result;
 }
 
-function throwError(Exception $ex) {
+function throwError(Exception $ex) :mixed{
   throw $ex;
 }
 
 
 <<__EntryPoint>>
-function main_subtypeof() {
+function main_subtypeof() :mixed{
 var_dump(foo(42));
 }

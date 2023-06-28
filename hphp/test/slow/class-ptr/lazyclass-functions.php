@@ -19,7 +19,7 @@ abstract class Bar {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $classes = vec[Foo::class, Bar::class];
   foreach ($classes as $to_test) {
     var_dump($to_test);

@@ -3,9 +3,9 @@
 class Asd {
   public static $heh = Map { 'a' => 'b' };
 
-  function other() { self::$heh = new stdClass; }
+  function other() :mixed{ self::$heh = new stdClass; }
 
-  function foo() {
+  function foo() :mixed{
     var_dump(self::$heh);
     return self::$heh;
   }
@@ -13,6 +13,6 @@ class Asd {
 
 
 <<__EntryPoint>>
-function main_public_static_props_007() {
+function main_public_static_props_007() :mixed{
 (new Asd)->foo();
 }

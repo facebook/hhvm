@@ -13,12 +13,12 @@ class Pair {
 
 use Test\Pair;
 
-function main() {
+function main() :mixed{
   $custom_set = new Pair();
 }
 
 
 <<__EntryPoint>>
-function main_hh_pair4() {
+function main_hh_pair4() :mixed{
 main();
 }

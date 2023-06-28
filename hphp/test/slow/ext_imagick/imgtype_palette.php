@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_imgtype_palette() {
+function main_imgtype_palette() :mixed{
 $im = new Imagick;
 $im->readImage(__DIR__.'/facebook.png');
 

@@ -6,7 +6,7 @@ type FBID = int;
 <<__StrictType>>
 newtype FBID2 as int = FBID;
 
-function wat(<<__Soft>> FBID $x) {
+function wat(<<__Soft>> FBID $x) :mixed{
   var_dump($x);
 }
 function make_fbid2(int $id): FBID2 {
@@ -14,7 +14,7 @@ function make_fbid2(int $id): FBID2 {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   wat(42);
   wat(make_fbid2(5));
   wat("fail");

@@ -6,16 +6,16 @@ class Bar {
   }
 
   <<__DynamicallyCallable>>
-  public function baz($a) {
+  public function baz($a) :mixed{
     return $a + $this->base;
   }
   <<__DynamicallyCallable>>
-  public static function foo($a) {
+  public static function foo($a) :mixed{
     return $a + 1;
   }
 }
 <<__DynamicallyCallable>>
-function foo($a) {
+function foo($a) :mixed{
   return $a + 2;
 }
 <<__EntryPoint>> function main(): void {

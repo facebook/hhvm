@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_832() {
+function main_832() :mixed{
 $mapFn = function ($x) {
  return $x*3+1;
  }

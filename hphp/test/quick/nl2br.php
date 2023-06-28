@@ -2,7 +2,7 @@
 //Tests issue #3815
 
 //This makes reading the output easier for debugging
-function escapeNewLine($string) {
+function escapeNewLine($string) :mixed{
   return str_replace(varray["\n", "\r"], varray['\n', '\r'], $string);
 }
 <<__EntryPoint>> function main(): void {

@@ -4,7 +4,7 @@ const THIRD_KEY = "c";
 
 
 function test()
-{
+:mixed{
         $arr = darray[
                 FIRST_KEY => "111",
                 "b" => "222",
@@ -15,7 +15,7 @@ function test()
 }
 
 function test2()
-{
+:mixed{
         $arr = darray[
                 FIRST_KEY => "111",
                 "a" => "222",

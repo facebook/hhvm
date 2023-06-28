@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
   return "Hello World";
 }
 <<__EntryPoint>> function main(): void {

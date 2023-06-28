@@ -138,7 +138,7 @@ class OuterStructNoAdapter {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function getStruct() {
+function getStruct() :mixed{
   $v = new OuterStruct();
   $v->value = "42";
   $v->nested = new HackStruct("1337");
@@ -146,7 +146,7 @@ function getStruct() {
   return $v;
 }
 
-function testBinary() {
+function testBinary() :mixed{
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
@@ -159,7 +159,7 @@ function testBinary() {
   var_dump(thrift_protocol_read_binary($p, 'OuterStructNoAdapter', true));
 }
 
-function testCompact() {
+function testCompact() :mixed{
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
@@ -173,7 +173,7 @@ function testCompact() {
 }
 
 <<__EntryPoint>>
-function main_forward_compatibility() {
+function main_forward_compatibility() :mixed{
   require 'common.inc';
   echo "--- binary ---\n";
   testBinary();

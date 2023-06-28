@@ -11,6 +11,6 @@ async function test(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(test());
 }

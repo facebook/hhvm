@@ -1,16 +1,16 @@
 <?hh
 
-function test1() {
+function test1() :mixed{
  $a = varray[__FUNCTION__, __LINE__];
  return $a;
  }
-function test2() {
+function test2() :mixed{
  $a = varray[__FUNCTION__, __LINE__];
  return $a;
  }
 
 <<__EntryPoint>>
-function main_546() {
+function main_546() :mixed{
 var_dump(test1());
  var_dump(test2());
 }

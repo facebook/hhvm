@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_7() {
+function main_7() :mixed{
 apc_store("ts", 12);
 $res = null;
 if (apc_inc("ts", 1, inout $res) !== 13) echo "no\n";

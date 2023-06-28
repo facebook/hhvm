@@ -9,7 +9,7 @@ class Y {
 class X1 extends X {
   public $x = 'baz';
 }
-function f($x) {
+function f($x) :mixed{
   if ($x is X && isset($x->x)) {
     var_dump($x->x);
   }
@@ -22,7 +22,7 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main_1856() {
+function main_1856() :mixed{
 f(null);
 f(new X);
 f(new Y);

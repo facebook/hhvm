@@ -2,7 +2,7 @@
 
 class R { public $recur; }
 
-function main() {
+function main() :mixed{
   $recur = new R();
   $recur->recur = $recur;
   $recur2 = new R();
@@ -16,6 +16,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_compare_recursive_declared() {
+function main_compare_recursive_declared() :mixed{
 main();
 }

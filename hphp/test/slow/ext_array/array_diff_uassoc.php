@@ -1,12 +1,12 @@
 <?hh
 
-function comp_func($n1,$n2) {
+function comp_func($n1,$n2) :mixed{
   $n1=(int)$n1; $n2=(int)$n2;
   return $n1 === $n2 ? 0 : ($n1 > $n2 ? 1 : -1);
 }
 
 
-function a() {
+function a() :mixed{
   $array1 = darray[
     "a" => "green",
     "b" => "brown",
@@ -25,6 +25,6 @@ function a() {
 
 
 <<__EntryPoint>>
-function main_array_diff_uassoc() {
+function main_array_diff_uassoc() :mixed{
 a();
 }

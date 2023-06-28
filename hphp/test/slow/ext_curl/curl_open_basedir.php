@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_curl_open_basedir() {
+function main_curl_open_basedir() :mixed{
 var_dump(ini_set('open_basedir', sys_get_temp_dir()));
 
 $ch = curl_init();

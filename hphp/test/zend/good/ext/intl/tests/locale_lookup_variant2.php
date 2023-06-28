@@ -6,7 +6,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $loc_ranges = varray[
         'de-de',
         'sl_IT',

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_source_root_empty() {
+function main_source_root_empty() :mixed{
 $expected = getcwd();
 if ($expected[strlen($expected)-1] !== '/') {
   $expected .= '/';

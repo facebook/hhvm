@@ -1,14 +1,14 @@
 <?hh
-function foo() {
+function foo() :AsyncGenerator<mixed,mixed,void>{
   yield 1 => 2;
   yield 'a' => 'b';
 }
-function bar() {
+function bar() :AsyncGenerator<mixed,mixed,void>{
   foreach (foo() as $k => $v) {
     yield $k => $v;
   }
 }
-function main() {
+function main() :mixed{
   foreach (bar() as $k => $v) {
     echo "$k $v\n";
   }
@@ -16,6 +16,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_yield_key_value_bug() {
+function main_yield_key_value_bug() :mixed{
 main();
 }

@@ -6,6 +6,6 @@
 namespace Foo\Bar;
 
 <<__EntryPoint>>
-function cli_main() {
+function cli_main() :mixed{
   echo 'HI!';
 }

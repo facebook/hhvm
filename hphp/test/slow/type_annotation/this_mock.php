@@ -17,7 +17,7 @@ final class MockA extends A {
 
 
 <<__EntryPoint>>
-function main_this_mock() {
+function main_this_mock() :mixed{
 $m = new MockA();
 
 A::setSingleton($m);

@@ -3,7 +3,7 @@
 class SXETest extends SimpleXMLIterator
 {
 	function count()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::count();
 	}

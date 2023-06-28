@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_colorcrash() {
+function main_colorcrash() :mixed{
 $img=imagecreatetruecolor(10, 10);
 imagetruecolortopalette($img, false, (int)(PHP_INT_MAX / 8));
 

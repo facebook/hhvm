@@ -1,13 +1,13 @@
 <?hh
 
 class A {
-  public static function bar($baz) {}
+  public static function bar($baz) :mixed{}
 }
 
 
 // Bad function.
 <<__EntryPoint>>
-function main_reflection_param_exception() {
+function main_reflection_param_exception() :mixed{
 try {
   new ReflectionParameter(1, 'baz');
 } catch (ReflectionException $e) {

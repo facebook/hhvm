@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_format() {
+function main_date_format() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $dt = date_create("@1170288001");

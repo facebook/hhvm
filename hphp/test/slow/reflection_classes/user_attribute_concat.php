@@ -8,7 +8,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_user_attribute_concat() {
+function main_user_attribute_concat() :mixed{
 $r = new ReflectionClass("C");
 var_dump($r->getAttributes());
 }

@@ -1,11 +1,11 @@
 <?hh
 namespace test\ns1;
 
-function foo() {
+function foo() :mixed{
   echo __FUNCTION__,"\n";
 }
 
-function bar() {
+function bar() :mixed{
   echo __FUNCTION__,"\n";
 }
 

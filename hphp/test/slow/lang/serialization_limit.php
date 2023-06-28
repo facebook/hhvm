@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   $v = varray[];
   for ($i = 0; $i < 1024; $i++) {
     $v[] = $a;
@@ -8,7 +8,7 @@ function foo($a) {
   return $v;
 }
 
-function test() {
+function test() :mixed{
   $a = foo(1);
   $a = foo($a);
   $a = foo($a);
@@ -17,6 +17,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_serialization_limit() {
+function main_serialization_limit() :mixed{
 test();
 }

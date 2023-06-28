@@ -1,8 +1,8 @@
 <?hh
 
-function junk() { return 2; }
+function junk() :mixed{ return 2; }
 <<__EntryPoint>>
-function bar() {
+function bar() :mixed{
   $y = null;
   $x = darray['z' => junk()];
   unset($x['z']);

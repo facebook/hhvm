@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-async function test() {
+async function test() :Awaitable<mixed>{
   $failed_awaitable = async {
     await RescheduleWaitHandle::create(0, 0);
     throw new Exception();

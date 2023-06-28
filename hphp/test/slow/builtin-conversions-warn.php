@@ -1,10 +1,10 @@
 <?hh
 
-class X { static function y() {} }
-function t() { var_dump(__FUNCTION__); }
+class X { static function y() :mixed{} }
+function t() :mixed{ var_dump(__FUNCTION__); }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(($_n, $str) ==> { echo "Warning: $str\n"; return true; });
 
   (new ReflectionFunction('t'))->invoke();

@@ -6,18 +6,18 @@ class Counter {
 }
 
 <<__Memoize(#KeyedByIC)>>
-function memoNoArg() {
+function memoNoArg() :mixed{
   Counter::$noArg++;
   return 1;
 }
 
 <<__Memoize(#KeyedByIC)>>
-function memoWithArg($x) {
+function memoWithArg($x) :mixed{
   Counter::$withArg++;
   return 1;
 }
 
-function f() {
+function f() :mixed{
   $v = vec[
     () ==> memoNoArg(),
     () ==> memoWithArg(1),
@@ -28,17 +28,17 @@ function f() {
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function ic_inaccessible() {
+function ic_inaccessible() :mixed{
   f();
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function soft_ic_inaccessible() {
+function soft_ic_inaccessible() :mixed{
   f();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   for ($i = 0; $i < 4; $i++) {
     f();

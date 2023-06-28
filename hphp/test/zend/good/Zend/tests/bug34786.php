@@ -1,9 +1,9 @@
 <?hh
-function foo($a,$b,$c) {
+function foo($a,$b,$c) :mixed{
   echo "foo: ".error_reporting()."\n";
 }
 
-function bar() {
+function bar() :mixed{
   echo "bar: ".error_reporting()."\n";
 }
 

@@ -1,5 +1,5 @@
 <?hh
-function testing($source) {
+function testing($source) :mixed{
   unset($source['']);
 }
 <<__EntryPoint>>

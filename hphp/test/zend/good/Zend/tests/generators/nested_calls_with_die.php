@@ -1,20 +1,20 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     die('Test');
     yield; // force generator
 }
 
-function function_with_3_args() {
+function function_with_3_args() :mixed{
     $gen = gen();
     $gen->rewind();
 }
 
-function function_with_4_args() {
+function function_with_4_args() :mixed{
     function_with_3_args(4, 5, 6);
 }
 
-function outerGen() {
+function outerGen() :AsyncGenerator<mixed,mixed,void>{
     function_with_4_args(0, 1, 2, 3);
     yield; // force generator
 }

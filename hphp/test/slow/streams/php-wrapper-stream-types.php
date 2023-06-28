@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $to_open = varray[
     varray['php://stdin', 'r'],
     varray['php://stdout', 'w'],
@@ -26,6 +26,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_php_wrapper_stream_types() {
+function main_php_wrapper_stream_types() :mixed{
 main();
 }

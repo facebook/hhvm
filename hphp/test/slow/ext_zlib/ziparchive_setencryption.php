@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_ziparchive_setencryption() {
+function main_ziparchive_setencryption() :mixed{
 $str = 'temp';
 $archive = new ZipArchive();
 $archive->open(sys_get_temp_dir().'/'.'comptest.zip', ZipArchive::CREATE);

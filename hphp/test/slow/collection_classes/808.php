@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_808() {
+function main_808() :mixed{
 $m = new Map;
 $m[3] = 'foo';
 $m['bar'] = 7;

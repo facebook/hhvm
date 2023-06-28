@@ -1,17 +1,17 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
 
-function FAIL() {
+function FAIL() :mixed{
   echo "Failed: \n";
   var_dump(debug_backtrace());
 }
 
-function EXPECT_THROWS($function, $catch_block) {
+function EXPECT_THROWS($function, $catch_block) :mixed{
   try {
     $function();
     FAIL();
@@ -20,22 +20,22 @@ function EXPECT_THROWS($function, $catch_block) {
   }
 }
 
-function EXPECT_INVALID_STR($gen, $function) {
+function EXPECT_INVALID_STR($gen, $function) :mixed{
   EXPECT_THROWS($function, function ($e) use ($gen) {
     VS($gen->getErrorCode(), 10);
     VS($gen->getErrorMessage(), 'U_INVALID_CHAR_FOUND');
   });
 }
 
-function EXPECT_THROWS_MESSAGE($function, $message) {
+function EXPECT_THROWS_MESSAGE($function, $message) :mixed{
   EXPECT_THROWS($function, $e ==> VS($e->getMessage(), $message));
 }
 
-function EXPECT_INVALID_PATTERN_FIELD($value, $function) {
+function EXPECT_INVALID_PATTERN_FIELD($value, $function) :mixed{
   EXPECT_THROWS_MESSAGE($function, "Invalid value: $value for pattern field");
 }
 
-function EXPECT_NO_LOCALE($function) {
+function EXPECT_NO_LOCALE($function) :mixed{
   EXPECT_THROWS_MESSAGE($function, 'No locale provided');
 }
 
@@ -47,19 +47,19 @@ const INVALID_FIELD = -1;
 
 //////////////////////////////////////////////////////////////////////
 
-function test_create_instance_with_no_locale_fails() {
+function test_create_instance_with_no_locale_fails() :mixed{
   EXPECT_NO_LOCALE(function () {
     IntlDatePatternGenerator::createInstance("");
   });
 }
 
-function test_create_instance_with_null_locale_fails() {
+function test_create_instance_with_null_locale_fails() :mixed{
   EXPECT_NO_LOCALE(function () {
     IntlDatePatternGenerator::createInstance('');
   });
 }
 
-function test_create_instances_with_different_locales() {
+function test_create_instances_with_different_locales() :mixed{
   $gen = IntlDatePatternGenerator::createInstance("en_US");
   VS($gen->getBestPattern('yyyyMMdd'), 'MM/dd/yyyy');
 
@@ -71,7 +71,7 @@ function test_create_instances_with_different_locales() {
   VS($gen->getBestPattern('yyyyMMdd'), 'dd/MM/yyyy');
 }
 
-function test_create_empty_instance() {
+function test_create_empty_instance() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
 
   // NOTE: This segfaults with ICU 49.1.2 (only with an empty instance)
@@ -80,7 +80,7 @@ function test_create_empty_instance() {
   VS($gen->getDateTimeFormat(), '');
 }
 
-function test_get_skeleton() {
+function test_get_skeleton() :mixed{
   $skeleton = "";
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
@@ -92,7 +92,7 @@ function test_get_skeleton() {
   });
 }
 
-function test_get_base_skeleton() {
+function test_get_base_skeleton() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
   VS($gen->getBaseSkeleton(''), '');
@@ -103,7 +103,7 @@ function test_get_base_skeleton() {
   });
 }
 
-function test_add_pattern() {
+function test_add_pattern() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getBestPattern('MMMMdd'), 'MMMM dd');
 
@@ -124,7 +124,7 @@ function test_add_pattern() {
   });
 }
 
-function test_append_item_format() {
+function test_append_item_format() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getAppendItemFormat(ERA_FIELD), '{0} {1}');
 
@@ -152,7 +152,7 @@ function test_append_item_format() {
   });
 }
 
-function test_append_item_name() {
+function test_append_item_name() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getAppendItemName(ERA_FIELD), "Era");
   $gen->setAppendItemName(ERA_FIELD, 'eras');
@@ -179,7 +179,7 @@ function test_append_item_name() {
   });
 }
 
-function test_date_time_format() {
+function test_date_time_format() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   //
   // Different versions of ICU will give us slightly different formats
@@ -197,7 +197,7 @@ function test_date_time_format() {
   });
 }
 
-function test_get_best_pattern() {
+function test_get_best_pattern() :mixed{
   $skeleton = 'yyyyMMMMddhhmm';
   $gen = IntlDatePatternGenerator::createInstance('en_US');
 
@@ -215,7 +215,7 @@ function test_get_best_pattern() {
   });
 }
 
-function test_replace_field_types() {
+function test_replace_field_types() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   VS($gen->replaceFieldTypes("dd-MM-yy", 'yyyyMMMMdd'), 'dd-MMMM-yyyy');
 
@@ -234,7 +234,7 @@ function test_replace_field_types() {
   });
 }
 
-function test_get_skeletons() {
+function test_get_skeletons() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
 
   $skeletons = $gen->getSkeletons();
@@ -247,7 +247,7 @@ function test_get_skeletons() {
   VS($skeletons->next(), null);
 }
 
-function test_get_pattern_for_skeleton() {
+function test_get_pattern_for_skeleton() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   $pattern = $gen->getPatternForSkeleton('yyMMdd');
   VS($pattern, '');
@@ -265,7 +265,7 @@ function test_get_pattern_for_skeleton() {
   });
 }
 
-function test_get_base_skeletons() {
+function test_get_base_skeletons() :mixed{
   $gen = IntlDatePatternGenerator::createEmptyInstance();
   $skeletons = $gen->getBaseSkeletons();
   VS($skeletons->valid(), false);
@@ -277,7 +277,7 @@ function test_get_base_skeletons() {
   VS($skeletons->next(), null);
 }
 
-function test_decimal() {
+function test_decimal() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getDecimal(), '.');
 
@@ -289,7 +289,7 @@ function test_decimal() {
   });
 }
 
-function test_get_error() {
+function test_get_error() :mixed{
   $gen = IntlDatePatternGenerator::createInstance('en_US');
   VS($gen->getErrorCode(), 0);
   VS($gen->getErrorMessage(), 'U_ZERO_ERROR');
@@ -301,7 +301,7 @@ function test_get_error() {
 
 
 <<__EntryPoint>>
-function main_date_pattern_gen() {
+function main_date_pattern_gen() :mixed{
 $tests = varray[
   'test_create_instance_with_no_locale_fails',
   'test_create_instance_with_null_locale_fails',

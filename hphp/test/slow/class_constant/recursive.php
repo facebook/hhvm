@@ -72,34 +72,34 @@ class K {
   const BAR = varray[self::FOO];
 }
 
-function test1() { var_dump(A::FOO); }
-function test2() { var_dump(A::BAR); }
-function test3() { var_dump(A::BAZ); }
-function test4() { var_dump(B::FOO); }
-function test5() { var_dump(B::BAR); }
-function test6() { var_dump(B::BAZ); }
-function test7() { var_dump(C1::FOO); }
-function test8() { var_dump(C2::BAR); }
-function test9() { var_dump(D::FOO); }
-function test10() { var_dump(E::FOO1); }
-function test11() { var_dump(E::BAR1); }
-function test12() { var_dump(E::FOO2); }
-function test13() { var_dump(E::BAR2); }
-function test14() { var_dump(F::FOO); }
-function test15() { var_dump(F::BAR); }
-function test16() { var_dump(G::FOO); }
-function test17() { var_dump(G::BAR); }
-function test18() { var_dump(H1::FOO); }
-function test19() {
+function test1() :mixed{ var_dump(A::FOO); }
+function test2() :mixed{ var_dump(A::BAR); }
+function test3() :mixed{ var_dump(A::BAZ); }
+function test4() :mixed{ var_dump(B::FOO); }
+function test5() :mixed{ var_dump(B::BAR); }
+function test6() :mixed{ var_dump(B::BAZ); }
+function test7() :mixed{ var_dump(C1::FOO); }
+function test8() :mixed{ var_dump(C2::BAR); }
+function test9() :mixed{ var_dump(D::FOO); }
+function test10() :mixed{ var_dump(E::FOO1); }
+function test11() :mixed{ var_dump(E::BAR1); }
+function test12() :mixed{ var_dump(E::FOO2); }
+function test13() :mixed{ var_dump(E::BAR2); }
+function test14() :mixed{ var_dump(F::FOO); }
+function test15() :mixed{ var_dump(F::BAR); }
+function test16() :mixed{ var_dump(G::FOO); }
+function test17() :mixed{ var_dump(G::BAR); }
+function test18() :mixed{ var_dump(H1::FOO); }
+function test19() :mixed{
   var_dump(I1_NotRecursive::FOO);
 }
-function test20() {
+function test20() :mixed{
   var_dump(I1_Recursive::FOO);
 }
-function test21() { var_dump(J1::FOO); }
-function test22() { var_dump(J2::FOO); }
-function test23() { var_dump(K::FOO); }
-function test24() { var_dump(K::BAR); }
+function test21() :mixed{ var_dump(J1::FOO); }
+function test22() :mixed{ var_dump(J2::FOO); }
+function test23() :mixed{ var_dump(K::FOO); }
+function test24() :mixed{ var_dump(K::BAR); }
 
 const TESTS = vec[
   'test1',
@@ -129,7 +129,7 @@ const TESTS = vec[
 ];
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if ($count === false) {
     $count = 0;

@@ -1,6 +1,6 @@
 <?hh
 
-function count_rows ($pix) {
+function count_rows ($pix) :mixed{
   $rows = 0;
   foreach ($pix as $r) {
     $rows++;
@@ -8,7 +8,7 @@ function count_rows ($pix) {
   return $rows;
 }
 
-function count_objects ($pix) {
+function count_objects ($pix) :mixed{
   $objects = 0;
   foreach ($pix as $r) {
     foreach ($r as $o) {

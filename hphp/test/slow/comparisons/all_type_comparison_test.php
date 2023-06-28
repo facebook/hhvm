@@ -19,34 +19,34 @@ class C {
 class ToString {
   public $str;
   function __construct($str = 'foo') { $this->str = $str; }
-  function __toString() { return $this->str; }
+  function __toString() :mixed{ return $this->str; }
 }
 
 class ToStringThrower {
-  function __toString() { throw new Exception('sneaky'); }
+  function __toString() :mixed{ throw new Exception('sneaky'); }
 }
 
 class DateTime1 implements DateTimeInterface {
   public $timestamp = 0;
   function __construct($timestamp) { $this->timestamp = $timestamp; }
-  function getTimestamp() {
+  function getTimestamp() :mixed{
     if ($this->timestamp <= 0) {
       throw new Exception('sneaky');
     }
     return $this->timestamp;
   }
-  function diff($dt, $absolute = null) {}
-  function format($format) {}
-  function getTimezone() {}
-  function getOffset() {}
+  function diff($dt, $absolute = null) :mixed{}
+  function format($format) :mixed{}
+  function getTimezone() :mixed{}
+  function getOffset() :mixed{}
 }
 
 class DateTime2 implements DateTimeInterface {
-  function getTimestamp() { return 100; }
-  function diff($dt, $absolute = null) {}
-  function format($format) {}
-  function getTimezone() {}
-  function getOffset() {}
+  function getTimestamp() :mixed{ return 100; }
+  function diff($dt, $absolute = null) :mixed{}
+  function format($format) :mixed{}
+  function getTimezone() :mixed{}
+  function getOffset() :mixed{}
 }
 
 function foo(): void {}
@@ -57,7 +57,7 @@ class Bar {
   public static function rfoo<reify T>(): void {}
 }
 
-function test_pair($k1, $v1, $k2, $v2) {
+function test_pair($k1, $v1, $k2, $v2) :mixed{
   echo "$k1 cmp $k2:\n";
   try {
     echo (($v1 === $v2) ? "T       " : "F       ");

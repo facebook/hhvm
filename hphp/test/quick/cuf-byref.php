@@ -1,6 +1,6 @@
 <?hh
-function foo(inout $a) { var_dump($a++); }
-function test($cuf, $f) {
+function foo(inout $a) :mixed{ var_dump($a++); }
+function test($cuf, $f) :mixed{
   $a = varray[1];
   try {
     $cuf($f, $a);

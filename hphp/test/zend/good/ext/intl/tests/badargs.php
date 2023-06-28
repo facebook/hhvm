@@ -1,5 +1,5 @@
 <?hh
-function ignore_err() {}
+function ignore_err() :mixed{}
 <<__EntryPoint>>
 function main_entry(): void {
   $funcs = get_extension_funcs("intl");

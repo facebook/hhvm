@@ -6,11 +6,11 @@ class X {
     $this->m = $m;
   }
 }
-function prof($what, $fn) {
+function prof($what, $fn) :mixed{
   if ($what == 'exit' && $fn == 'main') throw new Exception("Surprise");
 }
 <<__NEVER_INLINE>>
-function main() {
+function main() :mixed{
   return new X(null);
 }
 <<__EntryPoint>>

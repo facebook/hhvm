@@ -2,7 +2,7 @@
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 class C {
-  public function foo() {
+  public function foo() :mixed{
     echo "foo\n";
     $x = varray[];
     if ($x) {

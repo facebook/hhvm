@@ -33,6 +33,6 @@ class C {
 
 
 <<__EntryPoint>>
-function main_nested_traits() {
+function main_nested_traits() :mixed{
 var_dump(serialize(new C()));
 }

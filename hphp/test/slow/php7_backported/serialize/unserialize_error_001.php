@@ -4,7 +4,7 @@ class foo {
 }
 
 <<__EntryPoint>>
-function main_unserialize_error_001() {
+function main_unserialize_error_001() :mixed{
 $z = varray[new foo(), 2, "3"];
 $s = serialize($z);
 

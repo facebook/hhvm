@@ -7,18 +7,18 @@ class X {
   function __construct() {
     $this->a = darray['x' => new Y];
   }
-  function bar() {
+  function bar() :mixed{
     var_dump('bar');
     $this->qq = new Y;
     $this->qq->x = $this->qq->y = 1;
     return $this->qq;
   }
 }
-function foo() {
+function foo() :mixed{
   var_dump('foo');
   return 'foo';
 }
-function test($x, $a, $s) {
+function test($x, $a, $s) :mixed{
   unset($x->bar()->x);
   try {
     unset($x->q->r->s->$foo);
@@ -34,7 +34,7 @@ function test($x, $a, $s) {
 }
 
 <<__EntryPoint>>
-function main_798() {
+function main_798() :mixed{
   $s = false;
   test(new X, varray[], $s);
 }

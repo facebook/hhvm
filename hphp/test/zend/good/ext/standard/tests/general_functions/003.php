@@ -1,6 +1,6 @@
 <?hh
 
-function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) {
+function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) :mixed{
 
   if($cost1==0)
       $result=levenshtein($text1,$text2);

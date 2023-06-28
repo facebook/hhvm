@@ -1,15 +1,15 @@
 <?hh
 
-function asd($x) {
+function asd($x) :mixed{
   var_dump($x);
 }
 
-function foo($b) {
+function foo($b) :mixed{
   asd($b[]);
 }
 
 
 <<__EntryPoint>>
-function main_fpassm_mw() {
+function main_fpassm_mw() :mixed{
 foo(varray[]);
 }

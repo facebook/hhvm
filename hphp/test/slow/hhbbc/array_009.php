@@ -2,19 +2,19 @@
 
 class Foo {
   private $thing;
-  function go() {
+  function go() :mixed{
     // This better not iterate the dataflow algorithm forever:
     $this->thing = darray['thing' => $this->thing];
     return $this->thing;
   }
 }
 
-function main() {
+function main() :mixed{
   var_dump((new Foo)->go());
 }
 
 
 <<__EntryPoint>>
-function main_array_009() {
+function main_array_009() :mixed{
 main();
 }

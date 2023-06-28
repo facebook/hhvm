@@ -9,7 +9,7 @@ class TestClass {
 
 
 <<__EntryPoint>>
-function main_shape_type_param_with_known_and_unknown_fields() {
+function main_shape_type_param_with_known_and_unknown_fields() :mixed{
 TestClass::test();
 
 echo "Done.";

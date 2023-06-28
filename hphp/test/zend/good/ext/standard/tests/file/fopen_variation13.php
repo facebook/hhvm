@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
     $tempDir = sys_get_temp_dir().'/'.'fopen_variation13.dir.tmp';
     $tmpfile = 'fopen_variation13.tmp';
     $absFile = $tempDir.'/'.$tmpfile;

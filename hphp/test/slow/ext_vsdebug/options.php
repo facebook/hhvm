@@ -1,6 +1,6 @@
 <?hh
 
-function skipEvents() {
+function skipEvents() :mixed{
   $msg = json_decode(getNextVsDebugMessage(), true);
   while ($msg['type'] == 'event') {
     $msg = json_decode(getNextVsDebugMessage(), true);

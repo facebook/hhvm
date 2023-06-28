@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 interface I {
-  function foo();
+  function foo():mixed;
 }
 
 class C implements I {
@@ -72,10 +72,10 @@ class C implements I {
     $_63 = null,
     $_64 = null,
     $_65 = null,
-  ) {}
+  ) :mixed{}
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   echo "done\n";
 }

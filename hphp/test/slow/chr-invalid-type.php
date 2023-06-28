@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_chr_invalid_type() {
+function main_chr_invalid_type() :mixed{
 $inputs = varray[
   -1, 0, 1, 2, 128, 255,
   "0string", "1string", "2",

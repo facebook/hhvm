@@ -1,11 +1,11 @@
 <?hh
 
 class Baz {
-  public function m() {}
-  public static function sm() {}
+  public function m() :mixed{}
+  public static function sm() :mixed{}
 }
 
-function foo($x) {
+function foo($x) :mixed{
   $ed = HH\array_mark_legacy(darray[]);
   var_dump(HH\is_array_marked_legacy($ed));
   var_dump($ed);
@@ -60,12 +60,12 @@ function foo($x) {
   var_dump($d);
 }
 
-function bar<reify T>(vec<T> $v, int $i) {
+function bar<reify T>(vec<T> $v, int $i) :mixed{
   var_dump($v[$i]);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo(1);
   bar<int>(vec[1, 2], 0);
   var_dump(gettype(HH\array_mark_legacy(varray[])));

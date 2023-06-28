@@ -7,7 +7,7 @@ interface IFooInterface {}
 enum class ParentEC : IFooInterface {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $is_serialize = ini_get('hhvm.jit_serdes_mode') === 'Serialize';
 
   if (!$is_serialize) {

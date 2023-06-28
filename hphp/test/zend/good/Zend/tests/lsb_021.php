@@ -1,12 +1,12 @@
 <?hh
 class A {
-    <<__DynamicallyCallable>> public static function test() {
+    <<__DynamicallyCallable>> public static function test() :mixed{
         echo static::class."\n";
     }
 }
 
 class B extends A {
-    public static function testForward() {
+    public static function testForward() :mixed{
         parent::test();
         call_user_func(parent::class."::test");
         call_user_func(varray[parent::class, "test"]);
@@ -14,7 +14,7 @@ class B extends A {
         call_user_func(self::class."::test");
         call_user_func(varray[self::class, "test"]);
     }
-    public static function testNoForward() {
+    public static function testNoForward() :mixed{
         A::test();
         call_user_func("A::test");
         call_user_func(varray["A", "test"]);

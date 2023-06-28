@@ -1,5 +1,5 @@
 <?hh
-function handler($errno, $errmsg) {
+function handler($errno, $errmsg) :mixed{
   $pos = strpos($errmsg, ", Closure");
   if ($pos !== false) {
     $errmsg = substr($errmsg, 0, $pos) . ", Closure given";
@@ -17,7 +17,7 @@ function handler($errno, $errmsg) {
 
 type my_t = int;
 
-function f1($p) { return $p; }
+function f1($p) :mixed{ return $p; }
 function f2($p): int { return $p; }
 function f2_soft($p): <<__Soft>> int { return $p; }
 function f3($p): string { return $p; }
@@ -70,13 +70,13 @@ class B extends A {
   public function f21_soft(): <<__Soft>> this { return $this; }
   public function f22($p): this { return $p; }
   public function f22_soft($p): <<__Soft>> this { return $p; }
-  public static function testfunc() {}
+  public static function testfunc() :mixed{}
 }
 class C extends B {}
 
-function testfunc() {}
+function testfunc() :mixed{}
 
-function call_wrapper($fn, $arg) {
+function call_wrapper($fn, $arg) :mixed{
   try {
     $fn($arg);
   } catch (Exception $e) {
@@ -84,7 +84,7 @@ function call_wrapper($fn, $arg) {
   }
 }
 
-function main() {
+function main() :mixed{
   for ($i = 1; $i <= 21; $i++) {
     foreach (varray['', '_soft'] as $suffix) {
       if ($suffix !== '' && $i === 1) {
@@ -151,7 +151,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_hh_return_type_this_3() {
+function main_hh_return_type_this_3() :mixed{
 error_reporting(-1);
 set_error_handler(handler<>);
 main();

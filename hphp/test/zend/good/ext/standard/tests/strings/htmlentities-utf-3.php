@@ -6,7 +6,7 @@ abstract final class ZendGoodExtStandardTestsStringsHtmlentitiesUtf3 {
   public static $val_ranges;
 }
 
-function is_valid($seq) {
+function is_valid($seq) :mixed{
 
 	$b = ord($seq[0]);
 	foreach (ZendGoodExtStandardTestsStringsHtmlentitiesUtf3::$val_ranges as $l) {
@@ -25,7 +25,7 @@ function is_valid($seq) {
 	return false;
 }
 
-function concordance($s) {
+function concordance($s) :mixed{
 	$vhe = strlen(htmlspecialchars($s, ENT_QUOTES, "UTF-8")) > 0;
 	$v = is_valid($s);
 	return ($vhe === $v);

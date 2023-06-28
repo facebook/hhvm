@@ -22,7 +22,7 @@ function foo5<T super string as int>(T $x): T {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(
     (int $errno, string $errstr) ==> {
       throw new Exception($errstr);

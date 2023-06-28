@@ -2,7 +2,7 @@
 
 // taking references
 class C2 {
-  public function __invoke(inout $a0) {
+  public function __invoke(inout $a0) :mixed{
     var_dump($a0);
     return $a0++;
   }

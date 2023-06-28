@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1793() {
+function main_1793() :mixed{
 $filename = 'test/images/test1pix.jpg';
 $width = null;
 $height = null;

@@ -1,6 +1,6 @@
 <?hh
 
-function row_dump($row, $pixels) {
+function row_dump($row, $pixels) :mixed{
   printf("[%d] ", $row);
   if ($pixels === null) {
     var_dump($pixels);

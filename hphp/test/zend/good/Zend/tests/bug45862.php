@@ -1,7 +1,7 @@
 <?hh
 
 class Ancestor {
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
     var_dump(Tester::$prot);
   }
@@ -13,7 +13,7 @@ class Tester extends Ancestor {
 }
 
 class Child extends Tester {
-  function test() { var_dump(get_class_vars("Tester")); }
+  function test() :mixed{ var_dump(get_class_vars("Tester")); }
 }
 <<__EntryPoint>> function main(): void {
 echo "\n From parent scope\n";

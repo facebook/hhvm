@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1933() {
+function main_1933() :mixed{
 $my_array = varray[7, 1, 5, 6];
 $some_value = 6;
 usort(inout $my_array,   function($a, $b) use ($some_value) {

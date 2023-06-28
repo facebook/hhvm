@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_json_preserve_zero_fraction() {
+function main_json_preserve_zero_fraction() :mixed{
   $o = new stdClass;
   $o->float = 12.0;
   $o->integer = 12;

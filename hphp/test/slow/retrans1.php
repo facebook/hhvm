@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main($a, $b, $c) {
+function main($a, $b, $c) :mixed{
   return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
 }
 <<__EntryPoint>> function main_entry(): void {

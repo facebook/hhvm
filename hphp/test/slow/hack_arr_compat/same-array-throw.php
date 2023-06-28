@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   var_dump(varray[vec[]] === varray[varray[]]);
 }
 <<__EntryPoint>>

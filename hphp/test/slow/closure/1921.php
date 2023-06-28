@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $var = 123;
   $abc = 789;
   $a = function() use ($var) {
@@ -16,6 +16,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1921() {
+function main_1921() :mixed{
   foo();
 }

@@ -1,7 +1,7 @@
 <?hh
 
 <<__NEVER_INLINE>>
-function create($i) {
+function create($i) :mixed{
   if ($i > 20) {
     return shape(
       'bf1' => 1,
@@ -780,7 +780,7 @@ function create($i) {
 }
 
 <<__NEVER_INLINE>>
-function foo($d, $s1, $s2) {
+function foo($d, $s1, $s2) :mixed{
   $d[$s1] = 100;
   $sum = $d[$s1];
   foreach ($d as $v) {
@@ -792,7 +792,7 @@ function foo($d, $s1, $s2) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = create(21);
   foo($d, 'a', 'bf10');
   $d = create(11);

@@ -1,19 +1,19 @@
 <?hh
 
 class base {
-    private function show() {
+    private function show() :mixed{
         echo "base\n";
     }
-    function test() {
+    function test() :mixed{
         $this->show();
     }
 }
 
 class derived extends base {
-    function show() {
+    function show() :mixed{
         echo "derived\n";
     }
-    function test() {
+    function test() :mixed{
         echo "test\n";
         $this->show();
         parent::test();

@@ -1,32 +1,32 @@
 <?hh
 
-async function test0($x) {
+async function test0($x) :Awaitable<mixed>{
   await SleepWaitHandle::create(1000);
   if ($x % 3 === 0) throw new Exception('thrown');
   return $x;
 }
 
-async function test1($x) {
+async function test1($x) :Awaitable<mixed>{
   return await test0($x + 1);
 }
 
-async function test2($x) {
+async function test2($x) :Awaitable<mixed>{
   return await test1($x + 1);
 }
 
-async function test3($x) {
+async function test3($x) :Awaitable<mixed>{
   return await test2($x + 1);
 }
 
-async function test4($x) {
+async function test4($x) :Awaitable<mixed>{
   return await test3($x + 1);
 }
 
-async function test5($x) {
+async function test5($x) :Awaitable<mixed>{
   return await test4($x + 1);
 }
 
-async function test6($x) {
+async function test6($x) :Awaitable<mixed>{
   return await test5($x + 1);
 }
 
@@ -34,11 +34,11 @@ async function test7($x): Awaitable<int> {
   return await test6($x + 1);
 }
 
-async function test8($x) {
+async function test8($x) :Awaitable<mixed>{
   return await test7($x + 1);
 }
 
-async function test9($x) {
+async function test9($x) :Awaitable<mixed>{
   try {
     return await test8($x + 1);
   } catch (Exception $e) {
@@ -47,7 +47,7 @@ async function test9($x) {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   for ($i = 0; $i < 3; $i++) {
     print("\n======================\nIteration $i:\n");
     $results = vec[

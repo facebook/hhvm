@@ -2,13 +2,13 @@
 
 abstract class Base
 {
-    abstract function someMethod($param);
+    abstract function someMethod($param):mixed;
 }
 
 class Ext extends Base
 {
     function someMethod($param = "default")
-    {
+:mixed    {
         echo $param, "\n";
     }
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function foo(?(int, int) $x) {}
+function foo(?(int, int) $x) :mixed{}
 <<__EntryPoint>> function main(): void {
 foo(null);
 foo(varray[1,2]);

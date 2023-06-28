@@ -76,7 +76,7 @@ class NewStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function testBinary($val) {
+function testBinary($val) :mixed{
   $p = new DummyProtocol();
   thrift_protocol_write_binary($p, 'OldStruct', 1, $val, 20, true);
   try {
@@ -86,7 +86,7 @@ function testBinary($val) {
   }
 }
 
-function testCompact($val) {
+function testCompact($val) :mixed{
   $p = new DummyProtocol();
   thrift_protocol_write_compact2($p, 'OldStruct', 2, $val, 20);
   try {
@@ -96,7 +96,7 @@ function testCompact($val) {
   }
 }
 
-function main() {
+function main() :mixed{
   $v = new OldStruct();
   $v->field1 = vec[vec[1, 2, 3]];
   testBinary($v);
@@ -110,7 +110,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_forward_compatibility() {
+function main_forward_compatibility() :mixed{
   require 'common.inc';
   main();
 }

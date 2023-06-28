@@ -19,7 +19,7 @@ function group<Tk, Tv>(
   return $result;
 }
 
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 4; $i++) {
     $d = group(darray['a' => 1, 'b' => 1, 'c' => 2, 'd' => 2], $v ==> $v + 1);
     var_dump($d);
@@ -27,6 +27,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_hhbbc_group() {
+function main_hhbbc_group() :mixed{
 main();
 }

@@ -4,14 +4,14 @@ class C {
     var_dump(isset($this));
     var_dump(static::class);
   }
-  public function foo() {
+  public function foo() :mixed{
     var_dump(isset($this));
     var_dump(static::class);
   }
-  public static function bar() {
+  public static function bar() :mixed{
     var_dump(static::class);
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::class);
   }
@@ -22,7 +22,7 @@ class D extends C {
     var_dump(isset($this));
     var_dump(static::class);
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::class);
     C::yar();

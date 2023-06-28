@@ -1,6 +1,6 @@
 <?hh
 
-function blah() {
+function blah() :mixed{
   $xs = varray[1, 2, 3];
   $ys = varray[1, 2, 3];
   $zs = varray[1, 2, 3];

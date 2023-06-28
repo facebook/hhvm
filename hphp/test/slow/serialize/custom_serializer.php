@@ -3,11 +3,11 @@
 class MySerializable implements Serializable {
   public function __construct(public $foo)[] {}
 
-  public function serialize() {
+  public function serialize() :mixed{
     return serialize($this->foo);
   }
 
-  public function unserialize($str) {
+  public function unserialize($str) :mixed{
     $this->foo = unserialize($str);
   }
 }

@@ -1,6 +1,6 @@
 <?hh
 class test {
-	function __toString() {
+	function __toString() :mixed{
 		return "test object";
 	}
 }

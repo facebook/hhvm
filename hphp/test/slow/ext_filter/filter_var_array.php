@@ -1,6 +1,6 @@
 <?hh
 
-function perform_test($name, $test_filters, $add_empty) {
+function perform_test($name, $test_filters, $add_empty) :mixed{
   $params = darray[
     'null' => NULL,
     'empty_array' => varray[],
@@ -23,7 +23,7 @@ function perform_test($name, $test_filters, $add_empty) {
 
 
 <<__EntryPoint>>
-function main_filter_var_array() {
+function main_filter_var_array() :mixed{
 $all_filters = darray[
   'No filters' => varray[],
   'Require Scalar' => darray['flags' => FILTER_REQUIRE_SCALAR],

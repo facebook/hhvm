@@ -1,15 +1,15 @@
 <?hh
 
-function foo($arg) {
+function foo($arg) :mixed{
     echo @$nonex_foo;
 }
 
-function bar() {
+function bar() :mixed{
     echo @$nonex_bar;
     throw new Exception("test");
 }
 
-function foo1() {
+function foo1() :mixed{
     echo $undef1;
     error_reporting(E_ALL|E_STRICT);
     echo $undef2;

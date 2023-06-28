@@ -1,10 +1,10 @@
 <?hh
 class C {
-  <<__DynamicallyCallable>> public static function foo(...$args) {
+  <<__DynamicallyCallable>> public static function foo(...$args) :mixed{
     var_dump(__FUNCTION__, $args);
   }
 }
-function main() {
+function main() :mixed{
   $cufa = 'call_user_func_array';
   if (\HH\global_get('argc') > 1000000000) {
     $cufa = 'call_user_func';
@@ -61,6 +61,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_call_user_func_array() {
+function main_call_user_func_array() :mixed{
 main();
 }

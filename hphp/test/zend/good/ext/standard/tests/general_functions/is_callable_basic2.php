@@ -9,7 +9,7 @@
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */
-function check_iscallable_objects($methods, $loop_counter) {
+function check_iscallable_objects($methods, $loop_counter) :mixed{
   $counter = 1;
   foreach ($methods as $method) {
     echo "-- Innerloop iteration $counter of Outerloop iteration ".$loop_counter." --\n";
@@ -29,24 +29,24 @@ class object_class {
   public $value = 100;
 
   /* static method */
-  static public function foo() {
+  static public function foo() :mixed{
   }
 
-  public function foo1() {
+  public function foo1() :mixed{
   }
   /* function name with mixed string and integer */
-  public function x123() {
+  public function x123() :mixed{
   }
   /* function name as NULL */
-  public function null() {
+  public function null() :mixed{
   }
   /* function name having boolean value */
-  public function TRUE() {
+  public function TRUE() :mixed{
   }
 
-  protected function foo2() {
+  protected function foo2() :mixed{
   }
-  private function foo3() {
+  private function foo3() :mixed{
   }
 }
 
@@ -60,7 +60,7 @@ class contains_object_class {
    public $class_object1;
    public $no_member_class_object;
 
-   public function func() {
+   public function func() :mixed{
      echo "func() is called \n";
    }
 

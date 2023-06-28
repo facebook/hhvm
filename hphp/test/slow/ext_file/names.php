@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_names() {
+function main_names() :mixed{
 var_dump(basename('test/ext/test_ext_file.tmp'));
 var_dump(basename('test/ext/test_ext_file.tmp', '.tmp'));
 

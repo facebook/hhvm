@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function str_dump($a, $b) {
+function str_dump($a, $b) :mixed{
     var_dump(strnatcasecmp($a, $b));
 }
 <<__EntryPoint>> function main(): void {

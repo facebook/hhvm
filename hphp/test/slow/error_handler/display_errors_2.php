@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_display_errors_2() {
+function main_display_errors_2() :mixed{
 ini_set('display_errors', '2');
 var_dump(ini_get('display_errors'));
 fclose(HH\stdout());

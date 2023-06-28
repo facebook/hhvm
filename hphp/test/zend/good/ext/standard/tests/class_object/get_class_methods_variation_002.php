@@ -6,7 +6,7 @@
  */
 
 class caseSensitivityTest {
-    function MyMeThOd() {}
+    function MyMeThOd() :mixed{}
 }
 <<__EntryPoint>> function get_class_methods_variation_002(): void {
 echo "*** Testing get_class_methods() : usage variations ***\n";

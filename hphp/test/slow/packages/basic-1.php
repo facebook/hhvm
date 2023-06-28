@@ -1,11 +1,11 @@
 <?hh
 
-function get_vec($vec) {
+function get_vec($vec) :mixed{
   $vec = HH\Lib\Vec\sort($vec);
   return "[".HH\Lib\Str\join($vec, ", ")."]";
 }
 
-function print_dict($dict, $level = 1) {
+function print_dict($dict, $level = 1) :mixed{
   $dict = HH\Lib\Dict\sort_by_key($dict);
   foreach ($dict as $k => $v) {
     for ($i = 0; $i < $level; $i++) {
@@ -21,7 +21,7 @@ function print_dict($dict, $level = 1) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Packages\n";
   print_dict(HH\get_all_packages());
   echo "Deployments\n";

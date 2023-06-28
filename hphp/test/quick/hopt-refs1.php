@@ -1,11 +1,11 @@
 <?hh
 
-function foo($x) {
+function foo($x) :mixed{
   $x = $x + 1;
   return $x;
 }
 
-function main() {
+function main() :mixed{
   $y = foo(1);
   return $y;
 }

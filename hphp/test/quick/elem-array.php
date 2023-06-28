@@ -1,7 +1,7 @@
 <?hh
 
 
-function go($a) {
+function go($a) :mixed{
   if ($a) $x = 5;
 
   $a[1] = darray[];

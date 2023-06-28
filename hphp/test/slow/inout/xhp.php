@@ -1,14 +1,14 @@
 <?hh // strict
 
 class :x {
-  public static function foo(inout $x) {
+  public static function foo(inout $x) :mixed{
     $x++;
   }
 }
 
 
 <<__EntryPoint>>
-function main_xhp() {
+function main_xhp() :mixed{
 $x = 42;
 :x::foo(inout $x);
 

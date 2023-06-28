@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_issue2601error() {
+function main_issue2601error() :mixed{
 $flags = STREAM_CLIENT_CONNECT;
 $uri = 'unix:///socket/not/found';
 

@@ -1,12 +1,12 @@
 <?hh
 class C {
-  static public function func1() {
+  static public function func1() :mixed{
     return 1;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m = C::func1<>;
   var_dump(!($m ?? false));
   var_dump(isset($m), isset($m[1]), isset($m[2]), isset($m['s']));

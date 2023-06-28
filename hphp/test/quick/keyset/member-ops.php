@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function base_elem_warn($ks, $k) {
+function base_elem_warn($ks, $k) :mixed{
   try {
     var_dump($ks[$k][0]);
   } catch (Exception $e) {
@@ -9,7 +9,7 @@ function base_elem_warn($ks, $k) {
   }
 }
 
-function base_elem($ks, $k) {
+function base_elem($ks, $k) :mixed{
   try {
     var_dump($ks[$k][0] ?? "MISSING");
   } catch (Exception $e) {
@@ -17,7 +17,7 @@ function base_elem($ks, $k) {
   }
 }
 
-function base_define($ks, $k) {
+function base_define($ks, $k) :mixed{
   try {
     $ks[$k][0] = 200;
   } catch (Exception $e) {
@@ -26,7 +26,7 @@ function base_define($ks, $k) {
   var_dump($ks);
 }
 
-function base_unset($ks, $k) {
+function base_unset($ks, $k) :mixed{
   try {
     unset($ks[$k][0]);
   } catch (Exception $e) {
@@ -35,7 +35,7 @@ function base_unset($ks, $k) {
   var_dump($ks);
 }
 
-function base($ks) {
+function base($ks) :mixed{
   echo "======= base_elem_warn =============================\n";
   base_elem_warn($ks, 3);
   base_elem_warn($ks, '1');
@@ -97,7 +97,7 @@ function base($ks) {
   }
 }
 
-function dim_elem_warn($a, $k) {
+function dim_elem_warn($a, $k) :mixed{
   try {
     var_dump($a[1][$k][0]);
   } catch (Exception $e) {
@@ -105,7 +105,7 @@ function dim_elem_warn($a, $k) {
   }
 }
 
-function dim_elem($a, $k) {
+function dim_elem($a, $k) :mixed{
   try {
     var_dump($a[1][$k][0] ?? "MISSING");
   } catch (Exception $e) {
@@ -113,7 +113,7 @@ function dim_elem($a, $k) {
   }
 }
 
-function dim_define($a, $k) {
+function dim_define($a, $k) :mixed{
   try {
     $a[1][$k][0] = 200;
   } catch (Exception $e) {
@@ -122,7 +122,7 @@ function dim_define($a, $k) {
   var_dump($a);
 }
 
-function dim_unset($a, $k) {
+function dim_unset($a, $k) :mixed{
   try {
     unset($a[1][$k][0]);
   } catch (Exception $e) {
@@ -131,7 +131,7 @@ function dim_unset($a, $k) {
   var_dump($a);
 }
 
-function dim($a) {
+function dim($a) :mixed{
   echo "======= dim_elem_warn ==============================\n";
   dim_elem_warn($a, 3);
   dim_elem_warn($a, '1');
@@ -193,7 +193,7 @@ function dim($a) {
   }
 }
 
-function fini_cget_warn($a, $k) {
+function fini_cget_warn($a, $k) :mixed{
   try {
     var_dump($a[1][$k]);
   } catch (Exception $e) {
@@ -201,7 +201,7 @@ function fini_cget_warn($a, $k) {
   }
 }
 
-function fini_cget($a, $k) {
+function fini_cget($a, $k) :mixed{
   try {
     var_dump($a[1][$k] ?? "MISSING");
   } catch (Exception $e) {
@@ -209,7 +209,7 @@ function fini_cget($a, $k) {
   }
 }
 
-function fini_empty($a, $k) {
+function fini_empty($a, $k) :mixed{
   try {
     var_dump(!($a[1][$k] ?? false));
   } catch (Exception $e) {
@@ -217,7 +217,7 @@ function fini_empty($a, $k) {
   }
 }
 
-function fini_isset($a, $k) {
+function fini_isset($a, $k) :mixed{
   try {
     var_dump(isset($a[1][$k]));
   } catch (Exception $e) {
@@ -225,7 +225,7 @@ function fini_isset($a, $k) {
   }
 }
 
-function fini_set($a, $k) {
+function fini_set($a, $k) :mixed{
   try {
     $a[1][$k] = 123;
   } catch (Exception $e) {
@@ -234,7 +234,7 @@ function fini_set($a, $k) {
   var_dump($a);
 }
 
-function fini_incdec($a, $k) {
+function fini_incdec($a, $k) :mixed{
   try {
     $a[1][$k]++;
   } catch (Exception $e) {
@@ -243,7 +243,7 @@ function fini_incdec($a, $k) {
   var_dump($a);
 }
 
-function fini_setop($a, $k) {
+function fini_setop($a, $k) :mixed{
   try {
     $a[1][$k] .= "some-str";
   } catch (Exception $e) {
@@ -252,7 +252,7 @@ function fini_setop($a, $k) {
   var_dump($a);
 }
 
-function fini_unset($a, $k) {
+function fini_unset($a, $k) :mixed{
   try {
     unset($a[1][$k]);
   } catch (Exception $e) {
@@ -261,7 +261,7 @@ function fini_unset($a, $k) {
   var_dump($a);
 }
 
-function fini($a) {
+function fini($a) :mixed{
   echo "======= fini_cget_warn =============================\n";
   fini_cget_warn($a, 1);
   fini_cget_warn($a, 3);

@@ -1,14 +1,14 @@
 <?hh
 
-function f1($x) {
+function f1($x) :mixed{
   return HH\Lib\Legacy_FIXME\lt(true, $x);
 }
 
-function f2($x) {
+function f2($x) :mixed{
   return "0.0" == $x;
 }
 
-function f3($x) {
+function f3($x) :mixed{
   $y = varray[1];
   return $x == $y;
 }

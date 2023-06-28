@@ -3,7 +3,7 @@
 namespace Animal;
 
 <<Dog(3)>>
-function f(<<Hippo(7)>> $p) {}
+function f(<<Hippo(7)>> $p) :mixed{}
 
 <<Cat(4)>>
 type Bear = shape(...);

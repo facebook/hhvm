@@ -1,12 +1,12 @@
 <?hh
 
 function err($errno, $errstr, $errfile, $errline)
-{
+:mixed{
         throw new Exception($errstr);
 }
 
 class test {
-    function foo() {
+    function foo() :mixed{
         $var = $this->blah->prop = "string";
         var_dump($this->blah);
     }

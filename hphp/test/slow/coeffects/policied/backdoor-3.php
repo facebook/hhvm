@@ -8,7 +8,7 @@ async function f(): Awaitable<int> {
 }
 
 <<__EntryPoint>>
-async function main()[] {
+async function main()[] :Awaitable<mixed>{
   $result = HH\Coeffects\backdoor(f<>);
   echo "second\n";
   echo (await $result)."\n";

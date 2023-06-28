@@ -1,8 +1,8 @@
 <?hh
 
-function f() { return darray[]; }
+function f() :mixed{ return darray[]; }
 
-function populateArray($max) {
+function populateArray($max) :mixed{
   $a = f();
   for ($i = 0; $i < $max; ++$i) {
     $a[$i] = $i * 9;

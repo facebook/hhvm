@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_ziparchive_extractto_file() {
+function main_ziparchive_extractto_file() :mixed{
 $str = 'temp';
 $dir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($dir);

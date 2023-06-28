@@ -1,12 +1,12 @@
 <?hh
 
-function foo(Vector<int> $a) {
+function foo(Vector<int> $a) :mixed{
 }
-function bar(string $x) {
+function bar(string $x) :mixed{
  echo $x . "\n";
  }
 
 <<__EntryPoint>>
-function main_hh_1() {
+function main_hh_1() :mixed{
 bar("Done");
 }

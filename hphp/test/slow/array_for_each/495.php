@@ -1,6 +1,6 @@
 <?hh
 
-function k1() {
+function k1() :mixed{
   $arr = varray[0,1,2,3,4];
   foreach ($arr as $v) {
     echo "val=$v\n";
@@ -8,6 +8,6 @@ function k1() {
 }
 
 <<__EntryPoint>>
-function main_495() {
+function main_495() :mixed{
 k1();
 }

@@ -12,7 +12,7 @@ function bar(xhp_prefixed_class $arg): xhp_prefixed_class {
   return $arg;
 }
 
-function reflect($name) {
+function reflect($name) :mixed{
   echo '==== ', $name, ' ====', "\n";
   $rf = new ReflectionFunction($name);
   var_dump($rf->getReturnTypeText());
@@ -22,12 +22,12 @@ function reflect($name) {
   var_dump($params[0]->getTypehintText());
 }
 
-function main() {
+function main() :mixed{
   reflect('foo');
   reflect('bar');
 }
 
 <<__EntryPoint>>
-function main_xhp() {
+function main_xhp() :mixed{
 main();
 }

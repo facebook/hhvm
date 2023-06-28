@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_connect_and_query() {
+function main_connect_and_query() :mixed{
 try {
   $options = new AsyncMysqlConnectionOptions();
   $options->setTotalTimeout(10);

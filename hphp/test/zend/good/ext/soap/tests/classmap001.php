@@ -1,7 +1,7 @@
 <?hh
 
 class test{
-	function dotest(book $book){
+	function dotest(book $book):mixed{
 		$classname=get_class($book);
 		return "Classname: ".$classname;
 	}

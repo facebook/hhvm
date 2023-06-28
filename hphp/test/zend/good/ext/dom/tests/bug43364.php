@@ -1,6 +1,6 @@
 <?hh
 function loopElements($nodes)
-{
+:mixed{
     $count = 0;
     foreach($nodes as $node) {
         if($node is DOMElement) {

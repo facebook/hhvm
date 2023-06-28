@@ -2,61 +2,61 @@
 
 class A {
   <<__Memoize>>
-  public function func0A() {
+  public function func0A() :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo) echo "A::func0A()\n";
     return json_encode(varray[]);
   }
   <<__Memoize>>
-  public function func0B() {
+  public function func0B() :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo) echo "A::func0B()\n";
     return json_encode(varray[]);
   }
   <<__Memoize>>
-  public function func1A($p1) {
+  public function func1A($p1) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func1A(".(string)$p1.")\n";
     return json_encode(varray[$p1]);
   }
   <<__Memoize>>
-  public function func1B($p1) {
+  public function func1B($p1) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func1B(".(string)$p1.")\n";
     return json_encode(varray[$p1]);
   }
   <<__Memoize>>
-  public function func2A($p1, $p2) {
+  public function func2A($p1, $p2) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func2A(".(string)$p1.", ".(string)$p2.")\n";
     return json_encode(varray[$p1, $p2]);
   }
   <<__Memoize>>
-  public function func2B($p1, $p2) {
+  public function func2B($p1, $p2) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func2B(".(string)$p1.", ".(string)$p2.")\n";
     return json_encode(varray[$p1, $p2]);
   }
   <<__Memoize>>
-  public function func3A($p1, $p2, $p3) {
+  public function func3A($p1, $p2, $p3) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func3A(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
     return json_encode(varray[$p1, $p2, $p3]);
   }
   <<__Memoize>>
-  public function func3B($p1, $p2, $p3) {
+  public function func3B($p1, $p2, $p3) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func3B(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
     return json_encode(varray[$p1, $p2, $p3]);
   }
   <<__Memoize>>
-  public function func4A($p1, $p2, $p3, $p4) {
+  public function func4A($p1, $p2, $p3, $p4) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func4A(".
@@ -71,7 +71,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>>
-  public function func4B($p1, $p2, $p3, $p4) {
+  public function func4B($p1, $p2, $p3, $p4) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func4B(".
@@ -86,7 +86,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>>
-  public function func5A($p1, $p2, $p3, $p4, $p5) {
+  public function func5A($p1, $p2, $p3, $p4, $p5) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func5A(".
@@ -103,7 +103,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>>
-  public function func5B($p1, $p2, $p3, $p4, $p5) {
+  public function func5B($p1, $p2, $p3, $p4, $p5) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func5B(".
@@ -120,7 +120,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>>
-  public function func6A($p1, $p2, $p3, $p4, $p5, $p6) {
+  public function func6A($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func6A(".
@@ -139,7 +139,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>>
-  public function func6B($p1, $p2, $p3, $p4, $p5, $p6) {
+  public function func6B($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func6B(".
@@ -158,7 +158,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>>
-  public function func7A($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
+  public function func7A($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func7A(".
@@ -179,7 +179,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>>
-  public function func7B($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
+  public function func7B($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func7B(".
@@ -200,7 +200,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>>
-  public function func8A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
+  public function func8A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func8A(".
@@ -223,7 +223,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>>
-  public function func8B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
+  public function func8B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func8B(".
@@ -246,7 +246,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>>
-  public function func9A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
+  public function func9A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func9A(".
@@ -271,7 +271,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>>
-  public function func9B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
+  public function func9B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func9B(".
@@ -296,7 +296,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9]);
   }
   <<__Memoize>>
-  public function func10A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
+  public function func10A($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func10A(".
@@ -325,7 +325,7 @@ class A {
     );
   }
   <<__Memoize>>
-  public function func10B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) {
+  public function func10B($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9, $p10) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func10B(".
@@ -366,7 +366,7 @@ class A {
     $p9,
     $p10,
     $p11,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func11A(".
@@ -409,7 +409,7 @@ class A {
     $p9,
     $p10,
     $p11,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func11B(".
@@ -453,7 +453,7 @@ class A {
     $p10,
     $p11,
     $p12,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func12A(".
@@ -499,7 +499,7 @@ class A {
     $p10,
     $p11,
     $p12,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsInstance1Php::$do_echo)
       echo "A::func12B(".
@@ -533,7 +533,7 @@ class A {
   }
 }
 
-function test() {
+function test() :mixed{
 
 
   $x = new A();

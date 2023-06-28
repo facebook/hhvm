@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = 2;
   switch ($a) {
     case ++$a:
@@ -39,7 +39,7 @@ function main() {
   }
 }
 
-function strswitch() {
+function strswitch() :mixed{
   $a = 'luke';
   switch ($a) {
     case 'leia':

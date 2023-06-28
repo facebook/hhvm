@@ -1,18 +1,18 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 // Php doesn't support \u escapes.
-function u($x) { return json_decode("\"" . $x . "\""); }
+function u($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
 //////////////////////////////////////////////////////////////////////
 
-function test_htmlspecialchars_decode() {
+function test_htmlspecialchars_decode() :mixed{
   $str = "<p>this -&gt; &quot;</p>";
   VS(htmlspecialchars_decode($str), "<p>this -> \"</p>");
 
@@ -23,7 +23,7 @@ function test_htmlspecialchars_decode() {
                                "& &Eacute; &Alpha; '");
 }
 
-function test_htmlspecialchars() {
+function test_htmlspecialchars() :mixed{
   VS(htmlspecialchars("<a href='test'>Test</a>", ENT_QUOTES),
      "&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;");
 
@@ -82,7 +82,7 @@ function test_htmlspecialchars() {
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars() {
+function main_htmlspecialchars() :mixed{
 test_htmlspecialchars_decode();
 test_htmlspecialchars();
 }

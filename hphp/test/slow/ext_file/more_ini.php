@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_more_ini() {
+function main_more_ini() :mixed{
 var_dump(parse_ini_string(
 "a=1
 a[]=1

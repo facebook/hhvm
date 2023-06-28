@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout int $x) {
+function foo(inout int $x) :mixed{
   $x = 42;
 }
 
@@ -8,11 +8,11 @@ function inc(int $x): int {
   return $x + 1;
 }
 
-function bar(callable $f) {
+function bar(callable $f) :mixed{
   return $f('callable check');
 }
 
-function call_f((function(int): int) $f) {
+function call_f((function(int): int) $f) :mixed{
   return $f(0);
 }
 
@@ -20,9 +20,9 @@ class C {
   function __construct() {
     $this->th = 'th';
   }
-  public static function isOdd($i) { return $i % 2 == 1;}
-  public function isOddInst($i) { return $i % 2 == 1;}
-  public function filter($data)  {
+  public static function isOdd($i) :mixed{ return $i % 2 == 1;}
+  public function isOddInst($i) :mixed{ return $i % 2 == 1;}
+  public function filter($data)  :mixed{
     $callback = ($i) ==> $this->isOddInst($i);
     return $data->filter($callback);
   }
@@ -31,11 +31,11 @@ class C {
     return $x;
   }
 
-  public function ref(inout $x) {
+  public function ref(inout $x) :mixed{
     return 0;
   }
 
-  public function meth(inout string $x) {
+  public function meth(inout string $x) :mixed{
     $x = $x . $this->th;
     return "inst_" . $x;
   }

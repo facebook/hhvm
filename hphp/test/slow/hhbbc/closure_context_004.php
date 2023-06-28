@@ -3,7 +3,7 @@
 class Foo {
   private $foo = varray[1,2,3];
 
-  public function f() {
+  public function f() :mixed{
     return function () {
       yield 1;
       yield 2;
@@ -12,10 +12,10 @@ class Foo {
     };
   }
 
-  public function getter() { return $this->foo; }
+  public function getter() :mixed{ return $this->foo; }
 }
 
-function main() {
+function main() :mixed{
   $foo = new Foo();
   var_dump($foo->getter());
   $f = $foo->f();
@@ -28,6 +28,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_closure_context_004() {
+function main_closure_context_004() :mixed{
 main();
 }

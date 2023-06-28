@@ -1,7 +1,7 @@
 <?hh
 
 trait testTrait {
-    public function testMethod() {
+    public function testMethod() :mixed{
         if (1) {
             $letters1 = range('a', 'z', 1);
             $letters2 = range('A', 'Z', 1);

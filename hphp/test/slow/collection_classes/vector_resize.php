@@ -1,6 +1,6 @@
 <?hh
 
-function test($v, $s) {
+function test($v, $s) :mixed{
   echo "---- from " . $v->count() . " to $s\n";
   $v->resize($s, 0);
   foreach ($v as $val) {
@@ -8,7 +8,7 @@ function test($v, $s) {
   }
 }
 
-function main() {
+function main() :mixed{
   $vectors = varray[
     Vector {},
     Vector {1},
@@ -25,6 +25,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_vector_resize() {
+function main_vector_resize() :mixed{
 main();
 }

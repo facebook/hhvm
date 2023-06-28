@@ -1,6 +1,6 @@
 <?hh
 
-function test_pair($k1, $v1, $k2, $v2) {
+function test_pair($k1, $v1, $k2, $v2) :mixed{
   echo "$k1 cmp $k2:\n";
   try {
     echo (($v1 === $v2) ? "T       " : "F       ");

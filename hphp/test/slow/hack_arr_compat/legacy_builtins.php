@@ -1,6 +1,6 @@
 <?hh
 
-function clear(inout $array) {
+function clear(inout $array) :mixed{
   shuffle(inout $array);
   $legacy = HH\is_array_marked_legacy($array);
   $array = HH\is_vec_or_varray($array)
@@ -8,31 +8,31 @@ function clear(inout $array) {
     : ($legacy ? HH\array_mark_legacy(darray[]) : darray[]);
 }
 
-function pop(inout $array) {
+function pop(inout $array) :mixed{
   return array_pop(inout $array);
 }
 
-function push(inout $array) {
+function push(inout $array) :mixed{
   return array_push(inout $array, null);
 }
 
-function shift(inout $array) {
+function shift(inout $array) :mixed{
   return array_shift(inout $array);
 }
 
-function unshift(inout $array) {
+function unshift(inout $array) :mixed{
   return array_unshift(inout $array, null);
 }
 
-function splice(inout $array) {
+function splice(inout $array) :mixed{
   return array_splice(inout $array, 1, 1);
 }
 
-function show($input) {
+function show($input) :mixed{
   return json_encode($input, JSON_FB_FORCE_HACK_ARRAYS);
 }
 
-function test($legacy, $input) {
+function test($legacy, $input) :mixed{
   print("\n==============================================================\n");
   print('test('.$legacy.', '.show($input)."):\n");
 
@@ -63,7 +63,7 @@ function test($legacy, $input) {
   }
 }
 
-function test_multisort($as, $bs) {
+function test_multisort($as, $bs) :mixed{
   print("\n==============================================================\n");
   print('test_multisort('.show($as).', '.show($bs)."):\n");
 
@@ -84,7 +84,7 @@ function test_multisort($as, $bs) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foreach (vec[0, 1] as $legacy) {
     test($legacy, varray[]);
     test($legacy, varray[17]);

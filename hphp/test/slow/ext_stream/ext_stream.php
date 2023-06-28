@@ -1,11 +1,11 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 abstract final class Statics {
   public static $base = -1;
@@ -15,7 +15,7 @@ abstract final class Statics {
 //////////////////////////////////////////////////////////////////////
 
 // so we run on different range of ports every time
-function get_random_port() {
+function get_random_port() :mixed{
   if (Statics::$base == -1) {
     Statics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
@@ -25,7 +25,7 @@ function get_random_port() {
 // On the continuous integration server, it's not unlikely that we'll
 // fail to bind one of these random ports.  Retry a few times and hope
 // for the best.
-function retry_bind_server($udp = false) {
+function retry_bind_server($udp = false) :mixed{
   for ($i = 0; $i < 20; ++$i) {
     $port = get_random_port();
     $scheme = $udp ? "udp://" : "tcp://";
@@ -49,7 +49,7 @@ function retry_bind_server($udp = false) {
   throw new Exception("Couldn't bind server");
 }
 
-function retry_bind_server6($udp = false) {
+function retry_bind_server6($udp = false) :mixed{
   for ($i = 0; $i < 20; ++$i) {
     $port = get_random_port();
     $scheme = $udp ? "udp://" : "tcp://";
@@ -75,7 +75,7 @@ function retry_bind_server6($udp = false) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-function test_stream_copy_to_stream() {
+function test_stream_copy_to_stream() :mixed{
   $src = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   $dtmp = tempnam(sys_get_temp_dir(), 'vmcopystream');
   $dest = fopen($dtmp, "w");
@@ -88,7 +88,7 @@ function test_stream_copy_to_stream() {
   unlink($dtmp);
 }
 
-function test_stream_get_contents() {
+function test_stream_get_contents() :mixed{
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   VS(stream_get_contents($f), "Testing Ext File\n");
 
@@ -106,7 +106,7 @@ function test_stream_get_contents() {
   fclose($f);
 }
 
-function test_stream_get_line() {
+function test_stream_get_line() :mixed{
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   VS(stream_get_line($f), "Testing Ext File\n");
 
@@ -119,7 +119,7 @@ function test_stream_get_line() {
   fclose($f);
 }
 
-function test_stream_get_meta_data() {
+function test_stream_get_meta_data() :mixed{
   list($port, $address, $server) = retry_bind_server();
 
   $errno = null;
@@ -133,7 +133,7 @@ function test_stream_get_meta_data() {
   VS($meta['blocked'], true);
 }
 
-function test_stream_misc() {
+function test_stream_misc() :mixed{
   $transports = stream_get_transports();
   VERIFY(count($transports) > 0);
   VS(in_array("ssl", $transports), true);
@@ -144,7 +144,7 @@ function test_stream_misc() {
   VS(in_array("http", $w), true);
 }
 
-function test_stream_select() {
+function test_stream_select() :mixed{
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   $reads = varray[$f];
   $ignore = null;
@@ -157,7 +157,7 @@ function test_stream_select() {
          ) != false);
 }
 
-function test_stream_socket_recvfrom_tcp() {
+function test_stream_socket_recvfrom_tcp() :mixed{
   list($port, $address, $server) = retry_bind_server();
   $errno = null;
   $errstr = null;
@@ -172,7 +172,7 @@ function test_stream_socket_recvfrom_tcp() {
   VS($buffer, "testing");
 }
 
-function test_stream_socket_recvfrom_tcp6() {
+function test_stream_socket_recvfrom_tcp6() :mixed{
   list($port, $address, $server) = retry_bind_server6();
   $errno = null;
   $errstr = null;
@@ -187,7 +187,7 @@ function test_stream_socket_recvfrom_tcp6() {
   VS($buffer, "testing6");
 }
 
-function test_stream_socket_recvfrom_udp() {
+function test_stream_socket_recvfrom_udp() :mixed{
   list($port, $address, $server) = retry_bind_server(true);
   $errno = null;
   $errstr = null;
@@ -201,7 +201,7 @@ function test_stream_socket_recvfrom_udp() {
   VS($buffer, "testing-udp");
 }
 
-function test_stream_socket_recvfrom_udp6() {
+function test_stream_socket_recvfrom_udp6() :mixed{
   list($port, $address, $server) = retry_bind_server(true);
   $errno = null;
   $errstr = null;
@@ -216,7 +216,7 @@ function test_stream_socket_recvfrom_udp6() {
 }
 
 
-function test_stream_socket_recvfrom_unix() {
+function test_stream_socket_recvfrom_unix() :mixed{
   $sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
   $tmpsock = tempnam($sockdir, 'vmstreamtest');
   unlink($tmpsock);
@@ -236,7 +236,7 @@ function test_stream_socket_recvfrom_unix() {
   VS($buffer, $text);
 }
 
-function test_stream_socket_sendto_issue324() {
+function test_stream_socket_sendto_issue324() :mixed{
   list($port, $address, $server) = retry_bind_server();
   $errno = null;
   $errstr = null;
@@ -251,19 +251,19 @@ function test_stream_socket_sendto_issue324() {
   VS($buffer, $text);
 }
 
-function test_stream_socket_kind() {
+function test_stream_socket_kind() :mixed{
   list($port, $address, $server) = retry_bind_server();
   var_dump($server);
 }
 
-function test_stream_socket_shutdown() {
+function test_stream_socket_shutdown() :mixed{
   list($port, $address, $server) = retry_bind_server();
   VERIFY(stream_socket_shutdown($server, 0));
 }
 
 // Verify that the stream constants have been registered correctly
 // by checking some of them
-function test_stream_constants() {
+function test_stream_constants() :mixed{
   VS(STREAM_CLIENT_CONNECT, 4);
   VS(STREAM_SERVER_LISTEN, 8);
   VS(STREAM_IPPROTO_RAW, 255);
@@ -272,7 +272,7 @@ function test_stream_constants() {
 
 
 <<__EntryPoint>>
-function main_ext_stream() {
+function main_ext_stream() :mixed{
 test_stream_copy_to_stream();
 test_stream_get_contents();
 test_stream_get_line();

@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
     return new SoapFault("MyFault","My fault string");
 }
 <<__EntryPoint>> function main(): void {

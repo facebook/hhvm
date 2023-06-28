@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :AsyncGenerator<mixed,mixed,void>{
   yield 1 => 2;
   yield "a" => "b";
 }

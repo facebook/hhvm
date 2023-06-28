@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_6() {
+function main_6() :mixed{
 apc_store("ts", "TestString");
 apc_store("ta", darray["a" => 1, "b" => 2]);
 

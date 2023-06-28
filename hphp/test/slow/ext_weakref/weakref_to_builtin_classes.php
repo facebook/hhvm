@@ -3,7 +3,7 @@
 // This tests that we invalidate WeakRefs to an instance when it is destroyed
 // regardless of the instanceDtor it may have
 
-function test($what) {
+function test($what) :mixed{
   echo "==== $what ====\n";
   $producer = 'produce_' . $what;
   $foo = $producer();
@@ -14,12 +14,12 @@ function test($what) {
   var_dump($w->valid());
 }
 
-function produce_stdClass() { return new stdClass(); }
-function produce_native_data() { return new PDOStatement(); }
-function produce_collection() { return Vector{}; }
-async function produce_awaitable() { return 1; }
-function produce_php_closure() { return function() { return 1; }; }
-function produce_hack_closure() { return () ==> {}; }
+function produce_stdClass() :mixed{ return new stdClass(); }
+function produce_native_data() :mixed{ return new PDOStatement(); }
+function produce_collection() :mixed{ return Vector{}; }
+async function produce_awaitable() :Awaitable<mixed>{ return 1; }
+function produce_php_closure() :mixed{ return function() { return 1; }; }
+function produce_hack_closure() :mixed{ return () ==> {}; }
 
 <<__EntryPoint>> function main(): void {
   test('stdClass');

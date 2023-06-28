@@ -1,5 +1,5 @@
 <?hh
-function Test($param) {
+function Test($param) :mixed{
 
 	ZendGoodExtSoapTestsBugsBug38055::$g1 = $param->boolA;
 	ZendGoodExtSoapTestsBugsBug38055::$g2	= $param->boolB;
@@ -13,7 +13,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('Test');
   }
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

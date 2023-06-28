@@ -9,7 +9,7 @@ function get(dict $d, mixed $k): dict {
   return $d;
 }
 
-function manipulate($arr) {
+function manipulate($arr) :mixed{
   try {
     $arr['foo']['bar'][] = 12;
   } catch (OutOfBoundsException $ex) {

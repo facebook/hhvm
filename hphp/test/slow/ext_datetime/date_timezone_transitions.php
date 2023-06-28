@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_timezone_transitions() {
+function main_date_timezone_transitions() :mixed{
 $timezone = new DateTimeZone("Europe/London");
 $transitions = $timezone->getTransitions(1000000, 999999999);
 var_dump(is_varray($transitions));

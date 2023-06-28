@@ -1,7 +1,7 @@
 <?hh
 
 function ut_main()
-{
+:mixed{
         setlocale(LC_ALL, 'de_DE');
         $fmt = new NumberFormatter( 'sl_SI.UTF-8', NumberFormatter::DECIMAL);
         $num = "1.234.567,891";

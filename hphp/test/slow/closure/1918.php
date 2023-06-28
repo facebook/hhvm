@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1918() {
+function main_1918() :mixed{
 $a = function ($v) {
  return $v > 2;
  }

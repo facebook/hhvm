@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_soapheader() {
+function main_soapheader() :mixed{
 $soapHeader = new SoapHeader("env", "header1", darray['foo' => 'bar']);
 var_dump($soapHeader);
 var_dump($soapHeader->namespace);

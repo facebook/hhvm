@@ -1,19 +1,19 @@
 <?hh
 
 class A {
- function test() {
+ function test() :mixed{
 }
 }
  class B {
  public $b;
 }
  class C {
- function test() {
+ function test() :mixed{
 }
 }
 
  <<__EntryPoint>>
-function main_1273() {
+function main_1273() :mixed{
 $a = 'test';
  $a = new B();
  $a->b = new A();

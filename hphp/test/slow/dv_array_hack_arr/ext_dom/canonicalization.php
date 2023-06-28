@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_canonicalization() {
+function main_canonicalization() :mixed{
 $xml = <<<EOXML
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"

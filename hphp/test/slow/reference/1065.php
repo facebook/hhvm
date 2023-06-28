@@ -1,6 +1,6 @@
 <?hh
 
-function run(inout $a, inout $b) {
+function run(inout $a, inout $b) :mixed{
   $c = 2;
   $b = $c;
   $c = 5;
@@ -10,7 +10,7 @@ function run(inout $a, inout $b) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = 1;
   run(inout $a, inout $a);
 }

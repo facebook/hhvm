@@ -1,34 +1,34 @@
 <?hh
 
 class noCtor {
-  public static function reflectionObjectFactory() {
+  public static function reflectionObjectFactory() :mixed{
     return new ReflectionObject(new self);
   }
 }
 
 class publicCtorNew {
   public function __construct() {}
-  public static function reflectionObjectFactory() {
+  public static function reflectionObjectFactory() :mixed{
     return new ReflectionObject(new self);
   }
 }
 
 class protectedCtorNew {
   protected function __construct() {}
-  public static function reflectionObjectFactory() {
+  public static function reflectionObjectFactory() :mixed{
     return new ReflectionObject(new self);
   }
 }
 
 class privateCtorNew {
   private function __construct() {}
-  public static function reflectionObjectFactory() {
+  public static function reflectionObjectFactory() :mixed{
     return new ReflectionObject(new self);
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $reflectionObjects = vec[
     noCtor::reflectionObjectFactory(),
     publicCtorNew::reflectionObjectFactory(),

@@ -6,7 +6,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   apc_store("some-key", new A());
   __hhvm_intrinsics\apc_fetch_no_check("some-key");
   $b = __hhvm_intrinsics\apc_fetch_no_check("some-key");

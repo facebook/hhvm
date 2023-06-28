@@ -28,7 +28,7 @@ type TAlias = bool;
 
 // FILE: test.php
 
-function p($s) {
+function p($s) :mixed{
   $bcs = vec[];
   foreach (explode(' ', $s) as $word) {
     if (strpos($word, 'VerifyParamType') === 0) $bcs[] = $word;
@@ -36,21 +36,21 @@ function p($s) {
   echo "Verify BCs: ".implode(', ', $bcs)."\n";
 }
 
-function infoi(Foo<int> $foo)    { p(__hhvm_intrinsics\debug_get_bytecode()); }
-function infob(Foo<bool> $foo)   { p(__hhvm_intrinsics\debug_get_bytecode()); }
-function infoa(Foo<TAlias> $foo) { p(__hhvm_intrinsics\debug_get_bytecode()); }
+function infoi(Foo<int> $foo)    :mixed{ p(__hhvm_intrinsics\debug_get_bytecode()); }
+function infob(Foo<bool> $foo)   :mixed{ p(__hhvm_intrinsics\debug_get_bytecode()); }
+function infoa(Foo<TAlias> $foo) :mixed{ p(__hhvm_intrinsics\debug_get_bytecode()); }
 
-function testi(Foo<int> $foo)    { echo "testi(".$foo->str.") = ok\n"; }
-function testb(Foo<bool> $foo)   { echo "testb(".$foo->str.") = ok\n"; }
-function testa(Foo<TAlias> $foo) { echo "testa(".$foo->str.") = ok\n"; }
+function testi(Foo<int> $foo)    :mixed{ echo "testi(".$foo->str.") = ok\n"; }
+function testb(Foo<bool> $foo)   :mixed{ echo "testb(".$foo->str.") = ok\n"; }
+function testa(Foo<TAlias> $foo) :mixed{ echo "testa(".$foo->str.") = ok\n"; }
 
-function deps() {
+function deps() :mixed{
   echo "Deps: ".implode(', ', __hhvm_intrinsics\debug_file_deps())."\n";
 }
 
 // FILE: main.php
 
-function go($foo) {
+function go($foo) :mixed{
   $str = $foo->str;
   try { testi($foo); } catch (Exception $e) { echo "testi($str) = ex\n"; }
   try { testb($foo); } catch (Exception $e) { echo "testb($str) = ex\n"; }
@@ -58,7 +58,7 @@ function go($foo) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(() ==> { throw new Exception; }, E_RECOVERABLE_ERROR);
 
   $r = new ReflectionClass('Foo')->getReifiedTypeParamInfo();

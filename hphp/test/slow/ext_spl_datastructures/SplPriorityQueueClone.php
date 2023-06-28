@@ -1,6 +1,6 @@
 <?hh
 
-function getQueueWithLittleData() {
+function getQueueWithLittleData() :mixed{
   $q = new SplPriorityQueue();
   $q->insert('dux', 4);
   $q->insert('legati', 3);
@@ -9,7 +9,7 @@ function getQueueWithLittleData() {
   return $q;
 }
 
-function testExtractFlags() {
+function testExtractFlags() :mixed{
   $flags = varray[
     varray['SplPriorityQueue::EXTR_DATA', SplPriorityQueue::EXTR_DATA],
     varray['SplPriorityQueue::EXTR_PRIORITY', SplPriorityQueue::EXTR_PRIORITY],
@@ -27,7 +27,7 @@ function testExtractFlags() {
   }
 }
 
-function testExtractFlag($q, $flagName, $flagValue) {
+function testExtractFlag($q, $flagName, $flagValue) :mixed{
   $q->setExtractFlags($flagValue);
   echo "Get top with $flagName:\n";
   print_r($q->top());
@@ -45,7 +45,7 @@ function testExtractFlag($q, $flagName, $flagValue) {
 }
 
 
-function testCloneGivesValidCopy() {
+function testCloneGivesValidCopy() :mixed{
   $q = getQueueWithLittleData();
   $clonedQueue = clone $q;
 
@@ -56,7 +56,7 @@ function testCloneGivesValidCopy() {
 }
 
 <<__EntryPoint>>
-function main_spl_priority_queue_clone() {
+function main_spl_priority_queue_clone() :mixed{
 testExtractFlags();
 testCloneGivesValidCopy();
 }

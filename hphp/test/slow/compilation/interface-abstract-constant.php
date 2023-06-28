@@ -12,10 +12,10 @@ class C4 extends C3 {
   const int C = 123;
 }
 
-function bar(I $x) {
+function bar(I $x) :mixed{
   var_dump($x::C);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   bar(new C4());
 }

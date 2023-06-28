@@ -5,7 +5,7 @@ class A {
 
 class Token implements \Serializable {
     public function serialize()
-    {
+:mixed    {
         $c = new A;
 
         for ($i = 0; $i < 4; $i++)
@@ -19,7 +19,7 @@ class Token implements \Serializable {
     }
 
     public function unserialize($str)
-    {
+:mixed    {
         $r = unserialize($str);
         $r = unserialize($r[0]);
     }

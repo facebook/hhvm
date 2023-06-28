@@ -4,10 +4,10 @@ namespace A {
   const B = 'c';
   class D {
     public function e($f = \PHP_VERSION, $g = B,
-                      $h = varray[\PHP_VERSION], $i = varray[B]) {
+                      $h = varray[\PHP_VERSION], $i = varray[B]) :mixed{
     }
   }
-  function j($k = \PHP_VERSION, $l = B, $m = varray[\PHP_VERSION], $n = varray[B]) {
+  function j($k = \PHP_VERSION, $l = B, $m = varray[\PHP_VERSION], $n = varray[B]) :mixed{
   }
 }
 namespace {

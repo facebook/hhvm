@@ -7,7 +7,7 @@ class dyn_A{
 }
 
  <<__EntryPoint>>
-function main_1205() {
+function main_1205() :mixed{
 $cls = 'dyn_A';
  $a = new $cls();
 }

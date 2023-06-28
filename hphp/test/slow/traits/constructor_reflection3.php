@@ -9,7 +9,7 @@ class A {
   use B;
 }
 
-function main() {
+function main() :mixed{
   foreach (varray['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getMethods() as $method) {
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_constructor_reflection3() {
+function main_constructor_reflection3() :mixed{
 main();
 }

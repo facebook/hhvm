@@ -1,6 +1,6 @@
 <?hh
 
-function exception_error_handler() {
+function exception_error_handler() :mixed{
         throw new Exception();
 }
 <<__EntryPoint>> function main(): void {

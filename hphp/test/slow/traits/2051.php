@@ -3,10 +3,10 @@
 class Base {
 }
 trait T {
-  public function sayClass() {
+  public function sayClass() :mixed{
     echo get_class() . "\n";
   }
-  public function sayParent() {
+  public function sayParent() :mixed{
     echo get_parent_class();
   }
 }

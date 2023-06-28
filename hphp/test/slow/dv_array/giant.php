@@ -5,11 +5,11 @@ abstract final class FStatics {
   public static $x = 0;
 }
 
-function f() {
+function f() :mixed{
   return FStatics::$x++;
 }
 
-function test() {
+function test() :mixed{
   $x1 = varray[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -87,6 +87,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_giant() {
+function main_giant() :mixed{
 test();
 }

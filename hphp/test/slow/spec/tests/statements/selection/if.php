@@ -8,8 +8,8 @@
 
 // an ordinary if having 2 actions on TRUE and none on FALSE
 
-function processTransaction() { echo "Inside processTransaction\n"; }
-function postMessage() { echo "Inside postMessage\n"; }
+function processTransaction() :mixed{ echo "Inside processTransaction\n"; }
+function postMessage() :mixed{ echo "Inside postMessage\n"; }
 
 class Name
 {

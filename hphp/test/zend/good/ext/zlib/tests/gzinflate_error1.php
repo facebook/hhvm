@@ -1,7 +1,7 @@
 <?hh
 
 class Tester {
-    function Hello() {
+    function Hello() :mixed{
         echo "Hello\n"; 
     }
 }

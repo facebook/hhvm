@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = unserialize('O:14:"BogusTestClass":0:{}');
   var_dump(is_object($a));
   var_dump($a is __PHP_Incomplete_Class);

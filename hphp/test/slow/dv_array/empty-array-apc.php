@@ -6,12 +6,12 @@ function round_trip_in_apc(mixed $val): mixed {
   return apc_fetch('abc', inout $err);
 }
 
-function foo($v) {
+function foo($v) :mixed{
   return varray[$v];
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = foo(10);
   $a = HH\array_mark_legacy($a);
   unset($a[0]);

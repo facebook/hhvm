@@ -1,7 +1,7 @@
 <?hh
 
 
-function main($a, $doit) {
+function main($a, $doit) :mixed{
   $o = "abc";
   if ($doit) {
     $o = darray[];
@@ -16,7 +16,7 @@ function main($a, $doit) {
 
 
 <<__EntryPoint>>
-function main_loop_poly1() {
+function main_loop_poly1() :mixed{
 var_dump(main(varray[], 1));
 var_dump(main(varray["1",1], 1));
 var_dump(main(varray["1",1], 1));

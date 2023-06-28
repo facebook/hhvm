@@ -1,6 +1,6 @@
 <?hh
 
-function add_cssclass($add, $class) {
+function add_cssclass($add, $class) :mixed{
   $class = (!($class ?? false)) ? $add : $class .= ' ' . $add;
   return $class;
 }

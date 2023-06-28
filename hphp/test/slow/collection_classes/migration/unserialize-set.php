@@ -3,7 +3,7 @@
 // Test that we can handle unserialization of Sets with
 // and without namespaces.
 
-function main() {
+function main() :mixed{
   $set = Set {1, 2, 3};
 
   // unserialize o serialize == id
@@ -33,6 +33,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unserialize_set() {
+function main_unserialize_set() :mixed{
 main();
 }

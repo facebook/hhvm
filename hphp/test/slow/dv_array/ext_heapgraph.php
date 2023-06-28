@@ -3,14 +3,14 @@
 class RootClass {
   public darray<string, mixed> $children = darray[];
   <<__Memoize>>
-  public static function getInstance() {
+  public static function getInstance() :mixed{
     return new RootClass();
   }
 }
 
 class ChildWithClosureMember {
   public $closure;
-  public function doWork() {
+  public function doWork() :mixed{
     json_encode($this->closure);
   }
 }
@@ -26,7 +26,7 @@ class ParentWithClosureTarget {
     $this->child->closure = $this->createClosure();
   }
 
-  public function createClosure() {
+  public function createClosure() :mixed{
     return function() {
       return $this->someval;
     };
@@ -34,7 +34,7 @@ class ParentWithClosureTarget {
 }
 
 class ClassForSecondCapture { }
-function echo_buffer($str) {
+function echo_buffer($str) :mixed{
 
   // new root names
   $str = str_replace('HPHP::CppStack', 'onsome-stack', $str);
@@ -42,7 +42,7 @@ function echo_buffer($str) {
   $str = str_replace('HPHP::RdsLocal', 'rds-local', $str);
   DvArrayExtHeapgraphPhp::$echobuf[] = $str;
 }
-function echo_flush() {
+function echo_flush() :mixed{
 
   $echobuf_uniq = array_unique(DvArrayExtHeapgraphPhp::$echobuf);
   sort(inout $echobuf_uniq);
@@ -51,7 +51,7 @@ function echo_flush() {
   }
   DvArrayExtHeapgraphPhp::$echobuf = varray[];
 }
-function showTestClasses($node) {
+function showTestClasses($node) :mixed{
 
 
 
@@ -77,7 +77,7 @@ function showTestClasses($node) {
   }
 }
 
-function edgeName($hg, $edge) {
+function edgeName($hg, $edge) :mixed{
   $from = $edge['from'];
   $n = heapgraph_node($hg, $from);
   $kind = $n['kind'];
@@ -97,7 +97,7 @@ function edgeName($hg, $edge) {
   return "";
 }
 
-function showTestEdge($edge) {
+function showTestEdge($edge) :mixed{
 
   $testedges = darray[
     'ArrayKey:MemoizedSingleton' => 1,
@@ -116,19 +116,19 @@ function showTestEdge($edge) {
   }
 }
 
-function showAllEdges($hg, $edges) {
+function showAllEdges($hg, $edges) :mixed{
   foreach ($edges as $edge) {
     echo_buffer(edgeName($hg, $edge)."\n");
   }
 }
 
-function showClassOnly($node) {
+function showClassOnly($node) :mixed{
   if (idx($node, 'class')) {
     echo_buffer($node['class']."\n");
   }
 }
 
-function showClass($node) {
+function showClass($node) :mixed{
   if (idx($node, 'class')) {
     echo_buffer($node['class']."\n");
   } else {
@@ -136,7 +136,7 @@ function showClass($node) {
   }
 }
 
-function printNode($node) {
+function printNode($node) :mixed{
   echo "node ".$node['index']." ".$node['kind']." ";
   if (isset($node['class'])) echo $node['class']." ";
   if (isset($node['func'])) echo $node['func']." ";
@@ -145,12 +145,12 @@ function printNode($node) {
   echo "\n";
 }
 
-function printEdge($edge) {
+function printEdge($edge) :mixed{
   echo 'edge '.$edge['name'].' ';
   echo $edge['kind'].' '.$edge['from']."->".$edge['to'];
   echo "\n";
 }
-function dfsPrintNode($hg, $node) {
+function dfsPrintNode($hg, $node) :mixed{
 
   $id = $node['index'];
   DvArrayExtHeapgraphPhp::$visited[$id] = true;

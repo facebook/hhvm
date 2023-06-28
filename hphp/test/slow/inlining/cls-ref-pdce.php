@@ -3,18 +3,18 @@
 
 final class Bar {
   private static $member = 123;
-  public static function set(int $x) {
+  public static function set(int $x) :mixed{
     self::$member = $x;
   }
 }
 
 final class Foo {
-  public static function set(int $x) {
+  public static function set(int $x) :mixed{
     Bar::set($x);
   }
 }
 
-function main($x) {
+function main($x) :mixed{
   $a1 = $x;
   $a2 = $x;
   $a3 = $x;
@@ -38,7 +38,7 @@ function main($x) {
 
 
 <<__EntryPoint>>
-function main_cls_ref_pdce() {
+function main_cls_ref_pdce() :mixed{
 main(1);
 main(1);
 main(1);

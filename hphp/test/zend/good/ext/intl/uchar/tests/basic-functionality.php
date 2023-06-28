@@ -1,6 +1,6 @@
 <?hh
 
-function unicode_info($cp) {
+function unicode_info($cp) :mixed{
   $methods = dict[
     'charName' => IntlChar::charName<>,
 

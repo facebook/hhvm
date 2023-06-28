@@ -4,7 +4,7 @@ class Foo {
   eval("class Bar extends Foo {}");
  }
  <<__LSB>> public static $i = 0;
- public static function test() {
+ public static function test() :mixed{
   var_dump(++static::$i);
  }
 }

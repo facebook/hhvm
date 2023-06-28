@@ -3,7 +3,7 @@
 class AE extends Exception {}
 class BE extends Exception {}
 
-function foo () {
+function foo () :mixed{
     try {
         try {
             try {

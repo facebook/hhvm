@@ -1,6 +1,6 @@
 <?hh
 
-function main($bar) {
+function main($bar) :mixed{
   $foo = "Hello!";
   varray[1, 2, 3]
     |> array_map($x ==> $x + 1, $$)
@@ -17,6 +17,6 @@ function main($bar) {
 
 
 <<__EntryPoint>>
-function main_pipevar_3() {
+function main_pipevar_3() :mixed{
 main("Goodbye");
 }

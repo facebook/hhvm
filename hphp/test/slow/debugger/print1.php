@@ -1,18 +1,18 @@
 <?hh
 
 class C {
-  public function __toDebugDisplay() {
+  public function __toDebugDisplay() :mixed{
     return "some custom string";
   }
 }
 
 class D {
-  public function __toDebugDisplay() {
+  public function __toDebugDisplay() :mixed{
     return darray['c'=>new C()];
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
 $a = darray[];
 for ($i = 0; $i < 20; $i++) { $a[$i] = $i; }
 $s = "hello";

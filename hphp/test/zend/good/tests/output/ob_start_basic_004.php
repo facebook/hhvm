@@ -7,7 +7,7 @@
 abstract final class ObStartBasic {
   public static $callback_invocations = 0;
 }
-function callback($string) {
+function callback($string) :mixed{
 
   ObStartBasic::$callback_invocations++;
     $len = strlen($string);

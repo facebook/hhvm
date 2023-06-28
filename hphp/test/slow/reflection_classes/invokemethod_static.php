@@ -2,7 +2,7 @@
 
 class Foo {
   <<__DynamicallyCallable>>
-  public static function bar(...$args) {
+  public static function bar(...$args) :mixed{
     var_dump($args);
   }
 }
@@ -10,7 +10,7 @@ class Foo {
 class Bar {
 }
 
-function main() {
+function main() :mixed{
   $m = new ReflectionMethod('Foo', 'bar');
   $m->invoke($m);
   $m->invoke(new Bar());
@@ -18,6 +18,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_invokemethod_static() {
+function main_invokemethod_static() :mixed{
 main();
 }

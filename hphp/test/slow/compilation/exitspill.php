@@ -9,13 +9,13 @@ class X {
   const FIZ = FIZ;
 }
 
-function foo($a, $b) {
+function foo($a, $b) :mixed{
   var_dump($a, $b);
 }
 
-function f() { return FIZ; }
+function f() :mixed{ return FIZ; }
 
-function test() {
+function test() :mixed{
   foo(f(), varray[X::FOO, X::BAZ,
                  X::BAR, X::BAZ,
                  X::BOO, X::BIZ]);
@@ -26,7 +26,7 @@ function test() {
 
 const FIZ = 32;
 <<__EntryPoint>>
-function main_exitspill() {
+function main_exitspill() :mixed{
 
 test();
 }

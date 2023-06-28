@@ -14,22 +14,22 @@ class test {
     $this->object = new test_props;
   }
 
-  public function getArray() {
+  public function getArray() :mixed{
     return $this->array;
   }
 
-  public function getString() {
+  public function getString() :mixed{
     return $this->string;
   }
 
-  public function case1() {
+  public function case1() :mixed{
     foreach ($this->array as $foo) {
       echo $foo;
     }
     echo "\n";
   }
 
-  public function case2() {
+  public function case2() :mixed{
     try {
       foreach ($this->foobar as $foo)
         ;
@@ -38,7 +38,7 @@ class test {
     }
   }
 
-  public function case3() {
+  public function case3() :mixed{
     try {
       foreach ($this->string as $foo)
         ;
@@ -47,12 +47,12 @@ class test {
     }
   }
 
-  public function case4() {
+  public function case4() :mixed{
     foreach ($this->getArray() as $foo)
       ;
   }
 
-  public function case5() {
+  public function case5() :mixed{
     try {
       foreach ($this->getString() as $foo)
         ;
@@ -61,7 +61,7 @@ class test {
     }
   }
 
-  public function case6() {
+  public function case6() :mixed{
     foreach ($this->object as $foo) {
       echo $foo;
     }

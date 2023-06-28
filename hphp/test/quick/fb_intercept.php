@@ -1,24 +1,24 @@
 <?hh
-function mkh($c) { return ($_1, $_2, inout $_3) ==> shape('value' => $c()); }
-function handler($name, $obj, inout $args) {
+function mkh($c) :mixed{ return ($_1, $_2, inout $_3) ==> shape('value' => $c()); }
+function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   return shape('value' => null);
 }
 
-function passthrough_handler($name, $obj, inout $args) {
+function passthrough_handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   return shape();
 }
 
-function frap($arg) {
+function frap($arg) :mixed{
   echo "frap $arg\n";
 }
 
-function test_standard_function() {
+function test_standard_function() :mixed{
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
   // Call once normally first; make sure translator can handle it
   frap('claptrap');
@@ -41,11 +41,11 @@ function test_standard_function() {
   frap('claptrap');
 }
 
-function var_frap($arg, ...$rest) {
+function var_frap($arg, ...$rest) :mixed{
   echo "var_frap $arg "; var_dump($rest);
 }
 
-function test_variadic_function() {
+function test_variadic_function() :mixed{
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
 
   // Call once normally first; make sure translator can handle it
@@ -70,10 +70,10 @@ function test_variadic_function() {
 }
 
 class Blark {
-  public static function sfrap() {
+  public static function sfrap() :mixed{
     echo "static frap " . static::class . "\n";
   }
-  public function frap() {
+  public function frap() :mixed{
     echo "non-static frap\n";
   }
 }
@@ -81,7 +81,7 @@ class Blark {
 class SubBlark extends Blark {}
 class SubBlark2 extends Blark {}
 
-function test_methods() {
+function test_methods() :mixed{
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
 
   // Intercept static method

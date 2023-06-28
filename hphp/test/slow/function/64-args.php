@@ -67,7 +67,7 @@ function foo64(
   $_62 = null,
   $_63 = null,
   $_64 = null,
-) {
+) :mixed{
   echo "done64\n";
 }
 
@@ -201,12 +201,12 @@ function foo128(
   $_126 = null,
   $_127 = null,
   $_128 = null,
-) {
+) :mixed{
   echo "done128\n";
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   foo64(1);
   foo64(1);
   foo128(1);

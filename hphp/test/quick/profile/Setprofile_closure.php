@@ -1,6 +1,6 @@
 <?hh
 
-function globalFunc($a) {
+function globalFunc($a) :mixed{
   $l1 = ($_) ==> { error_log('In lambda1'); };
   $l2 = ($_) ==> { error_log('In lambda2'); };
   error_log('In globalFunc');
@@ -9,7 +9,7 @@ function globalFunc($a) {
 }
 
 class SomeClass {
-  public static function someFunc($a) {
+  public static function someFunc($a) :mixed{
     $l1 = ($_) ==> { error_log('In lambda1'); };
     $l2 = ($_) ==> { error_log('In lambda2'); };
     error_log('In someFunc');
@@ -18,14 +18,14 @@ class SomeClass {
   }
 }
 
-function proffunc($event, $name, $info) {
+function proffunc($event, $name, $info) :mixed{
   if ($name === "error_log" || $name === "fb_setprofile") {
     return;
   }
   echo "** $event $name\n";
 }
 
-function main($a) {
+function main($a) :mixed{
   fb_setprofile(
     proffunc<>,
     SETPROFILE_FLAGS_RESUME_AWARE | SETPROFILE_FLAGS_DEFAULT,

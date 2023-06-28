@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_key() {
+function main_key() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator(
   $sample_dir,

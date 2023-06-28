@@ -1,8 +1,8 @@
 <?hh
 
-function foo(inout $x) { var_dump($x); $x = 12; }
+function foo(inout $x) :mixed{ var_dump($x); $x = 12; }
 
-function checkStatic() {
+function checkStatic() :mixed{
   $a = darray['apple' => darray['orange' => 5]];
   try { foo(inout $a[10]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try { foo(inout $a['apple']['banana']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
@@ -15,7 +15,7 @@ function checkStatic() {
   }
 }
 
-function getOne(inout $a, $k) {
+function getOne(inout $a, $k) :mixed{
   try {
     foo(inout $a[$k]);
   } catch (Exception $e) {
@@ -23,7 +23,7 @@ function getOne(inout $a, $k) {
   }
 }
 
-function getTwo(inout $a, $k1, $k2) {
+function getTwo(inout $a, $k1, $k2) :mixed{
   try {
     foo(inout $a[$k1][$k2]);
   } catch (Exception $e) {
@@ -31,7 +31,7 @@ function getTwo(inout $a, $k1, $k2) {
   }
 }
 
-function checkNonStatic($a) {
+function checkNonStatic($a) :mixed{
   getOne(inout $a, 10);
   getTwo(inout $a, 'apple', 'banana');
   getTwo(inout $a, 'apple', 'orange');
@@ -39,7 +39,7 @@ function checkNonStatic($a) {
   var_dump($a);
 }
 
-function checkNums($a) {
+function checkNums($a) :mixed{
   getTwo(inout $a, 0, 1);
   getTwo(inout $a, 0, 100);
   getOne(inout $a, 0);
@@ -48,7 +48,7 @@ function checkNums($a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   checkStatic();
   $a = darray['apple' => darray['orange' => 5]];
   $b = dict['apple' => darray['orange' => 5]];

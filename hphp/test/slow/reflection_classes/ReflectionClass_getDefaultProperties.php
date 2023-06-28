@@ -19,7 +19,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_reflection_class_get_default_properties() {
+function main_reflection_class_get_default_properties() :mixed{
 $class = new ReflectionClass(A::class);
 var_dump($class->getDefaultProperties());
 

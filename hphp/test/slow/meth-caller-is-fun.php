@@ -1,9 +1,9 @@
 <?hh
 
-class C { function f() {} }
+class C { function f() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m1 = meth_caller(C::class, 'f');
   $m2 = __hhvm_intrinsics\launder_value($m1);
 

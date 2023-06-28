@@ -10,7 +10,7 @@ function is_varray_or_darray_(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_varray_or_darray() {
+function main_is_expression_varray_or_darray() :mixed{
 is_varray_or_darray_(vec[]);
 is_varray_or_darray_(dict[]);
 is_varray_or_darray_(keyset[]);

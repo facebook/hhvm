@@ -7,12 +7,12 @@ namespace X\Y {
   }
 
   <<C(6)>>
-  function j() {}
+  function j() :mixed{}
 
   <<__D(7)>>
-  function k() {}
+  function k() :mixed{}
 
-  function reflect () {
+  function reflect () :mixed{
     $rj = new \ReflectionFunction("X\Y\j");
     \var_dump($rj->getAttributeClass(C::class)->i); // 6
     // Built in attributes don't get namespaced
@@ -29,12 +29,12 @@ namespace {
   }
 
   <<B(4)>>
-  function g() {}
+  function g() :mixed{}
 
   <<C(5)>>
-  function h() {}
+  function h() :mixed{}
 
-  function reflect () {
+  function reflect () :mixed{
     $rg = new ReflectionFunction("g");
     \var_dump($rg->getAttributeClass(B::class)->i); // 4
     $rh = new ReflectionFunction("h");

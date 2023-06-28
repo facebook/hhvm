@@ -1,9 +1,9 @@
 <?hh
 
-function foo() {}
+function foo() :mixed{}
 
 class Cls {
-  public static function meth() {}
+  public static function meth() :mixed{}
 }
 
 class A {
@@ -21,7 +21,7 @@ class B {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(A::$arr);
   var_dump(B::f);
   var_dump(A::$arr === B::f);

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_bug48147() {
+function main_bug48147() :mixed{
 $text = "aa\xC3\xC3\xC3\xB8aa";
 var_dump(iconv("UTF-8", "UTF-8", $text));
 var_dump(urlencode(iconv("UTF-8", "UTF-8//IGNORE", $text)));

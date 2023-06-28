@@ -1,21 +1,21 @@
 <?hh
 
-function f_variadic(...$args) {
+function f_variadic(...$args) :mixed{
   echo "* ", __FUNCTION__, "\n";
   var_dump($args);
   return $args;
 }
 
-function g1($a1, $a2=null) {
+function g1($a1, $a2=null) :mixed{
   $args = isset($a2) ? varray[$a1, $a2] : varray[$a1];
   return $args;
 }
 
-function g2(...$args) {
+function g2(...$args) :mixed{
   return $args;
 }
 
-function main() {
+function main() :mixed{
   echo '= Single-arg array_map =', "\n";
   $v = Vector {1, 2, 3, 4};
   $a = $v->toVArray();
@@ -44,6 +44,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reentry() {
+function main_reentry() :mixed{
 main();
 }

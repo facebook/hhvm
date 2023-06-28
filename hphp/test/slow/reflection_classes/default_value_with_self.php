@@ -2,9 +2,9 @@
 namespace Foo\Bar {
   interface A {
     const SCOPE_CONTAINER = 'container';
-    public function set($a = self::SCOPE_CONTAINER);
+    public function set($a = self::SCOPE_CONTAINER):mixed;
   }
-  function foo($a = A::SCOPE_CONTAINER) { \var_dump($a); }
+  function foo($a = A::SCOPE_CONTAINER) :mixed{ \var_dump($a); }
 }
 
 namespace {

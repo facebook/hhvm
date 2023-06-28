@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_hash() {
+function main_hash() :mixed{
 echo strlen(password_hash('foo', PASSWORD_BCRYPT))."\n";
 
 $hash = password_hash('foo', PASSWORD_BCRYPT);

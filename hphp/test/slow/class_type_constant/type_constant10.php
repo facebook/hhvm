@@ -6,6 +6,6 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_constant10() {
+function main_type_constant10() :mixed{
 var_dump(C::T);
 }

@@ -4,7 +4,7 @@
 
 // Call $f(); if it throws, return the exception's error message.
 // Otherwise, return $f's return value.
-function callFailsafe((function (Pair): string) $f) {
+function callFailsafe((function (Pair): string) $f) :mixed{
   $pp = Pair {1, 2};
 
   try {
@@ -16,7 +16,7 @@ function callFailsafe((function (Pair): string) $f) {
   return $r;
 }
 
-function main() {
+function main() :mixed{
 
   $functions = ImmVector {
     function ($pp) {
@@ -51,6 +51,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_pair_magic_methods() {
+function main_pair_magic_methods() :mixed{
 main();
 }

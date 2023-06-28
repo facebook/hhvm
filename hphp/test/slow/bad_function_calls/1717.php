@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1717() {
+function main_1717() :mixed{
 $vals = varray[null, 0, false, varray[], 'test'];
 foreach ($vals as $val) {
   try {

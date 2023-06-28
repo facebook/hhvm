@@ -1,6 +1,6 @@
 <?hh
 
-function bleh() {
+function bleh() :AsyncGenerator<mixed,mixed,void>{
   echo "begin\n";
   try {
     echo "try\n";
@@ -16,7 +16,7 @@ function bleh() {
   yield 4;
 }
 
-function main() {
+function main() :mixed{
   $xs = bleh();
 
   foreach ($xs as $x) {
@@ -27,6 +27,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_finally_yield_001() {
+function main_finally_yield_001() :mixed{
 main();
 }

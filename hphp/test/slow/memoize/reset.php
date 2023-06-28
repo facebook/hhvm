@@ -3,13 +3,13 @@
 
 class Cls1 {
   <<__Memoize>>
-  public static function func1() {
+  public static function func1() :mixed{
     echo "Cls1::func1()\n";
     return 'abcdef';
   }
 
   <<__Memoize>>
-  public static function func2($a) {
+  public static function func2($a) :mixed{
     echo "Cls1::func2()\n";
     return $a;
   }
@@ -17,13 +17,13 @@ class Cls1 {
 
 class Cls2 {
   <<__Memoize>>
-  public function func1() {
+  public function func1() :mixed{
     echo "Cls2::func1()\n";
     return 'ghijkl';
   }
 
   <<__Memoize>>
-  public function func2($a) {
+  public function func2($a) :mixed{
     echo "Cls2::func2()\n";
     return $a;
   }
@@ -31,7 +31,7 @@ class Cls2 {
 
 class Cls3 {
   <<__Memoize>>
-  public function func() {
+  public function func() :mixed{
     echo "Cls3::func()\n";
     return 'xyz';
   }
@@ -39,7 +39,7 @@ class Cls3 {
 
 class Cls4 {
   <<__Memoize>>
-  public function func($a) {
+  public function func($a) :mixed{
     echo "Cls4::func()\n";
     return $a;
   }
@@ -47,13 +47,13 @@ class Cls4 {
 
 trait Trait1 {
   <<__Memoize>>
-  public function func1() {
+  public function func1() :mixed{
     echo "Trait1::func1()\n";
     return 123;
   }
 
   <<__Memoize>>
-  public function func2($a) {
+  public function func2($a) :mixed{
     echo "Trait1::func2()\n";
     return $a;
   }
@@ -61,13 +61,13 @@ trait Trait1 {
 
 trait Trait2 {
   <<__Memoize>>
-  public static function func1() {
+  public static function func1() :mixed{
     echo "Trait2::func1()\n";
     return 'qwerty';
   }
 
   <<__Memoize>>
-  public static function func2($a) {
+  public static function func2($a) :mixed{
     echo "Trait2::func2()\n";
     return $a;
   }
@@ -75,7 +75,7 @@ trait Trait2 {
 
 trait Trait3 {
   <<__Memoize>>
-  public function func() {
+  public function func() :mixed{
     echo "Trait3::func()\n";
     return 'xyz';
   }
@@ -83,7 +83,7 @@ trait Trait3 {
 
 trait Trait4 {
   <<__Memoize>>
-  public function func($a) {
+  public function func($a) :mixed{
     echo "Trait4::func()\n";
     return $a;
   }
@@ -105,22 +105,22 @@ class Cls8 {
   use Trait4;
 }
 
-<<__Memoize>> function func1() {
+<<__Memoize>> function func1() :mixed{
   echo "func1()\n";
   return 'zyzzy';
 }
 
-<<__Memoize>> function func2($a) {
+<<__Memoize>> function func2($a) :mixed{
   echo "func2()\n";
   return $a;
 }
 
-function runFuncs($c1, $c2) {
+function runFuncs($c1, $c2) :mixed{
   var_dump($c1());
   var_dump($c2(1234));
 }
 
-function testStatics() {
+function testStatics() :mixed{
   echo "================================\n";
   echo "Testing static functions....\n\n";
   runFuncs('Cls1::func1', 'Cls1::func2');
@@ -133,7 +133,7 @@ function testStatics() {
   runFuncs('Cls1::func1', 'Cls1::func2');
 }
 
-function testMethods() {
+function testMethods() :mixed{
   echo "================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls2();
@@ -143,7 +143,7 @@ function testMethods() {
   runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
 }
 
-function testSingleMethods() {
+function testSingleMethods() :mixed{
   echo "================================\n";
   echo "Testing single methods....\n\n";
   $a = new Cls3();
@@ -156,7 +156,7 @@ function testSingleMethods() {
   runFuncs(varray[$a, 'func'], varray[$b, 'func']);
 }
 
-function testTraits() {
+function testTraits() :mixed{
   echo "================================\n";
   echo "Testing traits....\n\n";
   $a = new Cls5();
@@ -166,7 +166,7 @@ function testTraits() {
   runFuncs(varray[$a, 'func1'], varray[$a, 'func2']);
 }
 
-function testTraitStatics() {
+function testTraitStatics() :mixed{
   echo "================================\n";
   echo "Testing trait static functions....\n\n";
   runFuncs('Cls6::func1', 'Cls6::func2');
@@ -179,7 +179,7 @@ function testTraitStatics() {
   runFuncs('Cls6::func1', 'Cls6::func2');
 }
 
-function testTraitSingleMethods() {
+function testTraitSingleMethods() :mixed{
   echo "================================\n";
   echo "Testing trait single methods....\n\n";
   $a = new Cls7();
@@ -192,7 +192,7 @@ function testTraitSingleMethods() {
   runFuncs(varray[$a, 'func'], varray[$b, 'func']);
 }
 
-function testFreeFuncs() {
+function testFreeFuncs() :mixed{
   echo "================================\n";
   echo "Testing free functions....\n\n";
   runFuncs('func1', 'func2');
@@ -203,7 +203,7 @@ function testFreeFuncs() {
   runFuncs('func1', 'func2');
 }
 
-function main() {
+function main() :mixed{
   testStatics();
   testMethods();
   testSingleMethods();
@@ -214,6 +214,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_reset() {
+function main_reset() :mixed{
 main();
 }

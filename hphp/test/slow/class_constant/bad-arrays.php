@@ -37,7 +37,7 @@ const TESTS = vec[
   'class Cls1 { static public $a = 123; const BADKEYSET = keyset[1, ketset[2, 100 + $a + 200], 3]; };'
 ];
 
-function main() {
+function main() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check('test-count');
   if ($count === false) $count = 0;
   if ($count >= count(TESTS)) return;
@@ -52,6 +52,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_bad_arrays() {
+function main_bad_arrays() :mixed{
 main();
 }

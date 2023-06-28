@@ -1,22 +1,22 @@
 <?hh
 
-function handler1($name, $target, inout $args) {
+function handler1($name, $target, inout $args) :mixed{
   $args[0] = 'handler1';
   return shape();
 }
 
 class W {
-  static function handler2($name, $target, inout $args) {
+  static function handler2($name, $target, inout $args) :mixed{
     $args[0] = 'handler2';
     return shape();
   }
 
-  function handler3($name, $target, inout $args) {
+  function handler3($name, $target, inout $args) :mixed{
     $args[0] = 'handler3';
     return shape();
   }
 
-  function make_closure() {
+  function make_closure() :mixed{
     return ($name, $target, inout $args) ==> {
       spl_object_hash($this);
       $args[0] = 'handler4';
@@ -24,7 +24,7 @@ class W {
     };
   }
 
-  static function make_static_closure() {
+  static function make_static_closure() :mixed{
     return ($name, $target, inout $args) ==> {
       $args[0] = 'handler5';
       return shape();
@@ -32,15 +32,15 @@ class W {
   }
 }
 
-function foo(inout $x) { echo "foo: $x\n"; }
-function bar(inout $x) { echo "bar: $x\n"; }
-function fiz(inout $x) { echo "fiz: $x\n"; }
-function buz(inout $x) { echo "buz: $x\n"; }
-function biz(inout $x) { echo "biz: $x\n"; }
-function far(inout $x) { echo "far: $x\n"; }
+function foo(inout $x) :mixed{ echo "foo: $x\n"; }
+function bar(inout $x) :mixed{ echo "bar: $x\n"; }
+function fiz(inout $x) :mixed{ echo "fiz: $x\n"; }
+function buz(inout $x) :mixed{ echo "buz: $x\n"; }
+function biz(inout $x) :mixed{ echo "biz: $x\n"; }
+function far(inout $x) :mixed{ echo "far: $x\n"; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $handler6 = ($name, $target, inout $args) ==> {
     $args[0] = 'handler6';
     return shape();

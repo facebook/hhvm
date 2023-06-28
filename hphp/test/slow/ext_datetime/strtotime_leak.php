@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   for ($i = 0; $i < 10000; $i++) {
     strtotime("10 September 2000");
     strtotime("10 September 2000 UTC");
@@ -8,7 +8,7 @@ function test() {
   }
 }
 
-function main($report) {
+function main($report) :mixed{
   $a = memory_get_usage(true);
   test();
   $b = memory_get_usage(true);

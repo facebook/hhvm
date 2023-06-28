@@ -1,6 +1,6 @@
 <?hh
 
-function a() {
+function a() :mixed{
   $input = darray[
     "a" => "green",
     0 => "red",
@@ -12,7 +12,7 @@ function a() {
   var_dump($result);
 }
 
-function b() {
+function b() :mixed{
   $input = varray[
     4,
     "4",
@@ -24,7 +24,7 @@ function b() {
   var_dump($result);
 }
 
-function c() {
+function c() :mixed{
   $input = darray[
     "a" => "A",
     "b" => "C",
@@ -37,7 +37,7 @@ function c() {
   var_dump(array_unique($input, SORT_REGULAR));
 }
 
-function d() {
+function d() :mixed{
   $input = darray[
     'a' => 'A',
     'b' => 'C',
@@ -50,7 +50,7 @@ function d() {
 
 
 <<__EntryPoint>>
-function main_array_unique() {
+function main_array_unique() :mixed{
 a();
 b();
 c();

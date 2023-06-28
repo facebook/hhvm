@@ -1,17 +1,17 @@
 <?hh
 
 class pass {
-    private function show() {
+    private function show() :mixed{
         echo "Call show()\n";
     }
 
-    public function do_show() {
+    public function do_show() :mixed{
         $this->show();
     }
 }
 
 class fail extends pass {
-    function do_show() {
+    function do_show() :mixed{
         $this->show();
     }
 }

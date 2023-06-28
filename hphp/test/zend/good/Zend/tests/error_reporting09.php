@@ -1,11 +1,11 @@
 <?hh
 
-function bar() {
+function bar() :mixed{
     echo @$blah;
     echo $undef2;
 }
 
-function foo() {
+function foo() :mixed{
     echo @$undef;
     error_reporting(E_ALL|E_STRICT);
     echo $blah;

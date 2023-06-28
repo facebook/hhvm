@@ -6,11 +6,11 @@
  */
 
 
-function oneArg($v) {
+function oneArg($v) :mixed{
   return $v;
 }
 
-function threeArgs($v, $w, $x) {
+function threeArgs($v, $w, $x) :mixed{
   return $v + $w + $x;
 }
 <<__EntryPoint>> function main(): void {

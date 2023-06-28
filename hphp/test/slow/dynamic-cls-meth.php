@@ -1,6 +1,6 @@
 <?hh
 
-function wrap($f) {
+function wrap($f) :mixed{
   try {
     $f()();
   } catch (InvalidArgumentException $e) {
@@ -9,29 +9,29 @@ function wrap($f) {
 }
 
 trait T {
-  private function point($v) {
+  private function point($v) :mixed{
     wrap(() ==>
       HH\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($v))
     );
   }
 
-  function go() {
+  function go() :mixed{
     parent::go();
     echo "In ".self::class."\n";
     foreach (varray['f', 'g', 'h', 'i'] as $f) self::point($f);
   }
 }
 
-class R { function go() {} }
+class R { function go() :mixed{} }
 class B extends R { use T; }
 
 class C extends B {
   use T;
 
-  <<__DynamicallyCallable>> function f() { echo __FUNCTION__."\n"; }
-  <<__DynamicallyCallable>> private static function g() { echo __FUNCTION__."\n"; }
-  <<__DynamicallyCallable>> protected static function h() { echo __FUNCTION__."\n"; }
-  <<__DynamicallyCallable>> public static function i() { echo __FUNCTION__."\n"; }
+  <<__DynamicallyCallable>> function f() :mixed{ echo __FUNCTION__."\n"; }
+  <<__DynamicallyCallable>> private static function g() :mixed{ echo __FUNCTION__."\n"; }
+  <<__DynamicallyCallable>> protected static function h() :mixed{ echo __FUNCTION__."\n"; }
+  <<__DynamicallyCallable>> public static function i() :mixed{ echo __FUNCTION__."\n"; }
 }
 
 class H extends C { use T; }
@@ -39,11 +39,11 @@ class H extends C { use T; }
 class W extends B { use T; }
 
 abstract class A extends C {
-  abstract static function j();
+  abstract static function j():mixed;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (new H)->go();
   (new W)->go();
 

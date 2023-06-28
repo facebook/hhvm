@@ -2,7 +2,7 @@
 class foo
 {
     function __toString()[]
-    {
+:mixed    {
         return "Object";
     }
 }

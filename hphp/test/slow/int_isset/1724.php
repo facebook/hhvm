@@ -1,6 +1,6 @@
 <?hh
 
-function f($p) {
+function f($p) :mixed{
   $i = strlen($p);
   if (isset($i)) {
   }

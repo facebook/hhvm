@@ -5,7 +5,7 @@ class test {
     public $test;
 
     function foo()
-    {
+:mixed    {
         $this->bar = 'meuh';
         $this->foo = 'lala';
         $this->test = 'test';

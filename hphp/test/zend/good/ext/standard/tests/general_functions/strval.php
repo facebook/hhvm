@@ -6,7 +6,7 @@
 // non_scalar values, objects, arrays, resources and boolean
 class foo
 {
-  function __toString() {
+  function __toString() :mixed{
     return "Object";
   }
 }

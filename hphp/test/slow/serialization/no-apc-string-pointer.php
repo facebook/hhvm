@@ -6,6 +6,6 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(unserialize("O:3:\"Foo\":1:{S:\x00\x00\x00\x00\x00\x00\x00\x00;s:5:\"value\";}"));
 }

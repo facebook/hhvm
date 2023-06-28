@@ -1,17 +1,17 @@
 <?hh
 
-function handle_error($errno, $errstr, ...) {
+function handle_error($errno, $errstr, ...) :mixed{
   echo "handle_error(): [$errno]: $errstr\n";
   return true;
 }
 
 class K   { const A = 0; const B = 1; }
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 
-function P(bool $b) { return $b ? "True\n" : "False\n"; }
-function LV($x)     { return __hhvm_intrinsics\launder_value($x); }
+function P(bool $b) :mixed{ return $b ? "True\n" : "False\n"; }
+function LV($x)     :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function is_as_static() {
+function is_as_static() :mixed{
   $m = Foo::bar<>;
 
   echo '$m is arraylike: '      .P($m is AnyArray);
@@ -36,7 +36,7 @@ function is_as_static() {
   try { var_dump(varray($m));     } catch (Exception $e) { echo "Passed\n"; }
 }
 
-function is_as_dynamic() {
+function is_as_dynamic() :mixed{
   $m = LV(Foo::bar<>);
 
   echo '$m is arraylike: '      .P($m is AnyArray);
@@ -61,7 +61,7 @@ function is_as_dynamic() {
   try { var_dump(varray($m));     } catch (Exception $e) { echo "Passed\n"; }
 }
 
-function is_as_shuffle_static() {
+function is_as_shuffle_static() :mixed{
   $m = Foo::bar<>;
 
   if (is_array($m)) {
@@ -79,7 +79,7 @@ function is_as_shuffle_static() {
   }
 }
 
-function is_as_shuffle_dynamic() {
+function is_as_shuffle_dynamic() :mixed{
   $m = LV(Foo::bar<>);
 
   if (is_array($m)) {
@@ -98,7 +98,7 @@ function is_as_shuffle_dynamic() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   is_as_static();          is_as_static();          is_as_static();

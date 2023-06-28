@@ -1,6 +1,6 @@
 <?hh
 
-function main($bits) {
+function main($bits) :mixed{
 
   for ($tries = 0; $tries < 5; ++$tries) {
     $baseMemory = memory_get_usage();
@@ -21,6 +21,6 @@ function main($bits) {
 
 
 <<__EntryPoint>>
-function main_str_xor_leak() {
+function main_str_xor_leak() :mixed{
 main('b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad');
 }

@@ -1,8 +1,8 @@
 <?hh
 
-function x() { return 2; }
-function foo() { return varray[x()]; }
-function bar() {
+function x() :mixed{ return 2; }
+function foo() :mixed{ return varray[x()]; }
+function bar() :mixed{
   $z = foo();
   $z[] = 12;
   for ($i = 0; $i < $z[1]; $z[1] = $z[1] - 1) {
@@ -19,6 +19,6 @@ function bar() {
 
 
 <<__EntryPoint>>
-function main_array_036() {
+function main_array_036() :mixed{
 bar();
 }

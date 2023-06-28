@@ -1,10 +1,10 @@
 <?hh
 
-function f(...$args) {}
-function g($required, ...$args) {}
-function h($optional = null, ...$args) {}
+function f(...$args) :mixed{}
+function g($required, ...$args) :mixed{}
+function h($optional = null, ...$args) :mixed{}
 
-<<__EntryPoint>> function test() {
+<<__EntryPoint>> function test() :mixed{
   f();
   g(1);
   h();

@@ -1,3 +1,3 @@
 <?hh
 
-function f()[this::C] {}
+function f()[this::C] :mixed{}

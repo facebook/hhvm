@@ -3,7 +3,7 @@ class SampleElement extends \DOMElement {}
 
 
 <<__EntryPoint>>
-function main_copy_classmap() {
+function main_copy_classmap() :mixed{
 $dom = new DOMDocument();
 $dom->registerNodeClass('DOMElement', 'SampleElement');
 $dom->loadXML('<?xml version="1.0" ?><root />');

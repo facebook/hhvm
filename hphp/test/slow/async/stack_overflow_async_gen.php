@@ -1,6 +1,6 @@
 <?hh
 
-async function gen($gen) {
+async function gen($gen) :AsyncGenerator<mixed,mixed,void>{
   if ($gen == null) {
     yield 42;
     return;
@@ -12,7 +12,7 @@ async function gen($gen) {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   $gen = gen(null);
   for ($i = 0; $i < 10000; ++$i) {
     $gen = gen($gen);

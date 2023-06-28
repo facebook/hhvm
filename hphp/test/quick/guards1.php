@@ -2,7 +2,7 @@
 
 class C {}
 
-function foo($x, $y) {
+function foo($x, $y) :mixed{
   $x = HH\is_any_array($x) ? 'Array' : $x;
   $y = HH\is_any_array($y) ? 'Array' : $y;
   $x__str = (string)($x);

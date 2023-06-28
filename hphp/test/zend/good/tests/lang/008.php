@@ -5,7 +5,7 @@ abstract final class TestStatics {
 }
 
 function Test()
-{
+:mixed{
     echo TestStatics::$a . " ";
     TestStatics::$a++;
     if(TestStatics::$a<10) Test();

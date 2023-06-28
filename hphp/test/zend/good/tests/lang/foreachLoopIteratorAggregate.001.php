@@ -8,35 +8,35 @@ class EnglishMealIterator implements Iterator {
     private $pos=0;
     private $myContent=varray["breakfast", "dinner", "tea"];
 
-    public function valid() {
+    public function valid() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos < count($this->myContent);
     }
 
-    public function next() {
+    public function next() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos++;
     }
 
-    public function rewind() {
+    public function rewind() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
@@ -49,35 +49,35 @@ class FrenchMealIterator implements Iterator {
     private $pos=0;
     private $myContent=varray["petit dejeuner", "dejeuner", "gouter", "dinner"];
 
-    public function valid() {
+    public function valid() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos < count($this->myContent);
     }
 
-    public function next() {
+    public function next() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos++;
     }
 
-    public function rewind() {
+    public function rewind() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__ . " ($this->pos)\n";
@@ -99,7 +99,7 @@ class EuropeanMeals implements IteratorAggregate {
 
   private static $getIteratorI = 0;
 
-    public function getIterator() {
+    public function getIterator() :mixed{
         $indent = ForeachLoopIteratorAggregate::$indent;
         $indent__str = (string)($indent);
         echo "$indent__str--> " . __METHOD__  . "\n";

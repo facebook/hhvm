@@ -21,12 +21,12 @@ class B implements Serializable
     }
 
     public function serialize()
-    {
+:mixed    {
         return serialize(clone $this->b);
     }
 
     public function unserialize($data)
-    {
+:mixed    {
         $this->b = unserialize($data);
     }
 }

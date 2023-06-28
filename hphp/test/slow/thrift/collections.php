@@ -36,7 +36,7 @@ class TestStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function test($name, $list, $map, $set) {
+function test($name, $list, $map, $set) :mixed{
   $s = new TestStruct();
   $s->aList = $list;
   $s->aMap = $map;
@@ -53,7 +53,7 @@ function test($name, $list, $map, $set) {
   var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
 
-function main() {
+function main() :mixed{
   test(
     "real collections",
     Vector {13.3, 23.4, 3576.2},
@@ -86,7 +86,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_collections() {
+function main_collections() :mixed{
   require 'common.inc';
   main();
 }

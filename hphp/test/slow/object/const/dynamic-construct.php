@@ -25,7 +25,7 @@ class E {
   }
 }
 
-function dynamic_construct($class) {
+function dynamic_construct($class) :mixed{
   echo "---- class $class ----\n";
 
   $x = new $class();
@@ -43,7 +43,7 @@ function dynamic_construct($class) {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   dynamic_construct("C");
   dynamic_construct("D");
   dynamic_construct("E");

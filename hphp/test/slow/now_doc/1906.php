@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1906() {
+function main_1906() :mixed{
 $b = 'bad';
 $a = <<<'NOWDOC'
 $b

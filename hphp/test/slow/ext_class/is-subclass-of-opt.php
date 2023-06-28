@@ -4,11 +4,11 @@
 class B {}
 class A extends B {}
 
-function get_sub_b() {
+function get_sub_b() :mixed{
   return extension_loaded('pdo') ? (new B()) : (new A());
 }
 
-function main() {
+function main() :mixed{
   // Shouldn't be optimized, don't support the first arg being a string yet.
   $x0 = is_subclass_of('A', 'B');
   $x1 = is_subclass_of('A', 'B', false);
@@ -33,7 +33,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_is_subclass_of_opt() {
+function main_is_subclass_of_opt() :mixed{
 main();
 main();
 main();

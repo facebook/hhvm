@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serde($x) {
+function serde($x) :mixed{
   $p = new DummyProtocol();
   thrift_protocol_write_binary($p, 'blah', 1, $x, 20, true);
   echo "===================== binary deserializing ==================\n";
@@ -19,7 +19,7 @@ function serde($x) {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   require 'thrift-defs.inc';
 
   serde(@new TestStruct1());

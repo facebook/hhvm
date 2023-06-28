@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1375() {
+function main_1375() :mixed{
 $d=fopen(__DIR__.'/../../sample_dir/file', 'r');
 var_dump(is_object($d));
 var_dump(is_resource($d));

@@ -3,7 +3,7 @@
 class C { public function __construct(public $x)[] {} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $result = 0;
   $structs = makeStructs(new C(17));
   foreach (readStructs($structs) as $v) {
@@ -12,7 +12,7 @@ function main() {
   var_dump($result);
 }
 
-function makeStructs($x) {
+function makeStructs($x) :mixed{
   $result = vec[];
   $result[] = dict['aaaaaaaaaa' => $x];
   $result[] = dict['aaaaaaaaab' => $x];
@@ -1041,7 +1041,7 @@ function makeStructs($x) {
   return $result;
 }
 
-function readStructs($x) {
+function readStructs($x) :mixed{
   $i = 0;
   $result = vec[];
   $result[] = $x[$i++]['aaaaaaaaaa'];

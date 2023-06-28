@@ -14,7 +14,7 @@
  */
 
 function callback($a, $b)
-{
+:mixed{
   return varray[$a, $b];
 }
 <<__EntryPoint>> function main(): void {

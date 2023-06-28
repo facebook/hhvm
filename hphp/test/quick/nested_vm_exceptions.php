@@ -2,11 +2,11 @@
 
 // Tests a case where prepareFuncEntry throws in a nested VM context.
 
-function error_handler() {
+function error_handler() :mixed{
   echo "Error handler\n";
   throw new Exception("unhandled exception");
 }
-function binary_function(string $x, $y) {
+function binary_function(string $x, $y) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 set_error_handler(error_handler<>);

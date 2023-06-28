@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = __hhvm_intrinsics\launder_value(varray[1, 2, 3]);
   $b = __hhvm_intrinsics\launder_value(darray["bing" => "crosby"]);
 

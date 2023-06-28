@@ -10,12 +10,12 @@ class SerDe {
   private $arr = varray[1,2,3];
   private $str = "one two three";
 
-  public function foo() {
+  public function foo() :mixed{
     var_dump($this->arr, $this->str);
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new SerDe;
   $x = unserialize(serialize($x));
   $x->foo();
@@ -23,6 +23,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_private_props_002() {
+function main_private_props_002() :mixed{
 main();
 }

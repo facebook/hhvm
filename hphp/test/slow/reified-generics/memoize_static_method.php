@@ -1,20 +1,20 @@
 <?hh
 class C {
   <<__Memoize>>
-  public static function f<reify Ta, Tb, reify Tc>($x, $y, $z) {
+  public static function f<reify Ta, Tb, reify Tc>($x, $y, $z) :mixed{
     var_dump("hi");
   }
 }
 class D {
   <<__Memoize>>
-  public static function g<reify Ta, Tb, reify Tc>() {
+  public static function g<reify Ta, Tb, reify Tc>() :mixed{
     var_dump("hi");
   }
 }
 
 trait T {
   <<__Memoize>>
-  public static function h<reify Ta, Tb, reify Tc>(mixed $x) {
+  public static function h<reify Ta, Tb, reify Tc>(mixed $x) :mixed{
     var_dump("hi");
   }
 }

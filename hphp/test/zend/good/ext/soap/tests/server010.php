@@ -2,7 +2,7 @@
 class foo {
   private $sum = 0;
 
-  function Sum($num) {
+  function Sum($num) :mixed{
     return $this->sum += $num;
   }
 }

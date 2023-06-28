@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_550() {
+function main_550() :mixed{
 $a = 1;
  $a = 'test';
  $a .= 'b';

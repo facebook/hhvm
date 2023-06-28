@@ -4,12 +4,12 @@
 */
 class temp
 {
-   function __toString() {
+   function __toString() :mixed{
      return "Object";
    }
 }
 
-function check_dirname( $paths ) {
+function check_dirname( $paths ) :mixed{
    $loop_counter = 0;
    $noOfPaths = count($paths);
    for( ; $loop_counter < $noOfPaths; $loop_counter++ ) {

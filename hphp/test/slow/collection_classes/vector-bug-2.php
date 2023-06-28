@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x = Vector {};
   $x->toImmVector();
   $x[] = 1;
@@ -7,6 +7,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_vector_bug_2() {
+function main_vector_bug_2() :mixed{
 main();
 }

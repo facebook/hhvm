@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include "module.inc";
   var_dump(module_exists('a')); // true
   var_dump(module_exists('b')); // false

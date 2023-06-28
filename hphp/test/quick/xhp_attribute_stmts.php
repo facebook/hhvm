@@ -3,15 +3,15 @@
 abstract class :base {
   private static $xhpAttributeDeclarationBase = darray[];
 
-  protected static function __xhpAttributeDeclaration()[] {
+  protected static function __xhpAttributeDeclaration()[] :mixed{
     return HH\Coeffects\backdoor(()[defaults] ==> self::$xhpAttributeDeclarationBase);
   }
 
-  public static function xhpAttributeDeclaration() {
+  public static function xhpAttributeDeclaration() :mixed{
     return static::__xhpAttributeDeclaration();
   }
 
-  public static function updateBase($d) {
+  public static function updateBase($d) :mixed{
     self::$xhpAttributeDeclarationBase = $d;
   }
 }
@@ -34,7 +34,7 @@ class :node3 extends :base {
     string attr2 = "world";
 }
 
-function repr($x) {
+function repr($x) :mixed{
   if ($x === null) {
     return 'null';
   } else if ($x === true) {
@@ -46,7 +46,7 @@ function repr($x) {
   }
 }
 
-function dump($arr) {
+function dump($arr) :mixed{
   foreach ($arr as $k => $v) {
     echo $k . "[" . join(",", array_map($x ==> repr($x), $v)) . "] ";
   }

@@ -1,7 +1,7 @@
 <?hh
 // c.f. http://3v4l.org/qa6EP
 
-function foo() {
+function foo() :mixed{
 
   LibxmlDomIterLifetimeV1::$d = new DOMDocument;
   $c = LibxmlDomIterLifetimeV1::$d->createDocumentFragment();

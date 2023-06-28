@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   var_dump(
     curl_setopt(
       curl_init(),
@@ -12,6 +12,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_set_stderr_to_tempfile() {
+function main_set_stderr_to_tempfile() :mixed{
 main();
 }

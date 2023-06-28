@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function f($a) { echo "inside f($a)\n"; return 0;}
+function f($a) :mixed{ echo "inside f($a)\n"; return 0;}
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);
 

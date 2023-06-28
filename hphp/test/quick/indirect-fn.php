@@ -1,6 +1,6 @@
 <?hh
 <<__DynamicallyCallable>>
-function f($a) {
+function f($a) :mixed{
   echo $a;
   echo "\n";
 }

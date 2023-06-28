@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_cast_with_strings() {
+function main_array_cast_with_strings() :mixed{
 $node = simplexml_load_string(<<<EOF
 <config>
 <hello>world</hello>

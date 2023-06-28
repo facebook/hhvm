@@ -1,19 +1,19 @@
 <?hh
 
-function test1(...$args) {
+function test1(...$args) :mixed{
     var_dump(count($args));
 }
 
-function test2($a, ...$args) {
+function test2($a, ...$args) :mixed{
     var_dump(1 + count($args));
 }
 
-function test3($a, $b, ...$args) {
+function test3($a, $b, ...$args) :mixed{
     var_dump(2 + count($args));
 }
 
 class test {
-    static function test1($a, ...$args) {
+    static function test1($a, ...$args) :mixed{
         var_dump(1 + count($args));
     }
 }

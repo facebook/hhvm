@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_array_multisort_bug_1() {
+function main_array_multisort_bug_1() :mixed{
 error_reporting(-1);
 $arr1 = varray[3, 1, 2];
 $arr2 = varray['a', 'b', 'c'];

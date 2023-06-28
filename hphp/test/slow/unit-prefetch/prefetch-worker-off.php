@@ -3,7 +3,7 @@
 
 namespace PrefetchWorkerOff;
 
-function test_loaded() {
+function test_loaded() :mixed{
   $files = vec[
     'prefetch-worker-off.php',
     'A.inc',
@@ -19,7 +19,7 @@ function test_loaded() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Before:\n";
   test_loaded();
   new \Dummy();

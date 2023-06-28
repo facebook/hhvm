@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   __hhvm_intrinsics\rqtrace_create_event("EVENT0", 100, 200, dict[]);
   __hhvm_intrinsics\rqtrace_create_event("EVENT1", 200, 300, dict['a'=>'b']);
   __hhvm_intrinsics\rqtrace_create_scope("SCOPE0", 300, 400, dict[]);

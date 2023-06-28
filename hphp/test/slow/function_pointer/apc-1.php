@@ -1,11 +1,11 @@
 <?hh
 
-function foo<reify T>() {
+function foo<reify T>() :mixed{
   var_dump(HH\ReifiedGenerics\get_type_structure<T>());
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo<int>();
 
   $foo = foo<int>;

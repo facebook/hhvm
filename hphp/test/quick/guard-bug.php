@@ -2,7 +2,7 @@
 
 abstract final class GuardBug { public static $x; }
 
-function k() {
+function k() :mixed{
   // a comment!
   if (!isset(GuardBug::$x)) {
     GuardBug::$x = fopen(__FILE__, 'r');

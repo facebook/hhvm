@@ -1,6 +1,6 @@
 <?hh
 
-function redirect_on_error($e) {
+function redirect_on_error($e) :mixed{
     ob_end_clean();
     echo "Goodbye Cruel World\n";
 }

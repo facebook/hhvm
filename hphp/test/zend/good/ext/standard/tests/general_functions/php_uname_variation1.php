@@ -4,7 +4,7 @@
 */
 
 class fooClass {
-   function __toString() {
+   function __toString() :mixed{
        return "m";
    }
 }

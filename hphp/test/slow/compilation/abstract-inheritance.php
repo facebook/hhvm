@@ -16,12 +16,12 @@ function func2(): C1 {
   return new C4();
 }
 
-function func1() {
+function func1() :mixed{
   $x = func2();
   return $x->f1();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(func1());
 }

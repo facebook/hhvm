@@ -6,7 +6,7 @@ trait T {
   public $pa = 1;
   public static $spa = 1;
 
-  public function t() {
+  public function t() :mixed{
     var_dump($this->a);
     var_dump(get_object_vars($this));
   }
@@ -24,7 +24,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_prop_from_traits() {
+function main_prop_from_traits() :mixed{
   $a = new A();
   $a->t();
 

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_proc_open_empty_pipes() {
+function main_proc_open_empty_pipes() :mixed{
 $command = 'echo "foo" >> /dev/null';
 $descriptors = varray[
   varray['pipe', 'r'],

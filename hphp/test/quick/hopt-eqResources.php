@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x, $y) {
+function foo($x, $y) :mixed{
   var_dump($x == $y);
   var_dump($x === $y);
 }

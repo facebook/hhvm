@@ -1,6 +1,6 @@
 <?hh
 
-function obj_dump($o) {
+function obj_dump($o) :mixed{
   var_dump($o);
   print "Properties:\n";
   $a = get_object_vars($o);
@@ -29,7 +29,7 @@ class C {
   function __construct() {
     $this->s = 0;
   }
-  function fC() {
+  function fC() :mixed{
     $this->np.='c';
     $this->nq.='c';
     $this->nr.='c';
@@ -53,7 +53,7 @@ class D extends C {
     $this->q = 22;
     $this->r = 33;
   }
-  function fD() {
+  function fD() :mixed{
     $this->np.='d';
     $this->nq.='d';
     $this->nr.='d';
@@ -70,7 +70,7 @@ class E extends C {
   protected $p = 11;
   protected $q = 22;
   public $r = 33;
-  function fE() {
+  function fE() :mixed{
     $this->np.='e';
     $this->nq.='e';
     $this->nr.='e';
@@ -87,7 +87,7 @@ class F extends C {
   public $p = 11;
   public $q = 22;
   public $r = 33;
-  function fF() {
+  function fF() :mixed{
     $this->np.='f';
     $this->nq.='f';
     $this->nr.='f';
@@ -104,7 +104,7 @@ class G extends D {
   public $p = 111;
   public $q = 222;
   public $r = 333;
-  function fG() {
+  function fG() :mixed{
     $this->np.='g';
     $this->nq.='g';
     $this->nr.='g';
@@ -121,7 +121,7 @@ class H {
   public $p = 111;
   public $q = 222;
   public $r = 333;
-  function fH() {
+  function fH() :mixed{
     $this->np.='h';
     $this->nq.='h';
     $this->nr.='h';
@@ -146,17 +146,17 @@ class J extends I {
 
 class dumper { public int $prop = 0;
 }
-function foo() {
+function foo() :mixed{
   return new dumper;
 }
-function useReturn() {
+function useReturn() :mixed{
   $five = 5;
   foo()->prop += $five + 5;
 }
 
 
 <<__EntryPoint>>
-function main_properties() {
+function main_properties() :mixed{
 print "Test begin\n";
 
 print "=== C ===\n";

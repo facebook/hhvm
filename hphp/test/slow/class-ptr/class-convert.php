@@ -5,7 +5,7 @@ class Props {
   public static string $b;
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) { echo "caught: ".$e->getMessage()."\n"; }
@@ -16,13 +16,13 @@ class bar {}
 class baz {}
 class buz {}
 
-function foo(string $s) {
+function foo(string $s) :mixed{
   var_dump($s);
   var_dump(is_string($s));
   var_dump(strlen($s));
 }
 
-function bar($f) {
+function bar($f) :mixed{
   var_dump($f);
   var_dump((string)$f);
   var_dump(is_string($f));
@@ -37,7 +37,7 @@ function baz(): string {
   return __hhvm_intrinsics\create_class_pointer('baz');
 }
 
-function buz() {
+function buz() :mixed{
   return __hhvm_intrinsics\create_class_pointer('buz');
 }
 
@@ -47,7 +47,7 @@ function io(inout string $a, inout $b): string {
   return $a;
 }
 
-function main() {
+function main() :mixed{
   foo("hello");
   foo(__hhvm_intrinsics\create_class_pointer('foo'));
 

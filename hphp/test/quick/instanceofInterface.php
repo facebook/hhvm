@@ -12,7 +12,7 @@ abstract class AC4 extends AC3 { }
 
 class C1 extends AC4 { }
 
-function array_some(darray $array) {
+function array_some(darray $array) :mixed{
   foreach ($array as $value) {
     if ($value) {
       echo "Empty: ";

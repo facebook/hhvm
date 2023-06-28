@@ -15,14 +15,14 @@ class Bar extends ReflectionClass {
   public $dontSerializeMe = "not serialized";
   private $meh = 456;
 
-  public function __sleep() {
+  public function __sleep() :mixed{
     var_dump("__sleep invoked");
     var_dump($this->name);
     var_dump($this->getName());
     return varray['name', 'prop', 'meh'];
   }
 
-  public function __wakeup() {
+  public function __wakeup() :mixed{
     var_dump("__wakeup invoked");
     var_dump($this->prop);
     var_dump($this->dontSerializeMe);
@@ -34,7 +34,7 @@ class Bar extends ReflectionClass {
 
 
 <<__EntryPoint>>
-function main_serialize_with_sleep_and_wakeup() {
+function main_serialize_with_sleep_and_wakeup() :mixed{
 $rc = new Bar(Foo::class);
 $rc->prop = 1337;
 $rc->name = 'Foo';

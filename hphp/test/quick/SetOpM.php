@@ -6,7 +6,7 @@ class T {
     $this->str = '';
     $this->int = 0;
   }
-  function bongo($a, $b) {
+  function bongo($a, $b) :mixed{
     $this->str .= $a;
     $this->int += $b;
   }

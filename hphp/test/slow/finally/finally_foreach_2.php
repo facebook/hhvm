@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :mixed{
   foreach (varray[1,2,3] as $v) {
     foreach (varray[1,2,3] as $w) {
       try {
@@ -22,7 +22,7 @@ function foo() {
     }
   }
 }
-function main() {
+function main() :mixed{
   try {
     foo();
   } catch (Exception $e) {
@@ -31,6 +31,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_finally_foreach_2() {
+function main_finally_foreach_2() :mixed{
 main();
 }

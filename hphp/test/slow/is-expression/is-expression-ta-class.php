@@ -36,7 +36,7 @@ function is_D(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_class() {
+function main_is_expression_ta_class() :mixed{
 $d = new D();
 is_D($d);
 is_C($d);

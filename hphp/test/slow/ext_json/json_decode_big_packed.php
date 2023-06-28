@@ -3,7 +3,7 @@
 // Exercises slow-case for packed array construction, and also has the
 // current worst-case ratio of encoded vs. in-memory size.
 <<__EntryPoint>>
-function main_json_decode_big_packed() {
+function main_json_decode_big_packed() :mixed{
 $arr = varray[];
 for ($i = 0; $i <= 9000; $i += 1) {
   $arr[] = $i % 10;

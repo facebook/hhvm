@@ -1,7 +1,7 @@
 <?hh
 
 <<genList>>
-function main_date_get_last_errors() {
+function main_date_get_last_errors() :mixed{
   f('a', inout $b, $b->f('Y'));
 }
 
@@ -21,7 +21,7 @@ strstr(
 }
 
 class B {
-  function main_1468() {
+  function main_1468() :mixed{
     $x = $this;
     self(mapWithKey($x, inout $x));
   }

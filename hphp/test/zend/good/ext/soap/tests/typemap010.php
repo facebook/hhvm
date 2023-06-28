@@ -1,11 +1,11 @@
 <?hh
 
-function book_to_xml($book) {
+function book_to_xml($book) :mixed{
 	throw new SoapFault("Server", "Conversion Fault");
 }
 
 class test{
-	function dotest2($str){
+	function dotest2($str):mixed{
 		$book = new book;
 		$book->a = "foo";
 		$book->b = "bar";

@@ -1,6 +1,6 @@
 <?hh
 
-function f(inout $a, inout $b) {
+function f(inout $a, inout $b) :mixed{
   $a[0] = 1;
   $b[1] = 2;
   return 3;
@@ -11,7 +11,7 @@ function f(inout $a, inout $b) {
 
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $a = darray[];
   f(inout $a, inout $a);
   var_dump($a);

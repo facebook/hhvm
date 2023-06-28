@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   $fname = sys_get_temp_dir().'/'.bin2hex(random_bytes(8));
   $f = fopen($fname, 'x+');
   try {

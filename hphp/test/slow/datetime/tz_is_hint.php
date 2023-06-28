@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_tz_is_hint() {
+function main_tz_is_hint() :mixed{
 date_default_timezone_set('Asia/Jerusalem');
 
 $format = "c\nO\nZ\nr";

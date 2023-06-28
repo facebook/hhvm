@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_89() {
+function main_89() :mixed{
 $a = 1;
            var_dump($a);
 }

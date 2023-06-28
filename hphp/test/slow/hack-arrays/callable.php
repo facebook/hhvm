@@ -2,15 +2,15 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  <<__DynamicallyCallable>> public function func1($x) { return $x; }
-  <<__DynamicallyCallable>> public static function func2($x) { return $x; }
+  <<__DynamicallyCallable>> public function func1($x) :mixed{ return $x; }
+  <<__DynamicallyCallable>> public static function func2($x) :mixed{ return $x; }
 }
 
-function call1($c, $x) { return $c($x); }
-function call2($c, $x) { return call_user_func($c, $x); }
-function call3($c, $x) { return array_map($c, $x); }
+function call1($c, $x) :mixed{ return $c($x); }
+function call2($c, $x) :mixed{ return call_user_func($c, $x); }
+function call3($c, $x) :mixed{ return array_map($c, $x); }
 
-function make_tests($tests, $c1, $c2) {
+function make_tests($tests, $c1, $c2) :mixed{
   if ($c1) $tests[] = vec[call1<>, $c1, count($tests)+1];
   if ($c2) $tests[] = vec[call1<>, $c2, count($tests)+1];
   if ($c1) $tests[] = vec[call2<>, $c1, count($tests)+1];
@@ -21,7 +21,7 @@ function make_tests($tests, $c1, $c2) {
 }
 
 <<__EntryPoint>>
-function main_callable() {
+function main_callable() :mixed{
   $tests = vec[]
     |> make_tests(
       $$,

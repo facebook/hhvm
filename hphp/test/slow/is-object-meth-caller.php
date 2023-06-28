@@ -1,9 +1,9 @@
 <?hh
 
-class C { <<__DynamicallyCallable>> function f() {} }
+class C { <<__DynamicallyCallable>> function f() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $mc = meth_caller(C::class, 'f');
   $lv = __hhvm_intrinsics\launder_value($mc);
 

@@ -1,14 +1,14 @@
 <?hh
 
-function always_true() {
+function always_true() :mixed{
   return mt_rand(1, 2) < 10;
 }
 
-function id($x) {
+function id($x) :mixed{
   return $x;
 }
 
-function noinline($x) {
+function noinline($x) :mixed{
   if (always_true()) {
     return $x;
   } else {
@@ -16,11 +16,11 @@ function noinline($x) {
   }
 }
 
-function exn($e) {
+function exn($e) :mixed{
   echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
-function run_tests() {
+function run_tests() :mixed{
   echo 3 << 64, "\n";
   echo 3 << id(64), "\n";
   echo 3 << noinline(64), "\n";

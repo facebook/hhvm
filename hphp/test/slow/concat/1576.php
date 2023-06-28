@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1576() {
+function main_1576() :mixed{
 echo '\\';
 echo '\'';
 echo '\\';

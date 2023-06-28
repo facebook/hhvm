@@ -7,11 +7,11 @@
  */
 
 // Output is in the format expected by JsonTestRunner.
-function say($val) {
+function say($val) :mixed{
   fwrite(HH\stderr(), json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
 }
 
-function finish($status) {
+function finish($status) :mixed{
 
 
 
@@ -26,7 +26,7 @@ function finish($status) {
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
 
-function start($test) {
+function start($test) :mixed{
 
 
   ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
@@ -34,11 +34,11 @@ function start($test) {
             'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current]);
 }
 
-function test_is_running() {
+function test_is_running() :mixed{
   return \HH\global_get('current') != '';
 }
 
-function loop_tests($cmd, $line_func) {
+function loop_tests($cmd, $line_func) :mixed{
 
 
   $ftest = popen($cmd, 'r');

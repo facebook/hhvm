@@ -1,10 +1,10 @@
 <?hh
 
-function unknown($x) {
+function unknown($x) :mixed{
   return \HH\global_get('asd');
 }
 
-function foo($ids) {
+function foo($ids) :mixed{
   $x = darray[];
   foreach ($ids as $id) {
     $target = unknown($id);
@@ -15,7 +15,7 @@ function foo($ids) {
   }
   return $x;
 }
-function main() {
+function main() :mixed{
   $x = foo(varray[1,2,3]);
   foreach ($x as $k => $v) {
     var_dump($v);

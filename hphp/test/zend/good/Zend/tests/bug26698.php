@@ -3,7 +3,7 @@
 class MyObject
 {
     function getNone()
-    {
+:mixed    {
         throw new Exception('NONE');
     }
 }
@@ -11,11 +11,11 @@ class MyObject
 class Proxy
 {
     function three($a, $b, $c)
-    {
+:mixed    {
     }
 
     function callOne()
-    {
+:mixed    {
         try
         {
             $res = new MyObject();
@@ -28,7 +28,7 @@ class Proxy
     }
 
     function callTwo()
-    {
+:mixed    {
         try
         {
             $res = new MyObject();
@@ -41,7 +41,7 @@ class Proxy
     }
 
     function callThree()
-    {
+:mixed    {
         try
         {
             $res = new MyObject();

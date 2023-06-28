@@ -11,7 +11,7 @@ function cow(): (vec<int>, vec<int>, vec<int>) {
   return varray[$v1, $v2, $v3];
 }
 
-function main() {
+function main() :mixed{
   echo "---- profiling ----\n";
   var_dump(cow());
   cow();
@@ -21,6 +21,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cow() {
+function main_cow() :mixed{
 main();
 }

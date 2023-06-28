@@ -15,7 +15,7 @@ class A {
     protected $AProt = "A.AProt";
     public $APub = "A.APub";
 
-    function audit() {
+    function audit() :mixed{
         return isset($this->APriv, $this->AProt, $this->APub);
     }
 }
@@ -25,7 +25,7 @@ class B extends A {
     protected $BProt = "B.BProt";
     public $BPub = "B.BPub";
 
-    function audit() {
+    function audit() :mixed{
         return  parent::audit() && isset($this->AProt, $this->APub,
                      $this->BPriv, $this->BProt, $this->BPub);
     }
@@ -40,14 +40,14 @@ class C extends B {
     protected $CProt = "C.BProt";
     public $CPub = "C.CPub";
 
-    function audit() {
+    function audit() :mixed{
         return parent::audit() && isset($this->APriv, $this->AProt, $this->APub,
                      $this->BProt, $this->BPub,
                      $this->CPriv, $this->CProt, $this->CPub);
     }
 }
 
-function prettyPrint($obj) {
+function prettyPrint($obj) :mixed{
     echo "\n\nBefore serialization:\n";
     var_dump($obj);
 

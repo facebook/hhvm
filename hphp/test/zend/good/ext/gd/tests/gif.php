@@ -1,6 +1,6 @@
 <?hh
 
-function check_box($r,$g,$b, $error=0) {
+function check_box($r,$g,$b, $error=0) :mixed{
 	$im2 = imagecreatefromgif(sys_get_temp_dir().'/'.'test_gif.gif');
 
 	$c = imagecolorsforindex($im2, imagecolorat($im2, 8,8));

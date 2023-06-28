@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_lchown_wronguser() {
+function main_lchown_wronguser() :mixed{
 $file = tempnam(sys_get_temp_dir(), 'lchown');
 $link = tempnam(sys_get_temp_dir(), 'lchown');
 touch($file);

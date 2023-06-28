@@ -1,21 +1,21 @@
 <?hh
 
 class pass {
-    private static function show() {
+    private static function show() :mixed{
         echo "Call show()\n";
     }
 
-    protected static function good() {
+    protected static function good() :mixed{
         pass::show();
     }
 }
 
 class fail extends pass {
-    static function ok() {
+    static function ok() :mixed{
         pass::good();
     }
 
-    static function not_ok() {
+    static function not_ok() :mixed{
         pass::show();
     }
 }

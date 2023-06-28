@@ -1,12 +1,12 @@
 <?hh
 
 class c {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     return 'c';
   }
 }
 
-function test_uninit() {
+function test_uninit() :mixed{
   $a = 'string';
   try {
     $x = $a & $b;
@@ -24,7 +24,7 @@ function test_uninit() {
   }
 }
 
-function dump($a, $b, $bitop_str, $bitop) {
+function dump($a, $b, $bitop_str, $bitop) :mixed{
   $res = $bitop($a, $b);
   printf(
     "%s(%s) %s %s(%s) = %s(%s)\n",
@@ -38,29 +38,29 @@ function dump($a, $b, $bitop_str, $bitop) {
   );
 }
 
-function cast(inout $a, inout $b) {
+function cast(inout $a, inout $b) :mixed{
   if ($a is string && $b is string) return;
   $a = (int)$a;
   $b = (int)$b;
 }
 
-function and($a, $b) {
+function and($a, $b) :mixed{
   cast(inout $a, inout $b);
   return $a & $b;
 }
 
-function xor($a, $b) {
+function xor($a, $b) :mixed{
   cast(inout $a, inout $b);
   return $a ^ $b;
 }
 
-function or($a, $b) {
+function or($a, $b) :mixed{
   cast(inout $a, inout $b);
   return $a | $b;
 }
 
 <<__EntryPoint>>
-function main_bitop_types() {
+function main_bitop_types() :mixed{
   $ops = vec[tuple('&', and<>), tuple('^', xor<>), tuple('|', or<>)];
 
   $values = vec[

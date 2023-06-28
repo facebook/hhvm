@@ -1,10 +1,10 @@
 <?hh
 
-function printImplicit() {
+function printImplicit() :mixed{
   echo "Implicit: " . (string) IntContext::getContext() . "\n";
 }
 
-function aux() {
+function aux() :mixed{
   $x = IntContext::getContext();
   var_dump($x);
   IntContext::start($x+1, printImplicit<>);
@@ -12,7 +12,7 @@ function aux() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
   IntContext::start(0, aux<>);

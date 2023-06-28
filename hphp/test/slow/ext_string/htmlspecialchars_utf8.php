@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars_utf8() {
+function main_htmlspecialchars_utf8() :mixed{
 $inputs = varray[
   "Foo\xc0barbaz",
   "\xc2\"",

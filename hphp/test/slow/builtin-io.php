@@ -16,7 +16,7 @@
  *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
-function go(bool $ret) {
+function go(bool $ret) :mixed{
   $ret__str = (string)($ret);
   echo "ret = $ret__str\n\n";
 
@@ -89,7 +89,7 @@ function go(bool $ret) {
  *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
-function go2(bool $ret) {
+function go2(bool $ret) :mixed{
   $ret__str = (string)($ret);
   echo "ret = $ret__str\n\n";
 
@@ -147,7 +147,7 @@ function go2(bool $ret) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   go(true);  go(false);  go(true);
   go2(true); go2(false); go2(true);
 }

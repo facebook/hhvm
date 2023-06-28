@@ -1,6 +1,6 @@
 <?hh
 
-function good() {
+function good() :mixed{
   $x = 1;
 
   $f_hack = function (): int use ($x) {
@@ -10,7 +10,7 @@ function good() {
   var_dump($f_hack());
 }
 
-function bad() {
+function bad() :mixed{
   $x = 1;
 
   $f_hack = function (): string use ($x) {
@@ -28,7 +28,7 @@ function bad() {
 
 
 <<__EntryPoint>>
-function main_return_types() {
+function main_return_types() :mixed{
 good();
 
 set_error_handler(function ($no, $str) {

@@ -1,7 +1,7 @@
 <?hh
 
 function f1(varray $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
@@ -11,14 +11,14 @@ class C1 {}
 class D1 extends C1 {}
 
 function f2(C1 $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
 }
 
 function f3(object $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
@@ -30,19 +30,19 @@ class C2 implements I1 {}
 class D2 extends C2 implements I2 {}
 
 function f4(I1 $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
 }
 <<__DynamicallyCallable>>
 function hello()
-{
+:mixed{
     echo "Hello!\n";
 }
 
 function f5(callable $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);
@@ -50,7 +50,7 @@ function f5(callable $p1)
 }
 
 function f6(inout C1 $p1)
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 
     var_dump($p1);

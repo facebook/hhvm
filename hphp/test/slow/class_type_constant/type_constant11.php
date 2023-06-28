@@ -6,6 +6,6 @@ abstract class C {
 
 
 <<__EntryPoint>>
-function main_type_constant11() {
+function main_type_constant11() :mixed{
 var_dump(C::T);
 }

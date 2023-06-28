@@ -1,6 +1,6 @@
 <?hh
 
-function test($val, $exp, $feature) {
+function test($val, $exp, $feature) :mixed{
   if ($val !== $exp) {
     echo $feature . " failed. Got:\n";
     var_dump($val);
@@ -12,7 +12,7 @@ function test($val, $exp, $feature) {
 }
 
 <<__EntryPoint>>
-function run() {
+function run() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
     include '1463-1.inc';
   } else {

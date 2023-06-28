@@ -9,6 +9,6 @@ class B {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(B::meth1());
 }

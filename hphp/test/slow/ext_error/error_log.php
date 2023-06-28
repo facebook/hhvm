@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_error_log() {
+function main_error_log() :mixed{
 $log_string = 'hello world';
 $filename = sys_get_temp_dir().'/'.'errorlog_test';
 

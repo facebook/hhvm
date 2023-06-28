@@ -1,7 +1,7 @@
 <?hh
 
 function factorial($int)
-{
+:mixed{
     return ($int > 1) ? $int * factorial($int - 1) : $int;
 }
 <<__EntryPoint>>

@@ -3,7 +3,7 @@
 
 class Foo {}
 
-function test_is_a($a, $interfaces) {
+function test_is_a($a, $interfaces) :mixed{
   echo "====================================================\n";
   echo "Testing: ";
   var_dump($a);
@@ -80,7 +80,7 @@ function test_is_a($a, $interfaces) {
   }
 }
 
-function test_is_vec($val) {
+function test_is_vec($val) :mixed{
   echo "====================================================\n";
   echo "Testing for is_vec: ";
   var_dump($val);

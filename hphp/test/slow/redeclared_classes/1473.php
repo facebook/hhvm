@@ -3,7 +3,7 @@
 class A extends Exception {
   public $a = 1;
 }
-function test() {
+function test() :mixed{
   try {
     throw new A;
   } catch (A $e) {
@@ -13,7 +13,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1473() {
+function main_1473() :mixed{
   if (__hhvm_intrinsics\launder_value(0)) {
     include '1473.inc';
   }

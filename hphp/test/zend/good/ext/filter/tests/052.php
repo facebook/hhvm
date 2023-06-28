@@ -1,6 +1,6 @@
 <?hh
 function filter_cb($var)
-{
+:mixed{
   return 1;
 }
 <<__EntryPoint>> function main(): void {

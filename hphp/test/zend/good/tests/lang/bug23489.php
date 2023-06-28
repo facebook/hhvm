@@ -8,7 +8,7 @@ class Test {
     );
   }
 
-  <<__DynamicallyCallable>> function transform($buffer) {
+  <<__DynamicallyCallable>> function transform($buffer) :mixed{
     return 'success';
   }
 }

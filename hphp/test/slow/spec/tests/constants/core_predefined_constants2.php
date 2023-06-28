@@ -1,7 +1,7 @@
 <?hh
 
 function trace($text, $pdc)
-{
+:mixed{
     echo "$text: ";
     var_dump($pdc);
 }

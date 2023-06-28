@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1781() {
+function main_1781() :mixed{
 $image = imagecreatetruecolor(180,40);
 // Writes the text and apply a gaussian blur on the image
 imagestring($image, 5, 10, 8, 'Gaussian Blur Text', 0x00ff00);

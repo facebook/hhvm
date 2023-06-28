@@ -3,7 +3,7 @@
 
 // PHP's string -> double conversion doesn't care about locale.
 <<__EntryPoint>>
-function main_decimal_point() {
+function main_decimal_point() :mixed{
 setlocale(LC_ALL, 'fr_FR');
 
 $a1 = '1.5';

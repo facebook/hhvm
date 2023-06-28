@@ -1,14 +1,14 @@
 <?hh
 
 trait T {
-  function foo() {
+  function foo() :mixed{
     echo "Foo";
     parent::bar();
     echo "I'm in class " . get_class() . "\n";
   }
 }
 class C {
-  function bar() {
+  function bar() :mixed{
     echo "BAR!\n";
   }
 }

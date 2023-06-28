@@ -1,11 +1,11 @@
 <?hh
 class Foo {
-  final public function f() {
+  final public function f() :mixed{
     return 'Foo';
   }
 }
 trait T {
-  final public function f() {
+  final public function f() :mixed{
     return 'Bar';
   }
 }

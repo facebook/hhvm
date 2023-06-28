@@ -7,7 +7,7 @@ function fruit(): Iterator<string> {
 
 
  <<__EntryPoint>>
-function main_2145() {
+function main_2145() :mixed{
 foreach (fruit() as $fruit) {
  var_dump($fruit);
 }

@@ -3,7 +3,7 @@
 class D {
 }
 
-function foo(inout int $x) {
+function foo(inout int $x) :mixed{
   foreach (varray[new D] as $bar) {
     try {
       return $x;
@@ -13,7 +13,7 @@ function foo(inout int $x) {
   }
 }
 
-function main() {
+function main() :mixed{
   $y = 0;
   foo(inout $y);
   echo "done\n";
@@ -21,6 +21,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_inout_loop_2() {
+function main_inout_loop_2() :mixed{
 main();
 }

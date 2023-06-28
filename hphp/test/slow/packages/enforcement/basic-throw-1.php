@@ -3,7 +3,7 @@
 module a.b;
 
 <<__EntryPoint>>
-function main_throw() {
+function main_throw() :mixed{
   try {
     foo();
   } catch (Exception $e) {

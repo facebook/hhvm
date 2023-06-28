@@ -25,26 +25,26 @@ class DateTime1 implements DateTimeInterface {
   function __construct($timestamp) {
     $this->timestamp = $timestamp;
   }
-  function getTimestamp() {
+  function getTimestamp() :mixed{
     if ($this->timestamp <= 0) {
       throw () ==> new Exception('sneaky');
     }
     return $this->timestamp;
   }
-  function diff($dt, $absolute = null) {}
-  function format($format) {}
-  function getTimezone() {}
-  function getOffset() {}
+  function diff($dt, $absolute = null) :mixed{}
+  function format($format) :mixed{}
+  function getTimezone() :mixed{}
+  function getOffset() :mixed{}
 }
 
 class DateTime2 implements DateTimeInterface {
-  function getTimestamp() {
+  function getTimestamp() :mixed{
     return 100;
   }
-  function diff($dt, $absolute = null) {}
-  function format($format) {}
-  function getTimezone() {}
-  function getOffset() {}
+  function diff($dt, $absolute = null) :mixed{}
+  function format($format) :mixed{}
+  function getTimezone() :mixed{}
+  function getOffset() :mixed{}
 }
 
 function foo(): void {}
@@ -55,7 +55,7 @@ class Bar {
   public static function rfoo<reify T>(): void {}
 }
 
-function wrapped($f) {
+function wrapped($f) :mixed{
   try {
     $f();
   } catch (Exception $e) {

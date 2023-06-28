@@ -9,12 +9,12 @@
 class Foo {}
 newtype FooBar = Foo;
 
-function dofoo(FooBar $f) {
+function dofoo(FooBar $f) :mixed{
   var_dump($f);
 }
 
 newtype StringAlias = string;
-function dostring(StringAlias $s) {
+function dostring(StringAlias $s) :mixed{
   var_dump($f);
 }
 <<__EntryPoint>> function main(): void {

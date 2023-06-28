@@ -8,7 +8,7 @@ class Sub <T2 as int> extends Sup {
   public T2 $x;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $o = new Sub;
   $o->x = 10;
   var_dump($o->x);

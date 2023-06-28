@@ -5,7 +5,7 @@ class C {}
 // The size values are a bit of a difficult thing to check so we use them as
 // sort of a lower bound. It's a weak check but unless it gets bad it's a
 // useful thing to check.
-function checkInfo($info, $valuesSize, $keysSize, $entriesCount, $checkList) {
+function checkInfo($info, $valuesSize, $keysSize, $entriesCount, $checkList) :mixed{
   if (count($info) == 1) echo "error\n";
   if ($info['values_size'] < $valuesSize) {
     printf("valuesSize: %d smaller than expected %d\n",
@@ -21,7 +21,7 @@ function checkInfo($info, $valuesSize, $keysSize, $entriesCount, $checkList) {
   }
 }
 
-function dumpKeys($info) {
+function dumpKeys($info) :mixed{
   $list = $info['cache_list'];
   foreach($list as $entry) {
     var_dump($entry['info']);
@@ -30,7 +30,7 @@ function dumpKeys($info) {
 
 
 <<__EntryPoint>>
-function main_cache_info() {
+function main_cache_info() :mixed{
 echo "no key\n";
 $info = apc_cache_info('user');
 if (count($info) <= 1) echo "cache size error\n";

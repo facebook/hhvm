@@ -18,7 +18,7 @@ function baz<T as N>(T $x) : T {
   return $x;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $x = 'a';
   foo1(inout $x);
   foo2(inout $x);

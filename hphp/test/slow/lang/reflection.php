@@ -10,7 +10,7 @@ class State { public static $staticX = 4; }
 /**
  * This is f's doc comment.
  */
-function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) {
+function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) :mixed{
   print "In f()\n";
   State::$staticX++;
   $x = State::$staticX;
@@ -33,7 +33,7 @@ function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) {
 /**
  * This is g's doc comment.
  */
-function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
+function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) :mixed{
   print "In g($a, $b, $c)\n";
 }
 
@@ -41,22 +41,22 @@ function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
 // ReflectionClass.
 
 interface H {
-  public function methH();
+  public function methH():mixed;
 }
 interface I {
-  public function methI();
+  public function methI():mixed;
 }
 interface J {
-  public function methJ();
+  public function methJ():mixed;
 }
 interface K extends I, J {
-  public function methK();
+  public function methK():mixed;
 }
 interface L {}
 
 class A implements H {
-  public function methH() {}
-  protected function methA() {}
+  public function methH() :mixed{}
+  protected function methA() :mixed{}
 }
 /**
  * This is B's doc comment.
@@ -71,12 +71,12 @@ class B extends A implements I, K {
   protected $p1 = 2;
   public $p2 = 3;
   public $p3;
-  static public function smethB0() {}
-  static private function smethB1() {}
-  public function methI() {}
-  public function methJ() {}
-  public function methK() {}
-  private function methB() {}
+  static public function smethB0() :mixed{}
+  static private function smethB1() :mixed{}
+  public function methI() :mixed{}
+  public function methJ() :mixed{}
+  public function methK() :mixed{}
+  private function methB() :mixed{}
 }
 class C {}
 

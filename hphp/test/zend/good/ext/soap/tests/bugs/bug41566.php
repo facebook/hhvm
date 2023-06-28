@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
   $aUser = new User();
   $aUser->sName = 'newUser';
 

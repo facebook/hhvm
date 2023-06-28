@@ -17,14 +17,14 @@
 class FooClass
 {
     public function __toString()
-    {
+:mixed    {
         return "Object";
     }
 }
 
 // Output facilitating function
 function writeAndDump($fp, $format, $args)
-{
+:mixed{
     try { ftruncate( $fp, 0 ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     $length = vfprintf( $fp, $format, $args );
     try { rewind( $fp ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

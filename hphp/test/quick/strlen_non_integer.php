@@ -1,19 +1,19 @@
 <?hh
 
-function none() {}
+function none() :mixed{}
 
 
 class Foo {
 }
 
-function asdf($pattern) {
+function asdf($pattern) :mixed{
   $len = strlen($pattern);
   $len--;
   echo $len;
   echo "\n";
 }
 
-function main() {
+function main() :mixed{
   $foo = new Foo();
   for ($i=0; $i<100; $i++) {
     try {
@@ -27,7 +27,7 @@ function main() {
 
 
 
-function main2() {
+function main2() :mixed{
   try {
     echo "foo: " .strlen($x)."\n";
   } catch (Exception $e) {

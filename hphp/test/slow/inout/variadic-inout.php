@@ -1,18 +1,18 @@
 <?hh
 
-function foo(inout $x, $y, ...$z) {
+function foo(inout $x, $y, ...$z) :mixed{
   $x[] = $y;
   foreach ($z as $v) $x[] = $v;
 }
 
-function bar(inout $x, ...$z) {
+function bar(inout $x, ...$z) :mixed{
   $r = $x[count($x) - 1];
   unset($x[count($x) - 1]);
   if (count($z) > 0) var_dump("wat");
   return $r;
 }
 
-function main() {
+function main() :mixed{
   $x = varray[1, 2, 3];
   foo(inout $x, 24);
   foo(inout $x, 42, 'apple', 200);
@@ -28,6 +28,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_variadic_inout() {
+function main_variadic_inout() :mixed{
 main();
 }

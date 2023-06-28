@@ -4,7 +4,7 @@ namespace foo {
 	class bar {
 		function __construct() {echo __METHOD__,"\n";}
 	}
-	function test() {
+	function test() :mixed{
 		new foo;
 		new bar;
 	}
@@ -16,14 +16,14 @@ namespace {
 	}
 	use foo\bar as foo1;
 
-	function test() {
+	function test() :mixed{
 		new foo1;
 		new foo;
 		echo "===DONE===\n";
 	}
 
 	<<__EntryPoint>>
-	function main() {
+	function main() :mixed{
 		\foo\test();
 		\test();
 	}

@@ -1,5 +1,5 @@
 <?hh
-function throw_exc() {
+function throw_exc() :mixed{
   throw new Exception('TEST_EXCEPTION');
 }
 

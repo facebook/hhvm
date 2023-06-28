@@ -6,7 +6,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_static_member() {
+function main_static_member() :mixed{
 $A_str = 'A';
 $A_obj = new A;
 $b_str = 'b';

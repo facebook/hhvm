@@ -6,7 +6,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_remove_key() {
+function main_remove_key() :mixed{
 $s = shape(
   'x' => 4
 );

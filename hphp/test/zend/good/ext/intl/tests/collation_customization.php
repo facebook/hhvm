@@ -6,7 +6,7 @@
 
 
 function cmp_array( inout $coll, $a )
-{
+:mixed{
     $res = '';
     $prev = null;
     foreach( $a as $i )
@@ -28,7 +28,7 @@ function cmp_array( inout $coll, $a )
 }
 
 function check_alternate_handling( inout $coll )
-{
+:mixed{
     $res = '';
 
     ut_coll_set_strength( $coll, Collator::TERTIARY );
@@ -49,7 +49,7 @@ function check_alternate_handling( inout $coll )
 }
 
 function ut_main()
-{
+:mixed{
     $coll = ut_coll_create( 'en_US' );
 
     return

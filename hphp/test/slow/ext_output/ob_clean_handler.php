@@ -4,7 +4,7 @@ abstract final class ExtOutputObCleanHandler {
   public static $buffer = '';
 }
 
-function my_output($output, $flag) {
+function my_output($output, $flag) :mixed{
   ExtOutputObCleanHandler::$buffer = var_export(darray['output' => $output, 'flags' => $flag], true);
   return $output;
 }

@@ -8,7 +8,7 @@ class testobj {
   }
 }
 
-function alloc_lots($x) {
+function alloc_lots($x) :mixed{
   $v = darray[];
   for ($i = 0; $i < $x * 5000; ++$i) {
     $m = new testobj($x * $i);
@@ -22,7 +22,7 @@ function alloc_lots($x) {
 
 
 <<__EntryPoint>>
-function main_memory_interval() {
+function main_memory_interval() :mixed{
 memory_get_usage(); // force stats update
 
 // drive memory up to its highest peak in the script

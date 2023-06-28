@@ -2,7 +2,7 @@
 
 class C {}
 
-function test_varray(string $name, varray $array) {
+function test_varray(string $name, varray $array) :mixed{
   print("\n=============================\nTesting: $name\n");
   var_dump(HH\is_array_marked_legacy($array));
   $array = HH\array_mark_legacy($array);
@@ -13,7 +13,7 @@ function test_varray(string $name, varray $array) {
   var_dump(HH\is_array_marked_legacy($array));
 }
 
-function test_darray(string $name, darray $array) {
+function test_darray(string $name, darray $array) :mixed{
   print("\n=============================\nTesting: $name\n");
   var_dump(HH\is_array_marked_legacy($array));
   $array = HH\array_mark_legacy($array);
@@ -25,7 +25,7 @@ function test_darray(string $name, darray $array) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_varray('varray[]', varray[]);
   test_varray('varray[new C()]', varray[new C()]);
   test_darray('darray[]', darray[]);

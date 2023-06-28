@@ -2,14 +2,14 @@
 
 
 class someclass {
-  static public function yo() {
+  static public function yo() :mixed{
     return $_ENV['hey'] ?? false;
   }
 }
 
-function asd() { return mt_rand() ? 'a' : 2; }
-function array_of_one() { return varray['ZZZZ']; }
-function main() {
+function asd() :mixed{ return mt_rand() ? 'a' : 2; }
+function array_of_one() :mixed{ return varray['ZZZZ']; }
+function main() :mixed{
   $time = asd();
   $items = darray[];
   if (someclass::yo()) {
@@ -20,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_possibly_empty_002() {
+function main_array_possibly_empty_002() :mixed{
 main();
 }

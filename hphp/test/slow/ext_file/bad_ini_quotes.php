@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $path = __DIR__.'/bad_ini_quotes.ini';
   $x = file_get_contents($path);
   $y = parse_ini_string($x, true);
@@ -9,6 +9,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_bad_ini_quotes() {
+function main_bad_ini_quotes() :mixed{
 main();
 }

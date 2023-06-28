@@ -1,7 +1,7 @@
 <?hh
 class Test {
    public $a = varray[1,2,3,4,5]; // removed, crash too
-   function c() {
+   function c() :mixed{
       return new Test();
    }
 

@@ -2,7 +2,7 @@
 
 // Test that we can clone a ImmSet.
 
-function main() {
+function main() :mixed{
   $fs = ImmSet {1, 2, 3};
   $clone = clone $fs;
   var_dump($clone == $fs);
@@ -10,6 +10,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_clone() {
+function main_clone() :mixed{
 main();
 }

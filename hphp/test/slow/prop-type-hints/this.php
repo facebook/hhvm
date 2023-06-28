@@ -3,7 +3,7 @@
 
 class A {
   public this $p;
-  public function test($c) { $this->p = $c; }
+  public function test($c) :mixed{ $this->p = $c; }
 }
 
 class B extends A {}

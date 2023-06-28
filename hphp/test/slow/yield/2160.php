@@ -1,9 +1,9 @@
 <?hh
 
-function f($x) {
+function f($x) :mixed{
  return $x;
  }
-function foo($a) {
+function foo($a) :AsyncGenerator<mixed,mixed,void>{
   yield 1;
   foreach (darray(f($a) ) as $x) {
     var_dump('i:'.$x);
@@ -11,7 +11,7 @@ function foo($a) {
 }
 
 <<__EntryPoint>>
-function main_2160() {
+function main_2160() :mixed{
 foreach (foo(varray[1]) as $x) {
   var_dump('o:'.$x);
 }

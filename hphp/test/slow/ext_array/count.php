@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_count() {
+function main_count() :mixed{
 $a = darray[];
 $a[0] = 1;
 $a[1] = 3;

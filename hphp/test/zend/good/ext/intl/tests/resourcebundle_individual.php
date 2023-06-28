@@ -1,6 +1,6 @@
 <?hh
 
-function ut_main($bundle) {
+function ut_main($bundle) :mixed{
 	$str_res = '';
 	// fall back
 	$r = ut_resourcebundle_create( 'en_US', $bundle );
@@ -24,7 +24,7 @@ function ut_main($bundle) {
 
 	return $str_res;
 }
-function ut_run2($bundle) {
+function ut_run2($bundle) :mixed{
 			// Run unit test in OO mode.
 			\HH\global_set('oo-mode', true);
 			$oo_result = ut_main($bundle);

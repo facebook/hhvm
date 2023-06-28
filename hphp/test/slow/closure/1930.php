@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1930() {
+function main_1930() :mixed{
 $v=5;
 call_user_func(  function() use($v)   {
  echo $v;

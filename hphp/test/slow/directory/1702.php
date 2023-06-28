@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1702() {
+function main_1702() :mixed{
 $d = dir(__DIR__."/../../sample_dir/");
 echo "Path: " . $d->path . "\n";
 $files = varray[];

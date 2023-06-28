@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1799() {
+function main_1799() :mixed{
 $dir = new DirectoryIterator(__DIR__.'/../../sample_dir');
 $files = varray[];
  // order changes per machine

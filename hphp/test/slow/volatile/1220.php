@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   if (class_exists('bar')) {
     echo "yes\n";
   }
@@ -17,6 +17,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1220() {
+function main_1220() :mixed{
 foo();
 }

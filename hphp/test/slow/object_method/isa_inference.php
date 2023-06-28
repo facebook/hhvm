@@ -1,10 +1,10 @@
 <?hh
 
 class X {
-  <<__DynamicallyCallable>> static function foo() { var_dump(__METHOD__); }
+  <<__DynamicallyCallable>> static function foo() :mixed{ var_dump(__METHOD__); }
 }
 
-function test(string $s) {
+function test(string $s) :mixed{
   if (is_a($s, 'X', true)) {
     call_user_func(varray[$s, 'foo']);
   }
@@ -18,6 +18,6 @@ function test(string $s) {
 
 
 <<__EntryPoint>>
-function main_isa_inference() {
+function main_isa_inference() :mixed{
   test('X');
 }

@@ -5,7 +5,7 @@ final class quickUnset {
 }
 
 <<__EntryPoint>>
-function f() {
+function f() :mixed{
 
 
   print ":".(string)(isset($x)).":\n";

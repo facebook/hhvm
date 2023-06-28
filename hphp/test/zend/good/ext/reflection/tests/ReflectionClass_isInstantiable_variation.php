@@ -16,7 +16,7 @@ class privateCtorNew {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $classes = varray["noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew"];
 
   foreach($classes  as $class ) {

@@ -1,27 +1,27 @@
 <?hh
 
-function foo1() {
+function foo1() :mixed{
   $x = 4;
   $y = 2;
   return $x ^ $y;
 }
 
 
-function foo3() {
+function foo3() :mixed{
   $x = 5;
   $y = 5;
   return $x ^ $y;
 }
 
-function foo4($x, $y) {
+function foo4($x, $y) :mixed{
   return $x ^ $y;
 }
 
-function foo5($x) {
+function foo5($x) :mixed{
   return ~$x;
 }
 
-function foo6($x) {
+function foo6($x) :mixed{
   return !$x;
 }
 <<__EntryPoint>> function main(): void {

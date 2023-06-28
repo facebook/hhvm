@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_zlib_null_byte() {
+function main_zlib_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 var_dump(gzopen($file, 'r'));

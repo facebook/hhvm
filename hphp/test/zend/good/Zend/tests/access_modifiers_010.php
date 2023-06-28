@@ -1,13 +1,13 @@
 <?hh
 
 class d {
-    private function test2() {
+    private function test2() :mixed{
         print "Bar\n";
     }
 }
 
 abstract class a extends d {
-    public function test() {
+    public function test() :mixed{
         $this->test2();
     }
 }

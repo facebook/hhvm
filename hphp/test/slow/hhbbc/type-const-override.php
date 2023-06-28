@@ -2,7 +2,7 @@
 
 interface I1 {
   abstract const type T1 = shape(...);
-  function foo();
+  function foo():mixed;
 }
 
 interface I2 extends I1 {
@@ -23,10 +23,10 @@ final class D implements I4 {
 
 final class C implements I3, I2, I4 {
   const type T2 = shape('A' => self::Type1);
-  function foo() { echo "foo()\n"; }
+  function foo() :mixed{ echo "foo()\n"; }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $x = new C();
   $x->foo();
 }

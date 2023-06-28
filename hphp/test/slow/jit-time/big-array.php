@@ -1,6 +1,6 @@
 <?hh
 
-function test($a) {
+function test($a) :mixed{
   $x = darray[
     $a.'1' => $a.'1',
     $a.'2' => $a.'2',
@@ -1507,6 +1507,6 @@ function test($a) {
 }
 
 <<__EntryPoint>>
-function main_big_array() {
+function main_big_array() :mixed{
 test('hi');
 }

@@ -1,11 +1,11 @@
 <?hh
 
-function callback($data) {
+function callback($data) :mixed{
   return "callback: $data";
 }
 
 <<__EntryPoint>>
-function main_1562() {
+function main_1562() :mixed{
 ob_start();
 echo "from first level\n";
 ob_start();

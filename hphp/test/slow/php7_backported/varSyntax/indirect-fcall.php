@@ -1,12 +1,12 @@
 <?hh
-function id($x = 'id') { return $x; }
+function id($x = 'id') :mixed{ return $x; }
 class Test {
-  public static function id($x = varray[__CLASS__, 'id']) { return $x; }
+  public static function id($x = varray[__CLASS__, 'id']) :mixed{ return $x; }
   public static $f;
 }
 
 <<__EntryPoint>>
-function main_indirect_fcall() {
+function main_indirect_fcall() :mixed{
 var_dump(0);
 id('var_dump')(1);
 id('id')('var_dump')(2);

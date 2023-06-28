@@ -1,5 +1,5 @@
 <?hh
-function foo() {\HH\global_unset("x");}
+function foo() :mixed{\HH\global_unset("x");}
 <<__EntryPoint>>
 function main_entry(): void {
   $x = 1;

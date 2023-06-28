@@ -2,7 +2,7 @@
 
 module a;
 
-function dyn($x, $y, $enum_class = false) {
+function dyn($x, $y, $enum_class = false) :mixed{
   try {
     var_dump($x::BAR);
   } catch (Exception $e) {
@@ -16,7 +16,7 @@ function dyn($x, $y, $enum_class = false) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include "enum-1.inc";
   try {
     var_dump(Foo::BAR);

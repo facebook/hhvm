@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_conditional_fatal() {
+function main_conditional_fatal() :mixed{
 $execute_fatal = false;
 if ($execute_fatal) {
   include 'conditional_fatal-1.inc';

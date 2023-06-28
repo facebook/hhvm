@@ -36,7 +36,7 @@ class G implements I {
 }
 
 class H {
-  public function bar() { return vec[]; }
+  public function bar() :mixed{ return vec[]; }
 }
 
 abstract class X1 extends E {
@@ -45,7 +45,7 @@ abstract class X2 extends E {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $f = new F();
   $f->foo();
   echo "done\n";

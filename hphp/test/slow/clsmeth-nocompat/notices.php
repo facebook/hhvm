@@ -1,18 +1,18 @@
 <?hh
 
-function handle_error($_errno, $str, ...) {
+function handle_error($_errno, $str, ...) :mixed{
   echo " (error: $str)";
   return true;
 }
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 class K { const A = 0; const B = 1; }
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
-function C(bool $b) {
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
+function C(bool $b) :mixed{
   echo ($b ? " True\n" : " False\n");
 }
 
-function is_functions_static() {
+function is_functions_static() :mixed{
   $m = Foo::bar<>;
 
   echo 'is_array($m):'        ;C(is_array($m));
@@ -38,7 +38,7 @@ function is_functions_static() {
   echo 'is_a($m, KeyedContainer):'        ;C(is_a($m, 'KeyedContainer'));
 }
 
-function is_functions_dynamic() {
+function is_functions_dynamic() :mixed{
   $m = LV(Foo::bar<>);
 
   echo 'is_array($m):'        ;C(is_array($m));
@@ -64,7 +64,7 @@ function is_functions_dynamic() {
   echo 'is_a($m, KeyedContainer):'   ;C(LV('is_a')($m, 'KeyedContainer'));
 }
 
-function is_functions_builtins() {
+function is_functions_builtins() :mixed{
   $m = LV(Foo::bar<>);
 
   echo 'is_array($m):'       ;C(LV('is_array')($m));
@@ -74,7 +74,7 @@ function is_functions_builtins() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   is_functions_static();

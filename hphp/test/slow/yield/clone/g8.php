@@ -1,6 +1,6 @@
 <?hh
 class State { public static $x = 1; }
-function foo() {
+function foo() :AsyncGenerator<mixed,mixed,void>{
   State::$x += 10;
   yield State::$x;
   State::$x += 100;
@@ -10,7 +10,7 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_g8() {
+function main_g8() :mixed{
 $x = foo();
 $x->rewind();
 $y1 = clone $x;

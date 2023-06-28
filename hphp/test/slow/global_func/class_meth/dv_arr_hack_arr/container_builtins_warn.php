@@ -1,15 +1,15 @@
 <?hh
 
-function CM($c, $m) { return __hhvm_intrinsics\create_clsmeth_pointer($c, $m); }
+function CM($c, $m) :mixed{ return __hhvm_intrinsics\create_clsmeth_pointer($c, $m); }
 
 class A {
-  static public function func1() { return 1; }
+  static public function func1() :mixed{ return 1; }
 }
 
 /*
  * These builtins are NOT compatible with AnyArray and will raise Warning.
  */
-function test_warning($c, $f, $cmp) {
+function test_warning($c, $f, $cmp) :mixed{
   $x = CM($c, $f); var_dump(shuffle(inout $x));
 
   var_dump(array_diff(CM($c, $f), darray(vec[$f])));
@@ -50,7 +50,7 @@ function test_warning($c, $f, $cmp) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_warning(
     A::class,
     'func1',

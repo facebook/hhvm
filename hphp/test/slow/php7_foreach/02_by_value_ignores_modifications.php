@@ -1,6 +1,6 @@
 <?hh
 
-function run(inout $a) {
+function run(inout $a) :mixed{
   foreach($a as $v) {
     echo "$v\n";
     unset($a[1]);
@@ -8,7 +8,7 @@ function run(inout $a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = darray[0 => 1, 1 => 2, 2 => 3];
   run(inout $a);
 }

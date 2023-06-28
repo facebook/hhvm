@@ -21,6 +21,6 @@ function f(): dict {
 
 
 <<__EntryPoint>>
-function main_preg_replace_impl_type() {
+function main_preg_replace_impl_type() :mixed{
 f();
 }

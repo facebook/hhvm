@@ -4,7 +4,7 @@ class KM {
   private $kSA;
   private $specs;
 
-  function getKS() {
+  function getKS() :mixed{
     return $this->kSA;
   }
   function __construct() {
@@ -16,12 +16,12 @@ class KM {
       ];
   }
 
-  private static function decay($a, $b, $c, $d) { return 0; }
+  private static function decay($a, $b, $c, $d) :mixed{ return 0; }
 
-  private function getXXX() {
+  private function getXXX() :mixed{
     return varray[1, 0, 0];
   }
-  public function getInfo() {
+  public function getInfo() :mixed{
     $time = time();
     $this->kSA = darray[];
     foreach ($this->specs as $key => $spec) {

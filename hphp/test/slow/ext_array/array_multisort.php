@@ -1,6 +1,6 @@
 <?hh
 
-function a() {
+function a() :mixed{
   $ar1 = varray[10, 100, 100, 0];
   $ar2 = varray[1, 3, 2, 4];
   array_multisort2(inout $ar1, inout $ar2);
@@ -8,7 +8,7 @@ function a() {
   var_dump($ar2);
 }
 
-function b() {
+function b() :mixed{
   $ar0 = varray["10", 11, 100, 100, "a"];
   $ar1 = varray[1, 2, "2", 3, 1];
   $asc = SORT_ASC;
@@ -23,7 +23,7 @@ function b() {
   var_dump($ar);
 }
 
-function c() {
+function c() :mixed{
   $array = varray["Alpha", "atomic", "Beta", "bank"];
   $array_lowercase = array_map(strtolower<>, $array);
   $asc = SORT_ASC;
@@ -36,7 +36,7 @@ function c() {
 
 
 <<__EntryPoint>>
-function main_array_multisort() {
+function main_array_multisort() :mixed{
 a();
 b();
 c();

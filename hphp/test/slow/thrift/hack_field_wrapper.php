@@ -367,14 +367,14 @@ class StructWithTypeWrapper  {
   }
 }
 
-async function getStructWithWrapper() {
+async function getStructWithWrapper() :Awaitable<mixed>{
   $v = new OuterStructWithWrapper();
   await $v->get_value()->genWrap(42);
   await $v->get_struct_value()->genWrap(InnerStruct::withDefaultValues());
   return $v;
 }
 
-async function testBinary() {
+async function testBinary() :Awaitable<mixed>{
   $p = new DummyProtocol();
   $v = await getStructWithWrapper();
   await $v->print();
@@ -401,7 +401,7 @@ async function testBinary() {
   $new_value->print();
 }
 
-async function testCompact() {
+async function testCompact() :Awaitable<mixed>{
   $p = new DummyProtocol();
   $v = await getStructWithWrapper();
   $v->print();
@@ -428,7 +428,7 @@ async function testCompact() {
 }
 
 <<__EntryPoint>>
-async function main_forward_compatibility() {
+async function main_forward_compatibility() :Awaitable<mixed>{
   require 'common.inc';
   echo "--- binary ---\n";
   await testBinary();

@@ -2,13 +2,13 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  public static function func() {}
+  public static function func() :mixed{}
 }
 
-function takes_callable(<<__Soft>> callable $x) {}
+function takes_callable(<<__Soft>> callable $x) :mixed{}
 function returns_callable($x): <<__Soft>> callable { return $x; }
 
-function test() {
+function test() :mixed{
   takes_callable(vec['A', 'func']);
   returns_callable(vec['A', 'func']);
 
@@ -21,7 +21,7 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_callable_type_hint() {
+function main_callable_type_hint() :mixed{
 test();
 echo "DONE\n";
 }

@@ -6,12 +6,12 @@ class C {
   }
 }
 
-function foo($x) {
+function foo($x) :mixed{
   new C(...$x);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     foo(varray[1,2]);
   } catch (Exception $e) {

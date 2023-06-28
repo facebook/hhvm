@@ -24,15 +24,15 @@ class C
 
 // methods
 
-    function f1() {}
-    public function f2() {}
-    protected function f3() {}
-    private function f4() {}
+    function f1() :mixed{}
+    public function f2() :mixed{}
+    protected function f3() :mixed{}
+    private function f4() :mixed{}
 
-    static function sf1() {}
-    public static function sf2() {}
-    static protected function sf3() {}  // visibility and static ordering unimportant
-    private static function sf4() {}
+    static function sf1() :mixed{}
+    public static function sf2() :mixed{}
+    static protected function sf3() :mixed{}  // visibility and static ordering unimportant
+    private static function sf4() :mixed{}
 
 // constructors
 
@@ -49,32 +49,32 @@ class C
 
 abstract class D1
 {
-    public abstract function paf1($p1);
-    abstract protected  function paf2();
+    public abstract function paf1($p1):mixed;
+    abstract protected  function paf2():mixed;
 //  private abstract function paf3();   // can't ever provide an implementation
-    public static abstract  function pasf1();
-    protected abstract static function pasf2($p1);
+    public static abstract  function pasf1():mixed;
+    protected abstract static function pasf2($p1):mixed;
 }
 
 class D2 extends D1
 {
 //  public function paf1() {}           // Declaration of D2::paf1() must be compatible with D1::paf1($p1)
-    public function paf1($q1) {}        // OK; has same visibility as abstract decl, and same signature
+    public function paf1($q1) :mixed{}        // OK; has same visibility as abstract decl, and same signature
 //  public function paf1($q1, $q2) {}   // Declaration of D2::paf1() must be compatible with D1::paf1($p1)
 //  protected function paf1($q1) {}     // Access level to D2::paf1() must be public
 //  private function paf1($q1) {}       // Access level to D2::paf1() must be public
 
 //  public function paf2() {}           // OK; has wider visibility than abstract decl
-    protected function paf2() {}        // OK; has same visibility as abstract decl
+    protected function paf2() :mixed{}        // OK; has same visibility as abstract decl
 //  private function paf2() {}          // Access level to D2::paf2() must be protected
 
-    public static function pasf1() {}   // OK; has same visibility as abstract decl
+    public static function pasf1() :mixed{}   // OK; has same visibility as abstract decl
 //  protected static function pasf1() {}// Access level to D2::pasf1() must be public
 //  private static function pasf1() {}  // Access level to D2::pasf1() must be public
 
 //  static public function pasf2($q1) {}    // OK; has wider visibility than abstract decl
 //  static protected function pasf2() {}    // Declaration of D2::pasf2() must be compatible with D1::pasf2($p1)
-    static protected function pasf2($q1) {} // OK; has same visibility as abstract decl, and same signature
+    static protected function pasf2($q1) :mixed{} // OK; has same visibility as abstract decl, and same signature
 //  static protected function pasf2($q1, $q2) {}    // Declaration of D2::pasf2() must be compatible with D1::pasf2($p1)
 //  static private function pasf2() {$q1}   // Access level to D2::pasf2() must be protected
 }

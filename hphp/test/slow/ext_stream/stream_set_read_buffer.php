@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_set_read_buffer() {
+function main_stream_set_read_buffer() :mixed{
 $descriptorspec = darray[
   0 => varray["pipe", "r+"],
   1 => varray["pipe", "w"],

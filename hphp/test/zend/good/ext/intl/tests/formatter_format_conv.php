@@ -1,7 +1,7 @@
 <?hh
 
 function ut_main()
-{
+:mixed{
     $fmt = ut_nfmt_create( 'en_US', NumberFormatter::DECIMAL );
     $number = 1234567.891234567890000;
 

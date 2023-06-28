@@ -4,7 +4,7 @@
 // For simple cases, see php5_pcntl_003.php
 
 <<__EntryPoint>>
-function main_sigprocmask_edge_cases() {
+function main_sigprocmask_edge_cases() :mixed{
 $oldset = null;
 print("Correct usage, two args\n");
 var_dump(pcntl_sigprocmask(SIG_BLOCK, varray[SIGHUP], inout $oldset));

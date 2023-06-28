@@ -11,12 +11,12 @@
 //get a class
 class classA
 {
-  public function __toString(){
+  public function __toString():mixed{
     return "Class A object";
   }
 }
 function callback($a)
-{
+:mixed{
   return ($a);
 }
 <<__EntryPoint>> function main(): void {

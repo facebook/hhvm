@@ -2,7 +2,7 @@
 
 class C {}
 
-function print_recursive_marking_helper($x, $path) {
+function print_recursive_marking_helper($x, $path) :mixed{
   if (HH\is_any_array($x)) {
     $marking = HH\is_array_marked_legacy($x) ? "marked" : "unmarked";
     print($path.': '.$marking."\n");
@@ -14,13 +14,13 @@ function print_recursive_marking_helper($x, $path) {
   }
 }
 
-function print_recursive_marking($x, $name) {
+function print_recursive_marking($x, $name) :mixed{
   print("\nPrinting marking for ".$name.":\n");
   var_dump($x);
   print_recursive_marking_helper($x, $name);
 }
 
-function test_marking_nested_arrays() {
+function test_marking_nested_arrays() :mixed{
   print("\n==============================================\n");
   print("test_marking_nested_arrays():\n");
   $c = new C();
@@ -39,7 +39,7 @@ function test_marking_nested_arrays() {
   print_recursive_marking($y, '$y');
 }
 
-function test_unmarking_nested_arrays() {
+function test_unmarking_nested_arrays() :mixed{
   print("\n==============================================\n");
   print("test_unmarking_nested_arrays():\n");
   $c = new C();
@@ -59,7 +59,7 @@ function test_unmarking_nested_arrays() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_marking_nested_arrays();
   test_unmarking_nested_arrays();
 }

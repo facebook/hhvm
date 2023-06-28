@@ -1,13 +1,13 @@
 <?hh
 
 trait MY_TRAIT1 {
-  public function sayHello() {
+  public function sayHello() :mixed{
     echo "Hello from MY_TRAIT1\n";
   }
 }
 trait MY_TRAIT2 {
   use MY_TRAIT1;
-  public function sayHello() {
+  public function sayHello() :mixed{
     echo "Hello from MY_TRAIT2\n";
   }
 }

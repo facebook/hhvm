@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_test() {
+function main_test() :mixed{
 echo "Hello world!\n";
 }

@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main_reflection_property_constructor_throws() {
+function main_reflection_property_constructor_throws() :mixed{
 try {
   new ReflectionProperty('CC', 'p');
 } catch (ReflectionException $e) {

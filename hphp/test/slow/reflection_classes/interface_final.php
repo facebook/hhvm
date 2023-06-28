@@ -1,11 +1,11 @@
 <?hh
 
 interface I {
-  function m();
+  function m():mixed;
 }
 
 class A implements I {
-  final function m() { }
+  final function m() :mixed{ }
 }
 
 class B extends A { }
@@ -16,7 +16,7 @@ class D extends C { }
 
 
 <<__EntryPoint>>
-function main_interface_final() {
+function main_interface_final() :mixed{
 $rc = new ReflectionClass('I');
 var_dump($rc->getMethods()[0]->isFinal());
 

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_register_shutdown_function_nested() {
+function main_register_shutdown_function_nested() :mixed{
 var_dump('before reg');
 
 register_shutdown_function(function() {

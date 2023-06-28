@@ -6,7 +6,7 @@ class Base {
 
 
 <<__EntryPoint>>
-function main_shape_typedef_with_optional_field() {
+function main_shape_typedef_with_optional_field() :mixed{
 $type = new ReflectionTypeConstant('Base', 'ShapeWithOptionalField');
 var_dump($type->getAssignedTypeText());
 var_dump($type->getTypeStructure());

@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_949() {
+function main_949() :mixed{
 $i = 0;
  print ++$i;
  print "\t";

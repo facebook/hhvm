@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function foo() {
+function foo() :mixed{
 	(ZendGoodZendTestsBug43851::$LAST = HH\Lib\Legacy_FIXME\cast_for_arithmetic(ZendGoodZendTestsBug43851::$LAST) + 0) * 1;
 	echo "ok\n";
 }

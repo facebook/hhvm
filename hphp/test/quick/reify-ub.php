@@ -1,12 +1,12 @@
 <?hh
 
 class Bar<reify Tc as num> {
-  function baz(Tc $x) {
+  function baz(Tc $x) :mixed{
     var_dump($x);
   }
 }
 
-function foo<reify T as num>(T $x) {
+function foo<reify T as num>(T $x) :mixed{
   var_dump($x);
 }
 
@@ -15,7 +15,7 @@ function foobar<reify T as num>(T $x): T {
   return 'a';
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   set_error_handler(
     (int $errno, string $errstr) ==> {
      if ($errno == E_WARNING) {

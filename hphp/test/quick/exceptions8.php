@@ -1,8 +1,8 @@
 <?hh
-function doThrow() {
+function doThrow() :mixed{
   throw new Exception("f you!");
 }
-function f($a1, $a2) {
+function f($a1, $a2) :mixed{
   if (false) {
     var_dump($b1);
     var_dump($b2);
@@ -16,14 +16,14 @@ function f($a1, $a2) {
     var_dump($b10);
   }
 }
-function main() {
+function main() :mixed{
   try {
     f(1);
   } catch (Exception $e) {
   }
   echo "Done\n";
 }
-function main2() {
+function main2() :mixed{
   try {
     new NonExist();
   } catch (Exception $e) {

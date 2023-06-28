@@ -22,7 +22,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(__hhvm_intrinsics\launder_value(Foo::baz(C2::class)));
   var_dump(Foo::baz(C2::class));
 }

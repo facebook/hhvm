@@ -4,7 +4,7 @@
 class c {
 }
 
-function main($a) {
+function main($a) :mixed{
   return $a[c::BAR];
 }
 <<__EntryPoint>> function main_entry(): void {

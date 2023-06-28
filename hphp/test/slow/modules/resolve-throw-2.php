@@ -3,12 +3,12 @@
 
 module b;
 
-function pp_exn(Exception $e) {
+function pp_exn(Exception $e) :mixed{
   return $e->getMessage() . " @ " . $e->getFile() . ":" . $e->getLine() . "\n";
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include "resolve-1.inc1";
   include "resolve-2.inc";
 

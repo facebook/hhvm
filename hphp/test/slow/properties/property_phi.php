@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function id($x) { return $x; }
+function id($x) :mixed{ return $x; }
 
 class thinger {
   private
@@ -9,20 +9,20 @@ class thinger {
     $otherThings = varray[],
     $updatedIDs = varray[];
 
-  function thinger() {
+  function thinger() :mixed{
     $this->things[3] = 'three';
     $this->things[44] = 'forty four';
     $this->things[45] = 'forty five';
     $this->fn = id<>;
   }
 
-  private function process($history, inout $updated) {
+  private function process($history, inout $updated) :mixed{
     $updated = rand(0, 1) == 2;
     $fn = $this->fn;
     return $fn(varray[$history]);
   }
 
-  public function done($init) {
+  public function done($init) :mixed{
     if ($this->things) {
       foreach ($this->things as $id => $history) {
         $updated = $init;
@@ -36,7 +36,7 @@ class thinger {
   }
 }
 
-function main() {
+function main() :mixed{
   $t = new thinger;
   for ($i = 0; $i < 20; ++$i) {
     $t->done(false);
@@ -44,6 +44,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_property_phi() {
+function main_property_phi() :mixed{
 main();
 }

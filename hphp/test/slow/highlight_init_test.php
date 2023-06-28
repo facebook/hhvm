@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_highlight_init_test() {
+function main_highlight_init_test() :mixed{
 var_dump(ini_get('highlight.comment'));
 var_dump(ini_get('highlight.default'));
 var_dump(ini_get('highlight.keyword'));

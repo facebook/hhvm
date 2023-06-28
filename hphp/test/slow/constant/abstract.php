@@ -7,20 +7,20 @@ interface i2 {
 }
 class a implements i1, i2 {
   const con = 42;
-  public function bar() {
+  public function bar() :mixed{
     echo "Fail\n";
   }
-  final public function main() {
+  final public function main() :mixed{
     return $this->bar();
   }
 }
 class b extends a {
-  public function bar() {
+  public function bar() :mixed{
     echo "Pass\n";
   }
 }
 
 <<__EntryPoint>>
-function main_abstract() {
+function main_abstract() :mixed{
 (new b)->main();
 }

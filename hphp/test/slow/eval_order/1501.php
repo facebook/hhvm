@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = varray[123];
   foreach ($a as $x => $x) {
     var_dump($x);
@@ -9,6 +9,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_1501() {
+function main_1501() :mixed{
 main();
 }

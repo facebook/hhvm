@@ -5,14 +5,14 @@ abstract final class ObjectMethod {
 }
 
 class W {
-  <<__DynamicallyCallable>> function f($a) {
+  <<__DynamicallyCallable>> function f($a) :mixed{
     ObjectMethod::$trace .= $a;
     return $a;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $w = new W();
   ObjectMethod::$trace = "a";
   call_user_func_array(varray[$w, 'f'], varray["b"]);

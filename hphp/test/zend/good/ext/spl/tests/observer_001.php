@@ -10,12 +10,12 @@ class ObserverImpl implements SplObserver
     }
 
     function update(SplSubject $subject)
-    {
+:mixed    {
         echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
     }
 
     function getName()
-    {
+:mixed    {
         return $this->name;
     }
 }
@@ -31,7 +31,7 @@ class SubjectImpl implements SplSubject
     }
 
     function attach(SplObserver $observer)
-    {
+:mixed    {
         echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
         if (!in_array($observer, $this->observers))
         {
@@ -40,7 +40,7 @@ class SubjectImpl implements SplSubject
     }
 
     function detach(SplObserver $observer)
-    {
+:mixed    {
         echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
         $idx = array_search($observer, $this->observers);
         if ($idx !== false)
@@ -50,7 +50,7 @@ class SubjectImpl implements SplSubject
     }
 
     function notify()
-    {
+:mixed    {
         echo '$sub->' . __METHOD__ . "();\n";
         foreach($this->observers as $observer)
         {
@@ -59,7 +59,7 @@ class SubjectImpl implements SplSubject
     }
 
     function getName()
-    {
+:mixed    {
         return $this->name;
     }
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function Test() {
+function Test() :mixed{
   var_dump(__FUNCTION__);
 }
 

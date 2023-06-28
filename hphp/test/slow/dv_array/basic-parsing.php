@@ -18,22 +18,22 @@ function func10(): darray<int,varray<int>> {}
 function func11(): darray<int,darray<int,int>> {}
 function func12(): darray<int,varray<int>> {}
 
-function func13(varray $x) {}
-function func14(darray $x) {}
+function func13(varray $x) :mixed{}
+function func14(darray $x) :mixed{}
 
-function func15(varray<int> $x) {}
-function func16(darray<int,int> $x) {}
+function func15(varray<int> $x) :mixed{}
+function func16(darray<int,int> $x) :mixed{}
 
-function func17(varray<varray<int>> $x) {}
-function func18(varray<darray<int,int>> $x) {}
+function func17(varray<varray<int>> $x) :mixed{}
+function func18(varray<darray<int,int>> $x) :mixed{}
 
-function func19(varray<varray<int>> $x) {}
-function func20(varray<darray<int,int>> $x) {}
-function func21(varray<varray<int>> $x) {}
+function func19(varray<varray<int>> $x) :mixed{}
+function func20(varray<darray<int,int>> $x) :mixed{}
+function func21(varray<varray<int>> $x) :mixed{}
 
-function func22(darray<int,varray<int>> $x) {}
-function func23(darray<int,darray<int,int>> $x) {}
-function func24(darray<int,varray<int>> $x) {}
+function func22(darray<int,varray<int>> $x) :mixed{}
+function func23(darray<int,darray<int,int>> $x) :mixed{}
+function func24(darray<int,varray<int>> $x) :mixed{}
 
 class A {
   public varray $prop1;

@@ -3,20 +3,20 @@
 
 
 
-function func1(inout $x) {}
-<<__DynamicallyCallable>> function func4(inout $x) {}
+function func1(inout $x) :mixed{}
+<<__DynamicallyCallable>> function func4(inout $x) :mixed{}
 
 class A {
-  public function func2(inout $x) {}
-  public static function func3(inout $x) {}
+  public function func2(inout $x) :mixed{}
+  public static function func3(inout $x) :mixed{}
 }
 
 class B {
-  <<__DynamicallyCallable>> public function func5(inout $x) {}
-  <<__DynamicallyCallable>> public static function func6(inout $x) {}
+  <<__DynamicallyCallable>> public function func5(inout $x) :mixed{}
+  <<__DynamicallyCallable>> public static function func6(inout $x) :mixed{}
 }
 
-function positive_tests() {
+function positive_tests() :mixed{
   echo "====================== positive tests ========================\n";
   $v = 123;
 
@@ -41,7 +41,7 @@ function positive_tests() {
 
 }
 
-function negative_tests() {
+function negative_tests() :mixed{
   echo "====================== negative tests ========================\n";
   $v = 123;
 

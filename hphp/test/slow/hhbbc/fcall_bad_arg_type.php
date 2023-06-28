@@ -10,7 +10,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C();
   var_dump($c->foo(null));
 }

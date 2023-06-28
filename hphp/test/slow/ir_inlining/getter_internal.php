@@ -7,22 +7,22 @@ class GetterInternal {
     $this->foo = "asd";
   }
 
-  public function doit() {
+  public function doit() :mixed{
     return $this->getFoo() . "asd";
   }
 
-  public function getFoo() {
+  public function getFoo() :mixed{
     return $this->foo;
   }
 }
 
-function test10() {
+function test10() :mixed{
   $k = new GetterInternal();
   $k->doit();
 }
 
 
 <<__EntryPoint>>
-function main_getter_internal() {
+function main_getter_internal() :mixed{
 test10();
 }

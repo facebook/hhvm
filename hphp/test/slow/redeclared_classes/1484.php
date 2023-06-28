@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $x = new X1;
   $x->t = 5;
   $x->a = 3;

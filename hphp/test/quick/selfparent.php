@@ -1,16 +1,16 @@
 <?hh
 class B {
   const MYCONST = "B::MYCONST";
-  public static function foo() {
+  public static function foo() :mixed{
     echo "B::foo\n";
   }
 }
 class C extends B {
   const MYCONST = "C::MYCONST";
-  public static function foo() {
+  public static function foo() :mixed{
     echo "C::foo\n";
   }
-  public static function test() {
+  public static function test() :mixed{
     $arr = varray['foo'];
     self::foo();
     parent::foo();

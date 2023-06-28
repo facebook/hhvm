@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $v = new Vector;
   $v->reverse();
   var_dump($v);
@@ -8,6 +8,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_empty_vector() {
+function main_empty_vector() :mixed{
 test();
 }

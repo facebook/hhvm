@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1931() {
+function main_1931() :mixed{
 $myfunc = function() {
   echo "hello, world!\n";
 }

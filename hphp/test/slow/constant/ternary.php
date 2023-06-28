@@ -7,6 +7,6 @@ class A {
 
 
 <<__EntryPoint>>
-function main_ternary() {
+function main_ternary() :mixed{
 var_dump(A::FOO);
 }

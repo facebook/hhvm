@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function foo () {
+function foo () :mixed{
    try {
         echo "3";
    }

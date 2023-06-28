@@ -12,10 +12,10 @@
 class SimpleClass
 {
   public $var1 = 1;
-  public function square($n) {
+  public function square($n) :mixed{
     return $n * $n;
   }
-  public static function cube($n) {
+  public static function cube($n) :mixed{
     return $n * $n * $n;
   }
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function get($d, $k) {
+function get($d, $k) :mixed{
   try {
     var_dump($d[$k]);
   } catch (InvalidArgumentException $ex) {
@@ -9,7 +9,7 @@ function get($d, $k) {
   return $d;
 }
 
-function add($d, $v) {
+function add($d, $v) :mixed{
   try {
     $d[] = $v;
   } catch (InvalidArgumentException $ex) {
@@ -18,7 +18,7 @@ function add($d, $v) {
   return $d;
 }
 
-function run(inout $ref, inout $badref) {
+function run(inout $ref, inout $badref) :mixed{
   $dyn = 42;
   add(keyset[$dyn], 1)
     |> add($$, "1")
@@ -42,7 +42,7 @@ function run(inout $ref, inout $badref) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = 12;
   $bar = darray[];
   run(inout $foo, inout $bar);

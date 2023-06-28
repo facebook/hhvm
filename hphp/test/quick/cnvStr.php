@@ -1,11 +1,11 @@
 <?hh
 
-function foo($v) {
+function foo($v) :mixed{
   return (string)$v;
 }
-class C { public function __toString() { return "a C"; } }
+class C { public function __toString() :mixed{ return "a C"; } }
 
-function bar($i) {
+function bar($i) :mixed{
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";

@@ -27,6 +27,6 @@ function show(int $x): int {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

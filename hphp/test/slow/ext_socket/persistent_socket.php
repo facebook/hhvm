@@ -1,7 +1,7 @@
 <?hh
 
 
-function read_all_data( $conn, $bytes ) {
+function read_all_data( $conn, $bytes ) :mixed{
   $all_data = '';
   $data = '';
 
@@ -15,7 +15,7 @@ function read_all_data( $conn, $bytes ) {
   return $bytes == 0 ? $all_data : false;
 }
 
-function test_server($server) {
+function test_server($server) :mixed{
   // The server only accepts once, but the client will call
   // stream_socket_client multiple times with the persistent flag.
   $peername = null;
@@ -38,7 +38,7 @@ function test_server($server) {
   fclose($server);
 }
 
-function test_client($scheme, $port) {
+function test_client($scheme, $port) :mixed{
   $clientcontext = null;
   if ($scheme != "tcp") {
     $clientcontext = stream_context_create();
@@ -51,7 +51,7 @@ function test_client($scheme, $port) {
   do_request($scheme, $port, $clientcontext);
 }
 
-function do_request($scheme, $port, $context) {
+function do_request($scheme, $port, $context) :mixed{
   $errno = null;
   $errstr = null;
   $client = stream_socket_client(
@@ -84,7 +84,7 @@ function do_request($scheme, $port, $context) {
 
 
 <<__EntryPoint>>
-function main_persistent_socket() {
+function main_persistent_socket() :mixed{
 $pemfile = tempnam(sys_get_temp_dir(), 'sslservertest');
 
 $certdata = darray['countryName' => 'US',

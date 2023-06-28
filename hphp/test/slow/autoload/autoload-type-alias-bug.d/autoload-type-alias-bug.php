@@ -5,6 +5,6 @@ function take(Bar $_): void {
 }
 
 <<__EntryPoint>>
-function main_autoload_type_alias_bug() {
+function main_autoload_type_alias_bug() :mixed{
   take(new Baz());
 }

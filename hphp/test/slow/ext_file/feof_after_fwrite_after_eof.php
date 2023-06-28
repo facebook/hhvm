@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $inputs = varray[
     'php://temp',
     'php://memory',
@@ -27,6 +27,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_feof_after_fwrite_after_eof() {
+function main_feof_after_fwrite_after_eof() :mixed{
 main();
 }

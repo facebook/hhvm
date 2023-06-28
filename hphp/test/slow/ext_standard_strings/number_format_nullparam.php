@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_number_format_nullparam() {
+function main_number_format_nullparam() :mixed{
 $value = 750000.0;
 
 // Null should fallback to default separators.

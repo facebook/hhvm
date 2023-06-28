@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_stream_get_line_buffer_properly_resized() {
+function main_stream_get_line_buffer_properly_resized() :mixed{
 $fp = fopen(dirname(__FILE__)."/16384chars.txt", 'r');
 $init = fgets($fp, 42);
 rewind($fp);

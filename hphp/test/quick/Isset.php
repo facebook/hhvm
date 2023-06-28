@@ -4,7 +4,7 @@ abstract final class quickIsset {
   public static $y;
 }
 
-function f() {
+function f() :mixed{
 
 
   print ":".(string)(isset($x)).":\n";
@@ -30,12 +30,12 @@ function f() {
   var_dump(isset($a["foo"]));
 }
 
-function get_index() {
+function get_index() :mixed{
   echo "I've made a huge mistake\n";
   return 0;
 }
 
-function g($dontTake, inout $toFillIn, $id, $key, $value) {
+function g($dontTake, inout $toFillIn, $id, $key, $value) :mixed{
   $toFillIn = darray[];
   if (isset($toFillIn[$id])) {
     $cur = $toFillIn[$id];

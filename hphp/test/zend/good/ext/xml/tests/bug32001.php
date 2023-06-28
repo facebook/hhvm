@@ -14,15 +14,15 @@ class testcase {
 		$this->tags = varray[];
 	}
 
-	function start_element($parser, $name, $attrs) {
+	function start_element($parser, $name, $attrs) :mixed{
 		$attrs = array_map('bin2hex', $attrs);
 		$this->tags[] = bin2hex($name).": ".implode(', ', $attrs);
 	}
 
-	function end_element($parser, $name) {
+	function end_element($parser, $name) :mixed{
 	}
 
-	function run() {
+	function run() :mixed{
 		$data = '';
 
 		if ($this->prologue) {

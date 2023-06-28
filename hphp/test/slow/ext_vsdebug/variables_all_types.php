@@ -1,7 +1,7 @@
 <?hh
 
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
 require(__DIR__ . '/common.inc');
   $path = __FILE__ . '.test';
   $bp1_line = 10;

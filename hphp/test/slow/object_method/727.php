@@ -1,10 +1,10 @@
 <?hh
 
 class foo {
-  public function bar() {
+  public function bar() :mixed{
     echo "in bar\n";
   }
-  public function test() {
+  public function test() :mixed{
     self::bar();
     foo::bar();
     echo "in test\n";
@@ -12,7 +12,7 @@ class foo {
 }
 
 <<__EntryPoint>>
-function main_727() {
+function main_727() :mixed{
 $obj = new foo();
 $obj->test();
 }

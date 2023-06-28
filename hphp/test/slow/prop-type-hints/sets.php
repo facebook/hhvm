@@ -13,7 +13,7 @@ class A {
   public static int $s4 = 123;
 }
 
-function error_boundary($fn) {
+function error_boundary($fn) :mixed{
   try {
     $fn();
   } catch (Exception $e) {
@@ -22,7 +22,7 @@ function error_boundary($fn) {
 }
 
 class B extends A {
-  public function test() {
+  public function test() :mixed{
     $this->p1 = 'abc';
     $this->p2 = HH\Lib\Legacy_FIXME\cast_for_arithmetic($this->p2);
     $this->p2 += 123;

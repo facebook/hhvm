@@ -8,24 +8,24 @@ class c_iter implements Iterator {
         echo __METHOD__ . "\n";
         $this->obj = $obj;
     }
-    function rewind() {
+    function rewind() :mixed{
         echo __METHOD__ . "\n";
         $this->num = 0;
     }
-    function valid() {
+    function valid() :mixed{
         $more = $this->num < $this->obj->max;
         echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
         return $more;
     }
-    function current() {
+    function current() :mixed{
         echo __METHOD__ . "\n";
         return $this->num;
     }
-    function next() {
+    function next() :mixed{
         echo __METHOD__ . "\n";
         $this->num++;
     }
-    function key() {
+    function key() :mixed{
         echo __METHOD__ . "\n";
         switch($this->num) {
             case 0: return "1st";
@@ -40,7 +40,7 @@ class c implements IteratorAggregate {
 
     public $max = 3;
 
-    function getIterator() {
+    function getIterator() :mixed{
         echo __METHOD__ . "\n";
         return new c_iter($this);
     }

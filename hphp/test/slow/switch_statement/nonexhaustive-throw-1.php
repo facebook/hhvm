@@ -1,6 +1,6 @@
 <?hh
 
-function f($x) {
+function f($x) :mixed{
   switch($x) {
     case 1:
       return 1;
@@ -10,7 +10,7 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try { var_dump(f(1)); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump(f(2)); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump(f(3)); } catch (Exception $e) { var_dump($e->getMessage()); }

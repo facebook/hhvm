@@ -1,6 +1,6 @@
 <?hh
 
-function test($category, $locale) {
+function test($category, $locale) :mixed{
   var_dump(setlocale($category, $locale));
   echo sprintf("%.3f\n", 3.142);
   setlocale(LC_ALL, "");
@@ -8,7 +8,7 @@ function test($category, $locale) {
 
 
 <<__EntryPoint>>
-function main_setlocale_fail() {
+function main_setlocale_fail() :mixed{
 setlocale(LC_ALL, "");
 
 // Let's try some terrible locales to ensure they fail

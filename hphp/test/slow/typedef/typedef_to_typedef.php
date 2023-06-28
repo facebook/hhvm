@@ -3,12 +3,12 @@
 type Foo = varray;
 type Bar = Foo;
 
-function main(Bar $x) {
+function main(Bar $x) :mixed{
   echo "Hi\n";
 }
 
 
 <<__EntryPoint>>
-function main_typedef_to_typedef() {
+function main_typedef_to_typedef() :mixed{
 main(varray[12]);
 }

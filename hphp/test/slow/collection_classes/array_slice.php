@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $input = Vector {"a", "b", "c", "d", "e"};
 
   var_dump(array_slice($input, 2));
@@ -43,6 +43,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_slice() {
+function main_array_slice() :mixed{
 main();
 }

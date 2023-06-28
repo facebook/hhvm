@@ -1,21 +1,21 @@
 <?hh
 
-function f($a) {
+function f($a) :mixed{
   var_dump($a);
 }
 class ClassA {
   public $val;
-  function foo() {
+  function foo() :mixed{
     f($val = 1);
   }
-  function bar() {
+  function bar() :mixed{
     f($this->val = 1);
   }
-  function goo() {
+  function goo() :mixed{
     f($val = 'val');
     f($this->$val = 2);
   }
-  function zoo() {
+  function zoo() :mixed{
     try {
       var_dump($val);
     } catch (UndefinedVariableException $e) {
@@ -24,12 +24,12 @@ class ClassA {
     var_dump($this->val);
   }
 }
-function foo() {
+function foo() :mixed{
   f($val2 = 1);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new ClassA();
   var_dump($obj);
   $obj->foo();

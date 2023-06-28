@@ -1,6 +1,6 @@
 <?hh
 
-function reflectProperty($class, $property) {
+function reflectProperty($class, $property) :mixed{
     $propInfo = new ReflectionProperty($class, $property);
 
     echo "**********************************\n";

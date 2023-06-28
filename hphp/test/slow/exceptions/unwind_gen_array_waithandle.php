@@ -10,28 +10,28 @@ class E1 extends Exception {
     }
   }
 
-  static function rethrow() {
+  static function rethrow() :mixed{
     $e = self::$e;
     self::$e = null;
     throw $e;
   }
 }
 
-function reschedule($priority) {
+function reschedule($priority) :mixed{
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }
 
-async function fuz() {
+async function fuz() :Awaitable<mixed>{
   await reschedule(0);
   throw new E1("Boom");
 }
 
-function baz() {
+function baz() :mixed{
   return AwaitAllWaitHandle::fromVec(vec[fuz(), fuz()]);
 }
 
-async function bar() {
+async function bar() :Awaitable<mixed>{
   try {
     await baz();
     throw E1::rethrow();
@@ -41,12 +41,12 @@ async function bar() {
   }
 }
 
-function test() {
+function test() :mixed{
   \HH\Asio\join(bar());
 }
 
 
 <<__EntryPoint>>
-function main_unwind_gen_array_waithandle() {
+function main_unwind_gen_array_waithandle() :mixed{
 test();
 }

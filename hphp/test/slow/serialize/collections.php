@@ -1,6 +1,6 @@
 <?hh
 
-class B { public function __wakeup() { var_dump('a'); } }
+class B { public function __wakeup() :mixed{ var_dump('a'); } }
 <<__EntryPoint>> function main(): void {
 $serialized_strs = varray[
   'O:1:"B":0:{}',

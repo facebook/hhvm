@@ -1,6 +1,6 @@
 <?hh
 
-function f($i) {
+function f($i) :mixed{
   $j = 1;
   var_dump($j);
   if ($i == 1) {

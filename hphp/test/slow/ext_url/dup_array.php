@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dup_array() {
+function main_dup_array() :mixed{
 $nested = darray[
   'key1' => darray[
     'subkey1' => 'subval1',

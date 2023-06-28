@@ -10,7 +10,7 @@ function is_tuple(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   is_tuple(null);
   is_tuple(new stdClass());
   is_tuple(darray[

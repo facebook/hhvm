@@ -1,24 +1,24 @@
 <?hh
 
 class A1 {
-  <<__DynamicallyCallable>> function a1f($a) {
+  <<__DynamicallyCallable>> function a1f($a) :mixed{
     var_dump('a1f:0');
   }
-  <<__DynamicallyCallable>> static function a1b($a) {
+  <<__DynamicallyCallable>> static function a1b($a) :mixed{
     var_dump('a1b:0');
   }
 }
 class B1 extends A1 {
-  <<__DynamicallyCallable>> function b1f($a) {
+  <<__DynamicallyCallable>> function b1f($a) :mixed{
     var_dump('b1f:0');
   }
-  <<__DynamicallyCallable>> static function b1b($a) {
+  <<__DynamicallyCallable>> static function b1b($a) :mixed{
     var_dump('b1b:0');
   }
 }
 
 <<__EntryPoint>>
-function main_728() {
+function main_728() :mixed{
   $a1 = new A1();
   $b1=  new B1();
   $f = 'a1f';

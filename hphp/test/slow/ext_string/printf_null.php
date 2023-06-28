@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_printf_null() {
+function main_printf_null() :mixed{
 $format = "(\000)\n";
 
 printf($format);

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_copy_props() {
+function main_copy_props() :mixed{
 $template = <<<XML
 <?xml version="1.0" encoding="utf-8"?>
 <resources></resources>

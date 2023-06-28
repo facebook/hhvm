@@ -1,5 +1,5 @@
 <?hh
-function handler($errno, $errmsg) {
+function handler($errno, $errmsg) :mixed{
   if ($errno === E_RECOVERABLE_ERROR) {
     throw new Exception("Type constraint failed");
   } else if ($errno === E_WARNING) {
@@ -11,7 +11,7 @@ function handler($errno, $errmsg) {
   }
 }
 
-function helper($x) {
+function helper($x) :mixed{
   var_dump($x);
   if ($x is Map) {
     $x['z'] = 4;
@@ -21,7 +21,7 @@ function helper($x) {
     var_dump($x);
   }
 }
-function helper_ref(inout $x) {
+function helper_ref(inout $x) :mixed{
   var_dump($x);
   if ($x is Map) {
     $x['z'] = 4;
@@ -32,16 +32,16 @@ function helper_ref(inout $x) {
   }
 }
 
-function f1(varray $x) { helper($x); }
-function f2(?varray $x) { helper($x); }
-function f3(<<__Soft>> varray $x) { helper($x); }
-function f4(<<__Soft>> ?varray $x) { helper($x); }
-function f5(inout varray $x) { helper_ref(inout $x); }
-function f6(inout ?varray $x) { helper_ref(inout $x); }
-function f7(<<__Soft>> inout varray $x) { helper_ref(inout $x); }
-function f8(<<__Soft>> inout ?varray $x) { helper_ref(inout $x); }
+function f1(varray $x) :mixed{ helper($x); }
+function f2(?varray $x) :mixed{ helper($x); }
+function f3(<<__Soft>> varray $x) :mixed{ helper($x); }
+function f4(<<__Soft>> ?varray $x) :mixed{ helper($x); }
+function f5(inout varray $x) :mixed{ helper_ref(inout $x); }
+function f6(inout ?varray $x) :mixed{ helper_ref(inout $x); }
+function f7(<<__Soft>> inout varray $x) :mixed{ helper_ref(inout $x); }
+function f8(<<__Soft>> inout ?varray $x) :mixed{ helper_ref(inout $x); }
 
-function main() {
+function main() :mixed{
   $containers = Map {
     'array' => varray[1, 2, 3],
     'Vector' => Vector {1, 2, 3},
@@ -78,7 +78,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_typehint() {
+function main_array_typehint() :mixed{
 error_reporting(-1);
 set_error_handler(handler<>);
 main();

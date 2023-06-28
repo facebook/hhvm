@@ -1,5 +1,5 @@
 <?hh
-function exampleFunc($arg1) {
+function exampleFunc($arg1) :mixed{
     echo($arg1);
 }
 <<__EntryPoint>> function main(): void {

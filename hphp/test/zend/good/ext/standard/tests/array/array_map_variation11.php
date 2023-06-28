@@ -9,7 +9,7 @@
  */
 
 // callback function
-function square_recur_single_array($var) {
+function square_recur_single_array($var) :mixed{
    if (is_array($var))
      return array_map(square_recur_single_array<>, $var);
    return $var * $var;

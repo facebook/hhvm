@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :mixed{
 
   sleep(1);
   $sprop = '$sprop_'.time() % 60;
@@ -16,7 +16,7 @@ EOD
   fclose($f);
 }
 
-function visit_root($node) {
+function visit_root($node) :mixed{
   if (!isset($node['type'])) return;
   if ($node['type'] === 'HPHP::StaticPropData' ||
       $node['type'] === 'HPHP::StaticMultiPropData') {

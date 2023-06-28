@@ -1,6 +1,6 @@
 <?hh
 
-function makeBig($n) {
+function makeBig($n) :mixed{
   $m = Map { 'foo' => 123, 'bar' => 9876543210 };
   for ($i = 0; $i < $n; $i += 1) {
     $m['key' . $i] = $i;

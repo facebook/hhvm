@@ -1,30 +1,30 @@
 <?hh
 
 class returnNull implements Countable {
-    function count() {
+    function count() :mixed{
     }
 }
 
 class returnString implements Countable {
-    function count() {
+    function count() :mixed{
         return "hello";
     }
 }
 
 class returnObject implements Countable {
-    function count() {
+    function count() :mixed{
         return new returnObject;
     }
 }
 
 class returnArray implements Countable {
-    function count() {
+    function count() :mixed{
         return varray[1,2,3];
     }
 }
 
 class throwException implements Countable {
-    function count() {
+    function count() :mixed{
         throw new Exception('Thrown from count');
     }
 }

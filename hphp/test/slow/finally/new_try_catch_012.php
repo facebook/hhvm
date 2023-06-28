@@ -4,7 +4,7 @@ class A extends Exception {}
 class B extends Exception {}
 class C extends B {}
 
-function ble() {
+function ble() :mixed{
   echo "14\n";
   try {
     echo "15\n";
@@ -18,7 +18,7 @@ function ble() {
   echo "18\n";
 }
 
-function blah() {
+function blah() :mixed{
   echo "1\n";
   try {
     echo "2\n";

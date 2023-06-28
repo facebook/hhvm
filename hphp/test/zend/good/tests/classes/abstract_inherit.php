@@ -1,7 +1,7 @@
 <?hh
 
 abstract class pass {
-    abstract function show();
+    abstract function show():mixed;
 }
 
 abstract class fail extends pass {

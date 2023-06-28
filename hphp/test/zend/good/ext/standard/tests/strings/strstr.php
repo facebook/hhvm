@@ -5,14 +5,14 @@ The error can be  avoided by choosing the __toString magix method as follows: */
 
 class mystring
 {
-  function __toString() {
+  function __toString() :mixed{
     return "Hello, world";
   }
 }
 
 class needle
 {
-  function __toString() {
+  function __toString() :mixed{
     return "world";
   }
 }

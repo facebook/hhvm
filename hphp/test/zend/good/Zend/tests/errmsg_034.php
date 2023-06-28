@@ -2,7 +2,7 @@
 
 class test {
 
-    static function __clone() {
+    static function __clone() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

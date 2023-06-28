@@ -14,19 +14,19 @@ trait MyTrait implements J {
 
 class C {
   use MyTrait;
-  function f() {
+  function f() :mixed{
     echo self::ONE, "\n";
     echo self::ABC, "\n";
     echo self::XYZ, "\n";
   }
 }
 
-function main() {
+function main() :mixed{
   $c = new C();
   $c->f();
 }
 
-function reflect() {
+function reflect() :mixed{
   echo '==========', ' ', __FUNCTION__, ' ', '==========', "\n";
   $rc = new ReflectionClass("C");
   print_r($rc->getInterfaceNames());
@@ -36,7 +36,7 @@ function reflect() {
 
 
 <<__EntryPoint>>
-function main_traits_and_interfaces7() {
+function main_traits_and_interfaces7() :mixed{
 error_reporting(-1);
 
 main();

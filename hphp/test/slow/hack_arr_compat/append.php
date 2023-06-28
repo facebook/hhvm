@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = dict[];
   $x[] = new C();
   $x['a'] = new C();

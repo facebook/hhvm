@@ -1,59 +1,59 @@
 <?hh
 
-function non_zoned($fn) {
+function non_zoned($fn) :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_local($fn)[zoned_local] {
+function zoned_local($fn)[zoned_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_shallow($fn)[zoned_shallow] {
+function zoned_shallow($fn)[zoned_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned($fn)[zoned] {
+function zoned($fn)[zoned] :mixed{
   if ($fn) $fn(null);
 }
 
-function zoned_with($fn)[zoned_with] {
+function zoned_with($fn)[zoned_with] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe_local($fn)[leak_safe_local] {
+function leak_safe_local($fn)[leak_safe_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe_shallow($fn)[leak_safe_shallow] {
+function leak_safe_shallow($fn)[leak_safe_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function leak_safe($fn)[leak_safe] {
+function leak_safe($fn)[leak_safe] :mixed{
   if ($fn) $fn(null);
 }
 
-function read_globals($fn)[read_globals] {
+function read_globals($fn)[read_globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function globals($fn)[globals] {
+function globals($fn)[globals] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props($fn)[write_props] {
+function write_props($fn)[write_props] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_this_props($fn)[write_this_props] {
+function write_this_props($fn)[write_this_props] :mixed{
   if ($fn) $fn(null);
 }
 
-function pure($fn)[] {
+function pure($fn)[] :mixed{
   if ($fn) $fn(null);
 }
 
 <<__EntryPoint>>
-function main()[zoned_with, defaults] {
+function main()[zoned_with, defaults] :mixed{
   $functions = vec[
     'non_zoned',
     'zoned_local',

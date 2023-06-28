@@ -2,10 +2,10 @@
 
 class A implements Serializable {
   public $__foo = true;
-  public function serialize() {
+  public function serialize() :mixed{
     return serialize(darray['a' => 'apple', 'b' => 'banana']);
   }
-  public function unserialize($serialized) {
+  public function unserialize($serialized) :mixed{
     $props = unserialize($serialized);
     $this->a = $props['a'];
     $this->b = $props['b'];
@@ -13,7 +13,7 @@ class A implements Serializable {
 }
 
  <<__EntryPoint>>
-function main_1540() {
+function main_1540() :mixed{
 $obj = unserialize(serialize(new A()));
  var_dump($obj->b);
 }

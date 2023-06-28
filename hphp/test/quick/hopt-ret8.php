@@ -3,7 +3,7 @@
 class C {
 }
 
-function foo() {
+function foo() :mixed{
   $x = new C;
 }
 <<__EntryPoint>> function main(): void {

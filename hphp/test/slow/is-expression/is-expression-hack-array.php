@@ -35,7 +35,7 @@ function is_vec_or_dict_(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_hack_array() {
+function main_is_expression_hack_array() :mixed{
 is_vec_(1);
 is_vec_(true);
 is_vec_(1.5);

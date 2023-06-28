@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1907() {
+function main_1907() :mixed{
 $a = <<<NOWDOC
 "'\t
 NOWDOC;

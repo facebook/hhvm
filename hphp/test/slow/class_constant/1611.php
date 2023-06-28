@@ -9,12 +9,12 @@ abstract class TB {
 abstract class ATB extends TB {
 }
 class ABCD extends ATB {
-  static public function foo() {
+  static public function foo() :mixed{
     return darray[      'a_ids'   => darray[        ATB::PARAM_A => true,        ATB::PARAM_C   => varray[          varray['tcks', 'none'],          varray['tcks', 'ids'],          ],        ATB::PARAM_B     =>          'aaaa',      ],      'user_id'   => darray[        ATB::PARAM_A => true,        ATB::PARAM_C   => varray[          varray['tcks', 'none'],          varray['tcks', 'id'],          ],        ATB::PARAM_B     =>          'bbbb',      ],    ];
   }
 }
 
 <<__EntryPoint>>
-function main_1611() {
+function main_1611() :mixed{
 var_dump(ABCD::foo());
 }

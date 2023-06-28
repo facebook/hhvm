@@ -2,7 +2,7 @@
 
 class SerializableObject implements JsonSerializable {
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return darray['foo' => 'bar'];
   }
 
@@ -10,7 +10,7 @@ class SerializableObject implements JsonSerializable {
 
 class MultipleNonCircularReference implements JsonSerializable {
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     $obj = new SerializableObject();
     return darray['a' => $obj, 'b' => $obj, 'c' => darray['d' => $obj]];
   }
@@ -19,7 +19,7 @@ class MultipleNonCircularReference implements JsonSerializable {
 
 class SimpleRecursion implements JsonSerializable {
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return darray['foo' => $this];
   }
 
@@ -27,7 +27,7 @@ class SimpleRecursion implements JsonSerializable {
 
 class MultilevelRecursion implements JsonSerializable {
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return darray[
       'Recursion' => darray[
         'across' => darray[
@@ -43,7 +43,7 @@ class Circular implements JsonSerializable {
 
   public $d;
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return $this->d;
   }
 
@@ -53,7 +53,7 @@ class Dependency implements JsonSerializable {
 
   public $c;
 
-  public function jsonSerialize() {
+  public function jsonSerialize() :mixed{
     return $this->c;
   }
 
@@ -61,7 +61,7 @@ class Dependency implements JsonSerializable {
 
 
 <<__EntryPoint>>
-function main_json_encode() {
+function main_json_encode() :mixed{
   var_dump(json_encode(darray["a" => 1, "b" => 2.3, 3 => "test"]));
   var_dump(json_encode(varray["a", 1, true, false, null]));
 

@@ -2,7 +2,7 @@
 class Callback {
     protected $val = 'hello, world';
 
-    public function __invoke() {
+    public function __invoke() :mixed{
         return $this->val;
     }
 }

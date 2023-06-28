@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1378() {
+function main_1378() :mixed{
 var_dump(hex2bin(";
 lwekn"));
 var_dump(hex2bin("68656c6c6f"));

@@ -4,49 +4,49 @@
 class IterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() { ++$this->position; }
-  public function valid() { return $this->position < 3; }
+  public function next() :mixed{ ++$this->position; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class ThrowIterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() {
+  public function next() :mixed{
     ++$this->position;
     if ($this->position == 2) throw new Exception("ThrowIterableObj");
   }
-  public function valid() { return $this->position < 3; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class AggregateObj implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new IterableObj();
   }
 }
 
-function convert_from($d) {
+function convert_from($d) :mixed{
   echo "====================================================\n";
   var_dump($d);
   echo "----------------------------------------------------\n";
@@ -79,7 +79,7 @@ function convert_from($d) {
   echo "====================================================\n";
 }
 
-function convert_to($from) {
+function convert_to($from) :mixed{
   echo "====================================================\n";
   var_dump($from);
   echo "----------------------------------------------------\n";

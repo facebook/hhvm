@@ -1,14 +1,14 @@
 <?hh
 
-function foo1(KeyedTraversable<string> $foo, $f) {
+function foo1(KeyedTraversable<string> $foo, $f) :mixed{
   var_dump($foo);
 }
 
-function foo2(KeyedContainer<string> $foo, $f) {
+function foo2(KeyedContainer<string> $foo, $f) :mixed{
   var_dump($foo);
 }
 
-function test($a) {
+function test($a) :mixed{
   if ($a is KeyedTraversable) {
     foo1($a, false);
   }
@@ -19,6 +19,6 @@ function test($a) {
 
 
 <<__EntryPoint>>
-function main_array_like() {
+function main_array_like() :mixed{
 test(varray[1]);
 }

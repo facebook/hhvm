@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_replace_recursive() {
+function main_array_replace_recursive() :mixed{
 $ar1 = darray[
   "color" => darray["favoritte" => "red"],
   0 => 5

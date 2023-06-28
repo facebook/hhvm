@@ -11,7 +11,7 @@ class C implements I {
 
 
 <<__EntryPoint>>
-function main_type_constant5() {
+function main_type_constant5() :mixed{
 var_dump(C::type - 1);
 var_dump(C::type + 1);
 }

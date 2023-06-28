@@ -3,7 +3,7 @@
 class Foo {}
 class Bar {}
 
-function main($x) {
+function main($x) :mixed{
   if (!is_array($x)) $x = varray[$x];
   echo is_array($x);
   echo "\n";
@@ -13,7 +13,7 @@ function main($x) {
 
 
 <<__EntryPoint>>
-function main_jmp_type_002() {
+function main_jmp_type_002() :mixed{
 main(12);
 main(varray[1,2,3]);
 }

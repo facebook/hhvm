@@ -5,18 +5,18 @@
 function func1(int $b, ?int $c,
                bool $d, ?bool $e,
                string $e, ?string $f,
-               arraykey $g) {
+               arraykey $g) :mixed{
   echo "func1 called\n";
   return $b;
 }
 
 <<__Memoize>>
-function func2(int $a, string $b, arraykey $c) {
+function func2(int $a, string $b, arraykey $c) :mixed{
   echo "func2 called\n";
   return $c;
 }
 
-function test() {
+function test() :mixed{
   var_dump(func1(1, null, true, null, 'abc', null, 456));
   var_dump(func1(1, null, true, null, 'abc', null, 456));
 
@@ -31,6 +31,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_type_hint() {
+function main_type_hint() :mixed{
 test();
 }

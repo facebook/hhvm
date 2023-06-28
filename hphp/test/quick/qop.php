@@ -1,6 +1,6 @@
 <?hh
 
-function id($x) {
+function id($x) :mixed{
   var_dump($x);
   return $x;
 }

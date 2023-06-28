@@ -1,14 +1,14 @@
 <?hh
 
-function p(?AnyArray $i = null) {
+function p(?AnyArray $i = null) :mixed{
   var_dump($i);
   $i = varray[];
 }
-function q() {
+function q() :mixed{
   p(null);
 }
 
 <<__EntryPoint>>
-function main_1747() {
+function main_1747() :mixed{
 p();
 }

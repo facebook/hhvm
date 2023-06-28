@@ -1,6 +1,6 @@
 <?hh
 
-function foo($s) {
+function foo($s) :mixed{
   print "In foo(\"".$s."\")\n";
   throw new Exception("foo exception");
 }

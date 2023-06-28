@@ -27,7 +27,7 @@ final class TestingChild extends TestingParent implements IP {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o = new TestingChild;
   var_dump($o->foo());
 }

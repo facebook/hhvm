@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($x) {
+function test($x) :mixed{
   $x = __hhvm_intrinsics\launder_value($x);
   var_dump(HH\is_list_like($x));
 }

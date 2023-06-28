@@ -8,7 +8,7 @@
  * Converts comparison result to a character.
  */
 function cmp_to_char( $comp_res )
-{
+:mixed{
     switch( $comp_res )
     {
     case 0:            // UCOL_EQUAL
@@ -27,7 +27,7 @@ function cmp_to_char( $comp_res )
  * using specified locale.
  */
 function compare_pairs( $locale, $test_array )
-{
+:mixed{
     $res_str = '';
 
     $coll = ut_coll_create( $locale );
@@ -50,7 +50,7 @@ function compare_pairs( $locale, $test_array )
 }
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     // Compare strings using en_US locale.

@@ -3,7 +3,7 @@
 class Ref { public int $n; }
 
 <<__EntryPoint>>
-function main_g6() {
+function main_g6() :mixed{
 $a1 = 1;
 $a2 = new Ref();
 $a2->n = -999999999;

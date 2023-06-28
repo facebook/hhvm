@@ -6,7 +6,7 @@ class base2 {
 }
 
 <<__EntryPoint>>
-function main_1462() {
+function main_1462() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
     include '1462-1.inc';
   } else {

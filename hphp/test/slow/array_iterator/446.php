@@ -1,6 +1,6 @@
 <?hh
 
-function ex($m) {
+function ex($m) :mixed{
   var_dump('Throwing: '.$m);
   throw new Exception($m);
 }
@@ -11,7 +11,7 @@ class A {
 }
 class B {
   public $a;
-  public function gen() {
+  public function gen() :AsyncGenerator<mixed,mixed,void>{
     ex('die!');
     yield(2);
   }
@@ -22,7 +22,7 @@ class II {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  public function gen() {
+  public function gen() :mixed{
  return new I($this->tn, $this->tv);
  }
 }
@@ -32,7 +32,7 @@ class JJ {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  public function gen() {
+  public function gen() :mixed{
  return new J($this->tn, $this->tv);
  }
 }
@@ -42,7 +42,7 @@ class KK {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  public function gen() {
+  public function gen() :mixed{
  return new K($this->tn, $this->tv);
  }
 }
@@ -52,38 +52,38 @@ class LL {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  public function gen() {
+  public function gen() :mixed{
  return new L($this->tn, $this->tv);
  }
 }
 class I implements Iterator{
   private $tn, $tv, $i = 0;
-  public function gen() {
+  public function gen() :mixed{
  return $this;
  }
   public function __construct($tn, $tv) {
     $this->tn = $tn;
     $this->tv = $tv;
   }
-  public function rewind() {
+  public function rewind() :mixed{
     var_dump(__METHOD__);
     if ($this->tn == 0) ex(__METHOD__);
     $this->i = 1;
   }
-  public function current() {
+  public function current() :mixed{
     var_dump(__METHOD__);
     return $this->i;
   }
-  public function key() {
+  public function key() :mixed{
     var_dump(__METHOD__);
     return $this->i;
   }
-  public function next() {
+  public function next() :mixed{
     var_dump(__METHOD__);
     if ($this->tn == $this->i) ex(__METHOD__);
     return ++$this->i;
   }
-  public function valid() {
+  public function valid() :mixed{
     var_dump(__METHOD__);
     if ($this->tv == $this->i) ex(__METHOD__);
     return $this->i < 10;
@@ -94,10 +94,10 @@ class J implements IteratorAggregate {
   public function __construct($tn, $tv) {
     $this->i = new I($tn, $tv);
   }
-  public function getIterator() {
+  public function getIterator() :mixed{
  return $this->i;
  }
-  public function gen() {
+  public function gen() :mixed{
  return $this;
  }
 }
@@ -107,22 +107,22 @@ class K implements IteratorAggregate {
     $this->tn = $tn;
     $this->tv = $tv;
   }
-  public function getIterator() {
+  public function getIterator() :mixed{
  return new I($this->tn, $this->tv);
  }
-  public function gen() {
+  public function gen() :mixed{
  return $this;
  }
 }
 class L implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator() :mixed{
  ex(__METHOD__);
  }
-  public function gen() {
+  public function gen() :mixed{
  return $this;
  }
 }
-function run($n, $tn, $tv) {
+function run($n, $tn, $tv) :mixed{
   var_dump('>>>main');
   $a = new A();
   $b = new $n($tn, $tv);
@@ -139,16 +139,16 @@ function run($n, $tn, $tv) {
   unset($b);
   var_dump('<<<main');
 }
-function test($n, $tn, $tv) {
+function test($n, $tn, $tv) :mixed{
   run($n, $tn, $tv);
   var_dump('Done: '.$n);
 }
-function triple($n) {
+function triple($n) :mixed{
   test($n, 0, 0);
   test($n, -1, 1);
   test($n, 2,-1);
 }
-function main() {
+function main() :mixed{
   triple('I');
   triple('J');
   triple('K');
@@ -161,6 +161,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_446() {
+function main_446() :mixed{
 main();
 }

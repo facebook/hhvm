@@ -5,14 +5,14 @@ abstract final class PushStackStatics {
   public static $stack = varray[];
 }
 
-function push_stack(){
+function push_stack():mixed{
 
   $val = PushStackStatics::$index++;
   $stack = PushStackStatics::$stack;
   array_push(inout $stack, $val);
   PushStackStatics::$stack = $stack;
 }
-function pop_stack(){
+function pop_stack():mixed{
 
   if (PushStackStatics::$stack) {
     $stack = PushStackStatics::$stack;

@@ -1,20 +1,20 @@
 <?hh
 
 class X {
-  protected function foo() { echo "X::foo\n"; }
-  private function bar() { echo "X::bar\n"; }
+  protected function foo() :mixed{ echo "X::foo\n"; }
+  private function bar() :mixed{ echo "X::bar\n"; }
   protected $field = 1;
 }
 
 
 class A extends X {
-  protected function foo() {
+  protected function foo() :mixed{
     echo "A::foo " . $this->field . "\n";
   }
 }
 
 class B extends X {
-  function foo() {
+  function foo() :mixed{
     $a = new A;
     $a->foo();
     $a->field = 123;

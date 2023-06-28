@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_fgets_cr() {
+function main_fgets_cr() :mixed{
     $fh = tmpfile();
     fwrite($fh, str_repeat('x', 8191) . "\r\rend");
     fseek($fh, 0);

@@ -8,6 +8,6 @@ class C {
 
 
 <<__EntryPoint>>
-function main_bad_yield() {
+function main_bad_yield() :mixed{
 echo "Done\n";
 }

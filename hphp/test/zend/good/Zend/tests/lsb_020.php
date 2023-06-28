@@ -2,17 +2,17 @@
 class TestClass {
     public static $staticVar;
 
-    public static function staticFunction() {
+    public static function staticFunction() :mixed{
         return 'TestClassFunction';
     }
 
-    public static function testStaticVar() {
+    public static function testStaticVar() :mixed{
         TestClass::$staticVar = 'TestClassStatic';
         ChildClass1::$staticVar = 'ChildClassStatic';
         return static::$staticVar;
     }
 
-    public static function testStaticFunction() {
+    public static function testStaticFunction() :mixed{
         return static::staticFunction();
     }
 }
@@ -20,7 +20,7 @@ class TestClass {
 class ChildClass1 extends TestClass {
     public static $staticVar;
 
-    public static function staticFunction() {
+    public static function staticFunction() :mixed{
         return 'ChildClassFunction';
     }
 }

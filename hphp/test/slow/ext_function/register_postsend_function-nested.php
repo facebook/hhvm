@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_register_postsend_function_nested() {
+function main_register_postsend_function_nested() :mixed{
 var_dump('before reg');
 
 register_postsend_function(function() {

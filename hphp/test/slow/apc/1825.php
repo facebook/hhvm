@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_1825() {
+function main_1825() :mixed{
 $f = function($a) {
  return $a;
  }

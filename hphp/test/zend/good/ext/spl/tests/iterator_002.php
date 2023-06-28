@@ -3,12 +3,12 @@
 class RecursiceArrayIterator extends ArrayIterator implements RecursiveIterator
 {
     function hasChildren()
-    {
+:mixed    {
         return is_array($this->current());
     }
 
     function getChildren()
-    {
+:mixed    {
         return new RecursiceArrayIterator($this->current());
     }
 }
@@ -16,17 +16,17 @@ class RecursiceArrayIterator extends ArrayIterator implements RecursiveIterator
 class CrashIterator extends FilterIterator implements RecursiveIterator
 {
     function accept()
-    {
+:mixed    {
         return true;
     }
 
     function hasChildren()
-    {
+:mixed    {
         return $this->getInnerIterator()->hasChildren();
     }
 
     function getChildren()
-    {
+:mixed    {
         return new RecursiceArrayIterator($this->getInnerIterator()->current());
     }
 }

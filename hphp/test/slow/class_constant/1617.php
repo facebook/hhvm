@@ -8,6 +8,6 @@ class C {
  }
 
 <<__EntryPoint>>
-function main_1617() {
+function main_1617() :mixed{
 var_dump(get_class_constants('C'));
 }

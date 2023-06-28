@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x = darray[];
   $x[42] = 2;
   $x[] = 3;
@@ -14,6 +14,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_empty_array_010() {
+function main_empty_array_010() :mixed{
 main();
 }

@@ -1,11 +1,11 @@
 <?hh
- function bar() {
+ function bar() :mixed{
  return 123;
 }
 
 
 <<__EntryPoint>>
-function main_1240() {
+function main_1240() :mixed{
 $a = bar();
  if ($a) {
    include '1240-1.inc';

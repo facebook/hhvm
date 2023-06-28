@@ -1,11 +1,11 @@
 <?hh
 
 trait THello {
-  public abstract function hello();
+  public abstract function hello():mixed;
 }
 
 trait THelloImpl {
-  public function hello() {
+  public function hello() :mixed{
     echo 'Hello';
   }
 }

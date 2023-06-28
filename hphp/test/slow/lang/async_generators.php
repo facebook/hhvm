@@ -7,11 +7,11 @@ function log_construction<T>(T $obj): T {
 }
 
 class Base {
-  public static function create($key) {
+  public static function create($key) :mixed{
     return log_construction(new static($key));
   }
 
-  public function __toString() {
+  public function __toString() :mixed{
     return (string)$this->key;
   }
 
@@ -25,19 +25,19 @@ class Key extends Base {}
 class Value extends Base {}
 class SentValue extends Base {}
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   echo "foo\n";
   return 42;
 }
 
-async function bar() {
+async function bar() :Awaitable<mixed>{
   echo "bar before\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "bar after\n";
   return 47;
 }
 
-async function gen($exit_type) {
+async function gen($exit_type) :AsyncGenerator<mixed,mixed,void>{
   echo "step 1\n";
   $val = yield Value::create(1);
   echo "step 2: got $val\n";
@@ -77,7 +77,7 @@ async function gen($exit_type) {
   }
 }
 
-async function main($exit_type) {
+async function main($exit_type) :Awaitable<mixed>{
   echo "creating\n";
   $gen = log_construction(gen($exit_type));
   $step = 0;
@@ -103,7 +103,7 @@ async function main($exit_type) {
 
 
 <<__EntryPoint>>
-function main_async_generators() {
+function main_async_generators() :mixed{
 Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 echo "start\n";
 for ($exit_type = 0; $exit_type < 4; ++$exit_type) {

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
     return "blah";
 }
 <<__EntryPoint>> function main(): void {

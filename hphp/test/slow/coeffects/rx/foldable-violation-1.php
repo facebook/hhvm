@@ -1,9 +1,9 @@
 <?hh
 
-function rx()[rx] {}
-function pure()[] { rx(); }
+function rx()[rx] :mixed{}
+function pure()[] :mixed{ rx(); }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   pure();
 }

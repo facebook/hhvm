@@ -1,7 +1,7 @@
 <?hh
 class P { }
 class T {
-    function f(?P $p = NULL) {
+    function f(?P $p = NULL) :mixed{
         var_dump($p);
         echo "-\n";
     }

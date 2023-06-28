@@ -1,10 +1,10 @@
 <?hh
 
-function r($r) {
+function r($r) :mixed{
   print ($r ? " true" : "false")."\n";
 }
 
-function build() {
+function build() :mixed{
   $a = darray["A0" => 0,
              "A1" => "a1"];
   $b = darray["A" => $a,
@@ -18,7 +18,7 @@ function build() {
   return $c;
 }
 
-function main() {
+function main() :mixed{
   $arr = build();
 
   r(isset($arr["A"]));

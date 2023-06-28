@@ -16,20 +16,20 @@ class Foo3 implements I {
   const ctx C = [defaults];
 }
 
-function f1(I $a = null)[$a::C] {
+function f1(I $a = null)[$a::C] :mixed{
   echo "in f1\n";
 }
 
-function f2(I $a = null)[write_props, $a::C] {
+function f2(I $a = null)[write_props, $a::C] :mixed{
   echo "in f2\n";
 }
 
-function pure($f, $a)[] { $f($a); }
-function rx($f, $a)[rx] { $f($a); }
-function defaults($f, $a) { $f($a); }
+function pure($f, $a)[] :mixed{ $f($a); }
+function rx($f, $a)[rx] :mixed{ $f($a); }
+function defaults($f, $a) :mixed{ $f($a); }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $callers = vec['pure', 'rx', 'defaults'];
   $callees = vec[
     tuple('f1', new Foo1()),

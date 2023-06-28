@@ -1,10 +1,10 @@
 <?hh
 function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
-{
+:mixed{
 	echo "$errno: $errmsg\n";
 }
 function foo($haystk, $needle, $to_charset = false, $from_charset = false)
-{
+:mixed{
 	if ($from_charset !== false) {
 		$haystk = iconv($from_charset, $to_charset, $haystk);
 	}

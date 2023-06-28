@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_memory_stream() {
+function main_memory_stream() :mixed{
 try {
   $wh = stream_await(fopen('php://memory', 'rw'),
     STREAM_AWAIT_READ | STREAM_AWAIT_WRITE, 0.0);

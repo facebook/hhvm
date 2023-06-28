@@ -1,7 +1,7 @@
 <?hh
 
 abstract class test {
-    abstract private function foo() {
+    abstract private function foo() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

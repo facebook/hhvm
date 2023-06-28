@@ -22,6 +22,6 @@ function baz():void {
 }
 
 <<__EntryPoint>>
-function main_foreach_as_list() {
+function main_foreach_as_list() :mixed{
 baz();
 }

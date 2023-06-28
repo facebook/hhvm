@@ -1,13 +1,13 @@
 <?hh
 
 namespace MyNS\Herp {
-  function do_stuff() {
+  function do_stuff() :mixed{
     \var_dump(__FUNCTION__);
   }
 }
 
 namespace MyNS\Derp {
-  function do_stuff() {
+  function do_stuff() :mixed{
     \var_dump(__FUNCTION__);
   }
 }

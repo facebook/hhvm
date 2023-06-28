@@ -4,7 +4,7 @@
  * This is a small test case for handling comparisons on null SSATmps
  * that aren't isConst().
  */
-function ar() { return null; }
+function ar() :mixed{ return null; }
 <<__EntryPoint>> function foo(): void {
   $x = ar();
   echo $x != true;

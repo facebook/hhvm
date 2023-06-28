@@ -11,20 +11,20 @@ class TestComparison {
 }
 
 class ChildClass extends TestBase {
-  public static function get_parent_foo() {
+  public static function get_parent_foo() :mixed{
     return parent::foo<int>;
   }
 
-  public static function get_static_foo() {
+  public static function get_static_foo() :mixed{
     return static::foo<int>;
   }
 
-  public static function get_self_foo() {
+  public static function get_self_foo() :mixed{
     return self::foo<int>;
   }
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -32,7 +32,7 @@ function wrap($fun) {
   }
 }
 
-function comp($x, $y, $case) {
+function comp($x, $y, $case) :mixed{
   print($case."\n");
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\eq($x, $y)));
   wrap(() ==> var_dump($x === $y));

@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...) :mixed{
   $matches = null;
   $pat1 = '/Argument ([0-9]+) passed to ([^(]+)\(\) must be an instance of ([^,]+), clsmeth given/';
   if (preg_match_with_matches($pat1, $msg, inout $matches)) {
@@ -21,9 +21,9 @@ function handle_error($_no, $msg, ...) {
   return false;
 }
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
 function args(
   varray_or_darray $arr,
@@ -54,7 +54,7 @@ function inout_args(
   inout varray $varr,
   inout Traversable $trav,
   inout Container $cont,
-) {
+) :mixed{
   var_dump(
     $arr,
     $varr,
@@ -67,7 +67,7 @@ function inout_args(
   if ($cont[0] !== Foo::class || $cont[1] !== 'bar') echo "Fail!\n";
 }
 
-function test_static() {
+function test_static() :mixed{
   try {
     args(
       Foo::bar<>,
@@ -98,7 +98,7 @@ function test_static() {
   } catch (Exception $_) {}
 }
 
-function test_dynamic() {
+function test_dynamic() :mixed{
   try {
     args(
       LV(Foo::bar<>),
@@ -130,7 +130,7 @@ function test_dynamic() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   test_static();  test_static();  test_static();

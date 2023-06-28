@@ -4,7 +4,7 @@ abstract final class DynamicFunctions1184 {
   public static $a;
 }
 <<__DynamicallyCallable>>
-function test() {
+function test() :mixed{
  return DynamicFunctions1184::$a;
 }
 <<__EntryPoint>> function main(): void {

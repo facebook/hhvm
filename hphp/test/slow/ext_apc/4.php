@@ -3,7 +3,7 @@
 
 // reproducing a memory leak (3/26/09)
 <<__EntryPoint>>
-function main_4() {
+function main_4() :mixed{
 apc_add("apcdata", darray["a" => "test", "b" => 1]); // MapVariant
 
 $apcdata = __hhvm_intrinsics\apc_fetch_no_check("apcdata");

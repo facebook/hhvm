@@ -16,7 +16,7 @@
 // function having no declared parameters
 <<__DynamicallyCallable>>
 function f1(...$argList)
-{
+:mixed{
     echo "f1: # arguments passed is ".count($argList)."\n";
 
     foreach ($argList as $k => $e)
@@ -30,7 +30,7 @@ function f1(...$argList)
 // function having 2 declared parameters
 
 function f2($p1, $p2)
-{
+:mixed{
     // A NULL value doesn't prove the argument wasn't passed; find a better test
 
     echo "f2: \$p1 = ".($p1 == NULL ? "NULL" : $p1).
@@ -38,7 +38,7 @@ function f2($p1, $p2)
 }
 
 <<__DynamicallyCallable>>
-function square($v) { return $v * $v; }
+function square($v) :mixed{ return $v * $v; }
 
 <<__EntryPoint>> function main(): void {
 error_reporting(-1);

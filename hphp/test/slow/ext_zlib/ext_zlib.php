@@ -1,17 +1,17 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_zlib() {
+function main_ext_zlib() :mixed{
 var_dump(readgzfile(__DIR__."/test_ext_zlib.gz"));
 
 VS(gzfile(__DIR__."/test_ext_zlib.gz"), varray["Testing Ext Zlib\n"]);

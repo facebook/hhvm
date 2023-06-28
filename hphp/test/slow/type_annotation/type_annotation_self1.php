@@ -18,7 +18,7 @@ class Child extends Base implements I {
 
 
 <<__EntryPoint>>
-function main_type_annotation_self1() {
+function main_type_annotation_self1() :mixed{
 var_dump(type_structure(Base::class, 'U'));
 
 var_dump(type_structure(Child::class, 'U'));

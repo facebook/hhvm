@@ -3,24 +3,24 @@
 namespace ShutdownTest;
 
 <<__DynamicallyCallable>>
-function test() {
+function test() :mixed{
   \var_dump('function');
 }
 
 class Test {
   <<__DynamicallyCallable>>
-  function handleInstance() {
+  function handleInstance() :mixed{
     \var_dump('Method - instance');
   }
 
   <<__DynamicallyCallable>>
-  static function handleStatic() {
+  static function handleStatic() :mixed{
     \var_dump('Method - static');
   }
 }
 
 <<__EntryPoint>>
-function main_register_shutdown_function_simple() {
+function main_register_shutdown_function_simple() :mixed{
   \register_shutdown_function(__NAMESPACE__ . '\test');
   \register_shutdown_function(varray[new Test, 'handleInstance']);
   \register_shutdown_function(varray[__NAMESPACE__ . '\Test', 'handleStatic']);

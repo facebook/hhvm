@@ -13,11 +13,11 @@ abstract class C2 extends C1 implements I1<string> {}
 interface I2 {
   require extends C2;
 
-  public function bar();
+  public function bar():mixed;
 }
 
 interface I3 extends I2 {
-  public function bar();
+  public function bar():mixed;
 }
 
 abstract class C3 extends C2 implements I3 {}
@@ -29,18 +29,18 @@ class C4 extends C3 {
     return __METHOD__;
   }
 
-  public function bar() {
+  public function bar() :mixed{
     echo __METHOD__, "\n";
   }
 }
 
-function main() {
+function main() :mixed{
   $i = new C4();
   $i->foo();
   $i->bar();
 }
 
-function reflect_requirements($name) {
+function reflect_requirements($name) :mixed{
   $rc = new ReflectionClass($name);
   if ($rc->isInterface()) {
     echo 'interface';
@@ -55,7 +55,7 @@ function reflect_requirements($name) {
   var_dump($rc->getRequirementNames());
 }
 
-function reflection() {
+function reflection() :mixed{
   echo '-------', __FUNCTION__, '-------', "\n";
   reflect_requirements(I3::class);
   reflect_requirements(C3::class);
@@ -63,7 +63,7 @@ function reflection() {
 }
 
 <<__EntryPoint>>
-function main_require_constraint_iface() {
+function main_require_constraint_iface() :mixed{
 main();
 reflection();
 }

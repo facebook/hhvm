@@ -6,7 +6,7 @@ class A {
   <<__LateInit>> public static $p2;
 }
 
-function test() {
+function test() :mixed{
   $a = new A();
   var_dump(hphp_get_property($a, '', 'p1'));
   var_dump(hphp_get_static_property('A', 'p2', false));
@@ -18,6 +18,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_reflection() {
+function main_reflection() :mixed{
 test();
 }

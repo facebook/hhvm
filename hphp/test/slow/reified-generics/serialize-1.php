@@ -6,7 +6,7 @@ class C<reify T> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C<int>();
   echo (string)($c is C<int>) . "\n";
   $s = serialize($c);

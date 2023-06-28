@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_809() {
+function main_809() :mixed{
 var_dump(unserialize(
   "K:8:\"stdClass\":2:{
 i:0;

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main () {
+function main () :mixed{
   $a = darray["" => "empty string", 1 => "one", 0 => "zero"];
   try {
     var_dump($a + darray["more stuff" => "yep"]);

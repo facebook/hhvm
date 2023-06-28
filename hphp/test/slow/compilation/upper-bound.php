@@ -15,7 +15,7 @@ class B {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $x = new B();
   var_dump($x->get<I3>());
 }

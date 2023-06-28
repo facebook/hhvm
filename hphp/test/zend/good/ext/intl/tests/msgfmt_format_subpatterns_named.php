@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
 
 $pattern=<<<_MSG_
 {gender_of_host, select,

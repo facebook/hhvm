@@ -1,13 +1,13 @@
 <?hh
 
-function adjustDoctype($xml) {
+function adjustDoctype($xml) :mixed{
     return str_replace(varray[">
 <","DOCTYPE HTML",'<p>','</p>'],varray["><","DOCTYPE html",'',''],$xml);
 }
 
 
 <<__EntryPoint>>
-function main_1674() {
+function main_1674() :mixed{
 $dom = new DOMDocument;
 $html = <<<EOM
 <html><head>

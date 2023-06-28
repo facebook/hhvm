@@ -4,7 +4,7 @@ class BbBb {
 
 
 <<__EntryPoint>>
-function main_1356() {
+function main_1356() :mixed{
 $z=true;
 if ($z) {
   include '1356-1.inc';

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_2109() {
+function main_2109() :mixed{
 $dom = new \DOMDocument();
 $dom->loadHTML('
 <html>

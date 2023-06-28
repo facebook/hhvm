@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_asio_callbacks_sleep() {
+function main_asio_callbacks_sleep() :mixed{
 SleepWaitHandle::setOnCreateCallback(function($wait_handle) {
   echo get_class($wait_handle)." enter\n";
 });

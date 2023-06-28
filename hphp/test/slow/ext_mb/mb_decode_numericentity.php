@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_decode_numericentity() {
+function main_mb_decode_numericentity() :mixed{
 $convmap = varray[0x0, 0x2FFFF, 0, 0xFFFF];
 var_dump(mb_decode_numericentity("&#8217;&#7936;&#226;", $convmap, "UTF-8") ===
      "\xe2\x80\x99\xe1\xbc\x80\xc3\xa2");

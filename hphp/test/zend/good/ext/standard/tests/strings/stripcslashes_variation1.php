@@ -11,7 +11,7 @@
 
 // declaring a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
   return "obj'ct";
   }
 }

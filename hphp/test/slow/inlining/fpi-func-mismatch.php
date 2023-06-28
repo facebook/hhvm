@@ -1,11 +1,11 @@
 <?hh
 
 class A implements StringishObject{
-  function __toString()[] { return "I'M A"; }
+  function __toString()[] :mixed{ return "I'M A"; }
 }
 
 class B implements StringishObject{
-  function __toString()[] { return "I'M B"; }
+  function __toString()[] :mixed{ return "I'M B"; }
 }
 
 function stringish_cast($value): string {
@@ -14,7 +14,7 @@ function stringish_cast($value): string {
     : (string)$value;
 }
 
-function my_strtolower($x) {
+function my_strtolower($x) :mixed{
   return strtolower($x);
 }
 

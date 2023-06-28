@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_touch() {
+function main_touch() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 touch($tempfile);

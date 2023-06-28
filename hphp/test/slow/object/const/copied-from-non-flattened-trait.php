@@ -23,11 +23,11 @@ class C {
 }
 
 class D extends C {
-  public static function makeParent() { return new parent(); }
+  public static function makeParent() :mixed{ return new parent(); }
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = D::makeParent();
   echo "-- after constructor completes --\n";
   var_dump($c);

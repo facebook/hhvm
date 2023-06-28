@@ -1,6 +1,6 @@
 <?hh
 
-function makeBlob($length) {
+function makeBlob($length) :mixed{
   $str = '';
   for ($i = 0; $i < $length; $i++) {
     $str .= chr(rand(ord('a'), ord('z')));
@@ -8,7 +8,7 @@ function makeBlob($length) {
   return $str;
 }
 
-function foo() {
+function foo() :mixed{
   $doc = new DOMDocument;
   $doc->loadHTML('<html><a id="foo" blob="'.makeBlob(500).'">foo</a></html>');
   $link = $doc->getElementById('foo');
@@ -26,7 +26,7 @@ function foo() {
   }
 }
 
-function runfoo() {
+function runfoo() :mixed{
   $start = memory_get_usage(true);
   for ($i=0; $i<10; $i++) {
     foo();
@@ -37,7 +37,7 @@ function runfoo() {
 
 
 <<__EntryPoint>>
-function main_dom_attr_leak() {
+function main_dom_attr_leak() :mixed{
 foo();
 foo();
 runfoo();

@@ -1,11 +1,11 @@
 <?hh
 
-function add($a, $b) {
+function add($a, $b) :mixed{
  return HH\Lib\Legacy_FIXME\cast_for_arithmetic($a) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($b);
  }
 
 <<__EntryPoint>>
-function main_1808() {
+function main_1808() :mixed{
 $server = new SoapServer(NULL, darray['uri' => 'http://test-uri']);
 $str = '<?xml version="1.0" '
 .       'encoding="ISO-8859-1"?>'

@@ -8,7 +8,7 @@ function test(
   I $x,
   classname<I> $y,
   string $z
-) {
+) :mixed{
   $x::foo(); // pass
   try {
     $y::foo(); // pass
@@ -19,7 +19,7 @@ function test(
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'basic-4.inc';
   test(
     conjureC(),

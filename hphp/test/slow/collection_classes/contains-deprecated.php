@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_contains_deprecated() {
+function main_contains_deprecated() :mixed{
 $v = Vector {0, 1, 2};
 var_dump($v->contains(1));
 var_dump($v->contains(5));

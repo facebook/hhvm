@@ -1,18 +1,18 @@
 <?hh
 
 class foo {
-    public static function elementOpen( $parser, $name, $attribs ) {
+    public static function elementOpen( $parser, $name, $attribs ) :mixed{
         print "<$name>";
     }
 
-    public static function elementClose ( $parser, $name ) {
+    public static function elementClose ( $parser, $name ) :mixed{
         print "</$name>";
     }
 }
 
 
 <<__EntryPoint>>
-function main_bad_xml_callback() {
+function main_bad_xml_callback() :mixed{
 var_dump( is_callable( varray[ 'foo', 'elementopen', 'elementclose' ] ) );
 var_dump( is_callable( 'foo::randomClose' ) );
 var_dump( is_callable( varray[ 'foo'] ) );

@@ -8,6 +8,6 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1269() {
+function main_1269() :mixed{
 var_dump(B::$a);
 }

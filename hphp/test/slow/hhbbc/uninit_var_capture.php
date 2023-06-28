@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $foo = () ==> $x;
   $x = 1;
   $foo();
@@ -8,6 +8,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_uninit_var_capture() {
+function main_uninit_var_capture() :mixed{
 test();
 }

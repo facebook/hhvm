@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   echo "yielding\n";
   yield 24;
   echo "returning\n";

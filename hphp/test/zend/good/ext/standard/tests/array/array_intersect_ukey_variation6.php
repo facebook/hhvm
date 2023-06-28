@@ -6,7 +6,7 @@
 
 //Call back function
 function key_compare_func($key1, $key2)
-{
+:mixed{
     if (HH\Lib\Legacy_FIXME\eq($key1, $key2))
         return 0;
     else

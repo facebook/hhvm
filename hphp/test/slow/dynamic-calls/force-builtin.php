@@ -1,9 +1,9 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function wrap($f) {
+function wrap($f) :mixed{
   try {
     $f()();
   } catch (Exception $e) {
@@ -12,31 +12,31 @@ function wrap($f) {
 }
 
 <<__DynamicallyCallable>>
-function foo() { var_dump(__FUNCTION__); }
-function bar() { var_dump(__FUNCTION__); }
+function foo() :mixed{ var_dump(__FUNCTION__); }
+function bar() :mixed{ var_dump(__FUNCTION__); }
 <<__DynamicallyCallable>>
-function reified_fun<reify T>() { var_dump(__FUNCTION__); }
+function reified_fun<reify T>() :mixed{ var_dump(__FUNCTION__); }
 <<__DynamicallyCallable>>
-function soft_reified_fun<<<__Soft>> reify T>() { var_dump(__FUNCTION__); }
+function soft_reified_fun<<<__Soft>> reify T>() :mixed{ var_dump(__FUNCTION__); }
 
 abstract class Cls {
   <<__DynamicallyCallable>>
-  static function foo() { var_dump(__METHOD__); }
-  static function bar() { var_dump(__METHOD__); }
-  protected static function prot() { var_dump(__METHOD__); }
-  private static function priv() { var_dump(__METHOD__); }
-  function inst() { var_dump(__METHOD__); }
-  abstract static function abstr();
+  static function foo() :mixed{ var_dump(__METHOD__); }
+  static function bar() :mixed{ var_dump(__METHOD__); }
+  protected static function prot() :mixed{ var_dump(__METHOD__); }
+  private static function priv() :mixed{ var_dump(__METHOD__); }
+  function inst() :mixed{ var_dump(__METHOD__); }
+  abstract static function abstr():mixed;
   <<__DynamicallyCallable>>
-  static function reified_meth<reify T>() { var_dump(__METHOD__); }
+  static function reified_meth<reify T>() :mixed{ var_dump(__METHOD__); }
   <<__DynamicallyCallable>>
-  static function soft_reified_meth<<<__Soft>> reify T>() {
+  static function soft_reified_meth<<<__Soft>> reify T>() :mixed{
     var_dump(__METHOD__);
   }
 }
 
 <<__EntryPoint>>
-function force_builtin_main() {
+function force_builtin_main() :mixed{
   foreach (vec['foo', 'bar', 'reified_fun', 'soft_reified_fun'] as $f) {
     wrap(() ==> HH\dynamic_fun_force(LV($f)));
   }

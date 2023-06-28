@@ -6,7 +6,7 @@ enum IsAssoc: int {
   TRUE = 1;
 }
 
-function make_object($d) {
+function make_object($d) :mixed{
   $obj = new stdClass;
   foreach ($d as $k => $v) {
     $obj->$k = $v;
@@ -14,7 +14,7 @@ function make_object($d) {
   return $obj;
 }
 
-function report($msg, $obj1, $obj2) {
+function report($msg, $obj1, $obj2) :mixed{
   echo "$msg\nShould be\n";
   var_dump($obj1);
   echo "But found\n";
@@ -22,7 +22,7 @@ function report($msg, $obj1, $obj2) {
   echo "\n";
 }
 
-function is_equal($result1, $result2) {
+function is_equal($result1, $result2) :mixed{
   if ($result1 === null && $result2 === null) {
     return true;
   }

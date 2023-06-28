@@ -5,7 +5,7 @@ class foo {
     private $pp2 = 2;
     protected $pp3 = 3;
 
-    function bar() {
+    function bar() :mixed{
         var_dump(property_exists("foo","pp1"));
         var_dump(property_exists("foo","pp2"));
         var_dump(property_exists("foo","pp3"));
@@ -13,7 +13,7 @@ class foo {
 }
 
 class bar extends foo {
-    function test() {
+    function test() :mixed{
         var_dump(property_exists("foo","pp1"));
         var_dump(property_exists("foo","pp2"));
         var_dump(property_exists("foo","pp3"));

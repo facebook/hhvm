@@ -3,11 +3,11 @@
 class blah {
 
   private static $breakerX = 0;
-  private function breaker() {
+  private function breaker() :mixed{
     return self::$breakerX++ == 0 ? varray[] : null;
   }
 
-  public function foo() {
+  public function foo() :mixed{
     $x = 0;
     $y = 0;
 

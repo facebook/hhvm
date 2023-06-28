@@ -3,12 +3,12 @@
 class C {
 }
 
-function test<reify T>(<<__Soft>>int $foo) {
+function test<reify T>(<<__Soft>>int $foo) :mixed{
   return new T();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(
     (int $errno,
     string $errstr,

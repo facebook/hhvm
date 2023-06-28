@@ -1,6 +1,6 @@
 <?hh
 
-function run(inout $a, inout $b, inout $c) {
+function run(inout $a, inout $b, inout $c) :mixed{
   $a = "hello";
   $b = 2;
   $c = varray[];

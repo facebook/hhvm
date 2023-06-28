@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $val = 'value';
 
   $v = Vector {'v1', 'v2'};
@@ -21,6 +21,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_fill_keys() {
+function main_array_fill_keys() :mixed{
 main();
 }

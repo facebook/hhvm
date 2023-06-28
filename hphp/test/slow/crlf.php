@@ -4,9 +4,9 @@
 foo
 bar
 */
-function foo() {}
+function foo() :mixed{}
 
 <<__EntryPoint>>
-function main_crlf() {
+function main_crlf() :mixed{
 var_dump((new ReflectionFunction('foo'))->getDocComment());
 }

@@ -3,7 +3,7 @@
 // FILE: error_page.php
 
 <<__EntryPoint>>
-function main_error() {
+function main_error() :mixed{
   echo "Reading implicit context\n";
   var_dump(IntContext::get());
 }
@@ -20,7 +20,7 @@ abstract final class IntContext extends HH\ImplicitContext {
   }
 }
 
-function foo() {
+function foo() :mixed{
   var_dump(IntContext::get());
   hphp_throw_fatal_error("Throwing fatal!");
 }

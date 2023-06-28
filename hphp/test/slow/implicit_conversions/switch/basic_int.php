@@ -4,7 +4,7 @@ class M {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f(0);
   f(-1);
   f(1);
@@ -42,7 +42,7 @@ function main() {
 
 }
 
-function f($x) {
+function f($x) :mixed{
   var_dump($x);
   print "goes to:\n";
   switch ($x) {

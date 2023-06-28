@@ -1,6 +1,6 @@
 <?hh
 class bomb {
-  <<__DynamicallyCallable>> static function go($n) {
+  <<__DynamicallyCallable>> static function go($n) :mixed{
     $backtrace = debug_backtrace(0);
     $backtrace[1]['args'][] = 'bomb';
   }

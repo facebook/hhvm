@@ -29,7 +29,7 @@ class Gronk {
 
 
 <<__EntryPoint>>
-function main_maybe_empty_array_get() {
+function main_maybe_empty_array_get() :mixed{
 $y = new Gronk;
 
 $break = false;

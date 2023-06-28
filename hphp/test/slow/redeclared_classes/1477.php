@@ -1,9 +1,9 @@
 <?hh
 
-function f() {
+function f() :mixed{
  return false;
  }
-function test($c) {
+function test($c) :mixed{
   var_dump(class_exists('A'));
   var_dump(interface_exists('A'));
   var_dump(class_exists('B'));
@@ -13,7 +13,7 @@ function test($c) {
 }
 
 <<__EntryPoint>>
-function main_1477() {
+function main_1477() :mixed{
 if (f()) {
   include '1477-1.inc';
 }

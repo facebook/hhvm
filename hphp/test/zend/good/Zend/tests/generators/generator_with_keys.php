@@ -1,6 +1,6 @@
 <?hh
 
-function reverse(darray $array) {
+function reverse(darray $array) :AsyncGenerator<mixed,mixed,void>{
   $keys = vec[];
   $vals = vec[];
   foreach ($array as $key => $val) {

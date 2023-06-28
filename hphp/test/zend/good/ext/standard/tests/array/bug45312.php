@@ -4,16 +4,16 @@ class cr {
     function __construct($val) {
         $this->priv_member = $val;
     }
-    <<__DynamicallyCallable>>static function comp_func_cr($a, $b) {
+    <<__DynamicallyCallable>>static function comp_func_cr($a, $b) :mixed{
         if ($a->priv_member === $b->priv_member) return 0;
         return ($a->priv_member > $b->priv_member) ? 1 : -1;
     }
-    <<__DynamicallyCallable>> static function comp_func_cr2($a, $b) {
+    <<__DynamicallyCallable>> static function comp_func_cr2($a, $b) :mixed{
         echo ".";
         if ($a->priv_member === $b->priv_member) return 0;
         return ($a->priv_member < $b->priv_member) ? 1 : -1;
     }
-    function dump() {
+    function dump() :mixed{
         echo $this->priv_member . "\n";
     }
 }

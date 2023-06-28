@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $ctypes = darray[
     'Vector' => new Vector(),
     'Map' => new Map(),
@@ -64,6 +64,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_817() {
+function main_817() :mixed{
 main();
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function plop() {
+function plop() :mixed{
     $ts = time();
     while(true) {
         if ((time()-$ts) > 2) {

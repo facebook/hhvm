@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_set_flags() {
+function main_set_flags() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator(
   $sample_dir,

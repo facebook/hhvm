@@ -2,54 +2,54 @@
 
 class C{
 }
-function f1(?string $x = null) {
+function f1(?string $x = null) :mixed{
 $y = (string) $x;
  var_dump($y);
  return $y;
  }
-function f2(?AnyArray $x = null) {
+function f2(?AnyArray $x = null) :mixed{
  $y = $x !== null ? darray($x) : darray[];
  var_dump($y);
  return $y;
  }
-function f4(?int $x = null) {
+function f4(?int $x = null) :mixed{
 $y = (int) $x;
  var_dump($y);
  return $y;
  }
-function f5(?bool $x = null) {
+function f5(?bool $x = null) :mixed{
 $y = (bool) $x;
  var_dump($y);
  return $y;
  }
-function f6(?float $x = null) {
+function f6(?float $x = null) :mixed{
 $y = (float)$x;
  var_dump($y);
  return $y;
  }
-function rf1($x) {
+function rf1($x) :mixed{
  if ($x) return f1<>;
  return 0;
  }
-function rf2($x) {
+function rf2($x) :mixed{
  if ($x) return f2<>;
  return 0;
  }
-function rf4($x) {
+function rf4($x) :mixed{
  if ($x) return f4<>;
  return 0;
  }
-function rf5($x) {
+function rf5($x) :mixed{
  if ($x) return f5<>;
  return 0;
  }
-function rf6($x) {
+function rf6($x) :mixed{
  if ($x) return f6<>;
  return 0;
  }
 
 <<__EntryPoint>>
-function main_2191() {
+function main_2191() :mixed{
 var_dump(f1());
  var_dump(f2());
 

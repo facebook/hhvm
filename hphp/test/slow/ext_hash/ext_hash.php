@@ -2,11 +2,11 @@
 
 // HPHP has has many version of these functions over time
 // Faceobok has implementation differences
-function is_facebook() {
+function is_facebook() :mixed{
   return extension_loaded("facebook");
 }
 
-function brown_fox() {
+function brown_fox() :mixed{
   echo "==== brown_fox ====\n";
   $data = "The quick brown fox jumped over the lazy dog.";
   var_dump(hash("md2",        $data));
@@ -58,7 +58,7 @@ function brown_fox() {
   }
 }
 
-function test_hash_init() {
+function test_hash_init() :mixed{
   echo "==== test_hash_init ====\n";
   $ctx = hash_init("md5");
   hash_update($ctx, "The quick brown fox ");
@@ -66,20 +66,20 @@ function test_hash_init() {
   var_dump(hash_final($ctx));
 }
 
-function test_hash_file() {
+function test_hash_file() :mixed{
   echo "==== test_hash_file ====\n";
   var_dump(hash_file('md5', __DIR__.'/test_file.txt'));
   var_dump(hash_hmac_file("md5", __DIR__.'/test_file.txt', "secret"));
 }
 
-function test_hash_hmac() {
+function test_hash_hmac() :mixed{
   echo "==== test_hash_hmac ====\n";
   $data = "the quick brown fox jumped over the lazy dog.";
   var_dump(hash_hmac("md5", $data, "secret"));
   var_dump(hash_hmac("md5", $data, ""));
 }
 
-function test_furchash() {
+function test_furchash() :mixed{
   echo "==== test_furchash ====\n";
   if (is_facebook()) {
     var_dump(furchash_hphp_ext("15minutesoffame", 15, 86) === 25);
@@ -88,7 +88,7 @@ function test_furchash() {
   }
 }
 
-<<__EntryPoint>> function main_ext_hash() {
+<<__EntryPoint>> function main_ext_hash() :mixed{
   brown_fox();
   test_hash_init();
   test_hash_file();

@@ -4,7 +4,7 @@ async function asyncval<T>(T $in): Awaitable<T> {
   return $in;
 }
 
-function main() {
+function main() :mixed{
   $in_v = Vector {
     asyncval(123),
     asyncval(456),
@@ -35,6 +35,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_hh_async_utils() {
+function main_hh_async_utils() :mixed{
 main();
 }

@@ -4,7 +4,7 @@ class X {
   public $bar = 5;
 
   private static $fooV;
-  function foo() {
+  function foo() :mixed{
     if (!self::$fooV) self::$fooV = $this;
     return self::$fooV;
   }
@@ -13,11 +13,11 @@ class X {
 abstract final class FooStatics {
   public static $v;
 }
-function foo() {
+function foo() :mixed{
   if (!FooStatics::$v) FooStatics::$v = new X;
   return FooStatics::$v;
 }
-function test() {
+function test() :mixed{
   $x = new X;
   var_dump($x->foo()->bar);
   var_dump($x->foo()->bar);
@@ -32,6 +32,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_719() {
+function main_719() :mixed{
 test();
 }

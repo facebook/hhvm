@@ -24,23 +24,23 @@ class Unsetter {
     unset($this->x);
   }
 
-  public function useX($k) {
+  public function useX($k) :mixed{
     echo "sup\n";
     $z = $k->wat + $this->x;
     return $z;
   }
 }
 
-function thrower() {
+function thrower() :mixed{
   throw new Exception("wat");
 }
 
-function main() {
+function main() :mixed{
   set_error_handler(thrower<>);
   $k = new Unsetter;
   $k->useX(new Something());
 }
-<<__EntryPoint>> function main_entry() {
+<<__EntryPoint>> function main_entry() :mixed{
 try {
   main();
 } catch (Exception $x) {

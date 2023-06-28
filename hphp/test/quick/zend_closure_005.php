@@ -7,19 +7,19 @@ class A {
         $this->x = $x;
     }
 
-    function getIncer($val) {
+    function getIncer($val) :mixed{
         return function() use ($val) {
             $this->x += $val;
         };
     }
 
-    function getPrinter() {
+    function getPrinter() :mixed{
         return function() {
             echo $this->x."\n";
         };
     }
 
-    function printX() {
+    function printX() :mixed{
         echo $this->x."\n";
     }
 }

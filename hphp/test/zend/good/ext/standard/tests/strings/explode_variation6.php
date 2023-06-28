@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 function test_explode($delim, $string, $limit)
-{
+:mixed{
     $e = explode($delim, $string, $limit);
     foreach ( $e as $v)
     {

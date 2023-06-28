@@ -4,7 +4,7 @@ class A {}
 class B<reify T> {}
 class C<reify T> {}
 
-function f<reify T>() {
+function f<reify T>() :mixed{
   return (new T());
 }
 <<__EntryPoint>> function main(): void {

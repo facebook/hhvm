@@ -1,6 +1,6 @@
 <?hh
 
-async function aux()[zoned] {
+async function aux()[zoned] :Awaitable<mixed>{
   $x = IntContext::getContext();
   if ($x > 10) return;
   var_dump($x);
@@ -9,7 +9,7 @@ async function aux()[zoned] {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
   await IntContext::genStart(0, aux<>);

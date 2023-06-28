@@ -6,7 +6,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   // unserializing non-declared prop in a const class throws
   try {
     unserialize('O:1:"C":2:{s:1:"i";i:1;s:1:"j";i:2;}');

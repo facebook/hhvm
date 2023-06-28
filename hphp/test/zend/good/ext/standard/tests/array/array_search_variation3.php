@@ -7,7 +7,7 @@
 
 class array_search_check {
   public $array_var = darray[1=>"one", "two"=>2, 3=>3];
-  public function foo() {
+  public function foo() :mixed{
     echo "Public function\n";
   }
 }

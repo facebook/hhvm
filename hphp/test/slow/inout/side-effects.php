@@ -1,9 +1,9 @@
 <?hh
 
-function ref(inout $x) {
+function ref(inout $x) :mixed{
 }
 
-function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
+function foo($r, inout $a, inout $b, $q, inout $c, ...$_) :mixed{
   $a = 'FOO:A';
   $b = 'FOO:B';
   $c = 'FOO:C';
@@ -15,17 +15,17 @@ class Herp {
   public $baz;
 }
 
-function launder($x) {
+function launder($x) :mixed{
   echo "launder()\n";
   return $x;
 }
-function get_arr() {
+function get_arr() :mixed{
   $x = darray['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
   $x['alpha'][0]['beta'] = darray['one' => '*BLANK*', 'two' => '*BLANK*'];
   return $x;
 }
 
-function main() {
+function main() :mixed{
   $x = get_arr();
   $i = 1;
   $t = 'alpha';
@@ -155,6 +155,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_side_effects() {
+function main_side_effects() :mixed{
 main();
 }

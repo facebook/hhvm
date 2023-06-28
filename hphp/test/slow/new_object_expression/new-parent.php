@@ -1,6 +1,6 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   new parent();
 }

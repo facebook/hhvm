@@ -3,30 +3,30 @@
 // This error handler swallows typehint errors, which is
 // disallowed in RepoAuthoritative mode. Thus, this test
 // is set to be norepo.
-function err($code, $msg) {
+function err($code, $msg) :mixed{
   echo "Handled {$code}: $msg", "\n";
   return true;
 }
 
 <<__MockClass>> // to bypass sealing
 class CExplicit implements Stringish {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     return __CLASS__;
   }
 }
 
 class CImplicit {
-  public function __toString()[] {
+  public function __toString()[] :mixed{
     return __CLASS__;
   }
 }
 
 trait TStringish {
-  public function __toString()[] { return __TRAIT__; }
+  public function __toString()[] :mixed{ return __TRAIT__; }
 }
 
 interface IStringish {
-  public function __toString();
+  public function __toString():mixed;
 }
 
 class CThruTrait {
@@ -49,7 +49,7 @@ function f2(<<__Soft>> Stringish $x): void {
   echo "\n";
 }
 
-function test_functionality() {
+function test_functionality() :mixed{
   echo '********** static string **********', "\n";
   f1("a boring string");
   f2("a boring string");
@@ -92,7 +92,7 @@ function test_functionality() {
   f2(-4.2);
 }
 
-function test_reflection() {
+function test_reflection() :mixed{
   echo "\n",
     '--------------------', ' ', __FUNCTION__, ' ', '--------------------',
     "\n\n";
@@ -132,7 +132,7 @@ function test_reflection() {
 }
 
 <<__EntryPoint>>
-function main_stringish() {
+function main_stringish() :mixed{
 set_error_handler(err<>);
 
 test_functionality();

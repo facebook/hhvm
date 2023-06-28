@@ -1,7 +1,7 @@
 <?hh
 namespace test;
 <<__DynamicallyCallable>>
-function foo() {
+function foo() :mixed{
     return __FUNCTION__;
 }
 <<__EntryPoint>> function main(): void {

@@ -1,5 +1,5 @@
 <?hh
-class Stringable { public function __toString()[] { return "foobar"; } }
+class Stringable { public function __toString()[] :mixed{ return "foobar"; } }
 <<__EntryPoint>> function main(): void {
 require 'fix_exceptions.inc'; fix_exceptions();
 $functions = darray[

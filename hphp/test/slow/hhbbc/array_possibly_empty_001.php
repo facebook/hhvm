@@ -2,13 +2,13 @@
 
 
 class someclass {
-  static public function yo() {
+  static public function yo() :mixed{
     return $_ENV['hey'] ?? false;
   }
 }
 
-function asd() { return mt_rand() ? 'a' : 2; }
-function main() {
+function asd() :mixed{ return mt_rand() ? 'a' : 2; }
+function main() :mixed{
   $time = asd();
   $items = varray[];
   if (someclass::yo()) {
@@ -19,6 +19,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_possibly_empty_001() {
+function main_array_possibly_empty_001() :mixed{
 main();
 }

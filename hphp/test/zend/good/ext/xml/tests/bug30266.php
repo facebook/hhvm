@@ -11,7 +11,7 @@ class XML_Parser
     public $dummy = "a";
 
     function parse($data)
-    {
+:mixed    {
         $parser = xml_parser_create();
 
         xml_set_object($parser, $this);
@@ -24,13 +24,13 @@ class XML_Parser
     }
 
     function startHandler($XmlParser, $tag, $attr)
-    {
+:mixed    {
             $this->dummy = "b";
 		    throw new Exception("ex");
     }
 
     function endHandler($XmlParser, $tag)
-    {
+:mixed    {
     }
 }
 <<__EntryPoint>>

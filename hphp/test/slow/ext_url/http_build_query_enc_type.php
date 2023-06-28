@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_http_build_query_enc_type() {
+function main_http_build_query_enc_type() :mixed{
 var_dump(PHP_QUERY_RFC1738);
 var_dump(PHP_QUERY_RFC3986);
 

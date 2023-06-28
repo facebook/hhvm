@@ -1,6 +1,6 @@
 <?hh
 class foo {
-  function foo($n=0) {
+  function foo($n=0) :mixed{
     if ($n) throw new Exception("new");
   }
 }

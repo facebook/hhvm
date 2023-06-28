@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_fileobject_seek_exception() {
+function main_fileobject_seek_exception() :mixed{
 $file = new SplFileObject(__FILE__);
 
 try {

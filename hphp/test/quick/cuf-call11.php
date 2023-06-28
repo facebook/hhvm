@@ -8,10 +8,10 @@
  */
 
 class D5 {
-  private function foo() {
+  private function foo() :mixed{
     echo "D5::foo " . (isset($this) ? "true\n" : "false\n");
   }
-  public function test() {
+  public function test() :mixed{
     call_user_func('F5::foo');
     call_user_func(varray['F5','foo']);
   }
@@ -19,14 +19,14 @@ class D5 {
 class E5 extends D5 {
 }
 class X5 extends D5 {
-  private function foo() {
+  private function foo() :mixed{
     echo "X5::foo\n";
   }
 }
 class F5 extends X5 {
 }
 
-function main5() {
+function main5() :mixed{
   $e5 = new E5;
   $e5->test(); // Fatals
 }

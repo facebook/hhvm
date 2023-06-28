@@ -15,7 +15,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_hhbbc4() {
+function main_hhbbc4() :mixed{
 $a = new A;
 var_dump(\HH\Asio\join($a->gen()));
 }

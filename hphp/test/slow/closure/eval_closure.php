@@ -1,13 +1,13 @@
 <?hh
 
-function reproduce( $code, $func ) {
+function reproduce( $code, $func ) :mixed{
         eval( $code );
         return $func( varray[] );
 }
 
 
 <<__EntryPoint>>
-function main_eval_closure() {
+function main_eval_closure() :mixed{
 echo reproduce('function foo() {
     return (function() {return "first\n";})();
 }', 'foo');

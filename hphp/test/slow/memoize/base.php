@@ -3,28 +3,28 @@ class A {
 
   private static $testPublicIA = 100;
   <<__Memoize>>
-  public function testPublic() { return self::$testPublicIA++; }
+  public function testPublic() :mixed{ return self::$testPublicIA++; }
 
   private static $testProtectedIA = 110;
   <<__Memoize>>
-  protected function testProtected() { return self::$testProtectedIA++; }
+  protected function testProtected() :mixed{ return self::$testProtectedIA++; }
 
   private static $testPrivateIA = 120;
   <<__Memoize>>
-  private function testPrivate() { return self::$testPrivateIA++; }
+  private function testPrivate() :mixed{ return self::$testPrivateIA++; }
 
   <<__LSB>>
   private static $testNotMemoizedIA = 130;
 
-  public function testNotMemoized() { return static::$testNotMemoizedIA++; }
+  public function testNotMemoized() :mixed{ return static::$testNotMemoizedIA++; }
 
   <<__Memoize>>
-  public function testPassesThis() { return A::fnThatTakesThis($this); }
+  public function testPassesThis() :mixed{ return A::fnThatTakesThis($this); }
 
   private static $testAsyncI = 140;
 
   <<__Memoize>>
-  public async function testAsync() {
+  public async function testAsync() :Awaitable<mixed>{
     await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
     return self::$testAsyncI++;
   }
@@ -32,14 +32,14 @@ class A {
   private static $testNotMemoizedOverrideI = 150;
 
   <<__Memoize>>
-  public function testNotMemoizedOverride() { return self::$testNotMemoizedOverrideI++; }
+  public function testNotMemoizedOverride() :mixed{ return self::$testNotMemoizedOverrideI++; }
 
   private static $testMemoizedOverrideI = 160;
-  public function testMemoizedOverride() { return self::$testMemoizedOverrideI++; }
+  public function testMemoizedOverride() :mixed{ return self::$testMemoizedOverrideI++; }
 
-  public static function fnThatTakesThis(A $a) { return $a->testNotMemoized(); }
+  public static function fnThatTakesThis(A $a) :mixed{ return $a->testNotMemoized(); }
 
-  public function testA() {
+  public function testA() :mixed{
     // Show that after the first run we're returning the cached result
     echo $this->testPublic().' ';
     echo $this->testPublic().' ';
@@ -56,25 +56,25 @@ class B extends A {
 
   private static $testPublicIB = 200;
   <<__Memoize>>
-  public function testPublic() { return self::$testPublicIB++; }
+  public function testPublic() :mixed{ return self::$testPublicIB++; }
 
   private static $testProtectedIB = 210;
   <<__Memoize>>
-  protected function testProtected() { return self::$testProtectedIB++; }
+  protected function testProtected() :mixed{ return self::$testProtectedIB++; }
 
   private static $testPrivateIB = 220;
   <<__Memoize>>
-  private function testPrivate() { return self::$testPrivateIB++; }
+  private function testPrivate() :mixed{ return self::$testPrivateIB++; }
 
   private static $testNotMemoizedOverrideIB = 230;
 
-  public function testNotMemoizedOverride() { return self::$testNotMemoizedOverrideIB++; }
+  public function testNotMemoizedOverride() :mixed{ return self::$testNotMemoizedOverrideIB++; }
 
   private static $testMemoizedOverrideIB = 240;
   <<__Memoize>>
-  public function testMemoizedOverride() { return self::$testMemoizedOverrideIB++; }
+  public function testMemoizedOverride() :mixed{ return self::$testMemoizedOverrideIB++; }
 
-  public function testB() {
+  public function testB() :mixed{
     // Show that after the first run we're returning the cached result
     echo $this->testPublic().' ';
     echo $this->testPublic().' ';
@@ -91,7 +91,7 @@ class B extends A {
 
 
 <<__EntryPoint>>
-function main_base() {
+function main_base() :mixed{
 (new A())->testA();
 // Test to make sure that a new object isn't reusing the results from the old
 // object,

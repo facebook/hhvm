@@ -1,5 +1,5 @@
 <?hh
-function first_key($a) { foreach ($a as $k => $_) { return $k; } }
+function first_key($a) :mixed{ foreach ($a as $k => $_) { return $k; } }
 
 <<__EntryPoint>> function main(): void {
 $a = varray["a", "b", "c"];

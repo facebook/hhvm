@@ -1,6 +1,6 @@
 <?hh
 
-function main(varray $x = null) {
+function main(varray $x = null) :mixed{
   if ($x) {
     echo is_array($x);
     echo "\n";
@@ -11,7 +11,7 @@ function main(varray $x = null) {
 
 
 <<__EntryPoint>>
-function main_jmp_local_006() {
+function main_jmp_local_006() :mixed{
 main(varray[]);
 main(varray[1,2,3]);
 }

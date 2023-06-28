@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_text_node_offsetset() {
+function main_text_node_offsetset() :mixed{
 $xml = <<<XML
 <test>
   <tag>text</tag>

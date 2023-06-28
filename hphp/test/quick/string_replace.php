@@ -1,20 +1,20 @@
 <?hh
 
-function replace_array_str($in) {
+function replace_array_str($in) :mixed{
   $search = varray['a', 'b'];
   $count = 0;
   $out = str_replace_with_count($search, '', $in, inout $count);
   var_dump(varray[$out, $count]);
 }
 
-function replace_array_array($inarr) {
+function replace_array_array($inarr) :mixed{
   $search = varray['a', 'b'];
   $count = 0;
   $out = str_replace_with_count($search, '', $inarr, inout $count);
   var_dump(varray[$out, $count]);
 }
 
-function replace_str_str($in) {
+function replace_str_str($in) :mixed{
   $search = 'a';
   $count = 0;
   $out = str_replace_with_count($search, '', $in, inout $count);

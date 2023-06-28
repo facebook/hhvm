@@ -1,7 +1,7 @@
 <?hh
 class ExampleParent {
     private $hello_world = "hello foo\n";
-    public function foo() {
+    public function foo() :mixed{
            echo $this->hello_world;
     }
 }
@@ -19,7 +19,7 @@ trait ExampleTrait {
      *
      */
     public $prop = "ops";
-    public function bar() {
+    public function bar() :mixed{
         echo $this->hello_world;
     }
 }

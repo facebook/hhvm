@@ -33,6 +33,6 @@ function softLeakSafeShallow()[leak_safe_shallow]: void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Done\n";
 }

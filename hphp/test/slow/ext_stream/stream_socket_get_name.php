@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_socket_get_name() {
+function main_stream_socket_get_name() :mixed{
 $socketdir = getenv("HPHP_TEST_SOCKETDIR");
 $name = "";
 $errstr = "Could not grab a random socket file in 10 tries.";

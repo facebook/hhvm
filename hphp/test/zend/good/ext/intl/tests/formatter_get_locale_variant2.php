@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $locales = varray[
         'en_UK',
         'en_US@California',

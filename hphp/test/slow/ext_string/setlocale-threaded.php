@@ -1,6 +1,6 @@
 <?hh
 
-function send_to_pagelet($relative_file_path, $locale) {
+function send_to_pagelet($relative_file_path, $locale) :mixed{
   $headers = darray[];
   $task = pagelet_server_task_start(
     "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
@@ -20,7 +20,7 @@ function send_to_pagelet($relative_file_path, $locale) {
   echo trim($result) . "\n";
 }
 
-function escape_non_ascii($str) {
+function escape_non_ascii($str) :mixed{
   $count = -1;
   return preg_replace_callback('/([\x00-\x1F\x7F-\xFF]+)/',
     function ($match) { return urlencode($match[1]); },
@@ -29,7 +29,7 @@ function escape_non_ascii($str) {
 
 
 <<__EntryPoint>>
-function main_setlocale_threaded() {
+function main_setlocale_threaded() :mixed{
 $cwd = getcwd();
 $file_path = __FILE__;
 $relative_file_path = str_replace($cwd, '', $file_path);

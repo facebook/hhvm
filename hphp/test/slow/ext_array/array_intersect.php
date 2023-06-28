@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_intersect() {
+function main_array_intersect() :mixed{
 $array1 = darray[
   "a" => "green",
   0 => "red",

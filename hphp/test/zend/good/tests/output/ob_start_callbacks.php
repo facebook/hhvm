@@ -2,12 +2,12 @@
 
 class foo {
   <<__DynamicallyCallable>>
-  static function out($foo) {
+  static function out($foo) :mixed{
     return strtoupper($foo);
   }
 }
 <<__DynamicallyCallable>>
-function my_strtoupper($foo, $bar) {
+function my_strtoupper($foo, $bar) :mixed{
   return strtoupper($foo);
 }
 

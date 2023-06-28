@@ -8,7 +8,7 @@ namespace foo {
   class bar extends \bar {}
 
   <<__EntryPoint>>
-  function main() {
+  function main() :mixed{
     $x = function (?\bar $x = NULL) {
       \var_dump($x);
     };

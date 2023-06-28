@@ -11,12 +11,12 @@ class ImmVector {
   }
 }
 
-function main() {
+function main() :mixed{
   $custom_set = new ImmVector();
 }
 
 
 <<__EntryPoint>>
-function main_hh_frozenvector4() {
+function main_hh_frozenvector4() :mixed{
 main();
 }

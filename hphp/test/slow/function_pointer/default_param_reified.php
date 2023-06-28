@@ -14,21 +14,21 @@ function rbaz<reify T>(): void {
   var_dump(HH\ReifiedGenerics\get_type_structure<T>());
 }
 
-function func1($p0 = Foo::rbar<int>) {
+function func1($p0 = Foo::rbar<int>) :mixed{
   $p0();
 }
-function func2($p0 = rbaz<int>) {
+function func2($p0 = rbaz<int>) :mixed{
   $p0();
 }
-function func3($p0 = Foo::rbar<C>) {
+function func3($p0 = Foo::rbar<C>) :mixed{
   $p0();
 }
-function func4($p0 = rbaz<C>) {
+function func4($p0 = rbaz<C>) :mixed{
   $p0();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   func1();
   func2();
   func3();

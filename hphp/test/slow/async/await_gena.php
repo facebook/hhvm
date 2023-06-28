@@ -1,6 +1,6 @@
 <?hh
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   return await gena(varray[
                       async { return 1; },
                       async { return 2; },
@@ -8,7 +8,7 @@ async function foo() {
                     ]);
 }
 
-async function fooReschedule() {
+async function fooReschedule() :Awaitable<mixed>{
   return await gena(varray[
                       async { return 1; },
                       async { return 2; },
@@ -16,7 +16,7 @@ async function fooReschedule() {
                     ]);
 }
 
-async function fooError() {
+async function fooError() :Awaitable<mixed>{
   return await gena(varray[
                       async { return 1; },
                       async { return 2; },
@@ -24,7 +24,7 @@ async function fooError() {
                     ]);
 }
 
-async function bogusGena() {
+async function bogusGena() :Awaitable<mixed>{
   return await gena(
     varray[async { return 1; }],
     varray[async { return 2; }],
@@ -34,7 +34,7 @@ async function bogusGena() {
 
 
 <<__EntryPoint>>
-function main_await_gena() {
+function main_await_gena() :mixed{
 var_dump(HH\Asio\join(foo()));
 var_dump(HH\Asio\join(fooReschedule()));
 try {

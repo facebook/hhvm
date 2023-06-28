@@ -3,11 +3,11 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_instances(string $cls, ?darray $objs) {
+function get_instances(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
-function get_bytes_eq(string $cls, ?darray $objs) {
+function get_bytes_eq(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
@@ -16,11 +16,11 @@ function get_bytes_eq(string $cls, ?darray $objs) {
   }
   return $bytes;
 }
-function get_bytes(string $cls, ?darray $objs) {
+function get_bytes(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
-function get_bytesd(string $cls, ?darray $objs) {
+function get_bytesd(string $cls, ?darray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
@@ -89,7 +89,7 @@ class SimpleClassForExclude {
 }
 
 <<__EntryPoint>>
-function main_objprof_props() {
+function main_objprof_props() :mixed{
 $myClass = new EmptyClass();
 __hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);

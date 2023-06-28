@@ -1,6 +1,6 @@
 <?hh
 
-function test($f) {
+function test($f) :mixed{
   try {
     \var_dump(fb_call_user_func_async(__DIR__.'/call_user_func.inc', $f, 2));
   } catch (Exception $e) {
@@ -9,7 +9,7 @@ function test($f) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require_once 'call_user_func.inc';
 
   test('afunc');

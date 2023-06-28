@@ -3,7 +3,7 @@
 
 // method bits
 <<__EntryPoint>>
-function main_reflection_get_modifiers() {
+function main_reflection_get_modifiers() :mixed{
 $public = 256;
 $private = 1024;
 $protected = 512;

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_123() {
+function main_123() :mixed{
 $a = 'test';
  $b = $a;
  print $b;

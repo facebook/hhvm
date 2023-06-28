@@ -7,7 +7,7 @@ class X {
     function __construct() {
         echo "class ok\n";
     }
-    static function bar() {
+    static function bar() :mixed{
         echo "method ok\n";
     }
 }

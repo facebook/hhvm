@@ -547,7 +547,7 @@ class C extends B {
   <<__Soft>> public static ?CondEnum1 $s84;
   <<__Soft>> public static ?CondAlias $s85;
 
-  public static function test() {
+  public static function test() :mixed{
     new A();
     new B();
     new C();

@@ -1,13 +1,13 @@
 <?hh
 
 class A {
-  <<__DynamicallyCallable>> public static function f($a) {
+  <<__DynamicallyCallable>> public static function f($a) :mixed{
     return 'ok'.$a;
   }
 }
 
 <<__EntryPoint>>
-function main_1332() {
+function main_1332() :mixed{
   $obj = new A();
   var_dump(method_exists($obj, 'f'));
   var_dump(method_exists('A', 'f'));

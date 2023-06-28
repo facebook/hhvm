@@ -1,28 +1,28 @@
 <?hh
 
-function handler($name, $obj, inout $args) {
+function handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   throw new Exception;
 }
 
-function another_handler($name, $obj, inout $args) {
+function another_handler($name, $obj, inout $args) :mixed{
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";
   throw new Exception;
 }
 
-function frap($arg) {
+function frap($arg) :mixed{
   echo "frap $arg\n";
 }
 
 class Blark {
-  public static function sfrap() {
+  public static function sfrap() :mixed{
     echo "static frap\n";
   }
-  public function frap() {
+  public function frap() :mixed{
     echo "non-static frap\n";
   }
 }

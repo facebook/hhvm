@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_502() {
+function main_502() :mixed{
 $a = varray[1, 2, 3];
 $b = $a;
 $b[] = 4;

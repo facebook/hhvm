@@ -1,13 +1,13 @@
 <?hh
 
-function test($name, $c) {
+function test($name, $c) :mixed{
   echo "---- $name\n";
   foreach ($c->keys() as $k) {
     var_dump($k);
   }
 }
 
-function main() {
+function main() :mixed{
   $containers = darray[
     'Vector'          => Vector {1},
     'empty Vector'    => Vector {},
@@ -31,6 +31,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_keys() {
+function main_keys() :mixed{
 main();
 }

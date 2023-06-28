@@ -5,12 +5,12 @@ class Baz {
 
 class Foo {
     const X = 1;
-    public function x($a = self::X, $b = Baz::B, $c = 99) {}
+    public function x($a = self::X, $b = Baz::B, $c = 99) :mixed{}
 }
 
 class Bar extends Foo {
     const Y = 2;
-    public function y($a = self::Y, $b = Baz::B, $c = 99) {}
+    public function y($a = self::Y, $b = Baz::B, $c = 99) :mixed{}
 }
 
 class Test {

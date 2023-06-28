@@ -7,14 +7,14 @@ abstract final class GetRandomPortStatics {
 //////////////////////////////////////////////////////////////////////
 
 // so we run on different range of ports every time
-function get_random_port() {
+function get_random_port() :mixed{
   if (GetRandomPortStatics::$base == -1) {
     GetRandomPortStatics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
   return ++GetRandomPortStatics::$base;
 }
 
-function bind_random_port($socket, $address) {
+function bind_random_port($socket, $address) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     if (@socket_bind($socket, $address, $port)) return $port;
@@ -22,7 +22,7 @@ function bind_random_port($socket, $address) {
   return 0;
 }
 
-function create_listen_random_port(inout $sock) {
+function create_listen_random_port(inout $sock) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     if ($sock = @socket_create_listen($port)) return $port;
@@ -30,7 +30,7 @@ function create_listen_random_port(inout $sock) {
   return 0;
 }
 
-function pfsockopen_random_port(inout $fsock, $address) {
+function pfsockopen_random_port(inout $fsock, $address) :mixed{
   $fsock = false;
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
@@ -42,7 +42,7 @@ function pfsockopen_random_port(inout $fsock, $address) {
   return 0;
 }
 
-function get_client_server() {
+function get_client_server() :mixed{
   $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
   $port = bind_random_port($server, "127.0.0.1");
   var_dump($port != 0);
@@ -59,7 +59,7 @@ function get_client_server() {
 ///////////////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_socket() {
+function main_ext_socket() :mixed{
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 

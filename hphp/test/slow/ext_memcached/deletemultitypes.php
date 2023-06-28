@@ -1,6 +1,6 @@
 <?hh
 
-function dump_types($v) {
+function dump_types($v) :mixed{
   echo gettype($v) . "\n";
 }
 <<__EntryPoint>>

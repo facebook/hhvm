@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_is_a_autoload() {
+function main_is_a_autoload() :mixed{
 var_dump(is_a(1, 'Foo'));
 var_dump(is_a(2, 'Foo', false));
 var_dump(is_a(3, 'Foo', true));

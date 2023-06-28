@@ -66,7 +66,7 @@ class C6 {
   }
 }
 
-function test_unserialize($class, $s) {
+function test_unserialize($class, $s) :mixed{
   invariant(strlen($class) === strlen(C1::class),
             'string lengths must match');
 
@@ -88,7 +88,7 @@ function test_unserialize($class, $s) {
 }
 
 
-function main() {
+function main() :mixed{
   echo '== no serialization ==', "\n";
   $inst = new C1();
   var_dump($inst->f(10));
@@ -109,6 +109,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 main();
 }

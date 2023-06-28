@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1565() {
+function main_1565() :mixed{
 $command = "exit 2";
 $return = -1;
 passthru($command, inout $return);

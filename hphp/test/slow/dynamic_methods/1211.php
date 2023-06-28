@@ -1,6 +1,6 @@
 <?hh
 <<__DynamicallyCallable>>
-function bar() {
+function bar() :mixed{
   echo 'bar called';
 }
 class foo {
@@ -15,6 +15,6 @@ class foo {
 }
 
 <<__EntryPoint>>
-function main_1211() {
+function main_1211() :mixed{
 $a = new foo ();
 }

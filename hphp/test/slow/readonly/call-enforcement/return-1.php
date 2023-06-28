@@ -5,7 +5,7 @@
 function f($x): readonly int { echo ""; return $x; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   readonly f(1);
   try { f(1); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 

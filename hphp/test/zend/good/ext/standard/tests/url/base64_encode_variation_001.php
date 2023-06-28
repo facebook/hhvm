@@ -1,7 +1,7 @@
 <?hh
 
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 <<__EntryPoint>>

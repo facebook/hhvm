@@ -9,7 +9,7 @@ class logger {
   }
 }
 
-function create() {
+function create() :AsyncGenerator<mixed,mixed,void>{
   $x = 5;
   yield $x;
   $s = 'foo';
@@ -20,7 +20,7 @@ function create() {
   yield $foo;
 }
 
-function unusedarg($x, $y) {
+function unusedarg($x, $y) :AsyncGenerator<mixed,mixed,void>{
   $z = 5;
   yield darray['x' => $x, 'z' => $z];
   $s = 'foo';
@@ -30,24 +30,24 @@ function unusedarg($x, $y) {
   yield darray['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
 }
 
-function dumpgen($g) {
+function dumpgen($g) :mixed{
   foreach ($g as $v) {
     var_dump($v);
   }
 }
 
-function getargs(...$args) {
+function getargs(...$args) :AsyncGenerator<mixed,mixed,void>{
   yield 0xdeadbeef;
   yield $args;
   yield $args[3];
 }
 
-function genthrow() {
+function genthrow() :AsyncGenerator<mixed,mixed,void>{
   throw new Exception();
   yield 5;
 }
 
-function manylocals() {
+function manylocals() :AsyncGenerator<mixed,mixed,void>{
   $a = 1;
   $b = 2;
   $c = 3;

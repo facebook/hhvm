@@ -25,7 +25,7 @@ class E extends D {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $e = new E();
   echo "-- after constructor completes --\n";
   var_dump($e);

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_ereg() {
+function main_mb_ereg() :mixed{
 var_dump(!mb_ereg_match("a", "some apples"));
 var_dump(mb_ereg_match("a", "a kiwi"));
 var_dump(mb_ereg_match(".*a", "some apples"));

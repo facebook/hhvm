@@ -6,13 +6,13 @@ class F {
 }
 
 <<__NEVER_INLINE>>
-function foo(int $x, F $y) {
+function foo(int $x, F $y) :mixed{
   $z = $y->y + $x;
   return (() ==> $x + $y->x + $z)();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $q = new F;
   $q->x = 10;
   $q->y = 20;

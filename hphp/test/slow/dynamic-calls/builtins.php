@@ -1,7 +1,7 @@
 <?hh
 
 class A extends DateTime {
-  public function test() {
+  public function test() :mixed{
     $x = 'createFromFormat';
     self::$x('j-M-Y', '05-Nov-2017');
     static::$x('j-M-Y', '05-Nov-2017');
@@ -10,7 +10,7 @@ class A extends DateTime {
   }
 }
 
-function test() {
+function test() :mixed{
   $x = 'count'; $x(varray[]);
 
   $x = 'HH\Vector::fromItems'; $x(varray[]);
@@ -31,7 +31,7 @@ function test() {
 }
 
 <<__EntryPoint, __DynamicallyCallable>>
-function main_builtins() {
+function main_builtins() :mixed{
   test();
   echo "======================================================\n";
   test();

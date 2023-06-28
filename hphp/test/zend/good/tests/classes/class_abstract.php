@@ -1,7 +1,7 @@
 <?hh
 
 abstract class base {
-    function show() {
+    function show() :mixed{
         echo "base\n";
     }
 }

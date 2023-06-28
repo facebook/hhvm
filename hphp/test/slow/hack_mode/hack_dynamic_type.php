@@ -23,7 +23,7 @@ function test() : void {
 
 
 <<__EntryPoint>>
-function main_hack_dynamic_type() {
+function main_hack_dynamic_type() :mixed{
 test();
 var_dump("done");
 }

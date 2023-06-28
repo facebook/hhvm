@@ -2,8 +2,8 @@
 
 class test {
 
-    function foo() {}
-    function foo() {}
+    function foo() :mixed{}
+    function foo() :mixed{}
 
 }
 <<__EntryPoint>> function main(): void {

@@ -1,6 +1,6 @@
 <?hh
 
-function f(darray $a = null, $e) {
+function f(darray $a = null, $e) :mixed{
   if (is_int($e) || is_string($e)) {
     $a[$e] ??= darray[];
     $a[$e]['foo'] = 30;
@@ -12,7 +12,7 @@ function f(darray $a = null, $e) {
   }
   var_dump($a, $x);
 }
-function g($x, $y) {
+function g($x, $y) :mixed{
   $x[$y]['foo'] = 30;
   $x[$y]['bar'] = 30;
   $z = $x[$y]['bar'];
@@ -22,7 +22,7 @@ function g($x, $y) {
   }
   return $x;
 }
-function h($x, $y) {
+function h($x, $y) :mixed{
   if ($x) {
     $x[$y]['foo'] = 30;
     $x[$y]['bar'] = 30;
@@ -31,7 +31,7 @@ function h($x, $y) {
 }
 
 <<__EntryPoint>>
-function main_534() {
+function main_534() :mixed{
 f(darray[], 'e');
 f(darray['e' => darray['baz' => 40]], 'e');
 var_dump(f(darray['y' => darray[]], 'y'));

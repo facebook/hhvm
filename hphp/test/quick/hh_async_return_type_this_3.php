@@ -1,5 +1,5 @@
 <?hh
-function handler($errno, $errmsg) {
+function handler($errno, $errmsg) :mixed{
   $pos = strpos($errmsg, ", Closure");
   if ($pos !== false) {
     $errmsg = substr($errmsg, 0, $pos) . ", Closure given";
@@ -17,7 +17,7 @@ function handler($errno, $errmsg) {
 
 type my_t = int;
 
-async function f1($p) { return $p; }
+async function f1($p) :Awaitable<mixed>{ return $p; }
 async function f2($p): Awaitable<int> { return $p; }
 async function f2_soft($p): <<__Soft>> Awaitable<int> { return $p; }
 async function f3($p): Awaitable<string> { return $p; }
@@ -68,13 +68,13 @@ class B extends A {
   public async function f21_soft(): <<__Soft>> Awaitable<this> { return $this; }
   public async function f22($p): Awaitable<this> { return $p; }
   public async function f22_soft($p): <<__Soft>> Awaitable<this> { return $p; }
-  public static function testfunc() {}
+  public static function testfunc() :mixed{}
 }
 class C extends B {}
 
-function testfunc() {}
+function testfunc() :mixed{}
 
-function call_wrapper($fn, $arg) {
+function call_wrapper($fn, $arg) :mixed{
   try {
     HH\Asio\join($fn($arg));
   } catch (Exception $e) {
@@ -82,7 +82,7 @@ function call_wrapper($fn, $arg) {
   }
 }
 
-function main() {
+function main() :mixed{
   for ($i = 1; $i <= 20; $i++) {
     foreach (varray['', '_soft'] as $suffix) {
       if ($suffix !== '' && $i === 1) {

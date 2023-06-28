@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_json_decode() {
+function main_json_decode() :mixed{
 $arr = darray["fbid" => 101501853510151001];
 var_dump(json_decode(json_encode($arr), true));
 

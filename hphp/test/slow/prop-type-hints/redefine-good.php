@@ -432,7 +432,7 @@ class G extends F {
   public Alias12 $p50;
   public ?Alias1 $p51;
 
-  public static function test() {
+  public static function test() :mixed{
     new A();
     new B();
     new C();

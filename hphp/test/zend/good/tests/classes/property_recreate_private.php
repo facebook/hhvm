@@ -1,16 +1,16 @@
 <?hh
 class C {
     private $p = 'test';
-    function unsetPrivate() {
+    function unsetPrivate() :mixed{
         unset($this->p);
     }
-    function setPrivate() {
+    function setPrivate() :mixed{
         $this->p = 'changed';
     }
 }
 
 class D extends C {
-    function setP() {
+    function setP() :mixed{
         $this->p = 'changed in D';
     }
 }

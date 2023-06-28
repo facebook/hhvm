@@ -1,26 +1,26 @@
 <?hh
 
 class X {
-  public function a() {
+  public function a() :mixed{
  var_dump(get_class_methods($this));
  }
-  protected function b() {
+  protected function b() :mixed{
 }
-  private function c() {
+  private function c() :mixed{
 }
-  final function d() {
+  final function d() :mixed{
 }
-  public function e() {
+  public function e() :mixed{
 }
 }
 class Y {
-  public function a() {
+  public function a() :mixed{
  var_dump(get_class_methods($this));
  }
 }
 
 <<__EntryPoint>>
-function main_1334() {
+function main_1334() :mixed{
 $x = new X;
 $x->a();
 $y = new Y;

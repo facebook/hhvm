@@ -15,6 +15,6 @@ async function geny(): Awaitable<void> {}
 async function genz(): Awaitable<int> { return 43; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

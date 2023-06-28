@@ -1,16 +1,16 @@
 <?hh
 
 class A {
-  public function d() {}
+  public function d() :mixed{}
 }
 
 class B extends ReflectionClass {}
 
-<<__DynamicallyCallable>> function c() {}
+<<__DynamicallyCallable>> function c() :mixed{}
 
 
 <<__EntryPoint>>
-function main_is_hack_003() {
+function main_is_hack_003() :mixed{
 $a = new ReflectionClass('A');
 $b = new ReflectionClass('B');
 $c = new ReflectionFunction('c');

@@ -96,7 +96,7 @@ abstract final class DefaultargsStatics {
 }
 
 <<__Memoize>>
-function defaultArgs(int $a, int $b = 5) {
+function defaultArgs(int $a, int $b = 5) :mixed{
   return ($a * $b) + DefaultargsStatics::$i++;
 }
 
@@ -114,7 +114,7 @@ abstract final class BoolnoretStatics {
 }
 
 <<__Memoize>>
-function boolNoRet(bool $a) {return ($a ? 42 : -42) + BoolnoretStatics::$i++;}
+function boolNoRet(bool $a) :mixed{return ($a ? 42 : -42) + BoolnoretStatics::$i++;}
 
 interface I extends HH\IMemoizeParam {}
 
@@ -128,11 +128,11 @@ abstract final class MemoizeobjStatics {
 }
 
 <<__Memoize>>
-function memoizeObj(I $obj) { return MemoizeobjStatics::$i++; }
+function memoizeObj(I $obj) :mixed{ return MemoizeobjStatics::$i++; }
 
 
 <<__EntryPoint>>
-function main_args() {
+function main_args() :mixed{
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';

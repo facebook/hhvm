@@ -7,7 +7,7 @@ class t
     }
 
     function __sleep()
-    {
+:mixed    {
         echo "__sleep called\n";
         return varray['a','b'];
     }

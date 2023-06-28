@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1571() {
+function main_1571() :mixed{
 $str = '';
 $arr1 = varray['a', 'b'];
 $arr2 = $arr1;

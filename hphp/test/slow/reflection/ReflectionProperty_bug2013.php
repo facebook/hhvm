@@ -6,7 +6,7 @@ class foo
 
 
 <<__EntryPoint>>
-function main_reflection_property_bug2013() {
+function main_reflection_property_bug2013() :mixed{
 error_reporting(-1);
 
 $foo  = new foo;

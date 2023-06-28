@@ -2,14 +2,14 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handler<>);
   handler(E_NOTICE, 'my test', __FILE__, __LINE__);
   trigger_error('foobar');
 }
 
 class Handler {
-  static function derp($errno, $errstr, $errfile, $errline, ...) {
+  static function derp($errno, $errstr, $errfile, $errline, ...) :mixed{
     $errnames = darray[
       E_NOTICE => 'E_NOTICE',
       E_WARNING => 'E_WARNING',
@@ -19,7 +19,7 @@ class Handler {
   }
 }
 
-function handler(...$args) {
+function handler(...$args) :mixed{
   $h = __hhvm_intrinsics\launder_value(Handler::class);
   $h::derp(...$args);
 }

@@ -19,7 +19,7 @@ function bar(MyAlias $a) : MyAlias {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo());
   var_dump(bar(MyEnum::BB));
   MyEnum::assertAll(vec[A::class]);

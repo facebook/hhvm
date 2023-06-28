@@ -1,18 +1,18 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
 //////////////////////////////////////////////////////////////////////
 
 // Php doesn't support \u escapes.
-function getunicode($x) { return json_decode("\"" . $x . "\""); }
+function getunicode($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
-function detect_and_convert_to_utf8($bytes, $utf8) {
+function detect_and_convert_to_utf8($bytes, $utf8) :mixed{
   $detector = new EncodingDetector();
   $detector->setText($bytes);
   $match = $detector->detect();
@@ -24,7 +24,7 @@ function detect_and_convert_to_utf8($bytes, $utf8) {
   return $match->getUTF8() == $utf8;
 }
 
-function test_basics() {
+function test_basics() :mixed{
   // This is as unmistakably UTF-8 as it gets.
   $utf8_snowman_with_bom = getunicode("\\uFEFF\\u2603");
 
@@ -38,7 +38,7 @@ function test_basics() {
   VERIFY($match->getUTF8() == $utf8_snowman_with_bom);
 }
 
-function test_cannot_detect() {
+function test_cannot_detect() :mixed{
   $detector = new EncodingDetector();
 
   // The detector has no idea what to do with this.
@@ -47,7 +47,7 @@ function test_cannot_detect() {
   VERIFY($match->isValid() == false);
 }
 
-function test_declared_encoding() {
+function test_declared_encoding() :mixed{
   // Right now (ICU 4.6), this API doesn't actually do anything, but
   // let's at least verify it doesn't crash.
   $detector = new EncodingDetector();
@@ -59,11 +59,11 @@ function test_declared_encoding() {
   VERIFY($match->getUTF8() == "Yo!");
 }
 
-function test_hello_world() {
+function test_hello_world() :mixed{
   VERIFY(detect_and_convert_to_utf8("Hello, world!", "Hello, world!") == true);
 }
 
-function test_windows_1252() {
+function test_windows_1252() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "Toda Europa ley\xf3 Don Quijote como una s\xe1tira.",
     getunicode('Toda Europa ley\u00f3 Don Quijote como una s\u00e1tira.'))
@@ -83,7 +83,7 @@ function test_windows_1252() {
      'Jahres\u201C ausgezeichnet, kommt zur Welt.')) == true);
 }
 
-function test_windows_1250() {
+function test_windows_1250() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "Do Wikipedie m\xf9\x9e" ."e p\xf8isp\xedvat kdokoliv.",
     getunicode('Do Wikipedie m\u016f\u017ee p\u0159isp\u00edvat kdokoliv.'))
@@ -101,7 +101,7 @@ function test_windows_1250() {
     'Windows firmy Microsoft przeprowadzono w listopadzie 1985.')) == true);
 }
 
-function test_windows_1256() {
+function test_windows_1256() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\xe1\xc7 \xc3\xca\xdf\xe1\xe3 \xc7\xe1\xda\xd1\xc8\xed\xc9",
     getunicode(
@@ -127,7 +127,7 @@ function test_windows_1256() {
     '\u064a\u0631 \u0631\u0628\u062d\u064a\u0629.')) == true);
 }
 
-function test_shift_jis() {
+function test_shift_jis() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\x81w\x82\xc6\x82\xc8\x82\xe8\x82\xcc\x83g\x83g\x83\x8d\x81x\x82\xcd\x81".
     "A\x83X\x83^\x83W\x83I\x83W\x83u\x83\x8a\x90\xa7\x8d\xec\x82\xcc\x93\xfa".
@@ -157,7 +157,7 @@ function test_shift_jis() {
   //   "\u4e16\u754c\u4eba\u6a29\u5ba3\u8a00") == true);
 }
 
-function test_euc_jp() {
+function test_euc_jp() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\xb2\xbf\xbf\xcd\xa4\xe2\xa1\xa2\xa4\xdb\xa4\xb7\xa4\xa4\xa4\xde\xa4\xde".
     "\xa4\xcb\xc2\xe1\xca\xe1\xa1\xa2\xb9\xb4\xb6\xd8\xa1\xa2\xcb\xf4\xa4\xcf".
@@ -177,7 +177,7 @@ function test_euc_jp() {
     '\u8a18\u4e8b\u3002')) == true);
 }
 
-function test_iso_2022_jp() {
+function test_iso_2022_jp() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\x1b\$B%-%M%F%#%C%/%3%M%/%7%g%s!J\x1b(Bkinetic connection\x1b\$B!K\$O\x1b(B1".
     "986\x1b\$BG/\$K%=%K!<\$,\x1b(BMSX2\x1b\$B\$GH/Gd\$7\$?%Q%:%k%2!<%`!#\x1b(B",
@@ -191,7 +191,7 @@ function test_iso_2022_jp() {
     getunicode("\u7a76\u6975!!\u5909\u614b\u4eee\u9762")) == true);
 }
 
-function test_gb2312() {
+function test_gb2312() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\xca\xc7\xd2\xbb\xb8\xf6\xd3\xef\xd1\xd4\xa1\xa2\xc4\xda\xc8\xdd\xbf\xaa".
     "\xb7\xc5\xb5\xc4\xcd\xf8\xc2\xe7\xb0\xd9\xbf\xc6\xc8\xab\xca\xe9\xbc\xc6".
@@ -212,7 +212,7 @@ function test_gb2312() {
   //   "\u5434\u54e5\u7a9f") == true);
 }
 
-function test_big5() {
+function test_big5() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "1\xa1]\xa4@\xa1^\xacO0\xbbP2\xa4\xa7\xb6\xa1\xaa\xba\xa6\xdb\xb5M\xbc\xc6".
     "\xa1". "A\xacO\xb3\xcc\xa4p\xaa\xba\xa5\xbf\xa9_\xbc\xc6\xa1". "C",
@@ -232,7 +232,7 @@ function test_big5() {
   //   "\u5433\u54e5\u7a9f") == true);
 }
 
-function test_koi8r() {
+function test_koi8r() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\xeb\xd7\xc5\xc2\xc5\xcb \xd0\xc5\xd2\xd7\xc1\xd1 \xd0\xcf \xd0\xcc\xcf".
     "\xdd\xc1\xc4\xc9 \xc9 \xd7\xd4\xcf\xd2\xc1\xd1 \xd0\xcf \xce\xc1\xd3\xc5".
@@ -259,7 +259,7 @@ function test_koi8r() {
     '\u044a\u0437\u0445\u043e\u0434\u043d\u0430')) == true);
 }
 
-function test_windows_1251() {
+function test_windows_1251() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     "\xce\xf7\xe5 \xed\xe0\xf8, \xea\xee\xbc \xf1\xe8 \xed\xe0 \xed\xe5\xe1".
     "\xe5\xf1\xe0\xf2\xe0",
@@ -282,7 +282,7 @@ function test_windows_1251() {
     '\u0440\u044f\u0434\u0430 \u0445\u0438\u0449\u043d\u044b\u0445.')) == true);
 }
 
-function test_utf8() {
+function test_utf8() :mixed{
   VERIFY(detect_and_convert_to_utf8(
     getunicode(
     "\u10e8\u10d8\u10dc\u10d0\u10e3\u10e0\u10d8 \u10d9\u10d0\u10e2\u10d0"),
@@ -294,7 +294,7 @@ function test_utf8() {
     getunicode('\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e25\u0e31\u0e01')) == true);
 }
 
-function test_utf16() {
+function test_utf16() :mixed{
   // The detector only handles UTF-16 if there's a BOM at the front.
   $utf16 =
     "\xff\xfeH\x00". "e\x00l\x00l\x00o\x00,\x00 \x00w\x00o\x00r\x00l\x00".
@@ -306,7 +306,7 @@ function test_utf16() {
 
 
 <<__EntryPoint>>
-function main_ucsdet() {
+function main_ucsdet() :mixed{
 test_basics();
 test_cannot_detect();
 test_declared_encoding();

@@ -1,16 +1,16 @@
 <?hh
 
-function block() {
+function block() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
-async function ret() {
+async function ret() :Awaitable<mixed>{
   return 0;
 }
 
-async function inFunc() {
+async function inFunc() :Awaitable<mixed>{
   $x = async function($a) { return $a; };
   $y = async function($a) { await block(); return $a; };
   $xval = await $x(1);
@@ -21,7 +21,7 @@ async function inFunc() {
 
 
 class F {
-  static async function inMeth() {
+  static async function inMeth() :Awaitable<mixed>{
     $x = async function($a) { return $a; };
     $y = async function($a) { await block(); return $a; };
     $xval = await $x(3);
@@ -32,7 +32,7 @@ class F {
 }
 
 <<__EntryPoint>>
-function main_closure() {
+function main_closure() :mixed{
 ;
 
 $global = async function () {

@@ -3,7 +3,7 @@ class foo {
     function __construct () {
         $this->bar('1');
     }
-    private function bar ( $param ) {
+    private function bar ( $param ) :mixed{
         echo 'Called function foo:bar('.$param.')'."\n";
     }
 }

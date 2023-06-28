@@ -1,6 +1,6 @@
 <?hh
 
-function test_simple() {
+function test_simple() :mixed{
   $arr = varray[
     varray[1,2],
     null,
@@ -11,7 +11,7 @@ function test_simple() {
   }
 }
 
-function test_nested() {
+function test_nested() :mixed{
   $arr = varray[
     varray[1, varray[2,3], 4],
     varray[5, varray[6,7], 8],
@@ -24,7 +24,7 @@ function test_nested() {
   }
 }
 
-function test_single() {
+function test_single() :mixed{
   $arr = varray[
     varray[1], varray[2]
   ];
@@ -33,23 +33,23 @@ function test_single() {
   }
 }
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   yield varray[1,2] => 3;
   yield varray[4,5] => 6;
 }
-function test_key() {
+function test_key() :mixed{
   foreach (gen() as list($a, $b) => $c) {
     var_dump($c, $a, $b);
   }
 }
 
-function gen2() {
+function gen2() :AsyncGenerator<mixed,mixed,void>{
   yield varray[1,varray[2,3],4] => varray[varray[1,2],varray[3,4]];
   yield varray[1,null,2] => varray[null, varray[1,2]];
   yield null => null;
   yield varray[1,varray[2,3,4],5] => varray[varray[1,2],varray[3,4],varray[5,6]];
 }
-function test_complex() {
+function test_complex() :mixed{
   foreach (gen2() as
            list($a, list($b, $c), $d) =>
            list(list($e, $f), list($g, $h))) {

@@ -1,6 +1,6 @@
 <?hh
 
-function run($fn) {
+function run($fn) :mixed{
   try {
     print(json_encode($fn())."\n");
   } catch (Exception $e) {
@@ -75,7 +75,7 @@ function set3Tuple($x): varray<int> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   run(() ==> set0(3));
   run(() ==> set1(3));
   run(() ==> setNew(3));

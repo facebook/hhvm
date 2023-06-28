@@ -3,7 +3,7 @@
 class MyObject
 {
     function fail()
-    {
+:mixed    {
         throw new Exception();
     }
 
@@ -14,7 +14,7 @@ class MyObject
     }
 
     static function test()
-    {
+:mixed    {
         try
         {
             new MyObject();

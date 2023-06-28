@@ -1,6 +1,6 @@
 <?hh
 
-function f<reify T>(mixed $x) {
+function f<reify T>(mixed $x) :mixed{
   try {
     $x as T;
     var_dump("yes");

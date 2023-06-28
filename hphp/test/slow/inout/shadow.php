@@ -1,15 +1,15 @@
 <?hh
 
-function wrap($x) {
+function wrap($x) :mixed{
   return ', '.$x.'!';
 }
 
-function io(inout $x, $y) {
+function io(inout $x, $y) :mixed{
   $x = 'hello';
   return $y;
 }
 
-function main() {
+function main() :mixed{
   $f = varray[1, 'world', 3];
   $ret = io(inout $f, wrap($f[1]));
   echo $f.$ret."\n";
@@ -37,6 +37,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_shadow() {
+function main_shadow() :mixed{
 main();
 }

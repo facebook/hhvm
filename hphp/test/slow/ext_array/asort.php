@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_asort() {
+function main_asort() :mixed{
 $fruits = darray[
   "d" => "lemon",
   "a" => "orange",

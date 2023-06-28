@@ -4,7 +4,7 @@
 // methods
 
 class A {
-  public static function foo() {
+  public static function foo() :mixed{
     echo 'foo called';
   }
 }
@@ -14,7 +14,7 @@ class B extends A {
 
 
 <<__EntryPoint>>
-function main_1201() {
+function main_1201() :mixed{
 fb_intercept2('A::foo', function($_1, $called_on, inout $_3) {
   var_dump($called_on);
   return shape('value' => null);

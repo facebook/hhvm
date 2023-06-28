@@ -1,7 +1,7 @@
 <?hh
 
 abstract class C1 {
-  public function foo() {
+  public function foo() :mixed{
     $x = $this->f1();
     if ($x is int) return "int";
     return "string";
@@ -17,6 +17,6 @@ class C3 extends C1 {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(__hhvm_intrinsics\launder_value(new C2())->foo());
 }

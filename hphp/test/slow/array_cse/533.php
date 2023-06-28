@@ -1,12 +1,12 @@
 <?hh
 
-function f($x, $y) {
+function f($x, $y) :mixed{
   try {
     var_dump($x[$y]);
     if ($x[$y]) print "HI\n";
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-function g(inout $x, $y) {
+function g(inout $x, $y) :mixed{
   try {
     var_dump($x[$y]);
     if ($x[$y]) print "HI\n";
@@ -14,7 +14,7 @@ function g(inout $x, $y) {
 }
 
 <<__EntryPoint>>
-function main_533() {
+function main_533() :mixed{
   f(null, 0);
   f(varray[0], 0);
   f(varray[0], 'noidx');

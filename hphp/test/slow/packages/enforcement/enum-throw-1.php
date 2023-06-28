@@ -2,7 +2,7 @@
 
 module a.b;
 
-function dyn($x, $y, $enum_class) {
+function dyn($x, $y, $enum_class) :mixed{
   try {
     var_dump($x::FOO);
   } catch (Exception $e) {
@@ -16,7 +16,7 @@ function dyn($x, $y, $enum_class) {
 }
 
 <<__EntryPoint>>
-function main_enum_throw_1() {
+function main_enum_throw_1() :mixed{
   try {
     var_dump(EnumFoo::FOO);
   } catch (Exception $e) {

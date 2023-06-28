@@ -7,7 +7,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main_1851() {
+function main_1851() :mixed{
 $foo = new Foo;
 $foo->a = function ($x) {
  echo '!' . $x;

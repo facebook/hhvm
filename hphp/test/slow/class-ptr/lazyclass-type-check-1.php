@@ -4,16 +4,16 @@ class C {}
 
 type X = Stringish;
 
-function foo(Stringish $x) {
+function foo(Stringish $x) :mixed{
   echo "in foo\n";
 }
 
-function foo2(X $x) {
+function foo2(X $x) :mixed{
   echo "in foo2\n";
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo("C");
   foo(C::class);
 

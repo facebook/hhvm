@@ -1,13 +1,13 @@
 <?hh
 
-function varray_cases() {
+function varray_cases() :mixed{
   return vec[
     tuple(varray[1, 2, 3], varray[1, 2, 3]),
     tuple(varray[], varray[]),
   ];
 }
 
-function darray_cases() {
+function darray_cases() :mixed{
   return vec[
     tuple(darray['foo' => 1, 'bar' => 3], darray['foo' => 1, 'bar' => 3]),
     tuple(darray[0 => 1, 1 => 2], darray[0 => 1, 1 => 2]),
@@ -15,7 +15,7 @@ function darray_cases() {
   ];
 }
 
-function roundtrip($input) {
+function roundtrip($input) :mixed{
   $ret = null;
   $out = fb_unserialize(
     fb_serialize($input, FB_SERIALIZE_VARRAY_DARRAY),
@@ -27,7 +27,7 @@ function roundtrip($input) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foreach (varray_cases() as list($in, $exp)) {
     $out = roundtrip($in);
     invariant(

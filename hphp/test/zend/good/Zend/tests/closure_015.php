@@ -1,5 +1,5 @@
 <?hh
-function myErrorHandler($errno, $errstr, $errfile, $errline) {
+function myErrorHandler($errno, $errstr, $errfile, $errline) :mixed{
   echo "Error: $errstr at $errfile($errline)\n"; return true;
 }
 <<__EntryPoint>> function main(): void {

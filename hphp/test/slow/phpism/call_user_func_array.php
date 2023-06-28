@@ -1,5 +1,5 @@
 <?hh
-function exampleFunc($arg1, $arg2) {
+function exampleFunc($arg1, $arg2) :mixed{
     echo($arg1);
     echo($arg2);
 }

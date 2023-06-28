@@ -1,7 +1,7 @@
 <?hh
 
 trait Too {
-  static function bar() {
+  static function bar() :mixed{
     $a = function () {
  var_dump(__CLASS__, __FUNCTION__);
 }
@@ -14,6 +14,6 @@ class Foo {
  }
 
 <<__EntryPoint>>
-function main_2086() {
+function main_2086() :mixed{
 Foo::bar();
 }

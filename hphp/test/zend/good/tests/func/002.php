@@ -5,7 +5,7 @@ abstract final class BlahStatics {
   public static $yo =0;
 }
 function blah()
-{
+:mixed{
 
   echo "hey=".BlahStatics::$hey++.", ",BlahStatics::$yo--."\n";
 }

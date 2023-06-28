@@ -9,7 +9,7 @@ function print_key_status(string $key): void {
 }
 
 <<__EntryPoint>>
-function main_apc_extend_ttl() {
+function main_apc_extend_ttl() :mixed{
   apc_store('key_to_extend', 123, 3);
   apc_store('key_to_not_extend', 234, 3);
   apc_store('key_to_extend_later', 345, 3);

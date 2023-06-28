@@ -20,7 +20,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   try {
     $c = new C();
   } catch (Exception $_) {}

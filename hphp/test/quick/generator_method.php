@@ -1,12 +1,12 @@
 <?hh
 
 class A {
-  public function Gen() {
+  public function Gen() :AsyncGenerator<mixed,mixed,void>{
     var_dump($this);
     yield 1; yield 2; yield 3;
   }
 
-  public static function SGen() {
+  public static function SGen() :AsyncGenerator<mixed,mixed,void>{
     var_dump(static::class);
     yield 4; yield 5; yield 6;
   }

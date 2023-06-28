@@ -1,13 +1,13 @@
 <?hh
 
 trait THello1 {
-  private function hello() {
+  private function hello() :mixed{
     echo 'Hello';
   }
 }
 
 trait THello2 {
-  private function hello() {
+  private function hello() :mixed{
     echo 'Hello';
   }
 }

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_power_multiply_equivalence() {
+function main_power_multiply_equivalence() :mixed{
   var_dump(3 ** 2);
   var_dump(3 ** 2.0);
   var_dump(3 ** 4);

@@ -1,6 +1,6 @@
 <?hh
 
-function print_cover_maps(dict<string, vec<int>> $map) {
+function print_cover_maps(dict<string, vec<int>> $map) :mixed{
   foreach ($map as $path => $lines) {
     if ($lines[0] === 1) {
       // Don't count the pseudomain
@@ -26,7 +26,7 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   A_foo(false); A_foo(false);
   B_foo();      B_foo();
   HH\enable_per_file_coverage(keyset[

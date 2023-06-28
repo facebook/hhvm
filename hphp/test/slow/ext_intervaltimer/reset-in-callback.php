@@ -1,6 +1,6 @@
 <?hh
 
-function ping($w) {
+function ping($w) :mixed{
 
 
   ExtIntervaltimerResetInCallback::$x++;

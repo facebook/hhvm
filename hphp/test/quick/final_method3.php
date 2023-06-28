@@ -1,6 +1,6 @@
 <?hh
 trait T {
-  final public function foo() {
+  final public function foo() :mixed{
     return 'T::foo';
   }
 }
@@ -8,7 +8,7 @@ class Foo {
   use T;
 }
 class Bar extends Foo {
-  final public function foo() {
+  final public function foo() :mixed{
     return 'Bar::foo';
   }
 }

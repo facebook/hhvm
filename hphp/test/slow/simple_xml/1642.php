@@ -1,6 +1,6 @@
 <?hh
 
-function convert_simplexml_to_array($sxml) {
+function convert_simplexml_to_array($sxml) :mixed{
   $arr = darray[];
   if ($sxml) {
     foreach ($sxml as $k => $v) {
@@ -27,7 +27,7 @@ function convert_simplexml_to_array($sxml) {
 
 
 <<__EntryPoint>>
-function main_1642() {
+function main_1642() :mixed{
 $xml = <<<EOM
 <root list="true">
   <node key="key1" list="true">

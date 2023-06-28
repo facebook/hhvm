@@ -1,13 +1,13 @@
 <?hh
 
-function bar() {
+function bar() :mixed{
 }
-function foo() {
+function foo() :mixed{
   $foo = bar();
   unset($foo);
 }
 
 <<__EntryPoint>>
-function main_1744() {
+function main_1744() :mixed{
 foo();
 }

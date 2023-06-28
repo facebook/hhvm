@@ -1,84 +1,84 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-<<__Memoize>> function freeFunc1() {
+<<__Memoize>> function freeFunc1() :mixed{
   echo "freeFunc1()\n";
   return 123;
 }
-<<__Memoize>> function freeFunc2($a) {
+<<__Memoize>> function freeFunc2($a) :mixed{
   echo "freeFunc2()\n";
   return $a;
 }
-<<__Memoize>> function freeFunc3($a, $b, $c) {
+<<__Memoize>> function freeFunc3($a, $b, $c) :mixed{
   echo "freeFunc3()\n";
   return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
 }
-<<__Memoize>> function freeFunc4() {
+<<__Memoize>> function freeFunc4() :mixed{
   echo "freeFunc4()\n";
   return null;
 }
-<<__Memoize>> function freeFunc5($a) {
+<<__Memoize>> function freeFunc5($a) :mixed{
   echo "freeFunc5()\n";
   return null;
 }
 
 class Cls1 {
   <<__Memoize>>
-  public static function staticFunc1() {
+  public static function staticFunc1() :mixed{
     echo "Cls1::staticFunc1()\n";
     return 123;
   }
 
   <<__Memoize>>
-  public static function staticFunc2($a) {
+  public static function staticFunc2($a) :mixed{
     echo "Cls1::staticFunc2()\n";
     return $a;
   }
 
   <<__Memoize>>
-  public static function staticFunc3($a, $b, $c) {
+  public static function staticFunc3($a, $b, $c) :mixed{
     echo "Cls1::staticFunc3()\n";
     return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
   }
 
   <<__Memoize>>
-  public static function staticFunc4() {
+  public static function staticFunc4() :mixed{
     echo "Cls1::staticFunc4()\n";
     return null;
   }
 
   <<__Memoize>>
-  public static function staticFunc5($a) {
+  public static function staticFunc5($a) :mixed{
     echo "Cls1::staticFunc5()\n";
     return null;
   }
 
   <<__Memoize>>
-  public function func1() {
+  public function func1() :mixed{
     echo "Cls1::func1()\n";
     return 123;
   }
 
   <<__Memoize>>
-  public function func2($a) {
+  public function func2($a) :mixed{
     echo "Cls1::func2()\n";
     return $a;
   }
 
   <<__Memoize>>
-  public function func3($a, $b, $c) {
+  public function func3($a, $b, $c) :mixed{
     echo "Cls1::func3()\n";
     return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
   }
 
   <<__Memoize>>
-  public function func4() {
+  public function func4() :mixed{
     echo "Cls1::func4()\n";
     return null;
   }
 
   <<__Memoize>>
-  public function func5($a) {
+  public function func5($a) :mixed{
     echo "Cls1::func5()\n";
     return null;
   }
@@ -86,7 +86,7 @@ class Cls1 {
 
 class Cls2 {
   <<__Memoize>>
-  public function func() {
+  public function func() :mixed{
     echo "Cls2::func()\n";
     return 123;
   }
@@ -94,7 +94,7 @@ class Cls2 {
 
 class Cls3 {
   <<__Memoize>>
-  public function func($a) {
+  public function func($a) :mixed{
     echo "Cls3::func()\n";
     return $a;
   }
@@ -102,7 +102,7 @@ class Cls3 {
 
 class Cls4 {
   <<__Memoize>>
-  public function func($a, $b, $c) {
+  public function func($a, $b, $c) :mixed{
     echo "Cls4::func()\n";
     return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
   }
@@ -110,7 +110,7 @@ class Cls4 {
 
 class Cls5 {
   <<__Memoize>>
-  public function func() {
+  public function func() :mixed{
     echo "Cls5::func()\n";
     return null;
   }
@@ -118,7 +118,7 @@ class Cls5 {
 
 class Cls6 {
   <<__Memoize>>
-  public function func($a) {
+  public function func($a) :mixed{
     echo "Cls6::func()\n";
     return null;
   }
@@ -126,13 +126,13 @@ class Cls6 {
 
 trait Trait1 {
   <<__Memoize>>
-  public function func1() {
+  public function func1() :mixed{
     echo "Trait1::func1()\n";
     return 123;
   }
 
   <<__Memoize>>
-  public static function staticFunc1() {
+  public static function staticFunc1() :mixed{
     echo "Trait1::staticFunc1()\n";
     return 123;
   }
@@ -140,13 +140,13 @@ trait Trait1 {
 
 trait Trait2 {
   <<__Memoize>>
-  public function func2($a) {
+  public function func2($a) :mixed{
     echo "Trait2::func2()\n";
     return $a;
   }
 
   <<__Memoize>>
-  public static function staticFunc2($a) {
+  public static function staticFunc2($a) :mixed{
     echo "Trait2::staticFunc2()\n";
     return $a;
   }
@@ -154,13 +154,13 @@ trait Trait2 {
 
 trait Trait3 {
   <<__Memoize>>
-  public function func3($a, $b, $c) {
+  public function func3($a, $b, $c) :mixed{
     echo "Trait3::func3()\n";
     return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
   }
 
   <<__Memoize>>
-  public static function staticFunc3($a, $b, $c) {
+  public static function staticFunc3($a, $b, $c) :mixed{
     echo "Trait3::staticFunc3()\n";
     return (string)$a . ' ' . (string)$b . ' ' . (string)$c;
   }
@@ -168,13 +168,13 @@ trait Trait3 {
 
 trait Trait4 {
   <<__Memoize>>
-  public function func4() {
+  public function func4() :mixed{
     echo "Trait4::func4()\n";
     return null;
   }
 
   <<__Memoize>>
-  public static function staticFunc4() {
+  public static function staticFunc4() :mixed{
     echo "Trait4::staticFunc4()\n";
     return null;
   }
@@ -182,13 +182,13 @@ trait Trait4 {
 
 trait Trait5 {
   <<__Memoize>>
-  public function func5($a) {
+  public function func5($a) :mixed{
     echo "Trait5::func5()\n";
     return null;
   }
 
   <<__Memoize>>
-  public static function staticFunc5($a) {
+  public static function staticFunc5($a) :mixed{
     echo "Trait5::staticFunc5()\n";
     return null;
   }
@@ -210,7 +210,7 @@ class Cls8 {
   use Trait5;
 }
 
-function runFuncs($c1, $c2, $c3, $c4, $c5) {
+function runFuncs($c1, $c2, $c3, $c4, $c5) :mixed{
   var_dump($c1());
   var_dump($c1());
   var_dump($c1('abc'));
@@ -251,7 +251,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c5('abc', 123));
 }
 
-function runFreeFuncs() {
+function runFreeFuncs() :mixed{
   echo "==========================================\n";
   echo "Testing free functions....\n\n";
   runFuncs('freeFunc1',
@@ -261,7 +261,7 @@ function runFreeFuncs() {
            'freeFunc5');
 }
 
-function runStaticFuncs() {
+function runStaticFuncs() :mixed{
   echo "==========================================\n";
   echo "Testing static functions....\n\n";
   runFuncs('Cls1::staticFunc1',
@@ -271,7 +271,7 @@ function runStaticFuncs() {
            'Cls1::staticFunc5');
 }
 
-function runMethods() {
+function runMethods() :mixed{
   echo "==========================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls1();
@@ -289,7 +289,7 @@ function runMethods() {
            varray[$b, 'func5']);
 }
 
-function runSingleMethods() {
+function runSingleMethods() :mixed{
   echo "==========================================\n";
   echo "Testing single methods....\n\n";
   $a = new Cls2();
@@ -304,7 +304,7 @@ function runSingleMethods() {
            varray[$e, 'func']);
 }
 
-function runTraitStatics() {
+function runTraitStatics() :mixed{
   echo "==========================================\n";
   echo "Testing trait statics....\n\n";
   runFuncs('Cls7::staticFunc1',
@@ -319,7 +319,7 @@ function runTraitStatics() {
            'Cls8::staticFunc5');
 }
 
-function runTraitMethods() {
+function runTraitMethods() :mixed{
   echo "==========================================\n";
   echo "Testing trait methods....\n\n";
   $a = new Cls7();
@@ -338,7 +338,7 @@ function runTraitMethods() {
 
 
 <<__EntryPoint>>
-function main_basic() {
+function main_basic() :mixed{
 error_reporting(0);
 
 runFreeFuncs();

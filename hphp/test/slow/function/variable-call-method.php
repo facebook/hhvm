@@ -1,6 +1,6 @@
 <?hh
 
-function g() {
+function g() :mixed{
   $f = 'IntlChar::ord';
   var_dump($f(' '));
 
@@ -14,6 +14,6 @@ function g() {
 
 
 <<__EntryPoint>>
-function main_variable_call_method() {
+function main_variable_call_method() :mixed{
 g();
 }

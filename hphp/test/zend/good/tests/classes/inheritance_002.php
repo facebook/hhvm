@@ -13,7 +13,7 @@ class Child_php5 extends Base_php5 {
   }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "### PHP 5 style\n";
   $c5= new Child_php5();
 }

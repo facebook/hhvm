@@ -1,6 +1,6 @@
 <?hh
 
-function fuzz(inout $a) {
+function fuzz(inout $a) :mixed{
   $orig_a = $a;
   $a = 'fuzzed';
   return varray[
@@ -14,7 +14,7 @@ function fuzz(inout $a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $arr = darray[0 => darray[12 => varray[darray['bar' => darray[]]]],
           18 => varray[darray['hello' => darray[]]]];
   $arr[0][12][0]['bar']['x'] = 'value1';

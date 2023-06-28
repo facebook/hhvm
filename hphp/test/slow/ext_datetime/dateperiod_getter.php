@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dateperiod_getter() {
+function main_dateperiod_getter() :mixed{
 $period = new DatePeriod(
   new DateTime("2015-01-01"),
   new DateInterval("PT6H"),

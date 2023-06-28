@@ -1,23 +1,23 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-function red() {
+function red() :mixed{
   trigger_error("test triggering error");
 }
 
 <<__ALWAYS_INLINE>>
-function green() {
+function green() :mixed{
   trigger_error("test triggering error");
   red();
 }
 
 <<__ALWAYS_INLINE>>
-function blue() {
+function blue() :mixed{
   trigger_error("test triggering error");
   green();
 }
 
-function main() {
+function main() :mixed{
   blue();
 }
 <<__EntryPoint>>

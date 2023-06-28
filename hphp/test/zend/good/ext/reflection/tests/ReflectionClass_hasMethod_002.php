@@ -1,6 +1,6 @@
 <?hh
 class C {
-    function f() {}
+    function f() :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 $rc = new ReflectionClass("C");

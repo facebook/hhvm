@@ -1,6 +1,6 @@
 <?hh
 
-function bar() {
+function bar() :mixed{
   return SleepWaitHandle::create(1000);
 }
 
@@ -8,7 +8,7 @@ abstract final class FooStatics {
   public static $result_cache = darray[];
 }
 
-async function foo($uid) {
+async function foo($uid) :Awaitable<mixed>{
   if (!isset(FooStatics::$result_cache[$uid])) {
     FooStatics::$result_cache[$uid] = bar();
   }
@@ -17,7 +17,7 @@ async function foo($uid) {
 
 
 <<__EntryPoint>>
-function main_ref_count() {
+function main_ref_count() :mixed{
 $i = 0;
 while ($i++ < 15) {
   HH\Asio\join(foo(0));

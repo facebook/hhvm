@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $f = fopen(__FILE__, "r");
   var_export($f);
   echo "\n";
@@ -9,6 +9,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_resource() {
+function main_resource() :mixed{
 test();
 }

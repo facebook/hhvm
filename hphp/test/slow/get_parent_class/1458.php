@@ -1,26 +1,26 @@
 <?hh
 
 interface i {
-  function test();
+  function test():mixed;
 }
 class foo implements i {
-  function test() {
+  function test() :mixed{
     var_dump(get_parent_class());
   }
 }
 class bar extends foo {
-  function test_bar() {
+  function test_bar() :mixed{
     var_dump(get_parent_class());
   }
 }
 class goo extends bar {
-  function test_goo() {
+  function test_goo() :mixed{
     var_dump(get_parent_class());
   }
 }
 
 <<__EntryPoint>>
-function main_1458() {
+function main_1458() :mixed{
 $bar = new bar;
 $foo = new foo;
 $goo = new goo;

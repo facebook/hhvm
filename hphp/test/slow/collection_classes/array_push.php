@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $elts = varray['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
   $v = Vector {'a', 'b', 'c', 'd'};
@@ -20,7 +20,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_push() {
+function main_array_push() :mixed{
 main();
 echo "Done\n";
 }

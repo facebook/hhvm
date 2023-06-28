@@ -3,7 +3,7 @@ namespace a\b\c;
 
 use a\b\c as Test;
 
-function foo() {
+function foo() :mixed{
     echo __FUNCTION__,"\n";
 }
 <<__EntryPoint>> function main(): void {

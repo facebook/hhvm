@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
 
 $pattern=<<<_MSG_
 {0, select,

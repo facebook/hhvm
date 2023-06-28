@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     $herp->derp = 'foobar';
   } catch (Exception $e) {

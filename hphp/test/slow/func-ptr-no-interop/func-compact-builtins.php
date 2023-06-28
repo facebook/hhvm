@@ -1,9 +1,9 @@
 <?hh
 
-function foo() {}
-function bar() {}
+function foo() :mixed{}
+function bar() :mixed{}
 
-function W($f) {
+function W($f) :mixed{
   try {
     var_dump($f());
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function W($f) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   W(() ==> array_column(varray[darray[foo<> => 't1'], darray['foo' => 't2'], darray['bar' => 't3']], foo<>));
   W(() ==> array_count_values(varray[foo<>, 'foo', 1]));
   W(() ==> array_key_exists(foo<>, darray['foo' => 1]));

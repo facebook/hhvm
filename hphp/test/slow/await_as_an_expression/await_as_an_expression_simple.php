@@ -19,6 +19,6 @@ function genz(): Awaitable<int> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

@@ -2,7 +2,7 @@
 
 // Test the ConstCollection interface.
 
-function foo(ConstCollection $fv) {
+function foo(ConstCollection $fv) :mixed{
   var_dump($fv->isEmpty());
   var_dump($fv->count());
 
@@ -11,7 +11,7 @@ function foo(ConstCollection $fv) {
   }
 }
 
-function main() {
+function main() :mixed{
   $v = Vector {1, 2, 3};
   $fv = new ImmVector($v);
   foo($fv);
@@ -19,6 +19,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_const_collection() {
+function main_const_collection() :mixed{
 main();
 }

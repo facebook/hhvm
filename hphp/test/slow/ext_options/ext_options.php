@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_options() {
+function main_ext_options() :mixed{
 var_dump(dl(""));
 
 var_dump(extension_loaded("bcmath"));

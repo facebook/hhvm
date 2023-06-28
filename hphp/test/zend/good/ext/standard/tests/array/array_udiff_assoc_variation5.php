@@ -5,13 +5,13 @@
  * Alias to functions:
  */
 
-function incorrect_return_value ($val1, $val2) {
+function incorrect_return_value ($val1, $val2) :mixed{
   return varray[1];
 }
-function too_many_parameters ($val1, $val2, $val3) {
+function too_many_parameters ($val1, $val2, $val3) :mixed{
   return 1;
 }
-function too_few_parameters ($val1) {
+function too_few_parameters ($val1) :mixed{
   return 1;
 }
 <<__EntryPoint>> function main(): void {

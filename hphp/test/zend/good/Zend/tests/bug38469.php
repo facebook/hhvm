@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
 	$a = darray[];
 	$a[0] = $a;
 	var_dump($a);

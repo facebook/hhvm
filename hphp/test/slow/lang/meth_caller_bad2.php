@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  function foo() {
+  function foo() :mixed{
     $cb = meth_caller('B', 'c');
     $cb(null);
   }

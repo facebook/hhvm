@@ -7,7 +7,7 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_property_constructor() {
+function main_property_constructor() :mixed{
 $a = new Foo(42);
 
 $gotException = false;

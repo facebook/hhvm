@@ -1,31 +1,31 @@
 <?hh
 
 class A {
-  public function Gen() {
+  public function Gen() :AsyncGenerator<mixed,mixed,void>{
     var_dump($this);
     yield 1; yield 2; yield 3;
     return 11;
   }
 
-  public static function SGen() {
+  public static function SGen() :AsyncGenerator<mixed,mixed,void>{
     var_dump(static::class);
     yield 4; yield 5; yield 6;
     return 22;
   }
 }
 
-function basicGen() {
+function basicGen() :AsyncGenerator<mixed,mixed,void>{
   yield 7; yield 8;
   return 33;
 }
 
-function noReturnGen() {
+function noReturnGen() :AsyncGenerator<mixed,mixed,void>{
   yield 9; yield 10;
 }
 
 
 <<__EntryPoint>>
-function main_generator_return() {
+function main_generator_return() :mixed{
 $a = new A();
 $g = $a->Gen();
 foreach ($g as $num) { var_dump($num); }

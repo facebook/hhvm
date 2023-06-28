@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = darray[
     "10" => "string_A",
     10   => "int_A",

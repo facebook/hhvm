@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_curl_abandon() {
+function main_curl_abandon() :mixed{
 $files = Map {
   "file://" . __FILE__ => null,
   "file://" . __FILE__ . ".expectf" => null,

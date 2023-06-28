@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function pagelet_entrypoint() {
+function pagelet_entrypoint() :mixed{
 ob_start();
 echo "one";
 ob_flush();

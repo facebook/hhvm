@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_invalid() {
+function main_invalid() :mixed{
 $streams = varray[
   "data://invalid,data",
   "data://invalid-data",

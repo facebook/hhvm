@@ -10,7 +10,7 @@ function is_varray_(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_varray() {
+function main_is_expression_varray() :mixed{
 is_varray_(vec[]);
 is_varray_(dict[]);
 is_varray_(keyset[]);

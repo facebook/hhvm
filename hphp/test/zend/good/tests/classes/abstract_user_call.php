@@ -2,13 +2,13 @@
 
 abstract class test_base
 {
-    abstract function func();
+    abstract function func():mixed;
 }
 
 class test extends test_base
 {
     function func()
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
     }
 }

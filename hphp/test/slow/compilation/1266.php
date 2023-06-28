@@ -5,7 +5,7 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1266() {
+function main_1266() :mixed{
 $a = 1;
  $a = new A();
  $a->prop++;

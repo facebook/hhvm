@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_gmt_offsets() {
+function main_gmt_offsets() :mixed{
 $tzs = varray[
   'GMT+0',
   'GMT-1',

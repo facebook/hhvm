@@ -4,7 +4,7 @@ class Ref {
   public $value;
 }
 
-function testCycleBackTrace() {
+function testCycleBackTrace() :mixed{
   Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 
   $ref = new Ref();

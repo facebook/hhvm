@@ -3,7 +3,7 @@
 class Foo {
   private $prop = varray[1,2,3];
 
-  public async function genFoo() {
+  public async function genFoo() :Awaitable<mixed>{
     return async function() {
       return function() {
         $this->prop = null;
@@ -11,10 +11,10 @@ class Foo {
     };
   }
 
-  public function getter() { return $this->prop; }
+  public function getter() :mixed{ return $this->prop; }
 }
 
-function main() {
+function main() :mixed{
   $x = new Foo;
   var_dump($x->getter());
   $z = HH\Asio\join($x->genFoo());
@@ -29,6 +29,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_closure_context_003() {
+function main_closure_context_003() :mixed{
 main();
 }

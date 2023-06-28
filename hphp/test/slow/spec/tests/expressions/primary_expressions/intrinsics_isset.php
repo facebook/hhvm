@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function e() {
+function e() :mixed{
   try {
     var_dump($p);
     var_dump(isset($p));
@@ -15,7 +15,7 @@ function e() {
   }
 }
 
-function f($p) {
+function f($p) :mixed{
   var_dump($p);
   var_dump(isset($p));
 }

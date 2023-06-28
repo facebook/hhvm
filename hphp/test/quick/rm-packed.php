@@ -1,5 +1,5 @@
 <?hh
-function main($a, $i) {
+function main($a, $i) :mixed{
   unset($a[$i]);
   $a[] = 'foo';
   return $a;

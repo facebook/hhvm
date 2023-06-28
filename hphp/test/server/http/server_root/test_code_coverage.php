@@ -1,11 +1,11 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   echo "I'm FOOO\n";
 }
 
 <<__EntryPoint>>
-function main_test_code_coverage() {
+function main_test_code_coverage() :mixed{
   if (isset($_GET['enable_code_coverage'])) {
     echo "Code coverage: ".$_GET['enable_code_coverage']."\n";
   }

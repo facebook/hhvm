@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   include "prop-ub-class-1.inc";
   include "prop-type-alias.inc";
   include "prop-ub-class-2.inc";

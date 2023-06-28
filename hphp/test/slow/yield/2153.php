@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_2153() {
+function main_2153() :mixed{
 $a = function() {
  yield 1;
  yield 2;

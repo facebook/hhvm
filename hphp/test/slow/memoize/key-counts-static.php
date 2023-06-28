@@ -2,33 +2,33 @@
 
 class A {
   <<__Memoize>>
-  public static function func0() {
+  public static function func0() :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func0()\n";
     return json_encode(varray[]);
   }
   <<__Memoize>>
-  public static function func1($p1) {
+  public static function func1($p1) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo) echo "A::func1(".(string)$p1.")\n";
     return json_encode(varray[$p1]);
   }
   <<__Memoize>>
-  public static function func2($p1, $p2) {
+  public static function func2($p1, $p2) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func2(".(string)$p1.", ".(string)$p2.")\n";
     return json_encode(varray[$p1, $p2]);
   }
   <<__Memoize>>
-  public static function func3($p1, $p2, $p3) {
+  public static function func3($p1, $p2, $p3) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func3(".(string)$p1.", ".(string)$p2.", ".(string)$p3.")\n";
     return json_encode(varray[$p1, $p2, $p3]);
   }
   <<__Memoize>>
-  public static function func4($p1, $p2, $p3, $p4) {
+  public static function func4($p1, $p2, $p3, $p4) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func4(".
@@ -43,7 +43,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4]);
   }
   <<__Memoize>>
-  public static function func5($p1, $p2, $p3, $p4, $p5) {
+  public static function func5($p1, $p2, $p3, $p4, $p5) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func5(".
@@ -60,7 +60,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5]);
   }
   <<__Memoize>>
-  public static function func6($p1, $p2, $p3, $p4, $p5, $p6) {
+  public static function func6($p1, $p2, $p3, $p4, $p5, $p6) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func6(".
@@ -79,7 +79,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6]);
   }
   <<__Memoize>>
-  public static function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) {
+  public static function func7($p1, $p2, $p3, $p4, $p5, $p6, $p7) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func7(".
@@ -100,7 +100,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7]);
   }
   <<__Memoize>>
-  public static function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) {
+  public static function func8($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func8(".
@@ -123,7 +123,7 @@ class A {
     return json_encode(varray[$p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8]);
   }
   <<__Memoize>>
-  public static function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) {
+  public static function func9($p1, $p2, $p3, $p4, $p5, $p6, $p7, $p8, $p9) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func9(".
@@ -159,7 +159,7 @@ class A {
     $p8,
     $p9,
     $p10,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func10(".
@@ -200,7 +200,7 @@ class A {
     $p9,
     $p10,
     $p11,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func11(".
@@ -244,7 +244,7 @@ class A {
     $p10,
     $p11,
     $p12,
-  ) {
+  ) :mixed{
 
     if (MemoizeKeyCountsStaticPhp::$do_echo)
       echo "A::func12(".
@@ -278,7 +278,7 @@ class A {
   }
 }
 
-function test() {
+function test() :mixed{
 
 
   var_dump(A::func0());

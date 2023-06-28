@@ -5,20 +5,20 @@ class foo {
     public $a3;
     public $o2;
 
-    public function f1() {
+    public function f1() :mixed{
         return $this->a1;
     }
 
-    public function f2() {
+    public function f2() :mixed{
         return $this->a2;
     }
 
-    public function f3() {
+    public function f3() :mixed{
         $this->a3 = darray[];
         return $this->a3;
     }
 
-    public function f5() {
+    public function f5() :mixed{
         $this->o2 = new stdClass;
         return $this->o2;
     }

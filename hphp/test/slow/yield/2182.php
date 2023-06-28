@@ -2,11 +2,11 @@
 
 class X {
   private $a = varray[1,2,3];
-  function foo() {
+  function foo() :AsyncGenerator<mixed,mixed,void>{
     yield $this->a;
   }
 }
-function test() {
+function test() :mixed{
   $z = new Z;
   foreach ($z->foo() as $v) {
     var_dump($v);

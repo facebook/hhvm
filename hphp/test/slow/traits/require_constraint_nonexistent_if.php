@@ -9,6 +9,6 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_require_constraint_nonexistent_if() {
+function main_require_constraint_nonexistent_if() :mixed{
   $x = new X();
 }

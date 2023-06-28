@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $a = new DOMDocument;
   $a->loadXML('<a/>');
   $o1 = $a->getElementsByTagName('a')->item(0);
@@ -10,7 +10,7 @@ function test() {
   var_dump($hash1 === $hash2);
   return $o1;
 }
-function main() {
+function main() :mixed{
   $o1 = test();
   $o2 = test();
   $hash1 = spl_object_hash($o1);
@@ -19,6 +19,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_same_object2() {
+function main_same_object2() :mixed{
 main();
 }

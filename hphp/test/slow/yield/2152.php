@@ -3,7 +3,7 @@
 class Ref {
   function __construct(public $value)[] {}
 }
-function f($a1, $a2) {
+function f($a1, $a2) :AsyncGenerator<mixed,mixed,void>{
   foreach ($a1 as $k1 => $v1) {
     foreach ($a2->value as $k2 => $v2) {
       $a2->value[$k2] += $v1;
@@ -13,7 +13,7 @@ function f($a1, $a2) {
 }
 
 <<__EntryPoint>>
-function main_2152() {
+function main_2152() :mixed{
 $a1 = varray[1, 2];
 $a2 = new Ref(varray[1, 2]);
 foreach (f($a1, $a2) as $v) {

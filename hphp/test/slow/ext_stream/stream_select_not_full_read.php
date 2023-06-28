@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_select_not_full_read() {
+function main_stream_select_not_full_read() :mixed{
 $descriptorspec = varray[
   varray["pipe", "r"],
   varray["pipe", "w"],

@@ -5,7 +5,7 @@
 // wrong type passed.
 
 <<__EntryPoint>>
-function main_1436_htmlspecialchars() {
+function main_1436_htmlspecialchars() :mixed{
 $inputs = varray[
   'foo<>bar',
   '',

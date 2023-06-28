@@ -2,17 +2,17 @@
 
 class A {
   <<__Memoize>>
-  public static async function outer($i) {
+  public static async function outer($i) :Awaitable<mixed>{
     if ($i == 0) return '';
     return await A::inner($i);
   }
 
-  public static async function inner($i) {
+  public static async function inner($i) :Awaitable<mixed>{
     return 'number '.$i;
   }
 }
 
-async function submain() {
+async function submain() :Awaitable<mixed>{
   // does eager return
   $z = await A::outer(20);
   concurrent {
@@ -25,7 +25,7 @@ async function submain() {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   await submain();
   await submain();
 }

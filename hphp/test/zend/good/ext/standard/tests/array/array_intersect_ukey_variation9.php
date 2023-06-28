@@ -6,11 +6,11 @@
 
 class MyClass
 {
-  <<__DynamicallyCallable>> static function static_compare_func($key1, $key2) {
+  <<__DynamicallyCallable>> static function static_compare_func($key1, $key2) :mixed{
     return strcasecmp($key1, $key2);
   }
 
-  <<__DynamicallyCallable>> public function class_compare_func($key1, $key2) {
+  <<__DynamicallyCallable>> public function class_compare_func($key1, $key2) :mixed{
     return strcasecmp($key1, $key2);
   }
 }

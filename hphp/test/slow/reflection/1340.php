@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a, $b) {
+function foo($a, $b) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $funcs = get_defined_functions();

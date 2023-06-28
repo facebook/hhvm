@@ -3,10 +3,10 @@
 interface I {}
 
 trait T1 implements I {
-  private function foo() { return 1; }
+  private function foo() :mixed{ return 1; }
 }
 trait T2 implements I {
-  private function foo() { return 2; }
+  private function foo() :mixed{ return 2; }
 }
 
 abstract class C1 {

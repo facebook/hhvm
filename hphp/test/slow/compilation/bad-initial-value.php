@@ -2,14 +2,14 @@
 
 class B {}
 
-function returns_true() {
+function returns_true() :mixed{
   return true;
 }
 
 class A {
   private B $p = null;
 
-  public function set(B $p) {
+  public function set(B $p) :mixed{
     if (returns_true()) $p = 100;
     $this->p = $p;
   }
@@ -20,7 +20,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = new A();
   var_dump($a->get());
 }

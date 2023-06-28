@@ -5,7 +5,7 @@ class Foo {
   public static int $y = 100;
   const A = 10;
 
-  public static function cfun() {
+  public static function cfun() :mixed{
     var_dump('hello1\n');
   }
 }
@@ -27,7 +27,7 @@ function foo(HH\classname $x) : N {
 }
 
 <<__EntryPoint>>
-  function main() {
+  function main() :mixed{
   $ca = vec[Foo::class, Bar::class];
   var_dump($ca);
   $c = $ca[0];

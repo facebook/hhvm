@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $u = "abc";
   $v = "\0";
   $w = "def\n";
@@ -10,7 +10,7 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1579() {
+function main_1579() :mixed{
 foo();
 $u = "abc";
 $v = "\0";

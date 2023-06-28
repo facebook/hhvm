@@ -2,7 +2,7 @@
 
 trait T {
   public static $x=1;
-  public function printX() {
+  public function printX() :mixed{
  var_dump(self::$x);
  }
 }
@@ -13,7 +13,7 @@ class C2 {
  use T;
  }
 
-function error_boundary($fn) {
+function error_boundary($fn) :mixed{
   try {
     $fn();
   } catch (Exception $e) {
@@ -22,7 +22,7 @@ function error_boundary($fn) {
 }
 
 <<__EntryPoint>>
-function main_2052() {
+function main_2052() :mixed{
 $o1 = new C1;
 $o2 = new C2;
 var_dump(T::$x);

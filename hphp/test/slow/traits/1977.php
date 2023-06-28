@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  public static function F() {
+  public static function F() :mixed{
     echo "Hello from static function!\n";
   }
 }

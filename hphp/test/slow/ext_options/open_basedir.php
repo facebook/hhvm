@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_open_basedir() {
+function main_open_basedir() :mixed{
 var_dump(ini_set('open_basedir', sys_get_temp_dir()));
 var_dump(ini_set('open_basedir', '/home;'.sys_get_temp_dir().';/invalid_root_dir_asdfasdf/dfg;dfg'));
 var_dump(ini_get('open_basedir'));

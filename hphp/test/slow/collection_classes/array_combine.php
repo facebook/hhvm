@@ -1,9 +1,9 @@
 <?hh
-function dump($x) {
+function dump($x) :mixed{
   var_dump(is_array($x));
   var_dump($x);
 }
-function main() {
+function main() :mixed{
   $array1 = varray[11, 22, 33, '22'];
   $array2 = varray['a', 'b', 'c', 'd'];
   $vector1 = Vector {11, 22, 33, '22'};
@@ -67,6 +67,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_combine() {
+function main_array_combine() :mixed{
 main();
 }

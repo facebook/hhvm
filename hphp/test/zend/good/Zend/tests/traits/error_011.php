@@ -1,14 +1,14 @@
 <?hh
 
 trait foo {
-    public function test() { return 3; }
+    public function test() :mixed{ return 3; }
 }
 trait c {
-    public function test() { return 2; }
+    public function test() :mixed{ return 2; }
 }
 
 trait b {
-    public function test() { return 1; }
+    public function test() :mixed{ return 1; }
 }
 
 class bar {

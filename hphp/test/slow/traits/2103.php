@@ -1,31 +1,31 @@
 <?hh
 
 trait TraitFoo {
-  public function testDoSomethingInTrait() {
+  public function testDoSomethingInTrait() :mixed{
     return $this->doSomethingInTrait();
   }
-  public function testDoSomethingPublicInTrait() {
+  public function testDoSomethingPublicInTrait() :mixed{
     return $this->doSomethingPublicInTrait();
   }
 }
 class A {
   use TraitFoo;
-  public function testDoSomething() {
+  public function testDoSomething() :mixed{
     return $this->doSomething();
   }
-  protected function doSomething() {
+  protected function doSomething() :mixed{
     return 'doSomething';
   }
-  protected function doSomethingInTrait() {
+  protected function doSomethingInTrait() :mixed{
     return 'doSomethingInTrait';
   }
-  public function doSomethingPublicInTrait() {
+  public function doSomethingPublicInTrait() :mixed{
     return 'doSomethingPublicInTrait';
   }
 }
 
 <<__EntryPoint>>
-function main_2103() {
+function main_2103() :mixed{
 $a = new A();
 echo $a->testDoSomething()."
 ";

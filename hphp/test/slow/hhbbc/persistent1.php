@@ -1,6 +1,6 @@
 <?hh
 
-function main($x, $y) {
+function main($x, $y) :mixed{
   var_dump(class_exists($x, false));
   var_dump(class_exists($y, false));
   if (!class_exists('X')) {
@@ -13,6 +13,6 @@ function main($x, $y) {
 
 
 <<__EntryPoint>>
-function main_persistent1() {
+function main_persistent1() :mixed{
 main('X', 'Y');
 }

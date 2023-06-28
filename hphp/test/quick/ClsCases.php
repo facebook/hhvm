@@ -2,12 +2,12 @@
 
 class MyClass {
   public static $x;
-  public static function foo() {
+  public static function foo() :mixed{
     echo "in static method foo()\n";
   }
 }
 
-function clsFact() {
+function clsFact() :mixed{
   return new MyClass();
 }
 

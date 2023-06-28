@@ -4,57 +4,57 @@ class Ref {
   function __construct(public $value)[] {}
 }
 
-async function noblock() {
+async function noblock() :Awaitable<mixed>{
   echo "not blocking\n";
 }
 
-async function block() {
+async function block() :Awaitable<mixed>{
   echo "block enter\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
 }
 
-async function block_then_succeed(Ref $condition) {
+async function block_then_succeed(Ref $condition) :Awaitable<mixed>{
   echo "block enter\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
   $condition->value->succeed(42);
 }
 
-async function block_then_fail(Ref $condition) {
+async function block_then_fail(Ref $condition) :Awaitable<mixed>{
   echo "block enter\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
   $condition->value->fail(new Exception('horrible failure'));
 }
 <<__DynamicallyCallable>>
-async function condition_noblock() {
+async function condition_noblock() :Awaitable<mixed>{
   $condition = ConditionWaitHandle::create(noblock());
   echo "not reached\n";
 }
 <<__DynamicallyCallable>>
-async function condition_block() {
+async function condition_block() :Awaitable<mixed>{
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   await $condition;
   echo "not reached\n";
 }
 <<__DynamicallyCallable>>
-async function condition_block_ugly_succeed() {
+async function condition_block_ugly_succeed() :Awaitable<mixed>{
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   $condition->succeed(42);
   return await $condition;
 }
 <<__DynamicallyCallable>>
-async function condition_block_ugly_fail() {
+async function condition_block_ugly_fail() :Awaitable<mixed>{
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   $condition->fail(new Exception('horrible failure'));
   return await $condition;
 }
 <<__DynamicallyCallable>>
-async function condition_block_nice_succeed() {
+async function condition_block_nice_succeed() :Awaitable<mixed>{
   $condition = new Ref(null);
   $condition->value = ConditionWaitHandle::create(
     block_then_succeed($condition)
@@ -63,14 +63,14 @@ async function condition_block_nice_succeed() {
   return await $condition->value;
 }
 <<__DynamicallyCallable>>
-async function condition_block_nice_fail() {
+async function condition_block_nice_fail() :Awaitable<mixed>{
   $condition = new Ref(null);
   $condition->value = ConditionWaitHandle::create(block_then_fail($condition));
   echo "constructed ConditionWaitHandle\n";
   return await $condition->value;
 }
 
-async function run_one(string $name) {
+async function run_one(string $name) :Awaitable<mixed>{
   try {
     echo "running $name...\n";
     $res = await $name();
@@ -82,7 +82,7 @@ async function run_one(string $name) {
   echo "\n";
 }
 
-async function run() {
+async function run() :Awaitable<mixed>{
   await run_one('condition_noblock');
   await run_one('condition_block');
   await run_one('condition_block_ugly_succeed');
@@ -93,6 +93,6 @@ async function run() {
 
 
 <<__EntryPoint>>
-function main_condition() {
+function main_condition() :mixed{
 HH\Asio\join(run());
 }

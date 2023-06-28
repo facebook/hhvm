@@ -1,6 +1,6 @@
 <?hh
 
-function getContinentList() {
+function getContinentList() :mixed{
 	return darray["getContinentListResult"=>darray[
 	  "schema"=>"<xsd:schema><element name=\"test\" type=\"xsd:string\"/></xsd:schema>",
 	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"]];
@@ -13,7 +13,7 @@ class LocalSoapClient extends SoapClient {
 		$this->server->addFunction("getContinentList");
   }
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
   	echo $request;
     ob_start();
     $this->server->handle($request);

@@ -1,24 +1,24 @@
 <?hh
 
 class Counted implements Countable {
-  public function count() { return 5; }
+  public function count() :mixed{ return 5; }
 }
 class NotCounted {
-  public function count() { return 4; }
+  public function count() :mixed{ return 4; }
 }
 class BadCounted implements Countable {
-  public function count() { throw new Exception("y u do dis"); }
+  public function count() :mixed{ throw new Exception("y u do dis"); }
 }
 
-function res() { return count(HH\stdin()); }
-function staticArr() { return count(varray[3,2,1,0]); }
-function packed() { return count(varray[3,2,1,new stdClass]); }
-function vect() { return count(HH\Vector{5,7,8,3}); }
-function counted_obj() { return count(new Counted); }
-function not_counted_obj() { return count(new NotCounted); }
-function bad_counted_obj() { return count(new BadCounted); }
+function res() :mixed{ return count(HH\stdin()); }
+function staticArr() :mixed{ return count(varray[3,2,1,0]); }
+function packed() :mixed{ return count(varray[3,2,1,new stdClass]); }
+function vect() :mixed{ return count(HH\Vector{5,7,8,3}); }
+function counted_obj() :mixed{ return count(new Counted); }
+function not_counted_obj() :mixed{ return count(new NotCounted); }
+function bad_counted_obj() :mixed{ return count(new BadCounted); }
 
-function append($arr) {
+function append($arr) :mixed{
   var_dump(count($arr));
 
   $new_arr = $arr;
@@ -29,7 +29,7 @@ function append($arr) {
 
 
 <<__EntryPoint>>
-function main_count_opts() {
+function main_count_opts() :mixed{
 append(varray[3,2]);
 append(HH\Vector{3,2});
 

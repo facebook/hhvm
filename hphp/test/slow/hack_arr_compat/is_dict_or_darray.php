@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function check(mixed $arg, string $descr) {
+function check(mixed $arg, string $descr) :mixed{
   printf(
     "is_dict_or_darray(%s) = %s\n",
     $descr,

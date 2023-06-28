@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function f() {
+  function f() :mixed{
     $y = new Y;
     $y->bar();
     static::g();
@@ -9,22 +9,22 @@ class X {
     self::g();
     Y::foo() && static::g();
   }
-  static function g() {
+  static function g() :mixed{
  var_dump(__CLASS__);
  }
 }
 class Y extends X {
-  static function g() {
+  static function g() :mixed{
     var_dump(__CLASS__);
   }
-  static function foo() {
+  static function foo() :mixed{
     return true;
   }
-  function bar() {
+  function bar() :mixed{
     return false;
   }
 }
-function test() {
+function test() :mixed{
   $x = new X;
   $y = new Y;
   $x->f();
@@ -32,6 +32,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1876() {
+function main_1876() :mixed{
 test();
 }

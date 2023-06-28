@@ -2,7 +2,7 @@
 
 class It { public $x = 1; }
 <<__EntryPoint>>
-function main_g9() {
+function main_g9() :mixed{
 $it = new It;
 $foo = function() use($it) {
   $it->x += 10;

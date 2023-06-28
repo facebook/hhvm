@@ -33,7 +33,7 @@ class Struct2 {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function testBinary() {
+function testBinary() :mixed{
   $p = new DummyProtocol();
   try {
     thrift_protocol_write_binary($p, 'foomethod', 1, new Struct1(42), 20, true);
@@ -47,7 +47,7 @@ function testBinary() {
   }
 }
 
-function testCompact() {
+function testCompact() :mixed{
   $p = new DummyProtocol();
   try {
     thrift_protocol_write_compact2($p, 'foomethod', 2, new Struct1(42), 20);
@@ -62,7 +62,7 @@ function testCompact() {
 }
 
 <<__EntryPoint>>
-function main_forward_compatibility() {
+function main_forward_compatibility() :mixed{
   require 'common.inc';
   echo "--- binary ---\n";
   testBinary();

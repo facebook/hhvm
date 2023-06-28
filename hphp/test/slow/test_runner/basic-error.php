@@ -6,6 +6,6 @@ function foo(): int {
 
 
 <<__EntryPoint>>
-function main_basic_error() {
+function main_basic_error() :mixed{
 foo();
 }

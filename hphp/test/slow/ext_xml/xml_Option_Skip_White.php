@@ -1,5 +1,5 @@
 <?hh
-function read_xml($skip_white) {
+function read_xml($skip_white) :mixed{
   $xml=file_get_contents(__DIR__."/skipwhite.xml");
   $parser=xml_parser_create();
   xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
@@ -11,7 +11,7 @@ function read_xml($skip_white) {
   return $array;
 }
 
-function find_node($array,$node) {
+function find_node($array,$node) :mixed{
   foreach($array as $key=>$val) {
     if($val["tag"]==$node) return $val;
   }
@@ -21,7 +21,7 @@ function find_node($array,$node) {
 
 // WITH XML_OPTION_SKIP_WHITE=0 WORKS FINE
 <<__EntryPoint>>
-function main_xml_option_skip_white() {
+function main_xml_option_skip_white() :mixed{
 $array=read_xml(0);
 $node=find_node($array,"query");
 print_r($node);

@@ -1,6 +1,6 @@
 <?hh
 class Foo {
-    function __clone() {
+    function __clone() :mixed{
         throw new Exception();
     }
 }

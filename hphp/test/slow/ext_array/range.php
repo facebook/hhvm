@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_range() {
+function main_range() :mixed{
 $ret = range(0, 12);
 var_dump(count($ret));
 var_dump($ret[0]);

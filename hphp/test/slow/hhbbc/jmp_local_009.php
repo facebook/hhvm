@@ -2,7 +2,7 @@
 
 class A {}
 
-function foo() {
+function foo() :mixed{
   try {
     if ($x is A) {
       $y = "asd";
@@ -17,6 +17,6 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_jmp_local_009() {
+function main_jmp_local_009() :mixed{
   foo();
 }

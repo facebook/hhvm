@@ -82,7 +82,7 @@ function takes_vec_or_dict3(<<__Soft>> vec_or_dict<int> $x): vec_or_dict<int> {
   return $x;
 }
 
-function test_all_hints($x) {
+function test_all_hints($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
@@ -124,7 +124,7 @@ function test_all_hints($x) {
   var_dump($x);
 }
 
-function test_dict_hint($x) {
+function test_dict_hint($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[

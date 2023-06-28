@@ -1,6 +1,6 @@
 <?hh
 
-function test_decode() {
+function test_decode() :mixed{
   $json = varray[
     // A valid json string
     '{"Organization": "PHP Documentation Team"}',
@@ -24,7 +24,7 @@ function test_decode() {
   }
 }
 
-function test_encode() {
+function test_encode() :mixed{
   $json = varray[
     // A valid json string
     "hello",
@@ -44,7 +44,7 @@ function test_encode() {
 }
 
 <<__EntryPoint>>
-function main_json_last_error() {
+function main_json_last_error() :mixed{
   test_decode();
   test_encode();
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function makeNonStatic($n) {
+function makeNonStatic($n) :mixed{
   $s = 'foobar';
   for ($i = 0; $i < $n; $i += 1) {
     $s .= $i;

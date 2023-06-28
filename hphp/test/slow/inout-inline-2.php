@@ -11,7 +11,7 @@ function foo(
   inout $q,
   inout $r,
   inout $s,
-) {
+) :mixed{
   $a += 1;
   $b += 2;
   $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
@@ -29,7 +29,7 @@ function foo(
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // HHBBC should optimize these away...
   $x = 1;
   $y = 2;

@@ -1,7 +1,7 @@
 <?hh
 
 <<exit>>
-function g() {
+function g() :mixed{
 $a = darray[
   '012345678901234567890123456789012345678901234567890123456789' => -"b",
   'testclass' => 0567,
@@ -13,7 +13,7 @@ $a = darray[
 }
 
 <<C>>
-function h() {
+function h() :mixed{
   var_dump( $start, 0, opendir);
   $count= '/fgetcsv_variation10.tmp'.darray[
     '0x12ab' => 'koi8-r',

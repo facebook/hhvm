@@ -7,7 +7,7 @@ class Test {
             echo __METHOD__ . "()\n";
         };
     }
-    private function func() {
+    private function func() :mixed{
         echo __METHOD__ . "()\n";
     }
 }

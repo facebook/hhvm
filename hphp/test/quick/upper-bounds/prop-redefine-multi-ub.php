@@ -14,7 +14,7 @@ class Sub2 <T as Fooable as string> extends Sup {
   <<__LateInit>> public T $x;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $o1 = new Sub1;
   $o2 = new Sub2;
 }

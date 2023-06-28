@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_createfunction() {
+function main_createfunction() :mixed{
 $db = new PDO('sqlite::memory:');
 $db->sqliteCreateFunction('length', 'strlen', 1);
 

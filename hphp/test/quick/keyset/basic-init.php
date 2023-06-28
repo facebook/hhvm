@@ -1,7 +1,7 @@
 <?hh
 
 class ToString {
-  function __toString() {
+  function __toString() :mixed{
     return "foobaz";
   }
 }
@@ -9,7 +9,7 @@ class ToString {
 class Noisy {
 }
 
-function create($a, $b, $c) {
+function create($a, $b, $c) :mixed{
   try {
     var_dump(keyset[$a, $b, $c]);
   } catch (Exception $e) {

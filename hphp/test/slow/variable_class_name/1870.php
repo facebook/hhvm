@@ -4,13 +4,13 @@ class A {
   const C = 123;
   static public $foo = 456;
   <<__DynamicallyCallable>>
-  public static function bar() {
+  public static function bar() :mixed{
     return 789;
   }
 }
 
 <<__EntryPoint>>
-function main_1870() {
+function main_1870() :mixed{
 $cls = 'A';
 
 var_dump($cls::C);

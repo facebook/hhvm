@@ -20,7 +20,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   try {
     new C(); // We don't keep a copy of the instance here in the caller
   } catch (Exception $_) {}

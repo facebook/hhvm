@@ -1,5 +1,5 @@
 <?hh
 
 <<__Reified(varray[1,2])>>
-function f() {}
+function f() :mixed{}
 

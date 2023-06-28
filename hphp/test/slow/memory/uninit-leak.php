@@ -9,7 +9,7 @@ class X {
   public AnyArray $arr;
   public int $id;
 
-  public function f() {
+  public function f() :mixed{
     // echo "";
     for (;;) {
       echo "iterating...\n";
@@ -32,13 +32,13 @@ class X {
 }
 
 
-function f() {
+function f() :mixed{
   $x = new X();
   $x->f();
 }
 
 <<__EntryPoint>>
-function main_uninit_leak() {
+function main_uninit_leak() :mixed{
   f();
   var_dump(HH\objprof_get_data());
   echo "done\n";

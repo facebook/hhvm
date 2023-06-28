@@ -11,6 +11,6 @@ abstract class B implements I { use T;}
 class A extends B implements I {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(A::FOO);
 }

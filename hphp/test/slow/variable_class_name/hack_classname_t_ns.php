@@ -22,6 +22,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_hack_classname_t_ns() {
+function main_hack_classname_t_ns() :mixed{
 main();
 }

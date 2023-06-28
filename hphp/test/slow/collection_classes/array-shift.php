@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x1 = varray['a', 'b', 'c'];
   var_dump(array_shift(inout $x1));
   var_dump($x1);
@@ -39,6 +39,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_shift() {
+function main_array_shift() :mixed{
 main();
 }

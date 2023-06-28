@@ -8,7 +8,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_1736() {
+function main_1736() :mixed{
 $x = new X(varray[0, 1, 2]);
 var_dump($x->exp_info);
 $x1 = new X(null);

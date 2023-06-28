@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_decode_gif() {
+function main_decode_gif() :mixed{
 $streams = darray[
   'stream_rfc2397_003.gif' =>
     'data://image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw

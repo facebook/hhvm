@@ -13,7 +13,7 @@ namespace T {
 }
 
 namespace {
-function main() {
+function main() :mixed{
   $i  = new ReflectionClass('Iface');
   $ni = new ReflectionClass('N\Iface');
   $ti = new ReflectionClass('\T\Iface');

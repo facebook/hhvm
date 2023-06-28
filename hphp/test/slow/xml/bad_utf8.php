@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_bad_utf8() {
+function main_bad_utf8() :mixed{
 var_dump(utf8_decode(addslashes("\xf0\xc0\xc0\xa7 or 1=1-- -")));
 
 $tests = varray[

@@ -1,12 +1,12 @@
 <?hh
 
-function handleError($errno, $errstr, $errfile, $errline) {
+function handleError($errno, $errstr, $errfile, $errline) :mixed{
   echo "$errstr\n";
   // error_get_last() didn't available in handler
   var_dump(error_get_last());
 }
 
-function shutdownFunc() {
+function shutdownFunc() :mixed{
   var_dump(error_get_last()['line']);
 }
 <<__EntryPoint>>

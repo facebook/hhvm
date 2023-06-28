@@ -1,12 +1,12 @@
 <?hh
 
 namespace {
-class A { function f() {} function B() {} }
-class B { function f() {} function B() {} }
-class C { function f() {} function B() {} }
-class D { function f() {} function B() {} }
+class A { function f() :mixed{} function B() :mixed{} }
+class B { function f() :mixed{} function B() :mixed{} }
+class C { function f() :mixed{} function B() :mixed{} }
+class D { function f() :mixed{} function B() :mixed{} }
 
-function afunc() {
+function afunc() :mixed{
   $x = \HH\meth_caller(C::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -14,7 +14,7 @@ function afunc() {
 }
 
 class Acls {
-  function bfunc() {
+  function bfunc() :mixed{
     $x = \HH\meth_caller(D::class, "f");
     \var_dump(
       $x, \HH\is_meth_caller($x),
@@ -22,7 +22,7 @@ class Acls {
   }
 }
 
-function test() {
+function test() :mixed{
   $x = \HH\meth_caller(A::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -41,18 +41,18 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \test();
   \Ans\test();
 }
 }
 
 namespace Ans {
-class B { function f() {} }
-class C { function f() {} }
-class D { function f() {} }
+class B { function f() :mixed{} }
+class C { function f() :mixed{} }
+class D { function f() :mixed{} }
 
-function afunc() {
+function afunc() :mixed{
   $x = \HH\meth_caller(C::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),
@@ -60,7 +60,7 @@ function afunc() {
 }
 
 class Acls {
-  function bfunc() {
+  function bfunc() :mixed{
     $x = \HH\meth_caller(D::class, "f");
     \var_dump(
       $x, \HH\is_meth_caller($x),
@@ -79,7 +79,7 @@ final abstract class MethCallerStrWrap {
     }
 }
 
-function testFunction(mixed $fun_meth_or_string) {
+function testFunction(mixed $fun_meth_or_string) :mixed{
   $function_name = MethCallerStrWrap::get($fun_meth_or_string);
   return $function_name;
 }
@@ -90,13 +90,13 @@ function testFunction(mixed $fun_meth_or_string) {
 
 class A {
   private $map = darray[];
-  function set($k, $v) {
+  function set($k, $v) :mixed{
     $this->map[$k] = $v;
   }
-  function f() {}
+  function f() :mixed{}
 }
 
-function test() {
+function test() :mixed{
   $x = \HH\meth_caller(A::class, "f");
   \var_dump(
     $x, \HH\is_meth_caller($x),

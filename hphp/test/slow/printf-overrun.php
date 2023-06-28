@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_printf_overrun() {
+function main_printf_overrun() :mixed{
 printf("%'", "");
 }

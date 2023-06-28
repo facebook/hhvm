@@ -1,5 +1,5 @@
 <?hh
-function RekTest ($nr) {
+function RekTest ($nr) :mixed{
     echo " $nr ";
     $j=$nr+1;
     while ($j < 10) {

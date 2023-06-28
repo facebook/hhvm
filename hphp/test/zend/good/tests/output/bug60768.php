@@ -3,7 +3,7 @@
 class C { public static $storage; }
 
 <<__EntryPoint>>
-function bug60768() {
+function bug60768() :mixed{
 ob_start(function($buffer) { C::$storage .= $buffer; }, 20);
 
 echo str_repeat("0", 20); // fill in the buffer

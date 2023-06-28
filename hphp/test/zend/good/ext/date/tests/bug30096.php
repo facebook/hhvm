@@ -5,7 +5,7 @@ abstract final class ZendGoodExtDateTestsBug30096 {
   public static $tsold;
 }
 
-function gm_date_check($hour, $minute, $second, $month, $day, $year) {
+function gm_date_check($hour, $minute, $second, $month, $day, $year) :mixed{
     echo "gmmktime($hour,$minute,$second,$month,$day,$year): ";
 
     ZendGoodExtDateTestsBug30096::$tsold = ZendGoodExtDateTestsBug30096::$ts;

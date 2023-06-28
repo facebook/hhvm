@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_621() {
+function main_621() :mixed{
 $a = 10;
  $a++;
  var_dump($a);

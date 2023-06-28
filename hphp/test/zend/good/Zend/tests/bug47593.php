@@ -4,14 +4,14 @@ namespace test;
 const TEST = 11;
 
 class foo {
-    public function xyz() {
+    public function xyz() :mixed{
     }
 }
 
 interface baz {
 }
 
-function bar() {
+function bar() :mixed{
 }
 
 <<__EntryPoint>> function main(): void {

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1763() {
+function main_1763() :mixed{
 error_reporting(0);
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', varray[0]));
 var_dump(substr_replace('ABCDEFGH:/MNRPQR/', 'bob', varray[0], 3));

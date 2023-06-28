@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_var_dump() {
+function main_var_dump() :mixed{
 $i = new Imagick();
 var_dump($i);
 

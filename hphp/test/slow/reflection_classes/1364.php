@@ -20,7 +20,7 @@ class TI {
 }
 
 <<__EntryPoint>>
-function main_1364() {
+function main_1364() :mixed{
 $rc = new ReflectionClass('C1');
 $rp = $rc->getProperty('pp');
 var_dump($rp->getTypeText());

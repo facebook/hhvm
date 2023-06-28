@@ -3,7 +3,7 @@
 class foo {
     private $test = 3;
 
-    public function x() {
+    public function x() :mixed{
         $a = $this;
         $this->a = function() use ($a) { return $a; };
         var_dump($this->a->__invoke());

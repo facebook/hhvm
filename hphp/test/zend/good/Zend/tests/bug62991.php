@@ -1,7 +1,7 @@
 <?hh
 
 function test( varray $array )
-{
+:mixed{
     $closure = function() use ( $array ) {
         print_r( $array );
         yield "hi";
@@ -10,7 +10,7 @@ function test( varray $array )
 }
 
 function test2( varray $array )
-{
+:mixed{
     $closure = function() use ( $array ) {
         print_r( $array );
         yield "hi";

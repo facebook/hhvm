@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_541() {
+function main_541() :mixed{
 \HH\global_set('foo', 10);
 \HH\global_set(
   'bar',

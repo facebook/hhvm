@@ -4,7 +4,7 @@
 // Arbitrary - must not be UTC, and better if it's not where you are, or where
 // tests are run
 <<__EntryPoint>>
-function main_format_offset_tz() {
+function main_format_offset_tz() :mixed{
 date_default_timezone_set('Asia/Jerusalem');
 
 // All the standard formats including offsets

@@ -1,10 +1,10 @@
 <?hh // decl
 
-async function block() {
+async function block() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
-async function foo($from, $to) {
+async function foo($from, $to) :AsyncGenerator<mixed,mixed,void>{
   foreach (range($from, $to) as $num) {
     echo "foo $num\n";
     await block();
@@ -12,7 +12,7 @@ async function foo($from, $to) {
   }
 }
 
-async function bar($from, $to) {
+async function bar($from, $to) :AsyncGenerator<mixed,mixed,void>{
   echo "begin bar\n";
   foreach (foo($from, $to) await as $num) {
     echo "bar $num\n";
@@ -24,7 +24,7 @@ async function bar($from, $to) {
   echo "end bar\n";
 }
 
-async function baz($from, $to) {
+async function baz($from, $to) :Awaitable<mixed>{
   echo "begin baz\n";
   foreach (bar($from, $to) await as $key => list($value1, $value2)) {
     echo "baz $key\n";
@@ -38,6 +38,6 @@ async function baz($from, $to) {
 
 
 <<__EntryPoint>>
-function main_foreach_await_as() {
+function main_foreach_await_as() :mixed{
 HH\Asio\join(baz(42, 100));
 }

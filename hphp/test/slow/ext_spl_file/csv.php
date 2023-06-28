@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_csv() {
+function main_csv() :mixed{
 $file = new SplFileObject(__DIR__ . '/csv.csv');
 $file->setFlags(SplFileObject::READ_CSV);
 $file->setCsvControl(';');

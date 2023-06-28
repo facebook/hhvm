@@ -1,6 +1,6 @@
 <?hh
 
-function echoLong($num) {
+function echoLong($num) :mixed{
   return $num;
 }
 
@@ -12,7 +12,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('echoLong');
   }
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -22,7 +22,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-function test($num) {
+function test($num) :mixed{
 
   try {
 	  printf("%s %0.0f\n", gettype($num), $num);

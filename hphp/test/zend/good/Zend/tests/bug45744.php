@@ -5,7 +5,7 @@ class Foo {
         var_dump(array_map(varray[$this, 'callback'], $data));
     }
 
-    public function callback($value) {
+    public function callback($value) :mixed{
         if (!is_array($value)) {
             return stripslashes($value);
         }
@@ -21,7 +21,7 @@ class Foo2 {
         var_dump(array_map(varray[$this, 'callBack'], $data));
     }
 
-    public function callBack($value) {
+    public function callBack($value) :mixed{
     }
 }
 

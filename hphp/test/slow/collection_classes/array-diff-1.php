@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $a1 = varray["1", 1, "2", 3, 4, "a", "7"];
   $v1 = Vector {"1", 1, "2", 3, 4, "a", "7"};
   $m1 = Map {0 => "1", 1 => 1, 2 => "2", 3 => 3, 4 => 4, 5 => "a",
@@ -51,6 +51,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_diff_1() {
+function main_array_diff_1() :mixed{
 main();
 }

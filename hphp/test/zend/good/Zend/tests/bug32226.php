@@ -10,7 +10,7 @@ class A
         }
 
         public function EH()
-        {
+:mixed        {
                 restore_exception_handler();
 
                 throw new Exception();

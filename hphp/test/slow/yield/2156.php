@@ -1,13 +1,13 @@
 <?hh
 
-function f() {
+function f() :AsyncGenerator<mixed,mixed,void>{
   $a = yield 1;
  list($a, $b) = yield $a;
  yield $b;
 }
 
 <<__EntryPoint>>
-function main_2156() {
+function main_2156() :mixed{
 $c = f();
 $c->rewind();
 var_dump($c->current());

@@ -6,7 +6,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $locales  = varray[
         'sl_IT_nedis_KIRTI',
         'sl_IT_nedis-a-kirti-x-xyz',

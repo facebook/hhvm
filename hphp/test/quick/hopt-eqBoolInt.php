@@ -1,6 +1,6 @@
 <?hh
 
-function cmpCTrue($x) {
+function cmpCTrue($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -10,7 +10,7 @@ function cmpCTrue($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(false, $x));
 }
 
-function cmpCFalse($x) {
+function cmpCFalse($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -20,7 +20,7 @@ function cmpCFalse($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(false, $x));
 }
 
-function cmpC0($x) {
+function cmpC0($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -30,7 +30,7 @@ function cmpC0($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(0, $x));
 }
 
-function cmpC1($x) {
+function cmpC1($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -40,7 +40,7 @@ function cmpC1($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(1, $x));
 }
 
-function cmpC2($x) {
+function cmpC2($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -50,7 +50,7 @@ function cmpC2($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(2, $x));
 }
 
-function cmpC3($x) {
+function cmpC3($x) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -60,7 +60,7 @@ function cmpC3($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq(3, $x));
 }
 
-function cmp3($x, $y) {
+function cmp3($x, $y) :mixed{
   print "----------\n";
   print "x = ";
   var_dump($x);
@@ -72,12 +72,12 @@ function cmp3($x, $y) {
   var_dump(HH\Lib\Legacy_FIXME\neq($x, $y));
 }
 
-function cmp2($x, $y) {
+function cmp2($x, $y) :mixed{
   cmp3($x, $y);
   cmp3($y, $x);
 }
 
-function cmp1($x) {
+function cmp1($x) :mixed{
   cmp2($x, true);
   cmp2($x, false);
   cmp2($x, 0);

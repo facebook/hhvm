@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_exclude_comments() {
+function main_exclude_comments() :mixed{
 $element = simplexml_load_string(<<<EOF
 <root>
   <!-- I am a comment -->

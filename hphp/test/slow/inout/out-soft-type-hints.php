@@ -9,7 +9,7 @@ function bar($x, <<__Soft>> inout int $y): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(
     ($errno, $errstr, $errfile, $errline) ==> {
       echo "[$errno] $errstr\n";

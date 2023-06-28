@@ -1,6 +1,6 @@
 <?hh
 
-function decode($json) {
+function decode($json) :mixed{
   $error = null;
   $result = json_decode_with_error($json, inout $error);
   var_dump($result);

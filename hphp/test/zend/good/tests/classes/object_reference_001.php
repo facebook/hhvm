@@ -9,7 +9,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = new Foo;
   echo $foo->name;
   $bar = $foo;

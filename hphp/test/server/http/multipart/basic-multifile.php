@@ -113,7 +113,7 @@ trait T {
 // FILE: main.php
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $g = new GrandParent();
   $p = new Parent_();
   $c = new Child();

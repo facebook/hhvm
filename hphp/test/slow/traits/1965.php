@@ -8,7 +8,7 @@ trait T2 {
 }
 class C {
   use T1, T2;
-  public function printProps() {
+  public function printProps() :mixed{
     var_dump($this->y);
     var_dump($this->x);
   }

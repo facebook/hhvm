@@ -1,9 +1,9 @@
 <?hh
 
-async function heh() { return 2; }
+async function heh() :Awaitable<mixed>{ return 2; }
 
 trait T {
-  function f() {
+  function f() :mixed{
     return async function() {
       return await heh();
     };
@@ -18,7 +18,7 @@ class B {
   use T;
 }
 
-async function main() {
+async function main() :Awaitable<mixed>{
   $a = new A;
   $f = $a->f();
   $f = await $f();
@@ -27,6 +27,6 @@ async function main() {
 
 
 <<__EntryPoint>>
-function main_trait_generator_closure_002() {
+function main_trait_generator_closure_002() :mixed{
 main();
 }

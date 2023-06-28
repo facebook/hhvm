@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $a1 = darray[42 => "0", 73 => 0, 2 => "2", 3 => 3, 4 => 4, 5 => "a", 6 => "7"];
   $v1 = Vector {"0", 0, "2", 3, 4, "a", "7"};
   $m1 = Map {42 => "0", 73 => 0, 2 => "2", 3 => 3, 4 => 4, 5 => "a",
@@ -51,6 +51,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_intersect_1() {
+function main_array_intersect_1() :mixed{
 main();
 }

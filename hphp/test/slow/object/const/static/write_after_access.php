@@ -7,7 +7,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   A::$a = 60;
   var_dump(A::$a);
 
@@ -15,7 +15,7 @@ function test() {
   post_access();
 }
 
-function post_access(){
+function post_access():mixed{
   try {
     A::$ca = 10;
     echo "FAIL: wrote to static const property\n";

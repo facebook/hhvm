@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $inputs = vec[
     varray[],
     varray[1, 2, 3],

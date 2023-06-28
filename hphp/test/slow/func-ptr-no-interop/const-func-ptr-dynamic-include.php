@@ -13,7 +13,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_constant_functions() {
+function main_constant_functions() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check('count');
   if ($count === false) {
      $count = 0;

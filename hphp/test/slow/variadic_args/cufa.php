@@ -1,6 +1,6 @@
 <?hh
 
-function test_cufa($args) {
+function test_cufa($args) :mixed{
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
   var_dump($args);
 
@@ -23,7 +23,7 @@ function test_cufa($args) {
   try { call_user_func_array(varray[$inst, 'variadic_hack_some'], $args); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
-function test_cuf() {
+function test_cuf() :mixed{
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
   call_user_func(variadic_only_no_vv<>, 'a', 'b', 'c');
   call_user_func(variadic_only<>, 'a', 'b', 'c');
@@ -43,7 +43,7 @@ function test_cuf() {
   call_user_func(varray[$inst, 'variadic_hack_some'], 'a', 'b', 'c');
 }
 
-function test_cuf_insuffient_calls() {
+function test_cuf_insuffient_calls() :mixed{
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
   call_user_func(variadic_only_no_vv<>);
   call_user_func(variadic_only<>);
@@ -63,13 +63,13 @@ function test_cuf_insuffient_calls() {
   try { call_user_func(varray[$inst, 'variadic_hack_some']); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
-function test_stack_should_not_overflow(...$args) {
+function test_stack_should_not_overflow(...$args) :mixed{
   echo "\n", '********* ', __FUNCTION__, ' **********', "\n";
   var_dump(is_array($args));
   var_dump(count($args));
 }
 
-function main() {
+function main() :mixed{
   test_cuf();
   test_cuf_insuffient_calls();
 
@@ -83,7 +83,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cufa() {
+function main_cufa() :mixed{
 error_reporting(-1);
 require_once __DIR__.'/variadic_funcs.inc';
 main();

@@ -1,10 +1,10 @@
 <?hh
 
 interface I {
-  public function foo($x, $y);
+  public function foo($x, $y):mixed;
 }
 class C implements I {
-  public function foo($x) {
+  public function foo($x) :mixed{
     echo 'Hello ' . $x . "\n";
   }
 }

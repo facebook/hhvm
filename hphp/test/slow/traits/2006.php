@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function F(inout $a, $b="default") {
+  function F(inout $a, $b="default") :mixed{
     $a .= " = " . $b;
   }
 }

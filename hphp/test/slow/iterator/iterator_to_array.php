@@ -1,7 +1,7 @@
 <?hh
 
 class A implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new ArrayIterator(varray[1,2,3]);
   }
 }

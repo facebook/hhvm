@@ -13,7 +13,7 @@
 class test {
   public $t = 10;
   public $p = 10;
-  function __toString() {
+  function __toString() :mixed{
     return "testObject";
   }
 }

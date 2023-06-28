@@ -1,7 +1,7 @@
 <?hh
 
 interface I1 {
-  public function baz();
+  public function baz():mixed;
 }
 interface I2 {}
 
@@ -26,14 +26,14 @@ function bar2(): I2 {
   }
 }
 
-function bar() { return bar2(); }
+function bar() :mixed{ return bar2(); }
 
-function foo() {
+function foo() :mixed{
   $x = bar() as I1;
   return $x->baz();
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   try {
     var_dump(foo());
   } catch (Exception $e) {

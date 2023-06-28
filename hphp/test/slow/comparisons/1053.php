@@ -2,7 +2,7 @@
 
 class C {
 }
-function foo($p) {
+function foo($p) :mixed{
   if ($p) {
     $obj = new C;
   } else {
@@ -16,6 +16,6 @@ function foo($p) {
 }
 
 <<__EntryPoint>>
-function main_1053() {
+function main_1053() :mixed{
   foo(false);
 }

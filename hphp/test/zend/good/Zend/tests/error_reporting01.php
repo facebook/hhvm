@@ -1,9 +1,9 @@
 <?hh
 
-function foo($arg) {
+function foo($arg) :mixed{
 }
 
-function bar() {
+function bar() :mixed{
     throw new Exception("test");
 }
 <<__EntryPoint>> function main(): void {

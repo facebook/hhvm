@@ -4,7 +4,7 @@ class x {
   public $y1;
 }
 
-function cyclic_prop_declared_props() {
+function cyclic_prop_declared_props() :mixed{
   $a = new x;
   $a->x0 = new x;
   $a->x0->y1 = $a->x0;
@@ -12,7 +12,7 @@ function cyclic_prop_declared_props() {
   var_dump($a->x0->y1 = "ok");
 }
 
-function cyclic_prop_nondeclared_props() {
+function cyclic_prop_nondeclared_props() :mixed{
   $a = new stdClass;
   $a->x0 = new stdClass;
   $a->x0->y0 = 'a';

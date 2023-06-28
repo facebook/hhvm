@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
   /**
    * Rules for XHP names and guidelines for avoid ambiguities:
    *

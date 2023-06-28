@@ -2,12 +2,12 @@
 
 
 
-function h() {
+function h() :mixed{
     var_dump(fb_debug_backtrace());
 }
 
 class C {
-  static function f() {
+  static function f() :mixed{
     h();
   }
 }
@@ -26,7 +26,7 @@ abstract final class FbDebugBacktraceStatics {
  *
  * @author epriestley
  */
-function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
+function fb_debug_backtrace($skip_top_libcore=true, $bt=null) :mixed{
 
   if (FbDebugBacktraceStatics::$real === null) {
     FbDebugBacktraceStatics::$real = strlen(rtrim(realpath($_SERVER['PHP_ROOT']), '/').'/');
@@ -81,7 +81,7 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
   return array_values($bt);
 }
 
-function g() {
+function g() :mixed{
   C::f();
 }
 

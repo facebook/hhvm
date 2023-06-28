@@ -18,7 +18,7 @@ class Foo {
   }
 }
 
-function test_switch(int $b) {
+function test_switch(int $b) :mixed{
   $x = new Foo();
   switch($b) {
     case 0:

@@ -11,18 +11,18 @@ class Whatever {
     $this->x = new Bar();
   }
 
-  public function hey() {
+  public function hey() :mixed{
     $this->x->x = 123;
     return $this->x->x;
   }
 }
 
-function main() {
+function main() :mixed{
   var_dump((new Whatever(0))->hey());
 }
 
 
 <<__EntryPoint>>
-function main_private_props_009() {
+function main_private_props_009() :mixed{
 main();
 }

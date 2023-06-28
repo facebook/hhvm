@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_bogus_connection() {
+function main_bogus_connection() :mixed{
 $bogus = 42;
 
 try { var_dump(mysql_next_result($bogus)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

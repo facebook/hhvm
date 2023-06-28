@@ -1,7 +1,7 @@
 <?hh
-function handler() { throw new Exception; }
-function foo(inout $r) {}
-function test() {
+function handler() :mixed{ throw new Exception; }
+function foo(inout $r) :mixed{}
+function test() :mixed{
   try {
     foo();
   } catch (Exception $e) {

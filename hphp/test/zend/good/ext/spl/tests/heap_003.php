@@ -1,6 +1,6 @@
 <?hh
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b) :mixed{
         if ($a > $b) {
             $result = 1;
         } else if ($a < $b) {

@@ -1,10 +1,10 @@
 <?hh
 
-function decieve_static_analysis() {
+function decieve_static_analysis() :mixed{
   return mt_rand() ? 'a' : 'b';
 }
 
-function main() {
+function main() :mixed{
   $start_usage = memory_get_usage();
   $a = varray[];
   for ($i = 0; $i < $start_usage / 1000; $i++) {
@@ -14,6 +14,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_memory_get_usage() {
+function main_memory_get_usage() :mixed{
 main();
 }

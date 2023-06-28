@@ -1,13 +1,13 @@
 <?hh
 
 class one {
-  public function foo() {
+  public function foo() :mixed{
     echo "one\n";
   }
 }
 
 class two {
-  public static function foo() {
+  public static function foo() :mixed{
     echo "two\n";
     if (static::class === "three") {
       static::heh();
@@ -16,14 +16,14 @@ class two {
 }
 
 class three extends two {
-  public static function heh() { echo "three\n"; }
+  public static function heh() :mixed{ echo "three\n"; }
 }
 
 class doer {
-  public function ijunk($x) {
+  public function ijunk($x) :mixed{
     $x->foo();
   }
-  public function sjunk($x) {
+  public function sjunk($x) :mixed{
     $x::foo();
   }
 }

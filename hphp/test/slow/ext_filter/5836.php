@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_5836() {
+function main_5836() :mixed{
 $data = darray[
   'true'     => '1',
   'false'    => '0',

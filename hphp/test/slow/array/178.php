@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_178() {
+function main_178() :mixed{
 var_dump(darray[1 => 'a', 0 => 'b']);
 }

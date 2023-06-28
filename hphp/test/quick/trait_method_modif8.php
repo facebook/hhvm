@@ -1,11 +1,11 @@
 <?hh
 class Foo {
-  function f() {
+  function f() :mixed{
     echo "Foo\n";
   }
 }
 trait T {
-  static function f() {
+  static function f() :mixed{
     echo "Bar\n";
   }
 }

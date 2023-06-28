@@ -6,7 +6,7 @@ function round_trip_in_apc(mixed $val): mixed {
   return apc_fetch('abc', inout $err);
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $marked_arr = HH\array_mark_legacy(varray[4, 5, 6]);
   $marked_arr = round_trip_in_apc($marked_arr);
   var_dump(HH\is_array_marked_legacy($marked_arr));

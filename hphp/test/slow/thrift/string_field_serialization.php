@@ -16,7 +16,7 @@ class TestStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function _try($fn) {
+function _try($fn) :mixed{
   try {
     $fn();
   } catch (Exception $e) {
@@ -24,14 +24,14 @@ function _try($fn) {
   }
 }
 
-function test_binary($var) {
+function test_binary($var) :mixed{
   $p = new DummyProtocol();
   $v1 = new TestStruct($var);
   thrift_protocol_write_binary($p, 'foo', 1, $v1, 20, true);
   var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
 
-function test_compact($var) {
+function test_compact($var) :mixed{
   $p = new DummyProtocol();
   $v1 = new TestStruct($var);
   thrift_protocol_write_compact2($p, 'foo', 2, $v1, 20);
@@ -39,7 +39,7 @@ function test_compact($var) {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   require 'common.inc';
   echo "--- binary ---\n";
   _try(() ==> test_binary('asdf'));

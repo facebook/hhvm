@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function gen($a, $b) {
+  public function gen($a, $b) :AsyncGenerator<mixed,mixed,void>{
     yield $a;
     yield $b;
   }
@@ -9,7 +9,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_1824() {
+function main_1824() :mixed{
 $x = new A;
 $x->cache_gen = $x->gen('a', 'b');
 foreach ($x->cache_gen as $v) {

@@ -3,7 +3,7 @@
 abstract final class FStatics {
   public static $count = 1;
 }
-function f() {
+function f() :mixed{
   throw new Exception((string)FStatics::$count);
 }
 
@@ -11,7 +11,7 @@ function f() {
 // From PHP 7 testing sources, with minor modification
 
 <<__EntryPoint>>
-function main_preg_replace_callback_array_errors() {
+function main_preg_replace_callback_array_errors() :mixed{
 $count = -1;
 try { var_dump(preg_replace_callback_array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(preg_replace_callback_array(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

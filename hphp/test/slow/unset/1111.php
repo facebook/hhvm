@@ -4,7 +4,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new A;
   $obj->arr = varray['test'];
   var_dump($obj->arr);

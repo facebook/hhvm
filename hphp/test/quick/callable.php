@@ -1,16 +1,16 @@
 <?hh
 
-function check($f) {
+function check($f) :mixed{
   var_dump($f);
   var_dump(is_callable($f));
 }
 
-function typehint(callable $a) {
+function typehint(callable $a) :mixed{
   var_dump('worked');
 }
 
 <<__DynamicallyCallable>>
-function id() {}
+function id() :mixed{}
 
 <<__EntryPoint>> function main(): void {
     check('');

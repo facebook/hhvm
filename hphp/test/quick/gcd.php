@@ -1,5 +1,5 @@
 <?hh
-function gcd($x, $y) {
+function gcd($x, $y) :mixed{
   if ($x >= $y) {
     $a = $x;
     $b = $y;

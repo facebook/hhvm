@@ -3,7 +3,7 @@
 class Env { public static int $n = 3; }
 
 <<__EntryPoint>>
-function main_2161() {
+function main_2161() :mixed{
 $f = function ($arg0) {
   yield $arg0;
   yield $arg0 + (Env::$n++);

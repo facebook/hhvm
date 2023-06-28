@@ -5,31 +5,31 @@ class MealIterator implements Iterator {
     private $pos=0;
     private $myContent=varray["breakfast", "lunch", "dinner"];
 
-    public function valid() {
+    public function valid() :mixed{
         echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos<3;
     }
 
-    public function next() {
+    public function next() :mixed{
       echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
       try {
         return $this->myContent[$this->pos++];
       } catch (Exception $e) { echo $e->getMessage()."\n"; }
     }
 
-    public function rewind() {
+    public function rewind() :mixed{
 
         echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current() :mixed{
 
         echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key() :mixed{
 
         echo (string)(self::$indent)."--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;

@@ -1,5 +1,5 @@
 <?hh
-function Sum($a) {
+function Sum($a) :mixed{
   $sum = 0;
   if (is_array($a)) {
     foreach($a as $val) {

@@ -4,7 +4,7 @@
 // From https://github.com/facebook/hhvm/issues/2337
 
 <<__EntryPoint>>
-function main_filter_unsafe_raw_strip() {
+function main_filter_unsafe_raw_strip() :mixed{
 var_dump(
   filter_var(
     "a\ta",

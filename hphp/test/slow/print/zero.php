@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main() {
+function main() :mixed{
   $nzero = -1.0;
   while ($nzero != 0.0) {
     $nzero /= 2.0;
@@ -14,6 +14,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_zero() {
+function main_zero() :mixed{
 main();
 }

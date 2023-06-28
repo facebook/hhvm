@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_clone() {
+function main_clone() :mixed{
 $dom = new DOMDocument();
 $dom->loadHTML('
 <html>

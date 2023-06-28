@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   try {
     if (@$y is ?int) echo "Yes\n";
   } catch (UndefinedVariableException $e) {
@@ -9,6 +9,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_uninit_vs_nullable() {
+function main_uninit_vs_nullable() :mixed{
   test();
 }

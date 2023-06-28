@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x = Map {0 => 1};
   $y = $x->toImmMap();
   $x[0] += 2;
@@ -102,6 +102,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_map_buffer_sharing() {
+function main_map_buffer_sharing() :mixed{
 main();
 }

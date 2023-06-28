@@ -1,7 +1,7 @@
 <?hh
 
 class D {
-  function go() {
+  function go() :mixed{
     static::$boom = new stdClass;
   }
 }
@@ -10,7 +10,7 @@ class Y extends D {
   public static $boom = 'heh';
 }
 
-function go() {
+function go() :mixed{
   var_dump(Y::$boom);
   var_dump(is_string(Y::$boom));
   (new Y)->go();
@@ -21,6 +21,6 @@ function go() {
 
 
 <<__EntryPoint>>
-function main_public_static_props_003() {
+function main_public_static_props_003() :mixed{
 go();
 }

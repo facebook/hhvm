@@ -5,7 +5,7 @@
  */
 
 function key_compare_func($a, $b)
-{
+:mixed{
     if ($a === $b) {
         return 0;
     }

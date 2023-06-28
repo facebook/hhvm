@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :mixed{
   $x = new stdClass();
   $x->bar = darray[0 => 1];
   return $x;

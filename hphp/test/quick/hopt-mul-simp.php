@@ -1,51 +1,51 @@
 <?hh
-function foo1() {
+function foo1() :mixed{
   $x = 3;
   $y = 4;
   return $x * $y;
 }
 
-function foo2($x) {
+function foo2($x) :mixed{
   return $x * 2;
 }
 
-function foo3($x, $y) {
+function foo3($x, $y) :mixed{
   return $x * $y;
 }
 
-function foo4($x) {
+function foo4($x) :mixed{
   return (-1) * $x;
 }
 
-function foo5($x, $y, $z) {
+function foo5($x, $y, $z) :mixed{
   return $x * $y + $x * $z;
 }
 
-function foo6($x, $y, $z) {
+function foo6($x, $y, $z) :mixed{
   return $y * $x + $x * $z;
 }
 
-function foo7($x, $y, $z) {
+function foo7($x, $y, $z) :mixed{
   return $x * $y + $z * $x;
 }
 
-function foo8($x, $y, $z) {
+function foo8($x, $y, $z) :mixed{
   return $y * $x + $z * $x;
 }
 
-function foo9($x, $y) {
+function foo9($x, $y) :mixed{
   return ($x * 3) * ($y * 7);
 }
 
-function foo10($x) {
+function foo10($x) :mixed{
   return (3 * $x) * 7;
 }
 
-function foo11($x) {
+function foo11($x) :mixed{
   return $x * 8;
 }
 
-function foo12($x) {
+function foo12($x) :mixed{
   return $x * (-8);
 }
 <<__EntryPoint>> function main(): void {

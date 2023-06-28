@@ -1,6 +1,6 @@
 <?hh
 
-function httpsTestController($serverPort) {
+function httpsTestController($serverPort) :mixed{
   $args = darray['HTTPS' => ''];
   var_dump(request('localhost', $serverPort, "test_https.php",
                   darray[], darray[], $args));

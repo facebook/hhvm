@@ -1,10 +1,10 @@
 <?hh
 
-function throw_exception($msg) {
+function throw_exception($msg) :mixed{
     throw new Exception($msg);
 }
 
-function foo (inout $ex) {
+function foo (inout $ex) :mixed{
    try {
       echo "1";
       try {

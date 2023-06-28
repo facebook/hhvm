@@ -1,6 +1,6 @@
 <?hh
 
-function gen(varray $array) {
+function gen(varray $array) :AsyncGenerator<mixed,mixed,void>{
     foreach ($array as $value) {
         yield $value;
     }

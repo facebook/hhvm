@@ -1,27 +1,27 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-function lower($a) {
+function lower($a) :mixed{
  return strtolower($a);
 }
-function sumlen_step($a,$b,$c) {
+function sumlen_step($a,$b,$c) :mixed{
  return (int)$a + strlen($c);
 }
-function sumlen_fini($a) {
+function sumlen_fini($a) :mixed{
  return (int)$a;
 }
 
 
 <<__EntryPoint>>
-function main_ext_sqlite3() {
+function main_ext_sqlite3() :mixed{
 $db = new SQLite3(sys_get_temp_dir().'/'.':memory:test');
 $db->exec("DROP TABLE IF EXISTS foo");
 $db->exec("CREATE TABLE foo (bar STRING)");

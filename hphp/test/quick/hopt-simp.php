@@ -1,46 +1,46 @@
 <?hh
 
-function foo1() {
+function foo1() :mixed{
   $x = true;
   return !($x < false);
 }
 
-function foo2($x, $y) {
+function foo2($x, $y) :mixed{
   return !($x < $y);
 }
 
-function foo3() {
+function foo3() :mixed{
   $x = 4;
   return 0 + $x;
 }
 
-function foo4() {
+function foo4() :mixed{
   $a = 5;
   $b = 2;
   return $a - $b;
 }
 
-function foo5() {
+function foo5() :mixed{
   $x = "ab";
   $y = "a";
   return (int)($x == $y);
 }
 
-function foo6($x) {
+function foo6($x) :mixed{
   return 2 + $x + 2;
 }
 
-function foo7($x) {
+function foo7($x) :mixed{
   $y = $x;
   return $x <= $y;
 }
 
-function foo8() {
+function foo8() :mixed{
   $x = varray[];
   return (bool)$x;
 }
 
-function foo9() {
+function foo9() :mixed{
   $x = varray[1, 2, 3];
   return (bool)$x;
 }

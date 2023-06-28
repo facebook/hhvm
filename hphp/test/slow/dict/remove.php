@@ -15,7 +15,7 @@ function path(int $n): vec<int> {
 }
 
 // Comprehensive test of dict insertion and deletion. Runtime: O(n * 2^n).
-function test(int $n) {
+function test(int $n) :mixed{
   print("\n==============================================================\n");
   print("Running test($n):\n");
   $path = path($n);
@@ -50,7 +50,7 @@ function test(int $n) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // NOTE: The 18 here is the minimum size at which we'll hit MonotypeDict's
   // maximum tombstone count limit, which is what we're trying to test.
   for ($i = 0; $i < 18; $i++) {

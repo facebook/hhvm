@@ -8,7 +8,7 @@ class C extends B {
 }
 
 <<__EntryPoint>>
-function main_1350() {
+function main_1350() :mixed{
 $a = new A;
  $b = new B;
 var_dump(is_subclass_of('A', 'A', true));

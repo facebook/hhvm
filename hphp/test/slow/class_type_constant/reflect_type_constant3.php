@@ -16,7 +16,7 @@ class GrandChild extends Child implements I {
 
 
 <<__EntryPoint>>
-function main_reflect_type_constant3() {
+function main_reflect_type_constant3() :mixed{
 $rtc = new ReflectionTypeConstant(GrandChild::class, 'T');
 var_dump($rtc->getDeclaringClass()->getName());
 var_dump($rtc->getClass()->getName());

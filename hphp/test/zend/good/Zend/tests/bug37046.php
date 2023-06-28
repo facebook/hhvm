@@ -1,5 +1,5 @@
 <?hh
-function s() {
+function s() :mixed{
   $storage = varray[varray['x', 'y']];
   return $storage[0];
 }

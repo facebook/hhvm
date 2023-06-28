@@ -1,11 +1,11 @@
 <?hh
 
-function foo(inout $arr) {
+function foo(inout $arr) :mixed{
   if ($arr[0] == 0) return true;
   $arr[0] = 0;
 }
 
-function main() {
+function main() :mixed{
   $arr = darray[];
   $arr[0] = -1;
   while (true) {
@@ -15,7 +15,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_loop_boxiness1() {
+function main_loop_boxiness1() :mixed{
 main();
 main();
 main();

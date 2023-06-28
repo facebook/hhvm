@@ -1,6 +1,6 @@
 <?hh 
 
-function ctype_test_002($function) {
+function ctype_test_002($function) :mixed{
 	$n1 = $n2 = $n3 = 0;
 	// test portable POSIX characters 0..127
 	for ($a=0;$a<128;$a++) {

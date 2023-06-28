@@ -1,6 +1,6 @@
 <?hh
-function bar($x) { return !$x; }
-function main() {
+function bar($x) :mixed{ return !$x; }
+function main() :mixed{
   $v0 = Vector {};
   $v1 = Vector {1};
   var_dump(array_filter(
@@ -41,6 +41,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_filter() {
+function main_array_filter() :mixed{
 main();
 }

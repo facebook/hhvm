@@ -1,5 +1,5 @@
 <?hh
-function CommaSeparatedList($a, $b) {
+function CommaSeparatedList($a, $b) :mixed{
     if($a == null)
         return $b;
     else

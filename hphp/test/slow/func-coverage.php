@@ -1,42 +1,42 @@
 <?hh
 
-function a() { echo __METHOD__."\n"; }
-function b() { echo __METHOD__."\n"; }
-function c() { echo __METHOD__."\n"; }
+function a() :mixed{ echo __METHOD__."\n"; }
+function b() :mixed{ echo __METHOD__."\n"; }
+function c() :mixed{ echo __METHOD__."\n"; }
 
 trait T {
-  function f() { echo __METHOD__."\n"; }
-  function g() { echo __METHOD__."\n"; }
-  function h() { echo __METHOD__."\n"; }
+  function f() :mixed{ echo __METHOD__."\n"; }
+  function g() :mixed{ echo __METHOD__."\n"; }
+  function h() :mixed{ echo __METHOD__."\n"; }
 
-  static function i() { echo __METHOD__."\n"; }
-  static function j() { echo __METHOD__."\n"; }
-  static function k() { echo __METHOD__."\n"; }
+  static function i() :mixed{ echo __METHOD__."\n"; }
+  static function j() :mixed{ echo __METHOD__."\n"; }
+  static function k() :mixed{ echo __METHOD__."\n"; }
 }
 
 class P {
-  function x() { echo __METHOD__."\n"; }
-  function n() { echo __METHOD__."\n"; }
+  function x() :mixed{ echo __METHOD__."\n"; }
+  function n() :mixed{ echo __METHOD__."\n"; }
 
-  static function q() { echo __METHOD__."\n"; }
-  static function m() { echo __METHOD__."\n"; }
+  static function q() :mixed{ echo __METHOD__."\n"; }
+  static function m() :mixed{ echo __METHOD__."\n"; }
 }
 
 class C extends P {
   use T;
 
-  function x() { echo __METHOD__."\n"; }
-  function y() { echo __METHOD__."\n"; }
-  function z() { echo __METHOD__."\n"; }
+  function x() :mixed{ echo __METHOD__."\n"; }
+  function y() :mixed{ echo __METHOD__."\n"; }
+  function z() :mixed{ echo __METHOD__."\n"; }
 
-  static function q() { echo __METHOD__."\n"; }
-  static function r() { echo __METHOD__."\n"; }
-  static function s() { echo __METHOD__."\n"; }
+  static function q() :mixed{ echo __METHOD__."\n"; }
+  static function r() :mixed{ echo __METHOD__."\n"; }
+  static function s() :mixed{ echo __METHOD__."\n"; }
 }
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   a();
   HH\enable_function_coverage();
   echo ">>>>>> COVERAGE_START\n";

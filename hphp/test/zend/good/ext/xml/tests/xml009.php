@@ -1,9 +1,9 @@
 <?hh
-function start_elem($parser,$name,$attribs) {
+function start_elem($parser,$name,$attribs) :mixed{
     var_dump($name);
 }
 function end_elem()
-{
+:mixed{
 }
 <<__EntryPoint>> function main(): void {
 $xml = <<<HERE

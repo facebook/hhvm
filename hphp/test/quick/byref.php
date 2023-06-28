@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a, inout $b, inout $c, $d) {
+function foo($a, inout $b, inout $c, $d) :mixed{
   $a = 10;
   $b = 20;
   $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);

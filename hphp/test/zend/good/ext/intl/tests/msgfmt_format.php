@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
     $locales = darray[
         'en_US' => "{0,number,integer} monkeys on {1,number,integer} trees make {2,number} monkeys per tree",
         'ru_UA' => "{0,number,integer} мавп на {1,number,integer} деревах це {2,number} мавпи на кожному деревi",

@@ -1,6 +1,6 @@
 <?hh
 
-function outputPrototype($rf) {
+function outputPrototype($rf) :mixed{
   try {
     $prototype = $rf->getPrototype();
     print $prototype->getDeclaringClass()->getName() .
@@ -12,69 +12,69 @@ function outputPrototype($rf) {
 }
 
 interface Int1 {
-  function method1();
+  function method1():mixed;
 }
 interface Int2 {
-  function method2();
+  function method2():mixed;
 }
 interface Int3 extends Int2 {
-  function method3();
+  function method3():mixed;
 }
 interface Int4 {
-  function method4();
+  function method4():mixed;
 }
 
 class Cls1 {
-  public function method1() {
+  public function method1() :mixed{
   }
-  private function method2() {
+  private function method2() :mixed{
   }
 }
 class Cls2 {
-  public function method1() {
+  public function method1() :mixed{
   }
-  public function method2() {
+  public function method2() :mixed{
   }
 }
 abstract class Cls3 extends Cls2 implements Int3 {
 }
 class Cls4 extends Cls3 {
-  public function method3() {
+  public function method3() :mixed{
   }
 }
 class Cls5 extends Cls4 implements Int4 {
-  public function method4() {
+  public function method4() :mixed{
   }
 }
 
 trait Method3 {
-  public function method3() {
+  public function method3() :mixed{
   }
 }
 
 class Cls6 extends Cls4 implements Int4 {
   use Method3;
-  function method4() {
+  function method4() :mixed{
   }
 }
 class Cls7 extends Cls6 {
-  public function method1() {
+  public function method1() :mixed{
   }
-  public function method7() {
+  public function method7() :mixed{
   }
 }
 class Cls8 extends Cls7 {
-  public function method7() {
+  public function method7() :mixed{
   }
 }
 
 class PDOSubClass extends PDO {
-  public function commit() {
+  public function commit() :mixed{
     return true;
   }
 }
 
-function main() {
+function main() :mixed{
   $tests = varray[
     varray["Cls1", "method1"],
     varray["Cls1", "method2"],
@@ -107,6 +107,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reflection_method_get_prototype() {
+function main_reflection_method_get_prototype() :mixed{
 main();
 }

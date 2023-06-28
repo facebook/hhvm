@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  function f() {
+  function f() :mixed{
     $a = function() {
  yield 1;
  yield 2;
@@ -12,7 +12,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_2155() {
+function main_2155() :mixed{
 $a = new A;
 $f = $a->f();
 foreach ($f() as $v) {

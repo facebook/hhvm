@@ -1,13 +1,13 @@
 <?hh
 
 class X implements Serializable {
-  public function serialize() {
+  public function serialize() :mixed{
     return 'true';
   }
-  public function unserialize($serialized ) {
+  public function unserialize($serialized ) :mixed{
   }
 }
-function test() {
+function test() :mixed{
   $a = varray[];
   $a[] = $x = new X;
   $a[] = $x;
@@ -20,6 +20,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1827() {
+function main_1827() :mixed{
 test();
 }

@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $ro = readonly new P(1);
   $mut = new P(1);
   $p = varray[$ro, $mut];

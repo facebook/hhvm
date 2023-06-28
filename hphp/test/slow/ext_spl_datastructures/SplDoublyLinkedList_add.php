@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_spl_doubly_linked_list_add() {
+function main_spl_doubly_linked_list_add() :mixed{
 $dll = new SplDoublyLinkedList();
 
 $dll->push('Never');

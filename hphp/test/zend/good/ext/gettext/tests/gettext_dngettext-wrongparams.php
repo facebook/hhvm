@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main_entry() {
+<?hh <<__EntryPoint>> function main_entry() :mixed{
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');

@@ -10,6 +10,6 @@ function is_function(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_shape_function() {
+function main_is_expression_ta_shape_function() :mixed{
 is_function(shape('a' => () ==> 1));
 }

@@ -60,4 +60,4 @@ foreach ($oper1 as $e1)
 }
 }
 
-function E() { echo "cannot be compared\n"; }
+function E() :mixed{ echo "cannot be compared\n"; }

@@ -10,9 +10,9 @@
  */
 
 class C {
-    function f() {}
-    function g() {}
-    function h() {}
+    function f() :mixed{}
+    function g() :mixed{}
+    function h() :mixed{}
 }
 
 class D {}

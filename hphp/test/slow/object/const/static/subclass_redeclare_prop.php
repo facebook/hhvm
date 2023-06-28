@@ -4,7 +4,7 @@
 class A {
   <<__Const>>
   public static int $x = 5;
-  public static function write_x() {
+  public static function write_x() :mixed{
     static::$x = 10;
   }
 }
@@ -14,7 +14,7 @@ class B extends A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     A::write_x();
     echo "FAIL: wrote to static const property\n";

@@ -18,6 +18,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_val_colon_colon_class_method() {
+function main_val_colon_colon_class_method() :mixed{
 main();
 }

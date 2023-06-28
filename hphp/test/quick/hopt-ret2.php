@@ -2,7 +2,7 @@
 
 class C {
   public $y=5;
-  function foo($x) {
+  function foo($x) :mixed{
     return $x + $this->y;
   }
 }

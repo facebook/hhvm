@@ -1,7 +1,7 @@
 <?hh
 <<__DynamicallyCallable>>
 function global_func()
-{
+:mixed{
     echo __METHOD__ . "\n";
 }
 
@@ -10,7 +10,7 @@ class foo
     public static $method = 'global_func';
     <<__DynamicallyCallable>>
     static public function foo_func()
-    {
+:mixed    {
         echo __METHOD__ . "\n";
     }
 }

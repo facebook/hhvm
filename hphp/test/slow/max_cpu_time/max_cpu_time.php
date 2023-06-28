@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_max_cpu_time() {
+function main_max_cpu_time() :mixed{
 var_dump(ini_get('hhvm.max_cpu_time'));
 ini_set('hhvm.max_cpu_time', 1);
 var_dump(ini_get('hhvm.max_cpu_time'));

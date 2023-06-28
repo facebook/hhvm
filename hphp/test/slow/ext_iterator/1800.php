@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1800() {
+function main_1800() :mixed{
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;

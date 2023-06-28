@@ -3,13 +3,13 @@
 class X {
   private $p;
 
-  function g() { return $this->p; }
-  function s(X $c) { $c->p = $this; }
+  function g() :mixed{ return $this->p; }
+  function s(X $c) :mixed{ $c->p = $this; }
 }
 class Y extends X {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $y = new Y();
   $x = new X();
   $x->s($y);

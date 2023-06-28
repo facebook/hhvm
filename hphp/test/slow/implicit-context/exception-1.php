@@ -1,11 +1,11 @@
 <?hh
 
-function throwExn()[zoned] {
+function throwExn()[zoned] :mixed{
   throw new Exception();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
   IntContext::start(1, ()[zoned] ==> {

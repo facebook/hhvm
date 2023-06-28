@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
     $x = varray[1,2,3];
     foreach ($x as $a) {
         while (1) {

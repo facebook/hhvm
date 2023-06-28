@@ -1,7 +1,7 @@
 <?hh
 
 class Info { public static bool $sawHackArrNotice = false; }
-function handler($_errno, $errstr, ...) {
+function handler($_errno, $errstr, ...) :mixed{
   if (
     !Info::$sawHackArrNotice &&
     $errstr === 'Hack Array Compat: Comparing PHP array with Hack array'
@@ -12,7 +12,7 @@ function handler($_errno, $errstr, ...) {
   return false;
 }
 
-function do_compare_hack_array($cmp) {
+function do_compare_hack_array($cmp) :mixed{
   Info::$sawHackArrNotice = false;
   try {
     $cmp();
@@ -21,7 +21,7 @@ function do_compare_hack_array($cmp) {
   }
   return Info::$sawHackArrNotice ? 'T' : 'F';
 }
-function do_compare_non_any_array($cmp) {
+function do_compare_non_any_array($cmp) :mixed{
   try {
     $cmp();
   } catch (InvalidOperationException $e) {
@@ -29,7 +29,7 @@ function do_compare_non_any_array($cmp) {
   }
   return 'F';
 }
-function do_compares($a, $b, $cmp) {
+function do_compares($a, $b, $cmp) :mixed{
   echo "=========================== Notice Compare =======================\n";
   var_dump($a);
   var_dump($b);
@@ -46,7 +46,7 @@ function do_compares($a, $b, $cmp) {
 }
 
 <<__EntryPoint>>
-function main_compare() {
+function main_compare() :mixed{
   set_error_handler(handler<>);
 
   $x1 = vec[

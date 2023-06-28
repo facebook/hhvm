@@ -2,7 +2,7 @@
 
 class C {
 <<__Memoize(#KeyedByIC)>>
-function test()[] {
+function test()[] :mixed{
   echo "ok\n";
 }
 }

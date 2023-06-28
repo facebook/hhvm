@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function test() {
+function test() :mixed{
   echo "Inside test() in ".__FILE__."\n";
   try {
     echo "\$v1: $v1, \$v2: $v2\n";

@@ -1,6 +1,6 @@
 <?hh
 
-function foo($p) {
+function foo($p) :mixed{
   $a = varray['a', 'b', $p];
   $a[] = 'd';
   var_dump($a);
@@ -19,6 +19,6 @@ function foo($p) {
 }
 
 <<__EntryPoint>>
-function main_248() {
+function main_248() :mixed{
 foo('c');
 }

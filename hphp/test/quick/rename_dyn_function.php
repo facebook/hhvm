@@ -1,14 +1,14 @@
 <?hh
 
-function a() {
+function a() :mixed{
   echo "Hello from a\n";
 }
 
-function b() {
+function b() :mixed{
   echo "I am b\n";
 }
 
-function callfns($name, $name2) {
+function callfns($name, $name2) :mixed{
   echo "Calling $name\n";
   $name();
   echo "Calling $name2\n";

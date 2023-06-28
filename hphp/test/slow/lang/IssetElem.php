@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_isset_elem() {
+function main_isset_elem() :mixed{
 $a = varray[0, 1, 2];
 print ":".(string)(isset($a[-1])).":\n";
 print ":".(string)(isset($a[0])).":\n";

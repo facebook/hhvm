@@ -1,7 +1,7 @@
 <?hh
 
 function f1($b)
-{
+:mixed{
     $b__str = (string)($b);
     echo "\tInside function " . __FUNCTION__ . ", \$b is $b__str\n";
 
@@ -13,7 +13,7 @@ function f1($b)
 }
 
 function f2()
-{
+:mixed{
     $b = HH\stdout();
 
     $b__str = (string)($b);

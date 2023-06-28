@@ -2,7 +2,7 @@
 
 namespace {
     const foo = 'foo.const';
-    function foo() {
+    function foo() :mixed{
         return 'foo.function';
     }
 }

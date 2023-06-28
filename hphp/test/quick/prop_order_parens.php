@@ -1,20 +1,20 @@
 <?hh
 class D {
 public $prop = 300;
-public function prop() { return 350; }
+public function prop() :mixed{ return 350; }
 public $yo = 500;
-public function yo() { return 550; }
+public function yo() :mixed{ return 550; }
 public $blah = 600;
-public function blah() { return 650; }
+public function blah() :mixed{ return 650; }
 }
 class C {
 public static $x = 100;
 public static $y = varray[200];
 public static $z = varray[];
-public static function foo1() { return 150; }
-public static function foo2() { return 250; }
+public static function foo1() :mixed{ return 150; }
+public static function foo2() :mixed{ return 250; }
 public $bar1 = 400;
-public function bar2() { return 450; }
+public function bar2() :mixed{ return 450; }
 public $baz;
 public $w = varray[];
 public function __construct() {

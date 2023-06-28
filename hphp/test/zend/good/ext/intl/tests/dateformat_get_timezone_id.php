@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $timezone_id_arr = varray [
         'America/New_York',
         'US/Pacific',

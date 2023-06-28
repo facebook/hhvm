@@ -1,7 +1,7 @@
 <?hh
 
 class ToString {
-  function __toString() {
+  function __toString() :mixed{
     return "foobaz";
   }
 }
@@ -15,7 +15,7 @@ class Thrower {
   }
 }
 
-function create($a, $b, $c, $d) {
+function create($a, $b, $c, $d) :mixed{
   try {
     var_dump(vec[$a, $b, $c, $d]);
   } catch (Exception $e) {

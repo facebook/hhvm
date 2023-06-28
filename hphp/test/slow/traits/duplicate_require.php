@@ -9,6 +9,6 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_duplicate_require() {
+function main_duplicate_require() :mixed{
 ;
 }

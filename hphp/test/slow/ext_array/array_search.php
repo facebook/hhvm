@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_search() {
+function main_array_search() :mixed{
 $array = darray[
   0 => "blue",
   1 => "red",

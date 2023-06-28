@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function handler($_, $str, $file, $line) {
+function handler($_, $str, $file, $line) :mixed{
   if (preg_match('/Object of class (.*) could not be converted to (float|int)/', $str)) {
     throw new TypecastException($str." in $file on line $line");
   }

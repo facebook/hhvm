@@ -1,6 +1,6 @@
 <?hh
 
-function charsAsHexSeq($s) {
+function charsAsHexSeq($s) :mixed{
   if (!is_string($s)) {
     return $s;
   }
@@ -12,14 +12,14 @@ function charsAsHexSeq($s) {
 }
 
 class CountCharsTest {
-  function __toString()[] {
+  function __toString()[] :mixed{
     return 'hhvm';
   }
 }
 
 
 <<__EntryPoint>>
-function main_count_chars() {
+function main_count_chars() :mixed{
 echo "mode 0\n";
 var_dump(array_filter(count_chars('', 0)));
 var_dump(array_filter(count_chars('hhvm', 0)));

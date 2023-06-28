@@ -4,7 +4,7 @@
 namespace BuiltinBadParams;
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     \HH\prefetch_units(vec[], false);
   } catch (\Exception $e) {

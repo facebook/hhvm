@@ -3,7 +3,7 @@
 module a.b;
 
 <<__EntryPoint>>
-function main_soft() {
+function main_soft() :mixed{
   soft_foo();
 
   __hhvm_intrinsics\launder_value("soft_foo")();

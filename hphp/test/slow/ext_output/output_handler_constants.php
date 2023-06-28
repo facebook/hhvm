@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_output_handler_constants() {
+function main_output_handler_constants() :mixed{
 var_dump(PHP_OUTPUT_HANDLER_CONT);
 var_dump(PHP_OUTPUT_HANDLER_WRITE);
 

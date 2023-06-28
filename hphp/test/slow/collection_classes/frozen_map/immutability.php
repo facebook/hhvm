@@ -2,7 +2,7 @@
 
 // Test that ImmMap is immutable.
 
-function wrap_exception(callable $f) {
+function wrap_exception(callable $f) :mixed{
   try {
     $f(ImmMap {'a' => 1, 'b' => 2, 'c' => 3});
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function wrap_exception(callable $f) {
   return "NO EXCEPTION -- WRONG :(";
 }
 
-function main() {
+function main() :mixed{
   // All of these should throw.
   $funcs = varray[
     function ($fm) {
@@ -31,7 +31,7 @@ function main() {
   }
 }
 
-function nomutatorfuncs() {
+function nomutatorfuncs() :mixed{
   $fm = ImmMap{};
   var_dump(method_exists($fm, 'add'));
   var_dump(method_exists($fm, 'addAll'));
@@ -42,7 +42,7 @@ function nomutatorfuncs() {
 
 
 <<__EntryPoint>>
-function main_immutability() {
+function main_immutability() :mixed{
 main();
 nomutatorfuncs();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_bccomp_overflow() {
+function main_bccomp_overflow() :mixed{
 $intMaxPre = PHP_INT_MAX - 1;
 $stringNormal = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

@@ -10,7 +10,7 @@ class C extends D<(int, int)> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C<int>();
   echo (string)($c is C) . "\n";
   $s = serialize($c);

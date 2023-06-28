@@ -9,7 +9,7 @@ class X {
 
 const FOO = 'foo';
 <<__EntryPoint>>
-function main_691() {
+function main_691() :mixed{
 $vars = get_class_vars('X');
  uasort(inout $vars,  HH\Lib\Legacy_FIXME\cmp<>);
  var_dump($vars);

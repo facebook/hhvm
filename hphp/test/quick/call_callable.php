@@ -1,49 +1,49 @@
 <?hh
 
 class Functor {
-  public function __invoke($x) {
+  public function __invoke($x) :mixed{
     return intval($x);
   }
 }
 
 class Base {
-  private function blah() { echo 'Base::blah', "\n"; }
-  public function callInScope($x) {
+  private function blah() :mixed{ echo 'Base::blah', "\n"; }
+  public function callInScope($x) :mixed{
     $x();
   }
 }
 
 class C extends Base {
-  private function blah() { echo __CLASS__, "\n"; }
-  public function exposeBlah() {
+  private function blah() :mixed{ echo __CLASS__, "\n"; }
+  public function exposeBlah() :mixed{
     return varray[$this, 'blah'];
   }
 
-  public static function intval($x) {
+  public static function intval($x) :mixed{
     return intval($x);
   }
-  public function inst_intval($x) {
+  public function inst_intval($x) :mixed{
     return self::intval($x);
   }
 }
 
 class Foo extends Base {
-  public function get() { return varray[$this, 'blah']; }
+  public function get() :mixed{ return varray[$this, 'blah']; }
 }
 
-function invoker($x) {
+function invoker($x) :mixed{
   call_user_func($x);
   $x();
 }
 
-function test_inheritance() {
+function test_inheritance() :mixed{
   echo ' = ', __FUNCTION__, " =\n";
 
   $x = new C();
   $x->callInScope($x->exposeBlah());
 }
 
-function test_invocation_syntaxes() {
+function test_invocation_syntaxes() :mixed{
   echo ' = ', __FUNCTION__, " =\n";
 
   $test = '10f';

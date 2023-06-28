@@ -20,7 +20,7 @@ class K extends H {
   }
 }
 class M extends J {
-  function M() {
+  function M() :mixed{
     print "In M::M()\n";
   }
   function __construct() {

@@ -19,7 +19,7 @@ function test(
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 3; $i++) {
     test(
       Vector{},

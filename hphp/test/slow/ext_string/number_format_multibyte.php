@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_number_format_multibyte() {
+function main_number_format_multibyte() :mixed{
 $separators = darray[
   'multichar' => varray['herp', 'derp'],
   'multibyte' => varray['¡', '×']

@@ -1,6 +1,6 @@
 <?hh
 class A {
-    public function __wakeup() {
+    public function __wakeup() :mixed{
         throw new Exception("Failed");
     }
 }

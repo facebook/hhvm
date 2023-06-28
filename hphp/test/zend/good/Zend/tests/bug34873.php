@@ -6,7 +6,7 @@ class Pwa {
         $this->var = darray[];
     }
 
-    function test (){
+    function test ():mixed{
         $cont = darray[];
         $cont["mykey"] = "myvalue";
 

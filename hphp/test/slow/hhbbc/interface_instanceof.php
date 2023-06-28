@@ -10,13 +10,13 @@ class D1 extends Base implements Heh, Heh2 {}
 class D2 extends Derived implements Heh2 {}
 
 class Factory {
-  static function create($t) {
+  static function create($t) :mixed{
     if (!$t) return new D1;
     return new D2;
   }
 }
 
-function main($k) {
+function main($k) :mixed{
   $x = Factory::create($k);
   if ($x is Derived) {
     echo "derived\n";
@@ -25,6 +25,6 @@ function main($k) {
 
 
 <<__EntryPoint>>
-function main_interface_instanceof() {
+function main_interface_instanceof() :mixed{
 main(2);
 }

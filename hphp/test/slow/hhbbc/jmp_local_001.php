@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function main(?Foo $x = null) {
+function main(?Foo $x = null) :mixed{
   if (!$x) {
     echo (string)(is_object($x)) . "\n";
   } else {
@@ -15,6 +15,6 @@ function main(?Foo $x = null) {
 
 
 <<__EntryPoint>>
-function main_jmp_local_001() {
+function main_jmp_local_001() :mixed{
 main();
 }

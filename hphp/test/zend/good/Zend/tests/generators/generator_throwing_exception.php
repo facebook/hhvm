@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     yield 'foo';
     throw new Exception('test');
     yield 'bar';

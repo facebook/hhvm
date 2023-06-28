@@ -1,9 +1,9 @@
 <?hh
-function f() {
+function f() :mixed{
   echo '1 ';
   return 0;
 }
-function g() {
+function g() :mixed{
   echo '2 ';
   return 0;
 }

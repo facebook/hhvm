@@ -1,6 +1,6 @@
 <?hh
 
-class SomeOtherOtherClass {function trace(){ HH\meth_caller(
+class SomeOtherOtherClass {function trace():mixed{ HH\meth_caller(
 );
    }
 }

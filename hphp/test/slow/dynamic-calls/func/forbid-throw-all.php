@@ -1,53 +1,53 @@
 <?hh
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+function wrap($e) :mixed{ echo "Exception: {$e->getMessage()}\n"; }
 
-function func() {}
-async function async_func() { return 5; }
-function cmp($x, $y) { return $x <=> $y; }
+function func() :mixed{}
+async function async_func() :Awaitable<mixed>{ return 5; }
+function cmp($x, $y) :mixed{ return $x <=> $y; }
 
-<<__DynamicallyCallable>> function func2() {}
-<<__DynamicallyCallable>> async function async_func2() { return 5; }
-<<__DynamicallyCallable>> function cmp2($x, $y) { return $x <=> $y; }
+<<__DynamicallyCallable>> function func2() :mixed{}
+<<__DynamicallyCallable>> async function async_func2() :Awaitable<mixed>{ return 5; }
+<<__DynamicallyCallable>> function cmp2($x, $y) :mixed{ return $x <=> $y; }
 
 class Invokable {
-  public function __invoke() {}
+  public function __invoke() :mixed{}
 }
 
 class InvokableCmp {
-  public function __invoke($a, $b) { return $a <=> $b; }
+  public function __invoke($a, $b) :mixed{ return $a <=> $b; }
 }
 
 class B {
-  public function func() {}
-  public static function static_func() {}
-  public async function async_func() { return 5; }
-  public static async function static_async_func() { return 5; }
+  public function func() :mixed{}
+  public static function static_func() :mixed{}
+  public async function async_func() :Awaitable<mixed>{ return 5; }
+  public static async function static_async_func() :Awaitable<mixed>{ return 5; }
 
-  <<__DynamicallyCallable>> public function func2() {}
-  <<__DynamicallyCallable>> public static function static_func2() {}
-  <<__DynamicallyCallable>> public async function async_func2() { return 5; }
-  <<__DynamicallyCallable>> public static async function static_async_func2() { return 5; }
+  <<__DynamicallyCallable>> public function func2() :mixed{}
+  <<__DynamicallyCallable>> public static function static_func2() :mixed{}
+  <<__DynamicallyCallable>> public async function async_func2() :Awaitable<mixed>{ return 5; }
+  <<__DynamicallyCallable>> public static async function static_async_func2() :Awaitable<mixed>{ return 5; }
 }
 
 class A extends B {
   public function __construct()[] {}
 
-  public function func() {}
-  public async function async_func() { return 5; }
-  public function cmp($x, $y) { return $x <=> $y; }
-  public static function static_func() {}
-  public static async function static_async_func() { return 5; }
-  public static function static_cmp($x, $y) { return $x <=> $y; }
+  public function func() :mixed{}
+  public async function async_func() :Awaitable<mixed>{ return 5; }
+  public function cmp($x, $y) :mixed{ return $x <=> $y; }
+  public static function static_func() :mixed{}
+  public static async function static_async_func() :Awaitable<mixed>{ return 5; }
+  public static function static_cmp($x, $y) :mixed{ return $x <=> $y; }
 
-  <<__DynamicallyCallable>> public function func2() {}
-  <<__DynamicallyCallable>> public async function async_func2() { return 5; }
-  <<__DynamicallyCallable>> public function cmp2($x, $y) { return $x <=> $y; }
-  <<__DynamicallyCallable>> public static function static_func2() {}
-  <<__DynamicallyCallable>> public static async function static_async_func2() { return 5; }
-  <<__DynamicallyCallable>> public static function static_cmp2($x, $y) { return $x <=> $y; }
+  <<__DynamicallyCallable>> public function func2() :mixed{}
+  <<__DynamicallyCallable>> public async function async_func2() :Awaitable<mixed>{ return 5; }
+  <<__DynamicallyCallable>> public function cmp2($x, $y) :mixed{ return $x <=> $y; }
+  <<__DynamicallyCallable>> public static function static_func2() :mixed{}
+  <<__DynamicallyCallable>> public static async function static_async_func2() :Awaitable<mixed>{ return 5; }
+  <<__DynamicallyCallable>> public static function static_cmp2($x, $y) :mixed{ return $x <=> $y; }
 
-  public static async function positive_test1() {
+  public static async function positive_test1() :Awaitable<mixed>{
 
 
 
@@ -69,7 +69,7 @@ class A extends B {
     try { await parent::$x(); } catch (Exception $e) { wrap($e); }
   }
 
-  public static async function negative_test1() {
+  public static async function negative_test1() :Awaitable<mixed>{
 
 
 
@@ -116,7 +116,7 @@ class A extends B {
 class F extends A {
 }
 
-async function positive_tests() {
+async function positive_tests() :Awaitable<mixed>{
   try { $x = 'func'; $x(); } catch (Exception $e) { wrap($e); }
   try { $x = 'async_func'; await $x(); } catch (Exception $e) { wrap($e); }
   //try { $x = 'A::func'; $x(); } catch (Exception $e) { wrap($e); } // fatal
@@ -202,7 +202,7 @@ async function positive_tests() {
   try { $x = varray[new A, 'static_cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 }
 
-async function negative_tests() {
+async function negative_tests() :Awaitable<mixed>{
   try { func(); } catch (Exception $e) { wrap($e); }
   try { count(varray[]); } catch (Exception $e) { wrap($e); }
   try { await async_func(); } catch (Exception $e) { wrap($e); }

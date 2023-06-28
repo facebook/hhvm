@@ -2,7 +2,7 @@
 
 //defining a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "sample object";
   } 
 }

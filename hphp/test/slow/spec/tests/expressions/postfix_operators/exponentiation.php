@@ -1,6 +1,6 @@
 <?hh
 
-function f() { return 3; }
+function f() :mixed{ return 3; }
 
 class C
 {

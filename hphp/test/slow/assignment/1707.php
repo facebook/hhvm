@@ -1,6 +1,6 @@
 <?hh
 
-function g($key, $old, $new, $s = false) {
+function g($key, $old, $new, $s = false) :mixed{
   $diff = darray[];
   if ($old !== $new) {
     if ($s) {
@@ -14,11 +14,11 @@ function g($key, $old, $new, $s = false) {
   }
   return $diff;
 }
-function f($a0, $a1) {
+function f($a0, $a1) :mixed{
   return 'should_be_modified';
 }
 
 <<__EntryPoint>>
-function main_1707() {
+function main_1707() :mixed{
 var_dump(g('key', 'old', 'new', true));
 }

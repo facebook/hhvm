@@ -10,7 +10,7 @@ class C
 
 ///*
     public function __clone()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
 
 //      return NULL;    // ignored; not passed along as the result of 'clone'
@@ -28,7 +28,7 @@ class Employee
     }
 
     public function __clone()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
 //      $v = parent::__clone(); // as class has no parent, this is diagnosed
 
@@ -50,7 +50,7 @@ class Manager extends Employee
     }
 
     public function __clone()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
 
         $v = parent::__clone();

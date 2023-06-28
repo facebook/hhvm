@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $vec = Vector {
 1, 'b'}
 ;
@@ -24,6 +24,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_826() {
+function main_826() :mixed{
 f();
 }

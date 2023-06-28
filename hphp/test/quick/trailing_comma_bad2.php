@@ -1,5 +1,5 @@
 <?hh
-function id($x) { }
+function id($x) :mixed{ }
 <<__EntryPoint>> function main(): void {
 id(,1);
 }

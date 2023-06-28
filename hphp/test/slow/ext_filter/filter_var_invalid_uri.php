@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_filter_var_invalid_uri() {
+function main_filter_var_invalid_uri() :mixed{
 $urls = varray[
   "http://www.facebook.com/valid",
   "http://www.facebook.com/with space",

@@ -5,7 +5,7 @@ const AAA = true;
 const BBB = false;
 const CCC = null;
 <<__EntryPoint>>
-function main_1595() {
+function main_1595() :mixed{
 if (AAA){
   echo "AAA";
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_simplexml_import_dom_element() {
+function main_simplexml_import_dom_element() :mixed{
 $doc = new DOMDocument;
 $element = $doc->createElement('root');
 $xml = simplexml_import_dom($element);

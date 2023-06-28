@@ -4,11 +4,11 @@ class A {
   const ctx C = [];
 }
 
-function poly(A $x)[$x::C] {}
+function poly(A $x)[$x::C] :mixed{}
 
-function foo((function()[_]: void) $x)[ctx $x] {}
+function foo((function()[_]: void) $x)[ctx $x] :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo(poly<>);
 }

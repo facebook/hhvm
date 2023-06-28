@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_811() {
+function main_811() :mixed{
 $v = Vector::fromArray(varray['foo']);
 var_dump($v[0]);
 var_dump($v->at(0));

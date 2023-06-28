@@ -2,7 +2,7 @@
 
 abstract final class TestAsyncMysqlConn {
   public static $conn = null;
-  public static function testMultiQuery($input) {
+  public static function testMultiQuery($input) :mixed{
     if (self::$conn === null) {
       $conn = (new ReflectionClass(AsyncMysqlConnection::class))
         ->newInstanceWithoutConstructor();

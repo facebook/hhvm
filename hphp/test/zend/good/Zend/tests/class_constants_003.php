@@ -1,6 +1,6 @@
 <?hh
 
-function foo($v = test::val) {
+function foo($v = test::val) :mixed{
 	var_dump($v);
 }
 <<__EntryPoint>>

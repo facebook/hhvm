@@ -5,7 +5,7 @@
  */
 
 function key_compare_func($key1, $key2)
-{
+:mixed{
   return strcasecmp((string)$key1, (string)$key2);
 }
 <<__EntryPoint>> function main(): void {

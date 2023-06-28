@@ -1,13 +1,13 @@
 <?hh
 class C {
   <<__Memoize>>
-  public function f<reify Ta, Tb, reify Tc>($x, $y, $z) {
+  public function f<reify Ta, Tb, reify Tc>($x, $y, $z) :mixed{
     var_dump("hi");
   }
 }
 class D {
   <<__Memoize>>
-  public function g<reify Ta, Tb, reify Tc>() {
+  public function g<reify Ta, Tb, reify Tc>() :mixed{
     var_dump("hi");
   }
 }

@@ -9,7 +9,7 @@ async function defaults_async()[defaults]: Awaitable<void> {
 }
 
 <<__EntryPoint>>
-async function main()[] {
+async function main()[] :Awaitable<mixed>{
   defaults();
   HH\Coeffects\backdoor(defaults<>);
   await defaults_async();

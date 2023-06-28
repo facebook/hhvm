@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serialize_test($a) {
+function serialize_test($a) :mixed{
   var_dump(
     __hhvm_intrinsics\serialize_keep_dvarrays(
       __hhvm_intrinsics\launder_value($a)
@@ -11,7 +11,7 @@ function serialize_test($a) {
   echo "====================================================\n";
 }
 
-function unserialize_test($s) {
+function unserialize_test($s) :mixed{
   echo "unserialize_test(\"".$s."\")\n";
   $a = unserialize(__hhvm_intrinsics\launder_value($s));
   var_dump($a);
@@ -28,7 +28,7 @@ function unserialize_test($s) {
   echo "====================================================\n";
 }
 
-function round_trip($a) {
+function round_trip($a) :mixed{
   $a2 = __hhvm_intrinsics\launder_value($a);
   $a3 = unserialize(
     __hhvm_intrinsics\serialize_keep_dvarrays($a2)
@@ -52,7 +52,7 @@ function round_trip($a) {
   }
 }
 
-function serialize_tests() {
+function serialize_tests() :mixed{
   serialize_test(darray[]);
   serialize_test(darray(dict[100 => 200, 200 => 300, 300 => 400]));
   serialize_test(darray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
@@ -79,7 +79,7 @@ function serialize_tests() {
   serialize_test(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
 }
 
-function unserialize_tests() {
+function unserialize_tests() :mixed{
   unserialize_test('a:0:{}');
   unserialize_test('a:3:{i:100;i:123;i:200;i:456;i:300;i:789;}');
   unserialize_test('a:3:{i:100;s:3:"abc";i:200;s:3:"def";i:300;s:3:"ghi";}');
@@ -104,7 +104,7 @@ function unserialize_tests() {
   unserialize_test('Y:2:{i:0;y:3:{i:1;i:2;i:3;}i:1;y:3:{i:4;i:5;i:6;}}');
 }
 
-function round_trip_tests() {
+function round_trip_tests() :mixed{
   round_trip(varray[]);
   round_trip(varray[123, 456, 789]);
   round_trip(varray['abc', 'def', 'ghi']);
@@ -122,7 +122,7 @@ function round_trip_tests() {
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 serialize_tests();
 unserialize_tests();
 round_trip_tests();

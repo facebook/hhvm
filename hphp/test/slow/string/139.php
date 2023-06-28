@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_139() {
+function main_139() :mixed{
 $a = 'test';
  $a[10] = 'ABC';
  var_dump($a);

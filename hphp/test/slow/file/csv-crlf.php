@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_csv_crlf() {
+function main_csv_crlf() :mixed{
 $fh = tmpfile();
 fwrite($fh, str_repeat('x', 8191) . "\r\ny");
 fseek($fh, 0);

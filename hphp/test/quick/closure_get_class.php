@@ -1,7 +1,7 @@
 <?hh
 
 trait Too {
-  function bar() {
+  function bar() :mixed{
     $a = function () {
       var_dump(__CLASS__);
     };

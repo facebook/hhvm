@@ -4,11 +4,11 @@
 module B;
 
 class C {
-  function f() {}
+  function f() :mixed{}
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'reflection-1.inc';
   include 'reflection-1.inc2';
   var_dump((new ReflectionFunction('f'))->getModule());

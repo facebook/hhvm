@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_gmfoo() {
+function main_gmfoo() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $d = mktime(0, 0, 0, 1, 1, 1998);

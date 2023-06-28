@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
     require_once 'parent_by_name_unique_child.1.inc';
   } else {

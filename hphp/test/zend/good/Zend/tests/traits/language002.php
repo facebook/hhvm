@@ -1,20 +1,20 @@
 <?hh
 
 trait Hello {
-   public function sayHello() {
+   public function sayHello() :mixed{
      echo 'Hello ';
    }
 }
 
 trait World {
-   public function sayWorld() {
+   public function sayWorld() :mixed{
      echo 'World';
    }
 }
 
 class MyHelloWorld {
    use Hello, World;
-   public function sayExclamationMark() {
+   public function sayExclamationMark() :mixed{
      echo '!';
    }
 }

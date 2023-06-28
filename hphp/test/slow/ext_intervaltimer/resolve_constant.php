@@ -58,7 +58,7 @@ const dict<string, MyEnum> MAP = dict[
 ];
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // Set timer to a value such that it interrupts resolving A::MAP on line 69
   $t1 = new IntervalTimer(0.0, 0.035, () ==> {MAP;});
   $t1->start();

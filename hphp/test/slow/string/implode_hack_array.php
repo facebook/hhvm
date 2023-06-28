@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $arr = varray['a', 'b', 'c'];
 
   $v = vec['a', 'b', 'c'];
@@ -27,6 +27,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_implode_hack_array() {
+function main_implode_hack_array() :mixed{
 main();
 }

@@ -4,16 +4,16 @@
 
 module A;
 
-function inst($x) {
+function inst($x) :mixed{
   $x->foo();
 }
 
-function static_method($x) {
+function static_method($x) :mixed{
   $x::foo_static();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include "method-cache-1.inc";
   inst(new C);
   inst(new D);

@@ -3,37 +3,37 @@
 class SXETest extends SimpleXMLIterator
 {
 	function rewind()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::rewind();
 	}
 	function valid()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::valid();
 	}
 	function current()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::current();
 	}
 	function key()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::key();
 	}
 	function next()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::next();
 	}
 	function hasChildren()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::hasChildren();
 	}
 	function getChildren()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::getChildren();
 	}

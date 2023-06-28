@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout $str) {
+function foo(inout $str) :mixed{
   $str[3] = '.';
   $str .= "\n";
 }

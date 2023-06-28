@@ -1,4 +1,4 @@
 <?hh
 
-function f<reify T, reify T>() {}
+function f<reify T, reify T>() :mixed{}
 

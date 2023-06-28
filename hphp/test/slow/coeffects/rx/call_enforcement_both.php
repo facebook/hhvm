@@ -1,43 +1,43 @@
 <?hh
 
-function non_rx($fn) {
+function non_rx($fn) :mixed{
   if ($fn) $fn(null);
 }
 
-function rx_local($fn)[rx_local] {
+function rx_local($fn)[rx_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function rx_shallow($fn)[rx_shallow] {
+function rx_shallow($fn)[rx_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function rx($fn)[rx] {
+function rx($fn)[rx] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props($fn)[write_props] {
+function write_props($fn)[write_props] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props_rx($fn)[write_props, rx] {
+function write_props_rx($fn)[write_props, rx] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props_rx_shallow($fn)[write_props, rx_shallow] {
+function write_props_rx_shallow($fn)[write_props, rx_shallow] :mixed{
   if ($fn) $fn(null);
 }
 
-function write_props_rx_local($fn)[write_props, rx_local] {
+function write_props_rx_local($fn)[write_props, rx_local] :mixed{
   if ($fn) $fn(null);
 }
 
-function pure($fn)[] {
+function pure($fn)[] :mixed{
   if ($fn) $fn(null);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $functions = vec[
     'non_rx',
     'rx_local',

@@ -1,6 +1,6 @@
 <?hh
 
-function checker($x) {
+function checker($x) :mixed{
   $msg = foo();
   $notice = $msg['title'].'. '.$msg['body'];
   foo();

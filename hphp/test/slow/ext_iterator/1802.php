@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1802() {
+function main_1802() :mixed{
 $path = __DIR__."/../../sample_dir/";
 $files = varray[];
  // order changes per machine

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $html = '<b>Hello</b><i>World</i>';
   $doc = new DOMDocument();
   $element = $doc->createDocumentFragment();
@@ -13,6 +13,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1680() {
+function main_1680() :mixed{
 foo();
 }

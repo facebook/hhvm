@@ -26,7 +26,7 @@ class B extends C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
     $b = new B();
     //true
     B::bar();

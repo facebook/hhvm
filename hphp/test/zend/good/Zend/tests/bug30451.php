@@ -4,7 +4,7 @@ class A {
 
     protected static $property = TRUE;
 
-    protected static function method() {
+    protected static function method() :mixed{
         return TRUE;
     }
 

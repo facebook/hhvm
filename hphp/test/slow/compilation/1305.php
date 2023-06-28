@@ -5,7 +5,7 @@ class X {
 class Y extends X {
  public $foo;
  }
-function foo() {
+function foo() :mixed{
   $x = new Y;
   $x && var_dump($x->foo);
   $x = new X;
@@ -13,6 +13,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1305() {
+function main_1305() :mixed{
 foo();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_820() {
+function main_820() :mixed{
 $m1 = Map {
 }
 ;

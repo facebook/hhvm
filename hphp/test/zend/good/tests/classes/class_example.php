@@ -5,7 +5,7 @@
 class user {
   public $first_name,$family_name,$address,$phone_num;
   function display()
-  {
+:mixed  {
     echo "User information\n";
     echo "----------------\n\n";
     echo "First name:\t  ".$this->first_name."\n";
@@ -15,7 +15,7 @@ class user {
     echo "\n\n";
   }
   function initialize($first_name,$family_name,$address,$phone_num)
-  {
+:mixed  {
     $this->first_name = $first_name;
     $this->family_name = $family_name;
     $this->address = $address;
@@ -23,7 +23,7 @@ class user {
   }
 }
 
-function test($u) {
+function test($u) :mixed{
   /* one can pass classes as arguments */
   $u->display();
   $t = $u;

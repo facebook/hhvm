@@ -19,7 +19,7 @@ class Z extends Y {
   public $prot_base = 12;
   public $pub_base = 13;
 }
-function foo($x) {
+function foo($x) :mixed{
   $s = serialize($x);
   var_dump($s);
   $y = unserialize($s);
@@ -37,7 +37,7 @@ function foo($x) {
 }
 
 <<__EntryPoint>>
-function main_697() {
+function main_697() :mixed{
 $y = new Y;
 foo($y);
 $z = new Z;

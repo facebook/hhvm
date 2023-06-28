@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_parse_url() {
+function main_parse_url() :mixed{
 var_dump(parse_url('http://www.facebook.com'));
 var_dump(parse_url('https://lol:12345@www.facebook.com:14159/hhvmabcd'));
 var_dump(parse_url('irc://chat.freenode.net/#hhvm'));

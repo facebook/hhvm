@@ -1,38 +1,38 @@
 <?hh
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoNoArgOK() {
+function memoNoArgOK() :mixed{
   return 1;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoOK($x) {
+function memoOK($x) :mixed{
   return $x;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoNoArgFail() {
+function memoNoArgFail() :mixed{
   echo ClassContext::getContext()->name() . "\n";
   return 1;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoFail($x) {
+function memoFail($x) :mixed{
   echo ClassContext::getContext()->name() . "\n";
   return $x;
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoNoArgExn() {
+function memoNoArgExn() :mixed{
   throw new Exception("oh no exception");
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memoExn($x) {
+function memoExn($x) :mixed{
   throw new Exception("oh no exception");
 }
 
-function f() {
+function f() :mixed{
   $v = vec[
     tuple('memoNoArgOK', () ==> memoNoArgOK()),
     tuple('memoOK', () ==> memoOK(1)),
@@ -55,7 +55,7 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   ClassContext::start(new C, f<>);
 }

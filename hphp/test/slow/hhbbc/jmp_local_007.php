@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   if ($x) {
     $y = "asd";
   } else {
@@ -12,6 +12,6 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_jmp_local_007() {
+function main_jmp_local_007() :mixed{
 foo();
 }

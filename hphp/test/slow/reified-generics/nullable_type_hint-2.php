@@ -9,7 +9,7 @@ function f<reify T>(?T $x): ?T {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f<int>(null);
   f<int>(true);
 }

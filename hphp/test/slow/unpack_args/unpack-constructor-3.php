@@ -1,7 +1,7 @@
 <?hh
 
 
-function handler($kind, $name) {
+function handler($kind, $name) :mixed{
   throw new Exception('in handler');
 }
 
@@ -11,13 +11,13 @@ class C {
   }
 }
 
-function foo($x) {
+function foo($x) :mixed{
   fb_setprofile(handler<>);
   new C(...$x);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     foo(varray[1,2]);
   } catch (Exception $e) {

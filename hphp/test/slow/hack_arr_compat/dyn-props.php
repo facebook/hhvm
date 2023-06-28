@@ -2,7 +2,7 @@
 
 class C {}
 
-function error_boundary(inout $x, $fn) {
+function error_boundary(inout $x, $fn) :mixed{
   try {
     $fn(inout $x);
   } catch (Exception $e) {
@@ -11,7 +11,7 @@ function error_boundary(inout $x, $fn) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C();
   $c->foo = darray(vec[42]);
   $c->bar ??= 0;

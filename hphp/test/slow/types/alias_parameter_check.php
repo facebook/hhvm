@@ -8,17 +8,17 @@ interface Base {}
 type Foo = Base;
 class Bar implements Base {}
 
-function doit(Foo $x) {
+function doit(Foo $x) :mixed{
   var_dump($x is Foo);
 }
 
-function main() {
+function main() :mixed{
   $x = new Bar;
   doit($x);
 }
 
 
 <<__EntryPoint>>
-function main_alias_parameter_check() {
+function main_alias_parameter_check() :mixed{
 main();
 }

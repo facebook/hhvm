@@ -6,7 +6,7 @@ class base {
     public $p4 = 'base:4';
     public $p5 = 'base:5';
     private $p6 = 'base:6';
-    public function __clone() {
+    public function __clone() :mixed{
     }
 }
 
@@ -15,7 +15,7 @@ class test extends base {
     public $p3 = 'test:3';
     public $p4 = 'test:4';
     public $p5 = 'test:5';
-    public function __clone() {
+    public function __clone() :mixed{
         $this->p5 = 'clone:5';
     }
 }

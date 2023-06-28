@@ -5,27 +5,27 @@
  * pre-intercept function.
  */
 
-function foo($i = 10) {
+function foo($i = 10) :mixed{
   var_dump(__METHOD__);
 }
 
-function bar($_1, $_2, inout $_3) {
+function bar($_1, $_2, inout $_3) :mixed{
   var_dump(__METHOD__);
   return shape('value' => null);
 }
 
-function test() {
+function test() :mixed{
   foo();
 }
 
 class C {
-  function snoot() {
+  function snoot() :mixed{
     var_dump(__METHOD__);
   }
 }
 
 
-function swizzle($name, $obj, inout $args) {
+function swizzle($name, $obj, inout $args) :mixed{
   var_dump($name, $obj, $args);
   return shape();
 }

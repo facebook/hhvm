@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1798() {
+function main_1798() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 
 $files = varray[];

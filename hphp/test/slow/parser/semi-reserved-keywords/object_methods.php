@@ -203,7 +203,7 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_object_methods() {
+function main_object_methods() :mixed{
 echo Bar::foreach();
 $foo = new Foo();
 echo $foo->callable();

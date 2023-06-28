@@ -10,7 +10,7 @@ class Child extends Base{
 }
 
 <<__EntryPoint>>
-function main_1533() {
+function main_1533() :mixed{
 var_dump(get_object_vars(new Base()));
 var_dump(get_object_vars(new Child()));
 }

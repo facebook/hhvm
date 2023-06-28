@@ -1,6 +1,6 @@
 <?hh
 class B {
-  public function f1() {
+  public function f1() :mixed{
     var_dump(static::class);
     if ($this !== null) {
       var_dump(get_class($this));
@@ -11,7 +11,7 @@ class B {
   }
 }
 class C extends B {
-  public function g() {
+  public function g() :mixed{
     $obj = new B;
     $f = (varray['B', 'f1']);
     $f();

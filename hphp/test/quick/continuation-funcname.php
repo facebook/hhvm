@@ -1,7 +1,7 @@
 <?hh
 
 class BaseDerp {
-  public function genDerp() {
+  public function genDerp() :AsyncGenerator<mixed,mixed,void>{
     yield 'derp';
   }
 }

@@ -7,7 +7,7 @@ class State {
     public static $s, $k=10;
 }
 
-function staticNonStatic() {
+function staticNonStatic() :mixed{
     echo "---------\n";
     $a=0;
     echo "$a\n";
@@ -15,7 +15,7 @@ function staticNonStatic() {
     State::$a0++;
 }
 
-function manyInits() {
+function manyInits() :mixed{
     echo "------------- Call ".State::$counter." --------------\n";
     echo "Unitialised      : ".(string)(State::$a)."\n";
     echo "Initialised to 10: ".State::$b."\n";

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $v = null;
   hit1(inout $v);
   var_dump($v);

@@ -2,14 +2,14 @@
 
 // Test miscellaneous methods of the ImmVector API.
 
-function show_elems($fs) {
+function show_elems($fs) :mixed{
   echo '---- ', get_class($fs), ' ----', "\n";
   foreach ($fs as $e) {
     var_dump($e);
   }
   echo "----\n";
 }
-function materialization_methods() {
+function materialization_methods() :mixed{
   $fv = ImmVector {1, 2, 3};
 
   echo "\nvalues...\n";
@@ -34,14 +34,14 @@ function materialization_methods() {
   var_dump($fv->toVector());
 }
 
-function search_methods() {
+function search_methods() :mixed{
   $fv = ImmVector {1, 2, 3};
   echo "\nlinearSearch...\n";
   var_dump($fv->linearSearch(2));
   var_dump($fv->linearSearch(10));
 }
 
-function static_methods() {
+function static_methods() :mixed{
   echo "\nfromItems...\n";
   show_elems(ImmVector::fromItems((Vector {1, 2, 3})->items()));
   show_elems(ImmVector::fromItems(Set {4, 5, 6}));
@@ -54,14 +54,14 @@ function static_methods() {
   show_elems(ImmVector::fromKeysOf(Set {4, 5, 6}));
 }
 
-function main() {
+function main() :mixed{
   materialization_methods();
   search_methods();
   static_methods();
 }
 
 <<__EntryPoint>>
-function main_api() {
+function main_api() :mixed{
 ;
 
 main();

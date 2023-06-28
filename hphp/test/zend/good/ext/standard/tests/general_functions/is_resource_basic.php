@@ -5,7 +5,7 @@
  */
 
 class Hello {
-  public function SayHello($arg) {
+  public function SayHello($arg) :mixed{
       echo "Hello\n";
   }
 }

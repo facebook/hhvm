@@ -3,7 +3,7 @@ class c {}
 
 
 <<__EntryPoint>>
-function main_164() {
+function main_164() :mixed{
 $a = darray['x'=>'foo'];
 $b = 'qqq';
 $c = new c;

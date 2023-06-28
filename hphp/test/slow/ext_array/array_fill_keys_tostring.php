@@ -1,8 +1,8 @@
 <?hh
 
-class StringableObj { function __toString()[] { return 'Hello'; } }
+class StringableObj { function __toString()[] :mixed{ return 'Hello'; } }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   array_fill_keys(varray[new StringableObj()], 'value');
 }

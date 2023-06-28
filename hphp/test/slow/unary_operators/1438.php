@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {}
-function foo($x) {
+function foo($x) :mixed{
   if ($x) {
     $a = varray[];
     $s = 'hello';
@@ -25,6 +25,6 @@ function foo($x) {
 }
 
 <<__EntryPoint>>
-function main_1438() {
+function main_1438() :mixed{
   foo(false);
 }

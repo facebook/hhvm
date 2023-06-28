@@ -17,6 +17,6 @@ class :foo extends base {
 }
 
 <<__EntryPoint>>
-function main_rquired_attr() {
+function main_rquired_attr() :mixed{
   :foo::attr_decl();
 }

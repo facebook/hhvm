@@ -24,7 +24,7 @@ class CVarMod {
   }
 }
 
-function test_constructor() {
+function test_constructor() :mixed{
   $inst = new CVarSome('a', 'b', 'c');
   $inst = new CVarSome('a');
   $inst = new CVarSome(); // some undefined variable warnings
@@ -34,17 +34,17 @@ function test_constructor() {
   $inst = new CVarMod(); // some undefined variable warnings
 }
 
-function test_reflection() {
+function test_reflection() :mixed{
   // TODO: there's ReflectionClass::newInstance
 }
 
-function main() {
+function main() :mixed{
   test_constructor();
   test_reflection();
 }
 
 
 <<__EntryPoint>>
-function main_constructors() {
+function main_constructors() :mixed{
 error_reporting(-1);
 }

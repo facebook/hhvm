@@ -11,7 +11,7 @@ class t2 extends t {
 }
 
 <<__EntryPoint>>
-function main_1542() {
+function main_1542() :mixed{
 $x = new t;
 print_r($x);
 var_dump($x);

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_append($orig) {
+function test_append($orig) :mixed{
   echo "Testing append....\n";
   $v = $orig;
   $v[] = 0;
@@ -19,7 +19,7 @@ function test_append($orig) {
   var_dump($v);
 }
 
-function do_set($vec, $key, $val) {
+function do_set($vec, $key, $val) :mixed{
   try {
     $vec[$key] = $val;
     echo "Set to $val succeeded\n";
@@ -29,7 +29,7 @@ function do_set($vec, $key, $val) {
   return $vec;
 }
 
-function test_set($orig) {
+function test_set($orig) :mixed{
   echo "Testing set....\n";
   $v = do_set($orig, 0, "0 key value")
     |> do_set($$, 3, "3 key value")
@@ -51,7 +51,7 @@ function test_set($orig) {
   var_dump($v);
 }
 
-function do_setop($vec, $key, $val) {
+function do_setop($vec, $key, $val) :mixed{
   try {
     $vec[$key] .= $val;
     echo "Set-Op with \"$val\" succeeded\n";
@@ -61,7 +61,7 @@ function do_setop($vec, $key, $val) {
   return $vec;
 }
 
-function test_setop($orig) {
+function test_setop($orig) :mixed{
   echo "Test set-op....\n";
   $v = do_setop($orig, 0, " + 0 key value")
     |> do_setop($$, 3, " + 3 key value")
@@ -83,7 +83,7 @@ function test_setop($orig) {
   var_dump($v);
 }
 
-function do_new_setop($vec, $val, $s) {
+function do_new_setop($vec, $val, $s) :mixed{
   try {
     $vec[] .= $val;
     echo "New set-op with \"$s\" succeeded\n";
@@ -93,7 +93,7 @@ function do_new_setop($vec, $val, $s) {
   return $vec;
 }
 
-function test_new_setop($orig) {
+function test_new_setop($orig) :mixed{
   echo "Test new set-op....\n";
   $v = do_new_setop($orig, 0, "+ 0 value")
     |> do_new_setop($$, 3, "+ 3 value")
@@ -116,7 +116,7 @@ function test_new_setop($orig) {
   var_dump($v);
 }
 
-function do_unset($vec, $key, $str) {
+function do_unset($vec, $key, $str) :mixed{
   try {
     unset($vec[$key]);
     echo "Unset of $str succeeded\n";
@@ -126,7 +126,7 @@ function do_unset($vec, $key, $str) {
   return $vec;
 }
 
-function test_unset($orig) {
+function test_unset($orig) :mixed{
   echo "Test unset....\n";
   $vec1 = do_unset($orig, 0, "0 key value");
   var_dump($orig);
@@ -154,7 +154,7 @@ function test_unset($orig) {
   var_dump($vec3);
 }
 
-function test($v) {
+function test($v) :mixed{
   echo "Testing: ";
   var_dump($v);
   test_append($v);

@@ -1,6 +1,6 @@
 <?hh
 
-function autoload_miss($str1, $str2) {
+function autoload_miss($str1, $str2) :mixed{
   echo "Failure handler called: $str1 $str2\n";
 }
 

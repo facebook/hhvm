@@ -1,14 +1,14 @@
 <?hh
 
 class Foo {
-  public function __toString() { some(); }
+  public function __toString() :mixed{ some(); }
 }
 
-function some() {
+function some() :mixed{
   throw new Exception('bye');
 }
 
-function wat() {
+function wat() :mixed{
   $z = 'asd' . mt_rand();
   $k = new Foo();
   $l = varray[$z, $z];

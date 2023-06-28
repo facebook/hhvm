@@ -34,7 +34,7 @@ function h(): darray {
 
 
 <<__EntryPoint>>
-function main_preg_match_impl_type() {
+function main_preg_match_impl_type() :mixed{
 f();
 g();
 h();

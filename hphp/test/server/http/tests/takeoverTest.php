@@ -1,6 +1,6 @@
 <?hh
 
-function runTakeoverTest() {
+function runTakeoverTest() :mixed{
 
   $pid = posix_getpid();
 
@@ -70,7 +70,7 @@ function runTakeoverTest() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require __DIR__ . '/../../util/server_tests.inc';
   ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
   runTakeoverTest();

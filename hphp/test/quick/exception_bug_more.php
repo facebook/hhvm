@@ -1,10 +1,10 @@
 <?hh
 
-function thrower() {
+function thrower() :mixed{
   throw new Exception("Not MyJunk");
 }
 
-function foo() {
+function foo() :mixed{
   foreach (varray[1,2,3] as $x) {
     try {
       thrower();

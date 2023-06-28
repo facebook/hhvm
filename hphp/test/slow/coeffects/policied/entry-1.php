@@ -5,7 +5,7 @@ function zoned_with()[zoned_with]: void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   zoned_with();
   HH\Coeffects\_Private\enter_zoned_with(zoned_with<>);
 }

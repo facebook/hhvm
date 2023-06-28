@@ -4,7 +4,7 @@ class K { const A = 0; const B = 1; }
 class Q { const A = 'f'; const B = 'Q::B'; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = darray[0 => 42, 1 => 1337];
   $y = darray['f' => 10];
   $z = darray['Q::B' => 20];

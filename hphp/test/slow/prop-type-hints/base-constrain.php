@@ -13,7 +13,7 @@ final class B {
   public function __construct() {
     $this->p2 = new A();
   }
-  public function foo() {
+  public function foo() :mixed{
     return $this->p2->p1 |> dict($$);
   }
 }

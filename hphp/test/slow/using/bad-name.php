@@ -1,6 +1,6 @@
 <?hh
 
-function using($x) {
+function using($x) :mixed{
 
 }
 

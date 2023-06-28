@@ -1,11 +1,11 @@
 <?hh
 
 class pass {
-    private static function show() {
+    private static function show() :mixed{
         echo "Call show()\n";
     }
 
-    public static function do_show() {
+    public static function do_show() :mixed{
         pass::show();
     }
 }

@@ -4,7 +4,7 @@ class F {
   public $foo;
 }
 
-function t($o, $memb) {
+function t($o, $memb) :mixed{
   var_dump($o->$memb);
   unset($o->$memb);
   try {
@@ -14,7 +14,7 @@ function t($o, $memb) {
   }
 }
 
-function u() {
+function u() :mixed{
   echo "------------------------\n";
   $obj = new F;
   try {
@@ -37,7 +37,7 @@ function u() {
   }
 }
 
-function main() {
+function main() :mixed{
   print "Test begin\n";
 
   $f = new F();
@@ -57,21 +57,21 @@ function main() {
 }
 
 
-function getprop($o) {
+function getprop($o) :mixed{
   try {
     return $o->declprop;
   } catch (UndefinedPropertyException $e) {
     var_dump($e->getMessage());
   }
 }
-function setprop($o, $v) {
+function setprop($o, $v) :mixed{
   $o->declprop = $v;
 }
 class c2 {
   public $declprop = 'blah';
 }
 
-function main2() {
+function main2() :mixed{
   $o = new c2();
   setprop($o, 'set1');
   var_dump(getprop($o));

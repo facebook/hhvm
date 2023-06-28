@@ -16,7 +16,7 @@ function foobar<T as ?Baz>(?T $x) : ?T {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo(null));
   var_dump(Bar::baz(null));
   var_dump(foobar(null));

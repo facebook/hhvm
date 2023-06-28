@@ -1,7 +1,7 @@
 <?hh
 class Foo {
     static public $foo;
-    function __toString() {
+    function __toString() :mixed{
         self::$foo = $this;
         return 'foo';
     }

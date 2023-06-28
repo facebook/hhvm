@@ -4,7 +4,7 @@
 
 // Generate 10k random bytes
 <<__EntryPoint>>
-function main_zip_stream() {
+function main_zip_stream() :mixed{
 srand(42);
 $num_bytes = 10000;
 $orig_bytes = '';

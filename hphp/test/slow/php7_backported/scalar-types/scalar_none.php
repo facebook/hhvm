@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_scalar_none() {
+function main_scalar_none() :mixed{
 require 'fix_exceptions.inc';
 fix_exceptions();
 

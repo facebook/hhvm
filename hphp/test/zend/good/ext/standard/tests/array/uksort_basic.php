@@ -3,7 +3,7 @@
 * proto bool uksort ( array &$array, callback $cmp_function )
 * Function is implemented in ext/standard/array.c
 */
-function cmp($a, $b) {
+function cmp($a, $b) :mixed{
     if ($a == $b) {
         return 0;
     }

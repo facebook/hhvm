@@ -1,18 +1,18 @@
 <?hh
 
 <<__NEVER_INLINE>>
-function foo() {
+function foo() :mixed{
   var_dump(__FUNCTION__);
 }
 
 <<__NEVER_INLINE>>
-function bar() {
+function bar() :mixed{
   var_dump(__FUNCTION__);
   foo();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(__FUNCTION__);
   bar();
 

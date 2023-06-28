@@ -3,12 +3,12 @@
 class try_class
 {
     static public function main ()
-    {
+:mixed    {
         register_shutdown_function (varray ["self", "on_shutdown"]);
     }
 
     static public function on_shutdown ()
-    {
+:mixed    {
         printf ("CHECKPOINT\n"); /* never reached */
     }
 }

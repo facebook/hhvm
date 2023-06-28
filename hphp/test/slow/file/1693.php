@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1693() {
+function main_1693() :mixed{
 fclose(HH\stdout());
 echo 'test';
 ob_start();

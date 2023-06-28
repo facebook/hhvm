@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x) {
+function foo($x) :mixed{
   $s = serialize($x);
   var_dump($s);
   $y = unserialize($s);

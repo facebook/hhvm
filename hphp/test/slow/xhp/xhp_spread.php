@@ -16,7 +16,7 @@ class :bar extends :foo {
 
 
 <<__EntryPoint>>
-function main_xhp_spread() {
+function main_xhp_spread() :mixed{
 $bar = <bar name="test" age={21} />;
 <foo {...$bar} />;
 <foo {...$bar} name="foo2" />;

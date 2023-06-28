@@ -1,6 +1,6 @@
 <?hh
 
-function dump(vec<string> $var) {
+function dump(vec<string> $var) :mixed{
   sort(inout $var);
   var_dump($var);
 }

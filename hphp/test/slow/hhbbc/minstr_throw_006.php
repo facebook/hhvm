@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   try {
     $x->a = 2;
   } catch (Exception $e) {

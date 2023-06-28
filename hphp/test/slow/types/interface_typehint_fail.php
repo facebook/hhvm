@@ -4,7 +4,7 @@ interface Foo {
 }
 
 class Bar {
-  function baz(Foo $x) {
+  function baz(Foo $x) :mixed{
   }
 }
 <<__EntryPoint>> function main(): void {

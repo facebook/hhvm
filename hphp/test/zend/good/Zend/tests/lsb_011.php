@@ -1,16 +1,16 @@
 <?hh
 
 class Test1 {
-    static function ok() {
+    static function ok() :mixed{
         echo "bug";
     }
-    static function test() {
+    static function test() :mixed{
         static::ok();
     }
 }
 
 class Test2 extends Test1 {
-    static function ok() {
+    static function ok() :mixed{
         echo "ok";
     }
 }

@@ -9,6 +9,6 @@ trait Bar {
 }
 
 <<__EntryPoint>>
-function main_2128() {
+function main_2128() :mixed{
 echo "Done\n";
 }

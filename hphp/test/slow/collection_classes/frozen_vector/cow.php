@@ -2,7 +2,7 @@
 
 // Trigger COW
 
-function main() {
+function main() :mixed{
 
   // $cb is a lambda that expects a Vector and mutates it in some way.
   // That should trigger COW, which we'll be able to observe by dumping
@@ -35,6 +35,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cow() {
+function main_cow() :mixed{
 main();
 }

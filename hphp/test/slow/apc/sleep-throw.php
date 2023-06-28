@@ -7,12 +7,12 @@ class SleepThrow {
   function __construct($msg) {
     $this->msg = $msg;
   }
-  function __sleep() {
+  function __sleep() :mixed{
     throw new Exception($this->msg);
   }
 }
 
-function store($k, $a) {
+function store($k, $a) :mixed{
   try {
     apc_store($k, $a);
   } catch (Exception $e) {
@@ -22,7 +22,7 @@ function store($k, $a) {
 
 
 <<__EntryPoint>>
-function main_sleep_throw() {
+function main_sleep_throw() :mixed{
 store("a1", varray[new SleepThrow("Sleep throw 1")]);
 store("a2", darray["key" => new SleepThrow("Sleep throw 2")]);
 }

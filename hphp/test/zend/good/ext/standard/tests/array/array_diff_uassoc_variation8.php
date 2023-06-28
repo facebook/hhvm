@@ -6,7 +6,7 @@
  */
 
 function key_compare_func($key1, $key2)
-{
+:mixed{
     if ($key1 === $key2) {
         return 0;
     }

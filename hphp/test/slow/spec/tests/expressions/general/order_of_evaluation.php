@@ -2,37 +2,37 @@
 
 ///*
 function f($a, $b)
-{
+:mixed{
     echo "Inside f: \$a = $a, \$b = $b\n";
     return 22;
 }
 
 function g($a)
-{
+:mixed{
     echo "Inside g: \$a = $a\n";
     return 10;
 }
 
 function f1($a)
-{
+:mixed{
     echo "Inside f1\n";
     return $a;
 }
 
 function f2($a)
-{
+:mixed{
     echo "Inside f2\n";
     return $a;
 }
 
 function f3($a)
-{
+:mixed{
     echo "Inside f3\n";
     return $a;
 }
 
 function f4($a)
-{
+:mixed{
     echo "Inside f4\n";
     return $a;
 }

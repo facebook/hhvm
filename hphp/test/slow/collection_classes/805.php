@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_805() {
+function main_805() :mixed{
 $collections = darray[
   'Vector' => new Vector(),
   'Map' => new Map(),

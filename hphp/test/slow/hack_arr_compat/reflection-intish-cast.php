@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main () {
+function main () :mixed{
   try {
     var_dump(new ReflectionClass('42'));
   } catch (Exception $e) {}

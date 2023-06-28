@@ -1,8 +1,8 @@
 <?hh
 
-function test() {
+function test() :mixed{
 }
- function foo() {
+ function foo() :mixed{
  test($a = 1);
 }
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

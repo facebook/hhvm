@@ -1,26 +1,26 @@
 <?hh
 
-function handler($name, $obj, inout $args) {
+function handler($name, $obj, inout $args) :mixed{
   return shape('callback' => bar<>, 'prepend_this' => true);
 }
 
-function bar($_this, $arg) {
+function bar($_this, $arg) :mixed{
   $_this->baz($arg);
 }
 
 class C {
-function foo($arg) {
+function foo($arg) :mixed{
   echo "In foo!\n";
   echo "Arg is: " . $arg . "\n";
 }
-function baz($arg) {
+function baz($arg) :mixed{
   echo "In baz!\n";
   echo "Arg is: " . $arg . "\n";
 }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   fb_intercept2('C::foo', handler<>);
   $c = new C();
   $c->foo("Hey!");

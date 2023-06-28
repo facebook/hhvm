@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-    function wat() {
+    function wat() :mixed{
         var_dump(self::class);
     }
 }
@@ -12,7 +12,7 @@ class H extends G {}
 
 
 <<__EntryPoint>>
-function main_self_class_name() {
+function main_self_class_name() :mixed{
 (new F)->wat();
 (new G)->wat();
 (new H)->wat();

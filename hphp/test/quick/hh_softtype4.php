@@ -1,6 +1,6 @@
 <?hh
 
-function foo(<<__Soft>> (int, int) $x) {}
+function foo(<<__Soft>> (int, int) $x) :mixed{}
 <<__EntryPoint>> function main(): void {
 foo(null);
 foo(varray[1,2]);

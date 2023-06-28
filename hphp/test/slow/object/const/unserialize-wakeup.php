@@ -24,7 +24,7 @@ class D {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $d = new D(1, new C(2));
   var_dump($d);
   $d2 = unserialize(serialize($d));

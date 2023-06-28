@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function f(<<__Soft>> Foo $a) {
+function f(<<__Soft>> Foo $a) :mixed{
   return $a;
 }
 <<__EntryPoint>> function main(): void {

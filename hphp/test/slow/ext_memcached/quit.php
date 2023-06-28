@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_quit() {
+function main_quit() :mixed{
 $m = new Memcached();
 var_dump($m->quit());
 }

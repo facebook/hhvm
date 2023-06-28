@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $io = 1;
   $do = 1.5;
 
@@ -19,6 +19,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_power_assign() {
+function main_power_assign() :mixed{
 main();
 }

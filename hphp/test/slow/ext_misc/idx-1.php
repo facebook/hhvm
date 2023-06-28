@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $o = new stdClass();
   $v = Vector { 'a' , 'b' };
   $m = Map { 'a' => 2, 'b' => 'c' };
@@ -58,6 +58,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_idx_1() {
+function main_idx_1() :mixed{
 main();
 }

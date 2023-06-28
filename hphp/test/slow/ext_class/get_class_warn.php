@@ -12,6 +12,6 @@ class GetClassTest {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   GetClassTest::test();
 }

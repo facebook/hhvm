@@ -1,6 +1,6 @@
 <?hh
 abstract class B {
-  abstract public function foo();
+  abstract public function foo():mixed;
 }
 abstract class C extends B{}
 abstract class D extends C{}

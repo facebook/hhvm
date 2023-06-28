@@ -1,6 +1,6 @@
 <?hh
 class test {
-    <<__DynamicallyCallable>> function hdlr($errno, $errstr, $errfile, $errline) {
+    <<__DynamicallyCallable>> function hdlr($errno, $errstr, $errfile, $errline) :mixed{
         printf("[%d] errstr: %s, errfile: %s, errline: %d\n", $errno, $errstr, $errfile, $errline, $errstr);
     }
 }

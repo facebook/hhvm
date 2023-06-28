@@ -1,15 +1,15 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-function test_iconv_mime_encode() {
+function test_iconv_mime_encode() :mixed{
   $preferences = darray["input-charset" => "ISO-8859-1",
                                   "output-charset" => "UTF-8",
                                   "line-length" => 76,
@@ -23,7 +23,7 @@ function test_iconv_mime_encode() {
      "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=");
 }
 
-function test_iconv_mime_decode() {
+function test_iconv_mime_decode() :mixed{
   VS(iconv_mime_decode("=?windows-1256?Q?My_Persona?= =?windows-1256?Q?l_Profile_?= =?windows-1256?Q?was_Disabl?= =?windows-1256?Q?ed=FE?="), false);
 
   VS(iconv_mime_decode("Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=",
@@ -39,7 +39,7 @@ function test_iconv_mime_decode() {
      "Biel)");
 }
 
-function test_iconv_mime_decode_headers() {
+function test_iconv_mime_decode_headers() :mixed{
   VS(iconv_mime_decode_headers
      ("Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n".
       "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=\n",
@@ -48,14 +48,14 @@ function test_iconv_mime_decode_headers() {
                                            "Pr\xDC"."fung Pr\xDC"."fung"]]);
 }
 
-function test_iconv_get_encoding() {
+function test_iconv_get_encoding() :mixed{
   VS(iconv_get_encoding(),
      darray["input_encoding" => "ISO-8859-1",
                  "output_encoding" => "ISO-8859-1",
                  "internal_encoding" => "ISO-8859-1"]);
 }
 
-function test_iconv_set_encoding() {
+function test_iconv_set_encoding() :mixed{
   VS(iconv_set_encoding("output_encoding", "UTF-8"), true);
 
   VS(iconv_get_encoding(),
@@ -64,32 +64,32 @@ function test_iconv_set_encoding() {
                  "internal_encoding" => "ISO-8859-1"]);
 }
 
-function test_iconv() {
+function test_iconv() :mixed{
   VS(iconv("UTF-8", "BIG5", "\xE2\x82\xAC"), "\xa3\xe1");
   VS(iconv("ISO-8859-1", "UTF-8", "Pr\xDC"."fung"), "Pr\xC3\x9C"."fung");
 }
 
-function test_iconv_strlen() {
+function test_iconv_strlen() :mixed{
   VS(iconv_strlen("Pr\xDC"."fung", "ISO-8859-1"), 7);
   VS(iconv_strlen("Pr\xC3\x9C"."fung", "UTF-8"), 7);
 }
 
-function test_iconv_strpos() {
+function test_iconv_strpos() :mixed{
   VS(iconv_strpos("Pr\xC3\x9C\xC3\x9D"."fung", "\xC3\x9D", 0, "UTF-8"), 3);
 }
 
-function test_iconv_strrpos() {
+function test_iconv_strrpos() :mixed{
   VS(iconv_strrpos("Pr\xC3\x9C"."abc\xC3\x9C"."fung", "\xC3\x9C", "UTF-8"), 6);
 }
 
-function test_iconv_substr() {
+function test_iconv_substr() :mixed{
   VS(iconv_substr("Pr\xC3\x9C\xC3\x9D"."fung", 2, 2, "UTF-8"),
      "\xC3\x9C\xC3\x9D");
 }
 
 
 <<__EntryPoint>>
-function main_ext_iconv() {
+function main_ext_iconv() :mixed{
 test_iconv_mime_encode();
 test_iconv_mime_decode();
 test_iconv_mime_decode_headers();

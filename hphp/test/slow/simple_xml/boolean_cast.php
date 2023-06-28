@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_boolean_cast() {
+function main_boolean_cast() :mixed{
 $element = new SimpleXMLElement('<root />');
 var_dump((bool)$element);
 

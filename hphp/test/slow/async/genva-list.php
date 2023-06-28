@@ -1,16 +1,16 @@
 <?hh
 
-async function foo($x, $suspend = false, $throw = false) {
+async function foo($x, $suspend = false, $throw = false) :Awaitable<mixed>{
   if ($suspend) await RescheduleWaitHandle::create(0, 0);
   if ($throw) throw new Exception;
   return $x + 1;
 }
 
-async function bar($x) {
+async function bar($x) :Awaitable<mixed>{
   return varray[$x + 1, varray[$x + 2, $x + 3]];
 }
 
-async function herp() {
+async function herp() :Awaitable<mixed>{
   concurrent {
     $a = await foo(1);
     $b = await foo(2);
@@ -108,12 +108,12 @@ async function herp() {
   var_dump($f1, $f3);
 }
 
-function derp() {
+function derp() :mixed{
   HH\Asio\join(herp());
 }
 
 
 <<__EntryPoint>>
-function main_genva_list() {
+function main_genva_list() :mixed{
 derp();
 }

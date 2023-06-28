@@ -3,31 +3,31 @@
 class TestA
 {
     public function doSomething($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         return --$i;
     }
 
     public function doSomethingThis($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         return --$i;
     }
 
     public function doSomethingParent($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         return --$i;
     }
 
     public function doSomethingParentThis($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         return --$i;
     }
 
     public static function doSomethingStatic($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         return --$i;
     }
@@ -36,7 +36,7 @@ class TestA
 class TestB extends TestA
 {
     public function doSomething($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
@@ -45,7 +45,7 @@ class TestB extends TestA
     }
 
     public function doSomethingThis($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
@@ -54,7 +54,7 @@ class TestB extends TestA
     }
 
     public function doSomethingParent($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
@@ -63,7 +63,7 @@ class TestB extends TestA
     }
 
     public function doSomethingParentThis($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;
@@ -72,7 +72,7 @@ class TestB extends TestA
     }
 
     public static function doSomethingStatic($i)
-    {
+:mixed    {
         echo __METHOD__ . "($i)\n";
         $i++;
         if ($i >= 5) return 5;

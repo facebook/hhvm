@@ -10,7 +10,7 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_magic_constants() {
+function main_magic_constants() :mixed{
 \var_dump(WHERE_I_AM);
 \var_dump(Foo::DOUBLE_THE_FUN);
 \var_dump(Foo::INVALIDS);

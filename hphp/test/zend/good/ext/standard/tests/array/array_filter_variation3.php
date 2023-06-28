@@ -10,13 +10,13 @@
 
 // callback function returning always false
 function always_false($input)
-{
+:mixed{
   return false;
 }
 
 // callback function returning always true
 function always_true($input)
-{
+:mixed{
   return true;
 }
 <<__EntryPoint>> function main(): void {

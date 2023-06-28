@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_fseek_args() {
+function main_fseek_args() :mixed{
 $fname = tempnam(sys_get_temp_dir(), 'foobar');
 file_put_contents($fname, 'herpderp');
 $spl = new SplFileObject($fname, 'r');

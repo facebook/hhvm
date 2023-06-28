@@ -1,18 +1,18 @@
 <?hh // decl
 
-function thrower($why, $what) {
+function thrower($why, $what) :mixed{
   if ($why == 'exit' && $what == 'foo') {
     throw new Exception;
   }
 }
 
-async function foo($resched) {
+async function foo($resched) :Awaitable<mixed>{
   echo "enter foo\n";
   await $resched;
   echo "foo fallthrhough\n";
 }
 
-async function thing() {
+async function thing() :Awaitable<mixed>{
   echo "thing1\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "thing2\n";
@@ -20,7 +20,7 @@ async function thing() {
   echo "thing3\n";
 }
 
-function get($y) {
+function get($y) :mixed{
   try {
     HH\Asio\join(foo($y));
   } catch (Exception $ex) {
@@ -30,7 +30,7 @@ function get($y) {
 }
 
 <<__EntryPoint>>
-function main_suspend_hook_throw2() {
+function main_suspend_hook_throw2() :mixed{
 fb_setprofile(thrower<>);
 $y = thing();
 

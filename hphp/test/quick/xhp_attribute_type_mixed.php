@@ -3,11 +3,11 @@
 abstract class :base {
   // This is necessary because the generated __xhpAttributeDeclaration() has a
   // call to parent::__xhpAttributeDeclaration().
-  protected static function __xhpAttributeDeclaration()[] {
+  protected static function __xhpAttributeDeclaration()[] :mixed{
     return darray[];
   }
 
-  public static function xhpAttributeDeclaration()[] {
+  public static function xhpAttributeDeclaration()[] :mixed{
     return static::__xhpAttributeDeclaration();
   }
 }
@@ -39,8 +39,8 @@ class :node4 extends :base {
     string cheese = "hi";
 }
 
-function mixedFn1(mixed $test) { return 'fn'; }
-function mixedFn2(string $a1, mixed $v2) { return 'fn'; }
+function mixedFn1(mixed $test) :mixed{ return 'fn'; }
+function mixedFn2(string $a1, mixed $v2) :mixed{ return 'fn'; }
 <<__EntryPoint>> function main(): void {
 echo
   :node1::xhpAttributeDeclaration()['checkme'][0].

@@ -8,6 +8,6 @@ function is_nonexistent(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_nonexistent() {
+function main_is_expression_nonexistent() :mixed{
 is_nonexistent(new stdClass());
 }

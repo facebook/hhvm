@@ -1,18 +1,18 @@
 <?hh
 
 abstract class Base {
-   public abstract function sayHello(varray $a);
+   public abstract function sayHello(varray $a):mixed;
 }
 
 class SubClass extends Base {
-   public function sayHello(varray $a) {
+   public function sayHello(varray $a) :mixed{
      echo "World!\n";
    }
 }
 
 
 trait SayWorld {
-   public function sayHello(Base $d) {
+   public function sayHello(Base $d) :mixed{
      echo 'World!';
    }
 }

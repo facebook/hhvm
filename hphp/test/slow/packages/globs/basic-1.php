@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $deployments = vec["one", "two", "three"];
   $modules = vec["a", "b.c", "x.c", "t.a.x"];
 

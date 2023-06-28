@@ -1,5 +1,5 @@
 <?hh
-function F ($a) {
+function F ($a) :mixed{
     eval('function FImpl() { '.$a.' }');
     FImpl();
 }

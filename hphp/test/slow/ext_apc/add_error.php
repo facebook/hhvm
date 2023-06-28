@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_add_error() {
+function main_add_error() :mixed{
 $entries = darray[];
 $entries['key1'] = 'value1';
 $entries['key2'] = 'value2';

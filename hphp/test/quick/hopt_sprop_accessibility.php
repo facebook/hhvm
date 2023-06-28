@@ -2,7 +2,7 @@
 
 class A {
   private static $priv = 7;
-  function readVar() {
+  function readVar() :mixed{
     return A::$priv;
   }
 }

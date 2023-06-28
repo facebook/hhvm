@@ -1,14 +1,14 @@
 <?hh
 
 class C {
-  public function f<reify T>() {
+  public function f<reify T>() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
     echo "yep\n";
   }
 }
 
 class D<reify T1> {
-  public function f<reify T2>() {
+  public function f<reify T2>() :mixed{
     $f = 'f';
 
     T1::f<C>();

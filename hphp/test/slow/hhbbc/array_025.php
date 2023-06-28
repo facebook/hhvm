@@ -1,7 +1,7 @@
 <?hh
 
-function junk() { return 2; }
-function bar() {
+function junk() :mixed{ return 2; }
+function bar() :mixed{
   $x = darray['y' => junk()];
   $x['x'] = 0;
   $x['x'] += 1;
@@ -11,6 +11,6 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_array_025() {
+function main_array_025() :mixed{
 bar();
 }

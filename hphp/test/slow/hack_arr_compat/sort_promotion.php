@@ -1,6 +1,6 @@
 <?hh
 
-function test($name, $sf) {
+function test($name, $sf) :mixed{
   echo "==== $name 0 ====\n";
   $a = varray[];
   $sf(inout $a);
@@ -17,7 +17,7 @@ function test($name, $sf) {
   var_dump(is_varray($a), is_darray($a));
 }
 
-function utest($name, $sf) {
+function utest($name, $sf) :mixed{
   $cb = ($a, $b) ==> $a <=> $b;
 
   echo "==== $name 0 ====\n";
@@ -37,7 +37,7 @@ function utest($name, $sf) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "====== never promote varray => darray ======\n";
   test( 'sort',  sort<>);
   test( 'rsort', rsort<>);

@@ -2,15 +2,15 @@
 
 class foo {}
 
-function getStr() {
+function getStr() :mixed{
   return __hhvm_intrinsics\launder_value("foo");
 }
 
-function getClass() {
+function getClass() :mixed{
   return __hhvm_intrinsics\launder_value(foo::class);
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -18,7 +18,7 @@ function wrap($fun) {
   }
 }
 
-function comp($x, $y) {
+function comp($x, $y) :mixed{
   wrap(() ==> var_dump($x === $y));
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\eq($x, $y)));
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\lt($x, $y)));
@@ -28,7 +28,7 @@ function comp($x, $y) {
   print("\n");
 }
 
-function getTestcase(int $num) {
+function getTestcase(int $num) :mixed{
   $test_cases = varray[
     true, false, 0, 1, 0.0, 1.0, "foo",
     darray(vec['foo']),
@@ -41,7 +41,7 @@ function getTestcase(int $num) {
   return __hhvm_intrinsics\launder_value($test_cases[$num]);
 }
 
-function comp_test($x) {
+function comp_test($x) :mixed{
   for ($i = 0; $i < 13; $i++) {
     print("Test ".$i."\n");
     comp($x, getTestcase($i));

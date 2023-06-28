@@ -1,8 +1,8 @@
 <?hh
 
-function g() {
+function g() :mixed{
 }
-function test1() {
+function test1() :mixed{
   return '' . g();
 }
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

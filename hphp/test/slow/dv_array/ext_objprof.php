@@ -11,14 +11,14 @@ class NodeClass {
   public LeafClass $child;
 }
 
-function dump($data) {
+function dump($data) :mixed{
   ksort(inout $data);
   var_dump($data);
 }
 
 
 <<__EntryPoint>>
-function main_ext_objprof() {
+function main_ext_objprof() :mixed{
 $node = new NodeClass();
 $node->child = new LeafClass();
 dump(objprof_get_data());

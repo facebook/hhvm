@@ -15,7 +15,7 @@ final class E extends C {}
 
 
 <<__EntryPoint>>
-function main_is_expression_tc_this() {
+function main_is_expression_tc_this() :mixed{
 $d = new D();
 D::isT($d);
 C::isT($d);

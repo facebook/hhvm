@@ -7,16 +7,16 @@ class Exception1 extends Exception {
 }
 
 class Exception2 extends Exception1 {
-  public function exception2() {
+  public function exception2() :mixed{
     parent::__construct();
   }
 }
 
-function foo() {
+function foo() :mixed{
   throw new Exception2();
 }
 <<__EntryPoint>>
-function bar() {
+function bar() :mixed{
   try {
     foo();
   }

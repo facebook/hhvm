@@ -1,6 +1,6 @@
 <?hh
 
-function test(bool $throw) {
+function test(bool $throw) :mixed{
   $v = __hhvm_intrinsics\launder_value(vec[1, 2, 3]);
   var_dump($v);
   uksort(inout $v, ($p1, $p2) ==> {
@@ -11,7 +11,7 @@ function test(bool $throw) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test(false);
   try {
     test(true);

@@ -4,13 +4,13 @@ class X {
   private $str;
   private $arr;
   private $obj;
-  function foo() {
+  function foo() :mixed{
     $this->str = 'hello';
     $this->arr = varray[1,2,3];
     $this->obj = $this;
   }
 }
-function test() {
+function test() :mixed{
   $x = new X;
   $s = serialize($x);
   $x = unserialize($s);
@@ -18,6 +18,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1550() {
+function main_1550() :mixed{
 test();
 }

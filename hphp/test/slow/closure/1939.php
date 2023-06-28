@@ -1,11 +1,11 @@
 <?hh
 
-function get() {
+function get() :mixed{
  return true;
  }
 
 <<__EntryPoint>>
-function main_1939() {
+function main_1939() :mixed{
 if (get()) {
   $g = function ($x) {
     return function () use ($x) {

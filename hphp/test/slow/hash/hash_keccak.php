@@ -6,7 +6,7 @@
 // and output from reference implementation
 
 <<__EntryPoint>>
-function main_hash_keccak() {
+function main_hash_keccak() :mixed{
 $subjects = varray[
   '',
   'a',

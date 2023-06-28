@@ -3,7 +3,7 @@
 
 // Straight unpacking and repacking (or transferrence)
 <<__EntryPoint>>
-function main_hni_printf() {
+function main_hni_printf() :mixed{
 printf("Pi is 3.%d4%c5%s2\n", ...varray[1, ord('1'), 9]);
 
 // Splat unpacked and repacked

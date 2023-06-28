@@ -2,12 +2,12 @@
 
 class C {
 
-  private function foo() {
+  private function foo() :mixed{
     echo "in parent function\n";
     var_dump($this);
   }
 
-  protected function bar() {
+  protected function bar() :mixed{
     echo 'in C::bar: ';
     echo 'static::class: ' . static::class . ', ';
     echo 'get_class($this): ' . get_class($this) . "\n\n";
@@ -16,24 +16,24 @@ class C {
 }
 
 class D extends C {
-  protected function bar() {
+  protected function bar() :mixed{
     echo $this;
     echo "in D::bar\n";
   }
 
-  protected function direct() {
+  protected function direct() :mixed{
     echo "\ndirect:\n\n";
     array_map($x ==> parent::bar(), varray[1]); // capture $this
   }
 
-  protected function nestedCapture() {
+  protected function nestedCapture() :mixed{
     echo "\nnestedCapture:\n\n";
     array_map($x ==> { // capture, because of inner capture
       (() ==> parent::bar())(); // capture
     }, varray[1]);
   }
 
-  protected function reflectionInfo() {
+  protected function reflectionInfo() :mixed{
     echo "\nreflectionInfo:\n\n";
     $l1 = () ==> var_dump($this);
     $l2 = () ==> parent::bar();
@@ -48,7 +48,7 @@ class D extends C {
     var_dump($r3->getClosureThis());
   }
 
-  public static function test() {
+  public static function test() :mixed{
     (new D())->direct();
     (new D())->nestedCapture();
     (new D())->reflectionInfo();
@@ -57,7 +57,7 @@ class D extends C {
 
 
 <<__EntryPoint>>
-function main_lambda_implicit_this() {
+function main_lambda_implicit_this() :mixed{
 D::test();
 
 echo "\nouter:\n\n";

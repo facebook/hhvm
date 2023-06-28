@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_192() {
+function main_192() :mixed{
 $a = varray[1];
  $b = $a;
  $a = varray[2];

@@ -4,11 +4,11 @@ class foo {
 	public $x;
 	static public $y;
 		
-	public function a() {
+	public function a() :mixed{
 		return $this->x;
 	}
 	
-	static public function b() {
+	static public function b() :mixed{
 		return self::$y;
 	}
 }

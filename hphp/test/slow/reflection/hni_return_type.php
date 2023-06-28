@@ -1,6 +1,6 @@
 <?hh
 
-function reflect($name) {
+function reflect($name) :mixed{
   echo '==== ', $name, ' ====', "\n";
   $rf = new ReflectionFunction($name);
   var_dump($rf->getReturnTypeText());
@@ -8,11 +8,11 @@ function reflect($name) {
   var_dump(count($params));
 }
 
-function main() {
+function main() :mixed{
   reflect('hash_algos');
 }
 
 <<__EntryPoint>>
-function main_hni_return_type() {
+function main_hni_return_type() :mixed{
 main();
 }

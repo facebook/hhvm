@@ -3,6 +3,6 @@
 
 
 <<__EntryPoint>>
-function main_5566() {
+function main_5566() :mixed{
 constant('TEST_CONSTANT_3');
 }

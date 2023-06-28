@@ -9,7 +9,7 @@ class A {
     $this->c = $arg;
   }
 
-  public function getA() {
+  public function getA() :mixed{
     return $this->a;
   }
 }

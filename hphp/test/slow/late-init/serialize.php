@@ -11,7 +11,7 @@ class B {
   public $x = 123;
   <<__LateInit>> public $y;
   public $z = 'abc';
-  public function __sleep() {
+  public function __sleep() :mixed{
     return varray['x', 'y'];
   }
 }
@@ -20,33 +20,33 @@ class C {
   public $x = 123;
   <<__LateInit>> public $y;
   public $z = 'abc';
-  public function __sleep() {
+  public function __sleep() :mixed{
     return varray['x', 'z'];
   }
 }
 
-function serialize_test($a) {
+function serialize_test($a) :mixed{
   var_dump(serialize($a));
 }
 
-function json_encode_test($a) {
+function json_encode_test($a) :mixed{
   var_dump(json_encode($a));
 }
 
-function var_dump_test($a) {
+function var_dump_test($a) :mixed{
   var_dump($a);
 }
 
-function var_export_test($a) {
+function var_export_test($a) :mixed{
   var_export($a);
   echo "\n";
 }
 
-function print_r_test($a) {
+function print_r_test($a) :mixed{
   print_r($a);
 }
 
-function test($a, $func) {
+function test($a, $func) :mixed{
   echo "=============== $func ================\n";
 
   try {
@@ -70,7 +70,7 @@ function test($a, $func) {
   }
 }
 
-function run_serialize_tests($a) {
+function run_serialize_tests($a) :mixed{
   echo "===================== run_serialize_tests ====================\n";
   test($a, 'serialize_test');
   test($a, 'json_encode_test');
@@ -79,7 +79,7 @@ function run_serialize_tests($a) {
   test($a, 'print_r_test');
 }
 
-function unserialize_test($s) {
+function unserialize_test($s) :mixed{
   echo "================= unserialize_test ======================\n";
   $a = unserialize($s);
   try {

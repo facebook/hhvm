@@ -1,11 +1,11 @@
 <?hh
-function valRef($x, inout $y) {
+function valRef($x, inout $y) :mixed{
     var_dump($x, $y);
     $x = 'changed.x';
     $y = 'changed.y';
 }
 
-function refVal(inout $x, $y) {
+function refVal(inout $x, $y) :mixed{
     var_dump($x, $y);
     $x = 'changed.x';
     $y = 'changed.y';

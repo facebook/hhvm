@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_file_constants() {
+function main_file_constants() :mixed{
 var_dump(DIRECTORY_SEPARATOR);
 var_dump(FILE_SKIP_EMPTY_LINES);
 var_dump(GLOB_NOCHECK);

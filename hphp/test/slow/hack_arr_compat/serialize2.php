@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function literals() {
+function literals() :mixed{
   echo "================== literals ==================\n";
   HH\serialize_with_options(
     darray[],
@@ -55,7 +55,7 @@ function literals() {
   );
 }
 
-function test($name, $options) {
+function test($name, $options) :mixed{
   echo "==================== $name =========================\n";
   var_dump(HH\serialize_with_options(darray[], $options));
   var_dump(HH\serialize_with_options(darray(vec[1, 2, 3, 4]), $options));
@@ -96,7 +96,7 @@ class LateInitClass {
 }
 
 <<__EntryPoint>>
-function main_serialize2() {
+function main_serialize2() :mixed{
 literals();
 
 test("normal", dict[]);

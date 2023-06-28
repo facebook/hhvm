@@ -3,7 +3,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main_empty_objects() {
+function main_empty_objects() :mixed{
 $x = new stdClass();
 var_dump(var_export($x, true));
 $x->herp = 'derp';

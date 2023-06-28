@@ -5,7 +5,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_677() {
+function main_677() :mixed{
 $obj = new A;
 var_dump(isset($obj->a), property_exists($obj, 'a'));
 $obj->a = null;

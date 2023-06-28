@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $str = 'O:1:"X":0:{}';
   $obj = unserialize($str);
   var_dump($obj); // incomplete class

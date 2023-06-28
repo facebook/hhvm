@@ -15,7 +15,7 @@ class MyException extends Exception implements Catchable
 }
 
 function Error2Exception($errno, $errstr, $errfile, $errline)
-{
+:mixed{
     throw new MyException($errstr, $errno, $errfile, $errline);
 }
 <<__EntryPoint>> function main(): void {

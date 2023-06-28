@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__EntryPoint>>
-function test_treadmill() {
+function test_treadmill() :mixed{
   $v = keyset['a'.mt_rand() % 8];
   $key = "apc.key";
   apc_store($key, $v);

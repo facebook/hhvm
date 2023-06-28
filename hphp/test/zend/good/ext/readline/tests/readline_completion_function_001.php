@@ -1,6 +1,6 @@
 <?hh
 
-function foo() { }
+function foo() :mixed{ }
 <<__EntryPoint>> function main(): void {
 $data = varray[
     foo<>,

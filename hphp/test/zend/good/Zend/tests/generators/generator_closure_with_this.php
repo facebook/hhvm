@@ -1,7 +1,7 @@
 <?hh
 
 class Test {
-    public function getGenFactory() {
+    public function getGenFactory() :mixed{
         return function() {
             yield $this;
         };

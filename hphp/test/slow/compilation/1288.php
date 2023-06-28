@@ -1,6 +1,6 @@
 <?hh
 
-function bug1($a, $b) {
+function bug1($a, $b) :mixed{
 foreach ($b[$a++ + $a++] as $x) {
  echo $x;
  }

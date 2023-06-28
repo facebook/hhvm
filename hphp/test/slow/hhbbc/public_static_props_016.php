@@ -3,7 +3,7 @@
 class X {
   public static $y = varray[];
 
-  static function z() {
+  static function z() :mixed{
     self::$y[] = 2;
     return self::$y;
   }
@@ -11,7 +11,7 @@ class X {
 
 
 <<__EntryPoint>>
-function main_public_static_props_016() {
+function main_public_static_props_016() :mixed{
 var_dump(X::z());
 var_dump(X::z());
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function myCallBack( $match ) {
+function myCallBack( $match ) :mixed{
     ZendGoodExtPcreTestsBug44214::$array[] = $match;
     return 'xxx';
 }

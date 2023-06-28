@@ -2,7 +2,7 @@
 
 class Atype {}
 
-function set(dict<string, string> $cache) {
+function set(dict<string, string> $cache) :mixed{
   $cache[Atype::class] = "Atype";
 }
 

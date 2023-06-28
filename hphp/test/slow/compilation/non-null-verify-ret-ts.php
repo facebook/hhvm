@@ -13,6 +13,6 @@ function f(): D<C::A> {
   return $x;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   var_dump(f());
 }

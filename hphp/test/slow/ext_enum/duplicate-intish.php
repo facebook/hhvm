@@ -7,6 +7,6 @@ enum E : arraykey {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(E::getNames());
 }

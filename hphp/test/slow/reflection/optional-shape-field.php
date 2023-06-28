@@ -10,6 +10,6 @@ function func(): shape(?'key1' => ?bool,
 
 
 <<__EntryPoint>>
-function main_optional_shape_field() {
+function main_optional_shape_field() :mixed{
 var_dump((new ReflectionFunction('func'))->getReturnTypeText());
 }

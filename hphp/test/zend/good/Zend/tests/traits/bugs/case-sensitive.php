@@ -1,13 +1,13 @@
 <?hh
 
 trait A {
-    public function M1() {}
-    public function M2() {}
+    public function M1() :mixed{}
+    public function M2() :mixed{}
 }
 
 trait B {
-    public function M1() {}
-    public function M2() {}
+    public function M1() :mixed{}
+    public function M2() :mixed{}
 }
 
 class MyClass {

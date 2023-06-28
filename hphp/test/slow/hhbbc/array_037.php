@@ -1,8 +1,8 @@
 <?hh
 
-function aa() { return 'a'; }
-function heh() { return darray['a' => aa()]; }
-function x() {
+function aa() :mixed{ return 'a'; }
+function heh() :mixed{ return darray['a' => aa()]; }
+function x() :mixed{
   $x = heh();
   $r = $x[''] = 2;
   var_dump($r);
@@ -10,6 +10,6 @@ function x() {
 }
 
 <<__EntryPoint>>
-function main_array_037() {
+function main_array_037() :mixed{
 x();
 }

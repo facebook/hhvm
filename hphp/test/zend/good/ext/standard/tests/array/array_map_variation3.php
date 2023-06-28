@@ -9,7 +9,7 @@
  */
 
 function callback($a)
-{
+:mixed{
   return ($a);
 }
 <<__EntryPoint>> function main(): void {

@@ -8,7 +8,7 @@ function hexdump(string $s): string {
   return $out;
 }
 
-function to_hack_arrays_recursive($value) {
+function to_hack_arrays_recursive($value) :mixed{
   if (HH\is_vec_or_varray($value)) {
     $result = vec[];
     foreach ($value as $v) {
@@ -25,7 +25,7 @@ function to_hack_arrays_recursive($value) {
   return $value;
 }
 
-function test($value) {
+function test($value) :mixed{
   print("\n==============================================================\n");
   $value_str = json_encode($value, JSON_FB_FORCE_HACK_ARRAYS);
   print("test($value_str):\n");
@@ -43,7 +43,7 @@ function test($value) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test(varray[]);
   test(varray[varray[]]);
   test(darray(varray[17, 34]));

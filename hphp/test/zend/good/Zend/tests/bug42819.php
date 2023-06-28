@@ -77,7 +77,7 @@ class bar5 {
     public static $a7 = darray[\E_ERROR => \E_ERROR];
 }
 
-function oops($a = varray[foo\unknown]){}
+function oops($a = varray[foo\unknown]):mixed{}
 
 <<__EntryPoint>> function main(): void {
 echo "first\n";

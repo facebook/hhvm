@@ -1,6 +1,6 @@
 <?hh
 
-function sort_key_cmp(Collator $c, string $a, string $b) {
+function sort_key_cmp(Collator $c, string $a, string $b) :mixed{
   $ka = $c->getSortKey($a);
   $kb = $c->getSortKey($b);
   if ($ka < $kb) {
@@ -14,7 +14,7 @@ function sort_key_cmp(Collator $c, string $a, string $b) {
 
 
 <<__EntryPoint>>
-function main_get_sort_key() {
+function main_get_sort_key() :mixed{
 $inputs = varray[
   varray['1', '2', '10'],
   varray['y', 'k', 'i'],

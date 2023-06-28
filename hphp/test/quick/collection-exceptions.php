@@ -1,7 +1,7 @@
 <?hh
 
 
-function go($c, $k) {
+function go($c, $k) :mixed{
   try {
     $unused = $c[$k];
   } catch (Exception $e) {

@@ -2,7 +2,7 @@
 
 class C {
   public $val;
-  public function __debugInfo() {
+  public function __debugInfo() :mixed{
     return $this->val;
   }
   public function __construct($val) {

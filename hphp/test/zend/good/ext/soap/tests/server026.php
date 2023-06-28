@@ -1,6 +1,6 @@
 <?hh
 class Foo {
-  function test() {
+  function test() :mixed{
     return "Hello World";
   }
 }

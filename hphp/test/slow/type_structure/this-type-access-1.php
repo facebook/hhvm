@@ -5,7 +5,7 @@ abstract class C {
   function __construct() {
     var_dump(type_structure(static::class, 'TData'));
   }
-  function f($x) {
+  function f($x) :mixed{
     var_dump($x is this::TData);
     var_dump($x is ?this::TData);
     return $this;
@@ -18,7 +18,7 @@ class B extends C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (new A)->f('hi')->f(null);
   (new B)->f('hi')->f(null);
 }

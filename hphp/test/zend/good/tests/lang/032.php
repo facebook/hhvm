@@ -1,21 +1,21 @@
 <?hh
 class A {
-    function foo() {}
+    function foo() :mixed{}
 }
 
 class B extends A {
-    function foo() {}
+    function foo() :mixed{}
 }
 
 class C extends B {
-    function foo() {}
+    function foo() :mixed{}
 }
 
 class D extends A {
 }
 
 class F extends D {
-    function foo() {}
+    function foo() :mixed{}
 }
 
 // Following class definition should fail, but cannot test

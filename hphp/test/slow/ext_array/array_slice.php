@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_slice() {
+function main_array_slice() :mixed{
 $input = varray["a", "b", "c", "d", "e"];
 
 var_dump(array_slice($input, 2));

@@ -9,23 +9,23 @@
  *   int, string, bool, null values
  */
 function callback_int($a, $b)
-{
+:mixed{
   return $a + $b;
 }
 function callback_string($a, $b)
-{
+:mixed{
   return "$a"."$b";
 }
 function callback_bool($a, $b)
-{
+:mixed{
   return TRUE;
 }
 function callback_null($array1)
-{
+:mixed{
   return NULL;
 }
 function callback_without_ret($arr1)
-{
+:mixed{
   echo "callback_without_ret called\n";
 }
 <<__EntryPoint>> function main(): void {

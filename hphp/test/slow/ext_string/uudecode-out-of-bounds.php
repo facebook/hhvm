@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_uudecode_out_of_bounds() {
+function main_uudecode_out_of_bounds() :mixed{
 convert_uudecode("a.");
 }

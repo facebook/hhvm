@@ -2,12 +2,12 @@
 class A
 {
     private function Test()
-    {
+:mixed    {
         echo 'Hello from '.get_class($this)."\n";
     }
 
     public function call($method, $args = varray[])
-    {
+:mixed    {
         $this->Test();
         $this->$method();
         $this->$method();
@@ -17,7 +17,7 @@ class A
 class B extends A
 {
     protected function Test()
-    {
+:mixed    {
         echo 'Overridden hello from '.get_class($this)."\n";
     }
 }

@@ -1,10 +1,10 @@
 <?hh
 
-function getTestArray() {
+function getTestArray() :mixed{
   return varray['opera', '12', '16'];
 }
 
-function stringFunc() {
+function stringFunc() :mixed{
   $results = getTestArray();
   var_dump($results);
   if (!$results) return null;
@@ -27,7 +27,7 @@ function stringFunc() {
   return $groups;
 }
 
-function intFunc() {
+function intFunc() :mixed{
   $results = getTestArray();
   var_dump($results);
   if (!$results) return null;
@@ -52,7 +52,7 @@ function intFunc() {
 
 
 <<__EntryPoint>>
-function main_not_dead_stores() {
+function main_not_dead_stores() :mixed{
 var_dump(stringFunc());
 var_dump(intFunc());
 }

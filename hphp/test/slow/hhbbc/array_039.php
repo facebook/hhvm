@@ -1,18 +1,18 @@
 <?hh
 
-class C { function heh() { echo "heh\n"; } }
-function foo() { return darray[]; }
-function bar() {
+class C { function heh() :mixed{ echo "heh\n"; } }
+function foo() :mixed{ return darray[]; }
+function bar() :mixed{
   $x = foo();
   $x['a'] = new C;
   return $x;
 }
-function main() {
+function main() :mixed{
   $y = bar()['a'];
   $y->heh();
 }
 
 <<__EntryPoint>>
-function main_array_039() {
+function main_array_039() :mixed{
 main();
 }

@@ -3,7 +3,7 @@
 class A {}
 
 class B{
-    public function doit(A $a){
+    public function doit(A $a):mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_iterator_current_return() {
+function main_array_iterator_current_return() :mixed{
 $arr = new ArrayIterator(varray[1]);
 
 $arr->next();

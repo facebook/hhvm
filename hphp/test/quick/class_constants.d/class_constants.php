@@ -7,7 +7,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print "Test begin\n";
 
   var_dump(X::BAZ);

@@ -1,10 +1,10 @@
 <?hh
 
-function one() {
+function one() :mixed{
   echo "one\n";
 }
 
-function three() {
+function three() :mixed{
   echo "three\n";
 }
 
@@ -14,7 +14,7 @@ abstract final class MyMicrotimeStatics {
 
 // Try it with a builtin, too.
 
-function my_microtime(bool $foob = false) {
+function my_microtime(bool $foob = false) :mixed{
   echo "ca\$h m0n3y\n";
   MyMicrotimeStatics::$x += 1.0;
   if (false) {
@@ -23,9 +23,9 @@ function my_microtime(bool $foob = false) {
   return (string)MyMicrotimeStatics::$x;
 }
 
-function my_foo() {}
+function my_foo() :mixed{}
 
-function bar() {
+function bar() :mixed{
   $orig = "foo";
   $new = "my_$orig";
   var_dump(fb_rename_function($new, "foo"));

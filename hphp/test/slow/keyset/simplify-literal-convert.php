@@ -4,7 +4,7 @@
 // Make sure the simplifier doesn't crash on trying to simplify invalid
 // conversions to keyset.
 
-function main() {
+function main() :mixed{
   // These should all fail and not be simplified away at JIT time
   try {
     var_dump(keyset(darray[1 => 'a', 2 => 100, 3 => false]));
@@ -39,6 +39,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_simplify_literal_convert() {
+function main_simplify_literal_convert() :mixed{
 main();
 }

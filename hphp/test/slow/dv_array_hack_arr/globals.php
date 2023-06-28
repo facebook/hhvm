@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $dicts = vec[
     tuple("cookie", $_COOKIE),
     tuple("env", $_ENV),

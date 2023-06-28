@@ -7,15 +7,15 @@ class R {
   }
 }
 final class Table {
-  public function insert($key, $factory) { return $key; }
+  public function insert($key, $factory) :mixed{ return $key; }
 }
 
 class Other {
-  public function insert($id, $data) {return false;}
+  public function insert($id, $data) :mixed{return false;}
 }
 
 final class Tree {
-  static function go($t) {
+  static function go($t) :mixed{
     $things = new Table();
     $samples = function($row) use($things) {
       return darray[
@@ -31,6 +31,6 @@ final class Tree {
 
 
 <<__EntryPoint>>
-function main_refine_closure_crash() {
+function main_refine_closure_crash() :mixed{
 var_dump(Tree::go(new R));
 }

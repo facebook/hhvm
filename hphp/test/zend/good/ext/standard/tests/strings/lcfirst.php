@@ -2,7 +2,7 @@
 /* Make a string's first character uppercase */
 
 class mystring {
-  function __toString() {
+  function __toString() :mixed{
     return "Hello world";
   }
 }

@@ -10,34 +10,34 @@ class foo {
 
 // abstract class
 abstract class abstractClass {
-  abstract protected function getClassName();
-  public function printClassName () {
+  abstract protected function getClassName():mixed;
+  public function printClassName () :mixed{
     echo $this->getClassName() . "\n";
   }
 }
 
 // implement abstract class
 class concreteClass extends abstractClass {
-  protected function getClassName() {
+  protected function getClassName() :mixed{
     return "concreteClass";
   }
 }
 
 // interface class
 interface IValue {
-   public function setVal($name, $val);
-   public function dumpVal();
+   public function setVal($name, $val):mixed;
+   public function dumpVal():mixed;
 }
 
 // implement the interface
 class Value implements IValue {
   private $vars = varray[];
 
-  public function setVal($name, $val) {
+  public function setVal($name, $val) :mixed{
     $this->vars[$name] = $val;
   }
 
-  public function dumpVal() {
+  public function dumpVal() :mixed{
     var_dump($vars);
   }
 }

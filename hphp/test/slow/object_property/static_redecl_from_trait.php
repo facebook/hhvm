@@ -14,6 +14,6 @@ class Y extends X {
 
 
 <<__EntryPoint>>
-function main_static_redecl_from_trait() {
+function main_static_redecl_from_trait() :mixed{
 echo "Ok\n";
 }

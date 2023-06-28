@@ -6,11 +6,11 @@
  */
 
 class Ancestor {
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }
@@ -24,21 +24,21 @@ class Tester extends Ancestor {
   static protected $prots = "protected static var";
   static private $privs = "private static var";
 
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }
 
 class Child extends Tester {
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }

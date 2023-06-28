@@ -1,8 +1,8 @@
 <?hh
 
-function bar(mixed $x)[ctx $x] {}
+function bar(mixed $x)[ctx $x] :mixed{}
 
 <<__EntryPoint>>
-function main()[] {
+function main()[] :mixed{
   bar(meth_caller(A::class, 'foo'));
 }

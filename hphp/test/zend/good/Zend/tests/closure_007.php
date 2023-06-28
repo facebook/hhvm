@@ -3,7 +3,7 @@
 class A {
     private $x = 0;
 
-    function getClosureGetter () {
+    function getClosureGetter () :mixed{
         return function () {
             return function () {
                 $this->x++;
@@ -11,7 +11,7 @@ class A {
         };
     }
 
-    function printX () {
+    function printX () :mixed{
         echo $this->x."\n";
     }
 }

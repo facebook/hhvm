@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_uintersect_uassoc() {
+function main_array_uintersect_uassoc() :mixed{
 $array1 = dict[
   "a" => "green",
   "b" => "brown",

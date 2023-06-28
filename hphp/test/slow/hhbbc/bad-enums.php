@@ -46,21 +46,21 @@ enum BadEnum6 : Alias3 {
 
 newtype Alias4 = BadEnum6;
 
-function func1(BadEnum1 $e) {
+function func1(BadEnum1 $e) :mixed{
   var_dump($e);
 }
-function func2(BadEnum2 $e) {
+function func2(BadEnum2 $e) :mixed{
   var_dump($e);
 }
-function func3(Alias2 $e) {
+function func3(Alias2 $e) :mixed{
   var_dump($e);
 }
-function func4(Alias4 $e) {
+function func4(Alias4 $e) :mixed{
   var_dump($e);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   func1("hi");
   func2("bye");
   func3(1);

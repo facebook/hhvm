@@ -3,11 +3,11 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_instances(string $cls, ?AnyArray $objs) {
+function get_instances(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
-function get_bytes_eq(string $cls, ?AnyArray $objs) {
+function get_bytes_eq(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
@@ -16,11 +16,11 @@ function get_bytes_eq(string $cls, ?AnyArray $objs) {
   }
   return $bytes;
 }
-function get_bytes(string $cls, ?AnyArray $objs) {
+function get_bytes(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
-function get_bytesd(string $cls, ?AnyArray $objs) {
+function get_bytesd(string $cls, ?AnyArray $objs) :mixed{
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
@@ -65,7 +65,7 @@ class ChildClass extends ParentClass{
 
 
 <<__EntryPoint>>
-function main_objprof_paths() {
+function main_objprof_paths() :mixed{
 $childClass = new ChildClass();
 $childClass->parentNested = new NestedClass();
 $childClass->childNested = new NestedClass();

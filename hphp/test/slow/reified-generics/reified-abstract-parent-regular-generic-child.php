@@ -1,7 +1,7 @@
 <?hh
 
 abstract class A<reify T> {
-  function f() {
+  function f() :mixed{
     var_dump($this->{'86reified_prop'});
   }
 }
@@ -9,7 +9,7 @@ abstract class A<reify T> {
 class C<T> extends A<int> {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C<string>();
   $c->f();
 }

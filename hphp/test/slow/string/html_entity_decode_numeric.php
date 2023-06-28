@@ -3,7 +3,7 @@
 
 // Characters we know not to be numbers.
 <<__EntryPoint>>
-function main_html_entity_decode_numeric() {
+function main_html_entity_decode_numeric() :mixed{
 $characters = varray[' ', '#', 'a', '$', '_'];
 
 // Numbers (hex and dec) we know to be valid HTML entities.

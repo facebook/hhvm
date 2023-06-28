@@ -21,7 +21,7 @@
    Prototype: void stat_fn(string $filename);
    Description: Prints access, modification and change times of a file
 */
-function stat_fn( $filename ) {
+function stat_fn( $filename ) :mixed{
   echo "-- File access time is => ";
   print( @date( 'Y:M:D:H:i:s', fileatime($filename) ) )."\n";
   clearstatcache();

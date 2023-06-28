@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout $perms, inout $t) {
+function foo(inout $perms, inout $t) :mixed{
   $perms = darray['x' => 1];
   $t = $t['x'];
   unset($t);
@@ -8,7 +8,7 @@ function foo(inout $perms, inout $t) {
 }
 
 <<__EntryPoint>>
-function main_1095() {
+function main_1095() :mixed{
   $a = null;
   try {
     var_dump(foo(inout $a, inout $a));

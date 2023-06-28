@@ -5,14 +5,14 @@
  * Alias to functions:
  */
 
-function readFile2($file) {
+function readFile2($file) :mixed{
    $h = fopen($file, 'r');
    fpassthru($h);
    fclose($h);
    echo "\n";
 }
 
-function appendFile($file) {
+function appendFile($file) :mixed{
    $h = fopen($file, 'a+');
    fwrite($h, ' again!');
    fseek($h, 0);
@@ -21,7 +21,7 @@ function appendFile($file) {
    echo "\n";
 }
 
-function writeFile($file) {
+function writeFile($file) :mixed{
    $h = fopen($file, 'w');
    fwrite($h, 'Goodbye World');
    fclose($h);

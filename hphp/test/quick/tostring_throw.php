@@ -1,12 +1,12 @@
 <?hh
 
 class stringer {
-  public function __toString() { throw new Exception("nope\n"); }
+  public function __toString() :mixed{ throw new Exception("nope\n"); }
 }
 class dtor {}
 
-function ignore() {}
-function foo() {
+function ignore() :mixed{}
+function foo() :mixed{
   $x = new stringer();
   ignore(new dtor(),  "foo" . $x);
 }

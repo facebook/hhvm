@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_draw_affine() {
+function main_draw_affine() :mixed{
 $affine_matrix = darray[
   'sx' => 1,
   'rx' => 0,

@@ -1,6 +1,6 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) {
     echo "Failed: $y\n";
@@ -8,11 +8,11 @@ function VS($x, $y) {
     var_dump(debug_backtrace());
   }
 }
-function VERIFY($x) {
+function VERIFY($x) :mixed{
   VS($x != false, true);
 }
 
-function createSqliteTestTable($tmp_sqllite) {
+function createSqliteTestTable($tmp_sqllite) :mixed{
   unlink($tmp_sqllite);
   $db = new SQLite3($tmp_sqllite);
   $db->exec("CREATE TABLE foo (bar STRING)");
@@ -21,7 +21,7 @@ function createSqliteTestTable($tmp_sqllite) {
   VS($db->lasterrorcode(), 0);
 }
 
-function cleanupSqliteTestTable($tmp_sqllite) {
+function cleanupSqliteTestTable($tmp_sqllite) :mixed{
   unlink($tmp_sqllite);
 }
 
@@ -34,7 +34,7 @@ class MyStatement extends PDOStatement {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_pdo() {
+function main_ext_pdo() :mixed{
   $tmp_sqllite = tempnam(sys_get_temp_dir(), 'vmpdotest');
 
   ///////////////////////////////////////////////////////////////////////////////

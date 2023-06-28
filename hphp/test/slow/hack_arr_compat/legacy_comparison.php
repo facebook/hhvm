@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // We construct a C so that some of the arrays here are non-static.
   $c = new C();
   $values = dict[

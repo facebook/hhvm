@@ -1,11 +1,11 @@
 <?hh
 
 interface B {
-  function foo();
+  function foo():mixed;
 }
 
 class C implements B {
-  function foo() { return 1; }
+  function foo() :mixed{ return 1; }
 }
 
 class D implements B {}

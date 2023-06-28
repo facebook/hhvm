@@ -12,7 +12,7 @@
 class A
 {
 //  public $var = 10;
-  public function __toString() {
+  public function __toString() :mixed{
     return "object";
   }
 }

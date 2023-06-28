@@ -1,7 +1,7 @@
 <?hh
 
 class C<reify T1> {
-  function f<reify T2>(mixed $x) {
+  function f<reify T2>(mixed $x) :mixed{
     try {
       $x as (T1, T2);
       var_dump("yep");

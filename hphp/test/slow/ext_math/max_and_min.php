@@ -1,11 +1,11 @@
 <?hh
 
-function min_max_single($arg) {
+function min_max_single($arg) :mixed{
   var_dump(max($arg));
   var_dump(min($arg));
 }
 
-function min_max_multi(...$args) {
+function min_max_multi(...$args) :mixed{
 
   $multi_max = max(...$args);
   $single_max = max($args);
@@ -18,7 +18,7 @@ function min_max_multi(...$args) {
   var_dump($multi_min === $single_min);
 }
 
-function single_arg() {
+function single_arg() :mixed{
   echo ' === Single Array ===', "\n";
   min_max_single(varray[3, 1, 6, 7]);
   min_max_single(varray[2, 4, 5]);
@@ -30,7 +30,7 @@ function single_arg() {
   min_max_single(Map {1 => "1236150163"});
 }
 
-function multi_arg() {
+function multi_arg() :mixed{
   echo ' === Multiple Arguments ===', "\n";
   min_max_multi(varray[varray[2], 4, 8], varray[varray[2, 5, 1]]);
   min_max_multi(1, 1.0);
@@ -39,7 +39,7 @@ function multi_arg() {
 
 
 <<__EntryPoint>>
-function main_max_and_min() {
+function main_max_and_min() :mixed{
 single_arg();
 multi_arg();
 }

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function _try($fn) {
+function _try($fn) :mixed{
   try {
     $fn();
   } catch (InvalidArgumentException $e) {
@@ -9,7 +9,7 @@ function _try($fn) {
   }
 }
 
-function basic_getters($arr, $keys) {
+function basic_getters($arr, $keys) :mixed{
   echo "======================== get =================================\n";
   foreach ($keys as $key) { _try(() ==> { $arr[$key]; }); }
 
@@ -29,7 +29,7 @@ function basic_getters($arr, $keys) {
   foreach ($keys as $key) { _try(() ==> { !($arr[$key] ?? false); }); }
 }
 
-function basic_setters($arr, $keys) {
+function basic_setters($arr, $keys) :mixed{
   echo "======================== set =================================\n";
   foreach ($keys as $key) { _try(() ==> { $arr[$key] = 123; }); }
 
@@ -40,7 +40,7 @@ function basic_setters($arr, $keys) {
   foreach ($keys as $key) { _try(() ==> { unset($arr[$key]); }); }
 }
 
-function member_ops($arr, $keys) {
+function member_ops($arr, $keys) :mixed{
   $copy = $arr;
 
   echo "======================== base-elem ===========================\n";
@@ -95,7 +95,7 @@ function member_ops($arr, $keys) {
 
 
 <<__EntryPoint>>
-function main_implicit_key() {
+function main_implicit_key() :mixed{
 $sub = darray[0 => 100, 1 => 100, "" => 100];
 $arr = darray[
   0 => darray[

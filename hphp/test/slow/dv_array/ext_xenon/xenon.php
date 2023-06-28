@@ -2,28 +2,28 @@
 
 // Test showing async stacks in Xenon.
 
-async function genList(...$args) {
+async function genList(...$args) :Awaitable<mixed>{
   await AwaitAllWaitHandle::fromVec($args);
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
-async function gen1($a) {
+async function gen1($a) :Awaitable<mixed>{
   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   return $a + 1;
 }
 
-async function gen2($a) {
+async function gen2($a) :Awaitable<mixed>{
   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   $x = HH\Asio\join(gen1($a));
   return $x;
 }
 
-async function genBar($a) {
+async function genBar($a) :Awaitable<mixed>{
   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   return $a + 2;
 }
 
-async function genFoo($a) {
+async function genFoo($a) :Awaitable<mixed>{
   $a++;
   list($x, $y) = await genList(
     genBar($a),
@@ -33,11 +33,11 @@ async function genFoo($a) {
   return $x + $y;
 }
 
-function idx($arr, $idx, $def = null) {
+function idx($arr, $idx, $def = null) :mixed{
   return isset($arr[$idx]) ? $arr[$idx] : $def;
 }
 
-function main($a) {
+function main($a) :mixed{
   \HH\Asio\join(genFoo($a));
 }
 <<__EntryPoint>>

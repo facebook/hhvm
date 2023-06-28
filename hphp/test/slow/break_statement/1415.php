@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1415() {
+function main_1415() :mixed{
 $arr = varray['one', 'two', 'three', 'four', 'stop', 'five'];
 foreach ($arr as $val) {
   if ($val == 'stop') {

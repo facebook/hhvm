@@ -3,7 +3,7 @@
 class A {
   abstract const ctx C = [write_props];
   <<__NEVER_INLINE>>
-  function f()[this::C] { echo "in f\n"; }
+  function f()[this::C] :mixed{ echo "in f\n"; }
 }
 
 class B1 extends A {
@@ -15,7 +15,7 @@ class B2 extends A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (__hhvm_intrinsics\launder_value(new B1))->f();
   (__hhvm_intrinsics\launder_value(new B2))->f();
 }

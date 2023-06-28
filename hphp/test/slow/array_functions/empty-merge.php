@@ -1,10 +1,10 @@
 <?hh
 
-function get_empty_array() {
+function get_empty_array() :mixed{
   return extension_loaded('pdo') ? varray[] : varray['wut'];
 }
 
-function main() {
+function main() :mixed{
   $emp = get_empty_array();
   $full = varray[new stdClass, 2];
   $merge = array_merge($emp, $full);
@@ -13,6 +13,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_empty_merge() {
+function main_empty_merge() :mixed{
 var_dump(main());
 }

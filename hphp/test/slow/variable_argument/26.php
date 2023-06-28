@@ -1,9 +1,9 @@
 <?hh
 
-function f(...$args) {
+function f(...$args) :mixed{
   var_dump($args);
 }
-function g($x) {
+function g($x) :mixed{
   if ($x) $f = f<>;
   else    $f = '__nocall__';
   call_user_func_array($f,     darray['x' => 10, 'y' => 20, 'z' => 30, 'j' => 40]);
@@ -11,6 +11,6 @@ function g($x) {
 }
 
 <<__EntryPoint>>
-function main_26() {
+function main_26() :mixed{
 g(10);
 }

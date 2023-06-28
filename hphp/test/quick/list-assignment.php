@@ -1,7 +1,7 @@
 <?hh
 
 // Medium 2
-function f() {
+function f() :mixed{
   echo "f\n";
   return varray[4, 5, 6];
 }

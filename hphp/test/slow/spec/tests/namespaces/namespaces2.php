@@ -8,7 +8,7 @@
 
 namespace NS1
 {
-   function foo() {
+   function foo() :mixed{
       echo "Inside namespace " . __NAMESPACE__ . "\n";
       echo "Inside function " . __FUNCTION__ . "\n";
       echo "Inside method " . __METHOD__ . "\n";
@@ -24,7 +24,7 @@ namespace NS1
 namespace
 {
    <<__EntryPoint>>
-   function main() {
+   function main() :mixed{
       \error_reporting(-1);
 
       \NS1\foo();
@@ -40,7 +40,7 @@ namespace
 
 namespace NS2
 {
-   function foo() {
+   function foo() :mixed{
       echo "Inside namespace " . __NAMESPACE__ . "\n";
       echo "Inside function " . __FUNCTION__ . "\n";
       echo "Inside method " . __METHOD__ . "\n";

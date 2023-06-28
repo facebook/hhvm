@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_badconstruct() {
+function main_badconstruct() :mixed{
 try {
   $t = new IntervalTimer(1, function() { echo "ping\n"; });
   echo "Failed\n";

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
@@ -13,7 +13,7 @@ function foo() {
   }
 }
 
-function foo2() {
+function foo2() :mixed{
   $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = null;

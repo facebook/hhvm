@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_attributes_get() {
+function main_attributes_get() :mixed{
 $element = simplexml_load_string(<<<EOF
 <root>
   <hi hello="world">

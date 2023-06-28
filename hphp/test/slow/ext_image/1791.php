@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1791() {
+function main_1791() :mixed{
 var_dump(image_type_to_mime_type(IMAGETYPE_GIF));
 var_dump(image_type_to_mime_type(IMAGETYPE_JPEG));
 var_dump(image_type_to_mime_type(IMAGETYPE_PNG));

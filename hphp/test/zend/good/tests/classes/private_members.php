@@ -13,7 +13,7 @@ class base
   }
 
   function test()
-  {
+:mixed  {
       echo __METHOD__ . "\n";
     print_r($this);
   }
@@ -34,7 +34,7 @@ class derived extends base
   }
 
   function test()
-  {
+:mixed  {
       parent::test();
       echo __METHOD__ . "\n";
     print_r($this);

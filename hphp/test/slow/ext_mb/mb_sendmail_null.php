@@ -1,6 +1,6 @@
 <?hh
 
-function test($n) {
+function test($n) :mixed{
   return mb_send_mail("A\x00".str_repeat('b', $n), '', '');
 }
 

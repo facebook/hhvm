@@ -1,10 +1,10 @@
 <?hh
 
 class stringer {
-  public function __toString() { throw new Exception("nope\n"); }
+  public function __toString() :mixed{ throw new Exception("nope\n"); }
 }
 
-function foo() {
+function foo() :mixed{
   $x = new stringer();
   $b = "foo";
   $b .= $x;

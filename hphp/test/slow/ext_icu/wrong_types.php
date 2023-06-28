@@ -6,7 +6,7 @@ class MyFakeCalendar2 {}
 class MyFakeCalendar3 {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $calendar = IntlCalendar::createInstance('UTC');
   var_dump($calendar->after(new MyFakeCalendar0()));
   var_dump($calendar->before(new MyFakeCalendar1()));

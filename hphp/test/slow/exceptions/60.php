@@ -3,7 +3,7 @@
 class a extends Exception {
 }
 class b extends a {
-  function dump() {
+  function dump() :mixed{
     echo
       'c:',
       $this->code,
@@ -16,7 +16,7 @@ m:',
 }
 
 <<__EntryPoint>>
-function main_60() {
+function main_60() :mixed{
   if (__hhvm_intrinsics\launder_value(0)) {
     include '60.inc';
   }

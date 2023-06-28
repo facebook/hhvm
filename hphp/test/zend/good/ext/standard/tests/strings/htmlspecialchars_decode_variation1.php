@@ -11,7 +11,7 @@
 //get a class
 class classA
 {
-  function __toString() {
+  function __toString() :mixed{
     return "ClassAObject";
   }
 }

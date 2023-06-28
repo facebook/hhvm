@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_parentheses_deref() {
+function main_parentheses_deref() :mixed{
 $array = varray[varray[varray[varray[0, 1]]], 1];
 var_dump(($array)[1]);
 var_dump((($array[0][0])[0])[1]);

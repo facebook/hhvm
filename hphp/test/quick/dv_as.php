@@ -1,6 +1,6 @@
 <?hh
 class A {
-  public function a(AnyArray $a1 = "abc") {}
+  public function a(AnyArray $a1 = "abc") :mixed{}
 }
 
 <<__EntryPoint>>

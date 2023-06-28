@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   apc_store('mainf', main<>);
   apc_store('maina', varray[1, main<>, 'foo']);
 

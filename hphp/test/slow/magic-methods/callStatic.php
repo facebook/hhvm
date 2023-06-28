@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  function __callStatic() {}
+  function __callStatic() :mixed{}
 }

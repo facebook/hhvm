@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_294() {
+function main_294() :mixed{
 $a = varray['test'];
  $a[] = 'test';
          var_dump($a);

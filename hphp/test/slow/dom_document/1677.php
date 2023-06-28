@@ -1,6 +1,6 @@
 <?hh
 
-function rerender($html, $frag = false) {
+function rerender($html, $frag = false) :mixed{
     $doc = new DOMDocument();
     if ($frag) {
       $body = $doc->createDocumentFragment();
@@ -12,7 +12,7 @@ function rerender($html, $frag = false) {
     }
     return helper($body);
   }
-  function helper($element) {
+  function helper($element) :mixed{
     if ($element is DOMText) {
       return htmlspecialchars($element->nodeValue);
     }
@@ -41,7 +41,7 @@ function rerender($html, $frag = false) {
   }
 
   <<__EntryPoint>>
-function main_1677() {
+function main_1677() :mixed{
 $fragment = 'Hello, <b>world</b>.';
   $document = '<html><body><div style="color:red">    <p class="thing">'.$fragment.'</p></div>';
   echo rerender($fragment, true)."

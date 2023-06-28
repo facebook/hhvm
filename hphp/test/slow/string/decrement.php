@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_decrement() {
+function main_decrement() :mixed{
 $s = "Decrementing";
 var_dump(--$s);
 }

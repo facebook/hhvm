@@ -28,7 +28,7 @@ class C2 {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C1::FOO1);
   var_dump(C1::FOO2);
   var_dump(C1::FOO3);

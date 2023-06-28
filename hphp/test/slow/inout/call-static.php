@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x, inout $y, $z, inout $q, $r, inout $s) {
+function foo($x, inout $y, $z, inout $q, $r, inout $s) :mixed{
   var_dump($x, $y, $z, $q, $r, $s);
   $y = 'Hello';
   $q = ', ';
@@ -8,7 +8,7 @@ function foo($x, inout $y, $z, inout $q, $r, inout $s) {
   return '!';
 }
 
-function bar(inout $a) {
+function bar(inout $a) :mixed{
   try {
     echo "bar($a)\n";
     throw new Exception();
@@ -24,21 +24,21 @@ function bar(inout $a) {
   }
 }
 
-function baz($x, inout $a) {
+function baz($x, inout $a) :mixed{
   echo "baz($x, $a)\n";
   $a = $x;
   if ($x === 42) throw new Exception();
   return $x + 1;
 }
 
-function swap(inout $a, inout $b) {
+function swap(inout $a, inout $b) :mixed{
   $t = $b;
   $b = $a;
   $a = $t;
   // implicit return
 }
 
-function empty_(inout $t) {
+function empty_(inout $t) :mixed{
   try {
     new stdClass;
     return;
@@ -47,7 +47,7 @@ function empty_(inout $t) {
   }
 }
 
-function main() {
+function main() :mixed{
   $one = 'Eat';
   $two = ' my ';
   $three = 'shorts';
@@ -75,6 +75,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_call_static() {
+function main_call_static() :mixed{
 main();
 }

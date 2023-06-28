@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to getrusage() to test behaviour
  */
-class classA { function __toString() { return "ClassAObject"; } }
+class classA { function __toString() :mixed{ return "ClassAObject"; } }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing getrusage() : error conditions ***\n";
 

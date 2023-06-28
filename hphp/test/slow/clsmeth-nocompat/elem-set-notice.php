@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...) :mixed{
   if ($msg === 'Cannot use a scalar value as an array') {
     echo "[NOTICE] $msg\n";
     return true;
@@ -8,7 +8,7 @@ function handle_error($_no, $msg, ...) {
   return false;
 }
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 class P { function __construct(public mixed $m)[] {} }
 
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
@@ -150,7 +150,7 @@ function set_dynamic4(): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   set_static1();  set_static1();

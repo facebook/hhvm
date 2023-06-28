@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function info() {
+  function info() :AsyncGenerator<mixed,mixed,void>{
     yield __METHOD__;
     yield __CLASS__;
     yield __TRAIT__;
@@ -15,7 +15,7 @@ class C2 {
  }
 
 <<__EntryPoint>>
-function main_2073() {
+function main_2073() :mixed{
 $o1 = new C1;
 foreach ($o1->info() as $info) {
   var_dump($info);

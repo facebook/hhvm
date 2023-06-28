@@ -1,25 +1,25 @@
 <?hh
 
 
-function g($x) {
+function g($x) :mixed{
   return $x;
 }
 
-function h() {
+function h() :mixed{
   return varray[1,2];
 }
 
 class C {
   public $a;
   public $b;
-  function f($x) {
+  function f($x) :mixed{
     list($this->a, $this->b) = g($x) ? h() : tuple(null, null);
   }
 }
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new C;
   for ($i = 0; $i < 5; $i++) {
     $obj->f(!$i);

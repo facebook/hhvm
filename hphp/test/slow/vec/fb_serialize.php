@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serde($v) {
+function serde($v) :mixed{
   try {
     $ret = null;
     $ser = fb_serialize($v, FB_SERIALIZE_HACK_ARRAYS);
@@ -24,7 +24,7 @@ function serde($v) {
 
 
 <<__EntryPoint>>
-function main_fb_serialize() {
+function main_fb_serialize() :mixed{
 serde(vec[]);
 serde(vec[1, 2, 3]);
 serde(vec['a', 'b', 'c']);

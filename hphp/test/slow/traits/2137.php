@@ -13,6 +13,6 @@ class Something implements I {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "ok\n";
 }

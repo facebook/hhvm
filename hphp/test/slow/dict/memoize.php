@@ -1,12 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-<<__Memoize>> function get($k) {
+<<__Memoize>> function get($k) :mixed{
   echo "get() called....\n";
   return $k;
 }
 
-function main() {
+function main() :mixed{
   var_dump(get(dict[]));
   var_dump(get(dict[]));
 
@@ -46,6 +46,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_memoize() {
+function main_memoize() :mixed{
 main();
 }

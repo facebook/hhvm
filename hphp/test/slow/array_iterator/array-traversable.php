@@ -2,27 +2,27 @@
 
 interface IFoo {
 }
-function trav(Traversable $x) {
+function trav(Traversable $x) :mixed{
   echo "Traversable Array\n";
   var_dump($x);
 }
-function ktrav(KeyedTraversable $x) {
+function ktrav(KeyedTraversable $x) :mixed{
   echo "KeyedTraversable Array\n";
   var_dump($x);
 }
-function cont(Container $x) {
+function cont(Container $x) :mixed{
   echo "Container Array\n";
   var_dump($x);
 }
-function kcont(KeyedContainer $x) {
+function kcont(KeyedContainer $x) :mixed{
   echo "KeyedContainer Array\n";
   var_dump($x);
 }
-function ifoo(IFoo $x) {
+function ifoo(IFoo $x) :mixed{
   echo "IFoo Array\n";
   var_dump($x);
 }
-function main() {
+function main() :mixed{
   $arr = varray[];
   var_dump($arr is Traversable);
   var_dump($arr is KeyedTraversable);
@@ -38,6 +38,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_traversable() {
+function main_array_traversable() :mixed{
 main();
 }

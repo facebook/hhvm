@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ini_get_all() {
+function main_ini_get_all() :mixed{
 $all_detailed = ini_get_all();
 var_dump($all_detailed['hphp.compiler_version']['access']);
 var_dump($all_detailed['allow_url_fopen']);

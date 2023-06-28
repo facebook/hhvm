@@ -2,14 +2,14 @@
 
 class test extends PDO
 {
-    protected function isProtected() {
+    protected function isProtected() :mixed{
         echo "this is a protected method.\n";
     }
-    private function isPrivate() {
+    private function isPrivate() :mixed{
         echo "this is a private method.\n";
     }
 
-    public function quote($str, $paramtype = NULL) {
+    public function quote($str, $paramtype = NULL) :mixed{
         $this->isProtected();
         $this->isPrivate();
         print $str ."\n";

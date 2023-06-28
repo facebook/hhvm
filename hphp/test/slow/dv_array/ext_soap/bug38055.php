@@ -1,6 +1,6 @@
 <?hh
 
-function Test($param) {
+function Test($param) :mixed{
 
   DvArrayExtSoapBug38055::$g1 = $param->boolA;
   DvArrayExtSoapBug38055::$g2 = $param->boolB;
@@ -14,7 +14,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('Test');
   }
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

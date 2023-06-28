@@ -3,7 +3,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__EntryPoint>>
-function main_copy_directory() {
+function main_copy_directory() :mixed{
 
 $src_dir = sys_get_temp_dir().'/'.'copy_dir_src';
 $dest_dir = sys_get_temp_dir().'/'.'copy_dir_dest';

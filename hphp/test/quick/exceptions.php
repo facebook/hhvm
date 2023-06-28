@@ -9,7 +9,7 @@ class Ex2 extends Exception {
 class Ex3 extends Exception {
 }
 
-function bar($a) {
+function bar($a) :mixed{
   print "bar $a\n";
   $b = varray[1, 2];
   foreach($b as $c) {
@@ -23,7 +23,7 @@ function bar($a) {
   }
 }
 
-function foo2($a) {
+function foo2($a) :mixed{
   try {
     call_user_func(bar<>, $a);
   } catch (Ex1 $e) {
@@ -31,15 +31,15 @@ function foo2($a) {
   }
 }
 
-function foo1($a) {
+function foo1($a) :mixed{
   foo2($a);
 }
 
-function foo($a) {
+function foo($a) :mixed{
   foo1($a);
 }
 
-function main1() {
+function main1() :mixed{
   $a = varray[0, 1, 2];
   $b = varray[0];
 
@@ -68,7 +68,7 @@ class A {
   }
 }
 
-function main2() {
+function main2() :mixed{
   try {
     call_user_func(hphp_create_object<>, "A", NULL);
   } catch (Exception $e) {
@@ -84,18 +84,18 @@ class Ex4 extends Ex3 {
 }
 
 
-function a() {
+function a() :mixed{
   return b();
 }
-function b() {
+function b() :mixed{
   return c();
 }
-function c() {
+function c() :mixed{
   $e = new Exception();
   var_dump($e->getTraceAsString());
   return new Ex4('hello, exception');
 }
-function main3() {
+function main3() :mixed{
   $e = a();
   printf("Exception from %s:%d\n", $e->getFile(), $e->getLine());
   var_dump($e->getTraceAsString());

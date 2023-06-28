@@ -3,17 +3,17 @@
 class Foo {}
 class Bar {
   const FOO = Foo::class;
-  public static function sm() {
+  public static function sm() :mixed{
     var_dump("sm");
   }
   public static int $sp = 10;
-  public function m() {
+  public function m() :mixed{
     var_dump("m");
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = Bar::class;
   var_dump($c);
   var_dump(is_scalar($c));

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_accept_block() {
+function main_accept_block() :mixed{
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);

@@ -1,6 +1,6 @@
 <?hh
 
-function wrap($fn) {
+function wrap($fn) :mixed{
   try {
     var_dump($fn());
   } catch(Exception $e) {

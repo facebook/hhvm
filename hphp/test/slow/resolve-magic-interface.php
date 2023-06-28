@@ -5,7 +5,7 @@ type Foo = KeyedContainer<string, mixed>;
 function get(): Foo {
   return __hhvm_intrinsics\launder_value(vec[]);
 }
-function test() {
+function test() :mixed{
   var_dump(get());
 }
 <<__EntryPoint>>

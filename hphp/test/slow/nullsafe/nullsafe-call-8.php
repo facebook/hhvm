@@ -1,21 +1,21 @@
 <?hh
 class D {
-  public function bar() {
+  public function bar() :mixed{
     echo "D::bar() was called\n";
   }
 }
 class C {
-  public function foo() {
+  public function foo() :mixed{
     return new D();
   }
 }
-function test($obj) {
+function test($obj) :mixed{
   $d = $obj?->foo();
   if ($d !== null) {
     $d->bar();
   }
 }
-function main() {
+function main() :mixed{
   echo "1:\n";
   test(null);
   echo "2:\n";
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_nullsafe_call_8() {
+function main_nullsafe_call_8() :mixed{
 main();
 }

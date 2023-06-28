@@ -2,7 +2,7 @@
 class PHPObject {
 }
 
-function test() {
+function test() :mixed{
 	return new PHPObject();
 }
 <<__EntryPoint>>

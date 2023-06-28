@@ -1,13 +1,13 @@
 <?hh
 
-function f($x) {
+function f($x) :AsyncGenerator<mixed,mixed,void>{
   yield $x;
 }
 class X {
-  function f($x) {
+  function f($x) :AsyncGenerator<mixed,mixed,void>{
     yield $x;
   }
-  static function g($x) {
+  static function g($x) :AsyncGenerator<mixed,mixed,void>{
     yield static::class;
   }
 }
@@ -15,7 +15,7 @@ class Y extends X {
 }
 
 <<__EntryPoint>>
-function main_2174() {
+function main_2174() :mixed{
 $c = f(32);
 var_dump($c->getOrigFuncName());
 var_dump($c->getCalledClass());

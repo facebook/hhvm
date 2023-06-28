@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     yield varray[] => 1;
 }
 <<__EntryPoint>> function main(): void {

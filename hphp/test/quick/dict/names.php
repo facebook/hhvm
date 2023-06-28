@@ -2,26 +2,26 @@
 
 namespace dict {
 const STUFF = 12;
-function dict() { return 0; }
-function foo() { return 1; }
+function dict() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace alpha {
 const STUFF = 12;
-function dict() { return 0; }
-function foo() { return 1; }
+function dict() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace beta\dict {
 const STUFF = 12;
-function dict() { return 0; }
-function foo() { return 1; }
+function dict() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace {
-function dictnest(dict<int, dict<int, int>> $foo) {}
+function dictnest(dict<int, dict<int, int>> $foo) :mixed{}
 
-function main() {
+function main() :mixed{
   var_dump(\dict\dict());
   var_dump(\dict\foo());
   var_dump(\dict\STUFF);

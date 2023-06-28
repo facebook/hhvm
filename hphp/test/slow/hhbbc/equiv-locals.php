@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function loop() {
+function loop() :mixed{
   $a = $b = $c = $d = false;
   while (true) {
     if ($a) continue;
@@ -20,6 +20,6 @@ function loop() {
 }
 
 <<__EntryPoint>>
-function main_equiv_locals() {
+function main_equiv_locals() :mixed{
 loop();
 }

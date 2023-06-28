@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_72() {
+function main_72() :mixed{
 $modalité = 'extended ASCII';
  var_dump($modalité);
 }

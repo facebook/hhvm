@@ -1,102 +1,102 @@
 <?hh
 
-function test1() {
+function test1() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->isSameNode(new stdClass);
 }
 
-function test2() {
+function test2() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $doc->importNode(new stdClass);
 }
 
-function test3() {
+function test3() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $doc->saveHTML(new stdClass);
 }
 
-function test4() {
+function test4() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $doc->saveXML(new stdClass);
 }
 
-function test5() {
+function test5() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->removeAttributeNode(new stdClass);
 }
 
-function test6() {
+function test6() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->setAttributeNode(new stdClass);
 }
 
-function test7() {
+function test7() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->setAttributeNodeNS(new stdClass);
 }
 
-function test8() {
+function test8() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->setIDAttributeNode(new stdClass, false);
 }
 
-function test9() {
+function test9() :mixed{
   $impl= new DOMImplementation;
   $impl->createDocument("abc", "abc", new stdClass);
 }
 
-function test10() {
+function test10() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->insertBefore(new stdClass);
 }
 
-function test11() {
+function test11() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->insertBefore($doc->createElement("node"), new stdClass);
 }
 
-function test12() {
+function test12() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->removeChild(new stdClass);
 }
 
-function test13() {
+function test13() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->replaceChild(new stdClass, $doc->createElement("node"));
 }
 
-function test14() {
+function test14() :mixed{
   $doc = new DOMDocument();
   $node = $doc->createElement("node");
   $node->replaceChild($node, new stdClass);
 }
 
-function test15() {
+function test15() :mixed{
   $doc = new DOMDocument();
   $xpath = new DOMXPath($doc);
   $xpath->evaluate("abc", new stdClass);
 }
 
-function test16() {
+function test16() :mixed{
   $doc = new DOMDocument();
   $xpath = new DOMXPath($doc);
   $xpath->query("abc", new stdClass);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $tests = vec[
     test1<>,
     test2<>,

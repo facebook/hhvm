@@ -1,7 +1,7 @@
 <?hh
 
 namespace foo\bar {
-  function baz() {
+  function baz() :mixed{
     \var_dump(__LINE__);
   }
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_apc_fetch_object_fast_init() {
+function main_apc_fetch_object_fast_init() :mixed{
 require_once('apc_fetch_object_fast_init.inc');
 
 if (!apc_exists('my_key')) {

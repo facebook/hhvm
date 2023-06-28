@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "=== Falsy ===\n";
 
   $v  = Vector {};
@@ -50,6 +50,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_bool_cast() {
+function main_bool_cast() :mixed{
 main();
 }

@@ -1,5 +1,5 @@
 <?hh
 interface I {
-  async function f();
+  async function f():Awaitable<mixed>;
 }
 

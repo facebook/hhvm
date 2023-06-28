@@ -1,7 +1,7 @@
 <?hh
 
 function findValue($table, $v)  // where $table is 2x3 array
-{
+:mixed{
         $valid = true;
         for ($row = 0; $valid && $row <= 1; ++$row)
         {
@@ -23,7 +23,7 @@ function findValue($table, $v)  // where $table is 2x3 array
 // break;  // can't break from the outer-most level
 
 function f($i)
-{
+:mixed{
         echo "$i\n";
         break;  // break is not rejected here until runtime
 }

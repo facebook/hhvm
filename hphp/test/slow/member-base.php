@@ -1,6 +1,6 @@
 <?hh
 
-function append(inout $arr, $idx, $value) {
+function append(inout $arr, $idx, $value) :mixed{
   if (!isset($arr[$idx])) {
     $arr[$idx] = varray[];
   }
@@ -9,7 +9,7 @@ function append(inout $arr, $idx, $value) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = darray[];
   append(inout $x, 'a', 2);
   append(inout $x, 'a', 3);

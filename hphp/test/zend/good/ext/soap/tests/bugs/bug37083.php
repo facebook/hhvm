@@ -1,6 +1,6 @@
 <?hh
 class TestSoapClient extends SoapClient {
-	function __dorequest($request, $location, $action, $version, $one_way = 0) {
+	function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
 		return <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

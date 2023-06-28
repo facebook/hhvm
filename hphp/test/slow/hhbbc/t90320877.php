@@ -2,10 +2,10 @@
 
 class C {
   private $prop = null;
-  public function prop() {
+  public function prop() :mixed{
     return $this->prop;
   }
-  public function propset($p, $v) {
+  public function propset($p, $v) :mixed{
     $this->$p = $v;
   }
 }

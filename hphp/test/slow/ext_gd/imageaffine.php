@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_imageaffine() {
+function main_imageaffine() :mixed{
 $base_img = tempnam(sys_get_temp_dir(), 'test-imageaffine');
 $tgt_img = tempnam(sys_get_temp_dir(), 'test-imageaffine');
 

@@ -1,10 +1,10 @@
 <?hh
 
-function a() {
+function a() :mixed{
   while (true) { mt_rand(); }
 }
 
-async function heh() {
+async function heh() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(0, 0);
   throw new Exception('x');
 }

@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
     $fmt = ut_msgfmt_create( "en_US", "{0,number} monkeys on {1,number} trees" );
 

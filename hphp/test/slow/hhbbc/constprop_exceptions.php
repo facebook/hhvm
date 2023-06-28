@@ -1,8 +1,8 @@
 <?hh
 
-function foo() { return 1; }
+function foo() :mixed{ return 1; }
 
-function main() {
+function main() :mixed{
   $x = null;
   $y = $z = foo();
   try {
@@ -19,6 +19,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_constprop_exceptions() {
+function main_constprop_exceptions() :mixed{
 main();
 }

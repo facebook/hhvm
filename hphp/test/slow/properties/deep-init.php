@@ -11,6 +11,6 @@ class Widget {
 
 
 <<__EntryPoint>>
-function main_deep_init() {
+function main_deep_init() :mixed{
 var_dump(new Widget);
 }

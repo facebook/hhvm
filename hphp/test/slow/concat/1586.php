@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1586() {
+function main_1586() :mixed{
 $s = " ";
 $a = "hello";
 $a .= $s;

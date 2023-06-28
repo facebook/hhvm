@@ -1,8 +1,8 @@
 <?hh
 
-function bar($a) {
+function bar($a) :mixed{
 }
-function foo($x) {
+function foo($x) :mixed{
   $a = $x;
   echo $x;
   unset($a);

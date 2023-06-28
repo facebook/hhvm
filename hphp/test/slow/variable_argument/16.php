@@ -1,6 +1,6 @@
 <?hh
 
-function test(...$args) {
+function test(...$args) :mixed{
   var_dump($args[0]);
   var_dump($args[1]);
   var_dump($args[2]);
@@ -8,6 +8,6 @@ function test(...$args) {
 }
 
  <<__EntryPoint>>
-function main_16() {
+function main_16() :mixed{
 test(2, 'ok', 0, 'test');
 }

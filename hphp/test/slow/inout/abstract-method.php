@@ -18,6 +18,6 @@ class D extends B {
 
 
 <<__EntryPoint>>
-function main_abstract_method() {
+function main_abstract_method() :mixed{
 echo "Done.\n";
 }

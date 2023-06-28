@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_bin_format() {
+function main_bin_format() :mixed{
 echo "simple\n";
 var_dump(0b0);
 var_dump(0b1);

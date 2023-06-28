@@ -10,7 +10,7 @@ function is_dynamic($x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_dynamic() {
+function main_is_expression_dynamic() :mixed{
 is_dynamic(null);
 is_dynamic(-1);
 is_dynamic(false);

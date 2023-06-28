@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_timezone_identifiers_list_per_country() {
+function main_timezone_identifiers_list_per_country() :mixed{
 $country_codes = varray[
   'US',
   'PT',

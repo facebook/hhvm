@@ -1,13 +1,13 @@
 <?hh
 
-function show_elems($name, $fs) {
+function show_elems($name, $fs) :mixed{
   echo "---- $name\n";
   echo get_class($fs) . "\n";
   foreach ($fs as $e) {
     var_dump($e);
   }
 }
-function set_from_keys($containers) {
+function set_from_keys($containers) :mixed{
   echo "Set::fromKeysOf...\n";
   foreach ($containers as $name => $c) {
     show_elems($name, Set::fromKeysOf($c));
@@ -15,7 +15,7 @@ function set_from_keys($containers) {
   echo "\n";
 }
 
-function vector_from_keys($containers) {
+function vector_from_keys($containers) :mixed{
   echo "Vector::fromKeysOf...\n";
   foreach ($containers as $name => $c) {
     show_elems($name, Vector::fromKeysOf($c));
@@ -23,7 +23,7 @@ function vector_from_keys($containers) {
   echo "\n";
 }
 
-function main() {
+function main() :mixed{
   $containers = darray[
     'empty array'  => varray[],
     'packed array' => varray['a', 'b', 'c'],
@@ -48,7 +48,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_from_keys_of() {
+function main_from_keys_of() :mixed{
 ;
 main();
 }

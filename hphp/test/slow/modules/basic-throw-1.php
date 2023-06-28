@@ -5,7 +5,7 @@
 module A;
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'basic-1.inc';
   try {
     Cls::foo_static();

@@ -19,7 +19,7 @@ class Baz extends Foo {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo_fn = new ReflectionFunction('foo');
   var_dump($foo_fn->getAttributes());
   var_dump($foo_fn->getParameters());

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_client_zero_timeout_open_port() {
+function main_client_zero_timeout_open_port() :mixed{
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);

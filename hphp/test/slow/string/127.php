@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_127() {
+function main_127() :mixed{
 $a = 'a';
  $b = 'b';
  $c = 'a' . 'b';

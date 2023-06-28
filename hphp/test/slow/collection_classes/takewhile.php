@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $containers = Vector {
     Vector {0, 1, 3, -2, 7, 4},
     ImmVector {0, 1, 3, -2, 7, 4},
@@ -33,6 +33,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_takewhile() {
+function main_takewhile() :mixed{
 main();
 }

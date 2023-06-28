@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_build_type() {
+function main_build_type() :mixed{
 $build = ini_get('hhvm.build_type');
 var_dump(is_string($build));
 var_dump(strlen($build) > 0);

@@ -7,7 +7,7 @@ class bar {
     public function __construct() {
         $this->z = new stdClass;
     }
-    public function getZ() {
+    public function getZ() :mixed{
         return $this->z;
     }
 }

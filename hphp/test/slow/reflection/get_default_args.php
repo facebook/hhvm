@@ -14,7 +14,7 @@ class Test2 {
 
 
 <<__EntryPoint>>
-function main_get_default_args() {
+function main_get_default_args() :mixed{
 $refl = new ReflectionClass('Test2');
 
 $props = $refl->getDefaultProperties();

@@ -46,7 +46,7 @@ class NewStruct {
   public function clearTerseFields()[write_props]: void {}
 }
 
-function testBinary() {
+function testBinary() :mixed{
   $p1 = new DummyProtocol();
   $v1 = new OldStruct();
   $v1->features = darray[1 => 314, 2 => 271.8];
@@ -60,7 +60,7 @@ function testBinary() {
   var_dump(thrift_protocol_read_binary($p2, 'OldStruct', true));
 }
 
-function testCompact() {
+function testCompact() :mixed{
   $p1 = new DummyProtocol();
   $v1 = new OldStruct();
   $v1->features = darray[1 => 314, 2 => 271.8];
@@ -74,14 +74,14 @@ function testCompact() {
   var_dump(thrift_protocol_read_compact($p2, 'OldStruct'));
 }
 
-function main() {
+function main() :mixed{
   testBinary();
   testCompact();
 }
 
 
 <<__EntryPoint>>
-function main_forward_compatibility() {
+function main_forward_compatibility() :mixed{
   require 'common.inc';
   main();
 }

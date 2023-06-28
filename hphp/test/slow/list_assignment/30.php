@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_30() {
+function main_30() :mixed{
 $a = 'old';
  var_dump(list($a) = false);
  var_dump($a);

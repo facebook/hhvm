@@ -1,5 +1,5 @@
 <?hh
-function ret_true($x) {
+function ret_true($x) :mixed{
  return true;
 }
 <<__EntryPoint>>

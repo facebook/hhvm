@@ -3,7 +3,7 @@
 class test {
 }
 
-function my_dump($var) {
+function my_dump($var) :mixed{
     ob_start();
     var_dump($var);
     $buf = ob_get_clean();

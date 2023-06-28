@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_intlike_str_key_edge_cases() {
+function main_intlike_str_key_edge_cases() :mixed{
 $i = PHP_INT_MAX;
 $arr = darray[];
 $arr[(string)$i] = 1;

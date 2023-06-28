@@ -4,15 +4,15 @@
  * Source code: ext/standard/array.c
  */
 
-function multiply($p, $q) {
+function multiply($p, $q) :mixed{
   return ($p * $q);
 }
 
-function square($p) {
+function square($p) :mixed{
   return ($p * $p);
 }
 
-function concatenate($a, $b) {
+function concatenate($a, $b) :mixed{
   return "$a = $b";
 }
 <<__EntryPoint>> function main(): void {

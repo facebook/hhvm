@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  static public function foo() {
+  static public function foo() :mixed{
     return 1;
   }
 }

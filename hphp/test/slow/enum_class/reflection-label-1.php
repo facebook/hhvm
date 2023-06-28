@@ -2,11 +2,11 @@
 
 class C {
   <<MyAttr('a', 'b'), __Memoize(#KeyedByIC)>>
-  function foo() {}
+  function foo() :mixed{}
 }
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump((new ReflectionMethod(C::class, 'foo'))->getAttributes());
 }

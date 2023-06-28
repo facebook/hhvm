@@ -10,7 +10,7 @@ class B {
 }
 
 <<__EntryPoint>>
-function main_430() {
+function main_430() :mixed{
 ;
 ;
 $attr=darray[];

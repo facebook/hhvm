@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1796() {
+function main_1796() :mixed{
 chdir(__DIR__.'/../../..');
 
 $info = new SplFileInfo('test/sample_dir');

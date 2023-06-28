@@ -9,7 +9,7 @@ class A {
     $this->x = self::$count;
   }
 
-  public function __clone() {
+  public function __clone() :mixed{
     ++self::$count;
     $this->x = self::$count;
   }

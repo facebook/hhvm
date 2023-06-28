@@ -2,7 +2,7 @@
 class A {
     private $x = 0;
 
-    function getClosure () {
+    function getClosure () :mixed{
             return function () {
                 $this->x++;
                 self::printX();
@@ -11,17 +11,17 @@ class A {
             };
     }
 
-    function printX () {
+    function printX () :mixed{
         echo $this->x."\n";
     }
 
-    function print42() {
+    function print42() :mixed{
         echo "42\n";
     }
 }
 
 class B extends A {
-    function print42() {
+    function print42() :mixed{
         echo "forty two\n";
     }
 }

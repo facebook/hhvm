@@ -14,23 +14,23 @@
 
 // callback function without parameters and with return value
 function callback1()
-{
+:mixed{
   return 1;
 }
 
 // callback function with parameter and without return value
 function callback2($input)
-{
+:mixed{
 }
 
 // callback function without parameter and without return value
 function callback3()
-{
+:mixed{
 }
 
 // callback function with parameter and with return value
 function callback4($input)
-{
+:mixed{
   if(HH\Lib\Legacy_FIXME\gt($input, 0) ) {
     return true;
   }

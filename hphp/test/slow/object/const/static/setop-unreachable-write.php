@@ -8,7 +8,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   A::$a += 60;
   var_dump(A::$a);
   if (A::$a > 150) {

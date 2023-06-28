@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_substr_replace() {
+function main_substr_replace() :mixed{
 error_reporting(-1);
 var_dump(substr_replace(varray["x", "y"], varray[], varray[], 0));
 var_dump(substr_replace(varray["x", "y"], varray[], 0, varray[]));

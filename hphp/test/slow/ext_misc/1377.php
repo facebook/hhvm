@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   var_dump(is_subclass_of('C', 'D'));
   $cls_methods = get_class_methods('C');
   var_dump($cls_methods === null ? null : vec($cls_methods));
@@ -11,7 +11,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1377() {
+function main_1377() :mixed{
 test();
 var_dump(class_exists('C'));
 }

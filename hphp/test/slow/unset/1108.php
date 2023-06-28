@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   unset(Unset1108::$a[0]);
   var_dump(Unset1108::$a);
 }

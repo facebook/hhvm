@@ -1,6 +1,6 @@
 <?hh
 interface IFoo {
-    public function blah();
+    public function blah():mixed;
 }
 
 trait T implements IFoo {}
@@ -9,12 +9,12 @@ class C {
   use T;
 }
 
-function main() {
+function main() :mixed{
   $c = new C();
 }
 
 
 <<__EntryPoint>>
-function main_traits_and_interfaces3() {
+function main_traits_and_interfaces3() :mixed{
 main();
 }

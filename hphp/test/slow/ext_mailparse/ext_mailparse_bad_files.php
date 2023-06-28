@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_mailparse_bad_files() {
+function main_ext_mailparse_bad_files() :mixed{
 $f = fopen('/etc/passwd', 'r');
 fclose($f);
 var_dump(mailparse_uudecode_all($f));

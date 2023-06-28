@@ -67,7 +67,7 @@ class RobustRegularEnterpriseBusiness2 extends RobustEnterpriseBusiness2 {}
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $k = new RobustRegularEnterpriseBusiness;
   echo "ok\n";
   $k = new RobustRegularEnterpriseBusiness2;

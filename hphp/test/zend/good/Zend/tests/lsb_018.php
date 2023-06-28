@@ -5,7 +5,7 @@ abstract class Singleton
     static private $nextInstanceId = 0;
     private $instanceId = NULL;
     static final public function getInstance()
-    {
+:mixed    {
         $caller = static::class;
         if (!isset(self::$instances[$caller])) {
             self::$instances[$caller] = new $caller;
@@ -14,11 +14,11 @@ abstract class Singleton
         return self::$instances[$caller];
     }
     public final function getInstanceId()
-    {
+:mixed    {
         return $this->instanceId;
     }
     public final function identify()
-    {
+:mixed    {
         var_dump($this);
     }
 }

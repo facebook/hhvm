@@ -1,24 +1,24 @@
 <?hh
 
 class A {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
 class B extends A {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
-  public function doMeth() {
+  public function doMeth() :mixed{
     $this->meth();  // B B B
     B::meth();      // B B B
 
@@ -31,7 +31,7 @@ class B extends A {
     static::meth(); // B B B
     echo "****************\n";
   }
-  public function doStaticMeth() {
+  public function doStaticMeth() :mixed{
 
     B::staticMeth();      // B B
     C::staticMeth();      // C C
@@ -47,11 +47,11 @@ class B extends A {
 }
 
 class C extends B {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
   /**
@@ -79,7 +79,7 @@ class C extends B {
    *      Zend's implementation of forward_static_call contains a check for
    *      this, implying intent to uphold this invariant.
    */
-  public function testMeth1() {
+  public function testMeth1() :mixed{
     echo "############# testMeth1 ##############\n";
     B::meth(); // B D D
     C::meth(); // C D D
@@ -200,7 +200,7 @@ class C extends B {
     // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public static function testMeth2() {
+  public static function testMeth2() :mixed{
     echo "############# testMeth2 ##############\n";
 
 
@@ -331,7 +331,7 @@ class C extends B {
     // $call = array($g,'static::meth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public function testStaticMeth1() {
+  public function testStaticMeth1() :mixed{
     echo "############# testStaticMeth1 ##############\n";
     B::staticMeth(); // B B
     C::staticMeth(); // C C
@@ -462,7 +462,7 @@ class C extends B {
     // $call = array($g,'static::staticMeth'); $call(); // expected fatal
     echo "****************\n";
   }
-  public static function testStaticMeth2() {
+  public static function testStaticMeth2() :mixed{
     echo "############# testStaticMeth2 ##############\n";
     B::staticMeth(); // B B
     C::staticMeth(); // C C
@@ -596,34 +596,34 @@ class C extends B {
 }
 
 class D extends C {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
 class F {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
 class G extends F {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
-  public function doMeth() {
+  public function doMeth() :mixed{
     $this->meth();  // G G G
 
 
@@ -636,7 +636,7 @@ class G extends F {
     static::meth(); // G G G
     echo "****************\n";
   }
-  public function doStaticMeth() {
+  public function doStaticMeth() :mixed{
 
     B::staticMeth();      // B B
     C::staticMeth();      // C C
@@ -652,17 +652,17 @@ class G extends F {
 }
 
 class H extends G {
-  public function meth() {
+  public function meth() :mixed{
     echo __CLASS__ . ' ' . static::class .
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
-  public static function staticMeth() {
+  public static function staticMeth() :mixed{
     echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
 
-function main() {
+function main() :mixed{
   $d = new D;
   $d->testMeth1();
   D::testMeth2();
@@ -680,7 +680,7 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_cuf() {
+function main_cuf() :mixed{
 error_reporting(-1);
 main();
 }

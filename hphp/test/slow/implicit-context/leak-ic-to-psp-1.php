@@ -1,17 +1,17 @@
 <?hh
 
 <<__Memoize>>
-function memo() {
+function memo() :mixed{
   var_dump("memo");
 }
 
-async function baz() {
+async function baz() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(0, 0);
   var_dump("baz");
   memo();
 }
 
-async function bar() {
+async function bar() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(0, 0);
   var_dump("bar");
   $wh = baz();
@@ -26,7 +26,7 @@ async function bar() {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   await HH\ImplicitContext\soft_run_with(
     bar<>,
     'abc',

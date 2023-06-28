@@ -1,8 +1,8 @@
 <?hh
 
-function f() { return 1; }
+function f() :mixed{ return 1; }
 
-function foo(int $i) {
+function foo(int $i) :mixed{
   if ($i) {
     $v = vec[1,1,1];
   } else {
@@ -18,7 +18,7 @@ function foo(int $i) {
 
 
 <<__EntryPoint>>
-function main_cget_quiet_vec() {
+function main_cget_quiet_vec() :mixed{
 var_dump(foo(10));
 var_dump(foo(0));
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function test_encryption($method) {
+function test_encryption($method) :mixed{
   $tests = openssl_get_cipher_tests($method);
 
   foreach ($tests as $idx => $test) {

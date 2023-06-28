@@ -4,7 +4,7 @@
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_string() {
+function main_ext_string() :mixed{
 var_dump(addcslashes("ABCDEFGH\n", "A..D\n"));
 
 var_dump(stripcslashes("\\A\\B\\C\\DEFGH\\n"));

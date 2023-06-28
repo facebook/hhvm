@@ -7,7 +7,7 @@ class cls {
 
 
 <<__EntryPoint>>
-function main_reflection_property_set_value_exception() {
+function main_reflection_property_set_value_exception() :mixed{
 $prop = new ReflectionProperty('cls', 'priv');
 $s_prop = new ReflectionProperty('cls', 's_priv');
 

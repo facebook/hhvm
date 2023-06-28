@@ -3,7 +3,7 @@
 class NonThrowable {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     throw new Exception();
   } catch (Throwable $t) {

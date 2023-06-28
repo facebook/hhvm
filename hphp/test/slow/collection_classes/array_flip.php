@@ -1,6 +1,6 @@
 <?hh
 
-function flip($input) {
+function flip($input) :mixed{
   echo "--------------------\n";
   echo "input: ";
   var_dump($input);
@@ -8,7 +8,7 @@ function flip($input) {
   var_dump(array_flip($input));
 }
 
-function main() {
+function main() :mixed{
   flip(varray['foo', 'bar', 'baz']);
   flip(darray['a' => 10, 'b' => 20, 'c' => 30]);
   flip(Vector {'foo', 'bar', 'baz'});
@@ -24,6 +24,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_flip() {
+function main_array_flip() :mixed{
 main();
 }

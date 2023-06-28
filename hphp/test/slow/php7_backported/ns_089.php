@@ -1,7 +1,7 @@
 <?hh
 namespace Foo\Bar\Baz {
-    function foo(){echo __FUNCTION__,"\n";}
-    function bar(){echo __FUNCTION__,"\n";}
+    function foo():mixed{echo __FUNCTION__,"\n";}
+    function bar():mixed{echo __FUNCTION__,"\n";}
     const FOO = 0;
     const BAR = 1;
     class A { function __construct() {echo __METHOD__,"\n";} }
@@ -24,7 +24,7 @@ namespace Fiz\Biz\Buz {
     };
 
     class C { function __construct() {echo __METHOD__,"\n";}}
-    function bar(){echo __FUNCTION__,"\n";}
+    function bar():mixed{echo __FUNCTION__,"\n";}
     const BAR = 100;
 <<__EntryPoint>> function main(): void {
     new A;

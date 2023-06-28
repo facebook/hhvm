@@ -1,9 +1,9 @@
 <?hh
 
-class C { function heh() { echo "heh\n"; } }
-function foo() { return darray[]; }
-function some_int() { return mt_rand() ? 1 : 2; }
-function bar() {
+class C { function heh() :mixed{ echo "heh\n"; } }
+function foo() :mixed{ return darray[]; }
+function some_int() :mixed{ return mt_rand() ? 1 : 2; }
+function bar() :mixed{
   $x = foo();
   $val = some_int();
   $x[$val] = new C;
@@ -13,7 +13,7 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_array_041() {
+function main_array_041() :mixed{
 
   $y = bar();
   $l = (int)HhbbcArray041::$g;

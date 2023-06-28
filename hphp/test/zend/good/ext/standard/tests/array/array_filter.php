@@ -1,11 +1,11 @@
 <?hh
 function odd($var)
-{
+:mixed{
    return((int)($var) & 1);
 }
 
 function even($var)
-{
+:mixed{
    return(!((int)($var) & 1));
 }
 <<__EntryPoint>> function main(): void {

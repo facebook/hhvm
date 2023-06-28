@@ -1,6 +1,6 @@
 <?hh
 
-function reverse($input) {
+function reverse($input) :mixed{
   echo "--------------------\n";
   echo "input: ";
   var_dump($input);
@@ -14,7 +14,7 @@ function reverse($input) {
   var_dump(array_reverse(darray($input), true) === $reverse_preserve);
 }
 
-function main() {
+function main() :mixed{
   reverse(varray['foo', 'bar', 'baz']);
   reverse(darray['a' => 'foo', 'b' => 'bar', 'c' => 'baz']);
   reverse(darray[10 => 'foo', 20 => 'bar', 30 => 'baz']);
@@ -30,6 +30,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_reverse() {
+function main_array_reverse() :mixed{
 main();
 }

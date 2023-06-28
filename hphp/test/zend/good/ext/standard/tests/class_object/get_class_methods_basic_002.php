@@ -10,11 +10,11 @@
  */
 
 class C {
-    private function privC() {}
-    protected function protC() {}
-    public function pubC() {}
+    private function privC() :mixed{}
+    protected function protC() :mixed{}
+    public function pubC() :mixed{}
 
-    public static function testFromC() {
+    public static function testFromC() :mixed{
         echo "Accessing C from C:\n";
         var_dump(get_class_methods("C"));
         echo "Accessing D from C:\n";
@@ -25,11 +25,11 @@ class C {
 }
 
 class D extends C {
-    private function privD() {}
-    protected function protD() {}
-    public function pubD() {}
+    private function privD() :mixed{}
+    protected function protD() :mixed{}
+    public function pubD() :mixed{}
 
-    public static function testFromD() {
+    public static function testFromD() :mixed{
         echo "Accessing C from D:\n";
         var_dump(get_class_methods("C"));
         echo "Accessing D from D:\n";
@@ -40,11 +40,11 @@ class D extends C {
 }
 
 class X {
-    private function privX() {}
-    protected function protX() {}
-    public function pubX() {}
+    private function privX() :mixed{}
+    protected function protX() :mixed{}
+    public function pubX() :mixed{}
 
-    public static function testFromX() {
+    public static function testFromX() :mixed{
         echo "Accessing C from X:\n";
         var_dump(get_class_methods("C"));
         echo "Accessing D from X:\n";

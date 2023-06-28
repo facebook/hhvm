@@ -3,7 +3,7 @@
 
 // PHP_INI_ALL
 <<__EntryPoint>>
-function main_ini_set() {
+function main_ini_set() :mixed{
 var_dump(ini_set('arg_separator.output', 'foo'));
 var_dump(ini_get('arg_separator.output'));
 

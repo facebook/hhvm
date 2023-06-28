@@ -1,21 +1,21 @@
 <?hh
 
-function nocase($a, $b) {
+function nocase($a, $b) :mixed{
   $la = strtolower((string)$a);
   $lb = strtolower((string)$b);
   return ($la === $lb) ? 0 : (($la > $lb) ? 1 : (-1));
 }
 
-function vowel($c) {
+function vowel($c) :mixed{
   $k = keyset['a', 'e', 'i', 'o', 'u'];
   return isset($k[$c]);
 }
 
-function concat($s) {
+function concat($s) :mixed{
   return $s.$s;
 }
 
-function with_keyset($k1) {
+function with_keyset($k1) :mixed{
   echo "---- running " . __FUNCTION__ . " with\n";
   var_dump($k1);
   $k2 = keyset['q', 'n'];

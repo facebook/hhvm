@@ -6,7 +6,7 @@
  */
 
 function writeAndDump($fp, $format, $args)
-{
+:mixed{
     ftruncate( $fp, 0 );
     $length = vfprintf( $fp, $format, $args );
     rewind( $fp );

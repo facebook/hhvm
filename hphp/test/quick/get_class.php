@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function f($x) {
+  public function f($x) :mixed{
     var_dump($x());
     var_dump(get_class());
   }

@@ -1,6 +1,6 @@
 <?hh
 
-function test(inout $x) {
+function test(inout $x) :mixed{
     $class = new SQLite3(':memory:');
     $x = $class->prepare('SELECT 1');
 }

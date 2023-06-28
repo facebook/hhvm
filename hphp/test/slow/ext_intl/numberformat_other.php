@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_numberformat_other() {
+function main_numberformat_other() :mixed{
 $locales = varray[
   'en_US',
   'en_GB',

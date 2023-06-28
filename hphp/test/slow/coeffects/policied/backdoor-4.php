@@ -1,14 +1,14 @@
 <?hh
 
-function zoned_with()[zoned_with] {}
-function defaults() {}
+function zoned_with()[zoned_with] :mixed{}
+function defaults() :mixed{}
 
-function defaults_f() {
+function defaults_f() :mixed{
   // fails, because there's no way we can obtain implicit context
   HH\Coeffects\backdoor(()[zoned_with] ==> { zoned_with(); });
 }
 
-function zoned_with_f()[zoned_with] {
+function zoned_with_f()[zoned_with] :mixed{
   // still fails, because lambda doesn't capture the context of the
   // parent scope; it just happens to be zoned_with, but the intention
   // may have been to work with a different policy
@@ -19,13 +19,13 @@ function zoned_with_f()[zoned_with] {
   HH\Coeffects\backdoor(() ==> { zoned_with(); });
 }
 
-function unknown(mixed $arg)[ctx $arg] {
+function unknown(mixed $arg)[ctx $arg] :mixed{
   // behaves the same like above
   HH\Coeffects\backdoor(() ==> { zoned_with(); });
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   defaults_f();
   HH\Coeffects\_Private\enter_zoned_with(zoned_with_f<>);
   unknown(defaults<>);

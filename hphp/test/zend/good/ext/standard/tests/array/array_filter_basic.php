@@ -13,7 +13,7 @@
  *              It returns true if the element is even number else returns false
  */
 function even($input)
-{
+:mixed{
   return ($input % 2 == 0);
 }
 <<__EntryPoint>> function main(): void {

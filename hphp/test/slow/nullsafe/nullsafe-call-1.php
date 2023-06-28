@@ -42,7 +42,7 @@ function test5(?C $c): int {
   $c?->yar($x = 123);
   return $x;
 }
-function main() {
+function main() :mixed{
   $c = new C();
   echo "test1:\n";
   var_dump(test1($c));
@@ -65,6 +65,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_nullsafe_call_1() {
+function main_nullsafe_call_1() :mixed{
 main();
 }

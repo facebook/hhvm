@@ -12,6 +12,6 @@ function test(): void {
 }
 
 <<__EntryPoint>>
-function main_typedef_class_fail2() {
+function main_typedef_class_fail2() :mixed{
 test();
 }

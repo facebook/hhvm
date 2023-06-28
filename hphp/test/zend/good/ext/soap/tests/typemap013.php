@@ -1,11 +1,11 @@
 <?hh
 
-function book_to_xml($book) {
+function book_to_xml($book) :mixed{
 	return '<book xmlns="http://schemas.nothing.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
 }
 
 class test{
-	function dotest2($str){
+	function dotest2($str):mixed{
 		$book = new book;
 		$book->a = "foo";
 		$book->b = "bar";

@@ -11,7 +11,7 @@ trait T3 {
 }
 class C {
   use T2, T3;
-  public function printProps() {
+  public function printProps() :mixed{
     var_dump($this->x);
   }
 }

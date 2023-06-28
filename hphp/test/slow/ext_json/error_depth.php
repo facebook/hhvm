@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_error_depth() {
+function main_error_depth() :mixed{
   $array = varray[];
   for ($i=0; $i<550; $i++) {
     $array = varray[$array];

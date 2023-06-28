@@ -7,11 +7,11 @@ class Foo {
   public function __construct(string $type, ?string $annot) {
   }
 
-  public static function getCache() {
+  public static function getCache() :mixed{
     return self::$cache;
   }
 
-  public static function create(string $type, ?string $annot) {
+  public static function create(string $type, ?string $annot) :mixed{
     if ($annot === null) {
       $key_string = $type;
     } else {
@@ -27,7 +27,7 @@ class Foo {
   }
 }
 
-function main() {
+function main() :mixed{
   var_dump(Foo::getCache());
   $y = Foo::create('a', null);
   $y = Foo::create('a', null);
@@ -36,6 +36,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_static_props_014() {
+function main_static_props_014() :mixed{
 main();
 }

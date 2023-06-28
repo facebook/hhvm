@@ -36,6 +36,6 @@ function f(): void {
 
 
 <<__EntryPoint>>
-function main_bad_intermediate() {
+function main_bad_intermediate() :mixed{
   f();
 }

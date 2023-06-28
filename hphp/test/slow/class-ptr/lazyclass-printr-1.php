@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print_r(C::class);
 }
 

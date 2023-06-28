@@ -46,6 +46,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_skipwhile_takewhile() {
+function main_skipwhile_takewhile() :mixed{
 main();
 }

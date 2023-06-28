@@ -1,7 +1,7 @@
 <?hh
 
 class MyArrayIterator extends ArrayIterator {
-    public function current() {
+    public function current() :mixed{
         throw new Exception('Make the iterator break');
     }
 }

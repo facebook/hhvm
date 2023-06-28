@@ -1,6 +1,6 @@
 <?hh
 
-function bare_break_continue() {
+function bare_break_continue() :mixed{
   // This should emit properly; it's not an include-time fatal
   break;
   continue;

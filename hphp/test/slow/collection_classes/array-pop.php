@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $containers = Vector {
     varray[11, 22, 33],
     Vector {11, 22, 33},
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_pop() {
+function main_array_pop() :mixed{
 main();
 }

@@ -2,17 +2,17 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 
-function handler() { throw new Exception('Error'); }
+function handler() :mixed{ throw new Exception('Error'); }
 
 class A {
   public static int $x = 'abc';
 
-  public static function get() {
+  public static function get() :mixed{
     return A::$x;
   }
 }
 
-function test() {
+function test() :mixed{
   try {
     var_dump(A::get());
   } catch (Exception $e) {

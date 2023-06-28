@@ -2,7 +2,7 @@
 
 class test {
 
-    function __toString() {
+    function __toString() :mixed{
         return "blah";
     }
 }

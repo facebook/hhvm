@@ -4,7 +4,7 @@
  * Function is implemented in ext/standard/string.c
  */
 
-function check_basename( $path_arrays ) {
+function check_basename( $path_arrays ) :mixed{
   $loop_counter = 1;
   foreach ($path_arrays as $path) {
     echo "\n--Iteration $loop_counter--\n"; $loop_counter++;

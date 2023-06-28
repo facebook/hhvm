@@ -2,7 +2,7 @@
 
 class NonThrowable {}
 
-function raise($what) {
+function raise($what) :mixed{
   try {
     throw $what;
   } catch (Throwable $t) {
@@ -13,7 +13,7 @@ function raise($what) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   raise(new Exception());
   raise(new InvalidOperationException());
   raise(new Error());

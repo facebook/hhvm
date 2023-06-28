@@ -1,7 +1,7 @@
 <?hh
 
 function dump($a, $b, $c)
-{
+:mixed{
 	echo 'orig:    ', $a->format('Y-m-d H:i:s e'), "\n";
 	echo 'copy:    ', $b->format('Y-m-d H:i:s e'), "\n";
 	echo 'changed: ', $c->format('Y-m-d H:i:s e'), "\n";

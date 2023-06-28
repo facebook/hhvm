@@ -2,7 +2,7 @@
 
 class C {}
 
-function print_recursive_marking_helper($x, $path) {
+function print_recursive_marking_helper($x, $path) :mixed{
   if (HH\is_any_array($x)) {
     $marking = HH\is_array_marked_legacy($x) ? "marked" : "unmarked";
     print($path.': '.$marking."\n");
@@ -14,13 +14,13 @@ function print_recursive_marking_helper($x, $path) {
   }
 }
 
-function print_recursive_marking($x, $name) {
+function print_recursive_marking($x, $name) :mixed{
   print("\nPrinting marking for ".$name.":\n");
   var_dump($x);
   print_recursive_marking_helper($x, $name);
 }
 
-function test_marking_nested_arrays($recursive) {
+function test_marking_nested_arrays($recursive) :mixed{
   print("\n==============================================\n");
   print('test_marking_nested_arrays($recursive='.str($recursive)."):\n");
   $c = new C();
@@ -40,7 +40,7 @@ function test_marking_nested_arrays($recursive) {
 }
 
 // Nested refcount 1 arrays. We should update them in place.
-function test_cow_optimizations($recursive) {
+function test_cow_optimizations($recursive) :mixed{
   print("\n==============================================\n");
   print('test_cow_optimizations($recursive='.str($recursive)."):\n");
   $x = HH\array_mark_legacy(varray[varray[new C()]], $recursive);
@@ -48,7 +48,7 @@ function test_cow_optimizations($recursive) {
 }
 
 // Even though $x['a']['b'] has refcount 1, we should not COW it.
-function test_unable_to_cow($recursive) {
+function test_unable_to_cow($recursive) :mixed{
   print("\n==============================================\n");
   print('test_unable_to_cow($recursive='.str($recursive)."):\n");
   $x = darray['a' => darray['b' => varray[new C()]]];
@@ -57,12 +57,12 @@ function test_unable_to_cow($recursive) {
   print_recursive_marking($y, '$y');
 }
 
-function str($bool) {
+function str($bool) :mixed{
   return $bool ? 'true' : 'false';
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foreach (vec[true, false] as $recursive) {
     test_marking_nested_arrays($recursive);
     test_cow_optimizations($recursive);

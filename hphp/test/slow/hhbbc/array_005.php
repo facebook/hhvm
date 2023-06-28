@@ -16,7 +16,7 @@ function test(bool $x): void {
   return varray[$z['name'], $z['count']];
 }
 
-function main() {
+function main() :mixed{
   list($name, $cnt) = test(true);
   var_dump($name, $cnt);
   list($name, $cnt) = test(false);
@@ -25,6 +25,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_005() {
+function main_array_005() :mixed{
 main();
 }

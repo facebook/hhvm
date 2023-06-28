@@ -1,16 +1,16 @@
 <?hh
 
-function takes_varray(varray $a) {}
-function takes_nullable_varray(?varray $a) {}
-function takes_darray(darray $a) {}
-function takes_nullable_darray(?darray $a) {}
-function takes_varray_or_darray(varray_or_darray $a) {}
-function takes_nullable_varray_or_darray(?varray_or_darray $a) {}
-function takes_vec_or_dict(vec_or_dict $a) {}
-function takes_nullable_vec_or_dict(?vec_or_dict $a) {}
+function takes_varray(varray $a) :mixed{}
+function takes_nullable_varray(?varray $a) :mixed{}
+function takes_darray(darray $a) :mixed{}
+function takes_nullable_darray(?darray $a) :mixed{}
+function takes_varray_or_darray(varray_or_darray $a) :mixed{}
+function takes_nullable_varray_or_darray(?varray_or_darray $a) :mixed{}
+function takes_vec_or_dict(vec_or_dict $a) :mixed{}
+function takes_nullable_vec_or_dict(?vec_or_dict $a) :mixed{}
 
-function takes_varray2(varray<int> $a) {}
-function takes_darray2(darray<int, string> $a) {}
+function takes_varray2(varray<int> $a) :mixed{}
+function takes_darray2(darray<int, string> $a) :mixed{}
 
 function returns_varray($a): varray { return $a; }
 function returns_nullable_varray($a): ?varray { return $a; }
@@ -21,20 +21,20 @@ function returns_nullable_varray_or_darray($a): ?varray_or_darray { return $a; }
 function returns_vec_or_dict($a): vec_or_dict { return $a; }
 function returns_nullable_vec_or_dict($a): ?vec_or_dict { return $a; }
 
-class Foo {}function takes_bool(bool $v) {}
-function takes_int(int $v) {}
-function takes_str(string $v) {}
-function takes_vec(vec $v) {}
-function takes_dict(dict $v) {}
-function takes_keyset(keyset $v) {}
-function takes_resource(resource $v) {}
-function takes_obj(object $v) {}
-function takes_foo(Foo $v) {}
-function takes_vector(Vector $v) {}
-function takes_map(Map $v) {}
-function takes_mixed(mixed $v) {}
-function takes_traversable(Traversable $v) {}
-function takes_KeyedContainer(KeyedContainer $v) {}
+class Foo {}function takes_bool(bool $v) :mixed{}
+function takes_int(int $v) :mixed{}
+function takes_str(string $v) :mixed{}
+function takes_vec(vec $v) :mixed{}
+function takes_dict(dict $v) :mixed{}
+function takes_keyset(keyset $v) :mixed{}
+function takes_resource(resource $v) :mixed{}
+function takes_obj(object $v) :mixed{}
+function takes_foo(Foo $v) :mixed{}
+function takes_vector(Vector $v) :mixed{}
+function takes_map(Map $v) :mixed{}
+function takes_mixed(mixed $v) :mixed{}
+function takes_traversable(Traversable $v) :mixed{}
+function takes_KeyedContainer(KeyedContainer $v) :mixed{}
 
 function returns_bool($v): bool { return $v; }
 function returns_int($v): int { return $v; }
@@ -51,7 +51,7 @@ function returns_mixed($v): mixed { return $v; }
 function returns_traversable($v): Traversable { return $v; }
 function returns_KeyedContainer($v): KeyedContainer { return $v; }
 
-function test1() {
+function test1() :mixed{
   $values =
     __hhvm_intrinsics\launder_value(
       vec[
@@ -114,7 +114,7 @@ function test1() {
   }
 }
 
-function test2() {
+function test2() :mixed{
   $values = __hhvm_intrinsics\launder_value(
     vec[
       varray[1, 2, 3],
@@ -172,7 +172,7 @@ function test2() {
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__EntryPoint>>
-function main_type_hint() {
+function main_type_hint() :mixed{
 set_error_handler(
   (int $errno,
    string $errstr,

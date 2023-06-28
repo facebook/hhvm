@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'reflection-4.inc';
   include 'reflection-4.inc2';
 

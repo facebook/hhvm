@@ -1,13 +1,13 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function variadic($a, ...$b) {
+function variadic($a, ...$b) :mixed{
   echo "================== variadic ======================\n";
   var_dump($b);
   var_dump(is_varray($b));
 }
 
-function test($x) {
+function test($x) :mixed{
   variadic(1, 2, 3, 4);
   variadic(1, 2, ...$x);
   if (count($x) > 0) variadic(...$x);
@@ -15,7 +15,7 @@ function test($x) {
 }
 
 <<__EntryPoint>>
-function main_variadics() {
+function main_variadics() :mixed{
 test(varray[]);
 test(varray[3, 4, 5]);
 test(vec[]);

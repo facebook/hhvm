@@ -4,7 +4,7 @@ class C {
   public $max = PHP_INT_MAX;
 }
 
-function error_boundary(inout $x, $fn) {
+function error_boundary(inout $x, $fn) :mixed{
   try {
     $fn(inout $x);
   } catch (Exception $e) {

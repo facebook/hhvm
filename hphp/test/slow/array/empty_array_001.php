@@ -1,7 +1,7 @@
 <?hh
 
-function a() { return varray[]; }
-function main() {
+function a() :mixed{ return varray[]; }
+function main() :mixed{
   $x = a();
   $x[] = 2;
   return $x;
@@ -9,6 +9,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_empty_array_001() {
+function main_empty_array_001() :mixed{
 var_dump(main());
 }

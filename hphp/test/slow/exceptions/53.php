@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_53() {
+function main_53() :mixed{
 try {
  throw new Exception('test');
 }

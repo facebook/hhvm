@@ -1,5 +1,5 @@
 <?hh
-function do_translit($st) {
+function do_translit($st) :mixed{
     $replacement = darray[
         "й"=>"i","ц"=>"c","у"=>"u","к"=>"k","е"=>"e","н"=>"n",
         "г"=>"g","ш"=>"sh","щ"=>"sh","з"=>"z","х"=>"x","ъ"=>"\'",

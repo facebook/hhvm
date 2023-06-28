@@ -2,29 +2,29 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class NoisyClass {
-  function __sleep() {
+  function __sleep() :mixed{
     echo "NoisyClass::__sleep()\n";
     return varray[];
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo "NoisyClass::__wakeup()\n";
     $this->val = vec[12345];
   }
 }
 
 class SleepThrow {
-  function __sleep() {
+  function __sleep() :mixed{
     throw new Exception("Sleep exception");
   }
 }
 
 class WakeupThrow {
-  function __wakeup() {
+  function __wakeup() :mixed{
     throw new Exception("Wakeup exception");
   }
 }
 
-function roundtrip($v) {
+function roundtrip($v) :mixed{
   echo "====================================================\n";
   var_dump($v);
   $str = serialize($v);
@@ -33,7 +33,7 @@ function roundtrip($v) {
   var_dump($v2);
 }
 
-function try_serialize($val) {
+function try_serialize($val) :mixed{
   try {
     echo "====================================================\n";
     var_dump($val);
@@ -43,7 +43,7 @@ function try_serialize($val) {
   }
 }
 
-function try_unserialize($val) {
+function try_unserialize($val) :mixed{
   try {
     echo "====================================================\n";
     var_dump($val);

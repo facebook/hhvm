@@ -66,7 +66,7 @@ function rfun<reify T, reify R>(T $val): R {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(function (int $no, string $errmsg, string $f, int $l) {
     throw new Exception($errmsg);
   });

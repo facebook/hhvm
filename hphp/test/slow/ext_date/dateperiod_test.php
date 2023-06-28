@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dateperiod_test() {
+function main_dateperiod_test() :mixed{
 $start = new DateTime('2012-07-01');
 $ival = new DateInterval('P7D');
 $end = new DateTime('2012-07-31');

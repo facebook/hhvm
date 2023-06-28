@@ -6,7 +6,7 @@ class A {
 
 class B extends A {
   public $m = 10;
-  public function test() {
+  public function test() :mixed{
     $b = 'a';
     $this->$b = 'test';
     var_dump($this->$b);
@@ -17,7 +17,7 @@ class B extends A {
 }
 
  <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new B();
   $obj->test();
 }

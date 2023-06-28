@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  static function foo() {
+  static function foo() :mixed{
     echo "I'm in class " . get_class() . "\n";
   }
 }

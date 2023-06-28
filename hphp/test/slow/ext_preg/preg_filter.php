@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_preg_filter() {
+function main_preg_filter() :mixed{
 $pattern = varray['/\d/', '/[a-z]/', '/[1a]/'];
 $replace = varray['A:$0', 'B:$0', 'C:$0'];
 $subject = varray['1', 'a', '2', 'b', '3', 'A', 'B', '4'];

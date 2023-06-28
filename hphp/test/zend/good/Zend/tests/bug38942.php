@@ -1,6 +1,6 @@
 <?hh
 class foo {
-    public function foo() {}
+    public function foo() :mixed{}
 }
 
 class bar extends foo {

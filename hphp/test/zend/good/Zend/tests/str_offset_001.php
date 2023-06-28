@@ -1,5 +1,5 @@
 <?hh
-function foo($x) {
+function foo($x) :mixed{
     var_dump($x);
 }
 <<__EntryPoint>> function main(): void {

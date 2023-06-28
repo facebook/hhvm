@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_no_skip_ctor() {
+function main_no_skip_ctor() :mixed{
 $rc = new ReflectionClass('HH\\StaticWaitHandle');
 
 try {

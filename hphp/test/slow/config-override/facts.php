@@ -2,10 +2,10 @@
 
 @ThisIsAnAttribute
 @SoIsThis("ABC")
-function foo() {}
+function foo() :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $decode = ($text) ==> {
     $arr = json_decode($text, true);
     $decls = $arr['parse_tree']['script_declarations']['elements'];

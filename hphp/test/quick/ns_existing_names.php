@@ -2,11 +2,11 @@
 
 namespace A;
 const CO = "a";
-function f() { return "a"; }
+function f() :mixed{ return "a"; }
 
 namespace B;
 const CO = "b";
-function f() { return "b"; }
+function f() :mixed{ return "b"; }
 
 use A\f;
 use A\CO;

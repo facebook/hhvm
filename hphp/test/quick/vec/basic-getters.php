@@ -2,10 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class ToStringObj {
-  function __toString() { return "1"; }
+  function __toString() :mixed{ return "1"; }
 }
 
-function test($v, $description) {
+function test($v, $description) :mixed{
   $test_resource = imagecreate(1, 1);
 
   $tests = darray["0" => 0,

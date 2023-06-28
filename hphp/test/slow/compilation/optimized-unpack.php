@@ -1,15 +1,15 @@
 <?hh
 
-function foo($a, $b, $c) { var_dump($a, $b, $c); }
+function foo($a, $b, $c) :mixed{ var_dump($a, $b, $c); }
 
 class X {
   const FOO=varray[1,2,3];
-  static function bar() {
+  static function bar() :mixed{
     foo(...self::FOO);
   }
 }
 
 <<__EntryPoint>>
-function main_optimized_unpack() {
+function main_optimized_unpack() :mixed{
 X::bar();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1765() {
+function main_1765() :mixed{
 var_dump(str_replace(varray[65], varray['a'], 'axAX'));
 var_dump(str_ireplace(varray[65], varray['a'], 'axAX'));
 echo "**************************\n";

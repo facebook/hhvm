@@ -8,6 +8,6 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_equality_as_member() {
+function main_equality_as_member() :mixed{
 var_dump((new Foo()) == (new Foo()));
 }

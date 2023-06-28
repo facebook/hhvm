@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_encode_mimeheader() {
+function main_mb_encode_mimeheader() :mixed{
 mb_internal_encoding("ISO-8859-1");
 $expected_result = "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=";
 var_dump($expected_result === mb_encode_mimeheader(

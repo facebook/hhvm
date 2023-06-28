@@ -7,15 +7,15 @@ type B = ?callable;
 newtype C = X;
 type D = Y;
 class Q {
-  public static function foo() {}
+  public static function foo() :mixed{}
 }
-function a(<<__Soft>> A $x) {}
-function b(<<__Soft>> B $x) {}
-function c(<<__Soft>> C $x) {}
-function d(<<__Soft>> D $x) {}
+function a(<<__Soft>> A $x) :mixed{}
+function b(<<__Soft>> B $x) :mixed{}
+function c(<<__Soft>> C $x) :mixed{}
+function d(<<__Soft>> D $x) :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   a(null);
   a(1);
   a('var_dump');

@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
    //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
    // in the include path. In this case it doesn't so the file should be written in the current dir.

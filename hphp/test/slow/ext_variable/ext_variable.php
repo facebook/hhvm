@@ -1,6 +1,6 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) {
     echo "Failed: $y\n";
@@ -8,7 +8,7 @@ function VS($x, $y) {
     var_dump(debug_backtrace());
   }
 }
-function VERIFY($x) {
+function VERIFY($x) :mixed{
   VS($x != false, true);
 }
 
@@ -16,7 +16,7 @@ function VERIFY($x) {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_variable() {
+function main_ext_variable() :mixed{
   $valid_res = imagecreate(10, 10);
   $invalid_res = imagecreate(10, 10);
   imagedestroy($invalid_res);

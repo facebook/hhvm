@@ -3,25 +3,25 @@
 class Test
 {
     static function f1(varray $ar)
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
     static function f2(?varray $ar = NULL)
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
     static function f3(varray $ar = varray[])
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
     static function f4(varray $ar = varray[25])
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }

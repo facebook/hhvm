@@ -1,11 +1,11 @@
 <?hh
 class A {
-  public function fetchAll() {}
+  public function fetchAll() :mixed{}
 }
 
 
 <<__EntryPoint>>
-function main_class_get_methods() {
+function main_class_get_methods() :mixed{
 $reflection = new ReflectionClass('A');
 var_dump(array_map(function($x) { return $x->class . '::' . $x->name; },
                    $reflection->getMethods()));

@@ -99,7 +99,7 @@ function log_markings(TestStruct $struct): void {
   }
 }
 
-function test_thrift_protocol_read_binary() {
+function test_thrift_protocol_read_binary() :mixed{
   echo "== thrift_protocol_read_binary ==\n";
 
   echo "original struct\n";
@@ -127,7 +127,7 @@ function test_thrift_protocol_read_binary() {
   log_markings($struct);
 }
 
-function test_thrift_protocol_read_compact() {
+function test_thrift_protocol_read_compact() :mixed{
   echo "== thrift_protocol_read_compact ==\n";
 
   echo "original struct\n";
@@ -154,7 +154,7 @@ function test_thrift_protocol_read_compact() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require 'common.inc';
   test_thrift_protocol_read_binary();
   test_thrift_protocol_read_compact();

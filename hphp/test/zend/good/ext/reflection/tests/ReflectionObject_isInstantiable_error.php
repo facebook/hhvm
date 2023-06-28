@@ -1,7 +1,7 @@
 <?hh
 class privateCtorOld {
-    private function privateCtorOld() {}
-    public static function reflectionObjectFactory() {
+    private function privateCtorOld() :mixed{}
+    public static function reflectionObjectFactory() :mixed{
         return new ReflectionObject(new self);
     }
 }

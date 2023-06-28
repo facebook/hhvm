@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a = varray[0];
   $a = HH\array_mark_legacy($a);
   $a[0] += 10;

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_eval() {
+function test_eval() :mixed{
   echo "============ test_eval =======================================\n";
 
   eval('function f1() { return vec[1, 2, 3]; }');
@@ -33,12 +33,12 @@ function test_eval() {
   f8($d);
   f9($k);
 }
-function wrap($arr, $v) { return $arr[] = $v; }
+function wrap($arr, $v) :mixed{ return $arr[] = $v; }
 function test_func($v = wrap(varray[], vec[1, 2]),
                    $d = wrap(varray[], dict[100 => 'a', 200 => 'b']),
-                   $k = wrap(varray[], keyset['a', 'b'])) {}
+                   $k = wrap(varray[], keyset['a', 'b'])) :mixed{}
 
-function test_default_value() {
+function test_default_value() :mixed{
   echo "============ test_default_value ==============================\n";
   $r = new ReflectionFunction('test_func');
   var_dump($r->getParameters()[0]->info['default']);
@@ -48,7 +48,7 @@ function test_default_value() {
 
 
 <<__EntryPoint>>
-function main_hack_arrays_eval() {
+function main_hack_arrays_eval() :mixed{
 test_eval();
 test_default_value();
 }

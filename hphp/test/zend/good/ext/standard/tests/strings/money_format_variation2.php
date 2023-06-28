@@ -13,7 +13,7 @@ class class_no_tostring  {
 }
 
 class class_with_tostring  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "  sample object  ";
   }
 }

@@ -17,7 +17,7 @@ class C {
   }
 }
 
-function main() {
+function main() :mixed{
   $obj = new C;
   var_dump($obj->genWithAccessTokens(varray[]));
   var_dump($obj->genWithAccessTokens());
@@ -35,6 +35,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_test38() {
+function main_test38() :mixed{
 main();
 }

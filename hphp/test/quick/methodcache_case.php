@@ -1,17 +1,17 @@
 <?hh
 
 abstract class one {
-  abstract protected function foo();
+  abstract protected function foo():mixed;
 }
 
 class a extends one {
-  protected function foo() { echo "a\n"; }
+  protected function foo() :mixed{ echo "a\n"; }
 }
 
 class c extends one {
-  protected function foo() { echo "c\n"; }
+  protected function foo() :mixed{ echo "c\n"; }
 
-  public function go($x) {
+  public function go($x) :mixed{
     $x->foo();
   }
 }

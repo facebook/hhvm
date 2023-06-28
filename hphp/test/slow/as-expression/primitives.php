@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x) {
+function f(mixed $x) :mixed{
   $x__str = (string)($x);
   echo "\$x is $x__str\n";
   try {
@@ -18,7 +18,7 @@ function f(mixed $x) {
 
 
 <<__EntryPoint>>
-function main_primitives() {
+function main_primitives() :mixed{
 $arr = varray[1, 2, 3, 3.14, Vector {}, "hiii"];
 
 foreach ($arr as $e) {

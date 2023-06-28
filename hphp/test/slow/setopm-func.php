@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $f1 = main<>;
   $f2 = __hhvm_intrinsics\launder_value($f1);
 

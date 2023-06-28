@@ -2,16 +2,16 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  public function meth($x) { var_dump(__METHOD__); return $x; }
-  public static function staticMeth($x) { var_dump(__METHOD__); return $x; }
+  public function meth($x) :mixed{ var_dump(__METHOD__); return $x; }
+  public static function staticMeth($x) :mixed{ var_dump(__METHOD__); return $x; }
 }
 
-function call1($c, $x) { return $c($x); }
-function call2($c, $x) { return call_user_func($c, $x); }
-function call3($c, $x) { return array_map($c, varray[$x]); }
+function call1($c, $x) :mixed{ return $c($x); }
+function call2($c, $x) :mixed{ return call_user_func($c, $x); }
+function call3($c, $x) :mixed{ return array_map($c, varray[$x]); }
 
 <<__EntryPoint>>
-function main_callable_bad() {
+function main_callable_bad() :mixed{
   $cases = vec[
     42,
     'nonexistent',

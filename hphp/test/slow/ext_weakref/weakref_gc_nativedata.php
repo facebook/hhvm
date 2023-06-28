@@ -3,16 +3,16 @@
 class Foo {
   private $ptr = null;
   private $dt = null;
-  public function set($p) {
+  public function set($p) :mixed{
     $this->ptr = $p;
   }
-  public function getNativeDataWeakRef() {
+  public function getNativeDataWeakRef() :mixed{
     $dt = new DateTime();
     $this->dt = $dt;
     return new WeakRef($dt);
   }
 }
-function foo() {
+function foo() :mixed{
   $a = new Foo();
   $b = new Foo();
   $a->set($b);
@@ -23,17 +23,17 @@ function foo() {
 class Leaker {
   private $ptr = null;
   private $dt = null;
-  public function set($p) {
+  public function set($p) :mixed{
     $this->ptr = $p;
   }
-  public function getNativeDataWeakRef() {
+  public function getNativeDataWeakRef() :mixed{
     $dt = new DateTime();
     $this->dt = $dt;
     return new WeakRef($dt);
   }
 };
 
-function leak() {
+function leak() :mixed{
   $l1 = new Leaker();
   $l2 = new Leaker();
   $l1->set($l2);
@@ -41,13 +41,13 @@ function leak() {
   return $l1->getNativeDataWeakRef();
 }
 
-function factorial($n) {
+function factorial($n) :mixed{
   if ($n <= 1) return 1;
   return $n * factorial($n-1);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $wr = leak();
 
   var_dump($wr->valid(), $wr->get());

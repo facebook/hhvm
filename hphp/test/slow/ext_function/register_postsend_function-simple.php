@@ -3,24 +3,24 @@
 namespace ShutdownTest;
 
 <<__DynamicallyCallable>>
-function test() {
+function test() :mixed{
   \var_dump('function');
 }
 
 class Test {
   <<__DynamicallyCallable>>
-  function handleInstance() {
+  function handleInstance() :mixed{
     \var_dump('Method - instance');
   }
 
   <<__DynamicallyCallable>>
-  static function handleStatic() {
+  static function handleStatic() :mixed{
     \var_dump('Method - static');
   }
 }
 
 <<__EntryPoint>>
-function main_register_postsend_function_simple() {
+function main_register_postsend_function_simple() :mixed{
   \register_postsend_function(__NAMESPACE__ . '\test');
   \register_postsend_function(varray[new Test, 'handleInstance']);
   \register_postsend_function(varray[__NAMESPACE__ . '\Test', 'handleStatic']);

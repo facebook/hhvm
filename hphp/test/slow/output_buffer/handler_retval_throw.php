@@ -1,7 +1,7 @@
 <?hh
 
 class Chickpea {
-  public function __toString() {
+  public function __toString() :mixed{
     throw new Exception('chickpeas');
     return 'chickpea';
   }

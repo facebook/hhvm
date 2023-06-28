@@ -7,7 +7,7 @@ function get_dict() : dict<int, int>{
   ]);
 }
 
-function get_maybe_int() {
+function get_maybe_int() :mixed{
   return __hhvm_intrinsics\launder_value(1);
 }
 
@@ -16,11 +16,11 @@ function getSortedValue(?dict<int, int> $d = null) : int {
 }
 
 <<__NEVER_INLINE>>
-function test($d) {
+function test($d) :mixed{
   return getSortedValue($d);
 }
 
-function main() {
+function main() :mixed{
   // Generate a profile with a null dict.
   getSortedValue();
   $d = get_dict();
@@ -32,7 +32,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unreachable_idx() {
+function main_unreachable_idx() :mixed{
 main();
 echo "Success";
 }

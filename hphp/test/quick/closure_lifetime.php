@@ -3,7 +3,7 @@
 class blah {
   private string $t = "";
   public function __construct() { $this->t = "hi\n"; }
-  public function foo() { return function() { return $this->t; }; }
+  public function foo() :mixed{ return function() { return $this->t; }; }
 }
 
 <<__EntryPoint>> function main(): void {

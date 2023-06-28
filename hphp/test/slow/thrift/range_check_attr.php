@@ -39,7 +39,7 @@ class TestStruct {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   require 'common.inc';
   $p = new DummyProtocol();
   $v1 = new TestStruct();

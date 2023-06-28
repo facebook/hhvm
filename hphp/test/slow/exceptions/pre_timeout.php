@@ -1,14 +1,14 @@
 <?hh
 
-async function genWasteMilliseconds($ms) {
+async function genWasteMilliseconds($ms) :Awaitable<mixed>{
   await SleepWaitHandle::create($ms * 1000);
 }
 
-function randomFunction() {
+function randomFunction() :mixed{
   rand() * rand();
 }
 
-async function genLongFunction() {
+async function genLongFunction() :Awaitable<mixed>{
   $test_time_seconds = 5;
   set_time_limit(10);
   $start = time();
@@ -35,6 +35,6 @@ async function genLongFunction() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(genLongFunction());
 }

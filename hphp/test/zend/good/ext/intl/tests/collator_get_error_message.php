@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $res = '';
     $coll = ut_coll_create( 'ru_RU' );
 

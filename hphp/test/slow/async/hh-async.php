@@ -15,7 +15,7 @@ function makeWaitHandles(): darray<string,Awaitable<mixed>> {
 
 
 <<__EntryPoint>>
-function main_hh_async() {
+function main_hh_async() :mixed{
 $handles = makeWaitHandles();
 foreach($handles as $h) {
   var_dump(\HH\Asio\name($h));

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_spl_file_object_fputcsv() {
+function main_spl_file_object_fputcsv() :mixed{
 $file = sys_get_temp_dir().'/'.'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 

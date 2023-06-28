@@ -2,7 +2,7 @@
 
 class Ref { public function __construct(public $val) {} }
 
-function replace_variables($text, $params) {
+function replace_variables($text, $params) :mixed{
   $text = new Ref($text);
   $params = new Ref($params);
   $count = -1;

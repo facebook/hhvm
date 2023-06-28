@@ -1,5 +1,5 @@
 <?hh
-function foo(varray $a) {
+function foo(varray $a) :mixed{
     echo count($a)."\n";
 }
 <<__EntryPoint>> function main(): void {

@@ -1,11 +1,11 @@
 <?hh
 
-function test($name, $a, $b) {
+function test($name, $a, $b) :mixed{
   echo "---- $name\n";
   var_dump($a->concat($b));
 }
 
-function main() {
+function main() :mixed{
   $containers = darray[
     'Vector'          => Vector {1},
     'empty Vector'    => Vector {},
@@ -31,6 +31,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_concat_empty() {
+function main_concat_empty() :mixed{
 main();
 }

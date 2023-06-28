@@ -1,30 +1,30 @@
 <?hh
 
 <<__Memoize>>
-function memo_normal() {
+function memo_normal() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($hash) . "\n";
 }
 
 <<__Memoize(#KeyedByIC)>>
-function memo_keyed() {
+function memo_keyed() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($hash) . "\n";
 }
 
 <<__Memoize(#MakeICInaccessible)>>
-function memo_ic_inaccessible() {
+function memo_ic_inaccessible() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($hash) . "\n";
 }
 
 <<__Memoize(#SoftMakeICInaccessible)>>
-function memo_soft_ic_inaccessible() {
+function memo_soft_ic_inaccessible() :mixed{
   $hash = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($hash) . "\n";
 }
 
-function f(bool $has_ctx) {
+function f(bool $has_ctx) :mixed{
   $v = vec[
     "memo_normal",
     "memo_keyed",
@@ -49,7 +49,7 @@ function f(bool $has_ctx) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   ClassContext::start(new C, () ==> f(true));
   HH\ImplicitContext\soft_run_with(() ==> f(false), "SOFT_KEY");

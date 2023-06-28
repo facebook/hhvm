@@ -1,11 +1,11 @@
 <?hh
 
-class C { static function f() {} }
+class C { static function f() :mixed{} }
 
-function test(callable $x) { return $x; }
+function test(callable $x) :mixed{ return $x; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $base = varray['C', 'f'];
   $callables = vec[
     varray($base),

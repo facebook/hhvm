@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_231() {
+function main_231() :mixed{
 $a = darray['a' => 'apple', 'b' => 'banana', 'c' => 'citrus'];
 foreach ($a as $k1 => $v1) {
   foreach ($a as $k2 => $v2) {

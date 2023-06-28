@@ -1,8 +1,8 @@
 <?hh // strict
-function something($x) {
+function something($x) :mixed{
 return NullsafeNullsafeProp10Php::$z;
 }
-function test() {
+function test() :mixed{
 
   $foo = null;
   $x = something($foo?->bar); // ok

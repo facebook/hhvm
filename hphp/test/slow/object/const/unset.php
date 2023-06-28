@@ -18,7 +18,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C();
   echo "-- after constructor completes --\n";
   var_dump($c);

@@ -4,19 +4,19 @@ trait ATrait {
   public static $static_var = __CLASS__;
   public $var = __CLASS__;
 
-  public static function get_class_name() {
+  public static function get_class_name() :mixed{
     return __CLASS__;
   }
 
-  public function get_class_name_obj() {
+  public function get_class_name_obj() :mixed{
     return __CLASS__;
   }
 
-  public static function get_class_name2() {
+  public static function get_class_name2() :mixed{
     return self::$static_var;
   }
 
-  public function get_class_name_obj2() {
+  public function get_class_name_obj2() :mixed{
     return $this->var;
   }
 }

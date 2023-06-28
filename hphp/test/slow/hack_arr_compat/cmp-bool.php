@@ -1,30 +1,30 @@
 <?hh
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-<<__NEVER_INLINE>> function print_header($title) {
+<<__NEVER_INLINE>> function print_header($title) :mixed{
   echo "$title\n";
   echo "+---------+------+------+------+------+------+------+------+------+------+\n";
   echo "| VAR     | <    | <=   | >    | >=   | ==   | !=   | ===  | !==  | <=>  |\n";
   echo "+=========+======+======+======+======+======+======+======+======+======+";
 }
-<<__NEVER_INLINE>> function print_footer() {
+<<__NEVER_INLINE>> function print_footer() :mixed{
   echo "\n+---------+------+------+------+------+------+------+------+------+------+\n\n";
 }
-<<__NEVER_INLINE>> function begin_row($var) {
+<<__NEVER_INLINE>> function begin_row($var) :mixed{
   printf("\n| %-7s |", "\$$var");
 }
-<<__NEVER_INLINE>> function C(bool $v) {
+<<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %-4s |", $v ? 'T' : 'F');
 }
-<<__NEVER_INLINE>> function I(int $v) {
+<<__NEVER_INLINE>> function I(int $v) :mixed{
   printf(" %-4d |", $v);
 }
-<<__NEVER_INLINE>> function E() {
+<<__NEVER_INLINE>> function E() :mixed{
   printf("    * |");
 }
 
-<<__NEVER_INLINE>> function compare_varray_empty_static() {
+<<__NEVER_INLINE>> function compare_varray_empty_static() :mixed{
   $va = varray[];
   $tr = true;
   $fa = false;
@@ -97,7 +97,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_varray_empty_dynamic() {
+<<__NEVER_INLINE>> function compare_varray_empty_dynamic() :mixed{
   $va = LV(varray[]);
   $tr = LV(true);
   $fa = LV(false);
@@ -170,7 +170,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_varray_nonempty_static() {
+<<__NEVER_INLINE>> function compare_varray_nonempty_static() :mixed{
   $vx = varray[42, 'foo'];
   $tr = true;
   $fa = false;
@@ -243,7 +243,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_varray_nonempty_dynamic() {
+<<__NEVER_INLINE>> function compare_varray_nonempty_dynamic() :mixed{
   $vx = LV(varray[42, 'foo']);
   $tr = LV(true);
   $fa = LV(false);
@@ -316,7 +316,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_darray_empty_static() {
+<<__NEVER_INLINE>> function compare_darray_empty_static() :mixed{
   $da = darray[];
   $tr = true;
   $fa = false;
@@ -389,7 +389,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_darray_empty_dynamic() {
+<<__NEVER_INLINE>> function compare_darray_empty_dynamic() :mixed{
   $da = LV(darray[]);
   $tr = LV(true);
   $fa = LV(false);
@@ -462,7 +462,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_darray_nonempty_static() {
+<<__NEVER_INLINE>> function compare_darray_nonempty_static() :mixed{
   $dx = darray['foo' => 42, 'bar' => 'baz'];
   $tr = true;
   $fa = false;
@@ -535,7 +535,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_darray_nonempty_dynamic() {
+<<__NEVER_INLINE>> function compare_darray_nonempty_dynamic() :mixed{
   $dx = LV(darray['foo' => 42, 'bar' => 'baz']);
   $tr = LV(true);
   $fa = LV(false);
@@ -608,7 +608,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_vec_empty_static() {
+<<__NEVER_INLINE>> function compare_vec_empty_static() :mixed{
   $ve = vec[];
   $tr = true;
   $fa = false;
@@ -681,7 +681,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_vec_empty_dynamic() {
+<<__NEVER_INLINE>> function compare_vec_empty_dynamic() :mixed{
   $ve = LV(vec[]);
   $tr = LV(true);
   $fa = LV(false);
@@ -754,7 +754,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_vec_nonempty_static() {
+<<__NEVER_INLINE>> function compare_vec_nonempty_static() :mixed{
   $vz = vec[42, 'foo'];
   $tr = true;
   $fa = false;
@@ -827,7 +827,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_vec_nonempty_dynamic() {
+<<__NEVER_INLINE>> function compare_vec_nonempty_dynamic() :mixed{
   $vz = LV(vec[42, 'foo']);
   $tr = LV(true);
   $fa = LV(false);
@@ -900,7 +900,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_dict_empty_static() {
+<<__NEVER_INLINE>> function compare_dict_empty_static() :mixed{
   $di = dict[];
   $tr = true;
   $fa = false;
@@ -973,7 +973,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_dict_empty_dynamic() {
+<<__NEVER_INLINE>> function compare_dict_empty_dynamic() :mixed{
   $di = LV(dict[]);
   $tr = LV(true);
   $fa = LV(false);
@@ -1046,7 +1046,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_dict_nonempty_static() {
+<<__NEVER_INLINE>> function compare_dict_nonempty_static() :mixed{
   $dz = dict['foo' => 42, 'bar' => 'baz'];
   $tr = true;
   $fa = false;
@@ -1119,7 +1119,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_dict_nonempty_dynamic() {
+<<__NEVER_INLINE>> function compare_dict_nonempty_dynamic() :mixed{
   $dz = LV(dict['foo' => 42, 'bar' => 'baz']);
   $tr = LV(true);
   $fa = LV(false);
@@ -1192,7 +1192,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_keyset_empty_static() {
+<<__NEVER_INLINE>> function compare_keyset_empty_static() :mixed{
   $ks = keyset[];
   $tr = true;
   $fa = false;
@@ -1265,7 +1265,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_keyset_empty_dynamic() {
+<<__NEVER_INLINE>> function compare_keyset_empty_dynamic() :mixed{
   $ks = LV(keyset[]);
   $tr = LV(true);
   $fa = LV(false);
@@ -1338,7 +1338,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_keyset_nonempty_static() {
+<<__NEVER_INLINE>> function compare_keyset_nonempty_static() :mixed{
   $ky = keyset[42, 'foo'];
   $tr = true;
   $fa = false;
@@ -1411,7 +1411,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function compare_keyset_nonempty_dynamic() {
+<<__NEVER_INLINE>> function compare_keyset_nonempty_dynamic() :mixed{
   $ky = LV(keyset[42, 'foo']);
   $tr = LV(true);
   $fa = LV(false);
@@ -1485,7 +1485,7 @@ function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   compare_varray_empty_static(); compare_varray_empty_dynamic();
   compare_varray_nonempty_static(); compare_varray_nonempty_dynamic();
 

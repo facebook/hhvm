@@ -3,7 +3,7 @@
 class X {
 }
 
-function test($a) {
+function test($a) :mixed{
   apc_store('foo', darray[1 => $a]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $a[1] = 'bar';

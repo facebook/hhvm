@@ -1,6 +1,6 @@
 <?hh
 
-function test_validation($val, $msg) {
+function test_validation($val, $msg) :mixed{
 	$f = filter_var($val, FILTER_VALIDATE_INT);
 	echo "$msg filtered: "; var_dump($f); // filtered value (or false)
 	echo "$msg is_long: "; var_dump(is_long($f)); // test validation

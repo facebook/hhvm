@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_cleanup_persistent_socket() {
+function main_cleanup_persistent_socket() :mixed{
 $errno = null;
 $errstr = null;
 $sock = pfsockopen('udp://127.0.0.1', 63844, inout $errno, inout $errstr);

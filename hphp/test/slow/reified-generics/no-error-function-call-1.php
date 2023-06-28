@@ -1,6 +1,6 @@
 <?hh
 
-function f() {}
+function f() :mixed{}
 <<__EntryPoint>> function main(): void {
 f<int>();
 

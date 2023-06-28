@@ -7,7 +7,7 @@ function some_int() : int {
   return __hhvm_intrinsics\launder_value(0);
 }
 
-function foo() {
+function foo() :mixed{
   $r = vec[shape('key' => dict[])];
   while (__hhvm_intrinsics\launder_value(false)) {
     $r[some_int()]['key'][some_string()] = $r[some_int()];
@@ -16,6 +16,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo());
 }

@@ -9,7 +9,7 @@
 // First make sure we are working on normal primitive based bindings, where
 // something easily convertible to string is returned
 <<__EntryPoint>>
-function main_enhanced_get_ini() {
+function main_enhanced_get_ini() :mixed{
 var_dump(ini_get("hhvm.stats.slot_duration"));
 
 // And now the collection-y type settings

@@ -1,13 +1,13 @@
 <?hh
 
 class C<reify T> {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
  $c = new C<int>();
  $c->f();
 

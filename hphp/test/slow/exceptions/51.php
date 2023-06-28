@@ -4,7 +4,7 @@ class MyException extends Exception {
   public function __construct() {
   }
 }
-function thrower() {
+function thrower() :mixed{
   throw new MyException();
 }
 <<__EntryPoint>> function main(): void {

@@ -5,7 +5,7 @@
  */
 
 function ut_main()
-{
+:mixed{
 	$res_str = '';
 
 	$char_a_diaeresis = "\xC3\xA4";	// 'LATIN SMALL LETTER A WITH DIAERESIS' (U+00E4)
@@ -753,7 +753,7 @@ function ut_main()
 	return $res_str;
 }
 
-function check_result($result, $expected) {
+function check_result($result, $expected) :mixed{
 
 	if ( $result === false ) {
         	$result = 'false';

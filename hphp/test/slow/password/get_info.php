@@ -1,6 +1,6 @@
 <?hh
 
-function print_info($info) {
+function print_info($info) :mixed{
   echo $info['algo']."\n";
   echo $info['algoName']."\n";
   if (isset($info['options']['cost']))
@@ -10,7 +10,7 @@ function print_info($info) {
 
 
 <<__EntryPoint>>
-function main_get_info() {
+function main_get_info() :mixed{
 print_info(password_get_info('foo'));
 print_info(password_get_info('$2y$'));
 print_info(password_get_info(

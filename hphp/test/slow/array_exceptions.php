@@ -1,6 +1,6 @@
 <?hh
 
-function examine($a) {
+function examine($a) :mixed{
   try { print $a[0]."\n"; }
   catch(Exception $e) { echo get_class($e).": ".$e->getMessage()."\n"; }
 
@@ -30,7 +30,7 @@ function examine($a) {
 
 }
 
-function examine_io(inout $a) {
+function examine_io(inout $a) :mixed{
   try { print $a[0]."\n"; }
   catch(Exception $e) { echo get_class($e).": ".$e->getMessage()."\n"; }
 
@@ -61,7 +61,7 @@ function examine_io(inout $a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print "vec:\n";
   examine(vec["test"]);
   $a = vec["test"];

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_fputcsv() {
+function main_fputcsv() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $fields = varray['apple', "\"banana\""];

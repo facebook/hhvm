@@ -2,7 +2,7 @@
 
 // Create two temporary files.
 <<__EntryPoint>>
-function main_stream_copy_to_stream_seek() {
+function main_stream_copy_to_stream_seek() :mixed{
   $file1 = tmpfile();
 
   // Write > 2GB into the file

@@ -17,6 +17,6 @@
 */
 
 <<__EntryPoint>>
-function main_ext_time() {
+function main_ext_time() :mixed{
 var_dump(HH\Lib\_Private\Native\request_time_ns());
 }

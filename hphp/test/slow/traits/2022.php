@@ -6,7 +6,7 @@
  * Alias to functions:
  */
 
-function get_declared_user_traits() {
+function get_declared_user_traits() :mixed{
   $ret = varray[];
   foreach (get_declared_traits() as $v) {
     // exclude system traits

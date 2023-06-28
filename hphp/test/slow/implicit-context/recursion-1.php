@@ -1,6 +1,6 @@
 <?hh
 
-function aux()[zoned] {
+function aux()[zoned] :mixed{
   $x = IntContext::getContext();
   if ($x > 10) return;
   var_dump($x);
@@ -9,7 +9,7 @@ function aux()[zoned] {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
   IntContext::start(0, aux<>);

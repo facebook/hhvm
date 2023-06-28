@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $a = true;
   $b = true;
   $i = 0;

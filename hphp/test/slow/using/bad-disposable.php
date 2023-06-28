@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "Entering main\n";
 
   echo "5\n";
@@ -32,7 +32,7 @@ function main() {
   echo "Leaving main\n\n";
 }
 
-async function mainAsync() {
+async function mainAsync() :Awaitable<mixed>{
   echo "\nEntering mainAsync\n";
 
   try {
@@ -46,7 +46,7 @@ async function mainAsync() {
 
 
 <<__EntryPoint>>
-function main_bad_disposable() {
+function main_bad_disposable() :mixed{
 main();
 HH\Asio\join(mainAsync());
 }

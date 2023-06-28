@@ -1,10 +1,10 @@
 <?hh
 
-function sprintf_wrapper($format, ...$args) {
+function sprintf_wrapper($format, ...$args) :mixed{
   return vsprintf($format, $args);
 }
 
-function test_builtin() {
+function test_builtin() :mixed{
   $format = '%s %d %s';
   $args = varray['a', 10, 'b'];
 
@@ -14,6 +14,6 @@ function test_builtin() {
 
 
 <<__EntryPoint>>
-function main_unpack_call_builtin() {
+function main_unpack_call_builtin() :mixed{
 test_builtin();
 }

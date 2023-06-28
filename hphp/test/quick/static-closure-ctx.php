@@ -2,11 +2,11 @@
 
 
 class wub {
-  public static function wubwub($v) {
+  public static function wubwub($v) :mixed{
     return function() use ($v) { return $v; };
   }
 
-  public static function wubwubwub() {
+  public static function wubwubwub() :mixed{
     return function() { return "I'm static"; };
   }
 }

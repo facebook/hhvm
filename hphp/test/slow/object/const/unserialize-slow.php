@@ -6,7 +6,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   // props are in the wrong order so unserialize will take the slow path
   $c = unserialize('O:1:"C":2:{s:1:"j";i:2;s:1:"i";i:1;}');
   var_dump($c);

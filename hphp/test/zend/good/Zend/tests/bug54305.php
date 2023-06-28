@@ -1,6 +1,6 @@
 <?hh
 class TestClass {
-    public function methodWithArgs($a, $b) {
+    public function methodWithArgs($a, $b) :mixed{
     }
 }
 abstract class AbstractClass {

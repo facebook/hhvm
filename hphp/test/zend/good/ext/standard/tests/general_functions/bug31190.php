@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-  <<__DynamicallyCallable>> function throwException() { throw new Exception("Hello World!\n"); }
+  <<__DynamicallyCallable>> function throwException() :mixed{ throw new Exception("Hello World!\n"); }
 }
 <<__EntryPoint>> function main(): void {
 $array = varray[new test(), 'throwException'];

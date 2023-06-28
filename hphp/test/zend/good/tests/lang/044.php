@@ -1,6 +1,6 @@
 <?hh
 class A {
-  <<__DynamicallyCallable>> static function foo() { return 'foo'; }
+  <<__DynamicallyCallable>> static function foo() :mixed{ return 'foo'; }
 }
 <<__EntryPoint>> function main(): void {
 $classname        =  'A';

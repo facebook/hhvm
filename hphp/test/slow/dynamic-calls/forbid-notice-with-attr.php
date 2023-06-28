@@ -2,23 +2,23 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__DynamicallyCallable>>
-function foo() {}
+function foo() :mixed{}
 
 class A {
   <<__DynamicallyCallable>>
-  public function foo() {}
+  public function foo() :mixed{}
   <<__DynamicallyCallable>>
-  public static function bar() {}
+  public static function bar() :mixed{}
 }
 
-function corge() {}
+function corge() :mixed{}
 
 class A1 {
-  public function corge() {}
-  public static function flob() {}
+  public function corge() :mixed{}
+  public static function flob() :mixed{}
 }
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   echo "======== Called without using a function pointer ========\n\n";
   $foo = 'foo';
   $a_obj = new A();
@@ -56,4 +56,4 @@ function test() {
   HH\dynamic_class_meth($a1, $flob)();
 }
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+function wrap($e) :mixed{ echo "Exception: {$e->getMessage()}\n"; }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1584() {
+function main_1584() :mixed{
 $a1 = 'a';
 $a2 = 'b';
 $a3 = 'c';

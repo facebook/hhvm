@@ -1,7 +1,7 @@
 <?hh
 
 function test($name)
-{
+:mixed{
     echo "===$name===\n";
 
     $o = new SplFileObject(dirname(__FILE__) . '/' . $name);

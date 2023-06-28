@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $a = function() {
  yield 1;
  yield 2;
@@ -10,7 +10,7 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_2154() {
+function main_2154() :mixed{
 $f = f();
 foreach ($f() as $v) {
  var_dump($v);

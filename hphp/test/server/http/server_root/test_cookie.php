@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>>
-function test_cookie_entrypoint() {
+function test_cookie_entrypoint() :mixed{
 setcookie($_GET['cookie_name'],
           $_GET['cookie_value'],
           0,

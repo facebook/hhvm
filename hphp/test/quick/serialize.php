@@ -18,10 +18,10 @@ class C {
     $this->c = log(0.0);
     echo "C has a safe constructor.\n";
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo "C wakes up safely.\n";
   }
-  function __sleep() {
+  function __sleep() :mixed{
     echo "C sleeps safely.\n";
     return varray['a', 'b', 'c'];
   }
@@ -32,10 +32,10 @@ class DangerousClass {
   function __construct() {
     echo "I have dangerous constructor.\n";
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo "I wake up dangerously.\n";
   }
-  function __sleep() {
+  function __sleep() :mixed{
     echo "I sleep dangerously.\n";
     return varray['danger'];
   }
@@ -49,10 +49,10 @@ class E {
 }
 
 class F implements Serializable {
-  public function serialize() {
+  public function serialize() :mixed{
     return "SerializedData";
   }
-  public function unserialize($serialized) {
+  public function unserialize($serialized) :mixed{
     echo "unserialize: $serialized\n";
     return $this;
   }
@@ -61,7 +61,7 @@ class F implements Serializable {
 class G extends DangerousClass {
 }
 
-function test_serialization($obj, $class_whitelist) {
+function test_serialization($obj, $class_whitelist) :mixed{
   $str = serialize($obj);
   var_dump($str);
   $new_obj = unserialize($str, darray($class_whitelist));

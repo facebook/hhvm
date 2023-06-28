@@ -5,7 +5,7 @@
                 If the filename ends in suffix this will also be cut off.
 */
 
-function check_basename( $path_arrays ) {
+function check_basename( $path_arrays ) :mixed{
    $loop_counter = 1;
    foreach ($path_arrays as $path) {
      echo "\n--Iteration $loop_counter--\n"; $loop_counter++;

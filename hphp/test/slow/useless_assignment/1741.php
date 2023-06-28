@@ -1,9 +1,9 @@
 <?hh
 
-function out($a) {
+function out($a) :mixed{
   echo $a,'\n';
 }
-function test($a) {
+function test($a) :mixed{
   $a ? out('?a') : out(':a');
   $a ? out('+a') : 0;
   $a ? 0 : out('-a');
@@ -16,7 +16,7 @@ function test($a) {
 }
 
 <<__EntryPoint>>
-function main_1741() {
+function main_1741() :mixed{
 test(0);
 test('foo');
 }

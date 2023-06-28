@@ -85,6 +85,6 @@ class :foo {
 }
 
 <<__EntryPoint>>
-function main_xhp_keyword_hh() {
+function main_xhp_keyword_hh() :mixed{
 echo "Done\n";
 }

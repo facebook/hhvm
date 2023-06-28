@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test_auth_digest_entrypoint() {
+function test_auth_digest_entrypoint() :mixed{
     $realm = 'Restricted area';
 
     //user => password
@@ -39,7 +39,7 @@ function test_auth_digest_entrypoint() {
 
 // function to parse the http auth header
 function http_digest_parse($txt)
-{
+:mixed{
     // protect against missing data
     $needed_parts = darray['nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1,
                           'username'=>1, 'uri'=>1, 'response'=>1];

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_directory_iterator_seek() {
+function main_directory_iterator_seek() :mixed{
 $dit = new DirectoryIterator(__DIR__);
 
 $dit->seek(5);

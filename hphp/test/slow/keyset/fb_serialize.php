@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serde($v) {
+function serde($v) :mixed{
   $ret = null;
   try {
     $ser = fb_serialize($v, FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
@@ -33,7 +33,7 @@ function serde($v) {
 
 
 <<__EntryPoint>>
-function main_fb_serialize() {
+function main_fb_serialize() :mixed{
 serde(keyset[]);
 serde(keyset[1, 2, 3]);
 serde(keyset['a', 'b', 'c']);

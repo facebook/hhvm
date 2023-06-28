@@ -16,7 +16,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_1610() {
+function main_1610() :mixed{
 var_dump(A::CONSTANT);
 var_dump(B::CONSTANT);
 var_dump(C::$A_CONSTANT);

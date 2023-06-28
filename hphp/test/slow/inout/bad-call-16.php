@@ -1,5 +1,5 @@
 <?hh
 
-function main() {
+function main() :mixed{
   foo(inout $_ENV['x']);
 }

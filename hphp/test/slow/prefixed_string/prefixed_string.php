@@ -11,6 +11,6 @@ function f(): void {
 
 
 <<__EntryPoint>>
-function main_prefixed_string() {
+function main_prefixed_string() :mixed{
 f();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_566() {
+function main_566() :mixed{
 $a = 't';
  $a = 1;
  $a += HH\Lib\Legacy_FIXME\cast_for_arithmetic('n');

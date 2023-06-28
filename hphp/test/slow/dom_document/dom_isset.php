@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dom_isset() {
+function main_dom_isset() :mixed{
 $doc = new DOMDocument();
 $doc->loadXML('<x:x xmlns:x="urn:x"/>');
 $node = $doc->documentElement;

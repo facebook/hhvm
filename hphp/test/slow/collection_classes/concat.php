@@ -1,32 +1,32 @@
 <?hh
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new ArrayIterator(varray[1, 2, 3]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new ArrayIterator(varray[1, 2, 3]);
   }
 }
 
-function dump($iterable) {
+function dump($iterable) :mixed{
   echo get_class($iterable) . "\n";
   foreach ($iterable as $k => $v) {
     echo "$k => $v\n";
   }
 }
 
-function test($lhs, $rhs) {
+function test($lhs, $rhs) :mixed{
   echo get_class($lhs) . " concat ";
   echo (is_array($rhs) ? "array" : get_class($rhs)) . " = ";
   dump($lhs->concat($rhs));
 }
 
-function main() {
+function main() :mixed{
   $concatable = Vector {
     Vector {1, 2, 3},
     ImmVector {1, 2, 3},
@@ -50,6 +50,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_concat() {
+function main_concat() :mixed{
 main();
 }

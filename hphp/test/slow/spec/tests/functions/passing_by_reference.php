@@ -3,7 +3,7 @@
 // A useful pass-by-reference example; swap the values of two variables
 
 function swap(inout $p1, inout $p2)
-{
+:mixed{
    $temp = $p1;
    $p1 = $p2;
    $p2 = $temp;
@@ -13,7 +13,7 @@ function swap(inout $p1, inout $p2)
 // a simple example of passing by reference
 
 function f(inout $p)
-{
+:mixed{
    echo '$p '.(isset($p) ? "is set\n" : "is not set\n");
     echo "f In:  \$p: $p\n";
     $p = 200;       // actual argument's value changed

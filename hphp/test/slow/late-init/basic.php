@@ -21,7 +21,7 @@ class A {
   <<__LateInit>> public static $p13;
   <<__LateInit>> private static $p14;
 
-  public function set() {
+  public function set() :mixed{
     $this->p1 = 123;
     $this->p2 = 123;
     A::$p3 = 123;
@@ -36,49 +36,49 @@ class A {
     A::$p8->p9->p10 = 123;
   }
 
-  public function unset() {
+  public function unset() :mixed{
     unset($this->p1);
     unset($this->p2);
     unset(A::$p7->p9->p10);
     unset(A::$p8->p9->p10);
   }
 
-  public function get1() { return $this->p1; }
-  public function isset1() { return isset($this->p1); }
-  public function incdec1() { return ++$this->p1; }
-  public function setop1() { return $this->p1 += 1000; }
+  public function get1() :mixed{ return $this->p1; }
+  public function isset1() :mixed{ return isset($this->p1); }
+  public function incdec1() :mixed{ return ++$this->p1; }
+  public function setop1() :mixed{ return $this->p1 += 1000; }
 
 
-  public function get2() { return $this->p2; }
-  public function isset2() { return isset($this->p2); }
-  public function incdec2() { return ++$this->p2; }
-  public function setop2() { return $this->p2 += 1000; }
+  public function get2() :mixed{ return $this->p2; }
+  public function isset2() :mixed{ return isset($this->p2); }
+  public function incdec2() :mixed{ return ++$this->p2; }
+  public function setop2() :mixed{ return $this->p2 += 1000; }
 
 
-  public function get3() { return A::$p3; }
-  public function isset3() { return isset(A::$p3); }
-  public function incdec3() { return ++A::$p3; }
-  public function setop3() { return A::$p3 += 1000; }
+  public function get3() :mixed{ return A::$p3; }
+  public function isset3() :mixed{ return isset(A::$p3); }
+  public function incdec3() :mixed{ return ++A::$p3; }
+  public function setop3() :mixed{ return A::$p3 += 1000; }
 
-  public function get4() { return A::$p4; }
-  public function isset4() { return isset(A::$p4); }
-  public function incdec4() { return ++A::$p4; }
-  public function setop4() { return A::$p4 += 1000; }
+  public function get4() :mixed{ return A::$p4; }
+  public function isset4() :mixed{ return isset(A::$p4); }
+  public function incdec4() :mixed{ return ++A::$p4; }
+  public function setop4() :mixed{ return A::$p4 += 1000; }
 
-  public function get5() { return A::$p5->p9->p10; }
-  public function get6() { return A::$p6->p9->p10; }
-  public function get7() { return A::$p7->p9->p10; }
-  public function get8() { return A::$p8->p9->p10; }
+  public function get5() :mixed{ return A::$p5->p9->p10; }
+  public function get6() :mixed{ return A::$p6->p9->p10; }
+  public function get7() :mixed{ return A::$p7->p9->p10; }
+  public function get8() :mixed{ return A::$p8->p9->p10; }
 
-  public function get9() { return $this->p11; }
-  public function get10() { return $this->p12; }
-  public function get11() { return A::$p13; }
-  public function get12() { return A::$p14; }
+  public function get9() :mixed{ return $this->p11; }
+  public function get10() :mixed{ return $this->p12; }
+  public function get11() :mixed{ return A::$p13; }
+  public function get12() :mixed{ return A::$p14; }
 
-  public function isset5() { return isset($this->p11); }
-  public function isset6() { return isset($this->p12); }
-  public function isset7() { return isset(A::$p13); }
-  public function isset8() { return isset(A::$p14); }
+  public function isset5() :mixed{ return isset($this->p11); }
+  public function isset6() :mixed{ return isset($this->p12); }
+  public function isset7() :mixed{ return isset(A::$p13); }
+  public function isset8() :mixed{ return isset(A::$p14); }
 }
 
 class B {
@@ -100,11 +100,11 @@ class B {
   <<__LateInit>> public static $p13;
   <<__LateInit>> private static $p14;
 
-  private static function prop($i) {
+  private static function prop($i) :mixed{
     return __hhvm_intrinsics\launder_value("p$i");
   }
 
-  public function set() {
+  public function set() :mixed{
     $this->{B::prop(1)} = 123;
     $this->{B::prop(2)} = 123;
     B::$p3 = 123;
@@ -119,49 +119,49 @@ class B {
     B::$p8->{B::prop(9)}->{B::prop(10)} = 123;
   }
 
-  public function unset() {
+  public function unset() :mixed{
     unset($this->{B::prop(1)});
     unset($this->{B::prop(2)});
     unset(B::$p7->{B::prop(9)}->{B::prop(10)});
     unset(B::$p8->{B::prop(9)}->{B::prop(10)});
   }
 
-  public function get1() { return $this->{B::prop(1)}; }
-  public function isset1() { return isset($this->{B::prop(1)}); }
-  public function incdec1() { return ++$this->{B::prop(1)}; }
-  public function setop1() { return $this->{B::prop(1)} += 1000; }
+  public function get1() :mixed{ return $this->{B::prop(1)}; }
+  public function isset1() :mixed{ return isset($this->{B::prop(1)}); }
+  public function incdec1() :mixed{ return ++$this->{B::prop(1)}; }
+  public function setop1() :mixed{ return $this->{B::prop(1)} += 1000; }
 
 
-  public function get2() { return $this->{B::prop(2)}; }
-  public function isset2() { return isset($this->{B::prop(2)}); }
-  public function incdec2() { return ++$this->{B::prop(2)}; }
-  public function setop2() { return $this->{B::prop(2)} += 1000; }
+  public function get2() :mixed{ return $this->{B::prop(2)}; }
+  public function isset2() :mixed{ return isset($this->{B::prop(2)}); }
+  public function incdec2() :mixed{ return ++$this->{B::prop(2)}; }
+  public function setop2() :mixed{ return $this->{B::prop(2)} += 1000; }
 
 
-  public function get3() { return B::$p3; }
-  public function isset3() { return isset(B::$p3); }
-  public function incdec3() { return ++B::$p3; }
-  public function setop3() { return B::$p3 += 1000; }
+  public function get3() :mixed{ return B::$p3; }
+  public function isset3() :mixed{ return isset(B::$p3); }
+  public function incdec3() :mixed{ return ++B::$p3; }
+  public function setop3() :mixed{ return B::$p3 += 1000; }
 
-  public function get4() { return B::$p4; }
-  public function isset4() { return isset(B::$p4); }
-  public function incdec4() { return ++B::$p4; }
-  public function setop4() { return B::$p4 += 1000; }
+  public function get4() :mixed{ return B::$p4; }
+  public function isset4() :mixed{ return isset(B::$p4); }
+  public function incdec4() :mixed{ return ++B::$p4; }
+  public function setop4() :mixed{ return B::$p4 += 1000; }
 
-  public function get5() { return B::$p5->{B::prop(9)}->{B::prop(10)}; }
-  public function get6() { return B::$p6->{B::prop(9)}->{B::prop(10)}; }
-  public function get7() { return B::$p7->{B::prop(9)}->{B::prop(10)}; }
-  public function get8() { return B::$p8->{B::prop(9)}->{B::prop(10)}; }
+  public function get5() :mixed{ return B::$p5->{B::prop(9)}->{B::prop(10)}; }
+  public function get6() :mixed{ return B::$p6->{B::prop(9)}->{B::prop(10)}; }
+  public function get7() :mixed{ return B::$p7->{B::prop(9)}->{B::prop(10)}; }
+  public function get8() :mixed{ return B::$p8->{B::prop(9)}->{B::prop(10)}; }
 
-  public function get9() { return $this->{B::prop(11)}; }
-  public function get10() { return $this->{B::prop(12)}; }
-  public function get11() { return B::$p13; }
-  public function get12() { return B::$p14; }
+  public function get9() :mixed{ return $this->{B::prop(11)}; }
+  public function get10() :mixed{ return $this->{B::prop(12)}; }
+  public function get11() :mixed{ return B::$p13; }
+  public function get12() :mixed{ return B::$p14; }
 
-  public function isset5() { return isset($this->{B::prop(11)}); }
-  public function isset6() { return isset($this->{B::prop(12)}); }
-  public function isset7() { return isset(B::$p13); }
-  public function isset8() { return isset(B::$p14); }
+  public function isset5() :mixed{ return isset($this->{B::prop(11)}); }
+  public function isset6() :mixed{ return isset($this->{B::prop(12)}); }
+  public function isset7() :mixed{ return isset(B::$p13); }
+  public function isset8() :mixed{ return isset(B::$p14); }
 }
 
 const TESTS = vec[
@@ -197,7 +197,7 @@ const TESTS = vec[
   'isset8',
 ];
 
-function run_test($a, $test) {
+function run_test($a, $test) :mixed{
   try {
     echo "=== $test ===\n";
     var_dump($a->$test());
@@ -206,7 +206,7 @@ function run_test($a, $test) {
   }
 }
 
-function test($tests, $a) {
+function test($tests, $a) :mixed{
   foreach ($tests as $test) run_test($a, $test);
   echo "============= setting ================\n";
   $a->set();

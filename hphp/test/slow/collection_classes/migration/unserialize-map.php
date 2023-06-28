@@ -3,7 +3,7 @@
 // Test that we can handle unserialization of Maps with
 // and without namespaces.
 
-function main() {
+function main() :mixed{
   $m = Map {'a' => 1, 'b' => 2};
 
   // unserialize o serialize == id
@@ -38,6 +38,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unserialize_map() {
+function main_unserialize_map() :mixed{
 main();
 }

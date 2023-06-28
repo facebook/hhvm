@@ -1,6 +1,6 @@
 <?hh
 namespace Foo;
-function f($a=namespace\bar) {
+function f($a=namespace\bar) :mixed{
     return $a;
 }
 <<__EntryPoint>> function main(): void {

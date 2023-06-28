@@ -23,7 +23,7 @@ class E extends C {}
 
 
 <<__EntryPoint>>
-function main_is_expression_tc_this2() {
+function main_is_expression_tc_this2() :mixed{
 $c = new C();
 $d = new D();
 $e = new E();

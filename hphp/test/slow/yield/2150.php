@@ -1,6 +1,6 @@
 <?hh
 
-function nums() {
+function nums() :AsyncGenerator<mixed,mixed,void>{
  $i = 0;
  while (true) {
   switch ($i) {
@@ -18,7 +18,7 @@ function nums() {
 
 
  <<__EntryPoint>>
-function main_2150() {
+function main_2150() :mixed{
 foreach (nums() as $num) {
  var_dump($num);
 }

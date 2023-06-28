@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :mixed{
   if (\HH\global_isset('b')) $b = 0;
   try {
     return $b;
@@ -8,8 +8,8 @@ function foo() {
   }
 }
 
-function baz($x) {}
-function bar() {
+function baz($x) :mixed{}
+function bar() :mixed{
   if (\HH\global_isset('a')) $a = 0;
   try {
     baz($a);
@@ -19,7 +19,7 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo();
   bar();
 }

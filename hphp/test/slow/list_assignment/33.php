@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_33() {
+function main_33() :mixed{
 list() = varray[1,2,3];
 }

@@ -5,7 +5,7 @@ class P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $p = new P();
   $p->prop = new P();
   $z = readonly $p->prop; // should be okay

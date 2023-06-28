@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_imagescale() {
+function main_imagescale() :mixed{
 $im = imagecreate(256, 256);
 $tmpfile = tempnam(sys_get_temp_dir(), 'testimagescale.png');
 imagejpeg($im, $tmpfile);

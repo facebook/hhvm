@@ -3,14 +3,14 @@
 
 
 
-<<__Memoize>> function func1($x) {}
-<<__Memoize, __DynamicallyCallable>> function func4($x) {}
+<<__Memoize>> function func1($x) :mixed{}
+<<__Memoize, __DynamicallyCallable>> function func4($x) :mixed{}
 
 class A {
-  <<__Memoize>> public function func2($x) {}
-  <<__Memoize>> public static function func3($x) {}
+  <<__Memoize>> public function func2($x) :mixed{}
+  <<__Memoize>> public static function func3($x) :mixed{}
 
-  public static function positive_tests() {
+  public static function positive_tests() :mixed{
     echo "====================== positive tests (A) ==================\n";
     $v = 123;
 
@@ -48,10 +48,10 @@ class A {
 }
 
 class B {
-  <<__Memoize, __DynamicallyCallable>> public function func5($x) {}
-  <<__Memoize, __DynamicallyCallable>> public static function func6($x) {}
+  <<__Memoize, __DynamicallyCallable>> public function func5($x) :mixed{}
+  <<__Memoize, __DynamicallyCallable>> public static function func6($x) :mixed{}
 
-  public static function positive_tests() {
+  public static function positive_tests() :mixed{
     echo "====================== positive tests (B) ==================\n";
     $v = 123;
 
@@ -71,7 +71,7 @@ class B {
 
   }
 
-  public static function negative_tests() {
+  public static function negative_tests() :mixed{
     echo "====================== negative tests ======================\n";
     $v = 123;
 

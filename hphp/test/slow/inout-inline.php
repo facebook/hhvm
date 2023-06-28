@@ -1,7 +1,7 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-function foo(inout float $a, inout int $b, inout string $c) {
+function foo(inout float $a, inout int $b, inout string $c) :mixed{
   $a += 1;
   $b += 2;
   $c = HH\Lib\Legacy_FIXME\cast_for_arithmetic($c);
@@ -11,7 +11,7 @@ function foo(inout float $a, inout int $b, inout string $c) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   list($a, $b, $c) = varray[2.0, 3, "5"];
   var_dump(
     "one",

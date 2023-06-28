@@ -12,7 +12,7 @@ function is_mixed($x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_mixed() {
+function main_is_expression_ta_mixed() :mixed{
 is_mixed(null);
 is_mixed(-1);
 is_mixed(false);

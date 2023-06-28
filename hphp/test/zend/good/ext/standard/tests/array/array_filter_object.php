@@ -16,7 +16,7 @@
 class SimpleClass
 {
   public $var1 = 10;
-  public function check() {
+  public function check() :mixed{
     return $var1;
   }
 }
@@ -30,14 +30,14 @@ class EmptyClass
 abstract class AbstractClass
 {
   protected $var2 = 5;
-  abstract function emptyMethod();
+  abstract function emptyMethod():mixed;
 }
 
 // class deriving above abstract class
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyMethod() {
+  public function emptyMethod() :mixed{
     echo "defined in child";
   }
 }
@@ -46,7 +46,7 @@ class ChildClass extends AbstractClass
 class FinalClass
 {
   private $var4;
-  final function finalMethod() {
+  final function finalMethod() :mixed{
     echo 'This can not be overloaded';
   }
 }
@@ -55,20 +55,20 @@ class FinalClass
 class StaticClass
 {
   public static $var5 = 5;
-  public static function staticMethod() {
+  public static function staticMethod() :mixed{
     echo 'this is static method';
   }
 }
 
 // Callback function which returns always true
 function always_true($input)
-{
+:mixed{
   return true;
 }
 
 // Callback function which returns always false
 function always_false($input)
-{
+:mixed{
   return false;
 }
 <<__EntryPoint>> function main(): void {

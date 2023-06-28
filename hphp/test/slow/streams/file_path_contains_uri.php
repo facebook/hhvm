@@ -5,7 +5,7 @@
  * is treated as a file path, not a URI with a scheme of
  * /tmp/foo/http - if it is, an unknown stream type warning will be raised.
  */
-function main() {
+function main() :mixed{
   $root = tempnam(sys_get_temp_dir(), 'hhvmtest');
   unlink($root);
   mkdir($root);
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_file_path_contains_uri() {
+function main_file_path_contains_uri() :mixed{
 main();
 }

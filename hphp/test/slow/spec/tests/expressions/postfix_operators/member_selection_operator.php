@@ -4,16 +4,16 @@ class Point {
   private $x;
   private $y;
 
-  public function getX() {
+  public function getX() :mixed{
     return $this->x;
   }
-  public function setX($x) {
+  public function setX($x) :mixed{
     $this->x = $x;
   }
-  public function getY() {
+  public function getY() :mixed{
     return $this->y;
   }
-  public function setY($y) {
+  public function setY($y) :mixed{
     $this->y = $y;
   }
 
@@ -25,22 +25,22 @@ class Point {
     $this->y = $y;
   }
 
-  public function move($x, $y) {
+  public function move($x, $y) :mixed{
     $this->x = $x;
     $this->y = $y;
   }
 
-  public function translate($x, $y) {
+  public function translate($x, $y) :mixed{
     $this->x += $x;
     $this->y += $y;
   }
 
-  public function __toString() {
+  public function __toString() :mixed{
     return '('.$this->x.','.$this->y.')';
   }
 
   public $piProp = 555;
-  public static function psf() {
+  public static function psf() :mixed{
     return 123;
   }
   public static $psProp = 999;
@@ -57,7 +57,7 @@ class K {
 }
 
 class L {
-  public function f() {
+  public function f() :mixed{
     echo "Hello from f\n";
   }
 }

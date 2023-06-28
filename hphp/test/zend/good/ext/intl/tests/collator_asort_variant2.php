@@ -4,7 +4,7 @@
  * Sort various arrays in specified locale.
  */
 function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR )
-{
+:mixed{
     $res_str = '';
 
     $coll = ut_coll_create( $locale );
@@ -35,7 +35,7 @@ function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR
  * Test main function.
  */
 function ut_main()
-{
+:mixed{
 
     ZendGoodExtIntlTestsCollatorAsortVariant2::$test_num = 1;
     $res_str = '';

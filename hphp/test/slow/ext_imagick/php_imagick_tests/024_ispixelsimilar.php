@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_024_ispixelsimilar() {
+function main_024_ispixelsimilar() :mixed{
 $root3 = 1.732050807568877;
 
 $tests = varray[

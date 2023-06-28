@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test_status_entrypoint() {
+function test_status_entrypoint() :mixed{
 $uptime = HH\server_uptime();
 var_dump($uptime);
 

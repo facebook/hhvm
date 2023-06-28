@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function get_count() {
+function get_count() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check('count');
   if ($count === false) {
     $count = 0;
@@ -10,7 +10,7 @@ function get_count() {
   return $count;
 }
 
-function store() {
+function store() :mixed{
   echo "store()\n";
   $a = new A();
   $a->x = true;
@@ -23,13 +23,13 @@ function store() {
   __hhvm_intrinsics\apc_fetch_no_check('some-key2');
 }
 
-function get() {
+function get() :mixed{
   echo "get()\n";
   __hhvm_intrinsics\apc_fetch_no_check('some-key');
   __hhvm_intrinsics\apc_fetch_no_check('some-key2');
 }
 
-function run() {
+function run() :mixed{
   $count = get_count();
   echo "Count: $count\n";
   if ($count == 0) {

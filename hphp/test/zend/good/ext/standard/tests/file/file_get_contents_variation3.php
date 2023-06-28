@@ -8,7 +8,7 @@
 // define some classes
 class classWithToString
 {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -18,7 +18,7 @@ class classWithoutToString
 }
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     if (error_reporting() != 0) {
         // report non-silenced errors
         echo "Error: $err_no - $err_msg, $filename($linenum)\n";

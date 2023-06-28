@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_2() {
+function main_2() :mixed{
 apc_add("ts", "TestString");
 apc_add("ta", darray["a" => 1, "b" => 2]);
 apc_add("ts", "NewValue");

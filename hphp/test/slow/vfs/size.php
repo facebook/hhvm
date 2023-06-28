@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(filesize(__DIR__.'/files/foo.dat'));
   var_dump(filesize(__DIR__.'/files/foo.txt'));
   var_dump(filesize(__DIR__.'/files/bar.dat'));

@@ -1,6 +1,6 @@
 <?hh
 
-function decode($input) {
+function decode($input) :mixed{
   // We don't expose this option in userland: we only want to use it internally
   return json_decode($input, true, 512, 1 << 29);
 }
@@ -15,7 +15,7 @@ function cases(): vec<(string, bool, bool)> {
   ];
 }
 
-function deep_case() {
+function deep_case() :mixed{
   $res = decode('[{"bar": 0}, [1, 2, 3]]');
   invariant(is_varray($res), 'Expected top-level to be varray');
   invariant(is_darray($res[0]), 'Expected 0th element to be darray');
@@ -23,7 +23,7 @@ function deep_case() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foreach (cases() as $case) {
     list($input, $is_varray, $is_darray) = $case;
     invariant(

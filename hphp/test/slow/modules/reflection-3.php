@@ -3,15 +3,15 @@
 
 module A;
 
-internal function f() {}
-function g() {}
+internal function f() :mixed{}
+function g() :mixed{}
 
 class C {
-  internal function f() {}
-  static internal function f_static() {}
+  internal function f() :mixed{}
+  static internal function f_static() :mixed{}
 
-  function g() {}
-  static function g_static() {}
+  function g() :mixed{}
+  static function g_static() :mixed{}
 }
 
 internal class D {}
@@ -25,7 +25,7 @@ class E {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump((new ReflectionFunction('f')->isInternalToModule()));
   var_dump((new ReflectionFunction('g')->isInternalToModule()));
 

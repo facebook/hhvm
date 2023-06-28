@@ -1,10 +1,10 @@
 <?hh
 <<__DynamicallyCallable>>
-function test() {
+function test() :mixed{
     echo "Hello World\n";
 }
 <<__DynamicallyCallable>>
-function another_test($parameter) {
+function another_test($parameter) :mixed{
     var_dump($parameter);
 }
 <<__EntryPoint>> function main(): void {

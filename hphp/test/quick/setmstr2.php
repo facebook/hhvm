@@ -1,5 +1,5 @@
 <?hh
-function bar($a) {}
+function bar($a) :mixed{}
 <<__EntryPoint>> function baz(): void {
   $cipher = 'abcdefghij';
   $pos = 4;

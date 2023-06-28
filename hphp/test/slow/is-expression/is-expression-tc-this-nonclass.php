@@ -10,6 +10,6 @@ function is_T(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_tc_this_nonclass() {
+function main_is_expression_tc_this_nonclass() :mixed{
 is_T(new stdClass());
 }

@@ -7,7 +7,7 @@
 // define some classes
 class classWithToString
 {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -17,7 +17,7 @@ class classWithoutToString
 }
 
 function key_compare_func($key1, $key2)
-{
+:mixed{
     if ($key1 == $key2) {
         return 0;
     }

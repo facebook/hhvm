@@ -1,10 +1,10 @@
 <?hh
 
-async function block() {
+async function block() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
-async function foo($a) {
+async function foo($a) :Awaitable<mixed>{
   $fn = async ($b) ==> {
     $c = 0;
     while (true) {
@@ -24,6 +24,6 @@ async function foo($a) {
 
 
 <<__EntryPoint>>
-function main_lambda5() {
+function main_lambda5() :mixed{
 HH\Asio\join(foo(42));
 }

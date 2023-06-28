@@ -1,6 +1,6 @@
 <?hh
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 class P { function __construct(public mixed $m)[] {} }
 
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
@@ -41,7 +41,7 @@ function unset_dynamic(): void {
   var_dump($cm, $am, $dm, $om);
 }
 
-function unset_inner() {
+function unset_inner() :mixed{
   $cm = LV(Foo::bar<>);
 
   // emptyish
@@ -55,7 +55,7 @@ function unset_inner() {
   var_dump($cm);
 }
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...) :mixed{
   if ($msg === 'Implicit clsmeth to varray conversion') {
     echo "[NOTICE] $msg\n";
     return true;
@@ -64,7 +64,7 @@ function handle_error($_no, $msg, ...) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   unset_static();  unset_static();

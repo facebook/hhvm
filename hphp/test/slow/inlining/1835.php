@@ -1,6 +1,6 @@
 <?hh
 
-function id($x) {
+function id($x) :mixed{
  return $x;
  }
 class B {
@@ -12,21 +12,21 @@ class X extends B {
   function __construct() {
  parent::__construct(varray[]);
  }
-  function foo() {
+  function foo() :mixed{
  echo "foo
 ";
  }
 }
-function bar($x=0) {
+function bar($x=0) :mixed{
  if ($x) return 1;
  return '';
  }
-function test($foo) {
+function test($foo) :mixed{
   id(new X(bar()))->foo();
   id(new $foo(bar()))->foo();
 }
 
 <<__EntryPoint>>
-function main_1835() {
+function main_1835() :mixed{
 test('X');
 }

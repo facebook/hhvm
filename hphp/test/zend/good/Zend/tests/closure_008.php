@@ -1,6 +1,6 @@
 <?hh
 
-function replace_spaces($text) {
+function replace_spaces($text) :mixed{
     $lambda = function ($matches) {
         return str_replace(' ', '&nbsp;', $matches[1]).' ';
     };

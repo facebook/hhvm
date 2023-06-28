@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_message_queue() {
+function main_message_queue() :mixed{
 $s_msg_qnum = "msg_qnum";
 $filename = tempnam(sys_get_temp_dir(), 'vmmsgqueue');
 

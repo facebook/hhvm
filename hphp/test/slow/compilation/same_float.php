@@ -13,6 +13,6 @@ function to_string(mixed $value): string {
 
 
 <<__EntryPoint>>
-function main_same_float() {
+function main_same_float() :mixed{
 var_dump(to_string(42.0));
 }

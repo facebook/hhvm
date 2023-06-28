@@ -1,11 +1,11 @@
 <?hh
 
 
-function foo($a) {
+function foo($a) :mixed{
   return $a + 2;
 }
 
-function genFoo($a) {
+function genFoo($a) :AsyncGenerator<mixed,mixed,void>{
   $a = foo($a);
   $z = yield $a+5;
   // Step out from this line will cause us to handle an iternext, with
@@ -16,7 +16,7 @@ function genFoo($a) {
   error_log('Finished in genFoo');
 }
 
-function main() {
+function main() :mixed{
 
   $a = 42;
   foreach (genFoo(1) as $x) {

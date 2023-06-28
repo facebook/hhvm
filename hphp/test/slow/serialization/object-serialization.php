@@ -9,7 +9,7 @@ class OneProp {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $test_cases = vec[
     new NoProps(),
     new OneProp(),

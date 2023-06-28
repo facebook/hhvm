@@ -1,7 +1,7 @@
 <?hh
 
 class Base {
-  function foo() {
+  function foo() :mixed{
     $m = new ReflectionMethod(get_class($this), 'bar');
     var_dump($m->name);
   }

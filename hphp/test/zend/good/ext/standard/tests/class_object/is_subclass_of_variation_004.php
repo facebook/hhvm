@@ -6,7 +6,7 @@
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 <<__EntryPoint>> function is_subclass_of_variation_004(): void {

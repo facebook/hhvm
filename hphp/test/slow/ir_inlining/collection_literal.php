@@ -16,7 +16,7 @@ class X {
 
 
 <<__EntryPoint>>
-function main_collection_literal() {
+function main_collection_literal() :mixed{
 $x = new X;
 $x->fiz();
 }

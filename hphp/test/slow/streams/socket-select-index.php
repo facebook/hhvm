@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_socket_select_index() {
+function main_socket_select_index() :mixed{
 $msg = "Hello";
 $len = strlen($msg);
 

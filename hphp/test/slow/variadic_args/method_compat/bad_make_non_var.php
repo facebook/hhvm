@@ -1,11 +1,11 @@
 <?hh
 
 interface DB {
-  public function query($query, ...$params);
+  public function query($query, ...$params):mixed;
 }
 
 class MySQL implements DB {
-  public function query($query) {}
+  public function query($query) :mixed{}
 }
 
 <<__EntryPoint>>

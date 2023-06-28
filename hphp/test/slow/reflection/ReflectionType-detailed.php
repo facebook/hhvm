@@ -1,11 +1,11 @@
 <?hh
 function foo(stdClass $a, AnyArray $b, callable $c, ?stdClass $d = null,
              $e = null, string $f, bool $g, int $h, float $i,
-             NotExisting $j) { }
+             NotExisting $j) :mixed{ }
 function bar(): stdClass { return new stdClass; }
 
 <<__EntryPoint>>
-function main_reflection_type_detailed() {
+function main_reflection_type_detailed() :mixed{
 $closure = function (Test $a): Test { return $a; };
 echo "*** functions\n";
 foreach (varray[

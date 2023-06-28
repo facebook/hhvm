@@ -24,6 +24,6 @@ final abstract class X {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(X::get(42));
 }

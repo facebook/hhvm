@@ -1,5 +1,5 @@
 <?hh
-function utf32_utf8($k) {
+function utf32_utf8($k) :mixed{
     if ($k < 0x80) {
         $retval = pack('C', $k);
     } else if ($k < 0x800) {

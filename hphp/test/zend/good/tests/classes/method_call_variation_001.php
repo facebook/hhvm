@@ -2,13 +2,13 @@
 class C
 {
     function foo($a, $b)
-    {
+:mixed    {
         echo "Called C::foo($a, $b)\n";
     }
 }
 
 function foo($a, $b)
-{
+:mixed{
     echo "Called global foo($a, $b)\n";
 }
 

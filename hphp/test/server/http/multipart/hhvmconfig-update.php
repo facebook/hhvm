@@ -17,14 +17,14 @@ Parser {
 // FILE: a.php
 
 namespace A;
-function bar() {
+function bar() :mixed{
   return "A\\bar";
 }
 
 // FILE: b.php
 
 namespace B;
-function bar() {
+function bar() :mixed{
   return "B\\bar";
 }
 

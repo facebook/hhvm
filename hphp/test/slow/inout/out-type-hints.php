@@ -9,7 +9,7 @@ function bar(inout int $x, inout int $y): int {
   return $x + $y;
 }
 
-function main() {
+function main() :mixed{
   $a = 'hello';
   $b = 42;
   $c = 58;
@@ -21,7 +21,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_out_type_hints() {
+function main_out_type_hints() :mixed{
 set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
   echo "[$errno] $errstr\n";
   throw new Exception();

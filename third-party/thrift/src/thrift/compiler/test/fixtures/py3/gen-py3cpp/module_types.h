@@ -279,12 +279,6 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
 
 }} // apache::thrift
 
-namespace py3 { namespace simple {
-
-using _AnEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnum>;
-using _AnEnumRenamed_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumRenamed>;
-using _Flags_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Flags>;
-}} // py3::simple
 
 // END declare_enums
 // BEGIN forward_declare

@@ -80,10 +80,6 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
 
 }} // apache::thrift
 
-namespace a { namespace different { namespace ns {
-
-using _AnEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnum>;
-}}} // a::different::ns
 
 // END declare_enums
 // BEGIN forward_declare

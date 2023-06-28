@@ -149,10 +149,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test {
-
-using _Enum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Enum>;
-}}} // facebook::thrift::test
 
 // END declare_enums
 // BEGIN forward_declare

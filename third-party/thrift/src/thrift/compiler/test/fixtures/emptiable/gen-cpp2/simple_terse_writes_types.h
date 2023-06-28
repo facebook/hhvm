@@ -209,10 +209,6 @@ template <> struct TEnumTraits<::apache::thrift::test::MyEnum> {
 
 }} // apache::thrift
 
-namespace apache { namespace thrift { namespace test {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-}}} // apache::thrift::test
 
 // END declare_enums
 // BEGIN forward_declare

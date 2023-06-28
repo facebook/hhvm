@@ -346,16 +346,6 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enums {
-
-using _Metasyntactic_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Metasyntactic>;
-using _MyEnum1_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum1>;
-using _MyEnum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum2>;
-using _MyEnum3_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum3>;
-using _MyEnum4_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum4>;
-using _MyBitmaskEnum1_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyBitmaskEnum1>;
-using _MyBitmaskEnum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyBitmaskEnum2>;
-}}} // test::fixtures::enums
 
 // END declare_enums
 // BEGIN forward_declare

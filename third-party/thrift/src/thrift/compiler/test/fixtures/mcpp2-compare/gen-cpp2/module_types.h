@@ -1046,13 +1046,6 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
 
 }} // apache::thrift
 
-namespace some { namespace valid { namespace ns {
-
-using _MyEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnumA>;
-using _AnnotatedEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnnotatedEnum>;
-using _AnnotatedEnum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnnotatedEnum2>;
-using _MyEnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnumB>;
-}}} // some::valid::ns
 
 // END declare_enums
 // BEGIN forward_declare

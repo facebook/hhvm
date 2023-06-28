@@ -464,10 +464,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyEnum> {
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-}}}} // facebook::thrift::test::terse_write
 
 // END declare_enums
 // BEGIN forward_declare

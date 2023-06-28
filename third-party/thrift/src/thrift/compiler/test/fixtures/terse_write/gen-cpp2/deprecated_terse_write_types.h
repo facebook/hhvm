@@ -279,10 +279,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
 
 }} // apache::thrift
 
-namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-}}}}} // facebook::thrift::test::terse_write::deprecated
 
 // END declare_enums
 // BEGIN forward_declare

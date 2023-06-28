@@ -151,10 +151,6 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic-structured-annotations {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-}}} // test::fixtures::basic-structured-annotations
 
 // END declare_enums
 // BEGIN forward_declare

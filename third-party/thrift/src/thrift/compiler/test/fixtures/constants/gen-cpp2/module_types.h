@@ -268,12 +268,6 @@ template <> struct TEnumTraits<::cpp2::Company> {
 
 }} // apache::thrift
 
-namespace cpp2 {
-
-using _EmptyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<EmptyEnum>;
-using _City_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<City>;
-using _Company_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Company>;
-} // cpp2
 
 // END declare_enums
 // BEGIN forward_declare

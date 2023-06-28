@@ -79,14 +79,6 @@ template <> struct TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>> {
 
 }} // apache::thrift
 
-<% > common/namespace_cpp2_begin%>
-
-
-<%#program:enums%>
-using _<%enum:cpp_name%>_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<<%enum:cpp_name%>>;
-<%/program:enums%>
-<% > common/namespace_cpp2_end%>
-
 <%/program:enums?%>
 
 // END declare_enums

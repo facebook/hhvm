@@ -181,11 +181,6 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-using _HackEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<HackEnum>;
-}}} // test::fixtures::basic
 
 // END declare_enums
 // BEGIN forward_declare

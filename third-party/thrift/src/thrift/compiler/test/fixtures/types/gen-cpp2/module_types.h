@@ -493,12 +493,6 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
 
 }} // apache::thrift
 
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-
-using _has_bitwise_ops_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<has_bitwise_ops>;
-using _is_unscoped_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<is_unscoped>;
-using _MyForwardRefEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyForwardRefEnum>;
-}}}} // apache::thrift::fixtures::types
 
 // END declare_enums
 // BEGIN forward_declare

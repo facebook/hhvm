@@ -218,14 +218,6 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
 
 }} // apache::thrift
 
-namespace facebook { namespace ns { namespace qwerty {
-
-using _AnEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumA>;
-using _AnEnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumB>;
-using _AnEnumC_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumC>;
-using _AnEnumD_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumD>;
-using _AnEnumE_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<AnEnumE>;
-}}} // facebook::ns::qwerty
 
 // END declare_enums
 // BEGIN forward_declare

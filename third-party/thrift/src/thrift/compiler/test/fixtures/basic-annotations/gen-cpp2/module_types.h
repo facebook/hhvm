@@ -130,10 +130,6 @@ template <> struct TEnumTraits<::cpp2::YourEnum> {
 
 }} // apache::thrift
 
-namespace cpp2 {
-
-using _YourEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<YourEnum>;
-} // cpp2
 
 // END declare_enums
 // BEGIN forward_declare

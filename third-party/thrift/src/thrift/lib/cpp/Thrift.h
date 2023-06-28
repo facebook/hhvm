@@ -104,25 +104,6 @@ struct TEnumTraits {
   }
 };
 
-namespace detail {
-
-template <typename EnumTypeT>
-struct TEnumMapFactory {
-  using EnumType = EnumTypeT;
-  using ValuesToNamesMapType = std::map<EnumType, const char*>;
-  using Traits = TEnumTraits<EnumType>;
-
-  static ValuesToNamesMapType makeValuesToNamesMap() {
-    ValuesToNamesMapType _return;
-    for (size_t i = 0; i < Traits::size; ++i) {
-      _return.emplace(EnumType(Traits::values[i]), Traits::names[i].data());
-    }
-    return _return;
-  }
-};
-
-} // namespace detail
-
 class TOutput {
  public:
   TOutput() : f_(&errorTimeWrapper) {}

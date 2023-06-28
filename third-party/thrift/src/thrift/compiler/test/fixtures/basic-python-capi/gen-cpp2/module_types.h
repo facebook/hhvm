@@ -622,11 +622,6 @@ template <> struct TEnumTraits<::test::fixtures::basic-python-capi::NormalDecent
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace basic-python-capi {
-
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-using _NormalDecentEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<NormalDecentEnum>;
-}}} // test::fixtures::basic-python-capi
 
 // END declare_enums
 // BEGIN forward_declare

@@ -1011,13 +1011,6 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
 
 }} // apache::thrift
 
-namespace test_cpp2 { namespace cpp_reflection {
-
-using _enum1_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<enum1>;
-using _enum2_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<enum2>;
-using _enum3_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<enum3>;
-using _enum_with_special_names_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<enum_with_special_names>;
-}} // test_cpp2::cpp_reflection
 
 // END declare_enums
 // BEGIN forward_declare

@@ -167,12 +167,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace enumstrict {
-
-using _EmptyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<EmptyEnum>;
-using _MyEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnum>;
-using _MyBigEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyBigEnum>;
-}}} // test::fixtures::enumstrict
 
 // END declare_enums
 // BEGIN forward_declare

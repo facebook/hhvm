@@ -144,10 +144,6 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
 
 }} // apache::thrift
 
-namespace test { namespace fixtures { namespace tablebased {
-
-using _ExampleEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ExampleEnum>;
-}}} // test::fixtures::tablebased
 
 // END declare_enums
 // BEGIN forward_declare

@@ -140,10 +140,6 @@ template <> struct TEnumTraits<::some::ns::EnumB> {
 
 }} // apache::thrift
 
-namespace some { namespace ns {
-
-using _EnumB_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<EnumB>;
-}} // some::ns
 
 // END declare_enums
 // BEGIN forward_declare

@@ -1052,10 +1052,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
   Profile.measure_elapsed_time_and_report tcopt (Some env) cv.cv_id @@ fun () ->
   (* First pick up and localize the hint if it exists *)
   let decl_cty =
-    Typing_helpers.merge_hint_with_decl_hint
-      env
-      (hint_of_type_hint cv.cv_type)
-      None
+    Typing_helpers.merge_hint_with_decl_hint env (hint_of_type_hint cv.cv_type)
   in
   let no_auto_likes =
     Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes cv.cv_user_attributes

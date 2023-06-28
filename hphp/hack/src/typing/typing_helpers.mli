@@ -54,7 +54,6 @@ val reify_kind : Aast.reify_kind -> Aast.reify_kind
 val merge_hint_with_decl_hint :
   Typing_env_types.env ->
   Nast.xhp_attr_hint option ->
-  Typing_defs.decl_ty option ->
   Typing_defs.decl_ty option
 
 (** During the decl phase we can, for global inference, add "improved type hints".

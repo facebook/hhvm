@@ -32,6 +32,7 @@ class HTTPSessionStats : public TTLBAStats {
   virtual void recordPendingBufferedWriteBytes(int64_t) noexcept {
   }
   virtual void recordEgressContentLengthMismatches() noexcept = 0;
+  virtual void recordSessionPeriodicPingProbeTimeout() noexcept = 0;
 };
 
 } // namespace proxygen

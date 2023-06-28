@@ -21,6 +21,9 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
       txnsSessionStalled(prefix + "_txn_session_stall", facebook::fb303::SUM),
       egressContentLengthMismatches(
           prefix + "_egress_content_length_mismatches", facebook::fb303::SUM),
+      sessionPeriodicPingProbeTimeout(
+          prefix + "_session_periodic_ping_probe_timeout",
+          facebook::fb303::SUM),
       presendIoSplit(prefix + "_presend_io_split", facebook::fb303::SUM),
       presendExceedLimit(prefix + "_presend_exceed_limit",
                          facebook::fb303::SUM),
@@ -133,6 +136,10 @@ void TLHTTPSessionStats::recordSessionStalled() noexcept {
 
 void TLHTTPSessionStats::recordEgressContentLengthMismatches() noexcept {
   egressContentLengthMismatches.add(1);
+}
+
+void TLHTTPSessionStats::recordSessionPeriodicPingProbeTimeout() noexcept {
+  sessionPeriodicPingProbeTimeout.add(1);
 }
 
 void TLHTTPSessionStats::recordPendingBufferedReadBytes(

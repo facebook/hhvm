@@ -24,6 +24,8 @@ class DummyHTTPSessionStats : public HTTPSessionStats {
   void recordSessionStalled() noexcept override{};
   void recordEgressContentLengthMismatches() noexcept override {
   }
+  void recordSessionPeriodicPingProbeTimeout() noexcept override {
+  }
 
   void recordPresendIOSplit() noexcept override{};
   void recordPresendExceedLimit() noexcept override{};
@@ -83,6 +85,10 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
     _recordPendingBufferedWriteBytes(num);
   }
   MOCK_METHOD(void, _recordPendingBufferedWriteBytes, (int64_t));
+  void recordSessionPeriodicPingProbeTimeout() noexcept override {
+    _recordSessionPeriodicPingProbeTimeout();
+  }
+  MOCK_METHOD(void, _recordSessionPeriodicPingProbeTimeout, ());
 };
 
 } // namespace proxygen

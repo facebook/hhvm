@@ -28,6 +28,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
+#include <proxygen/lib/http/session/test/MockHTTPSessionStats.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <proxygen/lib/test/TestAsyncTransport.h>
@@ -4257,9 +4258,12 @@ TEST_F(HTTP2DownstreamSessionTest, PingProbes) {
                                  std::chrono::seconds(1),
                                  /*extendIntervalOnIngress=*/true,
                                  /*immediate=*/true);
+  MockHTTPSessionStats stats;
+  httpSession_->setSessionStats(&stats);
   eventBase_.loopOnce();
   uint64_t pingVal = 0;
   EXPECT_CALL(callbacks_, onPingRequest(_)).WillOnce(SaveArg<0>(&pingVal));
+  EXPECT_CALL(stats, _recordSessionPeriodicPingProbeTimeout()).Times(0);
   parseOutput(*clientCodec_);
   clientCodec_->generatePingReply(requests_, pingVal);
   flushRequestsAndLoopN(1);
@@ -4274,9 +4278,12 @@ TEST_F(HTTP2DownstreamSessionTest, PingProbeTimeout) {
                                  std::chrono::seconds(1),
                                  /*extendIntervalOnIngress=*/true,
                                  /*immediate=*/true);
+  MockHTTPSessionStats stats;
+  httpSession_->setSessionStats(&stats);
   eventBase_.loopOnce();
   uint64_t pingVal = 0;
   EXPECT_CALL(callbacks_, onPingRequest(_)).WillOnce(SaveArg<0>(&pingVal));
+  EXPECT_CALL(stats, _recordSessionPeriodicPingProbeTimeout()).Times(1);
   parseOutput(*clientCodec_);
   expectDetachSession();
   flushRequestsAndLoop();
@@ -4287,6 +4294,9 @@ TEST_F(HTTP2DownstreamSessionTest, PingProbeTimeoutRefresh) {
                                  std::chrono::seconds(1),
                                  /*extendIntervalOnIngress=*/true,
                                  /*immediate=*/false);
+  MockHTTPSessionStats stats;
+  httpSession_->setSessionStats(&stats);
+  EXPECT_CALL(stats, _recordSessionPeriodicPingProbeTimeout()).Times(1);
   // Don't send an immediate probe.  Send a request after 250ms, which starts
   // the probe interval timer. The ping probe interval fires at 1250 and times
   // out at 2250.

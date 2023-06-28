@@ -40,6 +40,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordPendingBufferedReadBytes(int64_t amount) noexcept override;
   void recordPendingBufferedWriteBytes(int64_t amount) noexcept override;
   void recordEgressContentLengthMismatches() noexcept override;
+  void recordSessionPeriodicPingProbeTimeout() noexcept override;
 
   BaseStats::TLCounter txnsOpen;
   BaseStats::TLCounter pendingBufferedReadBytes;
@@ -49,6 +50,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   BaseStats::TLTimeseries txnsTransactionStalled;
   BaseStats::TLTimeseries txnsSessionStalled;
   BaseStats::TLTimeseries egressContentLengthMismatches;
+  BaseStats::TLTimeseries sessionPeriodicPingProbeTimeout;
   // Time to Last Byte Ack (TTLBA)
   BaseStats::TLTimeseries presendIoSplit;
   BaseStats::TLTimeseries presendExceedLimit;

@@ -2597,6 +2597,9 @@ void HTTPSession::PingProber::refreshTimeout(bool onIngress) {
 void HTTPSession::PingProber::timeoutExpired() noexcept {
   if (pingVal_) {
     VLOG(3) << "Ping probe timed out, dropping connection sess=" << session_;
+    if (auto sessionStats = session_.sessionStats_) {
+      sessionStats->recordSessionPeriodicPingProbeTimeout();
+    }
     session_.dropConnection("Ping probe timed out");
   } else {
     pingVal_ = folly::Random::rand64();

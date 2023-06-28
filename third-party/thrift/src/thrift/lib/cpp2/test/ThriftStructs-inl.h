@@ -132,9 +132,10 @@ inline thrift::benchmark::OpMixed create<thrift::benchmark::OpMixed>() {
 
 template <class T>
 inline T createList(int size) {
+  std::mt19937 rng;
   T d;
   while (size-- != 0) {
-    d.lst()->push_back(folly::Random::rand32());
+    d.lst()->push_back(rng());
   }
   return d;
 }
@@ -202,46 +203,46 @@ create<thrift::benchmark::OpLargeListMixed>() {
   return d;
 }
 
+template <class T>
+inline T createSet(int size) {
+  std::mt19937 rng;
+  T d;
+  while (size-- != 0) {
+    d.s()->insert(rng());
+  }
+  return d;
+}
+
 template <>
 inline thrift::benchmark::LargeSetInt create<thrift::benchmark::LargeSetInt>() {
-  std::srand(1);
-  thrift::benchmark::LargeSetInt l;
-  for (int i = 0; i < 1'000'000; i++) {
-    l.s()->insert(folly::Random::rand32());
-  }
-  return l;
+  return createSet<thrift::benchmark::LargeSetInt>(1000000);
 }
 
 template <>
 inline thrift::benchmark::OpLargeSetInt
 create<thrift::benchmark::OpLargeSetInt>() {
-  std::srand(1);
-  thrift::benchmark::OpLargeSetInt l;
-  for (int i = 0; i < 1'000'000; i++) {
-    l.s()->insert(folly::Random::rand32());
+  return createSet<thrift::benchmark::OpLargeSetInt>(1000000);
+}
+
+template <class T>
+inline T createMap(int size) {
+  std::mt19937 rng;
+  T d;
+  while (size-- != 0) {
+    d.m()[size] = rng();
   }
-  return l;
+  return d;
 }
 
 template <>
 inline thrift::benchmark::LargeMapInt create<thrift::benchmark::LargeMapInt>() {
-  std::srand(1);
-  thrift::benchmark::LargeMapInt l;
-  for (int i = 0; i < 1'000'000; i++) {
-    l.m()[i] = folly::Random::rand32();
-  }
-  return l;
+  return createMap<thrift::benchmark::LargeMapInt>(1000000);
 }
 
 template <>
 inline thrift::benchmark::OpLargeMapInt
 create<thrift::benchmark::OpLargeMapInt>() {
-  std::srand(1);
-  thrift::benchmark::OpLargeMapInt l;
-  for (int i = 0; i < 1'000'000; i++) {
-    l.m()[i] = folly::Random::rand32();
-  }
-  return l;
+  return createMap<thrift::benchmark::OpLargeMapInt>(1000000);
 }
 
 template <>
@@ -412,20 +413,20 @@ create<thrift::benchmark::OpLargeMixed>() {
 
 template <class T>
 inline T createMixedInt() {
-  std::srand(1);
+  std::mt19937 rng;
   T d;
-  d.var1() = folly::Random::rand32();
-  d.var2() = folly::Random::rand32();
-  d.var3() = folly::Random::rand32();
-  d.var4() = folly::Random::rand32();
-  d.var5() = folly::Random::rand32();
-  d.var6() = folly::Random::rand32();
-  d.var7() = folly::Random::rand32();
-  d.var8() = folly::Random::rand32();
-  d.var9() = folly::Random::rand32();
-  d.varx() = folly::Random::rand32();
-  d.vary() = folly::Random::rand32();
-  d.varz() = folly::Random::rand32();
+  d.var1() = rng();
+  d.var2() = rng();
+  d.var3() = rng();
+  d.var4() = rng();
+  d.var5() = rng();
+  d.var6() = rng();
+  d.var7() = rng();
+  d.var8() = rng();
+  d.var9() = rng();
+  d.varx() = rng();
+  d.vary() = rng();
+  d.varz() = rng();
   return d;
 }
 

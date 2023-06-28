@@ -330,12 +330,6 @@ let open_tyvars env p =
 let close_tyvars env =
   { env with inference_env = Inf.close_tyvars env.inference_env }
 
-let extract_global_inference_env env =
-  let (inference_env, res) =
-    Inf.extract_global_inference_env env.inference_env
-  in
-  ({ env with inference_env }, res)
-
 let wrap_ty_in_var env r ty =
   let (inference_env, res) = Inf.wrap_ty_in_var env.inference_env r ty in
   ({ env with inference_env }, res)

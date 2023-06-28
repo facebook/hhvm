@@ -490,10 +490,6 @@ val get_global_tyvar_reason : env -> Ident.t -> Reason.t option
 
 val new_global_tyvar : env -> ?i:int -> Typing_reason.t -> env * locl_ty
 
-(** At the end of typechecking a function body, extract the remaining
-    inference env, which should only contain global type variables. *)
-val extract_global_inference_env : env -> env * Typing_inference_env.t_global
-
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
 val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option

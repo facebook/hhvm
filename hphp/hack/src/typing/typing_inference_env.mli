@@ -163,10 +163,6 @@ val add_subtype_prop : t -> Typing_logic.subtype_prop -> t
 
 val get_current_pos_from_tyvar_stack : t -> Pos.t option
 
-(** At the end of typechecking a function body, extract the remaining
-inference env, which should only contain global type variables. *)
-val extract_global_inference_env : t -> t * t_global
-
 (** Get the list of all type variables in the environment *)
 val get_vars : t -> Ident.t list
 

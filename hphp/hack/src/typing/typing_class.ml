@@ -390,12 +390,10 @@ let method_def ~is_disposable env cls m =
     else
       (env, under_normal_assumptions, None)
   in
-  let (env, global_inference_env) = Env.extract_global_inference_env env in
   let _env = Env.log_env_change "method_def" initial_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-  ( { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions },
-    (pos, global_inference_env) )
+  { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
 let check_parent env class_def class_type =
@@ -1144,7 +1142,6 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       Naming_error.(
         to_user_error @@ Prop_without_typehint { vis; pos; prop_name }));
 
-  let (env, global_inference_env) = Env.extract_global_inference_env env in
   let ((cv_type_ty, _) as cv_type) =
     match expected with
     | Some expected ->
@@ -1189,23 +1186,22 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
          cv_type_ty
   );
   ( env,
-    ( {
-        Aast.cv_final = cv.cv_final;
-        Aast.cv_xhp_attr = cv.cv_xhp_attr;
-        Aast.cv_abstract = cv.cv_abstract;
-        Aast.cv_visibility = cv.cv_visibility;
-        Aast.cv_type;
-        Aast.cv_id = cv.cv_id;
-        Aast.cv_expr = typed_cv_expr;
-        Aast.cv_user_attributes = user_attributes;
-        Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
-        Aast.cv_doc_comment = cv.cv_doc_comment;
-        (* Can make None to save space *)
-        Aast.cv_is_static = is_static;
-        Aast.cv_span = cv.cv_span;
-        Aast.cv_readonly = cv.cv_readonly;
-      },
-      (cv.cv_span, global_inference_env) ) )
+    {
+      Aast.cv_final = cv.cv_final;
+      Aast.cv_xhp_attr = cv.cv_xhp_attr;
+      Aast.cv_abstract = cv.cv_abstract;
+      Aast.cv_visibility = cv.cv_visibility;
+      Aast.cv_type;
+      Aast.cv_id = cv.cv_id;
+      Aast.cv_expr = typed_cv_expr;
+      Aast.cv_user_attributes = user_attributes;
+      Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
+      Aast.cv_doc_comment = cv.cv_doc_comment;
+      (* Can make None to save space *)
+      Aast.cv_is_static = is_static;
+      Aast.cv_span = cv.cv_span;
+      Aast.cv_readonly = cv.cv_readonly;
+    } )
 
 (** Check the where constraints of the parents of a class *)
 let check_class_parents_where_constraints env pc impl =
@@ -1670,17 +1666,14 @@ let check_class_members env c tc =
       SN.UserAttributes.uaNoAutoDynamic
       c.Aast.c_user_attributes
   in
-  let (env, typed_vars_and_global_inference_envs) =
+  let (env, typed_vars) =
     List.map_env
       env
       vars
       ~f:(class_var_def ~is_static:false ~is_noautodynamic tc)
   in
-  let (typed_vars, vars_global_inference_envs) =
-    List.unzip typed_vars_and_global_inference_envs
-  in
-  let (typed_methods, methods_global_inference_envs) =
-    List.filter_map methods ~f:(method_def ~is_disposable env tc) |> List.unzip
+  let typed_methods =
+    List.filter_map methods ~f:(method_def ~is_disposable env tc)
   in
   let typed_methods = Tast_with_dynamic.collect typed_methods in
   let (env, typed_typeconsts) =
@@ -1694,28 +1687,23 @@ let check_class_members env c tc =
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def ~is_disposable env tc constructor in
   let env = Env.set_static env in
-  let (env, typed_static_vars_and_global_inference_envs) =
+  let (env, typed_static_vars) =
     List.map_env
       env
       static_vars
       ~f:(class_var_def ~is_static:true ~is_noautodynamic tc)
   in
-  let (typed_static_vars, static_vars_global_inference_envs) =
-    List.unzip typed_static_vars_and_global_inference_envs
-  in
-  let (typed_static_methods, static_methods_global_inference_envs) =
+  let typed_static_methods =
     List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
-    |> List.unzip
   in
   let typed_static_methods = Tast_with_dynamic.collect typed_static_methods in
-  let (typed_methods, constr_global_inference_env) =
+  let typed_methods =
     match typed_constructor with
-    | None -> (Tast_with_dynamic.append typed_static_methods typed_methods, [])
-    | Some (ms, global_inference_env) ->
-      ( Tast_with_dynamic.append
-          (Tast_with_dynamic.cons ms typed_static_methods)
-          typed_methods,
-        [global_inference_env] )
+    | None -> Tast_with_dynamic.append typed_static_methods typed_methods
+    | Some ms ->
+      Tast_with_dynamic.append
+        (Tast_with_dynamic.cons ms typed_static_methods)
+        typed_methods
   in
   let typed_members =
     ( typed_consts,
@@ -1724,14 +1712,7 @@ let check_class_members env c tc =
       typed_static_vars,
       typed_methods )
   in
-  let global_inference_envs =
-    methods_global_inference_envs
-    @ static_methods_global_inference_envs
-    @ constr_global_inference_env
-    @ static_vars_global_inference_envs
-    @ vars_global_inference_envs
-  in
-  (env, typed_members, global_inference_envs)
+  (env, typed_members)
 
 let class_def_ env c tc =
   let parents = class_parents_hints_to_types env c in
@@ -1744,8 +1725,7 @@ let class_def_ env c tc =
           typed_typeconsts,
           typed_vars,
           typed_static_vars,
-          typed_methods ),
-        _global_inference_envs ) =
+          typed_methods ) ) =
     check_class_members env c tc
   in
   let (env, tparams) = class_type_param env c.c_tparams in

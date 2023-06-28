@@ -584,8 +584,6 @@ let full_expander =
 
 let fully_expand_type env ty = full_expander#on_type env ty
 
-let fully_expand_type_i env ty = full_expander#on_internal_type env ty
-
 let expand_internal_type env ty =
   match ty with
   | ConstraintType _ -> (env, ty)
@@ -773,49 +771,6 @@ let remove_tyvar_lower_bound env var lower_var =
         tvconstraints.lower_bounds
     in
     set_tyvar_constraints env var { tvconstraints with lower_bounds }
-
-let expand_bounds_of_global_tyvars env (solving_info : solving_info) =
-  match solving_info with
-  | TVIType ty ->
-    let (env, ty) = fully_expand_type env ty in
-    (env, TVIType ty)
-  | TVIConstraints tvconstraints ->
-    let (env, upper_bounds) =
-      ITySet.fold_map
-        tvconstraints.upper_bounds
-        ~init:env
-        ~f:fully_expand_type_i
-    in
-    let (env, lower_bounds) =
-      ITySet.fold_map
-        tvconstraints.lower_bounds
-        ~init:env
-        ~f:fully_expand_type_i
-    in
-    (env, TVIConstraints { tvconstraints with upper_bounds; lower_bounds })
-
-let extract_global_tyvar_info : t -> tyvar_info -> t * global_tyvar_info option
-    =
- fun env tvinfo ->
-  let { tyvar_pos = _; global_reason; solving_info; eager_solve_failed = _ } =
-    tvinfo
-  in
-  match global_reason with
-  | Some global_reason ->
-    let (env, solving_info_g) =
-      expand_bounds_of_global_tyvars env solving_info
-    in
-    let gtvinfo = { tyvar_reason = global_reason; solving_info_g } in
-    (env, Some gtvinfo)
-  | None -> (env, None)
-
-let extract_global_inference_env : t -> t * t_global =
- fun env ->
-  let tvenv = env.tvenv in
-  let extract_global_tyvar_info x _i y = extract_global_tyvar_info x y in
-  let (env, tvenv) = IMap.map_env extract_global_tyvar_info env tvenv in
-  let tvenv = IMap.filter_opt tvenv in
-  (env, tvenv)
 
 let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
   let { solving_info_g; tyvar_reason } = gtvinfo in

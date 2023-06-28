@@ -20,8 +20,7 @@ val make_class_member_standalone_check_env :
 val method_def_standalone :
   class_member_standalone_check_env ->
   string ->
-  (Tast.method_ Tast_with_dynamic.t * Typing_inference_env.t_global_with_pos)
-  option
+  Tast.method_ Tast_with_dynamic.t option
 
 (** This is a helper for [Typing_toplevel.class_def]. Call that instead.
 

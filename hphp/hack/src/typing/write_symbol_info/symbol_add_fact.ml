@@ -295,10 +295,9 @@ let readonly_assoc key = function
   | Some elem -> [(key, Build_json.build_readonly_kind_json elem)]
 
 let method_defn ctx source_text meth decl_id progress =
+  let m_tparams = Util.remove_generated_tparams meth.m_tparams in
   let tparams =
-    List.map
-      meth.m_tparams
-      ~f:(Build_json.build_type_param_json ctx source_text)
+    List.map m_tparams ~f:(Build_json.build_type_param_json ctx source_text)
   in
   let (signature, progress) =
     build_signature
@@ -491,8 +490,9 @@ let func_decl name progress =
 let func_defn ctx source_text fd decl_id progress =
   let elem = fd.fd_fun in
   let prog = namespace_decl_opt fd.fd_namespace progress in
+  let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
   let tparams =
-    List.map fd.fd_tparams ~f:(Build_json.build_type_param_json ctx source_text)
+    List.map fd_tparams ~f:(Build_json.build_type_param_json ctx source_text)
   in
   let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
   let (signature, prog) =

@@ -123,3 +123,10 @@ val json_to_locl_ty :
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
 val strip_ns : string -> string
+
+(* Split type parameters [tparams] into normal user-denoted type
+    parameters, and a list of polymorphic context names that were
+    desugared to type parameters. *)
+
+val split_desugared_ctx_tparams_gen :
+  tparams:'a list -> param_name:('a -> string) -> string list * 'a list

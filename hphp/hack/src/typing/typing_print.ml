@@ -100,6 +100,17 @@ type penv =
   | Loclenv of env
   | Declenv
 
+let split_desugared_ctx_tparams_gen ~tparams ~param_name =
+  let (generated_tparams, other_tparams) =
+    List.partition_tf tparams ~f:(fun param ->
+        param_name param |> SN.Coeffects.is_generated_generic)
+  in
+  let desugared_tparams =
+    List.map generated_tparams ~f:(fun param ->
+        param_name param |> SN.Coeffects.unwrap_generated_generic)
+  in
+  (desugared_tparams, other_tparams)
+
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
@@ -217,15 +228,8 @@ module Full = struct
      desugared to type parameters. *)
   let split_desugared_ctx_tparams (tparams : 'a tparam list) :
       string list * 'a tparam list =
-    let (generated_tparams, other_tparams) =
-      List.partition_tf tparams ~f:(fun { tp_name = (_, name); _ } ->
-          SN.Coeffects.is_generated_generic name)
-    in
-    let desugared_tparams =
-      List.map generated_tparams ~f:(fun { tp_name = (_, name); _ } ->
-          SN.Coeffects.unwrap_generated_generic name)
-    in
-    (desugared_tparams, other_tparams)
+    let param_name { tp_name = (_, name); _ } = name in
+    split_desugared_ctx_tparams_gen ~tparams ~param_name
 
   let rec is_supportdyn_mixed : type a. penv -> a ty -> bool =
    fun env t ->

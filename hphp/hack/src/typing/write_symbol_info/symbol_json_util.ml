@@ -213,3 +213,7 @@ let hint_to_string_and_symbols ctx h =
        upper bound on the size of types. *)
     Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref;
     (ty_pp_ref, [])
+
+let remove_generated_tparams tparams =
+  let param_name Aast_defs.{ tp_name = (_, name); _ } = name in
+  Typing_print.split_desugared_ctx_tparams_gen ~tparams ~param_name |> snd

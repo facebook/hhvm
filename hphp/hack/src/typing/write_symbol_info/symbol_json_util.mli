@@ -65,3 +65,7 @@ val namespace_ast_to_pos_id :
   Full_fidelity_positioned_syntax.syntax ->
   Full_fidelity_source_text.t ->
   Pos.t * string
+
+(* remove generated parameters of the form T/[ctx $f]*)
+val remove_generated_tparams :
+  ('a, 'b) Aast_defs.tparam list -> ('a, 'b) Aast_defs.tparam list

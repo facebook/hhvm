@@ -96,7 +96,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | PAUSE true -> false
   (* when you unpause, then it will catch up *)
   | PAUSE false -> true
-  | GLOBAL_INFERENCE _ -> true
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
 

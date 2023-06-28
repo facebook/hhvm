@@ -43,7 +43,6 @@
   server_code_actions_services
   server_file_outline
   server_find_refs
-  server_global_inference
   server_go_to
   server_highlight_refs
   server_symbol_info_service_utils

@@ -29,20 +29,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name server_global_inference)
- (wrapped false)
- (modules serverGlobalInference)
- (libraries
-  full_fidelity
-  server_codemod_type_printer
-  tast_type_collector
-  typing_defs
-  typing_global_inference
-  utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_revision_tracker)
  (wrapped false)
  (modules serverRevisionTracker)
@@ -595,7 +581,6 @@
     security_stubs
     server
     server_env_build
-    server_global_inference
     server_call_hierarchy
     server_go_to
     server_highlight_refs

@@ -578,9 +578,6 @@ type _ t =
       Lsp.CallHierarchyItem.t
       -> Lsp.CallHierarchyOutgoingCalls.result t
   | PAUSE : bool -> unit t
-  | GLOBAL_INFERENCE :
-      ServerGlobalInferenceTypes.mode * string list
-      -> ServerGlobalInferenceTypes.result t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
   | DEPS_IN_BATCH :

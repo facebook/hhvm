@@ -1023,21 +1023,6 @@ let main_internal
       print_endline
         "Resumed the automatic triggering of full checks upon file changes.";
     Lwt.return (Exit_status.No_error, telemetry)
-  | MODE_GLOBAL_INFERENCE (submode, files) ->
-    let%lwt conn = connect args in
-    let%lwt (results, telemetry) =
-      ClientConnect.rpc conn ~desc:args.desc
-      @@ Rpc.GLOBAL_INFERENCE (submode, files)
-    in
-    (match results with
-    | ServerGlobalInferenceTypes.RError error -> print_endline error
-    | ServerGlobalInferenceTypes.RRewrite patches ->
-      if args.output_json then
-        print_patches_json patches
-      else
-        apply_patches patches
-    | _ -> ());
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_VERBOSE verbose ->
     let%lwt ((), telemetry) = rpc args @@ Rpc.VERBOSE verbose in
     Lwt.return (Exit_status.No_error, telemetry)

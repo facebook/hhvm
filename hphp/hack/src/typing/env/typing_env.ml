@@ -141,9 +141,6 @@ let add_subtype_prop env prop =
   log_env_change "add_subtype_prop" env
   @@ { env with inference_env = Inf.add_subtype_prop env.inference_env prop }
 
-let get_global_tyvar_reason env var =
-  Inf.get_global_tyvar_reason env.inference_env var
-
 let empty_bounds = TySet.empty
 
 let tyvar_is_solved env var = Inf.tyvar_is_solved env.inference_env var
@@ -1809,22 +1806,6 @@ let add_tyvar_lower_bound_and_update_variances ?union env var ty =
     update_variance_of_tyvars_occurring_in_lower_bound env ty
   else
     env
-
-let initialize_tyvar_as_in ~as_in:genv env v =
-  log_env_change "initialize_tyvar_as_in" env
-  @@ {
-       env with
-       inference_env =
-         Inf.initialize_tyvar_as_in ~as_in:genv env.inference_env v;
-     }
-
-let copy_tyvar_from_genv_to_env var ~to_:env ~from:genv =
-  log_env_change_ "copy_tyvar_from_genv_to_env" env
-  @@
-  let (inference_env, res) =
-    Inf.copy_tyvar_from_genv_to_env var ~to_:env.inference_env ~from:genv
-  in
-  ({ env with inference_env }, res)
 
 let get_all_tyvars env = Inf.get_vars env.inference_env
 

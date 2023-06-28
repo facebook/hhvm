@@ -480,8 +480,6 @@ val get_tyvar_appears_contravariantly : env -> Ident.t -> bool
 
 val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
-val get_global_tyvar_reason : env -> Ident.t -> Reason.t option
-
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
 val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option
@@ -489,12 +487,6 @@ val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option
 val set_tyvar_type_const : env -> int -> pos_id -> locl_ty -> env
 
 val get_tyvar_type_consts : env -> int -> (pos_id * locl_ty) SMap.t
-
-val initialize_tyvar_as_in :
-  as_in:Typing_inference_env.t_global -> env -> int -> env
-
-val copy_tyvar_from_genv_to_env :
-  Ident.t -> to_:env -> from:Typing_inference_env.t_global -> env * Ident.t
 
 val get_all_tyvars : env -> Ident.t list
 

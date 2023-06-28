@@ -49,7 +49,6 @@ type tyvar_info = {
   tyvar_pos: Pos.t;
       (** Where was the type variable introduced? (e.g. generic method invocation,
           new object construction) *)
-  global_reason: Reason.t option;
   eager_solve_failed: bool;
   solving_info: solving_info;
 }
@@ -82,17 +81,6 @@ type t = {
   tyvar_occurrences: Typing_tyvar_occurrences.t;
 }
 
-type global_tyvar_info = {
-  tyvar_reason: Reason.t;
-  solving_info_g: solving_info;
-}
-
-type global_tvenv = global_tyvar_info IMap.t
-
-type t_global = global_tvenv
-
-type t_global_with_pos = Pos.t * t_global
-
 module Log = struct
   open Typing_log_value
 
@@ -123,15 +111,10 @@ module Log = struct
       variant_as_value "TVIConstraints" (tyvar_constraints_as_value tvcstr)
 
   let tyvar_info_as_value tvinfo =
-    let { tyvar_pos; global_reason; eager_solve_failed; solving_info } =
-      tvinfo
-    in
+    let { tyvar_pos; eager_solve_failed; solving_info } = tvinfo in
     make_map
       [
         ("tyvar_pos", pos_as_value tyvar_pos);
-        ( "global_reason",
-          list_as_value
-            (Option.to_list (Option.map ~f:reason_as_value global_reason)) );
         ("eager_solve_failed", bool_as_value eager_solve_failed);
         ("solving_info", solving_info_as_value solving_info);
       ]
@@ -157,38 +140,6 @@ module Log = struct
         ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
         ("subtype_prop", subtype_prop_as_value subtype_prop);
         ("tyvar_occurrences", Occ.Log.as_value tyvar_occurrences);
-      ]
-
-  let global_tyvar_info_as_value tvinfo =
-    let { tyvar_reason; solving_info_g } = tvinfo in
-    make_map
-      [
-        ("tyvar_reason", reason_as_value tyvar_reason);
-        ("solving_info", solving_info_as_value solving_info_g);
-      ]
-
-  let global_tvenv_as_value genv =
-    Map
-      (IMap.fold
-         (fun i tvinfo m ->
-           SMap.add (var_as_string i) (global_tyvar_info_as_value tvinfo) m)
-         genv
-         SMap.empty)
-
-  let global_inference_env_as_value genv = global_tvenv_as_value genv
-
-  let reason_to_json r =
-    let open Hh_json in
-    let p = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    let to_n x = JSON_Number (string_of_int x) in
-    JSON_Object
-      [
-        ("reason", JSON_String (Reason.to_constructor_string r));
-        ("filename", JSON_String (Relative_path.suffix (Pos.filename p)));
-        ("start_line", to_n @@ fst (Pos.line_column p));
-        ("start_column", to_n @@ snd (Pos.line_column p));
-        ("end_line", to_n @@ fst (Pos.end_line_column p));
-        ("end_column", to_n @@ snd (Pos.end_line_column p));
       ]
 
   let solving_info_to_json
@@ -222,22 +173,6 @@ module Log = struct
     | TVIConstraints cstr ->
       JSON_Object [("constraints", constraints_to_json cstr)]
 
-  let tyvar_to_json_g
-      (p_locl_ty : locl_ty -> string)
-      (p_internal_type : internal_type -> string)
-      (genv : t_global)
-      (v : Ident.t) =
-    let open Hh_json in
-    match IMap.find_opt v genv with
-    | None -> JSON_Null
-    | Some { tyvar_reason; solving_info_g } ->
-      JSON_Object
-        [
-          ("tyvar_reason", reason_to_json tyvar_reason);
-          ( "solving_info",
-            solving_info_to_json p_locl_ty p_internal_type solving_info_g );
-        ]
-
   let tyvar_to_json
       (p_locl_ty : locl_ty -> string)
       (p_internal_type : internal_type -> string)
@@ -246,16 +181,10 @@ module Log = struct
     let open Hh_json in
     match IMap.find_opt v env.tvenv with
     | None -> JSON_Null
-    | Some { tyvar_pos; global_reason; eager_solve_failed; solving_info } ->
-      let global_reason =
-        match global_reason with
-        | None -> JSON_Null
-        | Some global_reason -> reason_to_json global_reason
-      in
+    | Some { tyvar_pos; eager_solve_failed; solving_info } ->
       JSON_Object
         [
           ("tyvar_pos", string_ @@ Pos.string (Pos.to_absolute tyvar_pos));
-          ("global_reason", global_reason);
           ("eager_solve_failed", JSON_Bool eager_solve_failed);
           ( "solving_info",
             solving_info_to_json p_locl_ty p_internal_type solving_info );
@@ -284,7 +213,6 @@ let empty_tyvar_constraints =
 let empty_tyvar_info pos =
   {
     tyvar_pos = pos;
-    global_reason = None;
     eager_solve_failed = false;
     solving_info = TVIConstraints empty_tyvar_constraints;
   }
@@ -316,11 +244,6 @@ let get_tyvars_in_tyvar env = Occ.get_tyvars_in_tyvar env.tyvar_occurrences
 
 let contains_unsolved_tyvars env =
   Occ.contains_unsolved_tyvars env.tyvar_occurrences
-
-let get_global_tyvar_reason env v =
-  match get_tyvar_info_opt env v with
-  | None -> None
-  | Some tvinfo -> tvinfo.global_reason
 
 let tyvar_is_solved env var =
   match get_solving_info_opt env var with
@@ -432,15 +355,13 @@ let create_tyvar_constraints variance =
   in
   TVIConstraints tyvar_constraints
 
-let fresh_unsolved_tyvar env v ?variance ~global_reason tyvar_pos =
+let fresh_unsolved_tyvar env v ?variance tyvar_pos =
   let solving_info = create_tyvar_constraints variance in
-  let tvinfo =
-    { tyvar_pos; global_reason; solving_info; eager_solve_failed = false }
-  in
+  let tvinfo = { tyvar_pos; solving_info; eager_solve_failed = false } in
   set_tyvar_info env v tvinfo
 
 let add_current_tyvar ?variance env p v =
-  let env = fresh_unsolved_tyvar env v ?variance ~global_reason:None p in
+  let env = fresh_unsolved_tyvar env v ?variance p in
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
@@ -461,7 +382,6 @@ let wrap_ty_in_var env r ty =
   let tvinfo =
     {
       tyvar_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
-      global_reason = None;
       eager_solve_failed = false;
       solving_info = TVIType ty;
     }
@@ -726,20 +646,7 @@ let remove_tyvar_lower_bound env var lower_var =
     in
     set_tyvar_constraints env var { tvconstraints with lower_bounds }
 
-let global_tyvar_info_to_dummy_tyvar_info gtvinfo =
-  let { solving_info_g; tyvar_reason } = gtvinfo in
-  {
-    global_reason = Some tyvar_reason;
-    eager_solve_failed = false;
-    solving_info = solving_info_g;
-    tyvar_pos = Reason.to_pos tyvar_reason |> Pos_or_decl.unsafe_to_raw_pos;
-  }
-
 let get_vars (env : t) = IMap.keys env.tvenv
-
-let is_empty_g (genv : t_global) = IMap.is_empty genv
-
-let get_vars_g (genv : t_global) = IMap.keys genv
 
 let get_unsolved_vars (env : t) : identifier list =
   IMap.fold
@@ -749,39 +656,6 @@ let get_unsolved_vars (env : t) : identifier list =
       | TVIType _ -> vars)
     env.tvenv
     []
-
-let get_tyvar_info_exn_g (genv : t_global) v = IMap.find v genv
-
-let get_tyvar_reason_exn_g (genv : t_global) var =
-  let tvinfo = get_tyvar_info_exn_g genv var in
-  tvinfo.tyvar_reason
-
-let get_tyvar_pos_exn_g (genv : t_global) var =
-  Reason.to_pos (get_tyvar_reason_exn_g genv var)
-
-let has_var env v = Option.is_some (get_tyvar_info_opt env v)
-
-let initialize_tyvar_as_in ~as_in:(genv : t_global) (env : t) v =
-  match get_tyvar_info_opt env v with
-  | Some _ -> env
-  | None ->
-    get_tyvar_info_exn_g genv v
-    |> global_tyvar_info_to_dummy_tyvar_info
-    |> set_tyvar_info env v
-
-let copy_tyvar_from_genv_to_env v ~to_:(env : t) ~from:(genv : t_global) =
-  let tvinfo =
-    get_tyvar_info_exn_g genv v |> global_tyvar_info_to_dummy_tyvar_info
-  in
-  let rec get_tmp v =
-    if has_var env v then
-      get_tmp (Ident.tmp ())
-    else
-      v
-  in
-  let v' = get_tmp v in
-  let env = set_tyvar_info env v' tvinfo in
-  (env, v')
 
 module Size = struct
   (* This can be useful to debug type which blow up in size *)
@@ -856,14 +730,7 @@ module Size = struct
       ubound_size + lbound_size + tconst_size
 
   let tyvar_info_size env tvinfo =
-    let {
-      tyvar_pos = _;
-      solving_info;
-      global_reason = _;
-      eager_solve_failed = _;
-    } =
-      tvinfo
-    in
+    let { tyvar_pos = _; solving_info; eager_solve_failed = _ } = tvinfo in
     solving_info_size env solving_info
 
   let inference_env_size env =
@@ -872,13 +739,6 @@ module Size = struct
     in
     IMap.map (tyvar_info_size env) tvenv |> fun m ->
     IMap.fold (fun _ x y -> x + y) m 0
-
-  let global_inference_env_size (genv : t_global) =
-    let env = empty_inference_env in
-    IMap.map
-      (fun tyvar_info -> solving_info_size env tyvar_info.solving_info_g)
-      genv
-    |> fun m -> IMap.fold (fun _ x y -> x + y) m 0
 end
 
 (* The following merging logic is used to gather all the information we have
@@ -935,33 +795,11 @@ let merge_solving_infos sinfo1 sinfo2 =
   TVIConstraints cstr
 
 let merge_tyvar_infos tvinfo1 tvinfo2 =
-  let {
-    tyvar_pos = pos1;
-    global_reason = gl1;
-    eager_solve_failed = esf1;
-    solving_info = sinfo1;
-  } =
+  let { tyvar_pos = pos1; eager_solve_failed = esf1; solving_info = sinfo1 } =
     tvinfo1
   in
-  let {
-    tyvar_pos = pos2;
-    global_reason = gl2;
-    eager_solve_failed = esf2;
-    solving_info = sinfo2;
-  } =
+  let { tyvar_pos = pos2; eager_solve_failed = esf2; solving_info = sinfo2 } =
     tvinfo2
-  in
-  let global_reason =
-    match (gl1, gl2) with
-    | (Some r1, Some r2) ->
-      if Reason.is_none r1 then
-        Some r2
-      else
-        Some r1
-    | (Some r, None)
-    | (None, Some r) ->
-      Some r
-    | (None, None) -> None
   in
   {
     tyvar_pos =
@@ -969,7 +807,6 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
         pos2
       else
         pos1);
-    global_reason;
     eager_solve_failed = esf1 || esf2;
     solving_info = merge_solving_infos sinfo1 sinfo2;
   }
@@ -988,20 +825,6 @@ let merge_tyvars env v1 v2 =
     let env = remove_tyvar_lower_bound env v2 v2 in
     let env = remove_tyvar_upper_bound env v2 v2 in
     env
-
-let move_tyvar_from_genv_to_env v ~to_:(env : t) ~from:(genv : t_global) =
-  let tvinfo1 =
-    get_tyvar_info_exn_g genv v |> global_tyvar_info_to_dummy_tyvar_info
-  in
-  let tvenv = env.tvenv in
-  let tvinfo =
-    match IMap.find_opt v tvenv with
-    | None -> tvinfo1
-    | Some tvinfo2 -> merge_tyvar_infos tvinfo1 tvinfo2
-  in
-  let tvenv = IMap.add v tvinfo tvenv in
-  let env = { env with tvenv } in
-  env
 
 let simple_merge env1 env2 =
   let {
@@ -1031,7 +854,6 @@ let simple_merge env1 env2 =
         | (Some tvinfo1, Some tvinfo2) ->
           let {
             tyvar_pos = tyvar_pos1;
-            global_reason = global_reason1;
             eager_solve_failed = eager_solve_failed1;
             solving_info = sinfo1;
           } =
@@ -1039,7 +861,6 @@ let simple_merge env1 env2 =
           in
           let {
             tyvar_pos = tyvar_pos2;
-            global_reason = global_reason2;
             eager_solve_failed = eager_solve_failed2;
             solving_info = sinfo2;
           } =
@@ -1052,11 +873,6 @@ let simple_merge env1 env2 =
                   tyvar_pos2
                 else
                   tyvar_pos1);
-              global_reason =
-                (if Option.is_some global_reason1 then
-                  global_reason1
-                else
-                  global_reason2);
               eager_solve_failed = eager_solve_failed1 || eager_solve_failed2;
               solving_info =
                 (match (sinfo1, sinfo2) with
@@ -1115,199 +931,13 @@ let solving_info_carries_information = function
     || (not @@ SMap.is_empty type_constants)
 
 let tyvar_info_carries_information tvinfo =
-  let { tyvar_pos = _; solving_info; global_reason = _; eager_solve_failed = _ }
-      =
-    tvinfo
-  in
+  let { tyvar_pos = _; solving_info; eager_solve_failed = _ } = tvinfo in
   solving_info_carries_information solving_info
-
-let global_tyvar_info_carries_information tvinfo =
-  let { tyvar_reason = _; solving_info_g } = tvinfo in
-  solving_info_carries_information solving_info_g
 
 let compress env =
   let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
   let tvenv = IMap.filter (fun _k -> tyvar_info_carries_information) tvenv in
   { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences }
-
-let compress_g genv =
-  IMap.filter (fun _ -> global_tyvar_info_carries_information) genv
-
-let construct_undirected_tyvar_graph genvs (additional_edges : ISet.t list) :
-    (Pos.t * global_tyvar_info) list IMap.t * ISet.t IMap.t =
-  (* gather all constraints per type variable *)
-  let all_constraints : (Pos.t * global_tyvar_info) list IMap.t =
-    List.fold genvs ~init:IMap.empty ~f:(fun all_constraints (pos, genv) ->
-        IMap.fold
-          (fun tyvar tyvar_info ->
-            IMap.update tyvar @@ function
-            | None -> Some [(pos, tyvar_info)]
-            | Some tl -> Some ((pos, tyvar_info) :: tl))
-          genv
-          all_constraints)
-  in
-  (* create an undirected graph of type variables where an edge
-   * u <~> v means u <: v or v <: u.
-   * the graph is a mapping from a tyvar to other tyvars (a collection of
-   * directed edges).
-   *)
-  let add_edge ~(from : identifier) ~(to_ : identifier) (graph : ISet.t IMap.t)
-      =
-    IMap.update
-      from
-      (fun neighbors ->
-        let neighbors = Option.value neighbors ~default:ISet.empty in
-        Some (ISet.add to_ neighbors))
-      graph
-  in
-  let add_edges ~(from : identifier) ~(to_ : ISet.t) (graph : ISet.t IMap.t) =
-    IMap.update
-      from
-      (fun neighbors ->
-        let neighbors = Option.value neighbors ~default:ISet.empty in
-        Some (ISet.union to_ neighbors))
-      graph
-  in
-  let add_vertex (vertex : identifier) (graph : ISet.t IMap.t) =
-    IMap.update
-      vertex
-      (function
-        | Some s -> Some s
-        | None -> Some ISet.empty)
-      graph
-  in
-  let walk tyvar ty graph =
-    let graph = add_vertex tyvar graph in
-    match ty with
-    | ConstraintType _ -> graph
-    | LoclType ty ->
-      let walker =
-        object
-          inherit [ISet.t IMap.t] Type_mapper_generic.internal_type_mapper
-
-          method! on_tvar graph r tyvar' =
-            let graph =
-              graph
-              |> add_edge ~from:tyvar ~to_:tyvar'
-              |> add_edge ~from:tyvar' ~to_:tyvar
-            in
-            (graph, mk (r, Tvar tyvar'))
-        end
-      in
-      fst @@ walker#on_type graph ty
-  in
-  let graph : ISet.t IMap.t =
-    IMap.fold
-      (fun tyvar infos edges ->
-        List.fold infos ~init:edges ~f:(fun edges (_, tyvar_info) ->
-            match tyvar_info.solving_info_g with
-            | TVIType ty -> walk tyvar (LoclType ty) edges
-            | TVIConstraints cstrs ->
-              ITySet.fold (walk tyvar) cstrs.lower_bounds edges
-              |> ITySet.fold (walk tyvar) cstrs.upper_bounds))
-      all_constraints
-      IMap.empty
-  in
-  let graph =
-    List.fold
-      additional_edges
-      ~init:graph
-      ~f:(fun graph vars_which_must_be_in_same_cc ->
-        ISet.fold
-          (fun v graph ->
-            let new_edges = ISet.remove v vars_which_must_be_in_same_cc in
-            add_edges ~from:v ~to_:new_edges graph)
-          vars_which_must_be_in_same_cc
-          graph)
-  in
-  (all_constraints, graph)
-
-let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
-  (* compute connected components by doing DFS *)
-  let visited : ISet.t ref = ref ISet.empty in
-  let rec dfs (component : ISet.t) tyvar : ISet.t =
-    let component = ISet.add tyvar component in
-    visited := ISet.add tyvar !visited;
-    ISet.fold
-      (fun neighbor component ->
-        if not (ISet.mem neighbor !visited) then
-          dfs component neighbor
-        else
-          component)
-      (IMap.find tyvar graph)
-      component
-  in
-  let components : ISet.t list =
-    IMap.fold
-      (fun tyvar _ components ->
-        if not (ISet.mem tyvar !visited) then
-          let c = dfs ISet.empty tyvar in
-          c :: components
-        else
-          components)
-      graph
-      []
-  in
-  (* sanity check: no type variables should be lost *)
-  (* TODO: (hverr) T60273306 Normally the following should hold as well:
-   *       sum(len(c for c in components)) == len(all)
-   *       unfortunately it doesn't because somehow non-global (?)
-   *       variables appear in lower/upper bounds of some global
-   *       variables, for which we have no information whatsoever
-   *       (e.g. position), where do these tyvars come from?
-   *)
-  let () =
-    assert (
-      equal_identifier
-        (IMap.cardinal graph)
-        (List.fold components ~init:0 ~f:(fun acc c -> acc + ISet.cardinal c)))
-  in
-  (* sanity check: check whether components are really disconnected *)
-  let (_ : ISet.t) =
-    List.fold components ~init:ISet.empty ~f:(fun c set ->
-        ISet.fold
-          (fun var set ->
-            if ISet.mem var set then
-              failwith "variable is in two connected components, impossible"
-            else
-              ISet.add var set)
-          c
-          set)
-  in
-  components
-
-let connected_components_g genvs ~additional_edges =
-  let (nodes, graph) =
-    construct_undirected_tyvar_graph genvs additional_edges
-  in
-  let component_tyvars = split_undirected_tyvar_graph graph in
-  (* collect tyvar information *)
-  let components : (Pos.t * global_tyvar_info) list IMap.t list =
-    List.map component_tyvars ~f:(fun vars ->
-        ISet.fold
-          (fun var ->
-            IMap.update var @@ function
-            | Some _ -> failwith "programming error, expected unique variables"
-            | None -> IMap.find_opt var nodes)
-          vars
-          IMap.empty)
-  in
-  (* convert each component to a list of gobal environments *)
-  let component_to_subgraph
-      (component : (Pos.t * global_tyvar_info) list IMap.t) :
-      t_global_with_pos list =
-    IMap.fold
-      (fun tyvar infos all ->
-        let infos =
-          List.map infos ~f:(fun (pos, tyvar_info) ->
-              (pos, IMap.singleton tyvar tyvar_info))
-        in
-        infos @ all)
-      component
-      []
-  in
-  let components = List.map components ~f:component_to_subgraph in
-  List.zip_exn component_tyvars components
 
 let remove_var_from_bounds
     env v ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
@@ -1383,97 +1013,6 @@ let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   let subtype_prop = replace_var_by_ty_in_prop subtype_prop var ty in
   { tvenv; tyvars_stack; tyvar_occurrences; subtype_prop }
 
-let forget_tyvar_g (genv : t_global) var_to_forget =
-  let default_mapper_env = Type_mapper_forget.make_env var_to_forget in
-  let mapper = new Type_mapper_forget.forget_tyvar_mapper in
-  let process_solving_info : solving_info -> solving_info option = function
-    | TVIType locl_ty ->
-      let locl_ty = mapper#recurse_opt default_mapper_env locl_ty in
-      Option.map locl_ty ~f:(fun locl_ty -> TVIType locl_ty)
-    | TVIConstraints cstrs ->
-      let map_bound ity =
-        mapper#recurse_internal_type_opt default_mapper_env ity
-      in
-      let lower_bounds =
-        cstrs.lower_bounds
-        |> ITySet.elements
-        |> List.filter_map ~f:map_bound
-        |> ITySet.of_list
-      in
-      let upper_bounds =
-        cstrs.upper_bounds
-        |> ITySet.elements
-        |> List.filter_map ~f:map_bound
-        |> ITySet.of_list
-      in
-      let cstrs = { cstrs with lower_bounds; upper_bounds } in
-      Some (TVIConstraints cstrs)
-  in
-  let genv =
-    IMap.mapi
-      (fun var global_tyvar_info ->
-        if equal_identifier var var_to_forget then
-          None
-        else
-          let solving_info_g =
-            process_solving_info global_tyvar_info.solving_info_g
-          in
-          Option.map solving_info_g ~f:(fun solving_info_g ->
-              { global_tyvar_info with solving_info_g }))
-      genv
-  in
-  let genv = IMap.filter_opt genv in
-  (* sanity check *)
-  let () =
-    let throw_on_var_to_forget =
-      object
-        inherit [unit] Type_mapper_generic.internal_type_mapper
-
-        method! on_tvar () r var =
-          if equal_identifier var var_to_forget then
-            failwith
-            @@ Printf.sprintf "encountered %d, should have been removed" var
-          else
-            ((), mk (r, Tvar var))
-      end
-    in
-    IMap.iter
-      (fun _var global_tyvar_info ->
-        match global_tyvar_info.solving_info_g with
-        | TVIType locl_ty -> fst @@ throw_on_var_to_forget#on_type () locl_ty
-        | TVIConstraints cstrs ->
-          ITySet.iter
-            (fun ity -> fst @@ throw_on_var_to_forget#on_internal_type () ity)
-            cstrs.lower_bounds;
-          ITySet.iter
-            (fun ity -> fst @@ throw_on_var_to_forget#on_internal_type () ity)
-            cstrs.upper_bounds)
-      genv
-  in
-  genv
-
-let visit_types_g
-    (genv : t_global)
-    (mapper : 'a Type_mapper_generic.internal_type_mapper_type)
-    (acc : 'a) : 'a =
-  IMap.fold
-    (fun tyvar tyvar_info acc ->
-      let acc = fst @@ mapper#on_tvar acc tyvar_info.tyvar_reason tyvar in
-      match tyvar_info.solving_info_g with
-      | TVIType ty -> fst @@ mapper#on_type acc ty
-      | TVIConstraints cstrs ->
-        let process_bounds bounds acc =
-          ITySet.fold
-            (fun ity vars -> fst @@ mapper#on_internal_type vars ity)
-            bounds
-            acc
-        in
-        acc
-        |> process_bounds cstrs.lower_bounds
-        |> process_bounds cstrs.upper_bounds)
-    genv
-    acc
-
 (** This is a horrible thing meant to throw a warning when some invariant turns out
     to be wrong (namely a variable should not yet be solved) and to help us get back
     on our feet when this happens. Once we figure out why this invariant is wrong,
@@ -1483,9 +1022,7 @@ let unsolve env v =
   match IMap.find_opt v tvenv with
   | None -> env
   | Some tvinfo ->
-    let { solving_info; tyvar_pos; global_reason; eager_solve_failed } =
-      tvinfo
-    in
+    let { solving_info; tyvar_pos; eager_solve_failed } = tvinfo in
     (match solving_info with
     | TVIConstraints _ -> env
     | TVIType ty ->
@@ -1505,8 +1042,6 @@ let unsolve env v =
             type_constants = SMap.empty;
           }
       in
-      let tvinfo =
-        { solving_info; tyvar_pos; global_reason; eager_solve_failed }
-      in
+      let tvinfo = { solving_info; tyvar_pos; eager_solve_failed } in
       let tvenv = IMap.add v tvinfo tvenv in
       { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences })

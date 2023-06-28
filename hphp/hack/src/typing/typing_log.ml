@@ -691,10 +691,6 @@ let log_escape ?(level = 1) p env msg vars =
             List.iter vars ~f:(lprintf (Normal Green) "%s ")
           )))
 
-let log_global_inference_env p env global_tvenv =
-  log_position p (fun () ->
-      log_value env @@ Inf.Log.global_inference_env_as_value global_tvenv)
-
 let log_prop level p message env prop =
   log_with_level env "prop" ~level (fun () ->
       log_pos_or_decl p (fun () -> log_subtype_prop env message prop))

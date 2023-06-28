@@ -45,9 +45,6 @@ val log_escape :
   string list ->
   unit
 
-val log_global_inference_env :
-  Pos.t -> Typing_env_types.env -> Typing_inference_env.t_global -> unit
-
 val log_prop :
   int ->
   Pos_or_decl.t ->

@@ -477,31 +477,6 @@ let fresh_type ?variance env p =
 
 let fresh_type_invariant = fresh_type ~variance:Ast_defs.Invariant
 
-let new_global_tyvar env ?i r =
-  let v =
-    let extension =
-      match i with
-      | Some i -> Printf.sprintf "#%d" i
-      | None -> ""
-    in
-    Ident.from_string_hash
-      (Printf.sprintf
-         "%s%s"
-         (Pos.print_verbose_relative
-            (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos))
-         extension)
-  in
-  let env =
-    let p = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos in
-    match get_tyvar_info_opt env v with
-    | Some tvinfo ->
-      assert (Option.is_some tvinfo.global_reason);
-      assert (Pos.equal tvinfo.tyvar_pos p);
-      env
-    | None -> fresh_unsolved_tyvar env v ~global_reason:(Some r) p
-  in
-  (env, mk (r, Tvar v))
-
 let wrap_ty_in_var env r ty =
   let v = Identifier_provider.make_identifier () in
   let tvinfo =

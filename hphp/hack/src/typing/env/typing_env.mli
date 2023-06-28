@@ -488,8 +488,6 @@ val is_global_tyvar : env -> Ident.t -> bool
 
 val get_global_tyvar_reason : env -> Ident.t -> Reason.t option
 
-val new_global_tyvar : env -> ?i:int -> Typing_reason.t -> env * locl_ty
-
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
 val get_tyvar_type_const : env -> int -> pos_id -> (pos_id * locl_ty) option

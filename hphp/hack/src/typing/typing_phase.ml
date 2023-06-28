@@ -263,22 +263,12 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         (mk (r, Tshape (origin, MakeType.supportdyn r ty, shape_fields)))
     | _ -> lty
   in
-  let tvar_or_localize ~ety_env env r ty ~i =
-    if
-      TypecheckerOptions.global_inference env.genv.tcopt
-      && (is_any ty || is_tyvar ty)
-    then
-      let (env, tv) = Env.new_global_tyvar env ~i r in
-      ((env, None), tv)
-    else
-      localize ~ety_env env ty
-  in
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
   | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
-  | Tvar _var ->
-    let (env, tv) = Env.new_global_tyvar env r in
-    ((env, None), tv)
+  | Tvar var ->
+    (* TODO(hverr): remove - make locl ty only *)
+    ((env, None), mk (r, Tvar var))
   | (Tnonnull | Tprim _ | Tdynamic | Tany _) as x -> ((env, None), mk (r, x))
   | Tmixed -> ((env, None), MakeType.mixed r)
   | Tthis ->
@@ -291,8 +281,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     ((env, None), ty)
   | Tvec_or_dict (tk, tv) ->
-    let ((env, e1), tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
-    let ((env, e2), tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
+    let ((env, e1), tk) = localize ~ety_env env tk in
+    let ((env, e2), tv) = localize ~ety_env env tv in
     let ty = Tvec_or_dict (tk, tv) in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt), mk (r, ty))
@@ -752,26 +742,11 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
       let tparams = Cls.tparams class_info in
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
       let ((env, err), tyl) =
-        if
-          TypecheckerOptions.global_inference (Env.get_tcopt env)
-          && (not (List.is_empty tparams))
-          && List.is_empty tyargs
-        then
-          (* In this case we will infer the missing type parameters *)
-          (* FIXME: I guess in global inference mode, we should just reject
-           * classes with missing type args if they have any HK parameters ?
-           *)
-          localize_missing_tparams_class_for_global_inference
-            env
-            r
-            sid
-            class_info
-        else
-          localize_targs_by_kind
-            ~ety_env:{ ety_env with expand_visible_newtype = true }
-            env
-            tyargs
-            nkinds
+        localize_targs_by_kind
+          ~ety_env:{ ety_env with expand_visible_newtype = true }
+          env
+          tyargs
+          nkinds
       in
       (* Hide the class type if its internal and outside of the module *)
       if Typing_modules.is_class_visible env class_info then
@@ -1202,56 +1177,6 @@ and check_where_constraints
         (env, ty_errs))
   in
   (env, Typing_error.multiple_opt ty_errs)
-
-(**
- * If a type annotation for a class is missing type arguments, create a type variable
- * for them and apply constraints.
- *
- * This is not used for local inference on constructors, but rather for global inference
- * for partial files where function signatures are allowed to contain types ommitting type
- * arguments.
- *)
-and localize_missing_tparams_class_for_global_inference env r sid class_ =
-  let use_name = Utils.strip_ns (snd sid) in
-  let tparams = Cls.tparams class_ in
-  let ((env, _i), tyl) =
-    List.fold_map tparams ~init:(env, 0) ~f:(fun (env, i) tparam ->
-        let (env, ty) =
-          Env.new_global_tyvar
-            env
-            ~i
-            (Reason.Rglobal_type_variable_generics
-               (Reason.to_pos r, snd tparam.tp_name, use_name))
-        in
-        ((env, i + 1), ty))
-  in
-  let c_ty = mk (r, Tclass (sid, nonexact, tyl)) in
-  let ety_env =
-    {
-      empty_expand_env with
-      this_ty = c_ty;
-      substs = Subst.make_locl tparams tyl;
-      on_error = Some (Typing_error.Reasons_callback.unify_error_at Pos.none);
-    }
-  in
-  let (env, e1) =
-    check_tparams_constraints ~use_pos:Pos.none ~ety_env env tparams
-  in
-  let constraints = Cls.where_constraints class_ in
-  let (env, e2) =
-    if List.is_empty constraints then
-      (env, None)
-    else
-      check_where_constraints
-        ~in_class:true
-        ~use_pos:Pos.none
-        ~definition_pos:(Cls.pos class_)
-        ~ety_env
-        env
-        constraints
-  in
-  let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-  ((env, ty_err_opt), tyl)
 
 and localize_refinement ~ety_env env r root decl_cr =
   let mk_unsupported_err () =

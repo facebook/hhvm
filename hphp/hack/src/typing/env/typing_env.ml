@@ -137,12 +137,6 @@ let fresh_type_error_contravariant env p =
   in
   ({ env with inference_env }, res)
 
-let new_global_tyvar env ?i r =
-  log_env_change_ "new_global_tyvar" env
-  @@
-  let (inference_env, res) = Inf.new_global_tyvar env.inference_env ?i r in
-  ({ env with inference_env }, res)
-
 let add_subtype_prop env prop =
   log_env_change "add_subtype_prop" env
   @@ { env with inference_env = Inf.add_subtype_prop env.inference_env prop }

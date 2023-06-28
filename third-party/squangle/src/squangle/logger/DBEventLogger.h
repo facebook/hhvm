@@ -44,7 +44,7 @@ enum class OperationType {
 
 class EnumHelper {
  public:
-  static const char* failureReasonToString(FailureReason reason) {
+  static constexpr const char* failureReasonToString(FailureReason reason) {
     switch (reason) {
       case FailureReason::BAD_USAGE:
         return "BadUsage";
@@ -60,7 +60,7 @@ class EnumHelper {
     return "(should not happen)";
   }
 
-  static folly::StringPiece operationTypeToString(
+  static constexpr folly::StringPiece operationTypeToString(
       OperationType operation_type) {
     switch (operation_type) {
       case OperationType::None:
@@ -184,33 +184,33 @@ class DBLoggerBase {
   // Basic logging functions to be overloaded in children
   virtual void logQuerySuccess(
       const QueryLoggingData& loggingData,
-      const TConnectionInfo& connInfo) = 0;
+      const TConnectionInfo& connInfo) const = 0;
 
   virtual void logQueryFailure(
       const QueryLoggingData& logging_data,
       FailureReason reason,
       unsigned int mysqlErrno,
       const std::string& error,
-      const TConnectionInfo& connInfo) = 0;
+      const TConnectionInfo& connInfo) const = 0;
 
   virtual void logConnectionSuccess(
       const CommonLoggingData& logging_data,
-      const TConnectionInfo& connInfo) = 0;
+      const TConnectionInfo& connInfo) const = 0;
 
   virtual void logConnectionFailure(
       const CommonLoggingData& logging_data,
       FailureReason reason,
       unsigned int mysqlErrno,
       const std::string& error,
-      const TConnectionInfo& connInfo) = 0;
+      const TConnectionInfo& connInfo) const = 0;
 
   virtual void setLoggingPrefix(std::string_view logging_prefix) = 0;
 
-  const char* FailureString(FailureReason reason) {
+  static constexpr const char* FailureString(FailureReason reason) {
     return EnumHelper::failureReasonToString(reason);
   }
 
-  folly::StringPiece toString(OperationType operation_type) {
+  static constexpr folly::StringPiece toString(OperationType operation_type) {
     return EnumHelper::operationTypeToString(operation_type);
   }
 
@@ -229,25 +229,25 @@ class DBSimpleLogger : public SquangleLoggerBase {
 
   void logQuerySuccess(
       const QueryLoggingData& logging_data,
-      const SquangleLoggingData& connInfo) override;
+      const SquangleLoggingData& connInfo) const override;
 
   void logQueryFailure(
       const QueryLoggingData& logging_data,
       FailureReason reason,
       unsigned int mysqlErrno,
       const std::string& error,
-      const SquangleLoggingData& connInfo) override;
+      const SquangleLoggingData& connInfo) const override;
 
   void logConnectionSuccess(
       const CommonLoggingData& logging_data,
-      const SquangleLoggingData& connInfo) override;
+      const SquangleLoggingData& connInfo) const override;
 
   void logConnectionFailure(
       const CommonLoggingData& logging_data,
       FailureReason reason,
       unsigned int mysqlErrno,
       const std::string& error,
-      const SquangleLoggingData& connInfo) override;
+      const SquangleLoggingData& connInfo) const override;
 };
 } // namespace db
 } // namespace facebook

@@ -105,9 +105,11 @@ struct same_sizes {
 
 struct ref_type {
   1: required byte a;
-  2: required byte b (cpp.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: required byte b;
   3: required byte c;
-  4: required byte d (cpp2.ref_type = "unique");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: required byte d;
 } (cpp.minimize_padding)
 
 struct nonoptimal_struct_noexcept_move {

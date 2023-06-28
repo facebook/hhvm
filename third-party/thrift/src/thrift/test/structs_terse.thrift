@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/test/structs.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -53,25 +54,33 @@ struct NotEmptiableTerseFieldsStruct {
 }
 
 struct BasicRefsSharedTerseWrites {
-  1: optional structs.HasInt def_field (cpp.ref);
-  2: optional structs.HasInt shared_field (cpp.ref_type = "shared");
-  3: optional list<structs.HasInt> shared_fields (cpp.ref_type = "shared");
-  4: optional structs.HasInt shared_field_const (cpp.ref_type = "shared_const");
-  5: optional list<structs.HasInt> shared_fields_const (
-    cpp.ref_type = "shared_const",
-  );
-  6: structs.HasInt shared_field_req (cpp.ref_type = "shared");
-  7: list<structs.HasInt> shared_fields_req (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional structs.HasInt def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional structs.HasInt shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: optional list<structs.HasInt> shared_fields;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: optional structs.HasInt shared_field_const;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional list<structs.HasInt> shared_fields_const;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  6: structs.HasInt shared_field_req;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: list<structs.HasInt> shared_fields_req;
 }
 
 struct OptionalFieldsTerseStruct {
-  1: optional structs.HasInt def_field (cpp.ref);
-  2: optional structs.HasInt shared_field (cpp.ref_type = "shared");
-  3: optional list<structs.HasInt> shared_fields (cpp.ref_type = "shared");
-  4: optional structs.HasInt shared_field_const (cpp.ref_type = "shared_const");
-  5: optional list<structs.HasInt> shared_fields_const (
-    cpp.ref_type = "shared_const",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional structs.HasInt def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional structs.HasInt shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: optional list<structs.HasInt> shared_fields;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: optional structs.HasInt shared_field_const;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional list<structs.HasInt> shared_fields_const;
   @thrift.Box
   6: optional structs.HasInt boxed_field;
 }

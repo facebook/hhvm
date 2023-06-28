@@ -17,6 +17,7 @@
 include "thrift/annotation/internal.thrift"
 include "thrift/test/clear.thrift"
 include "thrift/test/inject_metadata_fields_annot.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test.inject_metadata_fields
 
@@ -58,7 +59,8 @@ struct InjectedEmptyStruct2 {}
 struct FieldsWithAnnotation {
   @thrift.Box
   1: optional i64 structured_boxed_field;
-  2: optional i64 unstructured_boxed_field (thrift.box);
+  @thrift.Box
+  2: optional i64 unstructured_boxed_field;
 }
 
 @internal.InjectMetadataFields{type = "FieldsWithAnnotation"}

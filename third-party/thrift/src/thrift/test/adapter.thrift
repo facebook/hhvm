@@ -48,8 +48,9 @@ typedef string AdaptedString
 
 typedef AdaptedBool DoubleTypedefBool
 
+@cpp.Type{name = "::folly::IOBuf"}
 @cpp.Adapter{name = "::apache::thrift::test::CustomProtocolAdapter"}
-typedef binary (cpp.type = "::folly::IOBuf") CustomProtocolType
+typedef binary CustomProtocolType
 
 @cpp.Adapter{
   name = "::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>",

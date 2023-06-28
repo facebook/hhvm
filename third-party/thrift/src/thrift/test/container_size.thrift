@@ -19,13 +19,19 @@ namespace cpp2 apache.thrift.test
 cpp_include "folly/io/IOBuf.h"
 cpp_include "thrift/test/ContainerSize.h"
 
+include "thrift/annotation/cpp.thrift"
+
 struct Struct {
-  1: string (cpp.type = "TestFileBackedString") str;
-  2: binary (cpp.type = "folly::IOBuf") iobuf;
-  3: optional binary (cpp.type = "std::unique_ptr<folly::IOBuf>") unique_iobuf;
-  4: list<i64> (cpp.type = "MockSize<std::vector<std::int64_t>>") l;
-  5: set<i64> (cpp.type = "MockSize<std::set<std::int64_t>>") s;
-  6: map<i64, i64> (
-    cpp.type = "MockSize<std::map<std::int64_t, std::int64_t>>",
-  ) m;
+  @cpp.Type{name = "TestFileBackedString"}
+  1: string str;
+  @cpp.Type{name = "folly::IOBuf"}
+  2: binary iobuf;
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  3: optional binary unique_iobuf;
+  @cpp.Type{name = "MockSize<std::vector<std::int64_t>>"}
+  4: list<i64> l;
+  @cpp.Type{name = "MockSize<std::set<std::int64_t>>"}
+  5: set<i64> s;
+  @cpp.Type{name = "MockSize<std::map<std::int64_t, std::int64_t>>"}
+  6: map<i64, i64> m;
 }

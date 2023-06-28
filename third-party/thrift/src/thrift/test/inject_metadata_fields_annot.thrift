@@ -21,7 +21,8 @@ include "thrift/annotation/thrift.thrift"
 struct FieldsWithAnnotation {
   @thrift.Box
   1: optional i64 structured_boxed_field;
-  2: optional i64 unstructured_boxed_field (thrift.box);
+  @thrift.Box
+  2: optional i64 unstructured_boxed_field;
 }
 
 @internal.InjectMetadataFields{type = "FieldsWithAnnotation"}

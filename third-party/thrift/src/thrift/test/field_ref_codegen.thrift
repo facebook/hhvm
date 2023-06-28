@@ -16,8 +16,11 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct test_struct {
   1: optional i64 foo;
-  2: optional i64 ref (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional i64 ref;
   3: i64 bar;
 }

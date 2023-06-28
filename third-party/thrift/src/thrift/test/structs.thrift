@@ -38,11 +38,13 @@ struct HasInt {
 }
 
 struct BasicRefs {
-  1: HasInt def_field (cpp.ref);
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: HasInt def_field;
 }
 
 struct BasicRefsShared {
-  1: HasInt def_field (cpp.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: HasInt def_field;
 }
 
 @cpp.Type{name = "WrappedTypeField<Basic>"}
@@ -90,11 +92,16 @@ struct NotEmptiableStruct {
 }
 
 struct OptionalFieldsStruct {
-  1: optional HasInt def_field (cpp.ref);
-  2: optional HasInt shared_field (cpp.ref_type = "shared");
-  3: optional list<HasInt> shared_fields (cpp.ref_type = "shared");
-  4: optional HasInt shared_field_const (cpp.ref_type = "shared_const");
-  5: optional list<HasInt> shared_fields_const (cpp.ref_type = "shared_const");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional HasInt def_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional HasInt shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: optional list<HasInt> shared_fields;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: optional HasInt shared_field_const;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional list<HasInt> shared_fields_const;
   @thrift.Box
   6: optional HasInt boxed_field;
 }

@@ -9,8 +9,13 @@
  */
 
 namespace {
+//<<__Deprecated('use HH\stdin() or HH\try_stdin()')>>
 const resource STDIN;
+
+//<<__Deprecated('use HH\stdout() or HH\try_stdout()')>>
 const resource STDOUT;
+
+//<<__Deprecated('use HH\stderr() or HH\try_stderr()')>>
 const resource STDERR;
 
 const int PATHINFO_DIRNAME;
@@ -377,10 +382,39 @@ function closedir(
 }
 
 namespace HH {
-  <<__PHPStdLib>> function try_stdin()[]: ?resource;
-  <<__PHPStdLib>> function try_stdout()[]: ?resource;
-  <<__PHPStdLib>> function try_stderr()[]: ?resource;
-  <<__PHPStdLib>> function stdin()[]: resource;
-  <<__PHPStdLib>> function stdout()[]: resource;
-  <<__PHPStdLib>> function stderr()[]: resource;
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or null in web requests
+ */
+<<__PHPStdLib>> function try_stdin()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or null in web requests
+ */
+<<__PHPStdLib>> function try_stdout()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or null in web requests
+ */
+<<__PHPStdLib>> function try_stderr()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+<<__PHPStdLib>> function stdin()[]: resource;
+
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+<<__PHPStdLib>> function stdout()[]: resource;
+
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+<<__PHPStdLib>> function stderr()[]: resource;
 }

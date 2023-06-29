@@ -1481,16 +1481,32 @@ function closedir(?resource $dir_handle = null): void;
 
 namespace HH {
 
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or null in web requests
+ */
 <<__Native>>
-function try_stdin(): ?resource;
+function try_stdin()[]: ?resource;
 
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or null in web requests
+ */
 <<__Native>>
-function try_stdout(): ?resource;
+function try_stdout()[]: ?resource;
 
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or null in web requests
+ */
 <<__Native>>
-function try_stderr(): ?resource;
+function try_stderr()[]: ?resource;
 
-function stdin(): resource {
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stdin()[]: resource {
   $s = try_stdin();
   if ($s is null) {
     throw new \RuntimeException(
@@ -1500,7 +1516,11 @@ function stdin(): resource {
   return $s;
 }
 
-function stdout(): resource {
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stdout()[]: resource {
   $s = try_stdout();
   if ($s is null) {
     throw new \RuntimeException(
@@ -1510,7 +1530,11 @@ function stdout(): resource {
   return $s;
 }
 
-function stderr(): resource {
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stderr()[]: resource {
   $s = try_stderr();
   if ($s is null) {
     throw new \RuntimeException(

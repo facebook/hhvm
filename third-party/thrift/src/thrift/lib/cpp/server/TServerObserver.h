@@ -163,6 +163,9 @@ class TServerObserver {
 
   virtual void undeclaredException() {}
 
+  virtual void resourcePoolsInitialized(
+      std::vector<std::string> /*resourcePoolsDescriptions*/) {}
+
   // The observer has to specify a sample rate for callCompleted notifications
   inline uint32_t getSampleRate() const { return sampleRate_; }
 

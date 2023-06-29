@@ -852,7 +852,18 @@ void ThriftServer::setupThreadManager() {
   resourcePoolSet().lock();
 
   if (!resourcePoolSet().empty()) {
-    LOG(INFO) << "Resource pools:" << resourcePoolSet().describe();
+    LOG(INFO) << "Resource pools (" << resourcePoolSet().size()
+              << "): " << resourcePoolSet().describe();
+
+    auto descriptions = resourcePoolSet().poolsDescriptions();
+    if (auto observer = getObserverShared()) {
+      observer->resourcePoolsInitialized(descriptions);
+    }
+
+    size_t count{0};
+    for (auto description : descriptions) {
+      LOG(INFO) << fmt::format("Resource pool [{}]: {}", count++, description);
+    }
   }
 }
 

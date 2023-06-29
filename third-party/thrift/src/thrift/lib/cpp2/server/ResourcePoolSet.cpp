@@ -289,6 +289,14 @@ std::string ResourcePoolSet::describe() const {
       priorityMapString());
 }
 
+std::vector<std::string> ResourcePoolSet::poolsDescriptions() const {
+  std::vector<std::string> result;
+  for (auto& pool : resourcePools_) {
+    result.push_back(pool ? pool->describe() : "null");
+  }
+  return result;
+}
+
 void ResourcePoolSet::calculatePriorityMapping() {
   // Calculate the best resource pool to return for each concurrency::PRIORITY
   // value

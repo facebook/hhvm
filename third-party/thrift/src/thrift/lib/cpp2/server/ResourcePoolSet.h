@@ -124,6 +124,8 @@ class ResourcePoolSet {
   // returned.
   std::string describe() const;
 
+  std::vector<std::string> poolsDescriptions() const;
+
   template <typename F>
   void forEachResourcePool(F&& f) const {
     for (auto& resourcePool : resourcePools_) {

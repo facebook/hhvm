@@ -115,11 +115,10 @@ class THttpParser {
 class THttpClientParser : public THttpParser {
  public:
   THttpClientParser() {}
-  THttpClientParser(std::string host, std::string path) {
-    host_ = host;
-    path_ = path;
-    userAgent_ = "C++/THttpClient";
-  }
+  THttpClientParser(std::string host, std::string path)
+      : host_{std::move(host)},
+        path_{std::move(path)},
+        userAgent_{"C++/THttpClient"} {}
 
   void setHost(const std::string& host) { host_ = host; }
   void setPath(const std::string& path) { path_ = path; }

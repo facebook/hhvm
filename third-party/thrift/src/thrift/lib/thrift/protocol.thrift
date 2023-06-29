@@ -51,8 +51,13 @@ struct Path {
 // Represents serialized data of unmasked fields.
 union MaskedData {
   1: id.ValueId full;
-  2: map<id.FieldId, MaskedData> (cpp.template = "folly::F14VectorMap") fields;
-  3: map<id.ValueId, MaskedData> (cpp.template = "folly::F14VectorMap") values;
+  // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "folly::F14VectorMap"}
+  2: map<id.FieldId, MaskedData> fields;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.Type{template = "folly::F14VectorMap"}
+  3: map<id.ValueId, MaskedData> values;
 } (py3.hidden)
 
 struct EncodedValue {

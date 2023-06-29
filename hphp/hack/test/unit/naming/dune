@@ -13,7 +13,7 @@
   global_options
   logging
   naming_provider
-  package
+  package_info
   provider_backend
   provider_context
   search_utils

@@ -8,7 +8,7 @@
   folly_stubs
   lwt
   lsp
-  package
+  package_info
   rust_batch_index_ffi
   server
   server_autocomplete_services

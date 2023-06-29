@@ -332,7 +332,7 @@
   decl_defs
   decl_pos_utils
   decl_utils
-  package
+  package_info
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -373,7 +373,7 @@
   classDiff
   decl_compare_utils
   decl_defs
-  package
+  package_info
   shallow_class_diff
   shallow_class_fanout
   shallow_classes_provider

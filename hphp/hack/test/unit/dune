@@ -13,7 +13,7 @@
   errors
   naming_global
   naming_table
-  package
+  package_info
   provider_context
   tast_provider))
 

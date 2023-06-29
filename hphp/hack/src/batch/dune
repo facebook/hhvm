@@ -23,7 +23,7 @@
   heap_shared_mem
   hhi
   naming
-  package
+  package_info
   procs_entry_point
   relative_path
   typechecker_options

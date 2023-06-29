@@ -22,7 +22,7 @@
    package_ocaml_ffi)))
 
 (library
- (name package)
+ (name package_info)
  (wrapped false)
  (modules
   package
@@ -38,7 +38,7 @@
  (libraries
   errors
   parsing_error
-  package
+  package_info
   package_ocaml_ffi
   pos_or_decl)
  (preprocess

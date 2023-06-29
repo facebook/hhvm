@@ -31,7 +31,7 @@
   hhi_get
   naming_ast_print
   memtrace
-  package
+  package_info
   package_config
   parent
   rust_provider_backend_stubs
@@ -168,7 +168,7 @@
   direct_decl_parser
   file_provider
   ocamlrep_marshal_ffi
-  package
+  package_info
   ppxlib.print_diff
   provider_context
   provider_utils

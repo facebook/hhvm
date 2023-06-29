@@ -586,7 +586,9 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setSSLConfig(
       folly::observer::Observer<wangle::SSLContextConfig> contextObserver) {
     sslContextObserver_ = folly::observer::makeObserver(
-        [observer = std::move(contextObserver)]() {
+        [observer = std::move(contextObserver),
+         tlsRevocationObserver = enableTLSCertRevocation()]() {
+          (void)**tlsRevocationObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -779,6 +781,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
   static folly::observer::Observer<bool> enableStopTLS();
+
+  static folly::observer::Observer<bool> enableTLSCertRevocation();
 
 #if FOLLY_HAS_COROUTINES
   /**

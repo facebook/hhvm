@@ -81,6 +81,7 @@ FOLLY_GFLAGS_DEFINE_string(
 
 THRIFT_FLAG_DEFINE_bool(server_alpn_prefer_rocket, true);
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
+THRIFT_FLAG_DEFINE_bool(enable_mrl_check_for_thrift_server, false);
 
 THRIFT_FLAG_DEFINE_bool(dump_snapshot_on_long_shutdown, true);
 
@@ -1919,6 +1920,10 @@ ThriftServer::defaultNextProtocols() {
 
 folly::observer::Observer<bool> ThriftServer::enableStopTLS() {
   return THRIFT_FLAG_OBSERVE(server_enable_stoptls);
+}
+
+folly::observer::Observer<bool> ThriftServer::enableTLSCertRevocation() {
+  return THRIFT_FLAG_OBSERVE(enable_mrl_check_for_thrift_server);
 }
 
 folly::observer::CallbackHandle ThriftServer::getSSLCallbackHandle() {

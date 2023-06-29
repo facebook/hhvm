@@ -5,6 +5,7 @@
  (libraries
   collections
   custom_error_types
+  package
   saved_state_rollouts
   utils_find)
  (preprocess

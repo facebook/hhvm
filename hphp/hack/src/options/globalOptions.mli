@@ -333,6 +333,8 @@ type t = {
   tco_rust_elab: bool;
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
+  tco_package_info: PackageInfo.t;
+      (** Information used to determine which package a module belongs to during typechecking. *)
 }
 [@@deriving eq, show]
 
@@ -459,6 +461,7 @@ val set :
   ?tco_rust_elab:bool ->
   ?dump_tast_hashes:bool ->
   ?tco_autocomplete_mode:bool ->
+  ?tco_package_info:PackageInfo.t ->
   t ->
   t
 

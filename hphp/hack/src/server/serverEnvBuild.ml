@@ -91,5 +91,4 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
     last_recheck_loop_stats = RecheckLoopStats.empty ~recheck_id:"<none>";
     last_recheck_loop_stats_for_actual_work = None;
     local_symbol_table = SearchUtils.default_si_env;
-    package_info = PackageInfo.empty;
   }

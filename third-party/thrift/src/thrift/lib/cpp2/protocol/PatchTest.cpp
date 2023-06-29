@@ -1074,6 +1074,29 @@ TEST_F(PatchTest, Struct) {
   // Remove
   {
     Object patchObj = makePatch(
+        op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({1}));
+    EXPECT_EQ(
+        protocol::Object{},
+        *applyContainerPatch(patchObj, value).objectValue_ref());
+    {
+      auto masks = extractMaskViewFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
+    {
+      auto masks = extractMaskFromPatch(patchObj);
+      EXPECT_TRUE(MaskRef{masks.read}.isAllMask());
+      EXPECT_TRUE(MaskRef{masks.write}.isAllMask());
+    }
+  }
+  {
+    Object patchObj = makePatch(
+        op::PatchOp::Remove, asValueStruct<type::list<type::i16_t>>({}));
+    expectNoop(patchObj);
+  }
+  // TODO: Remove this after migrating to List
+  {
+    Object patchObj = makePatch(
         op::PatchOp::Remove, asValueStruct<type::set<type::i16_t>>({1}));
     EXPECT_EQ(
         protocol::Object{},
@@ -1635,15 +1658,6 @@ TEST_F(PatchTest, RemoveField) {
   EXPECT_FALSE(obj.contains(FieldId{1}));
   EXPECT_FALSE(obj.contains(FieldId{2}));
   EXPECT_FALSE(obj.contains(FieldId{3}));
-
-  patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_list() = {};
-  try {
-    applyPatch(patch, obj);
-    EXPECT_TRUE(false);
-  } catch (std::runtime_error& e) {
-    std::string msg = e.what();
-    EXPECT_NE(msg.find("is not `set<i16>` but `listValue`"), msg.npos) << msg;
-  }
 
   patch[static_cast<FieldId>(op::PatchOp::Remove)].emplace_set() = {
       asValueStruct<type::i32_t>(1)};

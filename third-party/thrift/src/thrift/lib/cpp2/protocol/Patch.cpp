@@ -470,20 +470,27 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     applyFieldPatch(patchFields);
   }
   if (auto* to_remove = findOp(patch, PatchOp::Remove)) {
-    if (!to_remove->is_set()) {
-      throw std::runtime_error(fmt::format(
-          "The `PatchOp::Remove` field in struct/union patch is not `set<i16>` but `{}`",
-          util::enumNameSafe(to_remove->getType())));
-    }
+    auto remove = [&](const auto& ids) {
+      for (const auto& field_id : ids) {
+        if (!field_id.is_i16()) {
+          throw std::runtime_error(fmt::format(
+              "The `PatchOp::Remove` field in struct/union patch is not `set<i16>` but `set<{}>`",
+              util::enumNameSafe(field_id.getType())));
+        }
 
-    for (const auto& field_id : to_remove->as_set()) {
-      if (!field_id.is_i16()) {
-        throw std::runtime_error(fmt::format(
-            "The `PatchOp::Remove` field in struct/union patch is not `set<i16>` but `set<{}>`",
-            util::enumNameSafe(field_id.getType())));
+        value.erase(FieldId{field_id.as_i16()});
       }
+    };
 
-      value.erase(FieldId{field_id.as_i16()});
+    if (const auto* p = to_remove->if_set()) {
+      // TODO: Remove this after migrating to List
+      remove(*p);
+    } else if (const auto* p = to_remove->if_list()) {
+      remove(*p);
+    } else {
+      throw std::runtime_error(fmt::format(
+          "The `PatchOp::Remove` field in struct/union patch is not `set<i16>`/`list<i16>` but `{}`",
+          util::enumNameSafe(to_remove->getType())));
     }
   }
   if (auto* addFields = findOp(patch, PatchOp::Add)) {

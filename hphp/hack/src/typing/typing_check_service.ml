@@ -856,7 +856,6 @@ let process_with_hh_distc
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(check_info : check_info)
     ~(tcopt : TypecheckerOptions.t) : _ distc_outcome =
-  (* TODO: Plumb extra --config name=value args through to spawn() *)
   (* We don't want to use with_tempdir because we need to keep the folder around
      for subseqent typechecks that will read the dep graph in the folder *)
   let root = Option.value_exn root in

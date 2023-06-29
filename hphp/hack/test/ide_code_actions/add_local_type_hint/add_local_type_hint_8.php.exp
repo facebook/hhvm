@@ -1,5 +1,5 @@
 Code actions available:
 ------------------------------------------
-Inline variable $the_variable (CodeActionKind: refactor)
+Extract into variable (CodeActionKind: refactor)
 
 No code action titles match prefix: Add local type hint

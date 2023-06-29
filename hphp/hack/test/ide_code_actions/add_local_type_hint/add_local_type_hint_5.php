@@ -3,6 +3,6 @@
 
 function f() : void {
   $the_variable = 3;
-  // Offer refactroing to add type hint for $x
+  // don't offer the refactoring: not enough information to indicate the user intends to refactor `$x`
   $x = /*range-start*/$the_variable/*range-end*/;
 }

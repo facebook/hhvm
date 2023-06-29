@@ -1,0 +1,34 @@
+Code actions available:
+------------------------------------------
+Add local type hint for $y (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"let $y : int ",
+          "range":{"end":{"character":21,"line":6},"start":{"character":19,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add local type hint for $y"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file:__EnableUnstableFeatures('typed_local_variables')>>
+
+function f(int $x) : void {
+  $x = () ==> {
+    // add a type hint for `$y`
+    /*range-start*/let $y : int  = 3;/*range-end*/
+  }();
+}
+

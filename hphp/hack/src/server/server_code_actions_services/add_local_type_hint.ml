@@ -6,6 +6,12 @@ type candidate = {
   lhs_pos: Pos.t;
 }
 
+let should_offer_refactor ~(selection : Pos.t) ~lhs_pos ~rhs_pos =
+  let contains_full_assignment =
+    Pos.contains selection rhs_pos && Pos.contains selection lhs_pos
+  in
+  contains_full_assignment || Pos.contains lhs_pos selection
+
 let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
@@ -50,9 +56,10 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
                 Binop
                   {
                     bop = Ast_defs.Eq None;
-                    lhs = (lvar_ty, _, Lvar (lid_pos, lid));
-                    _;
-                  } ) ->
+                    lhs = (lvar_ty, lhs_pos, Lvar (lid_pos, lid));
+                    rhs = (_, rhs_pos, _);
+                  } )
+            when should_offer_refactor ~selection ~lhs_pos ~rhs_pos ->
             let tenv = Tast_env.tast_env_as_typing_env env in
             Some
               {

@@ -70,12 +70,11 @@ class ClientThread : public folly::HHWheelTimer::Callback {
       BaseLoadGenerator& loadGenerator,
       bool useLoadGenerator)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
+        continuous_(cfg.continuous),
         useLoadGenerator_(useLoadGenerator),
         testDoneTimeout_(testDone_),
         warmupDoneTimeout_(rpcStats_),
         loadGenerator_(loadGenerator) {
-    continuous_ = cfg.continuous;
-
     auto ebm = folly::EventBaseManager::get();
     auto factoryFunction = cfg.connConfig.ioUring
         ? folly::EventBaseBackendBase::FactoryFunc(getIOUringBackend)

@@ -109,7 +109,7 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
 
 void TestRunner::runTests() {
   LOG(INFO) << "Using io_uring: " << (FLAGS_io_uring ? "true" : "false");
-  if (FLAGS_continuous) {
+  if (cfg_.continuous) {
     runContinuously();
   } else {
     runFixedTime();

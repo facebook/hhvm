@@ -87,6 +87,7 @@ namespace apache::thrift::stress {
 
   ClientConfig config{};
 
+  config.continuous = FLAGS_continuous;
   // Configure qps load generator
   config.useLoadGenerator = FLAGS_gen_load;
   config.gen_load_interval = std::chrono::milliseconds(FLAGS_gen_load_interval);

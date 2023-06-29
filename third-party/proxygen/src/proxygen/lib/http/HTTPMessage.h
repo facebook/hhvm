@@ -782,7 +782,7 @@ class HTTPMessage {
     return h2Pri_;
   }
 
-  void setHTTP2Priority(HTTP2Priority h2Pri) {
+  void setHTTP2Priority(const HTTP2Priority& h2Pri) {
     h2Pri_ = h2Pri;
   }
 

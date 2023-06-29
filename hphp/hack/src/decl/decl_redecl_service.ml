@@ -594,8 +594,7 @@ let redo_type_decl
   in
   Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
   let (changed, to_recheck) =
-    let AffectedDeps.{ changed = changed'; mro_invalidated = _; needs_recheck }
-        =
+    let AffectedDeps.{ changed = changed'; needs_recheck } =
       Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
     in
 

@@ -24,34 +24,17 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (class_name : string)
-    (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
+    (member_diff : ClassDiff.member_diff) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
   let changed = DepSet.singleton (Dep.make (Dep.Type class_name)) in
   let acc = AffectedDeps.empty () in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
-  let {
-    mro_positions_changed;
-    member_diff =
-      { consts; typeconsts; props; sprops; methods; smethods; constructor };
-  } =
-    minor_change
+  let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
+    member_diff
   in
   let changed_and_descendants =
     lazy (Typing_deps.add_extend_deps mode changed)
-  in
-  let acc =
-    (* If positions have changed which are inherited by descendant folded
-       classes, we need to update positions in this class and all its
-       descendants. We mark them as invalidated here. We don't need to
-       recheck the fanout of the invalidated classes--since only positions
-       changed, there will be no change in the fanout except in the positions
-       in error messages, and we recheck all files with errors anyway. *)
-    if mro_positions_changed then
-      let changed_and_descendants = Lazy.force changed_and_descendants in
-      AffectedDeps.mark_mro_invalidated acc changed_and_descendants
-    else
-      acc
   in
   (* Recheck any file with a dependency on the provided member
      in the changed class and in each of its descendants,

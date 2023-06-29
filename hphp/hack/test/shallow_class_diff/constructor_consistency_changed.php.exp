@@ -1,6 +1,2 @@
-A: (Minor_change
-      { mro_positions_changed = false;
-        member_diff = {constructor = Changed_inheritance } })
-B: (Minor_change
-      { mro_positions_changed = false;
-        member_diff = {constructor = Changed_inheritance } })
+A: (Minor_change {constructor = Changed_inheritance })
+B: (Minor_change {constructor = Changed_inheritance })

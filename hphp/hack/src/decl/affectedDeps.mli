@@ -18,13 +18,6 @@ type t = {
   changed: DepSet.t;
       (** The subset of classes in changed files whose decls changed (excluding
           classes whose decls experienced a positions-only change). *)
-  mro_invalidated: DepSet.t;
-      (** These classes either directly experienced some change to their
-          inheritance hierarchy (e.g., an interface was added, or the extends
-          clause was changed), or one of their ancestors did. Since the
-          hierarchy has changed, descendant classes may inherit different
-          members, so their folded decls must be invalidated (they'll be lazily
-          recomputed on demand). *)
   needs_recheck: DepSet.t;
       (** This set represents the dependents of the declarations which were
           changed. In order to detect all errors which may have resulted from
@@ -38,8 +31,6 @@ type t = {
 val empty : unit -> t
 
 val mark_changed : t -> DepSet.t -> t
-
-val mark_mro_invalidated : t -> DepSet.t -> t
 
 val mark_as_needing_recheck : t -> DepSet.t -> t
 

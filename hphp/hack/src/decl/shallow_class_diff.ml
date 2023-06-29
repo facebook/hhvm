@@ -699,12 +699,8 @@ let diff_class (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class)
       (MajorChange.Modified (diff_class_shells class_shell1 class_shell2))
   else
     let mro_inputs_equal = mro_inputs_equal c1 c2 in
-    (* If the old and new classes were identical with positions normalized, but
-       mro_inputs_equal returns false, then we need to invalidate the MRO of
-       this class and its descendants because its positions have changed. *)
-    let mro_positions_changed = not mro_inputs_equal in
     let member_diff = diff_class_members c1 c2 in
     if mro_inputs_equal && ClassDiff.is_empty_member_diff member_diff then
       Unchanged
     else
-      Minor_change { mro_positions_changed; member_diff }
+      Minor_change member_diff

@@ -12,22 +12,15 @@ module Mode = Typing_deps_mode
 
 type t = {
   changed: DepSet.t;
-  mro_invalidated: DepSet.t;
   needs_recheck: DepSet.t;
 }
 
 let empty () =
   let empty = DepSet.make () in
-  { changed = empty; mro_invalidated = empty; needs_recheck = empty }
+  { changed = empty; needs_recheck = empty }
 
 let mark_changed (deps : t) (changed : DepSet.t) : t =
   { deps with changed = DepSet.union deps.changed changed }
-
-let mark_mro_invalidated (deps : t) (mro_invalidated : DepSet.t) : t =
-  {
-    deps with
-    mro_invalidated = DepSet.union deps.mro_invalidated mro_invalidated;
-  }
 
 let mark_as_needing_recheck (deps : t) (needs_recheck : DepSet.t) : t =
   { deps with needs_recheck = DepSet.union deps.needs_recheck needs_recheck }
@@ -46,11 +39,10 @@ let get_maximum_fanout (mode : Mode.t) (changed_dep : Dep.t) : t =
   let needs_recheck =
     Typing_deps.add_typing_deps mode changed_and_descendants
   in
-  { changed; mro_invalidated = changed_and_descendants; needs_recheck }
+  { changed; needs_recheck }
 
 let union (a : t) (b : t) : t =
   {
     changed = DepSet.union a.changed b.changed;
-    mro_invalidated = DepSet.union a.mro_invalidated b.mro_invalidated;
     needs_recheck = DepSet.union a.needs_recheck b.needs_recheck;
   }

@@ -669,11 +669,18 @@ void ThriftServer::setupThreadManager() {
     if (!useResourcePools()) {
       DCHECK(resourcePoolSet().empty());
       // We always need a threadmanager for cpp2.
-      LOG(INFO) << "Using thread manager (resource pools not enabled) "
-                << runtimeServerActions_.explain() << " on address/port "
-                << getAddressAsString() << " enable gflag:"
-                << FLAGS_thrift_experimental_use_resource_pools
-                << " disable gflag:" << FLAGS_thrift_disable_resource_pools;
+      auto explanation = fmt::format(
+          "runtime: {}, thrift flag: {}, enable gflag: {}, dsiable gflag: {}",
+          runtimeServerActions_.explain(),
+          THRIFT_FLAG(experimental_use_resource_pools),
+          FLAGS_thrift_experimental_use_resource_pools,
+          FLAGS_thrift_disable_resource_pools);
+      LOG(INFO)
+          << "Using thread manager (resource pools not enabled) on address/port "
+          << getAddressAsString() << ": " << explanation;
+      if (auto observer = getObserverShared()) {
+        observer->resourcePoolsDisabled(explanation);
+      }
       if (!threadManager_) {
         std::shared_ptr<apache::thrift::concurrency::ThreadManager>
             threadManager;
@@ -764,11 +771,16 @@ void ThriftServer::setupThreadManager() {
         THRIFT_SERVER_EVENT(resourcepoolsruntimedisallowed).log(*this);
       }
     } else {
+      auto explanation = fmt::format(
+          "thrift flag: {}, enable gflag: {}, dsiable gflag: {}",
+          THRIFT_FLAG(experimental_use_resource_pools),
+          FLAGS_thrift_experimental_use_resource_pools,
+          FLAGS_thrift_disable_resource_pools);
       LOG(INFO) << "Using resource pools on address/port "
-                << getAddressAsString() << " thrift flag:"
-                << THRIFT_FLAG(experimental_use_resource_pools)
-                << " enable gflag:"
-                << FLAGS_thrift_experimental_use_resource_pools;
+                << getAddressAsString() << ": " << explanation;
+      if (auto observer = getObserverShared()) {
+        observer->resourcePoolsEnabled(explanation);
+      }
 
       LOG(INFO) << "QPS limit will be enforced by "
                 << (FLAGS_thrift_server_enforces_qps_limit

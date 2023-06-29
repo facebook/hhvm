@@ -163,6 +163,10 @@ class TServerObserver {
 
   virtual void undeclaredException() {}
 
+  virtual void resourcePoolsEnabled(std::string /*explanation*/) {}
+
+  virtual void resourcePoolsDisabled(std::string /*explanation*/) {}
+
   virtual void resourcePoolsInitialized(
       std::vector<std::string> /*resourcePoolsDescriptions*/) {}
 

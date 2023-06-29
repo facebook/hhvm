@@ -62,6 +62,7 @@ class TestRunner {
   void runContinuously();
   void runContinuously(std::unique_ptr<StressTestBase> test);
   void runFixedTime();
+  void runFixedCount();
 };
 
 } // namespace stress

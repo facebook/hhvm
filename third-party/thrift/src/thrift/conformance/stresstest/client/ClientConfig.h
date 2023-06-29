@@ -31,6 +31,7 @@ DECLARE_string(client_cert_path);
 DECLARE_string(client_key_path);
 DECLARE_string(client_ca_path);
 DECLARE_bool(continuous);
+DECLARE_int64(runs_per_client);
 DECLARE_int64(stats_interval);
 DECLARE_bool(io_uring);
 DECLARE_int64(runtime_s);
@@ -62,6 +63,7 @@ struct ClientConfig {
   uint64_t numConnectionsPerThread;
   uint64_t numClientsPerConnection;
   bool continuous{false};
+  uint64_t numRunsPerClient;
   bool useLoadGenerator;
   uint32_t targetQps;
   std::chrono::duration<int64_t, std::milli> gen_load_interval;

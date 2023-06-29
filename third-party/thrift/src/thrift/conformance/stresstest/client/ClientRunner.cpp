@@ -71,6 +71,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
       bool useLoadGenerator)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
         continuous_(cfg.continuous),
+        numRunsPerClient_(cfg.numRunsPerClient),
         useLoadGenerator_(useLoadGenerator),
         testDoneTimeout_(testDone_),
         warmupDoneTimeout_(rpcStats_),
@@ -104,7 +105,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   }
 
   void checkIsContinuous() {
-    if (!continuous_) {
+    if (!continuous_ && numRunsPerClient_ == 0) {
       thread_->getEventBase()->timer().scheduleTimeout(
           &testDoneTimeout_,
           std::chrono::seconds(FLAGS_warmup_s + FLAGS_runtime_s));
@@ -178,8 +179,13 @@ class ClientThread : public folly::HHWheelTimer::Callback {
  private:
   folly::coro::Task<void> runConcurrentInternal(
       StressTestClient* client, const StressTestBase* test) {
+    size_t count = 0;
     while (!testDone_ && client->connectionGood()) {
       co_await test->runWorkload(client);
+      count++;
+      if (numRunsPerClient_ > 0 && count >= numRunsPerClient_) {
+        break;
+      }
     }
   }
 
@@ -205,6 +211,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   std::vector<std::unique_ptr<StressTestClient>> clients_;
   std::unique_ptr<folly::ScopedEventBaseThread> thread_;
   bool continuous_{false};
+  uint64_t numRunsPerClient_{0};
   bool useLoadGenerator_{false};
   bool testDone_{false};
   TestDoneTimeout testDoneTimeout_;

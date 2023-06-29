@@ -42,6 +42,7 @@ DEFINE_string(
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
 DEFINE_bool(continuous, false, "Runs a single test continuously");
+DEFINE_int64(runs_per_client, 0, "Runs a fixed number of workloads");
 DEFINE_int64(
     stats_interval,
     10,
@@ -88,6 +89,10 @@ namespace apache::thrift::stress {
   ClientConfig config{};
 
   config.continuous = FLAGS_continuous;
+  config.numRunsPerClient = FLAGS_runs_per_client;
+  if (config.continuous && config.numRunsPerClient > 0) {
+    LOG(FATAL) << "Cannot specify both --continuous and --runs_per_client";
+  }
   // Configure qps load generator
   config.useLoadGenerator = FLAGS_gen_load;
   config.gen_load_interval = std::chrono::milliseconds(FLAGS_gen_load_interval);

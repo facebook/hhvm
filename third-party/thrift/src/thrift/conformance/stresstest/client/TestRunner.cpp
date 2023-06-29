@@ -111,6 +111,8 @@ void TestRunner::runTests() {
   LOG(INFO) << "Using io_uring: " << (FLAGS_io_uring ? "true" : "false");
   if (cfg_.continuous) {
     runContinuously();
+  } else if (cfg_.numRunsPerClient > 0) {
+    runFixedCount();
   } else {
     runFixedTime();
   }
@@ -157,6 +159,15 @@ void TestRunner::scheduleContinuousStats(ClientRunner& runner) {
 
 void TestRunner::runFixedTime() {
   LOG(INFO) << fmt::format("Starting Fixed Duration Benchmark");
+  for (const auto& test : getSelectedTests()) {
+    LOG(INFO) << fmt::format("Running stress test '{}'", test);
+    auto result = run(test);
+    result.log();
+  }
+}
+
+void TestRunner::runFixedCount() {
+  LOG(INFO) << "Starting Fixed Count Benchmark";
   for (const auto& test : getSelectedTests()) {
     LOG(INFO) << fmt::format("Running stress test '{}'", test);
     auto result = run(test);

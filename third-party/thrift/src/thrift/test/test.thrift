@@ -72,7 +72,7 @@ const map<string, string> m_e = {};
 const map<i32, i32> m_1 = {23: 97, 42: 37, 56: 11};
 const map<string, string> m_2 = {"foo": "bar", "baz": "gaz"};
 const map<string, i32> m_3 = {'"': 34, "'": 39, "\\": 92, "\x61": 97};
-const map<i32, i32> (cpp.template = "folly::sorted_vector_map") m_4 = {1: 2};
+const map_i32_i32_7023 m_4 = {1: 2};
 
 struct struct1 {
   1: i32 a = 1234567;
@@ -152,3 +152,8 @@ const double minPSDub = +4.9406564584124654e-324;
 const double maxNDub = -1.79769313486231e+308;
 const double minNDub = -2.2250738585072014e-308;
 const double minNSDub = -4.9406564584124654e-324;
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<i32, i32> (
+  cpp.template = "folly::sorted_vector_map",
+) map_i32_i32_7023

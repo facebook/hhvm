@@ -239,17 +239,15 @@ module Lost_env = struct
   }
   [@@warning "-69"]
 
+  and shellout_standard_response = {
+    symbol: string;
+    find_refs_action: ServerCommandTypes.Find_refs.action;
+    ide_calculated_positions: Pos.absolute list UriMap.t;
+  }
+
   and shellable_type =
-    | FindRefs of {
-        symbol: string;
-        find_refs_action: ServerCommandTypes.Find_refs.action;
-        ide_calculated_refs: Pos.absolute list UriMap.t;
-      }
-    | GoToImpl of {
-        symbol: string;
-        action: ServerCommandTypes.Find_refs.action;
-        ide_calculated_positions: Pos.absolute list UriMap.t;
-      }
+    | FindRefs of shellout_standard_response
+    | GoToImpl of shellout_standard_response
     | Rename of {
         symbol_definition: Relative_path.t SymbolDefinition.t;
         find_refs_action: ServerCommandTypes.Find_refs.action;
@@ -2790,8 +2788,9 @@ let kickoff_shell_out_and_maybe_cancel
     let (cancel, cancellation_token) = Lwt.wait () in
     let cmd =
       begin
+        let open Lost_env in
         match shellable_type with
-        | Lost_env.FindRefs { symbol; find_refs_action; _ } ->
+        | FindRefs { symbol; find_refs_action; _ } ->
           let symbol_action_arg =
             Find_refs.symbol_and_action_to_string_exn symbol find_refs_action
           in
@@ -2802,9 +2801,9 @@ let kickoff_shell_out_and_maybe_cancel
               symbol_action_arg
           in
           cmd
-        | Lost_env.GoToImpl { symbol; action; _ } ->
+        | GoToImpl { symbol; find_refs_action; _ } ->
           let symbol_action_arg =
-            Find_refs.symbol_and_action_to_string_exn symbol action
+            Find_refs.symbol_and_action_to_string_exn symbol find_refs_action
           in
           let cmd =
             compose_shellout_cmd
@@ -2813,8 +2812,8 @@ let kickoff_shell_out_and_maybe_cancel
               symbol_action_arg
           in
           cmd
-        | Lost_env.Rename
-            { symbol_definition; find_refs_action; new_name; filename; _ } ->
+        | Rename { symbol_definition; find_refs_action; new_name; filename; _ }
+          ->
           let name_action_definition_string =
             ServerCommandTypes.Rename.arguments_to_string_exn
               new_name
@@ -3831,10 +3830,10 @@ let do_findReferences_local
     respond_jsonrpc ~powered_by:Serverless_ide id (FindReferencesResult []);
     let result_telemetry = make_result_telemetry (-1) in
     Lwt.return (state, result_telemetry)
-  | ClientIdeMessage.Find_refs_success (_symbol_name, None, ide_calculated_refs)
-    ->
+  | ClientIdeMessage.Find_refs_success
+      (_symbol_name, None, ide_calculated_positions) ->
     let positions =
-      match UriMap.values ide_calculated_refs with
+      match UriMap.values ide_calculated_positions with
       (*
           UriMap.values returns [Pos.absolute list list] and if we're here,
           we should only have one element - the list of positions in the file the localvar is defined.
@@ -3856,14 +3855,18 @@ let do_findReferences_local
     let result_telemetry = make_result_telemetry (List.length positions) in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Find_refs_success
-      (symbol_name, Some action, ide_calculated_refs) ->
+      (symbol_name, Some action, ide_calculated_positions) ->
     (* ClientIdeMessage.Find_references only supports localvar.
        Receiving an error with a non-localvar action indicates that we attempted to
        try and find references for a non-localvar
     *)
     let shellable_type =
       Lost_env.FindRefs
-        { symbol = symbol_name; find_refs_action = action; ide_calculated_refs }
+        {
+          Lost_env.symbol = symbol_name;
+          find_refs_action = action;
+          ide_calculated_positions;
+        }
     in
     (* If we reach kickoff a shell-out to hh_server, processing that response
        also invokes respond_jsonrpc *)
@@ -3882,24 +3885,24 @@ let do_findReferences_local
     Lwt.return (state, result_telemetry)
 
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
-let do_findReferences2 ~ide_calculated_refs ~hh_locations : Lsp.lsp_result * int
-    =
+let do_findReferences2 ~ide_calculated_positions ~hh_locations :
+    Lsp.lsp_result * int =
   (* lsp_locations return a file for each position. To support unsaved, edited files
      let's discard locations for files that we previously fetched from ClientIDEDaemon.
 
      First: filter out locations for any where the documentUri matches a relative_path
      in the returned map
-     Second: augment above list with values in `ide_calculated_refs`
+     Second: augment above list with values in `ide_calculated_positions`
   *)
   let hh_locations =
     List.filter
       ~f:(fun location ->
         let uri = location.Lsp.Location.uri in
-        not @@ UriMap.mem uri ide_calculated_refs)
+        not @@ UriMap.mem uri ide_calculated_positions)
       hh_locations
   in
   let ide_locations =
-    UriMap.bindings ide_calculated_refs
+    UriMap.bindings ide_calculated_positions
     |> List.map ~f:(fun (lsp_uri, pos_list) ->
            let filename = Lsp.string_of_uri lsp_uri in
            let lsp_locations =
@@ -3940,9 +3943,10 @@ let do_goToImplementation_local
     let result_telemetry = make_result_telemetry 0 in
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Go_to_impl_success
-      (symbol, action, ide_calculated_positions) ->
+      (symbol, find_refs_action, ide_calculated_positions) ->
+    let open Lost_env in
     let shellable_type =
-      Lost_env.GoToImpl { symbol; action; ide_calculated_positions }
+      GoToImpl { symbol; find_refs_action; ide_calculated_positions }
     in
     let start_time_local_handle = Unix.gettimeofday () in
     let%lwt (state, result_telemetry) =
@@ -3951,7 +3955,7 @@ let do_goToImplementation_local
         shellable_type
         ~triggering_request:
           {
-            Lost_env.id;
+            id;
             metadata;
             start_time_local_handle;
             request = ImplementationRequest params;
@@ -5184,14 +5188,15 @@ let handle_shell_out_complete
         |> String_utils.truncate 80);
       try
         let (lsp_result, result_count) =
+          let open Lost_env in
           match shellable_type with
-          | Lost_env.FindRefs { ide_calculated_refs; _ } ->
+          | FindRefs { ide_calculated_positions; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
-            do_findReferences2 ~ide_calculated_refs ~hh_locations
-          | Lost_env.GoToImpl { ide_calculated_positions; _ } ->
+            do_findReferences2 ~ide_calculated_positions ~hh_locations
+          | GoToImpl { ide_calculated_positions; _ } ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
             do_goToImplementation2 ~ide_calculated_positions ~hh_locations
-          | Lost_env.Rename { ide_calculated_patches; _ } ->
+          | Rename { ide_calculated_patches; _ } ->
             let hh_edits = shellout_patch_list_to_lsp_edits_exn stdout in
             do_documentRename2 ~ide_calculated_patches ~hh_edits
         in

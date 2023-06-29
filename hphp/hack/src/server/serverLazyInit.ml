@@ -505,8 +505,7 @@ let log_fanout_information to_recheck_deps files_to_recheck =
 
 (** Compare declarations loaded from the saved state to declarations based on
   the current versions of dirty files. This lets us check a smaller set of
-  files than the set we'd check if old declarations were not available.
-  To be used only when load_decls_from_saved_state is enabled. *)
+  files than the set we'd check if old declarations were not available. *)
 let get_files_to_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -650,10 +649,7 @@ let calculate_fanout_and_defer_or_do_type_check
     if use_prechecked_files genv then
       (* Start with dirty files and fan-out of local changes only *)
       let to_recheck =
-        if
-          genv.local_config.SLC.load_decls_from_saved_state
-          || genv.local_config.SLC.fetch_remote_old_decls
-        then
+        if genv.local_config.SLC.fetch_remote_old_decls then
           get_files_to_recheck dirty_local_files_changed_decls
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
@@ -671,10 +667,7 @@ let calculate_fanout_and_defer_or_do_type_check
     else
       (* Start with full fan-out immediately *)
       let to_recheck =
-        if
-          genv.local_config.SLC.load_decls_from_saved_state
-          || genv.local_config.SLC.fetch_remote_old_decls
-        then
+        if genv.local_config.SLC.fetch_remote_old_decls then
           get_files_to_recheck dirty_files_changed_decls
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in

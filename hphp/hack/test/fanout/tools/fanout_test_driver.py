@@ -268,7 +268,6 @@ def _launch_hh_from_saved_state(
     bins: Binaries,
     repo_root: RepoRoot,
     saved_state_dir: SavedStateDir,
-    load_decls_from_saved_state: bool,
     changed_files: List[str],
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("Launching hh from saved-state for %s", repo_root.path)
@@ -282,10 +281,6 @@ def _launch_hh_from_saved_state(
             "lazy_init2=true",
             "--config",
             "lazy_parse=true",
-            "--config",
-            "load_decls_from_saved_state={}".format(
-                "true" if load_decls_from_saved_state else "false"
-            ),
             "--with-mini-state",
             saved_state_dir.saved_state_spec(changed_files),
             "--config",
@@ -355,7 +350,6 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=True,
         changed_files=changed_files,
     )
     bins.exec_hh_stop(repo_root.path)
@@ -395,7 +389,6 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=False,
         changed_files=[],
     )
     _make_repo_change(repo_root, test)
@@ -438,7 +431,6 @@ def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) ->
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=True,
         changed_files=test.all_base_php_files(),
     )
     _make_repo_change(repo_root, test)

@@ -116,7 +116,7 @@ void PersistentQuicPskCache::putPsk(const std::string& identity,
       appender);
   cachedPsk.quicParams = quicParams->moveToFbString().toStdString();
   cachedPsk.uses = 0;
-  cache_.put(identity, std::move(cachedPsk));
+  cache_.put(identity, cachedPsk);
 }
 
 void PersistentQuicPskCache::removePsk(const std::string& identity) {

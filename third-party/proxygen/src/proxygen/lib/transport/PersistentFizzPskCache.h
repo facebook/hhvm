@@ -74,7 +74,7 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     PersistentCachedPsk serialized;
     serialized.serialized = fizz::client::serializePsk(psk);
     serialized.uses = 0;
-    cache_.put(identity, std::move(serialized));
+    cache_.put(identity, serialized);
   }
 
   void removePsk(const std::string& identity) override {

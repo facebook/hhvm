@@ -152,13 +152,13 @@ let reify_kind = function
 
 let hint_fun_decl ~params ~ret env =
   let ret_decl_ty =
-    Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint ret)
+    Decl_fun_utils.hint_to_type_opt env.decl_env (hint_of_type_hint ret)
   in
   let params_decl_ty =
     List.map
       ~f:(fun h ->
-        Option.map
-          ~f:(Decl_hint.hint env.decl_env)
+        Decl_fun_utils.hint_to_type_opt
+          env.decl_env
           (hint_of_type_hint h.param_type_hint))
       params
   in

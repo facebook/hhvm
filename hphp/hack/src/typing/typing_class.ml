@@ -1050,7 +1050,7 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
   Profile.measure_elapsed_time_and_report tcopt (Some env) cv.cv_id @@ fun () ->
   (* First pick up and localize the hint if it exists *)
   let decl_cty =
-    Option.map ~f:(Decl_hint.hint env.decl_env) (hint_of_type_hint cv.cv_type)
+    FunUtils.hint_to_type_opt env.decl_env (hint_of_type_hint cv.cv_type)
   in
   let no_auto_likes =
     Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes cv.cv_user_attributes

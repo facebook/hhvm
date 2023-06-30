@@ -7,7 +7,6 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
-use digest::Digest;
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
 use naming_special_names_rust::user_attributes;
@@ -121,16 +120,11 @@ pub struct Facts {
 }
 
 impl Facts {
-    pub fn to_json_value(&self, sha1sum: &str) -> serde_json::Value {
+    pub fn to_json(&self, pretty: bool, sha1sum: &str) -> String {
         let mut json = json!(&self);
         if let Some(m) = json.as_object_mut() {
             m.insert("sha1sum".into(), json!(sha1sum));
         };
-        json
-    }
-
-    pub fn to_json(&self, pretty: bool, sha1sum: &str) -> String {
-        let json = self.to_json_value(sha1sum);
         if pretty {
             serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
         } else {
@@ -224,12 +218,6 @@ impl Flag {
     pub fn combine(flags1: Flags, flags2: Flags) -> Flags {
         flags1 | flags2
     }
-}
-
-pub fn sha1(text: &[u8]) -> String {
-    let mut digest = sha1::Sha1::new();
-    digest.update(text);
-    hex::encode(digest.finalize())
 }
 
 // implementation details
@@ -599,6 +587,13 @@ mod tests {
 
     use super::*; // make assert_eq print huge diffs more human-readable
 
+    fn sha1(text: &[u8]) -> String {
+        use digest::Digest;
+        let mut digest = sha1::Sha1::new();
+        digest.update(text);
+        hex::encode(digest.finalize())
+    }
+
     #[test]
     fn type_kind_to_json() {
         assert_eq!(json!(TypeKind::Unknown).to_string(), "\"unknown\"");
@@ -733,7 +728,7 @@ mod tests {
             modules,
             types,
         };
-        (facts, super::sha1(b"fake source text"))
+        (facts, sha1(b"fake source text"))
     }
 
     #[test]

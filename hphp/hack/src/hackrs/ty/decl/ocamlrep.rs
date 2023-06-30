@@ -325,35 +325,30 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 alloc.set_field(&mut block, 2, map);
                 block.build()
             }
-            Ty_::Tvar(ident) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 9u8);
-                alloc.set_field(&mut block, 0, alloc.add(ident));
-                block.build()
-            }
             Ty_::Tgeneric(x) => {
-                let mut block = alloc.block_with_size_and_tag(2usize, 10u8);
+                let mut block = alloc.block_with_size_and_tag(2usize, 9u8);
                 alloc.set_field(&mut block, 0, alloc.add(&x.0));
                 alloc.set_field(&mut block, 1, alloc.add(&x.1));
                 block.build()
             }
             Ty_::Tunion(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 11u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 10u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
             Ty_::Tintersection(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 12u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 11u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
             Ty_::TvecOrDict(x) => {
-                let mut block = alloc.block_with_size_and_tag(2usize, 13u8);
+                let mut block = alloc.block_with_size_and_tag(2usize, 12u8);
                 alloc.set_field(&mut block, 0, alloc.add(&x.0));
                 alloc.set_field(&mut block, 1, alloc.add(&x.1));
                 block.build()
             }
             Ty_::Taccess(x) => {
-                let mut block = alloc.block_with_size_and_tag(1usize, 14u8);
+                let mut block = alloc.block_with_size_and_tag(1usize, 13u8);
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
@@ -458,32 +453,28 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                     ))))
                 }
                 9 => {
-                    ocamlrep::from::expect_block_size(block, 1)?;
-                    Ok(Ty_::Tvar(ocamlrep::from::field(block, 0)?))
-                }
-                10 => {
                     ocamlrep::from::expect_block_size(block, 2)?;
                     Ok(Ty_::Tgeneric(Box::new((
                         ocamlrep::from::field(block, 0)?,
                         ocamlrep::from::field(block, 1)?,
                     ))))
                 }
-                11 => {
+                10 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::Tunion(ocamlrep::from::field(block, 0)?))
                 }
-                12 => {
+                11 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::Tintersection(ocamlrep::from::field(block, 0)?))
                 }
-                13 => {
+                12 => {
                     ocamlrep::from::expect_block_size(block, 2)?;
                     Ok(Ty_::TvecOrDict(Box::new((
                         ocamlrep::from::field(block, 0)?,
                         ocamlrep::from::field(block, 1)?,
                     ))))
                 }
-                14 => {
+                13 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::Taccess(ocamlrep::from::field(block, 0)?))
                 }

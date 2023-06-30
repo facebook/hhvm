@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34860f03b8f1a004f75a92f5fe9999a0>>
+// @generated SignedSource<<bdf488dde7b364613bc49af5d03110b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -525,7 +525,6 @@ pub enum Ty_<'a> {
             t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),
     ),
-    Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
@@ -578,6 +577,7 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
+    Tvar(ident::Ident),
     /// This represents a type alias that lacks necessary type arguments. Given
     /// type Foo<T1,T2> = ...
     /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying

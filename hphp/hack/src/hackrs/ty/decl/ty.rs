@@ -345,7 +345,6 @@ pub enum Ty_<R: Reason> {
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
     Tshape(Box<(Ty<R>, BTreeMap<TshapeFieldName, ShapeFieldType<R>>)>),
-    Tvar(Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
@@ -385,7 +384,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
         use Ty_::*;
         match self {
-            Tthis | Tmixed | Tany | Tnonnull | Tdynamic | Tprim(_) | Tvar(_) => {}
+            Tthis | Tmixed | Tany | Tnonnull | Tdynamic | Tprim(_) => {}
             Tapply(id_and_args) => {
                 let (_, args) = &**id_and_args;
                 args.accept(v)

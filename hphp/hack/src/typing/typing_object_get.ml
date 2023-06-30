@@ -399,7 +399,6 @@ let rec this_appears_covariantly ~contra env ty =
   | Tnonnull
   | Tdynamic
   | Tprim _
-  | Tvar _
   | Tgeneric _ ->
     false
   | Tnewtype (name, tyl, _) ->

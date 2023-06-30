@@ -298,7 +298,6 @@ and _ ty_ =
       (** Whether all fields of this shape are known, types of each of the
        * known arms.
        *)
-  | Tvar : Ident.t -> 'phase ty_
   | Tgeneric : string * 'phase ty list -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
        * are accessed through the lenv.tpenv component of the environment, which
@@ -345,6 +344,7 @@ and _ ty_ =
        * The second parameter is the list of type arguments to the type.
        *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  | Tvar : Ident.t -> locl_phase ty_
   | Tunapplied_alias : string -> locl_phase ty_
       (** This represents a type alias that lacks necessary type arguments. Given
            type Foo<T1,T2> = ...

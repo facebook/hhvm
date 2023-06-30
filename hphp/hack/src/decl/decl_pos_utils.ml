@@ -145,7 +145,7 @@ struct
     mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | (Tany _ | Tthis | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
+    | (Tany _ | Tthis | Tmixed | Tnonnull | Tdynamic) as x -> x
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)

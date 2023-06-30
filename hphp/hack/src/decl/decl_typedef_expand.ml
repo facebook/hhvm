@@ -125,7 +125,6 @@ and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
     else
       let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
       (mk (r, Tapply ((_pos, name), tyl)), List.concat cycles)
-  | Tvar _ -> failwith "not implemented"
   | Tthis -> failwith "should never happen"
   | (Tmixed | Tnonnull | Tdynamic | Tprim _ | Tgeneric _ | Tany _) as x ->
     (mk (r, x), [])

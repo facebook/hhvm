@@ -150,7 +150,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Toption ty -> this#on_toption acc r ty
       | Tlike ty -> this#on_tlike acc r ty
       | Tprim prim -> this#on_tprim acc r prim
-      | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
       | Tapply (s, tyl) -> this#on_tapply acc r s tyl
       | Trefinement (ty, rs) -> this#on_trefinement acc r ty rs

@@ -106,7 +106,6 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 self.instantiate(&tys.1),
             ))),
             Ty_::Tthis
-            | Ty_::Tvar(_)
             | Ty_::Tmixed
             | Ty_::Tdynamic
             | Ty_::Tnonnull

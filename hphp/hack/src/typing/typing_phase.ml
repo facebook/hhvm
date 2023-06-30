@@ -266,9 +266,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   let r = get_reason dty |> Typing_reason.localize in
   match get_node dty with
   | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
-  | Tvar var ->
-    (* TODO(hverr): remove - make locl ty only *)
-    ((env, None), mk (r, Tvar var))
   | (Tnonnull | Tprim _ | Tdynamic | Tany _) as x -> ((env, None), mk (r, x))
   | Tmixed -> ((env, None), MakeType.mixed r)
   | Tthis ->

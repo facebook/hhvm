@@ -655,7 +655,6 @@ module Full = struct
       let like_doc = Concat [text "~"; ty_doc] in
       (fuel, like_doc)
     | Tprim x -> (fuel, tprim x)
-    | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
     | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
     | Tnewtype (n, _, ty)
       when String.equal n SN.Classes.cSupportDyn

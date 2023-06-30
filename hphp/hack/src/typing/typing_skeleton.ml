@@ -83,7 +83,6 @@ let rec of_decl_ty (ty : decl_ty) : string =
         fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields_with_ellipsis)
-  | Tvar _ -> "mixed"
   | Tunion [] -> "nothing"
   | Tunion _ -> "mixed"
   | Tintersection _ -> "mixed"

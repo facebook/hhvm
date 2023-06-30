@@ -183,7 +183,6 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
                     TShapeMap::from(shape_fields),
                 )))
             }
-            Ty_::Tvar(ident) => typing_defs::Ty_::Tvar((*ident).into()),
             Ty_::Tgeneric(x) => typing_defs::Ty_::Tgeneric(x.to_oxidized(arena)),
             Ty_::Tunion(x) => typing_defs::Ty_::Tunion(x.to_oxidized(arena)),
             Ty_::Tintersection(x) => typing_defs::Ty_::Tintersection(x.to_oxidized(arena)),

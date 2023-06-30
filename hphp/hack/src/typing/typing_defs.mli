@@ -205,17 +205,17 @@ val add_type_expansion_check_cycles :
 (** Returns whether there was an attempt at expanding a cyclic type. *)
 val cyclic_expansion : expand_env -> bool
 
-val get_var : 'a ty -> Ident.t option
+val get_var : locl_phase ty -> Ident.t option
 
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option
 
 val get_var_i : internal_type -> Ident.t option
 
-val is_tyvar : 'a ty -> bool
+val is_tyvar : locl_phase ty -> bool
 
 val is_tyvar_i : internal_type -> bool
 
-val is_var_v : 'a ty -> Ident.t -> bool
+val is_var_v : locl_phase ty -> Ident.t -> bool
 
 val is_generic : 'a ty -> bool
 

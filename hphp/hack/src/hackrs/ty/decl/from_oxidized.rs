@@ -175,7 +175,6 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                     },
                 }))
             }
-            typing_defs_core::Ty_::Tvar(ident) => Tvar(ident.into()),
             typing_defs_core::Ty_::Tgeneric(&(pos_id, tys)) => {
                 Tgeneric(Box::new((pos_id.into(), slice(tys))))
             }
@@ -189,7 +188,8 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             | typing_defs_core::Ty_::Tnewtype(_)
             | typing_defs_core::Ty_::Tdependent(_)
             | typing_defs_core::Ty_::Tclass(_)
-            | typing_defs_core::Ty_::Tneg(_) => {
+            | typing_defs_core::Ty_::Tneg(_)
+            | typing_defs_core::Ty_::Tvar(_) => {
                 unreachable!("Not used in decl tys")
             }
         };

@@ -363,8 +363,6 @@ module Simple = struct
     in
     match ty_ with
     | Tany _
-    | Tvar _
-    (* Tvar must not be higher-kinded yet *)
     | Tnonnull
     | Tprim _
     | Tdynamic

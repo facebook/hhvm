@@ -271,7 +271,6 @@ and _ ty_ =
   | Tshape :
       type_origin * 'phase ty * 'phase shape_field_type TShapeMap.t
       -> 'phase ty_
-  | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
    * is set up when checking the body of a function or method. See uses of
@@ -308,6 +307,7 @@ and _ ty_ =
    *)
   | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  | Tvar : Ident.t -> locl_phase ty_
   (* This represents a type alias that lacks necessary type arguments. Given
    *   type Foo<T1,T2> = ...
    * Tunappliedalias "Foo" stands for usages of plain Foo, without supplying

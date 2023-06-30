@@ -23,7 +23,6 @@ use decl_provider::SelfProvider;
 use direct_decl_parser::DeclParserOptions;
 use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
-use facts_rust as facts;
 use hhbc::Unit;
 use options::HhbcFlags;
 use options::Hhvm;

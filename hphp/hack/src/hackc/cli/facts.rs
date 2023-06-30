@@ -5,8 +5,7 @@ use std::io::Write;
 
 use anyhow::Result;
 use clap::Args;
-use facts_rust::Facts;
-use facts_rust::{self as facts};
+use facts::Facts;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 use serde_json::json;

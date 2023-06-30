@@ -17,7 +17,7 @@ compile = { version = "0.0.0", path = "../compile/cargo/compile" }
 cxx = "1.0.94"
 decl_provider = { version = "0.0.0", path = "../decl_provider" }
 direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_decl_parser" }
-facts_rust = { version = "0.0.0", path = "../../facts/cargo/facts_rust" }
+facts = { version = "0.0.0", path = "../facts/cargo/facts_rust" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
 itertools = "0.10.3"

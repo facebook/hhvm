@@ -13,10 +13,11 @@ module T = Inline_method_types
 let return_var_raw_name = "res"
 
 let pos_of_block block =
-  Option.Let_syntax.(
-    let* (hd_pos, _) = List.hd block in
-    let+ (last_pos, _) = List.last block in
-    Pos.merge hd_pos last_pos)
+  let open Option.Let_syntax in
+  let* (hd_pos, _) = List.hd block in
+  let* (last_pos, _) = List.last block in
+  let pos = Pos.merge hd_pos last_pos in
+  Option.some_if (Pos.length pos > 0) pos
 
 let to_lsp_range pos =
   Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos

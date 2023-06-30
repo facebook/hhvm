@@ -1098,6 +1098,92 @@ void validate_cpp_type_annotation(diagnostic_context& ctx, const Node& node) {
     }
   }
 }
+
+struct ValidateAnnotationPositions {
+  void operator()(diagnostic_context& ctx, const t_const& node) {
+    if (owns_annotations(node.type())) {
+      err(ctx);
+    }
+  }
+  void operator()(diagnostic_context& ctx, const t_function& node) {
+    for (const auto& type : node.return_types()) {
+      if (owns_annotations(type)) {
+        err(ctx);
+      }
+    }
+
+    for (auto& field : node.params().fields()) {
+      auto type = field.type();
+      if (owns_annotations(type)) {
+        err(ctx);
+      }
+    }
+  }
+  void operator()(diagnostic_context& ctx, const t_templated_type& type) {
+    switch (type.get_type_value()) {
+      case t_type::type::t_list: {
+        const auto& t = static_cast<const t_list&>(type);
+        if (owns_annotations(t.elem_type())) {
+          err(ctx);
+        }
+        break;
+      }
+      case t_type::type::t_set: {
+        const auto& t = static_cast<const t_set&>(type);
+        if (owns_annotations(t.elem_type())) {
+          err(ctx);
+        }
+        break;
+      }
+      case t_type::type::t_map: {
+        const auto& t = static_cast<const t_map&>(type);
+        if (owns_annotations(t.key_type()) || owns_annotations(t.val_type())) {
+          err(ctx);
+        }
+        break;
+      }
+      case t_type::type::t_stream: {
+        const auto& t = static_cast<const t_stream_response&>(type);
+        if (owns_annotations(t.elem_type())) {
+          err(ctx);
+        }
+        break;
+      }
+      case t_type::type::t_sink: {
+        const auto& t = static_cast<const t_sink&>(type);
+        if (owns_annotations(t.sink_type()) ||
+            owns_annotations(t.final_response_type())) {
+          err(ctx);
+        }
+        break;
+      }
+      default:
+        throw std::runtime_error("Unknown templated type");
+    }
+  }
+
+ private:
+  static void err(diagnostic_context& ctx) {
+    ctx.error(
+        "Annotations are not allowed in this position. Extract the type into a named typedef instead.");
+  }
+  static bool owns_annotations(t_type_ref type) {
+    auto ptr = type.get_type();
+    if (ptr->annotations().empty()) {
+      return false;
+    }
+    if (dynamic_cast<const t_templated_type*>(ptr)) {
+      return true;
+    }
+    if (dynamic_cast<const t_base_type*>(ptr)) {
+      return true;
+    }
+    if (auto t = dynamic_cast<const t_typedef*>(ptr)) {
+      return t->typedef_kind() != t_typedef::kind::defined;
+    }
+    return false;
+  }
+};
 } // namespace
 
 ast_validator standard_validator() {
@@ -1112,6 +1198,7 @@ ast_validator standard_validator() {
   validator.add_function_visitor(&validate_stream_exceptions_return_type);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(&validate_interaction_factories);
+  validator.add_function_visitor(ValidateAnnotationPositions{});
 
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
   validator.add_structured_definition_visitor(
@@ -1159,8 +1246,10 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor([](auto& ctx, const auto& node) {
     validate_cpp_type_annotation(ctx, node);
   });
+  validator.add_type_instantiation_visitor(ValidateAnnotationPositions{});
   validator.add_enum_visitor(&validate_cpp_enum_type);
   validator.add_const_visitor(&validate_const_type_and_value);
+  validator.add_const_visitor(ValidateAnnotationPositions{});
   validator.add_program_visitor(&validate_uri_uniqueness);
   return validator;
 }

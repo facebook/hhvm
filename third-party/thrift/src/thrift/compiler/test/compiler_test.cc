@@ -384,3 +384,15 @@ TEST(CompilerTest, mixin_field_names_uniqueness) {
     }
   )");
 }
+
+TEST(CompilerTest, annotation_positions) {
+  check_compile(
+      R"(
+      typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      service S {
+        i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+        void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      }
+)");
+}

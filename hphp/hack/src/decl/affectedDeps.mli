@@ -30,8 +30,6 @@ type t = {
 
 val empty : unit -> t
 
-val mark_changed : t -> DepSet.t -> t
-
 val mark_as_needing_recheck : t -> DepSet.t -> t
 
 val mark_all_dependents_as_needing_recheck :

@@ -27,8 +27,7 @@ let get_minor_change_fanout
     (member_diff : ClassDiff.member_diff) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
   let changed = DepSet.singleton (Dep.make (Dep.Type class_name)) in
-  let acc = AffectedDeps.empty () in
-  let acc = AffectedDeps.mark_changed acc changed in
+  let acc = { (AffectedDeps.empty ()) with AffectedDeps.changed } in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
     member_diff

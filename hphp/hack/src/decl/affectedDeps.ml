@@ -19,9 +19,6 @@ let empty () =
   let empty = DepSet.make () in
   { changed = empty; needs_recheck = empty }
 
-let mark_changed (deps : t) (changed : DepSet.t) : t =
-  { deps with changed = DepSet.union deps.changed changed }
-
 let mark_as_needing_recheck (deps : t) (needs_recheck : DepSet.t) : t =
   { deps with needs_recheck = DepSet.union deps.needs_recheck needs_recheck }
 

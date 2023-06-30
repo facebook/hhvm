@@ -62,10 +62,8 @@ class MapTests(unittest.TestCase):
         self.assertEqual(x["test"], "value")
         self.assertEqual(x[MyStringEnum.test], "value")
         with self.assertRaises(KeyError):
-            # pyre-ignore[6]: purposely use a wrong type to raise a KeyError
             x[5]
         with self.assertRaises(KeyError):
-            # pyre-ignore[6]: purposely use a wrong type to raise a KeyError
             x[x]
 
     def test_get(self) -> None:

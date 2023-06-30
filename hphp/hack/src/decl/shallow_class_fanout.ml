@@ -23,10 +23,10 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
 
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
-    (class_name : string)
+    (class_dep : Dep.t)
     (member_diff : ClassDiff.member_diff) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
-  let changed = DepSet.singleton (Dep.make (Dep.Type class_name)) in
+  let changed = DepSet.singleton class_dep in
   let acc = { (AffectedDeps.empty ()) with AffectedDeps.changed } in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
@@ -72,9 +72,7 @@ let get_minor_change_fanout
       AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
         mode
         acc
-        (Typing_deps.Dep.make_member_dep_from_type_dep
-           (Typing_deps.Dep.make (Typing_deps.Dep.Type class_name))
-           member)
+        (Dep.make_member_dep_from_type_dep class_dep member)
   in
   let add_member_fanouts ~is_const changes make_member acc =
     SMap.fold changes ~init:acc ~f:(fun name ->
@@ -110,16 +108,17 @@ let get_minor_change_fanout
   in
   acc
 
-let get_maximum_fanout (ctx : Provider_context.t) (class_name : string) =
+let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) =
   let mode = Provider_context.get_deps_mode ctx in
-  AffectedDeps.get_maximum_fanout mode (Dep.make (Dep.Type class_name))
+  AffectedDeps.get_maximum_fanout mode class_dep
 
 let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
+  let class_dep = Dep.make (Dep.Type class_name) in
   match diff with
   | Unchanged -> AffectedDeps.empty ()
-  | Major_change _major_change -> get_maximum_fanout ctx class_name
+  | Major_change _major_change -> get_maximum_fanout ctx class_dep
   | Minor_change minor_change ->
-    get_minor_change_fanout ~ctx class_name minor_change
+    get_minor_change_fanout ~ctx class_dep minor_change
 
 let direct_references_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Type class_name) |> DepSet.cardinal

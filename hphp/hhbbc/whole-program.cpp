@@ -722,10 +722,8 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       info.typeMappings.emplace_back(
         TypeMapping{
           typeAlias->name,
-          //TODO(T151885113): Support multiple constraints for case types
-          typeAlias->type_and_value_union[0].second,
           nullptr,
-          typeAlias->type_and_value_union[0].first,
+          typeAlias->typeAndValueUnion,
           typeAlias->nullable,
         }
       );
@@ -758,9 +756,8 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       typeMapping.emplace(
         TypeMapping{
           c->name,
-          tc.typeName(),
           c->name,
-          type,
+          {php::TypeAndValue{type, tc.typeName()}},
           false
         }
       );

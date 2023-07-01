@@ -774,14 +774,13 @@ std::string show(const Class&);
  */
 struct TypeMapping {
   LSString name;
-  LSString value;
   // If an enum, this is the same value as name. Otherwise it's the
   // first enum encountered when resolving a type-alias.
   LSString firstEnum;
-  AnnotType type;
+  php::TypeAlias::TypeAndValueUnion typeAndValueUnion;
   bool nullable;
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(value)(firstEnum)(type)(nullable);
+    sd(name)(firstEnum)(typeAndValueUnion)(nullable);
   }
 };
 

@@ -1215,11 +1215,19 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
   assertx(alias.attrs & AttrUnique);
   assertx(alias.attrs & AttrPersistent);
   auto const te = ue.newTypeAliasEmitter(alias.name->toCppString());
+
+  assertx(!alias.typeAndValueUnion.empty());
+
+  TypeAndValueUnion tvu;
+  for (auto const& [type, value] : alias.typeAndValueUnion) {
+    tvu.emplace_back(type, value);
+  }
+
   te->init(
       std::get<0>(alias.srcInfo.loc),
       std::get<1>(alias.srcInfo.loc),
       alias.attrs,
-      alias.type_and_value_union,
+      std::move(tvu),
       alias.nullable,
       alias.caseType,
       alias.typeStructure,

@@ -6050,7 +6050,7 @@ struct FlattenJob {
                     std::vector<SString> missingTypes) {
     LocalIndex index;
 
-    for (auto const tc : typeMappings) {
+    for (auto& tc : typeMappings) {
       auto const name = tc.name;
       always_assert(index.m_typeMappings.emplace(name, std::move(tc)).second);
     }
@@ -6828,7 +6828,9 @@ private:
         if (!base.isUnresolved()) return base.type();
         auto const tm = index.typeMapping(base.typeName());
         if (!tm) return AnnotType::Unresolved;
-        return tm->type;
+        // enums cannot use case types
+        assertx(tm->typeAndValueUnion.size() == 1);
+        return tm->typeAndValueUnion[0].type;
       }();
       if (!enumSupportsAnnot(baseType)) {
         ITRACE(2,
@@ -8253,20 +8255,28 @@ private:
 
     // Is this name a type-alias or enum?
     if (auto const tm = index.typeMapping(name)) {
+      if (tm->typeAndValueUnion.size() > 1) {
+        // TODO(T151885113): Support multiple constraints created by case types
+        // for param, return, upper bound and property type hints
+        always_assert(RO::EvalTreatCaseTypesAsMixed);
+      }
+      assertx(tm->typeAndValueUnion.size() == 1);
+      auto const tm_type = tm->typeAndValueUnion[0].type;
       // Whatever it's an alias of isn't valid, so leave unresolved.
-      if (tm->type == AnnotType::Unresolved) return;
+      if (tm_type == AnnotType::Unresolved) return;
       auto const value = [&] () -> SString {
         // Store the first enum encountered during resolution. This
         // lets us fixup the type later if needed.
         if (tm->firstEnum) return tm->firstEnum;
-        if (tm->type == AnnotType::Object) {
-          assertx(tm->value);
-          return tm->value;
+        if (tm_type == AnnotType::Object) {
+          auto const tm_value = tm->typeAndValueUnion[0].value;
+          assertx(tm_value);
+          return tm_value;
         }
         return nullptr;
       }();
       tc.resolveType(
-        tm->type,
+        tm_type,
         tm->nullable,
         value
       );
@@ -8755,6 +8765,8 @@ struct IndexFlattenMetadata {
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr size_t kNumTypeMappingRounds = 20;
+
 /*
  * Update the type-mappings in the program so they all point to their
  * ultimate type. After this step, every type-mapping that still has
@@ -8774,146 +8786,161 @@ void flatten_type_mappings(IndexData& index,
     [&] (const TypeMapping* typeMapping) {
       Optional<ISStringSet> seen;
       auto nullable = typeMapping->nullable;
-      auto name = typeMapping->value;
       auto firstEnum = typeMapping->firstEnum;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
 
-      if (typeMapping->type != AnnotType::Unresolved) {
-        // If the type-mapping is already resolved, we mainly take it
-        // as is. The exception is if it's an enum, in which case we
-        // validate the underlying base type.
-        assertx(typeMapping->type != AnnotType::Object);
-        if (!enumMeta) return *typeMapping;
-        if (!enumSupportsAnnot(typeMapping->type)) {
-          FTRACE(
-            2, "Type-mapping '{}' is invalid because it resolves to "
-            "invalid enum type {}\n",
-            typeMapping->name,
-            annotName(typeMapping->type)
-          );
-          auto ty = *typeMapping;
-          ty.type = AnnotType::Unresolved;
-          return ty;
-        }
-        return *typeMapping;
-      }
+      php::TypeAlias::TypeAndValueUnion tvu;
 
-      for (size_t rounds = 0;; ++rounds) {
-        name = normalizeNS(name);
+      for (auto const& [type, value] : typeMapping->typeAndValueUnion) {
+        auto name = value;
 
-        if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
-          nullable |= next->nullable;
-          if (!firstEnum) firstEnum = next->firstEnum;
-
-          if (enumMeta && next->firstEnum) {
-            enumMeta->deps.emplace(next->firstEnum);
+        if (type != AnnotType::Unresolved) {
+          // If the type-mapping is already resolved, we mainly take it
+          // as is. The exception is if it's an enum, in which case we
+          // validate the underlying base type.
+          assertx(type != AnnotType::Object);
+          if (!enumMeta) {
+            tvu.emplace_back(php::TypeAndValue{type, value});
+            continue;
           }
+          if (!enumSupportsAnnot(type)) {
+            FTRACE(
+              2, "Type-mapping '{}' is invalid because it resolves to "
+              "invalid enum type {}\n",
+              typeMapping->name,
+              annotName(type)
+            );
+            tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, value});
+            continue;
+          }
+          tvu.emplace_back(php::TypeAndValue{type, value});
+          continue;
+        }
 
-          if (next->type != AnnotType::Unresolved) {
-            assertx(next->type != AnnotType::Object);
-            if (firstEnum && !enumSupportsAnnot(next->type)) {
+        std::queue<LSString> queue;
+        queue.push(name);
+
+        for (size_t rounds = 0;; ++rounds) {
+          if (queue.empty()) break;
+          name = normalizeNS(queue.back());
+          queue.pop();
+
+          if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
+            nullable |= next->nullable;
+            if (!firstEnum) firstEnum = next->firstEnum;
+
+            if (enumMeta && next->firstEnum) {
+              enumMeta->deps.emplace(next->firstEnum);
+            }
+
+            for (auto const& [next_type, next_value] : next->typeAndValueUnion) {
+              if (next_type == AnnotType::Unresolved) {
+                queue.push(next_value);
+                continue;
+              }
+              assertx(next_type != AnnotType::Object);
+              if (firstEnum && !enumSupportsAnnot(next_type)) {
+                FTRACE(
+                  2, "Type-mapping '{}' is invalid because it resolves to "
+                  "invalid enum type {}{}\n",
+                  typeMapping->name,
+                  annotName(next_type),
+                  firstEnum->isame(typeMapping->name)
+                    ? "" : folly::sformat(" (via {})", firstEnum)
+                );
+                tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, name});
+                continue;
+              }
+              tvu.emplace_back(php::TypeAndValue{next_type, next_value});
+            }
+          } else if (index.classRefs.count(name)) {
+            if (firstEnum) {
               FTRACE(
                 2, "Type-mapping '{}' is invalid because it resolves to "
-                "invalid enum type {}{}\n",
+                "invalid object '{}' for enum type (via {})\n",
                 typeMapping->name,
-                annotName(next->type),
-                firstEnum->isame(typeMapping->name)
-                  ? "" : folly::sformat(" (via {})", firstEnum)
+                name,
+                firstEnum
+              );
+            }
+
+            tvu.emplace_back(php::TypeAndValue {
+              firstEnum ? AnnotType::Unresolved : AnnotType::Object,
+              name
+            });
+            break;
+          } else {
+            FTRACE(
+              2, "Type-mapping '{}' is invalid because it involves "
+              "non-existent type '{}'{}\n",
+              typeMapping->name,
+              name,
+              (firstEnum && !firstEnum->isame(typeMapping->name))
+                ? folly::sformat(" (via {})", firstEnum) : ""
+            );
+            tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, name});
+            break;
+          }
+
+          // Deal with cycles. Since we don't expect to encounter them, just
+          // use a counter until we hit a chain length of kNumTypeMappingRounds,
+          // then start tracking the names we resolve.
+          if (rounds == kNumTypeMappingRounds) {
+            seen.emplace();
+            seen->insert(name);
+          } else if (rounds > kNumTypeMappingRounds) {
+            if (!seen->insert(name).second) {
+              FTRACE(
+                2, "Type-mapping '{}' is invalid because it's definition "
+                "is circular with '{}'\n",
+                typeMapping->name,
+                name
               );
               return TypeMapping {
                 typeMapping->name,
-                name,
                 firstEnum,
-                AnnotType::Unresolved,
+                {php::TypeAndValue{AnnotType::Unresolved, name}},
                 nullable
               };
             }
-            return TypeMapping {
-              typeMapping->name,
-              next->value,
-              firstEnum,
-              next->type,
-              nullable
-            };
-          }
-
-          name = next->value;
-        } else if (index.classRefs.count(name)) {
-          if (firstEnum) {
-            FTRACE(
-              2, "Type-mapping '{}' is invalid because it resolves to "
-              "invalid object '{}' for enum type (via {})\n",
-              typeMapping->name,
-              name,
-              firstEnum
-            );
-          }
-
-          return TypeMapping {
-            typeMapping->name,
-            name,
-            firstEnum,
-            firstEnum ? AnnotType::Unresolved : AnnotType::Object,
-            nullable
-          };
-        } else {
-          FTRACE(
-            2, "Type-mapping '{}' is invalid because it involves "
-            "non-existent type '{}'{}\n",
-            typeMapping->name,
-            name,
-            (firstEnum && !firstEnum->isame(typeMapping->name))
-              ? folly::sformat(" (via {})", firstEnum) : ""
-          );
-          return TypeMapping {
-            typeMapping->name,
-            name,
-            firstEnum,
-            AnnotType::Unresolved,
-            nullable
-          };
-        }
-
-        // Deal with cycles. Since we don't expect to encounter them, just
-        // use a counter until we hit a chain length of 10, then start
-        // tracking the names we resolve.
-        if (rounds == 10) {
-          seen.emplace();
-          seen->insert(name);
-        } else if (rounds > 10) {
-          if (!seen->insert(name).second) {
-            FTRACE(
-              2, "Type-mapping '{}' is invalid because it's definition "
-              "is circular with '{}'\n",
-              typeMapping->name,
-              name
-            );
-            return TypeMapping {
-              typeMapping->name,
-              name,
-              firstEnum,
-              AnnotType::Unresolved,
-              nullable
-            };
           }
         }
       }
+      assertx(!tvu.empty());
+      return TypeMapping {
+        typeMapping->name,
+        firstEnum,
+        std::move(tvu),
+        nullable
+      };
     }
   );
 
   for (auto& after : resolved) {
+    assertx(!after.typeAndValueUnion.empty());
     auto const name = after.name;
+    bool unresolved = std::any_of(after.typeAndValueUnion.begin(),
+                                  after.typeAndValueUnion.end(),
+                                  [](const php::TypeAndValue& tv) {
+                                    return tv.type == AnnotType::Unresolved;
+                                  });
+    using namespace folly::gen;
     FTRACE(
-      4, "Type-mapping '{}' flattened to {}{}{}\n",
+      4, "Type-mapping '{}' flattened to {}({}){}\n",
       name,
-      annotName(after.type),
-      (after.value && !after.value->empty())
-        ? folly::sformat(" ({})", after.value) : "",
+      from(after.typeAndValueUnion)
+        | map([&] (const php::TypeAndValue& tv) { return annotName(tv.type); })
+        | unsplit<std::string>("|"),
+      from(after.typeAndValueUnion)
+        | map([&] (const php::TypeAndValue& tv) {
+            return tv.value && !tv.value->empty() ? tv.value->toCppString() : "";
+          })
+        | unsplit<std::string>("|"),
       (after.firstEnum && !after.firstEnum->isame(name))
         ? folly::sformat(" (via {})", after.firstEnum) : ""
     );
-    if (after.type == AnnotType::Unresolved && meta.cls.count(name)) {
+    if (unresolved && meta.cls.count(name)) {
       FTRACE(4, "  Marking enum '{}' as uninstantiable\n", name);
       meta.cls.at(name).uninstantiable = true;
     }

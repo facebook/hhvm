@@ -484,6 +484,12 @@ module Flags = struct
       ft_flags = set_bit ft_flags_readonly_this readonly_this ft.ft_flags;
     }
 
+  let set_ft_returns_readonly ft readonly_return =
+    {
+      ft with
+      ft_flags = set_bit ft_flags_returns_readonly readonly_return ft.ft_flags;
+    }
+
   let get_ft_is_function_pointer ft =
     is_set ft.ft_flags ft_flags_is_function_pointer
 

@@ -398,6 +398,8 @@ module Flags : sig
 
   val get_ft_returns_readonly : 'a fun_type -> bool
 
+  val set_ft_returns_readonly : 'a fun_type -> bool -> 'a fun_type
+
   val get_ft_async : 'a fun_type -> bool
 
   val get_ft_generator : 'a fun_type -> bool

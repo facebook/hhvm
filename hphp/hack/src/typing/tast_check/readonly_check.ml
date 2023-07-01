@@ -13,12 +13,57 @@ module SN = Naming_special_names
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
+(* Create a synthetic function type out of two fun_ty that has the correct readonlyness by being conservative *)
+let union_fty_readonly
+    (fty1 : Typing_defs.locl_ty Typing_defs.fun_type)
+    (fty2 : Typing_defs.locl_ty Typing_defs.fun_type) :
+    Typing_defs.locl_ty Typing_defs.fun_type =
+  let open Typing_defs in
+  let union_fp_readonly fp1 fp2 =
+    match (get_fp_readonly fp1, get_fp_readonly fp2) with
+    | (true, _) -> fp2 (* Must both be readonly to be readonly *)
+    | (false, _) -> fp1
+  in
+
+  (* Not readonly *)
+
+  (* Must both be readonly to be considered a readonly call *)
+  let fty_readonly_this =
+    get_ft_readonly_this fty1 && get_ft_readonly_this fty2
+  in
+  (* If either are readonly, consider readonly return *)
+  let fty_returns_readonly =
+    get_ft_returns_readonly fty1 || get_ft_returns_readonly fty2
+  in
+  let fty = set_ft_readonly_this fty1 fty_readonly_this in
+  let fty = set_ft_returns_readonly fty fty_returns_readonly in
+  let fps = List.map2 fty1.ft_params fty2.ft_params ~f:union_fp_readonly in
+  (* If lenghts unequal we have other problems and errors, just return the first one *)
+  let fps =
+    match fps with
+    | List.Or_unequal_lengths.Unequal_lengths -> fty1.ft_params
+    | List.Or_unequal_lengths.Ok fp -> fp
+  in
+  { fty with Typing_defs.ft_params = fps }
+
 let rec get_fty ty =
   let open Typing_defs in
   match get_node ty with
   | Tnewtype (name, _, ty2) when String.equal name SN.Classes.cSupportDyn ->
     get_fty ty2
   | Tfun fty -> Some fty
+  | Tunion tyl ->
+    (* Filter out dynamic types *)
+    let ftys = List.filter_map tyl ~f:get_fty in
+    (* Because Typing_union already aggressively simplifies function unions to a single function type,
+       there should be a single function type here 99% of the time. *)
+    (match ftys with
+    (* Not calling a function, ignore *)
+    | [] -> None
+    (* In the rare case where union did not simplify, use readonly union to merge all fty's together with a union into a single function type, and return it. *)
+    | fty1 :: rest ->
+      let result = List.fold ~init:fty1 ~f:union_fty_readonly rest in
+      Some result)
   | _ -> None
 
 type rty =

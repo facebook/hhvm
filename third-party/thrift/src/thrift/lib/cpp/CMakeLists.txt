@@ -61,6 +61,7 @@ add_library(
   transport/THeader.cpp
   transport/TZlibTransport.cpp
   ../cpp2/transport/rocket/framing/Util.cpp
+  ../cpp2/Flags.cpp
   util/PausableTimer.cpp
   util/THttpParser.cpp
   util/VarintUtils.cpp

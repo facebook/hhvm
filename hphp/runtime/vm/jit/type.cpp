@@ -1041,15 +1041,18 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     bool persistent = false;
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
-        auto ty = [&]{
-          if (alias->klass) {
-            if (interface_supports_non_objects(alias->klass->name())) {
-              return TInitCell;
+        auto ty = TBottom;
+        for (auto const& [type, klass] : alias->type_and_class_union()) {
+          if (klass) {
+            if (interface_supports_non_objects(klass->name())) {
+              ty |= TInitCell;
+            } else {
+              ty |= Type::SubObj(klass);
             }
-            return Type::SubObj(alias->klass);
+          } else {
+            ty |= atToType(type);
           }
-          return atToType(alias->type);
-        }();
+        }
         if (alias->nullable) ty |= TInitNull;
         return ty;
       }
@@ -1062,7 +1065,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
   return base;
 }
 
-}
+} // namespace
 
 Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     const Class* propCls,

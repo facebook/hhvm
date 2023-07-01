@@ -28,6 +28,8 @@
 
 #include "hphp/util/tiny-vector.h"
 
+#include <folly/Range.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -49,8 +51,9 @@ using TypeAndValueUnion = TinyVector<std::pair<AnnotType, LowStringPtr>>;
  * When `case_type` field is not set, these vectors are guarenteed to be of
  * size 1;
  *
- * The `types[0]' field is Object whenever the type alias is basically just a
- * name. At runtime we still might resolve this name to another type alias,
+ * The `type_and_value_union[0]' field is Object whenever the type alias is
+ * basically just a name.
+ * At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
  *
  * For the per-request struct, see TypeAlias below.
@@ -90,14 +93,6 @@ struct PreTypeAlias {
 struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
-  // Static constructors.
-
-  static TypeAlias Invalid(const PreTypeAlias* alias);
-  static TypeAlias From(const PreTypeAlias* alias);
-  static TypeAlias From(TypeAlias req, const PreTypeAlias* alias);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Comparison.
 
   bool same(const TypeAlias& req) const;
@@ -106,15 +101,17 @@ struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
+  using TypeAndClass = std::pair<AnnotType, LowPtr<Class>>;
 
-  // The aliased type.
-  AnnotType type{AnnotType::NoReturn};
+  // The aliased type and Class; class is nullptr if type != Object
+  // Since this struct is stored in RDS, this member needs to have trivial
+  // ctor/dtor hence cannot use TinyVector
+  TypeAndClass* type_and_class_union_arr;
+  size_t union_size;
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
   // For option types, like ?Foo.
   bool nullable{false};
-  // Aliased Class; nullptr if type != Object.
-  LowPtr<Class> klass{nullptr};
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)
@@ -127,6 +124,10 @@ struct TypeAlias {
   const Array& typeStructure() const { return m_preTypeAlias->typeStructure; }
   const Array& resolvedTypeStructureRaw() const {
     return m_preTypeAlias->resolvedTypeStructure;
+  }
+  folly::Range<const TypeAndClass*> type_and_class_union() const {
+    return folly::range(type_and_class_union_arr,
+                        type_and_class_union_arr + union_size);
   }
 
   // Return the type-structure, possibly as a logging array

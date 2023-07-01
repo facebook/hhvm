@@ -25,48 +25,21 @@ struct StringData;
 struct ArrayData;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Static constructors.
-
-inline TypeAlias TypeAlias::Invalid(const PreTypeAlias* alias) {
-  TypeAlias req(alias);
-  req.invalid = true;
-  return req;
-}
-
-inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
-  //TODO(T151885113): Support case types in runtime
-  assertx(alias->type_and_value_union[0].first != AnnotType::Object);
-  assertx(alias->type_and_value_union[0].first != AnnotType::Unresolved);
-
-  TypeAlias req(alias);
-  req.type = alias->type_and_value_union[0].first;
-  req.nullable = alias->nullable;
-  return req;
-}
-
-inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
-  //TODO(T151885113): Support case types in runtime
-  assertx(alias->type_and_value_union[0].first == AnnotType::Unresolved);
-
-  req.m_preTypeAlias = alias;
-  if (req.invalid) {
-    return req; // Do nothing.
-  }
-
-  assertx(req.type != AnnotType::Unresolved);
-  assertx((req.type == AnnotType::Object) == (req.klass != nullptr));
-  req.nullable |= alias->nullable;
-  return req;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
 inline bool TypeAlias::same(const TypeAlias& req) const {
-  return (invalid && req.invalid) ||
-         (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
-         (type == req.type && nullable == req.nullable &&
-          klass == req.klass);
+  if (invalid && req.invalid) return true;
+  if (union_size != req.union_size) return false;
+  for (size_t i = 0; i < union_size; ++i) {
+    auto const [type_a, klass_a] = type_and_class_union_arr[i];
+    auto const [type_b, klass_b] = req.type_and_class_union_arr[i];
+    if (type_a == AnnotType::Mixed && type_b == AnnotType::Mixed) continue;
+    if (type_a == type_b && nullable == req.nullable && klass_a == klass_b) {
+      continue;
+    }
+    return false;
+  }
+  return true;
 }
 
 inline bool operator==(const TypeAlias& l,

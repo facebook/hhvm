@@ -50,6 +50,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalEmitBespokeTypeStructures                = EmitBespokeTypeStructures;
   RO::EvalActiveDeployment                         = ActiveDeployment;
   RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
+  RO::EvalTreatCaseTypesAsMixed                    = TreatCaseTypesAsMixed;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -109,6 +110,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(DiamondTraitMethods);
   SHOW(EmitBespokeTypeStructures);
   SHOW(ModuleLevelTraits);
+  SHOW(TreatCaseTypesAsMixed);
 #undef SHOW
   folly::format(
     &out, "  SourceRootForFileBC: {}\n",

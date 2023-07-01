@@ -234,22 +234,27 @@ getNamedTypeWithAutoload(const NamedType* ne,
   return klass;
 }
 
-}
+} // namespace
 
-TypeConstraint TypeConstraint::resolvedWithAutoload() const {
+TinyVector<TypeConstraint> TypeConstraint::resolvedWithAutoload() const {
   auto copy = *this;
 
   // Nothing to do if we are not unresolved.
-  if (!isUnresolved()) return copy;
+  if (!isUnresolved()) return {copy};
 
   auto const p = getNamedTypeWithAutoload(typeNamedType(), typeName());
 
   // Type alias.
   if (auto const ptd = boost::get<const TypeAlias*>(&p)) {
     auto const td = *ptd;
-    auto const typeName = td->klass ? td->klass->name() : nullptr;
-    copy.resolveType(td->type, td->nullable, typeName);
-    return copy;
+    TinyVector<TypeConstraint> result;
+    for (auto const& [type, klass] : td->type_and_class_union()) {
+      auto copy = *this;
+      auto const typeName = klass ? klass->name() : nullptr;
+      copy.resolveType(type, td->nullable, typeName);
+      result.push_back(copy);
+    }
+    return result;
   }
 
   // Enum.
@@ -260,13 +265,13 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
         ? enumDataTypeToAnnotType(*cls->enumBaseTy())
         : AnnotType::ArrayKey;
       copy.resolveType(type, false, nullptr);
-      return copy;
+      return {copy};
     }
   }
 
   // Existing or non-existing class.
   copy.resolveType(AnnotType::Object, false, typeName());
-  return copy;
+  return {copy};
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
@@ -276,7 +281,9 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     isMixed()));
 
   auto const resolved = resolvedWithAutoload();
-  return resolved.isPrecise() ? resolved.underlyingDataType() : std::nullopt;
+  // Used for enums only -- enums cannot use union types
+  if (resolved.size() != 1) return std::nullopt;
+  return resolved[0].isPrecise() ? resolved[0].underlyingDataType() : std::nullopt;
 }
 
 bool TypeConstraint::isMixedResolved() const {
@@ -284,7 +291,9 @@ bool TypeConstraint::isMixedResolved() const {
   // isCheckable() implies !isMixed(), so if its not an unresolved object here,
   // we know it cannot be mixed.
   if (!isUnresolved()) return false;
-  return !resolvedWithAutoload().isCheckable();
+  auto const resolved = resolvedWithAutoload();
+  return std::any_of(resolved.begin(), resolved.end(),
+                     [](const TypeConstraint& tc) { return !tc.isCheckable(); });
 }
 
 bool TypeConstraint::maybeMixed() const {
@@ -293,7 +302,9 @@ bool TypeConstraint::maybeMixed() const {
   // we know it cannot be mixed.
   if (!isUnresolved()) return false;
   if (auto const def = typeNamedType()->getCachedTypeAlias()) {
-    return def->type == AnnotType::Mixed;
+    auto const it = def->type_and_class_union();
+    return std::any_of(it.begin(), it.end(),
+                       [] (auto tcu) { return tcu.first == AnnotType::Mixed; });
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
   return !Class::lookup(typeNamedType());
@@ -341,32 +352,36 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
     return true;
   }
 
-  auto const resolve = [&] (const TypeConstraint& origTC)
-    -> std::tuple<AnnotType, const StringData*, bool> {
-    auto const tc = origTC.resolvedWithAutoload();
+  auto const resolve = [&] (const TypeConstraint& origTC) {
+    auto const resolved = origTC.resolvedWithAutoload();
+    std::vector<std::tuple<AnnotType, const StringData*, bool>> result;
 
-    if (!tc.isCheckable()) {
-      return std::make_tuple(AnnotType::Mixed, nullptr, false);
-    }
+    for (auto const tc : resolved) {
+      if (!tc.isCheckable()) {
+        result.emplace_back(AnnotType::Mixed, nullptr, false);
+        continue;
+      }
 
-    switch (tc.metaType()) {
-      case MetaType::This:
-      case MetaType::Number:
-      case MetaType::ArrayKey:
-      case MetaType::Nonnull:
-      case MetaType::VecOrDict:
-      case MetaType::ArrayLike:
-      case MetaType::Classname:
-      case MetaType::Precise:
-        return std::make_tuple(tc.type(), tc.clsName(), tc.isNullable());
-      case MetaType::Nothing:
-      case MetaType::NoReturn:
-      case MetaType::Callable:
-      case MetaType::Mixed:
-      case MetaType::Unresolved:
-        always_assert(false);
+      switch (tc.metaType()) {
+        case MetaType::This:
+        case MetaType::Number:
+        case MetaType::ArrayKey:
+        case MetaType::Nonnull:
+        case MetaType::VecOrDict:
+        case MetaType::ArrayLike:
+        case MetaType::Classname:
+        case MetaType::Precise:
+          result.emplace_back(tc.type(), tc.clsName(), tc.isNullable());
+          continue;
+        case MetaType::Nothing:
+        case MetaType::NoReturn:
+        case MetaType::Callable:
+        case MetaType::Mixed:
+        case MetaType::Unresolved:
+          always_assert(false);
+      }
     }
-    not_reached();
+    return result;
   };
 
   return resolve(*this) == resolve(other);
@@ -397,30 +412,40 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   // Common case is that we actually find the alias:
   if (td) {
     if (td->nullable && val.type() == KindOfNull) return true;
-    auto result = annotCompat(val.type(), td->type,
-                              td->klass ? td->klass->name() : nullptr);
-    switch (result) {
-      case AnnotAction::Pass: return true;
-      case AnnotAction::Fail: return false;
-      case AnnotAction::CallableCheck:
-        return !ForProp && (Assert || is_callable(tvAsCVarRef(*val)));
-      case AnnotAction::WarnClass:
-      case AnnotAction::ConvertClass:
-      case AnnotAction::WarnLazyClass:
-      case AnnotAction::ConvertLazyClass:
-        return false; // verifyFail will deal with the conversion/warning
-      case AnnotAction::WarnClassname:
-        assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-        assertx(RuntimeOption::EvalClassPassesClassname);
-        assertx(RuntimeOption::EvalClassnameNotices);
-        if (!Assert) raise_notice(Strings::CLASS_TO_CLASSNAME);
-        return true;
-      case AnnotAction::ObjectCheck:
-      case AnnotAction::Fallback:
-      case AnnotAction::FallbackCoerce:
-        not_reached();
+    bool pass_and_raise_classname_notice = false;
+    for (auto const& [type, klass] : td->type_and_class_union()) {
+      auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
+      switch (result) {
+        case AnnotAction::Pass: return true;
+        case AnnotAction::Fail: continue;
+        case AnnotAction::CallableCheck:
+          if (!ForProp && (Assert || is_callable(tvAsCVarRef(*val)))) return true;
+          continue;
+        case AnnotAction::WarnClass:
+        case AnnotAction::ConvertClass:
+        case AnnotAction::WarnLazyClass:
+        case AnnotAction::ConvertLazyClass:
+          continue; // verifyFail will deal with the conversion/warning
+        case AnnotAction::WarnClassname:
+          assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+          assertx(RuntimeOption::EvalClassPassesClassname);
+          assertx(RuntimeOption::EvalClassnameNotices);
+          if (!Assert) {
+            pass_and_raise_classname_notice = true;
+            continue;
+          }
+          return true;
+        case AnnotAction::ObjectCheck:
+        case AnnotAction::Fallback:
+        case AnnotAction::FallbackCoerce:
+          not_reached();
+      }
     }
-    not_reached();
+    if (pass_and_raise_classname_notice) {
+      raise_notice(Strings::CLASS_TO_CLASSNAME);
+      return true;
+    }
+    return false;
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -441,7 +466,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
 }
 
 template <bool Assert>
-bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
+bool TypeConstraint::checkTypeAliasImpl(const Class* cls) const {
   assertx(isUnresolved());
 
   // Look up the type alias (autoloading if necessary)
@@ -456,31 +481,34 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
 
   // We found the type alias, check if an object of type 'type' is
   // compatible
-  switch (getAnnotMetaType(td->type)) {
-    case AnnotMetaType::Precise:
-      return
-        td->type == AnnotType::Object &&
-        td->klass &&
-        type->classof(td->klass);
-    case AnnotMetaType::Mixed:
-    case AnnotMetaType::Nonnull:
-      return true;
-    case AnnotMetaType::Callable:
-      return type->lookupMethod(s___invoke.get()) != nullptr;
-    case AnnotMetaType::Nothing:
-    case AnnotMetaType::NoReturn:
-    case AnnotMetaType::Number:
-    case AnnotMetaType::ArrayKey:
-    case AnnotMetaType::This:
-    case AnnotMetaType::VecOrDict:
-    case AnnotMetaType::ArrayLike:
-    case AnnotMetaType::Classname:  // TODO: T83332251
-      return false;
-    case AnnotMetaType::Unresolved:
-      not_reached();
-      break;
+  for (auto const& [type, klass] : td->type_and_class_union()) {
+    switch (getAnnotMetaType(type)) {
+      case AnnotMetaType::Precise:
+        if (type == AnnotType::Object && klass && cls->classof(klass)) {
+          return true;
+        }
+        continue;
+      case AnnotMetaType::Mixed:
+      case AnnotMetaType::Nonnull:
+        return true;
+      case AnnotMetaType::Callable:
+        if (cls->lookupMethod(s___invoke.get()) != nullptr) return true;
+        continue;
+      case AnnotMetaType::Nothing:
+      case AnnotMetaType::NoReturn:
+      case AnnotMetaType::Number:
+      case AnnotMetaType::ArrayKey:
+      case AnnotMetaType::This:
+      case AnnotMetaType::VecOrDict:
+      case AnnotMetaType::ArrayLike:
+      case AnnotMetaType::Classname:  // TODO: T83332251
+        continue;
+      case AnnotMetaType::Unresolved:
+        not_reached();
+        break;
+    }
   }
-  not_reached();
+  return false;
 }
 
 template bool TypeConstraint::checkTypeAliasImpl<false>(
@@ -808,10 +836,15 @@ bool TypeConstraint::checkStringCompatible() const {
   auto p = getNamedTypeWithAutoload(typeNamedType(), typeName());
   if (auto ptd = boost::get<const TypeAlias*>(&p)) {
     auto td = *ptd;
-    return td->type == AnnotType::String ||
-           td->type == AnnotType::ArrayKey ||
-           (td->type == AnnotType::Object &&
-            interface_supports_string(td->klass->name()));
+    for (auto const& [type, klass] : td->type_and_class_union()) {
+      if (type == AnnotType::String ||
+          type == AnnotType::ArrayKey ||
+          (type == AnnotType::Object &&
+            interface_supports_string(klass->name()))) {
+        return true;
+      }
+    }
+    return false;
   }
   if (auto pc = boost::get<Class*>(&p)) {
     auto c = *pc;

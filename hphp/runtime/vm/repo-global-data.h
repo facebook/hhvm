@@ -170,6 +170,11 @@ struct RepoGlobalData {
    */
   bool DiamondTraitMethods = false;
 
+  /*
+   * Treats case_type int | bool as mixed
+   */
+  bool TreatCaseTypesAsMixed = true;
+
   /* Whether bespoke type structures should be used */
   bool EmitBespokeTypeStructures = false;
 
@@ -233,6 +238,7 @@ struct RepoGlobalData {
       (EmitBespokeTypeStructures)
       (ActiveDeployment)
       (ModuleLevelTraits)
+      (TreatCaseTypesAsMixed)
       ;
   }
 };

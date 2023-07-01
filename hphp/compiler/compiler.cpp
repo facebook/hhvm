@@ -481,6 +481,7 @@ RepoGlobalData getGlobalData() {
   gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
   gd.ActiveDeployment = RO::EvalActiveDeployment;
   gd.ModuleLevelTraits = RO::EvalModuleLevelTraits;
+  gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

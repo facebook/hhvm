@@ -132,6 +132,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
    * `HH\embed_type_decl`  */                   \
   R(EnableIntrinsicsExtension)                  \
   R(EvalModuleLevelTraits)                      \
+  R(EvalTreatCaseTypesAsMixed)                  \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

@@ -543,9 +543,11 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
 const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
   const Id id = read_raw<Id>(ser);
   auto const unit = read_unit(ser);
-  auto const has_class = read_raw<bool>(ser);
-  if (has_class) {
-    read_class(ser);
+
+  auto sz = read_raw<uint32_t>(ser);
+  while (sz--) {
+    auto const has_class = read_raw<bool>(ser);
+    if (has_class) read_class(ser);
   }
   auto const td = unit->lookupTypeAliasId(id);
   return TypeAlias::def(td);
@@ -1565,11 +1567,14 @@ void write_typealias(ProfDataSerializer& ser, const TypeAlias* td) {
   write_raw(ser, tdId);
   write_unit(ser, td->unit());
 
-  if (td->klass) {
-    write_raw(ser, true);
-    write_class(ser, td->klass);
-  } else {
-    write_raw(ser, false);
+  write_raw(ser, safe_cast<uint32_t>(td->union_size));
+  for (auto const& [_, klass] : td->type_and_class_union()) {
+    if (klass) {
+      write_raw(ser, true);
+      write_class(ser, klass);
+    } else {
+      write_raw(ser, false);
+    }
   }
 }
 

@@ -1,1 +1,1 @@
-Fatal error: resolving type alias C1 failed. Have you declared all classes in the type alias in %s on line 9
+Fatal error: Unknown type or class HH\int|C1 in %s on line 5

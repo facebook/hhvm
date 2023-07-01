@@ -1486,6 +1486,7 @@ struct RuntimeOption {
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   F(bool, DiamondTraitMethods, false)                                   \
+  F(bool, TreatCaseTypesAsMixed, true)                                  \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \
   F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \

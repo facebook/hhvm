@@ -133,7 +133,7 @@ struct TypeConstraint {
   /*
    * If this->isUnresolved(), resolve it using the autoloader.
    */
-  TypeConstraint resolvedWithAutoload() const;
+  TinyVector<TypeConstraint> resolvedWithAutoload() const;
 
   /*
    * Returns the underlying DataType for this TypeConstraint.
@@ -219,7 +219,9 @@ struct TypeConstraint {
   }
 
   bool validForEnumBase() const {
-    auto const resolved = resolvedWithAutoload();
+    auto const resolvedVec = resolvedWithAutoload();
+    if (resolvedVec.size() != 1) return false;
+    auto const resolved = resolvedVec[0];
     return resolved.isInt() || resolved.isString() ||
            resolved.isArrayKey() || resolved.isClassname() ||
            resolved.isNothing();

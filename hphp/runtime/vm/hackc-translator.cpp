@@ -354,14 +354,19 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
 
   TypeAndValueUnion type_and_value_union;
   bool nullable = false;
-  for (auto const& ti : tis) {
-    auto const ty = translateTypeInfo(ti).second;
-    nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
-    auto const tname = ty.typeName();
-    if (tname && !tname->empty()) {
-      type_and_value_union.emplace_back(ty.type(), tname);
-    } else {
-      type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
+
+  if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
+    type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
+  } else {
+    for (auto const& ti : tis) {
+      auto const ty = translateTypeInfo(ti).second;
+      nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
+      auto const tname = ty.typeName();
+      if (tname && !tname->empty()) {
+        type_and_value_union.emplace_back(ty.type(), tname);
+      } else {
+        type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
+      }
     }
   }
 

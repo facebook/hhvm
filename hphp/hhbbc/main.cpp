@@ -282,6 +282,7 @@ RepoGlobalData get_global_data() {
   gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
   gd.ActiveDeployment = RO::EvalActiveDeployment;
   gd.ModuleLevelTraits = RuntimeOption::EvalModuleLevelTraits;
+  gd.TreatCaseTypesAsMixed = RO::EvalTreatCaseTypesAsMixed;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

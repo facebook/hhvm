@@ -29,10 +29,10 @@ struct ArrayData;
 
 inline bool TypeAlias::same(const TypeAlias& req) const {
   if (invalid && req.invalid) return true;
-  if (union_size != req.union_size) return false;
-  for (size_t i = 0; i < union_size; ++i) {
-    auto const [type_a, klass_a] = type_and_class_union_arr[i];
-    auto const [type_b, klass_b] = req.type_and_class_union_arr[i];
+  if (unionSize != req.unionSize) return false;
+  for (size_t i = 0; i < unionSize; ++i) {
+    auto const [type_a, klass_a] = typeAndClassUnionArr[i];
+    auto const [type_b, klass_b] = req.typeAndClassUnionArr[i];
     if (type_a == AnnotType::Mixed && type_b == AnnotType::Mixed) continue;
     if (type_a == type_b && nullable == req.nullable && klass_a == klass_b) {
       continue;

@@ -171,7 +171,7 @@ struct RepoGlobalData {
   bool DiamondTraitMethods = false;
 
   /*
-   * Treats case_type int | bool as mixed
+   * Treats caseType int | bool as mixed
    */
   bool TreatCaseTypesAsMixed = true;
 

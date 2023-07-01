@@ -853,7 +853,7 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
   auto flags = TypeConstraintFlags::NoFlags;
   if (alias.nullable) flags |= TypeConstraintFlags::Nullable;
   std::string type_constraints;
-  for (auto const& tv : alias.type_and_value_union) {
+  for (auto const& tv : alias.typeAndValueUnion) {
     if (!type_constraints.empty()) type_constraints.append(",");
     type_constraints.append(folly::to<std::string>(
       "<",
@@ -862,7 +862,7 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
   }
 
   out.fmtln(".{}{} {} = {} ({}, {}) {};",
-            alias.case_type ? "case_type" : "alias",
+            alias.caseType ? "case_type" : "alias",
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraints,

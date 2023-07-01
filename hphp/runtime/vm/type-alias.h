@@ -48,10 +48,10 @@ using TypeAndValueUnion = TinyVector<std::pair<AnnotType, LowStringPtr>>;
  * `types` and `values` fields are vectors because case types are comprised of
  * union of multiple types.
  *
- * When `case_type` field is not set, these vectors are guarenteed to be of
+ * When `caseType` field is not set, these vectors are guarenteed to be of
  * size 1;
  *
- * The `type_and_value_union[0]' field is Object whenever the type alias is
+ * The `typeAndValueUnion[0]' field is Object whenever the type alias is
  * basically just a name.
  * At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
@@ -62,11 +62,11 @@ struct PreTypeAlias {
   Unit* unit;
   LowStringPtr name;
   Attr attrs;
-  TypeAndValueUnion type_and_value_union;
+  TypeAndValueUnion typeAndValueUnion;
   int line0;
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
-  bool case_type;
+  bool caseType;
   UserAttributeMap userAttrs;
   Array typeStructure;
   // If !isNull(), contains m_typeStructure in post-resolved form from
@@ -106,8 +106,8 @@ struct TypeAlias {
   // The aliased type and Class; class is nullptr if type != Object
   // Since this struct is stored in RDS, this member needs to have trivial
   // ctor/dtor hence cannot use TinyVector
-  TypeAndClass* type_and_class_union_arr;
-  size_t union_size;
+  TypeAndClass* typeAndClassUnionArr;
+  size_t unionSize;
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
   // For option types, like ?Foo.
@@ -125,9 +125,8 @@ struct TypeAlias {
   const Array& resolvedTypeStructureRaw() const {
     return m_preTypeAlias->resolvedTypeStructure;
   }
-  folly::Range<const TypeAndClass*> type_and_class_union() const {
-    return folly::range(type_and_class_union_arr,
-                        type_and_class_union_arr + union_size);
+  folly::Range<const TypeAndClass*> typeAndClassUnion() const {
+    return folly::range(typeAndClassUnionArr, typeAndClassUnionArr + unionSize);
   }
 
   // Return the type-structure, possibly as a logging array

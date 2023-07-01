@@ -36,9 +36,9 @@ TypeAliasEmitter::TypeAliasEmitter(UnitEmitter& ue,
   , m_id(id) {}
 
 void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
-                            TypeAndValueUnion type_and_value_union,
+                            TypeAndValueUnion typeAndValueUnion,
                             bool nullable,
-                            bool case_type,
+                            bool caseType,
                             Array typeStructure,
                             Array resolvedTypeStructure) {
   assertx(typeStructure.isDict() &&
@@ -48,22 +48,22 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
           (resolvedTypeStructure.isDict() &&
            !resolvedTypeStructure.empty() &&
            resolvedTypeStructure->isStatic()));
-  assertx(!type_and_value_union.empty());
-  assertx(IMPLIES(!case_type, type_and_value_union.size() == 1));
+  assertx(!typeAndValueUnion.empty());
+  assertx(IMPLIES(!caseType, typeAndValueUnion.size() == 1));
   m_line0 = line0;
   m_line1 = line1;
   m_attrs = attrs;
-  m_type_and_value_union = std::move(type_and_value_union);
+  m_typeAndValueUnion = std::move(typeAndValueUnion);
   m_nullable = nullable;
-  m_case_type = case_type;
+  m_caseType = caseType;
   m_typeStructure = std::move(typeStructure);
   m_resolvedTypeStructure = std::move(resolvedTypeStructure);
 }
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
-    &unit, m_name, m_attrs, m_type_and_value_union, m_line0, m_line1,
-    m_nullable, m_case_type, m_userAttributes,
+    &unit, m_name, m_attrs, m_typeAndValueUnion, m_line0, m_line1,
+    m_nullable, m_caseType, m_userAttributes,
     m_typeStructure, m_resolvedTypeStructure
   };
 }
@@ -73,9 +73,9 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
   sd(m_line0)
     (m_line1)
     (m_attrs)
-    (m_type_and_value_union)
+    (m_typeAndValueUnion)
     (m_nullable)
-    (m_case_type)
+    (m_caseType)
     (m_userAttributes)
     (m_typeStructure)
     (m_resolvedTypeStructure)

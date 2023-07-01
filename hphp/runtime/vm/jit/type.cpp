@@ -1042,7 +1042,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
         auto ty = TBottom;
-        for (auto const& [type, klass] : alias->type_and_class_union()) {
+        for (auto const& [type, klass] : alias->typeAndClassUnion()) {
           if (klass) {
             if (interface_supports_non_objects(klass->name())) {
               ty |= TInitCell;

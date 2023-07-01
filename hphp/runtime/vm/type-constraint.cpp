@@ -248,7 +248,7 @@ TinyVector<TypeConstraint> TypeConstraint::resolvedWithAutoload() const {
   if (auto const ptd = boost::get<const TypeAlias*>(&p)) {
     auto const td = *ptd;
     TinyVector<TypeConstraint> result;
-    for (auto const& [type, klass] : td->type_and_class_union()) {
+    for (auto const& [type, klass] : td->typeAndClassUnion()) {
       auto copy = *this;
       auto const typeName = klass ? klass->name() : nullptr;
       copy.resolveType(type, td->nullable, typeName);
@@ -302,7 +302,7 @@ bool TypeConstraint::maybeMixed() const {
   // we know it cannot be mixed.
   if (!isUnresolved()) return false;
   if (auto const def = typeNamedType()->getCachedTypeAlias()) {
-    auto const it = def->type_and_class_union();
+    auto const it = def->typeAndClassUnion();
     return std::any_of(it.begin(), it.end(),
                        [] (auto tcu) { return tcu.first == AnnotType::Mixed; });
   }
@@ -413,7 +413,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   if (td) {
     if (td->nullable && val.type() == KindOfNull) return true;
     bool pass_and_raise_classname_notice = false;
-    for (auto const& [type, klass] : td->type_and_class_union()) {
+    for (auto const& [type, klass] : td->typeAndClassUnion()) {
       auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
       switch (result) {
         case AnnotAction::Pass: return true;
@@ -481,7 +481,7 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* cls) const {
 
   // We found the type alias, check if an object of type 'type' is
   // compatible
-  for (auto const& [type, klass] : td->type_and_class_union()) {
+  for (auto const& [type, klass] : td->typeAndClassUnion()) {
     switch (getAnnotMetaType(type)) {
       case AnnotMetaType::Precise:
         if (type == AnnotType::Object && klass && cls->classof(klass)) {
@@ -836,7 +836,7 @@ bool TypeConstraint::checkStringCompatible() const {
   auto p = getNamedTypeWithAutoload(typeNamedType(), typeName());
   if (auto ptd = boost::get<const TypeAlias*>(&p)) {
     auto td = *ptd;
-    for (auto const& [type, klass] : td->type_and_class_union()) {
+    for (auto const& [type, klass] : td->typeAndClassUnion()) {
       if (type == AnnotType::String ||
           type == AnnotType::ArrayKey ||
           (type == AnnotType::Object &&

@@ -1083,10 +1083,10 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     }
   }
 
-  assertx(!te.type_and_value_union().empty());
+  assertx(!te.typeAndValueUnion().empty());
 
   php::TypeAlias::TypeAndValueUnion tvu;
-  for (auto const& [type, value] : te.type_and_value_union()) {
+  for (auto const& [type, value] : te.typeAndValueUnion()) {
     tvu.emplace_back(php::TypeAndValue{type, value});
   }
 
@@ -1097,7 +1097,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     te.attrs() | AttrUnique | AttrPersistent,
     std::move(tvu),
     te.nullable(),
-    te.case_type(),
+    te.caseType(),
     te.userAttributes(),
     ts,
     Array{}

@@ -49,7 +49,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    */
   TypeAlias req(thisType);
   req.nullable = thisType->nullable;
-  req.union_size = 0;
+  req.unionSize = 0;
   std::vector<TypeAlias::TypeAndClass> tcu;
 
   auto const typeAliasFromClass = [&](Class* klass) {
@@ -73,11 +73,11 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
       return;
     }
     req.nullable |= ta.nullable;
-    auto it = ta.type_and_class_union();
+    auto it = ta.typeAndClassUnion();
     tcu.insert(tcu.end(), it.begin(), it.end());
   };
 
-  for (auto const& [type, typeName] : thisType->type_and_value_union) {
+  for (auto const& [type, typeName] : thisType->typeAndValueUnion) {
     if (type != AnnotType::Object && type != AnnotType::Unresolved) {
       tcu.emplace_back(type, nullptr);
       continue;
@@ -116,13 +116,13 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     return req;
   }
 
-  req.union_size = tcu.size();
+  req.unionSize = tcu.size();
   size_t allocSize = tcu.size() * sizeof(TypeAlias::TypeAndClass);
   auto const isPersistent = (thisType->attrs & AttrPersistent);
-  req.type_and_class_union_arr = static_cast<TypeAlias::TypeAndClass*>(
+  req.typeAndClassUnionArr = static_cast<TypeAlias::TypeAndClass*>(
     isPersistent ? malloc(allocSize) : req::malloc_untyped(allocSize));
   for (size_t i = 0; i < tcu.size(); ++i) {
-    req.type_and_class_union_arr[i] = tcu[i];
+    req.typeAndClassUnionArr[i] = tcu[i];
   }
   return req;
 }
@@ -132,12 +132,12 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
-  if (alias.type_and_value_union.size() != union_size) {
+  if (alias.typeAndValueUnion.size() != unionSize) {
     return false;
   }
-  for (size_t i = 0; i < union_size; ++i) {
-    auto const& [type, klass] = type_and_class_union_arr[i];
-    auto const& [ptype, value] = alias.type_and_value_union[i];
+  for (size_t i = 0; i < unionSize; ++i) {
+    auto const& [type, klass] = typeAndClassUnionArr[i];
+    auto const& [ptype, value] = alias.typeAndValueUnion[i];
     auto const preType =
       ptype == AnnotType::Unresolved ? AnnotType::Object : ptype;
     if (ptype == AnnotType::Mixed && type == AnnotType::Mixed) continue;
@@ -241,7 +241,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
     if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
     std::vector<folly::StringPiece> names;
-    for (auto const& [_, s] : thisType->type_and_value_union) {
+    for (auto const& [_, s] : thisType->typeAndValueUnion) {
       if (!s) continue;
       names.push_back(s->slice());
     }
@@ -252,7 +252,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
 
   auto const isPersistent = (thisType->attrs & AttrPersistent);
   if (debug && isPersistent) {
-    for (DEBUG_ONLY auto const& [_, klass] : resolved.type_and_class_union()) {
+    for (DEBUG_ONLY auto const& [_, klass] : resolved.typeAndClassUnion()) {
       assertx(!klass || classHasPersistentRDS(klass));
     }
   }

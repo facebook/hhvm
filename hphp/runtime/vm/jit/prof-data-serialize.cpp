@@ -1567,8 +1567,8 @@ void write_typealias(ProfDataSerializer& ser, const TypeAlias* td) {
   write_raw(ser, tdId);
   write_unit(ser, td->unit());
 
-  write_raw(ser, safe_cast<uint32_t>(td->union_size));
-  for (auto const& [_, klass] : td->type_and_class_union()) {
+  write_raw(ser, safe_cast<uint32_t>(td->unionSize));
+  for (auto const& [_, klass] : td->typeAndClassUnion()) {
     if (klass) {
       write_raw(ser, true);
       write_class(ser, klass);

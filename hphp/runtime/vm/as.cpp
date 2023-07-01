@@ -3124,7 +3124,7 @@ void parse_adata(AsmState& as) {
  * Following the type-constraint we encode the serialized type structure
  * corresponding to this alias.
  */
-void parse_alias(AsmState& as, bool case_type) {
+void parse_alias(AsmState& as, bool caseType) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttrs;
@@ -3152,20 +3152,20 @@ void parse_alias(AsmState& as, bool case_type) {
     as.error(".alias must have a valid array type structure");
   }
 
-  TypeAndValueUnion type_and_value_union;
+  TypeAndValueUnion typeAndValueUnion;
   bool nullable = false;
 
   if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
-    type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
+    typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
   } else {
     for (auto const& ty : tis) {
       nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
       auto const tname = ty.typeName();
       if (tname && !tname->empty()) {
         as.ue->mergeLitstr(tname);
-        type_and_value_union.emplace_back(ty.type(), tname);
+        typeAndValueUnion.emplace_back(ty.type(), tname);
       } else {
-        type_and_value_union.emplace_back(AnnotType::Mixed, staticEmptyString());
+        typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
       }
     }
   }
@@ -3175,9 +3175,9 @@ void parse_alias(AsmState& as, bool case_type) {
     line0,
     line1,
     attrs,
-    type_and_value_union,
+    typeAndValueUnion,
     nullable,
-    case_type,
+    caseType,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}
   );

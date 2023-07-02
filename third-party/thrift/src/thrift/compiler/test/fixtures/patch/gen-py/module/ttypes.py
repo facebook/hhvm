@@ -9269,6 +9269,15 @@ MyDataPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
   },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
+  },
   7: {
     "rust.box": "",
   },
@@ -9365,6 +9374,15 @@ MyDataWithCustomDefaultPatch.thrift_struct_annotations = {
 MyDataWithCustomDefaultPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
   },
   7: {
     "rust.box": "",
@@ -9592,6 +9610,15 @@ MyStructPatch.thrift_struct_annotations = {
 MyStructPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
   },
   7: {
     "rust.box": "",
@@ -10188,6 +10215,15 @@ LateDefStructPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
   },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
+  },
   7: {
     "rust.box": "",
   },
@@ -10250,6 +10286,15 @@ RecursivePatch.thrift_struct_annotations = {
 RecursivePatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
   },
   7: {
     "rust.box": "",
@@ -10365,6 +10410,15 @@ BarPatch.thrift_struct_annotations = {
 BarPatch.thrift_field_annotations = {
   1: {
     "thrift.box": "",
+  },
+  3: {
+    "rust.box": "",
+  },
+  5: {
+    "rust.box": "",
+  },
+  6: {
+    "rust.box": "",
   },
   7: {
     "rust.box": "",

@@ -137,11 +137,11 @@ pub struct MyDataPatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::MyDataFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::MyDataFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::MyDataEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::MyDataEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::MyDataFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::MyDataFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
@@ -183,11 +183,11 @@ pub struct MyDataWithCustomDefaultPatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::MyDataWithCustomDefaultFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::MyDataWithCustomDefaultFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::MyDataWithCustomDefaultEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::MyDataWithCustomDefaultEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::MyDataWithCustomDefaultFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::MyDataWithCustomDefaultFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
@@ -293,11 +293,11 @@ pub struct MyStructPatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::MyStructFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::MyStructFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::MyStructEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::MyStructEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::MyStructFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::MyStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
@@ -555,11 +555,11 @@ pub struct LateDefStructPatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::LateDefStructFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::LateDefStructFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::LateDefStructEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::LateDefStructEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::LateDefStructFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::LateDefStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
@@ -597,11 +597,11 @@ pub struct RecursivePatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::RecursiveFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::RecursiveFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::RecursiveEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::RecursiveEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::RecursiveFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::RecursiveFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this
@@ -655,11 +655,11 @@ pub struct BarPatch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
-    pub patchPrior: crate::types::BarFieldPatch,
+    pub patchPrior: ::std::boxed::Box<crate::types::BarFieldPatch>,
     #[doc = "Initialize fields, using the given defaults. Applies third."]
-    pub ensure: crate::types::BarEnsureStruct,
+    pub ensure: ::std::boxed::Box<crate::types::BarEnsureStruct>,
     #[doc = "Patches any set value, including newly set values. Applies last."]
-    pub patch: crate::types::BarFieldPatch,
+    pub patch: ::std::boxed::Box<crate::types::BarFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
     // This field forces `..Default::default()` when instantiating this

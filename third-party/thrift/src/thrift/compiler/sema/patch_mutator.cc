@@ -429,9 +429,9 @@ t_struct& patch_generator::add_struct_patch(
     return gen;
   }
   t_type_ref patch_type = add_field_patch(annot, value_type);
-  gen.patchPrior(patch_type);
-  gen.ensureStruct(add_ensure_struct(annot, value_type));
-  gen.patchAfter(patch_type);
+  rust_box(gen.patchPrior(patch_type));
+  rust_box(gen.ensureStruct(add_ensure_struct(annot, value_type)));
+  rust_box(gen.patchAfter(patch_type));
   if (const auto* p = program_.scope()->find_type("patch.FieldId")) {
     // Box it in rust to avoid stack-overflow
     rust_box(gen.remove(inst_set(*p)));

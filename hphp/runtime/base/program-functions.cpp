@@ -1975,7 +1975,7 @@ static int execute_program_impl(int argc, char** argv) {
       const auto& name = el.first;
       Logger::SetTheLogger(name, nullptr);
     }
-    Logger::SetTheLogger(Logger::DEFAULT, new Logger());
+    Logger::SetTheLogger(Logger::DEFAULT, std::make_unique<Logger>());
 
     if (po.isTempFile) {
       tempFile = po.lint;

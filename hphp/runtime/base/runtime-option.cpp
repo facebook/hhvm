@@ -1684,7 +1684,7 @@ void RuntimeOption::Load(
         ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
     }
     if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
-      Logger::SetTheLogger(Logger::DEFAULT, new ExtendedLogger());
+      Logger::SetTheLogger(Logger::DEFAULT, std::make_unique<ExtendedLogger>());
       ExtendedLogger::EnabledByDefault = true;
     }
 

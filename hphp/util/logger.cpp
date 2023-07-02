@@ -77,9 +77,53 @@ ServiceData::ExportedCounter* Logger::s_errorCompressedBytes =
     ServiceData::createCounter("errorlog_bytes_compressed");
 THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
-std::map<std::string, Logger*> Logger::s_loggers = {
-  {Logger::DEFAULT, new Logger()},
-};
+Logger::GlobalLoggers::GlobalLoggers() {
+  m_loggers.insert({Logger::DEFAULT, std::make_unique<Logger>()});
+}
+
+Logger* Logger::getLogger(const std::string& name) {
+  auto loggers = Logger::getLoggers();
+  if (!loggers) return nullptr;
+  auto it = loggers->m_loggers.find(name);
+  if (it == loggers->m_loggers.end()) {
+    return nullptr;
+  }
+  return it->second.get();
+}
+
+
+std::optional<Logger*> Logger::GlobalLoggers::get(const std::string& name) {
+  auto it = m_loggers.find(name);
+  if (it == m_loggers.end()) {
+    return std::nullopt;
+  } else {
+    return it->second.get();
+  }
+}
+
+std::shared_ptr<Logger::GlobalLoggers> Logger::getLoggers() {
+  // We use a meyers singleton to track the global singleton
+  // GlobalLoggers. Since we want to tell when the main GlobalLoggers has been
+  // destroyed and we can't guarantee that ~shared_ptr will clear itself on
+  // destruction we use a separate bool.
+  //
+  // Can't use folly::Singleton because we don't actually call folly::init()!
+  struct DestructTracker {
+    ~DestructTracker() { m_destroyed = true; }
+    explicit DestructTracker(bool& destroyed)
+      : m_destroyed(destroyed),
+        m_loggers{std::make_shared<Logger::GlobalLoggers>()} {
+    }
+    bool& m_destroyed;
+    std::shared_ptr<Logger::GlobalLoggers> m_loggers;
+  };
+  static bool s_destroyed;
+  static DestructTracker s_loggers(s_destroyed);
+  if (s_destroyed) {
+    return nullptr;
+  }
+  return s_loggers.m_loggers;
+}
 
 void Logger::Log(LogLevelType level, const char* type, const Exception& e,
                  const char *file /* = NULL */, int line /* = 0 */) {
@@ -118,49 +162,41 @@ void Logger::LogImpl(LogLevelType level, const std::string &msg,
       MaxMessagesPerRequest >= 0) {
     return;
   }
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    if (logger) {
-      auto growth = logger->log(level, msg, stackTrace, escape, escapeMore);
-      s_errorLines->addValue(growth.lines);
-      s_errorSerializedBytes->addValue(growth.serializedBytes);
-      s_errorCompressedBytes->addValue(growth.compressedBytes);
-    }
-  }
+  Logger::forEachLogger([&](Logger& logger) {
+    auto growth = logger.log(level, msg, stackTrace, escape, escapeMore);
+    s_errorLines->addValue(growth.lines);
+    s_errorSerializedBytes->addValue(growth.serializedBytes);
+    s_errorCompressedBytes->addValue(growth.compressedBytes);
+  });
 }
 
 void Logger::SetStandardOut(const std::string &name, FILE *file) {
-  auto it = s_loggers.find(name);
-  if (it != s_loggers.end()) {
-    auto& logger = it->second;
-    logger->m_standardOut = file;
-  }
+  Logger::withLoggers([&](auto& loggers) {
+    if (auto logger = loggers.get(name)) {
+      logger.value()->m_standardOut = file;
+    }
+  });
 }
 
 void Logger::FlushAll() {
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    if (logger) {
-      auto growth = logger->flush();
-      s_errorLines->addValue(growth.lines);
-      s_errorSerializedBytes->addValue(growth.serializedBytes);
-      s_errorCompressedBytes->addValue(growth.compressedBytes);
-    }
-  }
+  Logger::forEachLogger([&](Logger& logger) {
+    auto growth = logger.flush();
+    s_errorLines->addValue(growth.lines);
+    s_errorSerializedBytes->addValue(growth.serializedBytes);
+    s_errorCompressedBytes->addValue(growth.compressedBytes);
+  });
 }
 
 void Logger::SetBatchSize(size_t bsize) {
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    logger->setBatchSize(bsize);
-  }
+  Logger::forEachLogger([&](Logger& logger) {
+    logger.setBatchSize(bsize);
+  });
 }
 
 void Logger::SetFlushTimeout(std::chrono::milliseconds timeoutMs) {
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    logger->setFlushTimeout(timeoutMs);
-  }
+  Logger::forEachLogger([&](Logger& logger) {
+    logger.setFlushTimeout(timeoutMs);
+  });
 }
 
 int Logger::GetSyslogLevel(LogLevelType level) {
@@ -314,20 +350,22 @@ void Logger::SetThreadHook(LoggerHook* hook) {
   s_threadData.get()->hook = hook;
 }
 
-void Logger::SetTheLogger(const std::string &name, Logger* newLogger) {
-  auto& logger = s_loggers[name];
-  if (logger != nullptr) delete logger;
-  if (newLogger) {
-    logger = newLogger;
-  } else {
-    s_loggers.erase(name);
-  }
+void Logger::SetTheLogger(const std::string &name, std::unique_ptr<Logger> newLogger) {
+  withLoggers([&](GlobalLoggers& loggers) {
+    if (!newLogger) {
+      loggers.m_loggers.erase(name);
+    } else {
+      loggers.m_loggers.insert_or_assign(name, std::move(newLogger));
+    }
+  });
 }
 
 bool Logger::IsDefaultLogger(const std::string &name) {
-  auto it = s_loggers.find(name);
-  if (it == s_loggers.end()) return true;
-  return typeid(*it->second) == typeid(Logger);
+  if (auto logger = Logger::getLogger(name)) {
+    return typeid(*logger) == typeid(Logger);
+  }
+  // This is weird - but seems to be what the original code was doing.
+  return true;
 }
 
 void Logger::UnlimitThreadMessages() {
@@ -336,18 +374,15 @@ void Logger::UnlimitThreadMessages() {
 }
 
 Cronolog *Logger::CronoOutput(const std::string &name) {
-  auto it = s_loggers.find(name);
-  if (it != s_loggers.end()) {
-    auto& logger = it->second;
+  if (auto logger = Logger::getLogger(name)) {
     return &logger->m_cronOutput;
+  } else {
+    return nullptr;
   }
-  return nullptr;
 }
 
 void Logger::SetOutput(const std::string &name, FILE *output, bool isPipe) {
-  auto it = s_loggers.find(name);
-  if (it != s_loggers.end()) {
-    auto& logger = it->second;
+  if (auto logger = Logger::getLogger(name)) {
     if (logger->m_output && logger->m_output != output) {
       if (logger->m_isPipeOutput) {
         pclose(logger->m_output);
@@ -361,9 +396,7 @@ void Logger::SetOutput(const std::string &name, FILE *output, bool isPipe) {
 }
 
 std::pair<FILE*, bool> Logger::GetOutput(const std::string &name) {
-  const auto it = s_loggers.find(name);
-  if (it != s_loggers.end()) {
-    const auto& logger = it->second;
+  if (auto logger = Logger::getLogger(name)) {
     return std::make_pair(logger->m_output, logger->m_isPipeOutput);
   }
   return std::make_pair(nullptr, false);

@@ -121,7 +121,7 @@ struct Logger {
   static void SetThreadHook(LoggerHook*);
 
   static constexpr const char *DEFAULT = "Default";
-  static void SetTheLogger(const std::string &name, Logger* newLogger);
+  static void SetTheLogger(const std::string &name, std::unique_ptr<Logger> newLogger);
   static bool IsDefaultLogger(const std::string& name);
 
   static char *EscapeString(const std::string &msg);
@@ -140,6 +140,14 @@ struct Logger {
   static int64_t GetRequestId();
 
   virtual FILE* fileForStackTrace() { return output(); }
+
+  struct GlobalLoggers {
+    std::unordered_map<std::string, std::unique_ptr<Logger>> m_loggers;
+    GlobalLoggers();
+    auto begin() { return m_loggers.begin(); }
+    auto end() { return m_loggers.end(); }
+    std::optional<Logger*> get(const std::string& name);
+  };
 
 protected:
   struct ThreadData {
@@ -191,13 +199,34 @@ protected:
    */
   static std::string GetHeader();
   static pid_t s_pid;
+
 protected:
   bool m_isPipeOutput;
   FILE *m_output;
   FILE* m_standardOut;
   Cronolog m_cronOutput;
   LogFileFlusher m_flusher;
-  static std::map<std::string, Logger*> s_loggers;
+
+  static std::shared_ptr<GlobalLoggers> getLoggers();
+  template<typename F>
+  static void withLoggers(F f) {
+    auto loggers = getLoggers();
+    if (loggers) {
+      f(*loggers);
+    }
+  }
+  template<typename F>
+  static void forEachLogger(F f) {
+    withLoggers([&](auto& loggers) {
+      for (auto& it : loggers) {
+        if (it.second) {
+          f(*it.second);
+        }
+      }
+    });
+  }
+  static Logger* getLogger(const std::string& name);
+
   // serialized/compressed bytes and lines the DEFAULT logger has written
   static ServiceData::ExportedCounter* s_errorLines;
   static ServiceData::ExportedCounter* s_errorSerializedBytes;
@@ -208,4 +237,3 @@ protected:
 }
 
 #include "hphp/util/logger-inl.h"
-

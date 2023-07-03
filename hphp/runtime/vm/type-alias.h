@@ -40,7 +40,16 @@ struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TypeAndValueUnion = TinyVector<std::pair<AnnotType, LowStringPtr>>;
+struct TypeAndValue {
+  AnnotType type;
+  LowStringPtr value;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(type)(value);
+  }
+};
+
+using TypeAndValueUnion = TinyVector<TypeAndValue>;
 
 /*
  * This is the runtime representation of a type alias.
@@ -91,6 +100,16 @@ struct PreTypeAlias {
  * hints for a type alias at runtime.
  */
 struct TypeAlias {
+  struct TypeAndClass {
+    TypeAndClass(AnnotType type_, LowPtr<Class> klass_)
+      : type(type_)
+      , klass(klass_)
+      {}
+    TypeAndClass& operator=(const TypeAndClass&) = default;
+
+    AnnotType type;
+    LowPtr<Class> klass;
+  };
 
   /////////////////////////////////////////////////////////////////////////////
   // Comparison.
@@ -101,8 +120,6 @@ struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
-  using TypeAndClass = std::pair<AnnotType, LowPtr<Class>>;
-
   // The aliased type and Class; class is nullptr if type != Object
   // Since this struct is stored in RDS, this member needs to have trivial
   // ctor/dtor hence cannot use TinyVector

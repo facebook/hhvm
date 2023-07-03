@@ -356,16 +356,16 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   bool nullable = false;
 
   if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
-    typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
+    typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
   } else {
     for (auto const& ti : tis) {
       auto const ty = translateTypeInfo(ti).second;
       nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
       auto const tname = ty.typeName();
       if (tname && !tname->empty()) {
-        typeAndValueUnion.emplace_back(ty.type(), tname);
+        typeAndValueUnion.emplace_back(TypeAndValue{ty.type(), tname});
       } else {
-        typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
+        typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
       }
     }
   }

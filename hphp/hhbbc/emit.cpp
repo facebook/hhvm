@@ -1220,7 +1220,7 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
 
   TypeAndValueUnion tvu;
   for (auto const& [type, value] : alias.typeAndValueUnion) {
-    tvu.emplace_back(type, value);
+    tvu.emplace_back(TypeAndValue{type, value});
   }
 
   te->init(

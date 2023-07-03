@@ -304,7 +304,7 @@ bool TypeConstraint::maybeMixed() const {
   if (auto const def = typeNamedType()->getCachedTypeAlias()) {
     auto const it = def->typeAndClassUnion();
     return std::any_of(it.begin(), it.end(),
-                       [] (auto tcu) { return tcu.first == AnnotType::Mixed; });
+                       [] (auto tcu) { return tcu.type == AnnotType::Mixed; });
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
   return !Class::lookup(typeNamedType());

@@ -3156,16 +3156,16 @@ void parse_alias(AsmState& as, bool caseType) {
   bool nullable = false;
 
   if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
-    typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
+    typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
   } else {
     for (auto const& ty : tis) {
       nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
       auto const tname = ty.typeName();
       if (tname && !tname->empty()) {
         as.ue->mergeLitstr(tname);
-        typeAndValueUnion.emplace_back(ty.type(), tname);
+        typeAndValueUnion.emplace_back(TypeAndValue{ty.type(), tname});
       } else {
-        typeAndValueUnion.emplace_back(AnnotType::Mixed, staticEmptyString());
+        typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
       }
     }
   }

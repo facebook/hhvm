@@ -857,7 +857,7 @@ void print_alias(Output& out, const PreTypeAlias& alias) {
     if (!type_constraints.empty()) type_constraints.append(",");
     type_constraints.append(folly::to<std::string>(
       "<",
-      type_constraint(TypeConstraint(tv.second, flags)),
+      type_constraint(TypeConstraint(tv.value, flags)),
       ">"));
   }
 

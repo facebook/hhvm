@@ -17,23 +17,14 @@ open Typing_deps
 
 type get_classes_in_file = Relative_path.t -> SSet.t
 
-type fanout = {
-  changed: DepSet.t;
-  to_recheck: DepSet.t;
-}
-
 type redo_type_decl_result = {
-  fanout: fanout;
+  fanout: Fanout.t;
   old_decl_missing_count: int;
 }
 
 let lvl = Hh_logger.Level.Debug
 
-let empty_fanout =
-  let empty = DepSet.make () in
-  { changed = empty; to_recheck = empty }
-
-let compute_deps_neutral = (empty_fanout, 0)
+let compute_deps_neutral = (Fanout.empty, 0)
 
 (** This is the place where we are going to put everything necessary for
   the redeclaration. We could "pass" the values directly to the workers,
@@ -47,45 +38,39 @@ end)
 
 (** Given a set of functions, compare the old and the new decl and deduce
   what must be rechecked accordingly. *)
-let compare_funs_and_get_fanout ctx old_funs { changed; to_recheck } funs =
-  let ((rc, rdc), old_funs_missing) =
+let compare_funs_and_get_fanout ctx old_funs fanout_acc funs =
+  let (fanout, old_funs_missing) =
     Decl_compare.get_funs_deps ~ctx old_funs funs
   in
-  let changed = DepSet.union rc changed in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ({ changed; to_recheck }, old_funs_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_funs_missing)
 
 (** Given a set of typedefs, compare the old and the new decl and deduce
   what must be rechecked accordingly. *)
-let compare_types_and_get_fanout ctx old_types { changed; to_recheck } types =
-  let ((rc, rdc), old_types_missing) =
+let compare_types_and_get_fanout ctx old_types fanout_acc types =
+  let (fanout, old_types_missing) =
     Decl_compare.get_types_deps ~ctx old_types types
   in
-  let changed = DepSet.union rc changed in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ({ changed; to_recheck }, old_types_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_types_missing)
 
 (* Given a set of global constants, compare the old and the new decl and
    deduce what must be rechecked accordingly. *)
-let compare_gconsts_and_get_fanout
-    ctx old_gconsts { changed; to_recheck } gconsts =
-  let ((rc, rdc), old_gconsts_missing) =
+let compare_gconsts_and_get_fanout ctx old_gconsts fanout_acc gconsts =
+  let (fanout, old_gconsts_missing) =
     Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts
   in
-  let changed = DepSet.union rc changed in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ({ changed; to_recheck }, old_gconsts_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_gconsts_missing)
 
 (* Given a set of modules, compare the old and the new decl and
    deduce what must be rechecked accordingly. *)
-let compare_modules_and_get_fanout
-    ctx old_modules { changed; to_recheck } modules =
-  let ((rc, rdc), old_modules_missing) =
+let compare_modules_and_get_fanout ctx old_modules fanout_acc modules =
+  let (fanout, old_modules_missing) =
     Decl_compare.get_modules_deps ~ctx ~old_modules ~modules
   in
-  let changed = DepSet.union rc changed in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ({ changed; to_recheck }, old_modules_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_modules_missing)
 
 (*****************************************************************************)
 (* Redeclares a list of files
@@ -104,7 +89,7 @@ let decl_files ctx filel =
   redeclare_files ctx filel
 
 let compare_decls_and_get_fanout
-    ctx defs_per_file (filel : Relative_path.t list) : fanout * int =
+    ctx defs_per_file (filel : Relative_path.t list) : Fanout.t * int =
   let defs_in_files =
     List.map filel ~f:(fun fn -> Relative_path.Map.find defs_per_file fn)
   in
@@ -117,7 +102,7 @@ let compare_decls_and_get_fanout
   let { FileInfo.n_classes = _; n_funs; n_types; n_consts; n_modules } =
     all_defs
   in
-  let acc = empty_fanout in
+  let acc = Fanout.empty in
   (* Fetching everything at once is faster *)
   let (old_funs, old_types, old_consts, old_modules) =
     match Provider_backend.get () with
@@ -167,7 +152,7 @@ let decl_files_job ctx filel =
     Exception.reraise e
 
 let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
-    (fanout * int) * int =
+    (Fanout.t * int) * int =
   try
     let defs_per_file = OnTheFlyStore.load () in
     let (fanout, old_decl_missing_count) =
@@ -201,23 +186,13 @@ let merge_compute_deps
     ((fanout1, computed_count), old_decl_missing_count1)
     (fanout2, old_decl_missing_count2) =
   files_computed_count := !files_computed_count + computed_count;
-
-  let { changed = changed1; to_recheck = to_recheck1 } = fanout1 in
-  let { changed = changed2; to_recheck = to_recheck2 } = fanout2 in
-  let fanout =
-    {
-      changed = DepSet.union changed1 changed2;
-      to_recheck = DepSet.union to_recheck1 to_recheck2;
-    }
-  in
-
+  let fanout = Fanout.union fanout1 fanout2 in
   ServerProgress.write_percentage
     ~operation:"computing dependencies of"
     ~done_count:!files_computed_count
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:None;
-
   (fanout, old_decl_missing_count1 + old_decl_missing_count2)
 
 (*****************************************************************************)
@@ -232,7 +207,7 @@ let parallel_redecl_compare_and_get_fanout
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
     (defs_per_file : FileInfo.names Relative_path.Map.t)
-    (fnl : Relative_path.t list) : fanout * int =
+    (fnl : Relative_path.t list) : Fanout.t * int =
   try
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
@@ -581,7 +556,7 @@ let redo_type_decl
   let fnl = Relative_path.Map.keys defs in
 
   Hh_logger.log "Decl_redecl_service.redo_type_decl #2";
-  let ({ changed; to_recheck }, old_decl_missing_count) =
+  let (fanout_acc, old_decl_missing_count) =
     (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
       let () = decl_files ctx fnl in
@@ -593,30 +568,25 @@ let redo_type_decl
       parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
   Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
-  let (changed, to_recheck) =
-    let AffectedDeps.{ changed = changed'; needs_recheck } =
+  let fanout =
+    let fanout =
       Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
     in
-
     invalidate_folded_classes_for_shallow_fanout
       ctx
       workers
       ~bucket_size
       ~get_classes_in_file:get_classes
-      changed';
-
-    let changed = DepSet.union changed changed' in
-    let to_recheck = DepSet.union to_recheck needs_recheck in
-
-    (changed, to_recheck)
+      fanout.Fanout.changed;
+    Fanout.union fanout fanout_acc
   in
   remove_old_defs ctx all_defs all_elems;
 
   Hh_logger.log "Finished recomputing type declarations:";
-  Hh_logger.log "  changed: %d" (DepSet.cardinal changed);
-  Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
+  Hh_logger.log "  changed: %d" (DepSet.cardinal fanout.Fanout.changed);
+  Hh_logger.log "  to_recheck: %d" (DepSet.cardinal fanout.Fanout.to_recheck);
 
-  { fanout = { changed; to_recheck }; old_decl_missing_count }
+  { fanout; old_decl_missing_count }
 
 (** Mark all provided [defs] as old, as long as they were not previously
 oldified. *)

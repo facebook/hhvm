@@ -178,14 +178,14 @@ let add_fanout
 
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
-    AffectedDeps.t =
+    Fanout.t =
   let changed_deps =
     List.filter_map changes ~f:(fun (name, diff) ->
         Option.some_if (ClassDiff.has_changed diff) (Dep.make @@ Dep.Type name))
     |> DepSet.of_list
   in
-  let (fanout, max_class_fanout_cardinal) =
+  let (to_recheck, max_class_fanout_cardinal) =
     List.fold changes ~init:(DepSet.make (), 0) ~f:(add_fanout ~ctx)
   in
-  Log.log_fanout ctx changes fanout ~max_class_fanout_cardinal;
-  { AffectedDeps.changed = changed_deps; needs_recheck = fanout }
+  Log.log_fanout ctx changes to_recheck ~max_class_fanout_cardinal;
+  { Fanout.changed = changed_deps; to_recheck }

@@ -148,6 +148,7 @@
   decl_defs
   decl_heap
   decl_pos_utils
+  fanout
   naming_provider
   provider_context
   rust_provider_backend_stubs
@@ -339,12 +340,19 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name fanout)
+ (modules fanout)
+ (libraries
+  typing_deps))
+
+(library
  (name shallow_class_fanout)
  (modules shallow_class_fanout)
  (libraries
   affectedDeps
   classDiff
   decl_defs
+  fanout
   naming_provider
   shallow_decl_defs
   typing_defs)

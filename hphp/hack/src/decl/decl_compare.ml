@@ -253,8 +253,6 @@ module ClassEltDiff = struct
     |> compare_smeths mode class1 class2
 end
 
-let add_changed acc dep = DepSet.add acc (Dep.make dep)
-
 (*****************************************************************************)
 (* Determines if there is a "big" difference between two classes
  * What it really means: most of the time, a change in a class doesn't affect
@@ -309,8 +307,7 @@ let get_extend_deps mode cid_hash acc =
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
-let get_fun_deps
-    ~ctx ~mode old_funs fid ((changed, to_recheck), old_funs_missing) =
+let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
   match
     ( SMap.find fid old_funs,
       match Provider_backend.get () with
@@ -330,34 +327,28 @@ let get_fun_deps
   | (None, _)
   | (_, None) ->
     let dep = Dep.Fun fid in
-    let where_fun_is_used = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_fun_is_used to_recheck in
-    ((add_changed changed dep, to_recheck), old_funs_missing + 1)
+    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    (fanout_acc, old_funs_missing + 1)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
     if Poly.( = ) fe1 fe2 then
-      ((changed, to_recheck), old_funs_missing)
+      (fanout_acc, old_funs_missing)
     else
       let dep = Dep.Fun fid in
-      let where_fun_is_used = Typing_deps.get_ideps mode dep in
-      ( (add_changed changed dep, DepSet.union where_fun_is_used to_recheck),
-        old_funs_missing )
+      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      (fanout_acc, old_funs_missing)
 
 let get_funs_deps ~ctx old_funs funs =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_fun_deps ~ctx ~mode old_funs)
-    funs
-    ((DepSet.make (), DepSet.make ()), 0)
+  SSet.fold (get_fun_deps ~ctx ~mode old_funs) funs (Fanout.empty, 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new typedef
  *)
 (*****************************************************************************)
-let get_type_deps
-    ~ctx ~mode old_types tid ((changed, to_recheck), old_types_missing) =
+let get_type_deps ~ctx ~mode old_types tid (fanout_acc, old_types_missing) =
   match
     ( SMap.find tid old_types,
       match Provider_backend.get () with
@@ -371,27 +362,22 @@ let get_type_deps
   | (None, _)
   | (_, None) ->
     let dep = Dep.Type tid in
-    let where_typedef_was_used = Typing_deps.get_ideps mode dep in
-    ( (add_changed changed dep, DepSet.union where_typedef_was_used to_recheck),
-      old_types_missing + 1 )
+    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    (fanout_acc, old_types_missing + 1)
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
     let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
     let is_same_signature = Poly.( = ) tdef1 tdef2 in
     if is_same_signature then
-      ((changed, to_recheck), old_types_missing)
+      (fanout_acc, old_types_missing)
     else
       let dep = Dep.Type tid in
-      let where_type_is_used = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ((add_changed changed dep, to_recheck), old_types_missing)
+      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      (fanout_acc, old_types_missing)
 
 let get_types_deps ~ctx old_types types =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_type_deps ~ctx ~mode old_types)
-    types
-    ((DepSet.make (), DepSet.make ()), 0)
+  SSet.fold (get_type_deps ~ctx ~mode old_types) types (Fanout.empty, 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -399,7 +385,7 @@ let get_types_deps ~ctx old_types types =
  *)
 (*****************************************************************************)
 let get_gconst_deps
-    ~ctx ~mode old_gconsts cst_id ((changed, to_recheck), old_gconsts_missing) =
+    ~ctx ~mode old_gconsts cst_id (fanout_acc, old_gconsts_missing) =
   let cst1 = SMap.find cst_id old_gconsts in
   let cst2 =
     match Provider_backend.get () with
@@ -413,28 +399,24 @@ let get_gconst_deps
   match (cst1, cst2) with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.GConst cst_id in
-    let where_const_is_used = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_const_is_used to_recheck in
-    let const_name = Typing_deps.get_ideps mode (Dep.GConstName cst_id) in
-    ( (add_changed changed dep, DepSet.union const_name to_recheck),
-      old_gconsts_missing + 1 )
+    let fanout_acc =
+      fanout_acc
+      |> Fanout.add_fanout_of mode (Dep.GConst cst_id)
+      |> Fanout.add_fanout_of mode (Dep.GConstName cst_id)
+    in
+    (fanout_acc, old_gconsts_missing + 1)
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
     if is_same_signature then
-      ((changed, to_recheck), old_gconsts_missing)
+      (fanout_acc, old_gconsts_missing)
     else
       let dep = Dep.GConst cst_id in
-      let where_type_is_used = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ((add_changed changed dep, to_recheck), old_gconsts_missing)
+      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      (fanout_acc, old_gconsts_missing)
 
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_gconst_deps ~ctx ~mode old_gconsts)
-    gconsts
-    ((DepSet.make (), DepSet.make ()), 0)
+  SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) gconsts (Fanout.empty, 0)
 
 let rule_changed rule1 rule2 =
   match (rule1, rule2) with
@@ -454,8 +436,8 @@ let rules_changed rules1 rules2 =
     | List.Or_unequal_lengths.Ok res -> res
     | List.Or_unequal_lengths.Unequal_lengths -> true)
 
-let get_module_deps
-    ~ctx ~mode old_modules mid ((changed, to_recheck), old_modules_missing) =
+let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
+    : Fanout.t * int =
   match
     ( SMap.find mid old_modules,
       match Provider_backend.get () with
@@ -469,24 +451,19 @@ let get_module_deps
   | (None, _)
   | (_, None) ->
     let dep = Dep.Module mid in
-    let where_module_referenced = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_module_referenced to_recheck in
-    ((add_changed changed dep, to_recheck), old_modules_missing + 1)
+    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    (fanout_acc, old_modules_missing + 1)
   | (Some module1, Some module2) ->
     if
       rules_changed module1.mdt_exports module2.mdt_exports
       || rules_changed module1.mdt_imports module2.mdt_imports
     then
       let dep = Dep.Module mid in
-      let where_module_referenced = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_module_referenced to_recheck in
-      ((add_changed changed dep, to_recheck), old_modules_missing)
+      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      (fanout_acc, old_modules_missing)
     else
-      ((changed, to_recheck), old_modules_missing)
+      (fanout_acc, old_modules_missing)
 
 let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_module_deps ~ctx ~mode old_modules)
-    modules
-    ((DepSet.make (), DepSet.make ()), 0)
+  SSet.fold (get_module_deps ~ctx ~mode old_modules) modules (Fanout.empty, 0)

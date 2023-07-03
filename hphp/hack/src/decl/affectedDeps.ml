@@ -10,11 +10,6 @@
 open Typing_deps
 module Mode = Typing_deps_mode
 
-type t = {
-  changed: DepSet.t;
-  needs_recheck: DepSet.t;
-}
-
 let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
     DepSet.t =
   let fanout = Typing_deps.get_ideps_from_hash mode dep in

@@ -8,19 +8,11 @@
  *)
 
 open Reordered_argument_collections
-open Typing_deps
 
 type get_classes_in_file = Relative_path.t -> SSet.t
 
-type fanout = {
-  changed: DepSet.t;
-      (** The symbols that were changed compared to their old version. *)
-  to_recheck: DepSet.t;
-      (** The symbols which need to be re-typechecked as a result of the change. *)
-}
-
 type redo_type_decl_result = {
-  fanout: fanout;
+  fanout: Fanout.t;
   old_decl_missing_count: int;
       (** The number of old decls we didn't have when calculating the redecl. *)
 }

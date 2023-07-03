@@ -8,7 +8,7 @@
  *)
 
 val fanout_of_changes :
-  ctx:Provider_context.t -> (string * ClassDiff.t) list -> AffectedDeps.t
+  ctx:Provider_context.t -> (string * ClassDiff.t) list -> Fanout.t
 
 val class_names_from_deps :
   ctx:Provider_context.t ->

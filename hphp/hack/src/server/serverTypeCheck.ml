@@ -579,7 +579,7 @@ functor
       let ctx = Provider_utils.ctx_from_server_env env in
       let {
         Decl_redecl_service.old_decl_missing_count;
-        fanout = { Decl_redecl_service.changed; to_recheck = to_recheck_deps };
+        fanout = { Fanout.changed; to_recheck = to_recheck_deps };
       } =
         CgroupProfiler.step_start_end cgroup_steps "redecl"
         @@ fun _cgroup_step ->

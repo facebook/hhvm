@@ -545,8 +545,7 @@ let get_files_to_recheck
     genv.workers
     get_old_and_new_classes
     ~defs:dirty_names;
-  let { Decl_redecl_service.fanout = { Decl_redecl_service.to_recheck; _ }; _ }
-      =
+  let { Decl_redecl_service.fanout = { Fanout.to_recheck; _ }; _ } =
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx

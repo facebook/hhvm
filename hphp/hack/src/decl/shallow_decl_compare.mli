@@ -13,4 +13,4 @@ val compute_class_fanout :
   during_init:bool ->
   defs:FileInfo.names Relative_path.Map.t ->
   Relative_path.t list ->
-  AffectedDeps.t
+  Fanout.t

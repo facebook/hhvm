@@ -59,7 +59,7 @@ let compute_class_fanout
     (ctx : Provider_context.t)
     ~during_init
     ~(defs : FileInfo.names Relative_path.Map.t)
-    (changed_files : Relative_path.t list) : AffectedDeps.t =
+    (changed_files : Relative_path.t list) : Fanout.t =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 

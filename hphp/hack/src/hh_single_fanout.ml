@@ -105,10 +105,7 @@ let get_symbols_for_deps
 
 let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
     Typing_deps.DepSet.t =
-  let {
-    Decl_redecl_service.fanout = { Decl_redecl_service.to_recheck; changed };
-    _;
-  } =
+  let { Decl_redecl_service.fanout = { Fanout.to_recheck; changed }; _ } =
     Decl_redecl_service.redo_type_decl
       ctx
       ~during_init:false

@@ -10,24 +10,6 @@
 open Typing_deps
 module Mode = Typing_deps_mode
 
-(** AffectedDeps.t represents the "fanout" of a change, representing the cached
-    information we must invalidate and the files we must re-typecheck if we want
-    to produce a correct list of all errors in the repository which reflects
-    those changes. *)
-type t = {
-  changed: DepSet.t;
-      (** The subset of classes in changed files whose decls changed (excluding
-          classes whose decls experienced a positions-only change). *)
-  needs_recheck: DepSet.t;
-      (** This set represents the dependents of the declarations which were
-          changed. In order to detect all errors which may have resulted from
-          the changes, we must re-typecheck all files containing these
-          dependents. Because DepSet.t is lossy--it is only a set of symbol
-          hashes--we cannot precisely reproduce the set of symbols which need
-          rechecking. Instead, Typing_deps maintains a mapping from symbol hash
-          to filename (exposed via Typing_deps.get_files). *)
-}
-
 val include_fanout_of_dep : Mode.t -> Dep.t -> DepSet.t -> DepSet.t
 
 val get_maximum_fanout : Mode.t -> Dep.t -> DepSet.t

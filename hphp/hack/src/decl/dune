@@ -24,13 +24,6 @@
    rust_decl_ffi)))
 
 (library
- (name affectedDeps)
- (modules affectedDeps)
- (libraries decl_defs typing_defs typing_deps)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name classDiff)
  (modules classDiff)
  (libraries decl_defs typing_defs)
@@ -41,7 +34,6 @@
  (name decl)
  (modules decl)
  (libraries
-  affectedDeps
   classDiff
   ast_provider
   decl_class
@@ -265,7 +257,6 @@
  (name decl_redecl_service)
  (modules decl_redecl_service)
  (libraries
-  affectedDeps
   decl
   decl_class_elements
   decl_compare
@@ -349,7 +340,6 @@
  (name shallow_class_fanout)
  (modules shallow_class_fanout)
  (libraries
-  affectedDeps
   classDiff
   decl_defs
   fanout
@@ -377,7 +367,6 @@
  (name shallow_decl_compare)
  (modules shallow_decl_compare)
  (libraries
-  affectedDeps
   classDiff
   decl_compare_utils
   decl_defs

@@ -21,6 +21,11 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
           else
             acc))
 
+let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
+    DepSet.t =
+  let fanout = Typing_deps.get_ideps_from_hash mode dep in
+  DepSet.union fanout deps
+
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (class_dep : Dep.t)
@@ -45,7 +50,7 @@ let get_minor_change_fanout
     let changed_and_descendants = Lazy.force changed_and_descendants in
     DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
         DepSet.add acc dep
-        |> AffectedDeps.include_fanout_of_dep
+        |> include_fanout_of_dep
              mode
              (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
   in
@@ -69,7 +74,7 @@ let get_minor_change_fanout
     then
       recheck_descendants_and_their_member_dependents acc member
     else
-      AffectedDeps.include_fanout_of_dep
+      include_fanout_of_dep
         mode
         (Dep.make_member_dep_from_type_dep class_dep member)
         acc
@@ -111,7 +116,7 @@ let get_minor_change_fanout
 let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) : DepSet.t
     =
   let mode = Provider_context.get_deps_mode ctx in
-  AffectedDeps.get_maximum_fanout mode class_dep
+  Typing_deps.add_all_deps mode @@ DepSet.singleton class_dep
 
 let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : DepSet.t =
   let class_dep = Dep.make (Dep.Type class_name) in

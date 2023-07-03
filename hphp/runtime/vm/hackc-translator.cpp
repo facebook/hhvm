@@ -973,14 +973,19 @@ void upperBoundsHelper(TranslationState& ts,
                        const TParamNameVec& shadowedTParams,
                        CompactVector<TypeConstraint>& upperBounds,
                        TypeConstraint& tc,
-                       bool hasReifiedGenerics) {
+                       bool hasReifiedGenerics,
+                       bool isParam) {
   auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
   if (currUBs.size() == 1 && !hasReifiedGenerics) {
     applyFlagsToUB(currUBs[0], tc);
     tc = currUBs[0];
   } else if (!currUBs.empty()) {
     upperBounds = std::move(currUBs);
-    ts.fe->hasReturnWithMultiUBs = true;
+    if (isParam) {
+      ts.fe->hasParamsWithMultiUBs = true;
+    } else {
+      ts.fe->hasReturnWithMultiUBs = true;
+    }
   }
 }
 
@@ -991,7 +996,8 @@ bool upperBoundsHelper(TranslationState& ts,
                        const TParamNameVec& shadowedTParams,
                        CompactVector<TypeConstraint>& upperBounds,
                        TypeConstraint& tc,
-                       const UserAttributeMap& userAttrs) {
+                       const UserAttributeMap& userAttrs,
+                       bool isParam) {
   auto const hasReifiedGenerics = [&]() {
     if (userAttrs.find(s___Reified.get()) != userAttrs.end()) return true;
     if (checkPce) {
@@ -1002,7 +1008,7 @@ bool upperBoundsHelper(TranslationState& ts,
   }();
 
   upperBoundsHelper(ts, ubs, classUbs, shadowedTParams,
-                    upperBounds, tc, hasReifiedGenerics);
+                    upperBounds, tc, hasReifiedGenerics, isParam);
   return hasReifiedGenerics;
 }
 
@@ -1025,7 +1031,7 @@ void translateParameter(TranslationState& ts,
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
   upperBoundsHelper(ts, ubs, classUbs, shadowedTParams, param.upperBounds,
-                    param.typeConstraint, hasReifiedGenerics);
+                    param.typeConstraint, hasReifiedGenerics, true);
 
   auto const dv = maybe(p.default_value);
   if (dv) translateDefaultParameterValue(ts, dv.value(), param);
@@ -1203,7 +1209,8 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
   auto const hasReifiedGenerics =
-    upperBoundsHelper(ts, ubs, {}, {},ts.fe->retUpperBounds, retTypeInfo.second, userAttrs);
+    upperBoundsHelper(ts, ubs, {}, {},ts.fe->retUpperBounds, retTypeInfo.second,
+                      userAttrs, false);
 
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
   ts.srcLoc = Location::Range{static_cast<int>(f.span.line_begin), -1, static_cast<int>(f.span.line_end), -1};
@@ -1251,7 +1258,8 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
 
   auto const hasReifiedGenerics =
     upperBoundsHelper<true>(ts, ubs, classUbs, shadowedTParams,
-                            ts.fe->retUpperBounds, retTypeInfo.second, userAttrs);
+                            ts.fe->retUpperBounds, retTypeInfo.second, userAttrs,
+                            false);
 
   ts.srcLoc = Location::Range{static_cast<int>(m.span.line_begin), -1,
                               static_cast<int>(m.span.line_end), -1};

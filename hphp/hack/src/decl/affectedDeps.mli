@@ -30,9 +30,7 @@ type t = {
 
 val empty : unit -> t
 
-val mark_as_needing_recheck : t -> DepSet.t -> t
-
-val mark_all_dependents_as_needing_recheck_from_hash : Mode.t -> t -> Dep.t -> t
+val include_fanout_of_dep : Mode.t -> Dep.t -> DepSet.t -> DepSet.t
 
 val get_maximum_fanout : Mode.t -> Dep.t -> t
 

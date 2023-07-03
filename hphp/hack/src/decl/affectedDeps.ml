@@ -19,20 +19,10 @@ let empty () =
   let empty = DepSet.make () in
   { changed = empty; needs_recheck = empty }
 
-let mark_as_needing_recheck (deps : t) (needs_recheck : DepSet.t) : t =
-  { deps with needs_recheck = DepSet.union deps.needs_recheck needs_recheck }
-
 let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
     DepSet.t =
   let fanout = Typing_deps.get_ideps_from_hash mode dep in
   DepSet.union fanout deps
-
-let mark_all_dependents_as_needing_recheck_from_hash
-    (mode : Mode.t) (deps : t) (hash : Dep.t) : t =
-  {
-    deps with
-    needs_recheck = include_fanout_of_dep mode hash deps.needs_recheck;
-  }
 
 let get_maximum_fanout (mode : Mode.t) (changed_dep : Dep.t) : t =
   let changed = DepSet.singleton changed_dep in

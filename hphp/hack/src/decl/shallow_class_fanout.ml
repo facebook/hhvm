@@ -24,11 +24,10 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (class_dep : Dep.t)
-    (member_diff : ClassDiff.member_diff) : AffectedDeps.t =
+    (member_diff : ClassDiff.member_diff) : DepSet.t =
   let mode = Provider_context.get_deps_mode ctx in
   let changed = DepSet.singleton class_dep in
-  let acc = { (AffectedDeps.empty ()) with AffectedDeps.changed } in
-  let acc = AffectedDeps.mark_as_needing_recheck acc changed in
+  let acc = DepSet.singleton class_dep in
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
     member_diff
   in
@@ -41,19 +40,20 @@ let get_minor_change_fanout
      where adding, removing, or changing the abstract-ness of a member causes
      some subclass which inherits a member of that name from multiple parents
      to resolve the conflict in a different way than it did previously. *)
-  let recheck_descendants_and_their_member_dependents acc member =
+  let recheck_descendants_and_their_member_dependents (acc : DepSet.t) member :
+      DepSet.t =
     let changed_and_descendants = Lazy.force changed_and_descendants in
     DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
-        let acc =
-          AffectedDeps.mark_as_needing_recheck acc (DepSet.singleton dep)
-        in
-        AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
-          mode
-          acc
-          (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
+        DepSet.add acc dep
+        |> AffectedDeps.include_fanout_of_dep
+             mode
+             (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
   in
   let add_member_fanout
-      ~is_const (member : Dep.Member.t) (change : member_change) acc =
+      ~is_const
+      (member : Dep.Member.t)
+      (change : member_change)
+      (acc : DepSet.t) =
     (* Consts and typeconsts have their types copied into descendant classes in
        folded decl (rather than being stored in a separate heap as methods and
        properties are). As a result, when using a const, we register a
@@ -69,10 +69,10 @@ let get_minor_change_fanout
     then
       recheck_descendants_and_their_member_dependents acc member
     else
-      AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
+      AffectedDeps.include_fanout_of_dep
         mode
-        acc
         (Dep.make_member_dep_from_type_dep class_dep member)
+        acc
   in
   let add_member_fanouts ~is_const changes make_member acc =
     SMap.fold changes ~init:acc ~f:(fun name ->
@@ -118,7 +118,10 @@ let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
   | Unchanged -> AffectedDeps.empty ()
   | Major_change _major_change -> get_maximum_fanout ctx class_dep
   | Minor_change minor_change ->
-    get_minor_change_fanout ~ctx class_dep minor_change
+    {
+      AffectedDeps.changed = DepSet.singleton class_dep;
+      needs_recheck = get_minor_change_fanout ~ctx class_dep minor_change;
+    }
 
 let direct_references_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Type class_name) |> DepSet.cardinal

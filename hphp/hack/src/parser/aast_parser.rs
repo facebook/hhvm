@@ -4,7 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::borrow::Borrow;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -166,9 +165,9 @@ impl<'src> AastParser {
         let syntax_errors =
             Self::check_syntax_error(env, indexed_source_text, &tree, Some(&mut ret));
         let error_peak = stack_limit::peak() as u64;
-        let lowerer_parsing_errors = lowerer_env.parsing_errors().borrow().to_vec();
-        let errors = lowerer_env.hh_errors().borrow().to_vec();
-        let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
+        let lowerer_parsing_errors = lowerer_env.parsing_errors().to_vec();
+        let errors = lowerer_env.hh_errors().to_vec();
+        let lint_errors = lowerer_env.lint_errors().to_vec();
         let error_t = error_t.elapsed();
 
         Ok(ParserResult {

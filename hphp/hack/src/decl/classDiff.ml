@@ -365,6 +365,12 @@ type t =
   | Minor_change of member_diff
 [@@deriving eq, show { with_path = false }]
 
+let has_changed = function
+  | Unchanged -> false
+  | Major_change _
+  | Minor_change _ ->
+    true
+
 module ClassShellChangeCategory = struct
   module ListChange = struct
     type t = {

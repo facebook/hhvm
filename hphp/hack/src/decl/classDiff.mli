@@ -115,6 +115,8 @@ type t =
   | Minor_change of member_diff
 [@@deriving eq, show]
 
+val has_changed : t -> bool
+
 val empty_member_diff : member_diff
 
 val is_empty_member_diff : member_diff -> bool

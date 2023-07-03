@@ -28,10 +28,6 @@ type t = {
           to filename (exposed via Typing_deps.get_files). *)
 }
 
-val empty : unit -> t
-
 val include_fanout_of_dep : Mode.t -> Dep.t -> DepSet.t -> DepSet.t
 
-val get_maximum_fanout : Mode.t -> Dep.t -> t
-
-val union : t -> t -> t
+val get_maximum_fanout : Mode.t -> Dep.t -> DepSet.t

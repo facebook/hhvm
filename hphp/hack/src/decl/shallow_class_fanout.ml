@@ -108,20 +108,18 @@ let get_minor_change_fanout
   in
   acc
 
-let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) =
+let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) : DepSet.t
+    =
   let mode = Provider_context.get_deps_mode ctx in
   AffectedDeps.get_maximum_fanout mode class_dep
 
-let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : AffectedDeps.t =
+let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : DepSet.t =
   let class_dep = Dep.make (Dep.Type class_name) in
   match diff with
-  | Unchanged -> AffectedDeps.empty ()
+  | Unchanged -> DepSet.make ()
   | Major_change _major_change -> get_maximum_fanout ctx class_dep
   | Minor_change minor_change ->
-    {
-      AffectedDeps.changed = DepSet.singleton class_dep;
-      needs_recheck = get_minor_change_fanout ~ctx class_dep minor_change;
-    }
+    get_minor_change_fanout ~ctx class_dep minor_change
 
 let direct_references_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Type class_name) |> DepSet.cardinal
@@ -136,19 +134,15 @@ let descendants_cardinal mode class_name : int =
 let children_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
 
-let get_fanout_cardinal (fanout : AffectedDeps.t) : int =
-  DepSet.cardinal fanout.AffectedDeps.needs_recheck
-
 module Log = struct
   let do_log ctx ~fanout_cardinal =
     TypecheckerOptions.log_fanout ~fanout_cardinal
     @@ Provider_context.get_tcopt ctx
 
   let log_class_fanout
-      ctx
-      ((class_name : string), (diff : ClassDiff.t))
-      (fanout : AffectedDeps.t) : unit =
-    let fanout_cardinal = get_fanout_cardinal fanout in
+      ctx ((class_name : string), (diff : ClassDiff.t)) (fanout : DepSet.t) :
+      unit =
+    let fanout_cardinal = DepSet.cardinal fanout in
     if do_log ~fanout_cardinal ctx then
       let mode = Provider_context.get_deps_mode ctx in
       HackEventLogger.Fanouts.log_class
@@ -161,11 +155,9 @@ module Log = struct
         ~children_cardinal:(children_cardinal mode class_name)
 
   let log_fanout
-      ctx
-      (changes : _ list)
-      (fanout : AffectedDeps.t)
-      ~max_class_fanout_cardinal : unit =
-    let fanout_cardinal = get_fanout_cardinal fanout in
+      ctx (changes : _ list) (fanout : DepSet.t) ~max_class_fanout_cardinal :
+      unit =
+    let fanout_cardinal = DepSet.cardinal fanout in
     if do_log ~fanout_cardinal ctx then
       HackEventLogger.Fanouts.log
         ~changes_cardinal:(List.length changes)
@@ -173,20 +165,27 @@ module Log = struct
         ~fanout_cardinal
 end
 
-let add_fanout ~ctx (fanout_acc, max_class_fanout_cardinal) diff =
+let add_fanout
+    ~ctx ((fanout_acc, max_class_fanout_cardinal) : DepSet.t * int) diff :
+    DepSet.t * int =
   let fanout = get_fanout ~ctx diff in
   Log.log_class_fanout ctx diff fanout;
-  let fanout_acc = AffectedDeps.union fanout_acc fanout in
+  let fanout_acc = DepSet.union fanout_acc fanout in
   let max_class_fanout_cardinal =
-    Int.max max_class_fanout_cardinal (get_fanout_cardinal fanout)
+    Int.max max_class_fanout_cardinal (DepSet.cardinal fanout)
   in
   (fanout_acc, max_class_fanout_cardinal)
 
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
     AffectedDeps.t =
+  let changed_deps =
+    List.filter_map changes ~f:(fun (name, diff) ->
+        Option.some_if (ClassDiff.has_changed diff) (Dep.make @@ Dep.Type name))
+    |> DepSet.of_list
+  in
   let (fanout, max_class_fanout_cardinal) =
-    List.fold changes ~init:(AffectedDeps.empty (), 0) ~f:(add_fanout ~ctx)
+    List.fold changes ~init:(DepSet.make (), 0) ~f:(add_fanout ~ctx)
   in
   Log.log_fanout ctx changes fanout ~max_class_fanout_cardinal;
-  fanout
+  { AffectedDeps.changed = changed_deps; needs_recheck = fanout }

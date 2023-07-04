@@ -22,10 +22,10 @@ struct Small {
 }
 
 struct SubStruct {
-  // @lint-ignore FBTHRIFTSANITY6
+  // @lint-ignore THRIFTCHECKS
   1: optional string optDef = "IAMOPT";
   2: required string req_def = "IAMREQ";
-  // @lint-ignore FBTHRIFTSANITY4
+  // @lint-ignore THRIFTCHECKS
   3: optional map<Small, i32> key_map;
   4: binary bin;
 }
@@ -82,7 +82,7 @@ struct Containers {
 
 typedef double Double (rust.newtype, rust.type = "OrderedFloat<f64>", rust.ord)
 
-exception TestException {
+safe stateful server exception TestException {
   1: string message;
 }
 
@@ -90,10 +90,10 @@ service TestService {
   void method1(1: string req) throws (1: TestException ex);
 }
 
-exception TestExceptionMsgOverride {
+safe stateful server exception TestExceptionMsgOverride {
   1: string message;
 } (message = 'message')
 
-exception TestExceptionMsgOverrideOptional {
+safe stateful server exception TestExceptionMsgOverrideOptional {
   1: optional string message;
 } (message = 'message')

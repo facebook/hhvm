@@ -288,6 +288,7 @@ type t =
       tparam_name: string;
     }
   | Dynamic_hint_disallowed of Pos.t
+  | Illegal_typed_local of Pos.t * string * Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -414,6 +415,12 @@ let dynamic_hint_disallowed pos =
     Error_code.(to_enum DynamicHintDisallowed)
     (pos, "dynamic typehints are not allowed in this position")
     []
+
+let illegal_typed_local id_pos name def_pos =
+  User_error.make
+    Error_code.(to_enum IllegalTypedLocal)
+    (id_pos, "Illegal typed local variable definition of " ^ name ^ ".")
+    [(def_pos, "It is already defined")]
 
 let wildcard_param_disallowed pos =
   User_error.make
@@ -1388,3 +1395,5 @@ let to_user_error = function
   | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
     undefined_in_expr_tree pos var_name dsl did_you_mean
   | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos
+  | Illegal_typed_local (id_pos, id_name, def_pos) ->
+    illegal_typed_local id_pos id_name (Pos_or_decl.of_raw_pos def_pos)

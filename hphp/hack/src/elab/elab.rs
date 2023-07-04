@@ -58,6 +58,7 @@ use oxidized::typechecker_options::TypecheckerOptions;
 use pass::Pass;
 use relative_path::RelativePath;
 use transform::Transform;
+use vec1::Vec1;
 
 /// Provided for use in hackc, where we have an `ns_env` in hand already.
 /// Expected to behave the same as `elaborate_program` when `po_codegen` is
@@ -66,7 +67,7 @@ pub fn elaborate_program_for_codegen(
     ns_env: Arc<namespace_env::Env>,
     path: &RelativePath,
     program: &mut nast::Program,
-) {
+) -> Result<(), Vec1<NamingPhaseError>> {
     assert!(ns_env.is_codegen);
     let tco = TypecheckerOptions {
         po_codegen: true,
@@ -79,7 +80,12 @@ pub fn elaborate_program_for_codegen(
     let env = make_env(&tco, path);
     elaborate_common(&env, program);
     elaborate_package_expr(&env, program);
-    assert!(env.into_errors().is_empty());
+    // Passes below here can emit errors
+    let errs = env.into_errors();
+    match Vec1::try_from_vec(errs) {
+        Err(_) => Ok(()),
+        Ok(v) => Err(v),
+    }
 }
 
 pub fn elaborate_program(

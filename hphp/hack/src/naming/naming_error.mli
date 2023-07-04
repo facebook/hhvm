@@ -284,5 +284,6 @@ type t =
       tparam_name: string;
     }
   | Dynamic_hint_disallowed of Pos.t
+  | Illegal_typed_local of Pos.t * string * Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

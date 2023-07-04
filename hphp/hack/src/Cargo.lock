@@ -1547,6 +1547,7 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
+ "vec1",
 ]
 
 [[package]]
@@ -5730,6 +5731,15 @@ name = "vcpkg"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6454029bf181f092ad1b853286f23e2c507d8e8194d01d92da4a55c274a5508c"
+
+[[package]]
+name = "vec1"
+version = "1.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bda7c41ca331fe9a1c278a9e7ee055f4be7f5eb1c2b72f079b4ff8b5fce9d5c"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "vergen"

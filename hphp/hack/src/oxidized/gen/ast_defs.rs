@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1a35eb939716e5a45dfe6227e9be0fd1>>
+// @generated SignedSource<<35cc4f1b22122b4bb190e7ba988a539c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -27,7 +27,6 @@ pub type Id_ = String;
 
 #[derive(
     Clone,
-    Debug,
     Deserialize,
     Eq,
     EqModuloPos,

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cmp::Ordering;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 
@@ -32,7 +33,7 @@ const MAX_DELTA: usize = 2;
 /// Since the whole Map is just a 1 word pointer, it implements the
 /// `Copy` trait.
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
@@ -44,6 +45,12 @@ pub struct Map<'a, K, V>(
 impl_deserialize_in_arena!(Map<'arena, K, V>);
 
 impl<'a, K, V> TrivialDrop for Map<'a, K, V> {}
+
+impl<'a, K: Debug, V: Debug> Debug for Map<'a, K, V> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
+    }
+}
 
 /// The derived implementations of Copy and Clone require that K and V be
 /// Copy/Clone. We have no such requirement, since Map is just a pointer, so we
@@ -122,7 +129,7 @@ where
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, ToOcamlRep)]
+#[derive(Deserialize, Serialize, ToOcamlRep)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]

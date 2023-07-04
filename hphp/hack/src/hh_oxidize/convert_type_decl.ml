@@ -145,16 +145,17 @@ end = struct
     | "typing_env_types::Genv" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     (* And GlobalOptions is used in SavedEnv. *)
-    | "tast::SavedEnv"
-    | "tast::ByNames" ->
-      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
-    | "ast_defs::Id" when is_by_ref -> ["Debug"]
+    | "tast::SavedEnv" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    | "tast::ByNames" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
+    | "ast_defs::Id" -> ["Debug"]
     | "errors::Errors" when is_by_ref -> ["Debug"]
+    | "typing_reason::T_" when is_by_ref -> ["Debug"]
     | "typing_defs_core::Ty" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::Ty_" when is_by_ref -> ["Debug"]
     | "typing_defs_core::ConstraintType" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+    | "typing_defs_core::TshapeFieldName" when is_by_ref -> ["Debug"]
     | _ -> []
 
   let skip_list_for_trait trait =

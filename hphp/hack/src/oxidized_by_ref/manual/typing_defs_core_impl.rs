@@ -146,7 +146,7 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(fields)
                 .finish(),
             Tvar(ident) => f.debug_tuple("Tvar").field(ident).finish(),
-            Tgeneric(name) => write!(f, "Tgeneric({:?})", name),
+            Tgeneric((name, tys)) => write!(f, "Tgeneric({:?}, {:?})", name, tys),
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
             Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
             TvecOrDict((tk, tv)) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),
@@ -176,6 +176,17 @@ impl<'a> From<ParamKind<'a>> for ParamMode {
         match callconv {
             ParamKind::Pinout(_) => ParamMode::FPinout,
             ParamKind::Pnormal => ParamMode::FPnormal,
+        }
+    }
+}
+
+impl<'a> std::fmt::Debug for TshapeFieldName<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use TshapeFieldName::*;
+        match self {
+            TSFlitInt(p) => f.debug_tuple("TSFlitInt").field(p).finish(),
+            TSFlitStr(p) => f.debug_tuple("TSFlitStr").field(p).finish(),
+            TSFclassConst((i, p)) => f.debug_tuple("TSFclassConst").field(i).field(p).finish(),
         }
     }
 }

@@ -111,10 +111,7 @@ Program(
                 },
                 file_attributes: [],
                 mode: Mstrict,
-                name: Id(
-                    |tuple_hints.php(12:9-12),
-                    "foo",
-                ),
+                name: Id(|tuple_hints.php(12:9-12), "foo"),
                 fun: Fun_ {
                     span: |tuple_hints.php(12:0-36),
                     readonly_this: None,
@@ -140,10 +137,7 @@ Program(
                                     Hint(
                                         |tuple_hints.php(12:13-23),
                                         Happly(
-                                            Id(
-                                                |tuple_hints.php(12:13-18),
-                                                "\\tuple",
-                                            ),
+                                            Id(|tuple_hints.php(12:13-18), "\\tuple"),
                                             [
                                                 Hint(
                                                     |tuple_hints.php(12:19-22),

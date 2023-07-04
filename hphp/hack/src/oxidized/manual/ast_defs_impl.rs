@@ -49,6 +49,12 @@ impl Default for Id {
     }
 }
 
+impl std::fmt::Debug for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Id({:?}, {:?})", self.pos(), self.name())
+    }
+}
+
 impl Bop {
     pub fn is_any_eq(&self) -> bool {
         match self {

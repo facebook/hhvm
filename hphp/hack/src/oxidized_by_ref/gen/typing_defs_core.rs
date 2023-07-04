@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bdf488dde7b364613bc49af5d03110b8>>
+// @generated SignedSource<<0e29621a952a627ad0ebdbab0ce876fa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -170,7 +170,6 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
 #[derive(
     Clone,
     Copy,
-    Debug,
     Deserialize,
     Eq,
     EqModuloPos,

@@ -459,7 +459,8 @@ TEST(StructPatchTest, SetPatch) {
 
 TEST(StructPatchTest, MapPatch) {
   MapPatch patch;
-  patch.put({{"a", "1"}, {"b", "2"}});
+  patch.put({{"a", "1"}, {"b", "2"}, {"e", "5"}});
+  patch.erase("e");
   patch.insert_or_assign("b", "3");
   patch.insert_or_assign("c", "4");
 

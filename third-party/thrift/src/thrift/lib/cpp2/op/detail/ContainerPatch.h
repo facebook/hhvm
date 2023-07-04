@@ -342,6 +342,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     for (auto&& key : keys) {
       field.erase(key);
       data_.remove()->insert(key);
+      data_.put()->erase(key);
       patchPrior.erase(key);
       patch.erase(key);
     }

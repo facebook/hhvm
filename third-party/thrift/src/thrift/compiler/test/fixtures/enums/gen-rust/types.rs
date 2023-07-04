@@ -75,7 +75,7 @@ impl ::fbthrift::ThriftEnum for Metasyntactic {
 
 impl ::std::default::Default for Metasyntactic {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -211,7 +211,7 @@ impl ::fbthrift::ThriftEnum for MyEnum1 {
 
 impl ::std::default::Default for MyEnum1 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -339,7 +339,7 @@ impl ::fbthrift::ThriftEnum for MyEnum2 {
 
 impl ::std::default::Default for MyEnum2 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -473,7 +473,7 @@ impl ::fbthrift::ThriftEnum for MyEnum3 {
 
 impl ::std::default::Default for MyEnum3 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -605,7 +605,7 @@ impl ::fbthrift::ThriftEnum for MyEnum4 {
 
 impl ::std::default::Default for MyEnum4 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -729,7 +729,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum1 {
 
 impl ::std::default::Default for MyBitmaskEnum1 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -851,7 +851,7 @@ impl ::fbthrift::ThriftEnum for MyBitmaskEnum2 {
 
 impl ::std::default::Default for MyBitmaskEnum2 {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

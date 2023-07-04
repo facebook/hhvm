@@ -17,8 +17,6 @@
 #![recursion_limit = "1024"]
 #![deny(warnings)]
 
-use std::i32;
-
 macro_rules! bail_err {
     ($e:expr) => {
         return Err(From::from($e))
@@ -128,10 +126,3 @@ pub trait ThriftEnum: Sized {
 
     fn variant_values() -> &'static [Self];
 }
-
-/// Set the default ID's for unknown exceptions and fields.
-/// When reading off the wire, these default values will be
-/// overridden with the unrecognized id (which must be nonnegative).
-// ---
-// Keep in sync with the UNKNOWN_ID constant in //common/rust/thrift/ast.
-pub const __UNKNOWN_ID: i32 = i32::MIN;

@@ -66,7 +66,7 @@ impl ::std::default::Default for {{enum:rust_name}} {
         Self(0)
         {{/program:default_enum_zero?}}
         {{^program:default_enum_zero?}}
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
         {{/program:default_enum_zero?}}
     }
 }

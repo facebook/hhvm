@@ -43,7 +43,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
 
 impl ::std::default::Default for EmptyEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -149,7 +149,7 @@ impl ::fbthrift::ThriftEnum for MyEnum {
 
 impl ::std::default::Default for MyEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -331,7 +331,7 @@ impl ::fbthrift::ThriftEnum for MyBigEnum {
 
 impl ::std::default::Default for MyBigEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

@@ -94,7 +94,7 @@ impl ::fbthrift::ThriftEnum for Animal {
 
 impl ::std::default::Default for Animal {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

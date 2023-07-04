@@ -470,7 +470,7 @@ impl ::fbthrift::ThriftEnum for has_bitwise_ops {
 
 impl ::std::default::Default for has_bitwise_ops {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -592,7 +592,7 @@ impl ::fbthrift::ThriftEnum for is_unscoped {
 
 impl ::std::default::Default for is_unscoped {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -708,7 +708,7 @@ impl ::fbthrift::ThriftEnum for MyForwardRefEnum {
 
 impl ::std::default::Default for MyForwardRefEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

@@ -134,7 +134,7 @@ impl ::fbthrift::ThriftEnum for EmptyEnum {
 
 impl ::std::default::Default for EmptyEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -248,7 +248,7 @@ impl ::fbthrift::ThriftEnum for City {
 
 impl ::std::default::Default for City {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -370,7 +370,7 @@ impl ::fbthrift::ThriftEnum for Company {
 
 impl ::std::default::Default for Company {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

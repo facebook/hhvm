@@ -520,7 +520,7 @@ impl ::fbthrift::ThriftEnum for Color {
 
 impl ::std::default::Default for Color {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 
@@ -640,7 +640,7 @@ impl ::fbthrift::ThriftEnum for ThriftAdaptedEnum {
 
 impl ::std::default::Default for ThriftAdaptedEnum {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

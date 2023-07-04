@@ -97,7 +97,7 @@ impl ::fbthrift::ThriftEnum for B {
 
 impl ::std::default::Default for B {
     fn default() -> Self {
-        Self(::fbthrift::__UNKNOWN_ID)
+        Self(::std::primitive::i32::MIN)
     }
 }
 

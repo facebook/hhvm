@@ -111,20 +111,13 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
 let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
   if fetch_remote_old_decls ctx ~during_init then
     let missing_old_classes =
-      SMap.fold
-        (fun cid decl_opt missing_classes ->
-          if Option.is_none decl_opt then
-            cid :: missing_classes
-          else
-            missing_classes)
-        old_classes
-        []
+      SMap.filter (fun _key -> Option.is_none) old_classes |> SMap.keys
     in
     let remote_old_classes =
       Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
     in
-    SMap.union old_classes remote_old_classes ~combine:(fun _ decl _ ->
-        Some decl)
+    SMap.union old_classes remote_old_classes ~combine:(fun _key decl1 decl2 ->
+        Some (Option.first_some decl1 decl2))
   else
     old_classes
 

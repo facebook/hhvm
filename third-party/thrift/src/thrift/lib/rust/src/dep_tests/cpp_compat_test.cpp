@@ -25,12 +25,11 @@
 #include <thrift/lib/rust/src/dep_tests/gen-cpp2/test_thrift_types.h>
 
 namespace facebook {
-namespace azw {
 
 TEST(JsonTest, structKey) {
-  azw::Small s;
-  azw::SubStruct stru;
-  std::map<azw::Small, int32_t> m;
+  Small s;
+  SubStruct stru;
+  std::map<Small, int32_t> m;
   m.insert({s, 1});
   stru.key_map() = m;
 
@@ -46,7 +45,7 @@ TEST(JsonTest, structKey) {
 }
 
 TEST(JsonTest, weirdText) {
-  azw::SubStruct stru;
+  SubStruct stru;
   stru.optDef() = "stuff\twith\nescape\\characters'...\"lots{of}fun</xml>";
   stru.bin() = "1234";
 
@@ -73,7 +72,7 @@ TEST(JsonTest, weirdText) {
 }
 
 TEST(JsonTest, skipComplex) {
-  azw::SubStruct stru;
+  SubStruct stru;
   stru.optDef() = "thing";
   stru.bin() = "1234";
 
@@ -91,7 +90,7 @@ TEST(JsonTest, skipComplex) {
 }
 
 TEST(JsonTest, needCommas) {
-  azw::Small outStruct;
+  Small outStruct;
 
   // Note the missing commas
 
@@ -116,7 +115,7 @@ TEST(JsonTest, needCommas) {
 }
 
 TEST(JsonTest, needCommasContainers) {
-  azw::Containers outStruct;
+  Containers outStruct;
 
   std::string goodinput("{\"m\":{\"m1\":\"m1\",\"m2\":\"m2\"}}");
   // Note the missing comma
@@ -138,7 +137,7 @@ TEST(JsonTest, needCommasContainers) {
 }
 
 TEST(JsonTest, nullStuff) {
-  azw::SubStruct stru;
+  SubStruct stru;
   stru.bin() = "1234";
 
   SubStruct outStruct;
@@ -152,11 +151,10 @@ TEST(JsonTest, nullStuff) {
 }
 
 TEST(JsonTest, unknownUnion) {
-  azw::Un u;
+  Un u;
 
   auto t = apache::thrift::SimpleJSONSerializer::serialize<std::string>(u);
   ASSERT_EQ(t, "{}");
 }
 
-} // namespace azw
 } // namespace facebook

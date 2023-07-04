@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace cpp2 facebook.azw
+namespace cpp2 facebook
 
 struct Small {
   1: i32 num;

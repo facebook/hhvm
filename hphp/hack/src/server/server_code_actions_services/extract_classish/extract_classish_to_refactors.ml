@@ -17,6 +17,15 @@ let interface_body_of_methods source_text T.{ selected_methods; _ } : string =
   let open Aast_defs in
   let abstractify_one meth =
     let stmts = meth.m_body.fb_ast in
+    let remove_async_modifier : string -> string =
+      match meth.m_fun_kind with
+      | Ast_defs.FSync
+      | Ast_defs.FGenerator ->
+        Fn.id
+      | Ast_defs.FAsync
+      | Ast_defs.FAsyncGenerator ->
+        String.substr_replace_first ~pos:0 ~pattern:"async " ~with_:""
+    in
     match List.hd stmts with
     | Some (stmt_pos, _) when not (Pos.equal stmt_pos Pos.none) ->
       let body_until_first_statement_length =
@@ -29,6 +38,7 @@ let interface_body_of_methods source_text T.{ selected_methods; _ } : string =
       |> String.rstrip ~drop:(fun ch ->
              Char.is_whitespace ch || Char.equal ch '{')
       |> Fn.flip ( ^ ) ";"
+      |> remove_async_modifier
     | Some _
     | None ->
       St.sub_of_pos source_text meth.m_span
@@ -37,6 +47,7 @@ let interface_body_of_methods source_text T.{ selected_methods; _ } : string =
       |> String.rstrip ~drop:(fun ch ->
              Char.is_whitespace ch || Char.equal ch '{')
       |> Fn.flip ( ^ ) ";"
+      |> remove_async_modifier
   in
   selected_methods |> List.map ~f:abstractify_one |> String.concat ~sep:"\n"
 

@@ -14,7 +14,7 @@ JSON for selected code action:
           "range":{"end":{"character":7,"line":2},"start":{"character":7,"line":2}}
         },
         {
-          "newText":"interface Placeholder_ {\n  public async function foo(): Awaitable<void>;\n}\n\n",
+          "newText":"interface Placeholder_ {\n  public function foo(): Awaitable<void>;\n}\n\n",
           "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
         }
       ]
@@ -29,12 +29,11 @@ Applied edit for code action:
 <?hh
 
 interface Placeholder_ {
-  public async function foo(): Awaitable<void>;
+  public function foo(): Awaitable<void>;
 }
 
 class A
   implements Placeholder_ {
-  // Bug: extract interface method closing brace will be commented-out
   /*range-start*/
   public async function foo(): Awaitable<void> {}
   /*range-end*/

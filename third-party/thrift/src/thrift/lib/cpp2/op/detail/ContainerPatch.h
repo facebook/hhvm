@@ -221,8 +221,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   /// Remove a key.
   template <typename U = typename T::value_type>
   void erase(U&& val) {
-    assignOr(*data_.add()).erase(val);
-    assignOr(*data_.remove()).insert(std::forward<U>(val));
+    remove(single(std::forward<U>(val)));
   }
 
   /// @copybrief AssignPatch::customVisit

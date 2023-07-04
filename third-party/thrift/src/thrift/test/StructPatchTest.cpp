@@ -448,6 +448,7 @@ TEST(StructPatchTest, SetPatch) {
 
   auto assignPatch = SetPatch::createAssign({"a", "d", "e"});
   assignPatch.erase("a");
+  assignPatch.erase("f");
   assignPatch.emplace("a");
   assignPatch.insert("b");
   assignPatch.add({"c"});

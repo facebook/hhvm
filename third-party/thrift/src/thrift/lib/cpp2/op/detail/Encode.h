@@ -768,18 +768,17 @@ struct Decode<type::list<Tag>> {
       while (prot.peekList()) {
         consumeElem();
       }
-    } else {
+    } else if (typeTagToTType<Tag> == t) {
       apache::thrift::detail::pm::reserve_if_possible(&list, s);
-      if (typeTagToTType<Tag> == t) {
-        while (s--) {
-          consumeElem();
-        }
-      } else {
-        while (s--) {
-          prot.skip(t);
-        }
+      while (s--) {
+        consumeElem();
+      }
+    } else {
+      while (s--) {
+        prot.skip(t);
       }
     }
+
     prot.readListEnd();
   }
 };
@@ -815,18 +814,17 @@ struct Decode<type::set<Tag>> {
       while (prot.peekSet()) {
         consumeElem();
       }
-    } else {
+    } else if (typeTagToTType<Tag> == t) {
       apache::thrift::detail::pm::reserve_if_possible(&set, s);
-      if (typeTagToTType<Tag> == t) {
-        while (s--) {
-          consumeElem();
-        }
-      } else {
-        while (s--) {
-          prot.skip(t);
-        }
+      while (s--) {
+        consumeElem();
+      }
+    } else {
+      while (s--) {
+        prot.skip(t);
       }
     }
+
     prot.readSetEnd();
   }
 };
@@ -851,18 +849,16 @@ struct Decode<type::map<Key, Value>> {
       while (prot.peekMap()) {
         consumeElem();
       }
-    } else {
+    } else if (
+        typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
       apache::thrift::detail::pm::reserve_if_possible(&map, s);
-      if (typeTagToTType<Key> == keyType &&
-          typeTagToTType<Value> == valueType) {
-        while (s--) {
-          consumeElem();
-        }
-      } else {
-        while (s--) {
-          prot.skip(keyType);
-          prot.skip(valueType);
-        }
+      while (s--) {
+        consumeElem();
+      }
+    } else {
+      while (s--) {
+        prot.skip(keyType);
+        prot.skip(valueType);
       }
     }
     prot.readMapEnd();

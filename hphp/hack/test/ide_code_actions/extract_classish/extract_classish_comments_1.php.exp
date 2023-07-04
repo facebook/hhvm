@@ -14,7 +14,7 @@ JSON for selected code action:
           "range":{"end":{"character":7,"line":2},"start":{"character":7,"line":2}}
         },
         {
-          "newText":"interface Placeholder_ {\n  public function foo(): void {\n// comment on first line;}\n\n",
+          "newText":"interface Placeholder_ {\n  public function foo(): void {\n    // comment on first line;\n  }\n\n",
           "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
         }
       ]
@@ -30,11 +30,12 @@ Applied edit for code action:
 
 interface Placeholder_ {
   public function foo(): void {
-// comment on first line;}
+    // comment on first line;
+  }
 
 class A
   implements Placeholder_ {
-  // repro bug: commented-out closing brace in extracted interface
+  // Ensure that we don't comment out the closing brace in extracted interface methods
   /*range-start*/
   public function foo(): void {
     // comment on first line

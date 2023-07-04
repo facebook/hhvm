@@ -52,7 +52,7 @@ let interface_body_of_methods source_text T.{ selected_methods; _ } : string =
   selected_methods |> List.map ~f:abstractify_one |> String.concat ~sep:"\n"
 
 let format_classish path ~(body : string) : string =
-  let classish = Printf.sprintf "interface %s {%s}" placeholder_name body in
+  let classish = Printf.sprintf "interface %s {\n%s\n}" placeholder_name body in
   let prefixed = "<?hh\n" ^ classish in
   let strip_prefix s =
     s

@@ -185,9 +185,11 @@ ColoringMetaData findKeyColoring(LayoutWeightVector& layouts) {
       maxColored = newMaxColored;
     }
   } while(1);
-  assertx(maxColored + 1 == lastHigh);
   assertx(maxColored > 0);
   assertx(result);
+  assert_flog(maxColored + 1 == lastHigh,
+              "maxColored: {}, newMaxColored: {}, lastHigh: {}, lastLow: {}",
+              maxColored, newMaxColored, lastHigh, lastLow);
 
   s_metadata.coloring = *result;
   s_metadata.numColoredFields = maxColored;

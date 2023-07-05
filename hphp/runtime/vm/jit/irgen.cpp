@@ -64,6 +64,17 @@ uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion) {
 
 //////////////////////////////////////////////////////////////////////
 
+void eagerVMSync(IRGS& env, IRSPRelOffset spOff) {
+  auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
+  gen(env, StVMFP, fixupFP(env));
+  gen(env, StVMSP, bcSP);
+  gen(env, StVMPC, cns(env, uintptr_t(env.irb->curMarker().fixupSk().pc())));
+  genStVMReturnAddr(env);
+  gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * This is called when each instruction is generated during initial IR
  * creation.
@@ -153,21 +164,12 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     inst->maySyncVMRegsWithSources() &&
     !inst->marker().prologue() &&
     !inst->marker().sk().funcEntry() &&
-    !inst->is(CallBuiltin, Call, CallFuncEntry, ContEnter) &&
+    !inst->is(Call, CallFuncEntry, ContEnter) &&
     (env.unit.numInsts() % 3 == 0);
 
   if (shouldStressEagerSync) {
-    auto const bcSP = gen(
-      env,
-      LoadBCSP,
-      IRSPRelOffsetData { offsetFromIRSP(env, inst->marker().bcSPOff()) },
-      sp(env)
-    );
-    gen(env, StVMFP, fixupFP(env));
-    gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(inst->marker().fixupSk().pc())));
-    genStVMReturnAddr(env);
-    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
+    auto const spOff = offsetFromIRSP(env, inst->marker().bcSPOff());
+    eagerVMSync(env, spOff);
     auto const res = outputInst();
     gen(env, StVMRegState, cns(env, VMRegState::DIRTY));
     return res;
@@ -175,7 +177,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
 
   return outputInst();
 }
-}
+} // detail
 
 //////////////////////////////////////////////////////////////////////
 

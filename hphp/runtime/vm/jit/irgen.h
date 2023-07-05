@@ -126,6 +126,13 @@ void prepareEntry(IRGS&);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Sync VM regs eagerly
+ */
+void eagerVMSync(IRGS&, IRSPRelOffset spOff);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Support for Profiling counters, including reoptimization (CheckCold).
  */
 void incProfCounter(IRGS&, TransID);

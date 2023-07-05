@@ -68,11 +68,7 @@ let go
   (* TODO: the following is a bug! *)
   let repo = Wwwroot.interpret_command_line_root_parameter [] in
   let version = get_version ~repo in
-  let manifold_dir =
-    Printf.sprintf
-      "hack_decl_prefetching/tree/prefetch/%s/shallow_decls"
-      version
-  in
+  let manifold_dir = Remote_old_decl_client.Utils.make_manifold_path ~version in
   Hh_logger.log "Will upload to manifold directory %s" manifold_dir;
   let cmd = Printf.sprintf "manifold mkdirs %s" manifold_dir in
   ignore (Sys.command cmd);

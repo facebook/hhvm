@@ -14,6 +14,8 @@ val fetch_old_decls :
 module Utils : sig
   val get_dev_build_version : unit -> string
 
+  val make_manifold_path : version:string -> string
+
   val name_to_decl_hash_opt :
     name:string -> db_path:Naming_sqlite.db_path -> string option
 

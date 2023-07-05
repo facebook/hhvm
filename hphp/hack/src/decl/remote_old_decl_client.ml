@@ -39,6 +39,27 @@ module Utils = struct
     else
       Build_id.build_revision
 
+  let make_manifold_path ~version =
+    Printf.sprintf
+      "hack_decl_prefetching/tree/prefetch/%s/shallow_decls"
+      version
+
+  let manifold_path_exists ~path =
+    let cmd = Printf.sprintf "manifold exists %s" path in
+    let code = Sys.command cmd in
+    Int.equal code 0
+
+  let get_version () =
+    if Build_id.is_dev_build then
+      let version = get_dev_build_version () in
+      let path = make_manifold_path ~version in
+      if manifold_path_exists ~path then
+        version
+      else
+        get_hh_version ()
+    else
+      get_hh_version ()
+
   let db_path_of_ctx ~(ctx : Provider_context.t) : Naming_sqlite.db_path option
       =
     ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
@@ -111,7 +132,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     (match decl_hashes with
     | [] -> SMap.empty
     | _ ->
-      let hhconfig_version = Utils.get_hh_version () in
+      let hhconfig_version = Utils.get_version () in
       let start_t = Unix.gettimeofday () in
       let no_limit =
         TypecheckerOptions.remote_old_decls_no_limit

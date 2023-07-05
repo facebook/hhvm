@@ -65,19 +65,6 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 
  private:
   using Base::data_;
-
-  friend bool operator==(const FieldPatch& lhs, const Patch& rhs) {
-    return lhs.data_ == rhs;
-  }
-  friend bool operator==(const Patch& lhs, const FieldPatch& rhs) {
-    return lhs == rhs.data_;
-  }
-  friend bool operator!=(const FieldPatch& lhs, const Patch& rhs) {
-    return lhs.data_ != rhs;
-  }
-  friend bool operator!=(const Patch& lhs, const FieldPatch& rhs) {
-    return lhs != rhs.data_;
-  }
 };
 
 /// Create a base patch that supports Ensure operator.

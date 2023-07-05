@@ -21,6 +21,7 @@ namespace HH\Lib\Keyset;
  * Space complexity: O(n + m), where n is the size of `$first` and m is the
  * combined size of all the `...$rest`
  */
+<<__NoAutoLikes>>
 function union<Tv as arraykey>(
   Traversable<Tv> $first,
   Container<Tv> ...$rest

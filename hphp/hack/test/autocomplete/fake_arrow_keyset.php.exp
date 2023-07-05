@@ -321,7 +321,7 @@ Keyset\take
 Keyset\union
   INSERT Keyset\union(
   INSERT )
-  (function(Traversable<Tv> $first, Container<Tv> $rest...): ~keyset<Tv>)
+  (function(Traversable<Tv> $first, Container<Tv> $rest...): keyset<Tv>)
 Str\join
   INSERT Str\join(
   INSERT , ${1:\$glue})

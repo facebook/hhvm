@@ -5,14 +5,12 @@
 
 #include "aead_aegis256_aesni.h"
 
-#if defined(HAVE_TMMINTRIN_H) && defined(HAVE_WMMINTRIN_H)
+#include <fizz/third-party/libsodium-aegis/private/common.h>
+#include <fizz/third-party/libsodium-aegis/private/config.h>
 
-#ifdef __GNUC__
-#pragma GCC target("ssse3")
-#pragma GCC target("aes")
-#endif
+#if FIZZ_LIBSODIUM_HAS_AESNI
 
-#include "private/sse2_64_32.h"
+#include <fizz/third-party/libsodium-aegis/private/sse2_64_32.h>
 #include <tmmintrin.h>
 #include <wmmintrin.h>
 

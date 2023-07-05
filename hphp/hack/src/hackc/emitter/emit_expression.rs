@@ -3341,6 +3341,18 @@ fn emit_call_expr<'a, 'arena, 'decl>(
                 instr::null(),
             ]))
         }
+        (Expr_::Id(id), [(pk, arg1)], None)
+            if id.1 == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID
+                || id.1 == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID_DEFERRED =>
+        {
+            error::ensure_normal_paramkind(pk)?;
+            Ok(InstrSeq::gather(vec![
+                emit_expr(e, env, arg1)?,
+                emit_pos(pos),
+                instr::pop_l(e.named_local("$86productAttributionData".into())),
+                instr::null(),
+            ]))
+        }
         (Expr_::Id(id), [], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {

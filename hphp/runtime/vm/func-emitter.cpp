@@ -240,6 +240,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs |= AttrInternalSoft;
   }
 
+  if (hasVar(s_86productAttributionData.get())) {
+    attrs |= AttrHasAttributionData;
+  }
+
   auto const dynCallSampleRate = [&] () -> Optional<int64_t> {
     if (!(attrs & AttrDynamicallyCallable)) return {};
 

@@ -64,6 +64,9 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
   } else if (func->lookupVarId(s_86metadata.get()) != kInvalidId) {
     FTRACE(2, "  Function has metadata: {}\n", s_86metadata.get()->data());
     return false;
+  } else if (func->lookupVarId(s_86productAttributionData.get()) != kInvalidId) {
+    FTRACE(2, "  Function has metadata: {}\n", s_86productAttributionData.get()->data());
+    return false;
   }
   auto const offset = findCatchHandler(func, bcOff(env));
   if (offset != kInvalidOffset) {

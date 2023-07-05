@@ -132,4 +132,23 @@ namespace HH {
   function enable_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 
   function collect_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
+
+  /**
+   * Sets product attribution id into the caller's frame in order to be fetched
+   * later down the call stack.
+   */
+  function set_product_attribution_id(int $id)[]: void;
+
+  /**
+   * Same as the above `set_product_attribution_id` function except it takes a
+   * lambda that returns the attribution id to be called before fetching the value
+   */
+  function set_product_attribution_id_deferred((function()[leak_safe]: int) $fn)[]: void;
+
+  /**
+   * Fetches the closest product attribution id.
+   * If no value is set, returns null.
+   */
+  function get_product_attribution_id()[leak_safe]: ?int;
+
 } // HH namespace

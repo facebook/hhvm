@@ -1153,6 +1153,9 @@ pub mod regex {
 pub mod emitter_special_functions {
     pub const EVAL: &str = "\\eval";
     pub const SET_FRAME_METADATA: &str = "\\HH\\set_frame_metadata";
+    pub const SET_PRODUCT_ATTRIBUTION_ID: &str = "\\HH\\set_product_attribution_id";
+    pub const SET_PRODUCT_ATTRIBUTION_ID_DEFERRED: &str =
+        "\\HH\\set_product_attribution_id_deferred";
     pub const SYSTEMLIB_REIFIED_GENERICS: &str = "\\__systemlib_reified_generics";
     pub const GENA: &str = "gena";
 }

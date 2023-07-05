@@ -33,6 +33,7 @@
 #include "hphp/util/htonll.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/file.h"
@@ -1313,6 +1314,39 @@ int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Product attribution id
+
+void HHVM_FUNCTION(set_product_attribution_id, int64_t) {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Unsupported dynamic call of set_product_attribution_id()");
+}
+
+void HHVM_FUNCTION(set_product_attribution_id_deferred, const Variant&) {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Unsupported dynamic call of set_product_attribution_id_deferred()");
+}
+
+Variant HHVM_FUNCTION(get_product_attribution_id_internal) {
+  // The caller of this function always eagerly syncs the vmregs, so in
+  // non-debug mode this anchor should be a no-op.
+  VMRegAnchor _;
+
+  Variant result{Variant::NullInit()};
+  walkStack([&] (const BTFrame& frm) {
+    auto const func = frm.func();
+    if (!(func->attrs() & AttrHasAttributionData)) return false;
+    if (!frm.localsAvailable()) return false; // can this be an assert instead?
+    auto local = func->lookupVarId(s_86productAttributionData.get());
+    assertx(local != kInvalidId);
+    auto const val = frm.local(local);
+    assertx(tvIsPlausible(*val));
+    result = Variant{variant_ref{val}};
+    return true;
+  });
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // xbox APIs
 
 namespace {
@@ -1434,6 +1468,10 @@ struct FBExtension : Extension {
     HHVM_FALIAS(HH\\non_crypto_md5_lower, HH_non_crypto_md5_lower);
     HHVM_FALIAS(HH\\int_mul_overflow, HH_int_mul_overflow);
     HHVM_FALIAS(HH\\int_mul_add_overflow, HH_int_mul_add_overflow);
+
+    HHVM_FALIAS(HH\\set_product_attribution_id, set_product_attribution_id);
+    HHVM_FALIAS(HH\\set_product_attribution_id_deferred, set_product_attribution_id_deferred);
+    HHVM_FALIAS(HH\\get_product_attribution_id_internal, get_product_attribution_id_internal);
 
     HHVM_FE(fb_call_user_func_array_async);
     HHVM_FE(fb_check_user_func_async);

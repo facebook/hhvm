@@ -73,6 +73,7 @@ const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
 const StaticString s_86ctor("86ctor");
 const StaticString s_86metadata("86metadata");
+const StaticString s_86productAttributionData("86productAttributionData");
 const StaticString s_86reified_prop("86reified_prop");
 const StaticString s_86reifiedinit("86reifiedinit");
 const StaticString s___MockClass("__MockClass");

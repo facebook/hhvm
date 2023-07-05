@@ -166,6 +166,12 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                         if call_name == emitter_special_functions::SET_FRAME_METADATA {
                             self.add_local("$86metadata");
                         }
+                        if call_name == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID
+                            || call_name
+                                == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID_DEFERRED
+                        {
+                            self.add_local("$86productAttributionData");
+                        }
                     }
                     Expr_::ClassGet(box (id, prop, pom)) if *pom == PropOrMethod::IsMethod => {
                         self.on_class_get(id, prop)?

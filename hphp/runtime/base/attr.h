@@ -156,6 +156,9 @@ enum Attr {
   // Set on all builtin functions, whether PHP or C++.
   AttrBuiltin              = (1u << 20), //    X  |          |    X    //
                                          //       |          |         //
+  // Set on functions that have 86productAttributionData variable      //
+  AttrHasAttributionData   = (1u << 21), //       |          |    X    //
+                                         //       |          |         //
   // Set on properties to indicate they can't be changed after construction
   // and on classes to indicate that all that class' properties are const.
   AttrIsConst              = (1u << 21), //    X  |    X     |         //

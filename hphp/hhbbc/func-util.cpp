@@ -41,7 +41,8 @@ bool is_volatile_local(const php::Func* func, LocalId lid) {
 
   return l.name->same(s_reified_generics_var.get()) ||
          l.name->same(s_coeffects_var.get()) ||
-         l.name->same(s_86metadata.get());
+         l.name->same(s_86metadata.get()) ||
+         l.name->same(s_86productAttributionData.get());
 }
 
 SString memoize_impl_name(const php::Func* func) {

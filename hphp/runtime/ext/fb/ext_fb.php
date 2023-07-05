@@ -339,4 +339,42 @@ function int_mul_overflow(int $a, int $b): int;
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
 type INCORRECT_TYPE<T> = T;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Sets product attribution id into the caller's frame in order to be fetched
+ * later down the call stack.
+ */
+<<__Native>>
+function set_product_attribution_id(int $id)[]: void;
+
+/**
+ * Same as the above `set_product_attribution_id` function except it takes a
+ * lambda that returns the attribution id to be called before fetching the value
+ */
+<<__Native>>
+function set_product_attribution_id_deferred((function()[leak_safe]: int) $fn)[]: void;
+
+/**
+ * Fetches the closest stored value for one of the above product attribution setters.
+ * If no value is set, returns null.
+ */
+<<__Native, __EagerVMSync>>
+function get_product_attribution_id_internal()[leak_safe]: mixed; // null | int | (function(): int)
+
+/**
+ * Fetches the closest product attribution id.
+ * If no value is set, returns null.
+ */
+function get_product_attribution_id()[leak_safe]: ?int {
+  $value = get_product_attribution_id_internal();
+  if ($value is int || $value is null) {
+    return $value;
+  }
+  // Otherwise it must be a `(function(): int)`, lets invoke it.
+  return HH\FIXME\UNSAFE_CAST<mixed, (function()[leak_safe]: int)>($value)();
+}
+//////////////////////////////////////////////////////////////////////////////
+
 } // HH namespace

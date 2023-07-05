@@ -356,7 +356,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
       if null_is_subtype_of ty then
         (env, ty)
       else
-        MakeType.nullable_locl r ty |> TUtils.wrap_union_inter_ty_in_var env r
+        MakeType.nullable r ty |> TUtils.wrap_union_inter_ty_in_var env r
     in
     let (env, ty) = union_null env ty in
     ((env, ty_err_opt), ty)

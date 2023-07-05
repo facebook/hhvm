@@ -17,7 +17,7 @@ let is_always_castable env ty =
   let mixed = mixed r in
   let castable_ty =
     locl_like r
-    @@ nullable_locl r
+    @@ nullable r
     @@ union r [arraykey r; num r; bool r; hh_formatstring r mixed]
   in
   Env.is_sub_type env ty castable_ty
@@ -28,7 +28,7 @@ let is_bool_castable env ty =
   let mixed = mixed r in
   let bool_castable_ty =
     locl_like r
-    @@ nullable_locl r
+    @@ nullable r
     @@ union r [vec_or_dict r (arraykey r) mixed; keyset r (arraykey r)]
   in
   Env.is_sub_type env ty bool_castable_ty

@@ -343,7 +343,7 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
     let (env, ty) =
       Typing_solver.non_null env (Pos_or_decl.of_raw_pos id_pos) ty
     in
-    (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
+    (env, MakeType.nullable (Reason.Rnullsafe_op pos) ty)
 
 (* Return true if the `this` type appears in a covariant
  * (resp. contravariant, if contra=true) position in ty.

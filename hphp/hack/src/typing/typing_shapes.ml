@@ -614,7 +614,7 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
     match nargs with
     | 2 ->
       (* Return type should be ?Tv *)
-      let ret = MakeType.nullable_decl rret (MakeType.generic rret "Tv") in
+      let ret = MakeType.nullable rret (MakeType.generic rret "Tv") in
       ([param1; param2], ret)
     | 3 ->
       (* Third parameter should have type Tv *)

@@ -1843,7 +1843,7 @@ and simplify_subtype_i
           (* ?supportdyn<t> is equivalent to supportdyn<?t> *)
           | (_, Tnewtype (name, [tyarg], _))
             when String.equal name SN.Classes.cSupportDyn ->
-            let tyarg = MakeType.nullable_locl r_super tyarg in
+            let tyarg = MakeType.nullable r_super tyarg in
             simplify_subtype
               ~subtype_env
               ~sub_supportdyn

@@ -143,13 +143,8 @@ let this r = mk (r, Tgeneric (SN.Typehints.this, []))
 
 let taccess r ty id = mk (r, Taccess (ty, id))
 
-let nullable_decl r ty =
-  (* Cheap avoidance of double nullable *)
-  match get_node ty with
-  | Toption _ as ty_ -> mk (r, ty_)
-  | _ -> mk (r, Toption ty)
-
-let nullable_locl r ty =
+let nullable : type a. a Reason.t_ -> a ty -> a ty =
+ fun r ty ->
   (* Cheap avoidance of double nullable *)
   match get_node ty with
   | Toption _ as ty_ -> mk (r, ty_)

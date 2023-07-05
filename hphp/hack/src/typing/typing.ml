@@ -4936,7 +4936,7 @@ and expr_
       | (AFvalue (_, p, _), None) ->
         if is_async then
           let (env, ty) = Env.fresh_type env p in
-          (env, MakeType.nullable_locl (Reason.Ryield_asyncnull p) ty)
+          (env, MakeType.nullable (Reason.Ryield_asyncnull p) ty)
         else
           (env, MakeType.int (Reason.Rwitness p))
       | (_, Some x) -> (env, x)
@@ -4967,7 +4967,7 @@ and expr_
       env
       p
       (Aast.Yield taf)
-      (MakeType.nullable_locl (Reason.Ryield_send p) send)
+      (MakeType.nullable (Reason.Ryield_send p) send)
   | Await e ->
     begin
       match e with
@@ -5122,7 +5122,7 @@ and expr_
       else if is_nullable then
         let (_, e_p, _) = e in
         let (env, hint_ty) = refine_type env e_p expr_ty hint_ty in
-        ((env, None), MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
+        ((env, None), MakeType.nullable (Reason.Rwitness p) hint_ty)
       else
         let (env, locl) = make_a_local_of ~include_this:true env e in
         match locl with

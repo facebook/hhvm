@@ -199,9 +199,9 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
     | (None, Some dyn_r, (r, Tunion tyl)) ->
       MakeType.union r (MakeType.dynamic dyn_r :: tyl)
     | (None, Some dyn_r, _) -> like_ty dyn_r ty
-    | (Some null_r, None, _) -> MakeType.nullable_locl null_r ty
+    | (Some null_r, None, _) -> MakeType.nullable null_r ty
     | (Some null_r, Some dyn_r, _) ->
-      like_ty dyn_r (MakeType.nullable_locl null_r ty)
+      like_ty dyn_r (MakeType.nullable null_r ty)
   in
   let (env, ty) = Utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)

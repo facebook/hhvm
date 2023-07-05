@@ -41,7 +41,7 @@ let remove_tyvar_from_lower_bound env var lower_bound =
     | (_, Tvar v) when Ident.equal v var -> (env, MakeType.nothing Reason.none)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
-      (env, MakeType.nullable_locl r ty)
+      (env, MakeType.nullable r ty)
     | (r, Tunion tyl) ->
       let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
       let tyl = List.filter tyl ~f:(fun ty -> not (is_nothing ty)) in
@@ -107,7 +107,7 @@ let remove_tyvar_from_upper_bound env var upper_bound =
     | (_, Tvar v) when Ident.equal v var -> (env, MakeType.mixed Reason.none)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
-      (env, MakeType.nullable_locl r ty)
+      (env, MakeType.nullable r ty)
     | (r, Tunion tyl) ->
       let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
       let ty =

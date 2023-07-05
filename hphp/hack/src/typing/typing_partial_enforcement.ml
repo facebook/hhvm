@@ -97,7 +97,7 @@ let rec get_enforced_type env class_def_opt ty =
   end
   | Toption t ->
     let ety = get_enforced_type env class_def_opt t in
-    MakeType.nullable_decl Reason.Rnone ety
+    MakeType.nullable Reason.Rnone ety
   | Tlike t -> get_enforced_type env class_def_opt t
   (* Special case for intersections, as these are used to describe partial enforcement *)
   | Tintersection tys ->

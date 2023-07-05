@@ -35,7 +35,7 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
     ]
   in
   let stringish = MakeType.class_type r SN.Classes.cStringish [] in
-  let stringlike = MakeType.nullable_locl r (MakeType.union r tyl) in
+  let stringlike = MakeType.nullable r (MakeType.union r tyl) in
   let (is_sub_stringish, e1) = Typing_solver.is_sub_type env ty stringish in
   let err =
     Typing_error.(

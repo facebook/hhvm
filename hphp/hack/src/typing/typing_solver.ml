@@ -880,7 +880,19 @@ let expand_type_and_narrow
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           in
           (match res with
-          | (env, None) -> ((env, None), widened_ty)
+          | (env, None) ->
+            let supportdyn = Typing_utils.is_supportdyn env ty in
+            let res2 =
+              if supportdyn then begin
+                TUtils.sub_type
+                  env
+                  widened_ty
+                  (MakeType.supportdyn_mixed (Reason.Rwitness p))
+                @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+              end else
+                (env, None)
+            in
+            (res2, widened_ty)
           | _ ->
             if force_solve then
               expand_type_and_solve env ~description_of_expected p ty

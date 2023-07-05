@@ -151,13 +151,14 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
         ((env, None), None)
       | _ ->
         let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
+        let (env, rest_ty) = Env.fresh_type_invariant env expr_pos in
         let upper_fdm =
           TShapeMap.add
             field
             { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
             TShapeMap.empty
         in
-        let upper_shape_ty = MakeType.open_shape r upper_fdm in
+        let upper_shape_ty = MakeType.shape r rest_ty upper_fdm in
         ((env, None), Some upper_shape_ty))
   end
   | _ -> ((env, None), None)

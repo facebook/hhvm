@@ -15,7 +15,6 @@
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/HTTPSettings.h>
 #include <proxygen/lib/http/codec/compress/HeaderCodec.h>
-#include <zlib.h>
 
 namespace folly { namespace io {
 class Cursor;

@@ -25,11 +25,7 @@ jobs:
     - name: Fetch boost
       run: python build/fbcode_builder/getdeps.py fetch --no-tests boost
     - name: Install Rust Stable
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        default: true
-        profile: minimal
+      uses: dtolnay/rust-toolchain@stable
     - name: Fetch ninja
       run: python build/fbcode_builder/getdeps.py fetch --no-tests ninja
     - name: Fetch cmake

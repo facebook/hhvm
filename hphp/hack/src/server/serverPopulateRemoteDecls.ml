@@ -51,6 +51,15 @@ let get_hhconfig_version ~(repo : Path.t) :
   end
   >>= fun hhconfig_version -> return_ok hhconfig_version
 
+let get_version ~repo =
+  if Build_id.is_dev_build then
+    Remote_old_decl_client.Utils.get_dev_build_version ()
+  else
+    match Future.get @@ get_hhconfig_version ~repo with
+    | Ok (Ok result) -> result
+    | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
+    | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
+
 let go
     (env : ServerEnv.env)
     (genv : ServerEnv.genv)
@@ -58,17 +67,14 @@ let go
   let ctx = Provider_utils.ctx_from_server_env env in
   (* TODO: the following is a bug! *)
   let repo = Wwwroot.interpret_command_line_root_parameter [] in
-  let hhconfig_version =
-    match Future.get @@ get_hhconfig_version ~repo with
-    | Ok (Ok result) -> result
-    | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
-    | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
+  let version = get_version ~repo in
+  let manifold_dir =
+    Printf.sprintf
+      "hack_decl_prefetching/tree/prefetch/%s/shallow_decls"
+      version
   in
-  let cmd =
-    "manifold mkdirs hack_decl_prefetching/tree/prefetch/"
-    ^ hhconfig_version
-    ^ "/shallow_decls"
-  in
+  Hh_logger.log "Will upload to manifold directory %s" manifold_dir;
+  let cmd = Printf.sprintf "manifold mkdirs %s" manifold_dir in
   ignore (Sys.command cmd);
 
   let get_next =
@@ -99,7 +105,7 @@ let go
                 in
                 (decl_hash_64, marshalled_symbol_to_shallow_decl))
           in
-          acc @ decls_to_upload)
+          decls_to_upload @ acc)
       fnl
   in
 
@@ -112,8 +118,6 @@ let go
       ~next:get_next
   in
 
-  let _ =
-    Remote_old_decls_ffi.put_decls ~silent:false hhconfig_version results
-  in
+  let _ = Remote_old_decls_ffi.put_decls ~silent:false version results in
   Hh_logger.log "Processed %d decls" (List.length results);
   ()

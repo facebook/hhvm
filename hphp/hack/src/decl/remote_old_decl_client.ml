@@ -32,6 +32,13 @@ module Utils = struct
       let version = "v" ^ String_utils.lstrip version "^" in
       version
 
+  let get_dev_build_version () =
+    if String.is_empty Build_id.build_revision then
+      Sys_username.get_logged_in_username ()
+      |> Option.value ~default:"anonymous"
+    else
+      Build_id.build_revision
+
   let db_path_of_ctx ~(ctx : Provider_context.t) : Naming_sqlite.db_path option
       =
     ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path

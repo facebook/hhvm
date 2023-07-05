@@ -299,6 +299,7 @@
   process_types
   provider_context
   shallow_decl_defs
+  sys_username
   sys_utils
   temp_file
   typing_defs

@@ -38,10 +38,13 @@ module type S = sig
 
   val current_mergebase_hg_rev : string -> hg_rev Future.t
 
-  val current_working_copy_hg_rev :
-    string ->
-    (* bool indicates if there are working copy changes. *)
-    (hg_rev * bool) Future.t
+  (** [current_working_copy_hg_rev repo] gets the hg revision hash of the
+      current working copy in the repo dir.
+      The boolean returned indicates if there are working copy changes.
+
+      Similar to
+        hg id -i --cwd <repo> *)
+  val current_working_copy_hg_rev : string -> (hg_rev * bool) Future.t
 
   (** Get the global base revision of the current working copy in the given
    * repo dir. *)

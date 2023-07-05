@@ -23,6 +23,7 @@ use namespace HH\Lib\Math;
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function chunk<Tv as arraykey>(
   Traversable<Tv> $traversable,
   int $size,
@@ -49,6 +50,7 @@ function chunk<Tv as arraykey>(
  * Time complexity: O(n * f), where f is the complexity of `$value_func`
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function map<Tv1, Tv2 as arraykey>(
   Traversable<Tv1> $traversable,
   (function(Tv1)[_]: Tv2) $value_func,
@@ -67,6 +69,7 @@ function map<Tv1, Tv2 as arraykey>(
  * Time complexity: O(n * f), where f is the complexity of `$value_func`
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function map_with_key<Tk, Tv1, Tv2 as arraykey>(
   KeyedTraversable<Tk, Tv1> $traversable,
   (function(Tk, Tv1)[_]: Tv2) $value_func,
@@ -90,6 +93,7 @@ function map_with_key<Tk, Tv1, Tv2 as arraykey>(
  * Space complexity: O(n), where n is the combined size of all the
  * `$traversables`
  */
+<<__NoAutoLikes>>
 function flatten<Tv as arraykey>(
   Traversable<Container<Tv>> $traversables,
 )[]: keyset<Tv> {

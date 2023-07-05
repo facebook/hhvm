@@ -253,7 +253,7 @@ Dict\unique_by
 Keyset\chunk
   INSERT Keyset\chunk(
   INSERT , ${1:\$size})
-  (function(Traversable<Tv> $traversable, int $size): ~vec<keyset<Tv>>)
+  (function(Traversable<Tv> $traversable, int $size): vec<keyset<Tv>>)
 Keyset\diff
   INSERT Keyset\diff(
   INSERT , ${1:\$second})
@@ -293,7 +293,7 @@ Keyset\keys
 Keyset\map
   INSERT Keyset\map(
   INSERT , ${1:\$value_func})
-  (function(Traversable<Tv1> $traversable, (function(Tv1): ~Tv2) $value_func): ~keyset<Tv2>)
+  (function(Traversable<Tv1> $traversable, (function(Tv1): Tv2) $value_func): keyset<Tv2>)
 Keyset\map_async
   INSERT Keyset\map_async(
   INSERT , ${1:\$async_func})
@@ -301,7 +301,7 @@ Keyset\map_async
 Keyset\map_with_key
   INSERT Keyset\map_with_key(
   INSERT , ${1:\$value_func})
-  (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): ~Tv2) $value_func): ~keyset<Tv2>)
+  (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Tv2) $value_func): keyset<Tv2>)
 Keyset\partition
   INSERT Keyset\partition(
   INSERT , ${1:\$predicate})

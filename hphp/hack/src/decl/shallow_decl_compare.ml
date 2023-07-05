@@ -49,7 +49,7 @@ let compute_class_diffs
       let diff =
         diff_class_in_changed_file package_info old_classes new_classes cid
       in
-      Decl_compare_utils.log_class_diff cid diff;
+      Hh_logger.log "%s" (ClassDiff.pretty ~name:cid diff);
       if ClassDiff.equal diff Unchanged then
         acc
       else

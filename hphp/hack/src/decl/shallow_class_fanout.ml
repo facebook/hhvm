@@ -139,7 +139,17 @@ let descendants_cardinal mode class_name : int =
 let children_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
 
-module Log = struct
+module Log : sig
+  val log_class_fanout :
+    Provider_context.t -> string * ClassDiff.t -> DepSet.t -> unit
+
+  val log_fanout :
+    Provider_context.t ->
+    'a list ->
+    DepSet.t ->
+    max_class_fanout_cardinal:int ->
+    unit
+end = struct
   let do_log ctx ~fanout_cardinal =
     TypecheckerOptions.log_fanout ~fanout_cardinal
     @@ Provider_context.get_tcopt ctx

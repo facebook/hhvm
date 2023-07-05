@@ -151,13 +151,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_compare_utils)
- (modules decl_compare_utils)
- (libraries classDiff decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_defs)
  (modules decl_defs)
  (libraries pos_or_decl typing_defs utils_core)
@@ -368,7 +361,6 @@
  (modules shallow_decl_compare)
  (libraries
   classDiff
-  decl_compare_utils
   decl_defs
   package_info
   shallow_class_diff

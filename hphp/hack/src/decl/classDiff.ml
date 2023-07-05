@@ -371,6 +371,21 @@ let has_changed = function
   | Minor_change _ ->
     true
 
+let pretty ~(name : string) (diff : t) : string =
+  let buf = Buffer.create 512 in
+  let fmt = Format.formatter_of_buffer buf in
+  Format.pp_set_margin fmt 120;
+  Format.fprintf
+    fmt
+    "%s  @[<2>%s:@ %a@]@?"
+    (String.make 35 ' ') (* indentation hack (width of log timestamp) *)
+    (Utils.strip_ns name)
+    pp
+    diff;
+  let diffstr = Buffer.contents buf in
+  (* indentation hack *)
+  Printf.sprintf "  %s" (Caml.String.trim diffstr)
+
 module ClassShellChangeCategory = struct
   module ListChange = struct
     type t = {

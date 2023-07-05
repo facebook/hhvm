@@ -117,6 +117,8 @@ type t =
 
 val has_changed : t -> bool
 
+val pretty : name:string -> t -> string
+
 val empty_member_diff : member_diff
 
 val is_empty_member_diff : member_diff -> bool

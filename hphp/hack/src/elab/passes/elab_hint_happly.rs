@@ -378,7 +378,7 @@ mod tests {
         assert!(matches!(
             elem,
             ClassTypeconst::TCConcrete(ClassConcreteTypeconst {
-                c_tc_type: Hint(_, box Hint_::Hprim(Tprim::Tint))
+                c_tc_type: Hint(_, box Hint_::Hprim(Tprim::Tint)),
             })
         ))
     }

@@ -361,7 +361,9 @@ impl<'a> TextualFile<'a> {
         let curry_ty = curry.ty_name();
         let mut fields = Vec::new();
         if curry.virtual_call {
-            let FunctionName::Method(captured_this_ty, _) = &curry.name else { unreachable!(); };
+            let FunctionName::Method(captured_this_ty, _) = &curry.name else {
+                unreachable!();
+            };
             fields.push(Field {
                 name: "this".into(),
                 ty: Ty::named_type_ptr(captured_this_ty.clone()).into(),
@@ -589,7 +591,9 @@ impl Ty {
     }
 
     pub(crate) fn deref(&self) -> Ty {
-        let Some(ty) = self.try_deref() else { panic!("Unable to deref {self:?}"); };
+        let Some(ty) = self.try_deref() else {
+            panic!("Unable to deref {self:?}");
+        };
         ty
     }
 
@@ -1125,7 +1129,9 @@ impl FuncBuilder<'_, '_> {
         let obj = self.write_expr_stmt(Expr::Alloc(ty.clone()))?;
 
         if let Some(this) = this {
-            let FunctionName::Method(captured_this_ty, _) = &name else { unreachable!(); };
+            let FunctionName::Method(captured_this_ty, _) = &name else {
+                unreachable!();
+            };
             self.store(
                 Expr::Field(Box::new(obj.into()), ty.clone(), "this".to_string()),
                 this,

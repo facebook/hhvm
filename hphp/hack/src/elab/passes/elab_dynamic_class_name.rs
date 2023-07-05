@@ -192,7 +192,7 @@ mod tests {
             expr_,
             Expr_::FunctionPointer(box (
                 FunctionPtrId::FPClassConst(ClassId(_, _, ClassId_::CIself), _),
-                _
+                _,
             ))
         ));
     }
@@ -234,11 +234,7 @@ mod tests {
         assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem,
-            Expr(
-                _,
-                _,
-                Expr_::ClassConst(box (ClassId(_, _, ClassId_::CIself), _))
-            )
+            Expr(_, _, Expr_::ClassConst(box (ClassId(_, _, ClassId_::CIself), _)))
         ))
     }
 
@@ -263,8 +259,8 @@ mod tests {
                 Expr_::Invalid(box Some(Expr(
                     _,
                     _,
-                    Expr_::ClassConst(box (ClassId(_, _, ClassId_::CIexpr(..)), _))
-                )))
+                    Expr_::ClassConst(box (ClassId(_, _, ClassId_::CIexpr(..)), _)),
+                ))),
             )
         ))
     }
@@ -289,11 +285,7 @@ mod tests {
         assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem,
-            Expr(
-                _,
-                _,
-                Expr_::ClassGet(box (ClassId(_, _, ClassId_::CIself), _, _))
-            )
+            Expr(_, _, Expr_::ClassGet(box (ClassId(_, _, ClassId_::CIself), _, _)))
         ))
     }
 

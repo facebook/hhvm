@@ -329,10 +329,7 @@ mod tests {
         let Contexts(_, mut hints) = elem;
         assert!(matches!(
             hints.pop(),
-            Some(Hint(
-                _,
-                box Hint_::Haccess(Hint(_, box Hint_::Habstr(..)), _)
-            ))
+            Some(Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Habstr(..)), _)))
         ))
     }
 

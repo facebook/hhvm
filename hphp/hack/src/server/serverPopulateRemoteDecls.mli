@@ -7,4 +7,8 @@
  *)
 
 val go :
-  ServerEnv.env -> ServerEnv.genv -> MultiWorker.worker list option -> unit
+  ServerEnv.env ->
+  ServerEnv.genv ->
+  MultiWorker.worker list option ->
+  Relative_path.t list option ->
+  unit

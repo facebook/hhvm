@@ -157,6 +157,7 @@ let parse_check_args cmd ~from_default =
   (* custom behaviors *)
   let current_option = ref None in
   let set_from x () = from := x in
+  let single_files = ref [] in
   let set_mode ?(validate = true) x =
     if validate && Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
@@ -166,11 +167,15 @@ let parse_check_args cmd ~from_default =
       ()
     end
   in
-  let add_single x =
-    match !mode with
-    | Some (MODE_STATUS_SINGLE xs) ->
-      mode := Some (MODE_STATUS_SINGLE (x :: xs))
-    | _ -> set_mode (MODE_STATUS_SINGLE [x])
+  let add_single x = single_files := x :: !single_files in
+  let set_mode_from_single_files () =
+    match !single_files with
+    | [] -> ()
+    | single_files ->
+      (match !mode with
+      | Some (MODE_POPULATE_REMOTE_DECLS None) ->
+        mode := Some (MODE_POPULATE_REMOTE_DECLS (Some single_files))
+      | _ -> set_mode (MODE_STATUS_SINGLE single_files))
   in
   (* parse args *)
   let usage =
@@ -392,11 +397,11 @@ let parse_check_args cmd ~from_default =
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
       );
       ( "--gen-prefetch-dir",
-        Arg.String (fun _x -> set_mode MODE_POPULATE_REMOTE_DECLS),
+        Arg.String (fun _x -> set_mode (MODE_POPULATE_REMOTE_DECLS None)),
         " Compute all decls for the repo and upload them to the remote decl service."
         ^ " Usage: --gen-prefetch-dir unused" );
       ( "--populate-remote-decls",
-        Arg.Unit (fun () -> set_mode MODE_POPULATE_REMOTE_DECLS),
+        Arg.Unit (fun () -> set_mode (MODE_POPULATE_REMOTE_DECLS None)),
         " Compute all decls for the repo and upload them to the remote decl service."
       );
       ( "--gen-saved-ignore-type-errors",
@@ -777,6 +782,7 @@ let parse_check_args cmd ~from_default =
     exit 0
   );
 
+  set_mode_from_single_files ();
   let mode = Option.value !mode ~default:MODE_STATUS in
   (* fixups *)
   let (root, paths) =

@@ -32,7 +32,7 @@ type client_mode =
   | MODE_FORMAT of int * int
   | MODE_FULL_FIDELITY_PARSE of string
   | MODE_FULL_FIDELITY_SCHEMA
-  | MODE_POPULATE_REMOTE_DECLS
+  | MODE_POPULATE_REMOTE_DECLS of string list option
   | MODE_GO_TO_IMPL_CLASS of string
   | MODE_GO_TO_IMPL_CLASS_REMOTE of string
   | MODE_GO_TO_IMPL_METHOD of string

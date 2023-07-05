@@ -46,7 +46,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | DELETE_CHECKPOINT _ -> true
   | IN_MEMORY_DEP_TABLE_SIZE -> true
   | NO_PRECHECKED_FILES -> true
-  | POPULATE_REMOTE_DECLS -> false
+  | POPULATE_REMOTE_DECLS _ -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false

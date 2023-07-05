@@ -276,8 +276,15 @@ let main_internal
     let%lwt results = rpc_with_retry args @@ Rpc.FIND_REFS action in
     ClientFindRefs.go results args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | MODE_POPULATE_REMOTE_DECLS ->
-    let%lwt (_, telemetry) = rpc args Rpc.POPULATE_REMOTE_DECLS in
+  | MODE_POPULATE_REMOTE_DECLS files ->
+    let files =
+      Option.map
+        files
+        ~f:
+          (List.map ~f:(fun path ->
+               Relative_path.create_detect_prefix (expand_path path)))
+    in
+    let%lwt (_, telemetry) = rpc args (Rpc.POPULATE_REMOTE_DECLS files) in
     Lwt.return (Exit_status.No_error, telemetry)
   | MODE_GO_TO_IMPL_CLASS class_name ->
     let%lwt results =

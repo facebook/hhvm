@@ -63,7 +63,8 @@ let get_version ~repo =
 let go
     (env : ServerEnv.env)
     (genv : ServerEnv.genv)
-    (workers : MultiWorker.worker list option) : unit =
+    (workers : MultiWorker.worker list option)
+    (files : Relative_path.t list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   (* TODO: the following is a bug! *)
   let repo = Wwwroot.interpret_command_line_root_parameter [] in
@@ -72,13 +73,6 @@ let go
   Hh_logger.log "Will upload to manifold directory %s" manifold_dir;
   let cmd = Printf.sprintf "manifold mkdirs %s" manifold_dir in
   ignore (Sys.command cmd);
-
-  let get_next =
-    ServerUtils.make_next
-      ~hhi_filter:(fun _ -> true)
-      ~indexer:(genv.ServerEnv.indexer FindUtils.file_filter)
-      ~extra_roots:(ServerConfig.extra_paths genv.ServerEnv.config)
-  in
 
   let job (acc : (string * string) list) (fnl : Relative_path.t list) :
       (string * string) list =
@@ -106,12 +100,19 @@ let go
   in
 
   let results =
-    MultiWorker.call
-      workers
-      ~job
-      ~neutral:[]
-      ~merge:List.rev_append
-      ~next:get_next
+    match files with
+    | None ->
+      MultiWorker.call
+        workers
+        ~job
+        ~neutral:[]
+        ~merge:List.rev_append
+        ~next:
+          (ServerUtils.make_next
+             ~hhi_filter:(fun _ -> true)
+             ~indexer:(genv.ServerEnv.indexer FindUtils.file_filter)
+             ~extra_roots:(ServerConfig.extra_paths genv.ServerEnv.config))
+    | Some files -> job [] files
   in
 
   let _ = Remote_old_decls_ffi.put_decls ~silent:false version results in

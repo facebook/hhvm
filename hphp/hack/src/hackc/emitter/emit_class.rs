@@ -96,6 +96,7 @@ fn make_86method<'arena, 'decl>(
     attrs.set(Attr::AttrAbstract, is_abstract);
     attrs.set(Attr::AttrStatic, is_static);
     attrs.set(Attr::AttrBuiltin, emitter.systemlib());
+    attrs.set(Attr::AttrPersistent, emitter.systemlib());
     attrs.add(Attr::from(visibility));
 
     let attributes = vec![];

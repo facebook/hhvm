@@ -195,7 +195,6 @@ CompilerResult hackc_compile(
     .filepath = filename,
     .jit_enable_rename_function = getRenameFunctionValue(),
     .hhbc_flags = hackc::HhbcFlags {
-      .repo_authoritative = RO::RepoAuthoritative,
       .log_extern_compiler_perf = RO::EvalLogExternCompilerPerf,
       .enable_intrinsics_extension = RO::EnableIntrinsicsExtension,
       .emit_cls_meth_pointers = RO::EvalEmitClsMethPointers,

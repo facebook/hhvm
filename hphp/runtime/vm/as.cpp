@@ -2420,10 +2420,7 @@ void parse_function(AsmState& as) {
 
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
-
-  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrPersistent &&
-                                         attrs & AttrBuiltin &&
-                                         attrs & AttrUnique));
+  assertx(IMPLIES(as.ue->isASystemLib(), attrs & AttrBuiltin));
 
   int line0;
   int line1;
@@ -2434,8 +2431,11 @@ void parse_function(AsmState& as) {
   if (!as.in.readname(name)) {
     as.error(".function must have a name");
   }
+  auto const sname = makeStaticString(name);
+  assertx(IMPLIES(as.ue->isASystemLib(),
+    (attrs & AttrPersistent) != RO::funcIsRenamable(sname)));
 
-  as.fe = as.ue->newFuncEmitter(makeStaticString(name));
+  as.fe = as.ue->newFuncEmitter(sname);
   as.fe->init(line0, line1, attrs, nullptr);
 
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});

@@ -189,8 +189,8 @@ void FuncEmitter::init(int l1, int l2, Attr attrs_,
                        const StringData* docComment_) {
   line1 = l1;
   line2 = l2;
-  attrs = fix_attrs(attrs_);
   docComment = docComment_;
+  attrs = attrs_;
 
   assertx(!ue().isASystemLib() || attrs & AttrBuiltin);
 }
@@ -211,24 +211,27 @@ const StaticString
   s_SoftInternal("__SoftInternal");
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
-  bool isGenerated = isdigit(name->data()[0]);
+  auto const isGenerated = [&]() -> bool {
+    auto slice = name->slice();
+    auto ns_pos = slice.rfind('\\');
+    return isdigit(slice.data()[ns_pos+1]);
+  }();
 
-  auto attrs = fix_attrs(this->attrs);
-  if (attrs & AttrIsMethCaller && RuntimeOption::RepoAuthoritative) {
-    attrs |= AttrPersistent | AttrUnique;
+  auto attrs = this->attrs;
+  assertx(IMPLIES(attrs & AttrIsMethCaller && RO::RepoAuthoritative,
+    attrs & AttrPersistent && attrs & AttrUnique));
+
+  DEBUG_ONLY auto persistent = ue().isASystemLib() &&
+    (!RO::funcIsRenamable(name) || preClass || isGenerated);
+
+  assertx(IMPLIES(!RO::RepoAuthoritative && attrs & AttrPersistent, persistent));
+  assertx(IMPLIES(!RO::RepoAuthoritative && !(attrs & AttrPersistent), !persistent));
+
+  if (!(attrs & AttrPersistent) && attrs & AttrBuiltin) {
+    assertx(!preClass);
+    SystemLib::s_anyNonPersistentBuiltins = true;
   }
-  if (attrs & (AttrPersistent | AttrUnique) && !preClass) {
-    if ((RuntimeOption::EvalJitEnableRenameFunction ||
-         attrs & AttrInterceptable ||
-         (!RuntimeOption::RepoAuthoritative && !ue().isASystemLib()))) {
-      if (attrs & AttrBuiltin) {
-        SystemLib::s_anyNonPersistentBuiltins = true;
-      }
-      attrs = Attr(attrs & ~(AttrPersistent | AttrUnique));
-    }
-  } else {
-    assertx(preClass || !(attrs & AttrBuiltin) || (attrs & AttrIsMethCaller));
-  }
+
   if (isAsync && !isGenerator) {
     // Async functions can return results directly.
     attrs |= AttrSupportsAsyncEagerReturn;

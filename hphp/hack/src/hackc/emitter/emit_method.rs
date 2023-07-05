@@ -8,7 +8,6 @@ use std::sync::Arc;
 use ast_scope::Lambda;
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
-use bstr::ByteSlice;
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
@@ -59,7 +58,6 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     let is_systemlib = emitter.systemlib();
     let is_dyn_callable =
         is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
-    let is_interceptable = emitter.is_interceptable(method.name.1.as_bytes().as_bstr());
     let is_no_injection = hhbc::is_no_injection(user_attrs);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_readonly_return = method.readonly_ret.is_some();
@@ -70,7 +68,7 @@ pub fn get_attrs_for_method<'a, 'arena, 'decl>(
     attrs.set(Attr::AttrBuiltin, is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_callable);
     attrs.set(Attr::AttrFinal, method.final_);
-    attrs.set(Attr::AttrInterceptable, is_interceptable);
+    attrs.add(Attr::AttrInterceptable);
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrNoInjection, is_no_injection);
     attrs.set(Attr::AttrPersistent, is_systemlib);

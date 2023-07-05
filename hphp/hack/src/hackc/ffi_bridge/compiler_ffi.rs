@@ -73,7 +73,6 @@ pub mod compile_ffi {
     struct HhbcFlags {
         ltr_assign: bool,
         uvs: bool,
-        repo_authoritative: bool,
         log_extern_compiler_perf: bool,
         enable_intrinsics_extension: bool,
         emit_cls_meth_pointers: bool,
@@ -295,7 +294,6 @@ impl compile_ffi::NativeEnv {
             hhbc_flags: HhbcFlags {
                 ltr_assign: self.hhbc_flags.ltr_assign,
                 uvs: self.hhbc_flags.uvs,
-                repo_authoritative: self.hhbc_flags.repo_authoritative,
                 log_extern_compiler_perf: self.hhbc_flags.log_extern_compiler_perf,
                 enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
                 emit_cls_meth_pointers: self.hhbc_flags.emit_cls_meth_pointers,

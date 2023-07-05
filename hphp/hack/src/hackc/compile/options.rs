@@ -99,7 +99,6 @@ pub struct HhbcFlags {
     /// PHP7 Uniform Variable Syntax
     pub uvs: bool,
 
-    pub repo_authoritative: bool,
     pub log_extern_compiler_perf: bool,
     pub enable_intrinsics_extension: bool,
     pub emit_cls_meth_pointers: bool,
@@ -117,7 +116,6 @@ impl Default for HhbcFlags {
         Self {
             ltr_assign: false,
             uvs: false,
-            repo_authoritative: false,
             log_extern_compiler_perf: false,
             enable_intrinsics_extension: false,
             emit_cls_meth_pointers: true,

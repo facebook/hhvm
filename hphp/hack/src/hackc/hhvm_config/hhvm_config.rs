@@ -30,7 +30,6 @@ pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
 
     init(&mut flags.ltr_assign, "php7.ltr_assign")?;
     init(&mut flags.uvs, "php7.uvs")?;
-    init(&mut flags.repo_authoritative, "Repo.Authoritative")?;
     init(
         &mut flags.log_extern_compiler_perf,
         "Eval.LogExternCompilerPerf",

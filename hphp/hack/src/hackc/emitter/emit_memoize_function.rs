@@ -52,21 +52,22 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
         is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_meth_caller = hhbc::has_meth_caller(user_attrs);
+    let is_persistent = is_systemlib
+        && !emitter
+            .options()
+            .function_is_renamable(fd.name.1.as_bytes().as_bstr());
 
     let mut attrs = Attr::AttrNone;
+    attrs.add(Attr::AttrInterceptable);
+    attrs.set(Attr::AttrPersistent, is_persistent);
     attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
     attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
-    attrs.set(
-        Attr::AttrInterceptable,
-        emitter.is_interceptable(fd.name.1.as_bytes().as_bstr()),
-    );
     attrs.set(Attr::AttrIsFoldable, hhbc::has_foldable(user_attrs));
     attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
     attrs.set(Attr::AttrNoInjection, hhbc::is_no_injection(user_attrs));
-    attrs.set(Attr::AttrPersistent, is_systemlib);
     attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
     attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
-    attrs.set(Attr::AttrUnique, is_systemlib);
+    attrs.set(Attr::AttrUnique, is_persistent);
     attrs.set(Attr::AttrInternal, fd.internal);
     attrs.set(Attr::AttrVariadicParam, has_variadic);
     attrs

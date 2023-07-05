@@ -1158,6 +1158,16 @@ Optional<std::filesystem::path> RuntimeOption::GetHomePath(
   return std::nullopt;
 }
 
+bool RuntimeOption::funcIsRenamable(const StringData* name) {
+  if (RO::EvalJitEnableRenameFunction == 0) return false;
+  if (RO::EvalJitEnableRenameFunction == 2) {
+    return RO::RenamableFunctions.find(name->data()) !=
+      RO::RenamableFunctions.end();
+  } else {
+    return true;
+  }
+}
+
 std::string RuntimeOption::GetDefaultUser() {
   if (SandboxDefaultUserFile.empty()) return {};
 

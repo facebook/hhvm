@@ -1616,6 +1616,8 @@ public:
   static bool SetProfileNullThisObject;
 
   static bool ApplySecondaryQueuePenalty;
+
+  static bool funcIsRenamable(const StringData* name);
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

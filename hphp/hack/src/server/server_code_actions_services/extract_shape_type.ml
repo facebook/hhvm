@@ -1,11 +1,21 @@
 open Hh_prelude
 
-type candidate = {
-  tast_env: Tast_env.t;
-  (* the function or class containing the shape expression *)
-  container_pos: Pos.t;
-  shape_ty: Typing_defs.locl_ty;
-}
+type candidate =
+  | Of_expr of {
+      tast_env: Tast_env.t;
+      (* the function or class containing the shape expression *)
+      expr_container_pos: Pos.t;
+      shape_ty: Typing_defs.locl_ty;
+    }
+  | Of_hint of {
+      hint_container_pos: Pos.t;
+      hint_pos: Pos.t;
+    }
+
+(** We use distinct titles so we can tell the refactors apart in analytics *)
+let title_of_candidate = function
+  | Of_expr _ -> "Extract shape type"
+  | Of_hint _ -> "Extract shape type to alias"
 
 type state =
   | Searching of (Pos.t * candidate) option
@@ -54,6 +64,13 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
         ) else
           Searching None
 
+      method! on_type_hint_ env hint_ =
+        match Option.both hint_ !container_pos with
+        | Some ((hint_pos, Aast_defs.Hshape _), hint_container_pos)
+          when Pos.contains selection hint_pos ->
+          Searching (Some (hint_pos, Of_hint { hint_container_pos; hint_pos }))
+        | _ -> super#on_type_hint_ env hint_
+
       method! on_fun_def env fd =
         let pos = Aast_defs.(fd.fd_fun.f_span) in
         if Pos.contains pos selection then (
@@ -67,9 +84,12 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
         if Pos.contains selection expr_pos then
           let ty_ = Typing_defs_core.get_node ty in
           match (ty_, !container_pos) with
-          | (Typing_defs_core.Tshape _, Some container_pos) ->
+          | (Typing_defs_core.Tshape _, Some expr_container_pos) ->
             Searching
-              (Some (expr_pos, { tast_env = env; container_pos; shape_ty = ty }))
+              (Some
+                 ( expr_pos,
+                   Of_expr { tast_env = env; expr_container_pos; shape_ty = ty }
+                 ))
           | _ -> Selected_non_shape_type expr_pos
         else
           super#on_expr env expr
@@ -81,24 +101,52 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
   | Selected_non_shape_type _ ->
     None
 
-let edit_of_candidate ~path { shape_ty; container_pos; tast_env } :
-    Lsp.WorkspaceEdit.t =
-  let edit =
-    let pos = Pos.shrink_to_start container_pos in
-    let range =
-      Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
-    in
-    let tenv = Tast_env.tast_env_as_typing_env tast_env in
-    let ty_text = Typing_print.full_strip_ns tenv shape_ty in
-    let text = Printf.sprintf "type T${0:placeholder_} = %s;\n\n" ty_text in
-    Lsp.TextEdit.{ range; newText = text }
+let snippet_for_decl_of : string -> string =
+  Printf.sprintf "type T${0:placeholder_} = %s;\n\n"
+
+let snippet_for_use = "T${0:placeholder_}"
+
+let range_of_container_pos container_pos : Lsp.range =
+  let pos = Pos.shrink_to_start container_pos in
+  Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
+
+let edit_of_candidate source_text ~path candidate : Lsp.WorkspaceEdit.t =
+  let sub_of_pos = Full_fidelity_source_text.sub_of_pos source_text in
+  let edits =
+    match candidate with
+    | Of_expr { shape_ty; expr_container_pos; tast_env } ->
+      let range = range_of_container_pos expr_container_pos in
+      let text =
+        let ty_text =
+          let tenv = Tast_env.tast_env_as_typing_env tast_env in
+          Typing_print.full_strip_ns tenv shape_ty
+        in
+        snippet_for_decl_of ty_text
+      in
+      [Lsp.TextEdit.{ range; newText = text }]
+    | Of_hint { hint_container_pos; hint_pos } ->
+      let decl_edit =
+        let range = range_of_container_pos hint_container_pos in
+        let text =
+          let ty_text = sub_of_pos hint_pos in
+          snippet_for_decl_of ty_text
+        in
+        Lsp.TextEdit.{ range; newText = text }
+      in
+      let use_edit =
+        let range =
+          Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal hint_pos
+        in
+        Lsp.TextEdit.{ range; newText = snippet_for_use }
+      in
+      [decl_edit; use_edit]
   in
-  let changes = SMap.singleton (Relative_path.to_absolute path) [edit] in
+  let changes = SMap.singleton (Relative_path.to_absolute path) edits in
   Lsp.WorkspaceEdit.{ changes }
 
-let to_refactor ~path candidate =
-  let edit = lazy (edit_of_candidate ~path candidate) in
-  Code_action_types.Refactor.{ title = "Extract shape type"; edit }
+let to_refactor source_text ~path candidate =
+  let edit = lazy (edit_of_candidate source_text ~path candidate) in
+  Code_action_types.Refactor.{ title = title_of_candidate candidate; edit }
 
 let find ~entry ~(range : Lsp.range) ctx =
   let source_text = Ast_provider.compute_source_text ~entry in
@@ -108,5 +156,5 @@ let find ~entry ~(range : Lsp.range) ctx =
   let path = entry.Provider_context.path in
   let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
   find_candidate ~selection ~entry ctx
-  |> Option.map ~f:(to_refactor ~path)
+  |> Option.map ~f:(to_refactor source_text ~path)
   |> Option.to_list

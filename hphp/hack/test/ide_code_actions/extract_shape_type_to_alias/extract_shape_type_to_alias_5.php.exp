@@ -1,0 +1,36 @@
+Code actions available:
+------------------------------------------
+Extract shape type to alias (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"type T${0:placeholder_} = shape('a' => int, ...);\n\n",
+          "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
+        },
+        {
+          "newText":"T${0:placeholder_}",
+          "range":{"end":{"character":53,"line":2},"start":{"character":31,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract shape type to alias"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+type T${0:placeholder_} = shape('a' => int, ...);
+
+function foo(): /*range-start*/T${0:placeholder_}/*range-end*/ {
+    return shape('a' => 1);
+}
+

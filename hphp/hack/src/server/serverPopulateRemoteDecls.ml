@@ -22,17 +22,9 @@ let ( >>= ) res f =
       | Ok r -> f r
       | Error e -> Future.Promise.return (Error e))
 
-let ( >|= ) = Future.Promise.bind
-
 let return_ok x = Future.Promise.return (Ok x)
 
 let return_err x = Future.Promise.return (Error x)
-
-let get_name_and_decl_hashes_from_decls decls : (string * Int64.t) list =
-  List.filter_map decls ~f:(fun (name, decl, decl_hash) ->
-      match decl with
-      | Shallow_decl_defs.Class _ -> Some (name, decl_hash)
-      | _ -> None)
 
 let get_hhconfig_version ~(repo : Path.t) :
     (string, string) result Future.Promise.t =

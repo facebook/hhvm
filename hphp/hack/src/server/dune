@@ -463,7 +463,6 @@
   serverFileDependents
   serverFileSync
   serverFormat
-  serverGenPrefetchDir
   serverIdle
   serverInferTypeBatch
   serverTastHolesBatch
@@ -472,6 +471,7 @@
   serverLint
   serverMethodJumps
   serverMethodJumpsBatch
+  serverPopulateRemoteDecls
   serverRage
   serverRename
   serverRewriteLambdaParameters

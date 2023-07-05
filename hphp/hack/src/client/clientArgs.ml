@@ -392,9 +392,13 @@ let parse_check_args cmd ~from_default =
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
       );
       ( "--gen-prefetch-dir",
-        Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),
-        " generate a directory of decls and typecheck dependencies to use for prefetching"
-        ^ " Usage: --gen-prefetch-dir ~/prefetched-dir" );
+        Arg.String (fun _x -> set_mode MODE_POPULATE_REMOTE_DECLS),
+        " Compute all decls for the repo and upload them to the remote decl service."
+        ^ " Usage: --gen-prefetch-dir unused" );
+      ( "--populate-remote-decls",
+        Arg.Unit (fun () -> set_mode MODE_POPULATE_REMOTE_DECLS),
+        " Compute all decls for the repo and upload them to the remote decl service."
+      );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         " generate a saved state even if there are type errors (default: false)."

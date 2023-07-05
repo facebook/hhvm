@@ -411,10 +411,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, Error (Exception.to_string e))
   end
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
-  | GEN_PREFETCH_DIR dir ->
-    (* TODO(bobren) remove dir entirely from saved state job invocation *)
-    let _ = dir in
-    (env, ServerGenPrefetchDir.go env genv genv.workers)
+  | POPULATE_REMOTE_DECLS ->
+    (env, ServerPopulateRemoteDecls.go env genv genv.workers)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)

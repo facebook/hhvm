@@ -316,6 +316,8 @@ module UserAttributes = struct
 
   let uaNativeData = "__NativeData"
 
+  let uaEagerVMSync = "__EagerVMSync"
+
   let uaOutOnly = "__OutOnly"
 
   let uaAlwaysInline = "__ALWAYS_INLINE"
@@ -795,6 +797,13 @@ module UserAttributes = struct
               doc =
                 "Declares a native function."
                 ^ " This declares the signature, the implementation will be in an HHVM extension (usually C++).";
+            } );
+          ( uaEagerVMSync,
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Declares that runtime will eagerly sync vm registers for this function.";
             } );
           ( uaOutOnly,
             {

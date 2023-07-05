@@ -29,7 +29,7 @@ namespace {
  *   array  If inside a function, this lists the functions arguments. If
  *   inside an included file, this lists the included file name(s).
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection"), __EagerVMSync>>
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
                          int $limit = 0): vec<dict<string, mixed>>;
 
@@ -47,7 +47,7 @@ function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
  *
  * @return void -
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection"), __EagerVMSync>>
 function debug_print_backtrace(int $options = 0,
                                int $limit = 0): void;
 
@@ -249,7 +249,7 @@ function hphp_clear_unflushed(): void;
  *    indicate the filename, function, line number and class name (if in class
  *    context) of the callsite that invoked the current function or method.
  */
-<<__Native>>
+<<__Native, __EagerVMSync>>
 function hphp_debug_caller_info()[leak_safe]: darray<string, mixed>;
 
 <<__Native("NoInjection")>>

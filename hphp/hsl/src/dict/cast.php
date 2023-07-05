@@ -14,6 +14,7 @@ namespace HH\Lib\Dict;
  * Casts the given traversable to a dict, resetting the legacy array mark
  * if applicable.
  */
+<<__NoAutoLikes>>
 function cast_clear_legacy_array_mark<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $x,
 )[]: dict<Tk, Tv> {

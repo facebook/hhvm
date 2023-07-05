@@ -109,7 +109,7 @@ Dict\associate
 Dict\cast_clear_legacy_array_mark
   INSERT Dict\cast_clear_legacy_array_mark(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $x): ~dict<Tk, Tv>)
+  (function(KeyedTraversable<Tk, Tv> $x): dict<Tk, Tv>)
 Dict\chunk
   INSERT Dict\chunk(
   INSERT , ${1:\$size})
@@ -325,7 +325,7 @@ Str\join
 Vec\cast_clear_legacy_array_mark
   INSERT Vec\cast_clear_legacy_array_mark(
   INSERT )
-  (function(Traversable<T> $x): ~vec<T>)
+  (function(Traversable<T> $x): vec<T>)
 Vec\chunk
   INSERT Vec\chunk(
   INSERT , ${1:\$size})

@@ -329,15 +329,15 @@ class C {
   // TEST-CHECK-BAL: define C._86pinit
   // CHECK: define C._86pinit($this: *C) : *HackMixed {
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_int(42)
-  // CHECK:   n1: *HackMixed = load &$this
-  // CHECK:   store n1.?.prop1 <- n0: *HackMixed
+  // CHECK:   n0: *HackMixed = load &$this
+  // CHECK:   n1 = $builtins.hack_int(42)
+  // CHECK:   store n0.?.prop1 <- n1: *HackMixed
   // CHECK:   n2 = $builtins.hack_string("hello")
-  // CHECK:   store n1.?.prop2 <- n2: *HackMixed
+  // CHECK:   store n0.?.prop2 <- n2: *HackMixed
   // CHECK:   n3 = null
-  // CHECK:   store n1.?.prop5 <- n3: *HackMixed
+  // CHECK:   store n0.?.prop5 <- n3: *HackMixed
   // CHECK:   n4 = $builtins.hack_int(2)
-  // CHECK:   store n1.?.type <- n4: *HackMixed
+  // CHECK:   store n0.?.type <- n4: *HackMixed
   // CHECK:   jmp b1, b2
   // CHECK: #b1:
   // CHECK:   prune $builtins.hack_is_true($builtins.hack_bool(false))

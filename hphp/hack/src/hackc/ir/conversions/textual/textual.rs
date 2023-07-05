@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -924,6 +925,18 @@ where
 {
     fn into_exprs(self) -> Vec<Expr> {
         vec![self.0.into(), self.1.into(), self.2.into()]
+    }
+}
+
+impl<P1, P2, P3, P4> VarArgs for (P1, P2, P3, P4)
+where
+    P1: Into<Expr>,
+    P2: Into<Expr>,
+    P3: Into<Expr>,
+    P4: Into<Expr>,
+{
+    fn into_exprs(self) -> Vec<Expr> {
+        vec![self.0.into(), self.1.into(), self.2.into(), self.3.into()]
     }
 }
 

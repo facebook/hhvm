@@ -39,6 +39,7 @@ use crate::profile::DurationEx;
 
 /// Hack Compiler
 #[derive(Parser, Debug, Default)]
+#[command(author = "hphp_hphpi")]
 struct Opts {
     #[clap(subcommand)]
     command: Option<Command>,

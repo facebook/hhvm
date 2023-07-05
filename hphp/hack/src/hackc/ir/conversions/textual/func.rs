@@ -251,20 +251,12 @@ fn write_func(
         .collect::<HashSet<_>>();
     // TODO(arr): figure out how to provide more precise types
     let local_ty = textual::Ty::VoidPtr;
-    let mut locals = lids
+    let locals = lids
         .into_iter()
         .filter(|lid| !param_lids.contains(lid))
         .sorted_by(|x, y| cmp_lid(&strings, x, y))
         .zip(std::iter::repeat(&local_ty))
         .collect::<Vec<_>>();
-
-    // See if we need a temp var for use by member_ops.
-    let base_ty;
-    if member_op::func_needs_base_var(&func) {
-        let base = member_op::base_var(&strings);
-        base_ty = textual::Ty::mixed_ptr();
-        locals.push((base, &base_ty));
-    }
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
@@ -357,9 +349,6 @@ pub(crate) fn write_func_decl(
         .collect_vec();
 
     let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
-
-    // See if we need a temp var for use by member_ops.
-    if member_op::func_needs_base_var(&func) {}
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
@@ -534,16 +523,19 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             state.set_iid(iid, output);
         }
         Instr::Hhbc(Hhbc::SetS([field, class, value], _, _)) => {
+            // Note that "easy" SetS are lowered before this point.
             let class_str = lookup_constant_string(state.func, class);
             let field_str = lookup_constant_string(state.func, field);
             let value = state.lookup_vid(value);
             match (class_str, field_str) {
                 (None, Some(f)) => {
-                    // "C"::foo
-                    let obj = member_op::base_from_vid(state, class)?;
+                    // $x::foo
+                    let obj = state.lookup_vid(class);
                     let field = util::escaped_string(&state.strings.lookup_bstr(f));
-                    let dst = state.call_builtin(hack::Builtin::DimFieldGet, (obj, field))?;
-                    state.store_mixed(dst, value.clone())?;
+                    state.store_mixed(
+                        Expr::field(obj, textual::Ty::unknown(), field),
+                        value.clone(),
+                    )?;
                 }
                 // Although the rest of these are technically valid they're
                 // basically impossible to produce with HackC.

@@ -887,18 +887,19 @@ impl FunctionParser<'_, '_> {
                     BaseOp::BaseGC { mode, loc }
                 }
                 s if is_vid(s) => {
-                    let vid = self.vid(tokenizer)?;
-                    operands.push(vid);
+                    let vid_cls = self.vid(tokenizer)?;
 
                     if tokenizer.next_is_identifier("::")? {
-                        let vid = self.vid(tokenizer)?;
-                        operands.push(vid);
+                        let vid_prop = self.vid(tokenizer)?;
+                        operands.push(vid_prop);
+                        operands.push(vid_cls);
                         BaseOp::BaseSC {
                             mode,
                             loc,
                             readonly,
                         }
                     } else {
+                        operands.push(vid_cls);
                         BaseOp::BaseC { mode, loc }
                     }
                 }

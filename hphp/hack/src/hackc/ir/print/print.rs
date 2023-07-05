@@ -1599,8 +1599,8 @@ fn print_member_op(
             if readonly != ReadonlyOp::Any {
                 write!(w, "{} ", FmtReadonly(readonly))?;
             }
-            let cls = operands.next().unwrap();
             let prop = operands.next().unwrap();
+            let cls = operands.next().unwrap();
             write!(
                 w,
                 "{}::{}",

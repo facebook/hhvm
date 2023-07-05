@@ -47,9 +47,9 @@ function check2(int $c): void  {
 // CHECK:   n1 = $root.call(null, n0)
 // CHECK:   n2 = $builtins.hack_int(0)
 // CHECK:   n3 = $builtins.hack_int(7)
-// CHECK:   n4 = $builtins.hack_array_cow_set(&$a, n2, n3)
-// CHECK:   n5: *HackMixed = load &$a
-// CHECK:   n6 = $root.call(null, n5)
+// CHECK:   n4 = $builtins.hack_array_cow_set(n0, n2, n3)
+// CHECK:   store &$a <- n4: *HackMixed
+// CHECK:   n5 = $root.call(null, n4)
 // CHECK:   ret null
 // CHECK: }
 function check3(): void {

@@ -63,7 +63,7 @@ function f2_null(?A $arg): string {
 
 // TEST-CHECK-BAL: define $root.NullCheck::f3_as_nonnull
 // CHECK: define $root.NullCheck::f3_as_nonnull($this: *void, $arg: *NullCheck::A) : *HackString {
-// CHECK: local $0: *void, $1: *void, base: *HackMixed
+// CHECK: local $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(23))
 // CHECK:   n1: *HackMixed = load &$arg

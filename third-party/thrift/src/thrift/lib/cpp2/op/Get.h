@@ -165,6 +165,16 @@ FOLLY_INLINE_VARIABLE constexpr detail::Get<Id, T> get = {};
 ///   // returns nullptr if optional field doesn't have a value.
 FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull getValueOrNull;
 
+/// Gets the field ref type of Thrift field, for example:
+///
+///     std::is_same_v<
+///         get_field_ref<MyS, ident::foo>,
+///         optional_field_ref<std::string&>>;
+///
+template <typename T, typename Id>
+using get_field_ref =
+    folly::remove_cvref_t<decltype(get<Id>(std::declval<T&>()))>;
+
 // Implementation details.
 namespace detail {
 template <typename Id, typename Tag>

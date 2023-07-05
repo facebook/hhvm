@@ -90,7 +90,7 @@ let edit_of_candidate ~path { shape_ty; container_pos; tast_env } :
     in
     let tenv = Tast_env.tast_env_as_typing_env tast_env in
     let ty_text = Typing_print.full_strip_ns tenv shape_ty in
-    let text = Printf.sprintf "type placeholder_ = %s;\n\n" ty_text in
+    let text = Printf.sprintf "type T${0:placeholder_} = %s;\n\n" ty_text in
     Lsp.TextEdit.{ range; newText = text }
   in
   let changes = SMap.singleton (Relative_path.to_absolute path) [edit] in

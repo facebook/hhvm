@@ -18,6 +18,8 @@ namespace cpp2 apache.thrift.test
 
 cpp_include "folly/sorted_vector_types.h"
 
+include "thrift/annotation/cpp.thrift"
+
 enum enum1 {
   field0 = 0,
   field1 = 1,
@@ -154,6 +156,5 @@ const double minNDub = -2.2250738585072014e-308;
 const double minNSDub = -4.9406564584124654e-324;
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<i32, i32> (
-  cpp.template = "folly::sorted_vector_map",
-) map_i32_i32_7023
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, i32> map_i32_i32_7023

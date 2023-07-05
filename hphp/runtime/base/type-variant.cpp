@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -121,19 +122,52 @@ Variant Variant::fromDynamic(const folly::dynamic& dy) {
 
 namespace {
 
+template<bool OnlyVanilla>
 void vecReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaVec::Release(ad) : BespokeArray::Release(ad);
-}
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
 
+  if (OnlyVanilla) {
+    VanillaVec::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaVec::Release(ad) : BespokeArray::Release(ad);
+  }
+}
+template void vecReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void vecReleaseWrapper<true>(ArrayData* ad) noexcept;
+
+template<bool OnlyVanilla>
 void dictReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaDict::Release(ad) : BespokeArray::Release(ad);
-}
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
 
-void keysetReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaKeyset::Release(ad) : BespokeArray::Release(ad);
+  if (OnlyVanilla) {
+    VanillaDict::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaDict::Release(ad) : BespokeArray::Release(ad);
+  }
 }
+template void dictReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void dictReleaseWrapper<true>(ArrayData* ad) noexcept;
+
+template<bool OnlyVanilla>
+void keysetReleaseWrapper(ArrayData* ad) noexcept {
+  if (OnlyVanilla) {
+    VanillaKeyset::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaKeyset::Release(ad) : BespokeArray::Release(ad);
+  }
+}
+template void keysetReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void keysetReleaseWrapper<true>(ArrayData* ad) noexcept;
 
 void objReleaseWrapper(ObjectData* obj) noexcept {
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
+
   auto const cls = obj->getVMClass();
   cls->releaseFunc()(obj, cls);
 }
@@ -148,9 +182,9 @@ RawDestructors computeDestructors() {
   auto const set = [&](auto const type, auto const destructor) {
     result[typeToDestrIdx(type)] = (RawDestructor)destructor;
   };
-  set(KindOfVec,      &vecReleaseWrapper);
-  set(KindOfDict,     &dictReleaseWrapper);
-  set(KindOfKeyset,   &keysetReleaseWrapper);
+  set(KindOfVec,      &vecReleaseWrapper<false>);
+  set(KindOfDict,     &dictReleaseWrapper<false>);
+  set(KindOfKeyset,   &keysetReleaseWrapper<false>);
   set(KindOfString,   getMethodPtr(&StringData::release));
   set(KindOfObject,   &objReleaseWrapper);
   set(KindOfResource, getMethodPtr(&ResourceHdr::release));
@@ -170,9 +204,9 @@ void specializeVanillaDestructors() {
     if (allowBespokeArrayLikes() && arrayTypeCouldBeBespoke(type)) return;
     g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
   };
-  specialize(KindOfVec,    &VanillaVec::Release);
-  specialize(KindOfDict,   &VanillaDict::Release);
-  specialize(KindOfKeyset, &VanillaKeyset::Release);
+  specialize(KindOfVec,    &vecReleaseWrapper<true>);
+  specialize(KindOfDict,   &dictReleaseWrapper<true>);
+  specialize(KindOfKeyset, &keysetReleaseWrapper<true>);
 }
 
 #define IMPLEMENT_SET(argType, setOp)                     \

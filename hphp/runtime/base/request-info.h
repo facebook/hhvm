@@ -82,6 +82,7 @@ struct RequestInfo {
    * recursion exception.
    */
   static constexpr int StackSlack = 1024 * 1024;
+  static thread_local uintptr_t s_stackLimitWithSlack;
 
   /*
    * Since this is often used as a static global, we want to do anything that
@@ -162,7 +163,7 @@ inline void* stack_top_ptr() {
 NEVER_INLINE void* stack_top_ptr_conservative();
 
 inline bool stack_in_bounds() {
-  return uintptr_t(stack_top_ptr()) >= s_stackLimit + RequestInfo::StackSlack;
+  return uintptr_t(stack_top_ptr()) >= RequestInfo::s_stackLimitWithSlack;
 }
 
 /*

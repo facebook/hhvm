@@ -24,6 +24,7 @@ HPHP::(anonymous namespace)::tl_proc
 HPHP::(anonymous namespace)::tl_ucred
 HPHP::ResolverInit::s_res
 HPHP::s_stackLimit
+HPHP::RequestInfo::s_stackLimitWithSlack
 HPHP::MemcachedData::s_persistentMap
 HPHP::s_ini_setting
 HPHP::s_json_parser

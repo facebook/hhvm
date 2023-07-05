@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <limits>
 #include <memory>
 
@@ -30,8 +31,8 @@ namespace apache::thrift {
 
 class RoundRobinRequestPile : public RequestPileBase {
  public:
-  using Priority = unsigned int;
-  using Bucket = unsigned int;
+  using Priority = uint32_t;
+  using Bucket = uint32_t;
   // Function to specify priority and bucket for a request. The priority must be
   // <= the number of priorities (lower numbers have higher priority). The
   // bucket must be <= the number of buckets available at the specified

@@ -877,6 +877,11 @@ void ThriftServer::setupThreadManager() {
       LOG(INFO) << fmt::format("Resource pool [{}]: {}", count++, description);
     }
   }
+  if (FLAGS_thrift_server_enforces_qps_limit) {
+    LOG(INFO) << "QPS limit will be enforced by Thrift Server";
+  } else {
+    LOG(INFO) << "QPS limit will be enforced by Resource Pool";
+  }
 }
 
 namespace {

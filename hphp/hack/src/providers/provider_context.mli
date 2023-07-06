@@ -231,7 +231,7 @@ val implicit_sdt_for_class : t -> Shallow_decl_defs.shallow_class option -> bool
 
 val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
 
-val implicit_likes_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
+val no_auto_likes_for_fun : Shallow_decl_defs.fun_decl -> bool
 
 val get_package_info : t -> PackageInfo.t
 

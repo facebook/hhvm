@@ -600,52 +600,55 @@ let pessimise_param_type fp =
   avoid hierarchy errors.
 
 *)
-let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
+let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
   match get_node ty with
   | Tfun ft ->
-    let return_from_async = get_ft_async ft in
-    let ret_ty = ft.ft_ret.et_type in
     let ft =
-      {
-        ft with
-        ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
-        ft_params = List.map ft.ft_params ~f:pessimise_param_type;
-      }
+      { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
     in
-    (match
-       ( fun_kind,
-         TypecheckerOptions.(
-           experimental_feature_enabled
-             (Provider_context.get_tcopt ctx)
-             experimental_always_pessimise_return) )
-     with
-    | (Concrete_method, true)
-    | (Abstract_method, _) ->
-      mk
-        ( get_reason ty,
-          Tfun
-            (update_return_ty
-               ft
-               (make_like_type ~intersect_with:None ~return_from_async ret_ty))
-        )
-    | _ ->
-      (match get_enforcement ~return_from_async ~this_class ctx ret_ty with
-      | Enforced _ -> mk (get_reason ty, Tfun ft)
-      | Unenforced enf_ty_opt ->
-        (* For partially enforced type such as enums, we intersect with the
-         * base type for concrete method return types in order to avoid
-         * issues with hierarchies e.g. overriding a method that returns
-         * the base type
-         *)
-        let intersect_with =
-          match fun_kind with
-          | Concrete_method -> enf_ty_opt
-          | _ -> None
-        in
+    if no_auto_likes then
+      mk (get_reason ty, Tfun ft)
+    else
+      let return_from_async = get_ft_async ft in
+      let ret_ty = ft.ft_ret.et_type in
+      let ft =
+        { ft with ft_params = List.map ft.ft_params ~f:pessimise_param_type }
+      in
+      (match
+         ( fun_kind,
+           TypecheckerOptions.(
+             experimental_feature_enabled
+               (Provider_context.get_tcopt ctx)
+               experimental_always_pessimise_return) )
+       with
+      | (Concrete_method, true)
+      | (Abstract_method, _) ->
         mk
           ( get_reason ty,
             Tfun
               (update_return_ty
                  ft
-                 (make_like_type ~intersect_with ~return_from_async ret_ty)) )))
+                 (make_like_type ~intersect_with:None ~return_from_async ret_ty))
+          )
+      | _ ->
+        (match get_enforcement ~return_from_async ~this_class ctx ret_ty with
+        | Enforced _ -> mk (get_reason ty, Tfun ft)
+        | Unenforced enf_ty_opt ->
+          (* For partially enforced type such as enums, we intersect with the
+           * base type for concrete method return types in order to avoid
+           * issues with hierarchies e.g. overriding a method that returns
+           * the base type
+           *)
+          let intersect_with =
+            match fun_kind with
+            | Concrete_method -> enf_ty_opt
+            | _ -> None
+          in
+          mk
+            ( get_reason ty,
+              Tfun
+                (update_return_ty
+                   ft
+                   (make_like_type ~intersect_with ~return_from_async ret_ty))
+            )))
   | _ -> ty

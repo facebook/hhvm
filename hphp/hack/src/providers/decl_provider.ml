@@ -130,7 +130,8 @@ let get_class
   end
 
 let maybe_pessimise_fun_decl ctx fun_decl =
-  if Provider_context.implicit_likes_for_fun ctx fun_decl then
+  if Provider_context.implicit_sdt_for_fun ctx fun_decl then
+    let no_auto_likes = Provider_context.no_auto_likes_for_fun fun_decl in
     Typing_defs.
       {
         fun_decl with
@@ -139,6 +140,7 @@ let maybe_pessimise_fun_decl ctx fun_decl =
             pessimise_fun_type
               ~fun_kind:Function
               ~this_class:None
+              ~no_auto_likes
               ctx
               fun_decl.fe_pos
               fun_decl.fe_type);

@@ -107,6 +107,7 @@ type fun_kind =
 val pessimise_fun_type :
   fun_kind:fun_kind ->
   this_class:Shallow_decl_defs.shallow_class option ->
+  no_auto_likes:bool ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty ->

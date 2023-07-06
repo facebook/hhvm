@@ -699,7 +699,7 @@ let build_method_fun_elt
       fe_deprecated = None;
       fe_type =
         (if
-         (not (fe_no_auto_dynamic || fe_no_auto_likes))
+         (not fe_no_auto_dynamic)
          && Provider_context.implicit_sdt_for_class ctx this_class
         then
           Decl_enforceability.(
@@ -710,6 +710,7 @@ let build_method_fun_elt
                 else
                   Concrete_method)
               ~this_class
+              ~no_auto_likes:fe_no_auto_likes
               ctx
               pos
               m.sm_type)

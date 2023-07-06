@@ -1003,6 +1003,43 @@ TEST(StructPatchTest, EnsureStructValPatchable) {
   EXPECT_EQ(foo.structVal(), data);
 }
 
+TEST(StructPatchTest, AssignAndPatch) {
+  {
+    MyStructPatch patch;
+    MyStruct myStruct;
+    myStruct.optStringVal() = "1";
+    patch = myStruct;
+    patch.patchIfSet<ident::optStringVal>() += "2";
+
+    MyStruct foo;
+    foo.optStringVal() = "3";
+    patch.apply(foo);
+    EXPECT_EQ(foo.optStringVal(), "12");
+  }
+  {
+    MyStructPatch patch;
+    MyStruct myStruct;
+    myStruct.optStringVal() = "1";
+    patch = myStruct;
+    patch.patchIfSet<ident::optStringVal>().clear();
+
+    MyStruct foo;
+    foo.optStringVal() = "3";
+    patch.apply(foo);
+    EXPECT_FALSE(foo.optStringVal().has_value());
+  }
+  {
+    MyStructPatch patch;
+    patch.assign({});
+    patch.patchIfSet<ident::stringVal>() += "1";
+
+    MyStruct foo;
+    foo.stringVal() = "2";
+    patch.apply(foo);
+    EXPECT_EQ(foo.stringVal(), "1");
+  }
+}
+
 TEST(StructPatchTest, EnsureOptStructValPatchable) {
   MyData data;
   data.data2() = 42;

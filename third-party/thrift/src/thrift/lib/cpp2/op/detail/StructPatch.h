@@ -167,7 +167,9 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Returns the proper patch object for the given field.
   template <typename Id>
   decltype(auto) patchIfSet() {
-    return ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
+    ensurePatchable();
+    return ensures<Id>() ? getRawPatch<Id>(data_.patch())
+                         : getRawPatch<Id>(data_.patchPrior());
   }
 
   /// @copybrief AssignPatch::customVisit

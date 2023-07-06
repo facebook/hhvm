@@ -302,7 +302,7 @@ fn hint_to_type_constant_list<'arena>(
                 }
             }
             let hints = match &hints[..] {
-                [h] if name == typehints::POISON_MARKER || name == typehints::SUPPORTDYN_MARKER => {
+                [h] if name == typehints::POISON_MARKER => {
                     return hint_to_type_constant_list(
                         alloc,
                         opts,

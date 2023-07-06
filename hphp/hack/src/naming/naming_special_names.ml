@@ -1151,8 +1151,6 @@ module HH = struct
     let tTanyMarker = "\\HH\\FIXME\\TANY_MARKER"
 
     let tPoisonMarker = "\\HH\\FIXME\\POISON_MARKER"
-
-    let tSupportdynMarker = "\\HH\\FIXME\\SUPPORTDYN_MARKER"
   end
 end
 

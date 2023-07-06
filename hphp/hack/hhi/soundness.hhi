@@ -57,8 +57,8 @@ function UNSAFE_NONNULL_CAST<T as nonnull>(
 type TANY_MARKER<+T> = T;
 /* Acts as T under current semantics, and ~T under sound dynamic */
 type POISON_MARKER<+T> = T;
-/* Acts as T under current semantics, and supportdyn<T> under sound dynamic */
-type SUPPORTDYN_MARKER<+T> = T;
+
+
 
 /**
  * We haven't written the type for every property in the codebase yet.

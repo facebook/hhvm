@@ -384,14 +384,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         arg
     in
     localize ~ety_env env decl_ty
-  | Tapply ((p, x), [arg]) when String.equal x SN.HH.FIXME.tSupportdynMarker ->
-    let decl_ty =
-      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-        mk (get_reason dty, Tapply ((p, SN.Classes.cSupportDyn), [arg]))
-      else
-        arg
-    in
-    localize ~ety_env env decl_ty
   | Tapply (((_p, cid) as cls), argl) ->
     let (env_err, lty) =
       match Env.get_class_or_typedef env cid with

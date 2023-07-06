@@ -4,3 +4,4 @@
 
 extern struct crypto_aead_aegis256_implementation
     fizz_crypto_aead_aegis256_soft_implementation;
+extern struct aegis256_evp aegis256_soft_evp;

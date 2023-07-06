@@ -13,6 +13,7 @@
 
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/aead/IOBufUtil.h>
+#include <fizz/third-party/libsodium-aegis/aegis.h>
 #include <folly/Conv.h>
 #include <folly/Memory.h>
 #include <folly/Range.h>
@@ -23,6 +24,7 @@
 namespace fizz {
 class AEGISCipher : public Aead {
  public:
+  using AegisEVPCtx = fizz_aegis_evp_ctx;
   using EncryptFn = int (*const)(
       unsigned char* c,
       unsigned long long* clen_p,
@@ -43,6 +45,27 @@ class AEGISCipher : public Aead {
       unsigned long long adlen,
       const unsigned char* npub,
       const unsigned char* k);
+  using InitStateFn = int (*const)(
+      const unsigned char* key,
+      const unsigned char* nonce,
+      AegisEVPCtx* ctx);
+  using AadUpdateFn = int (*const)(
+      const unsigned char* ad,
+      unsigned long long adlen,
+      AegisEVPCtx* ctx);
+  using AadFinalFn = int (*const)(AegisEVPCtx* ctx);
+  using EncryptUpdateFn = int (*const)(
+      unsigned char* c,
+      unsigned long long* clen_p,
+      const unsigned char* m,
+      unsigned long long mlen,
+      AegisEVPCtx* ctx);
+  using EncryptFinalFn = int (*const)(
+      unsigned char* c,
+      unsigned long long* c_writtenlen_p,
+      unsigned long long mlen,
+      unsigned long long adlen,
+      AegisEVPCtx* ctx);
 
   static constexpr size_t kMaxIVLength = 32;
 
@@ -98,8 +121,12 @@ class AEGISCipher : public Aead {
 
  private:
   AEGISCipher(
-      EncryptFn encrypt,
       DecryptFn decrypt,
+      InitStateFn init,
+      AadUpdateFn aadUpdate,
+      AadFinalFn aadFinal_,
+      EncryptUpdateFn encryptUpdate,
+      EncryptFinalFn encryptFinal,
       size_t keyLength,
       size_t ivLength,
       size_t tagLength);
@@ -110,8 +137,13 @@ class AEGISCipher : public Aead {
   size_t headroom_{0};
 
   // set by the ctor
-  EncryptFn encrypt_;
   DecryptFn decrypt_;
+  InitStateFn initstate_;
+  AadUpdateFn aadUpdate_;
+  AadFinalFn aadFinal_;
+  EncryptUpdateFn encryptUpdate_;
+  EncryptFinalFn encryptFinal_;
+  AegisEVPCtx ctx_;
   size_t keyLength_;
   size_t ivLength_;
   size_t tagLength_;

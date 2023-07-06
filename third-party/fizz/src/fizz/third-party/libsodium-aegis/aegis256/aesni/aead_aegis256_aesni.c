@@ -15,6 +15,8 @@
 #include <wmmintrin.h>
 
 typedef __m128i aes_block_t;
+#define STATE_SIZE 16U
+#define TAG_LEN 16U
 #define AES_BLOCK_XOR(A, B)       _mm_xor_si128((A), (B))
 #define AES_BLOCK_AND(A, B)       _mm_and_si128((A), (B))
 #define AES_BLOCK_LOAD(A)         _mm_loadu_si128((const aes_block_t *) (const void *) (A))
@@ -237,9 +239,151 @@ aegis256_decrypt_detached(unsigned char *m, unsigned char *nsec, const unsigned 
     return 0;
 }
 
+static int aegis256_init_state(
+    const unsigned char* key,
+    const unsigned char* nonce,
+    fizz_aegis_evp_ctx *ctx) {
+  aegis256_init(key, nonce, ctx->aegis256.aesni_state);
+  ctx->aegis256.buffer_size = 0;
+  return 0;
+}
+
+static int aegis256_aad_update(
+    const unsigned char* ad,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx *ctx) {
+  unsigned long long i;
+  unsigned int buffer_size = ctx->aegis256.buffer_size;
+  unsigned int copy_size = 0;
+
+  // If buffer has existing bytes, copy aad to buffer and update state if
+  // buffer is full
+  if (buffer_size > 0 && buffer_size < STATE_SIZE) {
+    unsigned int rem_buffer_size = STATE_SIZE - buffer_size;
+    copy_size = adlen <= rem_buffer_size ? adlen : rem_buffer_size;
+    memcpy(ctx->aegis256.buffer + buffer_size, ad, copy_size);
+    buffer_size += copy_size;
+    if (buffer_size == STATE_SIZE) {
+      aegis256_absorb(
+          ctx->aegis256.buffer, ctx->aegis256.aesni_state);
+      buffer_size = 0;
+    }
+  }
+
+  // absorb full blocks (STATE_SIZE) worth of bytes of aad
+  for (i = copy_size; i + STATE_SIZE <= adlen; i += STATE_SIZE) {
+    aegis256_absorb(ad + i, ctx->aegis256.aesni_state);
+  }
+
+  // Copy remaining bytes from ad to buffer
+  unsigned int leftover = (adlen - copy_size) & 0xf;
+  if (leftover) {
+    memcpy(ctx->aegis256.buffer, ad + i, leftover);
+    buffer_size = leftover;
+  }
+  ctx->aegis256.buffer_size = buffer_size;
+  return 0;
+}
+
+static int aegis256_aad_final(
+    fizz_aegis_evp_ctx *ctx) {
+  if (ctx->aegis256.buffer_size > 0) {
+    CRYPTO_ALIGN(16) unsigned char src[STATE_SIZE];
+    memset(src, 0, STATE_SIZE);
+    memcpy(src, ctx->aegis256.buffer, ctx->aegis256.buffer_size);
+    aegis256_absorb(src, ctx->aegis256.aesni_state);
+    sodium_memzero(src, sizeof src);
+    ctx->aegis256.buffer_size = 0;
+  }
+  return 0;
+}
+
+static int aegis256_encrypt_update(
+    unsigned char* c,
+    unsigned long long* outlen,
+    const unsigned char* m,
+    unsigned long long mlen,
+    fizz_aegis_evp_ctx *ctx) {
+  unsigned long long i;
+  unsigned long long writtenlen = 0;
+  unsigned int buffer_size = ctx->aegis256.buffer_size;
+  unsigned int copy_size = 0;
+
+  // If buffer has existing bytes, copy m to buffer and update state if
+  // buffer is full
+  if (buffer_size > 0 && buffer_size < STATE_SIZE) {
+    unsigned int rem_buffer_size = STATE_SIZE - buffer_size;
+    copy_size = mlen <= rem_buffer_size ? mlen : rem_buffer_size;
+    memcpy(ctx->aegis256.buffer + buffer_size, m, copy_size);
+    buffer_size += copy_size;
+    if (buffer_size == STATE_SIZE) {
+      aegis256_enc(c, ctx->aegis256.buffer, ctx->aegis256.aesni_state);
+      buffer_size = 0;
+      writtenlen += STATE_SIZE;
+      memset(ctx->aegis256.buffer, 0, STATE_SIZE);
+    }
+  }
+
+  // encrypt full blocks (STATE_SIZE) worth of bytes
+  for (i = copy_size; i + STATE_SIZE <= mlen; i += STATE_SIZE) {
+    aegis256_enc(c + writtenlen, m + i, ctx->aegis256.aesni_state);
+    writtenlen += STATE_SIZE;
+  }
+
+  // Copy remaining bytes from m to buffer
+  unsigned int leftover = (mlen - copy_size) & 0xf;
+  if (leftover) {
+    memcpy(ctx->aegis256.buffer, m + i, leftover);
+    buffer_size  = leftover;
+  }
+
+  if (outlen != NULL) {
+    *outlen = writtenlen;
+  }
+  ctx->aegis256.buffer_size = buffer_size;
+  return 0;
+}
+
+static int aegis256_encrypt_final(
+    unsigned char* c,
+    unsigned long long* outlen,
+    unsigned long long mlen,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx *ctx) {
+  unsigned int buffer_size = ctx->aegis256.buffer_size;
+
+  if (buffer_size > 0) {
+    CRYPTO_ALIGN(16) unsigned char src[STATE_SIZE];
+    CRYPTO_ALIGN(16) unsigned char dst[STATE_SIZE];
+    memset(src, 0, STATE_SIZE);
+    memcpy(src, ctx->aegis256.buffer, buffer_size);
+    aegis256_enc(dst, src, ctx->aegis256.aesni_state);
+    memcpy(c, dst, buffer_size);
+    sodium_memzero(dst, sizeof dst);
+    sodium_memzero(src, sizeof src);
+    sodium_memzero(ctx->aegis256.buffer, sizeof ctx->aegis256.buffer);
+    ctx->aegis256.buffer_size = 0;
+  }
+
+  aegis256_mac(c + buffer_size, adlen, mlen, ctx->aegis256.aesni_state);
+  // total final written length is the buffer length plus tag length
+  if (outlen != NULL) {
+    *outlen = (buffer_size + TAG_LEN);
+  }
+
+  return 0;
+}
+
 struct crypto_aead_aegis256_implementation fizz_crypto_aead_aegis256_aesni_implementation = {
     SODIUM_C99(.encrypt_detached =) aegis256_encrypt_detached,
     SODIUM_C99(.decrypt_detached =) aegis256_decrypt_detached
 };
 
+struct aegis256_evp aegis256_aesni_evp = {
+    SODIUM_C99(.init_state =) aegis256_init_state,
+    SODIUM_C99(.aad_update =) aegis256_aad_update,
+    SODIUM_C99(.aad_final =) aegis256_aad_final,
+    SODIUM_C99(.encrypt_update =) aegis256_encrypt_update,
+    SODIUM_C99(.encrypt_final =) aegis256_encrypt_final,
+};
 #endif

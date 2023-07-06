@@ -5,8 +5,6 @@
 #include "crypto_aead_aegis128l.h"
 #include <sodium.h>
 
-#include "aead_aegis128l.h"
-
 #include "soft/aead_aegis128l_soft.h"
 
 #include <fizz/third-party/libsodium-aegis/private/config.h>
@@ -17,6 +15,8 @@
 
 static const crypto_aead_aegis128l_implementation *implementation =
     &fizz_crypto_aead_aegis128l_soft_implementation;
+static const aegis128l_evp* aegis_evp =
+    &aegis128l_soft_evp;
 
 size_t
 fizz_aegis128l_keybytes(void)
@@ -119,14 +119,52 @@ fizz_aegis128l_decrypt_detached(unsigned char *m, unsigned char *nsec,
     return implementation->decrypt_detached(m, nsec, c, clen, mac, ad, adlen, npub, k);
 }
 
+int aegis128l_init_state(
+    const unsigned char* key,
+    const unsigned char* nonce,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->init_state(key, nonce, ctx);
+}
+
+int aegis128l_aad_update(
+    const unsigned char* ad,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->aad_update(ad, adlen, ctx);
+}
+
+int aegis128l_aad_final(fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->aad_final(ctx);
+}
+
+int aegis128l_encrypt_update(
+    unsigned char* c,
+    unsigned long long* c_writtenlen_p,
+    const unsigned char* m,
+    unsigned long long mlen,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->encrypt_update(c, c_writtenlen_p, m, mlen, ctx);
+}
+
+int aegis128l_encrypt_final(
+    unsigned char* c,
+    unsigned long long* c_writtenlen_p,
+    unsigned long long mlen,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->encrypt_final(c, c_writtenlen_p, mlen, adlen, ctx);
+}
+
 int
 fizz_aegis128l_pick_best_implementation(void)
 {
     implementation = &fizz_crypto_aead_aegis128l_soft_implementation;
+    aegis_evp = &aegis128l_soft_evp;
 
 #if FIZZ_LIBSODIUM_HAS_AESNI
     if (sodium_runtime_has_aesni()) {
         implementation = &fizz_crypto_aead_aegis128l_aesni_implementation;
+        aegis_evp = &aegis128l_aesni_evp;
         return 0;
     }
 #endif

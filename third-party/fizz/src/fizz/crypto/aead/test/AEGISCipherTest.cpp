@@ -81,9 +81,46 @@ TEST_P(AEGISCipherTest, TestDecrypt) {
   }
 }
 
+TEST_P(AEGISCipherTest, TestEncryptChunkedAad) {
+  std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
+  auto plaintext = toIOBuf(GetParam().plaintext);
+  auto origLength = plaintext->computeChainDataLength();
+  auto nonce_iobuf = toIOBuf(GetParam().iv);
+  auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
+  auto aadLength = toIOBuf(GetParam().aad)->computeChainDataLength();
+  for (size_t i = 2; i < aadLength; i++) {
+    auto aad = toIOBuf(GetParam().aad);
+    auto chunkedAad = chunkIOBuf(std::move(aad), i);
+    auto out = cipher->encrypt(std::move(plaintext), chunkedAad.get(), nonce);
+    bool valid = IOBufEqualTo()(toIOBuf(GetParam().ciphertext), out);
+    EXPECT_EQ(valid, GetParam().valid);
+    EXPECT_EQ(
+        out->computeChainDataLength(),
+        origLength + cipher->getCipherOverhead());
+  }
+}
+
+TEST_P(AEGISCipherTest, TestEncryptChunkedInput) {
+  std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
+  auto origLength = toIOBuf(GetParam().plaintext)->computeChainDataLength();
+  auto aad = toIOBuf(GetParam().aad);
+  auto nonce_iobuf = toIOBuf(GetParam().iv);
+  auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
+  for (size_t i = 2; i < origLength; i++) {
+    auto plaintext = toIOBuf(GetParam().plaintext);
+    auto chunkedInput = chunkIOBuf(std::move(plaintext), i);
+    auto out = cipher->encrypt(std::move(chunkedInput), aad.get(), nonce);
+    bool valid = IOBufEqualTo()(toIOBuf(GetParam().ciphertext), out);
+    EXPECT_EQ(valid, GetParam().valid);
+    EXPECT_EQ(
+        out->computeChainDataLength(),
+        origLength + cipher->getCipherOverhead());
+  }
+}
+
 // Adapted from libsodium's aegis 128l testing values
 INSTANTIATE_TEST_SUITE_P(
-    AEGIS128TestVectors,
+    AEGIS128LTestVectors,
     AEGISCipherTest,
     ::testing::Values(
         AEGISCipherParams{
@@ -125,7 +162,11 @@ INSTANTIATE_TEST_SUITE_P(
             "dc5180954df0c3391a60b44cbf70aee72b7dbb2addc90a0bf2ceac6113287eb501fe1ea9f4c51822664b82fe0279b039f4",
             "c8a7d9131cebfa5388003cc30deac523aa9b09d148affff06ba40400e09ca900db770e07cedf5cd0647f6723c810ffcb596cac51edd6f49cd7be0010a3ac29e704",
             false,
-            CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL},
+            CipherSuite::TLS_AEGIS_128L_SHA256_EXPERIMENTAL}));
+INSTANTIATE_TEST_SUITE_P(
+    AEGIS256TestVectors,
+    AEGISCipherTest,
+    ::testing::Values(
         AEGISCipherParams{
             "7083505997f52fdf86548d86ee87c1429ed91f108cd56384dc840269ef7fdd73",
             "18cd778e6f5b1d35d4ca975fd719a17aaf22c3eba01928b6a78bac5810c92c75",
@@ -142,7 +183,14 @@ INSTANTIATE_TEST_SUITE_P(
             "b8565db06c2fa493e09b6764f4d09296422095eb6e9890f606654713bfee6f362a123688b61f254f315f18b20bcc5ed8b0b4f2224de9f498e3ef03532a8bcddb361f5ace8ff491bab8b3d06550496501264f9f48ebad277e7492146789d0fc1a3b1e3e81598370a4183683d1fee25a9a1fe359c836932746b983d01767ad4b9b3d70cc917fe57e41e0",
             true,
             CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL},
-        AEGISCipherParams{"77b473865175ebd5ddf9c382bac227029c25bdb836e683a138e4618cc964488b", "f183d8de1e6dd4ccefa79fe22fabfda58e68dd29116d13408042f0713a4ee5f8", "0679fd74a846965e33e558676115d843e440fa37092fbd5c57c82fd914210fcf948f911b04632d66be46248d772b3eb9f55b537e54b1ec751b63f035c8", "9888b8ee03c3217a777b7558a31e331909570ea196f02c8cffad2c8dc6499b8125363c06a71c057842666bfb5c6acc937d2eecd960330c2361abdd88a4b191557ddf5102de75ddc7e09aee9862f32e24f1db3847a5f5b379fb32e2ef7ffb0d3a60", "3464d835302583ade6ed99e23333e865d3308f31a6cb65bcefdc9a1b9b4d0e0f75513188480dac4a64922af4441324ce7de74eb9f7f4e414f6177a4814edc96313694b99ff8dd36b2f7f79c7ecd70ec475abe1c1909238767f172fd6b95e92c025b1f8c9704d7b845964e14ccb333f0d4b", true, CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL},
+        AEGISCipherParams{
+            "77b473865175ebd5ddf9c382bac227029c25bdb836e683a138e4618cc964488b",
+            "f183d8de1e6dd4ccefa79fe22fabfda58e68dd29116d13408042f0713a4ee5f8",
+            "0679fd74a846965e33e558676115d843e440fa37092fbd5c57c82fd914210fcf948f911b04632d66be46248d772b3eb9f55b537e54b1ec751b63f035c8",
+            "9888b8ee03c3217a777b7558a31e331909570ea196f02c8cffad2c8dc6499b8125363c06a71c057842666bfb5c6acc937d2eecd960330c2361abdd88a4b191557ddf5102de75ddc7e09aee9862f32e24f1db3847a5f5b379fb32e2ef7ffb0d3a60",
+            "3464d835302583ade6ed99e23333e865d3308f31a6cb65bcefdc9a1b9b4d0e0f75513188480dac4a64922af4441324ce7de74eb9f7f4e414f6177a4814edc96313694b99ff8dd36b2f7f79c7ecd70ec475abe1c1909238767f172fd6b95e92c025b1f8c9704d7b845964e14ccb333f0d4b",
+            true,
+            CipherSuite::TLS_AEGIS_256_SHA384_EXPERIMENTAL},
         AEGISCipherParams{
             "b8c6e8cea59ca9fd2922530ee61911c1ed1c5af98be8fb03cbb449adcea0ed83",
             "af5bc1abe7bafadee790390277874cdfcc1ac1955f249d1131555d345832f555",

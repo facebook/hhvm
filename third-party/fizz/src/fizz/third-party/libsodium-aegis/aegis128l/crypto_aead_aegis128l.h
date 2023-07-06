@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <sodium.h>
 
+#include <fizz/third-party/libsodium-aegis/private/state.h>
 
 #ifdef __cplusplus
 # ifdef __GNUC__
@@ -86,6 +87,37 @@ int fizz_aegis128l_decrypt_detached(unsigned char *m,
 SODIUM_EXPORT
 void fizz_aegis128l_keygen(unsigned char k[fizz_aegis128l_KEYBYTES])
             __attribute__ ((nonnull));
+
+SODIUM_EXPORT
+int aegis128l_init_state(
+    const unsigned char* key,
+    const unsigned char* nonce,
+    fizz_aegis_evp_ctx *ctx) __attribute__((nonnull(1, 2, 3)));
+
+SODIUM_EXPORT
+int aegis128l_aad_update(
+    const unsigned char* ad,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx *ctx) __attribute__((nonnull(1, 3)));
+
+SODIUM_EXPORT
+int aegis128l_aad_final(fizz_aegis_evp_ctx *ctx) __attribute__((nonnull(1)));
+
+SODIUM_EXPORT
+int aegis128l_encrypt_update(
+    unsigned char* c,
+    unsigned long long* c_writtenlen_p,
+    const unsigned char* m,
+    unsigned long long mlen,
+    fizz_aegis_evp_ctx *ctx) __attribute__((nonnull(1, 3, 5)));
+
+SODIUM_EXPORT
+int aegis128l_encrypt_final(
+    unsigned char* c,
+    unsigned long long* c_writtenlen_p,
+    unsigned long long mlen,
+    unsigned long long adlen,
+    fizz_aegis_evp_ctx *ctx) __attribute__((nonnull(1, 5)));
 
 SODIUM_EXPORT
 int fizz_aegis128l_pick_best_implementation();

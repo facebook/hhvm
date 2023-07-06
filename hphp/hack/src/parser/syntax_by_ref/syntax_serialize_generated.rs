@@ -560,15 +560,14 @@ ss.serialize_field("unset_right_paren", &self.with(right_paren))?;
 ss.serialize_field("unset_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::DeclareLocalStatement (DeclareLocalStatementChildren{keyword,variable,colon,type_,equal,init,semicolon} ) => {
-      let mut ss = s.serialize_struct("", 8)?;
+SyntaxVariant::DeclareLocalStatement (DeclareLocalStatementChildren{keyword,variable,colon,type_,initializer,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "declare_local_statement")?;
       ss.serialize_field("declare_local_keyword", &self.with(keyword))?;
 ss.serialize_field("declare_local_variable", &self.with(variable))?;
 ss.serialize_field("declare_local_colon", &self.with(colon))?;
 ss.serialize_field("declare_local_type", &self.with(type_))?;
-ss.serialize_field("declare_local_equal", &self.with(equal))?;
-ss.serialize_field("declare_local_init", &self.with(init))?;
+ss.serialize_field("declare_local_initializer", &self.with(initializer))?;
 ss.serialize_field("declare_local_semicolon", &self.with(semicolon))?;
       ss.end()
 } 

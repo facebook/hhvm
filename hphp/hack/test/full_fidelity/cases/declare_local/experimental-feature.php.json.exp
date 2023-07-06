@@ -268,34 +268,37 @@
                     }
                   }
                 },
-                "declare_local_equal":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"=",
-                    "text":"=",
-                    "offset":63,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":1,
-                    "leading":[],
-                    "trailing":[{"kind":"whitespace","text":" ","offset":64,"width":1}],
-                    "line_number":5
-                  }
-                },
-                "declare_local_init":{
-                  "kind":"literal",
-                  "literal_expression":{
+                "declare_local_initializer":{
+                  "kind":"simple_initializer",
+                  "simple_initializer_equal":{
                     "kind":"token",
                     "token":{
-                      "kind":"decimal_literal",
-                      "text":"1",
-                      "offset":65,
+                      "kind":"=",
+                      "text":"=",
+                      "offset":63,
                       "leading_width":0,
                       "width":1,
-                      "trailing_width":0,
+                      "trailing_width":1,
                       "leading":[],
-                      "trailing":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":64,"width":1}],
                       "line_number":5
+                    }
+                  },
+                  "simple_initializer_value":{
+                    "kind":"literal",
+                    "literal_expression":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"decimal_literal",
+                        "text":"1",
+                        "offset":65,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":5
+                      }
                     }
                   }
                 },

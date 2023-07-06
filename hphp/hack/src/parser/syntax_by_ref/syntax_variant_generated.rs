@@ -671,8 +671,7 @@ pub struct DeclareLocalStatementChildren<'a, T, V> {
     pub variable: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
-    pub equal: Syntax<'a, T, V>,
-    pub init: Syntax<'a, T, V>,
+    pub initializer: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
 

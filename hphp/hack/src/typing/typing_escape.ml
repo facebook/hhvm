@@ -517,7 +517,11 @@ let refresh_locals renv =
         let (renv, lty, changed) = refresh_type renv Ast_defs.Covariant lty in
         match changed with
         | Elim _ ->
-          { renv with env = Env.set_local ~bound_ty renv.env local lty pos }
+          {
+            renv with
+            env =
+              Env.set_local ~is_defined:true ~bound_ty renv.env local lty pos;
+          }
         | Unchanged -> renv
       else
         renv)

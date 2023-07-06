@@ -218,8 +218,8 @@ and ('ex, 'en) stmt_ =
        *     {}
        *     while (true) ;
        *     if ($foo) {} // the else is Noop here *)
-  | Declare_local of lid * hint * ('ex, 'en) expr
-      (** Declare a local variable with the given type and initial value *)
+  | Declare_local of lid * hint * ('ex, 'en) expr option
+      (** Declare a local variable with the given type and optional initial value *)
   | Block of ('ex, 'en) block
       (** Block, a list of statements in curly braces.
        *

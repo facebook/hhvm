@@ -1333,16 +1333,14 @@ module WithToken (Token : TokenType) = struct
             declare_local_variable;
             declare_local_colon;
             declare_local_type;
-            declare_local_equal;
-            declare_local_init;
+            declare_local_initializer;
             declare_local_semicolon;
           } ->
         let acc = f acc declare_local_keyword in
         let acc = f acc declare_local_variable in
         let acc = f acc declare_local_colon in
         let acc = f acc declare_local_type in
-        let acc = f acc declare_local_equal in
-        let acc = f acc declare_local_init in
+        let acc = f acc declare_local_initializer in
         let acc = f acc declare_local_semicolon in
         acc
       | UsingStatementBlockScoped
@@ -3100,8 +3098,7 @@ module WithToken (Token : TokenType) = struct
             declare_local_variable;
             declare_local_colon;
             declare_local_type;
-            declare_local_equal;
-            declare_local_init;
+            declare_local_initializer;
             declare_local_semicolon;
           } ->
         [
@@ -3109,8 +3106,7 @@ module WithToken (Token : TokenType) = struct
           declare_local_variable;
           declare_local_colon;
           declare_local_type;
-          declare_local_equal;
-          declare_local_init;
+          declare_local_initializer;
           declare_local_semicolon;
         ]
       | UsingStatementBlockScoped
@@ -4805,8 +4801,7 @@ module WithToken (Token : TokenType) = struct
             declare_local_variable;
             declare_local_colon;
             declare_local_type;
-            declare_local_equal;
-            declare_local_init;
+            declare_local_initializer;
             declare_local_semicolon;
           } ->
         [
@@ -4814,8 +4809,7 @@ module WithToken (Token : TokenType) = struct
           "declare_local_variable";
           "declare_local_colon";
           "declare_local_type";
-          "declare_local_equal";
-          "declare_local_init";
+          "declare_local_initializer";
           "declare_local_semicolon";
         ]
       | UsingStatementBlockScoped
@@ -6663,8 +6657,7 @@ module WithToken (Token : TokenType) = struct
             declare_local_variable;
             declare_local_colon;
             declare_local_type;
-            declare_local_equal;
-            declare_local_init;
+            declare_local_initializer;
             declare_local_semicolon;
           ] ) ->
         DeclareLocalStatement
@@ -6673,8 +6666,7 @@ module WithToken (Token : TokenType) = struct
             declare_local_variable;
             declare_local_colon;
             declare_local_type;
-            declare_local_equal;
-            declare_local_init;
+            declare_local_initializer;
             declare_local_semicolon;
           }
       | ( SyntaxKind.UsingStatementBlockScoped,
@@ -8771,8 +8763,7 @@ module WithToken (Token : TokenType) = struct
           declare_local_variable
           declare_local_colon
           declare_local_type
-          declare_local_equal
-          declare_local_init
+          declare_local_initializer
           declare_local_semicolon =
         let syntax =
           DeclareLocalStatement
@@ -8781,8 +8772,7 @@ module WithToken (Token : TokenType) = struct
               declare_local_variable;
               declare_local_colon;
               declare_local_type;
-              declare_local_equal;
-              declare_local_init;
+              declare_local_initializer;
               declare_local_semicolon;
             }
         in

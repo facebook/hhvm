@@ -617,14 +617,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             DeclareLocalStatement(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.variable),
                     2 => Some(&x.colon),
                     3 => Some(&x.type_),
-                    4 => Some(&x.equal),
-                    5 => Some(&x.init),
-                    6 => Some(&x.semicolon),
+                    4 => Some(&x.initializer),
+                    5 => Some(&x.semicolon),
                         _ => None,
                     }
                 })

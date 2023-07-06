@@ -1,5 +1,6 @@
 (8,11)-(8,11) A colon `:` is expected here.
 (8,11)-(8,13) A type specifier is expected here.
-(9,16)-(9,16) An equals sign `=` is expected here.
+(9,16)-(9,16) A semicolon `;` is expected here.
 (9,18)-(9,18) An expression is expected here.
 (9,18)-(9,19) Encountered unexpected token `1`.
+(11,10)-(11,10) A colon `:` is expected here.

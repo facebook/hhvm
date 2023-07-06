@@ -26,6 +26,7 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   (* Represents the capability for local operations inside a function body, excluding calls. *)
   let env =
     Env.set_local
+      ~is_defined:true
       ~bound_ty:None
       env
       local_capability_id
@@ -41,6 +42,7 @@ let register_capabilities env (cap_ty : locl_ty) (unsafe_cap_ty : locl_ty) =
   in
   (* The implicit argument for ft_implicit_params.capability *)
   ( Env.set_local
+      ~is_defined:true
       ~bound_ty:None
       env
       capability_id

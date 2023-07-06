@@ -1006,7 +1006,7 @@ let set_local_ env x ty =
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
-let set_local ?(immutable = false) ~bound_ty env x new_type pos =
+let set_local ?(immutable = false) ~is_defined ~bound_ty env x new_type pos =
   let new_type =
     match get_node new_type with
     | Tunion [ty] -> ty
@@ -1028,7 +1028,7 @@ let set_local ?(immutable = false) ~bound_ty env x new_type pos =
     in
     let local =
       Typing_local_types.
-        { ty = new_type; defined = true; bound_ty; pos; eid = expr_id }
+        { ty = new_type; defined = is_defined; bound_ty; pos; eid = expr_id }
     in
     set_local_ env x local
 

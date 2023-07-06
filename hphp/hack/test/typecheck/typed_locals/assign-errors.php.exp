@@ -1,6 +1,16 @@
+File "assign-errors.php", line 10, characters 3-4:
+Variable `$a` is undefined, or not always defined. (Naming[2050])
+  File "assign-errors.php", line 7, characters 3-9:
+  Did you mean `$x` instead?
 File "assign-errors.php", line 7, characters 3-9:
 Typing error (Typing[4110])
   File "assign-errors.php", line 5, characters 11-13:
   Expected `int`
   File "assign-errors.php", line 7, characters 8-9:
+  But got `string`
+File "assign-errors.php", line 11, characters 3-9:
+Typing error (Typing[4110])
+  File "assign-errors.php", line 9, characters 11-13:
+  Expected `int`
+  File "assign-errors.php", line 11, characters 8-9:
   But got `string`

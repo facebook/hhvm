@@ -662,14 +662,13 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_declare_local_statement(ctx: &C, keyword: Self, variable: Self, colon: Self, type_: Self, equal: Self, init: Self, semicolon: Self) -> Self {
+    fn make_declare_local_statement(ctx: &C, keyword: Self, variable: Self, colon: Self, type_: Self, initializer: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::DeclareLocalStatement(ctx.get_arena().alloc(DeclareLocalStatementChildren {
             keyword,
             variable,
             colon,
             type_,
-            equal,
-            init,
+            initializer,
             semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));

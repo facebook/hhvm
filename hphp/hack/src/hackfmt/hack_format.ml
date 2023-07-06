@@ -2664,8 +2664,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           declare_local_variable;
           declare_local_colon;
           declare_local_type;
-          declare_local_equal;
-          declare_local_init;
+          declare_local_initializer;
           declare_local_semicolon;
         } ->
       Concat
@@ -2677,11 +2676,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           SplitWith Cost.Base;
           Space;
           Nest [t env declare_local_type];
-          Space;
-          t env declare_local_equal;
-          Space;
-          SplitWith Cost.Base;
-          Nest [t env declare_local_init];
+          t env declare_local_initializer;
           t env declare_local_semicolon;
           Newline;
         ])

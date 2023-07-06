@@ -64,6 +64,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
           [this_local.Typing_local_types.ty; make_dynamic Pos_or_decl.none]
       in
       Env.set_local
+        ~is_defined:true
         ~bound_ty:this_local.Typing_local_types.bound_ty
         env
         this
@@ -200,6 +201,7 @@ let method_def ~is_disposable env cls m =
     | Some ty when not (Env.is_static env) ->
       (* The $this variable isn't a typed local, and so doesn't have a bound type. *)
       Env.set_local
+        ~is_defined:true
         ~bound_ty:None
         env
         this

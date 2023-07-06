@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<21feaab7eac2cd3329c133b7b7bae6c9>>
+// @generated SignedSource<<64a5d6b1ff53776f49b9637eaad369a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -300,11 +300,11 @@ pub enum Stmt_<'a, Ex, En> {
     ///     while (true) ;
     ///     if ($foo) {} // the else is Noop here
     Noop,
-    /// Declare a local variable with the given type and initial value
+    /// Declare a local variable with the given type and optional initial value
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Declare_local")]
     #[rust_to_ocaml(inline_tuple)]
-    DeclareLocal(&'a (&'a Lid<'a>, &'a Hint<'a>, &'a Expr<'a, Ex, En>)),
+    DeclareLocal(&'a (&'a Lid<'a>, &'a Hint<'a>, Option<&'a Expr<'a, Ex, En>>)),
     /// Block, a list of statements in curly braces.
     ///
     ///     { $foo = 42; }

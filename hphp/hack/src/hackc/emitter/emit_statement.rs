@@ -1668,13 +1668,17 @@ fn emit_declare_local<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     id: &ast::Lid,
-    e_: &ast::Expr,
+    e_: &Option<ast::Expr>,
 ) -> Result<InstrSeq<'arena>> {
-    let bop = ast::Binop {
-        bop: ast_defs::Bop::Eq(None),
-        lhs: ast::Expr::new((), pos.clone(), ast::Expr_::mk_lvar(id.clone())),
-        rhs: e_.clone(),
-    };
-    let e2 = ast::Expr::new((), pos.clone(), ast::Expr_::mk_binop(bop.clone()));
-    emit_binop(e, env, &e2, pos, &bop)
+    if let Some(e_) = e_ {
+        let bop = ast::Binop {
+            bop: ast_defs::Bop::Eq(None),
+            lhs: ast::Expr::new((), pos.clone(), ast::Expr_::mk_lvar(id.clone())),
+            rhs: e_.clone(),
+        };
+        let e2 = ast::Expr::new((), pos.clone(), ast::Expr_::mk_binop(bop.clone()));
+        emit_binop(e, env, &e2, pos, &bop)
+    } else {
+        Ok(InstrSeq::gather(vec![]))
+    }
 }

@@ -245,8 +245,8 @@ where S: SmartConstructors<State = St>,
     fn make_unset_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         compose(SyntaxKind::UnsetStatement, self.s.make_unset_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_declare_local_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::DeclareLocalStatement, self.s.make_declare_local_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
+    fn make_declare_local_statement(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::DeclareLocalStatement, self.s.make_declare_local_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }
     fn make_using_statement_block_scoped(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
         compose(SyntaxKind::UsingStatementBlockScoped, self.s.make_using_statement_block_scoped(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))

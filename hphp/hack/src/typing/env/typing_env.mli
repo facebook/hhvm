@@ -338,6 +338,7 @@ val all_continuations : env -> Typing_continuations.t list
 
 val set_local :
   ?immutable:bool ->
+  is_defined:bool ->
   bound_ty:locl_ty option ->
   env ->
   Local_id.t ->

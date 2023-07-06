@@ -309,8 +309,8 @@ where
         Node(self.0.make_unset_statement(keyword.0, left_paren.0, variables.0, right_paren.0, semicolon.0), self.1.make_unset_statement(keyword.1, left_paren.1, variables.1, right_paren.1, semicolon.1))
     }
 
-    fn make_declare_local_statement(&mut self, keyword: Self::Output, variable: Self::Output, colon: Self::Output, type_: Self::Output, equal: Self::Output, init: Self::Output, semicolon: Self::Output) -> Self::Output {
-        Node(self.0.make_declare_local_statement(keyword.0, variable.0, colon.0, type_.0, equal.0, init.0, semicolon.0), self.1.make_declare_local_statement(keyword.1, variable.1, colon.1, type_.1, equal.1, init.1, semicolon.1))
+    fn make_declare_local_statement(&mut self, keyword: Self::Output, variable: Self::Output, colon: Self::Output, type_: Self::Output, initializer: Self::Output, semicolon: Self::Output) -> Self::Output {
+        Node(self.0.make_declare_local_statement(keyword.0, variable.0, colon.0, type_.0, initializer.0, semicolon.0), self.1.make_declare_local_statement(keyword.1, variable.1, colon.1, type_.1, initializer.1, semicolon.1))
     }
 
     fn make_using_statement_block_scoped(&mut self, await_keyword: Self::Output, using_keyword: Self::Output, left_paren: Self::Output, expressions: Self::Output, right_paren: Self::Output, body: Self::Output) -> Self::Output {

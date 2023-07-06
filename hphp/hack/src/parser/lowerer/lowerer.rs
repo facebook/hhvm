@@ -3507,7 +3507,11 @@ fn p_declare_local_stmt<'a>(
     use ast::Stmt_ as S_;
     let var = lid_from_pos_name(pos.clone(), &c.variable, env)?;
     let hint = p_hint(&c.type_, env)?;
-    let expr = p_expr(&c.init, env)?;
+    let mut expr = None;
+    if let SimpleInitializer(c) = c.initializer.children {
+        let expr_tmp = p_expr(&c.value, env)?;
+        expr = Some(expr_tmp);
+    }
     Ok(Stmt::new(pos, S_::mk_declare_local(var, hint, expr)))
 }
 

@@ -369,8 +369,7 @@ module type Syntax_S = sig
         declare_local_variable: t;
         declare_local_colon: t;
         declare_local_type: t;
-        declare_local_equal: t;
-        declare_local_init: t;
+        declare_local_initializer: t;
         declare_local_semicolon: t;
       }
     | UsingStatementBlockScoped of {
@@ -1241,7 +1240,7 @@ module type Syntax_S = sig
 
   val make_unset_statement : t -> t -> t -> t -> t -> t
 
-  val make_declare_local_statement : t -> t -> t -> t -> t -> t -> t -> t
+  val make_declare_local_statement : t -> t -> t -> t -> t -> t -> t
 
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
 

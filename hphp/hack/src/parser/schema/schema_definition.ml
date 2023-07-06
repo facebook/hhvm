@@ -845,8 +845,7 @@ let schema : schema_node list =
           ("variable", Aggregate Expression);
           ("colon", Token);
           ("type", Aggregate Specifier);
-          ("equal", Token);
-          ("init", Aggregate Expression);
+          ("initializer", ZeroOrOne (Just "SimpleInitializer"));
           ("semicolon", Token);
         ];
     };

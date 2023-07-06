@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0c42cf7902079b05ce7399e09357efc>>
+// @generated SignedSource<<0d189a988ea47cb2317b700cf80743d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -72,7 +72,7 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_noop() -> Self {
         Stmt_::Noop
     }
-    pub fn mk_declare_local(p0: Lid, p1: Hint, p2: Expr<Ex, En>) -> Self {
+    pub fn mk_declare_local(p0: Lid, p1: Hint, p2: Option<Expr<Ex, En>>) -> Self {
         Stmt_::DeclareLocal(Box::new((p0, p1, p2)))
     }
     pub fn mk_block(p0: Block<Ex, En>) -> Self {
@@ -295,7 +295,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_declare_local(&self) -> Option<(&Lid, &Hint, &Expr<Ex, En>)> {
+    pub fn as_declare_local(&self) -> Option<(&Lid, &Hint, &Option<Expr<Ex, En>>)> {
         match self {
             Stmt_::DeclareLocal(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -416,7 +416,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_declare_local_mut(&mut self) -> Option<(&mut Lid, &mut Hint, &mut Expr<Ex, En>)> {
+    pub fn as_declare_local_mut(
+        &mut self,
+    ) -> Option<(&mut Lid, &mut Hint, &mut Option<Expr<Ex, En>>)> {
         match self {
             Stmt_::DeclareLocal(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -521,7 +523,7 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_declare_local_into(self) -> Option<(Lid, Hint, Expr<Ex, En>)> {
+    pub fn as_declare_local_into(self) -> Option<(Lid, Hint, Option<Expr<Ex, En>>)> {
         match self {
             Stmt_::DeclareLocal(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,

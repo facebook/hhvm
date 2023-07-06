@@ -17,4 +17,6 @@ function f(): void {
   $z = null;
   hh_expect_equivalent<arraykey>($z); // $z reverts to bound after type error
 
+  let $a: int;
+  $a = 1;
 }

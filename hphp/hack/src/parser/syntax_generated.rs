@@ -656,14 +656,13 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_declare_local_statement(_: &C, declare_local_keyword: Self, declare_local_variable: Self, declare_local_colon: Self, declare_local_type: Self, declare_local_equal: Self, declare_local_init: Self, declare_local_semicolon: Self) -> Self {
+    fn make_declare_local_statement(_: &C, declare_local_keyword: Self, declare_local_variable: Self, declare_local_colon: Self, declare_local_type: Self, declare_local_initializer: Self, declare_local_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::DeclareLocalStatement(Box::new(DeclareLocalStatementChildren {
             declare_local_keyword,
             declare_local_variable,
             declare_local_colon,
             declare_local_type,
-            declare_local_equal,
-            declare_local_init,
+            declare_local_initializer,
             declare_local_semicolon,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
@@ -2441,13 +2440,12 @@ where
                 acc
             },
             SyntaxVariant::DeclareLocalStatement(x) => {
-                let DeclareLocalStatementChildren { declare_local_keyword, declare_local_variable, declare_local_colon, declare_local_type, declare_local_equal, declare_local_init, declare_local_semicolon } = *x;
+                let DeclareLocalStatementChildren { declare_local_keyword, declare_local_variable, declare_local_colon, declare_local_type, declare_local_initializer, declare_local_semicolon } = *x;
                 let acc = f(declare_local_keyword, acc);
                 let acc = f(declare_local_variable, acc);
                 let acc = f(declare_local_colon, acc);
                 let acc = f(declare_local_type, acc);
-                let acc = f(declare_local_equal, acc);
-                let acc = f(declare_local_init, acc);
+                let acc = f(declare_local_initializer, acc);
                 let acc = f(declare_local_semicolon, acc);
                 acc
             },
@@ -3979,10 +3977,9 @@ where
                  unset_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::DeclareLocalStatement, 7) => SyntaxVariant::DeclareLocalStatement(Box::new(DeclareLocalStatementChildren {
+             (SyntaxKind::DeclareLocalStatement, 6) => SyntaxVariant::DeclareLocalStatement(Box::new(DeclareLocalStatementChildren {
                  declare_local_semicolon: ts.pop().unwrap(),
-                 declare_local_init: ts.pop().unwrap(),
-                 declare_local_equal: ts.pop().unwrap(),
+                 declare_local_initializer: ts.pop().unwrap(),
                  declare_local_type: ts.pop().unwrap(),
                  declare_local_colon: ts.pop().unwrap(),
                  declare_local_variable: ts.pop().unwrap(),
@@ -4868,7 +4865,7 @@ where
             SyntaxVariant::MarkupSection(x) => unsafe { std::slice::from_raw_parts(&x.markup_hashbang, 2) },
             SyntaxVariant::MarkupSuffix(x) => unsafe { std::slice::from_raw_parts(&x.markup_suffix_less_than_question, 2) },
             SyntaxVariant::UnsetStatement(x) => unsafe { std::slice::from_raw_parts(&x.unset_keyword, 5) },
-            SyntaxVariant::DeclareLocalStatement(x) => unsafe { std::slice::from_raw_parts(&x.declare_local_keyword, 7) },
+            SyntaxVariant::DeclareLocalStatement(x) => unsafe { std::slice::from_raw_parts(&x.declare_local_keyword, 6) },
             SyntaxVariant::UsingStatementBlockScoped(x) => unsafe { std::slice::from_raw_parts(&x.using_block_await_keyword, 6) },
             SyntaxVariant::UsingStatementFunctionScoped(x) => unsafe { std::slice::from_raw_parts(&x.using_function_await_keyword, 4) },
             SyntaxVariant::WhileStatement(x) => unsafe { std::slice::from_raw_parts(&x.while_keyword, 5) },
@@ -5053,7 +5050,7 @@ where
             SyntaxVariant::MarkupSection(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.markup_hashbang, 2) },
             SyntaxVariant::MarkupSuffix(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.markup_suffix_less_than_question, 2) },
             SyntaxVariant::UnsetStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.unset_keyword, 5) },
-            SyntaxVariant::DeclareLocalStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.declare_local_keyword, 7) },
+            SyntaxVariant::DeclareLocalStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.declare_local_keyword, 6) },
             SyntaxVariant::UsingStatementBlockScoped(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.using_block_await_keyword, 6) },
             SyntaxVariant::UsingStatementFunctionScoped(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.using_function_await_keyword, 4) },
             SyntaxVariant::WhileStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.while_keyword, 5) },
@@ -5701,8 +5698,7 @@ pub struct DeclareLocalStatementChildren<T, V> {
     pub declare_local_variable: Syntax<T, V>,
     pub declare_local_colon: Syntax<T, V>,
     pub declare_local_type: Syntax<T, V>,
-    pub declare_local_equal: Syntax<T, V>,
-    pub declare_local_init: Syntax<T, V>,
+    pub declare_local_initializer: Syntax<T, V>,
     pub declare_local_semicolon: Syntax<T, V>,
 }
 
@@ -7537,14 +7533,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             DeclareLocalStatement(x) => {
-                get_index(7).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.declare_local_keyword),
                     1 => Some(&x.declare_local_variable),
                     2 => Some(&x.declare_local_colon),
                     3 => Some(&x.declare_local_type),
-                    4 => Some(&x.declare_local_equal),
-                    5 => Some(&x.declare_local_init),
-                    6 => Some(&x.declare_local_semicolon),
+                    4 => Some(&x.declare_local_initializer),
+                    5 => Some(&x.declare_local_semicolon),
                         _ => None,
                     }
                 })

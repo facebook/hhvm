@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::AastParser;
 use ocamlrep::FromOcamlRep;
@@ -21,7 +23,7 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
             Err(e) => panic!("SourceText::from_ocaml failed: {:#?}", e),
         };
         let indexed_source_text = IndexedSourceText::new(source_text);
-        let res = AastParser::from_text(&env, &indexed_source_text);
+        let res = AastParser::from_text(&env, &indexed_source_text, HashSet::default());
         // Safety: Requires no concurrent interaction with OCaml
         // runtime from other threads.
         unsafe { to_ocaml(&res) }

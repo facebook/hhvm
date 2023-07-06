@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
 use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -86,7 +87,7 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
                 ParserKind::Aast => {
                     let indexed_source_text = IndexedSourceText::new(source_text);
                     let env = aast_parser::rust_aast_parser_types::Env::default();
-                    let _ = AastParser::from_text(&env, &indexed_source_text);
+                    let _ = AastParser::from_text(&env, &indexed_source_text, HashSet::default());
                 }
             }
             Ok(())

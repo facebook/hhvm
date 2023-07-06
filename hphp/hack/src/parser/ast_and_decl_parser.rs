@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
+
 use aast_parser::AastParser;
 pub use aast_parser::Result;
 use bumpalo::Bump;
@@ -21,6 +23,14 @@ pub fn from_text<'a>(
     let (language, mode, parser_env) = AastParser::make_parser_env(env, source);
     let opts = DeclParserOptions::from_parser_options(&env.parser_options);
     let (cst, decls) = cst_and_decl_parser::parse_script(&opts, parser_env, source, mode, arena);
-    let ast_result = AastParser::from_tree(env, indexed_source_text, arena, language, mode, cst);
+    let ast_result = AastParser::from_tree(
+        env,
+        indexed_source_text,
+        arena,
+        language,
+        mode,
+        cst,
+        HashSet::default(),
+    );
     (ast_result, decls)
 }

@@ -5,6 +5,7 @@
 
 pub mod dump_expr_tree;
 
+use std::collections::HashSet;
 use std::fmt;
 use std::sync::Arc;
 use std::time::Duration;
@@ -664,8 +665,12 @@ fn parse_file(
     };
 
     let indexed_source_text = IndexedSourceText::new(source_text);
-    let ast_result =
-        AastParser::from_text_with_namespace_env(&aast_env, namespace_env, &indexed_source_text);
+    let ast_result = AastParser::from_text_with_namespace_env(
+        &aast_env,
+        namespace_env,
+        &indexed_source_text,
+        HashSet::default(),
+    );
     match ast_result {
         Err(AastError::Other(msg)) => Err(ParseError(Pos::NONE, msg, FatalOp::Parse)),
         Err(AastError::NotAHackFile()) => Err(ParseError(

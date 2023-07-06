@@ -6,6 +6,7 @@
 mod ast_writer;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use aast_parser::rust_aast_parser_types::Env;
@@ -29,6 +30,7 @@ use regex::Match;
 use regex::Regex;
 use relative_path::Prefix;
 use relative_path::RelativePath;
+use rust_parser_errors::UnstableFeatures;
 use syn::parse::ParseStream;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
@@ -460,8 +462,12 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     let source_text = SourceText::make(Arc::new(rel_path), input.as_bytes());
     let indexed_source_text = IndexedSourceText::new(source_text);
 
-    let aast = aast_parser::AastParser::from_text(&env, &indexed_source_text)
-        .map_err(|err| convert_aast_error(err, input, internal_offset, span))?;
+    let mut default_unstable_features = HashSet::default();
+    default_unstable_features.insert(UnstableFeatures::TypedLocalVariables);
+
+    let aast =
+        aast_parser::AastParser::from_text(&env, &indexed_source_text, default_unstable_features)
+            .map_err(|err| convert_aast_error(err, input, internal_offset, span))?;
 
     aast.errors
         .iter()
@@ -1624,6 +1630,36 @@ mod tests {
                                 .collect::<Vec<_>>(),
                         ))),
                     )))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_typed_local_stmt() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(EX pos = p, "let $x: t = #e;")),
+            quote!({
+                use EX::ast::*;
+                let __hygienic_pos: Pos = p;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::DeclareLocal(Box::new((
+                        Lid(__hygienic_pos.clone(), (0isize, "$x".to_owned())),
+                        Hint(
+                            __hygienic_pos.clone(),
+                            Box::new(Hint_::Happly(
+                                Id(__hygienic_pos.clone(), "t".to_owned()),
+                                vec![],
+                            )),
+                        ),
+                        Some({
+                            let tmp: Expr = e;
+                            tmp
+                        }),
+                    ))),
                 );
                 __hygienic_tmp
             }),

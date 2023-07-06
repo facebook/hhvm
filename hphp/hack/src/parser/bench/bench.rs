@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -133,8 +134,12 @@ fn bench_aast_full_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])]
             for (filename, text) in files {
                 let text = SourceText::make(Arc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
-                aast_parser::AastParser::from_text(&AastParserEnv::default(), &indexed_source_text)
-                    .unwrap();
+                aast_parser::AastParser::from_text(
+                    &AastParserEnv::default(),
+                    &indexed_source_text,
+                    HashSet::default(),
+                )
+                .unwrap();
             }
         })
     });
@@ -152,6 +157,7 @@ fn bench_aast_quick_parse(c: &mut Criterion, files: &[(Arc<RelativePath>, &[u8])
                         ..AastParserEnv::default()
                     },
                     &indexed_source_text,
+                    HashSet::default(),
                 )
                 .unwrap();
             }

@@ -82,7 +82,7 @@ enum FeatureStatus {
 #[derive(Clone, Copy, Eq, Display, Hash, PartialEq)]
 #[derive(EnumIter, EnumString, IntoStaticStr)]
 #[strum(serialize_all = "snake_case")]
-enum UnstableFeatures {
+pub enum UnstableFeatures {
     // TODO: rename this from unstable to something else
     UnionIntersectionTypeHints,
     ClassLevelWhere,
@@ -5652,6 +5652,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         hhi_mode: bool,
         codegen: bool,
         systemlib: bool,
+        default_unstable_features: HashSet<UnstableFeatures>,
     ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
@@ -5663,7 +5664,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable: None,
                 active_callable_attr_spec: None,
                 active_const: None,
-                active_unstable_features: HashSet::default(),
+                active_unstable_features: default_unstable_features,
                 active_expression_tree: false,
             },
             hhvm_compat_mode,
@@ -5682,6 +5683,7 @@ pub fn parse_errors<'a, State: Clone>(
     hhi_mode: bool,
     codegen: bool,
     systemlib: bool,
+    default_unstable_features: HashSet<UnstableFeatures>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5691,6 +5693,7 @@ pub fn parse_errors<'a, State: Clone>(
         hhi_mode,
         codegen,
         systemlib,
+        default_unstable_features,
     )
 }
 
@@ -5702,6 +5705,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhi_mode: bool,
     codegen: bool,
     systemlib: bool,
+    default_unstable_features: HashSet<UnstableFeatures>,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
@@ -5711,5 +5715,6 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         hhi_mode,
         codegen,
         systemlib,
+        default_unstable_features,
     )
 }

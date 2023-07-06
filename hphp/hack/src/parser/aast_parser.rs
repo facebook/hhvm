@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use bumpalo::Bump;
+use hash::HashSet;
 use lowerer::lower;
 use lowerer::ScourComment;
 use mode_parser::parse_mode;
@@ -63,19 +64,26 @@ impl<'src> AastParser {
     pub fn from_text(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
+        default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.po_auto_namespace_map.clone(),
             env.codegen,
             env.parser_options.po_disable_xhp_element_mangling,
         );
-        Self::from_text_with_namespace_env(env, Arc::new(ns), indexed_source_text)
+        Self::from_text_with_namespace_env(
+            env,
+            Arc::new(ns),
+            indexed_source_text,
+            default_unstable_features,
+        )
     }
 
     pub fn from_text_with_namespace_env(
         env: &Env,
         ns: Arc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
+        default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
         let start_t = Instant::now();
         let arena = Bump::new();
@@ -91,6 +99,7 @@ impl<'src> AastParser {
             language,
             mode,
             tree,
+            default_unstable_features,
         )?;
 
         pr.profile.parse_peak = parse_peak as u64;
@@ -106,6 +115,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
+        default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.po_auto_namespace_map.clone(),
@@ -120,6 +130,7 @@ impl<'src> AastParser {
             language,
             mode,
             tree,
+            default_unstable_features,
         )
     }
 
@@ -131,6 +142,7 @@ impl<'src> AastParser {
         language: Language,
         mode: Option<Mode>,
         tree: PositionedSyntaxTree<'src, 'arena>,
+        default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Result<ParserResult> {
         let lowering_t = Instant::now();
         match language {
@@ -162,8 +174,13 @@ impl<'src> AastParser {
         };
         let (elaboration_t, error_t) = (elaboration_t.elapsed(), Instant::now());
         stack_limit::reset();
-        let syntax_errors =
-            Self::check_syntax_error(env, indexed_source_text, &tree, Some(&mut ret));
+        let syntax_errors = Self::check_syntax_error(
+            env,
+            indexed_source_text,
+            &tree,
+            Some(&mut ret),
+            default_unstable_features,
+        );
         let error_peak = stack_limit::peak() as u64;
         let lowerer_parsing_errors = lowerer_env.parsing_errors().to_vec();
         let errors = lowerer_env.hh_errors().to_vec();
@@ -195,6 +212,7 @@ impl<'src> AastParser {
         indexed_source_text: &'src IndexedSourceText<'src>,
         tree: &PositionedSyntaxTree<'src, 'arena>,
         aast: Option<&mut Program<(), ()>>,
+        default_unstable_features: HashSet<rust_parser_errors::UnstableFeatures>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
@@ -207,6 +225,7 @@ impl<'src> AastParser {
                 hhi_mode,
                 env.codegen,
                 env.is_systemlib,
+                default_unstable_features,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);

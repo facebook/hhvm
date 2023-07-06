@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -49,8 +50,9 @@ fn process_one_file(single_file: bool, path: &Path, _: &Opts) -> anyhow::Result<
         std::fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
     let rel_path = Arc::new(RelativePath::make(Prefix::Dummy, path.to_path_buf()));
     let source_text = IndexedSourceText::new(SourceText::make(Arc::clone(&rel_path), &content));
-    let mut parser_result = AastParser::from_text(&Default::default(), &source_text)
-        .map_err(|e| anyhow!("failed to parse {}: {:#?}", path.display(), e))?;
+    let mut parser_result =
+        AastParser::from_text(&Default::default(), &source_text, HashSet::default())
+            .map_err(|e| anyhow!("failed to parse {}: {:#?}", path.display(), e))?;
     let tco = TypecheckerOptions::default();
     let errs = elab::elaborate_program(&tco, &rel_path, &mut parser_result.aast);
     print_parse_result(single_file, path, &parser_result, &errs)?;

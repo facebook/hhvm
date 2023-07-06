@@ -685,16 +685,10 @@ let calculate_fanout_and_defer_or_do_type_check
   in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck =
-    Relative_path.Set.union to_recheck dirty_files_unchanged_decls
+    to_recheck
+    |> Relative_path.Set.union dirty_files_unchanged_decls
+    |> Relative_path.Set.union dirty_files_changed_decls
   in
-  let defs_per_files_to_recheck =
-    ServerCheckUtils.extend_defs_per_file
-      genv
-      old_and_new_defs_per_dirty_files_changed_decls
-      env.naming_table
-      to_recheck
-  in
-  let files_to_check = Relative_path.Map.keys defs_per_files_to_recheck in
 
   (* HACK: dump the fanout that we calculated and exit. This is for
      `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
@@ -707,29 +701,28 @@ let calculate_fanout_and_defer_or_do_type_check
          [
            ( "recheck_files",
              Hh_json.JSON_Array
-               (files_to_check
+               (Relative_path.Set.elements to_recheck
                |> List.map ~f:Relative_path.to_absolute
                |> List.map ~f:Hh_json.string_) );
          ]);
     exit 0
   ) else
     let env = { env with changed_files = dirty_files_changed_decls } in
-    let files_to_check =
+    let to_recheck =
       if
         not
           genv.ServerEnv.local_config
             .ServerLocalConfig.enable_type_check_filter_files
       then
-        files_to_check
+        to_recheck
       else
-        Relative_path.Set.elements
-        @@ ServerCheckUtils.user_filter_type_check_files
-             ~to_recheck:(Relative_path.Set.of_list files_to_check)
-             ~reparsed:
-               (Relative_path.Set.union
-                  dirty_files_unchanged_decls
-                  dirty_files_changed_decls)
-             ~is_ide_file:(fun _ -> false)
+        ServerCheckUtils.user_filter_type_check_files
+          ~to_recheck
+          ~reparsed:
+            (Relative_path.Set.union
+               dirty_files_unchanged_decls
+               dirty_files_changed_decls)
+          ~is_ide_file:(fun _ -> false)
     in
     let (state_distance, state_age) =
       match env.init_env.saved_state_delta with
@@ -772,7 +765,7 @@ let calculate_fanout_and_defer_or_do_type_check
       ServerInitCommon.defer_or_do_type_check
         genv
         env
-        files_to_check
+        (Relative_path.Set.elements to_recheck)
         init_telemetry
         t
         ~telemetry_label:"type_check_dirty"
@@ -1005,8 +998,7 @@ let full_init
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
       ~source:SearchUtils.Init;
-  let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
-  let fnl = Relative_path.Map.keys defs_per_file in
+  let fnl = Naming_table.get_files env.naming_table in
   ServerInitCommon.defer_or_do_type_check
     genv
     env

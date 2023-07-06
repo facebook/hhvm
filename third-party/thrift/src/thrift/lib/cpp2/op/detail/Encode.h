@@ -797,6 +797,59 @@ auto emplace_at_end(Container& container, Args&&... args) {
       container);
 }
 
+// Handles set with sorted_unique property
+template <typename Tag, typename Set, typename Protocol>
+typename std::enable_if_t<
+    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>
+decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+  if (set_size == 0) {
+    return;
+  }
+
+  typename Set::container_type tmp(set.get_allocator());
+  apache::thrift::detail::pm::reserve_if_possible(&tmp, set_size);
+  for (size_t i = 0; i < set_size; ++i) {
+    auto& elem = apache::thrift::detail::pm::emplace_back_default(tmp);
+    Decode<Tag>{}(prot, elem);
+  }
+
+  const bool sorted = std::is_sorted(tmp.begin(), tmp.end(), set.key_comp());
+  using folly::sorted_unique;
+  set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
+}
+
+// Handles set without sorted_unique property but has emplace_hint implemented
+template <typename Tag, typename Set, typename Protocol>
+typename std::enable_if_t<
+    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
+    apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
+decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+  apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
+
+  for (auto i = set_size; i > 0; i--) {
+    typename Set::value_type value =
+        apache::thrift::detail::default_set_element(set);
+    Decode<Tag>{}(prot, value);
+    set.emplace_hint(set.end(), std::move(value));
+  }
+}
+
+// Handles set without sorted_unique property or emplace_hint
+template <typename Tag, typename Set, typename Protocol>
+typename std::enable_if_t<
+    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
+    !apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
+decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+  apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
+
+  for (auto i = set_size; i--;) {
+    typename Set::value_type value =
+        apache::thrift::detail::default_set_element(set);
+    Decode<Tag>{}(prot, value);
+    set.insert(std::move(value));
+  }
+}
+
 template <typename Tag>
 struct Decode<type::set<Tag>> {
   template <typename Protocol, typename SetType>
@@ -804,7 +857,11 @@ struct Decode<type::set<Tag>> {
     auto consumeElem = [&] {
       typename SetType::value_type value;
       Decode<Tag>{}(prot, value);
-      emplace_at_end(set, std::move(value));
+      folly::overload(
+          [&](auto& c, int) -> decltype(c.emplace(std::move(value)).first) {
+            return emplace_at_end(c, std::move(value));
+          },
+          [&](auto& c, ...) { return c.insert(std::move(value)); })(set, 0);
     };
     TType t;
     uint32_t s;
@@ -815,10 +872,7 @@ struct Decode<type::set<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
-      apache::thrift::detail::pm::reserve_if_possible(&set, s);
-      while (s--) {
-        consumeElem();
-      }
+      decode_known_length_set<Tag>(prot, set, s);
     } else {
       while (s--) {
         prot.skip(t);

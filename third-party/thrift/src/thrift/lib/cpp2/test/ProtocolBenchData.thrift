@@ -81,6 +81,11 @@ struct UnorderedSetInt {
   1: set<i32> s;
 }
 
+struct SortedVecSetInt {
+  @cpp.Type{template = "folly::sorted_vector_set"}
+  1: set<i32> s;
+}
+
 struct LargeMapInt {
   1: map<i32, i32> m;
 }
@@ -350,6 +355,12 @@ struct OpLargeSetInt {
 @cpp.UseOpEncode
 struct OpUnorderedSetInt {
   @cpp.Type{template = "std::unordered_set"}
+  1: set<i32> s;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecSetInt {
+  @cpp.Type{template = "folly::sorted_vector_set"}
   1: set<i32> s;
 }
 

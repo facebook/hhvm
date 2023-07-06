@@ -236,6 +236,18 @@ create<thrift::benchmark::OpUnorderedSetInt>() {
   return createSet<thrift::benchmark::OpUnorderedSetInt>(1000000);
 }
 
+template <>
+inline thrift::benchmark::SortedVecSetInt
+create<thrift::benchmark::SortedVecSetInt>() {
+  return createSet<thrift::benchmark::SortedVecSetInt>(1000000);
+}
+
+template <>
+inline thrift::benchmark::OpSortedVecSetInt
+create<thrift::benchmark::OpSortedVecSetInt>() {
+  return createSet<thrift::benchmark::OpSortedVecSetInt>(1000000);
+}
+
 template <class T>
 inline T createMap(int size) {
   std::mt19937 rng;

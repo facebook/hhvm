@@ -15,7 +15,9 @@
  */
 
 #include <type_traits>
+#include <common/datastruct/hashtable/FBHashSet.h>
 #include <folly/portability/GTest.h>
+#include <folly/sorted_vector_types.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/TypeClass.h>
@@ -523,9 +525,18 @@ void testDecodeContainers() {
   testDecode<Protocol, type::list<type::bool_t>>(
       std::vector<bool>{true, false, true});
   testDecode<Protocol, type::set<type::bool_t>>(std::set<bool>{true, false});
+  testDecode<Protocol, type::set<type::bool_t>>(
+      std::unordered_set<bool>{true, false});
   testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
       std::map<std::string, int8_t>{
           {std::string("foo"), 1}, {std::string("foo"), 2}});
+  testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
+      std::unordered_map<std::string, int8_t>{
+          {std::string("foo"), 1}, {std::string("foo"), 2}});
+  testDecode<Protocol, type::set<type::byte_t>>(
+      folly::sorted_vector_set<int8_t>{3, 1, 2});
+  testDecode<Protocol, type::set<type::byte_t>>(
+      facebook::datastruct::FBHashSet<int8_t>{3, 1, 2});
 
   // Test if it skips when value type doesn't match.
   {

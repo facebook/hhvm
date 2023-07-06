@@ -40,7 +40,7 @@ Invalid argument (Typing[4110])
     via this generic `Tv`
   File "interfaces.hhi", line 115, characters 23-24:
     via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 48-49:
+  File "interfaces.hhi", line 92, characters 66-67:
     via this generic `Tv`
 File "anyarray_bad.php", line 25, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])

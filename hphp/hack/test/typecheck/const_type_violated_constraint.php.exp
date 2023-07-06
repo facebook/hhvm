@@ -1,10 +1,10 @@
 File "const_type_violated_constraint.php", line 4, characters 9-29:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 6-7:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "const_type_violated_constraint.php", line 4, characters 14-20:
   But got `?string`

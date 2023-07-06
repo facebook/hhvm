@@ -11,10 +11,12 @@ function test1(shape('a' => int, 'b' => float) $s1, supportdyn<shape('a' => int,
   $a3 = ($af)($s2);
   hh_expect_equivalent<dict<string,num>>($d1);
   hh_expect_equivalent<dict<arraykey,supportdyn<mixed>>>($d2);
-  hh_expect_equivalent<dict<arraykey,supportdyn<mixed>>>($d3);
+  // Signature in hhi doesn't include supportdyn unless pessimised
+  hh_expect_equivalent<dict<arraykey,mixed>>($d3);
   hh_expect_equivalent<darray<string,num>>($a1);
   hh_expect_equivalent<darray<arraykey,supportdyn<mixed>>>($a2);
-  hh_expect_equivalent<darray<arraykey,supportdyn<mixed>>>($a3);
+  // Signature in hhi doesn't include supportdyn unless pessimised
+  hh_expect_equivalent<darray<arraykey,mixed>>($a3);
 }
 
 function test2<T1 as shape('a' => int, 'b' => float), T2 as supportdyn<shape('a' => int, 'b' => float, ...)>>(T1 $s1, T2 $s2):void {

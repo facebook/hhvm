@@ -15,10 +15,10 @@ namespace HH {
    * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
    * Arrays (varray, darray).
    */
-  <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType, __NoAutoDynamic>>
+  <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
   abstract class AnyArray<
-    +Tk as arraykey,
-    +Tv,
+    <<__NoAutoBound>> +Tk as arraykey,
+    <<__NoAutoBound>> +Tv,
   > implements KeyedContainer<Tk, Tv>, \XHPChild {
 
   }
@@ -28,10 +28,10 @@ namespace HH {
    *
    * `dict` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType, __NoAutoDynamic>>
+  <<__SupportDynamicType>>
   abstract final class dict<
-    +Tk as arraykey,
-    +Tv,
+    <<__NoAutoBound>> +Tk as arraykey,
+    <<__NoAutoBound>> +Tv,
   > extends AnyArray<Tk, Tv> {}
 
   /**
@@ -39,8 +39,8 @@ namespace HH {
    *
    * `keyset` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType, __NoAutoDynamic>>
-  abstract final class keyset<+T as arraykey>
+  <<__SupportDynamicType>>
+  abstract final class keyset<<<__NoAutoBound>> +T as arraykey>
     extends AnyArray<T, T> {}
 
   /**
@@ -48,7 +48,7 @@ namespace HH {
    *
    * `vec` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType, __NoAutoDynamic>>
-  abstract final class vec<+T> extends AnyArray<int, T> {}
+  <<__SupportDynamicType>>
+  abstract final class vec<<<__NoAutoBound>> +T> extends AnyArray<int, T> {}
 
 } // namespace HH

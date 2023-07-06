@@ -63,15 +63,15 @@ namespace HH {
       arraykey $index,
     )[]: void;
 
-    <<__NoAutoDynamic, __SupportDynamicType>>
+    <<__NoAutoLikes>>
     public static function toArray(
-      FIXME\SUPPORTDYN_MARKER<shape(...)> $shape,
-    )[]: darray<arraykey, FIXME\SUPPORTDYN_MARKER<mixed>>;
+      shape(...) $shape,
+    )[]: darray<arraykey, mixed>;
 
-    <<__NoAutoDynamic, __SupportDynamicType>>
+    <<__NoAutoLikes>>
     public static function toDict(
-      FIXME\SUPPORTDYN_MARKER<shape(...)> $shape
-    )[]: dict<arraykey, FIXME\SUPPORTDYN_MARKER<mixed>>;
+      shape(...) $shape
+    )[]: dict<arraykey, mixed>;
 
     /**
      * Returns the value of the field $index of $shape,

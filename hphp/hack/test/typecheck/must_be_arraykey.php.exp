@@ -1,10 +1,10 @@
 File "must_be_arraykey.php", line 5, characters 14-22:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 32-32:
+  File "hackarray.hhi", line 43, characters 50-50:
   `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 37-44:
+  File "hackarray.hhi", line 43, characters 55-62:
   This type constraint is violated
-  File "hackarray.hhi", line 43, characters 37-44:
+  File "hackarray.hhi", line 43, characters 55-62:
   Expected `arraykey`
   File "must_be_arraykey.php", line 5, characters 21-21:
   But got `I`

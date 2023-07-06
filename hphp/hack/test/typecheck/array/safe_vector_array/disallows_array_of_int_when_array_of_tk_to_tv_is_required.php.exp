@@ -6,11 +6,11 @@ Invalid argument (Typing[4110])
   But got `vec<int>`
 File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 6-7:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
   But got `Tk`

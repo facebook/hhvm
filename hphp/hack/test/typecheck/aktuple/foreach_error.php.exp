@@ -4,11 +4,11 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "foreach_error.php", line 9, characters 18-21:
   But got `num`
-  File "hackarray.hhi", line 52, characters 54-54:
+  File "hackarray.hhi", line 52, characters 72-72:
     via this generic `T`
   File "hackarray.hhi", line 22, characters 35-36:
     via this generic `Tv`
   File "interfaces.hhi", line 115, characters 23-24:
     via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 48-49:
+  File "interfaces.hhi", line 92, characters 66-67:
     via this generic `Tv`

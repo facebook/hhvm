@@ -6,11 +6,11 @@ File "keyset.php", line 6, characters 18-19:
 Invalid argument (Typing[4110])
   File "keyset.php", line 22, characters 32-37:
   Expected `string`
-  File "hackarray.hhi", line 43, characters 37-44:
+  File "hackarray.hhi", line 43, characters 55-62:
   But got `arraykey`
 File "keyset.php", line 12, characters 18-19:
 Invalid argument (Typing[4110])
   File "keyset.php", line 22, characters 32-37:
   Expected `string`
-  File "hackarray.hhi", line 43, characters 37-44:
+  File "hackarray.hhi", line 43, characters 55-62:
   But got `arraykey`

@@ -6,11 +6,11 @@ Invalid argument (Typing[4110])
   But got `vec<T>` (variadic argument)
 File "variadic_args1.php--strict.php", line 29, characters 34-46:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 6-7:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 33, characters 12-19:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "variadic_args1.php--strict.php", line 29, characters 41-42:
   But got `Tk`

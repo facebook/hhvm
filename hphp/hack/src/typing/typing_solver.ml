@@ -379,6 +379,17 @@ let try_bind_to_equal_bound ~freshen env r var =
   else
     let old_env = env in
     let env = Utils.remove_tyvar_from_bounds env var in
+    let is_null ity =
+      match ity with
+      | LoclType ty -> begin
+        match get_node ty with
+        | Tprim Aast_defs.Tnull -> true
+        | _ -> false
+      end
+      | _ -> false
+    in
+    let lower_bounds = Env.get_tyvar_lower_bounds env var in
+    let has_null_lower_bound = ITySet.exists is_null lower_bounds in
     let expand_all ~strip_supportdyn env tyset =
       ITySet.fold
         (fun ty (env, res, sd_res) ->
@@ -386,15 +397,21 @@ let try_bind_to_equal_bound ~freshen env r var =
           match ty with
           | LoclType ty when strip_supportdyn ->
             let (_, env, stripped_ty) = TUtils.strip_supportdyn env ty in
-            ( env,
-              ITySet.add (LoclType stripped_ty) res,
-              ITySet.add (LoclType ty) sd_res )
+            let res = ITySet.add (LoclType stripped_ty) res in
+            let sd_res = ITySet.add (LoclType ty) sd_res in
+            let res =
+              if has_null_lower_bound then
+                ITySet.add (LoclType (MakeType.nullable r stripped_ty)) res
+              else
+                res
+            in
+            (env, res, sd_res)
           | _ -> (env, ITySet.add ty res, sd_res))
         tyset
         (env, ITySet.empty, ITySet.empty)
     in
     let (env, lower_bounds, sd_lower_bounds) =
-      expand_all ~strip_supportdyn:true env (Env.get_tyvar_lower_bounds env var)
+      expand_all ~strip_supportdyn:true env lower_bounds
     in
     let (env, upper_bounds, _) =
       expand_all

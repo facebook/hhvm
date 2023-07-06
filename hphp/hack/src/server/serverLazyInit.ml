@@ -439,8 +439,8 @@ let use_prechecked_files (genv : ServerEnv.genv) : bool =
   && Option.is_none (ServerArgs.save_filename genv.options)
 
 let get_old_and_new_defs_in_files
-    (old_naming_table : FileInfo.names Relative_path.Map.t)
-    (new_naming_table : FileInfo.names Relative_path.Map.t)
+    (old_naming_table : Naming_table.t)
+    (new_naming_table : Naming_table.t)
     (files : Relative_path.Set.t) : FileInfo.names Relative_path.Map.t =
   Relative_path.Set.fold
     files
@@ -448,10 +448,12 @@ let get_old_and_new_defs_in_files
       begin
         fun path acc ->
           let old_defs_in_file =
-            Relative_path.Map.find_opt old_naming_table path
+            Naming_table.get_file_info old_naming_table path
+            |> Option.map ~f:FileInfo.simplify
           in
           let new_defs_in_file =
-            Relative_path.Map.find_opt new_naming_table path
+            Naming_table.get_file_info new_naming_table path
+            |> Option.map ~f:FileInfo.simplify
           in
           let all_defs =
             Option.merge
@@ -509,8 +511,8 @@ let log_fanout_information to_recheck_deps files_to_recheck =
 let get_files_to_recheck
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (old_naming_table : FileInfo.names Relative_path.Map.t)
-    (new_naming_table : FileInfo.names Relative_path.Map.t)
+    (old_naming_table : Naming_table.t)
+    (new_naming_table : Naming_table.t)
     (defs_per_dirty_file : FileInfo.names Relative_path.Map.t)
     (files_to_redeclare : Relative_path.Set.t) : Relative_path.Set.t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
@@ -524,8 +526,14 @@ let get_files_to_recheck
         | None -> acc)
   in
   let get_old_and_new_classes path : SSet.t =
-    let old_names = Relative_path.Map.find_opt old_naming_table path in
-    let new_names = Relative_path.Map.find_opt new_naming_table path in
+    let old_names =
+      Naming_table.get_file_info old_naming_table path
+      |> Option.map ~f:FileInfo.simplify
+    in
+    let new_names =
+      Naming_table.get_file_info new_naming_table path
+      |> Option.map ~f:FileInfo.simplify
+    in
     let classes_from_names x = x.FileInfo.n_classes in
     let old_classes = Option.map old_names ~f:classes_from_names in
     let new_classes = Option.map new_names ~f:classes_from_names in
@@ -589,8 +597,6 @@ let calculate_fanout_and_defer_or_do_type_check
     ~(dirty_local_files_changed_decls : Relative_path.Set.t)
     (t : float)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let old_naming_table = Naming_table.to_defs_per_file old_naming_table in
-  let new_naming_table = Naming_table.to_defs_per_file new_naming_table in
   let start_t = Unix.gettimeofday () in
   let dirty_files_unchanged_decls =
     Relative_path.Set.union

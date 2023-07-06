@@ -5114,6 +5114,86 @@ function call_method(ClassWithFooBar $mc): void {
         )
         self.run_spec(spec, variables)
 
+    def test_code_action_content_modified(self) -> None:
+        """
+        **Potential bug**: we do not handle the following situation gracefully:
+        - client sends textDocument/codeAction
+        - server sends back a partially-resolved code action
+        - client sends codeAction/resolve with a *different* position s.t.
+        the server can't find a code action with the given position and title.
+        We should reply with an LSP error `ContentModified`
+        https://github.com/microsoft/language-server-protocol/issues/1738
+        """
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
+
+        spec = (
+            self.initialize_spec(LspTestSpec("code_action_flip_around_comma"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .request(
+                line=line(),
+                comment="get actions",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 3, "character": 10},
+                        "end": {"line": 3, "character": 10},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[
+                    {
+                        "title": "Flip around comma",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "data": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 3, "character": 10},
+                                "end": {"line": 3, "character": 10},
+                            },
+                            "context": {"diagnostics": []},
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="resolve code action",
+                method="codeAction/resolve",
+                params={
+                    "title": "Flip around comma",
+                    "data": {
+                        "textDocument": {"uri": "${php_file_uri}"},
+                        "range": {
+                            "start": {"line": 3, "character": 2},
+                            "end": {"line": 3, "character": 3},
+                        },
+                        "context": {"diagnostics": []},
+                    },
+                    "kind": "refactor",
+                    "diagnostics": [],
+                },
+                result=None,
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("incremental_derived.php"))

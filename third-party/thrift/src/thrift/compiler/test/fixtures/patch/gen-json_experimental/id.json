@@ -19,7 +19,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift.type",
+    "path": "thrift/type",
     "filename": "id"
   },
 

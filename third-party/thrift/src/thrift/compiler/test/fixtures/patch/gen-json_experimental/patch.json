@@ -21,7 +21,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift.op",
+    "path": "thrift/op",
     "filename": "patch"
   },
 

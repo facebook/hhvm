@@ -12,7 +12,7 @@
   "package": {
     "domain_prefix": "test",
     "domain_suffix": "dev",
-    "path": "fixtures.enums",
+    "path": "fixtures/enums",
     "filename": "module"
   },
 

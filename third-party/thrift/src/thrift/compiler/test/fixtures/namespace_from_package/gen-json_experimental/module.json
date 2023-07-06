@@ -11,7 +11,7 @@
   "package": {
     "domain_prefix": "test",
     "domain_suffix": "dev",
-    "path": "namespace_from_package.module",
+    "path": "namespace_from_package/module",
     "filename": "module"
   },
   "structs" :

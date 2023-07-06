@@ -14,7 +14,7 @@
   "package": {
     "domain_prefix": "test",
     "domain_suffix": "dev",
-    "path": "fixtures.no-legacy-apis",
+    "path": "fixtures/no-legacy-apis",
     "filename": "module"
   },
 

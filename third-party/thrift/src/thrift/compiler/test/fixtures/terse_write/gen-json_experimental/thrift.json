@@ -14,7 +14,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift.annotation",
+    "path": "thrift/annotation",
     "filename": "thrift"
   },
   "structs" :

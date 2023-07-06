@@ -13,7 +13,7 @@
   "package": {
     "domain_prefix": "test",
     "domain_suffix": "dev",
-    "path": "fixtures.basic",
+    "path": "fixtures/basic",
     "filename": "module"
   },
 

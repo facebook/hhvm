@@ -19,7 +19,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift.type",
+    "path": "thrift/type",
     "filename": "standard"
   },
   "global_docstring": "The **standard** types all Thrift implementations support.\n",

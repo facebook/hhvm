@@ -15,7 +15,7 @@
   "package": {
     "domain_prefix": "facebook",
     "domain_suffix": "com",
-    "path": "thrift.annotation.cpp",
+    "path": "thrift/annotation/cpp",
     "filename": "cpp"
   },
 

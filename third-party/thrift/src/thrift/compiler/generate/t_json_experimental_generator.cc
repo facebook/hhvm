@@ -126,12 +126,12 @@ class json_experimental_program : public mstch_program {
       result.push_back(mstch::map{
           {"key", std::string("domain_suffix")},
           {"value", package.domain()[domain.size() - 1]},
-          {"last?", package.path().empty()}});
+          {"last?", false}});
     }
     if (!package.path().empty()) {
       result.push_back(mstch::map{
           {"key", std::string("path")},
-          {"value", boost::join(package.path(), ".")},
+          {"value", boost::join(package.path(), "/")},
           {"last?", false}});
     }
     result.push_back(mstch::map{

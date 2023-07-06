@@ -367,6 +367,24 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     }
   }
 
+  ~StructPatch() {
+    if (false) {
+      // Implement this check in destructor to make sure it's instantiated.
+      op::for_each_ordinal<T>([](auto id) {
+        static_assert(
+            !apache::thrift::detail::is_shared_or_unique_ptr_v<
+                op::get_field_ref<T, decltype(id)>>,
+            "Patching cpp.ref field is unsupported since we cannot distinguish "
+            "unqualified and optional fields. Why? The type of `foo.field()` "
+            "is `std::unique_ptr` regardless Whether field is optional or "
+            "unqualified. In addition, Thrift Patch has different behavior "
+            "between optional and unqualified fields, e.g. `PatchOp::Clear` "
+            "will clear an optional field, but set an unqualified field to the "
+            "intrinsic default.");
+      });
+    }
+  }
+
  private:
   using Base::data_;
 };

@@ -25,6 +25,7 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/req-root.h"
@@ -33,6 +34,7 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/blob-encoder.h"
@@ -86,9 +88,7 @@ struct Recorder::LoggerHook final : public HPHP::LoggerHook {
 
 struct Recorder::StdoutHook final : public ExecutionContext::StdoutHook {
   void operator()(const char* s, int len) override {
-    g_context->removeStdoutHook(getStdoutHook());
-    g_context->write(s, len);
-    g_context->addStdoutHook(getStdoutHook());
+    g_context->writeStdout(s, len, true);
     get().m_nativeCalls.back().stdouts.append(std::string(s, len));
   }
 };
@@ -104,35 +104,6 @@ Recorder& Recorder::get() {
 Recorder::StdoutHook* Recorder::getStdoutHook() {
   static StdoutHook stdoutHook;
   return &stdoutHook;
-}
-
-void Recorder::onNativeCallArg(const String& arg) {
-  m_nativeCalls.back().args.append(arg);
-}
-
-void Recorder::onNativeCallEntry(std::uintptr_t id) {
-  static LoggerHook loggerHook;
-  m_nativeCalls.emplace_back().id = id;
-  g_context->addStdoutHook(getStdoutHook());
-  Logger::SetThreadHook(&loggerHook);
-}
-
-void Recorder::onNativeCallReturn(const String& ret) {
-  Logger::SetThreadHook(nullptr);
-  g_context->removeStdoutHook(getStdoutHook());
-  m_nativeCalls.back().ret = ret;
-}
-
-template<> String Recorder::serialize(Variant);
-
-void Recorder::onNativeCallThrow(std::exception_ptr exc) {
-  Logger::SetThreadHook(nullptr);
-  g_context->removeStdoutHook(getStdoutHook());
-  try {
-    std::rethrow_exception(exc);
-  } catch (const req::root<Object>& e) {
-    m_nativeCalls.back().exc = serialize(Variant{e});
-  }
 }
 
 template<>
@@ -212,6 +183,44 @@ String Recorder::serialize(TypedValue value) {
   return serialize(Variant::wrap(value));
 }
 
+void Recorder::onNativeCallArg(const String& arg) {
+  m_nativeCalls.back().args.append(arg);
+}
+
+void Recorder::onNativeCallEntry(std::uintptr_t id) {
+  static LoggerHook loggerHook;
+  m_nativeCalls.emplace_back().id = id;
+  g_context->addStdoutHook(getStdoutHook());
+  Logger::SetThreadHook(&loggerHook);
+  m_enabled = false;
+}
+
+void Recorder::onNativeCallExit() {
+  g_context->removeStdoutHook(getStdoutHook());
+  Logger::SetThreadHook(nullptr);
+  m_enabled = true;
+}
+
+void Recorder::onNativeCallReturn(const String& ret) {
+  m_nativeCalls.back().ret = ret;
+  onNativeCallExit();
+}
+
+void Recorder::onNativeCallThrow(std::exception_ptr exc) {
+  try {
+    std::rethrow_exception(exc);
+  } catch (const req::root<Object>& e) {
+    m_nativeCalls.back().exc = serialize(Variant{e});
+  }
+  onNativeCallExit();
+}
+
+void Recorder::onNativeCallWaitHandle(const Object& object) {
+  m_nativeCalls.back().returnedWaitHandle = true;
+  m_nativeCalls.back().waitHandle = object;
+  onNativeCallExit();
+}
+
 Array Recorder::toArray() const {
   DictInit files{g_context->m_evaledFiles.size()};
   for (const auto& [k, _] : g_context->m_evaledFiles) {
@@ -224,8 +233,16 @@ Array Recorder::toArray() const {
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
-    const auto& [id, stdouts, args, ret, exc]{m_nativeCalls.at(i)};
-    nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc));
+    auto [id, stdouts, args, ret, exc, rwh, wh]{m_nativeCalls.at(i)};
+    if (rwh) {
+      const auto ptr{static_cast<const c_Awaitable*>(wh.get())};
+      if (ptr->isSucceeded()) {
+        ret = serialize(ptr->getResult());
+      } else if (ptr->isFailed()) {
+        exc = serialize(ptr->getException());
+      }
+    }
+    nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, rwh));
     nativeFuncIds.set(String{g_nativeFuncNames[id]}, id);
   }
   return make_dict_array(

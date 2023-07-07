@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/assertions.h"
@@ -72,17 +73,99 @@ String Replayer::init(const String& path) {
   }
   for (auto i{recording[String{"nativeCalls"}].asCArrRef().begin()}; i; ++i) {
     const auto call{i.second().asCArrRef()};
-    always_assert(call.size() == 5);
-    const auto id{nativeFuncRecordToReplayId[call[0].asInt64Val()]};
+    always_assert(call.size() == 6);
     m_nativeCalls.push_back(NativeCall{
-      id,
+      nativeFuncRecordToReplayId[call[0].asInt64Val()],
       call[1].asCArrRef(),
       call[2].asCArrRef(),
       call[3].asCStrRef(),
       call[4].asCStrRef(),
+      call[5].asBooleanVal(),
     });
   }
   return header[String{"entryPoint"}].toString();
+}
+
+template<>
+Variant Replayer::unserialize(const String& recordedValue) {
+  TmpAssign _{RO::EvalCheckPropTypeHints, 0};
+  return VariableUnserializer{
+    recordedValue.data(),
+    static_cast<std::size_t>(recordedValue.size()),
+    VariableUnserializer::Type::DebuggerSerialize
+  }.unserialize();
+}
+
+template<>
+void Replayer::unserialize(const String& recordedValue) {
+  always_assert(unserialize<Variant>(recordedValue).isNull());
+}
+
+template<>
+bool Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isBoolean());
+  return variant.asBooleanVal();
+}
+
+template<>
+double Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isDouble());
+  return variant.asDoubleVal();
+}
+
+template<>
+std::int64_t Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isInteger());
+  return variant.asInt64Val();
+}
+
+template<>
+Array Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isArray());
+  return variant.asCArrRef();
+}
+
+template<>
+Object Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isObject());
+  return variant.asCObjRef();
+}
+
+template<>
+Resource Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isResource());
+  return variant.asCResRef();
+}
+
+template<>
+String Replayer::unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  always_assert(variant.isString());
+  return variant.asCStrRef();
+}
+
+template<>
+TypedValue Replayer::unserialize(const String& recordedValue) {
+  return unserialize<Variant>(recordedValue).detach();
+}
+
+Object Replayer::makeWaitHandle(const NativeCall& call) {
+  if (!call.ret.empty()) {
+    const auto ret{unserialize<TypedValue>(call.ret)};
+    return Object{c_StaticWaitHandle::CreateSucceeded(ret)};
+  } else if (!call.exc.empty()) {
+    const auto exc{unserialize<Object>(call.exc)};
+    return Object{c_StaticWaitHandle::CreateFailed(exc.get())};
+  } else {
+    const auto ret{make_tv<DataType::Null>()};
+    return Object{c_StaticWaitHandle::CreateSucceeded(ret)};
+  }
 }
 
 template<>
@@ -135,28 +218,20 @@ void Replayer::nativeArg(const String& recordedArg, TypedValue arg) {
   nativeArg<const Variant&>(recordedArg, Variant::wrap(arg));
 }
 
-template<> bool Replayer::unserialize(const String&);
-
 template<>
 void Replayer::nativeArg(const String& recordedArg, bool& arg) {
   arg = unserialize<bool>(recordedArg);
 }
-
-template<> double Replayer::unserialize(const String&);
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, double& arg) {
   arg = unserialize<double>(recordedArg);
 }
 
-template<> std::int64_t Replayer::unserialize(const String&);
-
 template<>
 void Replayer::nativeArg(const String& recordedArg, std::int64_t& arg) {
   arg = unserialize<std::int64_t>(recordedArg);
 }
-
-template<> Array Replayer::unserialize(const String&);
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, Array& arg) {
@@ -167,8 +242,6 @@ template<>
 void Replayer::nativeArg(const String& recordedArg, ArrayArg arg) {
   arg.m_px = unserialize<Array>(recordedArg).detach();
 }
-
-template<> Object Replayer::unserialize(const String&);
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, Object& arg) {
@@ -207,8 +280,6 @@ void Replayer::nativeArg(const String& recordedArg, ObjectData* arg) {
   }
 }
 
-template<> String Replayer::unserialize(const String&);
-
 template<>
 void Replayer::nativeArg(const String& recordedArg, String& arg) {
   arg = unserialize<String>(recordedArg);
@@ -219,77 +290,20 @@ void Replayer::nativeArg(const String& recordedArg, StringArg arg) {
   arg.m_px = unserialize<String>(recordedArg).detach();
 }
 
-template<> Variant Replayer::unserialize(const String&);
-
 template<>
 void Replayer::nativeArg(const String& recordedArg, Variant& arg) {
   arg = unserialize<Variant>(recordedArg);
 }
 
-std::tuple<Array, String, String> Replayer::popNativeCall(std::uintptr_t id) {
+NativeCall Replayer::popNativeCall(std::uintptr_t id) {
   always_assert(!m_nativeCalls.empty());
-  const auto [recordedId, stdouts, args, ret, exc]{m_nativeCalls.front()};
+  const auto call{m_nativeCalls.front()};
   m_nativeCalls.pop_front();
-  always_assert(recordedId == id);
-  for (auto i{stdouts.begin()}; i; ++i) {
+  always_assert(call.id == id);
+  for (auto i{call.stdouts.begin()}; i; ++i) {
     g_context->write(i.second().asCStrRef());
   }
-  return std::make_tuple(args, ret, exc);
-}
-
-template<>
-Variant Replayer::unserialize(const String& recordedValue) {
-  TmpAssign _{RO::EvalCheckPropTypeHints, 0};
-  return VariableUnserializer{
-    recordedValue.data(),
-    static_cast<std::size_t>(recordedValue.size()),
-    VariableUnserializer::Type::DebuggerSerialize
-  }.unserialize();
-}
-
-template<>
-void Replayer::unserialize(const String& recordedValue) {
-  always_assert(unserialize<Variant>(recordedValue).isNull());
-}
-
-template<>
-bool Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asBooleanVal();
-}
-
-template<>
-double Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asDoubleVal();
-}
-
-template<>
-std::int64_t Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asInt64Val();
-}
-
-template<>
-Array Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asCArrRef();
-}
-
-template<>
-Object Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asCObjRef();
-}
-
-template<>
-Resource Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asCResRef();
-}
-
-template<>
-String Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).asCStrRef();
-}
-
-template<>
-TypedValue Replayer::unserialize(const String& recordedValue) {
-  return unserialize<Variant>(recordedValue).detach();
+  return call;
 }
 
 } // namespace HPHP

@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
@@ -29,6 +30,8 @@ constexpr bool shouldRecordReplay(std::string_view name) {
   return !(
     // Native functions for async which are handled separately
     name == "HH\\Asio\\join" ||
+    name == "HH\\AwaitAllWaitHandle::fromDict" ||
+    name == "HH\\AwaitAllWaitHandle::fromVec" ||
     name == "HH\\RescheduleWaitHandle::create" ||
 
     // Native functions that call back to user code
@@ -40,6 +43,7 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "hphp_invoke" ||
     name == "hphp_invoke_method" ||
     name == "preg_replace_callback" ||
+    name == "register_shutdown_function" ||
     name == "set_error_handler" ||
     name == "set_exception_handler" ||
 
@@ -51,7 +55,24 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "printf" ||
     name == "sprintf" ||
     name == "vprintf" ||
-    name == "vsprintf"
+    name == "vsprintf" ||
+
+    // Native functions that are common and known to be deterministic
+    name == "HH\\Lib\\_Private\\Native\\last" ||
+    name == "count" ||
+    name == "ord" ||
+    name == "strlen" ||
+    name == "HH\\ImmVector->__construct" ||
+    name == "chr" ||
+    name == "HH\\BuiltinEnum::coerce" ||
+    name == "enum_exists" ||
+    name == "floor" ||
+    name == "HH\\Lib\\_Private\\_Str\\strpos_l" ||
+    name == "HH\\Lib\\_Private\\_Str\\starts_with_l" ||
+    name == "is_numeric" ||
+    name == "HH\\Lib\\_Private\\_Str\\split_l" ||
+    name == "HH\\Lib\\_Private\\Native\\first" ||
+    name == "inet_pton"
   );
 }
 
@@ -87,6 +108,8 @@ struct NativeCall {
   Array args{Array::CreateVec()};
   String ret{empty_string()};
   String exc{empty_string()};
+  bool returnedWaitHandle{false};
+  Object waitHandle{};
 };
 
 } // namespace HPHP

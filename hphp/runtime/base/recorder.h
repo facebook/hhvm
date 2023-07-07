@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 
@@ -67,8 +68,10 @@ struct Recorder {
   static StdoutHook* getStdoutHook();
   void onNativeCallArg(const String& arg);
   void onNativeCallEntry(std::uintptr_t id);
+  void onNativeCallExit();
   void onNativeCallReturn(const String& ret);
   void onNativeCallThrow(std::exception_ptr exc);
+  void onNativeCallWaitHandle(const Object& object);
   template<typename T> static String serialize(T value);
   Array toArray() const;
 
@@ -91,6 +94,12 @@ struct Recorder {
       onNativeCallThrow(exc);
       std::rethrow_exception(exc);
     } else {
+      if constexpr (std::is_same_v<R, Object>) {
+        if (ret && ret->isWaitHandle()) {
+          onNativeCallWaitHandle(ret);
+          return ret;
+        }
+      }
       onNativeCallReturn(serialize(ret));
       if constexpr (!std::is_void_v<R>) {
         return ret;

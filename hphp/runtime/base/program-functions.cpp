@@ -2160,7 +2160,7 @@ static int execute_program_impl(int argc, char** argv) {
         if (RO::EvalRecordSampleRate > 0) {
           Recorder::setEntryPoint(file);
         } else if (RO::EvalReplay) {
-          file = Replayer::get().init(file).toCppString();
+          file = new_argv[0] = Replayer::get().init(file).mutableData();
         }
       }
 

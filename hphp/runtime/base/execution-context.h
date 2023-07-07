@@ -209,7 +209,7 @@ public:
   void write(const char* s, int len);
   void write(const char*);
 
-  void writeStdout(const char* s, int len);
+  void writeStdout(const char* s, int len, bool skipHooks = false);
   size_t getStdoutBytesWritten() const;
 
   /**

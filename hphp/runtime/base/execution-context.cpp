@@ -237,9 +237,9 @@ static void safe_stdout(const  void  *ptr,  size_t  size) {
   write(fileno(stdout), ptr, size);
 }
 
-void ExecutionContext::writeStdout(const char *s, int len) {
+void ExecutionContext::writeStdout(const char *s, int len, bool skipHooks) {
   fflush(stdout);
-  if (m_stdoutHooks.empty()) {
+  if (skipHooks || m_stdoutHooks.empty()) {
     if (s_stdout_color) {
       safe_stdout(s_stdout_color, strlen(s_stdout_color));
       safe_stdout(s, len);

@@ -2325,9 +2325,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       Array properties = getSerializeProps(obj);
       if (type == VariableSerializer::Type::DebuggerSerialize) {
         try {
-          CoeffectsAutoGuard _;
           auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
-            RuntimeCoeffects::automatic());
+            m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults());
           if (val.isInitialized()) {
             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
           }
@@ -2371,9 +2370,8 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           return;
         }
         // Otherwise compute it if we have a __toDebugDisplay method.
-        CoeffectsAutoGuard _;
         auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
-          RuntimeCoeffects::automatic());
+          m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults());
         if (val.isInitialized()) {
           serializeVariant(val.asTypedValue(), false, false, true);
           return;

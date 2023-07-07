@@ -276,11 +276,19 @@ See [selection region]
       let acc =
         (* mutates refs *)
         match expr_ with
-        | Aast.Lfun _
-        | Aast.Efun _ ->
+        | Aast.Lfun (fun_, _)
+        | Aast.Efun Aast.{ ef_fun = fun_; _ } ->
           (region :=
              Region.{ !region with defined = Scopes.enter !region.defined });
-          let acc = super#on_expr env expr in
+          let acc =
+            match Aast_defs.(fun_.f_body.fb_ast) with
+            | [(_, Aast.Return (Some e))] ->
+              (* `() ==> 3 + 3` has a `return` in the tast, which we remove because "extract method" isn't
+                 safe for return statements in general. But it's fine to offer the refactor this case: we can extract the `3 + 3`.
+              *)
+              super#on_expr env e
+            | _ -> super#on_expr_ env expr_
+          in
           (region :=
              Region.{ !region with defined = Scopes.exit !region.defined });
           acc

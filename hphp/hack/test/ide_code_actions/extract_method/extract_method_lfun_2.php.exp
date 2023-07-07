@@ -1,1 +1,46 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function ${0:method0}(): int {\n  return 3 + 3;\n  }\n\n",
+          "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
+        },
+        {
+          "newText":"$this->${0:method0}()",
+          "range":{"end":{"character":26,"line":9},"start":{"character":21,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo((function(): int) $f): void {}
+
+class A {
+  private function ${0:method0}(): int {
+  return 3 + 3;
+  }
+
+  public function main(): void {
+    foo(() ==>
+      // We offer a refactor even though the selection
+      // corresponds to a `return` statement in the tast.
+      /*range-start*/$this->${0:method0}()/*range-end*/
+    );
+  }
+}
+

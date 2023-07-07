@@ -12,7 +12,6 @@ use oxidized_by_ref::ast_defs::Abstraction;
 use oxidized_by_ref::ast_defs::ClassishKind;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
-use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 use serde_derive::Serialize;
@@ -87,11 +86,11 @@ impl Facts {
             let type_fact = TypeFacts::of_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
-        for (name, decl) in parsed_file.decls.typedefs().filter(|(_, decl)| {
+        for (name, _) in parsed_file.decls.typedefs().filter(|(_, decl)| {
             // Ignore context aliases
             !decl.is_ctx
         }) {
-            let type_fact = TypeFacts::of_typedef_decl(decl);
+            let type_fact = TypeFacts::of_typedef_decl();
             add_or_update_classish_decl(format(name), type_fact, &mut types);
         }
 
@@ -181,7 +180,7 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
 }
 
 impl TypeFacts {
-    fn of_class_decl<'a>(decl: &'a ClassDecl<'a>) -> TypeFacts {
+    fn of_class_decl(decl: &ClassDecl<'_>) -> TypeFacts {
         let ClassDecl { kind, final_, .. } = decl;
 
         // Set flags according to modifiers - abstract, final, static (abstract + final)
@@ -209,7 +208,7 @@ impl TypeFacts {
         TypeFacts { kind, flags }
     }
 
-    fn of_typedef_decl<'a>(_: &'a TypedefDecl<'a>) -> TypeFacts {
+    fn of_typedef_decl() -> TypeFacts {
         TypeFacts {
             kind: TypeKind::TypeAlias,
             flags: Flags::default(),

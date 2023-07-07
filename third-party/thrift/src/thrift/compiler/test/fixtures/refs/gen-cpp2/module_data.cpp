@@ -55,6 +55,23 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::MyUnion>:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::name = "NonTriviallyDestructibleUnion";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::fields_names = {{
+  "int_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::fields_ids = {{
+  1,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::fields_types = {{
+  TType::T_I32,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::storage_names = {{
+  "int_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::NonTriviallyDestructibleUnion>::isset_indexes = {{
+  -1,
+}};
+
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyField>::name = "MyField";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyField>::fields_names = {{
   "opt_value",

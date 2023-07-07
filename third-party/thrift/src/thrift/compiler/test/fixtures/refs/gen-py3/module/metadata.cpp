@@ -14,6 +14,7 @@ namespace cpp2 {
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<TypedEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<NonTriviallyDestructibleUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyField>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructWithUnion>::gen(metadata);

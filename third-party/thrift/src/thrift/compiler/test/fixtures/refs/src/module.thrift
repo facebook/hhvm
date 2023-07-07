@@ -28,6 +28,11 @@ union MyUnion {
   2: string aString (cpp.ref = "true", cpp2.ref = "true");
 }
 
+union NonTriviallyDestructibleUnion {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: i32 int_field;
+}
+
 struct MyField {
   1: optional i64 opt_value (cpp.ref = "true", cpp2.ref = "true");
   2: i64 value (cpp.ref = "true", cpp2.ref = "true");

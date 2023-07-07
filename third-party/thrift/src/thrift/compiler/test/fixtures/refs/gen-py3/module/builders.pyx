@@ -11,6 +11,12 @@ cdef class MyUnion_Builder(thrift.py3.builder.StructBuilder):
         yield "anInteger", self.anInteger
         yield "aString", self.aString
 
+cdef class NonTriviallyDestructibleUnion_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.NonTriviallyDestructibleUnion
+
+    def __iter__(self):
+        yield "int_field", self.int_field
+
 cdef class MyField_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.MyField
 

@@ -23,6 +23,13 @@ struct TccStructTraits<::cpp2::MyUnion> {
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
+struct TccStructTraits<::cpp2::NonTriviallyDestructibleUnion> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::cpp2::MyField> {
   static void translateFieldName(
       folly::StringPiece _fname,
@@ -291,6 +298,119 @@ extern template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader
 extern template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void NonTriviallyDestructibleUnion::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+  _readState.fieldId = 0;
+
+  _readState.readStructBegin(iprot);
+
+  _readState.readFieldBegin(iprot);
+  if (_readState.atStop()) {
+    apache::thrift::clear(*this);
+  } else {
+    if (iprot->kUsesFieldNames()) {
+      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<NonTriviallyDestructibleUnion>>();
+    }
+    switch (_readState.fieldId) {
+      case 1:
+      {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
+          this->set_int_field();
+          auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
+          value_.int_field = std::move(ptr);
+          
+        } else {
+          _readState.skip(iprot);
+        }
+        break;
+      }
+      default:
+      {
+        _readState.skip(iprot);
+        break;
+      }
+    }
+    _readState.readFieldEnd(iprot);
+    _readState.readFieldBegin(iprot);
+    if (UNLIKELY(!_readState.atStop())) {
+      using apache::thrift::protocol::TProtocolException;
+      TProtocolException::throwUnionMissingStop();
+    }
+  }
+  _readState.readStructEnd(iprot);
+}
+template <class Protocol_>
+uint32_t NonTriviallyDestructibleUnion::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("NonTriviallyDestructibleUnion");
+  switch(this->getType()) {
+    case NonTriviallyDestructibleUnion::Type::int_field:
+    {
+      xfer += prot_->serializedFieldSize("int_field", apache::thrift::protocol::T_I32, 1);
+      if (value_.int_field) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, *value_.int_field);
+      }
+      break;
+    }
+    case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t NonTriviallyDestructibleUnion::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("NonTriviallyDestructibleUnion");
+  switch(this->getType()) {
+    case NonTriviallyDestructibleUnion::Type::int_field:
+    {
+      xfer += prot_->serializedFieldSize("int_field", apache::thrift::protocol::T_I32, 1);
+      if (value_.int_field) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, *value_.int_field);
+      }
+      break;
+    }
+    case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t NonTriviallyDestructibleUnion::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("NonTriviallyDestructibleUnion");
+  switch(this->getType()) {
+    case NonTriviallyDestructibleUnion::Type::int_field:
+    {
+      constexpr int16_t kPrevFieldId = 0;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "int_field", false);
+      if (value_.int_field) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, *value_.int_field);
+      }
+      xfer += prot_->writeFieldEnd();
+      break;
+    }
+    case NonTriviallyDestructibleUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void NonTriviallyDestructibleUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t NonTriviallyDestructibleUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t NonTriviallyDestructibleUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t NonTriviallyDestructibleUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void NonTriviallyDestructibleUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t NonTriviallyDestructibleUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t NonTriviallyDestructibleUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t NonTriviallyDestructibleUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 template <class Protocol_>

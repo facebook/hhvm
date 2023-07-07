@@ -21,6 +21,12 @@ class MyUnion_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class NonTriviallyDestructibleUnion_Builder(thrift.py3.builder.StructBuilder):
+    int_field: _typing.Optional[int]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class MyField_Builder(thrift.py3.builder.StructBuilder):
     opt_value: _typing.Optional[int]
     value: _typing.Optional[int]

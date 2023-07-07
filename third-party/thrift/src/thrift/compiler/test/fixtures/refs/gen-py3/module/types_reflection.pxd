@@ -16,6 +16,8 @@ from thrift.py3.reflection cimport (
 
 cdef __StructSpec get_reflection__MyUnion()
 
+cdef __StructSpec get_reflection__NonTriviallyDestructibleUnion()
+
 cdef __StructSpec get_reflection__MyField()
 
 cdef __StructSpec get_reflection__MyStruct()

@@ -99,6 +99,23 @@ cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_types_c
         const unique_ptr[string]& get_aString "get_aString" () const
         unique_ptr[string]& set_aString "set_aString" (const string&)
 
+    cdef enum cNonTriviallyDestructibleUnion__type "::cpp2::NonTriviallyDestructibleUnion::Type":
+        cNonTriviallyDestructibleUnion__type___EMPTY__ "::cpp2::NonTriviallyDestructibleUnion::Type::__EMPTY__",
+        cNonTriviallyDestructibleUnion__type_int_field "::cpp2::NonTriviallyDestructibleUnion::Type::int_field",
+
+    cdef cppclass cNonTriviallyDestructibleUnion "::cpp2::NonTriviallyDestructibleUnion":
+        cNonTriviallyDestructibleUnion() except +
+        cNonTriviallyDestructibleUnion(const cNonTriviallyDestructibleUnion&) except +
+        bint operator==(cNonTriviallyDestructibleUnion&)
+        bint operator!=(cNonTriviallyDestructibleUnion&)
+        bint operator<(cNonTriviallyDestructibleUnion&)
+        bint operator>(cNonTriviallyDestructibleUnion&)
+        bint operator<=(cNonTriviallyDestructibleUnion&)
+        bint operator>=(cNonTriviallyDestructibleUnion&)
+        cNonTriviallyDestructibleUnion__type getType() const
+        const shared_ptr[cint32_t]& get_int_field "get_int_field" () const
+        shared_ptr[cint32_t]& set_int_field "set_int_field" (const cint32_t&)
+
 
     cdef cppclass cMyField "::cpp2::MyField":
         cMyField() except +
@@ -351,6 +368,27 @@ cdef class MyUnion(thrift.py3.types.Union):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyUnion])
+
+cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
+    pass
+
+
+
+
+cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
+    cdef shared_ptr[cNonTriviallyDestructibleUnion] _cpp_obj
+    cdef readonly __NonTriviallyDestructibleUnionType type
+    cdef readonly object value
+    cdef _load_cache(NonTriviallyDestructibleUnion self)
+
+    @staticmethod
+    cdef unique_ptr[cNonTriviallyDestructibleUnion] _make_instance(
+        cNonTriviallyDestructibleUnion* base_instance,
+        object int_field
+    ) except *
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cNonTriviallyDestructibleUnion])
 
 
 

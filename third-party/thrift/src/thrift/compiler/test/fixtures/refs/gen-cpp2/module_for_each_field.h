@@ -23,6 +23,14 @@ struct ForEachField<::cpp2::MyUnion> {
 };
 
 template <>
+struct ForEachField<::cpp2::NonTriviallyDestructibleUnion> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).int_field_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::cpp2::MyField> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

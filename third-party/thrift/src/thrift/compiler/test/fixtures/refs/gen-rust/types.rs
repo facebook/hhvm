@@ -13,6 +13,12 @@ pub enum MyUnion {
     UnknownField(::std::primitive::i32),
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum NonTriviallyDestructibleUnion {
+    int_field(::std::primitive::i32),
+    UnknownField(::std::primitive::i32),
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyField {
     pub opt_value: ::std::option::Option<::std::primitive::i64>,
@@ -537,6 +543,102 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             1 => {
             },
             2 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+impl ::std::default::Default for NonTriviallyDestructibleUnion {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for NonTriviallyDestructibleUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for NonTriviallyDestructibleUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("NonTriviallyDestructibleUnion");
+        match self {
+            Self::int_field(inner) => {
+                p.write_field_begin("int_field", ::fbthrift::TType::I32, 1);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for NonTriviallyDestructibleUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 1),
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::I32, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::int_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "NonTriviallyDestructibleUnion".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
+                    let mut tmp = Some(cpp::types::Ref {
+                        r#type: cpp::types::RefType(2),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

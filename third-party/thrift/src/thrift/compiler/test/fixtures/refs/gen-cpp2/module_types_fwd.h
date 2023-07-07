@@ -9,6 +9,7 @@
 // BEGIN forward_declare
 namespace cpp2 {
 class MyUnion;
+class NonTriviallyDestructibleUnion;
 class MyField;
 class MyStruct;
 class StructWithUnion;

@@ -29,6 +29,19 @@ struct VisitByFieldId<::cpp2::MyUnion> {
 };
 
 template <>
+struct VisitByFieldId<::cpp2::NonTriviallyDestructibleUnion> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).int_field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::NonTriviallyDestructibleUnion");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::cpp2::MyField> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

@@ -18,6 +18,10 @@ cdef class MyUnion_Builder(thrift.py3.builder.StructBuilder):
     cdef public str aString
 
 
+cdef class NonTriviallyDestructibleUnion_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint int_field
+
+
 cdef class MyField_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint opt_value
     cdef public pint value

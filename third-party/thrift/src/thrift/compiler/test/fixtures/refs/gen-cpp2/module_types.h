@@ -15,6 +15,7 @@ namespace thrift {
 namespace ident {
 struct anInteger;
 struct aString;
+struct int_field;
 struct opt_value;
 struct value;
 struct req_value;
@@ -78,6 +79,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(anInteger);
 #ifndef APACHE_THRIFT_ACCESSOR_aString
 #define APACHE_THRIFT_ACCESSOR_aString
 APACHE_THRIFT_DEFINE_ACCESSOR(aString);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_int_field
+#define APACHE_THRIFT_ACCESSOR_int_field
+APACHE_THRIFT_DEFINE_ACCESSOR(int_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_opt_value
 #define APACHE_THRIFT_ACCESSOR_opt_value
@@ -391,6 +396,7 @@ template <> struct TEnumTraits<::cpp2::TypedEnum> {
 // BEGIN forward_declare
 namespace cpp2 {
 class MyUnion;
+class NonTriviallyDestructibleUnion;
 class MyField;
 class MyStruct;
 class StructWithUnion;
@@ -736,6 +742,238 @@ class MyUnion final  {
 
 template <class Protocol_>
 unsigned long MyUnion::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class NonTriviallyDestructibleUnion final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::int_field
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = NonTriviallyDestructibleUnion;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+
+
+ public:
+  enum Type : int {
+    __EMPTY__ = 0,
+    int_field = 1,
+  } ;
+
+  NonTriviallyDestructibleUnion()
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+
+  NonTriviallyDestructibleUnion(NonTriviallyDestructibleUnion&& rhs) noexcept
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::int_field:
+      {
+        set_int_field(std::move(*rhs.value_.int_field));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+  }
+
+  NonTriviallyDestructibleUnion(const NonTriviallyDestructibleUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::int_field:
+      {
+        set_int_field(*rhs.value_.int_field);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  NonTriviallyDestructibleUnion& operator=(NonTriviallyDestructibleUnion&& rhs) noexcept {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::int_field:
+      {
+        set_int_field(std::move(*rhs.value_.int_field));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+    return *this;
+  }
+
+  NonTriviallyDestructibleUnion& operator=(const NonTriviallyDestructibleUnion& rhs) {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::int_field:
+      {
+        set_int_field(*rhs.value_.int_field);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+
+
+  union storage_type {
+    ::std::shared_ptr<::std::int32_t> int_field;
+
+  } ;
+
+  bool operator==(const NonTriviallyDestructibleUnion&) const;
+  bool operator<(const NonTriviallyDestructibleUnion&) const;
+
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::std::shared_ptr<::std::int32_t>& set_int_field(::std::int32_t t = ::std::int32_t()) {
+    using T0 = ::std::int32_t;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::int_field);
+    ::new (std::addressof(value_.int_field)) T(t);
+    return value_.int_field;
+  }
+
+  ::std::shared_ptr<::std::int32_t> const& get_int_field() const {
+    if (getType() != Type::int_field) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.int_field;
+  }
+
+  ::std::shared_ptr<::std::int32_t>& mutable_int_field() {
+    assert(getType() == Type::int_field);
+    return value_.int_field;
+  }
+
+  ::std::shared_ptr<::std::int32_t> move_int_field() {
+    assert(getType() == Type::int_field);
+    return std::move(value_.int_field);
+  }
+
+  template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> int_field_ref() const& {
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> int_field_ref() const&& {
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> int_field_ref() & {
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> int_field_ref() && {
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  Type getType() const { return static_cast<Type>(type_); }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  storage_type value_;
+  std::underlying_type_t<Type> type_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<NonTriviallyDestructibleUnion>;
+  friend void swap(NonTriviallyDestructibleUnion& a, NonTriviallyDestructibleUnion& b);
+};
+
+template <class Protocol_>
+unsigned long NonTriviallyDestructibleUnion::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -4578,6 +4816,31 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
   using type = ::cpp2::MyUnion::Type;
 
   static constexpr std::size_t const size = 2;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
+
+template <> struct TEnumDataStorage<::cpp2::NonTriviallyDestructibleUnion::Type>;
+
+template <> struct TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type> {
+  using type = ::cpp2::NonTriviallyDestructibleUnion::Type;
+
+  static constexpr std::size_t const size = 1;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 

@@ -50,6 +50,16 @@ inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumT
   return *pairs;
 }
 
+template<>
+inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+    ::cpp2::NonTriviallyDestructibleUnion::Type>::namesmap() {
+  static const folly::Indestructible<NamesMap> pairs {
+    {
+    }
+  };
+  return *pairs;
+}
+
 
 template<>
 inline void reset_field<::cpp2::MyField>(
@@ -328,6 +338,16 @@ inline void reset_field<::cpp2::StructWithString>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::MyUnion>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::NonTriviallyDestructibleUnion>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

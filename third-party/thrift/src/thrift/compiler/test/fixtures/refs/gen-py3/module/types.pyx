@@ -203,6 +203,40 @@ cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __MyUnionType, <PyTypeObject*> __MyUnion_Union_TypeMeta)
 
 
+cdef __UnionTypeEnumData __NonTriviallyDestructibleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cNonTriviallyDestructibleUnion](),
+    __NonTriviallyDestructibleUnionType,
+)
+
+
+@__cython.internal
+@__cython.auto_pickle(False)
+cdef class __NonTriviallyDestructibleUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
+    def _fbthrift_get_by_value(cls, int value):
+        return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_value(value)
+
+    def _fbthrift_get_all_names(cls):
+        return __NonTriviallyDestructibleUnion_union_type_enum_data.get_all_names()
+
+    def __len__(cls):
+        return __NonTriviallyDestructibleUnion_union_type_enum_data.size()
+
+    def __getattribute__(cls, str name not None):
+        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
+            return super().__getattribute__(name)
+        return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_name(name)
+
+
+@__cython.final
+@__cython.auto_pickle(False)
+cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
+    cdef get_by_name(self, str name):
+        return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_name(name)
+
+
+__SetMetaClass(<PyTypeObject*> __NonTriviallyDestructibleUnionType, <PyTypeObject*> __NonTriviallyDestructibleUnion_Union_TypeMeta)
+
+
 
 
 @__cython.auto_pickle(False)
@@ -369,6 +403,151 @@ cdef class MyUnion(thrift.py3.types.Union):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
+
+
+@__cython.auto_pickle(False)
+cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
+    Type = __NonTriviallyDestructibleUnionType
+
+    def __init__(
+        self, *,
+        int_field=None
+    ):
+        if int_field is not None:
+            if not isinstance(int_field, int):
+                raise TypeError(f'int_field is not a { int !r}.')
+            int_field = <cint32_t> int_field
+
+        self._cpp_obj = __to_shared_ptr(cmove(NonTriviallyDestructibleUnion._make_instance(
+          NULL,
+          int_field,
+        )))
+        self._load_cache()
+
+    @staticmethod
+    def fromValue(value):
+        if value is None:
+            return NonTriviallyDestructibleUnion()
+        if isinstance(value, int):
+            if not isinstance(value, pbool):
+                try:
+                    <cint32_t> value
+                    return NonTriviallyDestructibleUnion(int_field=value)
+                except OverflowError:
+                    pass
+        raise ValueError(f"Unable to derive correct union field for value: {value}")
+
+    @staticmethod
+    cdef unique_ptr[cNonTriviallyDestructibleUnion] _make_instance(
+        cNonTriviallyDestructibleUnion* base_instance,
+        object int_field
+    ) except *:
+        cdef unique_ptr[cNonTriviallyDestructibleUnion] c_inst = make_unique[cNonTriviallyDestructibleUnion]()
+        cdef bint any_set = False
+        if int_field is not None:
+            if any_set:
+                raise TypeError("At most one field may be set when initializing a union")
+            deref(c_inst).set_int_field(deref((<cint32_t?>int_field)._cpp_obj))
+            any_set = True
+        # in C++ you don't have to call move(), but this doesn't translate
+        # into a C++ return statement, so you do here
+        return cmove(c_inst)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cNonTriviallyDestructibleUnion] cpp_obj):
+        __fbthrift_inst = <NonTriviallyDestructibleUnion>NonTriviallyDestructibleUnion.__new__(NonTriviallyDestructibleUnion)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        __fbthrift_inst._load_cache()
+        return __fbthrift_inst
+
+    @property
+    def int_field(self):
+        if self.type.value != 1:
+            raise AttributeError(f'Union contains a value of type {self.type.name}, not int_field')
+        return self.value
+
+
+    def __hash__(NonTriviallyDestructibleUnion self):
+        return  super().__hash__()
+
+    cdef _load_cache(NonTriviallyDestructibleUnion self):
+        self.type = NonTriviallyDestructibleUnion.Type(<int>(deref(self._cpp_obj).getType()))
+        cdef int type = self.type.value
+        if type == 0:    # Empty
+            self.value = None
+        elif type == 1:
+            if not deref(self._cpp_obj).get_int_field():
+                self.value = None
+            else:
+                self.value = cint32_t._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).get_int_field()), self._cpp_obj))
+
+    def __copy__(NonTriviallyDestructibleUnion self):
+        cdef shared_ptr[cNonTriviallyDestructibleUnion] cpp_obj = make_shared[cNonTriviallyDestructibleUnion](
+            deref(self._cpp_obj)
+        )
+        return NonTriviallyDestructibleUnion._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cNonTriviallyDestructibleUnion](
+            self._cpp_obj,
+            (<NonTriviallyDestructibleUnion>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__NonTriviallyDestructibleUnion()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cNonTriviallyDestructibleUnion].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.NonTriviallyDestructibleUnion"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cNonTriviallyDestructibleUnion](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(NonTriviallyDestructibleUnion self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cNonTriviallyDestructibleUnion](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(NonTriviallyDestructibleUnion self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cNonTriviallyDestructibleUnion]()
+        with nogil:
+            needed = serializer.cdeserialize[cNonTriviallyDestructibleUnion](buf, self._cpp_obj.get(), proto)
+        # force a cache reload since the underlying data's changed
+        self._load_cache()
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.NonTriviallyDestructibleUnion, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
 @__cython.auto_pickle(False)
 cdef class MyField(thrift.py3.types.Struct):
     def __init__(MyField self, **kwargs):

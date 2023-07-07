@@ -33,6 +33,11 @@ class StructMetadata<::cpp2::MyUnion> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::cpp2::NonTriviallyDestructibleUnion> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::cpp2::MyField> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

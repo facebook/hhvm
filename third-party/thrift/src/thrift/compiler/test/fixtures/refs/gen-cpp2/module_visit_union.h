@@ -29,6 +29,20 @@ struct VisitUnion<::cpp2::MyUnion> {
     }
   }
 };
+template <>
+struct VisitUnion<::cpp2::NonTriviallyDestructibleUnion> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::int_field:
+      return f(0, *static_cast<T&&>(t).int_field_ref());
+    case Union::Type::__EMPTY__:
+      return decltype(f(0, *static_cast<T&&>(t).int_field_ref()))();
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

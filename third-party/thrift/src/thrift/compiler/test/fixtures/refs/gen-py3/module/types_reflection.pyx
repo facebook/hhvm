@@ -55,6 +55,26 @@ cdef __StructSpec get_reflection__MyUnion():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__NonTriviallyDestructibleUnion():
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="NonTriviallyDestructibleUnion",
+        kind=__StructType.UNION,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="int_field",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__MyField():
     cdef _module_types.MyField defaults = _module_types.MyField._fbthrift_create(
         constant_shared_ptr[_module_types.cMyField](

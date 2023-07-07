@@ -77,6 +77,30 @@ StructMetadata<::cpp2::MyUnion>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::cpp2::NonTriviallyDestructibleUnion>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.NonTriviallyDestructibleUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_NonTriviallyDestructibleUnion = res.first->second;
+  module_NonTriviallyDestructibleUnion.name() = "module.NonTriviallyDestructibleUnion";
+  module_NonTriviallyDestructibleUnion.is_union() = true;
+  static const auto* const
+  module_NonTriviallyDestructibleUnion_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(2)}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_NonTriviallyDestructibleUnion_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_NonTriviallyDestructibleUnion.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::MyField>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyField", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

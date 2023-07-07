@@ -80,7 +80,7 @@ void RequestWorkerThread::forceStop() {
 }
 
 void RequestWorkerThread::cleanup() {
-  LOG(INFO) << "Worker " << getWorkerId() << " in cleanup";
+  LOG(INFO) << "Worker " << unsigned(getWorkerId()) << " in cleanup";
   if (!forceStopped_.load()) {
     LOG(INFO) << "Looping to finish pending work";
     evb_->loop();

@@ -35,12 +35,15 @@
 
 namespace HPHP {
 
+struct DebuggerHook;
+
 struct Replayer {
   ~Replayer();
   String file(const String& path) const;
   static Replayer& get();
   String init(const String& path);
   void requestInit() const;
+  void setDebuggerHook(DebuggerHook* debuggerHook);
 
   template<auto f>
   static auto wrapNativeFunc(const char* name) {
@@ -85,6 +88,7 @@ struct Replayer {
     }
   }
 
+  HPHP::DebuggerHook* m_debuggerHook;
   std::vector<std::int64_t> m_externalThreadEventOrder;
   std::unordered_map<std::string, std::string> m_files;
   std::deque<NativeCall> m_nativeCalls;

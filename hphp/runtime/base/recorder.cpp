@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/req-root.h"
@@ -231,6 +232,9 @@ void Recorder::onNativeCallEntry(std::uintptr_t id) {
   g_context->clearUserErrorHandlers();
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
+
+  // FIXME Disabling memory threshold until surprise flags are handled
+  tl_heap->setMemThresholdCallback(std::numeric_limits<std::size_t>::max());
 }
 
 void Recorder::onNativeCallExit() {

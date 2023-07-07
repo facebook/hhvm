@@ -128,7 +128,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     filename: &'a RelativePath<'a>,
     file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
-    classish_name_builder: ClassishNameBuilder<'a>,
+    classish_name_builder: Option<ClassishNameBuilder<'a>>,
     type_parameters: Rc<Vec<SSet<'a>>>,
     under_no_auto_dynamic: bool,
     under_no_auto_likes: bool,
@@ -167,7 +167,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     arena,
                 )),
                 opts,
-                classish_name_builder: ClassishNameBuilder::new(),
+                classish_name_builder: None,
                 type_parameters: Rc::new(Vec::new()),
                 source_text_allocator,
                 under_no_auto_dynamic: false,
@@ -690,61 +690,13 @@ impl<'a> NamespaceBuilder<'a> {
     }
 }
 
+/// We saw a classish keyword token followed by a Name, so we make it
+/// available as the name of the containing class declaration.
 #[derive(Clone, Debug)]
-enum ClassishNameBuilder<'a> {
-    /// We are not in a classish declaration.
-    NotInClassish,
-
-    /// We saw a classish keyword token followed by a Name, so we make it
-    /// available as the name of the containing class declaration.
-    InClassish(&'a (&'a str, &'a Pos<'a>, TokenKind)),
-}
-
-impl<'a> ClassishNameBuilder<'a> {
-    fn new() -> Self {
-        ClassishNameBuilder::NotInClassish
-    }
-
-    fn lexed_name_after_classish_keyword(
-        &mut self,
-        arena: &'a Bump,
-        name: &'a str,
-        pos: &'a Pos<'a>,
-        token_kind: TokenKind,
-    ) {
-        use ClassishNameBuilder::*;
-        match self {
-            NotInClassish => {
-                let name = if name.starts_with(':') {
-                    prefix_slash(arena, name)
-                } else {
-                    name
-                };
-                *self = InClassish(arena.alloc((name, pos, token_kind)))
-            }
-            InClassish(_) => {}
-        }
-    }
-
-    fn parsed_classish_declaration(&mut self) {
-        *self = ClassishNameBuilder::NotInClassish;
-    }
-
-    fn get_current_classish_name(&self) -> Option<(&'a str, &'a Pos<'a>)> {
-        use ClassishNameBuilder::*;
-        match self {
-            NotInClassish => None,
-            InClassish((name, pos, _)) => Some((name, pos)),
-        }
-    }
-
-    fn in_interface(&self) -> bool {
-        use ClassishNameBuilder::*;
-        match self {
-            InClassish((_, _, TokenKind::Interface)) => true,
-            InClassish((_, _, _)) | NotInClassish => false,
-        }
-    }
+struct ClassishNameBuilder<'a> {
+    name: &'a str,
+    pos: &'a Pos<'a>,
+    token_kind: TokenKind,
 }
 
 #[derive(Debug)]
@@ -1228,6 +1180,42 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
                 AttributeParam::Int(i) => UAP::Int(i),
             })),
         })
+    }
+
+    fn get_current_classish_name(&self) -> Option<(&'a str, &'a Pos<'a>)> {
+        let builder = self.classish_name_builder.as_ref()?;
+        Some((builder.name, builder.pos))
+    }
+
+    fn in_interface(&self) -> bool {
+        matches!(
+            self.classish_name_builder.as_ref(),
+            Some(ClassishNameBuilder {
+                token_kind: TokenKind::Interface,
+                ..
+            })
+        )
+    }
+
+    fn lexed_name_after_classish_keyword(
+        &mut self,
+        arena: &'a Bump,
+        name: &'a str,
+        pos: &'a Pos<'a>,
+        token_kind: TokenKind,
+    ) {
+        if self.classish_name_builder.is_none() {
+            let name = if name.starts_with(':') {
+                prefix_slash(arena, name)
+            } else {
+                name
+            };
+            self.classish_name_builder = Some(ClassishNameBuilder {
+                name,
+                pos,
+                token_kind,
+            });
+        }
     }
 }
 
@@ -2027,13 +2015,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     aast::ClassId(_, pos, aast::ClassId_::CIself),
                     const_name,
                 )),
-            )) => ShapeFieldName::SFclassConst(self.alloc((
-                Id(
-                    pos,
-                    self.classish_name_builder.get_current_classish_name()?.0,
-                ),
-                const_name,
-            ))),
+            )) => {
+                let (classish_name, _) = self.get_current_classish_name()?;
+                ShapeFieldName::SFclassConst(self.alloc((Id(pos, classish_name), const_name)))
+            }
             _ => return None,
         })
     }
@@ -2746,13 +2731,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     if let Some(current_class_name) = self.elaborate_defined_id(name) {
                         let previous_token_kind = self.previous_token_kind;
                         let this = Rc::make_mut(&mut self.state);
-                        this.classish_name_builder
-                            .lexed_name_after_classish_keyword(
-                                this.arena,
-                                current_class_name.1,
-                                pos,
-                                previous_token_kind,
-                            );
+                        this.lexed_name_after_classish_keyword(
+                            this.arena,
+                            current_class_name.1,
+                            pos,
+                            previous_token_kind,
+                        );
                     }
                 }
                 name
@@ -3936,12 +3920,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     ) -> Self::Output {
         match decls {
             // Class consts.
-            Node::List(consts)
-                if self
-                    .classish_name_builder
-                    .get_current_classish_name()
-                    .is_some() =>
-            {
+            Node::List(consts) if self.classish_name_builder.is_some() => {
                 let ty = self.node_to_ty(hint);
                 Node::List(
                     self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
@@ -4486,7 +4465,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name, cls);
 
-        this.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder = None;
 
         Node::Ignored(SK::ClassishDeclaration)
     }
@@ -4766,7 +4745,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut flags = MethodFlags::empty();
         flags.set(
             MethodFlags::ABSTRACT,
-            self.classish_name_builder.in_interface() || modifiers.is_abstract,
+            self.in_interface() || modifiers.is_abstract,
         );
         flags.set(MethodFlags::FINAL, modifiers.is_final);
         flags.set(MethodFlags::OVERRIDE, attributes.override_);
@@ -4949,7 +4928,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let this = Rc::make_mut(&mut self.state);
         this.add_class(key, cls);
 
-        this.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder = None;
 
         Node::Ignored(SK::EnumDeclaration)
     }
@@ -5146,7 +5125,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name.1, cls);
 
-        this.classish_name_builder.parsed_classish_declaration();
+        this.classish_name_builder = None;
 
         Node::Ignored(SyntaxKind::EnumClassDeclaration)
     }
@@ -5187,11 +5166,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         } else {
             type_
         };
-        let class_name = match self.classish_name_builder.get_current_classish_name() {
-            Some(name) => name,
+        let class_name = match self.get_current_classish_name() {
+            Some((name, _)) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
         };
-        let enum_class_ty_ = Ty_::Tapply(self.alloc(((pos, class_name.0), &[])));
+        let enum_class_ty_ = Ty_::Tapply(self.alloc(((pos, class_name), &[])));
         let enum_class_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), enum_class_ty_));
         let type_ = Ty_::Tapply(self.alloc((
             (pos, "\\HH\\MemberOf"),
@@ -5857,7 +5836,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             None => return Node::Ignored(SK::TypeConstant),
         };
         let pos = self.merge_positions(ty, constant_name);
-        let ty = match (ty, self.classish_name_builder.get_current_classish_name()) {
+        let ty = match (ty, self.get_current_classish_name()) {
             (Node::Name(("self", self_pos)), Some((name, class_name_pos))) => {
                 // In classes, we modify the position when rewriting the
                 // `self` keyword to point to the class name. In traits,

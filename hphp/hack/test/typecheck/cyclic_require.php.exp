@@ -1,0 +1,10 @@
+File "cyclic_require.php", line 5, characters 3-23:
+Only traits may use `require implements`. (Parsing[1002])
+File "cyclic_require.php", line 8, characters 3-23:
+Only traits may use `require implements`. (Parsing[1002])
+File "cyclic_require.php", line 5, characters 22-22:
+Only traits may use `require implements` (Naming[2030])
+File "cyclic_require.php", line 8, characters 22-22:
+Only traits may use `require implements` (Naming[2030])
+File "cyclic_require.php", line 5, characters 22-22:
+Cyclic class definition : `J` `I`  (Typing[4013])

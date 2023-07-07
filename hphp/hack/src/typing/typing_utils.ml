@@ -754,8 +754,11 @@ let class_has_no_params env c =
   | Some cls -> List.is_empty (Cls.tparams cls)
   | None -> false
 
-(* Is super_id an ancestor of sub_id, including through requires steps? *)
-let rec has_ancestor_including_req env cls super_id =
+(* Is super_id an ancestor of sub_id, including through requires steps?
+ * Maintain a visited set to catch cycles (these are rejected in folding but
+ * the definitions survive).
+ *)
+let rec has_ancestor_including_req ~visited env cls super_id =
   Cls.has_ancestor cls super_id
   ||
   let kind = Cls.kind cls in
@@ -766,15 +769,26 @@ let rec has_ancestor_including_req env cls super_id =
      List.exists bounds ~f:(fun ty ->
          match get_node ty with
          | Tapply ((_, name), _) ->
-           has_ancestor_including_req_refl env name super_id
+           has_ancestor_including_req_refl ~visited env name super_id
          | _ -> false))
 
-and has_ancestor_including_req_refl env sub_id super_id =
-  String.equal sub_id super_id
-  ||
-  match Env.get_class env sub_id with
-  | None -> false
-  | Some cls -> has_ancestor_including_req env cls super_id
+and has_ancestor_including_req_refl ~visited env sub_id super_id =
+  (not (SSet.mem sub_id visited))
+  && (String.equal sub_id super_id
+     ||
+     match Env.get_class env sub_id with
+     | None -> false
+     | Some cls ->
+       has_ancestor_including_req
+         ~visited:(SSet.add sub_id visited)
+         env
+         cls
+         super_id)
+
+let has_ancestor_including_req = has_ancestor_including_req ~visited:SSet.empty
+
+let has_ancestor_including_req_refl =
+  has_ancestor_including_req_refl ~visited:SSet.empty
 
 (* search through tyl, and any unions directly-recursively contained in tyl,
    and return those that satisfy f, and those that do not, separately.*)

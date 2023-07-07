@@ -260,3 +260,8 @@ union ReferringUnion {
   2: PlainStruct box_plain (cpp.box);
   3: ReferringUnion box_self (cpp.box);
 }
+
+union NonTriviallyDestructibleUnion {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: i32 int_field;
+}

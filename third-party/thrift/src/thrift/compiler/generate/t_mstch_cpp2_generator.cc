@@ -1656,7 +1656,8 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node is_trivially_destructible() {
     for (const auto& field : struct_->fields()) {
       const t_type* type = field.get_type()->get_true_type();
-      if (cpp2::is_custom_type(field) || !type->is_scalar()) {
+      if (cpp2::is_ref(&field) || cpp2::is_custom_type(field) ||
+          !type->is_scalar()) {
         return false;
       }
     }

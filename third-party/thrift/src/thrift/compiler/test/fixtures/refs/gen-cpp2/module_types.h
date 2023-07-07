@@ -890,10 +890,15 @@ class NonTriviallyDestructibleUnion final  {
     return *this;
   }
 
+  ~NonTriviallyDestructibleUnion() {
+    apache::thrift::clear(*this);
+  }
 
   union storage_type {
     ::std::shared_ptr<::std::int32_t> int_field;
 
+    storage_type() {}
+    ~storage_type() {}
   } ;
 
   bool operator==(const NonTriviallyDestructibleUnion&) const;

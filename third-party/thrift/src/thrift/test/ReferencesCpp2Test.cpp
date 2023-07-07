@@ -614,4 +614,12 @@ TEST(References, DoubleAdaptedRefStruct) {
   EXPECT_EQ(objd.opt_box_field()->value.value.data(), 1);
 }
 
+TEST(References, NonTriviallyDestructibleUnion) {
+  NonTriviallyDestructibleUnion obj;
+  obj.int_field_ref().ensure() = 1;
+  auto objd = CompactSerializer::deserialize<NonTriviallyDestructibleUnion>(
+      CompactSerializer::serialize<std::string>(obj));
+  EXPECT_EQ(obj, objd);
+}
+
 } // namespace cpp2

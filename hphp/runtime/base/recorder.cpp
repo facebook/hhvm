@@ -18,6 +18,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -28,6 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-object.h"
@@ -36,6 +38,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
@@ -48,6 +51,14 @@ namespace {
   static std::string g_entryPoint;
   static std::unordered_map<std::uintptr_t, std::string> g_nativeFuncNames;
 } // namespace
+
+void Recorder::onExternalThreadEventProcess(
+    const c_ExternalThreadEventWaitHandle* id) {
+  if (UNLIKELY(m_enabled)) {
+    m_externalThreadEventProcesses.emplace_back(
+      std::bit_cast<std::uintptr_t>(id));
+  }
+}
 
 void Recorder::requestExit() {
   if (UNLIKELY(m_enabled)) {
@@ -68,17 +79,37 @@ void Recorder::requestExit() {
       Logger::FWarning("Error while recording: {}", current_exception_name());
     }
     m_enabled = false;
+    m_externalThreadEventCreates.clear();
+    m_externalThreadEventProcesses.clear();
     m_nativeCalls.clear();
   }
 }
 
 void Recorder::requestInit() {
   m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate);
+  if (UNLIKELY(m_enabled)) {
+    HPHP::DebuggerHook::attach<DebuggerHook>();
+  }
 }
 
 void Recorder::setEntryPoint(const String& entryPoint) {
   g_entryPoint = std::filesystem::absolute(entryPoint.toCppString());
 }
+
+struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
+  static DebuggerHook* GetInstance() {
+    static DebuggerHook hook;
+    return &hook;
+  }
+
+  void onRequestInit() override {
+    const auto serverGlobal{php_global(StaticString{"_SERVER"}).asCArrRef()};
+    for (auto i{serverGlobal.begin()}; i; ++i) {
+      Recorder::get().m_serverGlobal.set(i.first(), i.second());
+    }
+    HPHP::DebuggerHook::detach();
+  }
+};
 
 struct Recorder::LoggerHook final : public HPHP::LoggerHook {
   void operator()(const char*, const char* msg, const char* ending) override {
@@ -110,7 +141,12 @@ template<>
 String Recorder::serialize(Variant value) {
   UnlimitSerializationScope _;
   VariableSerializer vs{VariableSerializer::Type::DebuggerSerialize};
-  return vs.serializeValue(value, false);
+  try {
+    return vs.serializeValue(value, false);
+  } catch (const req::root<Object>&) {
+    // TODO Record the error
+    return vs.serializeValue(init_null(), false);
+  }
 }
 
 template<>
@@ -191,12 +227,15 @@ void Recorder::onNativeCallEntry(std::uintptr_t id) {
   static LoggerHook loggerHook;
   m_nativeCalls.emplace_back().id = id;
   g_context->addStdoutHook(getStdoutHook());
+  g_context->backupSession();
+  g_context->clearUserErrorHandlers();
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
 }
 
 void Recorder::onNativeCallExit() {
   g_context->removeStdoutHook(getStdoutHook());
+  g_context->restoreSession();
   Logger::SetThreadHook(nullptr);
   m_enabled = true;
 }
@@ -216,8 +255,12 @@ void Recorder::onNativeCallThrow(std::exception_ptr exc) {
 }
 
 void Recorder::onNativeCallWaitHandle(const Object& object) {
-  m_nativeCalls.back().returnedWaitHandle = true;
-  m_nativeCalls.back().waitHandle = object;
+  object->incRefCount();
+  m_nativeCalls.back().waitHandle = std::bit_cast<std::uintptr_t>(object.get());
+  const auto kind{std::bit_cast<c_Awaitable*>(object.get())->getKind()};
+  if (kind == c_Awaitable::Kind::ExternalThreadEvent) {
+    m_externalThreadEventCreates.emplace_back(m_nativeCalls.back().waitHandle);
+  }
   onNativeCallExit();
 }
 
@@ -229,28 +272,43 @@ Array Recorder::toArray() const {
     oss << std::ifstream{path}.rdbuf();
     files.set(String{path}, oss.str());
   }
+  VecInit externalThreadEventOrder{m_externalThreadEventCreates.size()};
+  for (const auto create : m_externalThreadEventCreates) {
+    auto order{std::numeric_limits<std::uint64_t>::max()};
+    for (std::uint64_t i{0}; i < m_externalThreadEventProcesses.size(); i++) {
+      if (create == m_externalThreadEventProcesses[i]) {
+        order = i;
+        break;
+      }
+    }
+    externalThreadEventOrder.append(order);
+  }
   const std::size_t numNativeCall{m_nativeCalls.size()};
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
-    auto [id, stdouts, args, ret, exc, rwh, wh]{m_nativeCalls.at(i)};
-    if (rwh) {
-      const auto ptr{static_cast<const c_Awaitable*>(wh.get())};
+    auto [id, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
+    if (wh) {
+      const auto ptr{std::bit_cast<c_Awaitable*>(wh)};
       if (ptr->isSucceeded()) {
         ret = serialize(ptr->getResult());
       } else if (ptr->isFailed()) {
         exc = serialize(ptr->getException());
       }
+      wh = static_cast<std::uint8_t>(ptr->getKind()) + 1;
+      ptr->decReleaseCheck();
     }
-    nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, rwh));
+    nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, wh));
     nativeFuncIds.set(String{g_nativeFuncNames[id]}, id);
   }
   return make_dict_array(
     "header", make_dict_array(
       "compilerId", compilerId(),
-      "entryPoint", g_entryPoint
+      "entryPoint", g_entryPoint,
+      "serverGlobal", m_serverGlobal
     ),
     "files", files.toArray(),
+    "eteOrder", externalThreadEventOrder.toArray(),
     "nativeCalls", nativeCalls.toArray(),
     "nativeFuncIds", nativeFuncIds.toArray()
   );

@@ -22,6 +22,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -39,6 +40,7 @@ struct Replayer {
   String file(const String& path) const;
   static Replayer& get();
   String init(const String& path);
+  void requestInit() const;
 
   template<auto f>
   static auto wrapNativeFunc(const char* name) {
@@ -48,6 +50,8 @@ struct Replayer {
   }
 
  private:
+  struct ExternalThreadEvent;
+  struct DebuggerHook;
   template<auto f> struct WrapNativeFunc;
 
   template<typename R, typename... A, R(*f)(A...)>
@@ -69,8 +73,8 @@ struct Replayer {
     std::int64_t i{-1};
     (nativeArg<A>(call.args[++i].asCStrRef(), std::forward<A>(args)), ...);
     if constexpr (std::is_same_v<R, Object>) {
-      if (call.returnedWaitHandle) {
-          return makeWaitHandle(call);
+      if (call.waitHandle) {
+        return makeWaitHandle(call);
       }
     }
     if (call.ret.empty()) {
@@ -81,9 +85,11 @@ struct Replayer {
     }
   }
 
+  std::vector<std::int64_t> m_externalThreadEventOrder;
   std::unordered_map<std::string, std::string> m_files;
   std::deque<NativeCall> m_nativeCalls;
   std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
+  Array m_serverGlobal;
 };
 
 } // namespace HPHP

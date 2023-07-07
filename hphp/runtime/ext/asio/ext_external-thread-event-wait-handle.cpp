@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -188,6 +189,10 @@ void c_ExternalThreadEventWaitHandle::process() {
 
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
+
+  if (UNLIKELY(g_context->m_recorder.has_value())) {
+    g_context->m_recorder->onExternalThreadEventProcess(this);
+  }
 
   TypedValue result;
   try {

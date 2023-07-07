@@ -33,7 +33,10 @@
 
 namespace HPHP {
 
+struct c_ExternalThreadEventWaitHandle;
+
 struct Recorder {
+  void onExternalThreadEventProcess(const c_ExternalThreadEventWaitHandle* id);
   void requestExit();
   void requestInit();
   static void setEntryPoint(const String& entryPoint);
@@ -47,6 +50,7 @@ struct Recorder {
 
  private:
   friend struct Replayer;
+  struct DebuggerHook;
   struct LoggerHook;
   struct StdoutHook;
   template<auto f> struct WrapNativeFunc;
@@ -108,7 +112,10 @@ struct Recorder {
   }
 
   bool m_enabled{false};
+  req::vector<std::uintptr_t> m_externalThreadEventCreates;
+  req::vector<std::uintptr_t> m_externalThreadEventProcesses;
   req::vector<NativeCall> m_nativeCalls;
+  Array m_serverGlobal;
 };
 
 } // namespace HPHP

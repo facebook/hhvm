@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -1387,9 +1388,13 @@ void ExecutionContext::requestInit() {
   vmStack().requestInit();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate > 0)) {
-    m_recorder.emplace();
-    m_recorder->requestInit();
+  if (UNLIKELY(RO::EvalRecordReplay)) {
+    if (RO::EvalRecordSampleRate > 0) {
+      m_recorder.emplace();
+      m_recorder->requestInit();
+    } else if (RO::EvalReplay) {
+      Replayer::get().requestInit();
+    }
   }
 
   *rl_num_coeffect_violations = 0;

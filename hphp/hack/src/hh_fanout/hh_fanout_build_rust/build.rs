@@ -415,7 +415,7 @@ pub fn build(
         let optimize_config = OptimizeConfig::default();
         depgraph_compress::write_dep_graph(output, mem_dep_graph, &write_config, &optimize_config)?;
     } else {
-        depgraph_writer::write_dep_graph(output, mem_dep_graph)?;
+        depgraph_writer::write_dep_graph(output, &mem_dep_graph)?;
     }
 
     info!("Done");

@@ -58,7 +58,7 @@ impl MemDepGraph {
 }
 
 /// Write the given `MemDepGraph` to disk.
-pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
+pub fn write_dep_graph(output: &Path, g: &MemDepGraph) -> std::io::Result<()> {
     info!("Opening output file at {:?}", output);
     let f = File::create(output)?;
 
@@ -114,7 +114,7 @@ pub fn write_dep_graph(output: &Path, g: MemDepGraph) -> std::io::Result<()> {
 
     // Write edge lists.
     info!("Writing edge lists");
-    for h in g.edge_lists {
+    for h in g.edge_lists.iter() {
         if h.is_empty() {
             // As a special case, empty edge lists aren't stored in the file.
             continue;

@@ -883,6 +883,49 @@ struct Decode<type::set<Tag>> {
   }
 };
 
+// Handles map with sorted_unique property
+template <typename Key, typename Value, typename Map, typename Protocol>
+typename std::enable_if_t<
+    apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>
+decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
+  if (map_size == 0) {
+    return;
+  }
+
+  typename Map::container_type tmp(map.get_allocator());
+  apache::thrift::detail::pm::reserve_if_possible(&tmp, map_size);
+  for (size_t i = 0; i < map_size; ++i) {
+    auto& elem = apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
+    Decode<Key>{}(prot, elem.first);
+    Decode<Value>{}(prot, elem.second);
+  }
+
+  const bool sorted =
+      std::is_sorted(tmp.begin(), tmp.end(), [&](auto& l, auto& r) {
+        return map.key_comp()(l.first, r.first);
+      });
+  using folly::sorted_unique;
+  map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
+}
+
+// Handles map without sorted_unique property but has emplace_hint implemented
+template <typename Key, typename Value, typename Map, typename Protocol>
+typename std::enable_if_t<
+    !apache::thrift::detail::pm::sorted_unique_constructible_v<Map> &&
+    apache::thrift::detail::pm::map_emplace_hint_is_invocable_v<Map>>
+decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
+  apache::thrift::detail::pm::reserve_if_possible(&map, map_size);
+
+  for (auto i = map_size; i--;) {
+    typename Map::key_type key = apache::thrift::detail::default_map_key(map);
+    typename Map::mapped_type value =
+        apache::thrift::detail::default_map_value(map);
+    Decode<Key>{}(prot, key);
+    Decode<Value>{}(prot, value);
+    map.emplace_hint(map.end(), std::move(key), std::move(value));
+  }
+}
+
 template <typename Key, typename Value>
 struct Decode<type::map<Key, Value>> {
   template <typename Protocol, typename MapType>
@@ -890,8 +933,17 @@ struct Decode<type::map<Key, Value>> {
     auto consumeElem = [&] {
       typename MapType::key_type key;
       Decode<Key>{}(prot, key);
-      auto iter =
-          emplace_at_end(map, std::move(key), typename MapType::mapped_type{});
+      auto iter = folly::overload(
+          [&](auto& c, int) -> decltype(c.emplace(
+                                             std::move(key),
+                                             typename MapType::mapped_type{})
+                                            .first) {
+            return emplace_at_end(
+                c, std::move(key), typename MapType::mapped_type{});
+          },
+          [&](auto& c, ...) {
+            return c.insert(std::move(key), typename MapType::mapped_type{});
+          })(map, 0);
       Decode<Value>{}(prot, iter->second);
     };
 
@@ -905,10 +957,7 @@ struct Decode<type::map<Key, Value>> {
       }
     } else if (
         typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
-      apache::thrift::detail::pm::reserve_if_possible(&map, s);
-      while (s--) {
-        consumeElem();
-      }
+      decode_known_length_map<Key, Value>(prot, map, s);
     } else {
       while (s--) {
         prot.skip(keyType);

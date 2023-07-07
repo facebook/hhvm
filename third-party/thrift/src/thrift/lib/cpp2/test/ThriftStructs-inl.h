@@ -301,32 +301,35 @@ create<thrift::benchmark::SortedVecNestedMapRaw>() {
   return map;
 }
 
+template <class T>
+inline T createNestedMap() {
+  T d;
+  populateMap([&](int i, int j, int k, int l, int m, int v) {
+    d.m()[i].m()[j].m()[k].m()[l].m()[m] = v;
+  });
+  return d;
+}
+
 template <>
 inline thrift::benchmark::NestedMap create<thrift::benchmark::NestedMap>() {
-  thrift::benchmark::NestedMap map;
-  populateMap([&](int i, int j, int k, int l, int m, int v) {
-    map.m()[i].m()[j].m()[k].m()[l].m()[m] = v;
-  });
-  return map;
+  return createNestedMap<thrift::benchmark::NestedMap>();
 }
 
 template <>
 inline thrift::benchmark::OpNestedMap create<thrift::benchmark::OpNestedMap>() {
-  thrift::benchmark::OpNestedMap map;
-  populateMap([&](int i, int j, int k, int l, int m, int v) {
-    map.m()[i].m()[j].m()[k].m()[l].m()[m] = v;
-  });
-  return map;
+  return createNestedMap<thrift::benchmark::OpNestedMap>();
 }
 
 template <>
 inline thrift::benchmark::SortedVecNestedMap
 create<thrift::benchmark::SortedVecNestedMap>() {
-  thrift::benchmark::SortedVecNestedMap map;
-  populateMap([&](int i, int j, int k, int l, int m, int v) {
-    map.m()[i].m()[j].m()[k].m()[l].m()[m] = v;
-  });
-  return map;
+  return createNestedMap<thrift::benchmark::SortedVecNestedMap>();
+}
+
+template <>
+inline thrift::benchmark::OpSortedVecNestedMap
+create<thrift::benchmark::OpSortedVecNestedMap>() {
+  return createNestedMap<thrift::benchmark::OpSortedVecNestedMap>();
 }
 
 template <class T>

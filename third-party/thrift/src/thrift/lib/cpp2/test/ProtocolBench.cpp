@@ -156,48 +156,50 @@ constexpr SerializerMethod getSerializerMethod(std::string_view prefix) {
   OpEncodeX1(Prefix, proto, write, bench) \
   OpEncodeX1(Prefix, proto, read, bench)
 
-#define X(Prefix, proto)             \
-  X2(Prefix, proto, Empty)           \
-  X2(Prefix, proto, SmallInt)        \
-  X2(Prefix, proto, BigInt)          \
-  X2(Prefix, proto, SmallString)     \
-  X2(Prefix, proto, BigString)       \
-  X2(Prefix, proto, BigBinary)       \
-  X2(Prefix, proto, LargeBinary)     \
-  X2(Prefix, proto, Mixed)           \
-  X2(Prefix, proto, MixedInt)        \
-  X2(Prefix, proto, SmallListInt)    \
-  X2(Prefix, proto, BigListInt)      \
-  X2(Prefix, proto, BigListMixed)    \
-  X2(Prefix, proto, BigListMixedInt) \
-  X2(Prefix, proto, LargeListMixed)  \
-  X2(Prefix, proto, LargeSetInt)     \
-  X2(Prefix, proto, UnorderedSetInt) \
-  X2(Prefix, proto, SortedVecSetInt) \
-  X2(Prefix, proto, LargeMapInt)     \
-  X2(Prefix, proto, UnorderedMapInt) \
-  X2(Prefix, proto, NestedMap)       \
+#define X(Prefix, proto)                \
+  X2(Prefix, proto, Empty)              \
+  X2(Prefix, proto, SmallInt)           \
+  X2(Prefix, proto, BigInt)             \
+  X2(Prefix, proto, SmallString)        \
+  X2(Prefix, proto, BigString)          \
+  X2(Prefix, proto, BigBinary)          \
+  X2(Prefix, proto, LargeBinary)        \
+  X2(Prefix, proto, Mixed)              \
+  X2(Prefix, proto, MixedInt)           \
+  X2(Prefix, proto, SmallListInt)       \
+  X2(Prefix, proto, BigListInt)         \
+  X2(Prefix, proto, BigListMixed)       \
+  X2(Prefix, proto, BigListMixedInt)    \
+  X2(Prefix, proto, LargeListMixed)     \
+  X2(Prefix, proto, LargeSetInt)        \
+  X2(Prefix, proto, UnorderedSetInt)    \
+  X2(Prefix, proto, SortedVecSetInt)    \
+  X2(Prefix, proto, LargeMapInt)        \
+  X2(Prefix, proto, UnorderedMapInt)    \
+  X2(Prefix, proto, NestedMap)          \
+  X2(Prefix, proto, SortedVecNestedMap) \
   X2(Prefix, proto, ComplexStruct)
 
-#define OpEncodeX(Prefix, proto)             \
-  OpEncodeX2(Prefix, proto, Empty)           \
-  OpEncodeX2(Prefix, proto, SmallInt)        \
-  OpEncodeX2(Prefix, proto, BigInt)          \
-  OpEncodeX2(Prefix, proto, SmallString)     \
-  OpEncodeX2(Prefix, proto, BigString)       \
-  OpEncodeX2(Prefix, proto, Mixed)           \
-  OpEncodeX2(Prefix, proto, MixedInt)        \
-  OpEncodeX2(Prefix, proto, SmallListInt)    \
-  OpEncodeX2(Prefix, proto, BigListInt)      \
-  OpEncodeX2(Prefix, proto, BigListMixed)    \
-  OpEncodeX2(Prefix, proto, BigListMixedInt) \
-  OpEncodeX2(Prefix, proto, LargeListMixed)  \
-  OpEncodeX2(Prefix, proto, LargeSetInt)     \
-  OpEncodeX2(Prefix, proto, UnorderedSetInt) \
-  OpEncodeX2(Prefix, proto, SortedVecSetInt) \
-  OpEncodeX2(Prefix, proto, LargeMapInt)     \
-  OpEncodeX2(Prefix, proto, UnorderedMapInt) \
-  OpEncodeX2(Prefix, proto, NestedMap)       \
+#define OpEncodeX(Prefix, proto)                \
+  OpEncodeX2(Prefix, proto, Empty)              \
+  OpEncodeX2(Prefix, proto, SmallInt)           \
+  OpEncodeX2(Prefix, proto, BigInt)             \
+  OpEncodeX2(Prefix, proto, SmallString)        \
+  OpEncodeX2(Prefix, proto, BigString)          \
+  OpEncodeX2(Prefix, proto, Mixed)              \
+  OpEncodeX2(Prefix, proto, MixedInt)           \
+  OpEncodeX2(Prefix, proto, SmallListInt)       \
+  OpEncodeX2(Prefix, proto, BigListInt)         \
+  OpEncodeX2(Prefix, proto, BigListMixed)       \
+  OpEncodeX2(Prefix, proto, BigListMixedInt)    \
+  OpEncodeX2(Prefix, proto, LargeListMixed)     \
+  OpEncodeX2(Prefix, proto, LargeSetInt)        \
+  OpEncodeX2(Prefix, proto, UnorderedSetInt)    \
+  OpEncodeX2(Prefix, proto, SortedVecSetInt)    \
+  OpEncodeX2(Prefix, proto, LargeMapInt)        \
+  OpEncodeX2(Prefix, proto, UnorderedMapInt)    \
+  OpEncodeX2(Prefix, proto, NestedMap)          \
+  OpEncodeX2(Prefix, proto, SortedVecNestedMap) \
   OpEncodeX2(Prefix, proto, ComplexStruct)
 
 X(, Binary)

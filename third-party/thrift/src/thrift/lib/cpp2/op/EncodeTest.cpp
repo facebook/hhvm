@@ -535,6 +535,9 @@ void testDecodeContainers() {
           {std::string("foo"), 1}, {std::string("foo"), 2}});
   testDecode<Protocol, type::set<type::byte_t>>(
       folly::sorted_vector_set<int8_t>{3, 1, 2});
+  testDecode<Protocol, type::map<type::string_t, type::byte_t>>(
+      folly::sorted_vector_map<std::string, int8_t>{
+          {std::string("foo"), 1}, {std::string("foo"), 2}});
   testDecode<Protocol, type::set<type::byte_t>>(
       facebook::datastruct::FBHashSet<int8_t>{3, 1, 2});
 

@@ -395,6 +395,41 @@ struct OpNestedMap {
 }
 
 @cpp.UseOpEncode
+struct OpSortedVecNestedMapRaw {
+  1: Map5 m;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecNestedMap1 {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, i32> m;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecNestedMap2 {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, OpNestedMap1> m;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecNestedMap3 {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, OpNestedMap2> m;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecNestedMap4 {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, OpNestedMap3> m;
+}
+
+@cpp.UseOpEncode
+struct OpSortedVecNestedMap {
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  1: map<i32, OpNestedMap4> m;
+}
+
+@cpp.UseOpEncode
 struct OpUnorderedMapInt {
   @cpp.Type{template = "std::unordered_map"}
   1: map<i32, i32> m;

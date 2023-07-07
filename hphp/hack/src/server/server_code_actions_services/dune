@@ -12,6 +12,7 @@
   extract_method
   inline_method
   full_fidelity
+  logging
   lsp
   pos
   provider_context

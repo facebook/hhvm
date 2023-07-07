@@ -54,13 +54,15 @@ bool ensureConfigDirectoryExists(boost::filesystem::path directory) {
     return true;
   }
   if (ensureConfigDirectoryExists(directory.parent_path())) {
-    boost::system::error_code ec;
-    auto created = ensureDirExistsAndWritable(directory.string());
-    if (!created) {
-      LOG(ERROR) << "Failed to create directory '" << directory
-                 << "'. Error code: " << ec;
+    auto result = ensureDirExistsAndWritableOrReturnError(directory.string());
+    if (!result.hasError()) {
+      return true;
     }
-    return created;
+    LOG(ERROR) << "Failed to create directory '" << directory
+               << "': " << result.error().what();
+  } else {
+    LOG(ERROR) << "Parent directory '" << directory.parent_path()
+               << "' does not exist.";
   }
   return false;
 }

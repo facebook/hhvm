@@ -12,9 +12,11 @@
 #include <chrono>
 #include <string>
 
+#include <folly/Expected.h>
 #include <folly/Format.h>
 #include <folly/Likely.h>
 #include <folly/Range.h>
+#include <folly/Unit.h>
 #include <folly/json.h>
 
 using timeval_t = struct timeval;
@@ -256,9 +258,23 @@ std::string toPrettySortedJson(const folly::dynamic& json);
 bool ensureDirExistsAndWritable(const std::string& path);
 
 /**
+ * Makes sure a directory exists and is writable.
+ * Return more detailed information about errors to aid debugging.
+ */
+folly::Expected<folly::Unit, std::runtime_error>
+ensureDirExistsAndWritableOrReturnError(const std::string& path);
+
+/**
  * Makes sure that a file or directory has the desired permissions.
  */
 bool ensureHasPermission(const std::string& path, mode_t mode);
+
+/**
+ * Makes sure that a file or directory has the desired permissions.
+ * Return more detailed information about errors to aid debugging.
+ */
+folly::Expected<folly::Unit, std::runtime_error>
+ensureHasPermissionOrReturnError(const std::string& path, mode_t mode);
 
 /**
  * Determines if any two intervals are overlapping.

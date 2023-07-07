@@ -8,6 +8,7 @@
 #include "util.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <pthread.h>
 #include <utime.h>
 
@@ -197,31 +198,59 @@ std::string toPrettySortedJson(const folly::dynamic& json) {
   return folly::json::serialize(json, opts);
 }
 
-bool ensureDirExistsAndWritable(const std::string& path) {
-  boost::system::error_code ec;
-  boost::filesystem::create_directories(path, ec);
-  if (ec) {
-    return false;
-  }
-
-  return ensureHasPermission(path, 0777);
-}
-
-bool ensureHasPermission(const std::string& path, mode_t mode) {
+namespace {
+folly::Expected<folly::Unit, std::runtime_error> ensureHasPermissionImpl(
+    const std::string& path,
+    mode_t mode) {
   struct stat st;
   if (::stat(path.c_str(), &st) != 0) {
-    return false;
+    auto statErr = errno;
+    return folly::makeUnexpected(std::runtime_error(folly::errnoStr(statErr)));
   }
 
   if ((st.st_mode & mode) == mode) {
-    return true;
+    return folly::Unit();
   }
 
   if (::chmod(path.c_str(), mode) != 0) {
-    return false;
+    auto chmodErr = errno;
+    return folly::makeUnexpected(std::runtime_error(folly::errnoStr(chmodErr)));
   }
 
-  return true;
+  return folly::Unit();
+}
+
+folly::Expected<folly::Unit, std::runtime_error> ensureDirExistsAndWritableImpl(
+    const std::string& path) {
+  boost::system::error_code ec;
+
+  boost::filesystem::create_directories(path, ec);
+  if (ec) {
+    return folly::makeUnexpected(std::runtime_error(ec.message()));
+  }
+
+  return ensureHasPermissionImpl(path, 0777);
+}
+} // namespace
+
+bool ensureHasPermission(const std::string& path, mode_t mode) {
+  auto res = ensureHasPermissionImpl(path, mode);
+  return !res.hasError();
+}
+
+folly::Expected<folly::Unit, std::runtime_error>
+ensureHasPermissionOrReturnError(const std::string& path, mode_t mode) {
+  return ensureHasPermissionImpl(path, mode);
+}
+
+bool ensureDirExistsAndWritable(const std::string& path) {
+  auto res = ensureDirExistsAndWritableImpl(path);
+  return !res.hasError();
+}
+
+folly::Expected<folly::Unit, std::runtime_error>
+ensureDirExistsAndWritableOrReturnError(const std::string& path) {
+  return ensureDirExistsAndWritableImpl(path);
 }
 
 bool intervalOverlap(std::vector<std::vector<size_t>>& intervals) {

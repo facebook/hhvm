@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/server/xbox-request-handler.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -46,23 +46,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_LOCAL(AccessLog::ThreadData, XboxRequestHandler::s_accessLogThreadData);
+THREAD_LOCAL(AccessLog::ThreadData, RPCRequestHandler::s_accessLogThreadData);
 
-AccessLog XboxRequestHandler::s_accessLog(
-  &(XboxRequestHandler::getAccessLogThreadData));
+AccessLog RPCRequestHandler::s_accessLog(
+  &(RPCRequestHandler::getAccessLogThreadData));
 
-XboxRequestHandler::XboxRequestHandler()
-  : RequestHandler(RuntimeOption::XboxServerInfoDuration),
+RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
+  : RequestHandler(timeout),
     m_requestsSinceReset(0),
     m_reset(false),
-    m_logResets(false) {
+    m_logResets(info) {
 }
 
-XboxRequestHandler::~XboxRequestHandler() {
+RPCRequestHandler::~RPCRequestHandler() {
   if (vmStack().isAllocated()) cleanupState();
 }
 
-void XboxRequestHandler::initState() {
+void RPCRequestHandler::initState() {
   hphp_session_init(Treadmill::SessionKind::RpcRequest);
   m_context = g_context.getNoCheck();
   if (!is_any_cli_mode()) {
@@ -83,19 +83,19 @@ void XboxRequestHandler::initState() {
 
   Logger::ResetRequestCount();
   if (m_logResets) {
-    Logger::Info("initializing Xbox request handler");
+    Logger::Info("initializing RPC request handler");
   }
 
   m_reset = false;
   m_requestsSinceReset = 0;
 }
 
-void XboxRequestHandler::cleanupState() {
+void RPCRequestHandler::cleanupState() {
   hphp_context_exit();
   hphp_session_exit();
 }
 
-bool XboxRequestHandler::needReset() const {
+bool RPCRequestHandler::needReset() const {
   return (m_reset ||
           !vmStack().isAllocated() ||
           m_serverInfo->alwaysReset() ||
@@ -103,11 +103,8 @@ bool XboxRequestHandler::needReset() const {
           (m_requestsSinceReset >= m_serverInfo->getMaxRequest()));
 }
 
-void XboxRequestHandler::setLogInfo(bool logInfo) {
-  m_logResets = logInfo;
-}
 
-void XboxRequestHandler::handleRequest(Transport *transport) {
+void RPCRequestHandler::handleRequest(Transport *transport) {
   if (needReset()) {
     if (vmStack().isAllocated()) cleanupState();
     initState();
@@ -167,7 +164,7 @@ void XboxRequestHandler::handleRequest(Transport *transport) {
   HttpProtocol::ClearRecord(ret, tmpfile);
 }
 
-void XboxRequestHandler::abortRequest(Transport *transport) {
+void RPCRequestHandler::abortRequest(Transport *transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
@@ -186,7 +183,7 @@ const StaticString
   s_HPHP_RPC("HPHP_RPC"),
   s__ENV("_ENV");
 
-bool XboxRequestHandler::executePHPFunction(Transport *transport,
+bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            SourceRootInfo &sourceRootInfo) {
   std::string rpcFunc = transport->getCommand();
   {
@@ -281,7 +278,7 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport,
   return !error;
 }
 
-std::string XboxRequestHandler::getSourceFilename(const std::string &path,
+std::string RPCRequestHandler::getSourceFilename(const std::string &path,
                                             SourceRootInfo &sourceRootInfo) {
   if (path.empty() || path[0] == '/') return path;
   // If it is not a sandbox, sourceRoot will be the same as

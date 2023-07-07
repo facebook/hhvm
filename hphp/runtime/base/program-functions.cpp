@@ -69,7 +69,7 @@
 #include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/xbox-request-handler.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/static-content-cache.h"
@@ -1097,14 +1097,14 @@ static int start_server(const std::string &username) {
     (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
      RuntimeOption::AdminLogFile,
      username);
-  XboxRequestHandler::GetAccessLog().init
+  RPCRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
      username);
   SCOPE_EXIT {
     Logger::FlushAll();
     HttpRequestHandler::GetAccessLog().fini();
     AdminRequestHandler::GetAccessLog().fini();
-    XboxRequestHandler::GetAccessLog().fini();
+    RPCRequestHandler::GetAccessLog().fini();
   };
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {

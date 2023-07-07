@@ -31,7 +31,6 @@ struct SatelliteServer {
   enum class Type {
     Unknown,
 
-    KindOfInternalPageServer,  // handles restricted URLs
     KindOfXboxServer,          // handles internal xbox tasks
   };
 
@@ -81,9 +80,6 @@ public:
 
   // for all libevent servers
   std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
-
-  // only for InternalPageServer
-  const std::set<std::string> &getURLs() const { return m_urls;}
 
   // only for RPCServer
   int getMaxRequest() const { return m_maxRequest;}

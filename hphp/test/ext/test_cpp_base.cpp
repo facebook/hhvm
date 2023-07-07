@@ -39,8 +39,6 @@ bool TestCppBase::RunTests(const std::string &which) {
   bool ret = true;
   RUN_TEST(TestIpBlockMap);
   RUN_TEST(TestIpBlockMapIni);
-  RUN_TEST(TestSatelliteServer);
-  RUN_TEST(TestSatelliteServerIni);
   RUN_TEST(TestVirtualHost);
   RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
@@ -257,56 +255,6 @@ bool TestCppBase::TestIpBlockMapIni() {
   VERIFY(!ibm.isBlocking("test/blah.php",
                          "aaaa:bbbb:cccc:dddd:eee3:4444:3333:2222"));
 
-  return Count(true);
-}
-
-bool TestCppBase::TestSatelliteServer() {
-  IniSetting::Map ini = IniSetting::Map::object;
-  Hdf hdf;
-  hdf.fromString(
-    "Satellites {\n"
-    "  ips {\n"
-    "    Type = InternalPageServer\n"
-    "    BlockMainServer = false\n"
-    "  }\n"
-    "}\n"
-  );
-
-
-  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, hdf, infos);
-
-  for (auto& info_ptr : infos) {
-    auto info = info_ptr.get();
-    auto name = info->getName();
-    VERIFY(name == "ips");
-    VERIFY(info->getType() ==
-           SatelliteServer::Type::KindOfInternalPageServer);
-    VERIFY(info->getURLs().size() == 0);
-  }
-  return Count(true);
-}
-
-bool TestCppBase::TestSatelliteServerIni() {
-  std::string iniStr =
-    "hhvm.satellites[ips][type] = InternalPageServer\n"
-    "hhvm.satellites[ips][block_main_server] = false\n";
-
-  IniSettingMap ini = IniSetting::Map::object;
-  Hdf empty;
-  Config::ParseIniString(iniStr, ini);
-
-  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, empty, infos);
-
-  for (auto& info_ptr : infos) {
-    auto info = info_ptr.get();
-    auto name = info->getName();
-    VERIFY(name == "ips");
-    VERIFY(info->getType() ==
-           SatelliteServer::Type::KindOfInternalPageServer);
-    VERIFY(info->getURLs().size() == 0);
-  }
   return Count(true);
 }
 

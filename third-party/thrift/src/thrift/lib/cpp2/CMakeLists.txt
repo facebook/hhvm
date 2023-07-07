@@ -244,6 +244,7 @@ add_library(
   server/Cpp2Connection.cpp
   server/Cpp2Worker.cpp
   server/CPUConcurrencyController.cpp
+  server/IOUringUtil.cpp
   server/LoggingEvent.cpp
   server/LoggingEventHelper.cpp
   server/MonitoringMethodNames.cpp

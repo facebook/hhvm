@@ -599,7 +599,7 @@ class MyUnion final  {
   bool operator<(const MyUnion&) const;
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::int32_t& set_anInteger(::std::int32_t t = ::std::int32_t()) {
+  ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();

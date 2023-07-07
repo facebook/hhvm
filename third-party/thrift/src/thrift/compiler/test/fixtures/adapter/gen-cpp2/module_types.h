@@ -1468,7 +1468,7 @@ class Baz final  {
   bool operator<(const Baz&) const;
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::int32_t& set_intField(::std::int32_t t = ::std::int32_t()) {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>& set_intField(::std::int32_t t = ::std::int32_t()) {
     using T0 = ::std::int32_t;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -1505,7 +1505,7 @@ class Baz final  {
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312> const &t) {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Baz>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312> const &t) {
     using T0 = ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -1515,7 +1515,7 @@ class Baz final  {
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>&& t) {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Baz>& set_mapField(::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>&& t) {
     using T0 = ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -1524,7 +1524,7 @@ class Baz final  {
     return value_.mapField;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, T...>> ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>& set_mapField(T&&... t) {
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, T...>> ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Baz>& set_mapField(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::mapField);
     ::new (std::addressof(value_.mapField)) ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>(std::forward<T>(t)...);

@@ -30,10 +30,10 @@ TEST(CompilerTest, double_package) {
 
 TEST(CompilerTest, diagnostic_in_last_line) {
   check_compile(
-      R"(#expected-error: Parser error during include pass.
-    struct s {
-      1: i32 i;
-# expected-error: expected type)");
+      R"(
+      struct s {
+        1: i32 i;
+        # expected-error: expected type)");
 }
 
 TEST(CompilerTest, missing_type_definition) {

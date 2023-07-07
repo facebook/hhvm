@@ -86,27 +86,6 @@ TEST(TProgram, GetNamespace) {
   EXPECT_EQ(expect_3, program.get_namespace("Non existent"));
 }
 
-TEST(TProgram, AddInclude) {
-  t_program program("");
-
-  const std::string expect_1 = "tprogramtest1";
-  const std::string rel_file_path_1 = "./" + expect_1 + ".thrift";
-  const std::string full_file_path_1 = "/this/is/a/dir/" + expect_1 + ".thrift";
-  const std::string expect_2 = "tprogramtest2";
-  const std::string full_file_path_2 = "/this/is/a/dir/" + expect_2 + ".thrift";
-  const auto expect = std::vector<std::string>{expect_1, expect_2};
-
-  auto program_1 = program.add_include(full_file_path_1, rel_file_path_1, {});
-  auto program_2 = program.add_include(full_file_path_2, full_file_path_2, {});
-  const auto& includes = program.get_included_programs();
-
-  auto included_names = std::vector<std::string>();
-  for (auto include : includes) {
-    included_names.push_back(include->name());
-  }
-  EXPECT_EQ(expect, included_names);
-}
-
 TEST(TProgram, SetIncludePrefix) {
   t_program program("");
 

@@ -60,8 +60,10 @@ class t_program : public t_named {
    *
    * @param path - A *.thrift file path.
    */
-  explicit t_program(std::string path)
-      : t_program(std::move(path), std::make_shared<t_scope>()) {}
+  explicit t_program(std::string path, const t_program* parent = nullptr)
+      : t_program(
+            std::move(path),
+            parent ? parent->scope_ : std::make_shared<t_scope>()) {}
 
   void set_package(t_package package) { package_ = std::move(package); }
   const t_package& package() const { return package_; }
@@ -226,18 +228,6 @@ class t_program : public t_named {
 
   std::vector<std::string> gen_namespace_or_default(
       const std::string& language, namespace_config config) const;
-
-  /**
-   * This creates a new program for every thrift file in an
-   * include statement and sets their include_prefix by parsing
-   * the directory in which they were included from
-   *
-   * @param path         - A full thrift file path
-   * @param include_site - A full or relative thrift file path
-   * @param range        - The source range of the include statement
-   */
-  std::unique_ptr<t_program> add_include(
-      std::string path, std::string include_site, const source_range& range);
 
   void add_include(std::unique_ptr<t_include> include) {
     includes_.push_back(include.get());

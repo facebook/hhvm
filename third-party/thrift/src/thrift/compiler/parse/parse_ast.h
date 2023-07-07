@@ -81,8 +81,8 @@ struct parsing_params {
 std::unique_ptr<t_program_bundle> parse_ast(
     source_manager& sm,
     diagnostics_engine& diags,
-    std::string path,
-    parsing_params parse_params);
+    const std::string& path,
+    const parsing_params& params);
 
 } // namespace compiler
 } // namespace thrift

@@ -116,27 +116,6 @@ std::vector<std::string> t_program::gen_namespace_or_default(
   return ret;
 }
 
-std::unique_ptr<t_program> t_program::add_include(
-    std::string path, std::string include_site, const source_range& range) {
-  auto program = std::unique_ptr<t_program>(new t_program(path, scope_));
-
-  std::string include_prefix;
-  const auto last_slash = include_site.find_last_of("/\\");
-  if (last_slash != std::string::npos) {
-    include_prefix = include_site.substr(0, last_slash);
-  }
-
-  program->set_include_prefix(include_prefix);
-
-  auto include =
-      std::make_unique<t_include>(program.get(), std::move(include_site));
-  include->set_src_range(range);
-
-  add_include(std::move(include));
-
-  return program;
-}
-
 void t_program::set_include_prefix(std::string include_prefix) {
   include_prefix_ = std::move(include_prefix);
 

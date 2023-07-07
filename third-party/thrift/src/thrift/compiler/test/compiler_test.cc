@@ -366,6 +366,16 @@ TEST(CompilerTest, undefined_type) {
   )");
 }
 
+TEST(CompilerTest, undefined_annotation) {
+  check_compile(R"(
+    @BadAnnotation # expected-error: Type `test.BadAnnotation` not defined.
+    struct S {}
+
+    @bad.Annotation # expected-error: Type `bad.Annotation` not defined.
+    struct S {}
+  )");
+}
+
 TEST(CompilerTest, field_name_uniqueness) {
   check_compile(R"(
     struct S {

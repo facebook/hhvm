@@ -498,6 +498,22 @@ class ast_builder : public parser_actions {
     return result;
   }
 
+  void check_external_type_resolved(t_type_ref type) {
+    if (type.resolved()) {
+      return;
+    }
+    t_placeholder_typedef* unresolved_type = type.get_unresolved_type();
+    const std::string& type_name = unresolved_type->name();
+    size_t sep_pos = type_name.find(".");
+    if (sep_pos == std::string::npos ||
+        fmt::string_view(type_name.data(), sep_pos) == program_->name()) {
+      // Local types are handled separately because they can be used before
+      // definition.
+      return;
+    }
+    diags_.error(*unresolved_type, "Type `{}` not defined.", type_name);
+  }
+
   // Tries to set the given fields, reporting an error on a collision.
   void set_fields(t_structured& s, t_field_list&& fields) {
     assert(s.fields().empty());
@@ -644,7 +660,11 @@ class ast_builder : public parser_actions {
       source_range range, fmt::string_view name) override {
     auto const_value = std::make_unique<t_const_value>();
     const_value->set_map();
-    const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
+    t_type_ref type = new_type_ref(fmt::to_string(name), nullptr, range);
+    // Once Thrift Patch is decoupled from the compiler we will be able to
+    // always resolve external types. Until then just resolve annotation types.
+    check_external_type_resolved(type);
+    const_value->set_ttype(type);
     return on_structured_annotation(range, std::move(const_value));
   }
 

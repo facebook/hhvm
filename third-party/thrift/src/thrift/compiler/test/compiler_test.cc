@@ -21,6 +21,20 @@
 
 using apache::thrift::compiler::test::check_compile;
 
+TEST(CompilerTest, diagnostic_in_last_line) {
+  check_compile(R"(
+    struct s {
+      1: i32 i;
+      # expected-error: expected type)");
+}
+
+TEST(CompilerTest, absolute_line_number) {
+  check_compile(R"(
+    foo
+    # expected-error@2: expected definition
+    )");
+}
+
 TEST(CompilerTest, double_package) {
   check_compile(R"(
     package "test.dev/test"
@@ -28,43 +42,34 @@ TEST(CompilerTest, double_package) {
   )");
 }
 
-TEST(CompilerTest, diagnostic_in_last_line) {
-  check_compile(
-      R"(
-      struct s {
-        1: i32 i;
-        # expected-error: expected type)");
-}
-
 TEST(CompilerTest, missing_type_definition) {
-  check_compile(
-      R"(
-      struct s{
-        1: i32 i;
-        2: myStruct ms; # expected-error: Type `test.myStruct` not defined.
-      }
-)");
+  check_compile(R"(
+    struct S {
+      1: i32 i;
+      2: MyStruct ms; # expected-error: Type `test.MyStruct` not defined.
+    }
+  )");
 }
 
 TEST(CompilerTest, zero_as_field_id) {
   check_compile(R"(
     struct Foo {
-        0: i32 field; #expected-warning: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
-                      #expected-warning@3:  No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
-        1: list<i32> other;
+      0: i32 field; # expected-warning: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
+                    # expected-warning@-1:  No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
+      1: list<i32> other;
     }
-)");
+  )");
 }
 
 TEST(CompilerTest, zero_as_field_id_neg_keys) {
   check_compile(
       R"(
-    struct Foo {
-        0: i32 field; #expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).
-                      #expected-error@-1: Zero value (0) not allowed as a field id for `field`
+      struct Foo {
+        0: i32 field; # expected-warning: Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).
+                      # expected-error@-1: Zero value (0) not allowed as a field id for `field`
         1: list<i32> other;
-    }
-)",
+      }
+      )",
       {"--allow-neg-keys"});
 }
 
@@ -76,15 +81,17 @@ TEST(CompilerTest, no_field_id) {
 
     @NoLegacy
     struct Foo {
-        i32 field1; # expected-error: No field id specified for `field1`, resulting protocol may have conflicts or not be backwards compatible!
-        @Experimental
-        i32 field2; # expected-warning@-1: No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!
-        @Testing
-        i32 field3; # expected-warning@-1: No field id specified for `field3`, resulting protocol may have conflicts or not be backwards compatible!
+      i32 field1; # expected-error: No field id specified for `field1`, resulting protocol may have conflicts or not be backwards compatible!
+
+      @Experimental
+      i32 field2; # expected-warning@-1: No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!
+
+      @Testing
+      i32 field3; # expected-warning@-1: No field id specified for `field3`, resulting protocol may have conflicts or not be backwards compatible!
     }
 
     struct Bar {
-        i32 field4; # expected-warning: No field id specified for `field4`, resulting protocol may have conflicts or not be backwards compatible!
+      i32 field4; # expected-warning: No field id specified for `field4`, resulting protocol may have conflicts or not be backwards compatible!
     }
   )");
 }
@@ -93,77 +100,79 @@ TEST(CompilerTest, zero_as_field_id_annotation) {
   check_compile(R"(
     struct Foo {
       0: i32 field (cpp.deprecated_allow_zero_as_field_id);
-          #expected-warning@-1: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
-          #expected-warning@-2: No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
+        # expected-warning@-1: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
+        # expected-warning@-2: No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
+
       1: list<i32> other;
     }
-
   )");
 }
 
 TEST(CompilerTest, zero_as_field_id_allow_neg_keys) {
   check_compile(
       R"(
-    struct Foo {
-      0: i32 field (cpp.deprecated_allow_zero_as_field_id);
-          #expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).
-      1: list<i32> other;
-    }
+      struct Foo {
+        0: i32 field (cpp.deprecated_allow_zero_as_field_id);
+          # expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (-1).
 
-  )",
+        1: list<i32> other;
+      }
+      )",
       {"--allow-neg-keys"});
 }
 
 TEST(CompilerTest, neg_field_ids) {
   check_compile(
       R"(
-    struct Foo {
-      i32 f1;  // auto id = -1
-        #expected-warning@-1: No field id specified for `f1`, resulting protocol may have conflicts or not be backwards compatible!
-      -2: i32 f2; // auto and manual id = -2
-      -32: i32 f3; // min value.
-        #expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (-3).
-      -33: i32 f4; // min value - 1.
-        #expected-error@-1: Reserved field id (-33) cannot be used for `f4`.
-    }
-  )",
+      struct Foo {
+        i32 f1;  // auto id = -1
+          # expected-warning@-1: No field id specified for `f1`, resulting protocol may have conflicts or not be backwards compatible!
+
+        -2: i32 f2; // auto and manual id = -2
+        -32: i32 f3; // min value.
+          # expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (-3).
+
+        -33: i32 f4; // min value - 1.
+          # expected-error@-1: Reserved field id (-33) cannot be used for `f4`.
+      }
+      )",
       {"--allow-neg-keys"});
 }
 
 TEST(CompilerTest, exhausted_neg_field_ids) {
   check_compile(
       R"(
-    struct Foo {
-      -32: i32 f1; // min value.
-        #expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (-1).
-      i32 f2; // auto id = -2 or min value - 1
-        #expected-error@-1: Cannot allocate an id for `f2`. Automatic field ids are exhausted.
-    }
-  )",
+      struct Foo {
+        -32: i32 f1; // min value.
+          # expected-warning@-1: Nonpositive field id (-32) differs from what would be auto-assigned by thrift (-1).
+
+        i32 f2; // auto id = -2 or min value - 1
+          # expected-error@-1: Cannot allocate an id for `f2`. Automatic field ids are exhausted.
+      }
+      )",
       {"--allow-neg-keys"});
 }
 
 TEST(CompilerTest, exhausted_pos_field_ids) {
-  std::string thrift_struct;
-  thrift_struct.reserve(10000);
-  thrift_struct += "struct Foo {\n";
+  std::string src;
+  src += "struct Foo {\n";
   for (int i = 0; i < 33; i++) {
-    thrift_struct += "  i32 field_" + std::to_string(i) + ";\n";
+    src += "  i32 field_" + std::to_string(i) + ";\n";
   }
-  thrift_struct += "}\n";
-  thrift_struct +=
-      "#expected-error@34: Cannot allocate an id for `field_32`. Automatic field ids are exhausted.";
-  std::cout << thrift_struct << std::endl;
-  check_compile(thrift_struct);
+  src +=
+      "# expected-error@-1: Cannot allocate an id for `field_32`. "
+      "Automatic field ids are exhausted.\n";
+  src += "}\n";
+  check_compile(src);
 }
 
 TEST(CompilerTest, out_of_range_field_ids_overflow) {
   check_compile(R"(
     struct Foo {
-      -32768: i32 f1; #expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
+      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
       32767: i32 f2;
-      32768: i32 f3; #expected-error: Integer constant 32768 outside the range of field ids ([-32768, 32767]).
-        #expected-warning@-1: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -2.
+      32768: i32 f3; # expected-error: Integer constant 32768 outside the range of field ids ([-32768, 32767]).
+                     # expected-warning@-1: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -2.
     }
   )");
 }
@@ -171,10 +180,11 @@ TEST(CompilerTest, out_of_range_field_ids_overflow) {
 TEST(CompilerTest, out_of_range_field_ids_underflow) {
   check_compile(R"(
     struct Foo {
-      -32768: i32 f1; #expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
+      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
       32767: i32 f2;
-      -32769: i32 f3; #expected-error: Integer constant -32769 outside the range of field ids ([-32768, 32767]).
-        #expected-error@-1: Field id 32767 for `f3` has already been used.
+
+      -32769: i32 f3; # expected-error: Integer constant -32769 outside the range of field ids ([-32768, 32767]).
+                      # expected-error@-1: Field id 32767 for `f3` has already been used.
     }
   )");
 }
@@ -184,8 +194,8 @@ TEST(CompilerTest, oneway_exception) {
     exception A {}
 
     service MyService {
-        oneway void foo();
-        oneway void baz() throws (1: A ex); # expected-error: Oneway methods can't throw exceptions: baz
+      oneway void foo();
+      oneway void baz() throws (1: A ex); # expected-error: Oneway methods can't throw exceptions: baz
     }
   )");
 }
@@ -244,7 +254,7 @@ TEST(CompilerTest, unset_enum_value) {
 TEST(CompilerTest, enum_overflow) {
   check_compile(R"(
     enum Foo {
-      Bar = 2147483647
+      Bar = 2147483647,
       Baz = 2147483648 # expected-error: Integer constant 2147483648 outside the range of enum values ([-2147483648, 2147483647]).
     }
   )");
@@ -253,7 +263,7 @@ TEST(CompilerTest, enum_overflow) {
 TEST(CompilerTest, enum_underflow) {
   check_compile(R"(
     enum Foo {
-      Bar = -2147483648
+      Bar = -2147483648,
       Baz = -2147483649 # expected-error: Integer constant -2147483649 outside the range of enum values ([-2147483648, 2147483647]).
     }
   )");
@@ -302,22 +312,22 @@ TEST(CompilerTest, double_overflow_underflow) {
 
 TEST(CompilerTest, const_wrong_type) {
   check_compile(R"(
-    const i32 wrongInt = "stringVal" # expected-error: type error: const `wrongInt` was declared as i32.
-    const set<string> wrongSet = {1: 2}
+    const i32 wrongInt = "stringVal"; # expected-error: type error: const `wrongInt` was declared as i32.
+    const set<string> wrongSet = {1: 2};
       # expected-warning@-1: type error: const `wrongSet` was declared as set. This will become an error in future versions of thrift.
     const map<i32, i32> wrongMap = [1,32,3];
       # expected-warning@-1: type error: const `wrongMap` was declared as map. This will become an error in future versions of thrift.
-    const map<i32, i32> wierdMap = [];
-      # expected-warning@-1: type error: map `wierdMap` initialized with empty list.
-    const set<i32> wierdSet = {};
-      # expected-warning@-1: type error: set `wierdSet` initialized with empty map.
-    const list<i32> wierdList = {};
-      # expected-warning@-1: type error: list `wierdList` initialized with empty map.
-    const list<string> badValList = [1]
+    const map<i32, i32> weirdMap = [];
+      # expected-warning@-1: type error: map `weirdMap` initialized with empty list.
+    const set<i32> weirdSet = {};
+      # expected-warning@-1: type error: set `weirdSet` initialized with empty map.
+    const list<i32> weirdList = {};
+      # expected-warning@-1: type error: list `weirdList` initialized with empty map.
+    const list<string> badValList = [1];
       # expected-error@-1: type error: const `badValList<elem>` was declared as string.
-    const set<string> badValSet = [2]
+    const set<string> badValSet = [2];
       # expected-error@-1: type error: const `badValSet<elem>` was declared as string.
-    const map<string, i32> badValMap = {1: "str"}
+    const map<string, i32> badValMap = {1: "str"};
       # expected-error@-1: type error: const `badValMap<key>` was declared as string.
       # expected-error@-2: type error: const `badValMap<val>` was declared as i32.
   )");
@@ -326,15 +336,15 @@ TEST(CompilerTest, const_wrong_type) {
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
     struct Annot {
-      1: i32 val
-      2: list<string> otherVal
+      1: i32 val;
+      2: list<string> otherVal;
     }
 
     @Annot{val="hi", otherVal=5}
-      #expected-error@-1: type error: const `.val` was declared as i32.
-      #expected-warning@-2: type error: const `.otherVal` was declared as list. This will become an error in future versions of thrift.
+      # expected-error@-1: type error: const `.val` was declared as i32.
+      # expected-warning@-2: type error: const `.otherVal` was declared as list. This will become an error in future versions of thrift.
     struct BadFields {
-      1: i32 badInt = "str" # expected-error: type error: const `badInt` was declared as i32.
+      1: i32 badInt = "str"; # expected-error: type error: const `badInt` was declared as i32.
     }
   )");
 }
@@ -342,21 +352,21 @@ TEST(CompilerTest, struct_fields_wrong_type) {
 TEST(CompilerTest, duplicate_method_name) {
   check_compile(R"(
     service MySBB {
-      void lol(),
-      i32 lol(), # expected-error:  Function `lol` is already defined for `MySBB`.
+      void lol();
+      i32 lol(); # expected-error: Function `lol` is already defined for `MySBB`.
     }
   )");
 }
 
-TEST(CompilerTest, nonexistent_type) {
+TEST(CompilerTest, undefined_type) {
   check_compile(R"(
     struct S {
-      1: Random.Type field # expected-error: Type `Random.Type` not defined.
+      1: bad.Type field; # expected-error: Type `bad.Type` not defined.
     }
   )");
 }
 
-TEST(CompilerTest, field_names_uniqueness) {
+TEST(CompilerTest, field_name_uniqueness) {
   check_compile(R"(
     struct S {
       1: i32 a;
@@ -366,17 +376,17 @@ TEST(CompilerTest, field_names_uniqueness) {
   )");
 }
 
-TEST(CompilerTest, mixin_field_names_uniqueness) {
+TEST(CompilerTest, mixin_field_name_uniqueness) {
   check_compile(R"(
-    struct A { 1: i32 i }
-    struct B { 2: i64 i }
+    struct A { 1: i32 i; }
+    struct B { 2: i64 i; }
     struct C {
       1: A a (cpp.mixin);
       2: B b (cpp.mixin); # expected-error: Field `B.i` and `A.i` can not have same name in `C`.
     }
   )");
   check_compile(R"(
-    struct A { 1: i32 i }
+    struct A { 1: i32 i; }
 
     struct C {
       1: A a (cpp.mixin);

@@ -49,7 +49,7 @@ class hoist_annotated_types {
     if (typedefs_.empty()) {
       return;
     }
-    auto len = sm_.get_file(prog_.path()).text.size() - 1;
+    auto len = sm_.get_file(prog_.path())->text.size() - 1;
     std::vector<std::string> typedefs;
     for (const auto& [k, v] : typedefs_) {
       typedefs.push_back(fmt::format("typedef {} {}", v.name, k));

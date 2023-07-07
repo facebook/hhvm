@@ -26,7 +26,6 @@
 #include <boost/optional.hpp>
 #include <fmt/format.h>
 
-#include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_named.h>
@@ -1020,14 +1019,12 @@ class ast_builder : public parser_actions {
   // Parses a single .thrift file and populates program_ with the parsed AST.
   void parse_file() {
     const std::string& path = program_->path();
-    auto src = source();
-    try {
-      src = source_mgr_.get_file(path);
-    } catch (const std::runtime_error& e) {
-      diags_.error(source_location(), "{}", e.what());
+    boost::optional<source> src = source_mgr_.get_file(path);
+    if (!src) {
+      diags_.error(source_location(), "failed to open file: {}", path);
       end_parsing();
     }
-    program_->set_src_range({src.start, src.start});
+    program_->set_src_range({src->start, src->start});
 
     // Consume doctext and store it in `doctext_`.
     //
@@ -1039,9 +1036,9 @@ class ast_builder : public parser_actions {
       clear_doctext();
       doctext_ = comment{strip_doctext(text), loc};
     };
-    auto lexer = compiler::lexer(src, diags_, on_doc_comment);
+    auto lexer = compiler::lexer(*src, diags_, on_doc_comment);
 
-    diags_.report(src.start, diagnostic_level::info, "Parsing {}\n", path);
+    diags_.report(src->start, diagnostic_level::info, "Parsing {}\n", path);
     if (!compiler::parse(lexer, *this, diags_)) {
       end_parsing();
     }
@@ -1055,14 +1052,6 @@ std::unique_ptr<t_program_bundle> parse_ast(
     diagnostics_engine& diags,
     const std::string& path,
     const parsing_params& params) {
-  auto src = source();
-  try {
-    src = sm.get_file(path);
-  } catch (const std::runtime_error& e) {
-    diags.error(source_location(), "{}", e.what());
-    return {};
-  }
-
   // Always enable allow_neg_field_keys when parsing included files.
   // This way if a Thrift file has negative keys, --allow-neg-keys doesn't
   // have to be used by everyone that includes it.

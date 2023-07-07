@@ -41,19 +41,19 @@ class file {
   FILE* file_;
 
  public:
-  file(const char* filename, const char* mode) : file_(fopen(filename, mode)) {
-    if (!file_) {
-      throw std::runtime_error(std::string("failed to open file: ") + filename);
-    }
-  }
+  file(const char* filename, const char* mode) : file_(fopen(filename, mode)) {}
   ~file() {
-    int result = fclose(file_);
-    (void)result;
-    assert(result == 0);
+    if (file_) {
+      int result = fclose(file_);
+      (void)result;
+      assert(result == 0);
+    }
   }
 
   file(const file&) = delete;
   void operator=(const file&) = delete;
+
+  explicit operator bool() const { return file_ != nullptr; }
 
   read_result read(char* buffer, size_t size) {
     size_t result = fread(buffer, 1, size, file_);
@@ -86,8 +86,17 @@ source source_manager::add_source(
   return {source_location(sources_.size(), 0), sv};
 }
 
-source source_manager::add_file(const std::string& file_name) {
+boost::optional<source> source_manager::get_file(const std::string& file_name) {
+  if (auto source = file_source_map_.find(file_name);
+      source != file_source_map_.end()) {
+    return source->second;
+  }
+
+  // Read the file.
   auto f = file(file_name.c_str(), "rb");
+  if (!f) {
+    return {};
+  }
   char buffer[4096];
   auto text = std::vector<char>();
   for (;;) {
@@ -96,21 +105,13 @@ source source_manager::add_file(const std::string& file_name) {
       if (result.error_code == 0) {
         break;
       }
-      throw fmt::system_error(
-          result.error_code, "error reading from {}", file_name);
+      return {};
     }
     text.insert(text.end(), buffer, buffer + result.count);
   }
   text.push_back('\0');
-  return add_source(file_name, std::move(text));
-}
 
-source source_manager::get_file(const std::string& file_name) {
-  if (auto source = file_source_map_.find(file_name);
-      source != file_source_map_.end()) {
-    return source->second;
-  }
-  auto source = add_file(file_name);
+  auto source = add_source(file_name, std::move(text));
   file_source_map_.emplace(file_name, source);
   return source;
 }
@@ -118,7 +119,7 @@ source source_manager::get_file(const std::string& file_name) {
 source source_manager::add_virtual_file(
     const std::string& file_name, const std::string& src) {
   if (file_source_map_.find(file_name) != file_source_map_.end()) {
-    throw std::runtime_error(std::string("File already added: ") + file_name);
+    throw std::runtime_error(std::string("file already added: ") + file_name);
   }
   const char* start = src.c_str();
   auto source =

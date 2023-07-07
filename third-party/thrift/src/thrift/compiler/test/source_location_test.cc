@@ -28,22 +28,16 @@ TEST(SourceLocationTest, get_file) {
   auto file_name = file.path().string();
   std::ofstream(file_name) << text;
   auto source = sm.get_file(file_name);
-  auto loc = resolved_location(source.start, sm);
+  auto loc = resolved_location(source->start, sm);
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
-  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source.text);
+  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source->text);
 }
 
-TEST(SourceLocationTest, report_file_name_on_error) {
+TEST(SourceLocationTest, get_file_error) {
   auto sm = source_manager();
-  auto message = std::string();
-  try {
-    sm.get_file("nonexistent");
-  } catch (const std::runtime_error& e) {
-    message = e.what();
-  }
-  EXPECT_THAT(message, testing::HasSubstr("nonexistent"));
+  EXPECT_FALSE(sm.get_file("nonexistent"));
 }
 
 TEST(SourceLocationTest, add_virtual_file) {
@@ -129,9 +123,9 @@ TEST(SourceLocationTest, get_cached_virtual_file) {
   auto file_name = std::string("virtual_file");
   sm.add_virtual_file(file_name, text);
   auto source = sm.get_file(file_name);
-  auto loc = resolved_location(source.start, sm);
+  auto loc = resolved_location(source->start, sm);
   EXPECT_EQ(loc.file_name(), file_name);
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
-  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source.text);
+  EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source->text);
 }

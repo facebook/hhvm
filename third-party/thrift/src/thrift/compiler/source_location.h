@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/optional.hpp>
 #include <fmt/core.h>
 
 namespace apache {
@@ -120,13 +121,15 @@ class source_manager {
   friend class resolved_location;
 
   source add_source(const std::string& file_name, std::vector<char> text);
-  source add_file(const std::string& file_name);
 
  public:
-  // Adds a file source.
-  source get_file(const std::string& file_name);
+  // Loads a file and returns a source object representing its content.
+  // The file can be a real file or a virtual one previously registered with
+  // add_virtual_file.
+  // Returns an empty optional if opening or reading the file fails.
+  boost::optional<source> get_file(const std::string& file_name);
 
-  // Adds a string source; file_name is used for source locations.
+  // Adds a virtual file with the specified name and content.
   source add_virtual_file(const std::string& file_name, const std::string& src);
 
   // Returns the start location of a source containing the specified location.

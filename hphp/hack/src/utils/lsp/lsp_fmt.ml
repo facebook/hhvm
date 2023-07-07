@@ -107,6 +107,43 @@ let parse_range_opt (json : json option) : range option =
   else
     Some (parse_range_exn json)
 
+(************************************************************************)
+
+let print_error (e : Error.t) : json =
+  let open Hh_json in
+  let data =
+    match e.Error.data with
+    | None -> []
+    | Some data -> [("data", data)]
+  in
+  let entries =
+    ("code", int_ (Error.code_to_enum e.Error.code))
+    :: ("message", string_ e.Error.message)
+    :: data
+  in
+  JSON_Object entries
+
+let error_to_log_string (e : Error.t) : string =
+  let data =
+    Option.value_map e.Error.data ~f:Hh_json.json_to_multiline ~default:""
+  in
+  Printf.sprintf
+    "%s [%s]\n%s"
+    e.Error.message
+    (Error.show_code e.Error.code)
+    data
+
+let parse_error (error : json) : Error.t =
+  let json = Some error in
+  let code =
+    Jget.int_exn json "code"
+    |> Error.code_of_enum
+    |> Option.value ~default:Error.UnknownErrorCode
+  in
+  let message = Jget.string_exn json "message" in
+  let data = Jget.val_opt json "data" in
+  { Error.code; message; data }
+
 let parse_textDocumentIdentifier (json : json option) : TextDocumentIdentifier.t
     =
   TextDocumentIdentifier.{ uri = Jget.string_exn json "uri" |> uri_of_string }
@@ -649,7 +686,9 @@ let print_codeActionResolveResult (c : CodeActionResolve.result) : json =
       in
       print_codeAction c ~unresolved_to_code_action_request
   in
-  print_command_or_action c
+  match c with
+  | Ok command_or_action -> print_command_or_action command_or_action
+  | Error err -> print_error err
 
 (************************************************************************)
 
@@ -1329,43 +1368,6 @@ let parse_didChangeWatchedFiles (json : Hh_json.json option) :
            { DidChangeWatchedFiles.uri; type_ })
   in
   { DidChangeWatchedFiles.changes }
-
-(************************************************************************)
-
-let print_error (e : Error.t) : json =
-  let open Hh_json in
-  let data =
-    match e.Error.data with
-    | None -> []
-    | Some data -> [("data", data)]
-  in
-  let entries =
-    ("code", int_ (Error.code_to_enum e.Error.code))
-    :: ("message", string_ e.Error.message)
-    :: data
-  in
-  JSON_Object entries
-
-let error_to_log_string (e : Error.t) : string =
-  let data =
-    Option.value_map e.Error.data ~f:Hh_json.json_to_multiline ~default:""
-  in
-  Printf.sprintf
-    "%s [%s]\n%s"
-    e.Error.message
-    (Error.show_code e.Error.code)
-    data
-
-let parse_error (error : json) : Error.t =
-  let json = Some error in
-  let code =
-    Jget.int_exn json "code"
-    |> Error.code_of_enum
-    |> Option.value ~default:Error.UnknownErrorCode
-  in
-  let message = Jget.string_exn json "message" in
-  let data = Jget.val_opt json "data" in
-  { Error.code; message; data }
 
 (************************************************************************)
 (* universal parser+printer                                             *)

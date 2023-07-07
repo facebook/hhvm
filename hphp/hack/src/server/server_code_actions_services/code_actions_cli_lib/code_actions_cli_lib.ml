@@ -47,7 +47,7 @@ let patched_text_of_command_or_action ~source_text path = function
   | Ca.Command _ ->
     None
 
-let run ctx entry range ~title_prefix =
+let run_exn ctx entry range ~title_prefix =
   let module Ca = Lsp.CodeAction in
   let commands_or_actions =
     Server_code_actions_services.go ~ctx ~entry ~range
@@ -93,6 +93,10 @@ let run ctx entry range ~title_prefix =
           ~entry
           ~range
           ~resolve_title:selected_title
+        |> Result.map_error ~f:(fun e ->
+               Hh_json.json_to_string ~sort_keys:true ~pretty:true
+               @@ Lsp_fmt.print_error e)
+        |> Result.ok_or_failwith
       in
       let hermeticize_paths =
         Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""
@@ -114,6 +118,7 @@ let run ctx entry range ~title_prefix =
       in
       Printf.printf "\nJSON for selected code action:%s" separator;
       resolved
+      |> Result.return
       |> Lsp_fmt.print_codeActionResolveResult
       |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
       |> hermeticize_paths

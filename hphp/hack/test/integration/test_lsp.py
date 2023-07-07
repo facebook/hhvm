@@ -5115,13 +5115,12 @@ function call_method(ClassWithFooBar $mc): void {
         self.run_spec(spec, variables)
 
     def test_code_action_content_modified(self) -> None:
-        """
-        **Potential bug**: we do not handle the following situation gracefully:
+        """Test that we handle the following situation gracefully:
         - client sends textDocument/codeAction
         - server sends back a partially-resolved code action
         - client sends codeAction/resolve with a *different* position s.t.
         the server can't find a code action with the given position and title.
-        We should reply with an LSP error `ContentModified`
+        We should reply with an LSP error `ContentModified`, per
         https://github.com/microsoft/language-server-protocol/issues/1738
         """
         variables = self.write_hhconf_and_naming_table()
@@ -5187,7 +5186,11 @@ function call_method(ClassWithFooBar $mc): void {
                     "kind": "refactor",
                     "diagnostics": [],
                 },
-                result=None,
+                result={
+                    "code": -32801,
+                    "message": "Expected the code action requested with codeAction/resolve to be findable.\nNote: This error message may be caused by the source text changing between\nwhen the code action menu pops up and when the user selects the code action.\nIn such cases we may not be able to find a code action at the same location with\nthe same title, so cannot resolve the code action.\n        ",
+                },
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})

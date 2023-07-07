@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 open Hh_prelude
 open Sys_utils
 module Cls = Decl_provider.Class
@@ -2072,7 +2071,7 @@ let handle_mode
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let src = Provider_context.read_file_contents_exn entry in
     let range = find_ide_range src in
-    Code_actions_cli_lib.run ctx entry range ~title_prefix
+    Code_actions_cli_lib.run_exn ctx entry range ~title_prefix
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

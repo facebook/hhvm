@@ -400,6 +400,30 @@ module Initialize = struct
   and saveOptions = { includeText: bool }
 end
 
+module Error = struct
+  type code =
+    | ParseError [@value -32700]
+    | InvalidRequest [@value -32600]
+    | MethodNotFound [@value -32601]
+    | InvalidParams [@value -32602]
+    | InternalError [@value -32603]
+    | ServerErrorStart [@value -32099]
+    | ServerErrorEnd [@value -32000]
+    | ServerNotInitialized [@value -32002]
+    | UnknownErrorCode [@value -32001]
+    | RequestCancelled [@value -32800]
+    | ContentModified [@value -32801]
+  [@@deriving show, enum]
+
+  type t = {
+    code: code;
+    message: string;
+    data: Hh_json.json option;
+  }
+
+  exception LspException of t
+end
+
 module RageFB = struct
   type result = rageItem list
 
@@ -598,7 +622,7 @@ module CodeActionRequest = struct
 end
 
 module CodeActionResolve = struct
-  type result = CodeAction.resolved_command_or_action
+  type result = (CodeAction.resolved_command_or_action, Error.t) Result.t
 end
 
 (** method="codeAction/resolve" *)
@@ -978,30 +1002,6 @@ module ConnectionStatusFB = struct
   type params = connectionStatusParams
 
   and connectionStatusParams = { isConnected: bool }
-end
-
-module Error = struct
-  type code =
-    | ParseError [@value -32700]
-    | InvalidRequest [@value -32600]
-    | MethodNotFound [@value -32601]
-    | InvalidParams [@value -32602]
-    | InternalError [@value -32603]
-    | ServerErrorStart [@value -32099]
-    | ServerErrorEnd [@value -32000]
-    | ServerNotInitialized [@value -32002]
-    | UnknownErrorCode [@value -32001]
-    | RequestCancelled [@value -32800]
-    | ContentModified [@value -32801]
-  [@@deriving show, enum]
-
-  type t = {
-    code: code;
-    message: string;
-    data: Hh_json.json option;
-  }
-
-  exception LspException of t
 end
 
 type lsp_registration_options =

@@ -549,7 +549,7 @@ type _ t =
       range: range;
       resolve_title: string;
     }
-      -> Lsp.CodeAction.resolved_command_or_action t
+      -> Lsp.CodeActionResolve.result t
   | DISCONNECT : unit t
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t

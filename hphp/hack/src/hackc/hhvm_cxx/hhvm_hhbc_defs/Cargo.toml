@@ -10,8 +10,8 @@ path = "hhvm_hhbc_defs_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.94"
+cxx = "1.0.100"
 serde = { version = "1.0.167", features = ["derive", "rc"] }
 
 [build-dependencies]
-cxx-build = "1.0.94"
+cxx-build = "1.0.100"

@@ -9,10 +9,10 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.65"
-cxx = "1.0.94"
+anyhow = "1.0.71"
+cxx = "1.0.100"
 hdf = { version = "0.0.0", path = "../../hdf" }
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 
 [build-dependencies]
-cxx-build = "1.0.94"
+cxx-build = "1.0.100"

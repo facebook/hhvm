@@ -9,7 +9,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.65"
+anyhow = "1.0.71"
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 core_utils_rust = { version = "0.0.0", path = "../../utils/core" }
@@ -22,5 +22,5 @@ lazy_static = "1.4"
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 regex = "1.6.0"
-thiserror = "1.0.36"
+thiserror = "1.0.43"
 write_bytes = { version = "0.0.0", path = "../../utils/write_bytes/write_bytes" }

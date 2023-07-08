@@ -9,4 +9,4 @@ edition = "2021"
 path = "attr_parser.rs"
 
 [dependencies]
-syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

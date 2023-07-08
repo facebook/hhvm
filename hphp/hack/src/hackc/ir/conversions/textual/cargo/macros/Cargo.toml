@@ -16,4 +16,4 @@ itertools = "0.10.3"
 proc-macro-error = "1.0"
 proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
 quote = "1.0.29"
-syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

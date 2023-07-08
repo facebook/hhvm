@@ -123,5 +123,33 @@ TEST(PatchMergeTest, BoolPatch) {
   pickMultipleOpsAndTest(ops, {true, false}, 6);
 }
 
+template <class Patch, bool isFloat = false>
+void testNumberPatch() {
+  SCOPED_TRACE(folly::pretty_name<Patch>());
+  AddOps<Patch> ops;
+  ops.push_back([](auto& patch) { patch = 0; });
+  ops.push_back([](auto& patch) { patch = 42; });
+  ops.push_back([](auto& patch) { patch.clear(); });
+  ops.push_back([](auto& patch) { patch += 0; });
+  ops.push_back([](auto& patch) { patch += 10; });
+  ops.push_back([](auto& patch) { patch -= 0; });
+  ops.push_back([](auto& patch) { patch -= 20; });
+  if constexpr (isFloat) {
+    ops.push_back([](auto& patch) { patch = 1.5; });
+    ops.push_back([](auto& patch) { patch += 2.5; });
+    ops.push_back([](auto& patch) { patch -= 3.5; });
+  }
+  pickMultipleOpsAndTest(ops, {0, 10, 20, 42}, 5);
+}
+
+TEST(PatchMergeTest, NumberPatch) {
+  testNumberPatch<op::BytePatch>();
+  testNumberPatch<op::I16Patch>();
+  testNumberPatch<op::I32Patch>();
+  testNumberPatch<op::I64Patch>();
+  testNumberPatch<op::FloatPatch, true>();
+  testNumberPatch<op::DoublePatch, true>();
+}
+
 } // namespace
 } // namespace apache::thrift

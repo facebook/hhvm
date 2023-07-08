@@ -13,8 +13,8 @@ proc-macro = true
 
 [dependencies]
 proc-macro-error = "1.0"
-proc-macro2 = { version = "1.0.46", features = ["span-locations"] }
-quote = "1.0"
+proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
+quote = "1.0.29"
 
 [dev-dependencies]
 macro_test_util = { version = "0.0.0", path = "../../../../utils/test/macro_test_util" }

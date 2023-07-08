@@ -11,7 +11,6 @@ mod manual;
 pub use manual::aast;
 pub use manual::decl_counters;
 pub use manual::decl_env;
-pub use manual::decl_provider;
 pub use manual::direct_decl_parser;
 pub use manual::i_map;
 pub use manual::i_set;

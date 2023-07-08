@@ -7,7 +7,6 @@ pub use crate::gen::aast_defs as aast;
 
 pub mod decl_counters;
 pub mod decl_env;
-pub mod decl_provider;
 pub mod direct_decl_parser;
 pub mod i_map;
 pub mod i_set;

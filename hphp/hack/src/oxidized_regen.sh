@@ -55,6 +55,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/custom_error/validation_err.ml                                \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
+  hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/errors/user_error.ml                                          \
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \

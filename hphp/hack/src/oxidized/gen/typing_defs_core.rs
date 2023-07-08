@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<010b0b02d8aa8b9847a10dc1e7d54259>>
+// @generated SignedSource<<d69d448ccb7b7f441e647b280813ce1c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -504,7 +504,6 @@ pub struct ShapeFieldType {
 
 #[derive(
     Clone,
-    Debug,
     Deserialize,
     Eq,
     EqModuloPos,

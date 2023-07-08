@@ -152,7 +152,7 @@ end = struct
     | "typing_reason::T_" when is_by_ref -> ["Debug"]
     | "typing_defs_core::Ty" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-    | "typing_defs_core::Ty_" when is_by_ref -> ["Debug"]
+    | "typing_defs_core::Ty_" -> ["Debug"]
     | "typing_defs_core::ConstraintType" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::TshapeFieldName" when is_by_ref -> ["Debug"]

@@ -18,7 +18,9 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 eq_modulo_pos = { version = "0.0.0", path = "../utils/eq_modulo_pos" }
 file_info = { version = "0.0.0", path = "../deps/rust/file_info" }
 hash = { version = "0.0.0", path = "../utils/hash" }
+hh24_types = { version = "0.0.0", path = "../utils/hh24_types" }
 hh_autoimport_rust = { version = "0.0.0", path = "../parser/cargo/hh_autoimport" }
+hh_hash = { version = "0.0.0", path = "../utils/hh_hash" }
 itertools = "0.10.3"
 naming_types = { version = "0.0.0", path = "../naming/rust/naming_types" }
 no_pos_hash = { version = "0.0.0", path = "../utils/no_pos_hash" }

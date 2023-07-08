@@ -12,9 +12,9 @@ path = "../../facts.rs"
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
-serde_derive = "1.0"
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde_derive = "1.0.167"
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 
 [dev-dependencies]
 digest = "0.10"

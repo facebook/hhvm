@@ -16,4 +16,4 @@ line_break_map = { version = "0.0.0", path = "../../../utils/line_break_map" }
 ocaml_helper = { version = "0.0.0", path = "../../../utils/ocaml_helper" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }

@@ -13,7 +13,7 @@ arena_deserializer = { version = "0.0.0", path = "../utils/arena_deserializer" }
 arena_trait = { version = "0.0.0", path = "../arena_trait" }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
 
 [dev-dependencies]
 quickcheck = "1.0"

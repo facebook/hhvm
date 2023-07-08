@@ -19,7 +19,7 @@ num-derive = "0.3.3"
 num-traits = "0.2"
 ordered-float = { version = "3.7", features = ["serde"] }
 panic-message = "0.3"
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 thiserror = "1.0.36"
 
 [dev-dependencies]

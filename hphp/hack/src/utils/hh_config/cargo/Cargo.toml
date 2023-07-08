@@ -12,6 +12,6 @@ path = "../hh_config.rs"
 anyhow = "1.0.65"
 config_file = { version = "0.0.0", path = "../../config_file/rust" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 sha1 = "0.10.5"

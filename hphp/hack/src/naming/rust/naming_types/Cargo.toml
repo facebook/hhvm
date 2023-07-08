@@ -14,4 +14,4 @@ arena_trait = { version = "0.0.0", path = "../../../arena_trait" }
 eq_modulo_pos = { version = "0.0.0", path = "../../../utils/eq_modulo_pos" }
 no_pos_hash = { version = "0.0.0", path = "../../../utils/no_pos_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }

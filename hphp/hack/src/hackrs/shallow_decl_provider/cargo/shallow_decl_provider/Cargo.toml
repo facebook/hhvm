@@ -16,6 +16,6 @@ itertools = "0.10.3"
 naming_provider = { version = "0.0.0", path = "../../../naming_provider/cargo/naming_provider" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
 thiserror = "1.0.36"
 ty = { version = "0.0.0", path = "../../../ty/cargo/ty" }

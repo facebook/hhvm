@@ -21,7 +21,7 @@ quote = "1.0.29"
 regex = "1.6.0"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 rust_parser_errors = { version = "0.0.0", path = "../../../../parser/cargo/errors" }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
 syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 thiserror = "1.0.36"
 

@@ -15,4 +15,4 @@ anyhow = "1.0.65"
 fbthrift = { path = "../.." }
 fbthrift_test_if = { path = "cargo_thrift" }
 proptest = "1.0"
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }

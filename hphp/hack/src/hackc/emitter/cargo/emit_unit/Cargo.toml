@@ -38,7 +38,7 @@ oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 print_expr = { version = "0.0.0", path = "../../../print_expr" }
 regex = "1.6.0"
 scope = { version = "0.0.0", path = "../scope" }
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
 statement_state = { version = "0.0.0", path = "../statement_state" }

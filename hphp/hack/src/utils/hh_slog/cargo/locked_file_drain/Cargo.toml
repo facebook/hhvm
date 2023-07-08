@@ -14,5 +14,5 @@ slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 slog-json = "2.3"
 
 [dev-dependencies]
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 tempfile = "3.5"

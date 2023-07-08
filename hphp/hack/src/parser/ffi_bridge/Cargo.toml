@@ -17,7 +17,7 @@ cxx = "1.0.94"
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
 positioned_full_trivia_parser = { version = "0.0.0", path = "../api/cargo/positioned_full_trivia_parser" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]
 cxx-build = "1.0.94"

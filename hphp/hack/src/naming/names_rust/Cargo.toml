@@ -17,5 +17,5 @@ oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 rand = { version = "0.8", features = ["small_rng"] }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 rusqlite = { version = "0.29.0", features = ["backup", "blob", "column_decltype"] }
-serde = { version = "1.0.136", features = ["derive", "rc"] }
+serde = { version = "1.0.167", features = ["derive", "rc"] }
 typing_deps_hash = { version = "0.0.0", path = "../../deps/cargo/typing_deps_hash" }

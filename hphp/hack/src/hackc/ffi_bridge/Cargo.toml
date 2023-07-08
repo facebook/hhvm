@@ -25,7 +25,7 @@ libc = "0.2.139"
 options = { version = "0.0.0", path = "../compile/cargo/options" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
-serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 sha1 = "0.10.5"
 thiserror = "1.0.36"
 

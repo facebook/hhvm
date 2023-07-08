@@ -72,37 +72,16 @@ struct ast_mutators {
 
   mutation_result operator()(
       diagnostic_context& ctx, t_program_bundle& bundle) {
-    mutation_result ret;
-
-    // XXX: Currently due to the limitation of implementation, annotations can
-    // not be new types that's generated in mutators. We have to make sure
-    // structured annotations are resolved before mutation.
-    if (!are_all_annotations_resolved(bundle)) {
-      ret.unresolvable_typeref = true;
-      return ret;
-    }
-
     for (auto& stage : stages) {
       stage.mutate(ctx, bundle);
     }
     // We have no more mutators, so all type references **must** resolve.
+    mutation_result ret;
     ret.unresolvable_typeref = !resolve_all_types(ctx, bundle);
     return ret;
   }
 
  private:
-  static bool are_all_annotations_resolved(const t_program_bundle& bundle) {
-    basic_ast_visitor<true> visitor;
-    bool ret = true;
-    visitor.add_definition_visitor([&](const t_named& node) {
-      for (auto& anno : node.structured_annotations()) {
-        ret = ret && anno->type().resolved();
-      }
-    });
-    visitor(*bundle.root_program());
-    return ret;
-  }
-
   // Tries to resolve any unresolved type references, returning true if
   // successful.
   //

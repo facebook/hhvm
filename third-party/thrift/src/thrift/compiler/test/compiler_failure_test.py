@@ -1549,26 +1549,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:main.thrift:3] Type `header.Bar` not defined.\n",
         )
 
-        write_file(
-            "main.thrift",
-            textwrap.dedent(
-                """\
-                @Undefined
-                struct Bar {
-                    @Undefined
-                    1: i32 field1;
-                }
-                """
-            ),
-        )
-        ret, out, err = self.run_thrift("main.thrift")
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:main.thrift:1] Type `main.Undefined` not defined.\n"
-            "[ERROR:main.thrift:3] Type `main.Undefined` not defined.\n",
-        )
-
     def test_adapting_variable(self):
         write_file(
             "foo.thrift",

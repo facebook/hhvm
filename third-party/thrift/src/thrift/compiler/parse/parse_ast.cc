@@ -260,9 +260,8 @@ std::string find_include_file(
 // A semantic analyzer and AST builder for a single Thrift program.
 class ast_builder : public parser_actions {
  private:
-  source_manager& source_mgr_;
   diagnostics_engine& diags_;
-  t_program* program_; // The program being built.
+  t_program& program_; // The program being built.
   t_scope* scope_; // The program scope.
   const parsing_params& params_;
   include_handler on_include_;
@@ -439,7 +438,7 @@ class ast_builder : public parser_actions {
       auto node = std::make_unique<t_base_type>(*tbase_type);
       set_annotations(node.get(), std::move(annotations));
       t_type_ref result(*node);
-      program_->add_unnamed_type(std::move(node));
+      program_.add_unnamed_type(std::move(node));
       return result;
     }
 
@@ -453,7 +452,7 @@ class ast_builder : public parser_actions {
     const t_type* result = unnamed.get();
     unnamed->set_src_range(range);
     set_annotations(unnamed.get(), std::move(annotations));
-    program_->add_unnamed_typedef(std::move(unnamed));
+    program_.add_unnamed_typedef(std::move(unnamed));
     return *result;
   }
 
@@ -466,7 +465,7 @@ class ast_builder : public parser_actions {
     const t_type* type = node.get();
     set_annotations(node.get(), std::move(annotations));
     node->set_src_range(range);
-    program_->add_type_instantiation(std::move(node));
+    program_.add_type_instantiation(std::move(node));
     return *type;
   }
 
@@ -476,7 +475,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range,
       bool is_const = false) {
-    t_type_ref result = scope_->ref_type(*program_, name, range);
+    t_type_ref result = scope_->ref_type(program_, name, range);
 
     // TODO: Consider removing this special case for const, which requires a
     // specific declaration order.
@@ -506,7 +505,7 @@ class ast_builder : public parser_actions {
     const std::string& type_name = unresolved_type->name();
     size_t sep_pos = type_name.find(".");
     if (sep_pos == std::string::npos ||
-        fmt::string_view(type_name.data(), sep_pos) == program_->name()) {
+        fmt::string_view(type_name.data(), sep_pos) == program_.name()) {
       // Local types are handled separately because they can be used before
       // definition.
       return;
@@ -554,45 +553,43 @@ class ast_builder : public parser_actions {
 
     // Add to scope.
     if (auto* tnode = dynamic_cast<t_interaction*>(defn.get())) {
-      scope_->add_interaction(program_->scope_name(*defn), tnode);
+      scope_->add_interaction(program_.scope_name(*defn), tnode);
     } else if (auto* tnode = dynamic_cast<t_service*>(defn.get())) {
-      scope_->add_service(program_->scope_name(*defn), tnode);
+      scope_->add_service(program_.scope_name(*defn), tnode);
     } else if (auto* tnode = dynamic_cast<t_const*>(defn.get())) {
-      scope_->add_constant(program_->scope_name(*defn), tnode);
+      scope_->add_constant(program_.scope_name(*defn), tnode);
     } else if (auto* tnode = dynamic_cast<t_enum*>(defn.get())) {
-      scope_->add_type(program_->scope_name(*defn), tnode);
+      scope_->add_type(program_.scope_name(*defn), tnode);
       // Register enum value names in scope.
       for (const auto& value : tnode->consts()) {
         // TODO: Remove the ability to access unscoped enum values.
-        scope_->add_constant(program_->scope_name(value), &value);
-        scope_->add_constant(program_->scope_name(*defn, value), &value);
+        scope_->add_constant(program_.scope_name(value), &value);
+        scope_->add_constant(program_.scope_name(*defn, value), &value);
       }
     } else if (auto* tnode = dynamic_cast<t_type*>(defn.get())) {
       auto* tnode_true_type = tnode->get_true_type();
       if (tnode_true_type && tnode_true_type->is_enum()) {
         for (const auto& value :
              static_cast<const t_enum*>(tnode_true_type)->consts()) {
-          scope_->add_constant(program_->scope_name(*defn, value), &value);
+          scope_->add_constant(program_.scope_name(*defn, value), &value);
         }
       }
-      scope_->add_type(program_->scope_name(*defn), tnode);
+      scope_->add_type(program_.scope_name(*defn), tnode);
     } else {
       throw std::logic_error("Unsupported declaration.");
     }
     // Add to program.
-    program_->add_definition(std::move(defn));
+    program_.add_definition(std::move(defn));
   }
 
  public:
   ast_builder(
-      source_manager& sm,
       diagnostics_engine& diags,
       t_program& program,
       const parsing_params& params,
       include_handler on_include)
-      : source_mgr_(sm),
-        diags_(diags),
-        program_(&program),
+      : diags_(diags),
+        program_(program),
         scope_(program.scope()),
         params_(params),
         on_include_(on_include) {}
@@ -614,42 +611,46 @@ class ast_builder : public parser_actions {
       std::unique_ptr<attributes> attrs,
       fmt::string_view name) override {
     validate_header_location(range.begin);
-    set_attributes(*program_, std::move(attrs), range);
-    if (!program_->package().empty()) {
+    set_attributes(program_, std::move(attrs), range);
+    if (!program_.package().empty()) {
       diags_.error(range.begin, "Package already specified.");
     }
     try {
-      program_->set_package(t_package(fmt::to_string(name)));
+      program_.set_package(t_package(fmt::to_string(name)));
     } catch (const std::exception& e) {
       diags_.error(range.begin, "{}", e.what());
     }
   }
 
   void on_include(source_range range, fmt::string_view str) override {
-    auto include = std::make_unique<t_include>(
-        on_include_(range, fmt::to_string(str), *program_),
-        fmt::to_string(str));
+    std::string include_name = fmt::to_string(str);
+    auto included_program = on_include_(range, include_name, program_);
+    auto last_slash = include_name.find_last_of("/\\");
+    if (last_slash != std::string::npos) {
+      included_program->set_include_prefix(include_name.substr(0, last_slash));
+    }
+    auto include = std::make_unique<t_include>(included_program, include_name);
     include->set_src_range(range);
-    program_->add_include(std::move(include));
+    program_.add_include(std::move(include));
   }
 
   void on_cpp_include(source_range, fmt::string_view str) override {
-    program_->add_language_include("cpp", fmt::to_string(str));
+    program_.add_language_include("cpp", fmt::to_string(str));
   }
 
   void on_hs_include(source_range, fmt::string_view str) override {
-    program_->add_language_include("hs", fmt::to_string(str));
+    program_.add_language_include("hs", fmt::to_string(str));
   }
 
   void on_namespace(const identifier& language, fmt::string_view ns) override {
-    program_->set_namespace(fmt::to_string(language.str), fmt::to_string(ns));
+    program_.set_namespace(fmt::to_string(language.str), fmt::to_string(ns));
   }
 
   boost::optional<comment> on_doctext() override { return pop_doctext(); }
 
   void on_program_doctext() override {
     // When there is any doctext, assign it to the top-level program.
-    set_doctext(*program_, pop_doctext());
+    set_doctext(program_, pop_doctext());
   }
 
   comment on_inline_doc(source_location loc, fmt::string_view text) override {
@@ -672,7 +673,7 @@ class ast_builder : public parser_actions {
       source_range range, std::unique_ptr<t_const_value> value) override {
     auto ttype = value->ttype(); // Copy the t_type_ref.
     auto result = std::make_unique<t_const>(
-        program_, std::move(ttype), "", std::move(value));
+        &program_, std::move(ttype), "", std::move(value));
     result->set_src_range(range);
     return result;
   }
@@ -690,7 +691,7 @@ class ast_builder : public parser_actions {
           return result;
         }
         if (auto* result =
-                scope_->find_service(program_->scope_name(base_name))) {
+                scope_->find_service(program_.scope_name(base_name))) {
           return result;
         }
         diags_.error(
@@ -699,7 +700,7 @@ class ast_builder : public parser_actions {
       return nullptr;
     };
     auto service = std::make_unique<t_service>(
-        program_, fmt::to_string(name.str), find_base_service());
+        &program_, fmt::to_string(name.str), find_base_service());
     service->set_src_range(range);
     service->set_functions(std::move(functions));
     add_definition(range, std::move(service), std::move(attrs));
@@ -711,7 +712,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_function_list functions) override {
     auto interaction =
-        std::make_unique<t_interaction>(program_, fmt::to_string(name.str));
+        std::make_unique<t_interaction>(&program_, fmt::to_string(name.str));
     interaction->set_src_range(range);
     interaction->set_functions(std::move(functions));
     add_definition(range, std::move(interaction), std::move(attrs));
@@ -726,7 +727,7 @@ class ast_builder : public parser_actions {
       t_field_list params,
       std::unique_ptr<t_throws> throws) override {
     auto function = std::make_unique<t_function>(
-        program_, std::move(return_type), fmt::to_string(name.str));
+        &program_, std::move(return_type), fmt::to_string(name.str));
     function->set_qualifier(qual);
     set_fields(function->params(), std::move(params));
     function->set_exceptions(std::move(throws));
@@ -794,7 +795,7 @@ class ast_builder : public parser_actions {
         ? "create" + fmt::to_string(interaction_name.str)
         : "<interaction placeholder>";
     auto function = std::make_unique<t_function>(
-        program_, std::move(type), std::move(name));
+        &program_, std::move(type), std::move(name));
     function->set_src_range(range);
     function->set_is_interaction_constructor();
     return function;
@@ -812,7 +813,7 @@ class ast_builder : public parser_actions {
       t_type_ref type,
       const identifier& name) override {
     auto typedef_node = std::make_unique<t_typedef>(
-        program_, fmt::to_string(name.str), std::move(type));
+        &program_, fmt::to_string(name.str), std::move(type));
     typedef_node->set_src_range(range);
     add_definition(range, std::move(typedef_node), std::move(attrs));
   }
@@ -823,7 +824,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_field_list fields) override {
     auto struct_node =
-        std::make_unique<t_struct>(program_, fmt::to_string(name.str));
+        std::make_unique<t_struct>(&program_, fmt::to_string(name.str));
     struct_node->set_src_range(range);
     set_fields(*struct_node, std::move(fields));
     add_definition(range, std::move(struct_node), std::move(attrs));
@@ -835,7 +836,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_field_list fields) override {
     auto union_node =
-        std::make_unique<t_union>(program_, fmt::to_string(name.str));
+        std::make_unique<t_union>(&program_, fmt::to_string(name.str));
     union_node->set_src_range(range);
     set_fields(*union_node, std::move(fields));
     add_definition(range, std::move(union_node), std::move(attrs));
@@ -850,7 +851,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_field_list fields) override {
     auto exception =
-        std::make_unique<t_exception>(program_, fmt::to_string(name.str));
+        std::make_unique<t_exception>(&program_, fmt::to_string(name.str));
     exception->set_src_range(range);
     exception->set_safety(safety);
     exception->set_kind(kind);
@@ -899,7 +900,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       t_enum_value_list values) override {
     auto enum_node =
-        std::make_unique<t_enum>(program_, fmt::to_string(name.str));
+        std::make_unique<t_enum>(&program_, fmt::to_string(name.str));
     enum_node->set_src_range(range);
     enum_node->set_values(std::move(values));
     add_definition(range, std::move(enum_node), std::move(attrs));
@@ -929,7 +930,7 @@ class ast_builder : public parser_actions {
       const identifier& name,
       std::unique_ptr<t_const_value> value) override {
     auto constant = std::make_unique<t_const>(
-        program_, std::move(type), fmt::to_string(name.str), std::move(value));
+        &program_, std::move(type), fmt::to_string(name.str), std::move(value));
     constant->set_src_range(range);
     add_definition(range, std::move(constant), std::move(attrs));
   }
@@ -942,8 +943,8 @@ class ast_builder : public parser_actions {
         return constant;
       }
       if (const t_const* constant =
-              scope_->find_constant(program_->scope_name(name))) {
-        validate_not_ambiguous_enum(loc, program_->scope_name(name));
+              scope_->find_constant(program_.scope_name(name))) {
+        validate_not_ambiguous_enum(loc, program_.scope_name(name));
         return constant;
       }
       return nullptr;
@@ -1037,21 +1038,18 @@ class ast_builder : public parser_actions {
   [[noreturn]] void on_error() override { end_parsing(); }
 
   // Parses a single .thrift file and populates program_ with the parsed AST.
-  void parse_file() {
-    const std::string& path = program_->path();
-    boost::optional<source> src = source_mgr_.get_file(path);
+  void parse_file(source_manager& sm, source_location loc) {
+    const std::string& path = program_.path();
+    boost::optional<source> src = sm.get_file(path);
     if (!src) {
-      diags_.error(source_location(), "failed to open file: {}", path);
+      diags_.error(loc, "failed to open file: {}", path);
       end_parsing();
     }
-    program_->set_src_range({src->start, src->start});
+    program_.set_src_range({src->start, src->start});
 
-    // Consume doctext and store it in `doctext_`.
-    //
-    // It is non-trivial for a yacc-style LR(1) parser to accept doctext
-    // as an optional prefix before either a definition or standalone at
-    // the header. Hence this method of "pushing" it into the driver and
-    // "pop-ing" it on the node as needed.
+    // Consume doctext and store it in `doctext_`. Documentation comments are
+    // handled separately to avoid complicating the main parser logic and the
+    // grammar.
     auto on_doc_comment = [this](fmt::string_view text, source_location loc) {
       clear_doctext();
       doctext_ = comment{strip_doctext(text), loc};
@@ -1072,19 +1070,18 @@ std::unique_ptr<t_program_bundle> parse_ast(
     diagnostics_engine& diags,
     const std::string& path,
     const parsing_params& params) {
+  auto programs =
+      std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
+
+  // A map from paths to corresponding programs.
+  auto parsed_programs = std::map<std::string, t_program*>{};
+  auto circular_deps = std::set<std::string>{path};
+
   // Always enable allow_neg_field_keys when parsing included files.
   // This way if a Thrift file has negative keys, --allow-neg-keys doesn't
   // have to be used by everyone that includes it.
   auto include_params = params;
   include_params.allow_neg_field_keys = true;
-
-  auto programs =
-      std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
-  auto parsed_paths = std::set<std::string>();
-  auto circular_deps = std::set<std::string>{path};
-
-  // A map from paths to corresponding programs.
-  auto program_cache = std::map<std::string, t_program*>();
 
   include_handler on_include = [&](source_range range,
                                    const std::string& include_name,
@@ -1102,31 +1099,9 @@ std::unique_ptr<t_program_bundle> parse_ast(
     // Should have thrown an exception if not found.
     assert(!include_path.empty());
 
-    auto it = program_cache.find(include_path);
-    t_program* program = nullptr;
-    if (it == program_cache.end()) {
-      // Create a new program for a Thrift file in an include statement and
-      // set its include_prefix by parsing the directory which it is
-      // included from.
-      auto included_program =
-          std::unique_ptr<t_program>(new t_program(include_path, &parent));
-      program = included_program.get();
-      programs->add_program(std::move(included_program));
-      program_cache[include_path] = program;
-    } else {
-      program = it->second;
-    }
-
-    std::string include_prefix;
-    auto last_slash = include_name.find_last_of("/\\");
-    if (last_slash != std::string::npos) {
-      include_prefix = include_name.substr(0, last_slash);
-      program->set_include_prefix(include_prefix);
-    }
-
-    // Skip already parsed files.
-    if (!parsed_paths.insert(include_path).second) {
-      return program;
+    auto it = parsed_programs.find(include_path);
+    if (it != parsed_programs.end()) {
+      return it->second; // Skip already parsed files.
     }
 
     // Fail on circular dependencies.
@@ -1138,10 +1113,17 @@ std::unique_ptr<t_program_bundle> parse_ast(
       end_parsing();
     }
 
-    auto include_builder =
-        ast_builder(sm, diags, *program, include_params, on_include);
+    // Create a new program for a Thrift file in an include statement and
+    // set its include_prefix by parsing the directory which it is
+    // included from.
+    auto included_program = std::make_unique<t_program>(include_path, &parent);
+    t_program* program = included_program.get();
+    programs->add_program(std::move(included_program));
+    parsed_programs[include_path] = program;
+
     try {
-      include_builder.parse_file();
+      ast_builder(diags, *program, include_params, on_include)
+          .parse_file(sm, range.begin);
     } catch (...) {
       if (!params.allow_missing_includes) {
         throw;
@@ -1152,18 +1134,17 @@ std::unique_ptr<t_program_bundle> parse_ast(
     return program;
   };
 
-  auto builder =
-      ast_builder(sm, diags, *programs->root_program(), params, on_include);
+  t_program& root_program = *programs->root_program();
   try {
-    builder.parse_file();
+    ast_builder(diags, root_program, params, on_include).parse_file(sm, {});
   } catch (const parsing_terminator&) {
     return {}; // Return a null program bundle if parsing failed.
   }
 
   // Resolve types in the root program.
-  std::string program_prefix = programs->root_program()->name() + ".";
+  std::string program_prefix = root_program.name() + ".";
   for (t_placeholder_typedef& t :
-       programs->root_program()->scope()->placeholder_typedefs()) {
+       root_program.scope()->placeholder_typedefs()) {
     if (!t.resolve() && t.name().find(program_prefix) == 0) {
       diags.error(t, "Type `{}` not defined.", t.name());
     }

@@ -68,6 +68,8 @@ struct StreamPayload {
     }
   }
 
+  StreamPayload(StreamPayload&&) = default;
+
   StreamPayload& operator=(const StreamPayload& oth) {
     if (oth.payload) {
       payload = oth.payload->clone();
@@ -79,6 +81,8 @@ struct StreamPayload {
     }
     return *this;
   }
+
+  StreamPayload& operator=(StreamPayload&& oth) = default;
 
   std::unique_ptr<folly::IOBuf> payload;
   StreamPayloadMetadata metadata;

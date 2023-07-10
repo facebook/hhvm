@@ -333,6 +333,79 @@ TEST(CompilerTest, const_wrong_type) {
   )");
 }
 
+TEST(CompilerTest, const_byte_value) {
+  check_compile(R"(
+    const byte c1 = 127;
+    const byte c2 = 128;
+    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+
+    const byte c3 = -128;
+    const byte c4 = -129;
+    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+  )");
+}
+
+TEST(CompilerTest, const_i16_value) {
+  check_compile(R"(
+    const i16 c1 = 32767;
+    const i16 c2 = 32768;
+    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+
+    const i16 c3 = -32768;
+    const i16 c4 = -32769;
+    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+  )");
+}
+
+TEST(CompilerTest, const_i32_value) {
+  check_compile(R"(
+    const i32 c1 = 2147483647;
+    const i32 c2 = 2147483648;
+    # expected-warning@-1: 64-bit constant 2147483648 may not work in all languages
+    # expected-error@-2: value error: const `c2` has an invalid custom default value.
+
+    const i32 c3 = -2147483648;
+    const i32 c4 = -2147483649;
+    # expected-warning@-1: 64-bit constant -2147483649 may not work in all languages
+    # expected-error@-2: value error: const `c4` has an invalid custom default value.
+  )");
+}
+
+TEST(CompilerTest, const_float_value) {
+  check_compile(R"(
+    const float c0 = 1e8;
+
+    const float c1 = 3.4028234663852886e+38;
+    const float c2 = 3.402823466385289e+38; // max float + 1 double ulp
+    # expected-error@-1: value error: const `c2` has an invalid custom default value.
+
+    const float c3 = -3.4028234663852886e+38;
+    const float c4 = -3.402823466385289e+38; // min float - 1 double ulp
+    # expected-error@-1: value error: const `c4` has an invalid custom default value.
+
+    const float c5 = 100000001;
+    # expected-error@-1: value error: const `c5` cannot be represented precisely as `float` or `double`.
+    const float c6 = -100000001;
+    # expected-error@-1: value error: const `c6` cannot be represented precisely as `float` or `double`.
+  )");
+}
+
+TEST(CompilerTest, const_double_value) {
+  check_compile(R"(
+    const double c0 = 1e8;
+    const double c1 = 1.7976931348623157e+308;
+    const double c2 = -1.7976931348623157e+308;
+
+    const float c3 = 10000000000000001;
+    # expected-warning@-1: 64-bit constant 10000000000000001 may not work in all languages
+    # expected-error@-2: value error: const `c3` cannot be represented precisely as `float` or `double`.
+
+    const float c4 = -10000000000000001;
+    # expected-warning@-1: 64-bit constant -10000000000000001 may not work in all languages
+    # expected-error@-2: value error: const `c4` cannot be represented precisely as `float` or `double`.
+  )");
+}
+
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
     struct Annot {

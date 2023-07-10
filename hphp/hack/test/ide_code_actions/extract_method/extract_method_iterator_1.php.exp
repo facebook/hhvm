@@ -11,7 +11,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): Iterator<_> {\n  yield 2;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): Iterator<_> {\n    yield 2;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -31,7 +31,7 @@ Applied edit for code action:
 
 class Klass {
   private function ${0:method0}(): Iterator<_> {
-  yield 2;
+    yield 2;
   }
 
   public function foo(): Iterator<int> {

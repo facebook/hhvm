@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): void {\n  $local = 100;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): void {\n    $local = 100;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -30,7 +30,7 @@ Applied edit for code action:
 
 class Klass {
   private function ${0:method0}(): void {
-  $local = 100;
+    $local = 100;
   }
 
   public function foo(): void {

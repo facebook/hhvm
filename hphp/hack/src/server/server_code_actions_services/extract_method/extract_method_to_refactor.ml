@@ -133,10 +133,11 @@ let method_string_of_candidate
     |> String.concat ~sep:", "
   in
   (* we format as a function before adding modifiers, since a function is hackfmt-able (a valid top-level form) *)
+  let placeholder_to_replace_with_snippet = "the_function_name" in
   let raw_function_string =
     Format.sprintf
       "function %s(%s): %s {\n%s\n}"
-      snippet
+      placeholder_to_replace_with_snippet
       params_string
       return_type_string
       body_string
@@ -145,6 +146,9 @@ let method_string_of_candidate
   let add_suffix s = s ^ "\n\n" in
   raw_function_string
   |> hackfmt
+  |> String.substr_replace_first
+       ~pattern:placeholder_to_replace_with_snippet
+       ~with_:snippet
   |> add_modifiers
   |> indent ~indent_amount
   |> add_suffix

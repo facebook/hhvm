@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private async function ${0:method0}(int $x): AsyncIterator<_, _, _> {\n  await gen_void();\n      $y = $x;\n      yield 3;\n  }\n\n",
+          "newText":"  private async function ${0:method0}(int $x): AsyncIterator<_, _, _> {\n    await gen_void();\n    $y = $x;\n    yield 3;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -30,9 +30,9 @@ Applied edit for code action:
 
 class Klass {
   private async function ${0:method0}(int $x): AsyncIterator<_, _, _> {
-  await gen_void();
-      $y = $x;
-      yield 3;
+    await gen_void();
+    $y = $x;
+    yield 3;
   }
 
   public async function foo(int $x): AsyncIterator<int> {

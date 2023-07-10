@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): void {\n  $x = 1;\n          $y = $x;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): void {\n    $x = 1;\n    $y = $x;\n  }\n\n",
           "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
         },
         {
@@ -34,8 +34,8 @@ function cond(): bool {
 
 class Klass {
   private function ${0:method0}(): void {
-  $x = 1;
-          $y = $x;
+    $x = 1;
+    $y = $x;
   }
 
   public function foo(): void {

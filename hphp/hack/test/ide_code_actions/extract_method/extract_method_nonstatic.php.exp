@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): int {\n  $return = $this->one();\n      return $return;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): int {\n    $return = $this->one();\n    return $return;\n  }\n\n",
           "range":{"end":{"character":0,"line":6},"start":{"character":0,"line":6}}
         },
         {
@@ -33,8 +33,8 @@ class Klass {
     return 1;
   }
   private function ${0:method0}(): int {
-  $return = $this->one();
-      return $return;
+    $return = $this->one();
+    return $return;
   }
 
   public function foo(): void {

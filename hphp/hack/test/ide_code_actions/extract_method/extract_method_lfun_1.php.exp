@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(bool $referenced): void {\n  (() ==> {\n        $shadowed = false || $referenced;\n      });\n  }\n\n",
+          "newText":"  private function ${0:method0}(bool $referenced): void {\n    (\n      () ==> {\n        $shadowed = false || $referenced;\n      }\n    );\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -30,9 +30,11 @@ Applied edit for code action:
 
 class Klass {
   private function ${0:method0}(bool $referenced): void {
-  (() ==> {
+    (
+      () ==> {
         $shadowed = false || $referenced;
-      });
+      }
+    );
   }
 
   public function foo(): void {

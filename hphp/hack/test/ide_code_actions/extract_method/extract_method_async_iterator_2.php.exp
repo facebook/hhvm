@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"    private static async function ${0:method0}(int $x): AsyncKeyedIterator<_, _, _> {\n    foreach (async_it() await as $v) {\n              $x++;\n            }\n    }\n\n",
+          "newText":"    private static async function ${0:method0}(int $x): AsyncKeyedIterator<_, _, _> {\n      foreach (async_it() await as $v) {\n        $x++;\n      }\n    }\n\n",
           "range":{"end":{"character":0,"line":8},"start":{"character":0,"line":8}}
         },
         {
@@ -35,9 +35,9 @@ async function async_it(): AsyncIterator<string> {
 
 class Klass {
     private static async function ${0:method0}(int $x): AsyncKeyedIterator<_, _, _> {
-    foreach (async_it() await as $v) {
-              $x++;
-            }
+      foreach (async_it() await as $v) {
+        $x++;
+      }
     }
 
     public static async function m(int $x): Awaitable<void> {

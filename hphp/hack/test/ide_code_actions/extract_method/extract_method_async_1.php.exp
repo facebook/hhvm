@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private async function ${0:method0}(): Awaitable<void> {\n  $local = await foo();\n  }\n\n",
+          "newText":"  private async function ${0:method0}(): Awaitable<void> {\n    $local = await foo();\n  }\n\n",
           "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
         },
         {
@@ -32,7 +32,7 @@ async function foo(): Awaitable<void> {}
 
 class Klass {
   private async function ${0:method0}(): Awaitable<void> {
-  $local = await foo();
+    $local = await foo();
   }
 
   public async function foo(): Awaitable<void> {

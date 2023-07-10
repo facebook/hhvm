@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(): int {\n  return 3 + 3;\n  }\n\n",
+          "newText":"  private function ${0:method0}(): int {\n    return 3 + 3;\n  }\n\n",
           "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":5}}
         },
         {
@@ -32,7 +32,7 @@ function foo((function(): int) $f): void {}
 
 class A {
   private function ${0:method0}(): int {
-  return 3 + 3;
+    return 3 + 3;
   }
 
   public function main(): void {

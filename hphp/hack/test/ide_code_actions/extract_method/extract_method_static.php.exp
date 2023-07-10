@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private static function ${0:method0}(): int {\n  $return = 100;\n      return $return;\n  }\n\n",
+          "newText":"  private static function ${0:method0}(): int {\n    $return = 100;\n    return $return;\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -30,8 +30,8 @@ Applied edit for code action:
 
 class Klass {
   private static function ${0:method0}(): int {
-  $return = 100;
-      return $return;
+    $return = 100;
+    return $return;
   }
 
   public static function foo(): void {

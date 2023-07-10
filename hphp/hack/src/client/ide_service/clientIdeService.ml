@@ -56,11 +56,9 @@ module Stop_reason = struct
 end
 
 type state =
-  | Uninitialized of { full_index_fallback: bool }
+  | Uninitialized
       (** The ide_service is created. We may or may not have yet sent an
-      initialize message to the daemon.[full_index_fallback] indicates if the
-      daemon is currently falling back to fulling indexing the repo because it
-      failed to download a naming table. *)
+      initialize message to the daemon. *)
   | Failed_to_initialize of ClientIdeMessage.rich_error
       (** The response to our initialize message was a failure. This is
       a terminal state. *)
@@ -76,8 +74,7 @@ type state =
 
 let state_to_log_string (state : state) : string =
   match state with
-  | Uninitialized { full_index_fallback } ->
-    Printf.sprintf "Uninitialized(full_index_fallback = %B)" full_index_fallback
+  | Uninitialized -> Printf.sprintf "Uninitialized"
   | Failed_to_initialize { ClientIdeMessage.category; _ } ->
     Printf.sprintf "Failed_to_initialize(%s)" category
   | Initialized env ->
@@ -176,7 +173,7 @@ let make (args : ClientIdeMessage.daemon_args) : t =
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   {
-    state = Uninitialized { full_index_fallback = false };
+    state = Uninitialized;
     active_rpc_requests = Active_rpc_requests.new_ ();
     state_changed_cv = Lwt_condition.create ();
     daemon_handle;
@@ -220,7 +217,7 @@ let rpc
   try%lwt
     match t.state with
     | Stopped reason -> Lwt.return_error (ClientIdeUtils.to_lsp_error reason)
-    | Uninitialized _
+    | Uninitialized
     | Initialized _
     | Failed_to_initialize _ ->
       let success =
@@ -311,7 +308,7 @@ let initialize_from_saved_state
     ~(open_files : Path.t list) :
     (unit, ClientIdeMessage.rich_error) Lwt_result.t =
   let open ClientIdeMessage in
-  set_state t (Uninitialized { full_index_fallback = false });
+  set_state t Uninitialized;
 
   try%lwt
     let message =
@@ -369,13 +366,11 @@ let process_status_notification
   | (Stopped _, _) ->
     (* terminal states, which don't change with notifications *)
     ()
-  | (Uninitialized { full_index_fallback = false }, Full_index_fallback) ->
-    set_state t (Uninitialized { full_index_fallback = true })
-  | (Uninitialized _, Done_init (Ok { total = 0; _ })) ->
+  | (Uninitialized, Done_init (Ok { total = 0; _ })) ->
     set_state t (Initialized { status = Status.Ready })
-  | (Uninitialized _, Done_init (Ok p)) ->
+  | (Uninitialized, Done_init (Ok p)) ->
     set_state t (Initialized { status = Status.Processing_files p })
-  | (Uninitialized _, Done_init (Error edata)) ->
+  | (Uninitialized, Done_init (Error edata)) ->
     set_state t (Failed_to_initialize edata)
   | (Initialized _, Processing_files p) ->
     set_state t (Initialized { status = Status.Processing_files p })
@@ -394,7 +389,7 @@ let process_status_notification
 let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
   let%lwt () =
     match t.state with
-    | Uninitialized _
+    | Uninitialized
     | Failed_to_initialize _
     | Stopped _ ->
       Lwt.return_unit
@@ -566,7 +561,7 @@ let get_notifications (t : t) : notification_emitter = t.notification_emitter
 
 let get_status (t : t) : Status.t =
   match t.state with
-  | Uninitialized _ -> Status.Initializing
+  | Uninitialized -> Status.Initializing
   | Failed_to_initialize error_data -> Status.Stopped error_data
   | Stopped reason -> Status.Stopped reason
   | Initialized { status } ->

@@ -97,10 +97,7 @@ let init_via_fetch
 and then loading it. Also returns [si_addenda] from what we gathered
 during the full index. *)
 let init_via_build
-    ~(config : ServerConfig.t)
-    ~(root : Path.t)
-    ~(hhi_root : Path.t)
-    ~(notify_callback_in_case_of_fallback_to_full_init : unit -> unit Lwt.t) :
+    ~(config : ServerConfig.t) ~(root : Path.t) ~(hhi_root : Path.t) :
     (Path.t * SymbolIndexCore.paths_with_addenda) outcome Lwt.t =
   let path = Path.make (ServerFiles.client_ide_naming_table root) in
   let rec poll_build_until_complete_exn progress =
@@ -114,7 +111,6 @@ let init_via_build
   if not (ServerConfig.ide_fall_back_to_full_index config) then begin
     Lwt.return (Skip "ide_fallback_to_full_index=false")
   end else begin
-    let%lwt () = notify_callback_in_case_of_fallback_to_full_init () in
     let progress =
       Naming_table_builder_ffi_externs.build
         ~www:root
@@ -270,8 +266,7 @@ let init
     ~(local_config : ServerLocalConfig.t)
     ~(param : ClientIdeMessage.Initialize_from_saved_state.t)
     ~(hhi_root : Path.t)
-    ~(local_memory : Provider_backend.local_memory)
-    ~(notify_callback_in_case_of_fallback_to_full_init : unit -> unit Lwt.t) :
+    ~(local_memory : Provider_backend.local_memory) :
     (init_result, ClientIdeMessage.rich_error) result Lwt.t =
   let start_time = Unix.gettimeofday () in
   let open ClientIdeMessage.Initialize_from_saved_state in
@@ -369,11 +364,7 @@ let init
     match result with
     | Ok _ -> Lwt.return result
     | Error prev ->
-      init_via_build
-        ~config
-        ~root
-        ~hhi_root
-        ~notify_callback_in_case_of_fallback_to_full_init
+      init_via_build ~config ~root ~hhi_root
       |> map_attempt "build" ctx ~prev ~f:(fun (path, paths_with_addenda) ->
              let sienv =
                SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda

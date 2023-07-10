@@ -6108,14 +6108,6 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params=None,
             )
-            .wait_for_notification(
-                comment="This log should appear whenever we fall back to a full index.",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Falling back to full index naming table build",
-                },
-            )
             .wait_for_server_request(
                 comment="standalone status upon startup when it starts with hh_server stopped",
                 method="window/showStatus",

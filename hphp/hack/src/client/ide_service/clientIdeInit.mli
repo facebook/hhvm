@@ -48,5 +48,4 @@ val init :
   param:ClientIdeMessage.Initialize_from_saved_state.t ->
   hhi_root:Path.t ->
   local_memory:Provider_backend.local_memory ->
-  notify_callback_in_case_of_fallback_to_full_init:(unit -> unit Lwt.t) ->
   (init_result, ClientIdeMessage.rich_error) result Lwt.t

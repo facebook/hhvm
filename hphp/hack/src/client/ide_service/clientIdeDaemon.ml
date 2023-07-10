@@ -656,7 +656,6 @@ let handle_request
     (message_queue : message_queue)
     (state : state)
     (_tracking_id : string)
-    ~(out_fd : Lwt_unix.file_descr)
     (message : a ClientIdeMessage.t) : (state * (a, Lsp.Error.t) result) Lwt.t =
   let open ClientIdeMessage in
   match (state, message) with
@@ -682,18 +681,7 @@ let handle_request
       let dstate = initialize1 param in
       (* We're going to kick off the asynchronous part of initializing now.
          Once it's done, it will appear as a GotNamingTable message on the queue. *)
-      let notify_callback_in_case_of_fallback_to_full_init () =
-        write_message
-          ~out_fd
-          ~message:
-            (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
-      in
       Lwt.async (fun () ->
-          let%lwt () = Lwt.pause () in
-          (* [Lwt.pause] yields, i.e. resumes continuation on the next tick.
-             This is so that we don't [notify_callback_in_case_of_fallback_to_full_init] until after
-             we've responded to the initialize request. That fulfills the clientIdeService.ml contract
-             is that the first message after an Initialize request is its response; not a [Full_index_fallback]. *)
           let%lwt naming_table_result =
             ClientIdeInit.init
               ~config:dstate.dcommon.config
@@ -701,7 +689,6 @@ let handle_request
               ~param
               ~hhi_root:dstate.dcommon.hhi_root
               ~local_memory:dstate.dcommon.local_memory
-              ~notify_callback_in_case_of_fallback_to_full_init
           in
           (* if the following push fails, that must be because the queues
              have been shut down, in which case there's nothing to do. *)
@@ -1363,7 +1350,7 @@ let handle_one_message_exn
       let%lwt (state, response) =
         try%lwt
           let%lwt (s, r) =
-            handle_request message_queue state tracking_id ~out_fd message
+            handle_request message_queue state tracking_id message
           in
           Lwt.return (s, r)
         with

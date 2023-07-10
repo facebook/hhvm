@@ -6681,11 +6681,6 @@ let handle_daemon_notification
       to_stdout
       "[client-ide] Done processing file changes";
     Lwt.return_none
-  | ClientIdeMessage.Full_index_fallback ->
-    Lsp_helpers.telemetry_log
-      to_stdout
-      "[client-ide] Falling back to full index naming table build";
-    Lwt.return_none
 
 (** Called once a second but only when there are no pending messages from client,
 hh_server, or clientIdeDaemon. *)

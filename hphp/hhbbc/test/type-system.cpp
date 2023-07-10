@@ -1809,14 +1809,25 @@ void test_basic_operators(const std::vector<Type>& types) {
       return is_specialized_double(t2) || !t2.hasData();
     }
     if (is_specialized_cls(t1)) {
-      return is_specialized_cls(t2) || !t2.hasData();
+      if (!t2.hasData()) return true;
+      if (!is_specialized_cls(t2)) return false;
+      auto const& dcls1 = dcls_of(t1);
+      auto const& dcls2 = dcls_of(t2);
+      return
+        (!dcls1.isExact() || dcls1.cls().resolved()) &&
+        (!dcls2.isExact() || dcls2.cls().resolved());
     }
     if (is_specialized_wait_handle(t1) && is_specialized_wait_handle(t2)) {
       return self(wait_handle_inner(t1), wait_handle_inner(t2), self);
     }
     if (is_specialized_obj(t1)) {
       if (!t2.hasData()) return true;
-      return is_specialized_obj(t2);
+      if (!is_specialized_obj(t2)) return false;
+      auto const& dcls1 = dobj_of(t1);
+      auto const& dcls2 = dobj_of(t2);
+      return
+        (!dcls1.isExact() || dcls1.cls().resolved()) &&
+        (!dcls2.isExact() || dcls2.cls().resolved());
     }
     return true;
   };
@@ -1940,6 +1951,44 @@ TEST(Type, SpecializedClasses) {
 
   test_basic_operators(types);
 
+  auto const getDCls = [&] (const Type& t) -> std::pair<bool, const DCls*> {
+    if (is_specialized_obj(t)) return std::make_pair(true, &dobj_of(t));
+    if (is_specialized_cls(t)) return std::make_pair(false, &dcls_of(t));
+    return std::make_pair(false, nullptr);
+  };
+
+  auto const skipIsect = [&] (const Type& t1, const Type& t2) {
+    auto const [isObj1, dcls1] = getDCls(t1);
+    auto const [isObj2, dcls2] = getDCls(t2);
+    if (!dcls1 || !dcls2) return false;
+    if (isObj1 != isObj2) return false;
+    if (dcls1->isExact()) {
+      if (dcls1->cls().resolved()) return false;
+      if (dcls2->isIsect()) {
+        return std::all_of(
+          dcls2->isect().begin(),
+          dcls2->isect().end(),
+          [] (res::Class c) { return !c.resolved(); }
+        );
+      }
+      if (dcls2->isExact()) return false;
+      return !dcls2->cls().resolved();
+    }
+    if (dcls2->isExact()) {
+      if (dcls2->cls().resolved()) return false;
+      if (dcls1->isIsect()) {
+        return std::all_of(
+          dcls1->isect().begin(),
+          dcls1->isect().end(),
+          [] (res::Class c) { return !c.resolved(); }
+        );
+      }
+      if (dcls1->isExact()) return false;
+      return !dcls1->cls().resolved();
+    }
+    return false;
+  };
+
   for (auto const& t1 : types) {
     for (auto const& t2 : types) {
       if (!t2.subtypeOf(t1)) continue;
@@ -1949,7 +1998,9 @@ TEST(Type, SpecializedClasses) {
         for (auto const& t4 : types) {
           if (!t4.subtypeOf(t3)) continue;
           EXPECT_TRUE(union_of(t2, t4).subtypeOf(superU));
-          EXPECT_TRUE(intersection_of(t2, t4).subtypeOf(superI));
+          auto const isect = intersection_of(t2, t4);
+          if (skipIsect(t2, t4)) continue;
+          EXPECT_TRUE(isect.subtypeOf(superI));
         }
       }
     }
@@ -5032,11 +5083,11 @@ TEST(Type, Canonicalization) {
   EXPECT_EQ(clsExact(*clsICanon6, false), TBottom);
 
   EXPECT_EQ(subObj(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
-  EXPECT_EQ(objExact(clsFoo1), make_specialized_sub_object(BObj, clsFoo1, false, false));
+  EXPECT_EQ(objExact(clsFoo1), make_specialized_exact_object(BObj, clsFoo1, false, false));
   EXPECT_EQ(subCls(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
-  EXPECT_EQ(clsExact(clsFoo1), make_specialized_sub_class(BCls, clsFoo1, false, false));
+  EXPECT_EQ(clsExact(clsFoo1), make_specialized_exact_class(BCls, clsFoo1, false, false));
   EXPECT_EQ(subCls(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
-  EXPECT_EQ(clsExact(clsFoo1, false), make_specialized_sub_class(BCls, clsFoo1, false, false, false));
+  EXPECT_EQ(clsExact(clsFoo1, false), make_specialized_exact_class(BCls, clsFoo1, false, false, false));
 
   EXPECT_EQ(subObj(*clsT1), TBottom);
   EXPECT_EQ(objExact(*clsT1), TBottom);
@@ -7612,11 +7663,13 @@ TEST(Type, ResolveClasses) {
     if (u.resolved()) ADD_FAILURE();                                    \
     auto const r = index.resolve_class(s_##name.get());                 \
     auto const t1 = r ? subObj(*r) : TBottom;                           \
-    auto const t2 = r ? subCls(*r) : TBottom;                           \
+    auto const t2 = r ? objExact(*r) : TBottom;                         \
+    auto const t3 = r ? subCls(*r) : TBottom;                           \
+    auto const t4 = r ? clsExact(*r) : TBottom;                         \
     types.emplace(subObj(u), t1);                                       \
-    types.emplace(objExact(u), t1);                                     \
-    types.emplace(subCls(u), t2);                                       \
-    types.emplace(clsExact(u), t2);                                     \
+    types.emplace(objExact(u), t2);                                     \
+    types.emplace(subCls(u), t3);                                       \
+    types.emplace(clsExact(u), t4);                                     \
   }
 #define X(name) MAKE(name)
 #define Y(name) MAKE(name)
@@ -7627,12 +7680,13 @@ TEST(Type, ResolveClasses) {
 
   for (auto const& [t1, t2] : types) {
     for (auto const& [t3, t4] : types) {
-      EXPECT_EQ(
-        resolve_classes(
-          index,
-          intersection_of(t1, t3)
-        ),
-        intersection_of(t2, t4)
+      EXPECT_TRUE(
+        intersection_of(t2, t4).subtypeOf(
+          resolve_classes(
+            index,
+            intersection_of(t1, t3)
+          )
+        )
       );
     }
   }

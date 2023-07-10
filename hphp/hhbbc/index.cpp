@@ -1794,42 +1794,92 @@ bool Class::same(const Class& o) const {
 bool Class::exactSubtypeOfExact(const Class& o,
                                 bool nonRegularL,
                                 bool nonRegularR) const {
-  // Unresolved classes are never exact, so they shouldn't be passed.
-  assertx(!val.left());
-  assertx(!o.val.left());
-  // Otherwise two exact resolved classes are only subtypes of another
-  // if they're the same. One additional complication is if the class
-  // isn't regular and we're not considering non-regular classes. In
-  // that case, the class is actually Bottom, and we need to apply the
-  // rules of subtyping to Bottom (Bottom is a subtype of everything,
-  // but nothing is a subtype of it).
-  auto const c1 = val.right();
-  auto const c2 = o.val.right();
-  auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
-  auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
-  return bottomL || (!bottomR && c1 == c2);
+  // Two exact classes are only subtypes of another if they're the
+  // same. One additional complication is if the class isn't regular
+  // and we're not considering non-regular classes. In that case, the
+  // class is actually Bottom, and we need to apply the rules of
+  // subtyping to Bottom (Bottom is a subtype of everything, but
+  // nothing is a subtype of it).
+  if (auto const lname = val.left()) {
+    // For unresolved classes, we can't actually check if
+    // is_regular_class(), so we need to be pessimistic.
+    if (auto const rname = o.val.left()) {
+      // Two exact unresolved classes are only guarantee to subtypes
+      // of another if they're the same name and the lhs might not
+      // become Bottom, but the rhs could (we're assuming the class
+      // might not be regular). NB: if the class doesn't actually
+      // exist, this is correct as both sides will be Bottom.
+      return (!nonRegularL || nonRegularR) && lname->isame(rname);
+    }
+    // If the rhs is resolved, it's similar to the unresolved case,
+    // except we can know whether the class is regular or not. If an
+    // unresolved and resolved refer to the same class, the resolved
+    // one is considered a subtype of the unresolved one.
+    auto const c2 = o.val.right();
+    return
+      !nonRegularL &&
+      lname->isame(c2->cls->name) &&
+      !is_regular_class(*c2->cls);
+  } else if (auto const rname = o.val.left()) {
+    auto const c1 = val.right();
+    return
+      rname->isame(c1->cls->name) &&
+      (!nonRegularL || nonRegularR || is_regular_class(*c1->cls));
+  } else {
+    // Otherwise both sides are resolved and we can do a precise
+    // check.
+    auto const c1 = val.right();
+    auto const c2 = o.val.right();
+    auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
+    auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
+    return bottomL || (!bottomR && c1 == c2);
+  }
 }
 
 bool Class::exactSubtypeOf(const Class& o,
                            bool nonRegularL,
                            bool nonRegularR) const {
-  // Unresolved classes are never exact, so it should not show up on
-  // the lhs.
-  assertx(!val.left());
+  if (auto const lname = val.left()) {
+    // For unresolved classes, we can't actually check if
+    // is_regular_class(), so we need to be pessimistic and assume
+    // either side could go to Bottom if nonRegular is false.
+    if (auto const rname = o.val.left()) {
+      return (!nonRegularL || nonRegularR) && lname->isame(rname);
+    }
+    auto const c2 = o.val.right();
+    if (lname->isame(c2->cls->name)) {
+      // If they represent the same class, the lhs isn't a subtype of
+      // the rhs because the lhs is unresolved. The only exception is
+      // if the lhs is actually Bottom because it's not regular and we
+      // don't want those.
+      return !nonRegularL && !is_regular_class(*c2->cls);
+    }
+    if (c2->cls->attrs & AttrTrait) return false;
+    // The lhs is unresolved, but the rhs is resolved. Check to see if
+    // lhs exists on rhs subclass-list and is not filtered out from
+    // being a non-regular class.
+    for (auto const sub : c2->subclassList) {
+      if (!sub->cls->name->isame(lname)) continue;
+      return !nonRegularL || nonRegularR || is_regular_class(*sub->cls);
+    }
+    return false;
+  }
 
   auto const c1 = val.right();
   // If we want to exclude non-regular classes on either side, and the
   // lhs is not regular, there's no subtype relation. If nonRegularL
   // is false, then lhs is just a bottom (and bottom is a subtype of
-  // everything), and if nonRegularR is false, then the rhs doesn't
-  // contain any non-regular classes, so lhs cannot be part of it.
+  // everything), and if nonRegularR is false, then the rhs might not
+  // contain any non-regular classes, so lhs is not guaranteed to be
+  // part of it.
   if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
     return !nonRegularL;
   }
 
   if (auto const rname = o.val.left()) {
     // The lhs is resolved, but the rhs is not. The lhs is a subtype
-    // of rhs if any of its bases have the same name.
+    // of rhs if any of its bases have the same name or if it
+    // implements rname.
     for (auto const base : c1->baseList) {
       if (base->cls->name->isame(rname)) return true;
     }
@@ -1857,22 +1907,61 @@ bool Class::subSubtypeOf(const Class& o,
     // The lhs is unresolved, but the rhs is resolved. We can use the
     // rhs subclass list to see if the lhs is on it.
     auto const c2 = o.val.right();
-    if (c2->cls->attrs & AttrTrait) {
-      return nonRegularR && c2->cls->name->isame(lname);
+    if (lname->isame(c2->cls->name)) {
+      // If they represent the same class, the lhs isn't a subtype of
+      // the rhs because the lhs is unresolved. The only exception is
+      // if the lhs is actually Bottom because it's not regular (and
+      // none of it's children are) and we don't want those.
+      return
+        !nonRegularL &&
+        !is_regular_class(*c2->cls) &&
+        !c2->hasRegularSubclass;
     }
+    if (c2->cls->attrs & AttrTrait) return false;
+    // The lhs is unresolved, but the rhs is resolved. Check to see if
+    // lhs exists on rhs subclass-list and is not filtered out from
+    // being a non-regular class.
     for (auto const sub : c2->subclassList) {
-      if (!nonRegularR && !is_regular_class(*sub->cls)) continue;
-      if (sub->cls->name->isame(lname)) return true;
+      if (!sub->cls->name->isame(lname)) continue;
+      return !nonRegularL || nonRegularR || is_regular_class(*sub->cls);
     }
     return false;
   } else if (auto const rname = o.val.left()) {
     auto const c1 = val.right();
     // The lhs is resolved, but the rhs is not. The lhs is a subtype
-    // of rhs if any of its bases have the same name.
+    // of rhs if any of its bases have the same name or if it
+    // implements rname.
+
+    if (!is_regular_class(*c1->cls)) {
+      // If the lhs could contains non-regular types, but the rhs can
+      // not, then the lhs cannot ever be a subtype of rhs (because
+      // lhs is non-regular itself).
+      if (nonRegularL) {
+        if (!nonRegularR) return false;
+      } else if (!c1->hasRegularSubclass) {
+        // If lhs is excluding non-regular classes, and lhs does not
+        // have any regular subclasses (and lhs itself is
+        // non-regular), then lhs is a Bottom, so always a subtype.
+        return true;
+      }
+    }
     for (auto const base : c1->baseList) {
       if (base->cls->name->isame(rname)) return true;
     }
-    return c1->implInterfaces.count(rname);
+    if (c1->implInterfaces.count(rname)) return true;
+    // The above checks are sufficient if the lhs is regular or if
+    // we're considering non-regular classes. Otherwise, we need to
+    // check all of the lhs regular children if they implement rname.
+    if (is_regular_class(*c1->cls) || nonRegularL) return false;
+    return std::all_of(
+      begin(c1->subclassList),
+      end(c1->subclassList),
+      [&] (const ClassInfo* sub) {
+        return
+          !is_regular_class(*sub->cls) ||
+          sub->implInterfaces.count(rname);
+      }
+    );
   }
 
   auto const c1 = val.right();
@@ -1946,29 +2035,60 @@ bool Class::subSubtypeOf(const Class& o,
 bool Class::exactCouldBeExact(const Class& o,
                               bool nonRegularL,
                               bool nonRegularR) const {
-  // Unresolved classes can never be exact, so they shouldn't show up
-  // on either side.
-  assertx(!val.left());
-  assertx(!o.val.left());
-  // Two resolved exact classes can only be each other if they're the
-  // same class. The only complication is if the class isn't regular
-  // and we're not considering non-regular classes. In that case, the
-  // class is actually Bottom, a Bottom can never could-be anything
-  // (not even itself).
-  auto const c1 = val.right();
-  auto const c2 = o.val.right();
-  if (c1 != c2) return false;
-  auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
-  auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
-  return !bottomL && !bottomR;
+  if (auto const lname = val.left()) {
+    if (auto const rname = o.val.left()) return lname->isame(rname);
+    // An unresolved lhs and a resolved rhs can only be each other if
+    // their name is the same and neither side can become a Bottom.
+    auto const c2 = o.val.right();
+    return lname->isame(c2->cls->name) &&
+      ((nonRegularL && nonRegularR) ||
+       is_regular_class(*c2->cls) ||
+       c2->hasRegularSubclass);
+  } else if (auto const rname = o.val.left()) {
+    auto const c1 = val.right();
+    return rname->isame(c1->cls->name) &&
+      ((nonRegularL && nonRegularR) ||
+       is_regular_class(*c1->cls) ||
+       c1->hasRegularSubclass);
+  } else {
+    // Two resolved exact classes can only be each other if they're the
+    // same class. The only complication is if the class isn't regular
+    // and we're not considering non-regular classes. In that case, the
+    // class is actually Bottom, a Bottom can never could-be anything
+    // (not even itself).
+    auto const c1 = val.right();
+    auto const c2 = o.val.right();
+    if (c1 != c2) return false;
+    auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
+    auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
+    return !bottomL && !bottomR;
+  }
 }
 
 bool Class::exactCouldBe(const Class& o,
                          bool nonRegularL,
                          bool nonRegularR) const {
-  // Unresolved classes can never be exact, so they shouldn't show up
-  // on the lhs.
-  assertx(!val.left());
+  if (auto const lname = val.left()) {
+    // Two unresolved classes can always potentially be each other.
+    if (o.val.left()) return true;
+    // The lhs is unresolved but the rhs is resolved. The lhs can only
+    // be the rhs if it's on the rhs's subclass list.
+    auto const c2 = o.val.right();
+    if (lname->isame(c2->cls->name)) {
+      // If they're the same name, we still need to check if either
+      // side goes to Bottom.
+      return (nonRegularL && nonRegularR) || is_regular_class(*c2->cls);
+    }
+    // Traits don't have subclasses in the sense we care about here.
+    if (c2->cls->attrs & AttrTrait) return false;
+    for (auto const sub : c2->subclassList) {
+      if (!sub->cls->name->isame(lname)) continue;
+      // We found the class. If it's not regular and either side wants
+      // only regular classes, no match is possible.
+      return (nonRegularL && nonRegularR) || is_regular_class(*sub->cls);
+    }
+    return false;
+  }
 
   // Otherwise the check is very similar to exactSubtypeOf (except for
   // the handling of bottoms).
@@ -2413,9 +2533,12 @@ ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
 // the range includes a mix of resolved and unresolved classes, the
 // unresolved classes will be used to narrow the classes passed to the
 // callable, but the unresolved classes themself will not be passed to
-// the callable .If the callable returns false, iteration is
+// the callable. If the callable returns false, iteration is
 // stopped. If includeNonRegular is true, non-regular subclasses are
-// visited (normally they are skipped).
+// visited (normally they are skipped). The callable also receives a
+// bool which indicates whether the class passed to the callable
+// represents an exact type or a sub type. The only case where the
+// type can be a sub type is if all classes are unresolved.
 template <typename F>
 void Class::visitEverySub(folly::Range<const Class*> classes,
                           bool includeNonRegular,
@@ -2427,14 +2550,14 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
   if (classes.size() == 1) {
     auto const cinfo = classes.front().val.right();
     if (!cinfo) {
-      f(classes.front());
+      f(classes.front(), false);
     } else if (cinfo->cls->attrs & AttrTrait) {
-      if (includeNonRegular) f(Class { cinfo });
+      if (includeNonRegular) f(Class { cinfo }, true);
     } else {
       assertx(!cinfo->subclassList.empty());
       for (auto const sub : cinfo->subclassList) {
         if (!includeNonRegular && !is_regular_class(*sub->cls)) continue;
-        if (!f(Class { sub })) break;
+        if (!f(Class { sub }, true)) break;
       }
     }
     return;
@@ -2476,7 +2599,7 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
     assertx(common.empty());
     for (auto const c : classes) {
       assertx(c.val.left());
-      if (!f(c)) break;
+      if (!f(c, false)) break;
     }
     return;
   }
@@ -2528,7 +2651,7 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
   // callable.
   for (auto const c : common) {
     assertx(IMPLIES(!includeNonRegular, is_regular_class(*c->cls)));
-    if (!f(Class { c })) return;
+    if (!f(Class { c }, true)) return;
   }
 }
 
@@ -2745,11 +2868,12 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
     visitEverySub(
       classes,
       nonRegular,
-      [&] (res::Class c) {
+      [&] (res::Class c, bool isExact) {
         // visitEverySub will only report an unresolved class if the
         // entire list is unresolved, and we deal with that case
         // specially below and shouldn't get here.
         assertx(c.val.right());
+        assertx(isExact);
         // We'll only "visit" exact sub-classes, so only use
         // processNormal here.
         processNormal(c.val.right());
@@ -2808,7 +2932,9 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       auto const subtypeOf = std::any_of(
         classes2.begin(), classes2.end(),
         [&] (res::Class c2) {
-          return c2.subSubtypeOf(c1, either, either);
+          return isSub2
+            ? c2.subSubtypeOf(c1, either, either)
+            : c2.exactSubtypeOf(c1, either, either);
         }
       );
       if (subtypeOf) common.emplace_back(c1);
@@ -2817,7 +2943,9 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       auto const subtypeOf = std::any_of(
         classes1.begin(), classes1.end(),
         [&] (res::Class c1) {
-          return c1.subSubtypeOf(c2, either, either);
+          return isSub1
+            ? c1.subSubtypeOf(c2, either, either)
+            : c1.exactSubtypeOf(c2, either, either);
         }
       );
       if (subtypeOf) common.emplace_back(c2);
@@ -2840,7 +2968,7 @@ Class::removeNonRegular(folly::Range<const Class*> classes) {
   visitEverySub(
     classes,
     false,
-    [&] (res::Class c) {
+    [&] (res::Class c, bool isExact) {
       // Unresolved classes are always "regular" (we can't tell
       // otherwise), so they remain as is.
       if (c.val.left()) {
@@ -2852,6 +2980,7 @@ Class::removeNonRegular(folly::Range<const Class*> classes) {
       // were resolved.
       auto const cinfo = c.val.right();
       assertx(cinfo);
+      assertx(isExact);
       assertx(is_regular_class(*cinfo->cls));
 
       if (!commonBase) {
@@ -2942,12 +3071,13 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
     visitEverySub(
       lhs,
       bothNonRegular,
-      [&] (res::Class c) {
+      [&] (res::Class c, bool isExact) {
         auto const cinfo = c.val.right();
         // We shouldn't use visitEverySub if the class list is nothing
         // but unresolved classes, so we should never get an
         // unresolved class in the callback.
         assertx(cinfo);
+        assertx(isExact);
         assertx(IMPLIES(!bothNonRegular, is_regular_class(*cinfo->cls)));
 
         // Could this class be a class in the other list? If not, ignore
@@ -3056,25 +3186,24 @@ bool Class::couldBeIsect(folly::Range<const Class*> classes1,
 
   auto const bothNonReg = nonRegular1 && nonRegular2;
 
-  // Otherwise decompose the first class list into each of it's exact
+  // Decompose the first class list into each of it's exact
   // subclasses, and do a could-be check against every class on the
   // second list. This is precise since the lhs is always exact.
   auto couldBe = false;
   visitEverySub(
     classes1,
     bothNonReg,
-    [&] (res::Class c) {
-      if (!c.val.left()) {
-        for (auto const o : classes2) {
-          if (!c.exactCouldBe(o, bothNonReg, bothNonReg)) return true;
+    [&] (res::Class c, bool isExact) {
+      couldBe = std::all_of(
+        classes2.begin(),
+        classes2.end(),
+        [&] (Class c2) {
+          return isExact
+            ? c.exactCouldBe(c2, bothNonReg, bothNonReg)
+            : c.subCouldBe(c2, bothNonReg, bothNonReg);
         }
-      } else {
-        for (auto const o : classes2) {
-          if (!c.subCouldBe(o, bothNonReg, bothNonReg)) return true;
-        }
-      }
-      couldBe = true;
-      return false;
+      );
+      return !couldBe;
     }
   );
   return couldBe;
@@ -14738,8 +14867,9 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
   res::Class::visitEverySub(
     isect,
     dcls.containsNonRegular(),
-    [&] (res::Class c) {
+    [&] (res::Class c, bool isExact) {
       if (auto const cinfo = c.val.right()) {
+        assertx(isExact);
         return f(cinfo);
       }
       unresolved = true;

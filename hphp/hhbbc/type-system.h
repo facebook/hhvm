@@ -337,6 +337,9 @@ struct DCls {
   void setCtx(bool ctx) {
     val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
   }
+  void setNonReg(bool nonReg) {
+    val.set(nonReg ? addNonReg(val.tag()) : removeNonReg(val.tag()), val.ptr());
+  }
 
   void setCls(res::Class cls);
 
@@ -409,6 +412,44 @@ private:
       case PtrTag::ExactNonReg:
       case PtrTag::SubNonReg:
       case PtrTag::IsectNonReg:
+        return t;
+    }
+    not_reached();
+  }
+
+  static PtrTag addNonReg(PtrTag t) {
+    switch (t) {
+      case PtrTag::Exact:    return PtrTag::ExactNonReg;
+      case PtrTag::Sub:      return PtrTag::SubNonReg;
+      case PtrTag::Isect:    return PtrTag::IsectNonReg;
+      case PtrTag::ExactCtx: return PtrTag::ExactCtxNonReg;
+      case PtrTag::SubCtx:   return PtrTag::SubCtxNonReg;
+      case PtrTag::IsectCtx: return PtrTag::IsectCtxNonReg;
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return t;
+    }
+    not_reached();
+  }
+
+  static PtrTag removeNonReg(PtrTag t) {
+    switch (t) {
+      case PtrTag::ExactNonReg:    return PtrTag::Exact;
+      case PtrTag::SubNonReg:      return PtrTag::Sub;
+      case PtrTag::IsectNonReg:    return PtrTag::Isect;
+      case PtrTag::ExactCtxNonReg: return PtrTag::ExactCtx;
+      case PtrTag::SubCtxNonReg:   return PtrTag::SubCtx;
+      case PtrTag::IsectCtxNonReg: return PtrTag::IsectCtx;
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
         return t;
     }
     not_reached();

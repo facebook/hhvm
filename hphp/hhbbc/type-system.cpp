@@ -417,7 +417,7 @@ bool subtypeCls(const DCls& a, const DCls& b) {
     if (b.isExact()) {
       return a.cls().exactSubtypeOfExact(b.cls(), nonRegA, nonRegB);
     }
-    if (b.isSub())   return a.cls().exactSubtypeOf(b.cls(), nonRegA, nonRegB);
+    if (b.isSub()) return a.cls().exactSubtypeOf(b.cls(), nonRegA, nonRegB);
     auto const acls = a.cls();
     for (auto const bcls : b.isect()) {
       if (!acls.exactSubtypeOf(bcls, nonRegA, nonRegB)) return false;
@@ -470,7 +470,7 @@ bool couldBeCls(const DCls& a, const DCls& b) {
     if (b.isExact()) {
       return a.cls().exactCouldBeExact(b.cls(), nonRegA, nonRegB);
     }
-    if (b.isSub())   return a.cls().exactCouldBe(b.cls(), nonRegA, nonRegB);
+    if (b.isSub()) return a.cls().exactCouldBe(b.cls(), nonRegA, nonRegB);
     auto const acls = a.cls();
     for (auto const bcls : b.isect()) {
       if (!acls.exactCouldBe(bcls, nonRegA, nonRegB)) return false;
@@ -2854,8 +2854,8 @@ bool Type::checkInvariants() const {
           m_data.dcls.cls().mightBeRegular()
         )
       );
-      assertx(m_data.dcls.cls().resolved());
-      assertx(!is_closure_base(*m_data.dcls.cls().cls()));
+      assertx(!m_data.dcls.cls().resolved() ||
+              !is_closure_base(*m_data.dcls.cls().cls()));
     } else if (m_data.dcls.isSub()) {
       assertx(m_data.dcls.cls().couldBeOverridden());
       assertx(
@@ -2877,7 +2877,6 @@ bool Type::checkInvariants() const {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dcls.isect().size() > 1);
-      auto const DEBUG_ONLY resolved = m_data.dcls.isect().front().resolved();
       for (auto const DEBUG_ONLY c : m_data.dcls.isect()) {
         assertx(
           IMPLIES(
@@ -2886,7 +2885,6 @@ bool Type::checkInvariants() const {
           )
         );
         assertx(!c.resolved() || !is_closure_base(*c.cls()));
-        assertx(c.resolved() == resolved);
       }
     }
     break;
@@ -2896,8 +2894,8 @@ bool Type::checkInvariants() const {
     assertx(!m_data.dobj.containsNonRegular());
     if (m_data.dobj.isExact()) {
       assertx(m_data.dobj.cls().mightBeRegular());
-      assertx(m_data.dobj.cls().resolved());
-      assertx(!is_closure_base(*m_data.dobj.cls().cls()));
+      assertx(!m_data.dobj.cls().resolved() ||
+              !is_closure_base(*m_data.dobj.cls().cls()));
     } else if (m_data.dobj.isSub()) {
       assertx(m_data.dobj.cls().couldBeOverriddenByRegular());
       assertx(!m_data.dobj.cls().resolved() ||
@@ -2907,11 +2905,9 @@ bool Type::checkInvariants() const {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dobj.isect().size() > 1);
-      auto const DEBUG_ONLY resolved = m_data.dcls.isect().front().resolved();
       for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
         assertx(!c.resolved() || !is_closure_base(*c.cls()));
-        assertx(c.resolved() == resolved);
       }
     }
     break;
@@ -3434,9 +3430,7 @@ Type objExact(res::Class val) {
   auto t = Type { BObj, LegacyMark::Bottom };
   construct(
     t.m_data.dobj,
-    val.resolved()
-      ? DCls::MakeExact(val, false)
-      : DCls::MakeSub(val, false)
+    DCls::MakeExact(val, false)
   );
   t.m_dataTag = DataTag::Obj;
   assertx(t.checkInvariants());
@@ -3472,9 +3466,7 @@ Type clsExact(res::Class val, bool nonReg) {
   auto r        = Type { BCls, LegacyMark::Bottom };
   construct(
     r.m_data.dcls,
-    val.resolved()
-      ? DCls::MakeExact(val, nonReg)
-      : DCls::MakeSub(val, nonReg)
+    DCls::MakeExact(val, nonReg)
   );
   r.m_dataTag   = DataTag::Cls;
   assertx(r.checkInvariants());
@@ -4525,7 +4517,7 @@ Type intersection_of(Type a, Type b) {
     }
   }
 
-  auto const isectDCls = [&] (const DCls& acls, const DCls& bcls, bool isObj) {
+  auto const isectDCls = [&] (DCls& acls, DCls& bcls, bool isObj) {
     auto const ctx = acls.isCtx() || bcls.isCtx();
     if (subtypeCls<false>(acls, bcls)) return setctx(reuse(a), ctx);
     if (subtypeCls<false>(bcls, acls)) return setctx(reuse(b), ctx);
@@ -4534,15 +4526,28 @@ Type intersection_of(Type a, Type b) {
       return isect ? nodata() : TBottom;
     }
 
-    // Exact classes should have been definitively resolved by one of
-    // the above checks. The exception is if we have unresolved
-    // classes, but unresolved classes can never be exact.
-    assertx(!acls.isExact());
-    assertx(!bcls.isExact());
     auto const nonRegA = acls.containsNonRegular();
     auto const nonRegB = bcls.containsNonRegular();
 
     auto isectNonReg = nonRegA && nonRegB;
+
+    // Exact classes should have been definitively resolved by one of
+    // the above checks. The exception is if we have unresolved
+    // classes and the other class isn't exact. In that case, the
+    // intersection is just the unresolved class. Since the unresolved
+    // class is exact, any intersection must contain only it (or be
+    // Bottom).
+    if (acls.isExact()) {
+      assertx(!acls.cls().resolved());
+      assertx(!bcls.isExact());
+      acls.setNonReg(isectNonReg);
+      return setctx(reuse(a), ctx);
+    } else if (bcls.isExact()) {
+      assertx(!bcls.cls().resolved());
+      bcls.setNonReg(isectNonReg);
+      return setctx(reuse(b), ctx);
+    }
+
     auto const i = [&] {
       if (acls.isIsect()) {
         if (bcls.isIsect()) {
@@ -5937,11 +5942,20 @@ void resolve_classes_impl(const Index& index, const Type& t, COWer& parent) {
     auto newT = [&] () -> Optional<Type> {
       if (dcls.isIsect()) {
         auto const& isect = dcls.isect();
-        if (isect.front().resolved()) return std::nullopt;
+        if (!std::any_of(
+              isect.begin(),
+              isect.end(),
+              [] (res::Class i) { return !i.resolved(); }
+            )) {
+          return std::nullopt;
+        }
+
         auto out = TInitCell;
         for (auto const& i : isect) {
-          assertx(!i.resolved());
-          auto const resolved = index.resolve_class(i.name());
+          auto const resolved = [&] () -> Optional<res::Class> {
+            if (i.resolved()) return i;
+            return index.resolve_class(i.name());
+          }();
           if (!resolved) return TBottom;
           out &= isObj
             ? subObj(*resolved)

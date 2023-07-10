@@ -27,7 +27,7 @@ let with_wrapped_source_text ~block_source_text ~(f : string -> 'a * string) :
   let unwrap (wrapped_source_text : string) : string =
     wrapped_source_text
     |> String.split_lines
-    |> (Fn.flip List.drop) 2 (* drop "<?hh" and "function foo ..." *)
+    |> (fun lines -> List.drop lines 2) (* drop "<?hh" and "function foo ..." *)
     |> List.drop_last_exn
        (* we wrapped s.t. the string is guaranteed to have a last line *)
     |> String.concat ~sep:"\n"

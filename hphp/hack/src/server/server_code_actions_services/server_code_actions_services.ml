@@ -20,14 +20,17 @@ type resolvable_command_or_action =
   Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_
 
 let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
-  let module I = Ide_api_types in
   let lsp_pos_of_ide_pos ide_pos =
-    Lsp.{ line = ide_pos.I.line; character = ide_pos.I.column }
+    Lsp.
+      {
+        line = ide_pos.Ide_api_types.line;
+        character = ide_pos.Ide_api_types.column;
+      }
   in
   Lsp.
     {
-      start = lsp_pos_of_ide_pos ide_range.I.st;
-      end_ = lsp_pos_of_ide_pos ide_range.I.ed;
+      start = lsp_pos_of_ide_pos ide_range.Ide_api_types.st;
+      end_ = lsp_pos_of_ide_pos ide_range.Ide_api_types.ed;
     }
 
 let find

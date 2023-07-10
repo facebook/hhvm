@@ -6,13 +6,15 @@
  *
  *)
 open Hh_prelude
-module Srt = ServerRenameTypes
-module Ca = Lsp.CodeAction
+module CodeAction = Lsp.CodeAction
 
-let apply_patches_to_string old_content (patches : Srt.patch list) : string =
+let apply_patches_to_string old_content (patches : ServerRenameTypes.patch list)
+    : string =
   let buf = Buffer.create (String.length old_content) in
-  let patch_list = List.sort ~compare:Srt.compare_result patches in
-  Srt.write_patches_to_buffer buf old_content patch_list;
+  let patch_list =
+    List.sort ~compare:ServerRenameTypes.compare_result patches
+  in
+  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 let lsp_range_to_pos ~source_text path range =
@@ -34,21 +36,21 @@ let lsp_range_to_pos ~source_text path range =
   Lsp_helpers.lsp_range_to_pos ~line_to_offset path range |> Pos.to_absolute
 
 let patched_text_of_command_or_action ~source_text path = function
-  | Ca.Action Ca.{ action = EditOnly Lsp.WorkspaceEdit.{ changes }; _ } ->
+  | CodeAction.Action
+      CodeAction.{ action = EditOnly Lsp.WorkspaceEdit.{ changes }; _ } ->
     let to_patch Lsp.TextEdit.{ range; newText = text } =
       let pos = lsp_range_to_pos ~source_text path range in
-      Srt.Replace Srt.{ pos; text }
+      ServerRenameTypes.Replace ServerRenameTypes.{ pos; text }
     in
     let patches = SMap.values changes |> List.concat |> List.map ~f:to_patch in
     let source_text = Sys_utils.cat @@ Relative_path.to_absolute path in
     let rewritten_contents = apply_patches_to_string source_text patches in
     Some rewritten_contents
-  | Ca.Action _
-  | Ca.Command _ ->
+  | CodeAction.Action _
+  | CodeAction.Command _ ->
     None
 
 let run_exn ctx entry range ~title_prefix =
-  let module Ca = Lsp.CodeAction in
   let commands_or_actions =
     Server_code_actions_services.go ~ctx ~entry ~range
   in
@@ -58,14 +60,14 @@ let run_exn ctx entry range ~title_prefix =
     let description_triples =
       commands_or_actions
       |> List.map ~f:(function
-             | Ca.Action Ca.{ title; kind; _ } ->
+             | CodeAction.Action CodeAction.{ title; kind; _ } ->
                let kind_str =
                  Printf.sprintf "CodeActionKind: %s"
                  @@ Lsp.CodeActionKind.string_of_kind kind
                in
                let is_selected = String.is_prefix ~prefix:title_prefix title in
                (title, kind_str, is_selected)
-             | Ca.Command Lsp.Command.{ title; _ } ->
+             | CodeAction.Command Lsp.Command.{ title; _ } ->
                let is_selected = String.is_prefix ~prefix:title_prefix title in
                (title, "Command", is_selected))
     in

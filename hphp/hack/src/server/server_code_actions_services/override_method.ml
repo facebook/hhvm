@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Cls = Decl_provider.Class
 
 let to_range (pos : Pos.t) : Lsp.range =
   let (first_line, first_col) = Pos.line_column pos in
@@ -53,8 +52,8 @@ let override_method_quickfixes
              && not (Typing_defs.get_ce_final meth))
       |> List.map ~f:(stub_method_action ~is_static class_name parent_name)
     in
-    actions_for_methods ~is_static:false (Cls.methods decl)
-    @ actions_for_methods ~is_static:true (Cls.smethods decl)
+    actions_for_methods ~is_static:false (Decl_provider.Class.methods decl)
+    @ actions_for_methods ~is_static:true (Decl_provider.Class.smethods decl)
   | None -> []
 
 (* Quickfixes available at cursor position [start_line] and

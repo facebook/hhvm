@@ -8,7 +8,6 @@
 open Hh_prelude
 module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
-module St = Full_fidelity_source_text
 module T = Extract_classish_types
 
 let placeholder_name = "Placeholder_"
@@ -31,23 +30,21 @@ let interface_body_of_methods source_text T.{ selected_methods; _ } : string =
       let body_until_first_statement_length =
         Pos.start_offset stmt_pos - Pos.start_offset meth.m_span
       in
-      St.sub_of_pos
+      Full_fidelity_source_text.sub_of_pos
         source_text
         ~length:body_until_first_statement_length
         meth.m_span
       |> String.rstrip ~drop:(fun ch ->
              Char.is_whitespace ch || Char.equal ch '{')
-      |> Fn.flip ( ^ ) ";"
-      |> remove_async_modifier
+      |> fun x -> x ^ ";" |> remove_async_modifier
     | Some _
     | None ->
-      St.sub_of_pos source_text meth.m_span
+      Full_fidelity_source_text.sub_of_pos source_text meth.m_span
       |> String.rstrip ~drop:(fun ch ->
              Char.is_whitespace ch || Char.equal ch '}')
       |> String.rstrip ~drop:(fun ch ->
              Char.is_whitespace ch || Char.equal ch '{')
-      |> Fn.flip ( ^ ) ";"
-      |> remove_async_modifier
+      |> fun x -> x ^ ";" |> remove_async_modifier
   in
   selected_methods |> List.map ~f:abstractify_one |> String.concat ~sep:"\n"
 
@@ -61,11 +58,11 @@ let format_classish path ~(body : string) : string =
     |> String.concat ~sep:"\n"
   in
   prefixed
-  |> St.make path
+  |> Full_fidelity_source_text.make path
   |> PositionedTree.make
   |> Libhackfmt.format_tree
   |> strip_prefix
-  |> Fn.flip ( ^ ) "\n\n"
+  |> fun x -> x ^ "\n\n"
 
 (** Create text edit for "interface Placeholder_ { .... }" *)
 let extracted_classish_text_edit source_text path candidate : Lsp.TextEdit.t =

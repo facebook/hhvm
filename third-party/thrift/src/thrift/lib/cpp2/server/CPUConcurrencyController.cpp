@@ -46,13 +46,6 @@ CPUConcurrencyController::CPUConcurrencyController(
       enabled_{(*config_.rlock())->enabled()},
       serverConfigs_(serverConfigs),
       thriftServerConfig_(thriftServerConfig) {
-  thriftServerConfig_.setMaxRequests(
-      activeRequestsLimit_.getObserver(),
-      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
-  thriftServerConfig_.setMaxQps(
-      qpsLimit_.getObserver(),
-      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
-
   scheduler_.setThreadName("CPUConcurrencyController-loop");
   scheduler_.start();
   configSchedulerCallback_ = config.addCallback(
@@ -209,6 +202,13 @@ void CPUConcurrencyController::schedule(std::shared_ptr<const Config> config) {
   }
 
   LOG(INFO) << "Enabling CPUConcurrencyController: " << config->describe();
+  thriftServerConfig_.setMaxRequests(
+      activeRequestsLimit_.getObserver(),
+      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+  thriftServerConfig_.setMaxQps(
+      qpsLimit_.getObserver(),
+      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+
   this->setLimit(config, config->concurrencyUpperBound);
   scheduler_.addFunctionGenericNextRunTimeFunctor(
       [this] { this->cycleOnce(); },

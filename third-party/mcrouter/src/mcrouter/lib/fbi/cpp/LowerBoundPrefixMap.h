@@ -59,11 +59,11 @@ class SmallPrefix {
 // b) find a string that has that longest prefix with the query in common
 //
 // Proof:
-//   Without losing generality: longest prefix abc, query abfz
+//   Without losing generality: longest prefix abc, query abcfz
 //   Let's say we find
 //      [abc,  xxxxx, bcd, ...]
 //                   ^
-//   Assume that xxxxx doesn't start with abc: then abfz would be between
+//   Assume that xxxxx doesn't start with abc: then abcfz would be between
 //   abc and xxxxx which is against the assumption.
 //
 struct LowerBoundPrefixMapCommon {

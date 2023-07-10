@@ -1113,15 +1113,15 @@ std::unique_ptr<t_program_bundle> parse_ast(
       program = included_program.get();
       programs->add_program(std::move(included_program));
       program_cache[include_path] = program;
-
-      std::string include_prefix;
-      auto last_slash = include_name.find_last_of("/\\");
-      if (last_slash != std::string::npos) {
-        include_prefix = include_name.substr(0, last_slash);
-      }
-      program->set_include_prefix(include_prefix);
     } else {
       program = it->second;
+    }
+
+    std::string include_prefix;
+    auto last_slash = include_name.find_last_of("/\\");
+    if (last_slash != std::string::npos) {
+      include_prefix = include_name.substr(0, last_slash);
+      program->set_include_prefix(include_prefix);
     }
 
     // Skip already parsed files.

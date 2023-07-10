@@ -151,7 +151,8 @@ class ServerConfigsMock : public ServerConfigs {
       oConfig_{AdaptiveConcurrencyController::Config{}};
   AdaptiveConcurrencyController adaptiveConcurrencyController_{
       oConfig_.getObserver(),
-      thriftServerConfig_.getMaxRequests().getObserver()};
+      thriftServerConfig_.getMaxRequests().getObserver(),
+      thriftServerConfig_};
 
   folly::observer::SimpleObservable<
       apache::thrift::CPUConcurrencyController::Config>

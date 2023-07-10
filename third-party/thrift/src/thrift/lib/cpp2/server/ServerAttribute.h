@@ -43,6 +43,7 @@ namespace thrift {
 // (APP will override CONF). see comment on ServerAttribute to learn more
 
 class CPUConcurrencyController;
+class AdaptiveConcurrencyController;
 
 class AttributeSource final {
  public:
@@ -63,6 +64,7 @@ class AttributeSource final {
 
  private:
   friend CPUConcurrencyController;
+  friend AdaptiveConcurrencyController;
   static const AttributeSource OVERRIDE_INTERNAL;
 };
 

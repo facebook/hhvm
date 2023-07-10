@@ -19,10 +19,14 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <optional>
 
 #include <folly/Random.h>
 
 using Clock = std::chrono::steady_clock;
+
+THRIFT_FLAG_DEFINE_bool(
+    disable_adaptive_cc_affecting_server_max_requests, false);
 
 namespace apache {
 namespace thrift {
@@ -45,9 +49,11 @@ Clock::duration jitter(Clock::duration d, double jitter) {
 
 AdaptiveConcurrencyController::AdaptiveConcurrencyController(
     folly::observer::Observer<AdaptiveConcurrencyController::Config> oConfig,
-    folly::observer::Observer<uint32_t> maxRequestsLimit)
+    folly::observer::Observer<uint32_t> maxRequestsLimit,
+    apache::thrift::ThriftServerConfig& thriftServerConfig)
     : config_(std::move(oConfig)),
       maxRequestsLimit_(std::move(maxRequestsLimit)),
+      thriftServerConfig_(thriftServerConfig),
       minRtt_(config().minTargetRtt),
       concurrencyLimit_(config().minConcurrency) {
   rttRecalcStart_ = config().isEnabled() ? Clock::now() : kZero;
@@ -56,8 +62,21 @@ AdaptiveConcurrencyController::AdaptiveConcurrencyController(
       this->configUpdateCallback_(snapshot);
     }
     rttRecalcStart_ = snapshot->isEnabled() ? Clock::now() : kZero;
+    if (snapshot->isEnabled()) {
+      if (!THRIFT_FLAG(disable_adaptive_cc_affecting_server_max_requests)) {
+        thriftServerConfig_.setMaxRequests(
+            maxRequestsOb_.getObserver(),
+            apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+      } else {
+        thriftServerConfig_.setMaxRequests(
+            folly::observer::makeObserver(
+                []() { return std::optional<uint32_t>(std::nullopt); }),
+            apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+      }
+    }
     // reset all the state
     maxRequests_.store(0, std::memory_order_relaxed);
+    maxRequestsOb_.setValue(std::make_optional<uint32_t>(0));
     nextRttRecalcStart_.store(kZero, std::memory_order_relaxed);
     samplingPeriodStart_.store(kZero, std::memory_order_relaxed);
     latencySamplesIdx_.store(0, std::memory_order_relaxed);
@@ -84,6 +103,7 @@ void AdaptiveConcurrencyController::requestStarted(Clock::time_point started) {
 
     // tell the server to start enforcing min concurrency
     maxRequests_.store(config().minConcurrency, std::memory_order_relaxed);
+    maxRequestsOb_.setValue(config().minConcurrency);
     // reset targetRtt to 0 to indicate that we are computing targetRtt
     targetRtt_.store({}, std::memory_order_relaxed);
     // and start collecting samples for requests running with this concurrency
@@ -157,6 +177,7 @@ void AdaptiveConcurrencyController::recalculate() {
     }
     // reset concurrency limit to what it was before we started rtt calibration
     maxRequests_.store(concurrencyLimit_, std::memory_order_relaxed);
+    maxRequestsOb_.setValue(concurrencyLimit_);
   } else {
     // The gradient is computed as the ratio between the target RTT latency
     // and the pct RTT latency measured during the sampling period.
@@ -179,6 +200,7 @@ void AdaptiveConcurrencyController::recalculate() {
     concurrencyLimit_ =
         std::max(cfg.minConcurrency, std::min(newLimit, upperConcurrencyLimit));
     maxRequests_.store(concurrencyLimit_, std::memory_order_relaxed);
+    maxRequestsOb_.setValue(concurrencyLimit_);
   }
 }
 

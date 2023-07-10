@@ -51,7 +51,8 @@ BaseThriftServer::BaseThriftServer()
     : thriftConfig_(),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
-          thriftConfig_.getMaxRequests().getObserver()},
+          thriftConfig_.getMaxRequests().getObserver(),
+          detail::getThriftServerConfig(*this)},
       cpuConcurrencyController_{
           detail::makeCPUConcurrencyControllerConfig(this),
           *this,
@@ -63,7 +64,8 @@ BaseThriftServer::BaseThriftServer(
     : thriftConfig_(initialConfig),
       adaptiveConcurrencyController_{
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
-          thriftConfig_.getMaxRequests().getObserver()},
+          thriftConfig_.getMaxRequests().getObserver(),
+          detail::getThriftServerConfig(*this)},
       cpuConcurrencyController_{
           detail::makeCPUConcurrencyControllerConfig(this),
           *this,

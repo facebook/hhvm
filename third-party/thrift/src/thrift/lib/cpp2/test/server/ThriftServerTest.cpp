@@ -3690,10 +3690,10 @@ TEST_P(HeaderOrRocket, AdaptiveConcurrencyConfig) {
   runner.getThriftServer().setMaxRequests(2000);
   EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 20);
 
-  // verify disabling conroller causes the explicit limit to take effect
   setConfig(0, 0);
   EXPECT_FALSE(controller.enabled());
-  EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 2000);
+  // disabling controller will not cause the explicit limit to take effect
+  EXPECT_EQ(runner.getThriftServer().getMaxRequests(), 20);
 }
 
 TEST_P(HeaderOrRocket, OnStartStopServingTest) {

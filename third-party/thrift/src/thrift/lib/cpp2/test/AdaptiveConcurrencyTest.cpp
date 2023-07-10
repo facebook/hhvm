@@ -16,9 +16,10 @@
 
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 
+#include <folly/experimental/observer/SimpleObservable.h>
 #include <folly/portability/GTest.h>
 
-#include <folly/experimental/observer/SimpleObservable.h>
+#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
 using namespace std::literals::chrono_literals;
 using namespace apache::thrift;
@@ -56,6 +57,12 @@ class AdaptiveConcurrencyBase : public testing::Test {
   AdaptiveConcurrencyBase(uint32_t maxRequests = 0)
       : oMaxRequests(maxRequests) {}
 
+  void checkMaxRequests(uint32_t expected) const {
+    folly::observer_detail::ObserverManager::waitForAllUpdates();
+    EXPECT_EQ(expected, serverConfig.getMaxRequests().get());
+    EXPECT_EQ(expected, controller.getMaxRequests());
+  }
+
   void setConfig(
       size_t concurrency,
       double jitter = 0.0,
@@ -90,8 +97,10 @@ class AdaptiveConcurrencyBase : public testing::Test {
       oConfig{makeConfig(MinConcurrency)};
   folly::observer::SimpleObservable<uint32_t> oMaxRequests{0u};
 
+  apache::thrift::ThriftServerConfig serverConfig;
+
   AdaptiveConcurrencyController controller{
-      oConfig.getObserver(), oMaxRequests.getObserver()};
+      oConfig.getObserver(), oMaxRequests.getObserver(), serverConfig};
 
   void makeRequest(Clock::duration latency = kIdealRtt) {
     auto now = Clock::now();
@@ -132,6 +141,8 @@ class AdaptiveConcurrencyBase : public testing::Test {
       Clock::duration latency = kIdealRtt,
       EndState endState = EndState::SamplingScheduled) {
     auto concurrency = controller.getMaxRequests();
+    folly::observer_detail::ObserverManager::waitForAllUpdates();
+    EXPECT_EQ(concurrency, serverConfig.getMaxRequests().get());
     p(controller).samplingPeriodStart(Clock::now());
     doSamplingRequests(latency, endState);
     double slope = 1.0 * controller.targetRtt() / latency;
@@ -142,7 +153,9 @@ class AdaptiveConcurrencyBase : public testing::Test {
         expectConcurrency,
         (maxRequests == 0) ? 1000u : std::min(1000u, maxRequests));
     expectConcurrency = std::max(minConcurrency, expectConcurrency);
-    EXPECT_EQ(controller.getMaxRequests(), expectConcurrency);
+    checkMaxRequests(expectConcurrency);
+    folly::observer_detail::ObserverManager::waitForAllUpdates();
+    EXPECT_EQ(expectConcurrency, serverConfig.getMaxRequests().get());
     // targetRtt is computed to be 2x the observed p95 latency
     EXPECT_EQ(controller.targetRtt(), 2 * kIdealRtt);
   }
@@ -188,69 +201,69 @@ TEST_P(AdaptiveConcurrencyP, Sampling) {
   // provided maxRequests is smaller than 1000)
   auto lowLatency = kIdealRtt;
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 13);
+  checkMaxRequests(13);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 31);
+  checkMaxRequests(31);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 69);
+  checkMaxRequests(69);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 149);
+  checkMaxRequests(149);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 315);
+  checkMaxRequests(315);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 655);
+  checkMaxRequests(655);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
 
   // imitate higher latencies
   // concurrency limit drops until reaching min of 5
   auto highLatency = 4 * kIdealRtt;
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
   maxRequests = maxRequests / 2.0 + std::sqrt(maxRequests / 2.0);
-  EXPECT_EQ(controller.getMaxRequests(), maxRequests);
+  checkMaxRequests(maxRequests);
   performSampling(highLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 7);
+  checkMaxRequests(7);
   performSampling(highLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   performSampling(highLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   performSampling(highLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   // validate making requests before sampling periods does not affect
   // the sampling
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 13);
+  checkMaxRequests(13);
   for (int i = 0; i < 200; ++i) {
     makeRequest(highLatency);
   }
   performSampling(lowLatency);
-  EXPECT_EQ(controller.getMaxRequests(), 31);
+  checkMaxRequests(31);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -270,7 +283,7 @@ TEST_F(AdaptiveConcurrency, RttRecalibration) {
   EXPECT_LT(p(controller).nextRttRecalcStart(), after + 6min);
 
   performSampling(kIdealRtt, EndState::SamplingScheduled);
-  EXPECT_EQ(controller.getMaxRequests(), 13);
+  checkMaxRequests(13);
 
   // force entering calibration mode after the next sampling round
   // and perform sampling round
@@ -279,18 +292,18 @@ TEST_F(AdaptiveConcurrency, RttRecalibration) {
 
   // next request will cause concurrency to reset to the minimum
   // also resets next recalibration target time
-  EXPECT_EQ(controller.getMaxRequests(), 31);
+  checkMaxRequests(31);
   before = Clock::now();
   EXPECT_LT(p(controller).nextRttRecalcStart(), before);
   makeRequest();
   EXPECT_GT(p(controller).nextRttRecalcStart(), before + 4min);
   EXPECT_LT(p(controller).nextRttRecalcStart(), Clock::now() + 6min);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   // run recalibration, at the end of the calibration concurrency
   // should be return to pre-calibration value
   doSamplingRequests(kIdealRtt * 2);
-  EXPECT_EQ(controller.getMaxRequests(), 31);
+  checkMaxRequests(31);
 
   // targetRtt is computed to be 2x the observed p95 latency
   EXPECT_EQ(controller.targetRtt(), 4 * kIdealRtt);
@@ -306,10 +319,10 @@ TEST_F(AdaptiveConcurrency, FixedTargetRtt) {
   makeRequest();
   doSamplingRequests(kIdealRtt, EndState::SamplingScheduled);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   performSampling(kIdealRtt, EndState::SamplingScheduled);
-  EXPECT_EQ(controller.getMaxRequests(), 13);
+  checkMaxRequests(13);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
 
   setConfig(5, 0.2);
@@ -320,7 +333,7 @@ TEST_F(AdaptiveConcurrency, FixedTargetRtt) {
   doSamplingRequests(kIdealRtt, EndState::SamplingScheduled);
   EXPECT_GT(p(controller).nextRttRecalcStart(), before + 4min);
   EXPECT_LT(p(controller).nextRttRecalcStart(), after + 6min);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   setConfig(
       5,
@@ -330,10 +343,10 @@ TEST_F(AdaptiveConcurrency, FixedTargetRtt) {
   makeRequest();
   doSamplingRequests(kIdealRtt, EndState::SamplingScheduled);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   performSampling(kIdealRtt, EndState::SamplingScheduled);
-  EXPECT_EQ(controller.getMaxRequests(), 13);
+  checkMaxRequests(13);
   EXPECT_EQ(p(controller).nextRttRecalcStart(), Clock::time_point{});
 }
 
@@ -416,7 +429,7 @@ TEST_F(AdaptiveConcurrency, MinTargetRtt) {
   EXPECT_EQ(
       controller.minTargetRtt(),
       std::chrono::duration_cast<std::chrono::microseconds>(minTargetRtt));
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   // The target RTT should be floored at 5ms (minTargetRtt) even though the
   // sampled RTT times will be smaller (1 ms).
   EXPECT_EQ(controller.targetRtt(), minTargetRtt);
@@ -426,7 +439,7 @@ TEST_F(AdaptiveConcurrency, MinTargetRtt) {
   // The minTargetRtt shouldn't change after this but the sampled RTT should.
   p(controller).samplingPeriodStart(Clock::now());
   doSamplingRequests(kIdealRtt);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   EXPECT_EQ(controller.targetRtt(), minTargetRtt);
   EXPECT_EQ(controller.sampledRtt(), kIdealRtt);
 
@@ -444,7 +457,7 @@ TEST_F(AdaptiveConcurrency, MinTargetRtt) {
   // Concurrency shouldn't be bumped up since the minimum limit is higher
   // than the sampled latencies. So even though requests are getting processed
   // faster, we still adhere to the configured lower limit.
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   EXPECT_EQ(controller.targetRtt(), minTargetRtt);
   EXPECT_EQ(controller.sampledRtt(), kIdealRtt);
 
@@ -454,7 +467,7 @@ TEST_F(AdaptiveConcurrency, MinTargetRtt) {
   p(controller).samplingPeriodStart(Clock::now());
   doSamplingRequests(kIdealRtt, EndState::SamplingScheduled);
   EXPECT_EQ(controller.minTargetRtt(), std::chrono::microseconds{});
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   EXPECT_EQ(controller.targetRtt(), 2 * kIdealRtt);
   EXPECT_EQ(controller.sampledRtt(), kIdealRtt);
 
@@ -464,7 +477,7 @@ TEST_F(AdaptiveConcurrency, MinTargetRtt) {
   makeRequest();
   p(controller).samplingPeriodStart(Clock::now());
   doSamplingRequests(kMinRtt);
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
   EXPECT_EQ(controller.targetRtt(), 2 * kMinRtt);
   EXPECT_EQ(controller.sampledRtt(), kMinRtt);
 }
@@ -484,7 +497,7 @@ TEST_F(AdaptiveConcurrencyDisabled, Enabling) {
     makeRequest();
     EXPECT_GT(p(controller).samplingPeriodStart(), now);
   }
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 }
 
 TEST_F(AdaptiveConcurrency, Disabling) {
@@ -492,17 +505,17 @@ TEST_F(AdaptiveConcurrency, Disabling) {
 
   // disable controller
   setConfig(0);
-  EXPECT_EQ(controller.getMaxRequests(), 0);
+  checkMaxRequests(0);
 
   // re-enable controller
   setConfig(minConcurrency);
-  EXPECT_EQ(controller.getMaxRequests(), 0);
+  checkMaxRequests(0);
   makeRequest();
-  EXPECT_EQ(controller.getMaxRequests(), 5);
+  checkMaxRequests(5);
 
   doSamplingRequests(kIdealRtt, EndState::SamplingScheduled);
 
   // disable controller again
   setConfig(0);
-  EXPECT_EQ(controller.getMaxRequests(), 0);
+  checkMaxRequests(0);
 }

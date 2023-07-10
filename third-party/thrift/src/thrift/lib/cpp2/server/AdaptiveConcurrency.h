@@ -21,6 +21,7 @@
 #include <folly/Function.h>
 #include <folly/experimental/observer/Observer.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
+#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
 namespace apache {
 namespace thrift {
@@ -98,7 +99,8 @@ class AdaptiveConcurrencyController {
   using Clock = std::chrono::steady_clock;
   explicit AdaptiveConcurrencyController(
       folly::observer::Observer<Config> config,
-      folly::observer::Observer<uint32_t> maxRequestsLimit);
+      folly::observer::Observer<uint32_t> maxRequestsLimit,
+      apache::thrift::ThriftServerConfig& thriftServerConfig);
 
   // server should call this methods for requests
   // it wants to use as input to the algorithm
@@ -152,6 +154,10 @@ class AdaptiveConcurrencyController {
   folly::observer::Observer<uint32_t> maxRequestsLimit_;
   folly::observer::CallbackHandle enablingCallback_;
   std::function<void(folly::observer::Snapshot<Config>)> configUpdateCallback_;
+
+  folly::observer::SimpleObservable<std::optional<uint32_t>> maxRequestsOb_{
+      std::nullopt};
+  apache::thrift::ThriftServerConfig& thriftServerConfig_;
 
   std::atomic<Duration> targetRtt_{Duration{}};
   std::atomic<Duration> minRtt_{Duration{}};

@@ -30,10 +30,9 @@
 #include "hphp/util/thread-local.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/sync-signal.h"
 #include "hphp/util/timer.h"
 
-#include <signal.h>
+#include <chrono>
 #include <time.h>
 
 #include <folly/Random.h>
@@ -100,8 +99,8 @@ const StaticString
 // A singleton object that handles the two Xenon modes (always or timer).
 // If in always on mode, the Xenon Surprise flags have to be on for each thread
 // and are never cleared.
-// For timer mode, when start is invoked, it adds a new timer to the existing
-// handler for SIGPROF.
+// For timer mode, when start is invoked, it starts a new thread, responsible
+// for periodically setting Xenon surprise flags.
 
 Xenon& Xenon::getInstance() noexcept {
   static Xenon instance;
@@ -109,8 +108,7 @@ Xenon& Xenon::getInstance() noexcept {
 }
 
 Xenon::Xenon() noexcept
-  : m_lastSurpriseTime(0), m_stopping(false), m_missedSampleCount(0) {
-  m_timerid = 0;
+  : m_missedSampleCount(0), m_lastSurpriseTime(0), m_stopping(false) {
 }
 
 void Xenon::incrementMissedSampleCount(ssize_t val) {
@@ -118,56 +116,54 @@ void Xenon::incrementMissedSampleCount(ssize_t val) {
 }
 
 int64_t Xenon::getAndClearMissedSampleCount() {
-    return std::atomic_exchange<int64_t>(&m_missedSampleCount, 0);
+  return std::atomic_exchange<int64_t>(&m_missedSampleCount, 0);
 }
 
-static void onXenonTimer(int signo) {
-  if (signo == SIGPROF) {
-    Xenon::getInstance().onTimer();
-  }
-}
-
-// XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
-// Xenon needs to be started once per process.
-// The number of milliseconds has to be greater than zero.
-// If all of those happen, then we need a timer attached to a signal handler.
-void Xenon::start(uint64_t msec) {
+// Start Xenon profiler. Needs to be done once per process invocation.
+void Xenon::start() {
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
-  if (!RuntimeOption::XenonForceAlwaysOn && !m_timerid && msec > 0) {
-    time_t sec = msec / 1000;
-    long nsec = (msec % 1000) * 1000000;
-    TRACE(1, "Xenon::start periodic %ld seconds, %ld nanoseconds\n", sec, nsec);
 
-    // for the initial timer, we want to stagger time for large installations
-    auto const msecInit = folly::Random::rand32(static_cast<uint32_t>(msec));
-    auto const fSec = msecInit / 1000;
-    auto const fNsec = (msecInit % 1000) * 1000000;
-    TRACE(1, "Xenon::start initial %d seconds, %d nanoseconds\n",
-          fSec, fNsec);
+  // No initialization needed if always on.
+  if (RuntimeOption::XenonForceAlwaysOn) return;
 
-    sigevent sev={};
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGPROF;
-    timer_create(CLOCK_REALTIME, &sev, &m_timerid);
+  // Xenon not enabled.
+  if (RuntimeOption::XenonPeriodSeconds <= 0) return;
 
-    sync_signal(SIGPROF, onXenonTimer);
-    signal(SIGPROF, SIG_IGN);
+  assertx(!m_thread.joinable());
+  assertx(!m_stopping);
+  m_thread = std::thread([](Xenon* xenon) { xenon->run(); }, this);
 
-    itimerspec ts={};
-    ts.it_value.tv_sec = fSec;
-    ts.it_value.tv_nsec = fNsec;
-    ts.it_interval.tv_sec = sec;
-    ts.it_interval.tv_nsec = nsec;
-    timer_settime(m_timerid, 0, &ts, nullptr);
-  }
+  TRACE(1, "Xenon::start periodic %.2f seconds\n",
+        RuntimeOption::XenonPeriodSeconds);
 }
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
 void Xenon::stop() {
-  if (m_timerid) {
+  if (!m_thread.joinable()) return;
+
+  {
+    std::lock_guard<std::mutex> lock(m_shutdownMutex);
     m_stopping = true;
-    TRACE(1, "Xenon::stop has stopped the waiting thread\n");
-    timer_delete(m_timerid);
+  }
+  m_shutdownCondition.notify_one();
+  m_thread.join();
+
+  TRACE(1, "Xenon::stop has stopped the waiting thread\n");
+}
+
+void Xenon::run() {
+  auto const interval = std::chrono::duration_cast<std::chrono::nanoseconds>(
+    std::chrono::duration<double>(RuntimeOption::XenonPeriodSeconds));
+
+  // Stagger the initial event.
+  auto next = std::chrono::steady_clock::now() + std::chrono::nanoseconds(
+    folly::Random::rand64(interval.count()));
+
+  std::unique_lock<std::mutex> l(m_shutdownMutex);
+
+  while (!m_shutdownCondition.wait_until(l, next, [&] { return m_stopping; })) {
+    surpriseAll();
+    next = std::max(next + interval, std::chrono::steady_clock::now());
   }
 }
 
@@ -185,22 +181,17 @@ void Xenon::log(SampleType t,
       clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", show(t));
-    s_xenonData->log(t, sourceType, wh, m_lastSurpriseTime);
+    s_xenonData->log(
+      t, sourceType, wh, m_lastSurpriseTime.load(std::memory_order_acquire));
   }
-}
-
-// Called from timer handler, Lets non-signal code know the timer was fired.
-void Xenon::onTimer() {
-  auto& instance = getInstance();
-  if (instance.m_stopping) return;
-  instance.surpriseAll();
 }
 
 // Turns on the Xenon Surprise flag for every thread via a lambda function
 // passed to ExecutePerThread.
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
-  m_lastSurpriseTime = gettime_ns(CLOCK_REALTIME);
+  m_lastSurpriseTime.store(
+    gettime_ns(CLOCK_REALTIME), std::memory_order_release);
   RequestInfo::ExecutePerRequest(
     [] (RequestInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
   );

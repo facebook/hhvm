@@ -17,10 +17,13 @@
 
 #pragma once
 
-#include "hphp/util/timer.h"
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include <semaphore.h>
 
 /*
                         Project Xenon
@@ -31,13 +34,9 @@
 
   How does it work?
   There are two ways for Xenon to work: 1) always on, 2) via timer. For the
-  timer mode: Xenon starts a timer that raises SIGPROF periodically. When that
-  timer fires it sets a semaphore so that others may know. We'd like to be able
-  to record the status of every stack for every thread at this point, but during
-  a timer handler is not a reasonable place to do this.
-  Instead, Xenon has a pthread waiting for the semaphore.  When the semaphore
-  is set in the handler, it wakes, sets the Xenon Surprise flag for every
-  thread - this is the flash.
+  timer mode: Xenon starts a thread that raises events periodically. When that
+  happens, a Xenon surprise flag is set for every request thread - this is
+  the flash.
   There is a mechanism that hooks the enter/exit of every PHP function,
   using the Surprise flags leverages that mechanism and calls logging.
   At this point, if the flag is set for this thread, the PHP and async stack
@@ -46,8 +45,8 @@
   The for the always on mode:  when execute_command_line_begin is called,
   all of the threads are Surprised.  When the Xenon methods are invoked in
   this mode, the Xenon Surprise flags are not cleared, so functions will always
-  be Surprised on enter and exit.  In this mode, no threads or semaphores or
-  timers are created, since they are not needed.
+  be Surprised on enter and exit.  In this mode, no threads are created, since
+  they are not needed.
 
   How do I use it?
   Enabling it via Xenon Period runtime option will start Xenon snapping and
@@ -118,8 +117,9 @@ struct Xenon final {
   Xenon(const Xenon&) = delete;
   void operator=(const Xenon&) = delete;
 
-  void start(uint64_t msec);
+  void start();
   void stop();
+  void run();
   void incrementMissedSampleCount(ssize_t val);
   int64_t getAndClearMissedSampleCount();
   // Log a sample if XenonSignalFlag is set. Also clear it, unless
@@ -130,13 +130,14 @@ struct Xenon final {
     c_WaitableWaitHandle* wh = nullptr
   ) const;
   void surpriseAll();
-  void onTimer();
   bool getIsProfiledRequest();
 
-  int64_t   m_lastSurpriseTime;
-  bool      m_stopping;
  private:
   std::atomic<int64_t> m_missedSampleCount;
-  timer_t   m_timerid;
+  std::atomic<int64_t> m_lastSurpriseTime;
+  std::thread m_thread;
+  std::mutex m_shutdownMutex;
+  std::condition_variable m_shutdownCondition;
+  bool m_stopping;
 };
 }

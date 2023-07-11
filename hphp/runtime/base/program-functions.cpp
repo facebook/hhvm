@@ -2431,8 +2431,8 @@ void hphp_process_init(bool skipExtensions) {
   action.sa_flags = SA_SIGINFO | SA_NODEFER | SA_RESTART;
   sigaction(SIGVTALRM, &action, nullptr);
 
-  // start takes milliseconds, Period is a double in seconds
-  Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
+  // initialize Xenon profiler
+  Xenon::getInstance().start();
   BootStats::mark("xenon");
 
   // set up strobelight signal handling

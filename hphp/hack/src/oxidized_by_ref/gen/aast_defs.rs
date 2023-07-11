@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64a5d6b1ff53776f49b9637eaad369a5>>
+// @generated SignedSource<<48a20146dd127ed267deb77a31e1f281>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2955,6 +2955,7 @@ pub enum Hint_<'a> {
     Hany,
     Herr,
     Hmixed,
+    Hwildcard,
     Hnonnull,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]

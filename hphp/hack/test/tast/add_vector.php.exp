@@ -157,8 +157,7 @@
                  (Binop
                     { bop = (Eq None); lhs = ((MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x)));
                       rhs =
-                      ((MyPhonyVector<X>), [33:8-27],
-                       (New (((MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], (Happly (([Pos.none], "_"), []))))], [], None, ((function(): void)))))
+                      ((MyPhonyVector<X>), [33:8-27], (New (((MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
                       }))));
              ([34:3-20],
               (Expr

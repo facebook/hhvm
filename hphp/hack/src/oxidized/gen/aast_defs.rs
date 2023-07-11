@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<61ebd98921ccee38d08f0ac98bfc42d9>>
+// @generated SignedSource<<f70c73adc0f8be6a5d8912adfb784065>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2445,6 +2445,7 @@ pub enum Hint_ {
     Hany,
     Herr,
     Hmixed,
+    Hwildcard,
     Hnonnull,
     Habstr(String, Vec<Hint>),
     #[rust_to_ocaml(name = "Hvec_or_dict")]

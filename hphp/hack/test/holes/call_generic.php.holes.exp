@@ -51,7 +51,7 @@
                 ((void), [7:3-26],
                  (Call
                     { func = (((function<T as num>(int $x, int $y): void)), [7:3-18], (Id ([7:3-18], "\\generic_bounded"))); 
-                      targs = [((int), ([7:3-18], (Happly (([Pos.none], "_"), []))))];
+                      targs = [((int), ([7:3-18], Hwildcard))];
                       args = [(Pnormal, ((int), [7:19-21], (Lvar ([7:19-21], $x)))); (Pnormal, ((string), [7:23-25], (Hole (((string), [7:23-25], (Lvar ([7:23-25], $y))), (string), (int), Typing))))];
                       unpacked_arg = None }))))
              ]
@@ -86,7 +86,7 @@
                 ((void), [12:3-63],
                  (Call
                     { func = (((function<T as num>(num $x, num $y): void)), [12:3-18], (Id ([12:3-18], "\\generic_bounded"))); 
-                      targs = [((num), ([12:3-18], (Happly (([Pos.none], "_"), []))))];
+                      targs = [((num), ([12:3-18], Hwildcard))];
                       args =
                       [(Pnormal, ((int), [12:19-21], (Lvar ([12:19-21], $x))));
                         (Pnormal,

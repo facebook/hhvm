@@ -34,9 +34,7 @@
            [([8:3-17],
              (Expr
                 ((), [8:3-16],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [8:3-5], (Lvar ([8:3-5], $x)));
-                      rhs = ((), [8:8-16], (FunctionPointer ((FP_id ([8:8-13], "\\my_id")), [((), ([8:14-15], (Happly (([8:14-15], "_"), []))))]))) }))))
+                 (Binop { bop = (Eq None); lhs = ((), [8:3-5], (Lvar ([8:3-5], $x))); rhs = ((), [8:8-16], (FunctionPointer ((FP_id ([8:8-13], "\\my_id")), [((), ([8:14-15], Hwildcard))]))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

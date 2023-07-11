@@ -36,7 +36,7 @@ Errors:
                       ((shape(0 => string)), [7:8-19],
                        (Call
                           { func = (((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye")));
-                            targs = [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))];
+                            targs = [((shape(0 => string)), ([7:8-15], Hwildcard))]; 
                             args = [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))]; 
                             unpacked_arg = None }))
                       }))));

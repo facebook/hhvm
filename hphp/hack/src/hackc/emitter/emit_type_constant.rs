@@ -339,6 +339,15 @@ fn hint_to_type_constant_list<'arena>(
             };
             r
         }
+        Hint_::Hwildcard => {
+            let (classname, _s_res) = resolve_classname(alloc, &[], "_".to_owned());
+            let mut r = bumpalo::vec![in alloc];
+            r.push(encode_kind(TypeStructureKind::T_typevar));
+            if let Some(c) = classname {
+                r.push(c);
+            }
+            r
+        }
         Hint_::Hshape(si) => {
             let mut r = bumpalo::vec![in alloc];
             if let Some(v) = shape_allows_unknown_fields(si) {

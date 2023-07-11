@@ -70,13 +70,6 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
         @@ Primary.Invalid_newable_typaram_constraints
              { pos; tp_name; constraints })
 
-let is_wildcard (_, hint) =
-  match hint with
-  | (_, Aast.Happly ((_, class_id), _))
-    when String.equal class_id SN.Typehints.wildcard ->
-    true
-  | _ -> false
-
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
  *
@@ -139,7 +132,9 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
         (* mismatches with targs_length > 0 are not specific to reification and handled
                   elsewhere *)
         ());
-  let all_wildcards = List.for_all ~f:is_wildcard targs in
+  let all_wildcards =
+    List.for_all ~f:(fun (_, h) -> Aast_defs.is_wildcard_hint h) targs
+  in
   if all_wildcards && tparams_has_reified tparams then
     Typing_error_utils.add_typing_error
       ~env:(Tast_env.tast_env_as_typing_env env)

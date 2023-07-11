@@ -53,7 +53,7 @@ Errors:
                           { func =
                             (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],
                              (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx"))));
-                            targs = [((nothing), ([14:13-16], (Happly (([Pos.none], "_"), []))))];
+                            targs = [((nothing), ([14:13-16], Hwildcard))]; 
                             args = [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))]; 
                             unpacked_arg = None }))))
                   ]

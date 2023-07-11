@@ -10169,10 +10169,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
         tparamet
         lv
         (Reason.Rpredicated (p, f))
-        ( p,
-          Happly
-            ( (p, "\\HH\\AnyArray"),
-              [(p, Happly ((p, "_"), [])); (p, Happly ((p, "_"), []))] ) )
+        (p, Happly ((p, "\\HH\\AnyArray"), [(p, Hwildcard); (p, Hwildcard)]))
     in
     (env, { lset; pkgs = SSet.empty })
   | Aast.Call

@@ -92,7 +92,7 @@
                  ((dynamic), [15:7-22],
                   (Call
                      { func = (((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo")));
-                       targs = [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))];
+                       targs = [((nothing), ([15:7-10], Hwildcard)); ((nothing), ([15:7-10], Hwildcard))];
                        args = [((Pinout [15:11-16]), ((dynamic), [15:17-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))]; 
                        unpacked_arg = None })),
                  [([16:5-12], (Return None))], [([Pos.none], Noop)])));
@@ -105,7 +105,7 @@
                        ((nothing), [18:15-24],
                         (Call
                            { func = (((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux")));
-                             targs = [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))];
+                             targs = [((nothing), ([18:15-18], Hwildcard)); ((nothing), ([18:15-18], Hwildcard))]; 
                              args = [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))]; 
                              unpacked_arg = None }))
                        }))))

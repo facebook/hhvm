@@ -111,20 +111,20 @@
                       ((I<int>), [17:8-21],
                        (Call
                           { func = (((function<T>(I<int> $_, I<int> $_): I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
-                            targs = [((int), ([17:8-9], (Happly (([Pos.none], "_"), []))))];
+                            targs = [((int), ([17:8-9], Hwildcard))];
                             args =
                             [(Pnormal,
                               ((E<int>), [17:10-14],
                                (Call
                                   { func = (((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
-                                    targs = [((int), ([17:10-11], (Happly (([Pos.none], "_"), []))))]; 
+                                    targs = [((int), ([17:10-11], Hwildcard))]; 
                                     args = [(Pnormal, ((int), [17:12-13], (Int "1")))]; 
                                     unpacked_arg = None })));
                               (Pnormal,
                                ((E<int>), [17:16-20],
                                 (Call
                                    { func = (((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
-                                     targs = [((int), ([17:16-17], (Happly (([Pos.none], "_"), []))))]; 
+                                     targs = [((int), ([17:16-17], Hwildcard))]; 
                                      args = [(Pnormal, ((int), [17:18-19], (Int "2")))]; 
                                      unpacked_arg = None })))
                               ];

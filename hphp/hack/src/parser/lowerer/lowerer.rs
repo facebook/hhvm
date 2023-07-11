@@ -855,7 +855,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                     raise_parsing_error(node, env, &syntax_error::direct_coeffects_reference);
                 }
             }
-            Ok(Happly(ast::Id(pos, name), vec![]))
+            if name == "_" {
+                Ok(Hwildcard)
+            } else {
+                Ok(Happly(ast::Id(pos, name), vec![]))
+            }
         }
         ShapeTypeSpecifier(c) => {
             let allows_unknown_fields = !c.ellipsis.is_missing();
@@ -3713,22 +3717,18 @@ fn rewrite_fun_ctx<'a>(
         Hint_::Hfun(ref mut hf) => {
             if let Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
                 if let [ref mut h] = *hl.as_mut_slice() {
-                    if let Hint_::Happly(ast::Id(ref pos, s), _) = &*h.1 {
-                        if s == "_" {
-                            *h.1 = Hint_::HfunContext(name.to_string());
-                            tparams.push(ast::Tparam {
-                                variance: Variance::Invariant,
-                                name: ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
-                                parameters: vec![],
-                                constraints: vec![],
-                                reified: ReifyKind::Erased,
-                                user_attributes: Default::default(),
-                            });
-                        } else {
-                            invalid(pos);
-                        }
+                    if let Hint_::Hwildcard = &*h.1 {
+                        *h.1 = Hint_::HfunContext(name.to_string());
+                        tparams.push(ast::Tparam {
+                            variance: Variance::Invariant,
+                            name: ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
+                            parameters: vec![],
+                            constraints: vec![],
+                            reified: ReifyKind::Erased,
+                            user_attributes: Default::default(),
+                        });
                     } else {
-                        invalid(p);
+                        invalid(&h.0);
                     }
                 } else {
                     invalid(p);

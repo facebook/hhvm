@@ -626,6 +626,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hany
   | Herr
   | Hmixed
+  | Hwildcard
   | Hnonnull
   | Hdynamic
   | Hnothing

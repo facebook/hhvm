@@ -6447,7 +6447,7 @@ fn fixup_type_arg<'a, 'b, 'arena>(
             use ast::Id;
             match h {
                 H_::Happly(Id(_, id), _) if self.erased_tparams.contains(&id.as_str()) => {
-                    Ok(*id = "_".into())
+                    Ok(*h = H_::Hwildcard)
                 }
                 _ => h.recurse(c, self.object()),
             }

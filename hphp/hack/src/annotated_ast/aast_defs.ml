@@ -1218,6 +1218,7 @@ and hint_ =
   | Hany
   | Herr
   | Hmixed
+  | Hwildcard
   | Hnonnull
   | Habstr of string * hint list
   | Hvec_or_dict of hint option * hint
@@ -1344,3 +1345,8 @@ let string_of_visibility vis =
   | Public -> "public"
   | Protected -> "protected"
   | Internal -> "internal"
+
+let is_wildcard_hint h =
+  match h with
+  | (_, Hwildcard) -> true
+  | _ -> false

@@ -32,6 +32,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
   | Aast.Hdynamic -> Fmt.string ppf "dynamic"
   | Aast.Hnothing -> Fmt.string ppf "nothing"
   | Aast.Hmixed -> Fmt.string ppf "mixed"
+  | Aast.Hwildcard -> Fmt.string ppf "_"
   | Aast.Hnonnull -> Fmt.string ppf "nonnull"
   | Aast.Hvar name -> Fmt.string ppf name
   | Aast.Hfun_context name -> Fmt.(prefix (const string "ctx ") string) ppf name

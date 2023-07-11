@@ -177,7 +177,7 @@
                       ((<expr#1>::TX), [21:10-20],
                        (Call
                           { func = (((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen")));
-                            targs = [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))];
+                            targs = [((<expr#1> as WithTypeConstant), ([21:10-16], Hwildcard)); ((<expr#1>::TX), ([21:10-16], Hwildcard))];
                             args = [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))]; 
                             unpacked_arg = None }))
                       }))));
@@ -190,7 +190,7 @@
                        (((function(<expr#2>::TX): void)), [22:10-20],
                         (Call
                            { func = (((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log")));
-                             targs = [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))];
+                             targs = [((<expr#2> as WithTypeConstant), ([22:10-16], Hwildcard)); ((<expr#2>::TX), ([22:10-16], Hwildcard))];
                              args = [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))]; 
                              unpacked_arg = None }))
                        }))));

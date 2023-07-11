@@ -68,7 +68,6 @@ type canon_result =
   | Concrete of Aast.hint
   | This of Pos.t
   | Classname of Pos.t
-  | Wildcard of Pos.t
   | Tycon of Pos.t * string
   | Typaram of string
   | Varray of Pos.t
@@ -123,8 +122,6 @@ let canonical_tycon typarams (pos, name) =
     Concrete (pos, Aast.Hdynamic)
   else if String.equal name SN.Typehints.this then
     This pos
-  else if String.equal name SN.Typehints.wildcard then
-    Wildcard pos
   else if
     String.(
       equal name ("\\" ^ SN.Typehints.void)
@@ -234,16 +231,6 @@ let canonicalize_happly tparams hint_pos tycon hints =
         None
     in
     Ok ((pos, Aast.Hthis), err_opt)
-  | Wildcard pos ->
-    if not (List.is_empty hints) then
-      let err =
-        Err.naming
-        @@ Naming_error.Tparam_applied_to_type
-             { pos = hint_pos; tparam_name = SN.Typehints.wildcard }
-      in
-      Error ((hint_pos, Aast.Herr), err)
-    else
-      Ok ((hint_pos, Aast.Happly ((pos, SN.Typehints.wildcard), [])), None)
   | Classname pos ->
     (* TODO[mjt] currently if `classname` is not applied to exactly
        one type parameter, it canonicalizes to `Hprim Tstring`.

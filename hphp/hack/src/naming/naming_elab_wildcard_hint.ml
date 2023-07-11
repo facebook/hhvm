@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module SN = Naming_special_names
 
 module Env = struct
   let incr_tp_depth t =
@@ -74,8 +73,7 @@ let on_shape_field_info sfi ~ctx = (Env.incr_tp_depth ctx, Ok sfi)
 
 let on_context on_error hint ~ctx =
   match hint with
-  | (pos, Aast.Happly ((_, tycon_name), _))
-    when String.equal tycon_name SN.Typehints.wildcard ->
+  | (pos, Aast.Hwildcard) ->
     on_error
       (Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos);
     (ctx, Error (pos, Aast.Herr))
@@ -83,19 +81,9 @@ let on_context on_error hint ~ctx =
 
 let on_hint on_error hint ~ctx =
   match hint with
-  | (pos, Aast.Happly ((_, tycon_name), hints))
-    when String.equal tycon_name SN.Typehints.wildcard ->
+  | (pos, Aast.Hwildcard) ->
     if Env.(allow_wildcard ctx && tp_depth ctx >= 1) (* prevents 3 as _ *) then
-      if not (List.is_empty hints) then (
-        let err =
-          Naming_phase_error.naming
-          @@ Naming_error.Tparam_applied_to_type
-               { pos; tparam_name = SN.Typehints.wildcard }
-        in
-        on_error err;
-        (ctx, Ok (pos, Aast.Herr))
-      ) else
-        (ctx, Ok hint)
+      (ctx, Ok hint)
     else
       let err =
         Naming_phase_error.naming @@ Naming_error.Wildcard_hint_disallowed pos

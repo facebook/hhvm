@@ -1228,7 +1228,7 @@ let localize_targ_with_kind
    * Hack will generate a fresh type variable *)
   let kind = snd nkind in
   match hint with
-  | (_, Aast.Happly ((p, id), [])) when String.equal id SN.Typehints.wildcard ->
+  | (p, Aast.Hwildcard) ->
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
     if is_higher_kinded then
       let ty_err = Typing_error.(primary @@ Primary.HKT_wildcard (fst hint)) in
@@ -1289,14 +1289,7 @@ let localize_targs_with_kinds
      * TODO(coeffects) attempt to remove Tast.to_nast_expr calls *)
     generated_tparam_count > 0
     && targ_count = tparam_count
-    && List.for_all
-         ~f:(function
-           | a ->
-             (match a with
-             | (_, Aast.Happly ((_, n), _)) ->
-               String.equal n SN.Typehints.wildcard
-             | _ -> false))
-         targl
+    && List.for_all ~f:Aast_defs.is_wildcard_hint targl
   in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
@@ -1359,9 +1352,7 @@ let localize_targs_with_kinds
   (* Generate fresh type variables for the remainder *)
   let ((env, implicit_targ_ty_err_opt), implicit_targs) =
     let mk_implicit_targ env (kind_name, kind) =
-      let wildcard_hint =
-        (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), []))
-      in
+      let wildcard_hint = (use_pos, Aast.Hwildcard) in
       if
         check_well_kinded
         && KindDefs.Simple.get_arity kind > 0
@@ -1400,16 +1391,9 @@ let localize_targs_with_kinds
   in
 
   let check_for_explicit_user_attribute tparam (_, hint) =
-    let is_wildcard =
-      match hint with
-      | (_, Aast.Happly ((_, class_id), _))
-        when String.equal class_id SN.Typehints.wildcard ->
-        true
-      | _ -> false
-    in
     if
       Attributes.mem SN.UserAttributes.uaExplicit tparam.tp_user_attributes
-      && is_wildcard
+      && Aast_defs.is_wildcard_hint hint
     then
       let (decl_pos, param_name) = tparam.tp_name in
       Some

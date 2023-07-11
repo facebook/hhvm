@@ -22,6 +22,7 @@ let rec validate_classname env (pos, hint) =
   | Aast.Hany
   | Aast.Herr
   | Aast.Hmixed
+  | Aast.Hwildcard
   | Aast.Hnonnull
   | Aast.Habstr _
   | Aast.Haccess _
@@ -117,6 +118,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hdynamic
   | Aast.Hnonnull
   | Aast.Hmixed
+  | Aast.Hwildcard
   | Aast.Hthis
   | Aast.Hnothing
   | Aast.Hfun_context _

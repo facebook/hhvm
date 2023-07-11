@@ -154,6 +154,7 @@ and hint_ ~in_signature env p h_ =
   | Hany
   | Herr
   | Hmixed
+  | Hwildcard
   | Hnonnull
   | Hprim _
   | Hthis

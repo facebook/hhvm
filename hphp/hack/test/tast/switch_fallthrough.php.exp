@@ -34,8 +34,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                 ((#0), [6:3-14],
                  (Call
                     { func = (((function<T>(readonly #0 $val)[]: #0)), [6:3-10], (Id ([6:3-10], "\\hh_show"))); 
-                      targs = [((#0), ([6:3-10], (Happly (([Pos.none], "_"), []))))]; 
-                      args = [(Pnormal, ((int), [6:11-13], (Lvar ([6:11-13], $x))))]; 
+                      targs = [((#0), ([6:3-10], Hwildcard))]; args = [(Pnormal, ((int), [6:11-13], (Lvar ([6:11-13], $x))))]; 
                       unpacked_arg = None }))));
             ([7:3-35:4],
              (Switch (((int), [7:11-13], (Lvar ([7:11-13], $x))),
@@ -46,7 +45,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                         ((#1), [12:7-18],
                          (Call
                             { func = (((function<T>(readonly #1 $val)[]: #1)), [12:7-14], (Id ([12:7-14], "\\hh_show"))); 
-                              targs = [((#1), ([12:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                              targs = [((#1), ([12:7-14], Hwildcard))]; 
                               args = [(Pnormal, ((int), [12:15-17], (Lvar ([12:15-17], $x))))]; 
                               unpacked_arg = None }))));
                      ([14:7-15], (Expr ((string), [14:7-14], (Binop { bop = (Eq None); lhs = ((string), [14:7-9], (Lvar ([14:7-9], $x))); rhs = ((string), [14:12-14], (String "")) }))));
@@ -55,7 +54,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((#2), [15:7-18],
                           (Call
                              { func = (((function<T>(readonly #2 $val)[]: #2)), [15:7-14], (Id ([15:7-14], "\\hh_show"))); 
-                               targs = [((#2), ([15:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                               targs = [((#2), ([15:7-14], Hwildcard))]; 
                                args = [(Pnormal, ((string), [15:15-17], (Lvar ([15:15-17], $x))))]; 
                                unpacked_arg = None }))));
                      ([Pos.none], Fallthrough)]);
@@ -65,7 +64,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                         ((#3), [19:7-18],
                          (Call
                             { func = (((function<T>(readonly #3 $val)[]: #3)), [19:7-14], (Id ([19:7-14], "\\hh_show"))); 
-                              targs = [((#3), ([19:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                              targs = [((#3), ([19:7-14], Hwildcard))]; 
                               args = [(Pnormal, (((int | string)), [19:15-17], (Lvar ([19:15-17], $x))))]; 
                               unpacked_arg = None }))));
                      ([20:7-17], (Expr ((bool), [20:7-16], (Binop { bop = (Eq None); lhs = ((bool), [20:7-9], (Lvar ([20:7-9], $x))); rhs = ((bool), [20:12-16], True) }))));
@@ -74,7 +73,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((#4), [22:7-18],
                           (Call
                              { func = (((function<T>(readonly #4 $val)[]: #4)), [22:7-14], (Id ([22:7-14], "\\hh_show"))); 
-                               targs = [((#4), ([22:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                               targs = [((#4), ([22:7-14], Hwildcard))]; 
                                args = [(Pnormal, ((bool), [22:15-17], (Lvar ([22:15-17], $x))))]; 
                                unpacked_arg = None }))));
                      ([Pos.none], Fallthrough)]);
@@ -84,7 +83,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                         ((#5), [26:7-18],
                          (Call
                             { func = (((function<T>(readonly #5 $val)[]: #5)), [26:7-14], (Id ([26:7-14], "\\hh_show"))); 
-                              targs = [((#5), ([26:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                              targs = [((#5), ([26:7-14], Hwildcard))]; 
                               args = [(Pnormal, (((int | bool)), [26:15-17], (Lvar ([26:15-17], $x))))]; 
                               unpacked_arg = None }))));
                      ([27:7-13], Break)]);
@@ -94,7 +93,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                         ((#6), [30:7-18],
                          (Call
                             { func = (((function<T>(readonly #6 $val)[]: #6)), [30:7-14], (Id ([30:7-14], "\\hh_show"))); 
-                              targs = [((#6), ([30:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                              targs = [((#6), ([30:7-14], Hwildcard))]; 
                               args = [(Pnormal, ((int), [30:15-17], (Lvar ([30:15-17], $x))))]; 
                               unpacked_arg = None }))));
                      ([32:7-16], (Expr ((float), [32:7-15], (Binop { bop = (Eq None); lhs = ((float), [32:7-9], (Lvar ([32:7-9], $x))); rhs = ((float), [32:12-15], (Float "1.0")) }))));
@@ -103,7 +102,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                          ((#7), [33:7-18],
                           (Call
                              { func = (((function<T>(readonly #7 $val)[]: #7)), [33:7-14], (Id ([33:7-14], "\\hh_show"))); 
-                               targs = [((#7), ([33:7-14], (Happly (([Pos.none], "_"), []))))]; 
+                               targs = [((#7), ([33:7-14], Hwildcard))]; 
                                args = [(Pnormal, ((float), [33:15-17], (Lvar ([33:15-17], $x))))]; 
                                unpacked_arg = None }))));
                      ([34:7-13], Break)])
@@ -114,8 +113,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                 ((#8), [37:3-14],
                  (Call
                     { func = (((function<T>(readonly #8 $val)[]: #8)), [37:3-10], (Id ([37:3-10], "\\hh_show"))); 
-                      targs = [((#8), ([37:3-10], (Happly (([Pos.none], "_"), []))))]; 
-                      args = [(Pnormal, (((bool | num)), [37:11-13], (Lvar ([37:11-13], $x))))]; 
+                      targs = [((#8), ([37:3-10], Hwildcard))]; args = [(Pnormal, (((bool | num)), [37:11-13], (Lvar ([37:11-13], $x))))]; 
                       unpacked_arg = None }))))
             ]
           };

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d189a988ea47cb2317b700cf80743d2>>
+// @generated SignedSource<<8e994880e5fe969324808ed7be1a0641>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3508,6 +3508,9 @@ impl Hint_ {
     pub fn mk_hmixed() -> Self {
         Hint_::Hmixed
     }
+    pub fn mk_hwildcard() -> Self {
+        Hint_::Hwildcard
+    }
     pub fn mk_hnonnull() -> Self {
         Hint_::Hnonnull
     }
@@ -3610,6 +3613,12 @@ impl Hint_ {
     pub fn is_hmixed(&self) -> bool {
         match self {
             Hint_::Hmixed => true,
+            _ => false,
+        }
+    }
+    pub fn is_hwildcard(&self) -> bool {
+        match self {
+            Hint_::Hwildcard => true,
             _ => false,
         }
     }

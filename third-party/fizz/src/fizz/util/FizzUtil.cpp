@@ -53,6 +53,22 @@ std::vector<folly::ssl::X509UniquePtr> FizzUtil::readChainFile(
   return certs;
 }
 
+folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKeyFromBuf(
+    folly::ByteRange privateKey,
+    const std::string& passwordFilename) {
+  std::shared_ptr<folly::PasswordInFile> pf;
+  if (!passwordFilename.empty()) {
+    pf = std::make_shared<folly::PasswordInFile>(passwordFilename);
+  }
+  try {
+    return FizzUtil::decryptPrivateKey(privateKey, pf.get());
+  } catch (std::runtime_error&) {
+    std::string pwFile = pf ? pf->describe().c_str() : "(none)";
+    throw std::runtime_error(
+        folly::sformat("failed to decrypt private key; pwFile: {}", pwFile));
+  }
+}
+
 folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKey(
     const std::string& filename,
     const std::shared_ptr<folly::PasswordInFile>& pf) {
@@ -61,7 +77,7 @@ folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKey(
   try {
     return FizzUtil::decryptPrivateKey(data, pf.get());
   } catch (std::runtime_error&) {
-    const char* pwFile = pf ? pf->describe().c_str() : "(none)";
+    std::string pwFile = pf ? pf->describe().c_str() : "(none)";
     auto ex = folly::sformat(
         "Failed to read private key from file: {}, password file: {}",
         filename,
@@ -82,6 +98,13 @@ folly::ssl::EvpPkeyUniquePtr FizzUtil::readPrivateKey(
 
 folly::ssl::EvpPkeyUniquePtr FizzUtil::decryptPrivateKey(
     const std::string& data,
+    folly::PasswordInFile* pf) {
+  folly::ByteRange keyBuf((folly::StringPiece(data)));
+  return FizzUtil::decryptPrivateKey(keyBuf, pf);
+}
+
+folly::ssl::EvpPkeyUniquePtr FizzUtil::decryptPrivateKey(
+    folly::ByteRange data,
     folly::PasswordInFile* pf) {
   folly::ssl::BioUniquePtr keyBio(BIO_new_mem_buf(
       const_cast<void*>( // needed by openssl 1.0.2d

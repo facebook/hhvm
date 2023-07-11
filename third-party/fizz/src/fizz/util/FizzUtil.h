@@ -26,6 +26,10 @@ class FizzUtil {
   static std::vector<folly::ssl::X509UniquePtr> readChainFile(
       const std::string& filename);
 
+  static folly::ssl::EvpPkeyUniquePtr readPrivateKeyFromBuf(
+      folly::ByteRange privateKey,
+      const std::string& passwordFilename);
+
   static folly::ssl::EvpPkeyUniquePtr readPrivateKey(
       const std::string& filename,
       const std::shared_ptr<folly::PasswordInFile>& pf);
@@ -39,8 +43,13 @@ class FizzUtil {
   static std::vector<std::string> getAlpnsFromNpnList(
       const std::list<folly::SSLContext::NextProtocolsItem>& list);
 
+  // TODO richardsonnick Fix callsites that use std::string version
   static folly::ssl::EvpPkeyUniquePtr decryptPrivateKey(
       const std::string& data,
+      folly::PasswordInFile* pf);
+
+  static folly::ssl::EvpPkeyUniquePtr decryptPrivateKey(
+      folly::ByteRange data,
       folly::PasswordInFile* pf);
 
   static std::unique_ptr<KeyExchange> createKeyExchange(

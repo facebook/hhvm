@@ -76,7 +76,7 @@ Optional<ColorMap> performColoring(const LayoutWeightVector& layouts,
         result.emplace_back(std::move(key), std::move(val));
       }
     );
-    std::sort(
+    std::stable_sort(
       result.begin(),
       result.end(),
       [](auto const& a, auto const& b) {

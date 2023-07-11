@@ -44,9 +44,10 @@ pub(crate) fn write_ast<T: Serialize + fmt::Debug>(
     span: Span,
     replacements: HashMap<String, Replacement>,
     pos_src: TokenStream,
+    pos_id: TokenStream,
     t: T,
 ) -> Result<TokenStream, AstError> {
-    let state = Rc::new(AstState::new(exports, span, replacements));
+    let state = Rc::new(AstState::new(exports, pos_id, replacements));
     let exports = &state.exports;
 
     let t = t.serialize(AstWriter::new(state.clone()))?.into_tokens()?;
@@ -65,6 +66,10 @@ pub(crate) fn write_ast<T: Serialize + fmt::Debug>(
         let #tmp = #t;
         #tmp
     }))
+}
+
+pub(crate) fn hygienic_pos(span: Span) -> TokenStream {
+    Ident::new("__hygienic_pos", span).to_token_stream()
 }
 
 /// Describes replacements that should occur while we build the AST.
@@ -297,8 +302,11 @@ struct AstState {
 }
 
 impl AstState {
-    fn new(exports: syn::Path, span: Span, replacements: HashMap<String, Replacement>) -> Self {
-        let pos = Ident::new("__hygienic_pos", span).to_token_stream();
+    fn new(
+        exports: syn::Path,
+        pos: TokenStream,
+        replacements: HashMap<String, Replacement>,
+    ) -> Self {
         Self {
             exports,
             pos,

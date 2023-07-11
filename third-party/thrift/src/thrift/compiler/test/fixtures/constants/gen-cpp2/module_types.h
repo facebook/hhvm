@@ -932,10 +932,8 @@ class struct1 final  {
 
  public:
 
-  struct1() :
-      __fbthrift_field_a(static_cast<::std::int32_t>(1234567)),
-      __fbthrift_field_b(apache::thrift::StringTraits<std::string>::fromStringLiteral("<uninitialized>")) {
-  }
+  struct1();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   struct1(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::std::string b__arg);
@@ -947,6 +945,9 @@ class struct1 final  {
 
   struct1& operator=(struct1&&) noexcept;
   struct1& operator=(const struct1& src);
+
+  ~struct1();
+
  private:
   ::std::int32_t __fbthrift_field_a;
  private:
@@ -1143,9 +1144,8 @@ class struct2 final  {
 
  public:
 
-  struct2() :
-      __fbthrift_field_a() {
-  }
+  struct2();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   struct2(apache::thrift::FragileConstructor, ::std::int32_t a__arg, ::std::string b__arg, ::cpp2::struct1 c__arg, ::std::vector<::std::int32_t> d__arg);
@@ -1157,6 +1157,9 @@ class struct2 final  {
 
   struct2& operator=(struct2&&) noexcept;
   struct2& operator=(const struct2& src);
+
+  ~struct2();
+
  private:
   ::std::int32_t __fbthrift_field_a;
  private:
@@ -1453,9 +1456,8 @@ class struct3 final  {
 
  public:
 
-  struct3() :
-      __fbthrift_field_b() {
-  }
+  struct3();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   struct3(apache::thrift::FragileConstructor, ::std::string a__arg, ::std::int32_t b__arg, ::cpp2::struct2 c__arg);
@@ -1467,6 +1469,9 @@ class struct3 final  {
 
   struct3& operator=(struct3&&) noexcept;
   struct3& operator=(const struct3& src);
+
+  ~struct3();
+
  private:
   ::std::string __fbthrift_field_a;
  private:

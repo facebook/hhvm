@@ -415,6 +415,13 @@ const folly::StringPiece Val::__fbthrift_get_class_name() {
 
 Val::Val(const Val&) = default;
 Val& Val::operator=(const Val&) = default;
+Val::Val() :
+      __fbthrift_field_intVal() {
+}
+
+
+Val::~Val() {}
+
 Val::Val(FOLLY_MAYBE_UNUSED Val&& other) noexcept :
     __fbthrift_field_strVal(std::move(other.__fbthrift_field_strVal)),
     __fbthrift_field_intVal(std::move(other.__fbthrift_field_intVal)),

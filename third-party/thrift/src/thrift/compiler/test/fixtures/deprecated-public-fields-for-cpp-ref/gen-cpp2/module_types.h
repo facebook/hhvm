@@ -96,8 +96,8 @@ class Foo final  {
 
  public:
 
-  Foo() {
-  }
+  Foo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Foo(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Foo> foo__arg, ::std::shared_ptr<::cpp2::Foo> bar__arg);
@@ -108,6 +108,9 @@ class Foo final  {
 
   Foo& operator=(Foo&&) noexcept;
   Foo& operator=(const Foo& src);
+
+  ~Foo();
+
  private:
   ::std::unique_ptr<::cpp2::Foo> __fbthrift_field_foo;
  private:

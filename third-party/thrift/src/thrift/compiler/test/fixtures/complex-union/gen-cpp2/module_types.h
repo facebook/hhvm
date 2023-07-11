@@ -1545,9 +1545,8 @@ class Val final  {
 
  public:
 
-  Val() :
-      __fbthrift_field_intVal() {
-  }
+  Val();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Val(apache::thrift::FragileConstructor, ::std::string strVal__arg, ::std::int32_t intVal__arg, ::cpp2::containerTypedef typedefValue__arg);
@@ -1559,6 +1558,9 @@ class Val final  {
 
   Val& operator=(Val&&) noexcept;
   Val& operator=(const Val& src);
+
+  ~Val();
+
  private:
   ::std::string __fbthrift_field_strVal;
  private:

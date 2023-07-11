@@ -715,8 +715,8 @@ class MyDataItem final  {
 
  public:
 
-  MyDataItem() {
-  }
+  MyDataItem();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataItem(apache::thrift::FragileConstructor, ::std::string s__arg);
@@ -728,6 +728,9 @@ class MyDataItem final  {
 
   MyDataItem& operator=(MyDataItem&&) noexcept;
   MyDataItem& operator=(const MyDataItem& src);
+
+  ~MyDataItem();
+
  private:
   ::std::string __fbthrift_field_s;
  private:
@@ -1492,9 +1495,8 @@ class DoubledPair final  {
 
  public:
 
-  DoubledPair() :
-      __fbthrift_field_x() {
-  }
+  DoubledPair();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   DoubledPair(apache::thrift::FragileConstructor, ::std::string s__arg, ::std::int32_t x__arg);
@@ -1506,6 +1508,9 @@ class DoubledPair final  {
 
   DoubledPair& operator=(DoubledPair&&) noexcept;
   DoubledPair& operator=(const DoubledPair& src);
+
+  ~DoubledPair();
+
  private:
   ::std::string __fbthrift_field_s;
  private:
@@ -1702,9 +1707,8 @@ class StringPair final  {
 
  public:
 
-  StringPair() {
-    ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
-  }
+  StringPair();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StringPair(apache::thrift::FragileConstructor, ::std::string normal__arg, ::apache::thrift::adapt_detail::adapted_field_t<::thrift::test::lib::StringDoubler, 2, ::std::string, StringPair> doubled__arg);
@@ -1715,6 +1719,9 @@ class StringPair final  {
 
   StringPair& operator=(StringPair&&) noexcept;
   StringPair& operator=(const StringPair& src);
+
+  ~StringPair();
+
  private:
   ::std::string __fbthrift_field_normal;
  private:
@@ -4028,11 +4035,8 @@ class ComposeStruct final  {
 
  public:
 
-  ComposeStruct() :
-      __fbthrift_field_enum_(),
-      __fbthrift_field_renamed_(),
-      __fbthrift_field_aliased(std::make_shared<::test::fixtures::basic-python-capi::ListAlias>()) {
-  }
+  ComposeStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg);
@@ -4041,6 +4045,9 @@ class ComposeStruct final  {
 
 
   ComposeStruct& operator=(ComposeStruct&&) noexcept;
+
+  ~ComposeStruct();
+
  private:
   ::test::fixtures::basic-python-capi::MyEnum __fbthrift_field_enum_;
  private:
@@ -5209,9 +5216,8 @@ class MyStructField6PatchStruct final  {
 
  public:
 
-  MyStructField6PatchStruct() :
-      __fbthrift_field_clear() {
-  }
+  MyStructField6PatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructField6PatchStruct(apache::thrift::FragileConstructor, ::std::vector<float> assign__arg, bool clear__arg, ::std::vector<float> prepend__arg, ::std::vector<float> append__arg);
@@ -5223,6 +5229,9 @@ class MyStructField6PatchStruct final  {
 
   MyStructField6PatchStruct& operator=(MyStructField6PatchStruct&&) noexcept;
   MyStructField6PatchStruct& operator=(const MyStructField6PatchStruct& src);
+
+  ~MyStructField6PatchStruct();
+
  private:
   ::std::vector<float> __fbthrift_field_assign;
  private:
@@ -5990,9 +5999,8 @@ class MyStructField8PatchStruct final  {
 
  public:
 
-  MyStructField8PatchStruct() :
-      __fbthrift_field_clear() {
-  }
+  MyStructField8PatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructField8PatchStruct(apache::thrift::FragileConstructor, ::std::set<::std::int32_t> assign__arg, bool clear__arg, ::std::set<::std::int32_t> remove__arg, ::std::set<::std::int32_t> add__arg);
@@ -6004,6 +6012,9 @@ class MyStructField8PatchStruct final  {
 
   MyStructField8PatchStruct& operator=(MyStructField8PatchStruct&&) noexcept;
   MyStructField8PatchStruct& operator=(const MyStructField8PatchStruct& src);
+
+  ~MyStructField8PatchStruct();
+
  private:
   ::std::set<::std::int32_t> __fbthrift_field_assign;
  private:
@@ -6294,9 +6305,8 @@ class MyDataItemFieldPatchStruct final  {
 
  public:
 
-  MyDataItemFieldPatchStruct() :
-      __fbthrift_field_s(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())) {
-  }
+  MyDataItemFieldPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataItemFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> s__arg);
@@ -6307,6 +6317,9 @@ class MyDataItemFieldPatchStruct final  {
 
   MyDataItemFieldPatchStruct& operator=(MyDataItemFieldPatchStruct&&) noexcept;
   MyDataItemFieldPatchStruct& operator=(const MyDataItemFieldPatchStruct& src);
+
+  ~MyDataItemFieldPatchStruct();
+
  private:
   ::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch> __fbthrift_field_s;
 
@@ -6431,8 +6444,8 @@ class MyDataItemEnsureStruct final  {
 
  public:
 
-  MyDataItemEnsureStruct() {
-  }
+  MyDataItemEnsureStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyDataItemEnsureStruct(apache::thrift::FragileConstructor, ::std::string s__arg);
@@ -6444,6 +6457,9 @@ class MyDataItemEnsureStruct final  {
 
   MyDataItemEnsureStruct& operator=(MyDataItemEnsureStruct&&) noexcept;
   MyDataItemEnsureStruct& operator=(const MyDataItemEnsureStruct& src);
+
+  ~MyDataItemEnsureStruct();
+
  private:
   ::std::string __fbthrift_field_s;
  private:

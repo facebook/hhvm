@@ -173,11 +173,8 @@ class Default final  {
 
  public:
 
-  Default() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-  }
+  Default();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Default(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::string field3__arg, double field4__arg);
@@ -189,6 +186,9 @@ class Default final  {
 
   Default& operator=(Default&&) noexcept;
   Default& operator=(const Default& src);
+
+  ~Default();
+
  private:
   ::std::int32_t __fbthrift_field_field1;
  private:
@@ -505,11 +505,8 @@ class NonAtomic final  {
 
  public:
 
-  NonAtomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-  }
+  NonAtomic();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   NonAtomic(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::string field3__arg, double field4__arg);
@@ -521,6 +518,9 @@ class NonAtomic final  {
 
   NonAtomic& operator=(NonAtomic&&) noexcept;
   NonAtomic& operator=(const NonAtomic& src);
+
+  ~NonAtomic();
+
  private:
   ::std::int32_t __fbthrift_field_field1;
  private:
@@ -837,11 +837,8 @@ class Atomic final  {
 
  public:
 
-  Atomic() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-  }
+  Atomic();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Atomic(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::string field3__arg, double field4__arg);
@@ -853,6 +850,9 @@ class Atomic final  {
 
   Atomic& operator=(Atomic&&) noexcept;
   Atomic& operator=(const Atomic& src);
+
+  ~Atomic();
+
  private:
   ::std::int32_t __fbthrift_field_field1;
  private:
@@ -1169,11 +1169,8 @@ class AtomicFoo final  {
 
  public:
 
-  AtomicFoo() :
-      __fbthrift_field_field1(),
-      __fbthrift_field_field2(),
-      __fbthrift_field_field4() {
-  }
+  AtomicFoo();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   AtomicFoo(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::string field3__arg, double field4__arg);
@@ -1185,6 +1182,9 @@ class AtomicFoo final  {
 
   AtomicFoo& operator=(AtomicFoo&&) noexcept;
   AtomicFoo& operator=(const AtomicFoo& src);
+
+  ~AtomicFoo();
+
  private:
   ::std::int32_t __fbthrift_field_field1;
  private:

@@ -296,6 +296,12 @@ const folly::StringPiece MyDataItem::__fbthrift_get_class_name() {
 
 MyDataItem::MyDataItem(const MyDataItem&) = default;
 MyDataItem& MyDataItem::operator=(const MyDataItem&) = default;
+MyDataItem::MyDataItem() {
+}
+
+
+MyDataItem::~MyDataItem() {}
+
 MyDataItem::MyDataItem(FOLLY_MAYBE_UNUSED MyDataItem&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __isset(other.__isset) {
@@ -472,6 +478,13 @@ const folly::StringPiece DoubledPair::__fbthrift_get_class_name() {
 
 DoubledPair::DoubledPair(const DoubledPair&) = default;
 DoubledPair& DoubledPair::operator=(const DoubledPair&) = default;
+DoubledPair::DoubledPair() :
+      __fbthrift_field_x() {
+}
+
+
+DoubledPair::~DoubledPair() {}
+
 DoubledPair::DoubledPair(FOLLY_MAYBE_UNUSED DoubledPair&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __fbthrift_field_x(std::move(other.__fbthrift_field_x)),
@@ -591,6 +604,13 @@ StringPair& StringPair::operator=(const StringPair& other) {
   swap(*this, tmp);
   return *this;
 }
+
+StringPair::StringPair() {
+  ::apache::thrift::adapt_detail::construct<::thrift::test::lib::StringDoubler, 2>(__fbthrift_field_doubled, *this);
+}
+
+
+StringPair::~StringPair() {}
 
 StringPair::StringPair(FOLLY_MAYBE_UNUSED StringPair&& other) noexcept :
     __fbthrift_field_normal(std::move(other.__fbthrift_field_normal)),
@@ -1630,6 +1650,15 @@ const folly::StringPiece ComposeStruct::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ComposeStruct>::name;
 }
 
+ComposeStruct::ComposeStruct() :
+      __fbthrift_field_enum_(),
+      __fbthrift_field_renamed_(),
+      __fbthrift_field_aliased(std::make_shared<::test::fixtures::basic-python-capi::ListAlias>()) {
+}
+
+
+ComposeStruct::~ComposeStruct() {}
+
 ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept :
     __fbthrift_field_enum_(std::move(other.__fbthrift_field_enum_)),
     __fbthrift_field_renamed_(std::move(other.__fbthrift_field_renamed_)),
@@ -2219,6 +2248,13 @@ const folly::StringPiece MyStructField6PatchStruct::__fbthrift_get_class_name() 
 
 MyStructField6PatchStruct::MyStructField6PatchStruct(const MyStructField6PatchStruct&) = default;
 MyStructField6PatchStruct& MyStructField6PatchStruct::operator=(const MyStructField6PatchStruct&) = default;
+MyStructField6PatchStruct::MyStructField6PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+MyStructField6PatchStruct::~MyStructField6PatchStruct() {}
+
 MyStructField6PatchStruct::MyStructField6PatchStruct(FOLLY_MAYBE_UNUSED MyStructField6PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
@@ -2598,6 +2634,13 @@ const folly::StringPiece MyStructField8PatchStruct::__fbthrift_get_class_name() 
 
 MyStructField8PatchStruct::MyStructField8PatchStruct(const MyStructField8PatchStruct&) = default;
 MyStructField8PatchStruct& MyStructField8PatchStruct::operator=(const MyStructField8PatchStruct&) = default;
+MyStructField8PatchStruct::MyStructField8PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+MyStructField8PatchStruct::~MyStructField8PatchStruct() {}
+
 MyStructField8PatchStruct::MyStructField8PatchStruct(FOLLY_MAYBE_UNUSED MyStructField8PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
@@ -3445,6 +3488,13 @@ MyDataItemFieldPatchStruct& MyDataItemFieldPatchStruct::operator=(const MyDataIt
   return *this;
 }
 
+MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct() :
+      __fbthrift_field_s(::apache::thrift::detail::boxed_value<::apache::thrift::op::StringPatch>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>>())) {
+}
+
+
+MyDataItemFieldPatchStruct::~MyDataItemFieldPatchStruct() {}
+
 MyDataItemFieldPatchStruct::MyDataItemFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataItemFieldPatchStruct&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1>(*__fbthrift_field_s, *this);
@@ -3548,6 +3598,12 @@ const folly::StringPiece MyDataItemEnsureStruct::__fbthrift_get_class_name() {
 
 MyDataItemEnsureStruct::MyDataItemEnsureStruct(const MyDataItemEnsureStruct&) = default;
 MyDataItemEnsureStruct& MyDataItemEnsureStruct::operator=(const MyDataItemEnsureStruct&) = default;
+MyDataItemEnsureStruct::MyDataItemEnsureStruct() {
+}
+
+
+MyDataItemEnsureStruct::~MyDataItemEnsureStruct() {}
+
 MyDataItemEnsureStruct::MyDataItemEnsureStruct(FOLLY_MAYBE_UNUSED MyDataItemEnsureStruct&& other) noexcept :
     __fbthrift_field_s(std::move(other.__fbthrift_field_s)),
     __isset(other.__isset) {

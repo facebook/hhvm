@@ -204,8 +204,8 @@ class MyStructNestedAnnotation final  {
 
  public:
 
-  MyStructNestedAnnotation() {
-  }
+  MyStructNestedAnnotation();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   MyStructNestedAnnotation(apache::thrift::FragileConstructor, ::std::string name__arg);
@@ -217,6 +217,9 @@ class MyStructNestedAnnotation final  {
 
   MyStructNestedAnnotation& operator=(MyStructNestedAnnotation&&) noexcept;
   MyStructNestedAnnotation& operator=(const MyStructNestedAnnotation& src);
+
+  ~MyStructNestedAnnotation();
+
  private:
   ::std::string __fbthrift_field_name;
  private:
@@ -1235,9 +1238,8 @@ class SecretStruct final  {
 
  public:
 
-  SecretStruct() :
-      __fbthrift_field_id() {
-  }
+  SecretStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   SecretStruct(apache::thrift::FragileConstructor, ::std::int64_t id__arg, ::std::string password__arg);
@@ -1249,6 +1251,9 @@ class SecretStruct final  {
 
   SecretStruct& operator=(SecretStruct&&) noexcept;
   SecretStruct& operator=(const SecretStruct& src);
+
+  ~SecretStruct();
+
  private:
   ::std::int64_t __fbthrift_field_id;
  private:

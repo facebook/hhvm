@@ -45,6 +45,12 @@ const folly::StringPiece Foo::__fbthrift_get_class_name() {
 
 Foo::Foo(const Foo&) = default;
 Foo& Foo::operator=(const Foo&) = default;
+Foo::Foo() {
+}
+
+
+Foo::~Foo() {}
+
 Foo::Foo(FOLLY_MAYBE_UNUSED Foo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -238,6 +244,12 @@ LazyFoo& LazyFoo::operator=(const LazyFoo& other) {
   swap(*this, tmp);
   return *this;
 }
+
+LazyFoo::LazyFoo() {
+}
+
+
+LazyFoo::~LazyFoo() {}
 
 LazyFoo::LazyFoo(FOLLY_MAYBE_UNUSED LazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
@@ -506,6 +518,12 @@ const folly::StringPiece OptionalFoo::__fbthrift_get_class_name() {
 
 OptionalFoo::OptionalFoo(const OptionalFoo&) = default;
 OptionalFoo& OptionalFoo::operator=(const OptionalFoo&) = default;
+OptionalFoo::OptionalFoo() {
+}
+
+
+OptionalFoo::~OptionalFoo() {}
+
 OptionalFoo::OptionalFoo(FOLLY_MAYBE_UNUSED OptionalFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
@@ -700,6 +718,12 @@ OptionalLazyFoo& OptionalLazyFoo::operator=(const OptionalLazyFoo& other) {
   swap(*this, tmp);
   return *this;
 }
+
+OptionalLazyFoo::OptionalLazyFoo() {
+}
+
+
+OptionalLazyFoo::~OptionalLazyFoo() {}
 
 OptionalLazyFoo::OptionalLazyFoo(FOLLY_MAYBE_UNUSED OptionalLazyFoo&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
@@ -1006,6 +1030,13 @@ LazyCppRef& LazyCppRef::operator=(const LazyCppRef& other) {
   swap(*this, tmp);
   return *this;
 }
+
+LazyCppRef::LazyCppRef() :
+      __fbthrift_field_field4(std::make_unique<::std::vector<::std::int32_t>>()) {
+}
+
+
+LazyCppRef::~LazyCppRef() {}
 
 LazyCppRef::LazyCppRef(FOLLY_MAYBE_UNUSED LazyCppRef&& other) noexcept :
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),

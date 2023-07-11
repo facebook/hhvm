@@ -45,6 +45,12 @@ const folly::StringPiece Fields::__fbthrift_get_class_name() {
 
 Fields::Fields(const Fields&) = default;
 Fields& Fields::operator=(const Fields&) = default;
+Fields::Fields() {
+}
+
+
+Fields::~Fields() {}
+
 Fields::Fields(FOLLY_MAYBE_UNUSED Fields&& other) noexcept :
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __isset(other.__isset) {
@@ -144,6 +150,12 @@ const folly::StringPiece FieldsInjectedToEmptyStruct::__fbthrift_get_class_name(
 
 FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(const FieldsInjectedToEmptyStruct&) = default;
 FieldsInjectedToEmptyStruct& FieldsInjectedToEmptyStruct::operator=(const FieldsInjectedToEmptyStruct&) = default;
+FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct() {
+}
+
+
+FieldsInjectedToEmptyStruct::~FieldsInjectedToEmptyStruct() {}
+
 FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(FOLLY_MAYBE_UNUSED FieldsInjectedToEmptyStruct&& other) noexcept :
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
     __isset(other.__isset) {
@@ -243,6 +255,12 @@ const folly::StringPiece FieldsInjectedToStruct::__fbthrift_get_class_name() {
 
 FieldsInjectedToStruct::FieldsInjectedToStruct(const FieldsInjectedToStruct&) = default;
 FieldsInjectedToStruct& FieldsInjectedToStruct::operator=(const FieldsInjectedToStruct&) = default;
+FieldsInjectedToStruct::FieldsInjectedToStruct() {
+}
+
+
+FieldsInjectedToStruct::~FieldsInjectedToStruct() {}
+
 FieldsInjectedToStruct::FieldsInjectedToStruct(FOLLY_MAYBE_UNUSED FieldsInjectedToStruct&& other) noexcept :
     __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),
@@ -354,6 +372,12 @@ const folly::StringPiece FieldsInjectedWithIncludedStruct::__fbthrift_get_class_
 
 FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(const FieldsInjectedWithIncludedStruct&) = default;
 FieldsInjectedWithIncludedStruct& FieldsInjectedWithIncludedStruct::operator=(const FieldsInjectedWithIncludedStruct&) = default;
+FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct() {
+}
+
+
+FieldsInjectedWithIncludedStruct::~FieldsInjectedWithIncludedStruct() {}
+
 FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(FOLLY_MAYBE_UNUSED FieldsInjectedWithIncludedStruct&& other) noexcept :
     __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
     __fbthrift_field_injected_field(std::move(other.__fbthrift_field_injected_field)),

@@ -125,8 +125,8 @@ class InitialResponse final  {
 
  public:
 
-  InitialResponse() {
-  }
+  InitialResponse();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   InitialResponse(apache::thrift::FragileConstructor, ::std::string content__arg);
@@ -138,6 +138,9 @@ class InitialResponse final  {
 
   InitialResponse& operator=(InitialResponse&&) noexcept;
   InitialResponse& operator=(const InitialResponse& src);
+
+  ~InitialResponse();
+
  private:
   ::std::string __fbthrift_field_content;
  private:
@@ -276,8 +279,8 @@ class FinalResponse final  {
 
  public:
 
-  FinalResponse() {
-  }
+  FinalResponse();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   FinalResponse(apache::thrift::FragileConstructor, ::std::string content__arg);
@@ -289,6 +292,9 @@ class FinalResponse final  {
 
   FinalResponse& operator=(FinalResponse&&) noexcept;
   FinalResponse& operator=(const FinalResponse& src);
+
+  ~FinalResponse();
+
  private:
   ::std::string __fbthrift_field_content;
  private:
@@ -427,8 +433,8 @@ class SinkPayload final  {
 
  public:
 
-  SinkPayload() {
-  }
+  SinkPayload();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   SinkPayload(apache::thrift::FragileConstructor, ::std::string content__arg);
@@ -440,6 +446,9 @@ class SinkPayload final  {
 
   SinkPayload& operator=(SinkPayload&&) noexcept;
   SinkPayload& operator=(const SinkPayload& src);
+
+  ~SinkPayload();
+
  private:
   ::std::string __fbthrift_field_content;
  private:
@@ -578,8 +587,8 @@ class CompatibleWithKeywordSink final  {
 
  public:
 
-  CompatibleWithKeywordSink() {
-  }
+  CompatibleWithKeywordSink();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   CompatibleWithKeywordSink(apache::thrift::FragileConstructor, ::std::string sink__arg);
@@ -591,6 +600,9 @@ class CompatibleWithKeywordSink final  {
 
   CompatibleWithKeywordSink& operator=(CompatibleWithKeywordSink&&) noexcept;
   CompatibleWithKeywordSink& operator=(const CompatibleWithKeywordSink& src);
+
+  ~CompatibleWithKeywordSink();
+
  private:
   ::std::string __fbthrift_field_sink;
  private:

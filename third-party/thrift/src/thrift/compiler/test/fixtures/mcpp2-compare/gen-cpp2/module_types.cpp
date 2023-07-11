@@ -2618,6 +2618,14 @@ MyIncludedStruct& MyIncludedStruct::operator=(const MyIncludedStruct& other) {
   return *this;
 }
 
+MyIncludedStruct::MyIncludedStruct() :
+      __fbthrift_field_MyIncludedInt(static_cast<::a::different::ns::IncludedInt64>(42)),
+      __fbthrift_field_ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
+}
+
+
+MyIncludedStruct::~MyIncludedStruct() {}
+
 MyIncludedStruct::MyIncludedStruct(FOLLY_MAYBE_UNUSED MyIncludedStruct&& other) noexcept :
     __fbthrift_field_MyIncludedInt(std::move(other.__fbthrift_field_MyIncludedInt)),
     __fbthrift_field_MyIncludedStruct(std::move(other.__fbthrift_field_MyIncludedStruct)),
@@ -3377,6 +3385,12 @@ ComplexContainerStruct& ComplexContainerStruct::operator=(const ComplexContainer
   swap(*this, tmp);
   return *this;
 }
+
+ComplexContainerStruct::ComplexContainerStruct() {
+}
+
+
+ComplexContainerStruct::~ComplexContainerStruct() {}
 
 ComplexContainerStruct::ComplexContainerStruct(FOLLY_MAYBE_UNUSED ComplexContainerStruct&& other) noexcept :
     __fbthrift_field_map_of_iobufs(std::move(other.__fbthrift_field_map_of_iobufs)),

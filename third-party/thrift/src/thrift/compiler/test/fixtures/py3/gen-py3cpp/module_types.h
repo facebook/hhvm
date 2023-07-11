@@ -1286,8 +1286,8 @@ class OptionalRefStruct final  {
 
  public:
 
-  OptionalRefStruct() {
-  }
+  OptionalRefStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::simple::IOBufPtr optional_blob__arg);
@@ -1298,6 +1298,9 @@ class OptionalRefStruct final  {
 
   OptionalRefStruct& operator=(OptionalRefStruct&&) noexcept;
   OptionalRefStruct& operator=(const OptionalRefStruct& src);
+
+  ~OptionalRefStruct();
+
  private:
   ::py3::simple::IOBufPtr __fbthrift_field_optional_blob;
  private:
@@ -1441,9 +1444,8 @@ class HiddenTypeFieldsStruct final  {
 
  public:
 
-  HiddenTypeFieldsStruct() {
-    ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
-  }
+  HiddenTypeFieldsStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   HiddenTypeFieldsStruct(apache::thrift::FragileConstructor, ::py3::simple::AdaptedTypeDef field1__arg, ::std::vector<::py3::simple::AdaptedTypeDef> field2__arg, ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> field3__arg);
@@ -1454,6 +1456,9 @@ class HiddenTypeFieldsStruct final  {
 
   HiddenTypeFieldsStruct& operator=(HiddenTypeFieldsStruct&&) noexcept;
   HiddenTypeFieldsStruct& operator=(const HiddenTypeFieldsStruct& src);
+
+  ~HiddenTypeFieldsStruct();
+
  private:
   ::py3::simple::AdaptedTypeDef __fbthrift_field_field1;
  private:

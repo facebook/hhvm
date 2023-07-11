@@ -118,8 +118,8 @@ There are no other implicit or explicit conversions.
 
 ## Converting to Resource Type
 
-The [predefined resource-like constants](../built-in-types/resources.md) `STDIN`, `STDOUT`, and `STDERR`, can be converted implicitly to resource. No other
-non-resource type can be so converted. No explicit conversions exist.
+Standard IO streams returned by [file stream functions](../built-in-types/resources.md) `HH\\stdin()`, `HH\\stdout()`, and `HH\\stderr()`, can be converted implicitly to resource.
+No other non-resource type can be so converted. No explicit conversions exist.
 
 ## Converting to Mixed Type
 

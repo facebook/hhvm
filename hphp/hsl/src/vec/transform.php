@@ -20,6 +20,7 @@ use namespace HH\Lib\Math;
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function chunk<Tv>(
   Traversable<Tv> $traversable,
   int $size,
@@ -48,6 +49,7 @@ function chunk<Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function fill<Tv>(
   int $size,
   Tv $value,
@@ -71,6 +73,7 @@ function fill<Tv>(
  * Space complexity: O(n), where n is the combined size of all the
  * `$traversables`
  */
+<<__NoAutoLikes>>
 function flatten<Tv>(
   Traversable<Container<Tv>> $traversables,
 )[]: vec<Tv> {

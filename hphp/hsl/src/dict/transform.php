@@ -22,6 +22,7 @@ use namespace HH\Lib\Math;
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function chunk<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $traversable,
   int $size,
@@ -72,6 +73,7 @@ function count_values<Tv as arraykey>(
  * Space complexity: O(n), where n is the combined size of all the
  * `$traversables`
  */
+<<__NoAutoLikes>>
 function flatten<Tk as arraykey, Tv>(
   Traversable<KeyedContainer<Tk, Tv>> $traversables,
 )[]: dict<Tk, Tv> {
@@ -90,6 +92,7 @@ function flatten<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function fill_keys<Tk as arraykey, Tv>(
   Traversable<Tk> $keys,
   Tv $value,
@@ -111,6 +114,7 @@ function fill_keys<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function flip<Tk, Tv as arraykey>(
   KeyedTraversable<Tk, Tv> $traversable,
 )[]: dict<Tv, Tk> {
@@ -158,6 +162,7 @@ function from_keys<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function from_entries<Tk as arraykey, Tv>(
   Traversable<(Tk, Tv)> $entries,
 )[]: dict<Tk, Tv> {

@@ -113,7 +113,7 @@ Dict\cast_clear_legacy_array_mark
 Dict\chunk
   INSERT Dict\chunk(
   INSERT , ${1:\$size})
-  (function(KeyedTraversable<Tk, Tv> $traversable, int $size): ~vec<dict<Tk, Tv>>)
+  (function(KeyedTraversable<Tk, Tv> $traversable, int $size): vec<dict<Tk, Tv>>)
 Dict\count_values
   INSERT Dict\count_values(
   INSERT )
@@ -129,7 +129,7 @@ Dict\drop
 Dict\fill_keys
   INSERT Dict\fill_keys(
   INSERT , ${1:\$value})
-  (function(Traversable<Tk> $keys, Tv $value): ~dict<Tk, Tv>)
+  (function(Traversable<Tk> $keys, Tv $value): dict<Tk, Tv>)
 Dict\filter
   INSERT Dict\filter(
   INSERT )
@@ -157,7 +157,7 @@ Dict\filter_with_key_async
 Dict\flip
   INSERT Dict\flip(
   INSERT )
-  (function(KeyedTraversable<Tk, Tv> $traversable): ~dict<Tv, Tk>)
+  (function(KeyedTraversable<Tk, Tv> $traversable): dict<Tv, Tk>)
 Dict\from_keys
   INSERT Dict\from_keys(
   INSERT , ${1:\$value_func})
@@ -333,7 +333,7 @@ Vec\cast_clear_legacy_array_mark
 Vec\chunk
   INSERT Vec\chunk(
   INSERT , ${1:\$size})
-  (function(Traversable<Tv> $traversable, int $size): ~vec<vec<Tv>>)
+  (function(Traversable<Tv> $traversable, int $size): vec<vec<Tv>>)
 Vec\concat
   INSERT Vec\concat(
   INSERT )

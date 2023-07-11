@@ -26,9 +26,7 @@
         sc_where_constraints = [];
         sc_extends =
         [(Rhint ([6:17-21]),
-          (Tapply (([6:17-18], "\\C"),
-             [(Rhint ([6:19-20]), (Tapply (([6:19-20], "\\_"), [])))])))
-          ];
+          (Tapply (([6:17-18], "\\C"), [(Rhint ([6:19-20]), Twildcard)])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
@@ -47,8 +45,8 @@
         [(Rhint ([7:17-24]),
           (Tapply (([7:17-18], "\\C"),
              [(Rhint ([7:19-23]),
-               (Tapply (([7:19-20], "\\C"),
-                  [(Rhint ([7:21-22]), (Tapply (([7:21-22], "\\_"), [])))])))
+               (Tapply (([7:19-20], "\\C"), [(Rhint ([7:21-22]), Twildcard)]
+                  )))
                ]
              )))
           ];
@@ -76,9 +74,7 @@
                     (Tapply (([9:15-16], "\\C"),
                        [(Rhint ([9:17-21]),
                          (Tapply (([9:17-18], "\\C"),
-                            [(Rhint ([9:19-20]),
-                              (Tapply (([9:19-20], "\\_"), [])))]
-                            )))
+                            [(Rhint ([9:19-20]), Twildcard)])))
                          ]
                        )))
                    };
@@ -94,8 +90,7 @@
                 et_type =
                 (Rhint ([9:28-32]),
                  (Tapply (([9:28-29], "\\C"),
-                    [(Rhint ([9:30-31]), (Tapply (([9:30-31], "\\_"), [])))]
-                    )))
+                    [(Rhint ([9:30-31]), Twildcard)])))
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false

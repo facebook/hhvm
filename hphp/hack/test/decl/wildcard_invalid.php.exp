@@ -10,8 +10,7 @@
              [{ fp_pos = [3:16-18]; fp_name = (Some "$x");
                 fp_type =
                 { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([3:14-15]), (Tapply (([3:14-15], "\\_"), []))) };
+                  et_type = (Rhint ([3:14-15]), Twildcard) };
                 fp_flags =
                 (make_fp_flags ~accept_disposable:false ~has_default:false
                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
@@ -52,8 +51,7 @@
               ft_implicit_params = { capability = (CapDefaults [6:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rhint ([6:25-26]), (Tapply (([6:25-26], "\\_"), []))) };
+                et_type = (Rhint ([6:25-26]), Twildcard) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
@@ -75,8 +73,7 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([10:41-45], "foo");
-           sp_xhp_attr = None;
-           sp_type = (Rhint ([10:39-40]), (Tapply (([10:39-40], "\\_"), [])));
+           sp_xhp_attr = None; sp_type = (Rhint ([10:39-40]), Twildcard);
            sp_visibility = Private; sp_flags = needs_init }
           ];
         sc_sprops = [];
@@ -90,10 +87,7 @@
                       [{ fp_pos = [10:41-45]; fp_name = (Some "$foo");
                          fp_type =
                          { et_enforced = Typing_defs_core.Unenforced;
-                           et_type =
-                           (Rhint ([10:39-40]),
-                            (Tapply (([10:39-40], "\\_"), [])))
-                           };
+                           et_type = (Rhint ([10:39-40]), Twildcard) };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
                            ~has_default:false ~mode:Typing_defs_core.FPnormal

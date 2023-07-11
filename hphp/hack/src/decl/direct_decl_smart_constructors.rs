@@ -1474,6 +1474,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
                             Ty_::TvecOrDict(self.alloc((key_type, value_type)))
                         }
+                        "_" => Ty_::Twildcard,
                         _ => {
                             let name = self.elaborate_raw_id(name);
                             Ty_::Tapply(self.alloc(((pos, name), &[][..])))

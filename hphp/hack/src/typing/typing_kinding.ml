@@ -16,7 +16,6 @@ module KindDefs = Typing_kinding_defs
 module TGenConstraint = Typing_generic_constraint
 module TUtils = Typing_utils
 module Subst = Decl_subst
-module SN = Naming_special_names
 
 module Locl_Inst = struct
   let rec instantiate subst (ty : locl_ty) =
@@ -325,7 +324,7 @@ module Simple = struct
       =
     let kind = snd nkind in
     match get_node tyarg with
-    | Tapply ((_, x), _argl) when String.equal x SN.Typehints.wildcard ->
+    | Twildcard ->
       let is_higher_kinded = Simple.get_arity kind > 0 in
       if is_higher_kinded then (
         let pos =

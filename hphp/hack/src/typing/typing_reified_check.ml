@@ -24,13 +24,14 @@ let validator =
         this#invalid acc r "a typename"
       else if String.equal h SN.Classes.cClassname then
         this#invalid acc r "a classname"
-      else if
-        String.equal h SN.Typehints.wildcard
-        && not acc.Type_validator.env.Typing_env_types.allow_wildcards
-      then
-        this#invalid acc r "a wildcard"
       else
         super#on_tapply acc r (p, h) tyl
+
+    method! on_twildcard acc r =
+      if acc.Type_validator.env.Typing_env_types.allow_wildcards then
+        acc
+      else
+        this#invalid acc r "a wildcard"
 
     method! on_tgeneric acc r t _tyargs =
       (* Ignoring type aguments: If there were any, then this generic variable isn't allowed to be

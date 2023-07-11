@@ -153,7 +153,7 @@ let validator =
 
     method is_wildcard ty =
       match get_node ty with
-      | Tapply ((_, name), _) -> String.equal name SN.Typehints.wildcard
+      | Twildcard -> true
       | _ -> false
 
     method check_for_wildcards acc tyl s =

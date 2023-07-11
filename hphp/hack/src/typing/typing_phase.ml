@@ -268,9 +268,10 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   | Trefinement (root, cr) -> localize_refinement ~ety_env env r root cr
   | (Tnonnull | Tprim _ | Tdynamic | Tany _) as x -> ((env, None), mk (r, x))
   | Tmixed -> ((env, None), MakeType.mixed r)
+  (* This should come about only in illegal positions *)
   | Twildcard ->
-    failwith
-      "Twildcard not yet used; currently implemented as Tapply with type name _"
+    let (env, ty) = Env.fresh_type_error env Pos.none in
+    ((env, None), ty)
   | Tthis ->
     let ty =
       map_reason ety_env.this_ty ~f:(function
@@ -599,10 +600,8 @@ and localize_targs_by_kind
 and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     =
   let use_wild_card =
-    match deref ty with
-    | (_, Tapply ((_pos, x), _argl)) when String.equal x SN.Typehints.wildcard
-      ->
-      true
+    match get_node ty with
+    | Twildcard -> true
     | _ -> ety_env.sub_wildcards
   in
   if use_wild_card then

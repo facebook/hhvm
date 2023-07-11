@@ -100,7 +100,7 @@ and hint_ p env = function
   | Hany -> Typing_defs.make_tany ()
   | Herr -> Typing_defs.make_tany ()
   | Hmixed -> Tmixed
-  | Hwildcard -> Tapply ((Decl_env.make_decl_pos env p, "_"), [])
+  | Hwildcard -> Twildcard
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
   | Hdynamic -> Tdynamic

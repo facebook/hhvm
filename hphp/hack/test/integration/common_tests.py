@@ -1307,8 +1307,8 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}},'
-                '{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}}]}}]'
+                '[{{"filename":"{root}foo_4.php","patches":[{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}}'
+                "]}}]"
             ],
             options=["--refactor", "Class", "Foo", "Bar"],
         )

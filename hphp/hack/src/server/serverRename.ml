@@ -458,18 +458,27 @@ let go ctx action genv env =
   ServerFindRefs.go ctx find_refs_action include_defs genv env
   |> ServerCommandTypes.Done_or_retry.map_env ~f:(fun refs ->
          let changes =
-           List.fold_left
-             refs
-             ~f:
-               begin
-                 fun acc x ->
-                   let replacement =
-                     { pos = Pos.to_absolute (snd x); text = new_name }
-                   in
-                   let patch = Replace replacement in
-                   patch :: acc
-               end
-             ~init:[]
+           let fold_to_positions_and_patches (positions, patches) (_, pos) =
+             if Pos.Set.mem pos positions then
+               (* Don't rename at the same position twice. Double-renames were happening (~~T157645473~~) because
+                * ServerRename uses ServerFindRefs which searches the tast, which thinks Self::TWhatever
+                * is a use of the current class at the position of the declaration of the current class.
+                * *)
+               (positions, patches)
+             else
+               let positions = Pos.Set.add pos positions in
+               let replacement =
+                 { pos = Pos.to_absolute pos; text = new_name }
+               in
+               let patch = Replace replacement in
+               let patches = patch :: patches in
+               (positions, patches)
+           in
+           refs
+           |> List.fold_left
+                ~init:(Pos.Set.empty, [])
+                ~f:fold_to_positions_and_patches
+           |> snd
          in
          let deprecated_wrapper_patch =
            match action with

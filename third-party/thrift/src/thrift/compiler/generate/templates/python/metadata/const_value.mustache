@@ -18,6 +18,7 @@
 }}{{^value:const_struct?}}{{#value:bool?}}cv_bool={{#value:nonzero?}}True{{/value:nonzero?}}{{!
   }}{{^value:nonzero?}}False{{/value:nonzero?}}{{/value:bool?}}{{!
 }}{{#value:integer?}}cv_integer={{value:integer_value}}{{/value:integer?}}{{!
+}}{{#value:enum?}}cv_integer={{value:integer_value}}{{/value:enum?}}{{!
 }}{{#value:double?}}cv_double={{value:double_value}}{{/value:double?}}{{!
 }}{{#value:string?}}cv_string="{{value:string_value}}"{{/value:string?}}{{!
 }}{{#value:map?}}cv_map=[{{#value:map_elements}}_fbthrift_metadata.ThriftConstValuePair(key={{#element:key}}{{ > metadata/const_value }}{{/element:key}}, value={{#element:value}}{{ > metadata/const_value }}{{/element:value}}), {{/value:map_elements}}]{{/value:map?}}{{!

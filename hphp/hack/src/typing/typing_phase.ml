@@ -1483,6 +1483,9 @@ let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
     ?report_cycle
     h
 
+let localize_hint_for_refinement env h =
+  localize_hint_no_subst env ~ignore_errors:false h
+
 let localize_no_subst env ~ignore_errors ty =
   localize_no_subst_
     env

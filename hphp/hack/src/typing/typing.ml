@@ -2029,7 +2029,7 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
   match locl with
   | Some locl_ivar ->
     let ((env, ty_err_opt), hint_ty) =
-      Phase.localize_hint_no_subst env ~ignore_errors:false hint
+      Phase.localize_hint_for_refinement env hint
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     let hint_ty = strip_supportdyn hint_ty in
@@ -5113,7 +5113,7 @@ and expr_
     let (env, te, expr_ty) = expr env e in
     let env = might_throw ~join_pos:p env in
     let ((env, ty_err_opt1), hint_ty) =
-      Phase.localize_hint_no_subst env ~ignore_errors:false hint
+      Phase.localize_hint_for_refinement env hint
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
     let hint_ty = strip_supportdyn hint_ty in

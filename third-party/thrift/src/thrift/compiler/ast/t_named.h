@@ -93,9 +93,9 @@ class t_named : public t_node {
   void set_release_state(t_release_state state) { release_state_ = state; }
 
  protected:
-  // t_named is abstract.
-  t_named() = default;
-  explicit t_named(std::string name) : name_(std::move(name)) {}
+  t_named();
+  explicit t_named(std::string name);
+  t_named(const t_named& named);
 
   // TODO(afuller): make private.
   std::string name_;
@@ -105,7 +105,7 @@ class t_named : public t_node {
   t_release_state release_state_ = t_release_state::unspecified;
   std::string uri_;
   bool explicit_uri_ = false;
-  std::vector<std::shared_ptr<const t_const>> structured_annotations_;
+  std::vector<std::unique_ptr<t_const>> structured_annotations_;
 
   // TODO(ytj): use thrift.uri --> t_const map for structured annotation
   std::vector<const t_const*> structured_annotations_raw_;

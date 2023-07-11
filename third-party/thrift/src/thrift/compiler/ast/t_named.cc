@@ -25,6 +25,22 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+t_named::t_named() = default;
+
+t_named::t_named(std::string name) : name_(std::move(name)) {}
+
+t_named::t_named(const t_named& named)
+    : t_node::t_node(named),
+      name_(named.name_),
+      generated_(named.generated_),
+      release_state_(named.release_state_),
+      uri_(named.uri_),
+      explicit_uri_(named.explicit_uri_) {
+  for (const auto& annotation : named.structured_annotations_) {
+    add_structured_annotation(annotation->clone());
+  }
+}
+
 // NOTE: Must be defined here for t_const's destructor defintion.
 t_named::~t_named() = default;
 

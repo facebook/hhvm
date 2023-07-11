@@ -114,37 +114,48 @@ class parser {
   bool parse_program() {
     consume_token();
     try {
+      if (auto attrs = parse_package_and_directives()) {
+        auto loc = attrs->loc;
+        parse_definition(loc, std::move(attrs));
+      }
       while (token_.kind != tok::eof) {
         auto begin = token_.range.begin;
         auto attrs = parse_attributes();
-        switch (token_.kind) {
-          case tok::kw_include:
-          case tok::kw_cpp_include:
-          case tok::kw_hs_include:
-            actions_.on_program_doctext();
-            parse_include();
-            actions_.on_standard_header(begin, std::move(attrs));
-            break;
-          case tok::kw_package: {
-            actions_.on_program_doctext();
-            parse_package(begin, std::move(attrs));
-            break;
-          }
-          case tok::kw_namespace:
-            actions_.on_program_doctext();
-            parse_namespace();
-            actions_.on_standard_header(begin, std::move(attrs));
-            break;
-          default:
-            parse_definition(begin, std::move(attrs));
-            break;
-        }
+        parse_definition(begin, std::move(attrs));
       }
       actions_.on_program();
     } catch (const parse_error&) {
       return false; // The error has already been reported.
     }
     return true;
+  }
+
+  std::unique_ptr<attributes> parse_package_and_directives() {
+    while (token_.kind != tok::eof) {
+      auto begin = token_.range.begin;
+      switch (token_.kind) {
+        case tok::kw_include:
+        case tok::kw_cpp_include:
+        case tok::kw_hs_include:
+          actions_.on_program_doctext();
+          parse_include();
+          break;
+        case tok::kw_namespace:
+          actions_.on_program_doctext();
+          parse_namespace();
+          break;
+        default: {
+          auto attrs = parse_attributes();
+          if (token_.kind != tok::kw_package) {
+            return attrs;
+          }
+          actions_.on_program_doctext();
+          parse_package(begin, std::move(attrs));
+          break;
+        }
+      }
+    }
+    return {};
   }
 
   // include: ("include" | "cpp_include" | "hs_include") string_literal [";"]
@@ -249,6 +260,7 @@ class parser {
 
   // attributes: [doctext] structured_annotation*
   std::unique_ptr<attributes> parse_attributes() {
+    auto loc = token_.range.begin;
     auto doc = actions_.on_doctext();
     auto annotations = node_list<t_const>();
     while (token_.kind == '@') {
@@ -256,7 +268,7 @@ class parser {
     }
     return doc || !annotations.empty()
         ? std::make_unique<attributes>(
-              attributes{std::move(doc), std::move(annotations), {}})
+              attributes{loc, std::move(doc), std::move(annotations), {}})
         : nullptr;
   }
 

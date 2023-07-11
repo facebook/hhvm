@@ -266,13 +266,6 @@ class ast_builder : public parser_actions {
   const parsing_params& params_;
   include_handler on_include_;
   boost::optional<comment> doctext_; // The last parsed doctext comment.
-  bool parsed_definition_ = false;
-
-  void validate_header_location(source_location loc) {
-    if (parsed_definition_) {
-      diags_.error(loc, "Headers must be specified before definitions.");
-    }
-  }
 
   // Checks that the constant name does not refer to an ambiguous enum.
   // An ambiguous enum is one that is redefined but not referred to by
@@ -548,7 +541,6 @@ class ast_builder : public parser_actions {
       source_range range,
       std::unique_ptr<t_named> defn,
       std::unique_ptr<attributes> attrs) {
-    parsed_definition_ = true;
     set_attributes(*defn, std::move(attrs), range);
 
     // Add to scope.
@@ -596,21 +588,10 @@ class ast_builder : public parser_actions {
 
   void on_program() override { clear_doctext(); }
 
-  void on_standard_header(
-      source_location loc, std::unique_ptr<attributes> attrs) override {
-    validate_header_location(loc);
-    if (attrs && !attrs->annotations.empty()) {
-      diags_.error(
-          *attrs->annotations.front(),
-          "Structured annotations are not supported for a given entity.");
-    }
-  }
-
   void on_package(
       source_range range,
       std::unique_ptr<attributes> attrs,
       fmt::string_view name) override {
-    validate_header_location(range.begin);
     set_attributes(program_, std::move(attrs), range);
     if (!program_.package().empty()) {
       diags_.error(range.begin, "Package already specified.");

@@ -8,7 +8,7 @@
     "py": "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
   },
 
-
+  "global_docstring": "Program doctext.\n\nSeriously, this is the documentation for this whole program.\n",
   "typedefs": {
       "UserId": {
         "name": "UserId",

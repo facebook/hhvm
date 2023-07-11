@@ -633,6 +633,7 @@ module Full = struct
     | Tany _ -> (fuel, text "_")
     | Tthis -> (fuel, text SN.Typehints.this)
     | Tmixed -> (fuel, text "mixed")
+    | Twildcard -> (fuel, text "_")
     | Tdynamic -> (fuel, text "dynamic")
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"

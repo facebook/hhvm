@@ -241,6 +241,12 @@ and _ ty_ =
    * during the localization phase.
    *)
   | Tmixed : decl_phase ty_
+  | Twildcard : decl_phase ty_
+      (** Various intepretations, depending on context.
+        *   inferred type e.g. (vec<_> $x) ==> $x[0]
+        *   placeholder in refinement e.g. $x as Vector<_>
+        *   placeholder for higher-kinded formal type parameter e.g. foo<T1<_>>(T1<int> $_)
+        *)
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_

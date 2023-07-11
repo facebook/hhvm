@@ -17,6 +17,8 @@ class type ['a] decl_type_visitor_type =
 
     method on_tmixed : 'a -> decl_phase Reason.t_ -> 'a
 
+    method on_twildcard : 'a -> decl_phase Reason.t_ -> 'a
+
     method on_tnonnull : 'a -> decl_phase Reason.t_ -> 'a
 
     method on_tdynamic : 'a -> decl_phase Reason.t_ -> 'a
@@ -72,6 +74,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tany acc _ = acc
 
     method on_tmixed acc _ = acc
+
+    method on_twildcard acc _ = acc
 
     method on_tnonnull acc _ = acc
 
@@ -142,6 +146,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       match x with
       | Tany _ -> this#on_tany acc r
       | Tmixed -> this#on_tmixed acc r
+      | Twildcard -> this#on_twildcard acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
       | Tthis -> this#on_tthis acc r

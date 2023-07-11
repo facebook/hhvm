@@ -2225,6 +2225,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Ty_::Tdynamic
             | Ty_::Tgeneric(_)
             | Ty_::Tmixed
+            | Ty_::Twildcard
             | Ty_::Tnonnull
             | Ty_::Tprim(_)
             | Ty_::Tthis => return ty,

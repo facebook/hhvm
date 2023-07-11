@@ -27,6 +27,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
   match get_node ty with
   | Tprim p -> Aast_defs.string_of_tprim p
   | Tmixed
+  | Twildcard
   | Tany _ ->
     "mixed"
   | Tnewtype (name, tyl, ty) ->

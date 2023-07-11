@@ -367,6 +367,7 @@ module Simple = struct
     | Tprim _
     | Tdynamic
     | Tmixed
+    | Twildcard
     | Tthis ->
       ()
     | Tvec_or_dict (tk, tv) ->

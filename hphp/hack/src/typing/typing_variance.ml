@@ -334,7 +334,8 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tprim _
   | Tany _
   | Tthis
-  | Tmixed ->
+  | Tmixed
+  | Twildcard ->
     empty
   | Toption ty
   | Tlike ty

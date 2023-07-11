@@ -13,6 +13,8 @@ class type ['a] decl_type_visitor_type =
 
     method on_tmixed : 'a -> Typing_reason.decl_t -> 'a
 
+    method on_twildcard : 'a -> Typing_reason.decl_t -> 'a
+
     method on_tnonnull : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tdynamic : 'a -> Typing_reason.decl_t -> 'a

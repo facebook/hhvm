@@ -320,6 +320,7 @@ pub enum Ty_<R: Reason> {
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
     Tmixed,
+    Twildcard,
     Tlike(Ty<R>),
     Tany,
     Tnonnull,
@@ -384,7 +385,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
     fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
         use Ty_::*;
         match self {
-            Tthis | Tmixed | Tany | Tnonnull | Tdynamic | Tprim(_) => {}
+            Tthis | Tmixed | Twildcard | Tany | Tnonnull | Tdynamic | Tprim(_) => {}
             Tapply(id_and_args) => {
                 let (_, args) = &**id_and_args;
                 args.accept(v)

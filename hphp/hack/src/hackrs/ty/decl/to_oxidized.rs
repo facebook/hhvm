@@ -160,6 +160,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Tthis => typing_defs::Ty_::Tthis,
             Ty_::Tapply(x) => typing_defs::Ty_::Tapply(x.to_oxidized(arena)),
             Ty_::Tmixed => typing_defs::Ty_::Tmixed,
+            Ty_::Twildcard => typing_defs::Ty_::Twildcard,
             Ty_::Tlike(x) => typing_defs::Ty_::Tlike(x.to_oxidized(arena)),
             Ty_::Tany => typing_defs::Ty_::Tany(obr::tany_sentinel::TanySentinel),
             Ty_::Tnonnull => typing_defs::Ty_::Tnonnull,

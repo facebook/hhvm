@@ -411,6 +411,7 @@ module Enforce (ContextAccess : ContextAccess) :
       | Tintersection _ -> Unenforced None
       | Tshape _ -> Unenforced None
       | Tmixed -> Enforced ty
+      | Twildcard -> Unenforced None
       (* With no parameters, we enforce varray_or_darray just like array *)
       | Tvec_or_dict (_, el_ty) ->
         if is_any el_ty then

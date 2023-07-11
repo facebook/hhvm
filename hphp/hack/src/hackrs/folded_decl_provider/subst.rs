@@ -107,6 +107,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
             ))),
             Ty_::Tthis
             | Ty_::Tmixed
+            | Ty_::Twildcard
             | Ty_::Tdynamic
             | Ty_::Tnonnull
             | Ty_::Tany

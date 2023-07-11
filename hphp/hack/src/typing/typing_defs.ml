@@ -646,6 +646,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tmixed -> 102
   | Tlike _ -> 103
   | Trefinement _ -> 104
+  | Twildcard -> 105
   (* exist in both phases *)
   | Tany _ -> 0
   | Toption t -> begin
@@ -706,9 +707,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       | n -> n
     end
     | (Tmixed, Tmixed) -> 0
+    | (Twildcard, Twildcard) -> 0
     | (Tlike ty1, Tlike ty2) -> ty_compare ty1 ty2
-    | ((Tthis | Tapply _ | Tmixed | Tlike _), _)
-    | (_, (Tthis | Tapply _ | Tmixed | Tlike _)) ->
+    | ((Tthis | Tapply _ | Tmixed | Twildcard | Tlike _), _)
+    | (_, (Tthis | Tapply _ | Tmixed | Twildcard | Tlike _)) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
     (* Both or in Localized Phase *)
     | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2

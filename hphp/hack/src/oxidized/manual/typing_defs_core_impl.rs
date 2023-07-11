@@ -70,6 +70,7 @@ impl std::fmt::Debug for Ty_ {
             Trefinement(ty, rs) => f.debug_tuple("Trefinement").field(ty).field(rs).finish(),
             Taccess(taccess) => f.debug_tuple("Taccess").field(taccess).finish(),
             Tmixed => write!(f, "Tmixed"),
+            Twildcard => write!(f, "Twildcard"),
             Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
             Tany(_) => write!(f, "Tany"),
             Tnonnull => write!(f, "Tnonnull"),

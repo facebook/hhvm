@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0e29621a952a627ad0ebdbab0ce876fa>>
+// @generated SignedSource<<6998fd9a98b48f04413e32f9a201f868>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -486,6 +486,11 @@ pub enum Ty_<'a> {
     /// mixed exists only in the decl_phase phase because it is desugared into ?nonnull
     /// during the localization phase.
     Tmixed,
+    /// Various intepretations, depending on context.
+    ///   inferred type e.g. (vec<_> $x) ==> $x[0]
+    ///   placeholder in refinement e.g. $x as Vector<_>
+    ///   placeholder for higher-kinded formal type parameter e.g. foo<T1<_>>(T1<int> $_)
+    Twildcard,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tlike(&'a Ty<'a>),
     Tany(tany_sentinel::TanySentinel),

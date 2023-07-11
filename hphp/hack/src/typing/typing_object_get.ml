@@ -395,6 +395,7 @@ let rec this_appears_covariantly ~contra env ty =
     in
     this_appears_covariantly_params tparams tyl
   | Tmixed
+  | Twildcard
   | Tany _
   | Tnonnull
   | Tdynamic

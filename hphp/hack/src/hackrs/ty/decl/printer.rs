@@ -36,6 +36,7 @@ impl<R: Reason> Display for Ty_<R> {
             Tany => write!(f, "_"),
             Tthis => write!(f, "this"),
             Tmixed => write!(f, "mixed"),
+            Twildcard => write!(f, "_"),
             Tnonnull => write!(f, "nonnull"),
             Tdynamic => write!(f, "dynamic"),
             Tprim(prim) => match prim {

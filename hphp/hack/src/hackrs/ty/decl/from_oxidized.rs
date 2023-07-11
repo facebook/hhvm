@@ -147,6 +147,7 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                 Tapply(Box::new((pos_id.into(), slice(tys))))
             }
             typing_defs_core::Ty_::Tmixed => Tmixed,
+            typing_defs_core::Ty_::Twildcard => Twildcard,
             typing_defs_core::Ty_::Tlike(ty) => Tlike(ty.into()),
             typing_defs_core::Ty_::Tany(_) => Tany,
             typing_defs_core::Ty_::Tnonnull => Tnonnull,

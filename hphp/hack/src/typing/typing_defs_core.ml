@@ -268,6 +268,12 @@ and _ ty_ =
        * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
        * during the localization phase.
        *)
+  | Twildcard : decl_phase ty_
+      (** Various intepretations, depending on context.
+        *   inferred type e.g. (vec<_> $x) ==> $x[0]
+        *   placeholder in refinement e.g. $x as Vector<_>
+        *   placeholder for higher-kinded formal type parameter e.g. foo<T1<_>>(T1<int> $_)
+        *)
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
@@ -596,6 +602,7 @@ module Pp = struct
     | Tany _ -> Format.pp_print_string fmt "Tany"
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
+    | Twildcard -> Format.pp_print_string fmt "Twildcard"
     | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
     | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
     | Tapply (a0, a1) ->

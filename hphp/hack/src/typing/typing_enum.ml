@@ -167,6 +167,24 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
         ty_arraykey
         callback
   in
+  let ty_base = Option.value ~default:ty ty_interface in
+  (* Enforcement of case types for enum/enum classes is wonky.
+   * Forbid for now until we can more thoroughly audit the behavior *)
+  (match get_node ty_base with
+  | Tnewtype (name, _, _) ->
+    (match Typing_env.get_typedef env name with
+    | Some { td_vis = Aast.CaseType; td_pos; _ } ->
+      Typing_error_utils.add_typing_error ~env
+      @@ Typing_error.(
+           enum
+           @@ Primary.Enum.Enum_type_bad_case_type
+                {
+                  pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                  ty_name = lazy (Typing_print.full_strip_ns env ty_base);
+                  case_type_decl_pos = td_pos;
+                })
+    | _ -> ())
+  | _ -> ());
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 

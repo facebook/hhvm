@@ -1,0 +1,12 @@
+File "case_type_enum_base_type.php", line 6, characters 6-7:
+Cannot use a case type as the base type for an enum/enum class (Typing[4024])
+  File "case_type_enum_base_type.php", line 4, characters 11-15:
+  `MyInt` is declared as a case type here
+File "case_type_enum_base_type.php", line 11, characters 6-7:
+Cannot use a case type as the base type for an enum/enum class (Typing[4024])
+  File "case_type_enum_base_type.php", line 4, characters 11-15:
+  `MyInt` is declared as a case type here
+File "case_type_enum_base_type.php", line 16, characters 12-13:
+Cannot use a case type as the base type for an enum/enum class (Typing[4024])
+  File "case_type_enum_base_type.php", line 4, characters 11-15:
+  `MyInt` is declared as a case type here

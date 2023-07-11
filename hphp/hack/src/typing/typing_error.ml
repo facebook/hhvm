@@ -104,6 +104,11 @@ module Primary = struct
           is_enum_class: bool;
           trail: Pos_or_decl.t list;
         }
+      | Enum_type_bad_case_type of {
+          pos: Pos.t;
+          ty_name: string Lazy.t;
+          case_type_decl_pos: Pos_or_decl.t;
+        }
       | Enum_constant_type_bad of {
           pos: Pos.t;
           ty_pos: Pos_or_decl.t;

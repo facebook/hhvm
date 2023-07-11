@@ -498,6 +498,17 @@ module Eval_primary = struct
       and reasons = lazy (Common.reasons_of_trail trail) in
       (Error_code.EnumTypeBad, claim, reasons, [])
 
+    let enum_type_bad_case_type pos ty_name case_type_decl_pos =
+      let claim =
+        lazy
+          (pos, "Cannot use a case type as the base type for an enum/enum class")
+      and reasons =
+        Lazy.map ty_name ~f:(fun ty_name ->
+            let ty = Markdown_lite.md_codify ty_name in
+            [(case_type_decl_pos, ty ^ " is declared as a case type here")])
+      in
+      (Error_code.EnumTypeBad, claim, reasons, [])
+
     let enum_constant_type_bad pos ty_pos ty_name trail =
       let claim = lazy (pos, "Enum constants must be an `int` or `string`")
       and reasons =
@@ -662,6 +673,8 @@ module Eval_primary = struct
       match t with
       | Enum_type_bad { pos; is_enum_class; ty_name; trail } ->
         enum_type_bad pos is_enum_class ty_name trail
+      | Enum_type_bad_case_type { pos; ty_name; case_type_decl_pos } ->
+        enum_type_bad_case_type pos ty_name case_type_decl_pos
       | Enum_constant_type_bad { pos; ty_pos; ty_name; trail } ->
         enum_constant_type_bad pos ty_pos ty_name trail
       | Enum_type_typedef_nonnull pos -> enum_type_typedef_nonnull pos

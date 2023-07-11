@@ -144,5 +144,27 @@ TEST(UtilTest, ReadChainFile) {
   }
 }
 
+TEST(UtilTest, createKeyExchangeFromBuf) {
+  {
+    // Test X25519 KEM
+    auto keys = FizzUtil::generateKeypairCurve25519();
+    auto privKey = std::get<0>(keys);
+    folly::ByteRange privKeyBuf((folly::StringPiece(privKey)));
+    auto kex =
+        FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::x25519, privKeyBuf);
+    EXPECT_TRUE(kex != nullptr);
+    EXPECT_EQ(kex->getKeyShare()->computeChainDataLength(), 32);
+  }
+
+  {
+    // Test P256 KEM
+    folly::ByteRange privKeyBuf((folly::StringPiece(kP256Key)));
+    auto kex =
+        FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::secp256r1, privKeyBuf);
+    EXPECT_TRUE(kex != nullptr);
+    EXPECT_EQ(kex->getKeyShare()->computeChainDataLength(), 65);
+  }
+}
+
 } // namespace test
 } // namespace fizz

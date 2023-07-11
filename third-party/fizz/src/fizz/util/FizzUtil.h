@@ -52,9 +52,21 @@ class FizzUtil {
       folly::ByteRange data,
       folly::PasswordInFile* pf);
 
-  static std::unique_ptr<KeyExchange> createKeyExchange(
+  /**
+   * `createKeyExchangeFromBuf` creates a `KeyExchange` object that
+   * can be used as a KEM.
+   *
+   *  @param kemId   Determines the type of KEM to create, as well as the format
+   * of what `privKey` conveys.
+   *  @param privKey For NIST curve based KEMs, this is the PEM encoding of the
+   * private key. For X25519 KEM, this is the hexlified representation of the 32
+   * byte private key.
+   *
+   */
+
+  static std::unique_ptr<KeyExchange> createKeyExchangeFromBuf(
       hpke::KEMId kemId,
-      const std::string& echPrivateKeyFile);
+      folly::ByteRange privKey);
 
   static std::tuple<std::string, std::string> generateKeypairCurve25519();
 

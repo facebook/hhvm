@@ -594,9 +594,14 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
   auto kemId =
       getKEMId((*echConfigsJson)["echconfigs"][0]["kem_id"].asString());
 
+  std::string privKeyStrHex;
+  folly::readFile(echPrivateKeyFile.c_str(), privKeyStrHex);
+  auto privKeyStr = folly::unhexlify(privKeyStrHex);
+  folly::ByteRange privKeyBuf((folly::StringPiece(privKeyStr)));
+
   // Create a key exchange and set the private key
   auto kexWithPrivateKey =
-      fizz::FizzUtil::createKeyExchange(kemId, echPrivateKeyFile);
+      fizz::FizzUtil::createKeyExchangeFromBuf(kemId, privKeyBuf);
   if (!kexWithPrivateKey) {
     LOG(ERROR)
         << "Unable to create a key exchange and set a private key for it.";

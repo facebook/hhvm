@@ -3314,7 +3314,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         targs,
         args,
         unpacked_arg,
-    } = &*call_expr;
+    } = call_expr;
     match (&func.2, &args[..], unpacked_arg) {
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)

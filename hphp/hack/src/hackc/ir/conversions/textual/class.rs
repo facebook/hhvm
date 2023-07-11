@@ -253,7 +253,7 @@ impl ClassState<'_, '_, '_> {
     /// The factory only allocates an object of the required type. The initialization is done via a separate constructor invocation on the allocated object.
     ///
     /// The factory method is used only when the class of an object to allocate is not known statically. Otherwise, we directly use Textual's typed allocation builtin.
-    fn write_factory<'s>(&mut self) -> Result {
+    fn write_factory(&mut self) -> Result {
         let name = FunctionName::Intrinsic(Intrinsic::Factory(self.class.name));
         let static_ty = static_ty(self.class.name);
         let ty = non_static_ty(self.class.name);

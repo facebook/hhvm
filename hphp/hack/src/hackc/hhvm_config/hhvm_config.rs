@@ -9,7 +9,7 @@ use options::HhbcFlags;
 use options::JitEnableRenameFunction;
 use options::ParserOptions;
 
-/**!
+/*
 These helper functions are best-effort utilities for CLI tools like hackc
 to read HHVM configuration. No guarantees are made about coverage;
 ultimately the source of truth is HHVM, for how .hdf and .ini

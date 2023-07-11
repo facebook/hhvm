@@ -752,7 +752,6 @@ impl<'arena, 'a> State<'arena, 'a> {
         // The outputs are based on: (the "cleaned" instr, inputs, the output
         // index)
         let outputs: Vec<Value> = (0..n)
-            .into_iter()
             .map(|i| builder.compute_value(&clean_instr, i, &inputs))
             .collect();
 
@@ -912,7 +911,6 @@ impl<'arena, 'a> State<'arena, 'a> {
         };
 
         let outputs: Vec<Value> = (0..n)
-            .into_iter()
             .map(|i| builder.compute_value(&instr, i, &inputs))
             .collect();
 

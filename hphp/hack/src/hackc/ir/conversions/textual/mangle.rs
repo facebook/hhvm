@@ -42,31 +42,28 @@ impl Mangle for [u8] {
             b"unreachable" => "unreachable_".to_owned(),
             b"void" => "void_".to_owned(),
             _ => {
+                // This mangling is terrible... but probably "good enough".
+                // If a digit is first then we prepend a '_'.
                 // [A-Za-z0-9_$] -> identity
                 // \ -> ::
-                // anything else -> $xx
+                // anything else -> xx (hex digits)
                 let mut res = String::with_capacity(self.len());
-                let mut first = true;
+                if self.first().map_or(false, u8::is_ascii_digit) {
+                    res.push('_');
+                }
                 for &ch in self {
-                    if (b'A'..=b'Z').contains(&ch)
-                        || (b'a'..=b'z').contains(&ch)
-                        || (ch == b'_')
-                        || (ch == b'$')
-                    {
-                        res.push(ch as char);
-                    } else if (b'0'..=b'9').contains(&ch) {
-                        if first {
-                            res.push('_')
+                    match ch {
+                        b'_' | b'$' => res.push(ch as char),
+                        b'\\' => {
+                            res.push(':');
+                            res.push(':');
                         }
-                        res.push(ch as char);
-                    } else if ch == b'\\' {
-                        res.push(':');
-                        res.push(':');
-                    } else {
-                        res.push(b"0123456789abcdef"[(ch >> 4) as usize] as char);
-                        res.push(b"0123456789abcdef"[(ch & 15) as usize] as char);
+                        ch if ch.is_ascii_alphanumeric() => res.push(ch as char),
+                        _ => {
+                            res.push(b"0123456789abcdef"[(ch >> 4) as usize] as char);
+                            res.push(b"0123456789abcdef"[(ch & 15) as usize] as char);
+                        }
                     }
-                    first = false;
                 }
                 res
             }

@@ -150,8 +150,10 @@ pub struct ExFrame {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Default)]
 pub enum TryCatchId {
     /// This block doesn't catch exceptions.
+    #[default]
     None,
 
     /// This block is part of the 'try' portion of this exception frame.
@@ -171,12 +173,6 @@ impl TryCatchId {
             Self::None => ExFrameId::NONE,
             Self::Try(id) | Self::Catch(id) => *id,
         }
-    }
-}
-
-impl Default for TryCatchId {
-    fn default() -> Self {
-        TryCatchId::None
     }
 }
 

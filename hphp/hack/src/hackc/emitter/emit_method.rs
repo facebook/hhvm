@@ -94,7 +94,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         .any(|ua| user_attributes::is_memoized(&ua.name.1));
     let class_name = string_utils::mangle(string_utils::strip_global_ns(&class.name.1).into());
     let is_closure_body =
-        &method.name.1 == members::__INVOKE && (class.name.1).starts_with("Closure$");
+        method.name.1 == members::__INVOKE && (class.name.1).starts_with("Closure$");
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     if !is_closure_body {
         attributes.extend(emit_attribute::add_reified_attribute(

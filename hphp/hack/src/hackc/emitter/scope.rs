@@ -116,7 +116,6 @@ where
 fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
-            .into_iter()
             .map(|idx| instr::unset_l(Local::new(idx as usize)))
             .collect(),
     )
@@ -125,7 +124,6 @@ fn unset_unnamed_locals<'arena>(start: Local, end: Local) -> InstrSeq<'arena> {
 fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
     InstrSeq::gather(
         (start.idx..end.idx)
-            .into_iter()
             .map(|idx| instr::iter_free(IterId { idx }))
             .collect(),
     )

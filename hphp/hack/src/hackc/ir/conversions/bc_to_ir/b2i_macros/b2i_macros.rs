@@ -233,7 +233,6 @@ fn parse_convert_simple(
         Inputs::NOV => {}
         Inputs::Fixed(inputs) => {
             let mut inputs: Vec<Ident> = (0..inputs.len())
-                .into_iter()
                 .map(|i| Ident::new(&format!("s{}", i + 1), span))
                 .collect();
 

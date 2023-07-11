@@ -253,7 +253,7 @@ impl From<oxidized::ast_defs::Visibility> for Attr {
             // exclusive with other visibility modifiers or it should be a
             // modifier on top the others.
             // In order to unblock typechecker, let it be a modifier on top for now.
-            Visibility::Internal => (Self::AttrInternal | Self::AttrPublic).into(),
+            Visibility::Internal => Self::AttrInternal | Self::AttrPublic,
         }
     }
 }
@@ -269,7 +269,7 @@ impl From<&oxidized::ast_defs::Visibility> for Attr {
             // exclusive with other visibility modifiers or it should be a
             // modifier on top the others.
             // In order to unblock typechecker, let it be a modifier on top for now.
-            Visibility::Internal => (Self::AttrInternal | Self::AttrPublic).into(),
+            Visibility::Internal => Self::AttrInternal | Self::AttrPublic,
         }
     }
 }

@@ -1228,7 +1228,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                                 unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                             ))
                         }
-                        _ => Err(Error::fatal_parse(&pc, "Invalid class")),
+                        _ => Err(Error::fatal_parse(pc, "Invalid class")),
                     }
                 }
                 (Expr_::String(cls_name), Some(fname)) => Ok(self.convert_meth_caller_to_func_ptr(

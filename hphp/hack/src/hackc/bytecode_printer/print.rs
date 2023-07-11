@@ -819,7 +819,7 @@ fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
 fn is_bareword_char(c: &u8) -> bool {
     match *c {
         b'_' | b'.' | b'$' | b'\\' => true,
-        c => (b'0'..=b'9').contains(&c) || (b'a'..=b'z').contains(&c) || (b'A'..=b'Z').contains(&c),
+        c => c.is_ascii_alphanumeric(),
     }
 }
 

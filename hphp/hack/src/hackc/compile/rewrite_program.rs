@@ -175,10 +175,7 @@ fn extract_debugger_main(
     if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
         let Stmt(p, s) = stmts.pop().unwrap();
         let e = s.as_expr_into().unwrap();
-        stmts.push(hack_stmt!(
-            pos = p.clone(),
-            "#{lvar(clone(return_val))} = #e;"
-        ));
+        stmts.push(hack_stmt!(pos = p, "#{lvar(clone(return_val))} = #e;"));
     }
 
     match stmts.last_mut() {

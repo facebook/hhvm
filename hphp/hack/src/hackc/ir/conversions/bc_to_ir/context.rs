@@ -41,7 +41,7 @@ impl Addr {
     /// Can't iterator on Range<T> without implementing `Step for T` which is
     /// unstable.
     pub(crate) fn range_to_iter(range: std::ops::Range<Addr>) -> impl Iterator<Item = Addr> {
-        (range.start.0..range.end.0).into_iter().map(Addr)
+        (range.start.0..range.end.0).map(Addr)
     }
 }
 
@@ -157,7 +157,6 @@ impl<'a, 'b> Context<'a, 'b> {
         // We need to push the selects onto the stack in reverse order but
         // we want them to follow the instr in ascending order.
         let mut selects: Vec<_> = (0..count)
-            .into_iter()
             .map(|i| self.emit(Instr::Special(Special::Select(vid, i))))
             .collect();
         selects.reverse();

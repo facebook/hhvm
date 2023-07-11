@@ -4388,7 +4388,10 @@ function main(vec<string> $argv): int {
         // error out because of that.
         //
         // A common example is: [scribe_cat] <defunct>.
-        fprintf(STDERR, "WARNING: Got status for child that we didn't know we had with pid $pid\n");
+        fprintf(
+          HH\stderr(),
+          "WARNING: Got status for child that we didn't know we had with pid $pid\n"
+        );
       }
     }
   }

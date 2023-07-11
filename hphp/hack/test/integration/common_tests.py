@@ -1289,6 +1289,30 @@ class CommonTests(BarebonesTests):
 """,
             )
 
+        # test no double-rename (T157645473)
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
+            f.write(
+                """<?hh
+                class Foo {
+                  const type TEntry = int;
+                  public function main(): self::TEntry {
+                    return 3;
+                  }
+                }
+
+            """
+            )
+        self.test_driver.start_hh_server(changed_files=["foo_4.php"])
+
+        self.test_driver.check_cmd_and_json_cmd(
+            ["Rewrote 1 file."],
+            [
+                '[{{"filename":"{root}foo_4.php","patches":[{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}},'
+                '{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}}]}}]'
+            ],
+            options=["--refactor", "Class", "Foo", "Bar"],
+        )
+
     def test_refactor_functions(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(

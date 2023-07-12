@@ -97,6 +97,8 @@ THRIFT_FLAG_DEFINE_bool(enforce_queue_concurrency_resource_pools, false);
 
 THRIFT_FLAG_DEFINE_bool(enable_quic, false);
 
+THRIFT_FLAG_DEFINE_bool(fizz_server_enable_hybrid_kex, false);
+
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     apache::thrift::ThriftServer::DumpSnapshotOnLongShutdownResult,
@@ -2139,5 +2141,8 @@ void ThriftServer::startQuicServer() {
   quicServer_->start(server_addr, evbs);
 }
 
+folly::observer::Observer<bool> ThriftServer::enableHybridKex() {
+  return THRIFT_FLAG_OBSERVE(fizz_server_enable_hybrid_kex);
+}
 } // namespace thrift
 } // namespace apache

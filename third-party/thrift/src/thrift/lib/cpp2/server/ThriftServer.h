@@ -601,9 +601,11 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     sslContextObserver_ = folly::observer::makeObserver(
         [observer = std::move(contextObserver),
          tlsRevocationObserver = enableTLSCertRevocation(),
-         tlsRevocationEnforcementObserver = enforceTLSCertRevocation()]() {
+         tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
+         hybridKexObserver = enableHybridKex()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
+          (void)**hybridKexObserver;
           auto context = **observer;
           context.isDefault = true;
           context.alpnAllowMismatch = false;
@@ -1107,6 +1109,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void setQuickExitOnShutdownTimeout(bool quickExitOnShutdownTimeout) {
     quickExitOnShutdownTimeout_ = quickExitOnShutdownTimeout;
   }
+
+  static folly::observer::Observer<bool> enableHybridKex();
 
   /**
    * For each request debug stub, a snapshot information can be constructed to

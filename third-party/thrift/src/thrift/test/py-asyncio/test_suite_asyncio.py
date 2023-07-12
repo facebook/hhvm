@@ -23,7 +23,6 @@ from thrift.server.TAsyncioServer import (
     ThriftAsyncServerFactory,
     ThriftClientProtocolFactory,
 )
-from thrift.transport.THeaderTransport import CLIENT_TYPE
 from ThriftTest import ThriftTest
 from ThriftTest.ttypes import Xception, Xtruct
 
@@ -34,7 +33,7 @@ logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
 class TestHandler(ThriftTest.Iface):
     def __init__(self):
-        self.onewaysQueue = asyncio.Queue(loop=loop)
+        self.onewaysQueue = asyncio.Queue()
 
     async def testVoid(self):
         pass

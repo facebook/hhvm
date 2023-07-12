@@ -272,6 +272,7 @@ struct Reserved {
   5: string move; // not a keyword
   6: string inst; // not a keyword
   7: string changes; // not a keyword
+  8: string __mangled_str;
 }
 
 union ReservedUnion {

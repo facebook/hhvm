@@ -265,6 +265,7 @@ class StructTests(unittest.TestCase):
                 ("move", "Qh4xe1"),
                 ("inst", "foo"),
                 ("changes", "bar"),
+                ("__mangled_str", ""),
             ],
         )
         self.assertEqual(
@@ -277,6 +278,7 @@ class StructTests(unittest.TestCase):
                 "move",
                 "inst",
                 "changes",
+                "__mangled_str",
             ],
         )
 

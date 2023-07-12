@@ -691,7 +691,6 @@ struct RuntimeOption {
   static int LightProcessCount;
 
   // Eval options
-  static bool EnableHipHopSyntax;
   static bool EnableXHP;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;

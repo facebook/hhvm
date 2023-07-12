@@ -141,9 +141,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
 
-  Config::Bind(RuntimeOption::EnableHipHopSyntax,
-               ini, config, "EnableHipHopSyntax",
-               RuntimeOption::EnableHipHopSyntax);
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);

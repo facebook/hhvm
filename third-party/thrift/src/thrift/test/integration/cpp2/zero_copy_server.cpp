@@ -20,6 +20,7 @@
 #include <folly/init/Init.h>
 
 #include <folly/experimental/io/IoUringBackend.h>
+#include <folly/io/async/AsyncSignalHandler.h>
 
 #include <common/services/cpp/ServiceFramework.h>
 #include <thrift/test/integration/cpp2/gen-cpp2/ZeroCopyService.h>
@@ -43,6 +44,8 @@ DEFINE_bool(napi_id_assign, false, "Use NAPI ID based socket assignment");
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
 
 DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
+
+DEFINE_int32(size, 0, "Payload size");
 
 // io_uring related
 DEFINE_bool(use_iouring_event_eventfd, true, "");
@@ -162,6 +165,7 @@ class ServerIOVecQueue : public fizz::AsyncFizzBase::IOVecQueueOps {
   size_t readVecReadSize_;
   folly::ThreadLocalPtr<folly::IOBufIovecBuilder> ioVecQueue_;
 };
+
 class ZeroCopyServiceImpl
     : public apache::thrift::ServiceHandler<ZeroCopyService>,
       public ::facebook::fb303::FacebookBase2DeprecationMigration {
@@ -174,7 +178,14 @@ class ZeroCopyServiceImpl
       std::unique_ptr<apache::thrift::HandlerCallback<
           std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf>>> callback,
       std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf> data) override {
-    auto ret = data->clone();
+    std::unique_ptr<::thrift::zerocopy::cpp2::IOBuf> ret;
+    if (FLAGS_size <= 0) {
+      ret = data->clone();
+    } else {
+      ret = ::thrift::zerocopy::cpp2::IOBuf::create(FLAGS_size);
+      ret->append(FLAGS_size);
+    }
+
     if (FLAGS_debug_logs) {
       LOG(INFO) << "[" << num_ << "]: data = " << data->countChainElements()
                 << ":" << data->computeChainDataLength()
@@ -201,6 +212,31 @@ class ZeroCopyServiceImpl
 
  private:
   size_t num_{0};
+};
+
+class ShutdownSignalHandler : public folly::AsyncSignalHandler {
+ public:
+  explicit ShutdownSignalHandler(facebook::services::ServiceFramework& instance)
+      : AsyncSignalHandler(nullptr), instance_(instance) {
+    signalThread_.getEventBase()->runInEventBaseThreadAndWait([&]() {
+      attachEventBase(signalThread_.getEventBase());
+      registerSignalHandler(SIGTERM);
+      registerSignalHandler(SIGINT);
+    });
+    LOG(INFO) << "Installed shutdown signal handlers";
+  }
+
+ protected:
+  void signalReceived(int signum) noexcept override {
+    LOG(INFO) << "Starting shutdown because of signal " << signum << "..";
+    unregisterSignalHandler(SIGTERM);
+    unregisterSignalHandler(SIGINT);
+    instance_.stop();
+  }
+
+ private:
+  folly::ScopedEventBaseThread signalThread_{"SignalThread"};
+  facebook::services::ServiceFramework& instance_;
 };
 } // namespace
 
@@ -302,6 +338,7 @@ int main(int argc, char* argv[]) {
 
   // TODO(T123377436) CodeFrameworks Migration - Binary Contract
   instance.addPrimaryThriftService(server, handler.get(), options);
+  ShutdownSignalHandler shutdownHandler(instance);
   instance.go();
 
   return 0;

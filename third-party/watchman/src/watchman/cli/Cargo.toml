@@ -16,7 +16,7 @@ serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_de
 structopt = "0.3.23"
 sysinfo = "0.26.8"
 tabular = "0.2.0"
-tokio = { version = "1.25.0", features = ["full", "test-util", "tracing"] }
+tokio = { version = "1.29.1", features = ["full", "test-util", "tracing"] }
 watchman_client = { version = "0.8.0", path = "../rust/watchman_client" }
 
 [target.'cfg(target_os = "linux")'.dependencies]

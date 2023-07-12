@@ -25,6 +25,7 @@
 #include <boost/container/flat_set.hpp>
 #include <memory>
 #include <sys/stat.h>
+#include <folly/dynamic.h>
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/package.h"
@@ -134,6 +135,7 @@ struct RepoOptionsFlags {
   N(std::string,    Query,                                        "") \
   N(std::string,    TrustedDBPath,                                "") \
   N(StringVector,   IndexedMethodAttributes,                      {}) \
+  N(StringVector,   RepoBuildSearchDirs,                          {}) \
   /**/
 
   const PackageInfo& packageInfo() const { return m_packageInfo; }
@@ -146,7 +148,11 @@ struct RepoOptionsFlags {
   void initAliasedNamespaces(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
+  folly::dynamic autoloadQueryObj() const { return m_cachedQuery; }
   std::string trustedDBPath() const { return TrustedDBPath; }
+  const std::vector<std::string>& autoloadRepoBuildSearchDirs() const {
+    return RepoBuildSearchDirs;
+  }
 
   /**
    * Allowlist consisting of the attributes, marking methods, which Facts
@@ -172,6 +178,8 @@ struct RepoOptionsFlags {
     sd(m_packageInfo);
     sd(m_sha1);
     sd(m_factsCacheBreaker);
+
+    if constexpr (SerDe::deserializing) calcCachedQuery();
   }
 
   template <typename SerDe>
@@ -182,6 +190,7 @@ struct RepoOptionsFlags {
   }
 
   const std::string& getFactsCacheBreaker() const { return m_factsCacheBreaker;}
+  void calcCachedQuery();
 
 private:
   RepoOptionsFlags() = default;
@@ -201,6 +210,9 @@ private:
 
   SHA1 m_sha1;
   std::string m_factsCacheBreaker;
+
+  // The query to be used for autoloading
+  folly::dynamic m_cachedQuery;
 
   friend struct RepoOptions;
 };

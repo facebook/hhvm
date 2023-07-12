@@ -179,6 +179,9 @@ struct SqliteAutoloadMapKey {
     auto root = getRepoRoot(repoOptions);
 
     auto queryExpr = [&]() -> folly::dynamic {
+      auto const cached = repoOptions.flags().autoloadQueryObj();
+      if (cached.isObject()) return cached;
+
       auto queryStr = repoOptions.flags().autoloadQuery();
       if (queryStr.empty()) {
         return {};

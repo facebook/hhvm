@@ -367,6 +367,13 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;
 }
 
+void RepoOptionsFlags::calcCachedQuery() {
+  if (Query.empty()) return;
+  try {
+    m_cachedQuery = folly::parseJson(Query);
+  } catch (const folly::json::parse_error& e) { /* swallow error */ }
+}
+
 const RepoOptions& RepoOptions::forFile(const std::string& path) {
   tracing::BlockNoTrace _{"repo-options"};
 
@@ -607,6 +614,7 @@ AUTOLOADFLAGS();
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
   calcCacheKey();
   calcAutoloadDB();
+  m_flags.calcCachedQuery();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {

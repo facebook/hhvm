@@ -1,0 +1,6 @@
+Autoload {
+  RepoBuildSearchDirs {
+    * = repo-dir1
+    * = repo-dir2
+  }
+}

@@ -190,6 +190,22 @@ bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
   }
 }
 
+void addListToPackage(Package& package, const std::vector<std::string>& dirs,
+                     const CompilerOptions& po) {
+  namespace fs = std::filesystem;
+  std::string prefix{""};
+  if (po.repoOptionsDir != po.inputDir) {
+    auto const input = fs::path(po.inputDir);
+    auto const rdr = fs::path(po.repoOptionsDir);
+    prefix = fs::relative(po.repoOptionsDir, po.inputDir).native();
+    if (!prefix.empty() && prefix.back() != '/') prefix += '/';
+  }
+  for (auto const& dir : dirs) {
+    Logger::FInfo("adding autoload dir {}", dir);
+    package.addDirectory(prefix + dir);
+  }
+}
+
 void addInputsToPackage(Package& package, const CompilerOptions& po) {
   if (po.dirs.empty() && po.inputs.empty() && po.inputList.empty()) {
     package.addDirectory("/");
@@ -918,8 +934,11 @@ std::unique_ptr<UnitIndex> computeIndex(
   Timer indexTimer(Timer::WallTime, "indexing");
 
   auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
+  auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
   auto const queryStr = repoFlags.autoloadQuery();
-  if (!queryStr.empty()) {
+  if (!dirs.empty()) {
+    addListToPackage(indexPackage, dirs, po);
+  } else if (!queryStr.empty()) {
     // Index the files specified by Autoload.Query
     if (!addAutoloadQueryToPackage(indexPackage, queryStr)) return nullptr;
   } else {
@@ -1445,8 +1464,11 @@ bool process(CompilerOptions &po) {
     // Parse the input files specified on the command line
     addInputsToPackage(*parsePackage, po);
     auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
+    auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
     auto const queryStr = repoFlags.autoloadQuery();
-    if (!queryStr.empty()) {
+    if (!dirs.empty()) {
+      addListToPackage(*parsePackage, dirs, po);
+    } else if (!queryStr.empty()) {
       // Parse all the files specified by Autoload.Query
       if (!addAutoloadQueryToPackage(*parsePackage, queryStr)) return false;
     }

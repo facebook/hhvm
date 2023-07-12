@@ -120,6 +120,23 @@ int aegis256_encrypt_final(
     fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 5)));
 
 SODIUM_EXPORT
+int aegis256_decrypt_update(
+      unsigned char* m,
+      unsigned long long* outlen,
+      const unsigned char* c,
+      unsigned long long clen,
+      fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 3, 5)));
+
+SODIUM_EXPORT
+int aegis256_decrypt_final(
+      unsigned char* m,
+      unsigned long long* outlen,
+      unsigned long long mlen,
+      unsigned long long adlen,
+      const unsigned char* mac,
+      fizz_aegis_evp_ctx* ctx) __attribute__((nonnull(1, 5, 6)));
+
+SODIUM_EXPORT
 int fizz_aegis256_pick_best_implementation(void);
 
 #ifdef __cplusplus

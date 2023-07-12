@@ -66,8 +66,22 @@ class AEGISCipher : public Aead {
       unsigned long long mlen,
       unsigned long long adlen,
       AegisEVPCtx* ctx);
+  using DecryptUpdateFn = int (*const)(
+      unsigned char* m,
+      unsigned long long* outlen,
+      const unsigned char* c,
+      unsigned long long clen,
+      AegisEVPCtx* ctx);
+  using DecryptFinalFn = int (*const)(
+      unsigned char* m,
+      unsigned long long* outlen,
+      unsigned long long mlen,
+      unsigned long long adlen,
+      const unsigned char* mac,
+      AegisEVPCtx* ctx);
 
   static constexpr size_t kMaxIVLength = 32;
+  static constexpr size_t kTagLength = 16;
 
   static std::unique_ptr<Aead> make128L();
   static std::unique_ptr<Aead> make256();
@@ -127,6 +141,8 @@ class AEGISCipher : public Aead {
       AadFinalFn aadFinal_,
       EncryptUpdateFn encryptUpdate,
       EncryptFinalFn encryptFinal,
+      DecryptUpdateFn decryptUpdate,
+      DecryptFinalFn decryptFinal,
       size_t keyLength,
       size_t ivLength,
       size_t tagLength);
@@ -143,6 +159,8 @@ class AEGISCipher : public Aead {
   AadFinalFn aadFinal_;
   EncryptUpdateFn encryptUpdate_;
   EncryptFinalFn encryptFinal_;
+  DecryptUpdateFn decryptUpdate_;
+  DecryptFinalFn decryptFinal_;
   AegisEVPCtx ctx_;
   size_t keyLength_;
   size_t ivLength_;

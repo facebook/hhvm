@@ -155,6 +155,25 @@ int aegis128l_encrypt_final(
   return aegis_evp->encrypt_final(c, c_writtenlen_p, mlen, adlen, ctx);
 }
 
+int aegis128l_decrypt_update(
+    unsigned char* m,
+    unsigned long long* outlen,
+    const unsigned char* c,
+    unsigned long long clen,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->decrypt_update(m, outlen, c, clen, ctx);
+}
+
+int aegis128l_decrypt_final(
+    unsigned char* m,
+    unsigned long long* outlen,
+    unsigned long long mlen,
+    unsigned long long adlen,
+    const unsigned char* mac,
+    fizz_aegis_evp_ctx* ctx) {
+  return aegis_evp->decrypt_final(m, outlen, mlen, adlen, mac, ctx);
+}
+
 int
 fizz_aegis128l_pick_best_implementation(void)
 {

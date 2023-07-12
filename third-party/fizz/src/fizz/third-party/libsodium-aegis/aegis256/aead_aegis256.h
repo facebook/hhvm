@@ -37,6 +37,19 @@ typedef struct aegis256_evp {
       unsigned long long mlen,
       unsigned long long adlen,
       fizz_aegis_evp_ctx *ctx);
+  int (*decrypt_update)(
+      unsigned char* m,
+      unsigned long long* outlen,
+      const unsigned char* c,
+      unsigned long long clen,
+      fizz_aegis_evp_ctx* ctx);
+  int (*decrypt_final)(
+      unsigned char* m,
+      unsigned long long* outlen,
+      unsigned long long mlen,
+      unsigned long long adlen,
+      const unsigned char* mac,
+      fizz_aegis_evp_ctx* ctx);
 } aegis256_evp;
 
 #endif

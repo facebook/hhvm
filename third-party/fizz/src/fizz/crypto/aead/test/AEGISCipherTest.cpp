@@ -118,7 +118,29 @@ TEST_P(AEGISCipherTest, TestEncryptChunkedInput) {
   }
 }
 
-// Adapted from libsodium's aegis 128l testing values
+TEST_P(AEGISCipherTest, TestDecryptChunkedInput) {
+  std::unique_ptr<Aead> cipher = getTestCipher(GetParam());
+  auto origLength = toIOBuf(GetParam().ciphertext)->computeChainDataLength();
+  auto aad = toIOBuf(GetParam().aad);
+  auto nonce_iobuf = toIOBuf(GetParam().iv);
+  auto nonce = folly::ByteRange(nonce_iobuf->data(), nonce_iobuf->length());
+  for (size_t i = 2; i < origLength; i++) {
+    auto ciphertext = toIOBuf(GetParam().ciphertext);
+    auto chunkedInput = chunkIOBuf(std::move(ciphertext), i);
+    try {
+      auto out = cipher->decrypt(std::move(chunkedInput), aad.get(), nonce);
+      bool valid = IOBufEqualTo()(toIOBuf(GetParam().plaintext), out);
+      EXPECT_EQ(valid, GetParam().valid);
+      EXPECT_EQ(
+          out->computeChainDataLength(),
+          origLength - cipher->getCipherOverhead());
+    } catch (const std::runtime_error&) {
+      EXPECT_FALSE(GetParam().valid);
+    }
+  }
+}
+
+// Adapted from libsodium's aegis testing values
 INSTANTIATE_TEST_SUITE_P(
     AEGIS128LTestVectors,
     AEGISCipherTest,

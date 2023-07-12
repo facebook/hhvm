@@ -385,12 +385,99 @@ static int aegis128l_encrypt_final(
   }
 
   aegis128l_mac(c + buffer_size, adlen, mlen, state);
+  sodium_memzero(state, sizeof state);
   // total final written length is the buffer length plus tag length
   if (outlen != NULL) {
     *outlen = (buffer_size + TAG_LEN);
   }
 
   return 0;
+}
+
+static int aegis128l_decrypt_update(
+    unsigned char* m,
+    unsigned long long* outlen,
+    const unsigned char* c,
+    unsigned long long clen,
+    fizz_aegis_evp_ctx* ctx) {
+  unsigned long long i;
+  unsigned long long writtenlen = 0;
+  unsigned int buffer_size = ctx->aegis128l.buffer_size;
+  unsigned int copy_size = 0;
+  STATE ctx->aegis128l.soft_state;
+
+  // If buffer has existing bytes, copy m to buffer and update state if
+  // buffer is full
+  if (buffer_size > 0 && buffer_size < STATE_SIZE) {
+    unsigned int rem_buffer_size = STATE_SIZE - buffer_size;
+    copy_size = clen <= rem_buffer_size ? clen : rem_buffer_size;
+    memcpy(ctx->aegis128l.buffer + buffer_size, c, copy_size);
+    buffer_size += copy_size;
+    if (buffer_size == STATE_SIZE) {
+      aegis128l_dec(m, ctx->aegis128l.buffer, state);
+      buffer_size = 0;
+      writtenlen += STATE_SIZE;
+      memset(ctx->aegis128l.buffer, 0, STATE_SIZE);
+    }
+  }
+
+  // decrypt full blocks (STATE_SIZE) worth of bytes
+  for (i = copy_size; i + STATE_SIZE <= clen; i += STATE_SIZE) {
+    aegis128l_dec(m + writtenlen, c + i, state);
+    writtenlen += STATE_SIZE;
+  }
+
+  // Copy remaining bytes from c to buffer
+  unsigned int leftover = (clen - copy_size) & 0x1f;
+  if (leftover) {
+    memcpy(ctx->aegis128l.buffer, c + i, leftover);
+    buffer_size  = leftover;
+  }
+
+  if (outlen != NULL) {
+    *outlen = writtenlen;
+  }
+  ctx->aegis128l.buffer_size = buffer_size;
+  return 0;
+}
+
+static int aegis128l_decrypt_final(
+    unsigned char* m,
+    unsigned long long* outlen,
+    unsigned long long mlen,
+    unsigned long long adlen,
+    const unsigned char* mac,
+    fizz_aegis_evp_ctx* ctx) {
+  unsigned int buffer_size = ctx->aegis128l.buffer_size;
+  CRYPTO_ALIGN(16) unsigned char computed_mac[16];
+  STATE ctx->aegis128l.soft_state;
+  int ret;
+
+  if (buffer_size > 0) {
+    CRYPTO_ALIGN(16) unsigned char src[STATE_SIZE];
+    CRYPTO_ALIGN(16) unsigned char dst[STATE_SIZE];
+    memset(src, 0, STATE_SIZE);
+    memcpy(src, ctx->aegis128l.buffer, buffer_size);
+    aegis128l_dec(dst, src, state);
+    memcpy(m, dst, buffer_size);
+    memset(dst, 0, buffer_size);
+    state[0] = AES_BLOCK_XOR(state[0], AES_BLOCK_LOAD(dst));
+    state[4] = AES_BLOCK_XOR(state[4], AES_BLOCK_LOAD(dst + 16));
+    sodium_memzero(dst, sizeof dst);
+    sodium_memzero(src, sizeof src);
+    sodium_memzero(ctx->aegis128l.buffer, sizeof ctx->aegis128l.buffer);
+    ctx->aegis128l.buffer_size = 0;
+  }
+
+  if (outlen != NULL) {
+    *outlen = buffer_size;
+  }
+
+  aegis128l_mac(computed_mac, adlen, mlen, state);
+  ret = crypto_verify_16(computed_mac, mac);
+  sodium_memzero(computed_mac, sizeof computed_mac);
+  sodium_memzero(state, sizeof state);
+  return ret;
 }
 
 struct crypto_aead_aegis128l_implementation fizz_crypto_aead_aegis128l_soft_implementation = {
@@ -404,4 +491,6 @@ struct aegis128l_evp aegis128l_soft_evp = {
     SODIUM_C99(.aad_final =) aegis128l_aad_final,
     SODIUM_C99(.encrypt_update =) aegis128l_encrypt_update,
     SODIUM_C99(.encrypt_final =) aegis128l_encrypt_final,
+    SODIUM_C99(.decrypt_update =) aegis128l_decrypt_update,
+    SODIUM_C99(.decrypt_final =) aegis128l_decrypt_final,
 };

@@ -543,16 +543,7 @@ let test_errors_kill () : bool Lwt.t =
             ~expected:"[DWorking] typechecking"
         in
         let%lwt hh_client =
-          hh_open
-            ~root
-            ~tmp
-            [|
-              "check";
-              "--config";
-              "ide_standalone=true";
-              "--error-format";
-              "plain";
-            |]
+          hh_open ~root ~tmp [| "check"; "--error-format"; "plain" |]
         in
         let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
         (* Now, kill the server! *)
@@ -586,16 +577,7 @@ let test_errors_existing () : bool Lwt.t =
           ~file:(Path.concat root "a.php" |> Path.to_string)
           "<?hh\nfunction f():int {return 1}\n";
         let%lwt stdout =
-          hh
-            ~root
-            ~tmp
-            [|
-              "check";
-              "--config";
-              "ide_standalone=true";
-              "--error-format";
-              "plain";
-            |]
+          hh ~root ~tmp [| "check"; "--error-format"; "plain" |]
         in
         Sys_utils.write_file
           ~file:(Path.concat root "b.php" |> Path.to_string)
@@ -604,16 +586,7 @@ let test_errors_existing () : bool Lwt.t =
           stdout
           ~substring:"A semicolon `;` is expected here. (Parsing[1002])";
         let%lwt stdout =
-          hh
-            ~root
-            ~tmp
-            [|
-              "check";
-              "--config";
-              "ide_standalone=true";
-              "--error-format";
-              "plain";
-            |]
+          hh ~root ~tmp [| "check"; "--error-format"; "plain" |]
         in
         assert_substring
           stdout
@@ -642,16 +615,7 @@ let test_client_complete () : bool Lwt.t =
         in
         (* will a client be able to consume streaming errors and see all of them? *)
         let%lwt stdout =
-          hh
-            ~root
-            ~tmp
-            [|
-              "check";
-              "--config";
-              "ide_standalone=true";
-              "--error-format";
-              "plain";
-            |]
+          hh ~root ~tmp [| "check"; "--error-format"; "plain" |]
         in
         assert_substring stdout ~substring:"Invalid return type (Typing[4336])";
         Lwt.return_unit)
@@ -692,15 +656,7 @@ let test_client_during () : bool Lwt.t =
             ~deadline:(Unix.gettimeofday () +. 60.0)
             ~expected:"[DWorking] typechecking"
         in
-        let args =
-          [|
-            "check";
-            "--config";
-            "ide_standalone=true";
-            "--error-format";
-            "plain";
-          |]
-        in
+        let args = [| "check"; "--error-format"; "plain" |] in
         let%lwt hh_client = hh_open ~root ~tmp args in
         let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
         hh_client#kill Sys.sigkill;
@@ -734,8 +690,6 @@ let test_start () : bool Lwt.t =
               "max_workers=1";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "ide_standalone=true";
               "--error-format";
               "plain";
               "--custom-hhi-path";
@@ -762,8 +716,6 @@ let test_no_start () : bool Lwt.t =
               "max_workers=1";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "ide_standalone=true";
               "--error-format";
               "plain";
               "--custom-hhi-path";
@@ -793,8 +745,6 @@ let test_no_load () : bool Lwt.t =
               "max_workers=1";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "ide_standalone=true";
               "--error-format";
               "plain";
               "--custom-hhi-path";

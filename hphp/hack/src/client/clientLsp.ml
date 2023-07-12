@@ -24,16 +24,16 @@ type args = {
 }
 
 type serverless_ide =
-  | Ide_hh_server
+  | Ide_hh_server [@warning "-37"]
       (** [--config ide_serverless=false --config ide_standalone=false]
           All IDE requests are handled by RPC to hh_server *)
-  | Ide_serverless
+  | Ide_serverless [@warning "-37"]
       (** [--config ide_serverless=true --config ide_standalone=false]
           Most IDE requests are handled by clientIdeDaemon, some by RPC to hh_server *)
   | Ide_standalone
       (** [--config ide_serverless=true --config ide_standalone=true]
           Most IDE requests handled by clientIdeDaemon, some by shelling-out to hh_server *)
-[@@deriving eq, show { with_path = false }]
+[@@deriving eq, show { with_path = false }] [@@ocaml.warning "-37"]
 
 type env = {
   args: args;
@@ -6755,7 +6755,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
      depend on the version= line we read from root/.hhconfig. But nevertheless we need right now
      a few hh.conf flags that control clientLsp and which aren't done that way. So we'll read
      those flags right now. *)
-  let versionless_local_config =
+  let _versionless_local_config =
     ServerLocalConfig.load
       ~silent:true
       ~current_version:(Config_file.parse_version None)
@@ -6764,15 +6764,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       ~from:args.from
       (Config_file.of_list args.config)
   in
-  let serverless_ide =
-    match
-      ( versionless_local_config.ServerLocalConfig.ide_standalone,
-        versionless_local_config.ServerLocalConfig.ide_serverless )
-    with
-    | (true, _) -> Ide_standalone
-    | (false, true) -> Ide_serverless
-    | (false, false) -> Ide_hh_server
-  in
+  let serverless_ide = Ide_standalone in
   let env = { args; init_id; serverless_ide } in
 
   if env.args.verbose then begin
@@ -6808,8 +6800,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
      refreshing process here; other modes refresh every event and are handled
      later, in the event loop.
      TODO(ljw): delete the "other modes" status refresh once we switch over. *)
-  if versionless_local_config.ServerLocalConfig.ide_standalone then
-    background_status_refresher env ide_service;
+  background_status_refresher env ide_service;
 
   let client = Jsonrpc.make_t () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
@@ -6851,10 +6842,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       update_hh_server_state_if_necessary event;
 
       (* update status immediately if warranted *)
-      if
-        (not (is_pre_init !state || is_post_shutdown !state))
-        && not versionless_local_config.ServerLocalConfig.ide_standalone
-      then begin
+      if (not (is_pre_init !state || is_post_shutdown !state)) && false then begin
         state :=
           publish_hh_server_status_diagnostic !state !latest_hh_server_status;
         refresh_status env ~ide_service

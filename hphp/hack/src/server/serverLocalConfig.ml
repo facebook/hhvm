@@ -159,10 +159,6 @@ type t = {
       which files to ignore. This flag is not expected to be
       rolled out broadly, rather it is meant to be used by
       power users only. *)
-  ide_serverless: bool;
-      (** whether clientLsp should use serverless-ide, but with RPC hh_server for squiggles *)
-  ide_standalone: bool;
-      (** whether clientLsp should use serverless-ide, solely shelling-out to hh for some things. This flag overrides ide_serverless. *)
   ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
@@ -301,8 +297,6 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
-    ide_serverless = true;
-    ide_standalone = true;
     ide_max_num_decls = 5000;
     ide_max_num_shallow_decls = 10000;
     predeclare_ide = false;
@@ -674,14 +668,6 @@ let load_
       ~default:default.enable_type_check_filter_files
       ~current_version
       config
-  in
-  (* ide_serverless CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
-  let ide_serverless =
-    bool_ "ide_serverless" ~default:default.ide_serverless config
-  in
-  (* ide_standalone CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
-  let ide_standalone =
-    bool_ "ide_standalone" ~default:default.ide_standalone config
   in
   let ide_max_num_decls =
     int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
@@ -1121,8 +1107,6 @@ let load_
     trace_parsing;
     prechecked_files;
     enable_type_check_filter_files;
-    ide_serverless;
-    ide_standalone;
     ide_max_num_decls;
     ide_max_num_shallow_decls;
     ide_symbolindex_search_provider;

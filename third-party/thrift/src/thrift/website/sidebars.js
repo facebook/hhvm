@@ -87,37 +87,6 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Specification',
-      link: {
-        type: 'doc',
-        id: 'spec/index'
-      },
-      items: [
-        {
-          type: 'category',
-          label: 'Protocols',
-          link: {
-            type: 'doc',
-            id: 'spec/protocol/index',
-          },
-          items: [
-            {
-              type: 'category',
-              label: 'Interface Protocol',
-              link: {
-                type: 'doc',
-                id: 'spec/protocol/interface/index'
-              },
-              items: [
-                "spec/protocol/interface/rocket"
-              ],
-            }
-          ]
-        },
-      ]
-    },
-    {
-      type: 'category',
       label: 'Features',
       link: {
         type: 'doc',
@@ -340,6 +309,17 @@ module.exports = {
         'fb/server/flavors-of-main',
         'fb/server/components',
         'fb/server/transport',
+        {
+          type: 'category',
+          label: 'Interface Protocol',
+          link: {
+            type: 'doc',
+            id: 'fb/server/interface/index'
+          },
+          items: [
+            "fb/server/interface/rocket"
+          ],
+        },
         'fb/server/channels',
         'fb/server/threading-models',
         'fb/server/thrift-server-features',

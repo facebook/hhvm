@@ -26,14 +26,10 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals{{!
 }}{{^program:multifile?}}, unused_crate_dependencies{{/program:multifile?}}{{!
 }}, clippy::all)]
-{{#program:include_srcs}}
+{{#program:lib_include_srcs}}
 include!("{{program:include_src}}");
-{{/program:include_srcs}}
+{{/program:lib_include_srcs}}
 
-{{#program:serde?}}
-{{! work around https://github.com/rust-lang/rust/issues/46991 }}
-extern crate serde;
-{{/program:serde?}}
 {{#program:constants?}}
 pub use self::consts::*;
 {{/program:constants?}}
@@ -48,8 +44,13 @@ pub mod consts {{>lib/block}}{{>lib/mod.consts}}}{{!
 }}{{/program:constants?}}{{!
 }}{{#program:types?}}
 
-pub mod types;{{!
+pub use {{program:types}} as types;{{!
 }}{{/program:types?}}{{!
+}}{{#program:structs}}{{!
+    }}{{#struct:has_adapter?}}{{!
+    }}{{>lib/adapter/struct}}{{!
+    }}{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}{{!
 }}{{#program:services?}}
 
 #[doc(hidden)]
@@ -166,5 +167,5 @@ pub mod errors {{>lib/block}}{{>lib/mod.errors}}}{{!
 
 }}{{#program:nonstandardTypes?}}
 
-mod r#impl {{>lib/block}}{{>lib/mod.impl}}}{{!
+pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}{{!
 }}{{/program:nonstandardTypes?}}

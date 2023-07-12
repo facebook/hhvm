@@ -25,7 +25,7 @@ pub mod consts {
 
 }
 
-pub mod types;
+pub use :: as types;
 
 #[doc(hidden)]
 pub mod dependencies {

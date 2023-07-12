@@ -32,7 +32,7 @@ where
     P: ::fbthrift::ProtocolWriter,
 {
     fn write(&self, p: &mut P) {
-        super::r#impl::write(&self.0, p)
+        {{program:crate}}::r#impl::write(&self.0, p)
     }
 }
 
@@ -41,7 +41,7 @@ where
     P: ::fbthrift::ProtocolReader,
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
-        super::r#impl::read(p).map({{typedef:rust_name}})
+        {{program:crate}}::r#impl::read(p).map({{typedef:rust_name}})
     }
 }
 

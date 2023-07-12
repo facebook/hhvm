@@ -15,15 +15,15 @@
  */
 
 use get_struct_name::types::GetStructName as GetStructNameThrift;
-use get_struct_name::GetStructName;
+use get_struct_name::GetStructNameT;
 use get_struct_name::Wrapper;
 use thrift_test::types::Foo;
 
 #[test]
 fn test_struct_name() {
-    assert_eq!(<Foo as GetStructName>::get_struct_name(), "Foo");
+    assert_eq!(<Foo as GetStructNameT>::get_struct_name(), "Foo");
     assert_eq!(
-        <GetStructNameThrift as GetStructName>::get_struct_name(),
+        <GetStructNameThrift as GetStructNameT>::get_struct_name(),
         "GetStructName"
     );
 }

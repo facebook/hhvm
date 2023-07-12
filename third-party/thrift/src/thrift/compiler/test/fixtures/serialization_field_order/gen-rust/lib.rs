@@ -7,7 +7,7 @@
 pub use self::errors::*;
 pub use self::types::*;
 
-pub mod types;
+pub use :: as types;
 
 /// Error return types.
 pub mod errors {

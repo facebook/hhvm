@@ -24,9 +24,6 @@ use fbthrift::adapter::ThriftAdapter;
 use fbthrift::metadata::ThriftAnnotations;
 
 use crate::types as crate_types;
-use crate::types::AdaptedString;
-use crate::types::Foo;
-use crate::types::WrappedAdaptedBytes;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Wrapper<T: Clone + Debug + PartialEq + Sync + Send>(pub T);

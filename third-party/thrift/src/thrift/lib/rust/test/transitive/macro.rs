@@ -17,13 +17,13 @@
 use proc_macro::TokenStream;
 use quote::quote;
 
-#[proc_macro_derive(GetStructName)]
+#[proc_macro_derive(GetStructNameD)]
 pub fn standalone_subcommand_derive(input: TokenStream) -> TokenStream {
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
     match ast.data {
         syn::Data::Struct(s) => s,
-        _ => panic!("`#[derive(GetStructName)]` only supports Thrift structs"),
+        _ => panic!("`#[derive(GetStructNameD)]` only supports Thrift structs"),
     };
 
     let name = &ast.ident;
@@ -31,7 +31,7 @@ pub fn standalone_subcommand_derive(input: TokenStream) -> TokenStream {
     let name_string = name.to_string();
 
     let gen = quote! {
-        impl ::get_struct_name::GetStructName for #name {
+        impl ::get_struct_name::GetStructNameT for #name {
             fn get_struct_name() -> &'static str {
                 #name_string
             }

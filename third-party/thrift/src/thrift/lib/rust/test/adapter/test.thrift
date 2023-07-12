@@ -33,7 +33,7 @@ typedef list<AdaptedString> AdaptedListNewType (rust.newtype)
 
 typedef binary (rust.type = "bytes::Bytes") IOBuf
 
-@rust.Adapter{name = "crate::IOBufIdentityAdapter"}
+@rust.Adapter{name = "crate::types::IOBufIdentityAdapter"}
 typedef IOBuf AdaptedBytes
 
 typedef AdaptedBytes WrappedAdaptedBytes (rust.newtype)
@@ -58,7 +58,7 @@ enum AssetType {
   SERVER = 2,
 } (rust.name = "ThriftAssetType")
 
-@rust.Adapter{name = "crate::AssetAdapter"}
+@rust.Adapter{name = "crate::types::AssetAdapter"}
 struct Asset {
   1: AssetType type_;
   2: i64 id;
@@ -94,7 +94,7 @@ struct Foo {
   6: i64 validated_int_val = 1;
   @rust.Adapter{name = "::adapters::ListAdapter"}
   7: list<string> list_val = ["lorem", "ispum"];
-  @rust.Adapter{name = "crate::FieldCheckerAdapter"}
+  @rust.Adapter{name = "crate::types::FieldCheckerAdapter"}
   8: string field_checked;
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
   9: string ident_field;
@@ -114,10 +114,10 @@ struct Foo {
     "hello": [[[1, 2, 3], [4, 5, 6]]],
     "world": [[[7, 8, 9]]],
   };
-  @rust.Adapter{name = "crate::AdaptedStringListIdentityAdapter"}
+  @rust.Adapter{name = "crate::types::AdaptedStringListIdentityAdapter"}
   17: list<AdaptedString> field_adapted_adapted_string_list = ["zucc"];
   18: Asset adapted_struct;
-  @rust.Adapter{name = "crate::AdaptedAssetIdentityAdapter"}
+  @rust.Adapter{name = "crate::types::AdaptedAssetIdentityAdapter"}
   19: Asset double_adapted_struct;
   20: list<Asset> adapted_struct_list = [{"type_": AssetType.LAPTOP, "id": 10}];
   21: AdaptedListNewType adapted_list_new_type = ["hi", "there"];
@@ -145,14 +145,14 @@ struct FirstAnnotation {
   1: string uri;
 }
 
-@rust.Adapter{name = "crate::TransitiveTestAdapter<>"}
+@rust.Adapter{name = "crate::types::TransitiveTestAdapter<>"}
 @FirstAnnotation{uri = "thrift/test"}
 @scope.Transitive
 struct TransitiveAdapterAnnotation {
   1: string payload;
 }
 
-@rust.Adapter{name = "crate::TransitiveAnnotationTestAdapter<>"}
+@rust.Adapter{name = "crate::types::TransitiveAnnotationTestAdapter<>"}
 @FirstAnnotation{uri = "thrift/transitive_field_test"}
 @scope.Transitive
 struct TransitiveFieldAdapterAnnotation {
@@ -161,7 +161,7 @@ struct TransitiveFieldAdapterAnnotation {
 
 @TransitiveAdapterAnnotation{payload = "hello_world"}
 struct TransitiveStruct {
-  @rust.Adapter{name = "crate::AnnotationTestAdapter"}
+  @rust.Adapter{name = "crate::types::AnnotationTestAdapter"}
   1: string test_field;
   @TransitiveFieldAdapterAnnotation{payload = "foobar"}
   2: string test_field_2;

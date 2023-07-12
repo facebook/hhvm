@@ -369,7 +369,7 @@ pub mod consts {
 
 }
 
-pub mod types;
+pub use :: as types;
 
 /// Error return types.
 pub mod errors {

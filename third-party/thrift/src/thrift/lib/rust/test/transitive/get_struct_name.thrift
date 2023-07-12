@@ -17,10 +17,10 @@
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/scope.thrift"
 
-@rust.Derive{derives = ["crate::GetStructName"]}
+@rust.Derive{derives = ["crate::GetStructNameD"]}
 @scope.Transitive
 struct GetStructName {}
 
-@rust.Adapter{name = "crate::WrapperAdapter<>"}
+@rust.Adapter{name = "crate::types::WrapperAdapter<>"}
 @scope.Transitive
 struct Wrap {}

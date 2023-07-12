@@ -17,8 +17,8 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-pub use ::get_struct_name::GetStructName;
-pub use ::get_struct_name_derive::GetStructName;
+pub use ::get_struct_name::GetStructNameT; // T for trait
+pub use ::get_struct_name_derive::GetStructNameD; // D for derive
 use fbthrift::adapter::ThriftAdapter;
 
 pub struct WrapperAdapter<T>(PhantomData<T>);

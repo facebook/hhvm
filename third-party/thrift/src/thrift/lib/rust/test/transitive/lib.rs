@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-pub trait GetStructName {
+pub trait GetStructNameT {
     fn get_struct_name() -> &'static str;
 }

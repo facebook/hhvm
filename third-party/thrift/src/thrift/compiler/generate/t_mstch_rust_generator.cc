@@ -18,6 +18,7 @@
 #include <cctype>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -77,6 +78,10 @@ bool can_derive_ord(const t_type* type) {
 }
 
 struct rust_codegen_options {
+  // Name that the main crate uses to refer to its dependency on the types
+  // crate.
+  std::string types_crate;
+
   // Key: package name according to Thrift.
   // Value: rust_crate_name to use in generated code.
   std::map<std::string, std::string> cratemap;
@@ -98,8 +103,9 @@ struct rust_codegen_options {
   // True if we are generating a submodule rather than the whole crate.
   bool multifile_mode = false;
 
-  // List of extra sources to include at top-level of the crate.
-  std::vector<std::string> include_srcs;
+  // List of extra sources to include at top-level of each crate.
+  mstch::array lib_include_srcs;
+  mstch::array types_include_srcs;
 
   // The current program being generated and its Rust module path.
   const t_program* current_program;
@@ -172,6 +178,22 @@ FieldKind field_kind(const t_named& node) {
 // into the generated crate.
 bool has_nonstandard_type_annotation(const t_type* type) {
   return type->get_annotation("rust.type").find("::") != string::npos;
+}
+
+void parse_include_srcs(
+    mstch::array& elements, boost::optional<std::string> const& include_srcs) {
+  if (!include_srcs) {
+    return;
+  }
+  auto paths = *include_srcs;
+  string::size_type pos = 0;
+  while (pos != string::npos && pos < paths.size()) {
+    mstch::map node;
+    string::size_type next_pos = paths.find(':', pos);
+    node["program:include_src"] = paths.substr(pos, next_pos - pos);
+    elements.push_back(std::move(node));
+    pos = ((next_pos == string::npos) ? next_pos : next_pos + 1);
+  }
 }
 
 const t_const* find_structured_adapter_annotation(const t_named& node) {
@@ -459,6 +481,7 @@ class rust_mstch_program : public mstch_program {
         this,
         {
             {"program:types?", &rust_mstch_program::rust_has_types},
+            {"program:types", &rust_mstch_program::rust_types},
             {"program:structsOrEnums?",
              &rust_mstch_program::rust_structs_or_enums},
             {"program:nonexhaustiveStructs?",
@@ -479,7 +502,10 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_nonstandard_types},
             {"program:docs?", &rust_mstch_program::rust_has_docs},
             {"program:docs", &rust_mstch_program::rust_docs},
-            {"program:include_srcs", &rust_mstch_program::rust_include_srcs},
+            {"program:lib_include_srcs",
+             &rust_mstch_program::rust_lib_include_srcs},
+            {"program:types_include_srcs",
+             &rust_mstch_program::rust_types_include_srcs},
             {"program:has_default_tests?",
              &rust_mstch_program::rust_has_default_tests},
             {"program:structs_for_default_test",
@@ -503,6 +529,15 @@ class rust_mstch_program : public mstch_program {
     return !program_->structs().empty() || !program_->enums().empty() ||
         !program_->typedefs().empty() || !program_->xceptions().empty();
   }
+
+  mstch::node rust_types() {
+    auto types = "::" + options_.types_crate;
+    if (options_.multifile_mode) {
+      types += "::" + mangle(program_->name());
+    }
+    return types;
+  }
+
   mstch::node rust_structs_or_enums() {
     return !program_->structs().empty() || !program_->enums().empty() ||
         !program_->xceptions().empty();
@@ -622,15 +657,8 @@ class rust_mstch_program : public mstch_program {
   }
   mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }
-  mstch::node rust_include_srcs() {
-    mstch::array elements;
-    for (auto elem : options_.include_srcs) {
-      mstch::map node;
-      node["program:include_src"] = elem;
-      elements.push_back(node);
-    }
-    return elements;
-  }
+  mstch::node rust_lib_include_srcs() { return options_.lib_include_srcs; }
+  mstch::node rust_types_include_srcs() { return options_.types_include_srcs; }
   mstch::node rust_has_default_tests() {
     for (const t_struct* strct : program_->structs()) {
       for (const t_field& field : strct->fields()) {
@@ -1934,6 +1962,11 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
 }
 
 void t_mstch_rust_generator::generate_program() {
+  if (auto types_crate_flag = get_option("types_crate")) {
+    options_.types_crate =
+        boost::algorithm::replace_all_copy(*types_crate_flag, "-", "_");
+  }
+
   if (auto cratemap_flag = get_option("cratemap")) {
     auto cratemap = load_crate_map(*cratemap_flag);
     options_.multifile_mode = cratemap.multifile_mode;
@@ -1951,17 +1984,9 @@ void t_mstch_rust_generator::generate_program() {
     program_->set_include_prefix(*include_prefix_flag);
   }
 
-  if (auto include_srcs = get_option("include_srcs")) {
-    auto paths = *include_srcs;
-
-    string::size_type pos = 0;
-    while (pos != string::npos && pos < paths.size()) {
-      string::size_type next_pos = paths.find(':', pos);
-      auto path = paths.substr(pos, next_pos - pos);
-      options_.include_srcs.push_back(path);
-      pos = ((next_pos == string::npos) ? next_pos : next_pos + 1);
-    }
-  }
+  parse_include_srcs(options_.lib_include_srcs, get_option("lib_include_srcs"));
+  parse_include_srcs(
+      options_.types_include_srcs, get_option("types_include_srcs"));
 
   if (options_.multifile_mode) {
     options_.current_crate = "crate::" + mangle(program_->name());
@@ -2126,13 +2151,13 @@ void t_mstch_rust_generator::fill_validator_list(validator_list& l) const {
 THRIFT_REGISTER_GENERATOR(
     mstch_rust,
     "Rust",
-    "    serde:           Derive serde Serialize/Deserialize traits for types\n"
-    "    noserver:        Don't emit server code\n"
-    "    include_prefix=: Set program:include_prefix.\n"
-    "    include_srcs=:   Additional Rust source file to include in output, "
-    "`:` separated\n"
-    "    cratemap=map:    Mapping file from services to crate names\n");
-
+    "    serde:               Derive serde Serialize/Deserialize traits for types\n"
+    "    noserver:            Don't emit server code\n"
+    "    include_prefix=:     Set program:include_prefix.\n"
+    "    lib_include_srcs=:   Additional Rust source files to include in lib crate, `:` separated\n"
+    "    types_include_srcs=: Additional Rust source files to include in types crate, `:` separated\n"
+    "    cratemap=map:    Mapping file from services to crate names\n"
+    "    types_crate=:        Name that the main crate uses to refer to its dependency on the types crate\n");
 } // namespace rust
 } // namespace compiler
 } // namespace thrift

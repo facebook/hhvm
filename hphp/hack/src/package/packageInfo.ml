@@ -16,25 +16,22 @@ type t = {
 let empty = { glob_to_package = SMap.empty; existing_packages = SMap.empty }
 
 let get_package_for_module (info : t) (md : string) : Package.t option =
-  let matching_pkgs =
+  let candidates =
+    SMap.filter
+      (fun glob _ -> Str.string_match (Str.regexp glob) md 0)
+      info.glob_to_package
+  in
+  let (_strictest_matching_glob, package_with_strictest_matching_glob) =
     SMap.fold
-      (fun glob pkg acc ->
-        if Str.string_match (Str.regexp glob) md 0 then
-          (glob, pkg) :: acc
+      (fun glob pkg ((glob', _) as acc) ->
+        if String.compare glob glob' > 0 then
+          (glob, Some pkg)
         else
           acc)
-      info.glob_to_package
-      []
+      candidates
+      ("", None)
   in
-  let sorted_pkgs =
-    List.sort
-      ~compare:(fun (md1, _) (md2, _) -> String.compare md1 md2)
-      matching_pkgs
-    |> List.rev
-  in
-  match sorted_pkgs with
-  | [] -> None
-  | (_, pkg) :: _ -> Some pkg
+  package_with_strictest_matching_glob
 
 let package_exists (info : t) (pkg : string) : bool =
   SMap.mem pkg info.existing_packages

@@ -16,5 +16,22 @@
 
 %><% > Autogen%>
 #pragma once
+<%#program:enums?%>
+
+#include <cstdint>
+<%/program:enums?%>
 
 <% > module_types_h/forward_declare%>
+
+<%#program:enums?%>
+
+// BEGIN forward_declare_enums
+<% > common/namespace_cpp2_begin%>
+
+<%#program:enums%>
+enum <%^enum:cpp_is_unscoped%>class <%/enum:cpp_is_unscoped%><%enum:cpp_name%><%#enum:cpp_enum_type%> : <%enum:cpp_enum_type%><%/enum:cpp_enum_type%>;
+<%/program:enums%>
+<% > common/namespace_cpp2_end%>
+
+// END forward_declare_enums
+<%/program:enums?%>

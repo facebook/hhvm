@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace py3 { namespace simple {
 class SimpleException;
@@ -21,3 +23,11 @@ class BinaryUnion;
 class BinaryUnionStruct;
 }} // py3::simple
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace py3 { namespace simple {
+enum class AnEnum;
+enum class AnEnumRenamed;
+enum class Flags;
+}} // py3::simple
+// END forward_declare_enums

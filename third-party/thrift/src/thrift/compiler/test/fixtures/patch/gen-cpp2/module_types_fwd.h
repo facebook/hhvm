@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace patch {
 class MyData;
@@ -51,3 +53,9 @@ class BarEnsureStruct;
 class LoopPatchStruct;
 }}} // test::fixtures::patch
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test { namespace fixtures { namespace patch {
+enum class MyEnum;
+}}} // test::fixtures::patch
+// END forward_declare_enums

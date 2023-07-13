@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace some { namespace ns {
 class ModuleA;
@@ -16,3 +18,9 @@ class DirectlyAdapted;
 class CppRef;
 }} // some::ns
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace some { namespace ns {
+enum class EnumB;
+}} // some::ns
+// END forward_declare_enums

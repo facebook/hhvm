@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 class empty_struct;
@@ -49,3 +51,11 @@ class TypedefStruct;
 class StructWithDoubleUnderscores;
 }}}} // apache::thrift::fixtures::types
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+enum class has_bitwise_ops;
+enum is_unscoped : int;
+enum class MyForwardRefEnum;
+}}}} // apache::thrift::fixtures::types
+// END forward_declare_enums

@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic {
 class MyStruct;
@@ -15,3 +17,10 @@ class ReservedKeyword;
 class UnionToBeRenamed;
 }}} // test::fixtures::basic
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test { namespace fixtures { namespace basic {
+enum class MyEnum;
+enum class HackEnum;
+}}} // test::fixtures::basic
+// END forward_declare_enums

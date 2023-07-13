@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace apache { namespace thrift { namespace test {
 class MyStruct;
@@ -14,3 +16,9 @@ class EmptiableTerseStruct;
 class NotEmptiableStruct;
 }}} // apache::thrift::test
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace apache { namespace thrift { namespace test {
+enum class MyEnum;
+}}} // apache::thrift::test
+// END forward_declare_enums

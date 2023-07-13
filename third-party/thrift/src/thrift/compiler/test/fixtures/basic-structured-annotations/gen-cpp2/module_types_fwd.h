@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic-structured-annotations {
 class structured_annotation_inline;
@@ -18,3 +20,9 @@ class MyException;
 class MyUnion;
 }}} // test::fixtures::basic-structured-annotations
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test { namespace fixtures { namespace basic-structured-annotations {
+enum class MyEnum;
+}}} // test::fixtures::basic-structured-annotations
+// END forward_declare_enums

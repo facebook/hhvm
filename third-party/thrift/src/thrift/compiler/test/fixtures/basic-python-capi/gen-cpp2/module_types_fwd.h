@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic-python-capi {
 class MyStruct;
@@ -34,3 +36,10 @@ class MyDataItemFieldPatchStruct;
 class MyDataItemEnsureStruct;
 }}} // test::fixtures::basic-python-capi
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test { namespace fixtures { namespace basic-python-capi {
+enum class MyEnum;
+enum class NormalDecentEnum;
+}}} // test::fixtures::basic-python-capi
+// END forward_declare_enums

@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace facebook { namespace thrift { namespace test {
 class Foo;
@@ -14,3 +16,9 @@ class Baz;
 class OpEncodeStruct;
 }}} // facebook::thrift::test
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace facebook { namespace thrift { namespace test {
+enum class Enum;
+}}} // facebook::thrift::test
+// END forward_declare_enums

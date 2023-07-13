@@ -1,0 +1,4 @@
+File "requireclass_generic_04.bad.php", line 8, characters 17-17:
+Unbound name: `T` (an object type) (Naming[2049])
+File "requireclass_generic_04.bad.php", line 12, characters 19-19:
+Unbound name: `T` (an object type) (Naming[2049])

@@ -84,8 +84,9 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
 *)
 
 let get_require_class_name_pos ty =
-  match TUtils.unwrap_class_type ty with
-  | (_, (p, n), _) -> Some (n, p)
+  match TUtils.try_unwrap_class_type ty with
+  | Some (_, (p, n), _) -> Some (n, p)
+  | None -> None
 
 let check_require_class_require_extends_conflict
     env trait_pos required_classes tc =

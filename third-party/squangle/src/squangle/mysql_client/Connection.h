@@ -178,14 +178,12 @@ class Connection {
   static MultiQueryStreamHandler streamMultiQuery(
       std::unique_ptr<Connection> connection,
       std::vector<Query>&& queries,
-      const std::unordered_map<std::string, std::string>& attributes =
-          std::unordered_map<std::string, std::string>());
+      const AttributeMap& attributes = AttributeMap());
 
   static MultiQueryStreamHandler streamMultiQuery(
       std::unique_ptr<Connection> connection,
       MultiQuery&& multi_query,
-      const std::unordered_map<std::string, std::string>& attributes =
-          std::unordered_map<std::string, std::string>());
+      const AttributeMap& attributes = AttributeMap());
 
   // variant that takes a QueryOperation for more convenient chaining of
   // queries.
@@ -477,7 +475,7 @@ class Connection {
     persistentQueryAttributes_ = std::move(attrs);
   }
 
-  QueryAttributes getPersistentQueryAttributes() const {
+  const QueryAttributes& getPersistentQueryAttributes() const {
     return persistentQueryAttributes_;
   }
 

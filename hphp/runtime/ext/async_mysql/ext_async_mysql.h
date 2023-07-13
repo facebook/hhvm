@@ -72,7 +72,7 @@ struct AsyncMysqlConnection {
       std::unique_ptr<am::Connection> conn,
       std::shared_ptr<am::ConnectOperation> conn_op = nullptr,
       db::ClientPerfStats clientStats = db::ClientPerfStats());
-  using AttributeMap = std::unordered_map<std::string, std::string>;
+  using AttributeMap = am::AttributeMap;
   Object query(
       ObjectData* this_,
       am::Query query,

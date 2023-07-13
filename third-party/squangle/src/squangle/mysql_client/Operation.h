@@ -243,20 +243,17 @@ class ConnectionOptions {
   }
 
   // Provide a Connection Attribute to be passed in the connection handshake
-  ConnectionOptions& setAttribute(
-      const std::string& attr,
-      const std::string& value) {
-    attributes_[attr] = value;
+  ConnectionOptions& setAttribute(std::string_view attr, std::string value) {
+    attributes_[attr] = std::move(value);
     return *this;
   }
 
   // MySQL 5.6 connection attributes.  Sent at time of connect.
-  const std::unordered_map<std::string, std::string>& getAttributes() const {
+  const AttributeMap& getAttributes() const {
     return attributes_;
   }
 
-  ConnectionOptions& setAttributes(
-      const std::unordered_map<std::string, std::string>& attributes) {
+  ConnectionOptions& setAttributes(const AttributeMap& attributes) {
     for (auto& [key, value] : attributes) {
       attributes_[key] = value;
     }
@@ -403,7 +400,7 @@ class ConnectionOptions {
   Duration total_timeout_;
   Duration query_timeout_;
   std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider_;
-  std::unordered_map<std::string, std::string> attributes_;
+  AttributeMap attributes_;
   folly::Optional<CompressionAlgorithm> compression_lib_;
   bool use_checksum_ = false;
   uint32_t max_attempts_ = 1;
@@ -528,8 +525,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return std::move(*user_data_);
   }
 
-  Operation* setAttributes(
-      const std::unordered_map<std::string, std::string>& attributes) {
+  Operation* setAttributes(const AttributeMap& attributes) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     for (const auto& [key, value] : attributes) {
@@ -538,8 +534,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return this;
   }
 
-  Operation* setAttributes(
-      std::unordered_map<std::string, std::string>&& attributes) {
+  Operation* setAttributes(AttributeMap&& attributes) {
     CHECK_THROW(
         state() == OperationState::Unstarted, db::OperationStateException);
     for (auto& [key, value] : attributes) {
@@ -555,7 +550,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
     return this;
   }
 
-  const std::unordered_map<std::string, std::string>& getAttributes() const {
+  const AttributeMap& getAttributes() const {
     return attributes_;
   }
 
@@ -781,7 +776,7 @@ class Operation : public std::enable_shared_from_this<Operation> {
   std::string mysql_normalize_error_;
 
   // Connection or query attributes (depending on the Operation type)
-  std::unordered_map<std::string, std::string> attributes_;
+  AttributeMap attributes_;
 
   // This mutex protects the operation cancel process when the state
   // is being checked in `run` and the operation is being cancelled in other
@@ -1104,8 +1099,7 @@ class ConnectOperation : public Operation {
 // the state.
 class FetchOperation : public Operation {
  public:
-  using RespAttrs = std::unordered_map<std::string, std::string>;
-
+  using RespAttrs = AttributeMap;
   ~FetchOperation() override = default;
   void mustSucceed() override;
 

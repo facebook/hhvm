@@ -375,7 +375,7 @@ DbMultiQueryResult Connection::multiQuery(Args&&... args) {
 MultiQueryStreamHandler Connection::streamMultiQuery(
     std::unique_ptr<Connection> conn,
     std::vector<Query>&& queries,
-    const std::unordered_map<std::string, std::string>& attributes) {
+    const AttributeMap& attributes) {
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
@@ -391,7 +391,7 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
 MultiQueryStreamHandler Connection::streamMultiQuery(
     std::unique_ptr<Connection> conn,
     MultiQuery&& multi_query,
-    const std::unordered_map<std::string, std::string>& attributes) {
+    const AttributeMap& attributes) {
   auto proxy =
       Operation::ConnectionProxy(Operation::OwnedConnection(std::move(conn)));
   auto connP = proxy.get();
@@ -443,8 +443,9 @@ std::shared_ptr<QueryOperation> Connection::rollbackTransaction(
 }
 
 void Connection::mergePersistentQueryAttributes(QueryAttributes& attrs) const {
-  auto persistentQueryAttributes = getPersistentQueryAttributes();
-  attrs.merge(std::move(persistentQueryAttributes));
+  for (const auto& [key, value] : getPersistentQueryAttributes()) {
+    attrs[key] = value;
+  }
 }
 
 } // namespace facebook::common::mysql_client

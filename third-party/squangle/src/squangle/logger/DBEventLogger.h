@@ -14,6 +14,7 @@
 #include <chrono>
 #include <string>
 
+#include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventCounter.h"
 
@@ -126,6 +127,7 @@ struct CommonLoggingData {
 };
 
 struct QueryLoggingData : CommonLoggingData {
+  using AttributeMap = common::mysql_client::AttributeMap;
   QueryLoggingData(
       OperationType op,
       Duration duration,
@@ -136,10 +138,8 @@ struct QueryLoggingData : CommonLoggingData {
       uint64_t resultSize = 0,
       bool noIndexUsed = false,
       bool useChecksum = false,
-      const std::unordered_map<std::string, std::string>& queryAttributes =
-          std::unordered_map<std::string, std::string>(),
-      std::unordered_map<std::string, std::string> responseAttributes =
-          std::unordered_map<std::string, std::string>(),
+      const AttributeMap& queryAttributes = AttributeMap(),
+      AttributeMap responseAttributes = AttributeMap(),
       Duration maxThreadBlockTime = Duration(0),
       Duration totalThreadBlockTime = Duration(0),
       bool wasSlow = false)
@@ -164,8 +164,8 @@ struct QueryLoggingData : CommonLoggingData {
   uint64_t result_size;
   bool no_index_used;
   bool use_checksum;
-  std::unordered_map<std::string, std::string> query_attributes;
-  std::unordered_map<std::string, std::string> response_attributes;
+  AttributeMap query_attributes;
+  AttributeMap response_attributes;
   bool was_slow;
 };
 

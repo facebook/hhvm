@@ -88,6 +88,8 @@
 #include <string>
 #include <tuple>
 
+#include "squangle/base/Base.h"
+
 namespace facebook {
 namespace common {
 namespace mysql_client {
@@ -95,7 +97,7 @@ namespace mysql_client {
 using QualifiedColumn = std::tuple<folly::fbstring, folly::fbstring>;
 using AliasedQualifiedColumn =
     std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>;
-typedef std::unordered_map<std::string, std::string> QueryAttributes;
+using QueryAttributes = AttributeMap;
 
 class QueryArgument;
 

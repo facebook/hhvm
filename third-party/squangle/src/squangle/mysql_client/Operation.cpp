@@ -1127,7 +1127,7 @@ const std::string& FetchOperation::currentRecvGtid() const {
   return current_recv_gtid_;
 }
 
-const FetchOperation::RespAttrs& FetchOperation::currentRespAttrs() const {
+const AttributeMap& FetchOperation::currentRespAttrs() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_resp_attrs_;
 }
@@ -1171,8 +1171,8 @@ readNextResponseAtribute(MYSQL* mysql) {
   return folly::none;
 }
 
-FetchOperation::RespAttrs FetchOperation::readResponseAttributes() {
-  RespAttrs attrs;
+AttributeMap FetchOperation::readResponseAttributes() {
+  AttributeMap attrs;
   MYSQL* mysql = conn()->mysql();
   for (auto attr = readFirstResponseAtribute(mysql); attr;
        attr = readNextResponseAtribute(mysql)) {

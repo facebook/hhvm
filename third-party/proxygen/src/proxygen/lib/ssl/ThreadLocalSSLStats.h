@@ -19,7 +19,7 @@ namespace proxygen {
 
 class ProxygenSSLStats : public wangle::SSLStats {
  public:
-  virtual ~ProxygenSSLStats() = default;
+  virtual ~ProxygenSSLStats() override = default;
 
   virtual void recordReplayCacheRequestComplete(uint64_t duration,
                                                 bool cacheHit) noexcept = 0;
@@ -53,7 +53,7 @@ class ProxygenSSLStats : public wangle::SSLStats {
 class TLSSLStats : public ProxygenSSLStats {
  public:
   TLSSLStats(const std::string& prefix);
-  virtual ~TLSSLStats() = default;
+  virtual ~TLSSLStats() override = default;
 
   // downstream
   void recordSSLAcceptLatency(int64_t latency) noexcept override;

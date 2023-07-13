@@ -830,7 +830,11 @@ void RocketServerConnection::writeSuccess() noexcept {
     frameHandler_->requestComplete();
   }
   DCHECK(!context.writeEventsContext.endRawByteOffset.has_value());
-  context.writeEventsContext.endRawByteOffset = socket_->getRawBytesWritten();
+  if (context.writeEventsContext.startRawByteOffset.has_value()) {
+    context.writeEventsContext.endRawByteOffset = std::max(
+        context.writeEventsContext.startRawByteOffset.value(),
+        socket_->getRawBytesWritten() - 1);
+  }
 
   if (auto observerContainer = getObserverContainer();
       observerContainer && observerContainer->numObservers()) {

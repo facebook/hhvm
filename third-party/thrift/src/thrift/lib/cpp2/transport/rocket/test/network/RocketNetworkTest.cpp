@@ -1449,7 +1449,7 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
       constexpr folly::StringPiece kMetadata("metadata");
       constexpr folly::StringPiece kData("data");
       const unsigned int startOffsetBatch1 = 0;
-      const unsigned int endOffsetBatch1 = kSetupFrameSize + 24;
+      const unsigned int endOffsetBatch1 = kSetupFrameSize + 24 - 1;
 
       // responses to setup frame (stream id = 0) and to the first
       // request (stream id = 1) are batched together
@@ -1505,8 +1505,8 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestResponse) {
       constexpr folly::StringPiece kNewData("new_data");
       const unsigned int startOffsetBatch2 =
           kSetupFrameSize + 24 /* 24 is the size of the first response */;
-      const unsigned int endOffsetBatch2 =
-          startOffsetBatch2 + 32 /* 32 is the size of the second response */;
+      const unsigned int endOffsetBatch2 = startOffsetBatch2 + 32 -
+          1 /* 32 is the size of the second response */;
 
       EXPECT_CALL(
           *observer,
@@ -1576,7 +1576,7 @@ TEST_F(RocketNetworkTest, ObserverIsNotifiedOnWriteSuccessRequestStream) {
     const auto data =
         folly::to<std::string>("generate:", kNumRequestedPayloads);
     const unsigned int startOffsetBatch = 0;
-    const unsigned int endOffsetBatch = kSetupFrameSize + 16;
+    const unsigned int endOffsetBatch = kSetupFrameSize + 16 - 1;
 
     EXPECT_CALL(
         *observer,

@@ -11,6 +11,7 @@
 #include "SessionWrapper.h"
 #include <folly/Memory.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/DelayedDestruction.h>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/lib/http/HTTPConnector.h>
 
@@ -24,6 +25,7 @@ class ProxyStats;
 
 class ProxyHandler
     : public proxygen::RequestHandler
+    , public folly::DelayedDestruction
     , private proxygen::HTTPConnector::Callback
     , private folly::AsyncSocket::ConnectCallback
     , private folly::AsyncReader::ReadCallback

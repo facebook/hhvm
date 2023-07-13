@@ -325,6 +325,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
   // Set up the tag buffer now
   const auto& lastBuf = ciphertext->prev();
   folly::MutableByteRange tagOut;
+  std::array<uint8_t, kTagLength> tag;
   if (lastBuf->length() >= tagLength_) {
     // We can directly carve out this buffer from the last IOBuf
     // Adjust buffer sizes
@@ -332,7 +333,6 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
 
     tagOut = {lastBuf->writableTail(), tagLength_};
   } else {
-    std::array<uint8_t, kTagLength> tag;
     // buffer to copy the tag into when we decrypt
     tagOut = {tag.data(), tagLength_};
     trimBytes(*ciphertext, tagOut);

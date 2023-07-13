@@ -22,8 +22,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, Cloneable, Comparable<AdaptedStructWithInternBox> {
-  private static final TStruct STRUCT_DESC = new TStruct("AdaptedStructWithInternBox");
+public class AdaptedStructWithTerseInternBox implements TBase, java.io.Serializable, Cloneable, Comparable<AdaptedStructWithTerseInternBox> {
+  private static final TStruct STRUCT_DESC = new TStruct("AdaptedStructWithTerseInternBox");
   private static final TField FIELD1_FIELD_DESC = new TField("field1", TType.STRUCT, (short)1);
   private static final TField FIELD2_FIELD_DESC = new TField("field2", TType.STRUCT, (short)2);
 
@@ -46,13 +46,13 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(AdaptedStructWithInternBox.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(AdaptedStructWithTerseInternBox.class, metaDataMap);
   }
 
-  public AdaptedStructWithInternBox() {
+  public AdaptedStructWithTerseInternBox() {
   }
 
-  public AdaptedStructWithInternBox(
+  public AdaptedStructWithTerseInternBox(
       Empty field1,
       MyField field2) {
     this();
@@ -77,8 +77,8 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
       return this;
     }
 
-    public AdaptedStructWithInternBox build() {
-      AdaptedStructWithInternBox result = new AdaptedStructWithInternBox();
+    public AdaptedStructWithTerseInternBox build() {
+      AdaptedStructWithTerseInternBox result = new AdaptedStructWithTerseInternBox();
       result.setField1(this.field1);
       result.setField2(this.field2);
       return result;
@@ -92,7 +92,7 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public AdaptedStructWithInternBox(AdaptedStructWithInternBox other) {
+  public AdaptedStructWithTerseInternBox(AdaptedStructWithTerseInternBox other) {
     if (other.isSetField1()) {
       this.field1 = TBaseHelper.deepCopy(other.field1);
     }
@@ -101,15 +101,15 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
     }
   }
 
-  public AdaptedStructWithInternBox deepCopy() {
-    return new AdaptedStructWithInternBox(this);
+  public AdaptedStructWithTerseInternBox deepCopy() {
+    return new AdaptedStructWithTerseInternBox(this);
   }
 
   public Empty getField1() {
     return this.field1;
   }
 
-  public AdaptedStructWithInternBox setField1(Empty field1) {
+  public AdaptedStructWithTerseInternBox setField1(Empty field1) {
     this.field1 = field1;
     return this;
   }
@@ -133,7 +133,7 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
     return this.field2;
   }
 
-  public AdaptedStructWithInternBox setField2(MyField field2) {
+  public AdaptedStructWithTerseInternBox setField2(MyField field2) {
     this.field2 = field2;
     return this;
   }
@@ -195,9 +195,9 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof AdaptedStructWithInternBox))
+    if (!(_that instanceof AdaptedStructWithTerseInternBox))
       return false;
-    AdaptedStructWithInternBox that = (AdaptedStructWithInternBox)_that;
+    AdaptedStructWithTerseInternBox that = (AdaptedStructWithTerseInternBox)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetField1(), that.isSetField1(), this.field1, that.field1)) { return false; }
 
@@ -212,7 +212,7 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
   }
 
   @Override
-  public int compareTo(AdaptedStructWithInternBox other) {
+  public int compareTo(AdaptedStructWithTerseInternBox other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -310,7 +310,7 @@ public class AdaptedStructWithInternBox implements TBase, java.io.Serializable, 
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("AdaptedStructWithInternBox");
+    StringBuilder sb = new StringBuilder("AdaptedStructWithTerseInternBox");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

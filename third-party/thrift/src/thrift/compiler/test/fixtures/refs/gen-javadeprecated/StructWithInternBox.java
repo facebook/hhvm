@@ -26,17 +26,11 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
   private static final TStruct STRUCT_DESC = new TStruct("StructWithInternBox");
   private static final TField FIELD1_FIELD_DESC = new TField("field1", TType.STRUCT, (short)1);
   private static final TField FIELD2_FIELD_DESC = new TField("field2", TType.STRUCT, (short)2);
-  private static final TField FIELD3_FIELD_DESC = new TField("field3", TType.STRUCT, (short)3);
-  private static final TField FIELD4_FIELD_DESC = new TField("field4", TType.STRUCT, (short)4);
 
   public Empty field1;
   public MyField field2;
-  public Empty field3;
-  public MyField field4;
   public static final int FIELD1 = 1;
   public static final int FIELD2 = 2;
-  public static final int FIELD3 = 3;
-  public static final int FIELD4 = 4;
 
   // isset id assignments
 
@@ -47,10 +41,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
     tmpMetaDataMap.put(FIELD1, new FieldMetaData("field1", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, Empty.class)));
     tmpMetaDataMap.put(FIELD2, new FieldMetaData("field2", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, MyField.class)));
-    tmpMetaDataMap.put(FIELD3, new FieldMetaData("field3", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, Empty.class)));
-    tmpMetaDataMap.put(FIELD4, new FieldMetaData("field4", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, MyField.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -64,21 +54,15 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
 
   public StructWithInternBox(
       Empty field1,
-      MyField field2,
-      Empty field3,
-      MyField field4) {
+      MyField field2) {
     this();
     this.field1 = field1;
     this.field2 = field2;
-    this.field3 = field3;
-    this.field4 = field4;
   }
 
   public static class Builder {
     private Empty field1;
     private MyField field2;
-    private Empty field3;
-    private MyField field4;
 
     public Builder() {
     }
@@ -93,22 +77,10 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
       return this;
     }
 
-    public Builder setField3(final Empty field3) {
-      this.field3 = field3;
-      return this;
-    }
-
-    public Builder setField4(final MyField field4) {
-      this.field4 = field4;
-      return this;
-    }
-
     public StructWithInternBox build() {
       StructWithInternBox result = new StructWithInternBox();
       result.setField1(this.field1);
       result.setField2(this.field2);
-      result.setField3(this.field3);
-      result.setField4(this.field4);
       return result;
     }
   }
@@ -126,12 +98,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
     }
     if (other.isSetField2()) {
       this.field2 = TBaseHelper.deepCopy(other.field2);
-    }
-    if (other.isSetField3()) {
-      this.field3 = TBaseHelper.deepCopy(other.field3);
-    }
-    if (other.isSetField4()) {
-      this.field4 = TBaseHelper.deepCopy(other.field4);
     }
   }
 
@@ -187,54 +153,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
     }
   }
 
-  public Empty getField3() {
-    return this.field3;
-  }
-
-  public StructWithInternBox setField3(Empty field3) {
-    this.field3 = field3;
-    return this;
-  }
-
-  public void unsetField3() {
-    this.field3 = null;
-  }
-
-  // Returns true if field field3 is set (has been assigned a value) and false otherwise
-  public boolean isSetField3() {
-    return this.field3 != null;
-  }
-
-  public void setField3IsSet(boolean __value) {
-    if (!__value) {
-      this.field3 = null;
-    }
-  }
-
-  public MyField getField4() {
-    return this.field4;
-  }
-
-  public StructWithInternBox setField4(MyField field4) {
-    this.field4 = field4;
-    return this;
-  }
-
-  public void unsetField4() {
-    this.field4 = null;
-  }
-
-  // Returns true if field field4 is set (has been assigned a value) and false otherwise
-  public boolean isSetField4() {
-    return this.field4 != null;
-  }
-
-  public void setField4IsSet(boolean __value) {
-    if (!__value) {
-      this.field4 = null;
-    }
-  }
-
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case FIELD1:
@@ -253,22 +171,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
       }
       break;
 
-    case FIELD3:
-      if (__value == null) {
-        unsetField3();
-      } else {
-        setField3((Empty)__value);
-      }
-      break;
-
-    case FIELD4:
-      if (__value == null) {
-        unsetField4();
-      } else {
-        setField4((MyField)__value);
-      }
-      break;
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -281,12 +183,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
 
     case FIELD2:
       return getField2();
-
-    case FIELD3:
-      return getField3();
-
-    case FIELD4:
-      return getField4();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -307,16 +203,12 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
 
     if (!TBaseHelper.equalsNobinary(this.isSetField2(), that.isSetField2(), this.field2, that.field2)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetField3(), that.isSetField3(), this.field3, that.field3)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetField4(), that.isSetField4(), this.field4, that.field4)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {field1, field2, field3, field4});
+    return Arrays.deepHashCode(new Object[] {field1, field2});
   }
 
   @Override
@@ -344,22 +236,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(field2, other.field2);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
-    lastComparison = Boolean.valueOf(isSetField3()).compareTo(other.isSetField3());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(field3, other.field3);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
-    lastComparison = Boolean.valueOf(isSetField4()).compareTo(other.isSetField4());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(field4, other.field4);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -393,22 +269,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case FIELD3:
-          if (__field.type == TType.STRUCT) {
-            this.field3 = new Empty();
-            this.field3.read(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case FIELD4:
-          if (__field.type == TType.STRUCT) {
-            this.field4 = new MyField();
-            this.field4.read(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -434,16 +294,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
     if (this.field2 != null) {
       oprot.writeFieldBegin(FIELD2_FIELD_DESC);
       this.field2.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.field3 != null) {
-      oprot.writeFieldBegin(FIELD3_FIELD_DESC);
-      this.field3.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.field4 != null) {
-      oprot.writeFieldBegin(FIELD4_FIELD_DESC);
-      this.field4.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -485,28 +335,6 @@ public class StructWithInternBox implements TBase, java.io.Serializable, Cloneab
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getField2(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("field3");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getField3() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getField3(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("field4");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getField4() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getField4(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

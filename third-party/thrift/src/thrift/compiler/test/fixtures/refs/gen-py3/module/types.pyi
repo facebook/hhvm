@@ -475,24 +475,16 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     field2: Final[MyField] = ...
 
-    field3: Final[Empty] = ...
-
-    field4: Final[MyField] = ...
-
     def __init__(
         self, *,
         field1: _typing.Optional[Empty]=None,
-        field2: _typing.Optional[MyField]=None,
-        field3: _typing.Optional[Empty]=None,
-        field4: _typing.Optional[MyField]=None
+        field2: _typing.Optional[MyField]=None
     ) -> None: ...
 
     def __call__(
         self, *,
         field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        field3: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field4: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
     ) -> StructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithInternBox'], bytes]]: ...
@@ -508,6 +500,39 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_py3(self) -> StructWithInternBox: ...
     def _to_py_deprecated(self) -> "module.ttypes.StructWithInternBox": ...   # type: ignore
 
+class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        pass
+
+    field1: Final[Empty] = ...
+
+    field2: Final[MyField] = ...
+
+    def __init__(
+        self, *,
+        field1: _typing.Optional[Empty]=None,
+        field2: _typing.Optional[MyField]=None
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
+        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+    ) -> StructWithTerseInternBox: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithTerseInternBox'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'StructWithTerseInternBox') -> bool: ...
+    def __gt__(self, other: 'StructWithTerseInternBox') -> bool: ...
+    def __le__(self, other: 'StructWithTerseInternBox') -> bool: ...
+    def __ge__(self, other: 'StructWithTerseInternBox') -> bool: ...
+
+    def _to_python(self) -> "module.thrift_types.StructWithTerseInternBox": ...   # type: ignore
+    def _to_py3(self) -> StructWithTerseInternBox: ...
+    def _to_py_deprecated(self) -> "module.ttypes.StructWithTerseInternBox": ...   # type: ignore
+
 class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         field1: bool
@@ -518,24 +543,16 @@ class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     field2: Final[MyField] = ...
 
-    field3: Final[Empty] = ...
-
-    field4: Final[MyField] = ...
-
     def __init__(
         self, *,
         field1: _typing.Optional[Empty]=None,
-        field2: _typing.Optional[MyField]=None,
-        field3: _typing.Optional[Empty]=None,
-        field4: _typing.Optional[MyField]=None
+        field2: _typing.Optional[MyField]=None
     ) -> None: ...
 
     def __call__(
         self, *,
         field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        field3: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field4: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
     ) -> AdaptedStructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithInternBox'], bytes]]: ...
@@ -550,6 +567,39 @@ class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     def _to_python(self) -> "module.thrift_types.AdaptedStructWithInternBox": ...   # type: ignore
     def _to_py3(self) -> AdaptedStructWithInternBox: ...
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedStructWithInternBox": ...   # type: ignore
+
+class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        pass
+
+    field1: Final[Empty] = ...
+
+    field2: Final[MyField] = ...
+
+    def __init__(
+        self, *,
+        field1: _typing.Optional[Empty]=None,
+        field2: _typing.Optional[MyField]=None
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
+        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+    ) -> AdaptedStructWithTerseInternBox: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithTerseInternBox'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'AdaptedStructWithTerseInternBox') -> bool: ...
+    def __gt__(self, other: 'AdaptedStructWithTerseInternBox') -> bool: ...
+    def __le__(self, other: 'AdaptedStructWithTerseInternBox') -> bool: ...
+    def __ge__(self, other: 'AdaptedStructWithTerseInternBox') -> bool: ...
+
+    def _to_python(self) -> "module.thrift_types.AdaptedStructWithTerseInternBox": ...   # type: ignore
+    def _to_py3(self) -> AdaptedStructWithTerseInternBox: ...
+    def _to_py_deprecated(self) -> "module.ttypes.AdaptedStructWithTerseInternBox": ...   # type: ignore
 
 class StructWithRefTypeUnique(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:

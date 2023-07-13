@@ -1920,26 +1920,6 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
     def field2(self):
         return self.field2_impl()
 
-    cdef inline field3_impl(self):
-
-        if self.__fbthrift_cached_field3 is None:
-            self.__fbthrift_cached_field3 = Empty._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field3_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_field3
-
-    @property
-    def field3(self):
-        return self.field3_impl()
-
-    cdef inline field4_impl(self):
-
-        if self.__fbthrift_cached_field4 is None:
-            self.__fbthrift_cached_field4 = MyField._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field4_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_field4
-
-    @property
-    def field4(self):
-        return self.field4_impl()
-
 
     def __hash__(StructWithInternBox self):
         return super().__hash__()
@@ -1985,7 +1965,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 4
+        return 2
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(StructWithInternBox self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -2016,6 +1996,132 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
+@__cython.auto_pickle(False)
+cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
+    def __init__(StructWithTerseInternBox self, **kwargs):
+        self._cpp_obj = make_shared[cStructWithTerseInternBox]()
+        self._fields_setter = _fbthrift_types_fields.__StructWithTerseInternBox_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(StructWithTerseInternBox self, **kwargs):
+        if not kwargs:
+            return self
+        cdef StructWithTerseInternBox __fbthrift_inst = StructWithTerseInternBox.__new__(StructWithTerseInternBox)
+        __fbthrift_inst._cpp_obj = make_shared[cStructWithTerseInternBox](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithTerseInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("StructWithTerseInternBox", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cStructWithTerseInternBox] cpp_obj):
+        __fbthrift_inst = <StructWithTerseInternBox>StructWithTerseInternBox.__new__(StructWithTerseInternBox)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field1_impl(self):
+
+        if self.__fbthrift_cached_field1 is None:
+            self.__fbthrift_cached_field1 = Empty._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field1_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field1
+
+    @property
+    def field1(self):
+        return self.field1_impl()
+
+    cdef inline field2_impl(self):
+
+        if self.__fbthrift_cached_field2 is None:
+            self.__fbthrift_cached_field2 = MyField._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field2_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field2
+
+    @property
+    def field2(self):
+        return self.field2_impl()
+
+
+    def __hash__(StructWithTerseInternBox self):
+        return super().__hash__()
+
+    def __repr__(StructWithTerseInternBox self):
+        return super().__repr__()
+
+    def __str__(StructWithTerseInternBox self):
+        return super().__str__()
+
+
+    def __copy__(StructWithTerseInternBox self):
+        cdef shared_ptr[cStructWithTerseInternBox] cpp_obj = make_shared[cStructWithTerseInternBox](
+            deref(self._cpp_obj)
+        )
+        return StructWithTerseInternBox._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cStructWithTerseInternBox](
+            self._cpp_obj,
+            (<StructWithTerseInternBox>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__StructWithTerseInternBox()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cStructWithTerseInternBox].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.StructWithTerseInternBox"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cStructWithTerseInternBox](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(StructWithTerseInternBox self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cStructWithTerseInternBox](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(StructWithTerseInternBox self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cStructWithTerseInternBox]()
+        with nogil:
+            needed = serializer.cdeserialize[cStructWithTerseInternBox](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.StructWithTerseInternBox, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
 @__cython.auto_pickle(False)
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def __init__(AdaptedStructWithInternBox self, **kwargs):
@@ -2068,26 +2174,6 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def field2(self):
         return self.field2_impl()
 
-    cdef inline field3_impl(self):
-
-        if self.__fbthrift_cached_field3 is None:
-            self.__fbthrift_cached_field3 = Empty._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field3_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_field3
-
-    @property
-    def field3(self):
-        return self.field3_impl()
-
-    cdef inline field4_impl(self):
-
-        if self.__fbthrift_cached_field4 is None:
-            self.__fbthrift_cached_field4 = MyField._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field4_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_field4
-
-    @property
-    def field4(self):
-        return self.field4_impl()
-
 
     def __hash__(AdaptedStructWithInternBox self):
         return super().__hash__()
@@ -2133,7 +2219,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 4
+        return 2
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AdaptedStructWithInternBox self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -2164,6 +2250,132 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
+@__cython.auto_pickle(False)
+cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
+    def __init__(AdaptedStructWithTerseInternBox self, **kwargs):
+        self._cpp_obj = make_shared[cAdaptedStructWithTerseInternBox]()
+        self._fields_setter = _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(AdaptedStructWithTerseInternBox self, **kwargs):
+        if not kwargs:
+            return self
+        cdef AdaptedStructWithTerseInternBox __fbthrift_inst = AdaptedStructWithTerseInternBox.__new__(AdaptedStructWithTerseInternBox)
+        __fbthrift_inst._cpp_obj = make_shared[cAdaptedStructWithTerseInternBox](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("AdaptedStructWithTerseInternBox", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cAdaptedStructWithTerseInternBox] cpp_obj):
+        __fbthrift_inst = <AdaptedStructWithTerseInternBox>AdaptedStructWithTerseInternBox.__new__(AdaptedStructWithTerseInternBox)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field1_impl(self):
+
+        if self.__fbthrift_cached_field1 is None:
+            self.__fbthrift_cached_field1 = Empty._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field1_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field1
+
+    @property
+    def field1(self):
+        return self.field1_impl()
+
+    cdef inline field2_impl(self):
+
+        if self.__fbthrift_cached_field2 is None:
+            self.__fbthrift_cached_field2 = MyField._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field2_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field2
+
+    @property
+    def field2(self):
+        return self.field2_impl()
+
+
+    def __hash__(AdaptedStructWithTerseInternBox self):
+        return super().__hash__()
+
+    def __repr__(AdaptedStructWithTerseInternBox self):
+        return super().__repr__()
+
+    def __str__(AdaptedStructWithTerseInternBox self):
+        return super().__str__()
+
+
+    def __copy__(AdaptedStructWithTerseInternBox self):
+        cdef shared_ptr[cAdaptedStructWithTerseInternBox] cpp_obj = make_shared[cAdaptedStructWithTerseInternBox](
+            deref(self._cpp_obj)
+        )
+        return AdaptedStructWithTerseInternBox._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cAdaptedStructWithTerseInternBox](
+            self._cpp_obj,
+            (<AdaptedStructWithTerseInternBox>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__AdaptedStructWithTerseInternBox()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cAdaptedStructWithTerseInternBox].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AdaptedStructWithTerseInternBox"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cAdaptedStructWithTerseInternBox](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AdaptedStructWithTerseInternBox self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cAdaptedStructWithTerseInternBox](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(AdaptedStructWithTerseInternBox self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cAdaptedStructWithTerseInternBox]()
+        with nogil:
+            needed = serializer.cdeserialize[cAdaptedStructWithTerseInternBox](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.AdaptedStructWithTerseInternBox, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
 @__cython.auto_pickle(False)
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     def __init__(StructWithRefTypeUnique self, **kwargs):

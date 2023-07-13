@@ -175,8 +175,18 @@ cdef class __StructWithInternBox_FieldsSetter(__StructFieldsSetter):
     cdef __StructWithInternBox_FieldsSetter _fbthrift_create(_module_types.cStructWithInternBox* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
-    cdef void _set_field_2(self, _fbthrift_value) except *
-    cdef void _set_field_3(self, _fbthrift_value) except *
+
+
+ctypedef void (*__StructWithTerseInternBox_FieldsSetterFunc)(__StructWithTerseInternBox_FieldsSetter, object) except *
+
+cdef class __StructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cStructWithTerseInternBox* _struct_cpp_obj
+    cdef cumap[__cstring_view, __StructWithTerseInternBox_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __StructWithTerseInternBox_FieldsSetter _fbthrift_create(_module_types.cStructWithTerseInternBox* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
 
 
 ctypedef void (*__AdaptedStructWithInternBox_FieldsSetterFunc)(__AdaptedStructWithInternBox_FieldsSetter, object) except *
@@ -189,8 +199,18 @@ cdef class __AdaptedStructWithInternBox_FieldsSetter(__StructFieldsSetter):
     cdef __AdaptedStructWithInternBox_FieldsSetter _fbthrift_create(_module_types.cAdaptedStructWithInternBox* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
-    cdef void _set_field_2(self, _fbthrift_value) except *
-    cdef void _set_field_3(self, _fbthrift_value) except *
+
+
+ctypedef void (*__AdaptedStructWithTerseInternBox_FieldsSetterFunc)(__AdaptedStructWithTerseInternBox_FieldsSetter, object) except *
+
+cdef class __AdaptedStructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cAdaptedStructWithTerseInternBox* _struct_cpp_obj
+    cdef cumap[__cstring_view, __AdaptedStructWithTerseInternBox_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __AdaptedStructWithTerseInternBox_FieldsSetter _fbthrift_create(_module_types.cAdaptedStructWithTerseInternBox* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
 
 
 ctypedef void (*__StructWithRefTypeUnique_FieldsSetterFunc)(__StructWithRefTypeUnique_FieldsSetter, object) except *

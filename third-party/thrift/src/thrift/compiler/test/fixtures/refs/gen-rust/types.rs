@@ -146,8 +146,18 @@ pub struct StructWithBox {
 pub struct StructWithInternBox {
     pub field1: crate::types::Empty,
     pub field2: crate::types::MyField,
-    pub field3: crate::types::Empty,
-    pub field4: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructWithTerseInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -160,8 +170,18 @@ pub struct StructWithInternBox {
 pub struct AdaptedStructWithInternBox {
     pub field1: crate::types::Empty,
     pub field2: crate::types::MyField,
-    pub field3: crate::types::Empty,
-    pub field4: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdaptedStructWithTerseInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1745,8 +1765,6 @@ impl ::std::default::Default for self::StructWithInternBox {
         Self {
             field1: ::std::default::Default::default(),
             field2: ::std::default::Default::default(),
-            field3: ::std::default::Default::default(),
-            field4: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1758,8 +1776,6 @@ impl ::std::fmt::Debug for self::StructWithInternBox {
             .debug_struct("StructWithInternBox")
             .field("field1", &self.field1)
             .field("field2", &self.field2)
-            .field("field3", &self.field3)
-            .field("field4", &self.field4)
             .finish()
     }
 }
@@ -1784,12 +1800,6 @@ where
         p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
         ::fbthrift::Serialize::write(&self.field2, p);
         p.write_field_end();
-        p.write_field_begin("field3", ::fbthrift::TType::Struct, 3);
-        ::fbthrift::Serialize::write(&self.field3, p);
-        p.write_field_end();
-        p.write_field_begin("field4", ::fbthrift::TType::Struct, 4);
-        ::fbthrift::Serialize::write(&self.field4, p);
-        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1803,13 +1813,9 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ::fbthrift::Field::new("field3", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("field4", ::fbthrift::TType::Struct, 4),
         ];
         let mut field_field1 = ::std::option::Option::None;
         let mut field_field2 = ::std::option::Option::None;
-        let mut field_field3 = ::std::option::Option::None;
-        let mut field_field4 = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1817,8 +1823,6 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 3) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 4) => field_field4 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1827,8 +1831,6 @@ where
         ::std::result::Result::Ok(Self {
             field1: field_field1.unwrap_or_default(),
             field2: field_field2.unwrap_or_default(),
-            field3: field_field3.unwrap_or_default(),
-            field4: field_field4.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -1836,6 +1838,127 @@ where
 
 
 impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
+                    let mut tmp = Some(thrift::types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
+                    let mut tmp = Some(thrift::types::InternBox {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithTerseInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithTerseInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithTerseInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithTerseInternBox {}
+unsafe impl ::std::marker::Sync for self::StructWithTerseInternBox {}
+impl ::std::marker::Unpin for self::StructWithTerseInternBox {}
+
+impl ::fbthrift::GetTType for self::StructWithTerseInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithTerseInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+        let mut field_field1 = ::std::option::Option::None;
+        let mut field_field2 = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field1: field_field1.unwrap_or_default(),
+            field2: field_field2.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for StructWithTerseInternBox {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1871,28 +1994,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-            },
-            2 => {
-
-                if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
-                    let mut tmp = Some(thrift::types::InternBox {
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
-            },
-            3 => {
-
-                if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
-                    let mut tmp = Some(thrift::types::InternBox {
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
 
                 if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
                     let mut tmp = Some(thrift::types::TerseWrite {
@@ -1903,7 +2004,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithInternBox {
                     return r.take();
                 }
             },
-            4 => {
+            2 => {
 
                 if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
                     let mut tmp = Some(thrift::types::InternBox {
@@ -1937,8 +2038,6 @@ impl ::std::default::Default for self::AdaptedStructWithInternBox {
         Self {
             field1: ::std::default::Default::default(),
             field2: ::std::default::Default::default(),
-            field3: ::std::default::Default::default(),
-            field4: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1950,8 +2049,6 @@ impl ::std::fmt::Debug for self::AdaptedStructWithInternBox {
             .debug_struct("AdaptedStructWithInternBox")
             .field("field1", &self.field1)
             .field("field2", &self.field2)
-            .field("field3", &self.field3)
-            .field("field4", &self.field4)
             .finish()
     }
 }
@@ -1976,12 +2073,6 @@ where
         p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
         ::fbthrift::Serialize::write(&self.field2, p);
         p.write_field_end();
-        p.write_field_begin("field3", ::fbthrift::TType::Struct, 3);
-        ::fbthrift::Serialize::write(&self.field3, p);
-        p.write_field_end();
-        p.write_field_begin("field4", ::fbthrift::TType::Struct, 4);
-        ::fbthrift::Serialize::write(&self.field4, p);
-        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1995,13 +2086,9 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
-            ::fbthrift::Field::new("field3", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("field4", ::fbthrift::TType::Struct, 4),
         ];
         let mut field_field1 = ::std::option::Option::None;
         let mut field_field2 = ::std::option::Option::None;
-        let mut field_field3 = ::std::option::Option::None;
-        let mut field_field4 = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -2009,8 +2096,6 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 3) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 4) => field_field4 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2019,8 +2104,6 @@ where
         ::std::result::Result::Ok(Self {
             field1: field_field1.unwrap_or_default(),
             field2: field_field2.unwrap_or_default(),
-            field3: field_field3.unwrap_or_default(),
-            field4: field_field4.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -2031,19 +2114,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
-
-        if type_id == ::std::any::TypeId::of::<thrift::types::Experimental>() {
-            let mut tmp = Some(thrift::types::Experimental {
-                ..::std::default::Default::default()
-            });
-            let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
-            return r.take();
-        }
-
-        if let Some(r) = <thrift::types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
-        }
 
         None
     }
@@ -2111,7 +2181,119 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
             },
-            3 => {
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptedStructWithTerseInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptedStructWithTerseInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptedStructWithTerseInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptedStructWithTerseInternBox {}
+unsafe impl ::std::marker::Sync for self::AdaptedStructWithTerseInternBox {}
+impl ::std::marker::Unpin for self::AdaptedStructWithTerseInternBox {}
+
+impl ::fbthrift::GetTType for self::AdaptedStructWithTerseInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptedStructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptedStructWithTerseInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStructWithTerseInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+        let mut field_field1 = ::std::option::Option::None;
+        let mut field_field2 = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field1: field_field1.unwrap_or_default(),
+            field2: field_field2.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithTerseInternBox {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<thrift::types::Experimental>() {
+            let mut tmp = Some(thrift::types::Experimental {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <thrift::types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
                     let mut tmp = Some(cpp::types::Adapter {
@@ -2149,7 +2331,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
             },
-            4 => {
+            2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
                     let mut tmp = Some(cpp::types::Adapter {

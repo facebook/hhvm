@@ -25,29 +25,21 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
     @ThriftConstructor
     public StructWithInternBox(
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE) final test.fixtures.refs.Empty field1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE) final test.fixtures.refs.MyField field2,
-        @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE) final test.fixtures.refs.Empty field3,
-        @com.facebook.swift.codec.ThriftField(value=4, name="field4", requiredness=Requiredness.TERSE) final test.fixtures.refs.MyField field4
+        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE) final test.fixtures.refs.MyField field2
     ) {
         this.field1 = field1;
         this.field2 = field2;
-        this.field3 = field3;
-        this.field4 = field4;
     }
     
     @ThriftConstructor
     protected StructWithInternBox() {
       this.field1 = null;
       this.field2 = null;
-      this.field3 = test.fixtures.refs.Empty.defaultInstance();
-      this.field4 = test.fixtures.refs.MyField.defaultInstance();
     }
     
     public static class Builder {
         private test.fixtures.refs.Empty field1 = null;
         private test.fixtures.refs.MyField field2 = null;
-        private test.fixtures.refs.Empty field3 = test.fixtures.refs.Empty.defaultInstance();
-        private test.fixtures.refs.MyField field4 = test.fixtures.refs.MyField.defaultInstance();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
         public Builder setField1(test.fixtures.refs.Empty field1) {
@@ -65,37 +57,17 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
     
         public test.fixtures.refs.MyField getField2() { return field2; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE)
-        public Builder setField3(test.fixtures.refs.Empty field3) {
-            this.field3 = field3;
-            return this;
-        }
-    
-        public test.fixtures.refs.Empty getField3() { return field3; }
-    
-            @com.facebook.swift.codec.ThriftField(value=4, name="field4", requiredness=Requiredness.TERSE)
-        public Builder setField4(test.fixtures.refs.MyField field4) {
-            this.field4 = field4;
-            return this;
-        }
-    
-        public test.fixtures.refs.MyField getField4() { return field4; }
-    
         public Builder() { }
         public Builder(StructWithInternBox other) {
             this.field1 = other.field1;
             this.field2 = other.field2;
-            this.field3 = other.field3;
-            this.field4 = other.field4;
         }
     
         @ThriftConstructor
         public StructWithInternBox build() {
             StructWithInternBox result = new StructWithInternBox (
                 this.field1,
-                this.field2,
-                this.field3,
-                this.field4
+                this.field2
             );
             return result;
         }
@@ -111,12 +83,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
         private final test.fixtures.refs.MyField field2;
     public static final int _FIELD2 = 2;
     private static final TField FIELD2_FIELD_DESC = new TField("field2", TType.STRUCT, (short)2);
-        private final test.fixtures.refs.Empty field3;
-    public static final int _FIELD3 = 3;
-    private static final TField FIELD3_FIELD_DESC = new TField("field3", TType.STRUCT, (short)3);
-        private final test.fixtures.refs.MyField field4;
-    public static final int _FIELD4 = 4;
-    private static final TField FIELD4_FIELD_DESC = new TField("field4", TType.STRUCT, (short)4);
     static {
       NAMES_TO_IDS.put("field1", 1);
       THRIFT_NAMES_TO_IDS.put("field1", 1);
@@ -124,12 +90,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
       NAMES_TO_IDS.put("field2", 2);
       THRIFT_NAMES_TO_IDS.put("field2", 2);
       FIELD_METADATA.put(2, FIELD2_FIELD_DESC);
-      NAMES_TO_IDS.put("field3", 3);
-      THRIFT_NAMES_TO_IDS.put("field3", 3);
-      FIELD_METADATA.put(3, FIELD3_FIELD_DESC);
-      NAMES_TO_IDS.put("field4", 4);
-      THRIFT_NAMES_TO_IDS.put("field4", 4);
-      FIELD_METADATA.put(4, FIELD4_FIELD_DESC);
     }
     
     @Nullable
@@ -141,23 +101,11 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
     @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyField getField2() { return field2; }
     
-    
-    @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE)
-    public test.fixtures.refs.Empty getField3() { return field3; }
-    
-    
-    @Nullable
-    @com.facebook.swift.codec.ThriftField(value=4, name="field4", requiredness=Requiredness.TERSE)
-    public test.fixtures.refs.MyField getField4() { return field4; }
-    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("field1", field1);
         helper.add("field2", field2);
-        helper.add("field3", field3);
-        helper.add("field4", field4);
         return helper.toString();
     }
     
@@ -175,8 +123,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
         return
             Objects.equals(field1, other.field1) &&
             Objects.equals(field2, other.field2) &&
-            Objects.equals(field3, other.field3) &&
-            Objects.equals(field4, other.field4) &&
             true;
     }
     
@@ -184,9 +130,7 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             field1,
-            field2,
-            field3,
-            field4
+            field2
         });
     }
     
@@ -219,22 +163,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
-        case _FIELD3:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.Empty field3 = test.fixtures.refs.Empty.read0(oprot);
-            builder.setField3(field3);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
-        case _FIELD4:
-          if (__field.type == TType.STRUCT) {
-            test.fixtures.refs.MyField field4 = test.fixtures.refs.MyField.read0(oprot);
-            builder.setField4(field4);
-          } else {
-            TProtocolUtil.skip(oprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -247,9 +175,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
       if (field1 != null) {
         oprot.writeFieldBegin(FIELD1_FIELD_DESC);
         this.field1.write0(oprot);
@@ -260,26 +185,6 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
         this.field2.write0(oprot);
         oprot.writeFieldEnd();
       }
-      java.util.Objects.requireNonNull(field3, "field3 must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(FIELD3_FIELD_DESC);
-        pos = p.mark();
-        this.field3.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(field4, "field4 must not be null");
-      structStart = p.mark();
-        oprot.writeFieldBegin(FIELD4_FIELD_DESC);
-        pos = p.mark();
-        this.field4.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

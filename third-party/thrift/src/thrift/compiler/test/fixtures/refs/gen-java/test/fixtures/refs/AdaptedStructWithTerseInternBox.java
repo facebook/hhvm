@@ -20,28 +20,28 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="AdaptedStructWithInternBox", builder=AdaptedStructWithInternBox.Builder.class)
-public final class AdaptedStructWithInternBox implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="AdaptedStructWithTerseInternBox", builder=AdaptedStructWithTerseInternBox.Builder.class)
+public final class AdaptedStructWithTerseInternBox implements com.facebook.thrift.payload.ThriftSerializable {
     @ThriftConstructor
-    public AdaptedStructWithInternBox(
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE) final test.fixtures.refs.Empty field1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE) final test.fixtures.refs.MyField field2
+    public AdaptedStructWithTerseInternBox(
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE) final test.fixtures.refs.Empty field1,
+        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE) final test.fixtures.refs.MyField field2
     ) {
         this.field1 = field1;
         this.field2 = field2;
     }
     
     @ThriftConstructor
-    protected AdaptedStructWithInternBox() {
-      this.field1 = null;
-      this.field2 = null;
+    protected AdaptedStructWithTerseInternBox() {
+      this.field1 = test.fixtures.refs.Empty.defaultInstance();
+      this.field2 = test.fixtures.refs.MyField.defaultInstance();
     }
     
     public static class Builder {
-        private test.fixtures.refs.Empty field1 = null;
-        private test.fixtures.refs.MyField field2 = null;
+        private test.fixtures.refs.Empty field1 = test.fixtures.refs.Empty.defaultInstance();
+        private test.fixtures.refs.MyField field2 = test.fixtures.refs.MyField.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
         public Builder setField1(test.fixtures.refs.Empty field1) {
             this.field1 = field1;
             return this;
@@ -49,7 +49,7 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     
         public test.fixtures.refs.Empty getField1() { return field1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
         public Builder setField2(test.fixtures.refs.MyField field2) {
             this.field2 = field2;
             return this;
@@ -58,14 +58,14 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
         public test.fixtures.refs.MyField getField2() { return field2; }
     
         public Builder() { }
-        public Builder(AdaptedStructWithInternBox other) {
+        public Builder(AdaptedStructWithTerseInternBox other) {
             this.field1 = other.field1;
             this.field2 = other.field2;
         }
     
         @ThriftConstructor
-        public AdaptedStructWithInternBox build() {
-            AdaptedStructWithInternBox result = new AdaptedStructWithInternBox (
+        public AdaptedStructWithTerseInternBox build() {
+            AdaptedStructWithTerseInternBox result = new AdaptedStructWithTerseInternBox (
                 this.field1,
                 this.field2
             );
@@ -76,7 +76,7 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("AdaptedStructWithInternBox");
+    private static final TStruct STRUCT_DESC = new TStruct("AdaptedStructWithTerseInternBox");
     private final test.fixtures.refs.Empty field1;
     public static final int _FIELD1 = 1;
     private static final TField FIELD1_FIELD_DESC = new TField("field1", TType.STRUCT, (short)1);
@@ -93,12 +93,12 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.Empty getField1() { return field1; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.MyField getField2() { return field2; }
     
     @java.lang.Override
@@ -118,7 +118,7 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
             return false;
         }
     
-        AdaptedStructWithInternBox other = (AdaptedStructWithInternBox)o;
+        AdaptedStructWithTerseInternBox other = (AdaptedStructWithTerseInternBox)o;
     
         return
             Objects.equals(field1, other.field1) &&
@@ -135,14 +135,14 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     }
     
     
-    public static com.facebook.thrift.payload.Reader<AdaptedStructWithInternBox> asReader() {
-      return AdaptedStructWithInternBox::read0;
+    public static com.facebook.thrift.payload.Reader<AdaptedStructWithTerseInternBox> asReader() {
+      return AdaptedStructWithTerseInternBox::read0;
     }
     
-    public static AdaptedStructWithInternBox read0(TProtocol oprot) throws TException {
+    public static AdaptedStructWithTerseInternBox read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(AdaptedStructWithInternBox.NAMES_TO_IDS, AdaptedStructWithInternBox.THRIFT_NAMES_TO_IDS, AdaptedStructWithInternBox.FIELD_METADATA);
-      AdaptedStructWithInternBox.Builder builder = new AdaptedStructWithInternBox.Builder();
+      oprot.readStructBegin(AdaptedStructWithTerseInternBox.NAMES_TO_IDS, AdaptedStructWithTerseInternBox.THRIFT_NAMES_TO_IDS, AdaptedStructWithTerseInternBox.FIELD_METADATA);
+      AdaptedStructWithTerseInternBox.Builder builder = new AdaptedStructWithTerseInternBox.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
@@ -175,25 +175,38 @@ public final class AdaptedStructWithInternBox implements com.facebook.thrift.pay
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (field1 != null) {
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+      java.util.Objects.requireNonNull(field1, "field1 must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(FIELD1_FIELD_DESC);
+        pos = p.mark();
         this.field1.write0(oprot);
-        oprot.writeFieldEnd();
-      }
-      if (field2 != null) {
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
+      java.util.Objects.requireNonNull(field2, "field2 must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(FIELD2_FIELD_DESC);
+        pos = p.mark();
         this.field2.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
     
-    private static class _AdaptedStructWithInternBoxLazy {
-        private static final AdaptedStructWithInternBox _DEFAULT = new AdaptedStructWithInternBox.Builder().build();
+    private static class _AdaptedStructWithTerseInternBoxLazy {
+        private static final AdaptedStructWithTerseInternBox _DEFAULT = new AdaptedStructWithTerseInternBox.Builder().build();
     }
     
-    public static AdaptedStructWithInternBox defaultInstance() {
-        return  _AdaptedStructWithInternBoxLazy._DEFAULT;
+    public static AdaptedStructWithTerseInternBox defaultInstance() {
+        return  _AdaptedStructWithTerseInternBoxLazy._DEFAULT;
     }
 }

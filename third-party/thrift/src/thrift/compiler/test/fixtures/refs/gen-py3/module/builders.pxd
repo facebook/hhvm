@@ -84,15 +84,21 @@ cdef class StructWithBox_Builder(thrift.py3.builder.StructBuilder):
 cdef class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     cdef public object field1
     cdef public object field2
-    cdef public object field3
-    cdef public object field4
+
+
+cdef class StructWithTerseInternBox_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object field1
+    cdef public object field2
 
 
 cdef class AdaptedStructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     cdef public object field1
     cdef public object field2
-    cdef public object field3
-    cdef public object field4
+
+
+cdef class AdaptedStructWithTerseInternBox_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object field1
+    cdef public object field2
 
 
 cdef class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):

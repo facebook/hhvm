@@ -116,21 +116,23 @@ struct StructWithBox {
   3: optional StructWithRef c (thrift.box);
 }
 
-@thrift.Experimental
 struct StructWithInternBox {
   @thrift.InternBox
   1: Empty field1;
   @thrift.InternBox
   2: MyField field2;
-  @thrift.InternBox
-  @thrift.TerseWrite
-  3: Empty field3;
-  @thrift.InternBox
-  @thrift.TerseWrite
-  4: MyField field4;
 }
 
 @thrift.Experimental
+struct StructWithTerseInternBox {
+  @thrift.InternBox
+  @thrift.TerseWrite
+  1: Empty field1;
+  @thrift.InternBox
+  @thrift.TerseWrite
+  2: MyField field2;
+}
+
 struct AdaptedStructWithInternBox {
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.InternBox
@@ -138,14 +140,18 @@ struct AdaptedStructWithInternBox {
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.InternBox
   2: MyField field2;
+}
+
+@thrift.Experimental
+struct AdaptedStructWithTerseInternBox {
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.InternBox
   @thrift.TerseWrite
-  3: Empty field3;
+  1: Empty field1;
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.InternBox
   @thrift.TerseWrite
-  4: MyField field4;
+  2: MyField field2;
 }
 
 const StructWithRef kStructWithRef = {

@@ -600,10 +600,23 @@ cdef __StructSpec get_reflection__StructWithInternBox():
             },
         ),
     )
+    return spec
+cdef __StructSpec get_reflection__StructWithTerseInternBox():
+    cdef _module_types.StructWithTerseInternBox defaults = _module_types.StructWithTerseInternBox._fbthrift_create(
+        constant_shared_ptr[_module_types.cStructWithTerseInternBox](
+            default_inst[_module_types.cStructWithTerseInternBox]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="StructWithTerseInternBox",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=3,
-            name="field3",
+            id=1,
+            name="field1",
             type=_module_types.Empty,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -614,8 +627,8 @@ cdef __StructSpec get_reflection__StructWithInternBox():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=4,
-            name="field4",
+            id=2,
+            name="field2",
             type=_module_types.MyField,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -661,10 +674,23 @@ cdef __StructSpec get_reflection__AdaptedStructWithInternBox():
             },
         ),
     )
+    return spec
+cdef __StructSpec get_reflection__AdaptedStructWithTerseInternBox():
+    cdef _module_types.AdaptedStructWithTerseInternBox defaults = _module_types.AdaptedStructWithTerseInternBox._fbthrift_create(
+        constant_shared_ptr[_module_types.cAdaptedStructWithTerseInternBox](
+            default_inst[_module_types.cAdaptedStructWithTerseInternBox]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="AdaptedStructWithTerseInternBox",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=3,
-            name="field3",
+            id=1,
+            name="field1",
             type=_module_types.Empty,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
@@ -675,8 +701,8 @@ cdef __StructSpec get_reflection__AdaptedStructWithInternBox():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=4,
-            name="field4",
+            id=2,
+            name="field2",
             type=_module_types.MyField,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,

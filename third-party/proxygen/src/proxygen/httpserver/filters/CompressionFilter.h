@@ -112,10 +112,9 @@ class CompressionFilter : public Filter {
 
     // Need to send the trailer for compressed chunked messages
     if (compress_ && chunked_) {
-
-      auto emptyBuffer = folly::IOBuf::copyBuffer("");
+      folly::IOBuf emptyBuf{};
       CHECK(compressor_ && !compressor_->hasError());
-      auto compressed = compressor_->compress(emptyBuffer.get(), true);
+      auto compressed = compressor_->compress(&emptyBuf, true);
 
       if (compressor_->hasError()) {
         return fail();

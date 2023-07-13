@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace some { namespace valid { namespace ns {
 class Empty;
@@ -25,3 +27,12 @@ class FloatUnion;
 class AllRequiredNoExceptMoveCtrStruct;
 }}} // some::valid::ns
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace some { namespace valid { namespace ns {
+enum class MyEnumA;
+enum class AnnotatedEnum : ::std::uint32_t;
+enum class AnnotatedEnum2 : ::std::int16_t;
+enum class MyEnumB;
+}}} // some::valid::ns
+// END forward_declare_enums

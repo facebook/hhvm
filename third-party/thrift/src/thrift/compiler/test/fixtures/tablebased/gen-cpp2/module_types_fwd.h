@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace tablebased {
 class TrivialTypesStruct;
@@ -13,3 +15,9 @@ class ContainerStruct;
 class ExampleUnion;
 }}} // test::fixtures::tablebased
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test { namespace fixtures { namespace tablebased {
+enum class ExampleEnum;
+}}} // test::fixtures::tablebased
+// END forward_declare_enums

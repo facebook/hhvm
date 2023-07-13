@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace cpp2 {
 class MyStruct;
@@ -13,3 +15,9 @@ class MyDataItem;
 class MyUnion;
 } // cpp2
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace cpp2 {
+enum class MyEnum;
+} // cpp2
+// END forward_declare_enums

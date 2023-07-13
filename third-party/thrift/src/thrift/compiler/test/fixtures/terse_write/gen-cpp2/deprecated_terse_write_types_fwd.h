@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
 class MyStruct;
@@ -13,3 +15,9 @@ class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
 }}}}} // facebook::thrift::test::terse_write::deprecated
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace deprecated {
+enum class MyEnum;
+}}}}} // facebook::thrift::test::terse_write::deprecated
+// END forward_declare_enums

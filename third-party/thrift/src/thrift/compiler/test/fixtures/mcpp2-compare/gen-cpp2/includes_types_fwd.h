@@ -6,9 +6,17 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace a { namespace different { namespace ns {
 class AStruct;
 class AStructB;
 }}} // a::different::ns
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace a { namespace different { namespace ns {
+enum class AnEnum;
+}}} // a::different::ns
+// END forward_declare_enums

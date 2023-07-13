@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace test_cpp2 { namespace cpp_reflection {
 class union1;
@@ -29,3 +31,12 @@ class struct_with_special_names;
 class struct_with_indirections;
 }} // test_cpp2::cpp_reflection
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace test_cpp2 { namespace cpp_reflection {
+enum class enum1;
+enum class enum2;
+enum class enum3;
+enum class enum_with_special_names;
+}} // test_cpp2::cpp_reflection
+// END forward_declare_enums

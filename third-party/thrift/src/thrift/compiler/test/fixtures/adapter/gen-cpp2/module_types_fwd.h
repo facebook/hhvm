@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 // BEGIN forward_declare
 namespace facebook { namespace thrift { namespace test {
 class MyAnnotation;
@@ -55,3 +57,10 @@ class Person;
 class Person2;
 }}} // facebook::thrift::test
 // END forward_declare
+
+// BEGIN forward_declare_enums
+namespace facebook { namespace thrift { namespace test {
+enum class Color;
+enum class ThriftAdaptedEnum;
+}}} // facebook::thrift::test
+// END forward_declare_enums

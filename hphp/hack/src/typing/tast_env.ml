@@ -172,6 +172,12 @@ let localize env ety_env dty =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, lty)
 
+let localize_hint_for_refinement env h =
+  let ((env, _ty_err_opt), lty) =
+    Typing_phase.localize_hint_for_refinement env h
+  in
+  (env, lty)
+
 let localize_no_subst env ~ignore_errors dty =
   let ((env, ty_err_opt), lty) =
     Typing_phase.localize_no_subst env ~ignore_errors dty

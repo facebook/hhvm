@@ -161,6 +161,8 @@ val hint_to_ty : env -> Aast.hint -> Typing_defs.decl_ty
 val localize :
   env -> Typing_defs.expand_env -> Typing_defs.decl_ty -> env * Tast.ty
 
+val localize_hint_for_refinement : env -> Aast.hint -> env * Tast.ty
+
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
     into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
     Performs no substitutions of generics and initializes the late static bound

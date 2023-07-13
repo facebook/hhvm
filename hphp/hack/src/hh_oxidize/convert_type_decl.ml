@@ -253,6 +253,7 @@ let denylisted_types () =
       ("file_info", "Saved");
       ("typing_defs", "ExpandEnv");
       ("typing_defs", "PhaseTy");
+      ("typing_defs", "WildcardAction");
       ("typing_reason", "DeclPhase");
       ("typing_reason", "LoclPhase");
     ]

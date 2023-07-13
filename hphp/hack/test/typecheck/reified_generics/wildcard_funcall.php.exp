@@ -1,19 +1,3 @@
-File "wildcard_funcall.php", line 10, characters 11-22:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 10, characters 7-7:
-  Expected `T#1`
-  File "wildcard_funcall.php", line 10, characters 7-7:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 10, characters 17-19:
-  But got `int`
-File "wildcard_funcall.php", line 10, characters 11-22:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 10, characters 17-19:
-  Expected `int`
-  File "wildcard_funcall.php", line 10, characters 7-7:
-  But got `T#1`
-  File "wildcard_funcall.php", line 10, characters 7-7:
-  This type argument to `A` must match exactly (it is invariant)
 File "wildcard_funcall.php", line 11, characters 16-27:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 11, characters 7-12:
@@ -30,54 +14,6 @@ Invalid argument (Typing[4110])
   But got `string`
   File "wildcard_funcall.php", line 11, characters 7-12:
   This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 14, characters 11-25:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 14, characters 7-7:
-  Expected `T#2`
-  File "wildcard_funcall.php", line 14, characters 7-7:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 14, characters 17-22:
-  But got `A<int>`
-File "wildcard_funcall.php", line 14, characters 11-25:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 14, characters 17-22:
-  Expected `A<int>`
-  File "wildcard_funcall.php", line 14, characters 7-7:
-  But got `T#2`
-  File "wildcard_funcall.php", line 14, characters 7-7:
-  This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 15, characters 14-28:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  Expected `T#3`
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  But got `int`
-File "wildcard_funcall.php", line 15, characters 14-28:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  Expected `T#3`
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  But got `int`
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 15, characters 14-28:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  Expected `int`
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  But got `T#3`
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  This type argument to `A` must match exactly (it is invariant)
-File "wildcard_funcall.php", line 15, characters 14-28:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  Expected `int`
-  File "wildcard_funcall.php", line 15, characters 22-24:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 15, characters 9-9:
-  But got `T#3`
 File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 9-14:

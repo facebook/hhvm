@@ -21,11 +21,11 @@ All type arguments must be specified because a type parameter is reified (Typing
   File "explicit_reify_static_methods.php", line 13, characters 26-32:
   Definition is here
 File "explicit_reify_static_methods.php", line 24, characters 6-12:
-Generic type parameter `TF` must be specified explicitly (Typing[4347])
+Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly (Typing[4347])
   File "explicit_reify_static_methods.php", line 4, characters 49-50:
   Definition is here
 File "explicit_reify_static_methods.php", line 26, characters 9-15:
-Generic type parameter `TF` must be specified explicitly (Typing[4347])
+Illegal wildcard (`_`): generic type parameter `TF` must be specified explicitly (Typing[4347])
   File "explicit_reify_static_methods.php", line 4, characters 49-50:
   Definition is here
 File "explicit_reify_static_methods.php", line 16, characters 3-74:

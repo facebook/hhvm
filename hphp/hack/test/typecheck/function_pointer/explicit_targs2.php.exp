@@ -1,4 +1,4 @@
 File "explicit_targs2.php", line 8, characters 25-25:
-Generic type parameter `T` must be specified explicitly (Typing[4347])
-File "explicit_targs2.php", line 3, characters 42-42:
-Definition is here
+Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
+  File "explicit_targs2.php", line 3, characters 42-42:
+  Definition is here

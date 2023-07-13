@@ -68,10 +68,7 @@ let handler =
       let check_status = Env.get_check_status env in
       function
       | (_, p, Is ((lhs_ty, _, _), hint)) ->
-        let hint_ty = Env.hint_to_ty env hint in
-        let (env, hint_ty) =
-          Env.localize_no_subst env ~ignore_errors:true hint_ty
-        in
+        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
         trivial_check
           p
           env
@@ -80,10 +77,7 @@ let handler =
           ~always_subtype:(Lints_errors.is_always_true ~check_status)
           ~never_subtype:(Lints_errors.is_always_false ~check_status)
       | (_, p, As ((lhs_ty, lhs_pos, lhs_expr), hint, false)) ->
-        let hint_ty = Env.hint_to_ty env hint in
-        let (env, hint_ty) =
-          Env.localize_no_subst env ~ignore_errors:true hint_ty
-        in
+        let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
         let can_be_captured = Aast_utils.can_be_captured lhs_expr in
         let always_subtype p =
           Lints_errors.as_always_succeeds

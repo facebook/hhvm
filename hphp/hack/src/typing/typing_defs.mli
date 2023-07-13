@@ -176,6 +176,28 @@ module Type_expansions : sig
   val positions : t -> Pos_or_decl.t list
 end
 
+(** How should we treat the wildcard character _ when localizing?
+ *  1. Generate a fresh type variable, e.g. in type argument to constructor or function,
+ *     or in a lambda parameter or return type.
+ *       Example: foo<shape('a' => _)>($myshape);
+ *       Example: ($v : vec<_>) ==> $v[0]
+ *  2. As a placeholder in a formal higher-kinded type parameter
+ *       Example: function test<T1, T2<_>>() // T2 is HK and takes a type to a type
+ *  3. Generate a fresh generic (aka Skolem variable), e.g. in `is` or `as` test
+ *       Example: if ($x is Vector<_>) { // $x has type Vector<T#1> }
+ *  4. Reject, when in a type argument to a generic parameter marked <<__Explicit>>
+ *       Example: makeVec<_>(3)  where function makeVec<<<__Explicit>> T>(T $_): void
+ *  5. Reject, because the type must be explicit.
+ *  6. (Specially for case type checking). Replace any type argument by a fresh generic.
+ *)
+type wildcard_action =
+  | Wildcard_fresh_tyvar
+  | Wildcard_fresh_generic
+  | Wildcard_higher_kinded_placeholder
+  | Wildcard_require_explicit of decl_tparam
+  | Wildcard_illegal
+  | Wildcard_fresh_generic_type_argument
+
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
@@ -185,7 +207,7 @@ type expand_env = {
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
-  sub_wildcards: bool;
+  wildcard_action: wildcard_action;
 }
 
 val empty_expand_env : expand_env

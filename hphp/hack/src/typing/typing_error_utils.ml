@@ -3993,7 +3993,7 @@ module Eval_primary = struct
     ( Error_code.RequireGenericExplicit,
       lazy
         ( arg_pos,
-          "Generic type parameter "
+          "Illegal wildcard (`_`): generic type parameter "
           ^ Markdown_lite.md_codify def_name
           ^ " must be specified explicitly" ),
       lazy [(def_pos, "Definition is here")],

@@ -1,0 +1,24 @@
+File "wildcard_invalid_in_type_argument.php", line 20, characters 26-26:
+Wildcard typehints are not allowed in this position (Naming[2084])
+File "wildcard_invalid_in_type_argument.php", line 21, characters 28-28:
+Wildcard typehints are not allowed in this position (Naming[2084])
+File "wildcard_invalid_in_type_argument.php", line 16, characters 19-19:
+Invalid reified hint (Typing[4305])
+  File "wildcard_invalid_in_type_argument.php", line 16, characters 19-19:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "wildcard_invalid_in_type_argument.php", line 3, characters 15-15:
+  `T` is reified
+File "wildcard_invalid_in_type_argument.php", line 21, characters 19-20:
+Invalid return type (Typing[4336])
+  File "wildcard_invalid_in_type_argument.php", line 21, characters 24-29:
+  Expected `vec<_>`
+  File "wildcard_invalid_in_type_argument.php", line 21, characters 19-20:
+  But got `void` because this function does not always return a value
+File "wildcard_invalid_in_type_argument.php", line 14, characters 26-26:
+Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
+  File "wildcard_invalid_in_type_argument.php", line 9, characters 43-43:
+  Definition is here
+File "wildcard_invalid_in_type_argument.php", line 15, characters 30-30:
+Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
+  File "wildcard_invalid_in_type_argument.php", line 9, characters 43-43:
+  Definition is here

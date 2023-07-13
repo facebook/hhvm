@@ -146,6 +146,7 @@ val localize_targs_and_check_constraints :
 
 (** Declare and localize a single explicit type argument *)
 val localize_targ :
+  ?tparam:decl_tparam ->
   check_well_kinded:bool ->
   env ->
   Aast.hint ->

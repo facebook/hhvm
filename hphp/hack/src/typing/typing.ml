@@ -10363,7 +10363,11 @@ let stmt env st =
 let refine_hint ~pos ~reason env union_ty hint =
   let h = Decl_hint.hint env.Typing_env_types.decl_env hint in
   let ety_env =
-    { Typing_defs.empty_expand_env with Typing_defs.sub_wildcards = true }
+    Typing_defs.
+      {
+        empty_expand_env with
+        wildcard_action = Wildcard_fresh_generic_type_argument;
+      }
   in
   let ((env, _errors), refining_ty) = Phase.localize env h ~ety_env in
 

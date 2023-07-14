@@ -1,6 +1,5 @@
 <?hh
 <<file: __EnableUnstableFeatures('typed_local_variables')>>
-<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 interface I {}
 ;
@@ -12,13 +11,50 @@ function f(bool $b, J $j, I $i): void {
   let $x: arraykey = 1;
   if ($b) {
     let $x: int = 1;
-    let $y: I = $j;
+    let $y: J = $j;
   } else {
     let $y: J = $j;
-    let $z: int = 1;
   }
-  $x = ""; // error, $x has bound int
-  $y = $i; // error, $y has bound J
-  $z; // error, $z is not defined
-  $z = ""; // error, $z has bound int
+}
+
+function g(bool $b): void {
+  if ($b) {
+    if ($b) {
+    } else {
+      let $x: int = 1;
+    }
+  } else {
+    if ($b) {
+      $x = 1;
+    } else {
+      $x = 1;
+    }
+  }
+
+  if ($b) {
+    if ($b) {
+      $y = 1;
+    } else {
+      $y = 1;
+    }
+  } else {
+    if ($b) {
+    } else {
+      let $y: int = 1;
+    }
+  }
+}
+
+function h(bool $b): void {
+  $x = 1;
+  if ($b) {
+    let $x: int;
+  }
+}
+
+function i(bool $b): void {
+  if ($b) {
+    let $x: int;
+  }
+  $x = "";
 }

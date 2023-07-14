@@ -14,6 +14,7 @@ bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 core_utils_rust = { version = "0.0.0", path = "../utils/core" }
 elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }
 file_info = { version = "0.0.0", path = "../deps/rust/file_info" }
+hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macros" }
 hash = { version = "0.0.0", path = "../utils/hash" }
 itertools = "0.10.3"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }

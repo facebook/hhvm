@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e89e56e813101d6ccce841d56c369a5>>
+// @generated SignedSource<<300986842c3e4c9ed96b1db608bbb336>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -403,5 +403,10 @@ pub enum NamingError {
     #[rust_to_ocaml(name = "Dynamic_hint_disallowed")]
     DynamicHintDisallowed(pos::Pos),
     #[rust_to_ocaml(name = "Illegal_typed_local")]
-    IllegalTypedLocal(pos::Pos, String, pos::Pos),
+    IllegalTypedLocal {
+        join: bool,
+        id_pos: pos::Pos,
+        id_name: String,
+        def_pos: pos::Pos,
+    },
 }

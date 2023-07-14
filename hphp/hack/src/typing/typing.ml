@@ -1118,7 +1118,17 @@ let set_valid_rvalue
           env
           ty
           hty
-          (Some (Typing_error.Reasons_callback.unify_error_at p))
+          (Some
+             Typing_error.(
+               Reasons_callback.of_primary_error
+               @@ Typing_error.Primary.Unify_error
+                    {
+                      pos = p;
+                      msg_opt =
+                        Some
+                          "Typed locals can only be assigned values whose type is compatible with the declared type.";
+                      reasons_opt = None;
+                    }))
       in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
       (env, Some hty, hty)

@@ -1,3 +1,11 @@
+File "loop-errors.php", line 12, characters 5-27:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "loop-errors.php", line 11, characters 5-6:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "loop-errors.php", line 30, characters 5-27:
+Illegal definition of typed local variable $z. (Naming[2126])
+  File "loop-errors.php", line 28, characters 5-6:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
 File "loop-errors.php", line 11, characters 5-11:
 Typing error (Typing[4110])
   File "loop-errors.php", line 12, characters 13-18:
@@ -15,10 +23,4 @@ Typing error (Typing[4110])
   File "loop-errors.php", line 21, characters 13-18:
   Expected `string`
   File "loop-errors.php", line 23, characters 8-8:
-  But got `int`
-File "loop-errors.php", line 28, characters 3-219:
-Typing error (Typing[4110])
-  File "loop-errors.php", line 32, characters 13-18:
-  Expected `string`
-  File "loop-errors.php", line 27, characters 22-22:
   But got `int`

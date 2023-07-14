@@ -1571,6 +1571,7 @@ dependencies = [
  "core_utils_rust",
  "elaborate_namespaces_visitor",
  "file_info",
+ "hack_macros",
  "hash",
  "itertools 0.10.5",
  "naming_special_names_rust",

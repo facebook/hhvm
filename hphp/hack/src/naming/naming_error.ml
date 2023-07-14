@@ -288,7 +288,12 @@ type t =
       tparam_name: string;
     }
   | Dynamic_hint_disallowed of Pos.t
-  | Illegal_typed_local of Pos.t * string * Pos.t
+  | Illegal_typed_local of {
+      join: bool;
+      id_pos: Pos.t;
+      id_name: string;
+      def_pos: Pos.t;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -416,11 +421,17 @@ let dynamic_hint_disallowed pos =
     (pos, "dynamic typehints are not allowed in this position")
     []
 
-let illegal_typed_local id_pos name def_pos =
+let illegal_typed_local ~join id_pos name def_pos =
+  let desc =
+    if join then
+      "It is assigned in another branch. Consider moving the definition to an enclosing block."
+    else
+      "It is already defined. Typed locals must have their type declared before they can be assigned."
+  in
   User_error.make
     Error_code.(to_enum IllegalTypedLocal)
-    (id_pos, "Illegal typed local variable definition of " ^ name ^ ".")
-    [(def_pos, "It is already defined")]
+    (id_pos, "Illegal definition of typed local variable " ^ name ^ ".")
+    [(def_pos, desc)]
 
 let wildcard_param_disallowed pos =
   User_error.make
@@ -1395,5 +1406,5 @@ let to_user_error = function
   | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
     undefined_in_expr_tree pos var_name dsl did_you_mean
   | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos
-  | Illegal_typed_local (id_pos, id_name, def_pos) ->
-    illegal_typed_local id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
+  | Illegal_typed_local { join; id_pos; id_name; def_pos } ->
+    illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)

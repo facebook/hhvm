@@ -8,8 +8,8 @@ function get_bool(): bool {
 function f(): void {
 
   while (get_bool()) {
-    $x = 15; // error: $x is bounded by string
-    let $x: string = "foo";
+    $x = 15;
+    let $x: string = "foo"; // error: x already defined
   }
 
   let $y: string = "foo";
@@ -24,11 +24,10 @@ function f(): void {
 }
 
 function g(): void {
-  let $x: arraykey = 1;
   while (get_bool()) {
-    /* The following is an error because if we don't go through the loop, after
-     * the loop $x = 1, but the string bound from inside the loop also applies.
-     */
-    let $x: string = "";
+    $z = 1;
+    continue;
+    let $z: string = "foo"; // error: already defined
   }
+  $z = 4;
 }

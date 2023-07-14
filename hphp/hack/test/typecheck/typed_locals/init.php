@@ -10,8 +10,7 @@ function int_to_string(int $x): string {
 }
 
 class C<T1 as int> {
-  public function f<T>(int $a, T $b, T1 $c, mixed $y): void {
-    $x = 4;
+  public function f<T>(int $a, T $b, T1 $c): void {
     let $x: int = 1;
     let $y: vec<mixed> = vec<int>[1];
 
@@ -27,12 +26,14 @@ class C<T1 as int> {
       hh_expect_equivalent<dict<T1, vec<T>>>($z);
     }
   }
-  public function g(int $x): void {
-    let $x: string = int_to_string($x);
+
+  public function g(): void {
+    $xx = 1;
+    let $x: string = int_to_string($xx);
     hh_expect_equivalent<string>($x);
     let $y: arraykey = 1;
     hh_expect_equivalent<int>($y);
-    let $y: string = "s";
+    $y = "s";
     hh_expect_equivalent<string>($y);
   }
 }

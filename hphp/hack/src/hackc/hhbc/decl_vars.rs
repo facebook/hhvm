@@ -96,6 +96,10 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 visit(self, env, finally)
             }
+            Stmt_::DeclareLocal(box (id, _, expr)) => {
+                self.add_local(id.name());
+                visit(self, env, expr)
+            }
             _ => s.recurse(env, self),
         }
     }

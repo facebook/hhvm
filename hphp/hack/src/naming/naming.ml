@@ -178,9 +178,9 @@ let ( elab_core_program,
       elab_core_typedef ) =
   Naming_phase_pass.mk_visitor passes
 
-let elab_elem elem ~elab_ns ~elab_capture ~elab_core =
+let elab_elem elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core =
   reset_errors ();
-  let elem = elab_ns elem |> elab_capture |> elab_core in
+  let elem = elab_ns elem |> elab_capture |> elab_typed_locals |> elab_core in
   Naming_phase_error.emit @@ get_errors ();
   reset_errors ();
   elem
@@ -268,8 +268,9 @@ let program ctx program =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
     and elab_capture = Naming_captures.elab_program
+    and elab_typed_locals = Naming_typed_locals.elab_program
     and elab_core = elab_core_program (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core program
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core program
 
 let fun_def ctx fd =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -279,8 +280,9 @@ let fun_def ctx fd =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_fun_def
     and elab_capture = Naming_captures.elab_fun_def
+    and elab_typed_locals = Naming_typed_locals.elab_fun_def
     and elab_core = elab_core_fun_def (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core fd
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core fd
 
 let class_ ctx c =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -290,8 +292,9 @@ let class_ ctx c =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_class_
     and elab_capture = Naming_captures.elab_class
+    and elab_typed_locals = Naming_typed_locals.elab_class
     and elab_core = elab_core_class (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core c
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core c
 
 let module_ ctx md =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -301,8 +304,9 @@ let module_ ctx md =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_module_def
     and elab_capture = Naming_captures.elab_module_def
+    and elab_typed_locals x = x
     and elab_core = elab_core_module_def (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core md
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core md
 
 let global_const ctx cst =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -312,8 +316,9 @@ let global_const ctx cst =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_gconst
     and elab_capture = Naming_captures.elab_gconst
+    and elab_typed_locals x = x
     and elab_core = elab_core_gconst (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core cst
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core cst
 
 let typedef ctx td =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -323,5 +328,6 @@ let typedef ctx td =
   else
     let elab_ns = Naming_elaborate_namespaces_endo.elaborate_typedef
     and elab_capture = Naming_captures.elab_typedef
+    and elab_typed_locals x = x
     and elab_core = elab_core_typedef (mk_env filename tcopt) in
-    elab_elem ~elab_ns ~elab_capture ~elab_core td
+    elab_elem ~elab_ns ~elab_capture ~elab_typed_locals ~elab_core td

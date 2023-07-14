@@ -1,0 +1,16 @@
+File "param-error.php", line 5, characters 3-18:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "param-error.php", line 4, characters 16-17:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "param-error.php", line 6, characters 3-14:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "param-error.php", line 4, characters 27-28:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "param-error.php", line 11, characters 5-16:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "param-error.php", line 10, characters 25-26:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "param-error.php", line 12, characters 5-20:
+Illegal definition of typed local variable $b. (Naming[2126])
+  File "param-error.php", line 10, characters 36-37:
+  It is already defined. Typed locals must have their type declared before they can be assigned.

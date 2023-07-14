@@ -24,6 +24,7 @@ mod lambda_captures;
 mod pass;
 mod passes;
 mod transform;
+mod typed_local;
 
 /// Private convenience module for simplifying imports in pass implementations.
 mod prelude {
@@ -77,10 +78,11 @@ pub fn elaborate_program_for_codegen(
         ..Default::default()
     };
     elaborate_namespaces_visitor::elaborate_program(ns_env, program);
-    let env = make_env(&tco, path);
+    let mut env = make_env(&tco, path);
     elaborate_common(&env, program);
     elaborate_package_expr(&env, program);
     // Passes below here can emit errors
+    typed_local::elaborate_program(&mut env, program, tco.po_codegen);
     let errs = env.into_errors();
     match Vec1::try_from_vec(errs) {
         Err(_) => Ok(()),
@@ -100,6 +102,7 @@ pub fn elaborate_program(
         return env.into_errors();
     }
     lambda_captures::elaborate_program(&mut env, program);
+    typed_local::elaborate_program(&mut env, program, false);
     elaborate_for_typechecking(env, program)
 }
 
@@ -115,6 +118,7 @@ pub fn elaborate_fun_def(
         return env.into_errors();
     }
     lambda_captures::elaborate_fun_def(&mut env, f);
+    typed_local::elaborate_fun_def(&mut env, f, false);
     elaborate_for_typechecking(env, f)
 }
 
@@ -130,6 +134,7 @@ pub fn elaborate_class_(
         return env.into_errors();
     }
     lambda_captures::elaborate_class_(&mut env, c);
+    typed_local::elaborate_class_(&mut env, c, false);
     elaborate_for_typechecking(env, c)
 }
 

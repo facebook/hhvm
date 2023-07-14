@@ -1,6 +1,0 @@
-File "switch-fallthrough-error.php", line 10, characters 7-13:
-Typing error (Typing[4110])
-  File "switch-fallthrough-error.php", line 7, characters 15-17:
-  Expected `int`
-  File "switch-fallthrough-error.php", line 10, characters 12-13:
-  But got `string`

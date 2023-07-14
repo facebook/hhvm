@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import time
 import unittest
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import common_tests
 from hh_paths import hh_client
@@ -26,7 +26,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         options: Optional[List[str]] = None,
         retries: int = 30,
         assert_loaded_saved_state: bool = False,
-    ) -> str:
+    ) -> Tuple[str, str]:
         if options is None:
             options = []
         time.sleep(2)  # wait for Hack to catch up with file system changes
@@ -61,7 +61,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             self.assertCountEqual(
                 map(lambda x: x.format(root=root), expected_output), output.splitlines()
             )
-        return err
+        return output, err
 
     def assertEqualString(
         self, first: str, second: str, msg: Optional[str] = None

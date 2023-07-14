@@ -90,7 +90,7 @@ assume_php = true
         # Server may take some time to kill itself.
         time.sleep(2)
 
-        stderr = self.test_driver.check_cmd(
+        _, stderr = self.test_driver.check_cmd(
             None,
             options=["--autostart-server", "false"],
             assert_loaded_saved_state=False,

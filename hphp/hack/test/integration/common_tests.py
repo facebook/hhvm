@@ -312,7 +312,7 @@ class CommonTestDriver(TestDriver):
         return True
 
     # Runs `hh_client check` asserting the stdout is equal the expected.
-    # Returns stderr.
+    # Returns stdout and stderr.
     # Note: assert_laoded_mini_state is ignored here and only used
     # in some derived classes.
     def check_cmd(
@@ -321,7 +321,7 @@ class CommonTestDriver(TestDriver):
         stdin: Optional[str] = None,
         options: Optional[List[str]] = None,
         assert_loaded_saved_state: bool = False,
-    ) -> str:
+    ) -> Tuple[str, str]:
         (output, err, retcode) = self.run_check(stdin, options)
         root = self.repo_dir + os.path.sep
         if retcode != 0:
@@ -344,7 +344,7 @@ class CommonTestDriver(TestDriver):
                     file=sys.stderr,
                 )
                 raise
-        return err
+        return output, err
 
     def check_cmd_and_json_cmd(
         self,
@@ -520,9 +520,8 @@ class CommonTests(BarebonesTests):
         """
         self.test_driver.start_hh_server()
 
-        stderr = self.test_driver.check_cmd([], options=["--json"])
-        last_line = stderr.splitlines()[-1]
-        output = json.loads(last_line)
+        stdout, _ = self.test_driver.check_cmd(None, options=["--json"])
+        output = json.loads(stdout)
 
         self.assertEqual(output["errors"], [])
         self.assertEqual(output["passed"], True)
@@ -1057,7 +1056,7 @@ class CommonTests(BarebonesTests):
                 break
             attempts += 1
             time.sleep(1)
-        client_error = self.test_driver.check_cmd(
+        _, client_error = self.test_driver.check_cmd(
             expected_output=None, assert_loaded_saved_state=False
         )
         self.assertIn("Last server killed by signal", client_error)

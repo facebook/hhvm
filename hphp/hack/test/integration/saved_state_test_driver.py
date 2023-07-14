@@ -8,7 +8,17 @@ import shlex
 import shutil
 import sys
 import tempfile
-from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
+from typing import (
+    Iterable,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    TextIO,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import common_tests
 from hh_paths import hh_client, hh_fanout, hh_server
@@ -329,7 +339,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         stdin: Optional[str] = None,
         options: Optional[List[str]] = None,
         assert_loaded_saved_state: bool = True,
-    ) -> str:
+    ) -> Tuple[str, str]:
         result = super(SavedStateTestDriver, self).check_cmd(
             expected_output, stdin, options
         )

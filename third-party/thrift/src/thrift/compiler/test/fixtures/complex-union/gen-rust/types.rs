@@ -205,6 +205,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -311,6 +312,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ListUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             2 => {
             },
@@ -409,6 +411,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DataUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -520,6 +523,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Val {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -621,6 +625,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ValUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -719,6 +724,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualComplexUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -812,6 +818,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -899,6 +906,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

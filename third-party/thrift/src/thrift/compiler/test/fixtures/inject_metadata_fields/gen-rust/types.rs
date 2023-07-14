@@ -137,6 +137,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             100 => {
             },
@@ -239,6 +240,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToEmptyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             -1100 => {
             },
@@ -350,6 +352,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedToStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -485,6 +488,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldsInjectedWithIncludedStruc
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

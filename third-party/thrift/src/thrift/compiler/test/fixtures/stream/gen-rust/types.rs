@@ -161,6 +161,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FooStreamEx {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -242,6 +243,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FooEx {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -323,6 +325,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FooEx2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }

@@ -277,6 +277,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for A {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -374,6 +375,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for U {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -467,6 +469,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bang {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

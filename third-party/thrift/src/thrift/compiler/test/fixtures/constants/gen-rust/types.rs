@@ -576,6 +576,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Internship {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -685,6 +686,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Range {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -788,6 +790,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct1 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -909,6 +912,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1025,6 +1029,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct3 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1143,6 +1148,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for struct4 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1244,6 +1250,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for union1 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1362,6 +1369,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for union2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

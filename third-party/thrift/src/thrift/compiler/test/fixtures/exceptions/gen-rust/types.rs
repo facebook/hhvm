@@ -288,6 +288,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -382,6 +383,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -483,6 +485,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -586,6 +589,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -689,6 +693,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -802,6 +807,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -887,6 +893,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Banal {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }

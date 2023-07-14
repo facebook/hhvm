@@ -914,6 +914,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyData {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1023,6 +1024,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataWithCustomDefault {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1118,6 +1120,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for InnerUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1230,6 +1233,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1670,6 +1674,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             -1 => {
             },
@@ -1823,6 +1828,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for LateDefStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -1919,6 +1925,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Recursive {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             -1 => {
 
@@ -2030,6 +2037,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             -1 => {
             },
@@ -2141,6 +2149,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Loop {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             -1 => {
 

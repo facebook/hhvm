@@ -106,6 +106,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

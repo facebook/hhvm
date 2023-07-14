@@ -114,6 +114,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NoSerde {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -206,6 +207,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serde {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

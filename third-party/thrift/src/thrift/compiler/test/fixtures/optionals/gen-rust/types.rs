@@ -283,6 +283,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Color {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -425,6 +426,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Vehicle {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -622,6 +624,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

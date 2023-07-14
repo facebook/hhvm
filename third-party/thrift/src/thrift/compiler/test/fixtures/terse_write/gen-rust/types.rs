@@ -385,6 +385,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -606,6 +607,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -729,6 +731,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithCustomDefault {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -962,6 +965,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructLevelTerseStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1349,6 +1353,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FieldLevelTerseStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -1786,6 +1791,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseStructWithCustomDefault {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1937,6 +1943,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -2094,6 +2101,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for WrappedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -2211,6 +2219,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

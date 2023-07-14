@@ -845,6 +845,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyAnnotation {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -1041,6 +1042,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -1465,6 +1467,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -1744,6 +1747,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -1999,6 +2003,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -2115,6 +2120,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for IndependentDirectlyAdapted {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -2244,6 +2250,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -2502,6 +2509,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -2685,6 +2693,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for B {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -2774,6 +2783,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for A {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -2925,6 +2935,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -3032,6 +3043,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -3213,6 +3225,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -3646,6 +3659,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -3924,6 +3938,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedNestedTestStruct 
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -4027,6 +4042,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTestUnion {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -4126,6 +4142,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -4242,6 +4259,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdaptedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -4367,6 +4385,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructFieldAdaptedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -4489,6 +4508,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularAdaptee {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -4589,6 +4609,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -4697,6 +4718,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReorderedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -4814,6 +4836,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for DeclaredAfterStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -4928,6 +4951,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for RenamedStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -5044,6 +5068,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SameNamespaceStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -5151,6 +5176,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for HeapAllocated {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -5247,6 +5273,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MoveOnly {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -5345,6 +5372,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for AlsoMoveOnly {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -5479,6 +5507,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -5579,6 +5608,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveAdapted {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -5699,6 +5729,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CountingStruct {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
 
@@ -5864,6 +5895,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },
@@ -5962,6 +5994,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person2 {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
             },

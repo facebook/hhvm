@@ -149,6 +149,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TransitiveDerives {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -243,6 +244,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithTransitiveDerives {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }
@@ -324,6 +326,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for SomeError {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        #[allow(clippy::match_single_binding)]
         match field_id {
             _ => {}
         }

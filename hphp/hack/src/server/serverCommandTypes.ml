@@ -143,7 +143,14 @@ module Find_refs = struct
 
   type action =
     | Class of string
+        (** When user does find-all-refs on Foo::f or self::f or parent::f, it produces `Class "Foo"`
+        and passes this to serverFindRefs. As expected, it will find all references to the class Foo,
+        including self:: and parent:: references.
+        Class is used for all typelikes -- typedefs, enums, enum classes, classes, interfaces, traits *)
     | ExplicitClass of string
+        (** When user does rename of Foo to Bar, then serverRename produces `ExplicitClass "Foo"`
+        and passes this to serverFindRefs. This will only find the explicit references to the class Foo,
+        not including self:: and parent::, since they shouldn't be renamed. *)
     | Member of string * member
     | Function of string
     | GConst of string

@@ -7,7 +7,7 @@
  *)
 open Hh_prelude
 
-let find ~entry ~(range : Lsp.range) ctx =
+let find ~entry ~(range : Lsp.range) ctx : Code_action_types.Refactor.t list =
   if Lsp_helpers.lsp_range_is_selection range then
     let source_text = Ast_provider.compute_source_text ~entry in
     let path = entry.Provider_context.path in
@@ -17,12 +17,15 @@ let find ~entry ~(range : Lsp.range) ctx =
       in
       Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
     in
-    let candidate_opt =
-      Extract_method_traverse.find_candidate ~selection ~entry ctx
-    in
-    let to_refactor =
-      Extract_method_to_refactor.of_candidate ~source_text ~path
-    in
-    Option.(candidate_opt >>| to_refactor |> to_list)
+    match Extract_method_traverse.find_candidate ~selection ~entry ctx with
+    | Some candidate ->
+      let refactor =
+        Extract_method_to_refactor.of_candidate ~source_text ~path candidate
+      in
+      let refactors_from_plugins : Code_action_types.Refactor.t list =
+        Extract_method_plugins.find ~selection ~entry ctx candidate
+      in
+      refactors_from_plugins @ [refactor]
+    | None -> []
   else
     []

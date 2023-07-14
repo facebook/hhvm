@@ -4,6 +4,8 @@
  (libraries
   annotated_ast
   ast
+  extract_method_plugins
+  extract_method_types
   full_fidelity
   lsp
   pos

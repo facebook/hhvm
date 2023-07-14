@@ -107,6 +107,11 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name extract_method_plugins_stubs)
+ (wrapped false)
+ (modules extract_method_plugins))
+
+(library
  (name ci_util_stubs)
  (wrapped false)
  (modules ci_util)

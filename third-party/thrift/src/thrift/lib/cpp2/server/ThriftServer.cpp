@@ -702,7 +702,7 @@ void ThriftServer::setupThreadManager() {
       DCHECK(resourcePoolSet().empty());
       // We always need a threadmanager for cpp2.
       auto explanation = fmt::format(
-          "runtime: {}, thrift flag: {}, enable gflag: {}, dsiable gflag: {}",
+          "runtime: {}, thrift flag: {}, enable gflag: {}, disable gflag: {}",
           runtimeServerActions_.explain(),
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,

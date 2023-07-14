@@ -256,6 +256,14 @@ impl<Ex, En> Stmt<Ex, En> {
         }
         false
     }
+
+    pub fn is_declare_local_stmt(&self) -> bool {
+        if let Stmt(_, Stmt_::DeclareLocal(_)) = self {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl<Ex, En> Expr<Ex, En> {

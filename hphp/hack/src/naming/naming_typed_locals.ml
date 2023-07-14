@@ -118,7 +118,24 @@ let rec check_stmt env (id_pos, stmt_) =
     List.fold_left update_exprs ~init:env ~f:check_assign_expr
   (* TODO: make sure _cond is visited in case it has lambdas in it *)
   | While (_cond, block) -> check_block env block
-  | _ -> env
+  (* TODO: make sure _inits is visited in case it has lambdas in it *)
+  | Awaitall (_inits, block) -> check_block env block
+  | Block block -> check_block env block
+  | Using _
+  | Switch (_, _, _)
+  | Foreach (_, _, _)
+  | Try (_, _, _)
+  | Fallthrough
+  | Break
+  | Continue
+  | Yield_break
+  | Noop
+  | Throw _
+  | Return _
+  | Do _
+  | Markup _
+  | AssertEnv _ ->
+    env
 
 and check_block env block =
   match block with

@@ -192,12 +192,12 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             Stmt_::DeclareLocal(box (lid, hint, expr)) => {
                 let name = local_id::get_name(&lid.1);
                 if let Some((_, def_pos)) = self.get_local(name) {
-                    env.emit_error(NamingError::IllegalTypedLocal{
-                        join:false,
-                        id_pos:pos.clone(),
-                        id_name:name.clone(),
-                        def_pos:def_pos.clone(),
-                });
+                    env.emit_error(NamingError::IllegalTypedLocal {
+                        join: false,
+                        id_pos: pos.clone(),
+                        id_name: name.clone(),
+                        def_pos: def_pos.clone(),
+                    });
                 } else {
                     self.add_local(name.to_string(), Some(hint.clone()), pos);
                     self.add_declared_id(name);
@@ -219,7 +219,6 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                     } else if self.should_elab {
                         *stmt_ = Stmt_::Noop;
                     }
-
                 };
                 Ok(())
             }
@@ -248,19 +247,20 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 }
                 Ok(())
             }
+            Stmt_::Using(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Switch(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Foreach(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Try(_) => elem.recurse(env, self.object()),   // TODO
+            // Just need to visit these, no additional logic is required
             Stmt_::Fallthrough
+            | Stmt_::Awaitall(_)
             | Stmt_::Break
             | Stmt_::Continue
             | Stmt_::Throw(_)
             | Stmt_::Return(_)
             | Stmt_::YieldBreak
-            | Stmt_::Awaitall(_)// TODO
             | Stmt_::Do(_)
             | Stmt_::While(_)
-            | Stmt_::Using(_)   // TODO
-            | Stmt_::Switch(_)  // TODO
-            | Stmt_::Foreach(_) // TODO
-            | Stmt_::Try(_)     // TODO
             | Stmt_::Noop
             | Stmt_::Block(_)
             | Stmt_::Markup(_)

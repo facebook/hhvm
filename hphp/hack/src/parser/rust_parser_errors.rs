@@ -2830,7 +2830,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | ReturnStatement(_)
                 | UnsetStatement(_)
                 | EchoStatement(_)
-                | ThrowStatement(_) => break,
+                | ThrowStatement(_)
+                | DeclareLocalStatement(_) => break,
                 IfStatement(x) if std::ptr::eq(node, &x.condition) => break,
                 ForStatement(x) if std::ptr::eq(node, &x.initializer) => break,
                 SwitchStatement(x) if std::ptr::eq(node, &x.expression) => break,
@@ -5199,6 +5200,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 for n in statement_list() {
                     if let ExpressionStatement(x) = &n.children {
                         if !self.node_has_await_child(&x.expression) {
+                            self.errors.push(make_error_from_node(
+                                n,
+                                errors::statement_without_await_in_concurrent_block,
+                            ))
+                        }
+                    } else if let DeclareLocalStatement(x) = &n.children {
+                        if !self.node_has_await_child(&x.initializer) && !x.initializer.is_missing()
+                        {
                             self.errors.push(make_error_from_node(
                                 n,
                                 errors::statement_without_await_in_concurrent_block,

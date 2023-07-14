@@ -1,0 +1,28 @@
+File "concurrent-errors.php", line 28, characters 14-217:
+Statement without an `await` in a concurrent block (Parsing[1002])
+File "concurrent-errors.php", line 29, characters 5-19:
+Statement without an `await` in a concurrent block (Parsing[1002])
+File "concurrent-errors.php", line 19, characters 5-15:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "concurrent-errors.php", line 16, characters 5-6:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "concurrent-errors.php", line 21, characters 5-15:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "concurrent-errors.php", line 20, characters 5-6:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "concurrent-errors.php", line 22, characters 5-15:
+Illegal definition of typed local variable $b. (Naming[2126])
+  File "concurrent-errors.php", line 13, characters 3-4:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "concurrent-errors.php", line 15, characters 5-27:
+Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
+  File "concurrent-errors.php", line 15, characters 12-14:
+  Expected `int`
+  File "concurrent-errors.php", line 8, characters 31-36:
+  But got `string`
+File "concurrent-errors.php", line 18, characters 5-18:
+Typing error (Typing[4110])
+  File "concurrent-errors.php", line 17, characters 12-14:
+  Expected `int`
+  File "concurrent-errors.php", line 8, characters 31-36:
+  But got `string`

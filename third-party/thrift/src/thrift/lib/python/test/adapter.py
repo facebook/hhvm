@@ -189,3 +189,7 @@ class AdapterTest(unittest.TestCase):
         foo = Foo()
         self.assertIs(True, foo.wrapped_bool.value)
         self.assertIs(True, foo.double_wrapped_bool.value.value)
+
+    def test_adapted_field_with_container_value_annotation(self) -> None:
+        foo = Foo()
+        self.assertIs(0, foo.abc.value)

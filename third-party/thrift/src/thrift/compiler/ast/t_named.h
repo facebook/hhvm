@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/lib/uri.h>
 
@@ -70,6 +71,9 @@ class t_named : public t_node {
 
   const std::vector<const t_const*>& structured_annotations() const noexcept {
     return structured_annotations_raw_;
+  }
+  node_list_view<t_const> structured_annotations_mutable() {
+    return structured_annotations_;
   }
   void add_structured_annotation(std::unique_ptr<t_const> annot);
 

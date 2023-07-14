@@ -2326,7 +2326,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType(1),
+                        r#type: cpp::types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2356,7 +2356,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType(1),
+                        r#type: cpp::types::RefType::Shared,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4636,7 +4636,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for CircularStruct {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType(0),
+                        r#type: cpp::types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -4746,7 +4746,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReorderedStruct {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType(0),
+                        r#type: cpp::types::RefType::Unique,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

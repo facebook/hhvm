@@ -63,6 +63,7 @@ void mutator::mutate(t_program* const program) {
 static void fill_mutators(mutator_list& ms) {
   ms.add<field_type_to_const_value>();
   ms.add<const_type_to_const_value>();
+  ms.add<structured_annotation_type_to_const_value>();
 
   // add more mutators here ...
 }
@@ -149,6 +150,16 @@ static void match_type_with_const_value(
   }
 }
 
+static void match_annotation_types_with_const_values(
+    t_named* const tnamed, t_program* const program) {
+  for (t_const& tconst : tnamed->structured_annotations_mutable()) {
+    if (tconst.get_type() && tconst.get_value()) {
+      match_type_with_const_value(
+          &tconst, program, tconst.get_type(), tconst.get_value());
+    }
+  }
+}
+
 /**
  * field_type_to_const_value
  */
@@ -176,6 +187,21 @@ bool const_type_to_const_value::visit(t_const* const tconst) {
     match_type_with_const_value(
         tconst, program_, tconst->get_type(), tconst->get_value());
   }
+  return true;
+}
+
+bool structured_annotation_type_to_const_value::visit(t_program* program) {
+  program_ = program;
+  return true;
+}
+
+bool structured_annotation_type_to_const_value::visit(t_struct* tstruct) {
+  match_annotation_types_with_const_values(tstruct, program_);
+  return true;
+}
+
+bool structured_annotation_type_to_const_value::visit(t_field* t_field) {
+  match_annotation_types_with_const_values(t_field, program_);
   return true;
 }
 

@@ -52,6 +52,16 @@ struct Baz {
 }
 typedef bool WrappedBool
 
+@python.Adapter{
+  name = "thrift.python.test.adapters.noop.Wrapper",
+  typeHint = "thrift.python.test.adapters.noop.Wrapped[]",
+}
+@scope.Transitive
+struct AnnotationWithContainers {
+  1: list<string> names;
+  2: map<string, i32> counts;
+}
+
 struct Foo {
   @AsDatetime{signature = "DatetimeField"}
   1: i32 created_at;
@@ -79,6 +89,8 @@ struct Foo {
     typeHint = "thrift.python.test.adapters.noop.Wrapped[]",
   }
   12: WrappedBool double_wrapped_bool = true;
+  @AnnotationWithContainers{names = ["bar", "baz"], counts = {"c": 3}}
+  13: i32 abc;
 }
 
 union Bar {

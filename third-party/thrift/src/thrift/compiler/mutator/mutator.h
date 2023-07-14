@@ -55,7 +55,7 @@ void run_mutator(t_program* program, Args&&... args) {
 /**
  *  This matches the type of fields to their const values
  */
-class field_type_to_const_value : virtual public mutator {
+class field_type_to_const_value : public mutator {
  public:
   using mutator::visit;
 
@@ -69,12 +69,27 @@ class field_type_to_const_value : virtual public mutator {
 /**
  *  This matches the type of consts to their const values
  */
-class const_type_to_const_value : virtual public mutator {
+class const_type_to_const_value : public mutator {
  public:
   using mutator::visit;
 
   bool visit(t_program* program) override;
   bool visit(t_const* tconst) override;
+
+ private:
+  t_program* program_;
+};
+
+/**
+ *  This matches the types of structured annotations to their const values.
+ */
+class structured_annotation_type_to_const_value : public mutator {
+ public:
+  using mutator::visit;
+
+  bool visit(t_program* program) override;
+  bool visit(t_struct* tstruct) override;
+  bool visit(t_field* tfield) override;
 
  private:
   t_program* program_;

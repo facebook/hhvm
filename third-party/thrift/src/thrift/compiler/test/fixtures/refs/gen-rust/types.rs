@@ -658,7 +658,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
-                        r#type: cpp::types::RefType(2),
+                        r#type: cpp::types::RefType::SharedMutable,
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

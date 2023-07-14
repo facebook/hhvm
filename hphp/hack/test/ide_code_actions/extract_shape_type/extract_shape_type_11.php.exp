@@ -1,2 +1,5 @@
-(Failure
-  "invariant_violation_bug - expected only one candidate to be found, since we select the largest shape-typed expression containing the selection - data=_, pos=File \"extract_shape_type_11.php\", line 7, characters 5-24:")
+Code actions available:
+------------------------------------------
+Extract into method (CodeActionKind: refactor)
+
+No code action titles match prefix: Extract shape type

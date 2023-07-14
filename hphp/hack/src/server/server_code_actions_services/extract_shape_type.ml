@@ -85,6 +85,13 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
         ) else
           Searching None
 
+      method! on_stmt env stmt =
+        let stmt_pos = fst stmt in
+        if Pos.contains selection stmt_pos then
+          Selected_non_shape_type stmt_pos
+        else
+          super#on_stmt env stmt
+
       method! on_expr env expr =
         let (ty, expr_pos, _) = expr in
         if Pos.contains selection expr_pos then

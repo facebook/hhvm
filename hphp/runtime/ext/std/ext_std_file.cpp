@@ -2127,11 +2127,6 @@ Variant HHVM_FUNCTION(try_stderr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_STDIN("STDIN"),
-  s_STDOUT("STDOUT"),
-  s_STDERR("STDERR");
-
 void StandardExtension::initFile() {
   HHVM_RC_STR(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
   HHVM_RC_STR(PATH_SEPARATOR, s_PATH_SEPARATOR);
@@ -2165,9 +2160,6 @@ void StandardExtension::initFile() {
   HHVM_RC_INT_SAME(SEEK_CUR);
   HHVM_RC_INT_SAME(SEEK_END);
 
-  Native::registerConstant(s_STDIN.get(),  BuiltinFiles::getSTDIN);
-  Native::registerConstant(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
-  Native::registerConstant(s_STDERR.get(), BuiltinFiles::getSTDERR);
   HHVM_FALIAS(HH\\try_stdin, try_stdin);
   HHVM_FALIAS(HH\\try_stdout, try_stdout);
   HHVM_FALIAS(HH\\try_stderr, try_stderr);

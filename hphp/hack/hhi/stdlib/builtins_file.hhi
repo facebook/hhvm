@@ -9,15 +9,6 @@
  */
 
 namespace {
-//<<__Deprecated('use HH\stdin() or HH\try_stdin()')>>
-//const resource STDIN;
-
-//<<__Deprecated('use HH\stdout() or HH\try_stdout()')>>
-//const resource STDOUT;
-
-//<<__Deprecated('use HH\stderr() or HH\try_stderr()')>>
-//const resource STDERR;
-
 const int PATHINFO_DIRNAME;
 const int PATHINFO_BASENAME;
 const int PATHINFO_EXTENSION;

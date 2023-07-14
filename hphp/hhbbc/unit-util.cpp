@@ -53,7 +53,7 @@ std::unique_ptr<php::Unit> make_native_unit() {
   unit->filename = s_nativeUnitName.get();
 
   for (auto const& [name, val] : Native::getConstants()) {
-    assertx(type(val) != KindOfUninit || val.dynamic());
+    assertx(type(val) != KindOfUninit);
     auto cns = std::make_unique<php::Constant>();
     cns->name = name;
     cns->val = val;

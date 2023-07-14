@@ -868,20 +868,5 @@ std::string NativeSig::toString(const char* classname,
   return str;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-bool registerConstant(const StringData* cnsName,
-                      ConstantCallback callback) {
-  TypedValueAux tv;
-  tv.m_type = KindOfUninit;
-  tv.m_data.pcnt = reinterpret_cast<MaybeCountable*>(callback);
-  tv.dynamic() = true;
-  if (!Constant::defNativeConstantCallback(cnsName, tv)) {
-    return false;
-  }
-  s_constant_map[cnsName] = tv;
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::Native

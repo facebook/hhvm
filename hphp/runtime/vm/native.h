@@ -604,7 +604,6 @@ const ConstantMap& getConstants() {
 }
 
 using ConstantCallback = Variant (*)(const StringData*);
-bool registerConstant(const StringData*, ConstantCallback);
 
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants

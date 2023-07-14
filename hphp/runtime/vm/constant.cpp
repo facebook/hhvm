@@ -192,18 +192,4 @@ void Constant::def(const Constant* constant) {
   rds::initHandle(ch);
 }
 
-bool Constant::defNativeConstantCallback(const StringData* cnsName,
-                                         TypedValue value) {
-  static const bool kServer = RuntimeOption::ServerExecutionMode();
-  // Zend doesn't define the STD* streams in server mode so we don't either
-  if (UNLIKELY(kServer &&
-       (s_stdin.equal(cnsName) ||
-        s_stdout.equal(cnsName) ||
-        s_stderr.equal(cnsName)))) {
-    return false;
-  }
-  bindPersistentCns(cnsName, value);
-  return true;
-}
-
 }

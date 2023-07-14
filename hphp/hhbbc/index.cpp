@@ -4313,8 +4313,7 @@ void attribute_setter(const Attr& attrs, bool set, Attr attr) {
 
 void add_system_constants_to_index(IndexData& index) {
   for (auto cnsPair : Native::getConstants()) {
-    assertx(cnsPair.second.m_type != KindOfUninit ||
-            cnsPair.second.dynamic());
+    assertx(cnsPair.second.m_type != KindOfUninit);
     auto pc = new php::Constant {
       cnsPair.first,
       cnsPair.second,

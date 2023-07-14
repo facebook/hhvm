@@ -290,8 +290,7 @@ struct SymbolSets {
     // These aren't stored in the repo, but we still need to check for
     // collisions against them, so put them in the maps.
     for (auto const& kv : Native::getConstants()) {
-      assertx(kv.second.m_type != KindOfUninit ||
-              kv.second.dynamic());
+      assertx(kv.second.m_type != KindOfUninit);
       add(constants, kv.first, nullptr, "constant");
     }
   }

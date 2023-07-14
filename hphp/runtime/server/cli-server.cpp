@@ -646,28 +646,6 @@ struct CliLoggerHook final : LoggerHook {
 }
 
 const StaticString
-  s_STDIN("STDIN"),
-  s_STDOUT("STDOUT"),
-  s_STDERR("STDERR");
-
-void define_stdio_constants() {
-  auto defcns = [] (const StringData* name, Native::ConstantCallback func) {
-    auto handle = makeCnsHandle(name);
-    always_assert(rds::isHandleBound(handle));
-
-    rds::initHandle(handle);
-    auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
-
-    cns->m_type = KindOfUninit;
-    cns->m_data.pcnt = reinterpret_cast<MaybeCountable*>(func);
-  };
-
-  defcns(s_STDIN.get(),  BuiltinFiles::getSTDIN);
-  defcns(s_STDOUT.get(), BuiltinFiles::getSTDOUT);
-  defcns(s_STDERR.get(), BuiltinFiles::getSTDERR);
-}
-
-const StaticString
   s_local_value("local_value"),
   s_access("access");
 
@@ -1054,7 +1032,6 @@ void CLIWorker::doJob(int client) {
 
       Stream::setThreadLocalFileHandler(&wrapper);
       RID().setSafeFileAccess(false);
-      define_stdio_constants();
 
       FTRACE(1, "CLIWorker::doJob({}): invoking {}...\n", client, args[0]);
       auto const prelude = [&] () -> std::string {

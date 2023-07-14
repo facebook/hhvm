@@ -15,6 +15,7 @@
  */
 
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 
@@ -28,7 +29,7 @@ using AddOp = std::function<void(Patch&)>;
 template <class Patch>
 using AddOps = std::vector<AddOp<Patch>>;
 
-template <class Patch>
+template <class Tag, class Patch>
 void testMergePatchOps(
     const AddOps<Patch>& addOpList, const typename Patch::value_type& value) {
   Patch mergedPatch, patchWithMultipleOps;
@@ -64,7 +65,7 @@ void testMergePatchOps(
       auto v2 = value;
       mergedPatch.merge(patch);
       mergedPatch.apply(v2);
-      EXPECT_EQ(v1, v2);
+      EXPECT_TRUE(op::equal<Tag>(v1, v2));
     }
 
     {
@@ -87,12 +88,12 @@ void testMergePatchOps(
       auto v2 = value;
       addOp(patchWithMultipleOps);
       patchWithMultipleOps.apply(v2);
-      EXPECT_EQ(v1, v2);
+      EXPECT_TRUE(op::equal<Tag>(v1, v2));
     }
   }
 }
 
-template <class Patch>
+template <class Tag, class Patch>
 void pickMultipleOpsAndTest(
     const AddOps<Patch>& candidates,
     const std::vector<typename Patch::value_type>& values,
@@ -102,16 +103,26 @@ void pickMultipleOpsAndTest(
     AddOps<Patch> pickedOps = {}) {
   if (numberOfOpToPick == 0) {
     for (const auto& v : values) {
-      testMergePatchOps(pickedOps, v);
+      testMergePatchOps<Tag>(pickedOps, v);
     }
     return;
   }
 
   for (auto op : candidates) {
     pickedOps.push_back(op);
-    pickMultipleOpsAndTest(candidates, values, numberOfOpToPick - 1, pickedOps);
+    pickMultipleOpsAndTest<Tag>(
+        candidates, values, numberOfOpToPick - 1, pickedOps);
     pickedOps.pop_back();
   }
+}
+
+template <class Patch>
+void pickMultipleOpsAndTest(
+    const AddOps<Patch>& candidates,
+    const std::vector<typename Patch::value_type>& values,
+    const int numberOfOpToPick) {
+  pickMultipleOpsAndTest<type::infer_tag<typename Patch::value_type>>(
+      candidates, values, numberOfOpToPick);
 }
 
 TEST(PatchMergeTest, BoolPatch) {
@@ -149,6 +160,44 @@ TEST(PatchMergeTest, NumberPatch) {
   testNumberPatch<op::I64Patch>();
   testNumberPatch<op::FloatPatch, true>();
   testNumberPatch<op::DoublePatch, true>();
+}
+
+template <class Patch>
+auto stringOrBinary(std::string s) {
+  if constexpr (std::is_same_v<Patch, op::StringPatch>) {
+    return s;
+  } else {
+    return *folly::IOBuf::copyBuffer(s);
+  }
+}
+
+template <class Patch>
+auto genStringPatchOps() {
+  AddOps<Patch> ops;
+  ops.push_back([](auto& patch) { patch = stringOrBinary<Patch>(""); });
+  ops.push_back([](auto& patch) { patch = stringOrBinary<Patch>("42"); });
+  ops.push_back([](auto& patch) { patch.clear(); });
+  ops.push_back([](auto& patch) { patch.prepend(""); });
+  ops.push_back([](auto& patch) { patch.prepend("("); });
+  ops.push_back([](auto& patch) { patch.append(""); });
+  ops.push_back([](auto& patch) { patch.append(")"); });
+  return ops;
+}
+
+template <class Tag, class Patch>
+void testBaseStringPatch() {
+  SCOPED_TRACE(folly::pretty_name<Patch>());
+  pickMultipleOpsAndTest<Tag>(
+      genStringPatchOps<Patch>(),
+      {stringOrBinary<Patch>(""), stringOrBinary<Patch>("1")},
+      4);
+}
+
+TEST(PatchMergeTest, StringPatch) {
+  testBaseStringPatch<type::string_t, op::StringPatch>();
+  testBaseStringPatch<
+      type::cpp_type<folly::IOBuf, type::binary_t>,
+      op::BinaryPatch>();
 }
 
 } // namespace

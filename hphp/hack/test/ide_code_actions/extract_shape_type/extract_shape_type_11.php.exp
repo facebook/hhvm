@@ -1,0 +1,2 @@
+(Failure
+  "invariant_violation_bug - expected only one candidate to be found, since we select the largest shape-typed expression containing the selection - data=_, pos=File \"extract_shape_type_11.php\", line 7, characters 5-24:")

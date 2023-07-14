@@ -133,3 +133,8 @@ let run_exn ctx entry range ~title_prefix =
     | [] ->
       Printf.printf "\nNo code action titles match prefix: %s\n" title_prefix
   end
+
+let run ctx entry range ~title_prefix =
+  match run_exn ctx entry range ~title_prefix with
+  | exception exn -> print_endline @@ Exn.to_string exn
+  | () -> ()

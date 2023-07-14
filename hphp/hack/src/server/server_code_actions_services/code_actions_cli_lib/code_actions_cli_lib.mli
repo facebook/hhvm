@@ -8,10 +8,9 @@
 
 (**
 - Enables previewing code actions from the command line sans language server.
-- Can `failwith` a pretty-printed Lsp.Error.t
 - Currently used only by hh_single_type_check
 *)
-val run_exn :
+val run :
   Provider_context.t ->
   Provider_context.entry ->
   Ide_api_types.range ->

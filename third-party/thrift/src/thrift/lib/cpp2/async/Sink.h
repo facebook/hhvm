@@ -69,8 +69,8 @@ class ClientSink {
 
   folly::coro::Task<R> sink(folly::coro::AsyncGenerator<T&&> generator) {
     folly::exception_wrapper sinkError;
-    auto finalResponse =
-        co_await detail::ClientSinkBridge::Ptr(impl_.release())
+    auto finalResponse = co_await folly::coro::co_nothrow(
+        detail::ClientSinkBridge::Ptr(impl_.release())
             ->sink(
                 [this, &sinkError](folly::coro::AsyncGenerator<T&&> _generator)
                     -> folly::coro::AsyncGenerator<
@@ -89,7 +89,7 @@ class ClientSink {
                     co_yield (*serializer_)(std::move(**item));
                   }
                   co_return;
-                }(std::move(generator)));
+                }(std::move(generator))));
 
     if (finalResponse.hasException()) {
       co_yield folly::coro::co_error(

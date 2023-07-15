@@ -10,7 +10,7 @@
  */
 #ifndef HHVM_VERSION_OVERRIDE
 # define HHVM_VERSION_MAJOR 6
-# define HHVM_VERSION_MINOR 70
+# define HHVM_VERSION_MINOR 71
 # define HHVM_VERSION_PATCH 0
 # define HHVM_VERSION_SUFFIX "-dev"
 #endif

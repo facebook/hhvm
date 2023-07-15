@@ -40,7 +40,7 @@ namespace HH {
     KeyedTraversable::class,
     \ResourceBundle::class,
     \SplHeap::class,
-  ), __SupportDynamicType>>
+  )>>
   interface Traversable<<<__NoAutoBound>> +Tv> {
 
   }
@@ -73,7 +73,7 @@ namespace HH {
     KeyedIterable::class,
     KeyedIterator::class,
     \MysqlRow::class,
-  ), __SupportDynamicType>>
+  )>>
   interface KeyedTraversable<+Tk, <<__NoAutoBound>> +Tv> extends Traversable<Tv> {}
 
   /**
@@ -88,7 +88,7 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/interfaces
    */
-  <<__Sealed(KeyedContainer::class), __SupportDynamicType>>
+  <<__Sealed(KeyedContainer::class)>>
   interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
 
   }
@@ -110,7 +110,7 @@ namespace HH {
     \ConstMap::class,
     \ConstSet::class,
     AnyArray::class,
-  ), __SupportDynamicType>>
+  )>>
   interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv>
     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
 

@@ -5,8 +5,6 @@ type AwaitablePredicate<T> = supportdyn<(function(T): Awaitable<~bool>)>;
 
 <<__SupportDynamicType>>
 function ho(IAsyncPredicate<C,int> $predicate): void { }
-<<__SupportDynamicType>>
-function ho2(IAsyncPredicate<vec<string>,int> $p):void { }
 
 <<__SupportDynamicType>>
 interface IAsyncPredicate<-T as supportdyn<mixed>, +Tc> { }
@@ -24,7 +22,6 @@ function expectString(string $_):void { }
 <<__SupportDynamicType>>
 function test(keyset<int> $_): void {
   ho(asyncLambda(async ($sig) ==> $sig->p));
-  ho2(asyncLambda(async ($v) ==> { expectString($v[0]); return false; }));
   ho(asyncLambda(async ($s) ==> { expectString($s->foo()); return false; }));
   }
 

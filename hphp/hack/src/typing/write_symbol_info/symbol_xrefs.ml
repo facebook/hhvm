@@ -21,23 +21,30 @@ type target_info = {
   receiver_type: Hh_json.json option;
 }
 
-type pos_map = target_info PosMap.t
+type pos_map = target_info list PosMap.t
 
 type t = {
   fact_map: fact_map;
   pos_map: pos_map;
 }
 
-let add { fact_map; pos_map } target_id pos { target; receiver_type } =
+let add { fact_map; pos_map } target_id pos target_info =
   let fact_map =
     Fact_id.Map.update
       target_id
       (function
-        | None -> Some (target, [pos])
+        | None -> Some (target_info.target, [pos])
         | Some (json, refs) -> Some (json, pos :: refs))
       fact_map
   in
-  let pos_map = PosMap.add pos { target; receiver_type } pos_map in
+  let pos_map =
+    PosMap.update
+      pos
+      (function
+        | None -> Some [target_info]
+        | Some tis -> Some (target_info :: tis))
+      pos_map
+  in
   { fact_map; pos_map }
 
 let empty = { fact_map = Fact_id.Map.empty; pos_map = PosMap.empty }

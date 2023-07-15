@@ -263,8 +263,8 @@ let build_signature ctx pos_map_opt source_text params ctxs ret progress =
       let decl_json_pos =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
             match XRefs.PosMap.find_opt source_pos pos_map with
-            | None -> None
-            | Some XRefs.{ target; _ } -> Some (target, pos))
+            | Some (XRefs.{ target; _ } :: _) -> Some (target, pos)
+            | _ -> None)
       in
       let decl_json_aggr_pos = aggregate_pos decl_json_pos in
       let (fact_id, progress) = type_info ~ty decl_json_aggr_pos progress in
@@ -700,10 +700,10 @@ let method_occ receiver_class name progress =
     (JSON_Object json)
     progress
 
-let file_call
-    ~path pos ~callee_xref ~call_args ~dispatch_arg ~receiver_type progress =
+let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg progress =
+  let callee_xrefs = List.map callee_infos ~f:(fun ti -> ti.XRefs.target) in
   let receiver_type =
-    match receiver_type with
+    match List.find_map callee_infos ~f:(fun ti -> ti.XRefs.receiver_type) with
     | None -> []
     | Some receiver_type -> [("receiver_type", receiver_type)]
   in
@@ -712,19 +712,23 @@ let file_call
     | None -> receiver_type
     | Some dispatch_arg -> ("dispatch_arg", dispatch_arg) :: receiver_type
   in
-  let xref_dispatch =
-    match callee_xref with
-    | None -> dispatch_arg
-    | Some callee_xref -> ("callee_xref", callee_xref) :: dispatch_arg
+  (* pick an abitrary target, but resolved if possible. "declaration"
+     before "occurrence" *)
+  let callee_xref =
+    match List.sort ~compare:Hh_json.JsonKey.compare callee_xrefs with
+    | [] -> []
+    | hd :: _ -> [("callee_xref", hd)]
   in
   let json =
     JSON_Object
-      ([
-         ("file", Build_json.build_file_json_nested path);
-         ("callee_span", Build_json.build_bytespan_json pos);
-         ("call_args", JSON_Array call_args);
-       ]
-      @ xref_dispatch)
+      (callee_xref
+      @ dispatch_arg
+      @ [
+          ("file", Build_json.build_file_json_nested path);
+          ("callee_span", Build_json.build_bytespan_json pos);
+          ("call_args", JSON_Array call_args);
+          ("callee_xrefs", JSON_Array callee_xrefs);
+        ])
   in
   Fact_acc.add_fact Predicate.(Hack FileCall) json progress
 

@@ -180,10 +180,9 @@ val file_decls :
 val file_call :
   path:string ->
   Pos.t ->
-  callee_xref:Hh_json.json option ->
+  callee_infos:XRefs.target_info list ->
   call_args:Hh_json.json list ->
   dispatch_arg:Hh_json.json option ->
-  receiver_type:Hh_json.json option ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 

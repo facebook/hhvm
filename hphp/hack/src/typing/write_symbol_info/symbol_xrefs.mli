@@ -20,7 +20,7 @@ type target_info = {
 }
 
 (** maps a position to various info about the target *)
-type pos_map = target_info PosMap.t
+type pos_map = target_info list PosMap.t
 
 (* Maps of XRefs, constructed for a given file *)
 type t = private {

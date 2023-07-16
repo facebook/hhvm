@@ -19,9 +19,12 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
+#include <thrift/test/gen-cpp2/StructPatchTest_types.h>
 
 namespace apache::thrift {
 namespace {
+
+using namespace test::patch;
 
 // A callback to add a PatchOp to a Patch
 template <class Patch>
@@ -231,5 +234,19 @@ TEST(PatchMergeTest, BinaryPatch) {
       op::BinaryPatch>();
 }
 
+TEST(PatchMergeTest, ListPatch) {
+  using ListPatch =
+      std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optListVal())>;
+  AddOps<ListPatch> ops;
+  ops.push_back([](auto& patch) { patch = typename ListPatch::value_type{}; });
+  ops.push_back([](auto& patch) { patch = {0}; });
+  ops.push_back([](auto& patch) { patch = {10}; });
+  ops.push_back([](auto& patch) { patch.clear(); });
+  ops.push_back([](auto& patch) { patch.push_front(0); });
+  ops.push_back([](auto& patch) { patch.push_front(10); });
+  ops.push_back([](auto& patch) { patch.push_back(0); });
+  ops.push_back([](auto& patch) { patch.push_back(10); });
+  pickMultipleOpsAndTest(ops, {{}, {0}}, 4);
+}
 } // namespace
 } // namespace apache::thrift

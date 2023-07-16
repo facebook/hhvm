@@ -18,6 +18,7 @@
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift {
 namespace {
@@ -34,6 +35,7 @@ void testMergePatchOps(
     const AddOps<Patch>& addOpList, const typename Patch::value_type& value) {
   Patch mergedPatch, patchWithMultipleOps;
   auto v1 = value;
+  auto dv1 = protocol::asValueStruct<Tag>(value);
   for (const auto& addOp : addOpList) {
     Patch patch;
     addOp(patch);
@@ -46,6 +48,9 @@ void testMergePatchOps(
     //   p3.Method3()
     //   p3.apply(v1)
     patch.apply(v1);
+
+    protocol::applyPatch(patch.toObject(), dv1);
+    EXPECT_EQ(protocol::asValueStruct<Tag>(v1), dv1);
 
     {
       // 1. Test whether applying mergedPatch patch is equivalent to applying
@@ -66,6 +71,10 @@ void testMergePatchOps(
       mergedPatch.merge(patch);
       mergedPatch.apply(v2);
       EXPECT_TRUE(op::equal<Tag>(v1, v2));
+
+      auto dv2 = protocol::asValueStruct<Tag>(value);
+      protocol::applyPatch(mergedPatch.toObject(), dv2);
+      EXPECT_EQ(protocol::asValueStruct<Tag>(v2), dv2);
     }
 
     {
@@ -89,6 +98,10 @@ void testMergePatchOps(
       addOp(patchWithMultipleOps);
       patchWithMultipleOps.apply(v2);
       EXPECT_TRUE(op::equal<Tag>(v1, v2));
+
+      auto dv2 = protocol::asValueStruct<Tag>(value);
+      protocol::applyPatch(patchWithMultipleOps.toObject(), dv2);
+      EXPECT_EQ(protocol::asValueStruct<Tag>(v2), dv2);
     }
   }
 }
@@ -150,15 +163,30 @@ void testNumberPatch() {
     ops.push_back([](auto& patch) { patch += 2.5; });
     ops.push_back([](auto& patch) { patch -= 3.5; });
   }
-  pickMultipleOpsAndTest(ops, {0, 10, 20, 42}, 5);
+  pickMultipleOpsAndTest(ops, {0, 10, 20, 42}, 4);
 }
 
-TEST(PatchMergeTest, NumberPatch) {
+TEST(PatchMergeTest, BytePatch) {
   testNumberPatch<op::BytePatch>();
+}
+
+TEST(PatchMergeTest, I16Patch) {
   testNumberPatch<op::I16Patch>();
+}
+
+TEST(PatchMergeTest, I32Patch) {
   testNumberPatch<op::I32Patch>();
+}
+
+TEST(PatchMergeTest, I64Patch) {
   testNumberPatch<op::I64Patch>();
+}
+
+TEST(PatchMergeTest, FloatPatch) {
   testNumberPatch<op::FloatPatch, true>();
+}
+
+TEST(PatchMergeTest, DoublePatch) {
   testNumberPatch<op::DoublePatch, true>();
 }
 
@@ -195,6 +223,9 @@ void testBaseStringPatch() {
 
 TEST(PatchMergeTest, StringPatch) {
   testBaseStringPatch<type::string_t, op::StringPatch>();
+}
+
+TEST(PatchMergeTest, BinaryPatch) {
   testBaseStringPatch<
       type::cpp_type<folly::IOBuf, type::binary_t>,
       op::BinaryPatch>();

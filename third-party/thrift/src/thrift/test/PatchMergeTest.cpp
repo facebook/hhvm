@@ -248,5 +248,22 @@ TEST(PatchMergeTest, ListPatch) {
   ops.push_back([](auto& patch) { patch.push_back(10); });
   pickMultipleOpsAndTest(ops, {{}, {0}}, 4);
 }
+
+TEST(PatchMergeTest, SetPatch) {
+  using SetPatch =
+      std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optSetVal())>;
+  AddOps<SetPatch> ops;
+  ops.push_back([](auto& patch) { patch = typename SetPatch::value_type{}; });
+  ops.push_back([](auto& patch) { patch = {"10"}; });
+  ops.push_back([](auto& patch) { patch = {"20"}; });
+  ops.push_back([](auto& patch) { patch = {"30"}; });
+  ops.push_back([](auto& patch) { patch.clear(); });
+  ops.push_back([](auto& patch) { patch.insert("10"); });
+  ops.push_back([](auto& patch) { patch.insert("20"); });
+  ops.push_back([](auto& patch) { patch.erase("10"); });
+  ops.push_back([](auto& patch) { patch.erase("30"); });
+  pickMultipleOpsAndTest<type::set<type::binary_t>>(
+      ops, {{}, {"10"}, {"10", "20"}, {"10", "20", "30"}}, 3);
+}
 } // namespace
 } // namespace apache::thrift

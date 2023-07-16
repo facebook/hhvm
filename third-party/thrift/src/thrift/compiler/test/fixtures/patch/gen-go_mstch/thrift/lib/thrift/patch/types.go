@@ -46,6 +46,61 @@ if err != nil {
   return decodeResult, decodeErr
 }
 
+type FieldIdList = []int16
+
+func NewFieldIdList() FieldIdList {
+  return nil
+}
+
+func WriteFieldIdList(item FieldIdList, p thrift.Protocol) error {
+  if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI16(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+  return nil
+}
+
+func ReadFieldIdList(p thrift.Protocol) (FieldIdList, error) {
+  var decodeResult FieldIdList
+  decodeErr := func() error {
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int16, 0, size)
+for i := 0; i < size; i++ {
+    var elem int16
+    {
+        result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
+
 type PatchOp int32
 
 const (

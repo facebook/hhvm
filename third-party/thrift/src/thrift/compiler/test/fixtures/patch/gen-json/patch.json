@@ -60,6 +60,21 @@
           "column" : 27
         }
       }
+    },
+    "FieldIdList" : {
+      "lineno" : 339,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 339,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 340,
+          "column" : 30
+        }
+      }
     }
   },
   "structs" : {

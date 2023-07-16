@@ -334,3 +334,7 @@ enum PatchOp {
    */
   Put = 9,
 }
+
+// TODO change the element type to FieldId
+@cpp.Adapter{name = "::apache::thrift::op::detail::FieldIdListToSetAdapter"}
+typedef list<i16> FieldIdList

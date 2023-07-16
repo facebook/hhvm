@@ -30,6 +30,27 @@ namespace thrift {
 namespace op {
 namespace detail {
 
+struct FieldIdListToSetAdapter {
+  using FieldIdSet = std::unordered_set<FieldId>;
+  using FieldIdList = std::vector<std::int16_t>;
+  static FieldIdSet fromThrift(const FieldIdList& v) {
+    FieldIdSet ret;
+    ret.reserve(v.size());
+    for (auto i : v) {
+      ret.emplace(static_cast<FieldId>(i));
+    }
+    return ret;
+  }
+  static FieldIdList toThrift(const FieldIdSet& v) {
+    FieldIdList ret;
+    ret.reserve(v.size());
+    for (auto i : v) {
+      ret.emplace_back(folly::to_underlying(i));
+    }
+    return ret;
+  }
+};
+
 /// Patch for a Thrift field.
 ///
 /// Requires Patch have fields with ids 1:1 with the fields they patch.

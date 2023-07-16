@@ -117,6 +117,10 @@ type FieldId = id1.FieldId
 
 func FieldIdPtr(v FieldId) *FieldId { return &v }
 
+type FieldIdList = []int16
+
+func FieldIdListPtr(v FieldIdList) *FieldIdList { return &v }
+
 // An annotation that indicates a patch representation should be generated for
 // the associated definition.
 type GeneratePatch struct {

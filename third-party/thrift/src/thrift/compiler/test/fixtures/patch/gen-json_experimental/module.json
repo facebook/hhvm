@@ -568,7 +568,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }
@@ -736,7 +736,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }
@@ -1177,7 +1177,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }
@@ -2810,7 +2810,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }
@@ -2918,7 +2918,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }
@@ -3104,7 +3104,7 @@
             "key" : 7,
             "lineno" : 23,
             "type" : {
-  "type" : "set",
+  "type" : "list",
   "inner_type" : "i16"
 }
                   }

@@ -930,8 +930,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1131,8 +1131,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1610,8 +1610,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -3432,8 +3432,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -3575,8 +3575,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -3793,8 +3793,8 @@
           }
         },
         "remove" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.FieldId"} ,
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "patch.FieldIdList",
           "required" : true,
           "source_range" : {
             "begin" : {

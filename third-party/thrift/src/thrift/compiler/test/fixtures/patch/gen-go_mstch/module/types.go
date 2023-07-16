@@ -4265,7 +4265,7 @@ type MyDataPatch struct {
     PatchPrior *MyDataFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *MyDataEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *MyDataFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataPatch{}
@@ -4276,7 +4276,7 @@ func NewMyDataPatch() *MyDataPatch {
         SetPatchPriorNonCompat(*NewMyDataFieldPatch()).
         SetEnsureNonCompat(*NewMyDataEnsureStruct()).
         SetPatchNonCompat(*NewMyDataFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *MyDataPatch) GetAssignNonCompat() *MyData {
@@ -4335,13 +4335,13 @@ func (x *MyDataPatch) GetPatch() *MyDataFieldPatch {
     return x.Patch
 }
 
-func (x *MyDataPatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *MyDataPatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *MyDataPatch) GetRemove() []patch.FieldId {
+func (x *MyDataPatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -4397,12 +4397,12 @@ func (x *MyDataPatch) SetPatch(value *MyDataFieldPatch) *MyDataPatch {
     return x
 }
 
-func (x *MyDataPatch) SetRemoveNonCompat(value []patch.FieldId) *MyDataPatch {
+func (x *MyDataPatch) SetRemoveNonCompat(value patch.FieldIdList) *MyDataPatch {
     x.Remove = value
     return x
 }
 
-func (x *MyDataPatch) SetRemove(value []patch.FieldId) *MyDataPatch {
+func (x *MyDataPatch) SetRemove(value patch.FieldIdList) *MyDataPatch {
     x.Remove = value
     return x
 }
@@ -4528,25 +4528,14 @@ func (x *MyDataPatch) writeField7(p thrift.Protocol) error {  // Remove
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -4610,28 +4599,10 @@ if err != nil {
 }
 
 func (x *MyDataPatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -4724,7 +4695,7 @@ func (x *MyDataPatchBuilder) Patch(value *MyDataFieldPatch) *MyDataPatchBuilder 
     return x
 }
 
-func (x *MyDataPatchBuilder) Remove(value []patch.FieldId) *MyDataPatchBuilder {
+func (x *MyDataPatchBuilder) Remove(value patch.FieldIdList) *MyDataPatchBuilder {
     x.obj.Remove = value
     return x
 }
@@ -5314,7 +5285,7 @@ type MyDataWithCustomDefaultPatch struct {
     PatchPrior *MyDataWithCustomDefaultFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *MyDataWithCustomDefaultEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *MyDataWithCustomDefaultFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
@@ -5325,7 +5296,7 @@ func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
         SetPatchPriorNonCompat(*NewMyDataWithCustomDefaultFieldPatch()).
         SetEnsureNonCompat(*NewMyDataWithCustomDefaultEnsureStruct()).
         SetPatchNonCompat(*NewMyDataWithCustomDefaultFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *MyDataWithCustomDefaultPatch) GetAssignNonCompat() *MyDataWithCustomDefault {
@@ -5384,13 +5355,13 @@ func (x *MyDataWithCustomDefaultPatch) GetPatch() *MyDataWithCustomDefaultFieldP
     return x.Patch
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *MyDataWithCustomDefaultPatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetRemove() []patch.FieldId {
+func (x *MyDataWithCustomDefaultPatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -5446,12 +5417,12 @@ func (x *MyDataWithCustomDefaultPatch) SetPatch(value *MyDataWithCustomDefaultFi
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetRemoveNonCompat(value []patch.FieldId) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetRemoveNonCompat(value patch.FieldIdList) *MyDataWithCustomDefaultPatch {
     x.Remove = value
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatch) SetRemove(value []patch.FieldId) *MyDataWithCustomDefaultPatch {
+func (x *MyDataWithCustomDefaultPatch) SetRemove(value patch.FieldIdList) *MyDataWithCustomDefaultPatch {
     x.Remove = value
     return x
 }
@@ -5577,25 +5548,14 @@ func (x *MyDataWithCustomDefaultPatch) writeField7(p thrift.Protocol) error {  /
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -5659,28 +5619,10 @@ if err != nil {
 }
 
 func (x *MyDataWithCustomDefaultPatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -5773,7 +5715,7 @@ func (x *MyDataWithCustomDefaultPatchBuilder) Patch(value *MyDataWithCustomDefau
     return x
 }
 
-func (x *MyDataWithCustomDefaultPatchBuilder) Remove(value []patch.FieldId) *MyDataWithCustomDefaultPatchBuilder {
+func (x *MyDataWithCustomDefaultPatchBuilder) Remove(value patch.FieldIdList) *MyDataWithCustomDefaultPatchBuilder {
     x.obj.Remove = value
     return x
 }
@@ -7803,7 +7745,7 @@ type MyStructPatch struct {
     PatchPrior *MyStructFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *MyStructEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *MyStructFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructPatch{}
@@ -7814,7 +7756,7 @@ func NewMyStructPatch() *MyStructPatch {
         SetPatchPriorNonCompat(*NewMyStructFieldPatch()).
         SetEnsureNonCompat(*NewMyStructEnsureStruct()).
         SetPatchNonCompat(*NewMyStructFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *MyStructPatch) GetAssignNonCompat() *MyStruct {
@@ -7873,13 +7815,13 @@ func (x *MyStructPatch) GetPatch() *MyStructFieldPatch {
     return x.Patch
 }
 
-func (x *MyStructPatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *MyStructPatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *MyStructPatch) GetRemove() []patch.FieldId {
+func (x *MyStructPatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -7935,12 +7877,12 @@ func (x *MyStructPatch) SetPatch(value *MyStructFieldPatch) *MyStructPatch {
     return x
 }
 
-func (x *MyStructPatch) SetRemoveNonCompat(value []patch.FieldId) *MyStructPatch {
+func (x *MyStructPatch) SetRemoveNonCompat(value patch.FieldIdList) *MyStructPatch {
     x.Remove = value
     return x
 }
 
-func (x *MyStructPatch) SetRemove(value []patch.FieldId) *MyStructPatch {
+func (x *MyStructPatch) SetRemove(value patch.FieldIdList) *MyStructPatch {
     x.Remove = value
     return x
 }
@@ -8066,25 +8008,14 @@ func (x *MyStructPatch) writeField7(p thrift.Protocol) error {  // Remove
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -8148,28 +8079,10 @@ if err != nil {
 }
 
 func (x *MyStructPatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -8262,7 +8175,7 @@ func (x *MyStructPatchBuilder) Patch(value *MyStructFieldPatch) *MyStructPatchBu
     return x
 }
 
-func (x *MyStructPatchBuilder) Remove(value []patch.FieldId) *MyStructPatchBuilder {
+func (x *MyStructPatchBuilder) Remove(value patch.FieldIdList) *MyStructPatchBuilder {
     x.obj.Remove = value
     return x
 }
@@ -18512,7 +18425,7 @@ type LateDefStructPatch struct {
     PatchPrior *LateDefStructFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *LateDefStructEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *LateDefStructFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructPatch{}
@@ -18523,7 +18436,7 @@ func NewLateDefStructPatch() *LateDefStructPatch {
         SetPatchPriorNonCompat(*NewLateDefStructFieldPatch()).
         SetEnsureNonCompat(*NewLateDefStructEnsureStruct()).
         SetPatchNonCompat(*NewLateDefStructFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *LateDefStructPatch) GetAssignNonCompat() *LateDefStruct {
@@ -18582,13 +18495,13 @@ func (x *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
     return x.Patch
 }
 
-func (x *LateDefStructPatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *LateDefStructPatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *LateDefStructPatch) GetRemove() []patch.FieldId {
+func (x *LateDefStructPatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -18644,12 +18557,12 @@ func (x *LateDefStructPatch) SetPatch(value *LateDefStructFieldPatch) *LateDefSt
     return x
 }
 
-func (x *LateDefStructPatch) SetRemoveNonCompat(value []patch.FieldId) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetRemoveNonCompat(value patch.FieldIdList) *LateDefStructPatch {
     x.Remove = value
     return x
 }
 
-func (x *LateDefStructPatch) SetRemove(value []patch.FieldId) *LateDefStructPatch {
+func (x *LateDefStructPatch) SetRemove(value patch.FieldIdList) *LateDefStructPatch {
     x.Remove = value
     return x
 }
@@ -18775,25 +18688,14 @@ func (x *LateDefStructPatch) writeField7(p thrift.Protocol) error {  // Remove
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -18857,28 +18759,10 @@ if err != nil {
 }
 
 func (x *LateDefStructPatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -18971,7 +18855,7 @@ func (x *LateDefStructPatchBuilder) Patch(value *LateDefStructFieldPatch) *LateD
     return x
 }
 
-func (x *LateDefStructPatchBuilder) Remove(value []patch.FieldId) *LateDefStructPatchBuilder {
+func (x *LateDefStructPatchBuilder) Remove(value patch.FieldIdList) *LateDefStructPatchBuilder {
     x.obj.Remove = value
     return x
 }
@@ -19249,7 +19133,7 @@ type RecursivePatch struct {
     PatchPrior *RecursiveFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *RecursiveEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *RecursiveFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursivePatch{}
@@ -19260,7 +19144,7 @@ func NewRecursivePatch() *RecursivePatch {
         SetPatchPriorNonCompat(*NewRecursiveFieldPatch()).
         SetEnsureNonCompat(*NewRecursiveEnsureStruct()).
         SetPatchNonCompat(*NewRecursiveFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *RecursivePatch) GetAssignNonCompat() *Recursive {
@@ -19319,13 +19203,13 @@ func (x *RecursivePatch) GetPatch() *RecursiveFieldPatch {
     return x.Patch
 }
 
-func (x *RecursivePatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *RecursivePatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *RecursivePatch) GetRemove() []patch.FieldId {
+func (x *RecursivePatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -19381,12 +19265,12 @@ func (x *RecursivePatch) SetPatch(value *RecursiveFieldPatch) *RecursivePatch {
     return x
 }
 
-func (x *RecursivePatch) SetRemoveNonCompat(value []patch.FieldId) *RecursivePatch {
+func (x *RecursivePatch) SetRemoveNonCompat(value patch.FieldIdList) *RecursivePatch {
     x.Remove = value
     return x
 }
 
-func (x *RecursivePatch) SetRemove(value []patch.FieldId) *RecursivePatch {
+func (x *RecursivePatch) SetRemove(value patch.FieldIdList) *RecursivePatch {
     x.Remove = value
     return x
 }
@@ -19512,25 +19396,14 @@ func (x *RecursivePatch) writeField7(p thrift.Protocol) error {  // Remove
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -19594,28 +19467,10 @@ if err != nil {
 }
 
 func (x *RecursivePatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -19708,7 +19563,7 @@ func (x *RecursivePatchBuilder) Patch(value *RecursiveFieldPatch) *RecursivePatc
     return x
 }
 
-func (x *RecursivePatchBuilder) Remove(value []patch.FieldId) *RecursivePatchBuilder {
+func (x *RecursivePatchBuilder) Remove(value patch.FieldIdList) *RecursivePatchBuilder {
     x.obj.Remove = value
     return x
 }
@@ -20444,7 +20299,7 @@ type BarPatch struct {
     PatchPrior *BarFieldPatch `thrift:"patchPrior,3" json:"patchPrior" db:"patchPrior"`
     Ensure *BarEnsureStruct `thrift:"ensure,5" json:"ensure" db:"ensure"`
     Patch *BarFieldPatch `thrift:"patch,6" json:"patch" db:"patch"`
-    Remove []patch.FieldId `thrift:"remove,7" json:"remove" db:"remove"`
+    Remove patch.FieldIdList `thrift:"remove,7" json:"remove" db:"remove"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BarPatch{}
@@ -20455,7 +20310,7 @@ func NewBarPatch() *BarPatch {
         SetPatchPriorNonCompat(*NewBarFieldPatch()).
         SetEnsureNonCompat(*NewBarEnsureStruct()).
         SetPatchNonCompat(*NewBarFieldPatch()).
-        SetRemoveNonCompat(nil)
+        SetRemoveNonCompat(patch.NewFieldIdList())
 }
 
 func (x *BarPatch) GetAssignNonCompat() *Bar {
@@ -20514,13 +20369,13 @@ func (x *BarPatch) GetPatch() *BarFieldPatch {
     return x.Patch
 }
 
-func (x *BarPatch) GetRemoveNonCompat() []patch.FieldId {
+func (x *BarPatch) GetRemoveNonCompat() patch.FieldIdList {
     return x.Remove
 }
 
-func (x *BarPatch) GetRemove() []patch.FieldId {
+func (x *BarPatch) GetRemove() patch.FieldIdList {
     if !x.IsSetRemove() {
-        return nil
+        return patch.NewFieldIdList()
     }
 
     return x.Remove
@@ -20576,12 +20431,12 @@ func (x *BarPatch) SetPatch(value *BarFieldPatch) *BarPatch {
     return x
 }
 
-func (x *BarPatch) SetRemoveNonCompat(value []patch.FieldId) *BarPatch {
+func (x *BarPatch) SetRemoveNonCompat(value patch.FieldIdList) *BarPatch {
     x.Remove = value
     return x
 }
 
-func (x *BarPatch) SetRemove(value []patch.FieldId) *BarPatch {
+func (x *BarPatch) SetRemove(value patch.FieldIdList) *BarPatch {
     x.Remove = value
     return x
 }
@@ -20707,25 +20562,14 @@ func (x *BarPatch) writeField7(p thrift.Protocol) error {  // Remove
         return nil
     }
 
-    if err := p.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+    if err := p.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
     item := x.GetRemoveNonCompat()
-    if err := p.WriteSetBegin(thrift.I16, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        err := patch.WriteFieldId(item, p)
+    err := patch.WriteFieldIdList(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -20789,28 +20633,10 @@ if err != nil {
 }
 
 func (x *BarPatch) readField7(p thrift.Protocol) error {  // Remove
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]patch.FieldId, 0, size)
-for i := 0; i < size; i++ {
-    var elem patch.FieldId
-    {
-        result, err := patch.ReadFieldId(p)
+    result, err := patch.ReadFieldIdList(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetRemoveNonCompat(result)
     return nil
@@ -20903,7 +20729,7 @@ func (x *BarPatchBuilder) Patch(value *BarFieldPatch) *BarPatchBuilder {
     return x
 }
 
-func (x *BarPatchBuilder) Remove(value []patch.FieldId) *BarPatchBuilder {
+func (x *BarPatchBuilder) Remove(value patch.FieldIdList) *BarPatchBuilder {
     x.obj.Remove = value
     return x
 }

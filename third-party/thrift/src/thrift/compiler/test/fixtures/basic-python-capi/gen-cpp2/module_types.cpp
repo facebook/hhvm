@@ -1949,6 +1949,7 @@ MyStructPatchStruct::MyStructPatchStruct(const MyStructPatchStruct& srcObj) :
     __fbthrift_field_remove(srcObj.__fbthrift_field_remove) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 MyStructPatchStruct& MyStructPatchStruct::operator=(const MyStructPatchStruct& other) {
@@ -1961,6 +1962,7 @@ MyStructPatchStruct::MyStructPatchStruct() :
       __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 
@@ -1975,6 +1977,7 @@ MyStructPatchStruct::MyStructPatchStruct(FOLLY_MAYBE_UNUSED MyStructPatchStruct&
     __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 MyStructPatchStruct& MyStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructPatchStruct&& other) noexcept {
@@ -1988,7 +1991,7 @@ MyStructPatchStruct& MyStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructP
 }
 
 
-MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyStructEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg) :
+MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyStructEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -1997,6 +2000,7 @@ MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::a
     __fbthrift_field_remove(std::move(remove__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 
@@ -2007,7 +2011,7 @@ void MyStructPatchStruct::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
-  this->__fbthrift_field_remove.clear();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 void MyStructPatchStruct::__fbthrift_clear_terse_fields() {
@@ -2015,7 +2019,7 @@ void MyStructPatchStruct::__fbthrift_clear_terse_fields() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
-  this->__fbthrift_field_remove.clear();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 bool MyStructPatchStruct::__fbthrift_is_empty() const {
@@ -2024,7 +2028,7 @@ bool MyStructPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>>(this->__fbthrift_field_remove);
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
 bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
@@ -2044,7 +2048,7 @@ bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruc
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
     return false;
   }
-  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldIdListToSetAdapter>(lhs.__fbthrift_field_remove, rhs.__fbthrift_field_remove)) {
     return false;
   }
   return true;
@@ -2060,14 +2064,6 @@ const ::test::fixtures::basic-python-capi::MyStructEnsureStruct& MyStructPatchSt
 
 ::test::fixtures::basic-python-capi::MyStructEnsureStruct MyStructPatchStruct::get_ensure() && {
   return std::move(__fbthrift_field_ensure);
-}
-
-const ::std::unordered_set<::apache::thrift::op::FieldId>& MyStructPatchStruct::get_remove() const& {
-  return __fbthrift_field_remove;
-}
-
-::std::unordered_set<::apache::thrift::op::FieldId> MyStructPatchStruct::get_remove() && {
-  return std::move(__fbthrift_field_remove);
 }
 
 
@@ -3274,6 +3270,7 @@ MyDataItemPatchStruct::MyDataItemPatchStruct(const MyDataItemPatchStruct& srcObj
     __fbthrift_field_remove(srcObj.__fbthrift_field_remove) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(const MyDataItemPatchStruct& other) {
@@ -3286,6 +3283,7 @@ MyDataItemPatchStruct::MyDataItemPatchStruct() :
       __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 
@@ -3300,6 +3298,7 @@ MyDataItemPatchStruct::MyDataItemPatchStruct(FOLLY_MAYBE_UNUSED MyDataItemPatchS
     __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataItemPatchStruct&& other) noexcept {
@@ -3313,7 +3312,7 @@ MyDataItemPatchStruct& MyDataItemPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDat
 }
 
 
-MyDataItemPatchStruct::MyDataItemPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg) :
+MyDataItemPatchStruct::MyDataItemPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -3322,6 +3321,7 @@ MyDataItemPatchStruct::MyDataItemPatchStruct(apache::thrift::FragileConstructor,
     __fbthrift_field_remove(std::move(remove__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 
@@ -3332,7 +3332,7 @@ void MyDataItemPatchStruct::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
-  this->__fbthrift_field_remove.clear();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 void MyDataItemPatchStruct::__fbthrift_clear_terse_fields() {
@@ -3340,7 +3340,7 @@ void MyDataItemPatchStruct::__fbthrift_clear_terse_fields() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6>(__fbthrift_field_patch, *this);
-  this->__fbthrift_field_remove.clear();
+  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7>(__fbthrift_field_remove, *this);
 }
 
 bool MyDataItemPatchStruct::__fbthrift_is_empty() const {
@@ -3349,7 +3349,7 @@ bool MyDataItemPatchStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>>(this->__fbthrift_field_patch) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>>(this->__fbthrift_field_remove);
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>>(this->__fbthrift_field_remove);
 }
 
 bool MyDataItemPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemPatchStruct& rhs) const {
@@ -3369,7 +3369,7 @@ bool MyDataItemPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataItemPatchS
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
     return false;
   }
-  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldIdListToSetAdapter>(lhs.__fbthrift_field_remove, rhs.__fbthrift_field_remove)) {
     return false;
   }
   return true;
@@ -3385,14 +3385,6 @@ const ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct& MyDataItemPat
 
 ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct MyDataItemPatchStruct::get_ensure() && {
   return std::move(__fbthrift_field_ensure);
-}
-
-const ::std::unordered_set<::apache::thrift::op::FieldId>& MyDataItemPatchStruct::get_remove() const& {
-  return __fbthrift_field_remove;
-}
-
-::std::unordered_set<::apache::thrift::op::FieldId> MyDataItemPatchStruct::get_remove() && {
-  return std::move(__fbthrift_field_remove);
 }
 
 
@@ -3671,6 +3663,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::thrift::test::lib::StringDoubler, 2, ::std::string, ::test::fixtures::basic-python-capi::StringPair>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, 6, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::basic-python-capi::MyStructPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>, 1, ::apache::thrift::op::I64PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 2, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
@@ -3681,6 +3674,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::basic-python-capi::MyStructField8PatchStruct>, 8, ::test::fixtures::basic-python-capi::MyStructField8PatchStruct, ::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 3, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, 6, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::FieldIdListToSetAdapter, 7, ::std::vector<::std::int16_t>, ::test::fixtures::basic-python-capi::MyDataItemPatchStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>();
 }
 }}}} // test::fixtures::basic-python-capi

@@ -885,7 +885,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -1421,7 +1421,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             7,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "remove",  # name
-            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

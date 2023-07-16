@@ -5157,7 +5157,7 @@ class MyDataPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -5194,7 +5194,7 @@ class MyDataPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   MyDataPatchStruct(MyDataPatchStruct&&) noexcept;
   MyDataPatchStruct(const MyDataPatchStruct& src);
@@ -5216,7 +5216,7 @@ class MyDataPatchStruct final  {
  private:
   ::test::fixtures::patch::MyDataFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -5423,42 +5423,42 @@ class MyDataPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -5480,15 +5480,6 @@ class MyDataPatchStruct final  {
   ::test::fixtures::patch::MyDataEnsureStruct& set_ensure(T_MyDataPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_MyDataPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_MyDataPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_MyDataPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyDataPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -5942,7 +5933,7 @@ class MyDataWithCustomDefaultPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -5979,7 +5970,7 @@ class MyDataWithCustomDefaultPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   MyDataWithCustomDefaultPatchStruct(MyDataWithCustomDefaultPatchStruct&&) noexcept;
   MyDataWithCustomDefaultPatchStruct(const MyDataWithCustomDefaultPatchStruct& src);
@@ -6001,7 +5992,7 @@ class MyDataWithCustomDefaultPatchStruct final  {
  private:
   ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -6208,42 +6199,42 @@ class MyDataWithCustomDefaultPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -6265,15 +6256,6 @@ class MyDataWithCustomDefaultPatchStruct final  {
   ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& set_ensure(T_MyDataWithCustomDefaultPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_MyDataWithCustomDefaultPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_MyDataWithCustomDefaultPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_MyDataWithCustomDefaultPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyDataWithCustomDefaultPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -10302,7 +10284,7 @@ class LateDefStructPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -10339,7 +10321,7 @@ class LateDefStructPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::test::fixtures::patch::LateDefStructEnsureStruct ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::test::fixtures::patch::LateDefStructEnsureStruct ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   LateDefStructPatchStruct(LateDefStructPatchStruct&&) noexcept;
   LateDefStructPatchStruct(const LateDefStructPatchStruct& src);
@@ -10361,7 +10343,7 @@ class LateDefStructPatchStruct final  {
  private:
   ::test::fixtures::patch::LateDefStructFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -10568,42 +10550,42 @@ class LateDefStructPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -10625,15 +10607,6 @@ class LateDefStructPatchStruct final  {
   ::test::fixtures::patch::LateDefStructEnsureStruct& set_ensure(T_LateDefStructPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_LateDefStructPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_LateDefStructPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_LateDefStructPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_LateDefStructPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -14153,7 +14126,7 @@ class MyStructPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -14190,7 +14163,7 @@ class MyStructPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::test::fixtures::patch::MyStructEnsureStruct ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::test::fixtures::patch::MyStructEnsureStruct ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   MyStructPatchStruct(MyStructPatchStruct&&) noexcept;
   MyStructPatchStruct(const MyStructPatchStruct& src);
@@ -14212,7 +14185,7 @@ class MyStructPatchStruct final  {
  private:
   ::test::fixtures::patch::MyStructFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -14419,42 +14392,42 @@ class MyStructPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -14476,15 +14449,6 @@ class MyStructPatchStruct final  {
   ::test::fixtures::patch::MyStructEnsureStruct& set_ensure(T_MyStructPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_MyStructPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_MyStructPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_MyStructPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyStructPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -15035,7 +14999,7 @@ class RecursivePatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -15072,7 +15036,7 @@ class RecursivePatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::test::fixtures::patch::RecursiveEnsureStruct ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::test::fixtures::patch::RecursiveEnsureStruct ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   RecursivePatchStruct(RecursivePatchStruct&&) noexcept;
   RecursivePatchStruct(const RecursivePatchStruct& src);
@@ -15094,7 +15058,7 @@ class RecursivePatchStruct final  {
  private:
   ::test::fixtures::patch::RecursiveFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -15301,42 +15265,42 @@ class RecursivePatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -15358,15 +15322,6 @@ class RecursivePatchStruct final  {
   ::test::fixtures::patch::RecursiveEnsureStruct& set_ensure(T_RecursivePatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_RecursivePatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_RecursivePatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_RecursivePatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_RecursivePatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -15893,7 +15848,7 @@ class BarPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -15930,7 +15885,7 @@ class BarPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::test::fixtures::patch::BarEnsureStruct ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::test::fixtures::patch::BarEnsureStruct ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   BarPatchStruct(BarPatchStruct&&) noexcept;
   BarPatchStruct(const BarPatchStruct& src);
@@ -15952,7 +15907,7 @@ class BarPatchStruct final  {
  private:
   ::test::fixtures::patch::BarFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -16159,42 +16114,42 @@ class BarPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -16216,15 +16171,6 @@ class BarPatchStruct final  {
   ::test::fixtures::patch::BarEnsureStruct& set_ensure(T_BarPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_BarPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_BarPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_BarPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_BarPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>

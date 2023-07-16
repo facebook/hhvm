@@ -145,7 +145,7 @@ pub struct MyDataPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyDataFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -191,7 +191,7 @@ pub struct MyDataWithCustomDefaultPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyDataWithCustomDefaultFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -301,7 +301,7 @@ pub struct MyStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::MyStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -563,7 +563,7 @@ pub struct LateDefStructPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::LateDefStructFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -605,7 +605,7 @@ pub struct RecursivePatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::RecursiveFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -663,7 +663,7 @@ pub struct BarPatch {
     #[doc = "Patches any set value, including newly set values. Applies last."]
     pub patch: ::std::boxed::Box<crate::types::BarFieldPatch>,
     #[doc = "Removes entries, if present. Applies third."]
-    pub remove: ::std::boxed::Box<::fbthrift::builtin_types::HashSet<patch::types::FieldId>>,
+    pub remove: ::std::boxed::Box<patch::types::FieldIdList>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -2249,7 +2249,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -2268,7 +2268,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -2286,7 +2286,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -2549,7 +2549,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -2568,7 +2568,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -2586,7 +2586,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -3251,7 +3251,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -3270,7 +3270,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -3288,7 +3288,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5064,7 +5064,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -5083,7 +5083,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -5101,7 +5101,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5324,7 +5324,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -5343,7 +5343,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -5361,7 +5361,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -5692,7 +5692,7 @@ where
         p.write_field_begin("patch", ::fbthrift::TType::Struct, 6);
         ::fbthrift::Serialize::write(&self.patch, p);
         p.write_field_end();
-        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
         p.write_field_stop();
@@ -5711,7 +5711,7 @@ where
             ::fbthrift::Field::new("ensure", ::fbthrift::TType::Struct, 5),
             ::fbthrift::Field::new("patch", ::fbthrift::TType::Struct, 6),
             ::fbthrift::Field::new("patchPrior", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
@@ -5729,7 +5729,7 @@ where
                 (::fbthrift::TType::Struct, 3) => field_patchPrior = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 5) => field_ensure = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;

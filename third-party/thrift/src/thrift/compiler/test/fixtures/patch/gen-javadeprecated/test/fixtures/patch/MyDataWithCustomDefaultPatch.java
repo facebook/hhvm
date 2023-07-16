@@ -31,7 +31,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
   private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
   private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
-  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
+  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
 
   /**
    * Assigns to a (set) value.
@@ -61,7 +61,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
   /**
    * Removes entries, if present. Applies third.
    */
-  public Set<Short> remove;
+  public List<Short> remove;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
   public static final int PATCHPRIOR = 3;
@@ -88,7 +88,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
     tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, MyDataWithCustomDefaultFieldPatch.class)));
     tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
-        new SetMetaData(TType.SET, 
+        new ListMetaData(TType.LIST, 
             new FieldValueMetaData(TType.I16))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -105,7 +105,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
       MyDataWithCustomDefaultFieldPatch patchPrior,
       MyDataWithCustomDefaultEnsureStruct ensure,
       MyDataWithCustomDefaultFieldPatch patch,
-      Set<Short> remove) {
+      List<Short> remove) {
     this();
     this.clear = clear;
     setClearIsSet(true);
@@ -121,7 +121,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
       MyDataWithCustomDefaultFieldPatch patchPrior,
       MyDataWithCustomDefaultEnsureStruct ensure,
       MyDataWithCustomDefaultFieldPatch patch,
-      Set<Short> remove) {
+      List<Short> remove) {
     this();
     this.assign = assign;
     this.clear = clear;
@@ -138,7 +138,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
     private MyDataWithCustomDefaultFieldPatch patchPrior;
     private MyDataWithCustomDefaultEnsureStruct ensure;
     private MyDataWithCustomDefaultFieldPatch patch;
-    private Set<Short> remove;
+    private List<Short> remove;
 
     BitSet __optional_isset = new BitSet(1);
 
@@ -171,7 +171,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
       return this;
     }
 
-    public Builder setRemove(final Set<Short> remove) {
+    public Builder setRemove(final List<Short> remove) {
       this.remove = remove;
       return this;
     }
@@ -384,14 +384,14 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
   /**
    * Removes entries, if present. Applies third.
    */
-  public Set<Short> getRemove() {
+  public List<Short> getRemove() {
     return this.remove;
   }
 
   /**
    * Removes entries, if present. Applies third.
    */
-  public MyDataWithCustomDefaultPatch setRemove(Set<Short> remove) {
+  public MyDataWithCustomDefaultPatch setRemove(List<Short> remove) {
     this.remove = remove;
     return this;
   }
@@ -458,7 +458,7 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
       if (__value == null) {
         unsetRemove();
       } else {
-        setRemove((Set<Short>)__value);
+        setRemove((List<Short>)__value);
       }
       break;
 
@@ -637,19 +637,19 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
           }
           break;
         case REMOVE:
-          if (__field.type == TType.SET) {
+          if (__field.type == TType.LIST) {
             {
-              TSet _set41 = iprot.readSetBegin();
-              this.remove = new HashSet<Short>(Math.max(0, 2*_set41.size));
+              TList _list41 = iprot.readListBegin();
+              this.remove = new ArrayList<Short>(Math.max(0, _list41.size));
               for (int _i42 = 0; 
-                   (_set41.size < 0) ? iprot.peekSet() : (_i42 < _set41.size); 
+                   (_list41.size < 0) ? iprot.peekList() : (_i42 < _list41.size); 
                    ++_i42)
               {
                 short _elem43;
                 _elem43 = iprot.readI16();
                 this.remove.add(_elem43);
               }
-              iprot.readSetEnd();
+              iprot.readListEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -700,11 +700,11 @@ public class MyDataWithCustomDefaultPatch implements TBase, java.io.Serializable
     if (this.remove != null) {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
-        oprot.writeSetBegin(new TSet(TType.I16, this.remove.size()));
+        oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
         for (short _iter44 : this.remove)        {
           oprot.writeI16(_iter44);
         }
-        oprot.writeSetEnd();
+        oprot.writeListEnd();
       }
       oprot.writeFieldEnd();
     }

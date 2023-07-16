@@ -6577,7 +6577,7 @@ class MyDataItemPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -6614,7 +6614,7 @@ class MyDataItemPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyDataItemPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  MyDataItemPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyDataItem> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyDataItemFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   MyDataItemPatchStruct(MyDataItemPatchStruct&&) noexcept;
   MyDataItemPatchStruct(const MyDataItemPatchStruct& src);
@@ -6636,7 +6636,7 @@ class MyDataItemPatchStruct final  {
  private:
   ::test::fixtures::basic-python-capi::MyDataItemFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -6843,42 +6843,42 @@ class MyDataItemPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -6900,15 +6900,6 @@ class MyDataItemPatchStruct final  {
   ::test::fixtures::basic-python-capi::MyDataItemEnsureStruct& set_ensure(T_MyDataItemPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_MyDataItemPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_MyDataItemPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_MyDataItemPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyDataItemPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>
@@ -7950,7 +7941,7 @@ class MyStructPatchStruct final  {
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructEnsureStruct>,
     ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>, ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>,
-    ::apache::thrift::type::cpp_type<::std::unordered_set<::apache::thrift::op::FieldId>, ::apache::thrift::type::set<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>, ::apache::thrift::type::i16_t>>>
+    ::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldIdListToSetAdapter, ::apache::thrift::type::list<::apache::thrift::type::i16_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 6;
@@ -7987,7 +7978,7 @@ class MyStructPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyStructEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patch__arg, ::std::unordered_set<::apache::thrift::op::FieldId> remove__arg);
+  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::basic-python-capi::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patchPrior__arg, ::test::fixtures::basic-python-capi::MyStructEnsureStruct ensure__arg, ::test::fixtures::basic-python-capi::MyStructFieldPatch patch__arg, ::apache::thrift::op::FieldIdList remove__arg);
 
   MyStructPatchStruct(MyStructPatchStruct&&) noexcept;
   MyStructPatchStruct(const MyStructPatchStruct& src);
@@ -8009,7 +8000,7 @@ class MyStructPatchStruct final  {
  private:
   ::test::fixtures::basic-python-capi::MyStructFieldPatch __fbthrift_field_patch;
  private:
-  ::std::unordered_set<::apache::thrift::op::FieldId> __fbthrift_field_remove;
+  ::apache::thrift::op::FieldIdList __fbthrift_field_remove;
 
  public:
 
@@ -8216,42 +8207,42 @@ class MyStructPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> remove() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> remove() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_remove)};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> remove() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_remove};
   }
 
-  template <typename..., typename T = ::std::unordered_set<::apache::thrift::op::FieldId>>
+  template <typename..., typename T = ::apache::thrift::op::FieldIdList>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> remove() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_remove)};
   }
@@ -8273,15 +8264,6 @@ class MyStructPatchStruct final  {
   ::test::fixtures::basic-python-capi::MyStructEnsureStruct& set_ensure(T_MyStructPatchStruct_ensure_struct_setter&& ensure_) {
     ensure_ref() = std::forward<T_MyStructPatchStruct_ensure_struct_setter>(ensure_);
     return __fbthrift_field_ensure;
-  }
-  const ::std::unordered_set<::apache::thrift::op::FieldId>& get_remove() const&;
-  ::std::unordered_set<::apache::thrift::op::FieldId> get_remove() &&;
-
-  template <typename T_MyStructPatchStruct_remove_struct_setter = ::std::unordered_set<::apache::thrift::op::FieldId>>
-  [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::apache::thrift::op::FieldId>& set_remove(T_MyStructPatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyStructPatchStruct_remove_struct_setter>(remove_);
-    return __fbthrift_field_remove;
   }
 
   template <class Protocol_>

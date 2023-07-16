@@ -31,7 +31,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
   private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
-  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
+  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
 
   /**
    * Assigns to a (set) value.
@@ -61,7 +61,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   /**
    * Removes entries, if present. Applies third.
    */
-  public Set<Short> remove;
+  public List<Short> remove;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
   public static final int PATCHPRIOR = 3;
@@ -88,7 +88,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
     tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, MyStructFieldPatch.class)));
     tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
-        new SetMetaData(TType.SET, 
+        new ListMetaData(TType.LIST, 
             new FieldValueMetaData(TType.I16))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -105,7 +105,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       MyStructFieldPatch patchPrior,
       MyStructEnsureStruct ensure,
       MyStructFieldPatch patch,
-      Set<Short> remove) {
+      List<Short> remove) {
     this();
     this.clear = clear;
     setClearIsSet(true);
@@ -121,7 +121,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       MyStructFieldPatch patchPrior,
       MyStructEnsureStruct ensure,
       MyStructFieldPatch patch,
-      Set<Short> remove) {
+      List<Short> remove) {
     this();
     this.assign = assign;
     this.clear = clear;
@@ -138,7 +138,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
     private MyStructFieldPatch patchPrior;
     private MyStructEnsureStruct ensure;
     private MyStructFieldPatch patch;
-    private Set<Short> remove;
+    private List<Short> remove;
 
     BitSet __optional_isset = new BitSet(1);
 
@@ -171,7 +171,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       return this;
     }
 
-    public Builder setRemove(final Set<Short> remove) {
+    public Builder setRemove(final List<Short> remove) {
       this.remove = remove;
       return this;
     }
@@ -384,14 +384,14 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   /**
    * Removes entries, if present. Applies third.
    */
-  public Set<Short> getRemove() {
+  public List<Short> getRemove() {
     return this.remove;
   }
 
   /**
    * Removes entries, if present. Applies third.
    */
-  public MyStructPatch setRemove(Set<Short> remove) {
+  public MyStructPatch setRemove(List<Short> remove) {
     this.remove = remove;
     return this;
   }
@@ -458,7 +458,7 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
       if (__value == null) {
         unsetRemove();
       } else {
-        setRemove((Set<Short>)__value);
+        setRemove((List<Short>)__value);
       }
       break;
 
@@ -637,19 +637,19 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
           }
           break;
         case REMOVE:
-          if (__field.type == TType.SET) {
+          if (__field.type == TType.LIST) {
             {
-              TSet _set45 = iprot.readSetBegin();
-              this.remove = new HashSet<Short>(Math.max(0, 2*_set45.size));
+              TList _list45 = iprot.readListBegin();
+              this.remove = new ArrayList<Short>(Math.max(0, _list45.size));
               for (int _i46 = 0; 
-                   (_set45.size < 0) ? iprot.peekSet() : (_i46 < _set45.size); 
+                   (_list45.size < 0) ? iprot.peekList() : (_i46 < _list45.size); 
                    ++_i46)
               {
                 short _elem47;
                 _elem47 = iprot.readI16();
                 this.remove.add(_elem47);
               }
-              iprot.readSetEnd();
+              iprot.readListEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -700,11 +700,11 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
     if (this.remove != null) {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
-        oprot.writeSetBegin(new TSet(TType.I16, this.remove.size()));
+        oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
         for (short _iter48 : this.remove)        {
           oprot.writeI16(_iter48);
         }
-        oprot.writeSetEnd();
+        oprot.writeListEnd();
       }
       oprot.writeFieldEnd();
     }

@@ -29,7 +29,7 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
         @com.facebook.swift.codec.ThriftField(value=3, name="patchPrior", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patchPrior,
         @com.facebook.swift.codec.ThriftField(value=5, name="ensure", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct ensure,
         @com.facebook.swift.codec.ThriftField(value=6, name="patch", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patch,
-        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final Set<Short> remove
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE) final List<Short> remove
     ) {
         this.assign = assign;
         this.clear = clear;
@@ -46,7 +46,7 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
       this.patchPrior = test.fixtures.patch.MyDataWithCustomDefaultFieldPatch.defaultInstance();
       this.ensure = test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct.defaultInstance();
       this.patch = test.fixtures.patch.MyDataWithCustomDefaultFieldPatch.defaultInstance();
-      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+      this.remove = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     }
     
     public static class Builder {
@@ -55,7 +55,7 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
         private test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patchPrior = test.fixtures.patch.MyDataWithCustomDefaultFieldPatch.defaultInstance();
         private test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct ensure = test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct.defaultInstance();
         private test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patch = test.fixtures.patch.MyDataWithCustomDefaultFieldPatch.defaultInstance();
-        private Set<Short> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+        private List<Short> remove = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
         public Builder setAssign(test.fixtures.patch.MyDataWithCustomDefault assign) {
@@ -98,12 +98,12 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
         public test.fixtures.patch.MyDataWithCustomDefaultFieldPatch getPatch() { return patch; }
     
             @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
-        public Builder setRemove(Set<Short> remove) {
+        public Builder setRemove(List<Short> remove) {
             this.remove = remove;
             return this;
         }
     
-        public Set<Short> getRemove() { return remove; }
+        public List<Short> getRemove() { return remove; }
     
         public Builder() { }
         public Builder(MyDataWithCustomDefaultPatch other) {
@@ -148,9 +148,9 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
         private final test.fixtures.patch.MyDataWithCustomDefaultFieldPatch patch;
     public static final int _PATCH = 6;
     private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
-        private final Set<Short> remove;
+        private final List<Short> remove;
     public static final int _REMOVE = 7;
-    private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
+    private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
     static {
       NAMES_TO_IDS.put("assign", 1);
       THRIFT_NAMES_TO_IDS.put("assign", 1);
@@ -202,7 +202,7 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.TERSE)
-    public Set<Short> getRemove() { return remove; }
+    public List<Short> getRemove() { return remove; }
     
     @java.lang.Override
     public String toString() {
@@ -303,17 +303,17 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
           }
           break;
         case _REMOVE:
-          if (__field.type == TType.SET) {
-            Set<Short> remove;
+          if (__field.type == TType.LIST) {
+            List<Short> remove;
             {
-            TSet _set = oprot.readSetBegin();
-            remove = new HashSet<Short>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+            TList _list = oprot.readListBegin();
+            remove = new ArrayList<Short>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
                 
                 short _value1 = oprot.readI16();
                 remove.add(_value1);
             }
-            oprot.readSetEnd();
+            oprot.readListEnd();
             }
             builder.setRemove(remove);
           } else {
@@ -379,12 +379,12 @@ public final class MyDataWithCustomDefaultPatch implements com.facebook.thrift.p
       
       if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(remove)) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
-        Set<Short> _iter0 = remove;
-        oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
+        List<Short> _iter0 = remove;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
         }
-        oprot.writeSetEnd();
+        oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();

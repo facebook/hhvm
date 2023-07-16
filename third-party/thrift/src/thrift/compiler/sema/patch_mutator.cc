@@ -432,9 +432,9 @@ t_struct& patch_generator::add_struct_patch(
   rust_box(gen.patchPrior(patch_type));
   rust_box(gen.ensureStruct(add_ensure_struct(annot, value_type)));
   rust_box(gen.patchAfter(patch_type));
-  if (const auto* p = program_.scope()->find_type("patch.FieldId")) {
+  if (const auto* p = program_.scope()->find_type("patch.FieldIdList")) {
     // Box it in rust to avoid stack-overflow
-    rust_box(gen.remove(inst_set(*p)));
+    rust_box(gen.remove(*p));
   }
   gen.set_adapter("StructPatchAdapter");
   return gen;

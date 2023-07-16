@@ -2831,7 +2831,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -2854,10 +2854,10 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patchPrior' => ?\test\fixtures\patch\MyDataFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\MyDataEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\MyDataFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 3179324577763743942;
+  const int STRUCTURAL_ID = 205648210561254409;
   /**
    * Assigns to a (set) value.
    * 
@@ -2902,17 +2902,17 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\MyData $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyDataFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyDataEnsureStruct $ensure = null, ?\test\fixtures\patch\MyDataFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\MyData $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyDataFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyDataEnsureStruct $ensure = null, ?\test\fixtures\patch\MyDataFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -2939,7 +2939,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -3024,25 +3024,16 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -3107,6 +3098,16 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -3150,8 +3151,8 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -3160,7 +3161,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }
@@ -3530,7 +3531,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -3553,10 +3554,10 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
     ?'patchPrior' => ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\MyDataWithCustomDefaultEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 1453378509450537954;
+  const int STRUCTURAL_ID = 6383969185359802625;
   /**
    * Assigns to a (set) value.
    * 
@@ -3601,17 +3602,17 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\MyDataWithCustomDefault $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyDataWithCustomDefaultEnsureStruct $ensure = null, ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\MyDataWithCustomDefault $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyDataWithCustomDefaultEnsureStruct $ensure = null, ?\test\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -3638,7 +3639,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -3723,25 +3724,16 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -3806,6 +3798,16 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -3849,8 +3851,8 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -3859,7 +3861,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }
@@ -5206,7 +5208,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -5229,10 +5231,10 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patchPrior' => ?\test\fixtures\patch\MyStructFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\MyStructEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\MyStructFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 2180737522386571259;
+  const int STRUCTURAL_ID = 1585153395828590270;
   /**
    * Assigns to a (set) value.
    * 
@@ -5277,17 +5279,17 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\MyStruct $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyStructFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyStructEnsureStruct $ensure = null, ?\test\fixtures\patch\MyStructFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\MyStruct $assign = null, ?bool $clear = null, ?\test\fixtures\patch\MyStructFieldPatch $patchPrior = null, ?\test\fixtures\patch\MyStructEnsureStruct $ensure = null, ?\test\fixtures\patch\MyStructFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -5314,7 +5316,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -5399,25 +5401,16 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -5491,6 +5484,16 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -5534,8 +5537,8 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -5544,7 +5547,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }
@@ -11542,7 +11545,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -11565,10 +11568,10 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patchPrior' => ?\test\fixtures\patch\LateDefStructFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\LateDefStructEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\LateDefStructFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 4095174235818678939;
+  const int STRUCTURAL_ID = 5227201127973517807;
   /**
    * Assigns to a (set) value.
    * 
@@ -11613,17 +11616,17 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\LateDefStruct $assign = null, ?bool $clear = null, ?\test\fixtures\patch\LateDefStructFieldPatch $patchPrior = null, ?\test\fixtures\patch\LateDefStructEnsureStruct $ensure = null, ?\test\fixtures\patch\LateDefStructFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\LateDefStruct $assign = null, ?bool $clear = null, ?\test\fixtures\patch\LateDefStructFieldPatch $patchPrior = null, ?\test\fixtures\patch\LateDefStructEnsureStruct $ensure = null, ?\test\fixtures\patch\LateDefStructFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -11650,7 +11653,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -11735,25 +11738,16 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -11818,6 +11812,16 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -11861,8 +11865,8 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -11871,7 +11875,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }
@@ -12070,7 +12074,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -12093,10 +12097,10 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patchPrior' => ?\test\fixtures\patch\RecursiveFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\RecursiveEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\RecursiveFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 6057258732540886167;
+  const int STRUCTURAL_ID = 5269522164534960743;
   /**
    * Assigns to a (set) value.
    * 
@@ -12141,17 +12145,17 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\Recursive $assign = null, ?bool $clear = null, ?\test\fixtures\patch\RecursiveFieldPatch $patchPrior = null, ?\test\fixtures\patch\RecursiveEnsureStruct $ensure = null, ?\test\fixtures\patch\RecursiveFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\Recursive $assign = null, ?bool $clear = null, ?\test\fixtures\patch\RecursiveFieldPatch $patchPrior = null, ?\test\fixtures\patch\RecursiveEnsureStruct $ensure = null, ?\test\fixtures\patch\RecursiveFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -12178,7 +12182,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -12263,25 +12267,16 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -12346,6 +12341,16 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -12389,8 +12394,8 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -12399,7 +12404,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }
@@ -12921,7 +12926,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     7 => shape(
       'var' => 'remove',
       'is_terse' => true,
-      'type' => \TType::SET,
+      'type' => \TType::LST,
       'etype' => \TType::I16,
       'elem' => shape(
         'type' => \TType::I16,
@@ -12944,10 +12949,10 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'patchPrior' => ?\test\fixtures\patch\BarFieldPatch,
     ?'ensure' => ?\test\fixtures\patch\BarEnsureStruct,
     ?'patch' => ?\test\fixtures\patch\BarFieldPatch,
-    ?'remove' => ?Set<int>,
+    ?'remove' => ?Vector<int>,
   );
 
-  const int STRUCTURAL_ID = 7975740035235247535;
+  const int STRUCTURAL_ID = 557356788055445428;
   /**
    * Assigns to a (set) value.
    * 
@@ -12992,17 +12997,17 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Removes entries, if present. Applies third.
    * 
    * Original thrift field:-
-   * 7: set<patch.FieldId> remove
+   * 7: patch.FieldIdList remove
    */
-  public Set<int> $remove;
+  public Vector<int> $remove;
 
-  public function __construct(?\test\fixtures\patch\Bar $assign = null, ?bool $clear = null, ?\test\fixtures\patch\BarFieldPatch $patchPrior = null, ?\test\fixtures\patch\BarEnsureStruct $ensure = null, ?\test\fixtures\patch\BarFieldPatch $patch = null, ?Set<int> $remove = null)[] {
+  public function __construct(?\test\fixtures\patch\Bar $assign = null, ?bool $clear = null, ?\test\fixtures\patch\BarFieldPatch $patchPrior = null, ?\test\fixtures\patch\BarEnsureStruct $ensure = null, ?\test\fixtures\patch\BarFieldPatch $patch = null, ?Vector<int> $remove = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
     $this->patchPrior = $patchPrior;
     $this->ensure = $ensure;
     $this->patch = $patch;
-    $this->remove = $remove ?? Set {};
+    $this->remove = $remove ?? Vector {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -13029,7 +13034,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
     $this->patchPrior = null;
     $this->ensure = null;
     $this->patch = null;
-    $this->remove = Set {};
+    $this->remove = Vector {};
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -13114,25 +13119,16 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               "id" => 7,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => \tmeta_ThriftType::fromShape(
+                      "name" => "patch.FieldIdList",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                          "t_list" => \tmeta_ThriftListType::fromShape(
                             shape(
-                              "name" => "patch.FieldId",
-                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                              "valueType" => \tmeta_ThriftType::fromShape(
                                 shape(
-                                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                    shape(
-                                      "name" => "id.FieldId",
-                                      "underlyingType" => \tmeta_ThriftType::fromShape(
-                                        shape(
-                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                                        )
-                                      ),
-                                    )
-                                  ),
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
                                 )
                               ),
                             )
@@ -13197,6 +13193,16 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'remove' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldIdListToSetAdapter",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -13240,8 +13246,8 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       $this->patch = $_tmp7;
     }
     if (idx($parsed, 'remove') !== null) {
-      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['remove']);
-      $_container12 = Set {};
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container12 = Vector {};
       foreach($_json11 as $_key9 => $_value10) {
         $_elem13 = 0;
         $_tmp14 = (int)$_value10;
@@ -13250,7 +13256,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
         } else {
           $_elem13 = (int)$_tmp14;
         }
-        $_container12->add($_elem13);
+        $_container12 []= $_elem13;
       }
       $this->remove = $_container12;
     }

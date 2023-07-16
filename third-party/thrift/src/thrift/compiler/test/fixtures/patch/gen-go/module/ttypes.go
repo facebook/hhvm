@@ -3154,7 +3154,7 @@ type MyDataPatch struct {
   // unused field # 4
   Ensure *MyDataEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *MyDataFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewMyDataPatch() *MyDataPatch {
@@ -3222,7 +3222,7 @@ func (p *MyDataPatch) DefaultGetPatch() *MyDataFieldPatch {
   return p.Patch
 }
 
-func (p *MyDataPatch) GetRemove() []patch0.FieldId {
+func (p *MyDataPatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *MyDataPatch) IsSetAssign() bool {
@@ -3287,7 +3287,7 @@ func (m *MyDataPatchBuilder) Patch(patch *MyDataFieldPatch) *MyDataPatchBuilder 
   return m
 }
 
-func (m *MyDataPatchBuilder) Remove(remove []patch0.FieldId) *MyDataPatchBuilder {
+func (m *MyDataPatchBuilder) Remove(remove patch0.FieldIdList) *MyDataPatchBuilder {
   m.obj.Remove = remove
   return m
 }
@@ -3317,7 +3317,7 @@ func (m *MyDataPatch) SetPatch(patch *MyDataFieldPatch) *MyDataPatch {
   return m
 }
 
-func (m *MyDataPatch) SetRemove(remove []patch0.FieldId) *MyDataPatch {
+func (m *MyDataPatch) SetRemove(remove patch0.FieldIdList) *MyDataPatch {
   m.Remove = remove
   return m
 }
@@ -3416,24 +3416,23 @@ func (p *MyDataPatch)  ReadField6(iprot thrift.Protocol) error {
 }
 
 func (p *MyDataPatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem15 patch0.FieldId
+    var _elem15 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem15 = temp
+      _elem15 = v
     }
     p.Remove = append(p.Remove, _elem15)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -3511,24 +3510,17 @@ func (p *MyDataPatch) writeField6(oprot thrift.Protocol) (err error) {
 }
 
 func (p *MyDataPatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }
@@ -3961,7 +3953,7 @@ type MyDataWithCustomDefaultPatch struct {
   // unused field # 4
   Ensure *MyDataWithCustomDefaultEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *MyDataWithCustomDefaultFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
@@ -4029,7 +4021,7 @@ func (p *MyDataWithCustomDefaultPatch) DefaultGetPatch() *MyDataWithCustomDefaul
   return p.Patch
 }
 
-func (p *MyDataWithCustomDefaultPatch) GetRemove() []patch0.FieldId {
+func (p *MyDataWithCustomDefaultPatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *MyDataWithCustomDefaultPatch) IsSetAssign() bool {
@@ -4094,7 +4086,7 @@ func (m *MyDataWithCustomDefaultPatchBuilder) Patch(patch *MyDataWithCustomDefau
   return m
 }
 
-func (m *MyDataWithCustomDefaultPatchBuilder) Remove(remove []patch0.FieldId) *MyDataWithCustomDefaultPatchBuilder {
+func (m *MyDataWithCustomDefaultPatchBuilder) Remove(remove patch0.FieldIdList) *MyDataWithCustomDefaultPatchBuilder {
   m.obj.Remove = remove
   return m
 }
@@ -4124,7 +4116,7 @@ func (m *MyDataWithCustomDefaultPatch) SetPatch(patch *MyDataWithCustomDefaultFi
   return m
 }
 
-func (m *MyDataWithCustomDefaultPatch) SetRemove(remove []patch0.FieldId) *MyDataWithCustomDefaultPatch {
+func (m *MyDataWithCustomDefaultPatch) SetRemove(remove patch0.FieldIdList) *MyDataWithCustomDefaultPatch {
   m.Remove = remove
   return m
 }
@@ -4223,24 +4215,23 @@ func (p *MyDataWithCustomDefaultPatch)  ReadField6(iprot thrift.Protocol) error 
 }
 
 func (p *MyDataWithCustomDefaultPatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem16 patch0.FieldId
+    var _elem16 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem16 = temp
+      _elem16 = v
     }
     p.Remove = append(p.Remove, _elem16)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -4318,24 +4309,17 @@ func (p *MyDataWithCustomDefaultPatch) writeField6(oprot thrift.Protocol) (err e
 }
 
 func (p *MyDataWithCustomDefaultPatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }
@@ -5876,7 +5860,7 @@ type MyStructPatch struct {
   // unused field # 4
   Ensure *MyStructEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *MyStructFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewMyStructPatch() *MyStructPatch {
@@ -5944,7 +5928,7 @@ func (p *MyStructPatch) DefaultGetPatch() *MyStructFieldPatch {
   return p.Patch
 }
 
-func (p *MyStructPatch) GetRemove() []patch0.FieldId {
+func (p *MyStructPatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *MyStructPatch) IsSetAssign() bool {
@@ -6009,7 +5993,7 @@ func (m *MyStructPatchBuilder) Patch(patch *MyStructFieldPatch) *MyStructPatchBu
   return m
 }
 
-func (m *MyStructPatchBuilder) Remove(remove []patch0.FieldId) *MyStructPatchBuilder {
+func (m *MyStructPatchBuilder) Remove(remove patch0.FieldIdList) *MyStructPatchBuilder {
   m.obj.Remove = remove
   return m
 }
@@ -6039,7 +6023,7 @@ func (m *MyStructPatch) SetPatch(patch *MyStructFieldPatch) *MyStructPatch {
   return m
 }
 
-func (m *MyStructPatch) SetRemove(remove []patch0.FieldId) *MyStructPatch {
+func (m *MyStructPatch) SetRemove(remove patch0.FieldIdList) *MyStructPatch {
   m.Remove = remove
   return m
 }
@@ -6138,24 +6122,23 @@ func (p *MyStructPatch)  ReadField6(iprot thrift.Protocol) error {
 }
 
 func (p *MyStructPatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem17 patch0.FieldId
+    var _elem17 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem17 = temp
+      _elem17 = v
     }
     p.Remove = append(p.Remove, _elem17)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -6233,24 +6216,17 @@ func (p *MyStructPatch) writeField6(oprot thrift.Protocol) (err error) {
 }
 
 func (p *MyStructPatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }
@@ -13585,7 +13561,7 @@ type LateDefStructPatch struct {
   // unused field # 4
   Ensure *LateDefStructEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *LateDefStructFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewLateDefStructPatch() *LateDefStructPatch {
@@ -13653,7 +13629,7 @@ func (p *LateDefStructPatch) DefaultGetPatch() *LateDefStructFieldPatch {
   return p.Patch
 }
 
-func (p *LateDefStructPatch) GetRemove() []patch0.FieldId {
+func (p *LateDefStructPatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *LateDefStructPatch) IsSetAssign() bool {
@@ -13718,7 +13694,7 @@ func (l *LateDefStructPatchBuilder) Patch(patch *LateDefStructFieldPatch) *LateD
   return l
 }
 
-func (l *LateDefStructPatchBuilder) Remove(remove []patch0.FieldId) *LateDefStructPatchBuilder {
+func (l *LateDefStructPatchBuilder) Remove(remove patch0.FieldIdList) *LateDefStructPatchBuilder {
   l.obj.Remove = remove
   return l
 }
@@ -13748,7 +13724,7 @@ func (l *LateDefStructPatch) SetPatch(patch *LateDefStructFieldPatch) *LateDefSt
   return l
 }
 
-func (l *LateDefStructPatch) SetRemove(remove []patch0.FieldId) *LateDefStructPatch {
+func (l *LateDefStructPatch) SetRemove(remove patch0.FieldIdList) *LateDefStructPatch {
   l.Remove = remove
   return l
 }
@@ -13847,24 +13823,23 @@ func (p *LateDefStructPatch)  ReadField6(iprot thrift.Protocol) error {
 }
 
 func (p *LateDefStructPatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem83 patch0.FieldId
+    var _elem83 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem83 = temp
+      _elem83 = v
     }
     p.Remove = append(p.Remove, _elem83)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -13942,24 +13917,17 @@ func (p *LateDefStructPatch) writeField6(oprot thrift.Protocol) (err error) {
 }
 
 func (p *LateDefStructPatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }
@@ -14149,7 +14117,7 @@ type RecursivePatch struct {
   // unused field # 4
   Ensure *RecursiveEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *RecursiveFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewRecursivePatch() *RecursivePatch {
@@ -14217,7 +14185,7 @@ func (p *RecursivePatch) DefaultGetPatch() *RecursiveFieldPatch {
   return p.Patch
 }
 
-func (p *RecursivePatch) GetRemove() []patch0.FieldId {
+func (p *RecursivePatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *RecursivePatch) IsSetAssign() bool {
@@ -14282,7 +14250,7 @@ func (r *RecursivePatchBuilder) Patch(patch *RecursiveFieldPatch) *RecursivePatc
   return r
 }
 
-func (r *RecursivePatchBuilder) Remove(remove []patch0.FieldId) *RecursivePatchBuilder {
+func (r *RecursivePatchBuilder) Remove(remove patch0.FieldIdList) *RecursivePatchBuilder {
   r.obj.Remove = remove
   return r
 }
@@ -14312,7 +14280,7 @@ func (r *RecursivePatch) SetPatch(patch *RecursiveFieldPatch) *RecursivePatch {
   return r
 }
 
-func (r *RecursivePatch) SetRemove(remove []patch0.FieldId) *RecursivePatch {
+func (r *RecursivePatch) SetRemove(remove patch0.FieldIdList) *RecursivePatch {
   r.Remove = remove
   return r
 }
@@ -14411,24 +14379,23 @@ func (p *RecursivePatch)  ReadField6(iprot thrift.Protocol) error {
 }
 
 func (p *RecursivePatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem84 patch0.FieldId
+    var _elem84 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem84 = temp
+      _elem84 = v
     }
     p.Remove = append(p.Remove, _elem84)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -14506,24 +14473,17 @@ func (p *RecursivePatch) writeField6(oprot thrift.Protocol) (err error) {
 }
 
 func (p *RecursivePatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }
@@ -15053,7 +15013,7 @@ type BarPatch struct {
   // unused field # 4
   Ensure *BarEnsureStruct `thrift:"ensure,5" db:"ensure" json:"ensure"`
   Patch *BarFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
-  Remove []patch0.FieldId `thrift:"remove,7" db:"remove" json:"remove"`
+  Remove patch0.FieldIdList `thrift:"remove,7" db:"remove" json:"remove"`
 }
 
 func NewBarPatch() *BarPatch {
@@ -15121,7 +15081,7 @@ func (p *BarPatch) DefaultGetPatch() *BarFieldPatch {
   return p.Patch
 }
 
-func (p *BarPatch) GetRemove() []patch0.FieldId {
+func (p *BarPatch) GetRemove() patch0.FieldIdList {
   return p.Remove
 }
 func (p *BarPatch) IsSetAssign() bool {
@@ -15186,7 +15146,7 @@ func (b *BarPatchBuilder) Patch(patch *BarFieldPatch) *BarPatchBuilder {
   return b
 }
 
-func (b *BarPatchBuilder) Remove(remove []patch0.FieldId) *BarPatchBuilder {
+func (b *BarPatchBuilder) Remove(remove patch0.FieldIdList) *BarPatchBuilder {
   b.obj.Remove = remove
   return b
 }
@@ -15216,7 +15176,7 @@ func (b *BarPatch) SetPatch(patch *BarFieldPatch) *BarPatch {
   return b
 }
 
-func (b *BarPatch) SetRemove(remove []patch0.FieldId) *BarPatch {
+func (b *BarPatch) SetRemove(remove patch0.FieldIdList) *BarPatch {
   b.Remove = remove
   return b
 }
@@ -15315,24 +15275,23 @@ func (p *BarPatch)  ReadField6(iprot thrift.Protocol) error {
 }
 
 func (p *BarPatch)  ReadField7(iprot thrift.Protocol) error {
-  _, size, err := iprot.ReadSetBegin()
+  _, size, err := iprot.ReadListBegin()
   if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
+    return thrift.PrependError("error reading list begin: ", err)
   }
-  tSet := make([]patch0.FieldId, 0, size)
-  p.Remove =  tSet
+  tSlice := make(patch0.FieldIdList, 0, size)
+  p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem89 patch0.FieldId
+    var _elem89 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      temp := patch0.FieldId(v)
-      _elem89 = temp
+      _elem89 = v
     }
     p.Remove = append(p.Remove, _elem89)
   }
-  if err := iprot.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
   }
   return nil
 }
@@ -15410,24 +15369,17 @@ func (p *BarPatch) writeField6(oprot thrift.Protocol) (err error) {
 }
 
 func (p *BarPatch) writeField7(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
+  if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
-  if err := oprot.WriteSetBegin(thrift.I16, len(p.Remove)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-  }
-  set := make(map[patch0.FieldId]bool, len(p.Remove))
-  for _, v := range p.Remove {
-    if ok := set[v]; ok {
-      return thrift.PrependError("", fmt.Errorf("%T error writing set field: slice is not unique", v))
-    }
-    set[v] = true
+  if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
   }
   for _, v := range p.Remove {
     if err := oprot.WriteI16(int16(v)); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
   }
-  if err := oprot.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field end error 7:remove: ", p), err) }

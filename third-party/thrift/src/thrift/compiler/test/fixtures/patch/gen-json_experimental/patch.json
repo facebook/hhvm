@@ -31,6 +31,15 @@
         "type": "i16",
         "is_exception": false,
         "lineno": 40
+      },
+      "FieldIdList": {
+        "name": "FieldIdList",
+        "type": {
+  "type" : "list",
+  "inner_type" : "i16"
+},
+        "is_exception": false,
+        "lineno": 339
       }
   },
   "enumerations" :

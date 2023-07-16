@@ -384,7 +384,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::MyDataPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -470,7 +470,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -674,7 +674,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::MyStructPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -1351,7 +1351,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::LateDefStructPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -1417,7 +1417,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::RecursivePatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -1515,7 +1515,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::patch::BarPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",

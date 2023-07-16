@@ -475,7 +475,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::MyStructPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",
@@ -754,7 +754,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::tes
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
-  TType::T_SET,
+  TType::T_LIST,
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>::storage_names = {{
   "__fbthrift_field_assign",

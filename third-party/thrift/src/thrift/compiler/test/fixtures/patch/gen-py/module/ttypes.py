@@ -1954,18 +1954,18 @@ class MyDataPatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype121, _size118) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype121, _size118) = iprot.readListBegin()
           if _size118 >= 0:
             for _i122 in range(_size118):
               _elem123 = iprot.readI16()
-              self.remove.add(_elem123)
+              self.remove.append(_elem123)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem124 = iprot.readI16()
-              self.remove.add(_elem124)
-          iprot.readSetEnd()
+              self.remove.append(_elem124)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -2002,11 +2002,11 @@ class MyDataPatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter125 in self.remove:
         oprot.writeI16(iter125)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -2038,11 +2038,11 @@ class MyDataPatch:
       self.patch = MyDataFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e126 in json_obj['remove']:
         if _tmp_e126 > 0x7fff or _tmp_e126 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e126)
+        self.remove.append(_tmp_e126)
 
   def __repr__(self):
     L = []
@@ -2430,18 +2430,18 @@ class MyDataWithCustomDefaultPatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype130, _size127) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype130, _size127) = iprot.readListBegin()
           if _size127 >= 0:
             for _i131 in range(_size127):
               _elem132 = iprot.readI16()
-              self.remove.add(_elem132)
+              self.remove.append(_elem132)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem133 = iprot.readI16()
-              self.remove.add(_elem133)
-          iprot.readSetEnd()
+              self.remove.append(_elem133)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -2478,11 +2478,11 @@ class MyDataWithCustomDefaultPatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter134 in self.remove:
         oprot.writeI16(iter134)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -2514,11 +2514,11 @@ class MyDataWithCustomDefaultPatch:
       self.patch = MyDataWithCustomDefaultFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e135 in json_obj['remove']:
         if _tmp_e135 > 0x7fff or _tmp_e135 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e135)
+        self.remove.append(_tmp_e135)
 
   def __repr__(self):
     L = []
@@ -3538,18 +3538,18 @@ class MyStructPatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype139, _size136) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype139, _size136) = iprot.readListBegin()
           if _size136 >= 0:
             for _i140 in range(_size136):
               _elem141 = iprot.readI16()
-              self.remove.add(_elem141)
+              self.remove.append(_elem141)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem142 = iprot.readI16()
-              self.remove.add(_elem142)
-          iprot.readSetEnd()
+              self.remove.append(_elem142)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -3586,11 +3586,11 @@ class MyStructPatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter143 in self.remove:
         oprot.writeI16(iter143)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -3622,11 +3622,11 @@ class MyStructPatch:
       self.patch = MyStructFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e144 in json_obj['remove']:
         if _tmp_e144 > 0x7fff or _tmp_e144 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e144)
+        self.remove.append(_tmp_e144)
 
   def __repr__(self):
     L = []
@@ -7427,18 +7427,18 @@ class LateDefStructPatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype719, _size716) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype719, _size716) = iprot.readListBegin()
           if _size716 >= 0:
             for _i720 in range(_size716):
               _elem721 = iprot.readI16()
-              self.remove.add(_elem721)
+              self.remove.append(_elem721)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem722 = iprot.readI16()
-              self.remove.add(_elem722)
-          iprot.readSetEnd()
+              self.remove.append(_elem722)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -7475,11 +7475,11 @@ class LateDefStructPatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter723 in self.remove:
         oprot.writeI16(iter723)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -7511,11 +7511,11 @@ class LateDefStructPatch:
       self.patch = LateDefStructFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e724 in json_obj['remove']:
         if _tmp_e724 > 0x7fff or _tmp_e724 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e724)
+        self.remove.append(_tmp_e724)
 
   def __repr__(self):
     L = []
@@ -7821,18 +7821,18 @@ class RecursivePatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype728, _size725) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype728, _size725) = iprot.readListBegin()
           if _size725 >= 0:
             for _i729 in range(_size725):
               _elem730 = iprot.readI16()
-              self.remove.add(_elem730)
+              self.remove.append(_elem730)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem731 = iprot.readI16()
-              self.remove.add(_elem731)
-          iprot.readSetEnd()
+              self.remove.append(_elem731)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -7869,11 +7869,11 @@ class RecursivePatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter732 in self.remove:
         oprot.writeI16(iter732)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -7905,11 +7905,11 @@ class RecursivePatch:
       self.patch = RecursiveFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e733 in json_obj['remove']:
         if _tmp_e733 > 0x7fff or _tmp_e733 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e733)
+        self.remove.append(_tmp_e733)
 
   def __repr__(self):
     L = []
@@ -8434,18 +8434,18 @@ class BarPatch:
         else:
           iprot.skip(ftype)
       elif fid == 7:
-        if ftype == TType.SET:
-          self.remove = set()
-          (_etype767, _size764) = iprot.readSetBegin()
+        if ftype == TType.LIST:
+          self.remove = []
+          (_etype767, _size764) = iprot.readListBegin()
           if _size764 >= 0:
             for _i768 in range(_size764):
               _elem769 = iprot.readI16()
-              self.remove.add(_elem769)
+              self.remove.append(_elem769)
           else: 
-            while iprot.peekSet():
+            while iprot.peekList():
               _elem770 = iprot.readI16()
-              self.remove.add(_elem770)
-          iprot.readSetEnd()
+              self.remove.append(_elem770)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -8482,11 +8482,11 @@ class BarPatch:
       self.patch.write(oprot)
       oprot.writeFieldEnd()
     if self.remove != None:
-      oprot.writeFieldBegin('remove', TType.SET, 7)
-      oprot.writeSetBegin(TType.I16, len(self.remove))
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
       for iter771 in self.remove:
         oprot.writeI16(iter771)
-      oprot.writeSetEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -8518,11 +8518,11 @@ class BarPatch:
       self.patch = BarFieldPatch()
       self.patch.readFromJson(json_obj['patch'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'remove' in json_obj and json_obj['remove'] is not None:
-      self.remove = set_cls()
+      self.remove = []
       for _tmp_e772 in json_obj['remove']:
         if _tmp_e772 > 0x7fff or _tmp_e772 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.remove.add(_tmp_e772)
+        self.remove.append(_tmp_e772)
 
   def __repr__(self):
     L = []
@@ -9260,7 +9260,7 @@ MyDataPatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [MyDataEnsureStruct, MyDataEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyDataFieldPatch, MyDataFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 MyDataPatch.thrift_struct_annotations = {
@@ -9366,7 +9366,7 @@ MyDataWithCustomDefaultPatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [MyDataWithCustomDefaultEnsureStruct, MyDataWithCustomDefaultEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyDataWithCustomDefaultFieldPatch, MyDataWithCustomDefaultFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 MyDataWithCustomDefaultPatch.thrift_struct_annotations = {
@@ -9602,7 +9602,7 @@ MyStructPatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [MyStructEnsureStruct, MyStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [MyStructFieldPatch, MyStructFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 MyStructPatch.thrift_struct_annotations = {
@@ -10206,7 +10206,7 @@ LateDefStructPatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [LateDefStructEnsureStruct, LateDefStructEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [LateDefStructFieldPatch, LateDefStructFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 LateDefStructPatch.thrift_struct_annotations = {
@@ -10278,7 +10278,7 @@ RecursivePatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [RecursiveEnsureStruct, RecursiveEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [RecursiveFieldPatch, RecursiveFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 RecursivePatch.thrift_struct_annotations = {
@@ -10402,7 +10402,7 @@ BarPatch.thrift_spec = (
   None, # 4
   (5, TType.STRUCT, 'ensure', [BarEnsureStruct, BarEnsureStruct.thrift_spec, False], None, 3, ), # 5
   (6, TType.STRUCT, 'patch', [BarFieldPatch, BarFieldPatch.thrift_spec, False], None, 3, ), # 6
-  (7, TType.SET, 'remove', (TType.I16,None), None, 3, ), # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 3, ), # 7
 )
 
 BarPatch.thrift_struct_annotations = {

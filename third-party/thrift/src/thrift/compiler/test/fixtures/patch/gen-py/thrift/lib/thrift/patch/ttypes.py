@@ -35,7 +35,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'FieldId']
+__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'FieldId', 'FieldIdList']
 
 class PatchOp:
   r"""
@@ -1628,6 +1628,7 @@ class BinaryPatch:
     return self
 
 FieldId = thrift.lib.thrift.id.ttypes.FieldId
+FieldIdList = UnimplementedTypedef()
 all_structs.append(GeneratePatch)
 GeneratePatch.thrift_spec = (
 )

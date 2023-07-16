@@ -383,7 +383,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MyStructPatchStruct>::gen(Th
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
     {5, "ensure", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {7, "remove", false, std::make_unique<Set>(std::make_unique<Typedef>("patch.FieldId", std::make_unique<Typedef>("id.FieldId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+    {7, "remove", false, std::make_unique<Typedef>("patch.FieldIdList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldIdListToSetAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyStructPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -590,7 +590,7 @@ StructMetadata<::test::fixtures::basic-python-capi::MyDataItemPatchStruct>::gen(
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>("module.MyDataItemFieldPatch"), std::vector<ThriftConstStruct>{}},
     {5, "ensure", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyDataItemEnsureStruct>>("module.MyDataItemEnsureStruct"), std::vector<ThriftConstStruct>{}},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyDataItemFieldPatchStruct>>("module.MyDataItemFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {7, "remove", false, std::make_unique<Set>(std::make_unique<Typedef>("patch.FieldId", std::make_unique<Typedef>("id.FieldId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::FieldId>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+    {7, "remove", false, std::make_unique<Typedef>("patch.FieldIdList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldIdListToSetAdapter")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyDataItemPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;

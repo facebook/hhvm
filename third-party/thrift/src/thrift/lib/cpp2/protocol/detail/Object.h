@@ -78,6 +78,8 @@ struct ValueHelper {
       result.doubleValue_ref() = value;
     } else if constexpr (type::base_type_v<TT> == type::BaseType::String) {
       result.stringValue_ref() = std::forward<T>(value);
+    } else {
+      static_assert(folly::always_false<T>, "Unknown Type Tag.");
     }
   }
 };
@@ -132,6 +134,14 @@ struct ValueHelper<type::map<K, V>> {
       ValueHelper<V>::set(result_map[key], forward_elem<C>(entry.second));
     }
   }
+};
+
+template <typename T, typename Tag>
+struct ValueHelper<type::cpp_type<T, Tag>> : ValueHelper<Tag> {};
+
+template <typename Adapter, typename Tag>
+struct ValueHelper<type::adapted<Adapter, Tag>> {
+  static_assert(folly::always_false<Adapter>, "Not Implemented.");
 };
 
 class BaseObjectAdapter {

@@ -189,14 +189,19 @@ TEST(ObjectTest, List) {
   }
 
   // Works with other containers
-  value = asValueStruct<type::list<type::i16_t>>(
-      std::set<int>(data.begin(), data.end()));
+  std::set<int> s(data.begin(), data.end());
+  value = asValueStruct<type::list<type::i16_t>>(s);
   std::sort(data.begin(), data.end());
   ASSERT_EQ(value.getType(), Value::Type::listValue);
   ASSERT_EQ(value.get_listValue().size(), data.size());
   for (size_t i = 0; i < data.size(); ++i) {
     EXPECT_EQ(value.get_listValue()[i], asValueStruct<type::i16_t>(data[i]));
   }
+
+  // Works with cpp_type type tag
+  Value value2 =
+      asValueStruct<type::cpp_type<std::set<int>, type::list<type::i16_t>>>(s);
+  EXPECT_EQ(value, value2);
 }
 
 TEST(ObjectTest, Set) {

@@ -108,8 +108,9 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
 
   // Convert Static Patch to Dynamic Patch.
   protocol::Object toObject() const {
-    return protocol::asValueStruct<type::struct_c>(Base::toThrift())
-        .as_object();
+    // Pass the adapted type rather than the underlying thrift structure
+    // directly to use `adapter::encode(...)` hook
+    return protocol::asValueStruct<type::struct_c>(derived()).as_object();
   }
 
  protected:

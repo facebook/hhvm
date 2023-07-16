@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/test/StructPatchTestInclude.thrift"
@@ -102,6 +103,7 @@ struct InvalidMapMaskKeyStruct {
 
 @cpp.Frozen2Exclude
 @patch.AssignOnlyPatch
+@cpp.UseOpEncode
 struct IncludePatchStruct {
   1: StructPatchTestInclude.MyDataPatch patch (py3.hidden);
 }

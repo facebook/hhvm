@@ -20,6 +20,7 @@
 
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
+#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/type/Id.h>
@@ -27,6 +28,9 @@
 
 namespace apache {
 namespace thrift {
+namespace ident {
+struct remove;
+}
 namespace op {
 namespace detail {
 
@@ -390,6 +394,40 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     }
   }
 
+  template <class Protocol>
+  uint32_t encode(Protocol& prot) const {
+    uint32_t s = 0;
+    s += prot.writeStructBegin(op::get_class_name_v<Patch>.data());
+    const auto remove = removedFields();
+    op::for_each_field_id<Patch>([&](auto id) {
+      using Id = decltype(id);
+      using Tag = op::get_type_tag<Patch, Id>;
+      constexpr bool isRemoveField =
+          std::is_same<get_ident<Patch, Id>, ident::remove>::value;
+
+      auto&& field = op::get<Id>(data_);
+
+      if (!isRemoveField && !should_write<Tag>(field)) {
+        return;
+      }
+
+      if (isRemoveField && remove.empty()) {
+        return;
+      }
+
+      s += prot.writeFieldBegin(
+          &*op::get_name_v<Patch, Id>.begin(),
+          typeTagToTType<Tag>,
+          folly::to_underlying(Id::value));
+      s += op::encode<Tag>(
+          prot, folly::if_constexpr<isRemoveField>(remove, *field));
+      s += prot.writeFieldEnd();
+    });
+    s += prot.writeFieldStop();
+    s += prot.writeStructEnd();
+    return s;
+  }
+
   ~StructPatch() {
     if (false) {
       // Implement this check in destructor to make sure it's instantiated.
@@ -410,6 +448,43 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
 
  private:
   using Base::data_;
+
+  // Whether the field is removed
+  template <class Id>
+  bool isRemoved() const {
+    const auto& prior = data_.patchPrior()->toThrift();
+    const auto& ensure = *data_.ensure();
+    const auto& after = data_.patch()->toThrift();
+
+    using Ref = folly::remove_cvref_t<decltype(get<Id>(std::declval<T>()))>;
+    if (!is_optional_type<Ref>::value) {
+      // non-optional fields can not be removed
+      return false;
+    }
+
+    if (*get<Id>(after)->toThrift().clear()) {
+      // Cleared field in patch after
+      return true;
+    }
+
+    if (*get<Id>(prior)->toThrift().clear() && !get<Id>(ensure).has_value()) {
+      // Cleared field in patch prior and not ensured
+      return true;
+    }
+
+    return false;
+  }
+
+  // Combine fields from PatchOp::Clear and PatchOp::Remove operations
+  std::unordered_set<FieldId> removedFields() const {
+    auto removed = *data_.remove();
+    op::for_each_field_id<T>([&](auto id) {
+      if (isRemoved<decltype(id)>()) {
+        removed.insert(id.value);
+      }
+    });
+    return removed;
+  }
 };
 
 /// Patch for a Thrift union.

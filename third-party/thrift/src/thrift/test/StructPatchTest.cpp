@@ -1117,12 +1117,16 @@ TEST(PatchTest, IsPatch) {
 
 TEST(PatchTest, StructRemove) {
   MyStructPatch patch;
-  patch.toThrift().remove() = {
-      op::get_field_id<MyStruct, ident::optI32Val>::value};
+  patch.patch<ident::optI16Val>().clear();
+  patch.patchIfSet<ident::optI32Val>().clear();
+  patch.patchIfSet<ident::i16Val>().clear();
 
   MyStruct obj;
+  obj.optI16Val() = 16;
   obj.optI32Val() = 32;
   obj.optI64Val() = 64;
+  obj.i16Val() = 160;
+  obj.i32Val() = 320;
 
   protocol::Value value =
       protocol::asValueStruct<type::struct_t<MyStruct>>(obj);
@@ -1134,8 +1138,40 @@ TEST(PatchTest, StructRemove) {
   MyStruct patched;
   CompactSerializer::deserialize(buffer.get(), patched);
 
+  EXPECT_FALSE(patched.optI16Val().has_value());
   EXPECT_FALSE(patched.optI32Val().has_value());
   EXPECT_EQ(patched.optI64Val(), 64);
+  EXPECT_EQ(patched.i16Val(), 0);
+  EXPECT_EQ(patched.i32Val(), 320);
+
+  std::set<FieldId> ids;
+
+  EXPECT_TRUE(patch.toThrift().remove()->empty());
+  auto remove = patch.toObject().at(static_cast<FieldId>(op::PatchOp::Remove));
+  for (auto id : remove.as_list()) {
+    ids.insert(static_cast<FieldId>(id.as_i16()));
+  }
+  EXPECT_EQ(
+      ids,
+      (std::set{
+          op::get_field_id<MyStruct, ident::optI16Val>::value,
+          op::get_field_id<MyStruct, ident::optI32Val>::value,
+      }));
+}
+
+TEST(PatchTest, StructRemoveSerialization) {
+  using test::patch::IncludePatchStruct;
+  IncludePatchStruct s;
+  s.patch()->patch<ident::data3>().clear();
+
+  // Do a round-trip and check PatchOp::Remove field.
+  auto t = CompactSerializer::deserialize<IncludePatchStruct>(
+      CompactSerializer::serialize<std::string>(s));
+
+  EXPECT_TRUE(s.patch()->toThrift().remove()->empty());
+  EXPECT_EQ(
+      t.patch()->toThrift().remove(),
+      std::unordered_set{static_cast<FieldId>(3)});
 }
 
 } // namespace

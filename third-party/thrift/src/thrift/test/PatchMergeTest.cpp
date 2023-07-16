@@ -265,5 +265,35 @@ TEST(PatchMergeTest, SetPatch) {
   pickMultipleOpsAndTest<type::set<type::binary_t>>(
       ops, {{}, {"10"}, {"10", "20"}, {"10", "20", "30"}}, 3);
 }
+
+TEST(PatchMergeTest, MapPatch) {
+  using MapPatch =
+      std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optMapVal())>;
+  AddOps<MapPatch> ops;
+  ops.push_back([](auto& patch) { patch = typename MapPatch::value_type{}; });
+  ops.push_back([](auto& patch) { patch = {{"10", "1"}}; });
+  ops.push_back([](auto& patch) { patch = {{"20", "2"}}; });
+  ops.push_back([](auto& patch) { patch = {{"30", "3"}}; });
+  ops.push_back([](auto& patch) { patch.clear(); });
+  ops.push_back([](auto& patch) { patch.insert_or_assign("10", "100"); });
+  ops.push_back([](auto& patch) { patch.insert_or_assign("20", "100"); });
+  ops.push_back([](auto& patch) { patch.insert_or_assign("30", "300"); });
+  ops.push_back([](auto& patch) { patch.add({{"10", "1000"}}); });
+  ops.push_back([](auto& patch) { patch.add({{"20", "2000"}}); });
+  ops.push_back([](auto& patch) { patch.add({{"30", "3000"}}); });
+  ops.push_back([](auto& patch) { patch.erase("10"); });
+  ops.push_back([](auto& patch) { patch.erase("30"); });
+  for (auto f : genStringPatchOps<op::StringPatch>()) {
+    ops.push_back([f](auto& patch) { f(patch.patchByKey("10")); });
+    ops.push_back([f](auto& patch) { f(patch.ensureAndPatchByKey("10")); });
+  }
+  std::vector<MapPatch::value_type> values;
+  values.emplace_back();
+  values.emplace_back(values.back())["10"] = "1";
+  values.emplace_back(values.back())["20"] = "2";
+  values.emplace_back(values.back())["30"] = "3";
+  pickMultipleOpsAndTest<type::map<type::binary_t, type::binary_t>>(
+      ops, values, 2);
+}
 } // namespace
 } // namespace apache::thrift

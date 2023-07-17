@@ -5633,13 +5633,6 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
       check_body_under_known_params ~supportdyn:false env declared_ft
     ) else (
       match eexpected with
-      | Some (_pos, _ur, _supportdyn, ty, _) when is_any ty ->
-        (* If the expected type is Tany env then we're passing a lambda to
-         * an untyped function and we just assume every parameter has type
-         * Tany.
-         * Note: we should be using 'nothing' to type the arguments. *)
-        Typing_log.increment_feature_count env FL.Lambda.untyped_context;
-        check_body_under_known_params ~supportdyn:false env declared_ft
       | Some (_pos, _ur, supportdyn, expected_ty, _)
         when TUtils.is_mixed env expected_ty
              || is_nonnull expected_ty

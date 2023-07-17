@@ -14,7 +14,6 @@
 
 using namespace proxygen;
 using namespace quic;
-using namespace folly;
 using namespace testing;
 
 void H3DatagramAsyncSocketTest::SetUp() {
@@ -104,7 +103,7 @@ TEST_F(H3DatagramAsyncSocketTest, ConnectErrorBeforeReadCallbackSet) {
   EXPECT_CALL(readCallbacks_, onReadError_(_))
       .Times(1)
       .WillOnce(Invoke([&](auto err) {
-        EXPECT_EQ(err.getType(), AsyncSocketException::NETWORK_ERROR);
+        EXPECT_EQ(err.getType(), folly::AsyncSocketException::NETWORK_ERROR);
         EXPECT_EQ(std::string(err.what()),
                   "AsyncSocketException: connectError: 'unreachable', type = "
                   "Network error");
@@ -118,7 +117,7 @@ TEST_F(H3DatagramAsyncSocketTest, ConnectErrorAfterReadCallbackSet) {
   EXPECT_CALL(readCallbacks_, onReadError_(_))
       .Times(1)
       .WillOnce(Invoke([&](auto err) {
-        EXPECT_EQ(err.getType(), AsyncSocketException::NETWORK_ERROR);
+        EXPECT_EQ(err.getType(), folly::AsyncSocketException::NETWORK_ERROR);
         EXPECT_EQ(std::string(err.what()),
                   "AsyncSocketException: connectError: 'unreachable', type = "
                   "Network error");
@@ -136,7 +135,7 @@ TEST_F(H3DatagramAsyncSocketTest, HTTPNon200Response) {
   EXPECT_CALL(readCallbacks_, onReadError_(_))
       .Times(1)
       .WillOnce(Invoke([&](auto err) {
-        EXPECT_EQ(err.getType(), AsyncSocketException::INTERNAL_ERROR);
+        EXPECT_EQ(err.getType(), folly::AsyncSocketException::INTERNAL_ERROR);
         EXPECT_EQ(std::string(err.what()),
                   "AsyncSocketException: HTTP Error: status code 407, type = "
                   "Internal error");

@@ -27,6 +27,7 @@ from testing.thrift_types import (
     ComplexRef,
     customized,
     easy,
+    EmptyStruct,
     File,
     Integers,
     IOBufListStruct,
@@ -80,6 +81,7 @@ class StructTests(unittest.TestCase):
 
     def test_hashability(self) -> None:
         hash(easy())
+        hash(EmptyStruct())
 
     def test_optional_struct_creation(self) -> None:
         with self.assertRaises(TypeError):

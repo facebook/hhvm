@@ -20,6 +20,7 @@ import unittest
 
 from testing.thrift_types import (
     Color,
+    EmptyError,
     HardError,
     SimpleError,
     UnfriendlyError,
@@ -38,6 +39,7 @@ from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
 class ExceptionTests(unittest.TestCase):
     def test_hashability(self) -> None:
         hash(UnusedError())
+        hash(EmptyError())
 
     def test_cython_enum_scope(self) -> None:
         self.assertEqual(ApplicationErrorType(6), ApplicationErrorType.INTERNAL_ERROR)

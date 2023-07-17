@@ -259,7 +259,7 @@ cdef class GeneratedError(Error):
 
     def __hash__(GeneratedError self):
         value_tuple = tuple(v for _, v in self)
-        return hash(value_tuple) if value_tuple else type(self)
+        return hash(value_tuple if value_tuple else type(self))
 
     @classmethod
     def _fbthrift_create(cls, data):

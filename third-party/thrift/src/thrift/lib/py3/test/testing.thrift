@@ -414,3 +414,6 @@ service ClientMetadataTestingService {
 
 // The following were automatically generated and may benefit from renaming.
 typedef i32 (cpp.type = "uint32_t") i32_2395
+
+struct EmptyStruct {}
+exception EmptyError {}

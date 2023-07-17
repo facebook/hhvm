@@ -556,7 +556,7 @@ cdef class Struct(StructOrUnion):
 
     def __hash__(Struct self):
         value_tuple = tuple(v for _, v in self)
-        return hash(value_tuple) if value_tuple else type(self)
+        return hash(value_tuple if value_tuple else type(self))
 
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info

@@ -35,6 +35,24 @@ let get_local_pos env id =
   | Some pos -> pos
   | None -> Pos.none
 
+let restrict_env env uses =
+  List.fold_left uses ~init:empty ~f:(fun new_env (_, (_, id)) ->
+      let new_env =
+        match get_local env id with
+        | None -> new_env
+        | Some pos -> add_local new_env id pos
+      in
+      let new_env =
+        if Set.mem id env.declared_ids then
+          add_declared_id new_env id
+        else
+          new_env
+      in
+      if Set.mem id env.assigned_ids then
+        add_assigned_id new_env id
+      else
+        new_env)
+
 let find_clashes env other_env clashes =
   Set.iter
     (fun id ->
@@ -192,6 +210,11 @@ let visitor =
       in
       let _env = check_block (ignorefn super#on_expr) env fun_.f_body.fb_ast in
       fun_
+
+    method! on_efun env efun =
+      let env = restrict_env env efun.ef_use in
+      let _fun_ = s#on_fun_ env efun.ef_fun in
+      efun
 
     method! on_fun_def _env fun_def =
       let _fun_ = s#on_fun_ empty fun_def.fd_fun in

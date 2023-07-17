@@ -1,0 +1,28 @@
+File "lambda-php-errors.php", line 12, characters 9-20:
+Illegal definition of typed local variable $x2. (Naming[2126])
+  File "lambda-php-errors.php", line 6, characters 3-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "lambda-php-errors.php", line 13, characters 9-19:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "lambda-php-errors.php", line 10, characters 17-18:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "lambda-php-errors.php", line 14, characters 9-20:
+Illegal definition of typed local variable $b. (Naming[2126])
+  File "lambda-php-errors.php", line 4, characters 17-18:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "lambda-php-errors.php", line 17, characters 9-19:
+Illegal definition of typed local variable $c. (Naming[2126])
+  File "lambda-php-errors.php", line 15, characters 9-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "lambda-php-errors.php", line 11, characters 9-16:
+Typing error (Typing[4110])
+  File "lambda-php-errors.php", line 5, characters 12-14:
+  Expected `int`
+  File "lambda-php-errors.php", line 11, characters 15-16:
+  But got `string`
+File "lambda-php-errors.php", line 16, characters 9-15:
+Typing error (Typing[4110])
+  File "lambda-php-errors.php", line 15, characters 16-18:
+  Expected `int`
+  File "lambda-php-errors.php", line 16, characters 14-15:
+  But got `string`

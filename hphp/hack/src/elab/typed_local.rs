@@ -8,6 +8,7 @@ use std::collections::HashSet;
 #[allow(unused_imports)]
 use hack_macros::hack_stmts;
 use nast::Binop;
+use nast::CaptureLid;
 use nast::Expr;
 use nast::Expr_;
 use nast::Hint;
@@ -61,6 +62,27 @@ impl TypedLocal {
         } else {
             Pos::NONE
         }
+    }
+
+    fn restrict_env(&self, ids: &Vec<CaptureLid>) -> TypedLocal {
+        let should_elab = self.should_elab;
+        let mut new_env = TypedLocal {
+            should_elab,
+            ..Default::default()
+        };
+        for cid in ids {
+            let id = &cid.1.1.1;
+            if let Some((hint, pos)) = self.get_local(id) {
+                new_env.add_local(id.to_string(), hint.clone(), pos);
+            }
+            if self.declared_ids.contains(id) {
+                new_env.add_declared_id(id);
+            }
+            if self.assigned_ids.contains(id) {
+                new_env.add_assigned_id(id.clone());
+            }
+        }
+        new_env
     }
 
     fn clear(&mut self) {
@@ -286,10 +308,14 @@ impl<'a> VisitorMut<'a> for TypedLocal {
         Ok(())
     }
 
+    fn visit_efun(&mut self, env: &mut Env, elem: &mut nast::Efun) -> Result<(), ()> {
+        let mut fun_env = self.restrict_env(&elem.use_);
+        fun_env.visit_fun_(env, &mut elem.fun)
+    }
+
     fn visit_fun_def(&mut self, env: &mut Env, elem: &mut nast::FunDef) -> Result<(), ()> {
         self.clear();
-        self.visit_fun_(env, &mut elem.fun)?;
-        Ok(())
+        self.visit_fun_(env, &mut elem.fun)
     }
 
     fn visit_method_(&mut self, env: &mut Env, elem: &mut nast::Method_) -> Result<(), ()> {
@@ -298,8 +324,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             self.add_local(param.name.clone(), None, &param.pos);
             self.add_assigned_id(param.name.clone());
         }
-        elem.body.fb_ast.recurse(env, self.object())?;
-        Ok(())
+        elem.body.fb_ast.recurse(env, self.object())
     }
 }
 

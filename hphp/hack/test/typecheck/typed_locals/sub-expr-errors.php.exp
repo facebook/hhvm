@@ -1,0 +1,56 @@
+File "sub-expr-errors.php", line 6, characters 25-35:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 6, characters 13-23:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 8, characters 31-41:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 8, characters 19-29:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 11, characters 45-55:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 11, characters 33-43:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 12, characters 45-55:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 12, characters 33-43:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 16, characters 27-37:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 16, characters 15-25:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 19, characters 38-48:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 19, characters 26-36:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 21, characters 32-42:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 21, characters 20-30:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 23, characters 35-45:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 23, characters 23-33:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 23, characters 91-101:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 23, characters 79-89:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 23, characters 152-162:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 23, characters 140-150:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 25, characters 33-43:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 25, characters 21-31:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 27, characters 34-44:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 27, characters 22-32:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 29, characters 38-48:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 29, characters 26-36:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "sub-expr-errors.php", line 31, characters 32-42:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "sub-expr-errors.php", line 31, characters 20-30:
+  It is already defined. Typed locals must have their type declared before they can be assigned.

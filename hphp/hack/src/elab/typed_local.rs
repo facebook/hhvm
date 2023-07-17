@@ -190,6 +190,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
         let Stmt(pos, stmt_) = elem;
         match stmt_ {
             Stmt_::DeclareLocal(box (lid, hint, expr)) => {
+                expr.recurse(env, self.object())?;
                 let name = local_id::get_name(&lid.1);
                 if let Some((_, def_pos)) = self.get_local(name) {
                     env.emit_error(NamingError::IllegalTypedLocal {
@@ -223,10 +224,13 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 Ok(())
             }
             Stmt_::Expr(box expr) => {
+                expr.recurse(env, self.object())?;
                 self.enforce_assign_expr(expr);
                 Ok(())
             }
-            Stmt_::If(box (_cond, then_block, else_block)) => {
+            Stmt_::If(box (cond, then_block, else_block)) => {
+                let mut cond_self = self.clone();
+                cond.recurse(env, cond_self.object())?;
                 let mut declared_above = HashSet::default();
                 let mut assigned_above = HashSet::default();
                 std::mem::swap(&mut self.declared_ids, &mut declared_above);
@@ -237,12 +241,15 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 self.join(alt, env, declared_above, assigned_above);
                 Ok(())
             }
-            Stmt_::For(box (init_exprs, _, update_exprs, body)) => {
+            Stmt_::For(box (init_exprs, cond, update_exprs, body)) => {
                 for init_expr in init_exprs.iter_mut() {
+                    init_expr.recurse(env, self.object())?;
                     self.enforce_assign_expr(init_expr);
                 }
+                cond.recurse(env, self.object())?;
                 body.recurse(env, self.object())?;
                 for update_expr in update_exprs.iter_mut() {
+                    update_expr.recurse(env, self.object())?;
                     self.enforce_assign_expr(update_expr);
                 }
                 Ok(())
@@ -265,17 +272,23 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             | Stmt_::Block(_)
             | Stmt_::Markup(_)
             | Stmt_::AssertEnv(_) => elem.recurse(env, self.object()),
-            // TODO: check lambdas properly
         }
+    }
+
+    fn visit_fun_(&mut self, env: &mut Env, elem: &mut nast::Fun_) -> Result<(), ()> {
+        let old = self.clone();
+        for param in elem.params.iter() {
+            self.add_local(param.name.clone(), None, &param.pos);
+            self.add_assigned_id(param.name.clone());
+        }
+        elem.body.fb_ast.recurse(env, self.object())?;
+        *self = old;
+        Ok(())
     }
 
     fn visit_fun_def(&mut self, env: &mut Env, elem: &mut nast::FunDef) -> Result<(), ()> {
         self.clear();
-        for param in elem.fun.params.iter() {
-            self.add_local(param.name.clone(), None, &param.pos);
-            self.add_assigned_id(param.name.clone());
-        }
-        elem.fun.body.fb_ast.recurse(env, self.object())?;
+        self.visit_fun_(env, &mut elem.fun)?;
         Ok(())
     }
 

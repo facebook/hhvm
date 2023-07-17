@@ -75,17 +75,23 @@ let join env other_env declared_above assigned_above =
   in
   { locals; declared_ids; assigned_ids }
 
-let check_assign_expr env ((), _pos, expr_) =
+let check_assign_expr on_expr env (((), _pos, expr_) as expr) =
+  on_expr env expr;
   match expr_ with
   | Binop { bop = Ast_defs.Eq _; lhs = ((), pos, Lvar lid); rhs = _ } ->
     let name = snd lid in
-    let env = add_local env name pos in
-    add_assigned_id env name
+    (match get_local env name with
+    | None ->
+      let env = add_local env name pos in
+      add_assigned_id env name
+    | Some _ -> env)
   | _ -> env
 
-let rec check_stmt env (id_pos, stmt_) =
+let rec check_stmt on_expr env (id_pos, stmt_) =
+  let check_block = check_block on_expr in
   match stmt_ with
-  | Declare_local (id, _hint, _init) ->
+  | Declare_local (id, _hint, init) ->
+    Option.iter ~f:(on_expr env) init;
     let name = snd id in
     (match get_local env name with
     | None ->
@@ -104,71 +110,91 @@ let rec check_stmt env (id_pos, stmt_) =
                  def_pos;
                }));
       env)
-  | Expr expr -> check_assign_expr env expr
-  (* TODO: make sure _cond is visited in case it has lambdas in it *)
-  | If (_cond, then_block, else_block) ->
+  | Expr expr -> check_assign_expr on_expr env expr
+  | If (cond, then_block, else_block) ->
+    on_expr env cond;
     let new_env = { empty with locals = env.locals } in
     let then_env = check_block new_env then_block in
     let else_env = check_block new_env else_block in
     join then_env else_env env.declared_ids env.assigned_ids
-  (* TODO: make sure _cond is visited in case it has lambdas in it *)
-  | For (init_exprs, _cond, update_exprs, body) ->
-    let env = List.fold_left init_exprs ~init:env ~f:check_assign_expr in
+  | For (init_exprs, cond, update_exprs, body) ->
+    let env =
+      List.fold_left init_exprs ~init:env ~f:(check_assign_expr on_expr)
+    in
+    Option.iter ~f:(on_expr env) cond;
     let env = check_block env body in
-    List.fold_left update_exprs ~init:env ~f:check_assign_expr
-  (* TODO: make sure _cond is visited in case it has lambdas in it *)
-  | While (_cond, block) -> check_block env block
-  (* TODO: make sure _inits is visited in case it has lambdas in it *)
-  | Awaitall (_inits, block) -> check_block env block
+    List.fold_left update_exprs ~init:env ~f:(check_assign_expr on_expr)
+  | Switch (expr, _cases, _default) ->
+    on_expr env expr;
+    env
+  | Do (block, cond) ->
+    let env = check_block env block in
+    on_expr env cond;
+    env
+  | While (cond, block) ->
+    on_expr env cond;
+    check_block env block
+  | Awaitall (inits, block) ->
+    List.iter ~f:(fun (_, e) -> on_expr env e) inits;
+    check_block env block
   | Block block -> check_block env block
-  | Using _
-  | Switch (_, _, _)
-  | Foreach (_, _, _)
+  | Return (Some expr)
+  | Throw expr ->
+    on_expr env expr;
+    env
+  | Foreach (expr, _, _) ->
+    on_expr env expr;
+    env
   | Try (_, _, _)
+  | Using _
+  | Return None
   | Fallthrough
   | Break
   | Continue
   | Yield_break
   | Noop
-  | Throw _
-  | Return _
-  | Do _
   | Markup _
   | AssertEnv _ ->
     env
 
-and check_block env block =
+and check_block on_expr env block =
   match block with
   | [] -> env
   | stmt :: stmts ->
-    let env = check_stmt env stmt in
-    let env = check_block env stmts in
+    let env = check_stmt on_expr env stmt in
+    let env = check_block on_expr env stmts in
     env
 
+let ignorefn f x y = ignore (f x y)
+
 let visitor =
-  object
-    inherit [_] Aast.endo as _super
+  object (s)
+    inherit [_] Aast.endo as super
 
     method on_'ex (_ : typed_local_env) () = ()
 
     method on_'en (_ : typed_local_env) () = ()
 
     method! on_stmt env stmt =
-      let _env = check_stmt env stmt in
+      let _env = check_stmt (ignorefn super#on_expr) env stmt in
       stmt
 
     method! on_block env block =
-      let _env = check_block env block in
+      let _env = check_block (ignorefn super#on_expr) env block in
       block
 
-    method! on_fun_def _env fun_def =
+    method! on_fun_ env fun_ =
       let env =
-        List.fold_left fun_def.fd_fun.f_params ~init:empty ~f:(fun env param ->
+        List.fold_left fun_.f_params ~init:env ~f:(fun env param ->
             let local_id = Local_id.make_unscoped param.param_name in
             let env = add_local env local_id param.param_pos in
             add_assigned_id env local_id)
       in
-      let _env = check_block env fun_def.fd_fun.f_body.fb_ast in
+      let _env = check_block (ignorefn super#on_expr) env fun_.f_body.fb_ast in
+      fun_
+
+    method! on_fun_def _env fun_def =
+      let _fun_ = s#on_fun_ empty fun_def.fd_fun in
       fun_def
 
     method! on_method_ _env method_ =
@@ -178,7 +204,9 @@ let visitor =
             let env = add_local env local_id param.param_pos in
             add_assigned_id env local_id)
       in
-      let _env = check_block env method_.m_body.fb_ast in
+      let _env =
+        check_block (ignorefn super#on_expr) env method_.m_body.fb_ast
+      in
       method_
   end
 

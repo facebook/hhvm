@@ -867,7 +867,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for empty_struct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -965,7 +964,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for decorated_struct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1128,7 +1126,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1253,7 +1250,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CppTypeStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1353,7 +1349,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for VirtualStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1462,7 +1457,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructWithForwardRefEnum {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1573,7 +1567,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TrivialNumeric {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1692,7 +1685,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TrivialNestedWithDefault {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1803,7 +1795,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexString {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -1930,7 +1921,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexNestedWithDefault {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2077,7 +2067,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPadding {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2252,7 +2241,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2405,7 +2393,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2502,7 +2489,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyDataItem {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2600,7 +2586,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Renaming {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2709,7 +2694,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AnnotatedTypes {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2824,7 +2808,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageRoot {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -2928,7 +2911,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3030,7 +3012,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ForwardUsageByRef {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3132,7 +3113,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteMap {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3223,7 +3203,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteMapDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3323,7 +3302,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteMap {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3414,7 +3392,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteMapDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3514,7 +3491,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteList {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3605,7 +3581,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for IncompleteListDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3705,7 +3680,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteList {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3796,7 +3770,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CompleteListDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -3896,7 +3869,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedList {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4014,7 +3986,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedListDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4116,7 +4087,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedList {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4236,7 +4206,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DependentAdaptedListDep {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4399,7 +4368,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4542,7 +4510,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware2 {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4671,7 +4638,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TypedefStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -4775,7 +4741,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithDoubleUnderscores {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();

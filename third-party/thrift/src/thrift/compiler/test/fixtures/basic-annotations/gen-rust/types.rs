@@ -275,7 +275,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStructNestedAnnotation {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -372,7 +371,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -472,7 +470,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -660,7 +657,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -779,7 +775,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();

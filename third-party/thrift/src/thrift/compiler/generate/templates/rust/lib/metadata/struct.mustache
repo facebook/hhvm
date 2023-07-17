@@ -20,7 +20,7 @@
   Annotations on generated patch structs implicitly assume all dependencies
   of `thrift/annotation/patch.thrift` are immediately available in the
   crate, e.g. they require a dependency on `thrift/annotation/cpp.thrift`.
-
+  
   This might be fine in C++, but Rust crates have isolated dependencies, so
   this doesn't work for us. Disable generating annotations on patch structs
   for now.
@@ -29,7 +29,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         {{! We can't use a match statement as `TypeId::of` must be const, which is blocked by
             https://github.com/rust-lang/rust/issues/77125.
-
+            
             We assume there won't be a large number of annotations, so linear search should
             be fine here.
         }}
@@ -56,7 +56,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();

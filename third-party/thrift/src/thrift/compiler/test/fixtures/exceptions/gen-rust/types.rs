@@ -284,7 +284,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Fiery {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -380,7 +379,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serious {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -483,7 +481,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ComplexFieldNames {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -588,7 +585,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for CustomFieldNames {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -693,7 +689,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithPrimitiveField {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -808,7 +803,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -895,7 +889,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Banal {
         None
     }
 
-    #[allow(clippy::match_single_binding)]
     fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();

@@ -797,61 +797,63 @@ auto emplace_at_end(Container& container, Args&&... args) {
       container);
 }
 
-// Handles set with sorted_unique property
-template <typename Tag, typename Set, typename Protocol>
-typename std::enable_if_t<
-    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>
-decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
-  if (set_size == 0) {
-    return;
-  }
-
-  typename Set::container_type tmp(set.get_allocator());
-  apache::thrift::detail::pm::reserve_if_possible(&tmp, set_size);
-  for (size_t i = 0; i < set_size; ++i) {
-    auto& elem = apache::thrift::detail::pm::emplace_back_default(tmp);
-    Decode<Tag>{}(prot, elem);
-  }
-
-  const bool sorted = std::is_sorted(tmp.begin(), tmp.end(), set.key_comp());
-  using folly::sorted_unique;
-  set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
-}
-
-// Handles set without sorted_unique property but has emplace_hint implemented
-template <typename Tag, typename Set, typename Protocol>
-typename std::enable_if_t<
-    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
-    apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
-decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
-  apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
-
-  for (auto i = set_size; i > 0; i--) {
-    typename Set::value_type value =
-        apache::thrift::detail::default_set_element(set);
-    Decode<Tag>{}(prot, value);
-    set.emplace_hint(set.end(), std::move(value));
-  }
-}
-
-// Handles set without sorted_unique property or emplace_hint
-template <typename Tag, typename Set, typename Protocol>
-typename std::enable_if_t<
-    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
-    !apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
-decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
-  apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
-
-  for (auto i = set_size; i--;) {
-    typename Set::value_type value =
-        apache::thrift::detail::default_set_element(set);
-    Decode<Tag>{}(prot, value);
-    set.insert(std::move(value));
-  }
-}
-
 template <typename Tag>
 struct Decode<type::set<Tag>> {
+ private:
+  // Handles set with sorted_unique property
+  template <typename Set, typename Protocol>
+  static std::enable_if_t<
+      apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>
+  decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+    if (set_size == 0) {
+      return;
+    }
+
+    typename Set::container_type tmp(set.get_allocator());
+    apache::thrift::detail::pm::reserve_if_possible(&tmp, set_size);
+    for (size_t i = 0; i < set_size; ++i) {
+      auto& elem = apache::thrift::detail::pm::emplace_back_default(tmp);
+      Decode<Tag>{}(prot, elem);
+    }
+
+    const bool sorted = std::is_sorted(tmp.begin(), tmp.end(), set.key_comp());
+    using folly::sorted_unique;
+    set = sorted ? Set(sorted_unique, std::move(tmp)) : Set(std::move(tmp));
+  }
+
+  // Handles set without sorted_unique property but has emplace_hint implemented
+  template <typename Set, typename Protocol>
+  static std::enable_if_t<
+      !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
+      apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
+  decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+    apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
+
+    for (auto i = set_size; i > 0; i--) {
+      typename Set::value_type value =
+          apache::thrift::detail::default_set_element(set);
+      Decode<Tag>{}(prot, value);
+      set.emplace_hint(set.end(), std::move(value));
+    }
+  }
+
+  // Handles set without sorted_unique property or emplace_hint
+  template <typename Set, typename Protocol>
+  static std::enable_if_t<
+      !apache::thrift::detail::pm::sorted_unique_constructible_v<Set> &&
+      !apache::thrift::detail::pm::set_emplace_hint_is_invocable_v<Set>>
+  decode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size) {
+    apache::thrift::detail::pm::reserve_if_possible(&set, set_size);
+
+    for (auto i = set_size; i--;) {
+      typename Set::value_type value =
+          apache::thrift::detail::default_set_element(set);
+      Decode<Tag>{}(prot, value);
+      set.insert(std::move(value));
+    }
+  }
+
+ public:
   template <typename Protocol, typename SetType>
   void operator()(Protocol& prot, SetType& set) const {
     auto consumeElem = [&] {
@@ -872,7 +874,7 @@ struct Decode<type::set<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
-      decode_known_length_set<Tag>(prot, set, s);
+      decode_known_length_set(prot, set, s);
     } else {
       while (s--) {
         prot.skip(t);
@@ -883,51 +885,54 @@ struct Decode<type::set<Tag>> {
   }
 };
 
-// Handles map with sorted_unique property
-template <typename Key, typename Value, typename Map, typename Protocol>
-typename std::enable_if_t<
-    apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>
-decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
-  if (map_size == 0) {
-    return;
-  }
-
-  typename Map::container_type tmp(map.get_allocator());
-  apache::thrift::detail::pm::reserve_if_possible(&tmp, map_size);
-  for (size_t i = 0; i < map_size; ++i) {
-    auto& elem = apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
-    Decode<Key>{}(prot, elem.first);
-    Decode<Value>{}(prot, elem.second);
-  }
-
-  const bool sorted =
-      std::is_sorted(tmp.begin(), tmp.end(), [&](auto& l, auto& r) {
-        return map.key_comp()(l.first, r.first);
-      });
-  using folly::sorted_unique;
-  map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
-}
-
-// Handles map without sorted_unique property but has emplace_hint implemented
-template <typename Key, typename Value, typename Map, typename Protocol>
-typename std::enable_if_t<
-    !apache::thrift::detail::pm::sorted_unique_constructible_v<Map> &&
-    apache::thrift::detail::pm::map_emplace_hint_is_invocable_v<Map>>
-decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
-  apache::thrift::detail::pm::reserve_if_possible(&map, map_size);
-
-  for (auto i = map_size; i--;) {
-    typename Map::key_type key = apache::thrift::detail::default_map_key(map);
-    typename Map::mapped_type value =
-        apache::thrift::detail::default_map_value(map);
-    Decode<Key>{}(prot, key);
-    Decode<Value>{}(prot, value);
-    map.emplace_hint(map.end(), std::move(key), std::move(value));
-  }
-}
-
 template <typename Key, typename Value>
 struct Decode<type::map<Key, Value>> {
+ private:
+  // Handles map with sorted_unique property
+  template <typename Map, typename Protocol>
+  static std::enable_if_t<
+      apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>
+  decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
+    if (map_size == 0) {
+      return;
+    }
+
+    typename Map::container_type tmp(map.get_allocator());
+    apache::thrift::detail::pm::reserve_if_possible(&tmp, map_size);
+    for (size_t i = 0; i < map_size; ++i) {
+      auto& elem =
+          apache::thrift::detail::pm::emplace_back_default_map(tmp, map);
+      Decode<Key>{}(prot, elem.first);
+      Decode<Value>{}(prot, elem.second);
+    }
+
+    const bool sorted =
+        std::is_sorted(tmp.begin(), tmp.end(), [&](auto& l, auto& r) {
+          return map.key_comp()(l.first, r.first);
+        });
+    using folly::sorted_unique;
+    map = sorted ? Map(sorted_unique, std::move(tmp)) : Map(std::move(tmp));
+  }
+
+  // Handles map without sorted_unique property but has emplace_hint implemented
+  template <typename Map, typename Protocol>
+  static std::enable_if_t<
+      !apache::thrift::detail::pm::sorted_unique_constructible_v<Map> &&
+      apache::thrift::detail::pm::map_emplace_hint_is_invocable_v<Map>>
+  decode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size) {
+    apache::thrift::detail::pm::reserve_if_possible(&map, map_size);
+
+    for (auto i = map_size; i--;) {
+      typename Map::key_type key = apache::thrift::detail::default_map_key(map);
+      typename Map::mapped_type value =
+          apache::thrift::detail::default_map_value(map);
+      Decode<Key>{}(prot, key);
+      Decode<Value>{}(prot, value);
+      map.emplace_hint(map.end(), std::move(key), std::move(value));
+    }
+  }
+
+ public:
   template <typename Protocol, typename MapType>
   void operator()(Protocol& prot, MapType& map) const {
     auto consumeElem = [&] {
@@ -957,7 +962,7 @@ struct Decode<type::map<Key, Value>> {
       }
     } else if (
         typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
-      decode_known_length_map<Key, Value>(prot, map, s);
+      decode_known_length_map(prot, map, s);
     } else {
       while (s--) {
         prot.skip(keyType);

@@ -335,15 +335,49 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     elif name == "HPHP::LockFreePtrWrapper":
         ptr = rawptr(get(val, "val"))
     elif name == "HPHP::TokenOrPtr":
-        compact = get(val, "m_compact")  # HPHP::CompactTaggedPtr
-        data = val.CreateValueFromExpression("(tmp)", str(compact.unsigned >> 2))
-        compact_type = Type("uintptr_t", val.target).GetPointerType()
-        ptr = rawptr(unsigned_cast(data, compact_type))
+        data = TokenOrPtr.get_compact(val)
+        ptr = rawptr(TokenOrPtr.get_ptr(data))
 
     if ptr is not None:
         return rawptr(ptr)
 
     return None
+
+kMaxTagSize = 16
+kShiftAmount = 64 - kMaxTagSize  # 64 = std::numeric_limits<uintptr_t>::digits
+
+class TokenOrPtr:
+    @staticmethod
+    def get_compact(token_or_ptr) -> int:
+        compact = get(token_or_ptr, "m_compact")  # HPHP::CompactTaggedPtr
+        data = compact.unsigned >> 2
+        return data
+
+    @staticmethod
+    def get_tag(token_or_ptr) -> int:
+        data = TokenOrPtr.get_compact(token_or_ptr)
+        tag = data >> kShiftAmount
+        return tag
+
+    @staticmethod
+    def is_ptr(token_or_ptr) -> bool:
+        return TokenOrPtr.get_tag(token_or_ptr) == 0
+
+    @staticmethod
+    def is_token(token_or_ptr) -> bool:
+        return TokenOrPtr.get_tag(token_or_ptr) == 1
+
+    @staticmethod
+    def get_ptr(token_or_ptr) -> lldb.SBValue:
+        data = TokenOrPtr.get_compact(token_or_ptr)
+        ptr = data & (-1 >> kMaxTagSize)
+        return token_or_ptr.CreateValueFromExpression("tmp", f"(uintptr_t *){ptr}")
+
+    @staticmethod
+    def get_token(token_or_ptr) -> lldb.SBValue:
+        ptr = TokenOrPtr.get_ptr(token_or_ptr)
+        repo_token_type = Type("HPHP::RepoFile::Token", token_or_ptr.target)
+        return unsigned_cast(ptr, repo_token_type)
 
 
 def deref(val: lldb.SBValue) -> lldb.SBValue:

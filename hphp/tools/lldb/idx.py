@@ -92,16 +92,27 @@ def compact_vector_at(cv: lldb.SBValue, idx: int, hasher=None) -> typing.Optiona
         # TODO implement
         raise NotImplementedError("hasher argument currently unused")
 
-    if utils.get(cv, "m_data").unsigned == 0:  # null ptr
+    m_data = utils.get(cv, "m_data")
+    if utils.is_nullptr(m_data):
         return None
 
-    sz = utils.get(cv, "m_data", "m_len").unsigned
+    sz = utils.get(m_data, "m_len").unsigned
     if idx >= sz:
         return None
 
-    inner = cv.type.template_argument(0)
-    elems = (utils.get(cv, "m_data").Cast(utils.Type('char').GetPointerType())
-             + utils.get(cv, "elems_offset").Cast(inner.GetPointerType()))
+    inner = cv.type.template_args[0]
+    try:
+        offset = utils.get(cv, "elems_offset")
+    except Exception:
+        # LLDB apparently has issues getting static members
+        # of types with templates so do this manually instead
+        offset = inner.size if inner.size > m_data.type.size else m_data.type.size
+
+    raw_ptr = utils.unsigned_cast(m_data, utils.Type("char", cv.target).GetPointerType())
+    # utils.unsigned_cast won't work here because that function attempts to create
+    # a value by evaluating an expression, and LLDB has issues looking up templated types,
+    # even though we have a handle to the type via inner!
+    elems = utils.ptr_add(raw_ptr, offset).Cast(inner.GetPointerType())
     return at(elems, idx)
 
 

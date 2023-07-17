@@ -59,6 +59,8 @@ def sizeof(container: lldb.SBValue) -> lldb.SBValue:
     elif t == 'HPHP::Array':
         arr_data = utils.deref(utils.get(container, "m_arr"))
         return array_data_size(arr_data)
+    elif t == 'HPHP::CompactVector':
+        return utils.get(container, "m_data", "m_len").unsigned
 
 
 #------------------------------------------------------------------------------

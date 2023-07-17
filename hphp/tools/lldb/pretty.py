@@ -202,7 +202,7 @@ class pp_ArrayData:
         # We use this class for both the synthetic children and for the summary.
         # For the summary, we will be given the synthetic lldb.SBValue so we
         # must make sure to get the non-synthetic lldb.SBValue.
-        utils.debug_print(f"pp_ArrayData::__init__ with val_obj (load_addr: {val_obj.load_addr}, type: {val_obj.type.name})")
+        utils.debug_print(f"pp_ArrayData::__init__ with val_obj (load_addr: 0x{val_obj.load_addr:x}, type: {val_obj.type.name})")
         self.val_obj = val_obj.GetNonSyntheticValue()
         self.size = None
         self.func = None
@@ -232,6 +232,15 @@ class pp_ArrayData:
         return self.at_func(index)
 
     def update(self):
+        try:
+            return self._update()
+        except Exception:
+            utils.debug_print("Exception while pretty printing ArrayData")
+            if utils._Debug:
+                traceback.print_exc()
+            return False
+
+    def _update(self):
         # Doing this in here, rather than __init__(), because the API
         # says we should be re-updating internal state as much as possible (since the
         # state of variables can change since the last invocation).
@@ -240,7 +249,7 @@ class pp_ArrayData:
         specialized_obj = utils.cast_as_specialized_array_data_kind(self.val_obj)
         utils.debug_print(
             f"pp_ArrayData::update() with specialized_obj (type {specialized_obj.type.name}); "
-            f"specialized_obj.load_addr 0x{specialized_obj.load_addr:x} + specialized_obj.type.size {specialized_obj.type.size}"
+            f"specialized_obj.load_addr: 0x{specialized_obj.load_addr:x} + specialized_obj.type.size: {specialized_obj.type.size}"
         )
         char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()
         base = specialized_obj.CreateValueFromAddress("tmp", specialized_obj.load_addr + specialized_obj.type.size, char_ptr_type)
@@ -252,9 +261,6 @@ class pp_ArrayData:
             self.at_func = lambda ix: idx.dict_at(base, ix)
         elif utils.has_array_kind(self.val_obj, 'Keyset'):
             self.at_func = lambda ix: idx.keyset_at(base, ix)
-
-        return False
-
 
         # Return false to make sure we always update this object every time we
         # stop. If we return True, then the value will never update again.

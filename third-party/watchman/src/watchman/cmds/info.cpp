@@ -140,7 +140,7 @@ static UntypedResponse cmd_get_sockname(Client*, const json_ref&) {
         "unix_domain", w_string_to_json(w_string::build(get_unix_sock_name())));
   }
 
-#ifdef WIN32
+#ifdef _WIN32
   if (!disable_named_pipe) {
     resp.set(
         "named_pipe",

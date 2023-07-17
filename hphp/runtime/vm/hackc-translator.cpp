@@ -1349,12 +1349,6 @@ void translateConstant(TranslationState& ts, const hhbc::Constant& c) {
     [&](hhbc::TypedValue& tv) {return toTypedValue(tv);},
     [&]() {return make_tv<KindOfNull>();});
 
-  // An uninit constant means its actually a "dynamic" constant whose value
-  // is evaluated at runtime. We store the callback in m_data.pcnt and invoke
-  // on lookup. (see constant.cpp) It's used for things like STDERR.
-  if (type(constant.val) == KindOfUninit) {
-    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(HPHP::Constant::get);
-  }
   ts.ue->addConstant(constant);
 }
 

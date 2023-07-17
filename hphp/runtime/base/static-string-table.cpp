@@ -348,9 +348,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
     if (type(tv) != KindOfUninit) {
       tbl->set(key, tv, true);
     } else {
-      assertx(val(tv).pcnt);
-      auto callback = reinterpret_cast<Native::ConstantCallback>(val(tv).pcnt);
-      auto cns = callback(key.get());
+      auto cns = Constant::get(key.get());
       assertx(cns.isAllowedAsConstantValue() == Variant::AllowedAsConstantValue::Allowed);
       tbl->set(key, cns, true);
     }

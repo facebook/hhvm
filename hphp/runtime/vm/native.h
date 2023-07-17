@@ -603,8 +603,6 @@ const ConstantMap& getConstants() {
   return s_constant_map;
 }
 
-using ConstantCallback = Variant (*)(const StringData*);
-
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 

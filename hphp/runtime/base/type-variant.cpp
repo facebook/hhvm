@@ -398,7 +398,6 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
     case KindOfLazyClass:
@@ -434,6 +433,7 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
+    case KindOfResource:
       return Variant::AllowedAsConstantValue::NotAllowed;
   }
   not_reached();

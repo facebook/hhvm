@@ -144,24 +144,18 @@ static TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
                                          StringData* nm) {
   assertx(rds::isNormalHandle(tv_handle));
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
-    auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
-    if (tv->m_data.pcnt != nullptr) {
-      auto callback =
-        reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-      Variant v = callback(nm);
-      const TypedValue cns = v.detach();
-      assertx(tvIsPlausible(cns));
-      assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
-              Variant::AllowedAsConstantValue::Allowed);
-      // Resources are allowed as constant but we can't cache them
-      if (type(cns) != KindOfResource) {
-        tvIncRefGen(cns);
-        rds::handleToRef<TypedValue, rds::Mode::Normal>(tv_handle) = cns;
-      }
-      return cns;
-    }
+    UNUSED auto const tv =
+      rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
+    assertx(type(tv) == KindOfUninit);
+    Variant v = Constant::get(nm);
+    const TypedValue cns = v.detach();
+    assertx(tvIsPlausible(cns));
+    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+            Variant::AllowedAsConstantValue::Allowed);
+    tvIncRefGen(cns);
+    rds::handleToRef<TypedValue, rds::Mode::Normal>(tv_handle) = cns;
+    return cns;
   }
-  assertx(!rds::isHandleInit(tv_handle));
   return lookupCnsEHelper(nm);
 }
 
@@ -169,20 +163,15 @@ static TypedValue lookupCnsEHelperPersistent(rds::Handle tv_handle,
                                              StringData* nm) {
   assertx(rds::isPersistentHandle(tv_handle));
 
-  auto tv = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
+  UNUSED auto const tv =
+    rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
   assertx(type(tv) == KindOfUninit);
-
-  // Deferred system constants.
-  if (UNLIKELY(tv->m_data.pcnt != nullptr)) {
-    auto callback = reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-    Variant v = callback(nm);
-    const TypedValue cns = v.detach();
-    assertx(tvIsPlausible(cns));
-    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
-            Variant::AllowedAsConstantValue::Allowed);
-    return cns;
-  }
-  return lookupCnsEHelper(nm);
+  Variant v = Constant::get(nm);
+  const TypedValue cns = v.detach();
+  assertx(tvIsPlausible(cns));
+  assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+          Variant::AllowedAsConstantValue::Allowed);
+  return cns;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

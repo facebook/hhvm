@@ -102,10 +102,7 @@ TypedValue Constant::lookup(const StringData* cnsName) {
       return tv;
     }
 
-    assertx(tv.m_data.pcnt != nullptr);
-    auto const callback =
-      reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
-    Variant v = callback(cnsName);
+    Variant v = Constant::get(cnsName);
     const TypedValue tvRet = v.detach();
     assertx(tvIsPlausible(tvRet));
     assertx(tvAsCVarRef(&tvRet).isAllowedAsConstantValue() ==
@@ -170,24 +167,17 @@ void Constant::def(const Constant* constant) {
 
   auto const ch = makeCnsHandle(cnsName);
   assertx(rds::isHandleBound(ch));
-  auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
 
-  if (!rds::isHandleInit(ch)) {
-    cns->m_type = KindOfUninit;
-    cns->m_data.pcnt = nullptr;
-  }
-
-  if (UNLIKELY(cns->m_type != KindOfUninit ||
-               cns->m_data.pcnt != nullptr)) {
+  if (rds::isHandleInit(ch)) {
     raise_error(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   }
 
-  assertx(tvAsCVarRef(&cnsVal).isAllowedAsConstantValue() ==
-           Variant::AllowedAsConstantValue::Allowed ||
-          (cnsVal.m_type == KindOfUninit &&
-           cnsVal.m_data.pcnt != nullptr));
+  assertx(cnsVal.m_type == KindOfUninit ||
+          tvAsCVarRef(&cnsVal).isAllowedAsConstantValue() ==
+          Variant::AllowedAsConstantValue::Allowed);
 
   assertx(rds::isNormalHandle(ch));
+  auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
   tvDup(cnsVal, *cns);
   rds::initHandle(ch);
 }

@@ -15143,13 +15143,15 @@ Type Index::lookup_constant(Context ctx, SString cnsName) const {
     return from_cell(constant->val);
   }
 
+  // Assume a runtime call to Constant::get(), which will invoke
+  // 86cinit_<cnsName>(). Look up it's return type.
+
   auto const func_name = Constant::funcNameFromName(cnsName);
   assertx(func_name && "func_name will never be nullptr");
 
   auto rfunc = resolve_func(func_name);
-  // "Dynamic" constants like STDOUT will be KindOfUninit, but won't
-  // have an associated initializer.
-  if (!rfunc.exactFunc()) return TInitCell;
+  assertx(rfunc.exactFunc());
+
   return lookup_return_type(ctx, nullptr, rfunc, Dep::ConstVal);
 }
 

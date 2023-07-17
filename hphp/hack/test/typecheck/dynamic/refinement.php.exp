@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "refinement.php", line 6, characters 24-29:
   Expected `D<int>`
   File "refinement.php", line 20, characters 13-16:
-  But got `(<expr#1> as D<T#1> & (dynamic | <expr#1> as C<int>))` from this `is` expression test
+  But got `(<expr#1> as D<T#1> & ~<expr#1> as C<int>)` from this `is` expression test

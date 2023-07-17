@@ -7,6 +7,6 @@ Invalid return type (Typing[4110])
 File "akempty_tuple_bad.php", line 12, characters 8-9:
 Invalid `echo`/`print` argument (Typing[4438])
   File "akempty_tuple_bad.php", line 12, characters 3-6:
-  Expected `(dynamic | arraykey)`
+  Expected `~arraykey`
   File "akempty_tuple_bad.php", line 4, characters 18-24:
   But got `?string`

@@ -16,9 +16,7 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([5:3-10], (Expr ((string), [5:3-9], (String2 [((mixed), [5:4-8], (Hole (((mixed), [5:4-8], (Lvar ([5:4-8], $x))), (mixed), ((dynamic | arraykey | HH\FormatString<nothing>)), Typing)))]))))
-            ]
-          };
+          [([5:3-10], (Expr ((string), [5:3-9], (String2 [((mixed), [5:4-8], (Hole (((mixed), [5:4-8], (Lvar ([5:4-8], $x))), (mixed), (~(arraykey | HH\FormatString<nothing>)), Typing)))]))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

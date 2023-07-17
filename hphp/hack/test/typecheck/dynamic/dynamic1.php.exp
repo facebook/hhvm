@@ -23,9 +23,9 @@ File "dynamic1.php", line 33, characters 3-13:
 File "dynamic1.php", line 35, characters 3-13:
   dynamic
 File "dynamic1.php", line 37, characters 3-13:
-  (dynamic | int)
+  ~int
 File "dynamic1.php", line 39, characters 3-13:
-  (dynamic | float)
+  ~float
 File "dynamic1.php", line 41, characters 3-13:
   dynamic
 File "dynamic1.php", line 43, characters 3-13:

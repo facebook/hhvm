@@ -13,18 +13,18 @@
           [([3:3-14], (Expr ((string), [3:3-13], (Binop { bop = (Eq None); lhs = ((string), [3:3-5], (Lvar ([3:3-5], $s))); rhs = ((string), [3:8-13], (String "foo")) }))));
             ([4:3-42],
              (Expr
-                (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:3-41],
+                (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:3-41],
                  (Binop
-                    { bop = (Eq None); lhs = (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:3-5], (Lvar ([4:3-5], $f)));
+                    { bop = (Eq None); lhs = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:3-5], (Lvar ([4:3-5], $f)));
                       rhs =
-                      (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [4:8-41],
+                      (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:8-41],
                        (Lfun (
                           { f_span = [4:8-41]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
                             f_ret = ((string), None);
                             f_params =
-                            [{ param_annotation = ((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)));
-                               param_type_hint = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), None); 
+                            [{ param_annotation = (~?(bool | float | resource | arraykey | HH\FormatString<nothing>));
+                               param_type_hint = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), None); 
                                param_is_variadic = false; param_pos = [4:8-10]; 
                                param_name = "$n"; param_expr = None; 
                                param_readonly = None; param_callconv = Pnormal; 
@@ -41,7 +41,7 @@
                                                lhs =
                                                ((string), [4:24-31],
                                                 (Binop
-                                                   { bop = Dot; lhs = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), [4:24-26], (Lvar ([4:24-26], $n)));
+                                                   { bop = Dot; lhs = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), [4:24-26], (Lvar ([4:24-26], $n)));
                                                      rhs = ((string), [4:29-31], (Lvar ([4:29-31], $s))) }));
                                                rhs = ((string), [4:34-38], (String "\\n")) })))))
                                 ]
@@ -58,7 +58,7 @@
                       rhs =
                       ((string), [5:8-13],
                        (Call
-                          { func = (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
+                          { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
                             targs = []; args = [(Pnormal, ((int), [5:11-12], (Int "4")))]; 
                             unpacked_arg = None }))
                       }))));
@@ -70,7 +70,7 @@
                       rhs =
                       ((string), [6:8-17],
                        (Call
-                          { func = (((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
+                          { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
                             targs = []; args = [(Pnormal, ((string), [6:11-16], (String "bar")))]; 
                             unpacked_arg = None }))
                       }))))

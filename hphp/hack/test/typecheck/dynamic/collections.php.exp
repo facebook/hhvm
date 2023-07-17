@@ -1,5 +1,5 @@
 File "collections.php", line 8, characters 3-13:
-  vec<(dynamic | int)>
+  vec<~int>
 File "collections.php", line 10, characters 3-13:
   Vector<_>
 File "collections.php", line 12, characters 3-13:

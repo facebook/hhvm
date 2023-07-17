@@ -731,10 +731,6 @@ module Full = struct
         @ List.map (TySet.elements upper) ~f:(fun ty ->
               (tparam, Ast_defs.Constraint_as, ty))
 
-  let show_likes env =
-    TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-    || TypecheckerOptions.like_type_hints env.genv.tcopt
-
   let rec is_open_mixed env t =
     match get_node t with
     | Tnewtype (n, _, ty)
@@ -779,7 +775,7 @@ module Full = struct
     | Toption ty -> begin
       match deref ty with
       | (_, Tnonnull) -> (fuel, text "mixed")
-      | (r, Tunion tyl) when show_likes env && List.exists ~f:is_dynamic tyl ->
+      | (r, Tunion tyl) when List.exists ~f:is_dynamic tyl ->
         (* Unions with null become Toption, which leads to the awkward ?~...
          * The Tunion case can better handle this *)
         k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
@@ -879,7 +875,7 @@ module Full = struct
       *)
     | Ttuple tyl -> ttuple ~fuel k tyl
     | Tunion [] -> (fuel, text "nothing")
-    | Tunion tyl when show_likes env ->
+    | Tunion tyl ->
       let tyl =
         List.fold_right tyl ~init:TySet.empty ~f:TySet.add |> TySet.elements
       in
@@ -979,55 +975,6 @@ module Full = struct
             delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
           in
           let doc = Concat [text "~"; text "?"; tys_doc] in
-          (fuel, doc)
-      end
-    | Tunion tyl ->
-      let tyl =
-        List.fold_right tyl ~init:TySet.empty ~f:TySet.add |> TySet.elements
-      in
-      let (null, nonnull) =
-        List.partition_tf tyl ~f:(fun ty ->
-            equal_locl_ty_ (get_node ty) (Tprim Nast.Tnull))
-      in
-      begin
-        match (null, nonnull) with
-        (* type isn't nullable *)
-        | ([], [ty]) ->
-          let (fuel, ty_doc) = k ~fuel ty in
-          let doc =
-            if verbose then
-              Concat [text "("; ty_doc; text ")"]
-            else
-              ty_doc
-          in
-          (fuel, doc)
-        | ([], _) ->
-          delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
-        (* Type only is null *)
-        | (_, []) ->
-          let doc =
-            if verbose then
-              text "(null)"
-            else
-              text "null"
-          in
-          (fuel, doc)
-        (* Type is nullable single type *)
-        | (_, [ty]) ->
-          let (fuel, ty_doc) = k ~fuel ty in
-          let doc =
-            if verbose then
-              Concat [text "(null |"; ty_doc; text ")"]
-            else
-              Concat [text "?"; ty_doc]
-          in
-          (fuel, doc)
-        (* Type is nullable union type *)
-        | (_, _) ->
-          let (fuel, tys_doc) =
-            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
-          in
-          let doc = Concat [text "?"; tys_doc] in
           (fuel, doc)
       end
     | Tintersection [] -> (fuel, text "mixed")

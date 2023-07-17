@@ -25,7 +25,7 @@
                (Some ((string), [5:10-15],
                       (Binop
                          { bop = Dot; lhs = ((string), [5:10-12], (Lvar ([5:10-12], $x)));
-                           rhs = ((DateTime), [5:13-15], (Hole (((DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), ((dynamic | arraykey | HH\FormatString<nothing>)), Typing))) })))))
+                           rhs = ((DateTime), [5:13-15], (Hole (((DateTime), [5:13-15], (Lvar ([5:13-15], $y))), (DateTime), (~(arraykey | HH\FormatString<nothing>)), Typing))) })))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

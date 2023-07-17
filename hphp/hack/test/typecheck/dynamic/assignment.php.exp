@@ -1,5 +1,5 @@
 File "assignment.php", line 5, characters 3-13:
-  (dynamic | int)
+  ~int
 File "assignment.php", line 7, characters 3-13:
   string
 No errors

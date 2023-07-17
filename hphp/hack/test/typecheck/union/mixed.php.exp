@@ -9,7 +9,7 @@ File "mixed.php", line 43, characters 3-13:
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
-  ((function(?(dynamic | bool | float | resource | arraykey | HH\FormatString<_>) $s1, ?(dynamic | bool | float | resource | arraykey | HH\FormatString<_>) $s2): string) | (function(string $s1, string $s2): int))
+  ((function(~?(bool | float | resource | arraykey | HH\FormatString<_>) $s1, ~?(bool | float | resource | arraykey | HH\FormatString<_>) $s2): string) | (function(string $s1, string $s2): int))
 File "mixed.php", line 72, characters 3-13:
   A
 File "mixed.php", line 76, characters 3-13:

@@ -13,7 +13,7 @@ Invalid `echo`/`print` argument (Typing[4438])
 File "T90699200.php", line 9, characters 9-29:
 Invalid `echo`/`print` argument (Typing[4438])
   File "T90699200.php", line 9, characters 3-6:
-  Expected `(dynamic | arraykey)`
+  Expected `~arraykey`
   File "T90699200.php", line 9, characters 26-29:
   But got `?string`
 File "T90699200.php", line 11, characters 8-22:

@@ -8,7 +8,7 @@
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([3:68-83], (Happly (([3:68-77], "\\HH\\Awaitable"), [([3:78-82], (Hprim Tvoid))])))));
         f_params =
-        [{ param_annotation = ((dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)])))); 
+        [{ param_annotation = (~int); param_type_hint = ((~int), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)])))); 
            param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
@@ -17,7 +17,7 @@
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach ((((dynamic | int)), [5:12-15], (Hole ((((dynamic | int)), [5:12-15], (Lvar ([5:12-15], $xs))), ((dynamic | int)), (AsyncIterator<nothing>), Typing))),
+            (Foreach (((~int), [5:12-15], (Hole (((~int), [5:12-15], (Lvar ([5:12-15], $xs))), (~int), (AsyncIterator<nothing>), Typing))),
                (Await_as_v ([5:16-21], ((nothing), [5:25-27], (Lvar ([5:25-27], $x))))), 
                [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
             ]

@@ -1,5 +1,5 @@
 File "list_destructuring_union.php", line 7, characters 3-13:
-  (dynamic | int)
+  ~int
 File "list_destructuring_union.php", line 8, characters 3-13:
-  (dynamic | string)
+  ~string
 No errors

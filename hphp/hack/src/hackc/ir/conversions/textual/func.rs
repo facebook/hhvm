@@ -967,16 +967,11 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 // self::foo() - Static call to the method in the current class.
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
-                let (target, args) = if state.experimental_self_parent_in_trait && in_trait {
+                let target = if state.experimental_self_parent_in_trait && in_trait {
                     let base = ClassId::from_str("__self__", &state.strings);
-                    let var = LocalId::Named(state.strings.intern_str("self"));
-                    let self_ = state.load_mixed(textual::Expr::deref(var))?;
-                    args.push(textual::Expr::Sid(self_));
-                    let target = FunctionName::method(base, is_static, method);
-                    (target, args)
+                    FunctionName::method(base, is_static, method)
                 } else {
-                    let target = FunctionName::method(mi.class.name, is_static, method);
-                    (target, args)
+                    FunctionName::method(mi.class.name, is_static, method)
                 };
                 let this = state.load_this()?;
                 state.fb.call_static(&target, this.into(), args)?
@@ -992,13 +987,9 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                 // parent::foo() - Static call to the method in the parent class.
                 let mi = state.expect_method_info();
                 let is_static = mi.is_static;
-                let (target, args) = if state.experimental_self_parent_in_trait && in_trait {
+                let target = if state.experimental_self_parent_in_trait && in_trait {
                     let base = ClassId::from_str("__parent__", &state.strings);
-                    let var = LocalId::Named(state.strings.intern_str("self"));
-                    let self_ = state.load_mixed(textual::Expr::deref(var))?;
-                    args.push(textual::Expr::Sid(self_));
-                    let target = FunctionName::method(base, is_static, method);
-                    (target, args)
+                    FunctionName::method(base, is_static, method)
                 } else {
                     let base = if let Some(base) = mi.class.base {
                         base
@@ -1007,8 +998,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
                         // have a known parent. This can happen in a trait...
                         ClassId::from_str("__parent__", &state.strings)
                     };
-                    let target = FunctionName::method(base, is_static, method);
-                    (target, args)
+                    FunctionName::method(base, is_static, method)
                 };
                 let this = state.load_this()?;
                 state.fb.call_static(&target, this.into(), args)?

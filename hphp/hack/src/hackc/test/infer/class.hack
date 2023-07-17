@@ -378,9 +378,8 @@ trait T0 {
   // TEST-CHECK-BAL: define T0.trait_parent_caller
   // CHECK: define T0.trait_parent_caller($this: *T0, self: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &self
-  // CHECK:   n1: *T0 = load &$this
-  // CHECK:   n2 = __parent__.test_const(n1, n0)
+  // CHECK:   n0: *T0 = load &$this
+  // CHECK:   n1 = __parent__.test_const(n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
@@ -395,9 +394,8 @@ trait T1 {
   // TEST-CHECK-BAL: define T1.trait_parent_caller
   // CHECK: define T1.trait_parent_caller($this: *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &self
-  // CHECK:   n1: *T1 = load &$this
-  // CHECK:   n2 = __parent__.test_const(n1, n0)
+  // CHECK:   n0: *T1 = load &$this
+  // CHECK:   n1 = __parent__.test_const(n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_caller(): void {
@@ -407,9 +405,8 @@ trait T1 {
   // TEST-CHECK-BAL: define T1.trait_parent_static_caller
   // CHECK: define T1.trait_parent_static_caller($this: *T1, self: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &self
-  // CHECK:   n1: *T1 = load &$this
-  // CHECK:   n2 = __parent__.test_static(n1, n0)
+  // CHECK:   n0: *T1 = load &$this
+  // CHECK:   n1 = __parent__.test_static(n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_parent_static_caller(): void {
@@ -421,9 +418,8 @@ trait T2 {
   // TEST-CHECK-BAL: define T2$static.trait_self_caller
   // CHECK: define T2$static.trait_self_caller($this: *T2$static, self: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &self
-  // CHECK:   n1: *T2$static = load &$this
-  // CHECK:   n2 = __self__$static.f(n1, n0)
+  // CHECK:   n0: *T2$static = load &$this
+  // CHECK:   n1 = __self__$static.f(n0)
   // CHECK:   ret null
   // CHECK: }
   public static function trait_self_caller(): void {
@@ -437,10 +433,9 @@ trait T3 {
   // TEST-CHECK-BAL: define T3.trait_self_caller
   // CHECK: define T3.trait_self_caller($this: *T3, self: *HackMixed) : *void {
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &self
-  // CHECK:   n1: *T3 = load &$this
-  // CHECK:   n2 = __self__.f(n1, n0)
-  // CHECK:   n3 = __self__.g(n1, n0)
+  // CHECK:   n0: *T3 = load &$this
+  // CHECK:   n1 = __self__.f(n0)
+  // CHECK:   n2 = __self__.g(n0)
   // CHECK:   ret null
   // CHECK: }
   public function trait_self_caller(): void {

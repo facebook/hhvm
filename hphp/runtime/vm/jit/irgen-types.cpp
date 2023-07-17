@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
@@ -837,13 +838,45 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     return true;
   };
 
+  auto const primitiveKindToType = [](TypeStructure::Kind kind) {
+    switch (kind) {
+      case TypeStructure::Kind::T_int:         return TInt;
+      case TypeStructure::Kind::T_bool:        return TBool;
+      case TypeStructure::Kind::T_float:       return TDbl;
+      case TypeStructure::Kind::T_null:        return TNull;
+      case TypeStructure::Kind::T_void:        return TNull;
+      case TypeStructure::Kind::T_keyset:      return TKeyset;
+      default: always_assert(false && "Not primitive");
+    }
+    not_reached();
+  };
+
+  auto const classnameForResolvedClass = [&](const ArrayData* arr) -> const StringData* {
+    auto const clsname = get_ts_classname(arr);
+    if (arr->exists(s_generic_types)) {
+      auto cls = lookupUniqueClass(env, clsname);
+      if ((classIsPersistentOrCtxParent(env, cls) &&
+           cls->hasReifiedGenerics()) ||
+          !isTSAllWildcards(arr)) {
+        // If it is a reified class or has non wildcard generics,
+        // we need to bail
+        return nullptr;
+      }
+    }
+    return clsname;
+  };
+
   if (t->isA(TNull) && is_nullable_ts) return success();
 
   auto kind = get_ts_kind(ts);
   switch (kind) {
-    case TypeStructure::Kind::T_int:         return primitive(TInt);
-    case TypeStructure::Kind::T_bool:        return primitive(TBool);
-    case TypeStructure::Kind::T_float:       return primitive(TDbl);
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_keyset:
+      return primitive(primitiveKindToType(kind));
     case TypeStructure::Kind::T_string: {
       if (t->type().maybe(TLazyCls) &&
           RuntimeOption::EvalClassIsStringNotices) {
@@ -869,9 +902,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       }
       return unionOf(TStr, TLazyCls, TCls);
     }
-    case TypeStructure::Kind::T_null:        return primitive(TNull);
-    case TypeStructure::Kind::T_void:        return primitive(TNull);
-    case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_dynamic:
@@ -936,16 +966,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
-      auto const clsname = get_ts_classname(ts);
-      auto cls = lookupUniqueClass(env, clsname);
-      if (ts->exists(s_generic_types) &&
-          ((classIsPersistentOrCtxParent(env, cls) &&
-            cls->hasReifiedGenerics()) ||
-           !isTSAllWildcards(ts))) {
-        // If it is a reified class or has non wildcard generics,
-        // we need to bail
-        return false;
-      }
+      auto const clsname = classnameForResolvedClass(ts);
+      if (!clsname) return false;
       popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
       auto const res = implInstanceOfD(env, c, clsname);
@@ -955,6 +977,76 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
       return fail();
+    case TypeStructure::Kind::T_union: {
+      hphp_fast_set<Type> primitives;
+      hphp_fast_set<const StringData*> instances;
+      bool fallback = false;
+      if (is_nullable_ts) primitives.emplace(TNull);
+      IterateV(
+        get_ts_union_types(ts),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          auto const arr = ty.m_data.parr;
+          if (is_ts_nullable(arr)) primitives.emplace(TNull);
+          auto const arr_kind = get_ts_kind(arr);
+          switch (arr_kind) {
+            case TypeStructure::Kind::T_int:
+            case TypeStructure::Kind::T_bool:
+            case TypeStructure::Kind::T_float:
+            case TypeStructure::Kind::T_null:
+            case TypeStructure::Kind::T_void:
+            case TypeStructure::Kind::T_keyset:
+              primitives.emplace(primitiveKindToType(arr_kind));
+              break;
+            case TypeStructure::Kind::T_string:
+              if (RO::EvalClassIsStringNotices) {
+                // punt
+                fallback = true;
+                return true; // short-circuit
+              }
+              primitives.insert({TStr, TLazyCls, TCls});
+              break;
+            case TypeStructure::Kind::T_class:
+            case TypeStructure::Kind::T_interface:
+            case TypeStructure::Kind::T_xhp: {
+              auto const clsname = classnameForResolvedClass(arr);
+              if (!clsname) {
+                // punt
+                fallback = true;
+                return true; // short-circuit
+              }
+              instances.emplace(clsname);
+              break;
+            }
+            default:
+              fallback = true;
+              return true; // short-circuit
+          }
+          return false; // keep-going
+        }
+      );
+      if (fallback) return false; // fallback to regular check
+      assertx(!primitives.empty() || !instances.empty());
+      popC(env); // pop the ts that's on the stack
+      auto const c = popC(env);
+
+      MultiCond mc{env};
+      for (auto& ty : primitives) {
+        mc.ifTypeThen(c, ty, [&](SSATmp*) { return cns(env, true); });
+      }
+      for (auto const clsname : instances) {
+        mc.ifThen(
+          [&] (Block* taken) {
+            auto const success = implInstanceOfD(env, c, clsname);
+            gen(env, JmpZero, taken, success);
+            return c;
+          },
+          [&] (SSATmp*) { return cns(env, true); }
+        );
+      }
+      push(env, mc.elseDo([&]{ return cns(env, false); }));
+      return true;
+    }
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
@@ -967,7 +1059,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_union:
       // TODO(T28423611): Implement these
       return false;
   }

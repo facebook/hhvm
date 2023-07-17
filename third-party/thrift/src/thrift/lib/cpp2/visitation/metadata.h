@@ -22,7 +22,7 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-inline const auto& empty_thrift_field() {
+inline const auto& empty_thrift_field() noexcept {
   static const folly::Indestructible<metadata::ThriftField> t;
   return *t;
 }
@@ -36,10 +36,12 @@ struct MetadataForwarder {
 
   const bool kHasMetadata = !meta.fields()->empty();
 
+  const metadata::ThriftField& kEmpty = empty_thrift_field();
+
   template <class... Args>
   FOLLY_ERASE decltype(auto) operator()(size_t idx, Args&&... args) {
     return f(
-        kHasMetadata ? meta.fields()[idx] : empty_thrift_field(),
+        kHasMetadata ? meta.fields()[idx] : kEmpty,
         std::forward<Args>(args)...);
   }
 };

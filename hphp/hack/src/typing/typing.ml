@@ -9216,13 +9216,9 @@ and call
             ~default:el
             unpacked_element
         in
-        let expected_arg_ty =
-          (* Note: We ought to be using 'mixed' here *)
-          ExpectedTy.make expr_pos Reason.URparam (TUtils.mk_tany env expr_pos)
-        in
         let (env, tel) =
           List.map_env env el ~f:(fun env (pk, elt) ->
-              let (env, te, _ty) = expr ~expected:expected_arg_ty env elt in
+              let (env, te, _ty) = expr env elt in
               let env =
                 match pk with
                 | Ast_defs.Pinout _ ->

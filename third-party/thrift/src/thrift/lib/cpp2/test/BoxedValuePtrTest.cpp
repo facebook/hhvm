@@ -303,12 +303,12 @@ TEST(BoxedValueTest, CopyConstructor) {
   boxed_value<TestStruct> b{a};
   EXPECT_EQ(a.value(), 5);
   // shallow copy.
-  EXPECT_EQ(&b.value(), &a.value());
+  EXPECT_EQ(b.get(), a.get());
 
   a.mut();
   boxed_value<TestStruct> c{a};
   // deep copy.
-  EXPECT_NE(&c.value(), &a.value());
+  EXPECT_NE(c.get(), a.get());
 }
 
 TEST(BoxedValueTest, CopyAssignment) {
@@ -317,12 +317,12 @@ TEST(BoxedValueTest, CopyAssignment) {
   boxed_value<TestStruct> b = a;
   EXPECT_EQ(a.value(), 5);
   // shallow copy.
-  EXPECT_EQ(&b.value(), &a.value());
+  EXPECT_EQ(b.get(), a.get());
 
   a.mut();
   boxed_value<TestStruct> c = a;
   // deep copy.
-  EXPECT_NE(&c.value(), &a.value());
+  EXPECT_NE(c.get(), a.get());
 }
 
 TEST(BoxedValueTest, MoveConstructor) {
@@ -455,7 +455,7 @@ TEST(BoxedValueTest, ValueComparison) {
   b.mut();
 
   // 'b' points to shared value; meanwhile, 'c' owns the same value.
-  EXPECT_NE(&a.value(), &b.value());
+  EXPECT_NE(a.get(), b.get());
   EXPECT_EQ(a, b);
 }
 
@@ -465,9 +465,9 @@ TEST(BoxedValueTest, Ensure) {
   boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t);
   boxed_value<TestStruct> c;
 
-  EXPECT_EQ(&a.value(), &b.value());
+  EXPECT_EQ(a.get(), b.get());
   a.ensure();
-  EXPECT_EQ(&a.value(), &b.value());
+  EXPECT_EQ(a.get(), b.get());
 
   c.ensure();
   c.mut().set_a(1);

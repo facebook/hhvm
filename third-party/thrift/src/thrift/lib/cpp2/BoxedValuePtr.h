@@ -212,6 +212,8 @@ class boxed_ptr {
     return ptr;
   }
 
+  FOLLY_ERASE constexpr T* get() const noexcept { return ptr_.get(); }
+
  private:
   static constexpr int kModeBits = 3;
   using aligned_pointer_type =
@@ -336,6 +338,7 @@ class boxed_value : public boost::totally_ordered<boxed_value<T>>,
   FOLLY_ERASE constexpr void reset(std::unique_ptr<T> p) noexcept {
     ptr_.reset(std::move(p));
   }
+  FOLLY_ERASE constexpr T* get() const noexcept { return ptr_.get(); }
 
  private:
   FOLLY_ERASE explicit constexpr boxed_value(const T* p)

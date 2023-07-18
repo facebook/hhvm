@@ -596,8 +596,8 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
 
   std::string privKeyStrHex;
   folly::readFile(echPrivateKeyFile.c_str(), privKeyStrHex);
-  auto privKeyStr = folly::unhexlify(privKeyStrHex);
-  folly::ByteRange privKeyBuf((folly::StringPiece(privKeyStr)));
+
+  folly::ByteRange privKeyBuf(folly::trimWhitespace(privKeyStrHex));
 
   // Create a key exchange and set the private key
   auto kexWithPrivateKey =

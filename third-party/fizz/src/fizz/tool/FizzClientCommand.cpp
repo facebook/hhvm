@@ -83,6 +83,8 @@ void printUsage() {
     << "                          (JSON format: {echconfigs: [${your ECH config here with all the fields..}]})\n"
     << "                          (See FizzCommandCommonTest for an example.)\n"
     << "                          (Note: Setting ech configs implicitly enables ECH.)\n"
+    << " -echbase64 echConfigList (base64 encoded string of echconfigs.)"
+    << "                          (The echconfigs file argument must match the ECH Config List format specified in the ECH RFC.)\n"
 #ifdef FIZZ_TOOL_ENABLE_OQS
     << " -hybridkex               (Use experimental hybrid key exchange. Currently the only supported named groups under\n"
     << "                          this mode are secp384r1_bikel3 and secp521r1_x25519)\n"
@@ -540,6 +542,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   bool delegatedCredentials = false;
   bool ech = false;
   std::string echConfigsFile;
+  std::string echConfigsBase64;
   bool uring = false;
   bool uringAsync = false;
   bool uringRegisterFds = false;
@@ -613,6 +616,9 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     }}},
     {"-echconfigs", {true, [&echConfigsFile](const std::string& arg) {
         echConfigsFile = arg;
+    }}},
+    {"-echbase64", {true, [&echConfigsBase64](const std::string& arg) {
+        echConfigsBase64 = arg;
     }}}
 #ifdef FIZZ_TOOL_ENABLE_OQS
     ,{"-hybridkex", {false, [&useHybridKexFactory](const std::string&) {
@@ -788,22 +794,26 @@ int fizzClientCommand(const std::vector<std::string>& args) {
             clientContext->getSupportedSigSchemes());
   }
 
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs = folly::none;
+  folly::Optional<ech::ECHConfigList> echConfigList = folly::none;
 
   if (ech) {
     // Use default ECH config values.
-    echConfigs = getDefaultECHConfigs();
-  }
-
-  if (!echConfigsFile.empty()) {
-    // Parse user set ECH configs.
+    auto echConfigContents = getDefaultECHConfigs();
+    echConfigList->configs = std::move(echConfigContents);
+  } else if (!echConfigsBase64.empty()) {
+    echConfigList = parseECHConfigsBase64(echConfigsBase64);
+    if (!echConfigList.has_value()) {
+      LOG(ERROR) << "Unable to parse ECHConfigList base64.";
+      return 1;
+    }
+  } else if (!echConfigsFile.empty()) {
     auto echConfigsJson = readECHConfigsJson(echConfigsFile);
     if (!echConfigsJson.has_value()) {
       LOG(ERROR) << "Unable to load ECH configs from json file";
       return 1;
     }
-    auto gotECHConfigs = parseECHConfigs(echConfigsJson.value());
-    if (!gotECHConfigs.has_value()) {
+    echConfigList = parseECHConfigs(echConfigsJson.value());
+    if (!echConfigList.has_value()) {
       LOG(ERROR)
           << "Unable to parse JSON file and make ECH config."
           << "Ensure the format matches what is expected."
@@ -811,7 +821,11 @@ int fizzClientCommand(const std::vector<std::string>& args) {
           << "See FizzCommandCommonTest for a more concrete example.";
       return 1;
     }
-    echConfigs = std::move(gotECHConfigs.value().configs);
+  }
+
+  std::vector<ech::ECHConfig> echConfigs;
+  if (echConfigList.has_value()) {
+    echConfigs = std::move(echConfigList->configs);
   }
 
   try {

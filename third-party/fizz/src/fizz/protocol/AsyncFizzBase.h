@@ -21,7 +21,8 @@ using Cert = folly::AsyncTransportCertificate;
 
 /**
  * This class is a wrapper around AsyncTransportWrapper to handle most app level
- * interactions so that the derived client and server classes
+ * interactions. The derived client and server classes utilize the protected
+ * methods.
  */
 class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
                           folly::AsyncTransportWrapper>,

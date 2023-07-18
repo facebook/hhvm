@@ -10,6 +10,9 @@
 open Hh_prelude
 open Sys_utils
 
+let comma_string_to_iset (s : string) : ISet.t =
+  Str.split (Str.regexp ", *") s |> List.map ~f:int_of_string |> ISet.of_list
+
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
@@ -24,6 +27,7 @@ type options = {
   extra_builtins: string list;
   mode: mode;
   no_builtins: bool;
+  naming_table_path: string option;
   tcopt: GlobalOptions.t;
 }
 
@@ -83,6 +87,8 @@ let parse_options () =
   let disable_xhp_element_mangling = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
+  let root = ref None in
+  let naming_table = ref None in
   let saved_state_manifold_api_key = ref None in
   let options =
     [
@@ -116,6 +122,13 @@ let parse_options () =
       ( "--manifold-api-key",
         Arg.String (set "manifold api key" saved_state_manifold_api_key),
         " API key used to download a saved state from Manifold (optional)" );
+      ( "--naming-table",
+        Arg.String (fun s -> naming_table := Some s),
+        " Naming table, to look up undefined symbols; needs --root."
+        ^ " (Hint: buck2 run //hphp/hack/src/hh_naming_table_builder)" );
+      ( "--root",
+        Arg.String (fun s -> root := Some s),
+        " Root for where to look up undefined symbols; needs --naming-table" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -126,7 +139,63 @@ let parse_options () =
     | (x, _) -> x
   in
 
-  let root = Path.make "/" (* we use this dummy *) in
+  if Option.is_some !naming_table && Option.is_none !root then
+    failwith "--naming-table needs --root";
+
+  (* --root implies certain things... *)
+  let ( allowed_fixme_codes_strict,
+        auto_namespace_map,
+        sharedmem_config,
+        no_builtins,
+        root ) =
+    match !root with
+    | None ->
+      let allowed_fixme_codes_strict = None in
+      let auto_namespace_map = None in
+      let sharedmem_config = SharedMem.default_config in
+      let no_builtins = false in
+      let root = Path.make "/" (* if none specified, we use this dummy *) in
+      ( allowed_fixme_codes_strict,
+        auto_namespace_map,
+        sharedmem_config,
+        no_builtins,
+        root )
+    | Some root ->
+      if Option.is_none !naming_table then
+        failwith "--root needs --naming-table";
+
+      (* builtins are already provided by project at --root, so we shouldn't provide our own *)
+      let no_builtins = true in
+      (* Following will throw an exception if .hhconfig not found *)
+      let (_config_hash, config) =
+        Config_file.parse_hhconfig
+          (Filename.concat root Config_file.file_path_relative_to_repo_root)
+      in
+      (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)
+      let auto_namespace_map =
+        config
+        |> Config_file.Getters.string_opt "auto_namespace_map"
+        |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map
+      in
+      let allowed_fixme_codes_strict =
+        config
+        |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
+        |> Option.map ~f:comma_string_to_iset
+      in
+      let sharedmem_config =
+        ServerConfig.make_sharedmem_config
+          config
+          (ServerArgs.default_options ~root)
+          ServerLocalConfig.default
+      in
+      (* Path.make canonicalizes it, i.e. resolves symlinks *)
+      let root = Path.make root in
+      ( allowed_fixme_codes_strict,
+        auto_namespace_map,
+        sharedmem_config,
+        no_builtins,
+        root )
+  in
 
   let tcopt =
     GlobalOptions.set
@@ -140,6 +209,9 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~tco_everything_sdt:true
       ~tco_enable_sound_dynamic:true
+      ?po_auto_namespace_map:auto_namespace_map
+      ~allowed_fixme_codes_strict:
+        (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
       GlobalOptions.default
   in
   (* Configure symbol index settings *)
@@ -166,12 +238,13 @@ let parse_options () =
       files = fns;
       extra_builtins = !extra_builtins;
       mode = !mode;
-      no_builtins = !no_builtins;
+      no_builtins;
+      naming_table_path = !naming_table;
       tcopt;
     },
     sienv,
     root,
-    SharedMem.default_config )
+    sharedmem_config )
 
 (** This is an almost-pure function which returns what we get out of parsing.
 The only side-effect it has is on the global errors list. *)
@@ -307,7 +380,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
 (*****************************************************************************)
 
 let decl_and_run_mode
-    { files; extra_builtins; mode; no_builtins; tcopt }
+    { files; extra_builtins; mode; no_builtins; tcopt; naming_table_path }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
     (sienv : SearchUtils.si_env) : unit =
@@ -389,6 +462,33 @@ let decl_and_run_mode
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
       ~package_info:PackageInfo.empty
   in
+
+  (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
+     so it will look in the sqlite database for names it doesn't know.
+     This function returns the forward naming table. *)
+  let naming_table_for_root : Naming_table.t option =
+    Option.map naming_table_path ~f:(fun path ->
+        Naming_table.load_from_sqlite ctx path)
+  in
+  (* If run in naming-table mode, we first have to remove any old names from the files we're about to redeclare --
+     otherwise when we declare them it'd count as a duplicate definition! *)
+  Option.iter naming_table_for_root ~f:(fun naming_table_for_root ->
+      Relative_path.Map.iter files_contents ~f:(fun file _content ->
+          let file_info =
+            Naming_table.get_file_info naming_table_for_root file
+          in
+          Option.iter file_info ~f:(fun file_info ->
+              let ids_to_strings ids =
+                List.map ids ~f:(fun (_, name, _) -> name)
+              in
+              Naming_global.remove_decls
+                ~backend:(Provider_context.get_backend ctx)
+                ~funs:(ids_to_strings file_info.FileInfo.funs)
+                ~classes:(ids_to_strings file_info.FileInfo.classes)
+                ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
+                ~consts:(ids_to_strings file_info.FileInfo.consts)
+                ~modules:(ids_to_strings file_info.FileInfo.modules))));
+
   let (_errors, files_info) = parse_name_and_decl ctx to_decl in
   let naming_table = Naming_table.create files_info in
   handle_mode mode files ctx sienv naming_table

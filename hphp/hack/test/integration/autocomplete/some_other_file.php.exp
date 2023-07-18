@@ -1,0 +1,18 @@
+class
+  INSERT class
+  classname<this>
+SECOND_NAME
+  INSERT SECOND_NAME
+  HH\MemberOf<SomeEnumClass, ~string>
+FIRST_NAME
+  INSERT FIRST_NAME
+  HH\MemberOf<SomeEnumClass, ~int>
+valueOf
+  INSERT valueOf(${1:\$label})
+  function(HH\EnumClass\Label<TEnum, TType> $label): ~HH\MemberOf<TEnum, TType>
+nameOf
+  INSERT nameOf(${1:\$label})
+  function(HH\EnumClass\Label<this, TType> $label): string
+getValues
+  INSERT getValues()
+  function(): ~dict<string, HH\MemberOf<SomeEnumClass, ~mixed>>

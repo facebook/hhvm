@@ -3616,22 +3616,6 @@ and expr_
     ~check_defined
     env
     ((_, p, e) as outer) =
-  let (e, outer) =
-    match e with
-    | Call
-        {
-          func = (_, _, Id (_, s));
-          targs = [_targ_from; (_, targ_to)];
-          args = (_, arg) :: _;
-          _;
-        }
-      when String.equal s SN.PseudoFunctions.unsafe_cast
-           && TCO.everything_sdt (Env.get_tcopt env) ->
-      (* Under implicit pessimisation, treat UNSAFE case as an upcast to a like type *)
-      let new_e = Upcast (arg, (p, Hlike targ_to)) in
-      (new_e, ((), p, new_e))
-    | _ -> (e, outer)
-  in
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
     let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
@@ -5187,19 +5171,11 @@ and expr_
     make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
   | Upcast (e, hint) ->
     let (env, te, expr_ty) = expr env e in
-    let ((env, ty_err_opt1), hint_ty) =
+    let ((env, ty_err_opt), hint_ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
-    let (env, ty_err_opt2) =
-      SubType.sub_type
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        expr_ty
-        hint_ty
-      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    let env = upcast env p expr_ty hint_ty in
     make_result env p (Aast.Upcast (te, hint)) hint_ty
   | Efun
       { ef_fun = f; ef_use = idl; ef_closure_class_name = closure_class_name }
@@ -7542,7 +7518,7 @@ and dispatch_call
       in
       let should_forget_fakes = false in
       (result, should_forget_fakes)
-    (* Special function `isset` *)
+      (* Special function `isset` *)
     | isset when String.equal isset SN.PseudoFunctions.isset ->
       let (env, tel, _) =
         argument_list_exprs
@@ -10019,6 +9995,18 @@ and call_untyped_unpack env f_pos unpacked_element =
       (LoclType ety)
       destructure_ty
       Typing_error.Callback.unify_error
+
+and upcast env p expr_ty hint_ty =
+  let (env, ty_err_opt) =
+    SubType.sub_type
+      ~coerce:(Some Typing_logic.CoerceToDynamic)
+      env
+      expr_ty
+      hint_ty
+    @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+  in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  env
 
 (**
  * Build an environment for the true or false branch of

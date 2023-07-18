@@ -1,7 +1,4 @@
 === SDT analysis results for unsafe_cast1.php
-Intraprocedural Constraints for (ClassLike "\\C"):
-   7: NeedsSDT
-
 Interprocedural Constraints for (ClassLike "\\C"):
      3: (CustomInterConstraint
    { classish_kind_opt = (Some (Cclass Concrete));

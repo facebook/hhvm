@@ -34,6 +34,19 @@
 
 namespace HPHP {
 
+
+PackageInfo::PackageInfo(PackageMap& packages,
+                         DeploymentMap& deployments)
+  : m_packages(packages)
+  , m_deployments(deployments) {
+  for (auto const& [packageName, package] : m_packages) {
+    for (auto const& glob: package.m_uses) {
+      m_globToPackage.push_back(std::make_pair(glob, packageName));
+    }
+  }
+  std::sort(m_globToPackage.begin(), m_globToPackage.end());
+}
+
 PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   std::ifstream file(path, std::ios::in);
   if (!file.is_open()) return defaults();
@@ -84,7 +97,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   }
 #endif
 
-  return PackageInfo { packages, deployments };
+  return PackageInfo(packages, deployments);
 }
 
 PackageInfo PackageInfo::defaults() {
@@ -166,9 +179,6 @@ bool moduleNameMatchesPattern(const std::string& moduleName,
   if (pattern == "*") return true;
   auto size = pattern.size();
   if (size > 2 && pattern[size-1] == '*' && pattern[size-2] == '.') {
-    // Looking for a prefix match
-    // TODO: This is very inefficient, improve this using a something along the
-    // lines of a trie before using it in production
     if (moduleName.size() <= size - 1) return false;
     // Check if size - 1 length prefix of moduleName matches pattern
     return moduleName.compare(0, size - 1, pattern, 0, size - 1) == 0;
@@ -179,22 +189,46 @@ bool moduleNameMatchesPattern(const std::string& moduleName,
 
 } // namespace
 
-bool PackageInfo::moduleInPackage(const StringData* module,
-                                  const Package& package) const {
+// Given `moduleName`, find the longest matching glob within
+// m_globToPackage[start:end] and return its corresponding package
+std::string PackageInfo::findPackageInRange(const std::string& moduleName,
+                                            ssize_t start, ssize_t end) const {
+  if (start > end) return "";
+  ssize_t mid = start + (end - start) / 2;
+  auto const& glob = m_globToPackage[mid].first;
+
+  // impossible to match against globs that are lexicographically larger
+  if (glob > moduleName) {
+    return findPackageInRange(moduleName, start, mid - 1);
+  }
+
+  if (moduleNameMatchesPattern(moduleName, glob)) {
+    auto const& currentMatch = m_globToPackage[mid].second;
+    // prioritize a more specific glob match if one exists
+    auto const nextMatch = findPackageInRange(moduleName, mid + 1, end);
+    if (!nextMatch.empty()) return nextMatch;
+    return currentMatch;
+  }
+  // attempt to find a glob match in the upper half first
+  auto const match = findPackageInRange(moduleName, mid + 1, end);
+  if (!match.empty()) return match;
+  // fall back to finding a match in the lower half
+  return findPackageInRange(moduleName, start, mid - 1);
+}
+
+std::string PackageInfo::getPackageForModule(const StringData* module) const {
   assertx(module && !module->empty());
   auto const moduleName = module->toCppString();
-  for (auto const& pattern : package.m_uses) {
-    if (moduleNameMatchesPattern(moduleName, pattern)) return true;
-  }
-  return false;
+  return findPackageInRange(moduleName, 0, m_globToPackage.size() - 1);
 }
 
 bool PackageInfo::moduleInPackages(const StringData* module,
                                    const PackageSet& packageSet) const {
+  auto const packageForModule = getPackageForModule(module);
   for (auto const& package : packageSet) {
     auto const it = packages().find(package);
     if (it == end(packages())) continue;
-    if (moduleInPackage(module, it->second)) return true;
+    if (package == packageForModule) return true;
   }
   return false;
 }

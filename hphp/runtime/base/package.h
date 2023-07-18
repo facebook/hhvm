@@ -81,11 +81,11 @@ struct PackageInfo {
   const PackageMap& packages() const { return m_packages; }
   const DeploymentMap& deployments() const { return m_deployments; }
 
+  PackageInfo(PackageMap& packages, DeploymentMap& deployments);
+  PackageInfo() = default;
+
   const Deployment* getActiveDeployment() const;
   bool isPackageInActiveDeployment(const StringData* package) const;
-
-  bool moduleInPackage(const StringData* module,
-                       const Package& package) const;
 
   bool moduleInDeployment(const StringData* module,
                           const Deployment& deployment,
@@ -98,18 +98,29 @@ struct PackageInfo {
   template <typename SerDe> void serde(SerDe& sd) {
     sd(m_packages, stdltstr{})
       (m_deployments, stdltstr{})
+      (m_globToPackage)
       ;
   }
 
   static PackageInfo fromFile(const std::filesystem::path&);
   static PackageInfo defaults();
 
+private:
+  std::string findPackageInRange(const std::string& moduleName,
+                                 ssize_t start, ssize_t end) const;
+
+  std::string getPackageForModule(const StringData* module) const;
+
+  bool moduleInPackages(const StringData* module,
+                        const PackageSet& packageSet) const;
+
+public:
   PackageMap m_packages;
   DeploymentMap m_deployments;
 
-  private:
-    bool moduleInPackages(const StringData* module,
-                          const PackageSet& packageSet) const;
+private:
+  std::vector<std::pair<std::string, std::string>> m_globToPackage;
+
 };
 
 bool will_symbol_raise_deployment_boundary_violation(

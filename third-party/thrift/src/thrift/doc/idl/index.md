@@ -390,6 +390,7 @@ struct ::=
   "}"
 
 field ::=
+  [annotations]
   field_id ":" [field_qualifier] type identifier [default_value]
 
 field_id ::=  integer
@@ -576,8 +577,11 @@ function ::=
 function_qualifier ::=  "oneway" | "idempotent" | "readonly"
 return_type        ::=  "void" | type | stream_return_type
 stream_return_type ::=  [("void" | type) ","] "stream" "<" type [throws] ">"
-parameter          ::=  field_id ":" type identifier [default_value]
 throws             ::=  ["throws" "(" field+ ")"]
+
+parameter ::=
+  [annotations]
+  field_id ":" type identifier [default_value]
 
 performs         ::=  "performs" interaction_name ";"
 interaction_name ::=  maybe_qualified_id
@@ -585,7 +589,7 @@ interaction_name ::=  maybe_qualified_id
 
 An interface for RPC is defined in a Thrift file as a service.
 
-Each service has a set of functions. Each function has a unique name and takes a list of arguments. It can return normally with a result if the result type is not `void` or it can return by throwing one of the listed application exceptions. In addition, the function can return by throwing a Thrift system exception if there was some underlying problem with the RPC itself.
+Each service has a set of functions. Each function has a unique name and takes a list of arguments. It can return normally with a result if the result type is not `void` or it can throw one of the listed application exceptions. In addition, the function can throw a Thrift system exception if there was some underlying problem with the RPC itself.
 
 The types of the field specifications after `throws` must be exception types. If a functions throws one of the exceptions given in the `throws` clause, then all of the members of this exception will be serialized and sent over the wire. For other undeclared exceptions only the message will be serialized and they will appear on the client side as `TApplicationException`.
 
@@ -788,7 +792,7 @@ Thrift has strongly-typed containers that map to commonly used containers in tar
 
 * `list<T>`: A list of elements of type `T`. May contain duplicates.
 * `set<T>`: An unordered set of unique elements of type `T`.
-* `map<K,V>`: An unordered map of unique keys of type `K` to values of type `V`.
+* `map<K, V>`: An unordered map of unique keys of type `K` to values of type `V`.
 
 :::note
 In some languages default mode is to use ordered sets and maps. This could be changed to use unordered and customized containers - see [Thrift Annotations](/idl/annotations.md#unstructured-annotations-deprecated).

@@ -164,40 +164,46 @@ struct Adapter {
 Thrift Adapter allows further customization points to avoid calling `fromThrift` and `toThrift` for optimization. Assume `obj` has type `AdaptedType`.
 
 * Comparison and Equality
-   * Comparison Priority
-      * `Adapter::equal(const AdaptedType& lhs, const AdaptedType& rhs)`
-      * `AdaptedType::operator==(const AdaptedType& rhs)`
-      * `DefaultType::operator==(const DefaultType& rhs)` using `Adapter::toThrift(lhs) == Adapter::toThrift(rhs)`
-   * Equality Priority is same as above.
+  * Comparison Priority
+    * `Adapter::equal(const AdaptedType& lhs, const AdaptedType& rhs)`
+    * `AdaptedType::operator==(const AdaptedType& rhs)`
+    * `DefaultType::operator==(const DefaultType& rhs)` using `Adapter::toThrift(lhs) == Adapter::toThrift(rhs)`
+  * Equality Priority is same as above.
 
 * Hash
-   * Hash Priority
-      * `std::hash<AdaptedType>(obj)`
-      * `std::hash<DefaultType>(Adapter::toThrift(obj))`
+  * Hash Priority
+    * `std::hash<AdaptedType>(obj)`
+    * `std::hash<DefaultType>(Adapter::toThrift(obj))`
 
 * Clear
-   * Clear Priority
-      * `Adapter::clear(obj)`
-      * `obj = AdaptedType()`
+  * Clear Priority
+    * `Adapter::clear(AdaptedType&)`
+    * `obj = AdaptedType()`
 
 * Serialized Size
-   * SerializeSize Priority
-      * `Adapter::serializedSize(Protocol&, AdaptedType&)`
-      * `Protocol::serializedSize(Adapter::toThrift(obj))`
+  * SerializeSize Priority
+    * `Adapter::serializedSize(Protocol&, AdaptedType&)`
+    * `Protocol::serializedSize(Adapter::toThrift(obj))`
 
 * Serialize and Deserialize
-   * Serialization Priority
-      * `Adapter::encode<Tag>(Protocol&, const AdaptedType&)`
-      * `Encode<Tag>(Protocol&, Adapter::toThrift(obj))`
-   * Deserialization Priority: [In-place deserialization](#in-place-deserialization)
+  * Serialization Priority
+    * `Adapter::encode<Tag>(Protocol&, const AdaptedType&)`
+    * `op::encode<Tag>(Protocol&, Adapter::toThrift(obj))`
+  * Deserialization Priority: [In-place deserialization](#in-place-deserialization)
    (second option) will be phased-out soon. We recommend that you implement the `Adapter::decode` customization instead.
-      * `Adapter::decode<Tag>(Protocol&, AdaptedType&)`
-      * `Decode<Tag>(Protocol&, Adapter::toThrift(obj))`
-      * ```
-         T thrift_value;
-         Decode<Tag>(protocol, thrift_value);
-         obj = Adapter::fromThrift(thrift_value);
-        ```
+    * `Adapter::decode<Tag>(Protocol&, AdaptedType&)`
+    * `op::decode<Tag>(Protocol&, Adapter::toThrift(obj))`
+    * ```
+      DefaultType thrift_value;
+      op::decode<Tag>(protocol, thrift_value);
+      obj = Adapter::fromThrift(thrift_value);
+      ```
+
+* Empty
+  * Empty Priority
+    * `Adapter::isEmpty(const AdaptedType&)`
+    * `op::isEmpty(Adapter::toThrift(obj))`
+
 
 ### Other Codegen Customizations
 

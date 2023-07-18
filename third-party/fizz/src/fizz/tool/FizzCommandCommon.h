@@ -35,8 +35,7 @@
 namespace fizz {
 namespace tool {
 
-folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
-    folly::dynamic json);
+folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json);
 
 folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile);
 

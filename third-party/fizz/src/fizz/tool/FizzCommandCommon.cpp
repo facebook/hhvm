@@ -164,8 +164,7 @@ folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile) {
   return json;
 }
 
-folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
-    folly::dynamic json) {
+folly::Optional<ech::ECHConfigList> parseECHConfigs(folly::dynamic json) {
   auto getKDFId = [](std::string kdfStr) {
     if (kdfStr == "Sha256") {
       return hpke::KDFId::Sha256;
@@ -256,7 +255,9 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
   if (echConfigs.empty()) {
     return folly::none;
   } else {
-    return echConfigs;
+    ech::ECHConfigList echConfigList;
+    echConfigList.configs = echConfigs;
+    return echConfigList;
   }
 }
 

@@ -590,7 +590,7 @@ std::shared_ptr<ech::Decrypter> setupDecrypterFromInputs(
   auto decrypter = std::make_shared<ech::ECHConfigManager>();
 
   // If more that 1 ECH config is provided, we use the first one.
-  ech::ECHConfig gotConfig = gotECHConfigs.value()[0];
+  ech::ECHConfig gotConfig = gotECHConfigs.value().configs[0];
   auto kemId =
       getKEMId((*echConfigsJson)["echconfigs"][0]["kem_id"].asString());
 

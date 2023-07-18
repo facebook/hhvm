@@ -811,7 +811,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
           << "See FizzCommandCommonTest for a more concrete example.";
       return 1;
     }
-    echConfigs = std::move(gotECHConfigs.value());
+    echConfigs = std::move(gotECHConfigs.value().configs);
   }
 
   try {

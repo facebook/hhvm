@@ -9,6 +9,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/protocol/ech/Types.h>
 #include <fizz/tool/FizzCommandCommon.h>
 #include <folly/container/Array.h>
 
@@ -90,13 +91,14 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
         }]
       }
   )");
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
-      parseECHConfigs(json);
+  folly::Optional<ech::ECHConfigList> echConfigList = parseECHConfigs(json);
 
-  ASSERT_TRUE(echConfigs.has_value());
+  ASSERT_TRUE(echConfigList.has_value());
 
-  ASSERT_EQ(echConfigs->size(), 1);
-  auto echConfig = echConfigs.value()[0];
+  auto echConfigs = echConfigList->configs;
+
+  ASSERT_EQ(echConfigs.size(), 1);
+  auto echConfig = echConfigs[0];
   ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft15);
 
   folly::io::Cursor cursor(echConfig.ech_config_content.get());
@@ -122,13 +124,15 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
         }]
       }
   )");
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
-      parseECHConfigs(json);
 
-  ASSERT_TRUE(echConfigs.has_value());
+  folly::Optional<ech::ECHConfigList> echConfigList = parseECHConfigs(json);
 
-  ASSERT_EQ(echConfigs->size(), 1);
-  auto echConfig = echConfigs.value()[0];
+  ASSERT_TRUE(echConfigList.has_value());
+
+  auto echConfigs = echConfigList->configs;
+
+  ASSERT_EQ(echConfigs.size(), 1);
+  auto echConfig = echConfigs[0];
   ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft15);
 
   folly::io::Cursor cursor(echConfig.ech_config_content.get());
@@ -144,8 +148,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsFailure) {
         }]
       }
   )");
-  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
-      parseECHConfigs(json);
+  folly::Optional<ech::ECHConfigList> echConfigs = parseECHConfigs(json);
   ASSERT_FALSE(echConfigs.has_value());
 }
 

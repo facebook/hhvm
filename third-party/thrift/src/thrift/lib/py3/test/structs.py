@@ -266,6 +266,7 @@ class StructTests(unittest.TestCase):
                 ("inst", "foo"),
                 ("changes", "bar"),
                 ("__mangled_str", ""),
+                ("__mangled_int", 0),
             ],
         )
         self.assertEqual(
@@ -279,6 +280,7 @@ class StructTests(unittest.TestCase):
                 "inst",
                 "changes",
                 "__mangled_str",
+                "__mangled_int",
             ],
         )
 

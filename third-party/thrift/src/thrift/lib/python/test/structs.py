@@ -23,6 +23,7 @@ from unittest import mock
 from folly.iobuf import IOBuf
 
 from testing.thrift_types import (
+    __Reserved as DoubleUnderscoreReserved,
     Color,
     ComplexRef,
     customized,
@@ -143,7 +144,6 @@ class StructTests(unittest.TestCase):
             Runtime(int_list_val=["foo", "bar", "baz"])
 
     def test_reserved(self) -> None:
-        # pyre-ignore[28]: Unexpected keyword argument `__mangled_str`.
         x = Reserved(
             from_="hello",
             nonlocal_=3,
@@ -152,7 +152,8 @@ class StructTests(unittest.TestCase):
             move="Qh4xe1",
             inst="foo",
             changes="bar",
-            __mangled_str="secret",
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
         )
         self.assertEqual(x.from_, "hello")
         self.assertEqual(x.nonlocal_, 3)
@@ -161,13 +162,17 @@ class StructTests(unittest.TestCase):
         self.assertEqual(x.move, "Qh4xe1")
         self.assertEqual(x.inst, "foo")
         self.assertEqual(x.changes, "bar")
-        # pyre-ignore[16]: `Reserved` has no attribute `__mangled_str`.
-        self.assertEqual(getattr(x, "__mangled_str"), "secret")  # noqa: B009
-        with self.assertRaises(AttributeError):
-            # pyre-ignore[16]: `Reserved` has no attribute `_StructTests__mangled_str`.
-            x.__mangled_str
+        self.assertEqual(x._Reserved__mangled_str, "secret")
+        self.assertEqual(x._Reserved__mangled_int, 42)
 
         self.assertEqual(x, x)
+
+        y = DoubleUnderscoreReserved(
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
+        )
+        self.assertEqual(y._Reserved__mangled_str, "secret")
+        self.assertEqual(y._Reserved__mangled_int, 42)
 
     def test_ordering(self) -> None:
         x = Runtime(bool_val=False, enum_val=Color.red, int_list_val=[64, 128])
@@ -184,7 +189,6 @@ class StructTests(unittest.TestCase):
             easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
 
     def test_iterate(self) -> None:
-        # pyre-ignore[28]: Unexpected keyword argument `__mangled_str`.
         x = Reserved(
             from_="hello",
             nonlocal_=3,
@@ -193,7 +197,8 @@ class StructTests(unittest.TestCase):
             move="Qh4xe1",
             inst="foo",
             changes="bar",
-            __mangled_str="secret",
+            _Reserved__mangled_str="secret",
+            _Reserved__mangled_int=42,
         )
         self.assertEqual(
             list(x),
@@ -205,7 +210,8 @@ class StructTests(unittest.TestCase):
                 ("move", "Qh4xe1"),
                 ("inst", "foo"),
                 ("changes", "bar"),
-                ("__mangled_str", "secret"),
+                ("_Reserved__mangled_str", "secret"),
+                ("_Reserved__mangled_int", 42),
             ],
         )
         self.assertEqual(
@@ -218,7 +224,8 @@ class StructTests(unittest.TestCase):
                 "move",
                 "inst",
                 "changes",
-                "__mangled_str",
+                "_Reserved__mangled_str",
+                "_Reserved__mangled_int",
             ],
         )
 

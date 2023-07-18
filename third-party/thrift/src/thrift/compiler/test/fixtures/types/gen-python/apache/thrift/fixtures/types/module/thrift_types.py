@@ -1604,7 +1604,7 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
         (
             1,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "__field",  # name
+            "_StructWithDoubleUnderscores__field",  # name
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info

@@ -273,6 +273,12 @@ struct Reserved {
   6: string inst; // not a keyword
   7: string changes; // not a keyword
   8: string __mangled_str;
+  9: i64 __mangled_int;
+}
+
+struct __Reserved {
+  1: string __mangled_str;
+  2: i64 __mangled_int;
 }
 
 union ReservedUnion {

@@ -963,7 +963,18 @@ class python_mstch_field : public mstch_field {
         });
   }
 
-  mstch::node py_name() { return py_name_; }
+  mstch::node py_name() {
+    if (boost::algorithm::starts_with(py_name_, "__") &&
+        !boost::algorithm::ends_with(py_name_, "__")) {
+      auto class_name = field_context_->strct->name();
+      boost::algorithm::trim_left_if(class_name, boost::is_any_of("_"));
+      if (class_name.empty()) {
+        return py_name_;
+      }
+      return "_" + class_name + py_name_;
+    }
+    return py_name_;
+  }
   mstch::node cpp_name() { return cpp2::get_name(field_); }
   mstch::node tablebased_qualifier() {
     const std::string enum_type = "FieldQualifier.";

@@ -89,6 +89,9 @@ val localize_hint_no_subst :
 val localize_hint_for_refinement :
   env -> Aast.hint -> (env * Typing_error.t option) * locl_ty
 
+val localize_hint_for_lambda :
+  env -> Aast.hint -> (env * Typing_error.t option) * locl_ty
+
 val localize_ft :
   ?instantiation:method_instantiation ->
   ety_env:expand_env ->

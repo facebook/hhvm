@@ -51,12 +51,14 @@ let hint_to_type_opt env hint = Option.map hint ~f:(Decl_hint.hint env)
 let hint_to_type ~default env hint =
   Option.value (hint_to_type_opt env hint) ~default
 
+let make_wildcard_ty pos =
+  mk (Reason.Rwitness_from_decl pos, Typing_defs.Twildcard)
+
 let make_param_ty env param =
   let param_pos = Decl_env.make_decl_pos env param.param_pos in
   let ty =
-    let r = Reason.Rwitness_from_decl param_pos in
     hint_to_type
-      ~default:(mk (r, Typing_defs.make_tany ()))
+      ~default:(make_wildcard_ty param_pos)
       env
       (hint_of_type_hint param.param_type_hint)
   in
@@ -91,12 +93,11 @@ let make_param_ty env param =
 
 let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =
   let pos = Decl_env.make_decl_pos env pos in
-  let default = mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       mk (Reason.Rwitness_from_decl pos, Tprim Tvoid)
     else
-      hint_to_type ~default env hint
+      hint_to_type ~default:(make_wildcard_ty pos) env hint
   in
   match hint with
   | None ->

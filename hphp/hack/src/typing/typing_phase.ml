@@ -1536,6 +1536,15 @@ let localize_hint_for_refinement env h =
     ~wildcard_action:Wildcard_fresh_generic
     h
 
+let localize_hint_for_lambda env h =
+  let (pos, _) = h in
+  let h = Decl_hint.hint env.decl_env h in
+  localize_no_subst_
+    env
+    ~on_error:(Some (Typing_error.Reasons_callback.invalid_type_hint pos))
+    ~wildcard_action:Wildcard_fresh_tyvar
+    h
+
 let localize_no_subst env ~ignore_errors ty =
   localize_no_subst_
     env

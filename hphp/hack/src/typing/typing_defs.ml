@@ -415,6 +415,11 @@ let is_nothing t =
   | Tunion [] -> true
   | _ -> false
 
+let is_wildcard t =
+  match get_node t with
+  | Twildcard -> true
+  | _ -> false
+
 let is_nonnull t =
   match get_node t with
   | Tnonnull -> true

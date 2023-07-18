@@ -921,9 +921,7 @@ let closure_check_param env param =
   | None -> env
   | Some hty ->
     let hint_pos = fst hty in
-    let ((env, ty_err_opt1), hty) =
-      Phase.localize_hint_no_subst env ~ignore_errors:false hty
-    in
+    let ((env, ty_err_opt1), hty) = Phase.localize_hint_for_lambda env hty in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
     let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
     let (env, ty_err_opt2) =
@@ -5443,7 +5441,7 @@ and check_function_dynamically_callable
 
 and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.
-   * If type hints are absent then use Tany instead. *)
+   * If type hints are absent then use Twildcard instead. *)
   let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
   let { fe_type; fe_pos; _ } = declared_fe in
   let (declared_pos, declared_ft) =
@@ -5464,6 +5462,8 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
     empty_expand_env_with_on_error
       (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
+  (* For Twildcard types, generate fresh type variables *)
+  let ety_env = { ety_env with wildcard_action = Wildcard_fresh_tyvar } in
   let ((env, ty_err_opt), declared_ft) =
     Phase.(
       localize_ft
@@ -5473,7 +5473,6 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
         env
         declared_decl_ft)
   in
-
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   let idl =
     List.map idl ~f:(fun ((), ((_, name) as id)) ->
@@ -5543,29 +5542,36 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
     check_lambda_arity env p (get_pos ty) declared_ft expected_ft;
     (* Use declared types for parameters in preference to those determined
      * by the context (expected parameters): they might be more general. *)
-    let rec replace_non_declared_types declared_ft_params expected_ft_params =
-      match (declared_ft_params, expected_ft_params) with
-      | ( declared_ft_param :: declared_ft_params,
+    let rec replace_non_declared_types
+        declared_decl_ft_params declared_ft_params expected_ft_params =
+      match
+        (declared_decl_ft_params, declared_ft_params, expected_ft_params)
+      with
+      | ( declared_decl_ft_param :: declared_decl_ft_params,
+          declared_ft_param :: declared_ft_params,
           expected_ft_param :: expected_ft_params ) ->
         let rest =
-          replace_non_declared_types declared_ft_params expected_ft_params
+          replace_non_declared_types
+            declared_decl_ft_params
+            declared_ft_params
+            expected_ft_params
         in
-        (* If the type parameter did not have a type hint, it is Tany and
+        (* If the type parameter did not have a type hint, it is Twildcard and
            we use the expected type instead. Otherwise, declared type takes
            precedence. *)
         let resolved_ft_param =
-          if TUtils.is_any env declared_ft_param.fp_type.et_type then
+          if Typing_defs.is_wildcard declared_decl_ft_param.fp_type.et_type then
             { declared_ft_param with fp_type = expected_ft_param.fp_type }
           else
             declared_ft_param
         in
         resolved_ft_param :: rest
-      | (_, []) ->
+      | (_, _, []) ->
         (* Morally, this case should match on ([],[]) because we already
            check arity mismatch between declared and expected types. We
            handle it more generally here to be graceful. *)
         declared_ft_params
-      | ([], _) ->
+      | ([], [], _) ->
         if (not (get_ft_variadic declared_ft)) && get_ft_variadic expected_ft
         then
           []
@@ -5574,12 +5580,17 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
            * than declared parameters in the lambda. For variadics, this is OK.
            *)
           expected_ft_params
+      | _ ->
+        failwith "declared_decl_ft_params length not same as declared_ft_params"
     in
     let expected_ft =
       {
         expected_ft with
         ft_params =
-          replace_non_declared_types declared_ft.ft_params expected_ft.ft_params;
+          replace_non_declared_types
+            declared_decl_ft.ft_params
+            declared_ft.ft_params
+            expected_ft.ft_params;
         ft_implicit_params = declared_ft.ft_implicit_params;
         ft_flags = declared_ft.ft_flags;
       }
@@ -5637,9 +5648,9 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
           else
             MakeType.mixed r
         in
-        let replace_non_declared_type declared_ft_param =
+        let replace_non_declared_type declared_decl_ft_param declared_ft_param =
           let is_undeclared =
-            TUtils.is_any env declared_ft_param.fp_type.et_type
+            Typing_defs.is_wildcard declared_decl_ft_param.fp_type.et_type
           in
           if is_undeclared then
             let enforced_ty =
@@ -5651,48 +5662,17 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
         in
         let expected_ft =
           let ft_params =
-            List.map ~f:replace_non_declared_type declared_ft.ft_params
+            List.map2_exn
+              ~f:replace_non_declared_type
+              declared_decl_ft.ft_params
+              declared_ft.ft_params
           in
           { declared_ft with ft_params }
         in
         check_body_under_known_params ~supportdyn env expected_ft
       | _ ->
+        (* Missing types in parameter and result will have been replaced by fresh type variables *)
         Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
-
-        (* Replace uses of Tany that originated from "untyped" parameters or return type
-         * with fresh type variables *)
-        let freshen_ftype env ft =
-          let freshen_ty env pos et =
-            match get_node et.et_type with
-            | Tany _ ->
-              let (env, ty) = Env.fresh_type env pos in
-              (env, { et with et_type = ty })
-            | Tclass (id, e, [ty])
-              when String.equal (snd id) SN.Classes.cAwaitable && is_any ty ->
-              let (env, t) = Env.fresh_type env pos in
-              ( env,
-                {
-                  et with
-                  et_type = mk (get_reason et.et_type, Tclass (id, e, [t]));
-                } )
-            | _ -> (env, et)
-          in
-          let freshen_untyped_param env ft_param =
-            let (env, fp_type) =
-              freshen_ty
-                env
-                (Pos_or_decl.unsafe_to_raw_pos ft_param.fp_pos)
-                ft_param.fp_type
-            in
-            (env, { ft_param with fp_type })
-          in
-          let (env, ft_params) =
-            List.map_env env ft.ft_params ~f:freshen_untyped_param
-          in
-          let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
-          (env, { ft with ft_params; ft_ret })
-        in
-        let (env, declared_ft) = freshen_ftype env declared_ft in
         let env =
           Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
         in
@@ -5848,9 +5828,7 @@ and closure_bind_variadic env vparam variadic_ty =
       (* if the hint is missing, use the type we expect *)
       ((env, None), variadic_ty, get_pos variadic_ty)
     | Some hint ->
-      let ((env, ty_err_opt1), h) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false hint
-      in
+      let ((env, ty_err_opt1), h) = Phase.localize_hint_for_lambda env hint in
       ((env, ty_err_opt1), h, Pos_or_decl.of_raw_pos vparam.param_pos)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -6113,12 +6091,14 @@ and closure_make
     empty_expand_env_with_on_error
       (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
+  let ety_env = { ety_env with wildcard_action = Wildcard_fresh_tyvar } in
   let this_class = Env.get_self_class env in
   let params_decl_ty =
     List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
-        match get_node et_type with
-        | Tany _ -> None
-        | _ -> Some et_type)
+        if Typing_defs.is_wildcard et_type then
+          None
+        else
+          Some et_type)
   in
   (* Do we need to re-check the body of the lambda under dynamic assumptions? *)
   let sdt_dynamic_check_required =

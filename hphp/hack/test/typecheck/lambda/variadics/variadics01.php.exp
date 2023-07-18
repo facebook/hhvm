@@ -6,3 +6,15 @@ File "variadics01.php", line 49, characters 26-30:
 Was expecting an object but type is unknown (Typing[4297])
   File "variadics01.php", line 49, characters 18-19:
   It is unknown because a type could not be determined here
+File "variadics01.php", line 62, characters 14-18:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadics01.php", line 61, characters 17-18:
+  It is unknown because a type could not be determined here
+File "variadics01.php", line 67, characters 14-18:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadics01.php", line 66, characters 9-10:
+  It is unknown because a type could not be determined here
+File "variadics01.php", line 75, characters 30-34:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadics01.php", line 75, characters 22-23:
+  It is unknown because a type could not be determined here

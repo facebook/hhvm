@@ -37,6 +37,19 @@ from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
 
 
+try:
+    import cinder
+    def _make_cached_property(f, owner, name):
+        return cinder.cached_property(f, getattr(owner, name))
+except ImportError:
+    # On MacOS/Windows where Cinder is not available, degrade to not-cached property.
+    # Field values are always cached in Cython level, we just lose the Python level cache.
+    def _make_cached_property(f, owner, name):
+        prop = property(f)
+        prop.__set_name__(owner, name)
+        return prop
+
+
 cdef public api cIOBuf* get_cIOBuf(object buf):
     if buf is None:
         return NULL
@@ -789,7 +802,7 @@ cdef class Union(StructOrUnion):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 
 cdef make_fget_struct(i):
-    return property(lambda self: (<Struct>self)._fbthrift_get_field_value(i))
+    return lambda self: (<Struct>self)._fbthrift_get_field_value(i)
 
 cdef make_fget_union(type_value, adapter_info):
     if adapter_info:
@@ -810,22 +823,34 @@ def _fbthrift_setattr(name, _):
 
 
 class StructMeta(type):
-    def __new__(cls, name, bases, dct):
+    def __new__(cls, cls_name, bases, dct):
         fields = dct.pop('_fbthrift_SPEC')
         num_fields = len(fields)
-        dct["_fbthrift_struct_info"] = StructInfo(name, fields)
-        dct["__setattr__"] = _fbthrift_setattr
+        dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
         primitive_types = []
+        non_primitive_types = []
         slots = []
         for i, f in enumerate(fields):
+            slots.append(f[2])
             if f[5] is not None or not isPrimitiveType(f[3]):
-                dct[f[2]] = make_fget_struct(i)
+                non_primitive_types.append((i, f[2]))
             else:
                 primitive_types.append((i, f[2], f[3]))
-                slots.append(f[2])
         dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
-        return super().__new__(cls, name, (Struct,), dct)
+        klass = super().__new__(cls, cls_name, (Struct,), dct)
+        for field_index, field_name in non_primitive_types:
+            type.__setattr__(
+                klass,
+                field_name,
+                _make_cached_property(
+                    make_fget_struct(field_index),
+                    klass,
+                    field_name,
+                )
+            )
+        klass.__setattr__ = _fbthrift_setattr
+        return klass
 
     def _fbthrift_fill_spec(cls):
         (<StructInfo>cls._fbthrift_struct_info).fill()

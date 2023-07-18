@@ -69,7 +69,6 @@ let init (root : Path.t) (naming_table_path : string option) :
       ~tcopt
       ~backend:Provider_backend.Shared_memory
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ~package_info:PackageInfo.empty
   in
   let workers = make_workers root server_config server_local_config in
   Hh_logger.log

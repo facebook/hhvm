@@ -2633,6 +2633,7 @@ let decl_and_run_mode
       in
       info
   in
+  let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
   let ctx =
     if rust_provider_backend then (
       Provider_backend.set_rust_backend popt;
@@ -2641,13 +2642,11 @@ let decl_and_run_mode
         ~tcopt
         ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-        ~package_info
     ) else
       Provider_context.empty_for_test
         ~popt
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-        ~package_info
   in
 
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"

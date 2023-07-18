@@ -293,7 +293,6 @@ let make_empty_ctx (common : common_state) : Provider_context.t =
     ~tcopt:(ServerConfig.typechecker_options common.config)
     ~backend:(Provider_backend.Local_memory common.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    ~package_info:PackageInfo.empty
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (common : common_state) (entry : Provider_context.entry)
@@ -327,6 +326,16 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   in
   let server_args = ServerArgs.set_config server_args param.config in
   let (config, local_config) = ServerConfig.load ~silent:true server_args in
+  (* Ignore package loading errors for now TODO(jjwu) *)
+  let open GlobalOptions in
+  log "Loading package configuration";
+  let (_, package_info) = PackageConfig.load_and_parse () in
+  let tco = ServerConfig.typechecker_options config in
+  let config =
+    ServerConfig.set_tc_options
+      config
+      { tco with tco_package_info = package_info }
+  in
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);
   HackEventLogger.set_rollout_flags

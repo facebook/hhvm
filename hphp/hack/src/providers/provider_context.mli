@@ -105,7 +105,6 @@ val empty_for_tool :
   tcopt:TypecheckerOptions.t ->
   backend:Provider_backend.t ->
   deps_mode:Typing_deps_mode.t ->
-  package_info:PackageInfo.t ->
   t
 
 (** The empty context, for use with Multiworker workers. This assumes that the
@@ -124,7 +123,6 @@ val empty_for_test :
   popt:ParserOptions.t ->
   tcopt:TypecheckerOptions.t ->
   deps_mode:Typing_deps_mode.t ->
-  package_info:PackageInfo.t ->
   t
 
 (** The empty context, for use in debugging aides in production code, where

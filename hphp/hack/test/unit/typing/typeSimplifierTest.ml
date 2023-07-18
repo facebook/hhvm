@@ -42,7 +42,6 @@ end = struct
         ~popt:ParserOptions.default
         ~tcopt:TypecheckerOptions.default
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-        ~package_info:PackageInfo.empty
     in
     let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let env = Env.set_log_level env "show" 2 in

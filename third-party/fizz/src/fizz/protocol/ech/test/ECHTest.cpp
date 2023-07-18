@@ -59,6 +59,39 @@ TEST(ECHTest, TestConfigContentEncodeDecode) {
       folly::StringPiece("cookie"));
 }
 
+TEST(ECHTest, TestECHConfigListEncodeDecode) {
+  // Make ECH configs
+  ECHConfig echConfig1;
+  echConfig1.version = ECHVersion::Draft15;
+  echConfig1.ech_config_content =
+      encode<ECHConfigContentDraft>(getECHConfigContent());
+  ECHConfig echConfig2;
+  echConfig2.version = ECHVersion::Draft15;
+  echConfig2.ech_config_content =
+      encode<ECHConfigContentDraft>(getECHConfigContent());
+  ECHConfig echConfig3;
+  echConfig3.version = ECHVersion::Draft15;
+  echConfig3.ech_config_content =
+      encode<ECHConfigContentDraft>(getECHConfigContent());
+
+  // Encode ECH config List
+  ECHConfigList echConfigList;
+  echConfigList.configs = {echConfig1, echConfig2};
+  auto encodedBuf = encode<ECHConfigList>(std::move(echConfigList));
+
+  // Decode ECH config
+  folly::io::Cursor cursor(encodedBuf.get());
+  auto gotECHConfigList = decode<ECHConfigList>(cursor);
+
+  // All ECHConfigs in ECHConfigList should be the same
+  for (auto& echConfig : gotECHConfigList.configs) {
+    EXPECT_EQ(echConfig.version, ECHVersion::Draft15);
+    EXPECT_TRUE(folly::IOBufEqualTo()(
+        echConfig.ech_config_content,
+        encode<ECHConfigContentDraft>(getECHConfigContent())));
+  }
+}
+
 TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;

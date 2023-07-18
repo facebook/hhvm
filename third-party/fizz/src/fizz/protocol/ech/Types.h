@@ -118,6 +118,10 @@ struct ECHConfig {
   }
 };
 
+struct ECHConfigList {
+  std::vector<ECHConfig> configs;
+};
+
 } // namespace ech
 } // namespace fizz
 

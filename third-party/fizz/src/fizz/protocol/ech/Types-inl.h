@@ -173,4 +173,26 @@ inline ech::ECHConfig decode(folly::io::Cursor& cursor) {
 
   return echConfig;
 }
+
+template <>
+inline ech::ECHConfigList decode(folly::io::Cursor& cursor) {
+  ech::ECHConfigList echConfigList;
+  detail::readVector<uint16_t>(echConfigList.configs, cursor);
+  return echConfigList;
+}
+
+template <>
+inline Buf encode<const ech::ECHConfigList&>(
+    const ech::ECHConfigList& echConfigList) {
+  auto buf = folly::IOBuf::create(sizeof(uint16_t));
+  folly::io::Appender appender(buf.get(), 20);
+  detail::writeVector<uint16_t>(echConfigList.configs, appender);
+  return buf;
+}
+
+template <>
+inline Buf encode<ech::ECHConfigList>(ech::ECHConfigList&& echConfigList) {
+  return encode<const ech::ECHConfigList&>(echConfigList);
+}
+
 } // namespace fizz

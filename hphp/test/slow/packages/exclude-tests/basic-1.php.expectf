@@ -1,0 +1,2 @@
+I'm %s/exclude-tests/basic-1.inc.php
+I'm %s/exclude-tests/__tests__/basic-1-test.inc.php

@@ -1,0 +1,10 @@
+[packages]
+
+[packages.foo]
+uses = ["a"]
+
+[deployments]
+
+[deployments.one]
+packages = ["foo"]
+soft_packages=[]

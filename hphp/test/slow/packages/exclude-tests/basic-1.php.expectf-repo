@@ -1,0 +1,3 @@
+I'm %s/exclude-tests/basic-1.inc.php
+
+Fatal error: Call to undefined function access_test_in_module_a() in %s/exclude-tests/basic-1.php on line 8

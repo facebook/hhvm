@@ -81,6 +81,7 @@ pub fn fmt_hint<'arena>(
                 format!("{}<{}>", name, fmt_hints(alloc, tparams, args)?)
             }
         }
+        Hwildcard => "_".into(),
         Hfun(hf) => {
             // TODO(mqian): Implement for inout parameters
             format!(
@@ -185,7 +186,7 @@ fn fmt_hints<'arena>(
 
 fn can_be_nullable(hint: &Hint_) -> bool {
     match hint {
-        Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
+        Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed | Hwildcard => false,
         Hoption(Hint(_, h)) => {
             if let Haccess(_, _) = **h {
                 true
@@ -210,7 +211,9 @@ fn hint_to_type_constraint<'arena>(
 ) -> Result<Constraint<'arena>> {
     let Hint(_, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => Constraint::default(),
+        Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | Hwildcard => {
+            Constraint::default()
+        }
         Haccess(_, _) => Constraint::make(
             Just("".into()),
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,

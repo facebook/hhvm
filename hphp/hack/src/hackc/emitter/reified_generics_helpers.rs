@@ -131,11 +131,11 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::Hrefinement(_, _)
         | Hint_::Happly(_, _)
         | Hint_::HfunContext(_)
-        | Hint_::Hvar(_) => Hint(pos, hint),
+        | Hint_::Hvar(_)
+        | Hint_::Hwildcard => Hint(pos, hint),
         Hint_::Herr
         | Hint_::Hany
         | Hint_::Hmixed
-        | Hint_::Hwildcard
         | Hint_::Hnonnull
         | Hint_::Habstr(_, _)
         | Hint_::HvecOrDict(_, _)
@@ -220,11 +220,13 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
                     field_map,
                 })
             }
-            h_ @ Hint_::Hfun(_) | h_ @ Hint_::Haccess(_, _) | h_ @ Hint_::Hrefinement(_, _) => h_,
+            h_ @ Hint_::Hfun(_)
+            | h_ @ Hint_::Haccess(_, _)
+            | h_ @ Hint_::Hrefinement(_, _)
+            | h_ @ Hint_::Hwildcard => h_,
             Hint_::Herr
             | Hint_::Hany
             | Hint_::Hmixed
-            | Hint_::Hwildcard
             | Hint_::Hnonnull
             | Hint_::Habstr(_, _)
             | Hint_::HvecOrDict(_, _)

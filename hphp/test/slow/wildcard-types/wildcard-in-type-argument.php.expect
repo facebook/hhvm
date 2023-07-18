@@ -1,0 +1,18 @@
+int(3)
+vec(1) {
+  int(2)
+}
+int(3)
+vec(1) {
+  int(2)
+}
+object(G) (1) {
+  ["item":"G":private]=>
+  int(3)
+}
+object(G) (1) {
+  ["item":"G":private]=>
+  vec(1) {
+    int(2)
+  }
+}

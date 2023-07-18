@@ -62,4 +62,4 @@ impl Hash for TShapeField {
     }
 }
 
-pub type TShapeMap<T> = crate::collections::SortedAssocList<TShapeField, T>;
+pub type TShapeMap<T> = std::collections::BTreeMap<TShapeField, T>;

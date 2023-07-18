@@ -24,7 +24,6 @@ pub use manual::aast;
 pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
 pub use manual::ast_defs_impl;
-pub use manual::collections;
 pub use manual::custom_error_config_impl;
 pub use manual::direct_decl_parser;
 pub use manual::global_options_impl;

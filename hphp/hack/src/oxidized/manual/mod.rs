@@ -7,7 +7,6 @@ pub use crate::gen::aast_defs as aast;
 pub mod aast_defs_impl;
 pub mod aast_impl;
 pub mod ast_defs_impl;
-pub mod collections;
 pub mod custom_error_config_impl;
 pub mod direct_decl_parser;
 pub mod errors_impl;

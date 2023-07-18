@@ -597,8 +597,6 @@ struct RuntimeOption {
   static std::string FatalErrorMessage;
   static std::string FontPath;
   static bool EnableStaticContentFromDisk;
-  static bool EnableOnDemandUncompress;
-  static bool EnableStaticContentMMap;
 
   static bool Utf8izeReplace;
 
@@ -710,7 +708,6 @@ struct RuntimeOption {
   static bool EnableArgsInBacktraces;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;
-  static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
   static int CheckCLIClientCommands;
   static HackStrictOption StrictArrayFillKeys;
@@ -890,7 +887,6 @@ struct RuntimeOption {
   F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, MemInfoCheckCgroup2,         true)                            \
-  F(bool, AllowScopeBinding,           false)                           \
   F(bool, TranslateHackC,              true)                            \
   F(bool, VerifyTranslateHackC,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
@@ -1494,7 +1490,6 @@ struct RuntimeOption {
   F(int32_t, RequestTearingSkewMicros, 1500)                            \
   F(bool,    SampleRequestTearingForce, true)                           \
   F(bool, EnableAbstractContextConstants, true)                         \
-  F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   F(bool, DiamondTraitMethods, false)                                   \
   F(bool, TreatCaseTypesAsMixed, true)                                  \

@@ -654,7 +654,6 @@ users can use the same machine serving their own source files.
     }
 
     TimeoutsUseWallTime = true
-    CheckFlushOnUserClose = true
 
     # Causes HHVM to disallow constructs that are unavailable when Repo.Authoritative
     # is active, without requiring you to run in Repo.Authoritative.
@@ -679,12 +678,6 @@ configuration, disable this when tuning.
 
 Determines whether or not to interpret set_time_limit timeouts as wall time or
 CPU time (which the reference implementation uses.) Defaults to wall time.
-
-- CheckFlushOnUserClose
-
-Determines whether or not close() for user streams (registered by
-stream_wrapper_register) will consider the return value of the implicit call to
-flush() when calculating its return value.
 
 = MySQL
 

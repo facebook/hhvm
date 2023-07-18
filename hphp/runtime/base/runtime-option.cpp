@@ -658,7 +658,6 @@ bool RuntimeOption::TrustAutoloaderPath = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
-bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
@@ -886,8 +885,6 @@ std::string RuntimeOption::ErrorDocument500;
 std::string RuntimeOption::FatalErrorMessage;
 std::string RuntimeOption::FontPath;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
-bool RuntimeOption::EnableOnDemandUncompress = true;
-bool RuntimeOption::EnableStaticContentMMap = true;
 
 bool RuntimeOption::Utf8izeReplace = true;
 
@@ -1960,8 +1957,6 @@ void RuntimeOption::Load(
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
                  true);
-    Config::Bind(CheckFlushOnUserClose, ini, config,
-                 "Eval.CheckFlushOnUserClose", true);
     Config::Bind(EvalInitialTypeTableSize, ini, config,
                  "Eval.InitialNamedEntityTableSize",
                  EvalInitialTypeTableSize);
@@ -2515,13 +2510,6 @@ void RuntimeOption::Load(
       Config::GetString(ini, config, "Server.FontPath"));
     Config::Bind(EnableStaticContentFromDisk, ini, config,
                  "Server.EnableStaticContentFromDisk", true);
-    Config::Bind(EnableOnDemandUncompress, ini, config,
-                 "Server.EnableOnDemandUncompress", true);
-    Config::Bind(EnableStaticContentMMap, ini, config,
-                 "Server.EnableStaticContentMMap", true);
-    if (EnableStaticContentMMap) {
-      EnableOnDemandUncompress = true;
-    }
     Config::Bind(Utf8izeReplace, ini, config, "Server.Utf8izeReplace", true);
 
     Config::Bind(RequestInitFunction, ini, config,

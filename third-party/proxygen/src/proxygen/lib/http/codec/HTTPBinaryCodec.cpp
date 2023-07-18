@@ -325,7 +325,7 @@ void HTTPBinaryCodec::onIngressEOF() {
           parseError_ =
               fmt::format("Invalid Framing Indicator '{}' for {} codec",
                           request_ ? "request" : "response",
-                          transportDirection_);
+                          folly::to_underlying(transportDirection_));
           break;
         }
         if (!request_) {

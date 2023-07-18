@@ -106,8 +106,8 @@ class t_field final : public t_named {
     clone->reset_annotations(annotations());
 
     // structued annotations
-    for (auto annot : structured_annotations()) {
-      clone->add_structured_annotation(annot->clone());
+    for (const auto& annot : structured_annotations()) {
+      clone->add_structured_annotation(annot.clone());
     }
 
     clone->qual_ = qual_;

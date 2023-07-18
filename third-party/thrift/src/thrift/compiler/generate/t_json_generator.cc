@@ -23,6 +23,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/generate/json.h>
@@ -78,8 +79,7 @@ class t_json_generator : public t_concat_generator {
  private:
   void print_annotations(
       const std::map<std::string, annotation_value>& annotations);
-  void print_structured_annotations(
-      const std::vector<const t_const*>& annotations);
+  void print_structured_annotations(node_list_view<const t_const> annotations);
   void print_node_annotations(
       const t_named& node, bool add_heading_comma, bool add_trailing_comma);
   void print_source_range(const source_range& range);
@@ -471,7 +471,7 @@ void t_json_generator::print_annotations(
 }
 
 void t_json_generator::print_structured_annotations(
-    const std::vector<const t_const*>& annotations) {
+    node_list_view<const t_const> annotations) {
   indent(f_out_) << "\"structured_annotations\" : {";
   indent_up();
   bool first = true;
@@ -481,8 +481,8 @@ void t_json_generator::print_structured_annotations(
       f_out_ << ",";
     }
     f_out_ << endl;
-    indent(f_out_) << "\"" << type_name(annotation->get_type()) << "\" : ";
-    print_const_value(annotation->get_value());
+    indent(f_out_) << "\"" << type_name(annotation.get_type()) << "\" : ";
+    print_const_value(annotation.get_value());
   }
   f_out_ << endl;
   indent_down();

@@ -56,13 +56,13 @@ struct allowed_scopes {
   std::unordered_set<std::type_index> types;
 
   explicit allowed_scopes(node_metadata_cache& cache, const t_const& annot) {
-    for (const auto* meta_annot : annot.get_type()->structured_annotations()) {
-      if (is_transitive_annotation(*meta_annot->get_type())) {
+    for (const auto& meta_annot : annot.get_type()->structured_annotations()) {
+      if (is_transitive_annotation(*meta_annot.get_type())) {
         const auto& transitive_scopes =
-            cache.get<allowed_scopes>(*meta_annot).types;
+            cache.get<allowed_scopes>(meta_annot).types;
         types.insert(transitive_scopes.begin(), transitive_scopes.end());
       }
-      auto itr = uri_map().find(meta_annot->get_type()->uri());
+      auto itr = uri_map().find(meta_annot.get_type()->uri());
       if (itr != uri_map().end()) {
         types.emplace(itr->second);
       }
@@ -86,8 +86,8 @@ void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node) {
     return;
   }
 
-  for (const t_const* annot : node.structured_annotations()) {
-    const t_type* annot_type = &*annot->type();
+  for (const t_const& annot : node.structured_annotations()) {
+    const t_type* annot_type = &*annot.type();
     // Ignore scoping annotations themselves.
     if (uri_map().find(annot_type->uri()) != uri_map().end() ||
         annot_type->uri() == kSchemaAnnotationUri) {
@@ -95,18 +95,18 @@ void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node) {
     }
 
     // Get the allowed set of node types.
-    const auto& allowed = ctx.cache().get<allowed_scopes>(*annot);
+    const auto& allowed = ctx.cache().get<allowed_scopes>(annot);
     if (allowed.types.empty()) {
       // Warn that the annotation isn't marked as such.
       ctx.warning_legacy_strict(
-          annot->src_range().begin,
+          annot.src_range().begin,
           "Using `{}` as an annotation, even though it has not been enabled "
           "for any annotation scope.",
           annot_type->name());
     } else if (allowed.types.find(typeid(node)) == allowed.types.end()) {
       // Type mismatch.
       ctx.error(
-          *annot, "`{}` cannot annotate `{}`", annot_type->name(), node.name());
+          annot, "`{}` cannot annotate `{}`", annot_type->name(), node.name());
     }
   }
 }

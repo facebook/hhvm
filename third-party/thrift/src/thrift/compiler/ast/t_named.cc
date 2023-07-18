@@ -46,16 +46,15 @@ t_named::~t_named() = default;
 
 void t_named::add_structured_annotation(std::unique_ptr<t_const> annot) {
   assert(!annot->type().empty());
-  structured_annotations_raw_.emplace_back(annot.get());
   structured_annotations_.emplace_back(std::move(annot));
 }
 
 const t_const* t_named::find_structured_annotation_or_null(
     const char* uri) const {
-  for (const auto* annotation : structured_annotations_raw_) {
+  for (const auto& annotation : structured_annotations_) {
     const t_type& annotation_type = *annotation->type();
     if (annotation_type.uri() == uri) {
-      return annotation;
+      return annotation.get();
     }
     if (is_transitive_annotation(annotation_type)) {
       if (const t_const* annot =
@@ -68,8 +67,8 @@ const t_const* t_named::find_structured_annotation_or_null(
 }
 
 bool is_transitive_annotation(const t_named& node) {
-  for (const auto* annotation : node.structured_annotations()) {
-    if (annotation->type()->uri() == kTransitiveUri) {
+  for (const auto& annotation : node.structured_annotations()) {
+    if (annotation.type()->uri() == kTransitiveUri) {
       return true;
     }
   }

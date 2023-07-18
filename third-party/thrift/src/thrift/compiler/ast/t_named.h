@@ -69,10 +69,10 @@ class t_named : public t_node {
   const std::string& name() const noexcept { return name_; }
   void set_name(const std::string& name) { name_ = name; }
 
-  const std::vector<const t_const*>& structured_annotations() const noexcept {
-    return structured_annotations_raw_;
+  node_list_view<const t_const> structured_annotations() const {
+    return structured_annotations_;
   }
-  node_list_view<t_const> structured_annotations_mutable() {
+  node_list_view<t_const> structured_annotations() {
     return structured_annotations_;
   }
   void add_structured_annotation(std::unique_ptr<t_const> annot);
@@ -110,9 +110,6 @@ class t_named : public t_node {
   std::string uri_;
   bool explicit_uri_ = false;
   std::vector<std::unique_ptr<t_const>> structured_annotations_;
-
-  // TODO(ytj): use thrift.uri --> t_const map for structured annotation
-  std::vector<const t_const*> structured_annotations_raw_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

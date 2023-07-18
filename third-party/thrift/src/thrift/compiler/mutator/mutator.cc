@@ -152,7 +152,7 @@ static void match_type_with_const_value(
 
 static void match_annotation_types_with_const_values(
     t_named* const tnamed, t_program* const program) {
-  for (t_const& tconst : tnamed->structured_annotations_mutable()) {
+  for (t_const& tconst : tnamed->structured_annotations()) {
     if (tconst.get_type() && tconst.get_value()) {
       match_type_with_const_value(
           &tconst, program, tconst.get_type(), tconst.get_value());

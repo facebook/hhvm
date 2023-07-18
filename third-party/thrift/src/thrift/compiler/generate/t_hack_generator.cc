@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_result_struct.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
@@ -974,7 +975,7 @@ class t_hack_generator : public t_concat_generator {
   std::string render_service_metadata_response(
       const t_service* service, const bool mangle);
   std::string render_structured_annotations(
-      const std::vector<const t_const*>& annotations,
+      node_list_view<const t_const> annotations,
       std::ostream& temp_var_initializations_out,
       t_name_generator& namer);
 
@@ -1571,7 +1572,7 @@ void t_hack_generator::close_generator() {
 
     annotations_out << indent() << "return dict[\n";
     indent_up();
-    for (const auto& tconst : program_->consts()) {
+    for (const t_const* tconst : program_->consts()) {
       if (tconst->structured_annotations().empty()) {
         continue;
       }
@@ -1739,7 +1740,7 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
                   << ",\n";
   annotations_out << indent() << "'constants' => dict[\n";
   indent_up();
-  for (const auto& constant : tenum->get_enum_values()) {
+  for (const t_enum_value* constant : tenum->get_enum_values()) {
     if (constant->structured_annotations().empty()) {
       continue;
     }
@@ -4975,7 +4976,7 @@ std::string t_hack_generator::render_service_metadata_response(
 }
 
 std::string t_hack_generator::render_structured_annotations(
-    const std::vector<const t_const*>& annotations,
+    node_list_view<const t_const> annotations,
     std::ostream& temp_var_initializations_out,
     t_name_generator& namer) {
   std::ostringstream out;
@@ -4984,10 +4985,10 @@ std::string t_hack_generator::render_structured_annotations(
     out << "\n";
     indent_up();
     for (const auto& annotation : annotations) {
-      indent(out) << "'" << hack_name(annotation->get_type()) << "' => "
+      indent(out) << "'" << hack_name(annotation.get_type()) << "' => "
                   << render_const_value_helper(
-                         annotation->get_type(),
-                         annotation->get_value(),
+                         annotation.get_type(),
+                         annotation.get_value(),
                          temp_var_initializations_out,
                          namer,
                          false, // immutable_collections

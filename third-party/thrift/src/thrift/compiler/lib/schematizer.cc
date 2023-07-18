@@ -69,12 +69,12 @@ void add_definition(
     definition->add_map(val("uri"), val(node.uri()));
   }
 
-  const auto& structured = node.structured_annotations();
+  auto structured = node.structured_annotations();
   if (!structured.empty()) {
     auto annots = val();
     annots->set_list();
 
-    for (const auto* item : structured) {
+    for (const auto& item : structured) {
       auto annot = val();
       static const std::string kStructuredAnnotationSchemaUri =
           "facebook.com/thrift/type/StructuredAnnotation";
@@ -84,8 +84,8 @@ void add_definition(
               program->scope()->find_def(kStructuredAnnotationSchemaUri)));
       annot->set_ttype(structured_annotation_ttype);
       annot->set_map();
-      annot->add_map(val("type"), typeUri(*item->type(), program));
-      if (!item->value()->is_empty()) {
+      annot->add_map(val("type"), typeUri(*item.type(), program));
+      if (!item.value()->is_empty()) {
         static const std::string kProtocolValueUri =
             "facebook.com/thrift/protocol/Value";
         // May be null when run from thrift2ast, which doesn't read this value.
@@ -94,7 +94,7 @@ void add_definition(
                 program->scope()->find_def(kProtocolValueUri)));
         auto fields = val();
         fields->set_map();
-        for (const auto& pair : item->value()->get_map()) {
+        for (const auto& pair : item.value()->get_map()) {
           fields->add_map(
               pair.first->clone(),
               wrap_with_protocol_value(*pair.second, protocol_value_ttype));

@@ -71,11 +71,10 @@ TEST(JsonTest, to_json_t_const_value) {
   EXPECT_EQ(structs.size(), 3);
 
   const t_struct* my_struct = structs[2];
-  const std::vector<const t_const*> annotations =
-      my_struct->structured_annotations();
+  auto annotations = my_struct->structured_annotations();
   EXPECT_EQ(annotations.size(), 1);
 
-  std::string to_json_result = to_json(annotations.at(0)->get_value());
+  std::string to_json_result = to_json(annotations.at(0).get_value());
   EXPECT_EQ(
       "{\"my_bool\": true, \"my_int\": 1, \"my_string\": \"hello\", "
       "\"my_double\": 9.9, \"my_list\": [0.1, -0.2], "

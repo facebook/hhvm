@@ -82,12 +82,12 @@ bool marshal_capi_override_annotation(const t_named& node) {
 
 const t_const* get_transitive_annotation_of_adapter_or_null(
     const t_named& node) {
-  for (const auto* annotation : node.structured_annotations()) {
-    const t_type& annotation_type = *annotation->type();
+  for (const auto& annotation : node.structured_annotations()) {
+    const t_type& annotation_type = *annotation.type();
     if (is_transitive_annotation(annotation_type)) {
       if (annotation_type.find_structured_annotation_or_null(
               kPythonAdapterUri)) {
-        return annotation;
+        return &annotation;
       }
     }
   }

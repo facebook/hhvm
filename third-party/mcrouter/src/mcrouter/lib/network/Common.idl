@@ -19,6 +19,14 @@ exception CarbonResultDeadlineExceeded {
   1: std::string message;
 };
 
+exception CarbonResultShutdown {
+  1: std::string message;
+};
+
+exception CarbonResultTryAgain {
+  1: std::string message;
+};
+
 request McVersionRequest {
   id: 13;
   name: "version";

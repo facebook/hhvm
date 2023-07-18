@@ -33,6 +33,14 @@ exception CarbonResultDeadlineExceeded {
   1: string message
 }
 
+exception CarbonResultShutdown {
+  1: string message
+}
+
+exception CarbonResultTryAgain {
+  1: string message
+}
+
 struct McVersionRequest {
   1: carbon.IOBufKey key
 }(cpp.methods = "

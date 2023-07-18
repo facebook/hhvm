@@ -95,6 +95,19 @@ FOLLY_NOINLINE auto ThriftTransportBase::makeError(
                setReplyResultAndMessage(
                    reply, carbon::Result::REMOTE_ERROR, e.what());
              })) {
+  } else if (ew.with_exception(
+                 [&](const thrift::CarbonResultDeadlineExceeded& e) {
+                   setReplyResultAndMessage(
+                       reply, carbon::Result::DEADLINE_EXCEEDED, e.what());
+                 })) {
+  } else if (ew.with_exception([&](const thrift::CarbonResultTryAgain& e) {
+               setReplyResultAndMessage(
+                   reply, carbon::Result::RES_TRY_AGAIN, e.what());
+             })) {
+  } else if (ew.with_exception([&](const thrift::CarbonResultShutdown& e) {
+               setReplyResultAndMessage(
+                   reply, carbon::Result::SHUTDOWN, e.what());
+             })) {
   } else if (ew.with_exception([&](const std::exception& e) {
                setReplyResultAndMessage(
                    reply, carbon::Result::LOCAL_ERROR, e.what());

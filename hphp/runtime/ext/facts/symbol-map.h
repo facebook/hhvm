@@ -235,6 +235,16 @@ struct SymbolMap {
   std::vector<Path> getFilesWithAttribute(const StringData& attr);
 
   /**
+   * Return the files with a given attribute and value
+   */
+  std::vector<Path> getFilesWithAttributeAndAnyValue(
+      Symbol<SymKind::Type> attr,
+      const folly::dynamic& value);
+  std::vector<Path> getFilesWithAttributeAndAnyValue(
+      const StringData& attr,
+      const folly::dynamic& value);
+
+  /**
    * Return the argument at the given position of a given type with a given
    * attribute.
    *

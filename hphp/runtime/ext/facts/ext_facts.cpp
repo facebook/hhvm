@@ -512,6 +512,42 @@ FactsStore& getFactsOrThrow() {
   return *facts;
 }
 
+// Only bool, int, double, string, and Hack arrays are supported.
+folly::dynamic dynamicFromVariant(const Variant& v) {
+  if (v.isBoolean()) {
+    return v.getBoolean();
+  }
+  if (v.isInteger()) {
+    return v.getInt64();
+  }
+  if (v.isDouble()) {
+    return v.getDouble();
+  }
+  if (v.isString()) {
+    return v.getStringData()->toCppString();
+  }
+  if (v.isDict()) {
+    folly::dynamic ret = folly::dynamic::object;
+    ret.resize(v.getArrayData()->size());
+    IterateKV(v.getArrayData(), [&](TypedValue k, TypedValue v) {
+      ret[dynamicFromVariant(Variant::wrap(k))] =
+          dynamicFromVariant(Variant::wrap(v));
+    });
+    return ret;
+  }
+  if (v.isArray()) {
+    folly::dynamic ret = folly::dynamic::array;
+    ret.resize(v.getArrayData()->size());
+    uint64_t i;
+    IterateV(v.getArrayData(), [&](TypedValue v) {
+      ret[i] = dynamicFromVariant(Variant::wrap(v));
+      i++;
+    });
+    return ret;
+  }
+  return nullptr;
+}
+
 } // namespace
 } // namespace Facts
 
@@ -683,6 +719,14 @@ Array HHVM_FUNCTION(facts_files_with_attribute, const String& attr) {
   return Facts::getFactsOrThrow().getFilesWithAttribute(attr);
 }
 
+Array HHVM_FUNCTION(
+    facts_files_with_attribute_and_any_value,
+    const String& attr,
+    const Variant& value) {
+  return Facts::getFactsOrThrow().getFilesWithAttributeAndAnyValue(
+      attr, Facts::dynamicFromVariant(value));
+}
+
 Array HHVM_FUNCTION(facts_type_attributes, const String& type) {
   return Facts::getFactsOrThrow().getTypeAttributes(type);
 }
@@ -784,6 +828,9 @@ void FactsExtension::moduleInit() {
       HH\\Facts\\methods_with_attribute, HHVM_FN(facts_methods_with_attribute));
   HHVM_NAMED_FE(
       HH\\Facts\\files_with_attribute, HHVM_FN(facts_files_with_attribute));
+  HHVM_NAMED_FE(
+      HH\\Facts\\files_with_attribute_and_any_value,
+      HHVM_FN(facts_files_with_attribute_and_any_value));
   HHVM_NAMED_FE(HH\\Facts\\type_attributes, HHVM_FN(facts_type_attributes));
   HHVM_NAMED_FE(
       HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));

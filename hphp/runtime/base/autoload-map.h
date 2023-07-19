@@ -244,6 +244,13 @@ struct FactsStore : public AutoloadMap {
   virtual Array getFilesWithAttribute(const String& attr) = 0;
 
   /**
+   * Return all files decorated with the given attribute and
+   * the given value passed into that attribute.
+   */
+  virtual Array getFilesWithAttributeAndAnyValue(
+      const String& attr, const folly::dynamic& value) = 0;
+
+  /**
    * Return all attributes decorating the given type.
    */
   virtual Array getTypeAttributes(const String& type) = 0;

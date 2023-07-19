@@ -410,6 +410,12 @@ struct MockAutoloadDB : public AutoloadDB {
       getFilesWithAttribute,
       (std::string_view attributeName),
       (override));
+  MOCK_METHOD(
+      std::vector<std::filesystem::path>,
+      getFilesWithAttributeAndAnyValue,
+      (const std::string_view attributeName,
+       const folly::dynamic& attributeValue),
+      (override));
 
   // Functions
   MOCK_METHOD(
@@ -2128,7 +2134,13 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
     EXPECT_THAT(a1files, ElementsAre(p1.native()));
 
     auto a2files = m.getFilesWithAttribute("A2");
-    EXPECT_THAT(a1files, ElementsAre(p1.native()));
+    EXPECT_THAT(a2files, ElementsAre(p1.native()));
+
+    auto a1valfiles = m.getFilesWithAttributeAndAnyValue("A1", 1);
+    EXPECT_THAT(a1valfiles, ElementsAre(p1.native()));
+
+    auto a2valfiles = m.getFilesWithAttributeAndAnyValue("A2", 1);
+    EXPECT_THAT(a2valfiles, ElementsAre());
 
     auto attrs = m.getAttributesOfFile(Path{p1});
     EXPECT_THAT(attrs, UnorderedElementsAre("A1", "A2"));

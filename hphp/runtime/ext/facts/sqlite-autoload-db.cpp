@@ -541,11 +541,17 @@ struct FileStmts {
         m_getFilesWithAttribute{
             db.prepare("SELECT path from all_paths"
                        " JOIN file_attributes USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")} {}
+                       " WHERE attribute_name = @attribute_name")},
+        m_getFilesWithAttributeAndAnyValue{
+            db.prepare("SELECT path FROM all_paths"
+                       " JOIN file_attributes USING (pathid)"
+                       " WHERE attribute_name = @attribute_name"
+                       " AND attribute_value = @attribute_value")} {}
   SQLiteStmt m_insertFileAttribute;
   SQLiteStmt m_getFileAttributes;
   SQLiteStmt m_getFileAttributeArgs;
   SQLiteStmt m_getFilesWithAttribute;
+  SQLiteStmt m_getFilesWithAttributeAndAnyValue;
 };
 
 struct FunctionStmts {
@@ -1071,6 +1077,21 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       const std::string_view attributeName) override {
     auto query = m_txn.query(m_fileStmts.m_getFilesWithAttribute);
     query.bindString("@attribute_name", attributeName);
+    std::vector<fs::path> results;
+    XLOGF(DBG9, "Running {}", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(fs::path{std::string{query.getString(0)}});
+    }
+    return results;
+  }
+
+  std::vector<fs::path> getFilesWithAttributeAndAnyValue(
+      const std::string_view attributeName,
+      const folly::dynamic& attributeValue) override {
+    auto query = m_txn.query(m_fileStmts.m_getFilesWithAttributeAndAnyValue);
+    std::string jsonValue = folly::toJson(attributeValue);
+    query.bindString("@attribute_name", attributeName);
+    query.bindString("@attribute_value", jsonValue);
     std::vector<fs::path> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {

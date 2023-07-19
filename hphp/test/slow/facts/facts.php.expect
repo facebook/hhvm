@@ -76,6 +76,7 @@ Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 Getting file attributes
 Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
 Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr and value Hello: ["attribute-classes.inc"]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths
@@ -168,6 +169,7 @@ Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
 Getting file attributes
 Files decorated with NoArgFileAttr: ["attribute-classes.inc"]
 Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
+Files decorated with TwoArgFileAttr and value Hello: ["attribute-classes.inc"]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths

@@ -729,6 +729,15 @@ struct FactsStoreImpl final
     });
   }
 
+  Array getFilesWithAttributeAndAnyValue(
+      const String& attr,
+      const folly::dynamic& value) override {
+    return logPerformance(__func__, [&]() {
+      return makeVecOfString(
+          m_map.getFilesWithAttributeAndAnyValue(*attr.get(), value));
+    });
+  }
+
   Array getTypeAttributes(const String& type) override {
     return logPerformance(__func__, [&]() {
       return makeVecOfString(m_map.getAttributesOfType(*type.get()));

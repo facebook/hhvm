@@ -207,6 +207,9 @@ struct AutoloadDB {
 
   virtual std::vector<std::filesystem::path> getFilesWithAttribute(
       std::string_view attributeName) = 0;
+  virtual std::vector<std::filesystem::path> getFilesWithAttributeAndAnyValue(
+      std::string_view attributeName,
+      const folly::dynamic& attributeValue) = 0;
 
   // Functions
   virtual void insertFunction(

@@ -737,6 +737,54 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(const StringData& attr) {
   return getFilesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
+std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(
+    Symbol<SymKind::Type> attr,
+    const folly::dynamic& value) {
+  using PathVec = std::vector<Path>;
+  auto paths = readOrUpdate<PathVec>(
+      [&](const Data& data) -> Optional<PathVec> {
+        auto pathsWithAttr = data.m_fileAttrs.getKeysWithAttribute(attr);
+        if (!pathsWithAttr) {
+          return std::nullopt;
+        }
+        PathVec pathsRet;
+        for (auto&& path : *pathsWithAttr) {
+          auto args = data.m_fileAttrs.getAttributeArgs(path, attr);
+          if (!args) {
+            return std::nullopt;
+          }
+          for (auto&& arg : *args) {
+            if (arg == value) {
+              pathsRet.push_back(path);
+              break;
+            }
+          }
+        }
+        return pathsRet;
+      },
+      [&](std::shared_ptr<AutoloadDB> db) -> PathVec {
+        auto dbPathDecls =
+            db->getFilesWithAttributeAndAnyValue(attr.slice(), value);
+        PathVec pathDecls;
+        pathDecls.reserve(dbPathDecls.size());
+        for (auto const& path : dbPathDecls) {
+          pathDecls.push_back(Path{path});
+        }
+        return pathDecls;
+      },
+      [&](Data& UNUSED data, PathVec pathsFromDB) -> PathVec {
+        // Not enough data to update the fileAttrs cache
+        return pathsFromDB;
+      });
+  return paths;
+}
+
+std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(
+    const StringData& attr,
+    const folly::dynamic& value) {
+  return getFilesWithAttributeAndAnyValue(Symbol<SymKind::Type>{attr}, value);
+}
+
 std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
     Symbol<SymKind::Type> type,
     Symbol<SymKind::Type> attr) {

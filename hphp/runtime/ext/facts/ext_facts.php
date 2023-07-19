@@ -230,6 +230,20 @@ function files_with_attribute(
 )[]: vec<string>;
 
 /**
+ * Get all files matching the given filters.
+ * Only bool, int, string, dict, vec, and keyset are supported
+ * as value types to query for. Unsupported types will be
+ * coerced to null.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function files_with_attribute_and_any_value(
+  /* classname<\HH\FileAttribute> */ string $attribute,
+  dynamic $value,
+)[]: vec<string>;
+
+/**
  * Get all attributes on the given type.
  *
  * Throw InvalidOperationException if Facts is not enabled.

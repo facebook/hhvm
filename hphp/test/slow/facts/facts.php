@@ -183,6 +183,16 @@ function print_attr_files(
   print "Files decorated with $attr: $files_json\n";
 }
 
+function print_attr_value_files(
+  classname<\HH\FileAttribute> $attr,
+  string $value,
+): void {
+  $files = HH\Facts\files_with_attribute_and_any_value($attr, $value);
+  \sort(inout $files);
+  $files_json = \json_encode($files);
+  print "Files decorated with $attr and value $value: $files_json\n";
+}
+
 function print_num_symbols(
   string $path,
 ): void {
@@ -420,6 +430,7 @@ function facts(): void {
   print "\nGetting file attributes\n";
   print_attr_files(NoArgFileAttr::class);
   print_attr_files(TwoArgFileAttr::class);
+  print_attr_value_files(TwoArgFileAttr::class, 'Hello');
   print_file_attrs('attribute-classes.inc');
 
   print "\nChecking nonexistent paths\n";

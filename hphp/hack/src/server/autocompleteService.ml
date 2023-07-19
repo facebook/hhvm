@@ -81,14 +81,17 @@ let expand_and_strip_dynamic env ty =
   let ty =
     Typing_utils.strip_dynamic (Tast_env.tast_env_as_typing_env env) ty
   in
-  let (_, ty) = Tast_env.expand_type env ty in
-  ty
+  Tast_env.expand_type env ty
 
 let expand_and_strip_supportdyn env ty =
-  let (_, ty) = Tast_env.expand_type env ty in
+  let (env, ty) = expand_and_strip_dynamic env ty in
   let (_, _, ty) =
     Typing_utils.strip_supportdyn (Tast_env.tast_env_as_typing_env env) ty
   in
+  ty
+
+let expand_and_strip_dynamic env ty =
+  let (_, ty) = expand_and_strip_dynamic env ty in
   ty
 
 let matches_auto_complete_suffix x =

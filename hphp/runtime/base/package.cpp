@@ -190,16 +190,16 @@ bool moduleNameMatchesPattern(const std::string& moduleName,
 } // namespace
 
 // Given `moduleName`, find the longest matching glob within
-// m_globToPackage[start:end] and return its corresponding package
+// m_globToPackage[start:end) and return its corresponding package
 std::string PackageInfo::findPackageInRange(const std::string& moduleName,
-                                            ssize_t start, ssize_t end) const {
-  if (start > end) return "";
-  ssize_t mid = start + (end - start) / 2;
+                                            size_t start, size_t end) const {
+  if (start >= end) return "";
+  size_t mid = start + (end - start) / 2;
   auto const& glob = m_globToPackage[mid].first;
 
   // impossible to match against globs that are lexicographically larger
   if (glob > moduleName) {
-    return findPackageInRange(moduleName, start, mid - 1);
+    return findPackageInRange(moduleName, start, mid);
   }
 
   if (moduleNameMatchesPattern(moduleName, glob)) {
@@ -213,13 +213,13 @@ std::string PackageInfo::findPackageInRange(const std::string& moduleName,
   auto const match = findPackageInRange(moduleName, mid + 1, end);
   if (!match.empty()) return match;
   // fall back to finding a match in the lower half
-  return findPackageInRange(moduleName, start, mid - 1);
+  return findPackageInRange(moduleName, start, mid);
 }
 
 std::string PackageInfo::getPackageForModule(const StringData* module) const {
   assertx(module && !module->empty());
   auto const moduleName = module->toCppString();
-  return findPackageInRange(moduleName, 0, m_globToPackage.size() - 1);
+  return findPackageInRange(moduleName, 0, m_globToPackage.size());
 }
 
 bool PackageInfo::moduleInPackages(const StringData* module,

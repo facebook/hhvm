@@ -107,7 +107,7 @@ struct PackageInfo {
 
 private:
   std::string findPackageInRange(const std::string& moduleName,
-                                 ssize_t start, ssize_t end) const;
+                                 size_t start, size_t end) const;
 
   std::string getPackageForModule(const StringData* module) const;
 

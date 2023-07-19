@@ -84,7 +84,7 @@ namespace HH {
  *   specified headers, but arrays where a header was specified more than once.
  */
 <<__Native>>
-function get_headers_secure(): darray<string, varray<string>>;
+function get_headers_secure()[read_globals]: darray<string, varray<string>>;
 
 /**
  * Fetch all HTTP request names in the order they were received from proxygen

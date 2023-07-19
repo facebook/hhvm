@@ -623,7 +623,7 @@ std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
 
   ech::ECHConfig chosenConfig = getDefaultECHConfigs()[0];
   auto kex = std::make_unique<X25519KeyExchange>();
-  kex->setKeyPair(std::move(defaultPrivateKey), std::move(defaultPublicKey));
+  kex->setPrivateKey(std::move(defaultPrivateKey));
 
   // Configure ECH decrpyter to be used server side.
   auto decrypter = std::make_shared<ech::ECHConfigManager>();

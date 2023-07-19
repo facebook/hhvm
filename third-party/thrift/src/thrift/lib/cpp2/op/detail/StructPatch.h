@@ -193,6 +193,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id>
   decltype(auto) patchIfSet() {
     ensurePatchable();
+    if constexpr (!is_thrift_union_v<T>) {
+      if (Base::derived().template isRemoved<Id>()) {
+        // If field is already cleared, Patch should be ignored.
+        getRawPatch<Id>(data_.patch()).toThrift().clear() = true;
+        return getRawPatch<Id>(data_.patchPrior());
+      }
+    }
     return ensures<Id>() ? getRawPatch<Id>(data_.patch())
                          : getRawPatch<Id>(data_.patchPrior());
   }
@@ -366,6 +373,8 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using T = typename Base::value_type;
   template <typename Id>
   using F = type::native_type<get_field_tag<T, Id>>;
+
+  friend class BaseEnsurePatch<Patch, StructPatch<Patch>>;
 
  public:
   using Base::apply;

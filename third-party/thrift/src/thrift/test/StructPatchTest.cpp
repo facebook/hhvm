@@ -1057,6 +1057,17 @@ TEST(StructPatchTest, EnsureOptStructValPatchable) {
   EXPECT_EQ(foo.optStructVal(), data);
 }
 
+TEST(StructPatchTest, PatchOptField) {
+  MyStructPatch patch;
+  patch.patchIfSet<ident::optI32Val>().clear();
+  patch.patchIfSet<ident::optI32Val>() = 0;
+
+  MyStruct foo;
+  foo.optI32Val() = 0;
+  patch.apply(foo);
+  EXPECT_FALSE(foo.optI32Val().has_value());
+}
+
 TEST(StructPatchTest, IncludePatch) {
   MyData data;
   data.data2() = 42;

@@ -45,10 +45,6 @@ class t_placeholder_typedef;
  */
 class t_type : public t_named {
  public:
-  // The program this type is defined in, or null if the type is built into
-  // thrift.
-  const t_program* program() const { return program_; }
-
   // Returns a string in the format "program_name.type_name"
   std::string get_scoped_name() const;
 
@@ -75,14 +71,14 @@ class t_type : public t_named {
    *
    * @param program - An entire thrift program
    */
-  explicit t_type(const t_program* program) : program_(program) {}
+  explicit t_type(const t_program* program) : t_named(program) {}
 
   /**
    * Constructor for t_type
    *
    * @param name - The symbolic name of the thrift type
    */
-  explicit t_type(std::string name) : t_named(std::move(name)) {}
+  explicit t_type(std::string name) : t_named(nullptr, std::move(name)) {}
 
   /**
    * Constructor for t_type
@@ -91,10 +87,7 @@ class t_type : public t_named {
    * @param name    - The symbolic name of the thrift type
    */
   t_type(const t_program* program, std::string name)
-      : t_named(std::move(name)), program_(program) {}
-
-  // TODO(afuller): Make this private.
-  const t_program* program_ = nullptr;
+      : t_named(program, std::move(name)) {}
 
   // TODO(afuller): Delete everything below this point. It's only here for
   // backwards compatibility.

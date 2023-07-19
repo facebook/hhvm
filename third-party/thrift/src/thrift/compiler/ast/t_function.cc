@@ -30,7 +30,7 @@ t_function::t_function(
     std::string name,
     std::unique_ptr<t_paramlist> paramlist,
     t_function_qualifier qualifier)
-    : t_named(std::move(name)),
+    : t_named(nullptr, std::move(name)),
       paramlist_(std::move(paramlist)),
       qualifier_(qualifier) {
   assert(paramlist_);

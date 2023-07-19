@@ -52,7 +52,7 @@ class t_function final : public t_named {
    * @param name             - The symbolic name of the function
    */
   t_function(t_program* program, t_type_ref return_type, std::string name)
-      : t_named(std::move(name)),
+      : t_named(program, std::move(name)),
         paramlist_(std::make_unique<t_paramlist>(program)) {
     set_return_type(return_type);
   }
@@ -61,7 +61,7 @@ class t_function final : public t_named {
       t_program* program,
       std::vector<t_type_ref> return_types,
       std::string name)
-      : t_named(std::move(name)),
+      : t_named(program, std::move(name)),
         return_types_(std::move(return_types)),
         paramlist_(std::make_unique<t_paramlist>(program)) {}
 

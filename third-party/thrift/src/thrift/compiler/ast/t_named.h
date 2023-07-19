@@ -30,6 +30,7 @@ namespace thrift {
 namespace compiler {
 
 class t_const;
+class t_program;
 
 /**
  * The (pre)release state for a given t_named.
@@ -96,13 +97,18 @@ class t_named : public t_node {
   t_release_state release_state() const noexcept { return release_state_; }
   void set_release_state(t_release_state state) { release_state_ = state; }
 
+  // The program this node appears in. Will be null for base types.
+  //  Also null for definitions where no one has found value in tracking this
+  //  yet, like enum values.
+  const t_program* program() const { return program_; }
+
  protected:
-  t_named();
-  explicit t_named(std::string name);
+  explicit t_named(const t_program* program = nullptr, std::string name = "");
   t_named(const t_named& named);
 
   // TODO(afuller): make private.
   std::string name_;
+  const t_program* program_;
 
  private:
   bool generated_ = false;

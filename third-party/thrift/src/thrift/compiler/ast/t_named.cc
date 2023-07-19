@@ -25,13 +25,13 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-t_named::t_named() = default;
-
-t_named::t_named(std::string name) : name_(std::move(name)) {}
+t_named::t_named(const t_program* program, std::string name)
+    : name_(std::move(name)), program_(program) {}
 
 t_named::t_named(const t_named& named)
     : t_node::t_node(named),
       name_(named.name_),
+      program_(named.program_),
       generated_(named.generated_),
       release_state_(named.release_state_),
       uri_(named.uri_),

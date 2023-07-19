@@ -51,8 +51,7 @@ class t_const final : public t_named {
       t_type_ref type,
       std::string name,
       std::unique_ptr<t_const_value> value)
-      : t_named(std::move(name)),
-        program_(program),
+      : t_named(program, std::move(name)),
         type_(std::move(type)),
         value_(std::move(value)) {
     // value->get_owner() is set when rhs is referencing another constant.
@@ -61,7 +60,6 @@ class t_const final : public t_named {
     }
   }
 
-  const t_program* program() const { return program_; }
   const t_type_ref& type() const { return type_; }
   const t_const_value* value() const { return value_.get(); }
   const t_const_value& get_value_from_structured_annotation(
@@ -70,7 +68,6 @@ class t_const final : public t_named {
       const char* key) const;
 
  private:
-  const t_program* const program_;
   t_type_ref type_;
 
   std::unique_ptr<t_const_value> value_;

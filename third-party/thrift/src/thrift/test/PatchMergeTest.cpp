@@ -341,6 +341,17 @@ TEST(PatchMergeTest, StructPatch) {
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>()); });
   ops.push_back(
       [](MyStructPatch& patch) { (patch.ensure<ident::optStringVal>("10")); });
+  for (auto f : genStringPatchOps<op::StringPatch>()) {
+    ops.push_back(
+        [f](MyStructPatch& patch) { f(patch.patchIfSet<ident::stringVal>()); });
+    ops.push_back([f](MyStructPatch& patch) {
+      f(patch.patchIfSet<ident::optStringVal>());
+    });
+    ops.push_back(
+        [f](MyStructPatch& patch) { f(patch.patch<ident::stringVal>()); });
+    ops.push_back(
+        [f](MyStructPatch& patch) { f(patch.patch<ident::optStringVal>()); });
+  }
   std::vector<MyStruct> values;
   values.emplace_back();
   values.emplace_back().optStringVal() = "";

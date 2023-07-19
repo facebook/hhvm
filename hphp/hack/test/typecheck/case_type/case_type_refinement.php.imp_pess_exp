@@ -1,0 +1,4 @@
+File "case_type_refinement.php", line 6, characters 11-20:
+The case type `ShapeOrKey` is invalid because one or more of its variants cannot be recovered using type tests (Typing[4475])
+  File "case_type_refinement.php", line 6, characters 39-60:
+  `shape('key' => T, _ => mixed)` cannot be recovered

@@ -194,7 +194,7 @@ module DataType = struct
             (* The this_ty does not need to be set because case types cannot
              * appear within classes thus cannot us the this type.
              * If we ever change that this could needs to be changed *)
-            Typing_phase.localize
+            Typing_utils.localize
               ~ety_env:
                 {
                   empty_expand_env with
@@ -229,7 +229,12 @@ module DataType = struct
       let right =
         match n with
         | Neg_prim prim -> prim_to_datatypes prim
-        | Neg_class (_, _) -> Set.singleton Tag.ObjectData
+        | Neg_class (_, cls) ->
+          (* This creates a class type ignoring if the class actually defines generics.
+           * This should be ok since this type won't leak outside this function, but if
+           * subtyping changes to reject these ill-formed types then this code would
+           * need to change. *)
+          fromTy env @@ Typing_make_type.class_type Reason.none cls []
       in
       minus mixed right
 end
@@ -237,7 +242,8 @@ end
 let mk_data_type_mapping env variants =
   let f map variant =
     let ((env, _), ty) =
-      Typing_phase.localize_hint_no_subst env ~ignore_errors:true variant
+      Decl_hint.hint env.decl_env variant
+      |> Typing_utils.localize_no_subst env ~ignore_errors:true
     in
     let tags = DataType.fromTy env ty in
     DataType.Set.fold
@@ -262,20 +268,44 @@ let mk_data_type_mapping env variants =
  * the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
  * the type level, they do intersect when considering only the runtime data types.
  *)
-let filter_variants_using_datatype env variants intersecting_ty =
+let filter_variants_using_datatype env reason variants intersecting_ty =
   let tags = DataType.fromTy env intersecting_ty in
-  let (env, variants) = Env.expand_type env variants in
-  let tyl =
-    match get_node variants with
-    | Tunion tyl -> tyl
-    | _ -> [variants]
-  in
   let tyl =
     List.filter
       ~f:(fun ty ->
         let variant_tags = DataType.fromTy env ty in
         let refined_tags = DataType.intersect variant_tags tags in
         not @@ DataType.Set.is_empty refined_tags)
-      tyl
+      variants
   in
-  Typing_utils.union_list env (get_reason variants) tyl
+  Typing_utils.union_list env reason tyl
+
+(**
+ * Look up case type via [name]. If the case type exist returns the list of
+ * variant types. If the case type doesn't exist, returns [None].
+*)
+let get_variant_tys env name ty_args :
+    Typing_env_types.env * locl_ty list option =
+  match Env.get_typedef env name with
+  | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+    let ((env, _ty_err_opt), variants) =
+      Typing_utils.localize
+        ~ety_env:
+          {
+            empty_expand_env with
+            substs =
+              (if List.is_empty ty_args then
+                SMap.empty
+              else
+                Decl_subst.make_locl td_tparams ty_args);
+          }
+        env
+        variants
+    in
+    let tyl =
+      match get_node variants with
+      | Tunion tyl -> tyl
+      | _ -> [variants]
+    in
+    (env, Some tyl)
+  | _ -> (env, None)

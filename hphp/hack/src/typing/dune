@@ -214,7 +214,6 @@
   typing_array_access
   typing_async
   typing_attributes
-  typing_case_types
   typing_debug
   typing_escape
   typing_expand
@@ -307,6 +306,7 @@
  (wrapped false)
  (modules
   typing_algebra
+  typing_case_types
   typing_coeffects
   typing_coercion
   typing_dynamic

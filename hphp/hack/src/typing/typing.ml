@@ -1857,29 +1857,24 @@ let safely_refine_class_type
            || Cls.requires_ancestor class_info name ->
       true
     | Tnewtype (name, tyl, _) ->
-      (match Env.get_typedef env name with
       (* For case types we want to open the union, filtering it to only the
        * variant types that share the same data type as [obj_ty] *)
-      | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
-        let ((env, _ty_err_opt), variants) =
-          Typing_phase.localize
-            ~ety_env:
-              {
-                empty_expand_env with
-                substs =
-                  (if List.is_empty tyl then
-                    SMap.empty
-                  else
-                    Decl_subst.make_locl td_tparams tyl);
-              }
-            env
-            variants
-        in
-        let (env, ty) =
-          Typing_case_types.filter_variants_using_datatype env variants obj_ty
-        in
-        might_be_supertype env ty
-      | _ -> false)
+      let (env, variants_opt) =
+        Typing_case_types.get_variant_tys env name tyl
+      in
+      begin
+        match variants_opt with
+        | Some variants ->
+          let (env, ty) =
+            Typing_case_types.filter_variants_using_datatype
+              env
+              (get_reason ty)
+              variants
+              obj_ty
+          in
+          might_be_supertype env ty
+        | None -> false
+      end
     | Toption ty -> might_be_supertype env ty
     | Tunion tyl -> List.for_all tyl ~f:(might_be_supertype env)
     | _ -> false

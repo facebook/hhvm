@@ -38,6 +38,7 @@
 #include <folly/VirtualExecutor.h>
 #include <folly/concurrency/PriorityUnboundedQueueSet.h>
 #include <folly/executors/Codel.h>
+#include <folly/executors/InlineExecutor.h>
 #include <folly/executors/MeteredExecutor.h>
 #include <folly/executors/QueueObserver.h>
 #include <folly/io/async/Request.h>

@@ -64,11 +64,11 @@ func NewMultiplexedProtocol(protocol Protocol, serviceName string) *MultiplexedP
 	}
 }
 
-func (t *MultiplexedProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
-	if typeId == CALL || typeId == ONEWAY {
-		return t.Protocol.WriteMessageBegin(t.serviceName+MULTIPLEXED_SEPARATOR+name, typeId, seqid)
+func (t *MultiplexedProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
+	if typeID == CALL || typeID == ONEWAY {
+		return t.Protocol.WriteMessageBegin(t.serviceName+MULTIPLEXED_SEPARATOR+name, typeID, seqid)
 	} else {
-		return t.Protocol.WriteMessageBegin(name, typeId, seqid)
+		return t.Protocol.WriteMessageBegin(name, typeID, seqid)
 	}
 }
 
@@ -147,14 +147,14 @@ func (t *MultiplexedProcessor) GetProcessorFunction(name string) (ProcessorFunct
 type storedMessageProtocol struct {
 	Protocol
 	name   string
-	typeId MessageType
+	typeID MessageType
 	seqid  int32
 }
 
-func NewStoredMessageProtocol(protocol Protocol, name string, typeId MessageType, seqid int32) *storedMessageProtocol {
-	return &storedMessageProtocol{protocol, name, typeId, seqid}
+func NewStoredMessageProtocol(protocol Protocol, name string, typeID MessageType, seqid int32) *storedMessageProtocol {
+	return &storedMessageProtocol{protocol, name, typeID, seqid}
 }
 
-func (s *storedMessageProtocol) ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error) {
-	return s.name, s.typeId, s.seqid, nil
+func (s *storedMessageProtocol) ReadMessageBegin() (name string, typeID MessageType, seqid int32, err error) {
+	return s.name, s.typeID, s.seqid, nil
 }

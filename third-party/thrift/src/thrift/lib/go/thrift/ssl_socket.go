@@ -161,6 +161,6 @@ func (p *SSLSocket) Interrupt() error {
 	return p.conn.Close()
 }
 
-func (p *SSLSocket) RemainingBytes() (num_bytes uint64) {
+func (p *SSLSocket) RemainingBytes() uint64 {
 	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

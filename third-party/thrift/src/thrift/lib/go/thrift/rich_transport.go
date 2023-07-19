@@ -39,7 +39,7 @@ func (r *richTransport) WriteString(s string) (n int, err error) {
 	return r.Write([]byte(s))
 }
 
-func (r *richTransport) RemainingBytes() (num_bytes uint64) {
+func (r *richTransport) RemainingBytes() uint64 {
 	return r.Transport.RemainingBytes()
 }
 

@@ -67,7 +67,7 @@ func NewJSONProtocolFactory() *JSONProtocolFactory {
 	return &JSONProtocolFactory{}
 }
 
-func (p *JSONProtocol) WriteMessageBegin(name string, typeId MessageType, seqId int32) error {
+func (p *JSONProtocol) WriteMessageBegin(name string, typeID MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
 	if e := p.OutputListBegin(); e != nil {
 		return e
@@ -78,10 +78,10 @@ func (p *JSONProtocol) WriteMessageBegin(name string, typeId MessageType, seqId 
 	if e := p.WriteString(name); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(typeId)); e != nil {
+	if e := p.WriteByte(byte(typeID)); e != nil {
 		return e
 	}
-	if e := p.WriteI32(seqId); e != nil {
+	if e := p.WriteI32(seqID); e != nil {
 		return e
 	}
 	return nil
@@ -102,14 +102,14 @@ func (p *JSONProtocol) WriteStructEnd() error {
 	return p.OutputObjectEnd()
 }
 
-func (p *JSONProtocol) WriteFieldBegin(name string, typeId Type, id int16) error {
+func (p *JSONProtocol) WriteFieldBegin(name string, typeID Type, id int16) error {
 	if e := p.WriteI16(id); e != nil {
 		return e
 	}
 	if e := p.OutputObjectBegin(); e != nil {
 		return e
 	}
-	s, e1 := p.TypeIdToString(typeId)
+	s, e1 := p.TypeIdToString(typeID)
 	if e1 != nil {
 		return e1
 	}
@@ -233,32 +233,32 @@ func (p *JSONProtocol) WriteBinary(v []byte) error {
 }
 
 // Reading methods.
-func (p *JSONProtocol) ReadMessageBegin() (name string, typeId MessageType, seqId int32, err error) {
+func (p *JSONProtocol) ReadMessageBegin() (name string, typeID MessageType, seqID int32, err error) {
 	p.resetContextStack() // THRIFT-3735
 	if isNull, err := p.ParseListBegin(); isNull || err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
 	version, err := p.ReadI32()
 	if err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
 	if version != THRIFT_JSON_PROTOCOL_VERSION {
 		e := fmt.Errorf("Unknown Protocol version %d, expected version %d", version, THRIFT_JSON_PROTOCOL_VERSION)
-		return name, typeId, seqId, NewProtocolExceptionWithType(INVALID_DATA, e)
+		return name, typeID, seqID, NewProtocolExceptionWithType(INVALID_DATA, e)
 
 	}
 	if name, err = p.ReadString(); err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
-	bTypeId, err := p.ReadByte()
-	typeId = MessageType(bTypeId)
+	bTypeID, err := p.ReadByte()
+	typeID = MessageType(bTypeID)
 	if err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
-	if seqId, err = p.ReadI32(); err != nil {
-		return name, typeId, seqId, err
+	if seqID, err = p.ReadI32(); err != nil {
+		return name, typeID, seqID, err
 	}
-	return name, typeId, seqId, nil
+	return name, typeID, seqID, nil
 }
 
 func (p *JSONProtocol) ReadMessageEnd() error {
@@ -280,19 +280,19 @@ func (p *JSONProtocol) ReadFieldBegin() (string, Type, int16, error) {
 	if len(b) < 1 || b[0] == JSON_RBRACE[0] || b[0] == JSON_RBRACKET[0] {
 		return "", STOP, -1, nil
 	}
-	fieldId, err := p.ReadI16()
+	fieldID, err := p.ReadI16()
 	if err != nil {
-		return "", STOP, fieldId, err
+		return "", STOP, fieldID, err
 	}
 	if _, err = p.ParseObjectStart(); err != nil {
-		return "", STOP, fieldId, err
+		return "", STOP, fieldID, err
 	}
 	sType, err := p.ReadString()
 	if err != nil {
-		return "", STOP, fieldId, err
+		return "", STOP, fieldID, err
 	}
 	fType, err := p.StringToTypeId(sType)
-	return "", fType, fieldId, err
+	return "", fType, fieldID, err
 }
 
 func (p *JSONProtocol) ReadFieldEnd() error {

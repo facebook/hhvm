@@ -85,14 +85,14 @@ func ProtocolTest1(test *testing.T, pf ProtocolFactory) (bool, error) {
 
 	s, err := t.WriteString(&m)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Unable to Serialize struct\n\t %s", err))
+		return false, fmt.Errorf("Unable to Serialize struct\n\t %s", err)
 	}
 
 	t1 := NewDeserializer()
 	t1.Protocol = pf.GetProtocol(t1.Transport)
 	var m1 = MyTestStruct{}
 	if err = t1.ReadString(&m1, s); err != nil {
-		return false, errors.New(fmt.Sprintf("Unable to Deserialize struct\n\t %s", err))
+		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
 
 	}
 
@@ -119,7 +119,7 @@ func ProtocolTest2(test *testing.T, pf ProtocolFactory) (bool, error) {
 
 	s, err := t.WriteString(&m)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Unable to Serialize struct\n\t %s", err))
+		return false, fmt.Errorf("Unable to Serialize struct\n\t %s", err)
 
 	}
 
@@ -127,7 +127,7 @@ func ProtocolTest2(test *testing.T, pf ProtocolFactory) (bool, error) {
 	t1.Protocol = pf.GetProtocol(t1.Transport)
 	var m1 = MyTestStruct{}
 	if err = t1.ReadString(&m1, s); err != nil {
-		return false, errors.New(fmt.Sprintf("Unable to Deserialize struct\n\t %s", err))
+		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
 
 	}
 

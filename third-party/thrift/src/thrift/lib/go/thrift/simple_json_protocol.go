@@ -152,7 +152,7 @@ func mismatch(expected, actual string) error {
 	return fmt.Errorf("Expected '%s' but found '%s' while parsing JSON.", expected, actual)
 }
 
-func (p *SimpleJSONProtocol) WriteMessageBegin(name string, typeId MessageType, seqId int32) error {
+func (p *SimpleJSONProtocol) WriteMessageBegin(name string, typeID MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
 	if e := p.OutputListBegin(); e != nil {
 		return e
@@ -160,10 +160,10 @@ func (p *SimpleJSONProtocol) WriteMessageBegin(name string, typeId MessageType, 
 	if e := p.WriteString(name); e != nil {
 		return e
 	}
-	if e := p.WriteByte(byte(typeId)); e != nil {
+	if e := p.WriteByte(byte(typeID)); e != nil {
 		return e
 	}
-	if e := p.WriteI32(seqId); e != nil {
+	if e := p.WriteI32(seqID); e != nil {
 		return e
 	}
 	return nil
@@ -184,7 +184,7 @@ func (p *SimpleJSONProtocol) WriteStructEnd() error {
 	return p.OutputObjectEnd()
 }
 
-func (p *SimpleJSONProtocol) WriteFieldBegin(name string, typeId Type, id int16) error {
+func (p *SimpleJSONProtocol) WriteFieldBegin(name string, typeID Type, id int16) error {
 	if e := p.WriteString(name); e != nil {
 		return e
 	}
@@ -289,23 +289,23 @@ func (p *SimpleJSONProtocol) WriteBinary(v []byte) error {
 }
 
 // Reading methods.
-func (p *SimpleJSONProtocol) ReadMessageBegin() (name string, typeId MessageType, seqId int32, err error) {
+func (p *SimpleJSONProtocol) ReadMessageBegin() (name string, typeID MessageType, seqID int32, err error) {
 	p.resetContextStack() // THRIFT-3735
 	if isNull, err := p.ParseListBegin(); isNull || err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
 	if name, err = p.ReadString(); err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
 	bTypeId, err := p.ReadByte()
-	typeId = MessageType(bTypeId)
+	typeID = MessageType(bTypeId)
 	if err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
-	if seqId, err = p.ReadI32(); err != nil {
-		return name, typeId, seqId, err
+	if seqID, err = p.ReadI32(); err != nil {
+		return name, typeID, seqID, err
 	}
-	return name, typeId, seqId, nil
+	return name, typeID, seqID, nil
 }
 
 func (p *SimpleJSONProtocol) ReadMessageEnd() error {

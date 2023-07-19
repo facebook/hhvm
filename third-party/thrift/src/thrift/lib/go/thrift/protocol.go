@@ -57,11 +57,11 @@ const (
 )
 
 type Protocol interface {
-	WriteMessageBegin(name string, typeId MessageType, seqid int32) error
+	WriteMessageBegin(name string, typeID MessageType, seqid int32) error
 	WriteMessageEnd() error
 	WriteStructBegin(name string) error
 	WriteStructEnd() error
-	WriteFieldBegin(name string, typeId Type, id int16) error
+	WriteFieldBegin(name string, typeID Type, id int16) error
 	WriteFieldEnd() error
 	WriteFieldStop() error
 	WriteMapBegin(keyType Type, valueType Type, size int) error
@@ -80,11 +80,11 @@ type Protocol interface {
 	WriteString(value string) error
 	WriteBinary(value []byte) error
 
-	ReadMessageBegin() (name string, typeId MessageType, seqid int32, err error)
+	ReadMessageBegin() (name string, typeID MessageType, seqid int32, err error)
 	ReadMessageEnd() error
 	ReadStructBegin() (name string, err error)
 	ReadStructEnd() error
-	ReadFieldBegin() (name string, typeId Type, id int16, err error)
+	ReadFieldBegin() (name string, typeID Type, id int16, err error)
 	ReadFieldEnd() error
 	ReadMapBegin() (keyType Type, valueType Type, size int, err error)
 	ReadMapEnd() error
@@ -112,8 +112,8 @@ type Protocol interface {
 const DEFAULT_RECURSION_DEPTH = 64
 
 // Skips over the next data element from the provided input Protocol object.
-func SkipDefaultDepth(prot Protocol, typeId Type) (err error) {
-	return Skip(prot, typeId, DEFAULT_RECURSION_DEPTH)
+func SkipDefaultDepth(prot Protocol, typeID Type) (err error) {
+	return Skip(prot, typeID, DEFAULT_RECURSION_DEPTH)
 }
 
 // Skips over the next data element from the provided input Protocol object.
@@ -153,11 +153,11 @@ func Skip(self Protocol, fieldType Type, maxDepth int) (err error) {
 			return err
 		}
 		for {
-			_, typeId, _, _ := self.ReadFieldBegin()
-			if typeId == STOP {
+			_, typeID, _, _ := self.ReadFieldBegin()
+			if typeID == STOP {
 				break
 			}
-			err := Skip(self, typeId, maxDepth-1)
+			err := Skip(self, typeID, maxDepth-1)
 			if err != nil {
 				return err
 			}

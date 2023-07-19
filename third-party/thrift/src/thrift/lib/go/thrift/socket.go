@@ -183,6 +183,6 @@ func (p *Socket) Interrupt() error {
 	return p.conn.Close()
 }
 
-func (p *Socket) RemainingBytes() (num_bytes uint64) {
+func (p *Socket) RemainingBytes() uint64 {
 	return UnknownRemaining // the truth is, we just don't know unless framed is used
 }

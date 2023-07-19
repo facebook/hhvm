@@ -75,6 +75,6 @@ func (p *MemoryBuffer) Flush() error {
 	return nil
 }
 
-func (p *MemoryBuffer) RemainingBytes() (num_bytes uint64) {
+func (p *MemoryBuffer) RemainingBytes() uint64 {
 	return uint64(p.Buffer.Len())
 }

@@ -131,12 +131,12 @@ func NewCompactProtocol(trans Transport) *CompactProtocol {
 
 // Write a message header to the wire. Compact Protocol messages contain the
 // protocol version so we can migrate forwards in the future if need be.
-func (p *CompactProtocol) WriteMessageBegin(name string, typeId MessageType, seqid int32) error {
+func (p *CompactProtocol) WriteMessageBegin(name string, typeID MessageType, seqid int32) error {
 	err := p.writeByteDirect(COMPACT_PROTOCOL_ID)
 	if err != nil {
 		return NewProtocolException(err)
 	}
-	err = p.writeByteDirect((byte(p.version) & COMPACT_VERSION_MASK) | ((byte(typeId) << COMPACT_TYPE_SHIFT_AMOUNT) & COMPACT_TYPE_MASK))
+	err = p.writeByteDirect((byte(p.version) & COMPACT_VERSION_MASK) | ((byte(typeID) << COMPACT_TYPE_SHIFT_AMOUNT) & COMPACT_TYPE_MASK))
 	if err != nil {
 		return NewProtocolException(err)
 	}
@@ -169,35 +169,35 @@ func (p *CompactProtocol) WriteStructEnd() error {
 	return nil
 }
 
-func (p *CompactProtocol) WriteFieldBegin(name string, typeId Type, id int16) error {
-	if typeId == BOOL {
+func (p *CompactProtocol) WriteFieldBegin(name string, typeID Type, id int16) error {
+	if typeID == BOOL {
 		// we want to possibly include the value, so we'll wait.
 		p.booleanFieldName, p.booleanFieldID, p.booleanFieldPending = name, id, true
 		return nil
 	}
-	_, err := p.writeFieldBeginInternal(name, typeId, id, 0xFF)
+	_, err := p.writeFieldBeginInternal(name, typeID, id, 0xFF)
 	return NewProtocolException(err)
 }
 
 // The workhorse of writeFieldBegin. It has the option of doing a
 // 'type override' of the type header. This is used specifically in the
 // boolean field case.
-func (p *CompactProtocol) writeFieldBeginInternal(name string, typeId Type, id int16, typeOverride byte) (int, error) {
+func (p *CompactProtocol) writeFieldBeginInternal(name string, typeID Type, id int16, typeOverride byte) (int, error) {
 	// short lastFieldWritten = lastFieldWritten_.pop();
 
 	// if there's a type override, use that.
 	var typeToWrite byte
 	if typeOverride == 0xFF {
-		typeToWrite = byte(p.getCompactType(typeId))
+		typeToWrite = byte(p.getCompactType(typeID))
 	} else {
 		typeToWrite = typeOverride
 	}
 	// check if we can use delta encoding for the field id
-	fieldId := int(id)
+	fieldID := int(id)
 	written := 0
-	if fieldId > p.lastFieldIDWritten && fieldId-p.lastFieldIDWritten <= 15 {
+	if fieldID > p.lastFieldIDWritten && fieldID-p.lastFieldIDWritten <= 15 {
 		// write them together
-		err := p.writeByteDirect(byte((fieldId-p.lastFieldIDWritten)<<4) | typeToWrite)
+		err := p.writeByteDirect(byte((fieldID-p.lastFieldIDWritten)<<4) | typeToWrite)
 		if err != nil {
 			return 0, err
 		}
@@ -214,8 +214,7 @@ func (p *CompactProtocol) writeFieldBeginInternal(name string, typeId Type, id i
 		}
 	}
 
-	p.lastFieldIDWritten = fieldId
-	// p.lastFieldWritten.Push(field.id);
+	p.lastFieldIDWritten = fieldID
 	return written, nil
 }
 
@@ -319,14 +318,12 @@ func (p *CompactProtocol) WriteFloat(value float32) error {
 
 // Write a string to the wire with a varint size preceding.
 func (p *CompactProtocol) WriteString(value string) error {
-	_, e := p.writeVarint32(int32(len(value)))
-	if e != nil {
-		return NewProtocolException(e)
+	_, err := p.writeVarint32(int32(len(value)))
+	if err != nil {
+		return NewProtocolException(err)
 	}
-	if len(value) > 0 {
-	}
-	_, e = p.trans.WriteString(value)
-	return e
+	_, err = p.trans.WriteString(value)
+	return err
 }
 
 // Write a byte array, using a varint for the size.
@@ -347,16 +344,16 @@ func (p *CompactProtocol) WriteBinary(bin []byte) error {
 //
 
 // Read a message header.
-func (p *CompactProtocol) ReadMessageBegin() (name string, typeId MessageType, seqId int32, err error) {
+func (p *CompactProtocol) ReadMessageBegin() (name string, typeID MessageType, seqID int32, err error) {
 
-	protocolId, err := p.readByteDirect()
+	protocolID, err := p.readByteDirect()
 	if err != nil {
 		return
 	}
 
-	if protocolId != COMPACT_PROTOCOL_ID {
-		e := fmt.Errorf("Expected protocol id %02x but got %02x", COMPACT_PROTOCOL_ID, protocolId)
-		return "", typeId, seqId, NewProtocolExceptionWithType(BAD_VERSION, e)
+	if protocolID != COMPACT_PROTOCOL_ID {
+		e := fmt.Errorf("Expected protocol id %02x but got %02x", COMPACT_PROTOCOL_ID, protocolID)
+		return "", typeID, seqID, NewProtocolExceptionWithType(BAD_VERSION, e)
 	}
 
 	versionAndType, err := p.readByteDirect()
@@ -365,7 +362,7 @@ func (p *CompactProtocol) ReadMessageBegin() (name string, typeId MessageType, s
 	}
 
 	version := versionAndType & COMPACT_VERSION_MASK
-	typeId = MessageType((versionAndType >> COMPACT_TYPE_SHIFT_AMOUNT) & COMPACT_TYPE_BITS)
+	typeID = MessageType((versionAndType >> COMPACT_TYPE_SHIFT_AMOUNT) & COMPACT_TYPE_BITS)
 	if version == COMPACT_VERSION || version == COMPACT_VERSION_BE {
 		p.version = int(version)
 	} else {
@@ -373,7 +370,7 @@ func (p *CompactProtocol) ReadMessageBegin() (name string, typeId MessageType, s
 		err = NewProtocolExceptionWithType(BAD_VERSION, e)
 		return
 	}
-	seqId, e := p.readVarint32()
+	seqID, e := p.readVarint32()
 	if e != nil {
 		err = NewProtocolException(e)
 		return
@@ -402,7 +399,7 @@ func (p *CompactProtocol) ReadStructEnd() error {
 }
 
 // Read a field header off the wire.
-func (p *CompactProtocol) ReadFieldBegin() (name string, typeId Type, id int16, err error) {
+func (p *CompactProtocol) ReadFieldBegin() (name string, typeID Type, id int16, err error) {
 	t, err := p.readByteDirect()
 	if err != nil {
 		return
@@ -424,7 +421,7 @@ func (p *CompactProtocol) ReadFieldBegin() (name string, typeId Type, id int16, 
 		// has a delta. add the delta to the last read field id.
 		id = int16(p.lastFieldIDRead) + modifier
 	}
-	typeId, e := p.getType(compactType(t & 0x0f))
+	typeID, e := p.getType(compactType(t & 0x0f))
 	if e != nil {
 		err = NewProtocolException(e)
 		return
@@ -580,9 +577,8 @@ func (p *CompactProtocol) ReadDouble() (value float64, err error) {
 	}
 	if p.version == COMPACT_VERSION {
 		return math.Float64frombits(binary.LittleEndian.Uint64(longBits)), nil
-	} else {
-		return math.Float64frombits(binary.BigEndian.Uint64(longBits)), nil
 	}
+	return math.Float64frombits(binary.BigEndian.Uint64(longBits)), nil
 }
 
 // No magic here - just read a float off the wire.

@@ -74,9 +74,9 @@ func (p *BinaryProtocolFactory) GetProtocol(t Transport) Protocol {
  * Writing Methods
  */
 
-func (p *BinaryProtocol) WriteMessageBegin(name string, typeId MessageType, seqId int32) error {
+func (p *BinaryProtocol) WriteMessageBegin(name string, typeID MessageType, seqID int32) error {
 	if p.strictWrite {
-		version := uint32(VERSION_1) | uint32(typeId)
+		version := uint32(VERSION_1) | uint32(typeID)
 		e := p.WriteI32(int32(version))
 		if e != nil {
 			return e
@@ -85,18 +85,18 @@ func (p *BinaryProtocol) WriteMessageBegin(name string, typeId MessageType, seqI
 		if e != nil {
 			return e
 		}
-		e = p.WriteI32(seqId)
+		e = p.WriteI32(seqID)
 		return e
 	} else {
 		e := p.WriteString(name)
 		if e != nil {
 			return e
 		}
-		e = p.WriteByte(byte(typeId))
+		e = p.WriteByte(byte(typeID))
 		if e != nil {
 			return e
 		}
-		e = p.WriteI32(seqId)
+		e = p.WriteI32(seqID)
 		return e
 	}
 }
@@ -113,8 +113,8 @@ func (p *BinaryProtocol) WriteStructEnd() error {
 	return nil
 }
 
-func (p *BinaryProtocol) WriteFieldBegin(name string, typeId Type, id int16) error {
-	e := p.WriteByte(byte(typeId))
+func (p *BinaryProtocol) WriteFieldBegin(name string, typeID Type, id int16) error {
+	e := p.WriteByte(byte(typeID))
 	if e != nil {
 		return e
 	}
@@ -237,44 +237,44 @@ func (p *BinaryProtocol) WriteBinary(value []byte) error {
  * Reading methods
  */
 
-func (p *BinaryProtocol) ReadMessageBegin() (name string, typeId MessageType, seqId int32, err error) {
+func (p *BinaryProtocol) ReadMessageBegin() (name string, typeID MessageType, seqID int32, err error) {
 	size, e := p.ReadI32()
 	if e != nil {
-		return "", typeId, 0, NewProtocolException(e)
+		return "", typeID, 0, NewProtocolException(e)
 	}
 	if size < 0 {
-		typeId = MessageType(size & 0x0ff)
+		typeID = MessageType(size & 0x0ff)
 		version := int64(int64(size) & VERSION_MASK)
 		if version != VERSION_1 {
-			return name, typeId, seqId, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Bad version in ReadMessageBegin"))
+			return name, typeID, seqID, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Bad version in ReadMessageBegin"))
 		}
 		name, e = p.ReadString()
 		if e != nil {
-			return name, typeId, seqId, NewProtocolException(e)
+			return name, typeID, seqID, NewProtocolException(e)
 		}
-		seqId, e = p.ReadI32()
+		seqID, e = p.ReadI32()
 		if e != nil {
-			return name, typeId, seqId, NewProtocolException(e)
+			return name, typeID, seqID, NewProtocolException(e)
 		}
-		return name, typeId, seqId, nil
+		return name, typeID, seqID, nil
 	}
 	if p.strictRead {
-		return name, typeId, seqId, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Missing version in ReadMessageBegin"))
+		return name, typeID, seqID, NewProtocolExceptionWithType(BAD_VERSION, fmt.Errorf("Missing version in ReadMessageBegin"))
 	}
 	name, e2 := p.readStringBody(size)
 	if e2 != nil {
-		return name, typeId, seqId, e2
+		return name, typeID, seqID, e2
 	}
 	b, e3 := p.ReadByte()
 	if e3 != nil {
-		return name, typeId, seqId, e3
+		return name, typeID, seqID, e3
 	}
-	typeId = MessageType(b)
-	seqId, e4 := p.ReadI32()
+	typeID = MessageType(b)
+	seqID, e4 := p.ReadI32()
 	if e4 != nil {
-		return name, typeId, seqId, e4
+		return name, typeID, seqID, e4
 	}
-	return name, typeId, seqId, nil
+	return name, typeID, seqID, nil
 }
 
 func (p *BinaryProtocol) ReadMessageEnd() error {
@@ -289,16 +289,16 @@ func (p *BinaryProtocol) ReadStructEnd() error {
 	return nil
 }
 
-func (p *BinaryProtocol) ReadFieldBegin() (name string, typeId Type, seqId int16, err error) {
+func (p *BinaryProtocol) ReadFieldBegin() (name string, typeID Type, seqID int16, err error) {
 	t, err := p.ReadByte()
-	typeId = Type(t)
+	typeID = Type(t)
 	if err != nil {
-		return name, typeId, seqId, err
+		return name, typeID, seqID, err
 	}
 	if t != STOP {
-		seqId, err = p.ReadI16()
+		seqID, err = p.ReadI16()
 	}
-	return name, typeId, seqId, err
+	return name, typeID, seqID, err
 }
 
 func (p *BinaryProtocol) ReadFieldEnd() error {

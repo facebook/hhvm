@@ -473,8 +473,8 @@ func TestReadJSONProtocolString(t *testing.T) {
 
 func TestWriteJSONProtocolBinary(t *testing.T) {
 	thetype := "binary"
-	value := protocol_bdata
-	b64value := make([]byte, base64.StdEncoding.EncodedLen(len(protocol_bdata)))
+	value := protocolBdata
+	b64value := make([]byte, base64.StdEncoding.EncodedLen(len(protocolBdata)))
 	base64.StdEncoding.Encode(b64value, value)
 	b64String := string(b64value)
 	trans := NewMemoryBuffer()
@@ -507,8 +507,8 @@ func TestWriteJSONProtocolBinary(t *testing.T) {
 
 func TestReadJSONProtocolBinary(t *testing.T) {
 	thetype := "binary"
-	value := protocol_bdata
-	b64value := make([]byte, base64.StdEncoding.EncodedLen(len(protocol_bdata)))
+	value := protocolBdata
+	b64value := make([]byte, base64.StdEncoding.EncodedLen(len(protocolBdata)))
 	base64.StdEncoding.Encode(b64value, value)
 	b64String := string(b64value)
 	trans := NewMemoryBuffer()

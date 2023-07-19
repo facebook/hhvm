@@ -44,7 +44,7 @@ type structData struct {
 
 var (
 	data           string // test data for writing
-	protocol_bdata []byte // test data for writing; same as data
+	protocolBdata  []byte // test data for writing; same as data
 	boolValues     = []bool{false, true, false, false, true}
 	byteValues     = []byte{117, 0, 1, 32, 127, 128, 255}
 	int16Values    = []int16{459, 0, 1, -1, -128, 127, 32767, -32768}
@@ -56,13 +56,13 @@ var (
 	structTestData = structData{
 		name: "test struct",
 		fields: []fieldData{
-			fieldData{
+			{
 				name:  "field1",
 				typ:   BOOL,
 				id:    1,
 				value: true,
 			},
-			fieldData{
+			{
 				name:  "field2",
 				typ:   STRING,
 				id:    2,
@@ -76,11 +76,11 @@ var (
 
 // func floatValues() []
 func init() {
-	protocol_bdata = make([]byte, PROTOCOL_BINARY_DATA_SIZE)
+	protocolBdata = make([]byte, PROTOCOL_BINARY_DATA_SIZE)
 	for i := 0; i < PROTOCOL_BINARY_DATA_SIZE; i++ {
-		protocol_bdata[i] = byte((i + 'a') % 255)
+		protocolBdata[i] = byte((i + 'a') % 255)
 	}
-	data = string(protocol_bdata)
+	data = string(protocolBdata)
 }
 
 type HTTPEchoServer struct{}
@@ -130,6 +130,9 @@ func HTTPClientSetupForHeaderTest(t *testing.T) net.Listener {
 
 func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
 	rCh := make(chan io.Reader)
 	errCh := make(chan error)
 	go func() {
@@ -688,13 +691,13 @@ func ReadWriteString(t testing.TB, p Protocol, trans Transport) {
 }
 
 func WriteBinary(t testing.TB, p Protocol, trans Transport) {
-	v := protocol_bdata
+	v := protocolBdata
 	p.WriteBinary(v)
 	p.Flush()
 }
 
 func ReadBinary(t testing.TB, p Protocol, trans Transport) {
-	v := protocol_bdata
+	v := protocolBdata
 	value, err := p.ReadBinary()
 	if err != nil {
 		t.Fatalf("%s: %T %T Unable to read binary: %s", "ReadBinary", p, trans, err.Error())

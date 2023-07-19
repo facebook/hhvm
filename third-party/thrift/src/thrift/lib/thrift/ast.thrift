@@ -20,16 +20,6 @@ include "thrift/lib/thrift/id.thrift"
 
 namespace py3 apache.thrift
 
-// A lightweight source range that can be resolved into the file name,
-// line and column when the schema is produced from an IDL file.
-struct SourceRange {
-  1: id.ProgramId programId;
-  2: i32 beginLine;
-  3: i32 beginColumn;
-  4: i32 endLine;
-  5: i32 endColumn;
-}
-
 /**
  * Information about a thrift source file.
  */
@@ -73,9 +63,4 @@ struct Ast {
    * Information about the files holding the thrift definitions.
    */
   5: map<id.ProgramId, SourceInfo> sources;
-
-  /**
-   * Information about where each definition is present in the source files.
-   */
-  6: map<id.DefinitionId, SourceRange> sourceRanges;
 }

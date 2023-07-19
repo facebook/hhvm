@@ -143,17 +143,19 @@ void t_ast_generator::generate_program() {
         continue;
       }
       defs.push_back(definition_index.at(&def));
-
-      resolved_location begin(def.src_range().begin, source_mgr_);
-      resolved_location end(def.src_range().end, source_mgr_);
-      cpp2::SourceRange range;
-      range.programId() = program_index.at(program);
-      range.beginLine() = begin.line();
-      range.beginColumn() = begin.column();
-      range.endLine() = end.line();
-      range.endColumn() = end.column();
-      ast.sourceRanges()[definition_index.at(&def)] = range;
     }
+  };
+
+  auto set_source_range = [&](const t_named& def,
+                              type::DefinitionAttrs& attrs) {
+    resolved_location begin(def.src_range().begin, source_mgr_);
+    resolved_location end(def.src_range().end, source_mgr_);
+    type::SourceRange& range = *attrs.sourceRange();
+    range.programId() = program_index.at(def.program());
+    range.beginLine() = begin.line();
+    range.beginColumn() = begin.column();
+    range.endLine() = end.line();
+    range.endColumn() = end.column();
   };
 
   schematizer schema_source(intern_value);
@@ -197,18 +199,18 @@ void t_ast_generator::generate_program() {
     // visits the children after this lambda returns.
   });
 
-#define THRIFT_ADD_VISITOR(kind)                               \
-  visitor.add_##kind##_visitor([&](const t_##kind& node) {     \
-    if (node.generated()) {                                    \
-      return;                                                  \
-    }                                                          \
-    auto& definitions = *ast.definitions();                    \
-    auto pos = definitions.size();                             \
-    definition_index[&node] =                                  \
-        positionToId<apache::thrift::type::DefinitionId>(pos); \
-    hydrate_const(                                             \
-        definitions.emplace_back().kind##Def_ref().ensure(),   \
-        *schema_source.gen_schema(node));                      \
+#define THRIFT_ADD_VISITOR(kind)                                     \
+  visitor.add_##kind##_visitor([&](const t_##kind& node) {           \
+    if (node.generated()) {                                          \
+      return;                                                        \
+    }                                                                \
+    auto& definitions = *ast.definitions();                          \
+    auto pos = definitions.size();                                   \
+    definition_index[&node] =                                        \
+        positionToId<apache::thrift::type::DefinitionId>(pos);       \
+    auto& def = definitions.emplace_back().kind##Def_ref().ensure(); \
+    hydrate_const(def, *schema_source.gen_schema(node));             \
+    set_source_range(node, *def.attrs());                            \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);

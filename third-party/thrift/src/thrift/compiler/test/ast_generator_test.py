@@ -72,7 +72,7 @@ class AstGeneratorTest(unittest.TestCase):
         ast = self.run_thrift("foo.thrift")
         self.assertEqual(ast.definitions[0].structDef.attrs.name, "Foo")
         self.assertEqual(ast.definitions[0].structDef.fields[0].id, 1)
-        srcRange = ast.sourceRanges[1]
+        srcRange = ast.definitions[0].structDef.attrs.sourceRange
         self.assertEqual(srcRange.programId, 1)
         self.assertEqual(srcRange.beginLine, 2)
         self.assertEqual(srcRange.beginColumn, 1)

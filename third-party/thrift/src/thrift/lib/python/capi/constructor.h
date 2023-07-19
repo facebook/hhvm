@@ -23,7 +23,6 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
-#include <thrift/lib/python/types.h>
 
 namespace apache {
 namespace thrift {

@@ -134,7 +134,6 @@ let connect ?(use_priority_pipe = false) args =
     max_errors = _;
     mode = _;
     output_json = _;
-    prefer_stdout = _;
     sort_results = _;
     stdin_name = _;
     desc = _;
@@ -759,7 +758,7 @@ let main_internal
       let exit_status =
         ClientCheckStatus.go
           status
-          (args.output_json, args.prefer_stdout)
+          args.output_json
           args.from
           args.error_format
           args.max_errors
@@ -799,7 +798,7 @@ let main_internal
     let exit_status =
       ClientCheckStatus.go
         status
-        (args.output_json, args.prefer_stdout)
+        args.output_json
         args.from
         args.error_format
         args.max_errors

@@ -531,7 +531,6 @@ let env =
       save_64bit = None;
       save_human_readable_64bit_dep_map = None;
       output_json = false;
-      prefer_stdout = false;
       prechecked = None;
       mini_state = None;
       remote = false;

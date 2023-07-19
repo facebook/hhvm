@@ -142,7 +142,6 @@ let parse_check_args cmd ~from_default =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
-  let prefer_stdout = ref true in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let rename_before = ref "" in
@@ -528,10 +527,7 @@ let parse_check_args cmd ~from_default =
       ( "--json",
         Arg.Set output_json,
         " output json for machine consumption. (default: false)" );
-      ( "--prefer-stdout",
-        Arg.Set prefer_stdout,
-        " when outputting json, output to stdout. No-op otherwise. (default: false)"
-      );
+      ("--prefer-stdout", Arg.Unit (fun () -> ()), " (dead option)");
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );
@@ -860,7 +856,6 @@ let parse_check_args cmd ~from_default =
     save_64bit = !save_64bit;
     save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
     output_json = !output_json;
-    prefer_stdout = !prefer_stdout;
     prechecked = !prechecked;
     mini_state = !mini_state;
     remote = !remote;

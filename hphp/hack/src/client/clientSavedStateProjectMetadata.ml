@@ -31,7 +31,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     save_64bit = _;
     save_human_readable_64bit_dep_map = _;
     output_json = _;
-    prefer_stdout = _;
     prechecked = _;
     mini_state = _;
     remote = _;

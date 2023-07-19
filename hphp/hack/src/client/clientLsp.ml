@@ -2732,7 +2732,6 @@ let kickoff_shell_out_and_maybe_cancel
       server_cmd;
       cmd_arg;
       "--json";
-      "--prefer-stdout";
       "--autostart-server";
       "false";
       get_root_exn () |> Path.to_string;

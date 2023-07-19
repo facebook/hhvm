@@ -250,7 +250,6 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
 
   /// Clears the value.
   void clear() { resetAnd().clear() = true; }
-  FOLLY_NODISCARD T& clearAnd() { return (clear(), data_); }
 };
 
 /// Base class for 'container' patch types.
@@ -261,7 +260,6 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
 template <typename Patch, typename Derived>
 class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
   using Base = BaseClearPatch<Patch, Derived>;
-  using T = typename Base::value_type;
 
  public:
   using Base::Base;
@@ -269,7 +267,6 @@ class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
   using Base::clear;
 
  protected:
-  using Base::data_;
   ~BaseContainerPatch() = default; // Abstract base class.
 };
 

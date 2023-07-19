@@ -69,7 +69,7 @@ type HeaderTransport struct {
 	firstRequest       bool
 }
 
-// NewHeaderTransport Create a new transport with defaults.
+// NewHeaderTransport creates a new transport with defaults.
 func NewHeaderTransport(transport Transport) *HeaderTransport {
 	return &HeaderTransport{
 		transport: transport,
@@ -216,7 +216,7 @@ func (t *HeaderTransport) AddTransform(trans TransformID) error {
 	return nil
 }
 
-// applyUntransform Fully read the frame and untransform into a local buffer
+// applyUntransform fully reads the frame and untransforms into a local buffer
 // we need to know the full size of the untransformed data
 func (t *HeaderTransport) applyUntransform() error {
 	out, err := ioutil.ReadAll(t.framebuf)
@@ -238,7 +238,7 @@ func (t *HeaderTransport) SetFlags(flags HeaderFlags) {
 	t.flags = uint16(flags)
 }
 
-// ResetProtocol Needs to be called between every frame receive (BeginMessageRead)
+// ResetProtocol needs to be called between every frame receive (BeginMessageRead)
 // We do this to read out the header for each frame. This contains the length of the
 // frame and protocol / metadata info.
 func (t *HeaderTransport) ResetProtocol() error {
@@ -292,27 +292,27 @@ func (t *HeaderTransport) ResetProtocol() error {
 	return nil
 }
 
-// Open Open the internal transport
+// Open opens the internal transport
 func (t *HeaderTransport) Open() error {
 	return t.transport.Open()
 }
 
-// IsOpen Is the current transport open
+// IsOpen returns whether the current transport is open
 func (t *HeaderTransport) IsOpen() bool {
 	return t.transport.IsOpen()
 }
 
-// Close Close the internal transport
+// Close closes the internal transport
 func (t *HeaderTransport) Close() error {
 	return t.transport.Close()
 }
 
-// UnderlyingTransport Get the underlying transport
+// UnderlyingTransport gets the underlying transport
 func (t *HeaderTransport) UnderlyingTransport() Transport {
 	return t.transport
 }
 
-// Read Read from the current framebuffer. EOF if the frame is done.
+// Read reads from the current framebuffer. EOF if the frame is done.
 func (t *HeaderTransport) Read(buf []byte) (int, error) {
 	n, err := t.framebuf.Read(buf)
 	// Shouldn't be possibe, but just in case the frame size was flubbed
@@ -323,32 +323,32 @@ func (t *HeaderTransport) Read(buf []byte) (int, error) {
 	return n, err
 }
 
-// ReadByte Read a single byte from the current framebuffer. EOF if the frame is done.
+// ReadByte reads a single byte from the current framebuffer. EOF if the frame is done.
 func (t *HeaderTransport) ReadByte() (byte, error) {
 	b, err := t.framebuf.ReadByte()
 	t.frameSize--
 	return b, err
 }
 
-// Write Write multiple bytes to the framebuffer, does not send to transport.
+// Write writes multiple bytes to the framebuffer, does not send to transport.
 func (t *HeaderTransport) Write(buf []byte) (int, error) {
 	n, err := t.wbuf.Write(buf)
 	return n, NewTransportExceptionFromError(err)
 }
 
-// WriteByte Write a single byte to the framebuffer, does not send to transport.
+// WriteByte writes a single byte to the framebuffer, does not send to transport.
 func (t *HeaderTransport) WriteByte(c byte) error {
 	err := t.wbuf.WriteByte(c)
 	return NewTransportExceptionFromError(err)
 }
 
-// WriteString Write a string to the framebuffer, does not send to transport.
+// WriteString writes a string to the framebuffer, does not send to transport.
 func (t *HeaderTransport) WriteString(s string) (int, error) {
 	n, err := t.wbuf.WriteString(s)
 	return n, NewTransportExceptionFromError(err)
 }
 
-// RemainingBytes Return how many bytes remain in the current recv framebuffer.
+// RemainingBytes returns how many bytes remain in the current recv framebuffer.
 func (t *HeaderTransport) RemainingBytes() uint64 {
 	return t.frameSize
 }

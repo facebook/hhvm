@@ -100,17 +100,17 @@ class SyncMysqlClient : public MysqlClientBase {
       mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT_MS, &qtmo);
       mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT_MS, &qtmo);
 
-      const auto usingUnixSocket = !key.unixSocketPath.empty();
+      const auto usingUnixSocket = !key.unixSocketPath().empty();
 
       // When using unix socket (AF_UNIX), host/port do not matter.
       const auto rv = mysql_real_connect(
           mysql,
-          usingUnixSocket ? nullptr : key.host.c_str(),
-          key.user.c_str(),
-          key.password.c_str(),
-          key.db_name.c_str(),
-          usingUnixSocket ? 0 : key.port,
-          usingUnixSocket ? key.unixSocketPath.c_str() : nullptr,
+          usingUnixSocket ? nullptr : key.host().c_str(),
+          key.user().c_str(),
+          key.password().c_str(),
+          key.db_name().c_str(),
+          usingUnixSocket ? 0 : key.port(),
+          usingUnixSocket ? key.unixSocketPath().c_str() : nullptr,
           flags);
       return rv == nullptr ? ERROR : DONE;
     }

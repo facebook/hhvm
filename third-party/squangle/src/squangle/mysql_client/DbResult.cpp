@@ -40,9 +40,9 @@ MysqlException::MysqlException(
                     "Mysql error {}. {} to db {} at {}:{}",
                     mysql_errno,
                     mysql_error,
-                    conn_key.db_name,
-                    conn_key.host,
-                    conn_key.port)
+                    conn_key.db_name(),
+                    conn_key.host(),
+                    conn_key.port())
               : std::string(Operation::toString(failure_type))),
       OperationResultBase(std::move(conn_key), elapsed_time),
       failure_type_(failure_type),

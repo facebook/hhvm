@@ -21,8 +21,8 @@ class PoolKey {
     options_hash_ = folly::hash::hash_range(
         connOptions.getAttributes().begin(), connOptions.getAttributes().end());
     partial_hash_ =
-        folly::hash::hash_combine(connKey.partial_hash, options_hash_);
-    full_hash_ = folly::hash::hash_combine(connKey.hash, options_hash_);
+        folly::hash::hash_combine(connKey.partial_hash(), options_hash_);
+    full_hash_ = folly::hash::hash_combine(connKey.hash(), options_hash_);
   }
 
   bool operator==(const PoolKey& rhs) const {

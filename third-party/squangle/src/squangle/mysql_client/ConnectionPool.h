@@ -559,9 +559,9 @@ class ConnectionPool
     conn->needToCloneConnection_ = false;
     auto changeUserOp = Connection::changeUser(
         std::move(conn),
-        poolKey.connKey.user,
-        poolKey.connKey.password,
-        poolKey.connKey.db_name);
+        poolKey.connKey.user(),
+        poolKey.connKey.password(),
+        poolKey.connKey.db_name());
 
     changeUserOp->setCallback(
         [this, rawPoolOp, poolKey, poolPtr = getSelfWeakPointer()](

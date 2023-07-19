@@ -234,17 +234,17 @@ MysqlHandler::Status AsyncMysqlClient::AsyncMysqlHandler::tryConnect(
     const ConnectionOptions& /*opts*/,
     const ConnectionKey& conn_key,
     int flags) {
-  const auto usingUnixSocket = !conn_key.unixSocketPath.empty();
+  const auto usingUnixSocket = !conn_key.unixSocketPath().empty();
 
   // When using unix socket (AF_UNIX), host/port do not matter.
   return toHandlerStatus(mysql_real_connect_nonblocking(
       mysql,
-      usingUnixSocket ? nullptr : conn_key.host.c_str(),
-      conn_key.user.c_str(),
-      conn_key.password.c_str(),
-      conn_key.db_name.c_str(),
-      usingUnixSocket ? 0 : conn_key.port,
-      usingUnixSocket ? conn_key.unixSocketPath.c_str() : nullptr,
+      usingUnixSocket ? nullptr : conn_key.host().c_str(),
+      conn_key.user().c_str(),
+      conn_key.password().c_str(),
+      conn_key.db_name().c_str(),
+      usingUnixSocket ? 0 : conn_key.port(),
+      usingUnixSocket ? conn_key.unixSocketPath().c_str() : nullptr,
       flags));
 }
 

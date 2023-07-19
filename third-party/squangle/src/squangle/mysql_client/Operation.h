@@ -864,10 +864,10 @@ class ConnectOperation : public Operation {
   }
 
   const std::string& database() const {
-    return conn_key_.db_name;
+    return conn_key_.db_name();
   }
   const std::string& user() const {
-    return conn_key_.user;
+    return conn_key_.user();
   }
 
   const ConnectionKey& getConnectionKey() const {

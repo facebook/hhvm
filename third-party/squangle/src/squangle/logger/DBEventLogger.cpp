@@ -34,7 +34,7 @@ void DBSimpleLogger::logConnectionSuccess(
     const CommonLoggingData&,
     const SquangleLoggingData& connInfo) const {
   VLOG(2) << "[" << api_name_ << "]"
-          << " connection with " << connInfo.connKey->host << " succeeded";
+          << " connection with " << connInfo.connKey->host() << " succeeded";
 }
 
 void DBSimpleLogger::logConnectionFailure(
@@ -44,7 +44,7 @@ void DBSimpleLogger::logConnectionFailure(
     const std::string&,
     const SquangleLoggingData& connInfo) const {
   VLOG(2) << "[" << api_name_ << "]"
-          << " connection with " << connInfo.connKey->host << " failed";
+          << " connection with " << connInfo.connKey->host() << " failed";
 }
 } // namespace db
 } // namespace facebook

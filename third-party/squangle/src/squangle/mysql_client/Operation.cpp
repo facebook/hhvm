@@ -728,7 +728,7 @@ void ConnectOperation::socketActionable() {
 
   auto& handler = conn()->client()->getMysqlHandler();
   MYSQL* mysql = conn()->mysql();
-  const auto usingUnixSocket = !conn_key_.unixSocketPath.empty();
+  const auto usingUnixSocket = !conn_key_.unixSocketPath().empty();
 
   auto status = handler.tryConnect(mysql, conn_options_, conn_key_, flags_);
 

@@ -10,9 +10,7 @@
 
 #include <folly/String.h>
 
-namespace facebook {
-namespace common {
-namespace mysql_client {
+namespace facebook::common::mysql_client {
 
 // This class encapsulates the data that differentiates 2 connections:
 // host, port, db name and user. We also store the password to avoid
@@ -21,18 +19,6 @@ namespace mysql_client {
 // for debugging purposes and to use as keys in other maps
 class ConnectionKey {
  public:
-  const std::string host;
-  const int port;
-  const std::string db_name;
-  const std::string user;
-  // keeping password to avoid password error
-  const std::string password;
-  const std::string special_tag;
-  const bool ignore_db_name;
-  const std::string unixSocketPath;
-  const size_t partial_hash;
-  const size_t hash;
-
   ConnectionKey(
       folly::StringPiece sp_host,
       int sp_port,
@@ -51,11 +37,58 @@ class ConnectionKey {
     return !(*this == rhs);
   }
 
+  FOLLY_NODISCARD const std::string& host() const noexcept {
+    return host_;
+  }
+
+  FOLLY_NODISCARD const std::string& db_name() const noexcept {
+    return dbName_;
+  }
+
+  FOLLY_NODISCARD const std::string& user() const noexcept {
+    return user_;
+  }
+
+  FOLLY_NODISCARD const std::string& password() const noexcept {
+    return password_;
+  }
+
+  FOLLY_NODISCARD const std::string& unixSocketPath() const noexcept {
+    return unixSocketPath_;
+  }
+
+  FOLLY_NODISCARD size_t hash() const noexcept {
+    return hash_;
+  }
+
+  FOLLY_NODISCARD size_t partial_hash() const noexcept {
+    return partialHash_;
+  }
+
+  FOLLY_NODISCARD int port() const noexcept {
+    return port_;
+  }
+
+  FOLLY_NODISCARD const std::string& special_tag() const noexcept {
+    return specialTag_;
+  }
+
   std::string getDisplayString(bool level2 = false) const;
+
+ private:
+  std::string host_;
+  std::string dbName_;
+  std::string user_;
+  std::string password_;
+  std::string specialTag_;
+  std::string unixSocketPath_;
+  size_t partialHash_;
+  size_t hash_;
+  int port_;
+  bool ignoreDbName_;
 };
-} // namespace mysql_client
-} // namespace common
-} // namespace facebook
+
+} // namespace facebook::common::mysql_client
 
 // make default template of unordered_map/unordered_set works for ConnectionKey
 namespace std {
@@ -63,7 +96,7 @@ template <>
 struct hash<facebook::common::mysql_client::ConnectionKey> {
   size_t operator()(
       const facebook::common::mysql_client::ConnectionKey& k) const {
-    return k.hash;
+    return k.hash();
   }
 };
 } // namespace std

@@ -215,8 +215,8 @@ std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
       "[{}]({})Connection to {}:{} timed out in pool",
       static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
       kErrorPrefix,
-      key.host,
-      key.port));
+      key.host(),
+      key.port()));
   parts.push_back(fmt::format(
       "(open {}, opening {}, key limit {})",
       pool_key_stats.open_connections,

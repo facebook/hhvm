@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -130,12 +131,13 @@ func HTTPClientSetupForHeaderTest(t *testing.T) net.Listener {
 func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	rCh := make(chan io.Reader)
+	errCh := make(chan error)
 	go func() {
 		defer close(rCh)
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				t.Fatalf("could not accept tcp: %s", err.Error())
+				errCh <- fmt.Errorf("could not accept tcp: %s", err.Error())
 			}
 			rCh <- conn
 		}
@@ -152,6 +154,8 @@ func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	}
 	select {
 	case rConn = <-rCh:
+	case err = <-errCh:
+		t.Fatalf(err.Error())
 	case <-time.After(1 * time.Second):
 		t.Fatalf("timed out waiting on a tcp connection")
 	}

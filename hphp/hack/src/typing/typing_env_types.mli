@@ -94,8 +94,6 @@ and genv = {
       (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
-  package_info: PackageInfo.t;
-      (** Given a module name returns the package it is in **)
   no_auto_likes: bool;
       (** Is the definition that we are checking marked <<__NoAutoLikes>>? *)
 }

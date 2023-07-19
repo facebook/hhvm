@@ -596,11 +596,11 @@ let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 let get_internal env = env.genv.this_internal
 
 let get_package_for_module env md =
-  let info = env.genv.package_info in
+  let info = get_tcopt env |> TypecheckerOptions.package_info in
   PackageInfo.get_package_for_module info md
 
 let get_package_by_name env pkg_name =
-  let info = env.genv.package_info in
+  let info = get_tcopt env |> TypecheckerOptions.package_info in
   PackageInfo.get_package info pkg_name
 
 let is_package_loaded env package = SSet.mem package env.loaded_packages

@@ -520,7 +520,6 @@ let genv_as_value env genv =
     this_internal;
     this_support_dynamic_type;
     no_auto_likes;
-    package_info = _;
   } =
     genv
   in

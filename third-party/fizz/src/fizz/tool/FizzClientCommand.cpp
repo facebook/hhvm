@@ -823,7 +823,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     }
   }
 
-  std::vector<ech::ECHConfig> echConfigs;
+  folly::Optional<std::vector<ech::ECHConfig>> echConfigs;
   if (echConfigList.has_value()) {
     echConfigs = std::move(echConfigList->configs);
   }

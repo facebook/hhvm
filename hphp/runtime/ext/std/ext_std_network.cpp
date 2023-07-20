@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
 #include "hphp/util/rds-local.h"
@@ -409,6 +410,18 @@ int64_t HHVM_FUNCTION(get_http_request_size) {
   }
 }
 
+Array HHVM_FUNCTION(parse_cookies, const String& header_value) {
+  auto ret = Array::CreateDict();
+  // DecodeCookies asserts a nonempty string, avoid fatals by checking length
+  if (header_value.length() != 0) {
+    // strtok_r is destructive, make a copy first
+    StringBuffer sb;
+    sb.append(header_value);
+    HttpProtocol::DecodeCookies(ret, (char*)sb.data());
+  }
+  return ret;
+}
+
 bool HHVM_FUNCTION(setcookie, const String& name,
                               const String& value /* = null_string */,
                               int64_t expire /* = 0 */,
@@ -516,6 +529,7 @@ void StandardExtension::initNetwork() {
   HHVM_FE(header_register_callback);
   HHVM_FE(header_remove);
   HHVM_FE(get_http_request_size);
+  HHVM_FALIAS(HH\\parse_cookies, parse_cookies);
   HHVM_FE(setcookie);
   HHVM_FE(setrawcookie);
   HHVM_FE(openlog);

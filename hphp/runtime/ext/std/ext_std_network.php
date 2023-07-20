@@ -1,5 +1,7 @@
 <?hh // partial
 
+namespace {
+
 /**
  * Check DNS records corresponding to a given Internet host name or IP address
  *
@@ -588,3 +590,22 @@ function socket_set_timeout(resource $stream, int $secs, int $msecs = 0): bool {
 <<__Native>>
 function syslog(int $priority,
                 string $message): bool;
+
+}
+
+namespace HH {
+
+/**
+ * Given a cookie header value, parse it in the same style that the $_COOKIE
+ * global uses.
+ *
+ * @param string $header_value - Cookie header value.
+ *
+ * @return dict<arraykey, mixed> - dict of cookie names and values. Similarly to
+ *   $_COOKIE, cookie names like 'foo[0]=bar; foo[1]=baz' are returned as
+ *   `dict['foo' => vec['bar', 'baz']]`.
+ */
+<<__Native>>
+function parse_cookies(string $header_value)[]: dict<arraykey, mixed>;
+
+}

@@ -171,10 +171,9 @@ fn rewrite_86sinit(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>) 
                 initial_value: None,
                 ..
             } if is_const => {
-                textual_todo! {
-                    trace!("TODO: abstract class constant");
-                }
-                Some(builder.emit_constant(Constant::Null))
+                // This is an abstract constant - its value will be overwritten
+                // in a subclass's init - so just skip it.
+                continue;
             }
             ir::Property {
                 initial_value: Some(initial_value),

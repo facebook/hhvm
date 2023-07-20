@@ -94,7 +94,7 @@ class CompilerFailureTest(unittest.TestCase):
             textwrap.dedent(
                 """\
                 service MySBB {
-                    void lol(),
+                    void lol();
                 }
                 """
             ),
@@ -105,7 +105,7 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "foo.thrift"
                 service MySB extends foo.MySBB {
-                    void meh(),
+                    void meh();
                 }
                 """
             ),
@@ -116,8 +116,8 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "bar.thrift"
                 service MyS extends bar.MySB {
-                    void lol(),
-                    void meh(),
+                    void lol();
+                    void meh();
                 }
                 """
             ),
@@ -138,7 +138,7 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "bar.thrift"
                 service MySBB {
-                    void lol(),
+                    void lol();
                 }
                 """
             ),
@@ -149,7 +149,7 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "foo.thrift"
                 service MySB extends foo.MySBB {
-                    void meh(),
+                    void meh();
                 }
                 """
             ),
@@ -1224,10 +1224,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:9] `@thrift.TerseWrite` cannot be used with qualified fields. "
-            "Remove `optional` qualifier from field `field2`.\n"
-            "[ERROR:foo.thrift:11] `@thrift.TerseWrite` cannot be used with qualified fields. "
-            "Remove `required` qualifier from field `field3`.\n"
+            "[ERROR:foo.thrift:9] `@thrift.TerseWrite` cannot be used with qualified fields\n"
+            "[ERROR:foo.thrift:11] `@thrift.TerseWrite` cannot be used with qualified fields\n"
+            "[WARNING:foo.thrift:11] Required field is deprecated: `field3`.\n"
             "[ERROR:foo.thrift:16] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
         )
 
@@ -1477,8 +1476,8 @@ class CompilerFailureTest(unittest.TestCase):
             textwrap.dedent(
                 """\
                 struct S {
-                    1: i32 field,
-                    2: set<float> set_of_float,
+                    1: i32 field;
+                    2: set<float> set_of_float;
                 }
                 """
             ),
@@ -1497,8 +1496,8 @@ class CompilerFailureTest(unittest.TestCase):
             textwrap.dedent(
                 """\
                 struct S {
-                    1: i32 field,
-                    2: map<float, i32> map_of_float_to_int,
+                    1: i32 field;
+                    2: map<float, i32> map_of_float_to_int;
                 }
                 """
             ),

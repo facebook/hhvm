@@ -189,6 +189,17 @@ TEST(CompilerTest, out_of_range_field_ids_underflow) {
   )");
 }
 
+TEST(CompilerTest, params) {
+  check_compile(R"(
+    service MyService {
+      void good(1: i32 i);
+      void semi(1: i32 i;); # expected-warning: unexpected ';'
+      void opt(1: optional i32 i); # expected-warning: 'optional' is not permitted on a parameter
+      void req(1: required i32 i); # expected-warning: 'required' is not permitted on a parameter
+    }
+  )");
+}
+
 TEST(CompilerTest, oneway_exception) {
   check_compile(R"(
     exception A {}

@@ -431,11 +431,7 @@ class parser {
 
     auto return_type = parse_return_type();
     auto name = parse_identifier();
-
-    // Parse arguments.
-    expect_and_consume('(');
-    auto params = parse_field_list(')');
-    expect_and_consume(')');
+    auto params = parse_param_list();
 
     auto throws = try_parse_throws();
     try_parse_deprecated_annotations(attrs);
@@ -504,10 +500,7 @@ class parser {
     if (!try_consume_token(tok::kw_throws)) {
       return {};
     }
-    expect_and_consume('(');
-    auto exceptions = parse_field_list(')');
-    expect_and_consume(')');
-    return actions_.on_throws(std::move(exceptions));
+    return actions_.on_throws(parse_param_list());
   }
 
   // typedef:
@@ -528,7 +521,7 @@ class parser {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_struct);
     auto name = parse_identifier();
-    auto fields = parse_braced_field_list();
+    auto fields = parse_field_list();
     try_parse_deprecated_annotations(attrs);
     actions_.on_struct(range, std::move(attrs), name, std::move(fields));
   }
@@ -539,7 +532,7 @@ class parser {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_union);
     auto name = parse_identifier();
-    auto fields = parse_braced_field_list();
+    auto fields = parse_field_list();
     try_parse_deprecated_annotations(attrs);
     actions_.on_union(range, std::move(attrs), name, std::move(fields));
   }
@@ -580,35 +573,50 @@ class parser {
     }
     expect_and_consume(tok::kw_exception);
     auto name = parse_identifier();
-    auto fields = parse_braced_field_list();
+    auto fields = parse_field_list();
     try_parse_deprecated_annotations(attrs);
     actions_.on_exception(
         range, std::move(attrs), safety, kind, blame, name, std::move(fields));
   }
 
-  t_field_list parse_braced_field_list() {
+  t_field_list parse_field_list() {
     expect_and_consume('{');
-    auto fields = parse_field_list('}');
+    auto fields = t_field_list();
+    while (token_.kind != '}') {
+      fields.emplace_back(parse_field(field_kind::field));
+    }
     expect_and_consume('}');
     return fields;
   }
 
-  t_field_list parse_field_list(token_kind delimiter) {
-    auto fields = t_field_list();
-    while (token_.kind != delimiter) {
-      fields.emplace_back(parse_field());
+  t_field_list parse_param_list() {
+    expect_and_consume('(');
+    auto params = t_field_list();
+    while (token_.kind != ')') {
+      params.emplace_back(parse_field(field_kind::param));
     }
-    return fields;
+    expect_and_consume(')');
+    return params;
   }
 
-  // field:
-  //   attributes field_id? field_qualifier? type identifier
-  //     field_value? annotations comma_or_semicolon? inline_doc?
+  enum class field_kind { field, param };
+
+  // Parses a field or a parameter.
   //
-  // field_id: integer ":"
+  // field:
+  //   attributes
+  //   field_id ":" [field_qualifier] type identifier
+  //     [default_value] annotations [';'] [inline_doc]
+  //
+  // parameter ::=
+  //   attributes
+  //   field_id ":" type identifier [default_value]
+  //     annotations [','] [inline_doc]
+  //
+  // field_id: integer
   // field_qualifier: "required" | "optional"
-  // field_value: "=" const_value
-  std::unique_ptr<t_field> parse_field() {
+  // default_value: "=" const_value
+  std::unique_ptr<t_field> parse_field(field_kind kind) {
     auto range = track_range();
     auto attrs = parse_attributes();
 
@@ -620,11 +628,19 @@ class parser {
     }
 
     // Parse the field qualifier.
-    auto qual = t_field_qualifier();
+    auto qual = t_field_qualifier::none;
+    auto qual_tok = token_;
     if (try_consume_token(tok::kw_optional)) {
       qual = t_field_qualifier::optional;
     } else if (try_consume_token(tok::kw_required)) {
       qual = t_field_qualifier::required;
+    }
+    if (qual != t_field_qualifier::none && kind == field_kind::param) {
+      diags_.warning(
+          qual_tok.range.begin,
+          "'{}' is not permitted on a parameter",
+          to_string(qual_tok.kind));
+      qual = t_field_qualifier::none;
     }
 
     auto type = parse_type();
@@ -637,7 +653,14 @@ class parser {
     }
 
     try_parse_deprecated_annotations(attrs);
-    try_parse_comma_or_semicolon();
+    char delimiter = kind == field_kind::field ? ';' : ',';
+    if (token_.kind == ',' || token_.kind == ';') {
+      if (token_.kind != delimiter) {
+        diags_.warning(
+            token_.range.begin, "unexpected '{}'", to_string(token_.kind));
+      }
+      consume_token();
+    }
     auto doc = try_parse_inline_doc();
     return actions_.on_field(
         range,

@@ -50,52 +50,22 @@ void propagate_process_in_event_base_annotation(
   }
 }
 
-void remove_param_list_field_qualifiers(
-    diagnostic_context& ctx, mutator_context&, t_function& node) {
-  for (auto& field : node.params().fields()) {
-    switch (field.qualifier()) {
-      case t_field_qualifier::none:
-        continue;
-      case t_field_qualifier::required:
-        ctx.warning("optional keyword is ignored in argument lists.");
-        break;
-      case t_field_qualifier::optional:
-        ctx.warning("required keyword is ignored in argument lists.");
-        break;
-      case t_field_qualifier::terse:
-        ctx.warning(
-            "@thrift.TerseWrite annotation is ignored in argument lists.");
-        break;
-    }
-    field.set_qualifier(t_field_qualifier::none);
-  }
-}
-
-// Only an unqualified field is eligible for terse write.
-void mutate_terse_write_annotation_field(
-    diagnostic_context& ctx, mutator_context&, t_field& node) {
-  const t_const* terse_write_annotation =
-      node.find_structured_annotation_or_null(kTerseWriteUri);
-
-  if (terse_write_annotation) {
-    auto qual = node.qualifier();
-    ctx.check(
-        qual == t_field_qualifier::none,
-        "`@thrift.TerseWrite` cannot be used with qualified fields. Remove `{}` qualifier from field `{}`.",
-        qual == t_field_qualifier::required ? "required" : "optional",
-        node.name());
-    node.set_qualifier(t_field_qualifier::terse);
-  }
-}
-
 // Only an unqualified field is eligible for terse write.
 void mutate_terse_write_annotation_structured(
     diagnostic_context& ctx, mutator_context&, t_structured& node) {
-  if (ctx.program().inherit_annotation_or_null(node, kTerseWriteUri)) {
-    for (auto& field : node.fields()) {
-      if (field.qualifier() == t_field_qualifier::none) {
-        field.set_qualifier(t_field_qualifier::terse);
-      }
+  bool program_has_terse_write =
+      ctx.program().inherit_annotation_or_null(node, kTerseWriteUri);
+  for (auto& field : node.fields()) {
+    bool field_has_terse_write =
+        field.find_structured_annotation_or_null(kTerseWriteUri);
+    if (!field_has_terse_write && !program_has_terse_write) {
+      continue;
+    }
+    if (field.qualifier() == t_field_qualifier::none) {
+      field.set_qualifier(t_field_qualifier::terse);
+    } else if (field_has_terse_write) {
+      ctx.error(
+          field, "`@thrift.TerseWrite` cannot be used with qualified fields");
     }
   }
 }
@@ -428,7 +398,6 @@ ast_mutators standard_mutators() {
     });
     initial.add_interaction_visitor(
         &propagate_process_in_event_base_annotation);
-    initial.add_function_visitor(&remove_param_list_field_qualifiers);
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
     initial.add_definition_visitor(&set_release_state);
@@ -437,7 +406,6 @@ ast_mutators standard_mutators() {
   {
     auto& main = mutators[standard_mutator_stage::main];
     main.add_definition_visitor(&inherit_release_state);
-    main.add_field_visitor(&mutate_terse_write_annotation_field);
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);

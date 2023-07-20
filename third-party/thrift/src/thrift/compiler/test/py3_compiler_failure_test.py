@@ -88,13 +88,13 @@ class CompilerFailureTest(unittest.TestCase):
             textwrap.dedent(
                 """
                 union Foo {
-                    1: string name,
-                    2: i32 value (py3.name = "value_"),
+                    1: string name;
+                    2: i32 value (py3.name = "value_");
                 }
 
                 union Bar {
-                    1: string name (py3.name = "name_"),
-                    2: i32 value,
+                    1: string name (py3.name = "name_");
+                    2: i32 value;
                 }
                 """
             ),

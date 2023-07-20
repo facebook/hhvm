@@ -43,16 +43,6 @@ class StandardMutatorTest : public ::testing::Test {
       std::make_unique<t_program>("/path/to/file.thrift")};
 };
 
-void check_field(
-    const t_field& field,
-    t_field_id id,
-    std::string_view name,
-    t_field_qualifier qual) {
-  EXPECT_EQ(field.id(), id);
-  EXPECT_EQ(field.name(), name);
-  EXPECT_EQ(field.qualifier(), qual);
-}
-
 TEST_F(StandardMutatorTest, Empty) {
   mutate();
 }
@@ -112,65 +102,6 @@ TEST_F(StandardMutatorTest, TerseWriteStruct) {
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::terse);
   EXPECT_EQ(optional_field_ptr->qualifier(), t_field_qualifier::optional);
   EXPECT_EQ(required_field_ptr->qualifier(), t_field_qualifier::required);
-}
-
-TEST_F(StandardMutatorTest, InjectMetadataFields) {
-  t_program* program = root_program();
-  auto field = std::make_unique<t_field>(t_base_type::t_i64(), "field", 1);
-  auto optional_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "optional_field", 2);
-  auto required_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "required_field", 3);
-  auto terse_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "terse_field", 4);
-  auto box_field =
-      std::make_unique<t_field>(t_base_type::t_i64(), "box_field", 5);
-  auto strct = std::make_unique<t_struct>(program, "MyStruct");
-
-  optional_field->set_qualifier(t_field_qualifier::optional);
-  required_field->set_qualifier(t_field_qualifier::required);
-  box_field->set_qualifier(t_field_qualifier::optional);
-
-  auto injected = std::make_unique<t_struct>(program, "Injected");
-  auto box = gen::thrift_annotation_builder::box(*program);
-  injected->add_structured_annotation(
-      gen::inject_metadata_fields_builder(*program).make("MyStruct"));
-  terse_field->add_structured_annotation(
-      gen::thrift_annotation_builder::terse(*program).make());
-  box_field->add_structured_annotation(box.make());
-
-  // Store pointers for testing purpose.
-  const auto* injected_ptr = injected.get();
-
-  strct->append_field(std::move(field));
-  strct->append_field(std::move(optional_field));
-  strct->append_field(std::move(required_field));
-  strct->append_field(std::move(terse_field));
-  strct->append_field(std::move(box_field));
-
-  // Append current program name `file`.
-  program->scope()->add_type("file.MyStruct", strct.get());
-  program->add_struct(std::move(injected));
-
-  const auto& injected_fields = injected_ptr->fields();
-  EXPECT_EQ(injected_fields.size(), 0);
-
-  mutate();
-
-  EXPECT_EQ(injected_fields.size(), 5);
-  // t_field::fields returns fields in injected order.
-  check_field(injected_fields[0], -1001, "field", t_field_qualifier::none);
-  check_field(
-      injected_fields[1], -1002, "optional_field", t_field_qualifier::optional);
-  check_field(
-      injected_fields[2], -1003, "required_field", t_field_qualifier::required);
-  check_field(
-      injected_fields[3], -1004, "terse_field", t_field_qualifier::terse);
-  check_field(
-      injected_fields[4], -1005, "box_field", t_field_qualifier::optional);
-  EXPECT_NE(
-      injected_fields[4].find_structured_annotation_or_null(box.uri().data()),
-      nullptr);
 }
 
 TEST_F(StandardMutatorTest, Transitive) {

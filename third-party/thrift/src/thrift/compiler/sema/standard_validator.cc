@@ -414,7 +414,7 @@ void validate_union_field_attributes(
           field.qualifier() == t_field_qualifier::required ? "required"
                                                            : "optional",
           field.name());
-    } else if (field.qualifier() == t_field_qualifier::terse) {
+    } else if (field.find_structured_annotation_or_null(kTerseWriteUri)) {
       ctx.error(
           field,
           "`@thrift.TerseWrite` cannot be applied to union fields (in `{}`).",

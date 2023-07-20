@@ -1,0 +1,22 @@
+File "foreach-error.php", line 14, characters 5-19:
+Illegal definition of typed local variable $i1. (Naming[2126])
+  File "foreach-error.php", line 13, characters 17-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "foreach-error.php", line 15, characters 5-16:
+Illegal definition of typed local variable $i2. (Naming[2126])
+  File "foreach-error.php", line 13, characters 24-26:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "foreach-error.php", line 7, characters 11-12:
+Typing error (Typing[4110])
+  File "foreach-error.php", line 6, characters 10-12:
+  Expected `int`
+  File "foreach-error.php", line 5, characters 12-14:
+  But got `string`
+  File "hackarray.hhi", line 52, characters 72-72:
+    via this generic `T`
+  File "hackarray.hhi", line 22, characters 35-36:
+    via this generic `Tv`
+  File "interfaces.hhi", line 115, characters 23-24:
+    via this generic `Tv`
+  File "interfaces.hhi", line 92, characters 66-67:
+    via this generic `Tv`

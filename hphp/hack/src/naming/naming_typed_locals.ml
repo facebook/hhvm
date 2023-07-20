@@ -104,6 +104,18 @@ let join envs before_env =
     assigned_ids = Set.union env.assigned_ids before_env.assigned_ids;
   }
 
+let check_assign_lval on_expr env (((), pos, expr_) as expr) =
+  on_expr env expr;
+  match expr_ with
+  | Lvar lid ->
+    let name = snd lid in
+    (match get_local env name with
+    | None ->
+      let env = add_local env name pos in
+      add_assigned_id env name
+    | Some _ -> env)
+  | _ -> env
+
 let check_assign_expr on_expr env (((), _pos, expr_) as expr) =
   on_expr env expr;
   match expr_ with
@@ -178,9 +190,19 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
   | Throw expr ->
     on_expr env expr;
     env
-  | Foreach (expr, _, _) ->
+  | Foreach (expr, as_expr, block) ->
     on_expr env expr;
-    env
+    let env =
+      match as_expr with
+      | As_v e
+      | Await_as_v (_, e) ->
+        check_assign_lval on_expr env e
+      | As_kv (e1, e2)
+      | Await_as_kv (_, e1, e2) ->
+        let env = check_assign_lval on_expr env e1 in
+        check_assign_lval on_expr env e2
+    in
+    check_block env block
   | Try (try_block, catches, finally_block) ->
     let env = check_block env try_block in
     let env = check_catches on_expr env catches in

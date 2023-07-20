@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 #[allow(unused_imports)]
 use hack_macros::hack_stmts;
+use nast::AsExpr;
 use nast::Binop;
 use nast::CaptureLid;
 use nast::Expr;
@@ -206,6 +207,14 @@ impl TypedLocal {
             _ => {}
         }
     }
+
+    fn visit_fun_helper(&mut self, env: &mut Env, elem: &mut nast::Fun_) -> Result<(), ()> {
+        for param in elem.params.iter() {
+            self.add_local(param.name.clone(), None, &param.pos);
+            self.add_assigned_id(param.name.clone());
+        }
+        elem.body.fb_ast.recurse(env, self.object())
+    }
 }
 
 impl<'a> VisitorMut<'a> for TypedLocal {
@@ -257,8 +266,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 Ok(())
             }
             Stmt_::If(box (cond, then_block, else_block)) => {
-                let mut cond_self = self.clone();
-                cond.recurse(env, cond_self.object())?;
+                cond.recurse(env, self.object())?;
                 let mut then_env = self.new_block_env();
                 let mut else_env = self.new_block_env();
                 then_block.recurse(env, then_env.object())?;
@@ -281,13 +289,11 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             }
             Stmt_::Using(_) => elem.recurse(env, self.object()), // TODO
             Stmt_::Switch(box (cond, cases, default)) => {
-                let mut cond_self = self.clone();
-                cond.recurse(env, cond_self.object())?;
+                cond.recurse(env, self.object())?;
                 let mut envs = cases
                     .iter_mut()
                     .map(|nast::Case(ref mut expr, ref mut block)| {
-                        let mut expr_self = self.clone();
-                        let _ = expr.recurse(env, expr_self.object());
+                        let _ = expr.recurse(env, self.object());
                         let mut new_env = self.new_block_env();
                         let _ = block.recurse(env, new_env.object());
                         new_env
@@ -301,7 +307,22 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 self.join(&mut envs, env);
                 Ok(())
             }
-            Stmt_::Foreach(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Foreach(box (expr, as_expr, block)) => {
+                expr.recurse(env, self.object())?;
+                match as_expr {
+                    AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => {
+                        e.recurse(env, self.object())?;
+                        self.get_hint(e);
+                    }
+                    AsExpr::AsKv(e1, e2) | AsExpr::AwaitAsKv(_, e1, e2) => {
+                        e1.recurse(env, self.object())?;
+                        e2.recurse(env, self.object())?;
+                        self.get_hint(e1);
+                        self.get_hint(e2);
+                    }
+                }
+                block.recurse(env, self.object())
+            }
             Stmt_::Try(box (try_block, catches, finally_block)) => {
                 try_block.recurse(env, self.object())?;
                 let mut envs = catches
@@ -338,23 +359,24 @@ impl<'a> VisitorMut<'a> for TypedLocal {
 
     fn visit_fun_(&mut self, env: &mut Env, elem: &mut nast::Fun_) -> Result<(), ()> {
         let old = self.clone();
-        for param in elem.params.iter() {
-            self.add_local(param.name.clone(), None, &param.pos);
-            self.add_assigned_id(param.name.clone());
-        }
-        elem.body.fb_ast.recurse(env, self.object())?;
+        self.visit_fun_helper(env, elem)?;
+        // ensure that checking a lammbda expression doesn't change self, so
+        // that we know that recursing on an expr will have no effect
         *self = old;
         Ok(())
     }
 
     fn visit_efun(&mut self, env: &mut Env, elem: &mut nast::Efun) -> Result<(), ()> {
+        let old = self.clone();
         let mut fun_env = self.restrict_env(&elem.use_);
-        fun_env.visit_fun_(env, &mut elem.fun)
+        fun_env.visit_fun_helper(env, &mut elem.fun)?;
+        *self = old;
+        Ok(())
     }
 
     fn visit_fun_def(&mut self, env: &mut Env, elem: &mut nast::FunDef) -> Result<(), ()> {
         self.clear();
-        self.visit_fun_(env, &mut elem.fun)
+        self.visit_fun_helper(env, &mut elem.fun)
     }
 
     fn visit_method_(&mut self, env: &mut Env, elem: &mut nast::Method_) -> Result<(), ()> {

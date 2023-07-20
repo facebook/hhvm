@@ -286,11 +286,14 @@ The output backtrace has the following format:
 
             try:
                 if frame.is_jitted(rip):
+                    utils.debug_print(f"Frame #{i} with rip=0x{rip.unsigned:x} is jitted")
                     result.write(frame.stringify(frame.create_php(idx=i, ar=utils.unsigned_cast(fp, ar_type), rip=rip)) + "\n")
                 else:
+                    utils.debug_print(f"Frame #{i} with rip=0x{rip.unsigned:x} is native")
                     result.write(frame.stringify(frame.create_native(
                         idx=i, fp=fp, rip=rip, name=function_name_for_rip(rip, target))) + "\n")
             except Exception:
+                utils.debug_print(f"Failed to create_php frame or get function name for native frame (frame #{i})")
                 result.write(frame.stringify(frame.create_native(idx=i, fp=fp, rip=rip)) + "\n")
 
             i += 1

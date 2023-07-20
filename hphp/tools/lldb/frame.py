@@ -136,6 +136,7 @@ def create_php(
     Returns:
         A Frame object
     """
+    utils.debug_print(f"create_php(idx={idx}, ar=0x{ar.unsigned:x}, rip={format_ptr(rip)}, pc={pc.unsigned if pc else None}")
     func = lookup.lookup_func_from_frame_pointer(ar)  # lldb.SBValue[HPHP::Func *]
     shared = utils.rawptr(utils.get(func, "m_shared"))  # lldb.SBValue[HPHP::SharedData]
     flags = utils.get(shared, "m_allFlags")  # lldb.SBValue[HPHP::Func::SharedData::Flags]

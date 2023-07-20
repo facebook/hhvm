@@ -335,8 +335,7 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     elif name == "HPHP::LockFreePtrWrapper":
         ptr = rawptr(get(val, "val"))
     elif name == "HPHP::TokenOrPtr":
-        data = TokenOrPtr.get_compact(val)
-        ptr = rawptr(TokenOrPtr.get_ptr(data))
+        ptr = rawptr(TokenOrPtr.get_ptr(val))
 
     if ptr is not None:
         return rawptr(ptr)

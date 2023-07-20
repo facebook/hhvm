@@ -134,7 +134,8 @@ bool BaseThriftServer::getTaskExpireTimeForRequest(
     queueTimeout = getQueueTimeout();
   }
 
-  if (taskTimeout != std::chrono::milliseconds(0) && getUseClientTimeout()) {
+  if (taskTimeout != std::chrono::milliseconds(0) && getUseClientTimeout() &&
+      clientTimeoutMs.count() >= 0) {
     // we add 10% to the client timeout so that the request is much more likely
     // to timeout on the client side than to read the timeout from the server
     // as a TApplicationException (which can be confusing)

@@ -19,7 +19,7 @@
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 
-#include <thrift/test/python_capi/gen-python/module/thrift_types_capi.h> // @manual=:test_module-python-types-capi
+#include <thrift/test/python_capi/gen-python/module/thrift_types_capi.h>
 
 namespace apache::thrift::test {
 

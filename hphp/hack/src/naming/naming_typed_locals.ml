@@ -53,45 +53,56 @@ let restrict_env env uses =
       else
         new_env)
 
-let find_clashes env other_env clashes =
-  Set.iter
-    (fun id ->
-      let id_pos = get_local_pos other_env id in
-      let def_pos = get_local_pos env id in
+let extend_error_map error_map env1 env2 clashes =
+  Set.fold
+    (fun id error_map ->
+      Map.add id (get_local_pos env1 id, get_local_pos env2 id) error_map)
+    clashes
+    error_map
+
+let join2 error_map env1 env2 =
+  let two_declare = Set.inter env1.assigned_ids env2.declared_ids in
+  let error_map = extend_error_map error_map env2 env1 two_declare in
+  let one_declare = Set.inter env1.declared_ids env2.assigned_ids in
+  let error_map = extend_error_map error_map env1 env2 one_declare in
+  let both_declare = Set.inter env1.declared_ids env2.declared_ids in
+  let error_map = extend_error_map error_map env1 env2 both_declare in
+  let locals =
+    Set.fold
+      (fun id locals -> Map.add id (Map.find id env1.locals) locals)
+      (Set.union
+         env1.declared_ids
+         (Set.diff env1.assigned_ids env2.declared_ids))
+      env2.locals
+  in
+  let declared_ids = Set.union env1.declared_ids env2.declared_ids in
+  let assigned_ids =
+    Set.diff
+      (Set.union env1.assigned_ids env2.assigned_ids)
+      (Set.union one_declare two_declare)
+  in
+  ({ locals; assigned_ids; declared_ids }, error_map)
+
+let join envs before_env =
+  let (env, error_map) =
+    List.fold_right
+      envs
+      ~init:({ empty with locals = before_env.locals }, Map.empty)
+      ~f:(fun env1 (env2, error_map) -> join2 error_map env1 env2)
+  in
+  Map.iter
+    (fun id (id_pos, def_pos) ->
       Errors.add_error
         Naming_error.(
           to_user_error
             (Illegal_typed_local
                { join = true; id_pos; id_name = Local_id.to_string id; def_pos })))
-    clashes
-
-let join env other_env declared_above assigned_above =
-  let clashes = Set.inter env.declared_ids other_env.declared_ids in
-  find_clashes env other_env clashes;
-  let clashes = Set.inter env.declared_ids other_env.assigned_ids in
-  find_clashes other_env env clashes;
-  let clashes = Set.inter env.assigned_ids other_env.declared_ids in
-  find_clashes env other_env clashes;
-  let other_ids = Set.union other_env.declared_ids other_env.assigned_ids in
-  let locals =
-    Set.fold
-      (fun id locals ->
-        if Map.mem id env.locals then
-          locals
-        else
-          match get_local other_env id with
-          | None -> locals
-          | Some pos -> Map.add id pos locals)
-      other_ids
-      env.locals
-  in
-  let declared_ids =
-    Set.union env.declared_ids (Set.union other_env.declared_ids declared_above)
-  in
-  let assigned_ids =
-    Set.union env.assigned_ids (Set.union other_env.assigned_ids assigned_above)
-  in
-  { locals; declared_ids; assigned_ids }
+    error_map;
+  {
+    env with
+    declared_ids = Set.union env.declared_ids before_env.declared_ids;
+    assigned_ids = Set.union env.assigned_ids before_env.assigned_ids;
+  }
 
 let check_assign_expr on_expr env (((), _pos, expr_) as expr) =
   on_expr env expr;
@@ -134,7 +145,7 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
     let new_env = { empty with locals = env.locals } in
     let then_env = check_block new_env then_block in
     let else_env = check_block new_env else_block in
-    join then_env else_env env.declared_ids env.assigned_ids
+    join [then_env; else_env] env
   | For (init_exprs, cond, update_exprs, body) ->
     let env =
       List.fold_left init_exprs ~init:env ~f:(check_assign_expr on_expr)
@@ -142,9 +153,16 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
     Option.iter ~f:(on_expr env) cond;
     let env = check_block env body in
     List.fold_left update_exprs ~init:env ~f:(check_assign_expr on_expr)
-  | Switch (expr, _cases, _default) ->
+  | Switch (expr, cases, default) ->
     on_expr env expr;
-    env
+    let new_env = { empty with locals = env.locals } in
+    let envs = List.map ~f:(check_case on_expr new_env) cases in
+    let default_env =
+      match default with
+      | None -> empty
+      | Some (_, block) -> check_block new_env block
+    in
+    join (envs @ [default_env]) env
   | Do (block, cond) ->
     let env = check_block env block in
     on_expr env cond;
@@ -163,7 +181,11 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
   | Foreach (expr, _, _) ->
     on_expr env expr;
     env
-  | Try (_, _, _)
+  | Try (try_block, catches, finally_block) ->
+    let env = check_block env try_block in
+    let env = check_catches on_expr env catches in
+    let env = check_block env finally_block in
+    env
   | Using _
   | Return None
   | Fallthrough
@@ -182,6 +204,25 @@ and check_block on_expr env block =
     let env = check_stmt on_expr env stmt in
     let env = check_block on_expr env stmts in
     env
+
+and check_catch on_expr env (_cn, (pos, name), block) =
+  let env =
+    match get_local env name with
+    | None ->
+      let env = add_local env name pos in
+      add_assigned_id env name
+    | Some _ -> env
+  in
+  check_block on_expr env block
+
+and check_catches on_expr env catches =
+  let new_env = { empty with locals = env.locals } in
+  let envs = List.map ~f:(check_catch on_expr new_env) catches in
+  join envs env
+
+and check_case on_expr env (expr, block) =
+  on_expr env expr;
+  check_block on_expr env block
 
 let ignorefn f x y = ignore (f x y)
 

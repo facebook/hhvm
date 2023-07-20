@@ -1,0 +1,32 @@
+File "catch-errors.php", line 17, characters 5-15:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "catch-errors.php", line 6, characters 3-17:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "catch-errors.php", line 18, characters 5-16:
+Illegal definition of typed local variable $x3. (Naming[2126])
+  File "catch-errors.php", line 9, characters 4-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "catch-errors.php", line 20, characters 5-15:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "catch-errors.php", line 19, characters 5-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "catch-errors.php", line 21, characters 5-21:
+Illegal definition of typed local variable $z. (Naming[2126])
+  File "catch-errors.php", line 14, characters 20-21:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "catch-errors.php", line 24, characters 3-13:
+Illegal definition of typed local variable $c. (Naming[2126])
+  File "catch-errors.php", line 22, characters 5-15:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "catch-errors.php", line 15, characters 5-12:
+Typing error (Typing[4110])
+  File "catch-errors.php", line 5, characters 11-13:
+  Expected `int`
+  File "catch-errors.php", line 15, characters 11-12:
+  But got `string`
+File "catch-errors.php", line 16, characters 5-12:
+Typing error (Typing[4110])
+  File "catch-errors.php", line 8, characters 12-14:
+  Expected `int`
+  File "catch-errors.php", line 16, characters 11-12:
+  But got `string`

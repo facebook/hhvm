@@ -1,0 +1,24 @@
+File "join-error2.php", line 8, characters 7-18:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "join-error2.php", line 29, characters 7-17:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "join-error2.php", line 9, characters 7-18:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "join-error2.php", line 28, characters 7-17:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "join-error2.php", line 15, characters 11-23:
+Illegal definition of typed local variable $x1. (Naming[2126])
+  File "join-error2.php", line 12, characters 11-13:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "join-error2.php", line 15, characters 11-23:
+Illegal definition of typed local variable $x1. (Naming[2126])
+  File "join-error2.php", line 30, characters 7-18:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "join-error2.php", line 19, characters 11-22:
+Illegal definition of typed local variable $x2. (Naming[2126])
+  File "join-error2.php", line 31, characters 7-9:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "join-error2.php", line 24, characters 7-18:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "join-error2.php", line 8, characters 7-18:
+  It is already defined. Typed locals must have their type declared before they can be assigned.

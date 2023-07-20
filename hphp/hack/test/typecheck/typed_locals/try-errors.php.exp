@@ -1,0 +1,20 @@
+File "try-errors.php", line 9, characters 5-15:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "try-errors.php", line 5, characters 3-17:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "try-errors.php", line 11, characters 5-15:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "try-errors.php", line 10, characters 5-19:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+File "try-errors.php", line 8, characters 5-11:
+Typing error (Typing[4110])
+  File "try-errors.php", line 5, characters 10-12:
+  Expected `int`
+  File "try-errors.php", line 8, characters 10-11:
+  But got `string`
+File "try-errors.php", line 16, characters 20-21:
+Typing error (Typing[4110])
+  File "try-errors.php", line 6, characters 10-12:
+  Expected `int`
+  File "try-errors.php", line 16, characters 10-18:
+  But got `Exception`

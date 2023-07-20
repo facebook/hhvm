@@ -34,6 +34,7 @@ pub struct TypedLocal {
     // The position is where the local was first declared.
     locals: BTreeMap<String, (Option<Hint>, Pos)>,
     // The subset of typed locals declared in the current scope, rather than preceding it.
+    // declared_ids and assigned_ids should be disjoint
     declared_ids: HashSet<String>,
     // The subset of untyped locals first assigned in the current scope, rather than preceding it.
     assigned_ids: HashSet<String>,
@@ -64,6 +65,14 @@ impl TypedLocal {
         }
     }
 
+    fn new_block_env(&self) -> Self {
+        TypedLocal {
+            locals: self.locals.clone(),
+            should_elab: self.should_elab,
+            ..Default::default()
+        }
+    }
+
     fn restrict_env(&self, ids: &Vec<CaptureLid>) -> TypedLocal {
         let should_elab = self.should_elab;
         let mut new_env = TypedLocal {
@@ -91,66 +100,63 @@ impl TypedLocal {
         self.locals.clear();
     }
 
-    fn join(
-        &mut self,
-        other: Self,
-        env: &mut Env,
-        mut declared_above: HashSet<String>,
-        mut assigned_above: HashSet<String>,
-    ) {
-        for id in self.declared_ids.intersection(&other.declared_ids) {
-            let id_pos = other.get_local_pos(id);
-            let def_pos = self.get_local_pos(id);
-            env.emit_error(NamingError::IllegalTypedLocal {
-                join: true,
-                id_pos,
-                id_name: id.clone(),
-                def_pos,
-            });
-        }
-        for id in self.declared_ids.intersection(&other.assigned_ids) {
-            let assign_pos = other.get_local_pos(id);
+    // Add the new_env into self, updating the error map
+    fn join2(&mut self, new_env: &mut Self, error_map: &mut BTreeMap<String, (Pos, Pos)>) {
+        for id in new_env.assigned_ids.intersection(&self.declared_ids) {
+            let assign_pos = new_env.get_local_pos(id);
             let decl_pos = self.get_local_pos(id);
-            env.emit_error(NamingError::IllegalTypedLocal {
-                join: true,
-                id_pos: decl_pos,
-                id_name: id.clone(),
-                def_pos: assign_pos,
-            });
+            error_map.insert(id.clone(), (decl_pos, assign_pos));
         }
-        for id in self.assigned_ids.intersection(&other.declared_ids) {
+        for id in new_env.declared_ids.intersection(&self.assigned_ids) {
             let assign_pos = self.get_local_pos(id);
-            let decl_pos = other.get_local_pos(id);
-            env.emit_error(NamingError::IllegalTypedLocal {
-                join: true,
-                id_pos: decl_pos,
-                id_name: id.clone(),
-                def_pos: assign_pos,
-            });
+            let decl_pos = new_env.get_local_pos(id);
+            error_map.insert(id.clone(), (decl_pos, assign_pos));
         }
-
+        for id in new_env.declared_ids.intersection(&self.declared_ids) {
+            let assign_pos = self.get_local_pos(id);
+            let decl_pos = new_env.get_local_pos(id);
+            error_map.insert(id.clone(), (decl_pos, assign_pos));
+        }
         // self.locals contains the cumulative bindings down the self branch.
-        // For the bindings newly defined in other branch, insert them into
-        // locals if they aren't already there
-        for id in other.declared_ids.iter().chain(other.assigned_ids.iter()) {
-            if !self.locals.contains_key(id) {
-                if let Some(x) = other.get_local(id) {
-                    self.locals.insert(id.to_string(), x.clone());
-                }
+        // For the bindings newly defined in new_env branch, insert them into
+        // the self locals if they aren't already declared there
+        let diff = new_env.assigned_ids.difference(&self.declared_ids);
+        for id in new_env.declared_ids.iter().chain(diff) {
+            if let Some(x) = new_env.get_local(id) {
+                self.locals.insert(id.to_string(), x.clone());
             }
         }
-        std::mem::swap(&mut self.declared_ids, &mut declared_above);
-        self.declared_ids.extend(
-            declared_above
-                .into_iter()
-                .chain(other.declared_ids.into_iter()),
-        );
-        std::mem::swap(&mut self.assigned_ids, &mut assigned_above);
-        self.assigned_ids.extend(
-            assigned_above
-                .into_iter()
-                .chain(other.assigned_ids.into_iter()),
-        );
+        let declared_ids = std::mem::take(&mut new_env.declared_ids);
+        let assigned_ids = std::mem::take(&mut new_env.assigned_ids);
+        self.declared_ids.extend(declared_ids);
+        self.assigned_ids.extend(assigned_ids);
+        // If the id was declared then we need to remove it from the assigned
+        // list to keep them disjoint. This situation could arise when
+        // self has a declaration and new_env and assignment (or vice versa).
+        for id in &self.declared_ids {
+            self.assigned_ids.remove(id);
+        }
+    }
+
+    // join a list of TypedLocals together. self should be the TypedLocal from
+    // before the split
+    fn join(&mut self, envs: &mut [TypedLocal], env: &mut Env) {
+        let mut error_map = BTreeMap::default();
+        let before_declared_ids = std::mem::take(&mut self.declared_ids);
+        let before_assigned_ids = std::mem::take(&mut self.assigned_ids);
+        for env in envs.iter_mut().rev() {
+            self.join2(env, &mut error_map);
+        }
+        for (id, (decl_pos, assign_pos)) in error_map {
+            env.emit_error(NamingError::IllegalTypedLocal {
+                join: true,
+                id_pos: decl_pos,
+                id_name: id.clone(),
+                def_pos: assign_pos,
+            })
+        }
+        self.declared_ids.extend(before_declared_ids);
+        self.assigned_ids.extend(before_assigned_ids);
     }
 
     fn get_hint(&mut self, expr: &Expr) -> Option<Hint> {
@@ -253,14 +259,11 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             Stmt_::If(box (cond, then_block, else_block)) => {
                 let mut cond_self = self.clone();
                 cond.recurse(env, cond_self.object())?;
-                let mut declared_above = HashSet::default();
-                let mut assigned_above = HashSet::default();
-                std::mem::swap(&mut self.declared_ids, &mut declared_above);
-                std::mem::swap(&mut self.assigned_ids, &mut assigned_above);
-                let mut alt = self.clone();
-                then_block.recurse(env, self.object())?;
-                else_block.recurse(env, alt.object())?;
-                self.join(alt, env, declared_above, assigned_above);
+                let mut then_env = self.new_block_env();
+                let mut else_env = self.new_block_env();
+                then_block.recurse(env, then_env.object())?;
+                else_block.recurse(env, else_env.object())?;
+                self.join(&mut vec![then_env, else_env], env);
                 Ok(())
             }
             Stmt_::For(box (init_exprs, cond, update_exprs, body)) => {
@@ -277,9 +280,45 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 Ok(())
             }
             Stmt_::Using(_) => elem.recurse(env, self.object()), // TODO
-            Stmt_::Switch(_) => elem.recurse(env, self.object()), // TODO
+            Stmt_::Switch(box (cond, cases, default)) => {
+                let mut cond_self = self.clone();
+                cond.recurse(env, cond_self.object())?;
+                let mut envs = cases
+                    .iter_mut()
+                    .map(|nast::Case(ref mut expr, ref mut block)| {
+                        let mut expr_self = self.clone();
+                        let _ = expr.recurse(env, expr_self.object());
+                        let mut new_env = self.new_block_env();
+                        let _ = block.recurse(env, new_env.object());
+                        new_env
+                    })
+                    .collect::<Vec<_>>();
+                if let Some(default_block) = default {
+                    let mut default_env = self.new_block_env();
+                    let _ = default_block.recurse(env, default_env.object());
+                    envs.push(default_env);
+                }
+                self.join(&mut envs, env);
+                Ok(())
+            }
             Stmt_::Foreach(_) => elem.recurse(env, self.object()), // TODO
-            Stmt_::Try(_) => elem.recurse(env, self.object()),   // TODO
+            Stmt_::Try(box (try_block, catches, finally_block)) => {
+                try_block.recurse(env, self.object())?;
+                let mut envs = catches
+                    .iter_mut()
+                    .map(|nast::Catch(_cn, Lid(pos, name), ref mut block)| {
+                        if !self.locals.contains_key(&name.1) {
+                            self.add_local(name.1.to_string(), None, pos);
+                        }
+                        let mut new_env = self.new_block_env();
+                        let _ = block.recurse(env, new_env.object());
+                        new_env
+                    })
+                    .collect::<Vec<_>>();
+                self.join(&mut envs, env);
+                finally_block.recurse(env, self.object())?;
+                Ok(())
+            }
             // Just need to visit these, no additional logic is required
             Stmt_::Fallthrough
             | Stmt_::Awaitall(_)

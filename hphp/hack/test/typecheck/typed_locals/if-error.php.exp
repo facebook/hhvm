@@ -2,9 +2,9 @@ File "if-error.php", line 13, characters 5-20:
 Illegal definition of typed local variable $x. (Naming[2126])
   File "if-error.php", line 11, characters 3-23:
   It is already defined. Typed locals must have their type declared before they can be assigned.
-File "if-error.php", line 16, characters 5-19:
+File "if-error.php", line 14, characters 5-19:
 Illegal definition of typed local variable $y. (Naming[2126])
-  File "if-error.php", line 14, characters 5-19:
+  File "if-error.php", line 16, characters 5-19:
   It is assigned in another branch. Consider moving the definition to an enclosing block.
 File "if-error.php", line 24, characters 7-22:
 Illegal definition of typed local variable $x. (Naming[2126])

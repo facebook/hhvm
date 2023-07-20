@@ -1,0 +1,8 @@
+File "catch-join-errors.php", line 12, characters 5-15:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "catch-join-errors.php", line 15, characters 5-15:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+File "catch-join-errors.php", line 17, characters 3-13:
+Illegal definition of typed local variable $a. (Naming[2126])
+  File "catch-join-errors.php", line 5, characters 3-13:
+  It is already defined. Typed locals must have their type declared before they can be assigned.

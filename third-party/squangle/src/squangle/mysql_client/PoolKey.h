@@ -17,17 +17,18 @@ class PoolKey {
   // Hashes Connections and Operations waiting for connections based on basic
   // Connection info (ConnectionKey) and Connection Attributes.
   PoolKey(ConnectionKey conn_key, ConnectionOptions conn_opts)
-      : connKey(std::move(conn_key)), connOptions(std::move(conn_opts)) {
+      : connKey_(std::move(conn_key)), connOptions_(std::move(conn_opts)) {
     options_hash_ = folly::hash::hash_range(
-        connOptions.getAttributes().begin(), connOptions.getAttributes().end());
+        connOptions_.getAttributes().begin(),
+        connOptions_.getAttributes().end());
     partial_hash_ =
-        folly::hash::hash_combine(connKey.partial_hash(), options_hash_);
-    full_hash_ = folly::hash::hash_combine(connKey.hash(), options_hash_);
+        folly::hash::hash_combine(connKey_.partial_hash(), options_hash_);
+    full_hash_ = folly::hash::hash_combine(connKey_.hash(), options_hash_);
   }
 
   bool operator==(const PoolKey& rhs) const {
     return full_hash_ == rhs.full_hash_ && options_hash_ == rhs.options_hash_ &&
-        connKey == rhs.connKey;
+        connKey_ == rhs.connKey_;
   }
 
   bool operator!=(const PoolKey& rhs) const {
@@ -36,15 +37,17 @@ class PoolKey {
 
   bool partialCompare(const PoolKey& rhs) const {
     return partial_hash_ == rhs.partial_hash_ &&
-        options_hash_ == rhs.options_hash_ && connKey.partialEqual(rhs.connKey);
+        options_hash_ == rhs.options_hash_ &&
+        connKey_.partialEqual(rhs.connKey_);
   }
 
-  const ConnectionKey* getConnectionKey() const {
-    return &connKey;
+  const ConnectionKey& getConnectionKey() const noexcept {
+    return connKey_;
   }
 
-  const ConnectionKey connKey;
-  const ConnectionOptions connOptions;
+  const ConnectionOptions& getConnectionOptions() const noexcept {
+    return connOptions_;
+  }
 
   size_t getHash() const {
     return full_hash_;
@@ -59,6 +62,9 @@ class PoolKey {
   }
 
  private:
+  ConnectionKey connKey_;
+  ConnectionOptions connOptions_;
+
   size_t options_hash_;
   size_t full_hash_;
   size_t partial_hash_;

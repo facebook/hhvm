@@ -119,7 +119,7 @@ class MysqlConnectionHolder {
   // origin is deleted.
   explicit MysqlConnectionHolder(
       std::unique_ptr<MysqlConnectionHolder> from_holder,
-      const ConnectionKey* connKey = nullptr);
+      std::optional<ConnectionKey> connKey = std::nullopt);
 
  protected:
   MysqlClientBase* client_;

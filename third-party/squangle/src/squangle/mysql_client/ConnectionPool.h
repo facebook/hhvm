@@ -511,8 +511,8 @@ class ConnectionPool
     VLOG(11) << "Requesting new Connection";
     // get a shared pointer for operation
 
-    auto connOp = mysql_client_->beginConnection(pool_key.connKey);
-    connOp->setConnectionOptions(pool_key.connOptions);
+    auto connOp = mysql_client_->beginConnection(pool_key.getConnectionKey());
+    connOp->setConnectionOptions(pool_key.getConnectionOptions());
     if (!context) {
       context = std::make_shared<db::ConnectionContextBase>();
     }
@@ -557,11 +557,9 @@ class ConnectionPool
     auto conn =
         makeNewConnection(rawPoolOp->getConnectionKey(), std::move(mysqlConn));
     conn->needToCloneConnection_ = false;
+    const auto& connKey = poolKey.getConnectionKey();
     auto changeUserOp = Connection::changeUser(
-        std::move(conn),
-        poolKey.connKey.user(),
-        poolKey.connKey.password(),
-        poolKey.connKey.db_name());
+        std::move(conn), connKey.user(), connKey.password(), connKey.db_name());
 
     changeUserOp->setCallback(
         [this, rawPoolOp, poolKey, poolPtr = getSelfWeakPointer()](

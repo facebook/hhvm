@@ -196,8 +196,9 @@ std::ostream& operator<<(std::ostream& os, const PoolOptions& options) {
 }
 
 std::ostream& operator<<(std::ostream& os, const PoolKey& key) {
-  return os << "{key:" << key.connKey.getDisplayString()
-            << ",options:" << key.connOptions.getDisplayString() << "}";
+  return os << "{key:" << key.getConnectionKey().getDisplayString()
+            << ",options:" << key.getConnectionOptions().getDisplayString()
+            << "}";
 }
 
 template <>

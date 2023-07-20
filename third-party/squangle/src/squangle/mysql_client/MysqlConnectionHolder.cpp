@@ -28,9 +28,10 @@ MysqlConnectionHolder::MysqlConnectionHolder(
 
 MysqlConnectionHolder::MysqlConnectionHolder(
     std::unique_ptr<MysqlConnectionHolder> from_holder,
-    const ConnectionKey* connKey)
+    std::optional<ConnectionKey> connKey)
     : client_(from_holder->client_),
-      conn_key_((connKey) ? *connKey : from_holder->conn_key_),
+      conn_key_(
+          connKey ? std::move(*connKey) : folly::copy(from_holder->conn_key_)),
       conn_context_(from_holder->conn_context_),
       creation_time_(from_holder->creation_time_),
       last_activity_time_(from_holder->last_activity_time_),

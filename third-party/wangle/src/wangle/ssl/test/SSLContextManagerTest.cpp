@@ -240,21 +240,12 @@ TEST(SSLContextManagerTest, Test1) {
   auto www_example_com_ctx = std::make_shared<SSLContext>();
   auto start_example_com_ctx = std::make_shared<SSLContext>();
   auto start_abc_example_com_ctx = std::make_shared<SSLContext>();
-  auto www_example_com_ctx_sha1 = std::make_shared<SSLContext>();
-  auto start_example_com_ctx_sha1 = std::make_shared<SSLContext>();
-  auto www_example_org_ctx_sha1 = std::make_shared<SSLContext>();
 
-  sslCtxMgr.insertSSLCtxByDomainName(
-      "*.example.com", start_example_com_ctx_sha1, CertCrypto::SHA1_SIGNATURE);
   sslCtxMgr.insertSSLCtxByDomainName("www.example.com", www_example_com_ctx);
   sslCtxMgr.insertSSLCtxByDomainName("www.example.com", www_example_com_ctx);
   sslCtxMgr.insertSSLCtxByDomainName("*.example.com", start_example_com_ctx);
   sslCtxMgr.insertSSLCtxByDomainName(
       "*.abc.example.com", start_abc_example_com_ctx);
-  sslCtxMgr.insertSSLCtxByDomainName(
-      "www.example.com", www_example_com_ctx_sha1, CertCrypto::SHA1_SIGNATURE);
-  sslCtxMgr.insertSSLCtxByDomainName(
-      "www.example.org", www_example_org_ctx_sha1, CertCrypto::SHA1_SIGNATURE);
 
   shared_ptr<SSLContext> retCtx;
   retCtx = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.example.com"));
@@ -279,22 +270,6 @@ TEST(SSLContextManagerTest, Test1) {
   // ensure wildcard name only matches one domain up
   EXPECT_FALSE(
       sslCtxMgr.getSSLCtxBySuffix(SSLContextKey("abc.xyz.example.com")));
-
-  retCtx = sslCtxMgr.getSSLCtxByExactDomain(
-      SSLContextKey("www.example.com", CertCrypto::SHA1_SIGNATURE));
-  EXPECT_EQ(retCtx, www_example_com_ctx_sha1);
-  retCtx = sslCtxMgr.getSSLCtxBySuffix(
-      SSLContextKey("abc.example.com", CertCrypto::SHA1_SIGNATURE));
-  EXPECT_EQ(retCtx, start_example_com_ctx_sha1);
-  retCtx = sslCtxMgr.getSSLCtxBySuffix(
-      SSLContextKey("xyz.abc.example.com", CertCrypto::SHA1_SIGNATURE));
-  EXPECT_FALSE(retCtx);
-
-  retCtx = sslCtxMgr.getSSLCtxByExactDomain(
-      SSLContextKey("www.example.org", CertCrypto::SHA1_SIGNATURE));
-  EXPECT_EQ(retCtx, www_example_org_ctx_sha1);
-  retCtx = sslCtxMgr.getSSLCtxByExactDomain(SSLContextKey("www.example.org"));
-  EXPECT_EQ(retCtx, www_example_org_ctx_sha1);
 }
 
 // This test uses multiple contexts, which requires SNI support to work at all.

@@ -835,32 +835,8 @@ SSLContextManager::SslContexts::serverNameCallback(
 
   // Check if we think the client is outdated and require weak crypto.
   CertCrypto certCryptoReq = CertCrypto::BEST_AVAILABLE;
-
-  // TODO: use SSL_get_sigalgs (requires openssl 1.0.2).
-  auto clientInfo = sslSocket->getClientHelloInfo();
-  if (clientInfo) {
-    certCryptoReq = CertCrypto::SHA1_SIGNATURE;
-    for (const auto& sigAlgPair : clientInfo->clientHelloSigAlgs_) {
-      if (sigAlgPair.first == folly::ssl::HashAlgorithm::SHA256) {
-        certCryptoReq = CertCrypto::BEST_AVAILABLE;
-        break;
-      }
-    }
-
-    // Assume the client supports SHA2 if it sent SNI.
-    const auto& extensions = clientInfo->clientHelloExtensions_;
-    if (std::find(
-            extensions.begin(),
-            extensions.end(),
-            folly::ssl::TLSExtension::SERVER_NAME) != extensions.end()) {
-      certCryptoReq = CertCrypto::BEST_AVAILABLE;
-    }
-  }
-
   DNString dnstr(sn, snLen);
-  // First look for a context with the exact crypto needed. Weaker crypto will
-  // be in the map as best available if it is the best we have for that
-  // subject name.
+
   SSLContextKey key(dnstr, certCryptoReq);
   ctx = contexts->getSSLCtx(key);
   if (ctx) {
@@ -874,24 +850,6 @@ SSLContextManager::SslContexts::serverNameCallback(
       stats->recordCertCrypto(certCryptoReq, certCryptoReq);
     }
     return SSLContext::SERVER_NAME_FOUND;
-  }
-
-  // If we didn't find an exact match, look for a cert with upgraded crypto.
-  if (certCryptoReq != CertCrypto::BEST_AVAILABLE) {
-    SSLContextKey fallbackKey(dnstr, CertCrypto::BEST_AVAILABLE);
-    ctx = contexts->getSSLCtx(fallbackKey);
-    if (ctx) {
-      sslSocket->switchServerSSLContext(ctx);
-    }
-    if (ctx || contexts->isDefaultCtx(fallbackKey)) {
-      if (stats) {
-        if (reqHasServerName) {
-          stats->recordMatch();
-        }
-        stats->recordCertCrypto(certCryptoReq, CertCrypto::BEST_AVAILABLE);
-      }
-      return SSLContext::SERVER_NAME_FOUND;
-    }
   }
 
   VLOG(6) << folly::stringPrintf("Cannot find a SSL_CTX for \"%s\"", sn);
@@ -1023,27 +981,19 @@ void SSLContextManager::SslContexts::insert(
     return;
   }
 
-  CertCrypto certCrypto;
-  int sigAlg = X509_get_signature_nid(x509);
-  if (sigAlg == NID_sha1WithRSAEncryption || sigAlg == NID_ecdsa_with_SHA1) {
-    certCrypto = CertCrypto::SHA1_SIGNATURE;
-    VLOG(4) << "Adding SSLContext with SHA1 Signature";
-  } else {
-    certCrypto = CertCrypto::BEST_AVAILABLE;
-    VLOG(4) << "Adding SSLContext with best available crypto";
-  }
-
   // Insert by identity.
   //
   // This will be used as the lookup key if this SSLContext is marked as
   // the default.
-  insertSSLCtxByDomainName(*identity, sslCtx, certCrypto, defaultFallback);
+  insertSSLCtxByDomainName(
+      *identity, sslCtx, CertCrypto::BEST_AVAILABLE, defaultFallback);
 
   // Insert by subject alternative name(s)
   auto altNames = SSLUtil::getSubjectAltName(x509);
   if (altNames) {
     for (auto& name : *altNames) {
-      insertSSLCtxByDomainName(name, sslCtx, certCrypto, defaultFallback);
+      insertSSLCtxByDomainName(
+          name, sslCtx, CertCrypto::BEST_AVAILABLE, defaultFallback);
     }
   }
 
@@ -1123,18 +1073,6 @@ void SSLContextManager::SslContexts::insertSSLCtxByDomainNameImpl(
     insertIntoDefaultKeys(mainKey, true);
   } else {
     insertIntoDnMap(mainKey, sslCtx, true);
-  }
-
-  if (certCrypto != CertCrypto::BEST_AVAILABLE) {
-    // Note: there's no partial ordering here (you either get what you request,
-    // or you get best available).
-    VLOG(6) << "Attempting insert of weak crypto SSLContext as best available.";
-    auto weakKey = SSLContextKey(dnstr, CertCrypto::BEST_AVAILABLE);
-    if (defaultFallback) {
-      insertIntoDefaultKeys(weakKey, false);
-    } else {
-      insertIntoDnMap(weakKey, sslCtx, false);
-    }
   }
 }
 

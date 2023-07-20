@@ -77,7 +77,7 @@ void verifyTypeHint(const Class* thisCls,
     prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
   }
   if (RuntimeOption::EvalEnforceGenericsUB <= 0) return;
-  for (auto const& ub : prop->ubs) {
+  for (auto const& ub : prop->ubs.m_constraints) {
     if (ub.isCheckable()) {
       ub.verifyProperty(val, thisCls, prop->cls, prop->name);
     }
@@ -140,7 +140,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   }
   if (!assertATypeHint(propDecl.typeConstraint, prop)) return false;
   if (RuntimeOption::EvalEnforceGenericsUB <= 2) return true;
-  for (auto const& ub : propDecl.ubs) {
+  for (auto const& ub : propDecl.ubs.m_constraints) {
     if (!assertATypeHint(ub, prop)) return false;
   }
   return true;
@@ -1460,7 +1460,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       if (setOpNeedsTypeCheck(tc, op, prop)) {
         return true;
       }
-      for (auto& ub : lookup.prop->ubs) {
+      for (auto& ub : lookup.prop->ubs.m_constraints) {
         if (setOpNeedsTypeCheck(ub, op, prop)) return true;
       }
       return false;
@@ -1537,7 +1537,7 @@ TypedValue ObjectData::incDecProp(const MemberLookupContext& ctx, IncDecOp op, c
       if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
       auto const isAnyCheckable = lookup.prop && [&] {
         if (lookup.prop->typeConstraint.isCheckable()) return true;
-        for (auto const& ub : lookup.prop->ubs) {
+        for (auto const& ub : lookup.prop->ubs.m_constraints) {
           if (ub.isCheckable()) return true;
         }
         return false;

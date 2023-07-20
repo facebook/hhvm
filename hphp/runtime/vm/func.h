@@ -174,7 +174,7 @@ struct Func final {
 
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
-  using UpperBoundVec = VMCompactVector<TypeConstraint>;
+  using UpperBoundVec = VMTypeIntersectionConstraint;
   using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
   using CoeffectRules = VMFixedVector<CoeffectRule>;
 

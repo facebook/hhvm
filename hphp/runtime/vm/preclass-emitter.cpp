@@ -320,7 +320,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       AttrPrivate|AttrSystemInitialValue,
       staticEmptyString(),
       TypeConstraint(),
-      CompactVector<TypeConstraint>{},
+      TypeIntersectionConstraint{},
       staticEmptyString(),
       tvInit,
       RepoAuthType{},

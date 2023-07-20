@@ -53,9 +53,8 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
-  using UpperBoundVec = CompactVector<TypeConstraint>;
-  using UpperBoundMap =
-    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
+  using UpperBoundVec = TypeIntersectionConstraint;
+  using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo() {}
 

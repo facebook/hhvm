@@ -1492,7 +1492,7 @@ ThisPointerEffect getThisPointerEffect(SrcKey sk) {
         auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
         auto it = ubs.find(local);
         if (it != ubs.end()) {
-          for (auto& ub : it->second) {
+          for (auto& ub : it->second.m_constraints) {
             applyFlagsToUB(ub, tc);
             if (reads_this(ub)) return TPE::READ_CLASS;
           }
@@ -1508,7 +1508,7 @@ ThisPointerEffect getThisPointerEffect(SrcKey sk) {
       if (reads_this(tc)) return TPE::READ_CLASS;
       if (op != Op::VerifyRetNonNullC && func->hasReturnWithMultiUBs()) {
         auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
-        for (auto& ub : ubs) {
+        for (auto& ub : ubs.m_constraints) {
           applyFlagsToUB(ub, tc);
           if (reads_this(ub)) return TPE::READ_CLASS;
         }

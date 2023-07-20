@@ -685,14 +685,14 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     [&] (KeyI::UnresolvedTypes& u,
          const TypeConstraint& tc,
          const php::Class* cls = nullptr,
-         const CompactVector<TypeConstraint>* ubs = nullptr) {
+         const TypeIntersectionConstraint* ubs = nullptr) {
     // Skip names which match the current class name. We don't need to
     // report these as it's implicit.
     if (tc.isUnresolved() && (!cls || !cls->name->isame(tc.typeName()))) {
       u.emplace(tc.typeName());
     }
     if (!ubs) return;
-    for (auto const& ub : *ubs) {
+    for (auto const& ub : ubs->m_constraints) {
       if (ub.isUnresolved() && (!cls || !cls->name->isame(ub.typeName()))) {
         u.emplace(ub.typeName());
       }

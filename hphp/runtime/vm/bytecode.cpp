@@ -3262,7 +3262,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
     auto const& tc = sprop.typeConstraint;
     if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
     if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      for (auto const& ub : sprop.ubs) {
+      for (auto const& ub : sprop.ubs.m_constraints) {
         if (ub.isCheckable()) {
           ub.verifyStaticProperty(tv1, cls, sprop.cls, name);
         }
@@ -4596,7 +4596,7 @@ OPTBLD_INLINE void iopVerifyOutType(local_var param) {
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(paramId);
     if (it != ubs.end()) {
-      for (auto& ub : it->second) {
+      for (auto& ub : it->second.m_constraints) {
         applyFlagsToUB(ub, tc);
         if (ub.isCheckable()) {
           auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
@@ -4618,7 +4618,7 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   }
   if (func->hasReturnWithMultiUBs()) {
     auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
-    for (auto& ub : ubs) {
+    for (auto& ub : ubs.m_constraints) {
       applyFlagsToUB(ub, tc);
       if (ub.isCheckable()) {
         auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;

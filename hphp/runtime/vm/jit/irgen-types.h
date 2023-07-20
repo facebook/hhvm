@@ -26,6 +26,8 @@ struct RepoAuthType;
 struct StringData;
 struct TypeConstraint;
 struct Func;
+template<typename T> struct TypeIntersectionConstraintT;
+using VMTypeIntersectionConstraint = TypeIntersectionConstraintT<VMCompactVector<TypeConstraint>>;
 
 namespace jit {
 
@@ -45,7 +47,7 @@ void verifyParamType(IRGS& env, const Func* callee, int32_t id,
 void verifyPropType(IRGS& env,
                     SSATmp* cls,
                     const HPHP::TypeConstraint* tc,
-                    const VMCompactVector<TypeConstraint>* ubs,
+                    const VMTypeIntersectionConstraint* ubs,
                     Slot slot,
                     SSATmp* val,
                     SSATmp* name,

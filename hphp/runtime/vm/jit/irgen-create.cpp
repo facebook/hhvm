@@ -185,7 +185,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         if (prop.attrs & AttrInitialSatisfiesTC) continue;
         auto const isAnyCheckable = [&] {
           if (prop.typeConstraint.isCheckable()) return true;
-          for (auto const& ub : prop.ubs) {
+          for (auto const& ub : prop.ubs.m_constraints) {
             if (ub.isCheckable()) return true;
           }
           return false;

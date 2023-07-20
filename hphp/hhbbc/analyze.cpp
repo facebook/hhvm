@@ -837,7 +837,7 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       return true;
     }
     return std::any_of(
-      begin(prop.ubs), end(prop.ubs),
+      begin(prop.ubs.m_constraints), end(prop.ubs.m_constraints),
       [&] (TypeConstraint ub) {
         applyFlagsToUB(ub, prop.typeConstraint);
         return !initial.moreRefined(
@@ -1560,7 +1560,7 @@ std::tuple<Type, bool, bool> verify_param_type(const Index& index,
   auto const& pinfo = ctx.func->params[paramId];
 
   std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};
-  for (auto const& tc : pinfo.upperBounds) tcs.push_back(&tc);
+  for (auto const& tc : pinfo.upperBounds.m_constraints) tcs.push_back(&tc);
 
   auto refined = TInitCell;
   auto noop = true;

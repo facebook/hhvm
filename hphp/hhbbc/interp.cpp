@@ -5219,14 +5219,14 @@ void in(ISS& env, const bc::VerifyOutType& op) {
   TCVec tcs;
   auto const& pinfo = env.ctx.func->params[op.loc1];
   tcs.push_back(&pinfo.typeConstraint);
-  for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
+  for (auto const& t : pinfo.upperBounds.m_constraints) tcs.push_back(&t);
   verifyRetImpl(env, tcs, false, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
   TCVec tcs;
   tcs.push_back(&env.ctx.func->retTypeConstraint);
-  for (auto const& t : env.ctx.func->returnUBs) tcs.push_back(&t);
+  for (auto const& t : env.ctx.func->returnUBs.m_constraints) tcs.push_back(&t);
   verifyRetImpl(env, tcs, true, false);
 }
 
@@ -5273,7 +5273,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
     }
   }
   TCVec tcs {&constraint};
-  for (auto const& t : env.ctx.func->returnUBs) tcs.push_back(&t);
+  for (auto const& t : env.ctx.func->returnUBs.m_constraints) tcs.push_back(&t);
   verifyRetImpl(env, tcs, true, true);
 }
 
@@ -5645,7 +5645,7 @@ void in(ISS& env, const bc::InitProp& op) {
 
     auto const [refined, effectFree] = [&] () -> std::pair<Type, bool> {
       auto [refined, effectFree] = refine(prop.typeConstraint);
-      for (auto ub : prop.ubs) {
+      for (auto ub : prop.ubs.m_constraints) {
         if (!effectFree) break;
         applyFlagsToUB(ub, prop.typeConstraint);
         auto [refined2, effectFree2] = refine(ub);

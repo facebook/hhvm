@@ -466,10 +466,10 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
   auto ub = getRelevantUpperBounds(typeConstraint, classUbs, classUbs, {});
 
   auto needsMultiUBs = false;
-  if (ub.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(ub[0], typeConstraint);
-    typeConstraint = ub[0];
-  } else if (!ub.empty()) {
+  if (ub.isSimple() && !hasReifiedGenerics) {
+    applyFlagsToUB(ub.asSimpleMut(), typeConstraint);
+    typeConstraint = ub.asSimple();
+  } else if (!ub.isTop()) {
     needsMultiUBs = true;
   }
 
@@ -518,11 +518,10 @@ void translateClassBody(TranslationState& ts,
 
 void translateUbs(const hhbc::UpperBound& ub, UpperBoundMap& ubs) {
   auto const& name = toStaticString(ub.name);
-  CompactVector<TypeConstraint> ret;
 
   auto infos = range(ub.bounds);
   for (auto const& i : infos) {
-    ubs[name].emplace_back(translateTypeInfo(i).second);
+    ubs[name].m_constraints.emplace_back(translateTypeInfo(i).second);
   }
 }
 
@@ -971,15 +970,15 @@ void upperBoundsHelper(TranslationState& ts,
                        const UpperBoundMap& ubs,
                        const UpperBoundMap& classUbs,
                        const TParamNameVec& shadowedTParams,
-                       CompactVector<TypeConstraint>& upperBounds,
+                       TypeIntersectionConstraint& upperBounds,
                        TypeConstraint& tc,
                        bool hasReifiedGenerics,
                        bool isParam) {
   auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs[0], tc);
-    tc = currUBs[0];
-  } else if (!currUBs.empty()) {
+  if (currUBs.isSimple() && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs.asSimpleMut(), tc);
+    tc = currUBs.asSimple();
+  } else if (!currUBs.isTop()) {
     upperBounds = std::move(currUBs);
     if (isParam) {
       ts.fe->hasParamsWithMultiUBs = true;
@@ -994,7 +993,7 @@ bool upperBoundsHelper(TranslationState& ts,
                        const UpperBoundMap& ubs,
                        const UpperBoundMap& classUbs,
                        const TParamNameVec& shadowedTParams,
-                       CompactVector<TypeConstraint>& upperBounds,
+                       TypeIntersectionConstraint& upperBounds,
                        TypeConstraint& tc,
                        const UserAttributeMap& userAttrs,
                        bool isParam) {

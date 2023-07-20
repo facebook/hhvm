@@ -937,7 +937,7 @@ void Class::initSProps() const {
           );
         }
         if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-          for (auto const& ub : sProp.ubs) {
+          for (auto const& ub : sProp.ubs.m_constraints) {
             if (ub.isCheckable()) {
               ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
             }
@@ -1005,7 +1005,7 @@ void Class::checkPropInitialValues() const {
     auto tv = rval.tv();
     if (tc.isCheckable()) tc.verifyProperty(&tv, this, prop.cls, prop.name);
     if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-      for (auto const& ub : prop.ubs) {
+      for (auto const& ub : prop.ubs.m_constraints) {
         if (ub.isCheckable()) {
           ub.verifyProperty(&tv, this, prop.cls, prop.name);
         }
@@ -1082,11 +1082,11 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
   }
 
   if (RuntimeOption::EvalEnforceGenericsUB > 0 &&
-      (!prop.ubs.empty() || !oldProp.ubs.empty())) {
+      (!prop.ubs.isTop() || !oldProp.ubs.isTop())) {
     std::vector<TypeConstraint> newTCs = {newTC};
-    for (auto const& ub : prop.ubs) newTCs.push_back(ub);
+    for (auto const& ub : prop.ubs.m_constraints) newTCs.push_back(ub);
     std::vector<TypeConstraint> oldTCs = {oldTC};
-    for (auto const& ub : oldProp.ubs) oldTCs.push_back(ub);
+    for (auto const& ub : oldProp.ubs.m_constraints) oldTCs.push_back(ub);
 
     for (auto const& ub : newTCs) {
       if (std::none_of(oldTCs.begin(), oldTCs.end(),
@@ -1402,7 +1402,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
 
           auto res = skipCheck ? true : decl.typeConstraint.assertCheck(sProp);
           if (RuntimeOption::EvalEnforceGenericsUB >= 2) {
-            for (auto const& ub : decl.ubs) {
+            for (auto const& ub : decl.ubs.m_constraints) {
               if (ub.isCheckable() && !ub.isSoft()) {
                 res = res && ub.assertCheck(sProp);
               }
@@ -3102,8 +3102,8 @@ void Class::setProperties() {
         if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
             !(preProp->attrs() & AttrNoBadRedeclare) &&
             (tc.maybeInequivalentForProp(prop.typeConstraint) ||
-             !preProp->upperBounds().empty() ||
-             !prop.ubs.empty())) {
+             !preProp->upperBounds().isTop() ||
+             !prop.ubs.isTop())) {
           // If this property isn't obviously not redeclaring a property in
           // the parent, we need to check that when we initialize the class.
           prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
@@ -3515,7 +3515,7 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
     if (!tc.alwaysPasses(&tv)) return false;
     if (RuntimeOption::EvalEnforceGenericsUB > 0) {
       auto& ubs = const_cast<PreClass::UpperBoundVec&>(preProp->upperBounds());
-      for (auto& ub : ubs) {
+      for (auto& ub : ubs.m_constraints) {
         if (!ub.alwaysPasses(&tv)) return false;
       }
     }
@@ -3549,7 +3549,7 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
   prop.repoAuthType        = preProp->repoAuthType();
 
   // If type constraint has soft or nullable flags, apply them to upper-bounds.
-  for (auto &ub : prop.ubs) applyFlagsToUB(ub, prop.typeConstraint);
+  for (auto &ub : prop.ubs.m_constraints) applyFlagsToUB(ub, prop.typeConstraint);
   // Check if this property's initial value needs to be type checked at
   // runtime.
   checkPrePropVal(prop, preProp);

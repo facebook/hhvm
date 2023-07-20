@@ -181,7 +181,7 @@ struct Param {
    */
   LSString userTypeConstraint;
 
-  CompactVector<TypeConstraint> upperBounds;
+  TypeIntersectionConstraint upperBounds;
 
   /*
    * Each parameter of a func can have arbitrary user attributes.
@@ -418,7 +418,7 @@ struct Func : FuncBase {
   bool fromModuleLevelTrait : 1;
   bool requiresFromOriginalModule : 1;
 
-  CompactVector<TypeConstraint> returnUBs;
+  TypeIntersectionConstraint returnUBs;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
@@ -489,7 +489,7 @@ struct Prop {
 
   LSString userType;
   TypeConstraint typeConstraint;
-  CompactVector<TypeConstraint> ubs;
+  TypeIntersectionConstraint ubs;
 
   /*
    * The default value of the property, for properties with scalar

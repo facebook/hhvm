@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/type-constraint-flags.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/containers.h"
 
 #include "hphp/util/functional.h"
 
@@ -413,6 +414,47 @@ private:
   LowStringPtr m_typeName;
   LowPtr<const NamedType> m_namedType;
 };
+
+/// TypeIntersectionConstraintT is generally used for upper-bounds. It's
+/// templated so we can have a common implementation with different vector
+/// representation (std::vector, TinyVector, VMCompactVector) based on need.
+template<typename VectorT>
+struct TypeIntersectionConstraintT {
+  VectorT m_constraints;
+
+  TypeIntersectionConstraintT() = default;
+
+  explicit TypeIntersectionConstraintT(TypeConstraint tc) {
+    m_constraints.emplace_back(std::move(tc));
+  }
+
+  template<class SerDe>
+  void serde(SerDe& sd) {
+    sd(m_constraints);
+  }
+
+  bool isTop() const { return m_constraints.empty(); }
+  bool isSimple() const { return m_constraints.size() == 1; }
+
+  const TypeConstraint& asSimple() const {
+    assertx(isSimple());
+    return m_constraints[0];
+  }
+
+  TypeConstraint& asSimpleMut() {
+    assertx(isSimple());
+    return m_constraints[0];
+  }
+
+  void add(TypeConstraint tc) {
+    m_constraints.emplace_back(std::move(tc));
+  }
+};
+
+using TinyTypeIntersectionConstraint = TypeIntersectionConstraintT<TinyVector<TypeConstraint>>;
+using TypeIntersectionConstraint = TypeIntersectionConstraintT<CompactVector<TypeConstraint>>;
+using StdTypeIntersectionConstraint = TypeIntersectionConstraintT<std::vector<TypeConstraint>>;
+using VMTypeIntersectionConstraint = TypeIntersectionConstraintT<VMCompactVector<TypeConstraint>>;
 
 //////////////////////////////////////////////////////////////////////
 

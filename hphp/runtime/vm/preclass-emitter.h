@@ -45,9 +45,9 @@ struct BuiltinObjExtents {
 
 struct PreClassEmitter {
   using MethodVec = std::vector<FuncEmitter*>;
-  using UpperBoundVec = CompactVector<TypeConstraint>;
+  using UpperBoundVec = TypeIntersectionConstraint;
   using UpperBoundMap =
-    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
+    std::unordered_map<const StringData*, TypeIntersectionConstraint>;
 
   struct Prop {
     Prop()

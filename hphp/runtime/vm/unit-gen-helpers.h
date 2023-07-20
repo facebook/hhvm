@@ -29,7 +29,7 @@ struct TranslationFatal : std::runtime_error {
 void checkSize(TypedValue tv, uint64_t& available);
 
 using TParamNameVec = CompactVector<const StringData*>;
-using UpperBoundVec = CompactVector<TypeConstraint>;
+using UpperBoundVec = TypeIntersectionConstraint;
 using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
 
 UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,

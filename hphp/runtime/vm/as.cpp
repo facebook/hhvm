@@ -2186,7 +2186,7 @@ void parse_ub(AsmState& as, UpperBoundMap& ubs) {
   for (;;) {
     const auto& tc = parse_type_info(as).second;
     auto& v = ubs[nameStr];
-    v.push_back(tc);
+    v.add(tc);
     as.in.skipWhitespace();
     if (as.in.peek() != ',') break;
     as.in.getc();
@@ -2287,10 +2287,10 @@ void parse_parameter_list(AsmState& as,
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
     auto currUBs = getRelevantUpperBounds(param.typeConstraint, ubs,
                                           class_ubs, shadowed_tparams);
-    if (currUBs.size() == 1 && !hasReifiedGenerics) {
-      applyFlagsToUB(currUBs[0], param.typeConstraint);
-      param.typeConstraint = currUBs[0];
-    } else if (!currUBs.empty()) {
+    if (currUBs.isSimple() && !hasReifiedGenerics) {
+      applyFlagsToUB(currUBs.asSimpleMut(), param.typeConstraint);
+      param.typeConstraint = currUBs.asSimple();
+    } else if (!currUBs.isTop()) {
       param.upperBounds = std::move(currUBs);
       as.fe->hasParamsWithMultiUBs = true;
     }
@@ -2441,10 +2441,10 @@ void parse_function(AsmState& as) {
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end();
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs[0], retTypeInfo.second);
-    retTypeInfo.second = currUBs[0];
-  } else if (!currUBs.empty()) {
+  if (currUBs.isSimple() && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs.asSimpleMut(), retTypeInfo.second);
+    retTypeInfo.second = currUBs.asSimple();
+  } else if (!currUBs.isTop()) {
     as.fe->retUpperBounds = std::move(currUBs);
     as.fe->hasReturnWithMultiUBs = true;
   }
@@ -2508,10 +2508,10 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
 
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs,
                                         class_ubs, shadowed_tparams);
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(currUBs[0], retTypeInfo.second);
-    retTypeInfo.second = currUBs[0];
-  } else if (!currUBs.empty()) {
+  if (currUBs.isSimple() && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs.asSimpleMut(), retTypeInfo.second);
+    retTypeInfo.second = currUBs.asSimple();
+  } else if (!currUBs.isTop()) {
     as.fe->retUpperBounds = std::move(currUBs);
     as.fe->hasReturnWithMultiUBs = true;
   }
@@ -2609,10 +2609,10 @@ void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
     userAttributes.find(s___Reified.get()) != userAttributes.end();
   auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, {}, {});
   auto needsMultiUBs = false;
-  if (ub.size() == 1 && !hasReifiedGenerics) {
-    applyFlagsToUB(ub[0], typeConstraint);
-    typeConstraint = ub[0];
-  } else if (!ub.empty()) {
+  if (ub.isSimple() && !hasReifiedGenerics) {
+    applyFlagsToUB(ub.asSimpleMut(), typeConstraint);
+    typeConstraint = ub.asSimple();
+  } else if (!ub.isTop()) {
     needsMultiUBs = true;
   }
   std::string name;

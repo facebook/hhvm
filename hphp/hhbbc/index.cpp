@@ -5449,7 +5449,7 @@ PropMergeResult prop_tc_effects(const Index& index,
   // Otherwise check every generic upper-bound. We'll feed the
   // narrowed type into each successive round. If we reach the point
   // where we'll know we'll definitely fail, just stop.
-  for (auto ub : prop.ubs) {
+  for (auto ub : prop.ubs.m_constraints) {
     applyFlagsToUB(ub, prop.typeConstraint);
     auto r = check(ub, result.adjusted);
     result.throws &= r.throws;
@@ -8425,10 +8425,10 @@ private:
                                       ISStringSet* uses) {
     for (auto& p : func.params) {
       update_type_constraint(index, p.typeConstraint, uses);
-      for (auto& ub : p.upperBounds) update_type_constraint(index, ub, uses);
+      for (auto& ub : p.upperBounds.m_constraints) update_type_constraint(index, ub, uses);
     }
     update_type_constraint(index, func.retTypeConstraint, uses);
-    for (auto& ub : func.returnUBs) update_type_constraint(index, ub, uses);
+    for (auto& ub : func.returnUBs.m_constraints) update_type_constraint(index, ub, uses);
   }
 
   static void update_type_constraints(const LocalIndex& index,
@@ -8440,7 +8440,7 @@ private:
     for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
     for (auto& prop : cls.properties) {
       update_type_constraint(index, prop.typeConstraint, uses);
-      for (auto& ub : prop.ubs) update_type_constraint(index, ub, uses);
+      for (auto& ub : prop.ubs.m_constraints) update_type_constraint(index, ub, uses);
     }
   }
 
@@ -8492,10 +8492,10 @@ private:
       };
 
       auto const process = [&] (const TypeConstraint& tc,
-                                const CompactVector<TypeConstraint>& ubs) {
+                                const TypeIntersectionConstraint& ubs) {
         auto ret = TInitCell;
         ret = intersection_of(std::move(ret), make_type(tc));
-        for (auto const& ub : ubs) {
+        for (auto const& ub : ubs.m_constraints) {
           ret = intersection_of(std::move(ret), make_type(ub));
         }
         return ret;
@@ -8590,7 +8590,7 @@ private:
         };
 
         if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
-        for (auto ub : prop.ubs) {
+        for (auto ub : prop.ubs.m_constraints) {
           applyFlagsToUB(ub, prop.typeConstraint);
           if (!initial.subtypeOf(make_type(ub))) return false;
         }
@@ -8642,9 +8642,9 @@ private:
             return false;
           }
 
-          for (auto ub : prop.ubs) {
+          for (auto ub : prop.ubs.m_constraints) {
             applyFlagsToUB(ub, prop.typeConstraint);
-            for (auto pub : parentProp->ubs) {
+            for (auto pub : parentProp->ubs.m_constraints) {
               update_type_constraint(index, pub, nullptr);
               applyFlagsToUB(pub, parentProp->typeConstraint);
               if (ub.maybeInequivalentForProp(pub)) return false;
@@ -8805,10 +8805,10 @@ private:
                      const ISStringSet& missing) {
     for (auto& p : func.params) {
       update(p.typeConstraint, missing);
-      for (auto& ub : p.upperBounds) update(ub, missing);
+      for (auto& ub : p.upperBounds.m_constraints) update(ub, missing);
     }
     auto updated = update(func.retTypeConstraint, missing);
-    for (auto& ub : func.returnUBs) updated |= update(ub, missing);
+    for (auto& ub : func.returnUBs.m_constraints) updated |= update(ub, missing);
     if (updated) {
       // One of the return constraints corresponds to a missing
       // type. This means the function can never return and must have
@@ -8828,7 +8828,7 @@ private:
     }
     for (auto& prop : cls.properties) {
       update(prop.typeConstraint, missing);
-      for (auto& ub : prop.ubs) update(ub, missing);
+      for (auto& ub : prop.ubs.m_constraints) update(ub, missing);
     }
   }
 };

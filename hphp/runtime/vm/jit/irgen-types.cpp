@@ -1298,7 +1298,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   verifyFunc(tc);
   if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
     auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
-    for (auto& ub : ubs) {
+    for (auto& ub : ubs.m_constraints) {
       applyFlagsToUB(ub, tc);
       verifyFunc(ub);
     }
@@ -1306,7 +1306,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(id);
     if (it != ubs.end()) {
-      for (auto& ub : it->second) {
+      for (auto& ub : it->second.m_constraints) {
         applyFlagsToUB(ub, tc);
         verifyFunc(ub);
       }
@@ -1399,7 +1399,7 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(id);
     if (it != ubs.end()) {
-      for (auto& ub : it->second) {
+      for (auto& ub : it->second.m_constraints) {
         applyFlagsToUB(ub, tc);
         verifyFunc(ub);
       }
@@ -1498,7 +1498,7 @@ void verifyPropType(IRGS& env,
   };
   verifyFunc(tc);
   if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : *ubs) {
+    for (auto const& ub : ubs->m_constraints) {
       verifyFunc(&ub);
     }
   }

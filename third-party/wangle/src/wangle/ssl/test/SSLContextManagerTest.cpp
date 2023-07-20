@@ -510,10 +510,7 @@ TEST(SSLContextManagerTest, TestSessionContextCertRemoval) {
 
   // Setting a default context
   sslCtxMgr.insertSSLCtxByDomainName(
-      "www.abc.example.com",
-      www_abc_example_com_ctx,
-      CertCrypto::BEST_AVAILABLE,
-      true);
+      "www.abc.example.com", www_abc_example_com_ctx, true);
 
   // Context Manager must throw on attempt to remove the default context
   EXPECT_THROW(

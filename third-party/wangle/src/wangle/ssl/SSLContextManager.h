@@ -293,7 +293,6 @@ class SSLContextManager {
   void insertSSLCtxByDomainName(
       const std::string& dn,
       std::shared_ptr<folly::SSLContext> sslCtx,
-      CertCrypto certCrypto = CertCrypto::BEST_AVAILABLE,
       bool defaultFallback = false);
 
   void loadCertsFromFiles(

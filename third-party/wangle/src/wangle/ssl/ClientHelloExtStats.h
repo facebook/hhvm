@@ -28,9 +28,6 @@ class ClientHelloExtStats {
   virtual void recordAbsentHostname() noexcept = 0;
   virtual void recordMatch() noexcept = 0;
   virtual void recordNotMatch() noexcept = 0;
-  virtual void recordCertCrypto(
-      CertCrypto requested,
-      CertCrypto served) noexcept = 0;
 };
 
 } // namespace wangle

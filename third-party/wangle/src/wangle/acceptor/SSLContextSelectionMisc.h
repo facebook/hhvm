@@ -17,12 +17,9 @@
 #pragma once
 
 #include <folly/String.h>
-#include <folly/hash/Hash.h>
 #include <string>
 
 namespace wangle {
-
-enum class CertCrypto { BEST_AVAILABLE, SHA1_SIGNATURE };
 
 struct dn_char_traits : public std::char_traits<char> {
   static bool eq(char c1, char c2) {
@@ -69,15 +66,11 @@ typedef std::basic_string<char, dn_char_traits> DNString;
 
 struct SSLContextKey {
   DNString dnString;
-  CertCrypto certCrypto;
 
-  explicit SSLContextKey(
-      DNString dns,
-      CertCrypto crypto = CertCrypto::BEST_AVAILABLE)
-      : dnString(dns), certCrypto(crypto) {}
+  explicit SSLContextKey(DNString dns) : dnString(std::move(dns)) {}
 
   bool operator==(const SSLContextKey& rhs) const {
-    return dnString == rhs.dnString && certCrypto == rhs.certCrypto;
+    return dnString == rhs.dnString;
   }
 };
 
@@ -86,8 +79,7 @@ struct SSLContextKeyHash {
     std::string lowercase(
         sslContextKey.dnString.data(), sslContextKey.dnString.size());
     folly::toLowerAscii(lowercase);
-    return folly::hash::hash_combine(
-        lowercase, static_cast<int>(sslContextKey.certCrypto));
+    return std::hash<std::string>{}(lowercase);
   }
 };
 

@@ -271,7 +271,6 @@ class SSLContextManager::SslContexts
   void insertSSLCtxByDomainName(
       const std::string& dn,
       std::shared_ptr<folly::SSLContext> sslCtx,
-      CertCrypto certCrypto,
       bool defaultFallback);
 
   // Does feature-specific setup for OpenSSL
@@ -351,7 +350,6 @@ class SSLContextManager::SslContexts
   void insertSSLCtxByDomainNameImpl(
       const std::string& dn,
       std::shared_ptr<folly::SSLContext> sslCtx,
-      CertCrypto certCrypto,
       bool defaultFallback);
 
   void insertIntoDnMap(
@@ -834,10 +832,9 @@ SSLContextManager::SslContexts::serverNameCallback(
   CHECK(sslSocket);
 
   // Check if we think the client is outdated and require weak crypto.
-  CertCrypto certCryptoReq = CertCrypto::BEST_AVAILABLE;
   DNString dnstr(sn, snLen);
 
-  SSLContextKey key(dnstr, certCryptoReq);
+  SSLContextKey key(dnstr);
   ctx = contexts->getSSLCtx(key);
   if (ctx) {
     sslSocket->switchServerSSLContext(ctx);
@@ -847,7 +844,6 @@ SSLContextManager::SslContexts::serverNameCallback(
       if (reqHasServerName) {
         stats->recordMatch();
       }
-      stats->recordCertCrypto(certCryptoReq, certCryptoReq);
     }
     return SSLContext::SERVER_NAME_FOUND;
   }
@@ -985,15 +981,13 @@ void SSLContextManager::SslContexts::insert(
   //
   // This will be used as the lookup key if this SSLContext is marked as
   // the default.
-  insertSSLCtxByDomainName(
-      *identity, sslCtx, CertCrypto::BEST_AVAILABLE, defaultFallback);
+  insertSSLCtxByDomainName(*identity, sslCtx, defaultFallback);
 
   // Insert by subject alternative name(s)
   auto altNames = SSLUtil::getSubjectAltName(x509);
   if (altNames) {
     for (auto& name : *altNames) {
-      insertSSLCtxByDomainName(
-          name, sslCtx, CertCrypto::BEST_AVAILABLE, defaultFallback);
+      insertSSLCtxByDomainName(name, sslCtx, defaultFallback);
     }
   }
 
@@ -1006,17 +1000,16 @@ void SSLContextManager::SslContexts::insert(
     const std::vector<std::string>& snis,
     shared_ptr<ServerSSLContext> sslCtx) {
   for (const auto& sni : snis) {
-    insertSSLCtxByDomainName(sni, sslCtx, CertCrypto::BEST_AVAILABLE, false);
+    insertSSLCtxByDomainName(sni, sslCtx, false);
   }
 }
 
 void SSLContextManager::SslContexts::insertSSLCtxByDomainName(
     const std::string& dn,
     shared_ptr<SSLContext> sslCtx,
-    CertCrypto certCrypto,
     bool defaultFallback) {
   try {
-    insertSSLCtxByDomainNameImpl(dn, sslCtx, certCrypto, defaultFallback);
+    insertSSLCtxByDomainNameImpl(dn, sslCtx, defaultFallback);
   } catch (const std::runtime_error& ex) {
     if (strict_) {
       throw ex;
@@ -1029,7 +1022,6 @@ void SSLContextManager::SslContexts::insertSSLCtxByDomainName(
 void SSLContextManager::SslContexts::insertSSLCtxByDomainNameImpl(
     const std::string& dn,
     shared_ptr<SSLContext> sslCtx,
-    CertCrypto certCrypto,
     bool defaultFallback) {
   const char* dn_ptr = dn.c_str();
   size_t len = dn.length();
@@ -1068,7 +1060,7 @@ void SSLContextManager::SslContexts::insertSSLCtxByDomainNameImpl(
   }
 
   DNString dnstr(dn_ptr, len);
-  auto mainKey = SSLContextKey(dnstr, certCrypto);
+  auto mainKey = SSLContextKey(dnstr);
   if (defaultFallback) {
     insertIntoDefaultKeys(mainKey, true);
   } else {
@@ -1167,7 +1159,7 @@ bool SSLContextManager::SslContexts::isDefaultCtxSuffix(
     const SSLContextKey& key) const {
   size_t dot;
   if ((dot = key.dnString.find_first_of(".")) != DNString::npos) {
-    SSLContextKey suffixKey(DNString(key.dnString, dot), key.certCrypto);
+    SSLContextKey suffixKey(DNString(key.dnString, dot));
     return isDefaultCtxExact(suffixKey);
   }
 
@@ -1188,7 +1180,7 @@ shared_ptr<SSLContext> SSLContextManager::SslContexts::getSSLCtxBySuffix(
   size_t dot;
 
   if ((dot = key.dnString.find_first_of(".")) != DNString::npos) {
-    SSLContextKey suffixKey(DNString(key.dnString, dot), key.certCrypto);
+    SSLContextKey suffixKey(DNString(key.dnString, dot));
     const auto v = dnMap_.find(suffixKey);
     if (v != dnMap_.end()) {
       VLOG(6) << folly::stringPrintf(
@@ -1289,7 +1281,7 @@ std::shared_ptr<folly::SSLContext> SSLContextManager::getDefaultSSLCtx() const {
 std::shared_ptr<folly::SSLContext> SSLContextManager::getSSLCtx(
     const std::string& sni) const {
   DNString dnstr(sni.c_str(), sni.size());
-  SSLContextKey key(std::move(dnstr), CertCrypto::BEST_AVAILABLE);
+  SSLContextKey key(std::move(dnstr));
   auto ctx = contexts_->getSSLCtx(key);
   if (!ctx && contexts_->isDefaultCtx(key)) {
     ctx = defaultCtx_;
@@ -1298,8 +1290,6 @@ std::shared_ptr<folly::SSLContext> SSLContextManager::getSSLCtx(
   if (ctx) {
     if (clientHelloTLSExtStats_) {
       clientHelloTLSExtStats_->recordMatch();
-      clientHelloTLSExtStats_->recordCertCrypto(
-          CertCrypto::BEST_AVAILABLE, CertCrypto::BEST_AVAILABLE);
     }
 
     return ctx;
@@ -1364,8 +1354,7 @@ ClientHelloExtStats* SSLContextManager::getClientHelloExtStats() const {
 void SSLContextManager::insertSSLCtxByDomainName(
     const std::string& dn,
     std::shared_ptr<folly::SSLContext> sslCtx,
-    CertCrypto certCrypto,
     bool defaultFallback) {
-  contexts_->insertSSLCtxByDomainName(dn, sslCtx, certCrypto, defaultFallback);
+  contexts_->insertSSLCtxByDomainName(dn, sslCtx, defaultFallback);
 }
 } // namespace wangle

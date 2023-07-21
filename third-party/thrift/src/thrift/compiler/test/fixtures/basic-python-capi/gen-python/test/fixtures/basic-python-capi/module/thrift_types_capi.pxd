@@ -101,13 +101,13 @@ cdef api object construct__test__fixtures__basic_python_capi__module__ComposeStr
 
 cdef api object init__test__fixtures__basic_python_capi__module__ComposeStruct(object data)
 
-cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(object) except -1
+cdef api int can_extract__test__fixtures__basic_python_capi__module__Onion(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyUnion(object) except NULL
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__Onion(object) except NULL
 
-cdef api object construct__test__fixtures__basic_python_capi__module__MyUnion(__unique_ptr[__cIOBuf])
+cdef api object construct__test__fixtures__basic_python_capi__module__Onion(__unique_ptr[__cIOBuf])
 
-cdef api object init__test__fixtures__basic_python_capi__module__MyUnion(object data)
+cdef api object init__test__fixtures__basic_python_capi__module__Onion(object data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructPatch(object) except -1
 

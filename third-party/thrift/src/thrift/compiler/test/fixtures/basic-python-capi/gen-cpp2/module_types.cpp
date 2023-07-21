@@ -1771,11 +1771,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::test::fixtures::basic-python-capi::OurUnion>::translateFieldName(
+void TccStructTraits<::test::fixtures::basic-python-capi::Shallot>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>;
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -1791,34 +1791,34 @@ void TccStructTraits<::test::fixtures::basic-python-capi::OurUnion>::translateFi
 namespace apache { namespace thrift {
 
 #if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::size;
+constexpr std::size_t const TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type>::size;
 #endif
-folly::Range<::test::fixtures::basic-python-capi::OurUnion::Type const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>::names);
+folly::Range<::test::fixtures::basic-python-capi::Shallot::Type const*> const TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::Shallot::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-python-capi::Shallot::Type>::names);
 
-bool TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type>::findName(type value, folly::StringPiece* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_name(value, out);
 }
 
-bool TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+bool TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type>::findValue(folly::StringPiece name, type* out) noexcept {
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
 namespace test { namespace fixtures { namespace basic-python-capi {
 
-const char* OurUnion::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-python-capi/MyUnion";
+const char* Shallot::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-python-capi/Onion";
 }
 
-const folly::StringPiece OurUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece Shallot::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<OurUnion>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<Shallot>::fields_names[folly::to_underlying(ord) - 1];
 }
-const folly::StringPiece OurUnion::__fbthrift_get_class_name() {
-  return apache::thrift::TStructDataStorage<OurUnion>::name;
+const folly::StringPiece Shallot::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Shallot>::name;
 }
 
-void OurUnion::__fbthrift_clear() {
+void Shallot::__fbthrift_clear() {
   // clear all fields
   if (getType() == Type::__EMPTY__) { return; }
   switch(getType()) {
@@ -1828,8 +1828,8 @@ void OurUnion::__fbthrift_clear() {
     case Type::myStruct:
       destruct(value_.myStruct);
       break;
-    case Type::myDataItem:
-      destruct(value_.myDataItem);
+    case Type::myString:
+      destruct(value_.myString);
       break;
     case Type::intSet:
       destruct(value_.intSet);
@@ -1847,19 +1847,19 @@ void OurUnion::__fbthrift_clear() {
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
-bool OurUnion::__fbthrift_is_empty() const {
+bool Shallot::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
 }
 
-bool OurUnion::operator==(const OurUnion& rhs) const {
+bool Shallot::operator==(const Shallot& rhs) const {
   if (getType() != rhs.getType()) { return false; }
   switch(getType()) {
     case Type::myEnum:
       return value_.myEnum == rhs.value_.myEnum;
     case Type::myStruct:
       return value_.myStruct == rhs.value_.myStruct;
-    case Type::myDataItem:
-      return value_.myDataItem == rhs.value_.myDataItem;
+    case Type::myString:
+      return value_.myString == rhs.value_.myString;
     case Type::intSet:
       return value_.intSet == rhs.value_.intSet;
     case Type::doubleList:
@@ -1871,36 +1871,30 @@ bool OurUnion::operator==(const OurUnion& rhs) const {
   }
 }
 
-bool OurUnion::operator<(FOLLY_MAYBE_UNUSED const OurUnion& rhs) const {
+bool Shallot::operator<(FOLLY_MAYBE_UNUSED const Shallot& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-void swap(OurUnion& a, OurUnion& b) {
-  OurUnion temp(std::move(a));
+void swap(Shallot& a, Shallot& b) {
+  Shallot temp(std::move(a));
   a = std::move(b);
   b = std::move(temp);
 }
 
-template void OurUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t OurUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t OurUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void OurUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t OurUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t OurUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void Shallot::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Shallot::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Shallot::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Shallot::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Shallot::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Shallot::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Shallot::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Shallot::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
-        OurUnion,
+        Shallot,
         ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-python-capi::MyStruct>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        OurUnion,
-        ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-python-capi::MyDataItem>,
+        ::test::fixtures::basic-python-capi::PrimitiveStruct>,
     "inconsistent use of json option");
 
 }}} // test::fixtures::basic-python-capi

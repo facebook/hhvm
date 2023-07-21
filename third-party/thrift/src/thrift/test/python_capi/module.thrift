@@ -151,11 +151,12 @@ struct ComposeStruct {
   4: ListAlias aliased;
 } (cpp.noncopyable)
 
-union MyUnion {
+@python.MarshalCapi
+union Onion {
   1: MyEnum myEnum;
-  2: MyStruct myStruct;
-  3: MyDataItem myDataItem;
-  4: set<i64> intSet;
-  5: list<double> doubleList;
-  6: map<binary, string> strMap;
-} (cpp.name = "OurUnion")
+  2: PrimitiveStruct myStruct;
+  4: string myString;
+  6: set<i64> intSet;
+  8: list<double> doubleList;
+  9: map<binary, string> strMap;
+} (cpp.name = "Shallot")

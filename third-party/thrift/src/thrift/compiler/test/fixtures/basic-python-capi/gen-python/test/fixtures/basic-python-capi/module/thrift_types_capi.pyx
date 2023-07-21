@@ -206,22 +206,22 @@ cdef api object construct__test__fixtures__basic_python_capi__module__ComposeStr
 cdef api object init__test__fixtures__basic_python_capi__module__ComposeStruct(object data):
     return __thrift_types.ComposeStruct._fbthrift_create(data)
 
-cdef api int can_extract__test__fixtures__basic_python_capi__module__MyUnion(object __obj) except -1:
-    return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
+cdef api int can_extract__test__fixtures__basic_python_capi__module__Onion(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.Onion) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__MyUnion(object __obj) except NULL:
+cdef api __cIOBuf* extract__test__fixtures__basic_python_capi__module__Onion(object __obj) except NULL:
     cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
     return __buf._ours.release()
 
-cdef api object construct__test__fixtures__basic_python_capi__module__MyUnion(__unique_ptr[__cIOBuf] __s):
+cdef api object construct__test__fixtures__basic_python_capi__module__Onion(__unique_ptr[__cIOBuf] __s):
     return __deserialize(
-        __thrift_types.MyUnion,
+        __thrift_types.Onion,
         __IOBuf_from_unique_ptr(__move(__s)),
         protocol=__Protocol.BINARY
     )
 
-cdef api object init__test__fixtures__basic_python_capi__module__MyUnion(object data):
-    return __thrift_types.MyUnion._fbthrift_create(data)
+cdef api object init__test__fixtures__basic_python_capi__module__Onion(object data):
+    return __thrift_types.Onion._fbthrift_create(data)
 
 cdef api int can_extract__test__fixtures__basic_python_capi__module__MyStructPatch(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructPatch) else 0

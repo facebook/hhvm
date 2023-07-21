@@ -23,7 +23,7 @@ class ListStruct;
 class SetStruct;
 class MapStruct;
 class ComposeStruct;
-class OurUnion;
+class Shallot;
 class MyStructPatchStruct;
 class MyStructField4PatchStruct;
 class MyStructField6PatchStruct;

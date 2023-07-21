@@ -410,40 +410,40 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   -1,
 }};
 
-THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::name = "MyUnion";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::name = "Onion";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::fields_names = {{
   "myEnum",
   "myStruct",
-  "myDataItem",
+  "myString",
   "intSet",
   "doubleList",
   "strMap",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 6> TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::fields_ids = {{
   1,
   2,
-  3,
   4,
-  5,
   6,
+  8,
+  9,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 6> TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::fields_types = {{
   TType::T_I32,
   TType::T_STRUCT,
-  TType::T_STRUCT,
+  TType::T_STRING,
   TType::T_SET,
   TType::T_LIST,
   TType::T_MAP,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::storage_names = {{
   "myEnum",
   "myStruct",
-  "myDataItem",
+  "myString",
   "intSet",
   "doubleList",
   "strMap",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::isset_indexes = {{
   0,
   1,
   2,

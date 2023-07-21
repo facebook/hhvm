@@ -15,6 +15,7 @@
 
 import unittest
 from sys import getrefcount
+from typing import Generator
 
 import thrift.python_capi.fixture as fixture
 from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_module-python-types
@@ -28,7 +29,7 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     MyEnum,
     MyStruct,
     MyStructPatch,  # this import breaks autodeps w/o manual
-    MyUnion,
+    Onion as MyUnion,
     PrimitiveStruct,
     SetStruct,
     StringPair,
@@ -48,8 +49,13 @@ class PythonCapiFixture(unittest.TestCase):
             intSetty={-1, 1, 2, 3, 5, 8},
         )
 
-    def my_union(self) -> MyUnion:
-        return MyUnion(myStruct=self.my_struct())
+    def my_union(self) -> Generator[MyUnion, None, None]:
+        yield MyUnion()
+        yield MyUnion(myEnum=MyEnum.MyValue1)
+        yield MyUnion(myStruct=self.primitive())
+        yield MyUnion(myString="acef")
+        yield MyUnion(doubleList=[1.0, 2.0, 3.0])
+        yield MyUnion(strMap={b"key": "val", b"bytes": "str"})
 
     def primitive(self) -> PrimitiveStruct:
         return PrimitiveStruct(
@@ -169,7 +175,8 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertEqual(s, fixture.roundtrip_MyStruct(s))
 
     def test_roundtrip_union(self) -> None:
-        self.assertEqual(self.my_union(), fixture.roundtrip_MyUnion(self.my_union()))
+        for u in self.my_union():
+            self.assertEqual(u, fixture.roundtrip_MyUnion(u))
 
     def test_roundtrip_enum(self) -> None:
         self.assertEqual(MyEnum.MyValue1, fixture.roundtrip_MyEnum(MyEnum.MyValue1))
@@ -322,7 +329,8 @@ class PythonCapiTypeCheck(PythonCapiFixture):
         self.assertFalse(fixture.check_MyStruct(i))
 
     def test_typeCheck_union(self) -> None:
-        self.assertTrue(fixture.check_MyUnion(self.my_union()))
+        for u in self.my_union():
+            self.assertTrue(fixture.check_MyUnion(u))
         self.assertFalse(fixture.check_MyUnion(self.my_struct()))
         self.assertFalse(fixture.check_MyUnion(MyEnum.MyValue1))
 

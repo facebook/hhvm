@@ -437,9 +437,16 @@ PyObject* FOLLY_NULLABLE getThriftData(PyObject* structOrUnion);
 /**
  * Sets index + 1 field of struct_tuple to `value` and records that is set
  * in the isset array at field 0. Returns 0 on success and -1 on failure.
- * PyErr_Occurred() must be checked on failure case.
+ * Only for use with fresh struct_tuple (i.e., no set field values)
  */
 int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value);
+/**
+ * Creates a union tuple of size 2.
+ * Sets index 0 of union_tuple to python int created from type_key
+ * Sets index 1 of union_tuple to value.
+ * Returns nullptr on failure, union tuple on success.
+ */
+PyObject* unionTupleFromValue(int64_t type_key, PyObject* value);
 
 } // namespace capi
 

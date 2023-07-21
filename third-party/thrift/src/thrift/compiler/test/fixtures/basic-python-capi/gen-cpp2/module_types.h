@@ -72,7 +72,7 @@ struct primitive;
 struct aliased;
 struct myEnum;
 struct myStruct;
-struct myDataItem;
+struct myString;
 struct intSet;
 struct doubleList;
 struct strMap;
@@ -329,9 +329,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
 #define APACHE_THRIFT_ACCESSOR_myStruct
 APACHE_THRIFT_DEFINE_ACCESSOR(myStruct);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_myDataItem
-#define APACHE_THRIFT_ACCESSOR_myDataItem
-APACHE_THRIFT_DEFINE_ACCESSOR(myDataItem);
+#ifndef APACHE_THRIFT_ACCESSOR_myString
+#define APACHE_THRIFT_ACCESSOR_myString
+APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_intSet
 #define APACHE_THRIFT_ACCESSOR_intSet
@@ -641,7 +641,7 @@ class ListStruct;
 class SetStruct;
 class MapStruct;
 class ComposeStruct;
-class OurUnion;
+class Shallot;
 class MyStructPatchStruct;
 class MyStructField4PatchStruct;
 class MyStructField6PatchStruct;
@@ -4277,7 +4277,7 @@ unsigned long ComposeStruct::read(Protocol_* iprot) {
 }
 
 
-class OurUnion final  {
+class Shallot final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
   template<class> friend struct ::apache::thrift::detail::invoke_reffer;
@@ -4290,17 +4290,17 @@ class OurUnion final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::myEnum,
     ::apache::thrift::ident::myStruct,
-    ::apache::thrift::ident::myDataItem,
+    ::apache::thrift::ident::myString,
     ::apache::thrift::ident::intSet,
     ::apache::thrift::ident::doubleList,
     ::apache::thrift::ident::strMap
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,4,6,8,9};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyStruct>,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::MyDataItem>,
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::PrimitiveStruct>,
+    ::apache::thrift::type::string_t,
     ::apache::thrift::type::set<::apache::thrift::type::i64_t>,
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>
@@ -4328,7 +4328,7 @@ class OurUnion final  {
   bool __fbthrift_is_empty() const;
 
  public:
-  using __fbthrift_cpp2_type = OurUnion;
+  using __fbthrift_cpp2_type = Shallot;
   static constexpr bool __fbthrift_cpp2_is_union =
     true;
 
@@ -4338,16 +4338,16 @@ class OurUnion final  {
     __EMPTY__ = 0,
     myEnum = 1,
     myStruct = 2,
-    myDataItem = 3,
-    intSet = 4,
-    doubleList = 5,
-    strMap = 6,
+    myString = 4,
+    intSet = 6,
+    doubleList = 8,
+    strMap = 9,
   } ;
 
-  OurUnion()
+  Shallot()
       : type_(folly::to_underlying(Type::__EMPTY__)) {}
 
-  OurUnion(OurUnion&& rhs) noexcept
+  Shallot(Shallot&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
@@ -4365,9 +4365,9 @@ class OurUnion final  {
         set_myStruct(std::move(rhs.value_.myStruct));
         break;
       }
-      case Type::myDataItem:
+      case Type::myString:
       {
-        set_myDataItem(std::move(rhs.value_.myDataItem));
+        set_myString(std::move(rhs.value_.myString));
         break;
       }
       case Type::intSet:
@@ -4394,7 +4394,7 @@ class OurUnion final  {
     apache::thrift::clear(rhs);
   }
 
-  OurUnion(const OurUnion& rhs)
+  Shallot(const Shallot& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
     switch (rhs.getType()) {
@@ -4412,9 +4412,9 @@ class OurUnion final  {
         set_myStruct(rhs.value_.myStruct);
         break;
       }
-      case Type::myDataItem:
+      case Type::myString:
       {
-        set_myDataItem(rhs.value_.myDataItem);
+        set_myString(rhs.value_.myString);
         break;
       }
       case Type::intSet:
@@ -4440,7 +4440,7 @@ class OurUnion final  {
     }
   }
 
-  OurUnion& operator=(OurUnion&& rhs) noexcept {
+  Shallot& operator=(Shallot&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
     switch (rhs.getType()) {
@@ -4458,9 +4458,9 @@ class OurUnion final  {
         set_myStruct(std::move(rhs.value_.myStruct));
         break;
       }
-      case Type::myDataItem:
+      case Type::myString:
       {
-        set_myDataItem(std::move(rhs.value_.myDataItem));
+        set_myString(std::move(rhs.value_.myString));
         break;
       }
       case Type::intSet:
@@ -4488,7 +4488,7 @@ class OurUnion final  {
     return *this;
   }
 
-  OurUnion& operator=(const OurUnion& rhs) {
+  Shallot& operator=(const Shallot& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
     switch (rhs.getType()) {
@@ -4506,9 +4506,9 @@ class OurUnion final  {
         set_myStruct(rhs.value_.myStruct);
         break;
       }
-      case Type::myDataItem:
+      case Type::myString:
       {
-        set_myDataItem(rhs.value_.myDataItem);
+        set_myString(rhs.value_.myString);
         break;
       }
       case Type::intSet:
@@ -4535,14 +4535,14 @@ class OurUnion final  {
     return *this;
   }
 
-  ~OurUnion() {
+  ~Shallot() {
     apache::thrift::clear(*this);
   }
 
   union storage_type {
     ::test::fixtures::basic-python-capi::MyEnum myEnum;
-    ::test::fixtures::basic-python-capi::MyStruct myStruct;
-    ::test::fixtures::basic-python-capi::MyDataItem myDataItem;
+    ::test::fixtures::basic-python-capi::PrimitiveStruct myStruct;
+    ::std::string myString;
     ::std::set<::std::int64_t> intSet;
     ::std::vector<double> doubleList;
     ::std::map<::std::string, ::std::string> strMap;
@@ -4551,8 +4551,8 @@ class OurUnion final  {
     ~storage_type() {}
   } ;
 
-  bool operator==(const OurUnion&) const;
-  bool operator<(const OurUnion&) const;
+  bool operator==(const Shallot&) const;
+  bool operator<(const Shallot&) const;
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::test::fixtures::basic-python-capi::MyEnum& set_myEnum(::test::fixtures::basic-python-capi::MyEnum t = ::test::fixtures::basic-python-capi::MyEnum()) {
@@ -4565,8 +4565,8 @@ class OurUnion final  {
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::test::fixtures::basic-python-capi::MyStruct& set_myStruct(::test::fixtures::basic-python-capi::MyStruct const &t) {
-    using T0 = ::test::fixtures::basic-python-capi::MyStruct;
+  ::test::fixtures::basic-python-capi::PrimitiveStruct& set_myStruct(::test::fixtures::basic-python-capi::PrimitiveStruct const &t) {
+    using T0 = ::test::fixtures::basic-python-capi::PrimitiveStruct;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -4575,8 +4575,8 @@ class OurUnion final  {
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::test::fixtures::basic-python-capi::MyStruct& set_myStruct(::test::fixtures::basic-python-capi::MyStruct&& t) {
-    using T0 = ::test::fixtures::basic-python-capi::MyStruct;
+  ::test::fixtures::basic-python-capi::PrimitiveStruct& set_myStruct(::test::fixtures::basic-python-capi::PrimitiveStruct&& t) {
+    using T0 = ::test::fixtures::basic-python-capi::PrimitiveStruct;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
@@ -4584,38 +4584,38 @@ class OurUnion final  {
     return value_.myStruct;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-python-capi::MyStruct, T...>> ::test::fixtures::basic-python-capi::MyStruct& set_myStruct(T&&... t) {
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-python-capi::PrimitiveStruct, T...>> ::test::fixtures::basic-python-capi::PrimitiveStruct& set_myStruct(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::myStruct);
-    ::new (std::addressof(value_.myStruct)) ::test::fixtures::basic-python-capi::MyStruct(std::forward<T>(t)...);
+    ::new (std::addressof(value_.myStruct)) ::test::fixtures::basic-python-capi::PrimitiveStruct(std::forward<T>(t)...);
     return value_.myStruct;
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::test::fixtures::basic-python-capi::MyDataItem& set_myDataItem(::test::fixtures::basic-python-capi::MyDataItem const &t) {
-    using T0 = ::test::fixtures::basic-python-capi::MyDataItem;
+  ::std::string& set_myString(::std::string const &t) {
+    using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) T(t);
-    return value_.myDataItem;
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) T(t);
+    return value_.myString;
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::test::fixtures::basic-python-capi::MyDataItem& set_myDataItem(::test::fixtures::basic-python-capi::MyDataItem&& t) {
-    using T0 = ::test::fixtures::basic-python-capi::MyDataItem;
+  ::std::string& set_myString(::std::string&& t) {
+    using T0 = ::std::string;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) T(std::move(t));
-    return value_.myDataItem;
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) T(std::move(t));
+    return value_.myString;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::basic-python-capi::MyDataItem, T...>> ::test::fixtures::basic-python-capi::MyDataItem& set_myDataItem(T&&... t) {
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_myString(T&&... t) {
     __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myDataItem);
-    ::new (std::addressof(value_.myDataItem)) ::test::fixtures::basic-python-capi::MyDataItem(std::forward<T>(t)...);
-    return value_.myDataItem;
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) ::std::string(std::forward<T>(t)...);
+    return value_.myString;
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
@@ -4706,18 +4706,18 @@ class OurUnion final  {
     return value_.myEnum;
   }
 
-  ::test::fixtures::basic-python-capi::MyStruct const& get_myStruct() const {
+  ::test::fixtures::basic-python-capi::PrimitiveStruct const& get_myStruct() const {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.myStruct;
   }
 
-  ::test::fixtures::basic-python-capi::MyDataItem const& get_myDataItem() const {
-    if (getType() != Type::myDataItem) {
+  ::std::string const& get_myString() const {
+    if (getType() != Type::myString) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
-    return value_.myDataItem;
+    return value_.myString;
   }
 
   ::std::set<::std::int64_t> const& get_intSet() const {
@@ -4746,14 +4746,14 @@ class OurUnion final  {
     return value_.myEnum;
   }
 
-  ::test::fixtures::basic-python-capi::MyStruct& mutable_myStruct() {
+  ::test::fixtures::basic-python-capi::PrimitiveStruct& mutable_myStruct() {
     assert(getType() == Type::myStruct);
     return value_.myStruct;
   }
 
-  ::test::fixtures::basic-python-capi::MyDataItem& mutable_myDataItem() {
-    assert(getType() == Type::myDataItem);
-    return value_.myDataItem;
+  ::std::string& mutable_myString() {
+    assert(getType() == Type::myString);
+    return value_.myString;
   }
 
   ::std::set<::std::int64_t>& mutable_intSet() {
@@ -4776,14 +4776,14 @@ class OurUnion final  {
     return std::move(value_.myEnum);
   }
 
-  ::test::fixtures::basic-python-capi::MyStruct move_myStruct() {
+  ::test::fixtures::basic-python-capi::PrimitiveStruct move_myStruct() {
     assert(getType() == Type::myStruct);
     return std::move(value_.myStruct);
   }
 
-  ::test::fixtures::basic-python-capi::MyDataItem move_myDataItem() {
-    assert(getType() == Type::myDataItem);
-    return std::move(value_.myDataItem);
+  ::std::string move_myString() {
+    assert(getType() == Type::myString);
+    return std::move(value_.myString);
   }
 
   ::std::set<::std::int64_t> move_intSet() {
@@ -4820,43 +4820,43 @@ class OurUnion final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myEnum_ref() && {
     return {std::move(value_.myEnum), type_, folly::to_underlying(Type::myEnum), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyStruct>
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::PrimitiveStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myStruct_ref() const& {
     return {value_.myStruct, type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyStruct>
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::PrimitiveStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myStruct_ref() const&& {
     return {std::move(value_.myStruct), type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyStruct>
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::PrimitiveStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myStruct_ref() & {
     return {value_.myStruct, type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyStruct>
+  template <typename..., typename T = ::test::fixtures::basic-python-capi::PrimitiveStruct>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myStruct_ref() && {
     return {std::move(value_.myStruct), type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myDataItem_ref() const& {
-    return {value_.myDataItem, type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myString_ref() const& {
+    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myDataItem_ref() const&& {
-    return {std::move(value_.myDataItem), type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myString_ref() const&& {
+    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myDataItem_ref() & {
-    return {value_.myDataItem, type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myString_ref() & {
+    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-python-capi::MyDataItem>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myDataItem_ref() && {
-    return {std::move(value_.myDataItem), type_, folly::to_underlying(Type::myDataItem), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myString_ref() && {
+    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   template <typename..., typename T = ::std::set<::std::int64_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intSet_ref() const& {
@@ -4938,12 +4938,12 @@ class OurUnion final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops<OurUnion>;
-  friend void swap(OurUnion& a, OurUnion& b);
+  friend class ::apache::thrift::Cpp2Ops<Shallot>;
+  friend void swap(Shallot& a, Shallot& b);
 };
 
 template <class Protocol_>
-unsigned long OurUnion::read(Protocol_* iprot) {
+unsigned long Shallot::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -8297,10 +8297,10 @@ using MyStructPatch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift
 
 namespace apache { namespace thrift {
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type>;
+template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::Shallot::Type>;
 
-template <> struct TEnumTraits<::test::fixtures::basic-python-capi::OurUnion::Type> {
-  using type = ::test::fixtures::basic-python-capi::OurUnion::Type;
+template <> struct TEnumTraits<::test::fixtures::basic-python-capi::Shallot::Type> {
+  using type = ::test::fixtures::basic-python-capi::Shallot::Type;
 
   static constexpr std::size_t const size = 6;
   static folly::Range<type const*> const values;

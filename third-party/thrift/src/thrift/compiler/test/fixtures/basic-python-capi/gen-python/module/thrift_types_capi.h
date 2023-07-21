@@ -296,25 +296,32 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Extractor<::test::fixtures::basic-python-capi::OurUnion>
-    : public BaseExtractor<::test::fixtures::basic-python-capi::OurUnion> {
-  ExtractorResult<::test::fixtures::basic-python-capi::OurUnion> operator()(PyObject* obj);
+struct Extractor<::test::fixtures::basic-python-capi::Shallot>
+    : public BaseExtractor<::test::fixtures::basic-python-capi::Shallot> {
+  ExtractorResult<::test::fixtures::basic-python-capi::Shallot> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::Shallot>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::Shallot>> {
+  ExtractorResult<::test::fixtures::basic-python-capi::Shallot> operator()(PyObject* obj);
+};
 
 template <>
-struct Constructor<::test::fixtures::basic-python-capi::OurUnion>
-    : public BaseConstructor<::test::fixtures::basic-python-capi::OurUnion> {
-  PyObject* operator()(const ::test::fixtures::basic-python-capi::OurUnion& val);
+struct Constructor<::test::fixtures::basic-python-capi::Shallot>
+    : public BaseConstructor<::test::fixtures::basic-python-capi::Shallot> {
+  PyObject* operator()(const ::test::fixtures::basic-python-capi::Shallot& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic-python-capi::OurUnion>>
+        ::test::fixtures::basic-python-capi::Shallot>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic-python-capi::OurUnion>> {
-  PyObject* operator()(const ::test::fixtures::basic-python-capi::OurUnion& val);
+        ::test::fixtures::basic-python-capi::Shallot>> {
+  PyObject* operator()(const ::test::fixtures::basic-python-capi::Shallot& val);
 };
 
 template <>

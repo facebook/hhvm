@@ -84,7 +84,7 @@ class StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-python-capi::OurUnion> {
+class StructMetadata<::test::fixtures::basic-python-capi::Shallot> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

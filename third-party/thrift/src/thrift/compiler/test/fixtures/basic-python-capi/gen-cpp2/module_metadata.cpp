@@ -339,32 +339,33 @@ StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMe
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-python-capi::OurUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::basic-python-capi::Shallot>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.Onion", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
-  module_MyUnion.name() = "module.MyUnion";
-  module_MyUnion.is_union() = true;
+  ::apache::thrift::metadata::ThriftStruct& module_Onion = res.first->second;
+  module_Onion.name() = "module.Onion";
+  module_Onion.is_union() = true;
   static const auto* const
-  module_MyUnion_fields = new std::array<EncodedThriftField, 6>{{
+  module_Onion_fields = new std::array<EncodedThriftField, 6>{{
     {1, "myEnum", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
-    {2, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
-    {3, "myDataItem", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
-    {4, "intSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
-    {5, "doubleList", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{}},
-    {6, "strMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {2, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
+    {4, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {6, "intSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+    {8, "doubleList", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{}},
+    {9, "strMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_MyUnion_fields) {
+  for (const auto& f : *module_Onion_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_MyUnion.fields()->push_back(std::move(field));
+    module_Onion.fields()->push_back(std::move(field));
   }
+  module_Onion.structured_annotations()->push_back(*cvStruct("python.MarshalCapi", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

@@ -160,6 +160,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::TransitiveDoubler>::o
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::TransitiveDoubler>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__TransitiveDoubler(*fbthrift_data);
 }
 
@@ -306,6 +309,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::VapidStruct>::operato
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::VapidStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__EmptyStruct(*fbthrift_data);
 }
 
@@ -402,6 +408,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::PrimitiveStruct>::ope
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::PrimitiveStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__PrimitiveStruct(*fbthrift_data);
 }
 
@@ -530,6 +539,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ListStruct>::operator
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::ListStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__ListStruct(*fbthrift_data);
 }
 
@@ -650,6 +662,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::SetStruct>::operator(
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::SetStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__SetStruct(*fbthrift_data);
 }
 
@@ -770,6 +785,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::MapStruct>::operator(
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::MapStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__MapStruct(*fbthrift_data);
 }
 
@@ -878,6 +896,9 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ComposeStruct>::opera
   Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::ComposeStruct>> ctor;
   StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
   return init__test__fixtures__basic_python_capi__module__ComposeStruct(*fbthrift_data);
 }
 
@@ -904,53 +925,128 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   return std::move(fbthrift_data).release();
 }
 
-ExtractorResult<::test::fixtures::basic-python-capi::OurUnion>
-Extractor<::test::fixtures::basic-python-capi::OurUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic-python-capi::OurUnion>(
-      "Module test.fixtures.basic-python-capi.module import error");
+ExtractorResult<::test::fixtures::basic-python-capi::Shallot>
+Extractor<::test::fixtures::basic-python-capi::Shallot>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Onion");
+      }
+      return extractorError<::test::fixtures::basic-python-capi::Shallot>(
+          "Marshal error: Onion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic_python_capi__module__MyUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic-python-capi::OurUnion>(
-        "Thrift serialize error: MyUnion");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic-python-capi::OurUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic-python-capi::Shallot>>{}(*fbThriftData);
 }
 
+ExtractorResult<::test::fixtures::basic-python-capi::Shallot>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::basic-python-capi::Shallot>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic-python-capi::Shallot cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
+  }
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>>{}.extractInto(
+          cpp.myEnum_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::PrimitiveStruct>>{}.extractInto(
+          cpp.myStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 4:
+      Extractor<Bytes>{}.extractInto(
+          cpp.myString_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 6:
+      Extractor<set<int64_t>>{}.extractInto(
+          cpp.intSet_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 8:
+      Extractor<list<double>>{}.extractInto(
+          cpp.doubleList_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 9:
+      Extractor<map<Bytes, Bytes>>{}.extractInto(
+          cpp.strMap_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+  }
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
 
-int Extractor<::test::fixtures::basic-python-capi::OurUnion>::typeCheck(PyObject* obj) {
+int Extractor<::test::fixtures::basic-python-capi::Shallot>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic-python-capi.module import error");
   }
   int result =
-      can_extract__test__fixtures__basic_python_capi__module__MyUnion(obj);
+      can_extract__test__fixtures__basic_python_capi__module__Onion(obj);
   if (result < 0) {
     ::folly::python::handlePythonError(
-      "Unexpected type check error: MyUnion");
+      "Unexpected type check error: Onion");
   }
   return result;
 }
 
 
-PyObject* Constructor<::test::fixtures::basic-python-capi::OurUnion>::operator()(
-    const ::test::fixtures::basic-python-capi::OurUnion& val) {
+PyObject* Constructor<::test::fixtures::basic-python-capi::Shallot>::operator()(
+    const ::test::fixtures::basic-python-capi::Shallot& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__basic_python_capi__module__MyUnion(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::Shallot>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__basic_python_capi__module__Onion(*fbthrift_data);
 }
 
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic-python-capi::Shallot>>::operator()(
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic-python-capi::Shallot& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(Constructor<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>>{}.constructFrom(val.myEnum_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(Constructor<apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::PrimitiveStruct>>{}.constructFrom(val.myStruct_ref()));
+      break;
+    case 4:
+      py_val = StrongRef(Constructor<Bytes>{}.constructFrom(val.myString_ref()));
+      break;
+    case 6:
+      py_val = StrongRef(Constructor<set<int64_t>>{}.constructFrom(val.intSet_ref()));
+      break;
+    case 8:
+      py_val = StrongRef(Constructor<list<double>>{}.constructFrom(val.doubleList_ref()));
+      break;
+    case 9:
+      py_val = StrongRef(Constructor<map<Bytes, Bytes>>{}.constructFrom(val.strMap_ref()));
+      break;
+  }
+  if (!py_val) {
+    return nullptr;
+  }
+  return unionTupleFromValue(type_key, *py_val);
+}
 
 ExtractorResult<::test::fixtures::basic-python-capi::MyStructPatch>
 Extractor<::test::fixtures::basic-python-capi::MyStructPatch>::operator()(PyObject* obj) {

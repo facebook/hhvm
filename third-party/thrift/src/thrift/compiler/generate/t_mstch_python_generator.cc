@@ -907,7 +907,7 @@ class python_mstch_struct : public mstch_struct {
 
   mstch::node marshal_capi() {
     return marshal_capi_override_annotation(*struct_) ||
-        (!struct_->is_union() && struct_->fields().size() == 0);
+        struct_->fields().size() == 0;
   }
 
   mstch::node adapter() {

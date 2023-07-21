@@ -759,7 +759,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComposeStruct, self)
 
 
-class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
+class Onion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         (
             1,  # id
@@ -773,20 +773,20 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             2,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "myStruct",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            3,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "myDataItem",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(PrimitiveStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
         (
             4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "myString",  # name
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "intSet",  # name
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
@@ -794,7 +794,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # adapter info
         ),
         (
-            5,  # id
+            8,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "doubleList",  # name
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_double),  # typeinfo
@@ -802,7 +802,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # adapter info
         ),
         (
-            6,  # id
+            9,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "strMap",  # name
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
@@ -813,15 +813,15 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     @staticmethod
     def __get_thrift_name__() -> str:
-        return "module.MyUnion"
+        return "module.Onion"
 
     @staticmethod
     def __get_thrift_uri__():
-        return "test.dev/fixtures/basic-python-capi/MyUnion"
+        return "test.dev/fixtures/basic-python-capi/Onion"
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_metadata__struct_MyUnion()
+        return _fbthrift_metadata__struct_Onion()
 
     def _to_python(self):
         return self
@@ -830,13 +830,13 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         import importlib
         py3_types = importlib.import_module("test.fixtures.basic-python-capi.module.types")
         import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyUnion, self)
+        return thrift.py3.converter.to_py3_struct(py3_types.Onion, self)
 
     def _to_py_deprecated(self):
         import importlib
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Onion, self)
 
 
 class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
@@ -1615,8 +1615,8 @@ def _fbthrift_metadata__struct_MapStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MapStruct()
 def _fbthrift_metadata__struct_ComposeStruct():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_ComposeStruct()
-def _fbthrift_metadata__struct_MyUnion():
-    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyUnion()
+def _fbthrift_metadata__struct_Onion():
+    return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_Onion()
 def _fbthrift_metadata__struct_MyStructPatch():
     return test.fixtures.basic-python-capi.module.thrift_metadata.gen_metadata_struct_MyStructPatch()
 def _fbthrift_metadata__struct_MyStructField4Patch():
@@ -1650,7 +1650,7 @@ _fbthrift_all_structs = [
     SetStruct,
     MapStruct,
     ComposeStruct,
-    MyUnion,
+    Onion,
     MyStructPatch,
     MyStructField4Patch,
     MyStructField6Patch,

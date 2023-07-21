@@ -665,6 +665,27 @@ int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value) {
   return 0;
 }
 
+/**
+ * This is a cpp version of Union._fbthrift_update_type_value, but it avoids the
+ * overhead of checking PyErr_Occurred(), similar to setStructField.
+ */
+PyObject* unionTupleFromValue(int64_t type_key, PyObject* value) {
+  PyObject* union_tuple = PyTuple_New(2);
+  if (union_tuple == nullptr) {
+    return nullptr;
+  }
+  PyObject* py_tag = PyLong_FromLong(type_key);
+  if (py_tag == nullptr) {
+    Py_DECREF(union_tuple);
+    return nullptr;
+  }
+  Py_INCREF(py_tag);
+  PyTuple_SET_ITEM(union_tuple, 0, py_tag);
+  Py_INCREF(value);
+  PyTuple_SET_ITEM(union_tuple, 1, value);
+  return union_tuple;
+}
+
 } // namespace capi
 
 } // namespace python

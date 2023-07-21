@@ -38,13 +38,13 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::NormalD
   }};
 };
 
-template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnion::Type> {
-  using type = ::test::fixtures::basic-python-capi::OurUnion::Type;
+template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::Shallot::Type> {
+  using type = ::test::fixtures::basic-python-capi::Shallot::Type;
   static constexpr const std::size_t size = 6;
   static constexpr std::array<type, size> values = {{
       type::myEnum,
       type::myStruct,
-      type::myDataItem,
+      type::myString,
       type::intSet,
       type::doubleList,
       type::strMap,
@@ -52,7 +52,7 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-python-capi::OurUnio
   static constexpr std::array<folly::StringPiece, size> names = {{
       "myEnum",
       "myStruct",
-      "myDataItem",
+      "myString",
       "intSet",
       "doubleList",
       "strMap",
@@ -235,7 +235,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::Compo
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::OurUnion> {
+template <> struct TStructDataStorage<::test::fixtures::basic-python-capi::Shallot> {
   static constexpr const std::size_t fields_size = 6;
   static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;

@@ -140,12 +140,12 @@ struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-python-capi::OurUnion> {
+struct ForEachField<::test::fixtures::basic-python-capi::Shallot> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
-    f(2, static_cast<T&&>(t).myDataItem_ref()...);
+    f(2, static_cast<T&&>(t).myString_ref()...);
     f(3, static_cast<T&&>(t).intSet_ref()...);
     f(4, static_cast<T&&>(t).doubleList_ref()...);
     f(5, static_cast<T&&>(t).strMap_ref()...);

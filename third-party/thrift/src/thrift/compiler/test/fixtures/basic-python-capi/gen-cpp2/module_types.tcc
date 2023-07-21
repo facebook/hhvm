@@ -93,7 +93,7 @@ struct TccStructTraits<::test::fixtures::basic-python-capi::ComposeStruct> {
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
-struct TccStructTraits<::test::fixtures::basic-python-capi::OurUnion> {
+struct TccStructTraits<::test::fixtures::basic-python-capi::Shallot> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
@@ -3009,7 +3009,7 @@ extern template uint32_t ComposeStruct::serializedSizeZC<>(apache::thrift::Compa
 
 
 template <class Protocol_>
-void OurUnion::readNoXfer(Protocol_* iprot) {
+void Shallot::readNoXfer(Protocol_* iprot) {
   apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
   _readState.fieldId = 0;
 
@@ -3020,7 +3020,7 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
     apache::thrift::clear(*this);
   } else {
     if (iprot->kUsesFieldNames()) {
-      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<OurUnion>>();
+      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<Shallot>>();
     }
     switch (_readState.fieldId) {
       case 1:
@@ -3039,20 +3039,7 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
           this->set_myStruct();
           _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::readWithContext(*iprot, value_.myStruct, _readState);
-          _readState.afterSubobject(iprot);
-          
-        } else {
-          _readState.skip(iprot);
-        }
-        break;
-      }
-      case 3:
-      {
-        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_myDataItem();
-          _readState.beforeSubobject(iprot);
-          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyDataItem>::readWithContext(*iprot, value_.myDataItem, _readState);
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::PrimitiveStruct>::readWithContext(*iprot, value_.myStruct, _readState);
           _readState.afterSubobject(iprot);
           
         } else {
@@ -3061,6 +3048,17 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
         break;
       }
       case 4:
+      {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
+          this->set_myString();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.myString, _readState);
+          
+        } else {
+          _readState.skip(iprot);
+        }
+        break;
+      }
+      case 6:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
           this->set_intSet();
@@ -3074,7 +3072,7 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
         }
         break;
       }
-      case 5:
+      case 8:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
           this->set_doubleList();
@@ -3088,7 +3086,7 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
         }
         break;
       }
-      case 6:
+      case 9:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
           this->set_strMap();
@@ -3118,105 +3116,105 @@ void OurUnion::readNoXfer(Protocol_* iprot) {
   _readState.readStructEnd(iprot);
 }
 template <class Protocol_>
-uint32_t OurUnion::serializedSize(Protocol_ const* prot_) const {
+uint32_t Shallot::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->serializedStructSize("MyUnion");
+  xfer += prot_->serializedStructSize("Onion");
   switch(this->getType()) {
-    case OurUnion::Type::myEnum:
+    case Shallot::Type::myEnum:
     {
       xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 1);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::MyEnum>::serializedSize<false>(*prot_, value_.myEnum);
       break;
     }
-    case OurUnion::Type::myStruct:
+    case Shallot::Type::myStruct:
     {
       xfer += prot_->serializedFieldSize("myStruct", apache::thrift::protocol::T_STRUCT, 2);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::serializedSize<false>(*prot_, value_.myStruct);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::PrimitiveStruct>::serializedSize<false>(*prot_, value_.myStruct);
       break;
     }
-    case OurUnion::Type::myDataItem:
+    case Shallot::Type::myString:
     {
-      xfer += prot_->serializedFieldSize("myDataItem", apache::thrift::protocol::T_STRUCT, 3);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyDataItem>::serializedSize<false>(*prot_, value_.myDataItem);
+      xfer += prot_->serializedFieldSize("myString", apache::thrift::protocol::T_STRING, 4);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, value_.myString);
       break;
     }
-    case OurUnion::Type::intSet:
+    case Shallot::Type::intSet:
     {
-      xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 4);
+      xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 6);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, value_.intSet);
       break;
     }
-    case OurUnion::Type::doubleList:
+    case Shallot::Type::doubleList:
     {
-      xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 5);
+      xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 8);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, value_.doubleList);
       break;
     }
-    case OurUnion::Type::strMap:
+    case Shallot::Type::strMap:
     {
-      xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 6);
+      xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 9);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, value_.strMap);
       break;
     }
-    case OurUnion::Type::__EMPTY__:;
+    case Shallot::Type::__EMPTY__:;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t OurUnion::serializedSizeZC(Protocol_ const* prot_) const {
+uint32_t Shallot::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->serializedStructSize("MyUnion");
+  xfer += prot_->serializedStructSize("Onion");
   switch(this->getType()) {
-    case OurUnion::Type::myEnum:
+    case Shallot::Type::myEnum:
     {
       xfer += prot_->serializedFieldSize("myEnum", apache::thrift::protocol::T_I32, 1);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic-python-capi::MyEnum>::serializedSize<false>(*prot_, value_.myEnum);
       break;
     }
-    case OurUnion::Type::myStruct:
+    case Shallot::Type::myStruct:
     {
       xfer += prot_->serializedFieldSize("myStruct", apache::thrift::protocol::T_STRUCT, 2);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::serializedSize<true>(*prot_, value_.myStruct);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::PrimitiveStruct>::serializedSize<true>(*prot_, value_.myStruct);
       break;
     }
-    case OurUnion::Type::myDataItem:
+    case Shallot::Type::myString:
     {
-      xfer += prot_->serializedFieldSize("myDataItem", apache::thrift::protocol::T_STRUCT, 3);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyDataItem>::serializedSize<true>(*prot_, value_.myDataItem);
+      xfer += prot_->serializedFieldSize("myString", apache::thrift::protocol::T_STRING, 4);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, value_.myString);
       break;
     }
-    case OurUnion::Type::intSet:
+    case Shallot::Type::intSet:
     {
-      xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 4);
+      xfer += prot_->serializedFieldSize("intSet", apache::thrift::protocol::T_SET, 6);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::serializedSize<false>(*prot_, value_.intSet);
       break;
     }
-    case OurUnion::Type::doubleList:
+    case Shallot::Type::doubleList:
     {
-      xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 5);
+      xfer += prot_->serializedFieldSize("doubleList", apache::thrift::protocol::T_LIST, 8);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::serializedSize<false>(*prot_, value_.doubleList);
       break;
     }
-    case OurUnion::Type::strMap:
+    case Shallot::Type::strMap:
     {
-      xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 6);
+      xfer += prot_->serializedFieldSize("strMap", apache::thrift::protocol::T_MAP, 9);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, value_.strMap);
       break;
     }
-    case OurUnion::Type::__EMPTY__:;
+    case Shallot::Type::__EMPTY__:;
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
 
 template <class Protocol_>
-uint32_t OurUnion::write(Protocol_* prot_) const {
+uint32_t Shallot::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
-  xfer += prot_->writeStructBegin("MyUnion");
+  xfer += prot_->writeStructBegin("Onion");
   switch(this->getType()) {
-    case OurUnion::Type::myEnum:
+    case Shallot::Type::myEnum:
     {
       constexpr int16_t kPrevFieldId = 0;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "myEnum", false);
@@ -3224,61 +3222,61 @@ uint32_t OurUnion::write(Protocol_* prot_) const {
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::myStruct:
+    case Shallot::Type::myStruct:
     {
       constexpr int16_t kPrevFieldId = 1;
       xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "myStruct", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyStruct>::write(*prot_, value_.myStruct);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::PrimitiveStruct>::write(*prot_, value_.myStruct);
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::myDataItem:
+    case Shallot::Type::myString:
     {
       constexpr int16_t kPrevFieldId = 2;
-      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "myDataItem", false);
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-python-capi::MyDataItem>::write(*prot_, value_.myDataItem);
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 4, kPrevFieldId>(*prot_, "myString", false);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, value_.myString);
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::intSet:
+    case Shallot::Type::intSet:
     {
-      constexpr int16_t kPrevFieldId = 3;
-      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_SET, 4, kPrevFieldId>(*prot_, "intSet", false);
+      constexpr int16_t kPrevFieldId = 4;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_SET, 6, kPrevFieldId>(*prot_, "intSet", false);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::write(*prot_, value_.intSet);
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::doubleList:
+    case Shallot::Type::doubleList:
     {
-      constexpr int16_t kPrevFieldId = 4;
-      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 5, kPrevFieldId>(*prot_, "doubleList", false);
+      constexpr int16_t kPrevFieldId = 6;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 8, kPrevFieldId>(*prot_, "doubleList", false);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::write(*prot_, value_.doubleList);
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::strMap:
+    case Shallot::Type::strMap:
     {
-      constexpr int16_t kPrevFieldId = 5;
-      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 6, kPrevFieldId>(*prot_, "strMap", false);
+      constexpr int16_t kPrevFieldId = 8;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 9, kPrevFieldId>(*prot_, "strMap", false);
       xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::write(*prot_, value_.strMap);
       xfer += prot_->writeFieldEnd();
       break;
     }
-    case OurUnion::Type::__EMPTY__:;
+    case Shallot::Type::__EMPTY__:;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
 }
 
-extern template void OurUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-extern template uint32_t OurUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-extern template uint32_t OurUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-extern template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-extern template void OurUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-extern template uint32_t OurUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-extern template uint32_t OurUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-extern template uint32_t OurUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template void Shallot::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t Shallot::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t Shallot::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t Shallot::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void Shallot::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t Shallot::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t Shallot::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t Shallot::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 template <class Protocol_>

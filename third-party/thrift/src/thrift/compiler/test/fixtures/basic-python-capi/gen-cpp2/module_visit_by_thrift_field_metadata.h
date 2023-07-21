@@ -233,7 +233,7 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::ComposeStruct> {
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-python-capi::OurUnion> {
+struct VisitByFieldId<::test::fixtures::basic-python-capi::Shallot> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
@@ -241,16 +241,16 @@ struct VisitByFieldId<::test::fixtures::basic-python-capi::OurUnion> {
       return f(0, static_cast<T&&>(t).myEnum_ref());
     case 2:
       return f(1, static_cast<T&&>(t).myStruct_ref());
-    case 3:
-      return f(2, static_cast<T&&>(t).myDataItem_ref());
     case 4:
-      return f(3, static_cast<T&&>(t).intSet_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).doubleList_ref());
+      return f(2, static_cast<T&&>(t).myString_ref());
     case 6:
+      return f(3, static_cast<T&&>(t).intSet_ref());
+    case 8:
+      return f(4, static_cast<T&&>(t).doubleList_ref());
+    case 9:
       return f(5, static_cast<T&&>(t).strMap_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::OurUnion");
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-python-capi::Shallot");
     }
   }
 };

@@ -97,7 +97,6 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   IndexBuilder.go ctxt None;
   let sienv =
     SymbolIndex.initialize
-      ~globalrev:None
       ~gleanopt:GleanOptions.default
       ~namespace_map:[]
       ~provider_name:"SqliteIndex"

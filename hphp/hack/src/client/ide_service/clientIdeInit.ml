@@ -285,7 +285,6 @@ let init
   in
   let sienv =
     SymbolIndex.initialize
-      ~globalrev:None
       ~gleanopt:(ServerConfig.glean_options config)
       ~namespace_map:(ParserOptions.auto_namespace_map tcopt)
       ~provider_name:

@@ -6,5 +6,4 @@
  *
  *)
 
-let go_to_implementation ~class_name:_ ~globalrev:_ : string HashSet.t =
-  HashSet.create ()
+let go_to_implementation ~class_name:_ : string HashSet.t = HashSet.create ()

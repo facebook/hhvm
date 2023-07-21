@@ -4,8 +4,7 @@
  *)
 
 (* Put any initialization code necessary here *)
-let initialize ~(globalrev : int option) ~(gleanopt : GleanOptions.t) : unit =
-  let _ = globalrev in
+let initialize ~(gleanopt : GleanOptions.t) : unit =
   let _ = gleanopt in
   ()
 

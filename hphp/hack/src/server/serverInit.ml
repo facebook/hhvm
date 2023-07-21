@@ -66,7 +66,6 @@ let post_init genv (env, _t) =
       env with
       local_symbol_table =
         SymbolIndex.initialize
-          ~globalrev:None
           ~gleanopt:env.gleanopt
           ~namespace_map
           ~provider_name:

@@ -115,7 +115,6 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
   (* Initialize symbol index *)
   let sienv =
     SymbolIndex.initialize
-      ~globalrev:None
       ~gleanopt:env.ServerEnv.gleanopt
       ~namespace_map:[]
       ~provider_name:"LocalIndex"

@@ -12,7 +12,6 @@ open SearchUtils
 
 (* Set the currently selected search provider *)
 let initialize
-    ~(globalrev : int option)
     ~(gleanopt : GleanOptions.t)
     ~(namespace_map : (string * string) list)
     ~(provider_name : string)
@@ -37,7 +36,7 @@ let initialize
         ~savedstate_file_opt
         ~namespace_map
     | CustomIndex ->
-      CustomSearchService.initialize ~globalrev ~gleanopt;
+      CustomSearchService.initialize ~gleanopt;
       sienv
     | NoIndex
     | LocalIndex ->

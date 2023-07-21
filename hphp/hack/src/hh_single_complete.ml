@@ -218,7 +218,6 @@ let parse_options () =
   let namespace_map = ParserOptions.auto_namespace_map tcopt in
   let sienv =
     SymbolIndex.initialize
-      ~globalrev:None
       ~gleanopt:tcopt
       ~namespace_map
       ~provider_name:"LocalIndex"

@@ -1116,7 +1116,7 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
 fn unop_allows_await(t: S<'_>) -> bool {
     use TokenKind::*;
     token_kind(t).map_or(false, |t| match t {
-        Exclamation | Tilde | Plus | Minus | At | Clone | Print | Readonly => true,
+        Exclamation | Tilde | Plus | Minus | At | Clone | Print | Readonly | DotDotDot => true,
         _ => false,
     })
 }

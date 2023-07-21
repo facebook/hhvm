@@ -42,29 +42,10 @@ void maybeLogTlsPeerCertEvent(
     const ConnectionLoggingContext& context,
     const folly::AsyncTransportCertificate* cert) {
   DCHECK(context.getWorker() && context.getWorker()->getServer());
-  if (!detail::shouldMonitorTLSPeerCert(context)) {
-    return;
-  }
-
-  auto allowedIPs = detail::getAllowedIPsForCert(cert);
-  if (allowedIPs.empty() || context.getPeerAddress() == nullptr ||
-      !context.getPeerAddress()->isFamilyInet()) {
-    return;
-  }
-  const auto& peerIP = context.getPeerAddress()->getIPAddress();
-  const auto peerLocal = detail::isLocalIP(peerIP);
-  if (std::any_of(
-          allowedIPs.begin(),
-          allowedIPs.end(),
-          [&peerIP, peerLocal](const folly::IPAddress& allowedIP) {
-            // Host ipv6 subnet
-            return peerIP == allowedIP ||
-                (allowedIP.isV6() && peerIP.inSubnet(allowedIP, 64)) ||
-                (peerLocal && detail::isLocalIP(allowedIP));
-          })) {
-    THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
-  } else {
+  if (detail::isCertIPMismatch(context, cert)) {
     THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);
+  } else {
+    THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
   }
 }
 

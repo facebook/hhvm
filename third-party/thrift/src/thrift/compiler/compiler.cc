@@ -45,7 +45,6 @@
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
-#include <thrift/compiler/mutator/mutator.h>
 #include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
@@ -525,14 +524,6 @@ compile_result compile(
       std::move(pparams),
       true /* return_nullptr_on_failure */);
   if (!program) {
-    return result;
-  }
-
-  // TODO(afuller): Migrate to ast_mutator.
-  try {
-    mutator::mutate(program->root_program());
-  } catch (const mutator_exception& e) {
-    ctx.report(e.loc, e.level, "{}", e.message);
     return result;
   }
 

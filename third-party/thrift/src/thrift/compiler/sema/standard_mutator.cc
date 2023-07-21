@@ -29,6 +29,100 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+namespace {
+
+const t_type* resolve_type(const t_type* type) {
+  while (type->is_typedef()) {
+    type = dynamic_cast<const t_typedef*>(type)->get_type();
+  }
+  return type;
+}
+
+void match_type_with_const_value(
+    diagnostic_context& ctx,
+    t_program& program,
+    const t_type* long_type,
+    t_const_value* value) {
+  const t_type* type = resolve_type(long_type);
+  value->set_ttype(t_type_ref::from_req_ptr(type));
+  if (type->is_list()) {
+    auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+    for (auto list_val : value->get_list()) {
+      match_type_with_const_value(ctx, program, elem_type, list_val);
+    }
+  }
+  if (type->is_set()) {
+    auto* elem_type = dynamic_cast<const t_set*>(type)->get_elem_type();
+    for (auto set_val : value->get_list()) {
+      match_type_with_const_value(ctx, program, elem_type, set_val);
+    }
+  }
+  if (type->is_map()) {
+    auto* key_type = dynamic_cast<const t_map*>(type)->get_key_type();
+    auto* val_type = dynamic_cast<const t_map*>(type)->get_val_type();
+    for (auto map_val : value->get_map()) {
+      match_type_with_const_value(ctx, program, key_type, map_val.first);
+      match_type_with_const_value(ctx, program, val_type, map_val.second);
+    }
+  }
+  if (type->is_struct()) {
+    auto* struct_type = dynamic_cast<const t_struct*>(type);
+    for (auto map_val : value->get_map()) {
+      auto name = map_val.first->get_string();
+      auto tfield = struct_type->get_field_by_name(name);
+      if (!tfield) {
+        // Error reported by const_checker.
+        return;
+      }
+      match_type_with_const_value(
+          ctx, program, tfield->get_type(), map_val.second);
+    }
+  }
+  // Set constant value types as enums when they are declared with integers
+  if (type->is_enum() && !value->is_enum()) {
+    value->set_is_enum();
+    auto enm = dynamic_cast<const t_enum*>(type);
+    value->set_enum(enm);
+    if (value->get_type() == t_const_value::CV_STRING) {
+      // The enum was defined after the struct field with that type was declared
+      // so the field default value, if present, was treated as a string rather
+      // than resolving to the enum constant in the parser.
+      // So we have to resolve the string to the enum constant here instead.
+      auto str = value->get_string();
+      auto constant = program.scope()->find_constant(str);
+      if (!constant) {
+        auto full_str = program.name() + "." + str;
+        constant = program.scope()->find_constant(full_str);
+      }
+      if (!constant) {
+        throw std::runtime_error(
+            std::string("type error: no matching constant: ") + str);
+      }
+      auto value_copy = constant->get_value()->clone();
+      value->assign(std::move(*value_copy));
+    }
+    if (enm->find_value(value->get_integer())) {
+      value->set_enum_value(enm->find_value(value->get_integer()));
+    }
+  }
+  // Remove enum_value if type is a base_type to use the integer instead
+  if (type->is_base_type() && value->is_enum()) {
+    value->set_enum_value(nullptr);
+  }
+}
+
+static void match_annotation_types_with_const_values(
+    diagnostic_context& ctx, mutator_context& mCtx, t_named& node) {
+  for (t_const& tconst : node.structured_annotations()) {
+    if (tconst.get_type() && tconst.get_value()) {
+      match_type_with_const_value(
+          ctx, mCtx.program(), tconst.get_type(), tconst.get_value());
+    }
+  }
+}
+
+} // namespace
+
 // TODO(afuller): Instead of mutating the AST, readers should look for
 // the interaction level annotation and the validation logic should be moved to
 // a standard validator.
@@ -386,6 +480,15 @@ void lower_type_annotations(
   }
 }
 
+template <typename Node>
+void const_type_to_const_value(
+    diagnostic_context& ctx, mutator_context& mCtx, Node& node) {
+  if (node.get_type() && node.get_value()) {
+    match_type_with_const_value(
+        ctx, mCtx.program(), node.get_type(), node.get_value());
+  }
+}
+
 ast_mutators standard_mutators() {
   ast_mutators mutators;
   {
@@ -416,7 +519,11 @@ ast_mutators standard_mutators() {
     main.add_const_visitor(&generate_const_schema);
     main.add_enum_visitor(&generate_enum_schema);
     main.add_typedef_visitor(&generate_typedef_schema);
+    main.add_const_visitor(&const_type_to_const_value<t_const>);
+    main.add_field_visitor(&const_type_to_const_value<t_field>);
+    main.add_definition_visitor(&match_annotation_types_with_const_values);
   }
+
   add_patch_mutators(mutators);
   return mutators;
 }

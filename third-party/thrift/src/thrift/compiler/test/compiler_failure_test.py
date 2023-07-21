@@ -931,7 +931,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            textwrap.dedent("[ERROR:foo.thrift:3] field `foo` does not exist.\n"),
+            textwrap.dedent(
+                "[ERROR:foo.thrift:3] type error: `Foo` has no field `foo`.\n"
+            ),
         )
 
     def test_annotation_scopes(self):

@@ -349,7 +349,7 @@ impl<B: BufMutExt> ProtocolWriter for SimpleJsonProtocolSerializer<B> {
         CompactFormatter
             .write_raw_fragment(
                 &mut self.buffer,
-                &base64::encode_config(&value, base64::STANDARD_NO_PAD),
+                &base64::encode_config(value, base64::STANDARD_NO_PAD),
             )
             .expect("Somehow failed to do \"io\" on a buffer");
         CompactFormatter

@@ -49,11 +49,6 @@
 
 namespace HPHP {
 
-RDS_LOCAL(std::string, s_misc_highlight_default_string);
-RDS_LOCAL(std::string, s_misc_highlight_default_comment);
-RDS_LOCAL(std::string, s_misc_highlight_default_keyword);
-RDS_LOCAL(std::string, s_misc_highlight_default_default);
-RDS_LOCAL(std::string, s_misc_highlight_default_html);
 RDS_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
@@ -133,31 +128,6 @@ String HHVM_FUNCTION(execution_context) {
 }
 
 void StandardExtension::threadInitMisc() {
-    IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
-      "highlight.string", "#DD0000",
-      s_misc_highlight_default_string.get()
-    );
-    IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
-      "highlight.comment", "#FF8000",
-      s_misc_highlight_default_comment.get()
-    );
-    IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
-      "highlight.keyword", "#007700",
-      s_misc_highlight_default_keyword.get()
-    );
-    IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
-      "highlight.default", "#0000BB",
-      s_misc_highlight_default_default.get()
-    );
-    IniSetting::Bind(
-      this, IniSetting::PHP_INI_ALL,
-      "highlight.html", "#000000",
-      s_misc_highlight_default_html.get()
-    );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "display_errors", "stderr",

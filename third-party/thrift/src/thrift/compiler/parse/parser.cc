@@ -653,8 +653,9 @@ class parser {
     }
 
     try_parse_deprecated_annotations(attrs);
-    char delimiter = kind == field_kind::field ? ';' : ',';
     if (token_.kind == ',' || token_.kind == ';') {
+      token_kind delimiter =
+          kind == field_kind::field ? token_kind(';') : token_kind(',');
       if (token_.kind != delimiter) {
         diags_.warning(
             token_.range.begin, "unexpected '{}'", to_string(token_.kind));

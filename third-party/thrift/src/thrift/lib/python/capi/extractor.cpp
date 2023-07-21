@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/python/iobuf.h>
 #include <thrift/lib/python/capi/extractor.h>
 
 namespace apache {
@@ -135,6 +136,40 @@ SPECIALIZE_STR(
     StringView, std::string_view, extractFromString, PyUnicode_CheckExact)
 
 #undef SPECIALIZE_STR
+
+ExtractorResult<folly::IOBuf> Extractor<folly::IOBuf>::operator()(
+    PyObject* obj) {
+  auto buf = folly::python::iobuf_from_python_iobuf(obj);
+  if (PyErr_Occurred()) {
+    return EXTRACTOR_ERROR(folly::IOBuf, "IOBuf extract error");
+  }
+  return buf;
+}
+
+#define SPECIALIZE_IOBUF_TYPECHECK(type)          \
+  int Extractor<type>::typeCheck(PyObject* obj) { \
+    auto result = (*this)(obj);                   \
+    if (result.hasError()) {                      \
+      PyErr_Clear();                              \
+      return 0;                                   \
+    }                                             \
+    return 1;                                     \
+  }
+
+SPECIALIZE_IOBUF_TYPECHECK(folly::IOBuf)
+
+ExtractorResult<std::unique_ptr<folly::IOBuf>>
+Extractor<std::unique_ptr<folly::IOBuf>>::operator()(PyObject* obj) {
+  auto buf = folly::python::iobuf_ptr_from_python_iobuf(obj);
+  if (buf == nullptr) {
+    CHECK(PyErr_Occurred());
+    return EXTRACTOR_ERROR(
+        std::unique_ptr<folly::IOBuf>, "IOBuf extract error");
+  }
+  return buf;
+}
+SPECIALIZE_IOBUF_TYPECHECK(std::unique_ptr<folly::IOBuf>)
+#undef SPECIALIZE_IOBUF_TYPECHECK
 
 } // namespace capi
 } // namespace python

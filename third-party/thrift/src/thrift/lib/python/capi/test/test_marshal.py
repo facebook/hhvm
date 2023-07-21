@@ -17,10 +17,8 @@ import unittest
 from sys import float_info, getrefcount
 from typing import Callable
 
-# @manual=//thrift/lib/python/capi/test:marshal_fixture
+from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
-
-# @manual=//thrift/lib/python/capi/test:marshal_fixture
 from thrift.python.marshal.marshal_fixture import (
     INT32_MAX,
     INT32_MIN,
@@ -90,7 +88,7 @@ class TestMarshalPrimitives(MarshalFixture):
         self.assert_type_error(fixture.roundtrip_bool, None, "oops", 1, 1.0)
 
     def test_bytes(self) -> None:
-        for x in (b"", b"bytes", b""):
+        for x in (b"", b"bytes", b"\xE2\x82\xAC"):
             self.assertEqual(x, fixture.roundtrip_bytes(x))
         self.assert_type_error(fixture.roundtrip_bytes, None, "oops", 1, 1.0)
 
@@ -102,6 +100,18 @@ class TestMarshalPrimitives(MarshalFixture):
         self.assertEqual("€", fixture.make_unicode(b"\xE2\x82\xAC"))
         with self.assertRaises(UnicodeDecodeError):
             fixture.make_unicode(b"\xE2\x82")
+
+    def test_iobuf_stack(self) -> None:
+        for b in (b"", b"bytes", b"\xE2\x82\xAC"):
+            x = IOBuf(memoryview(b))
+            self.assertEqual(x, fixture.roundtrip_iobuf_stack(x))
+        self.assert_type_error(fixture.roundtrip_iobuf_stack, None, b"oops", 1, 1.0)
+
+    def test_iobuf_heap(self) -> None:
+        for b in (b"", b"bytes", b"\xE2\x82\xAC"):
+            x = IOBuf(memoryview(b))
+            self.assertEqual(x, fixture.roundtrip_iobuf_heap(x))
+        self.assert_type_error(fixture.roundtrip_iobuf_heap, None, b"oops", 1, 1.0)
 
 
 class TestMarshalList(MarshalFixture):

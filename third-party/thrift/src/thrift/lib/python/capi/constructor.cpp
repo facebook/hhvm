@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/python/iobuf.h>
 #include <thrift/lib/python/capi/constructor.h>
 
 namespace apache {
@@ -61,6 +62,27 @@ SPECIALIZE_CAPI(double, PyFloat_FromDouble)
 SPECIALIZE_CAPI_STR(std::string, Bytes, PyBytes_FromCppString)
 SPECIALIZE_CAPI_STR(std::string, String, PyUnicode_FromCppString)
 #undef SPECIALIZE_CAPI_STR
+
+PyObject* Constructor<folly::IOBuf>::operator()(const folly::IOBuf& val) {
+  /* No need to check return value here because */
+  /* there are no further c-api calls in this function */
+  return folly::python::make_python_iobuf(std::make_unique<folly::IOBuf>(val));
+}
+
+PyObject* Constructor<folly::IOBuf>::operator()(folly::IOBuf&& val) {
+  return folly::python::make_python_iobuf(
+      std::make_unique<folly::IOBuf>(std::move(val)));
+}
+
+PyObject* Constructor<std::unique_ptr<folly::IOBuf>>::operator()(
+    const std::unique_ptr<folly::IOBuf>& val) {
+  return folly::python::make_python_iobuf(val->clone());
+}
+
+PyObject* Constructor<std::unique_ptr<folly::IOBuf>>::operator()(
+    std::unique_ptr<folly::IOBuf>&& val) {
+  return folly::python::make_python_iobuf(std::move(val));
+}
 
 } // namespace capi
 } // namespace python

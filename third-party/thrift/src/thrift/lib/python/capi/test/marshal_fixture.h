@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <Python.h>
+
 #include <type_traits>
 #include <folly/Expected.h>
 #include <folly/container/F14Map.h>

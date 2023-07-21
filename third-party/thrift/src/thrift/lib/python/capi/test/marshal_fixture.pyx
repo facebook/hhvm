@@ -15,6 +15,8 @@
 from libc cimport stdint
 from libcpp cimport bool as cbool
 from libcpp.string cimport string
+from libcpp.memory cimport unique_ptr
+from folly.iobuf cimport cIOBuf
 
 INT8_MIN = stdint.INT8_MIN
 INT8_MAX = stdint.INT8_MAX
@@ -76,6 +78,12 @@ def roundtrip_unicode(object x):
 
 def make_unicode(object x):
     return __make_unicode(x)
+
+def roundtrip_iobuf_stack(object x):
+    return __roundtrip_pyobject[cIOBuf](x)
+
+def roundtrip_iobuf_heap(object x):
+    return __roundtrip_pyobject[unique_ptr[cIOBuf]](x)
 
 # Lists
 def roundtrip_int32_list(object x):

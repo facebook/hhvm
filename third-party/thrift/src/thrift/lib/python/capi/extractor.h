@@ -21,6 +21,7 @@
 #include <Python.h>
 #include <folly/Expected.h>
 #include <folly/Preprocessor.h>
+#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 
@@ -148,7 +149,7 @@ struct Extractor : public BaseExtractor<T> {
   int typeCheck(PyObject* obj); /* returns 0/1 bool or -1 on error */
 };
 
-// Numeric specializations
+// Concrete type specializations
 #define SPECIALIZE_SCALAR(type)                         \
   template <>                                           \
   struct Extractor<type> : public BaseExtractor<type> { \
@@ -165,22 +166,14 @@ SPECIALIZE_SCALAR(uint64_t);
 SPECIALIZE_SCALAR(bool);
 SPECIALIZE_SCALAR(float);
 SPECIALIZE_SCALAR(double);
+SPECIALIZE_SCALAR(Bytes);
+SPECIALIZE_SCALAR(String);
+SPECIALIZE_SCALAR(BytesView);
+SPECIALIZE_SCALAR(StringView);
+SPECIALIZE_SCALAR(std::unique_ptr<folly::IOBuf>);
+SPECIALIZE_SCALAR(folly::IOBuf);
 
 #undef SPECIALIZE_SCALAR
-
-// String specializations
-#define SPECIALIZE_STR(type)                            \
-  template <>                                           \
-  struct Extractor<type> : public BaseExtractor<type> { \
-    ExtractorResult<type> operator()(PyObject* obj);    \
-    int typeCheck(PyObject* obj);                       \
-  }
-SPECIALIZE_STR(Bytes);
-SPECIALIZE_STR(String);
-SPECIALIZE_STR(BytesView);
-SPECIALIZE_STR(StringView);
-
-#undef SPECIALIZE_STR
 
 template <typename T>
 struct Extractor<ComposedEnum<T>> : public BaseExtractor<ComposedEnum<T>> {

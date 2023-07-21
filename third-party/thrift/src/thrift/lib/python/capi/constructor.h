@@ -21,6 +21,7 @@
 #include <Python.h>
 #include <folly/CppAttributes.h>
 #include <folly/Traits.h>
+#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 
@@ -103,8 +104,8 @@ SPECIALIZE_SCALAR(uint64_t);
 SPECIALIZE_SCALAR(bool);
 SPECIALIZE_SCALAR(float);
 SPECIALIZE_SCALAR(double);
-
 #undef SPECIALIZE_SCALAR
+
 #define SPECIALIZE_STR(cpp_type, py_type)                         \
   template <>                                                     \
   struct Constructor<py_type> : public BaseConstructor<py_type> { \
@@ -113,8 +114,23 @@ SPECIALIZE_SCALAR(double);
 
 SPECIALIZE_STR(std::string, Bytes);
 SPECIALIZE_STR(std::string, String);
-
 #undef SPECIALIZE_STR
+
+/*
+ * Some use cases need a `const` constructor to leave thrift-cpp
+ * struct in valid state; others take ownership (rvalue) to save
+ * an IOBuf clone
+ */
+#define SPECIALIZE_IOBUF(type)                              \
+  template <>                                               \
+  struct Constructor<type> : public BaseConstructor<type> { \
+    PyObject* FOLLY_NULLABLE operator()(const type&);       \
+    PyObject* FOLLY_NULLABLE operator()(type&&);            \
+  }
+
+SPECIALIZE_IOBUF(folly::IOBuf);
+SPECIALIZE_IOBUF(std::unique_ptr<folly::IOBuf>);
+#undef SPECIALIZE_IOBUF
 
 template <typename T>
 struct Constructor<ComposedEnum<T>> : public BaseConstructor<ComposedEnum<T>> {

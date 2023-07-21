@@ -462,34 +462,54 @@ let decl_and_run_mode
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
 
-  (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-     so it will look in the sqlite database for names it doesn't know.
-     This function returns the forward naming table. *)
-  let naming_table_for_root : Naming_table.t option =
-    Option.map naming_table_path ~f:(fun path ->
-        Naming_table.load_from_sqlite ctx path)
-  in
-  (* If run in naming-table mode, we first have to remove any old names from the files we're about to redeclare --
-     otherwise when we declare them it'd count as a duplicate definition! *)
-  Option.iter naming_table_for_root ~f:(fun naming_table_for_root ->
-      Relative_path.Map.iter files_contents ~f:(fun file _content ->
-          let file_info =
-            Naming_table.get_file_info naming_table_for_root file
-          in
-          Option.iter file_info ~f:(fun file_info ->
-              let ids_to_strings ids =
-                List.map ids ~f:(fun (_, name, _) -> name)
-              in
-              Naming_global.remove_decls
-                ~backend:(Provider_context.get_backend ctx)
-                ~funs:(ids_to_strings file_info.FileInfo.funs)
-                ~classes:(ids_to_strings file_info.FileInfo.classes)
-                ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
-                ~consts:(ids_to_strings file_info.FileInfo.consts)
-                ~modules:(ids_to_strings file_info.FileInfo.modules))));
+  (* The reverse naming table (name->filename, used for Naming_provider and Decl_provider)
+     is stored (1) through ctx pointing to the backing sqlite file if desired, (2) plus
+     a delta stored in a shmem heap, as per Provider_backend.
 
+     The forward naming table (filename->FileInfo.t, used for incremental updates and also for
+     fake-arrow autocomplete) is stored (1) through our [Naming_table.t] having a pointer
+     to the sqlitefile if desired, (2) plus a delta stored in [Naming_table.t] ocaml data structures.
+
+     This hh_single_complete tool is run in two modes: either with a sqlite file in which case
+     sqlite should contain builtins since [to_decl] doesn't, or without a sqlite file in which
+     case the delta ends up containing all provided files and all builtins. *)
+
+  (* NAMING PHASE 1: point to the sqlite backing if desired, for both reverse and forward,
+     but leave both reverse and forward deltas empty for now. *)
+  let naming_table =
+    match naming_table_path with
+    | Some path -> Naming_table.load_from_sqlite ctx path
+    | None -> Naming_table.create Relative_path.Map.empty
+  in
+
+  (* NAMING PHASE 2: for the reverse naming table delta, remove any old names from the files
+     we're about to redeclare -- otherwise when we declare them it'd count as a duplicate definition! *)
+  if Option.is_some naming_table_path then begin
+    Relative_path.Map.iter files_contents ~f:(fun file _content ->
+        let file_info = Naming_table.get_file_info naming_table file in
+        Option.iter file_info ~f:(fun file_info ->
+            let ids_to_strings ids =
+              List.map ids ~f:(fun (_, name, _) -> name)
+            in
+            Naming_global.remove_decls
+              ~backend:(Provider_context.get_backend ctx)
+              ~funs:(ids_to_strings file_info.FileInfo.funs)
+              ~classes:(ids_to_strings file_info.FileInfo.classes)
+              ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
+              ~consts:(ids_to_strings file_info.FileInfo.consts)
+              ~modules:(ids_to_strings file_info.FileInfo.modules)))
+  end;
+
+  (* NAMING PHASE 3: for the reverse naming table delta, add all new items from files we're declaring.
+     Note that [to_decl] either omits or includes builtins, according to whether we're
+     working from a sqlite naming table or from nothing. *)
   let (_errors, files_info) = parse_name_and_decl ctx to_decl in
-  let naming_table = Naming_table.create files_info in
+
+  (* NAMING PHASE 4: for the forward naming table delta, add all new items *)
+  let naming_table =
+    Naming_table.combine naming_table (Naming_table.create files_info)
+  in
+
   handle_mode mode files ctx sienv naming_table
 
 let main_hack

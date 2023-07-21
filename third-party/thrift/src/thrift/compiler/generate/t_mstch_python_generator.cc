@@ -103,6 +103,15 @@ const std::string extract_module_path(const std::string& fully_qualified_name) {
   return boost::algorithm::join(tokens, ".");
 }
 
+inline std::string get_capi_include_namespace(
+    const t_program* prog, mstch_context& ctx) {
+  std::shared_ptr<mstch_base> mstch_prog = make_mstch_program_cached(prog, ctx);
+  return fmt::format(
+      "{}gen-python/{}/thrift_types_capi.h",
+      boost::get<std::string>(mstch_prog->at("program:includePrefix")),
+      prog->name());
+}
+
 class python_mstch_const_value;
 
 mstch::node adapter_node(
@@ -267,6 +276,7 @@ class python_mstch_program : public mstch_program {
         {
             {"program:module_path", &python_mstch_program::module_path},
             {"program:generate_capi?", &python_mstch_program::has_types},
+            {"program:marshal_capi?", &python_mstch_program::has_marshal_types},
             {"program:capi_module_prefix",
              &python_mstch_program::capi_module_prefix},
             {"program:py_deprecated_module_path",
@@ -309,6 +319,7 @@ class python_mstch_program : public mstch_program {
     for (const auto& it : namespaces) {
       a.push_back(mstch::map{
           {"included_module_path", it->ns},
+          {"include_prefix", it->include_prefix},
           {"has_services?", it->has_services},
           {"has_types?", it->has_types}});
     }
@@ -323,6 +334,20 @@ class python_mstch_program : public mstch_program {
   mstch::node has_types() {
     return program_->structs().size() > 0 ||
         program_->exceptions().size() > 0 || program_->enums().size() > 0;
+  }
+
+  mstch::node has_marshal_types() {
+    for (const t_struct* s : program_->structs()) {
+      if (marshal_capi_override_annotation(*s)) {
+        return true;
+      }
+    }
+    for (const t_struct* e : program_->exceptions()) {
+      if (marshal_capi_override_annotation(*e)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   mstch::node capi_module_prefix() {
@@ -364,6 +389,7 @@ class python_mstch_program : public mstch_program {
  protected:
   struct Namespace {
     std::string ns;
+    std::string include_prefix;
     bool has_services;
     bool has_types;
   };
@@ -379,6 +405,7 @@ class python_mstch_program : public mstch_program {
       include_namespaces_[included_program->path()] = Namespace{
           get_py3_namespace_with_name_and_prefix(
               included_program, get_option("root_module_prefix")),
+          get_capi_include_namespace(included_program, context_),
           !included_program->services().empty(),
           has_types,
       };
@@ -395,6 +422,7 @@ class python_mstch_program : public mstch_program {
       auto ns = Namespace();
       ns.ns = get_py3_namespace_with_name_and_prefix(
           prog, get_option("root_module_prefix"));
+      ns.include_prefix = get_capi_include_namespace(prog, context_);
       ns.has_services = false;
       ns.has_types = true;
       include_namespaces_[path] = std::move(ns);

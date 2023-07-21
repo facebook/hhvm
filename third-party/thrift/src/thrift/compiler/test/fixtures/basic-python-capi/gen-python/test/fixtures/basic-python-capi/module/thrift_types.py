@@ -14,6 +14,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import apache.thrift.op.patch.thrift_types
 
+import thrift.test.python_capi.thrift_dep.thrift_types
+
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -726,6 +728,30 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "aliased",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(ListStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "xenum",  # name
+            lambda: _fbthrift_python_types.EnumTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepEnum),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "xstruct",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "friends",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(thrift.test.python_capi.thrift_dep.thrift_types.DepStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

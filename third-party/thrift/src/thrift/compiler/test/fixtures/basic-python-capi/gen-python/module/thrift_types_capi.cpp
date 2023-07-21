@@ -14,6 +14,9 @@
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/module/thrift_types_capi.h>
 
+#include "thrift/lib/thrift/gen-python/patch/thrift_types_capi.h"
+#include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-python/thrift_dep/thrift_types_capi.h"
+
 namespace apache {
 namespace thrift {
 namespace python {
@@ -866,6 +869,18 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.aliased(),
       PyTuple_GET_ITEM(fbThriftData, 3 + 1),
       error);
+  Extractor<apache::thrift::python::capi::ComposedEnum<::thrift::test::python_capi::DepEnum>>{}.extractInto(
+      cpp.xenum(),
+      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
+      error);
+  Extractor<apache::thrift::python::capi::ComposedStruct<::thrift::test::python_capi::DepStruct>>{}.extractInto(
+      cpp.xstruct(),
+      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
+      error);
+  Extractor<list<apache::thrift::python::capi::ComposedStruct<::thrift::test::python_capi::DepStruct>>>{}.extractInto(
+      cpp.friends(),
+      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
+      error);
   if (error) {
     return folly::makeUnexpected(*error);
   }
@@ -905,7 +920,7 @@ PyObject* Constructor<::test::fixtures::basic-python-capi::ComposeStruct>::opera
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic-python-capi::ComposeStruct>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::basic-python-capi::ComposeStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef fbthrift_data(createStructTuple(7));
   StrongRef __enum_(Constructor<apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic-python-capi::MyEnum>>{}.constructFrom(val.enum_()));
   if (!__enum_ || setStructField(*fbthrift_data, 0, *__enum_) == -1) {
     return nullptr;
@@ -920,6 +935,18 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   }
   StrongRef __aliased(Constructor<apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic-python-capi::ListStruct>>{}.constructFrom(val.aliased()));
   if (!__aliased || setStructField(*fbthrift_data, 3, *__aliased) == -1) {
+    return nullptr;
+  }
+  StrongRef __xenum(Constructor<apache::thrift::python::capi::ComposedEnum<::thrift::test::python_capi::DepEnum>>{}.constructFrom(val.xenum()));
+  if (!__xenum || setStructField(*fbthrift_data, 4, *__xenum) == -1) {
+    return nullptr;
+  }
+  StrongRef __xstruct(Constructor<apache::thrift::python::capi::ComposedStruct<::thrift::test::python_capi::DepStruct>>{}.constructFrom(val.xstruct()));
+  if (!__xstruct || setStructField(*fbthrift_data, 5, *__xstruct) == -1) {
+    return nullptr;
+  }
+  StrongRef __friends(Constructor<list<apache::thrift::python::capi::ComposedStruct<::thrift::test::python_capi::DepStruct>>>{}.constructFrom(val.friends()));
+  if (!__friends || setStructField(*fbthrift_data, 6, *__friends) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

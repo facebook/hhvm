@@ -379,35 +379,50 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::name = "ComposeStruct";
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_names = {{
   "enum_",
   "renamed_",
   "primitive",
   "aliased",
+  "xenum",
+  "xstruct",
+  "friends",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_ids = {{
   1,
   2,
   3,
   4,
+  5,
+  6,
+  7,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::storage_names = {{
   "__fbthrift_field_enum_",
   "__fbthrift_field_renamed_",
   "__fbthrift_field_primitive",
   "__fbthrift_field_aliased",
+  "__fbthrift_field_xenum",
+  "__fbthrift_field_xstruct",
+  "__fbthrift_field_friends",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures::basic-python-capi::ComposeStruct>::isset_indexes = {{
   0,
   1,
   2,
   -1,
+  3,
+  4,
+  5,
 }};
 
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-python-capi::Shallot>::name = "Onion";

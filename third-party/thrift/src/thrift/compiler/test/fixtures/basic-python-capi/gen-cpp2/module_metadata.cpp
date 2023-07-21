@@ -320,11 +320,14 @@ StructMetadata<::test::fixtures::basic-python-capi::ComposeStruct>::gen(ThriftMe
   module_ComposeStruct.name() = "module.ComposeStruct";
   module_ComposeStruct.is_union() = false;
   static const auto* const
-  module_ComposeStruct_fields = new std::array<EncodedThriftField, 4>{{
+  module_ComposeStruct_fields = new std::array<EncodedThriftField, 7>{{
     {1, "enum_", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {2, "renamed_", false, std::make_unique<Enum<::test::fixtures::basic-python-capi::NormalDecentEnum>>("module.AnnoyingEnum"), std::vector<ThriftConstStruct>{}},
     {3, "primitive", false, std::make_unique<Struct<::test::fixtures::basic-python-capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
     {4, "aliased", false, std::make_unique<Typedef>("module.ListAlias", std::make_unique<Struct<::test::fixtures::basic-python-capi::ListStruct>>("module.ListStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
+    {5, "xenum", false, std::make_unique<Enum<::thrift::test::python_capi::DepEnum>>("thrift_dep.DepEnum"), std::vector<ThriftConstStruct>{}},
+    {6, "xstruct", false, std::make_unique<Struct<::thrift::test::python_capi::DepStruct>>("thrift_dep.DepStruct"), std::vector<ThriftConstStruct>{}},
+    {7, "friends", false, std::make_unique<List>(std::make_unique<Struct<::thrift::test::python_capi::DepStruct>>("thrift_dep.DepStruct")), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_ComposeStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

@@ -136,6 +136,9 @@ struct ForEachField<::test::fixtures::basic-python-capi::ComposeStruct> {
     f(1, static_cast<T&&>(t).renamed__ref()...);
     f(2, static_cast<T&&>(t).primitive_ref()...);
     f(3, static_cast<T&&>(t).aliased_ref()...);
+    f(4, static_cast<T&&>(t).xenum_ref()...);
+    f(5, static_cast<T&&>(t).xstruct_ref()...);
+    f(6, static_cast<T&&>(t).friends_ref()...);
   }
 };
 

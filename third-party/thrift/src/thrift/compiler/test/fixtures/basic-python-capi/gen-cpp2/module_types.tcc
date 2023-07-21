@@ -2833,6 +2833,53 @@ _readField_aliased:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           4,
+          5,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_xenum:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::readWithContext(*iprot, this->__fbthrift_field_xenum, _readState);
+    
+  }
+ this->__isset.set(3, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          5,
+          6,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_xstruct:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::readWithContext(*iprot, this->__fbthrift_field_xstruct, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(4, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          6,
+          7,
+          apache::thrift::protocol::T_LIST))) {
+    goto _loop;
+  }
+_readField_friends:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_friends = ::std::vector<::thrift::test::python_capi::DepStruct>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::readWithContext(*iprot, this->__fbthrift_field_friends, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(5, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          7,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -2885,6 +2932,30 @@ _loop:
         goto _skip;
       }
     }
+    case 5:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_xenum;
+      } else {
+        goto _skip;
+      }
+    }
+    case 6:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_xstruct;
+      } else {
+        goto _skip;
+      }
+    }
+    case 7:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
+        goto _readField_friends;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -2921,6 +2992,18 @@ uint32_t ComposeStruct::serializedSize(Protocol_ const* prot_) const {
       xfer += prot_->serializedSizeStop();
     }
   }
+  {
+    xfer += prot_->serializedFieldSize("xenum", apache::thrift::protocol::T_I32, 5);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
+  }
+  {
+    xfer += prot_->serializedFieldSize("xstruct", apache::thrift::protocol::T_STRUCT, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_xstruct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("friends", apache::thrift::protocol::T_LIST, 7);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2949,6 +3032,18 @@ uint32_t ComposeStruct::serializedSizeZC(Protocol_ const* prot_) const {
       xfer += prot_->serializedStructSize("ListAlias");
       xfer += prot_->serializedSizeStop();
     }
+  }
+  {
+    xfer += prot_->serializedFieldSize("xenum", apache::thrift::protocol::T_I32, 5);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_xenum);
+  }
+  {
+    xfer += prot_->serializedFieldSize("xstruct", apache::thrift::protocol::T_STRUCT, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_xstruct);
+  }
+  {
+    xfer += prot_->serializedFieldSize("friends", apache::thrift::protocol::T_LIST, 7);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::serializedSize<false>(*prot_, this->__fbthrift_field_friends);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2991,6 +3086,27 @@ uint32_t ComposeStruct::write(Protocol_* prot_) const {
       xfer += prot_->writeStructEnd();
       xfer += prot_->writeFieldStop();
     }
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 4;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 5, kPrevFieldId>(*prot_, "xenum", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::thrift::test::python_capi::DepEnum>::write(*prot_, this->__fbthrift_field_xenum);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 5;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "xstruct", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::thrift::test::python_capi::DepStruct>::write(*prot_, this->__fbthrift_field_xstruct);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 6;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 7, kPrevFieldId>(*prot_, "friends", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, ::std::vector<::thrift::test::python_capi::DepStruct>>::write(*prot_, this->__fbthrift_field_friends);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

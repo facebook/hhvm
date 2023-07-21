@@ -35,6 +35,8 @@ from thrift.test.python_capi.module.thrift_types import (  # @manual=:test_modul
     StringPair,
 )
 
+from thrift.test.python_capi.thrift_dep.thrift_types import DepEnum, DepStruct
+
 
 class PythonCapiFixture(unittest.TestCase):
     def my_struct(self) -> MyStruct:
@@ -156,12 +158,21 @@ class PythonCapiFixture(unittest.TestCase):
             fast_list_map={},
         )
 
+    def dep_struct(self) -> DepStruct:
+        return DepStruct(
+            s="blah",
+            i=42,
+        )
+
     def composed(self) -> ComposeStruct:
         return ComposeStruct(
             enum_=MyEnum.MyValue2,
             renamed_=AnnoyingEnum.FOO,
             primitive=self.primitive(),
             aliased=self.list_struct(),
+            xenum=DepEnum.Arm2,
+            xstruct=self.dep_struct(),
+            friends=[self.dep_struct()] * 3,
         )
 
 

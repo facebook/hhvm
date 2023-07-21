@@ -10,6 +10,7 @@
 
 
 #include "thrift/lib/thrift/gen-cpp2/patch_types.h"
+#include "thrift/compiler/test/fixtures/basic-python-capi/src/gen-cpp2/thrift_dep_types.h"
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
@@ -70,6 +71,9 @@ struct enum_;
 struct renamed_;
 struct primitive;
 struct aliased;
+struct xenum;
+struct xstruct;
+struct friends;
 struct myEnum;
 struct myStruct;
 struct myString;
@@ -320,6 +324,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(primitive);
 #ifndef APACHE_THRIFT_ACCESSOR_aliased
 #define APACHE_THRIFT_ACCESSOR_aliased
 APACHE_THRIFT_DEFINE_ACCESSOR(aliased);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_xenum
+#define APACHE_THRIFT_ACCESSOR_xenum
+APACHE_THRIFT_DEFINE_ACCESSOR(xenum);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_xstruct
+#define APACHE_THRIFT_ACCESSOR_xstruct
+APACHE_THRIFT_DEFINE_ACCESSOR(xstruct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_friends
+#define APACHE_THRIFT_ACCESSOR_friends
+APACHE_THRIFT_DEFINE_ACCESSOR(friends);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_myEnum
 #define APACHE_THRIFT_ACCESSOR_myEnum
@@ -3994,18 +4010,24 @@ class ComposeStruct final  {
     ::apache::thrift::ident::enum_,
     ::apache::thrift::ident::renamed_,
     ::apache::thrift::ident::primitive,
-    ::apache::thrift::ident::aliased
+    ::apache::thrift::ident::aliased,
+    ::apache::thrift::ident::xenum,
+    ::apache::thrift::ident::xstruct,
+    ::apache::thrift::ident::friends
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::MyEnum>,
     ::apache::thrift::type::enum_t<::test::fixtures::basic-python-capi::NormalDecentEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::PrimitiveStruct>,
-    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::ListStruct>
+    ::apache::thrift::type::struct_t<::test::fixtures::basic-python-capi::ListStruct>,
+    ::apache::thrift::type::enum_t<::thrift::test::python_capi::DepEnum>,
+    ::apache::thrift::type::struct_t<::thrift::test::python_capi::DepStruct>,
+    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::thrift::test::python_capi::DepStruct>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 4;
+  static constexpr std::size_t __fbthrift_field_size_v = 7;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -4039,7 +4061,7 @@ class ComposeStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg);
+  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::basic-python-capi::MyEnum enum___arg, ::test::fixtures::basic-python-capi::NormalDecentEnum renamed___arg, ::test::fixtures::basic-python-capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> aliased__arg, ::thrift::test::python_capi::DepEnum xenum__arg, ::thrift::test::python_capi::DepStruct xstruct__arg, ::std::vector<::thrift::test::python_capi::DepStruct> friends__arg);
 
   ComposeStruct(ComposeStruct&&) noexcept;
 
@@ -4057,7 +4079,13 @@ class ComposeStruct final  {
  private:
   ::std::shared_ptr<const ::test::fixtures::basic-python-capi::ListAlias> __fbthrift_field_aliased;
  private:
-  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::thrift::test::python_capi::DepEnum __fbthrift_field_xenum;
+ private:
+  ::thrift::test::python_capi::DepStruct __fbthrift_field_xstruct;
+ private:
+  ::std::vector<::thrift::test::python_capi::DepStruct> __fbthrift_field_friends;
+ private:
+  apache::thrift::detail::isset_bitset<6, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -4223,6 +4251,126 @@ class ComposeStruct final  {
     return static_cast<const T&&>(__fbthrift_field_aliased);
   }
 
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum_ref() const& {
+    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum_ref() & {
+    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum() const& {
+    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum() & {
+    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xstruct_ref() const& {
+    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xstruct_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xstruct_ref() & {
+    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xstruct_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xstruct() const& {
+    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xstruct() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xstruct() & {
+    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::thrift::test::python_capi::DepStruct>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xstruct() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends_ref() const& {
+    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends_ref() & {
+    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends() const& {
+    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends() & {
+    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends() && {
+    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  }
+
   ::test::fixtures::basic-python-capi::MyEnum get_enum_() const {
     return __fbthrift_field_enum_;
   }
@@ -4250,6 +4398,34 @@ class ComposeStruct final  {
   ::test::fixtures::basic-python-capi::PrimitiveStruct& set_primitive(T_ComposeStruct_primitive_struct_setter&& primitive_) {
     primitive_ref() = std::forward<T_ComposeStruct_primitive_struct_setter>(primitive_);
     return __fbthrift_field_primitive;
+  }
+
+  ::thrift::test::python_capi::DepEnum get_xenum() const {
+    return __fbthrift_field_xenum;
+  }
+
+  [[deprecated("Use `FOO.xenum_ref() = BAR;` instead of `FOO.set_xenum(BAR);`")]]
+  ::thrift::test::python_capi::DepEnum& set_xenum(::thrift::test::python_capi::DepEnum xenum_) {
+    xenum_ref() = xenum_;
+    return __fbthrift_field_xenum;
+  }
+  const ::thrift::test::python_capi::DepStruct& get_xstruct() const&;
+  ::thrift::test::python_capi::DepStruct get_xstruct() &&;
+
+  template <typename T_ComposeStruct_xstruct_struct_setter = ::thrift::test::python_capi::DepStruct>
+  [[deprecated("Use `FOO.xstruct_ref() = BAR;` instead of `FOO.set_xstruct(BAR);`")]]
+  ::thrift::test::python_capi::DepStruct& set_xstruct(T_ComposeStruct_xstruct_struct_setter&& xstruct_) {
+    xstruct_ref() = std::forward<T_ComposeStruct_xstruct_struct_setter>(xstruct_);
+    return __fbthrift_field_xstruct;
+  }
+  const ::std::vector<::thrift::test::python_capi::DepStruct>& get_friends() const&;
+  ::std::vector<::thrift::test::python_capi::DepStruct> get_friends() &&;
+
+  template <typename T_ComposeStruct_friends_struct_setter = ::std::vector<::thrift::test::python_capi::DepStruct>>
+  [[deprecated("Use `FOO.friends_ref() = BAR;` instead of `FOO.set_friends(BAR);`")]]
+  ::std::vector<::thrift::test::python_capi::DepStruct>& set_friends(T_ComposeStruct_friends_struct_setter&& friends_) {
+    friends_ref() = std::forward<T_ComposeStruct_friends_struct_setter>(friends_);
+    return __fbthrift_field_friends;
   }
 
   template <class Protocol_>

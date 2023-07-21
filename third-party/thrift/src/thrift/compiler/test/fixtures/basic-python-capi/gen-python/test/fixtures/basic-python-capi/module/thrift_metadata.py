@@ -12,6 +12,8 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 import apache.thrift.op.patch.thrift_metadata
 
+import thrift.test.python_capi.thrift_dep.thrift_metadata
+
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
@@ -411,6 +413,12 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
         _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ListStruct")), name="aliased", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=1),  }),
         ]),
+        _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="thrift_dep.DepEnum")), name="xenum", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="thrift_dep.DepStruct")), name="xstruct", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="thrift_dep.DepStruct")))), name="friends", is_optional=False, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -424,6 +432,9 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
     new_struct = _fbthrift_gen_metadata_enum_AnnoyingEnum(new_struct) # renamed_
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct) # primitive
     new_struct = _fbthrift_gen_metadata_struct_ListStruct(new_struct) # aliased
+    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct) # xenum
+    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # xstruct
+    new_struct = thrift.test.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
 
     return new_struct
 def gen_metadata_struct_ComposeStruct() -> _fbthrift_metadata.ThriftMetadata:

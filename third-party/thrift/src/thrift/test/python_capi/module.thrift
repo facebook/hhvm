@@ -17,6 +17,7 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/patch.thrift"
+include "thrift/test/python_capi/thrift_dep.thrift"
 
 cpp_include "<deque>"
 cpp_include "<unordered_map>"
@@ -149,6 +150,9 @@ struct ComposeStruct {
   3: PrimitiveStruct primitive;
   @cpp.Ref{type = cpp.RefType.Shared}
   4: ListAlias aliased;
+  5: thrift_dep.DepEnum xenum;
+  6: thrift_dep.DepStruct xstruct;
+  7: list<thrift_dep.DepStruct> friends;
 } (cpp.noncopyable)
 
 @python.MarshalCapi

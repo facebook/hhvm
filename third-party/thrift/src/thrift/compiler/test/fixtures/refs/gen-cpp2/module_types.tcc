@@ -3161,7 +3161,7 @@ uint32_t AdaptedStructWithInternBox::serializedSize(Protocol_ const* prot_) cons
   {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
     if (this->__fbthrift_field_field1) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
     } else {
       xfer += prot_->serializedStructSize("Empty");
       xfer += prot_->serializedSizeStop();
@@ -3170,7 +3170,7 @@ uint32_t AdaptedStructWithInternBox::serializedSize(Protocol_ const* prot_) cons
   {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_field2) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
     } else {
       xfer += prot_->serializedStructSize("MyField");
       xfer += prot_->serializedSizeStop();
@@ -3187,7 +3187,7 @@ uint32_t AdaptedStructWithInternBox::serializedSizeZC(Protocol_ const* prot_) co
   {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
     if (this->__fbthrift_field_field1) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
     } else {
       xfer += prot_->serializedStructSize("Empty");
       xfer += prot_->serializedSizeStop();
@@ -3196,7 +3196,7 @@ uint32_t AdaptedStructWithInternBox::serializedSizeZC(Protocol_ const* prot_) co
   {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_field2) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
     } else {
       xfer += prot_->serializedStructSize("MyField");
       xfer += prot_->serializedSizeStop();
@@ -3366,7 +3366,7 @@ uint32_t AdaptedStructWithTerseInternBox::serializedSize(Protocol_ const* prot_)
   if (!(this->__fbthrift_field_field1 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1))) {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
     if (this->__fbthrift_field_field1) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
     } else {
       xfer += prot_->serializedStructSize("Empty");
       xfer += prot_->serializedSizeStop();
@@ -3375,7 +3375,7 @@ uint32_t AdaptedStructWithTerseInternBox::serializedSize(Protocol_ const* prot_)
   if (!(this->__fbthrift_field_field2 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2))) {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_field2) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
     } else {
       xfer += prot_->serializedStructSize("MyField");
       xfer += prot_->serializedSizeStop();
@@ -3392,7 +3392,7 @@ uint32_t AdaptedStructWithTerseInternBox::serializedSizeZC(Protocol_ const* prot
   if (!(this->__fbthrift_field_field1 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<1>>>(*this->__fbthrift_field_field1))) {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRUCT, 1);
     if (this->__fbthrift_field_field1) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Empty>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field1));});
     } else {
       xfer += prot_->serializedStructSize("Empty");
       xfer += prot_->serializedSizeStop();
@@ -3401,7 +3401,7 @@ uint32_t AdaptedStructWithTerseInternBox::serializedSizeZC(Protocol_ const* prot
   if (!(this->__fbthrift_field_field2 && ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedStructWithTerseInternBox, ::apache::thrift::field_id<2>>>(*this->__fbthrift_field_field2))) {
     xfer += prot_->serializedFieldSize("field2", apache::thrift::protocol::T_STRUCT, 2);
     if (this->__fbthrift_field_field2) {
-      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
+      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>, ::my::Adapter1>(*prot_, *this->__fbthrift_field_field2, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyField>::serializedSize<true>(*prot_, ::my::Adapter1::toThrift(*this->__fbthrift_field_field2));});
     } else {
       xfer += prot_->serializedStructSize("MyField");
       xfer += prot_->serializedSizeStop();

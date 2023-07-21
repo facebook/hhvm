@@ -348,3 +348,14 @@ struct ContainerWithAdaptedElement {
 struct NestedContainerOfAdapted {
   1: list<list<AdaptedByte>> container;
 }
+
+struct CustomSerializedSize {
+  @cpp.Adapter{name = "::apache::thrift::test::SerializedSizeAdapter"}
+  1: binary field;
+}
+
+@cpp.UseOpEncode
+struct CustomSerializedSizeOpEncode {
+  @cpp.Adapter{name = "::apache::thrift::test::SerializedSizeAdapter"}
+  1: binary field;
+}

@@ -348,12 +348,20 @@ struct SerializedSize<ZeroCopy, type::cpp_type<T, Tag>>
   }
 };
 
-// TODO: Use serializedSize in adapter to optimize.
 template <bool ZeroCopy, typename Adapter, typename Tag>
 struct SerializedSize<ZeroCopy, type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
   uint32_t operator()(Protocol& prot, const U& m) const {
-    return SerializedSize<ZeroCopy, Tag>{}(prot, Adapter::toThrift(m));
+    return folly::overload(
+        [&](auto adapter)
+            -> decltype(decltype(adapter)::
+                            template serializedSize<ZeroCopy, Tag>(prot, m)) {
+          return decltype(adapter)::template serializedSize<ZeroCopy, Tag>(
+              prot, m);
+        },
+        [&](auto...) {
+          return SerializedSize<ZeroCopy, Tag>{}(prot, Adapter::toThrift(m));
+        })(Adapter{});
   }
 };
 

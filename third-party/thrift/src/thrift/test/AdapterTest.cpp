@@ -1079,4 +1079,28 @@ TEST_F(AdapterTest, GetClassName) {
       "RenamedStruct");
 }
 
+template <class T>
+void testCustomSerializedSize(bool zeroCopy) {
+  T a;
+  CompactProtocolWriter writer;
+  if (!zeroCopy) {
+    SerializedSizeAdapter::mockSize = 0;
+    auto base = a.serializedSize(&writer);
+    SerializedSizeAdapter::mockSize = 10;
+    EXPECT_EQ(base + 10, a.serializedSize(&writer));
+    return;
+  }
+  SerializedSizeAdapter::mockSizeZeroCopy = 0;
+  auto base = a.serializedSizeZC(&writer);
+  SerializedSizeAdapter::mockSizeZeroCopy = 10;
+  EXPECT_EQ(base + 10, a.serializedSizeZC(&writer));
+}
+
+TEST_F(AdapterTest, CustomSerializedSize) {
+  testCustomSerializedSize<basic::CustomSerializedSize>(false);
+  testCustomSerializedSize<basic::CustomSerializedSize>(true);
+  testCustomSerializedSize<basic::CustomSerializedSizeOpEncode>(false);
+  testCustomSerializedSize<basic::CustomSerializedSizeOpEncode>(true);
+}
+
 } // namespace apache::thrift::test

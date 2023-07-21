@@ -625,7 +625,7 @@ uint32_t YourStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<false>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<false>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -669,7 +669,7 @@ uint32_t YourStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<true>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<true>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
   }
   xfer += prot_->serializedSizeStop();
   return xfer;

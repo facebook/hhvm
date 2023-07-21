@@ -354,9 +354,31 @@ struct CountingAdapter {
     ++count;
     return i;
   }
-  template <bool ZC, typename Protocol, bool Enable = hasSerializedSize>
+  template <
+      bool ZC,
+      typename Tag,
+      typename Protocol,
+      bool Enable = hasSerializedSize>
   static std::enable_if_t<Enable, uint32_t> serializedSize(Protocol& prot, T) {
     return prot.serializedSizeI64();
+  }
+};
+
+struct SerializedSizeAdapter {
+  template <typename T>
+  static T fromThrift(T i) {
+    return i;
+  }
+  template <typename T>
+  static T toThrift(T i) {
+    return i;
+  }
+  static inline uint32_t mockSize = 0;
+  static inline uint32_t mockSizeZeroCopy = 0;
+  template <bool ZC, typename Tag, typename Protocol, typename T>
+  static uint32_t serializedSize(Protocol&, T) {
+    static_assert(std::is_same_v<type::native_type<Tag>, T>);
+    return ZC ? mockSizeZeroCopy : mockSize;
   }
 };
 

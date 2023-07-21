@@ -2317,7 +2317,7 @@ uint32_t MinPaddingWithCustomType::serializedSize(Protocol_ const* prot_) const 
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium))) {
     xfer += prot_->serializedFieldSize("medium", apache::thrift::protocol::T_I16, 3);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i16_t>, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
     xfer += prot_->serializedFieldSize("biggish", apache::thrift::protocol::T_I32, 4);
@@ -2345,7 +2345,7 @@ uint32_t MinPaddingWithCustomType::serializedSizeZC(Protocol_ const* prot_) cons
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium))) {
     xfer += prot_->serializedFieldSize("medium", apache::thrift::protocol::T_I16, 3);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i16_t>, ::my::Adapter>(*prot_, this->__fbthrift_field_medium, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_medium));});
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish))) {
     xfer += prot_->serializedFieldSize("biggish", apache::thrift::protocol::T_I32, 4);

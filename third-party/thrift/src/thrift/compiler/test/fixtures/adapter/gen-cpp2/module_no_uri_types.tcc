@@ -87,7 +87,7 @@ uint32_t RefUnion::serializedSize(Protocol_ const* prot_) const {
     {
       xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRING, 1);
       if (value_.field1) {
-        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
+        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
       }
       break;
     }
@@ -106,7 +106,7 @@ uint32_t RefUnion::serializedSizeZC(Protocol_ const* prot_) const {
     {
       xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_STRING, 1);
       if (value_.field1) {
-        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
+        xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>, ::my::Adapter1>(*prot_, *value_.field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, ::my::Adapter1::toThrift(*value_.field1));});
       }
       break;
     }

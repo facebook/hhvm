@@ -27,7 +27,7 @@
 <%#struct:union?%>  <%/struct:union?%>    xfer += <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);
 <%/field:cpp_exactly_one_adapter?%>
 <%#field:cpp_exactly_one_adapter?%>
-<%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::adapt_detail::serializedSize<false, <%field:cpp_first_adapter%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>, [&] {return <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);});
+<%#struct:union?%>  <%/struct:union?%>    xfer += ::apache::thrift::adapt_detail::serializedSize<false, <%field:type_tag%>, <%field:cpp_first_adapter%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>, [&] {return <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);});
 <%/field:cpp_exactly_one_adapter?%>
 <%/field:use_op_encode?%>
 <%/field:non_opt_cpp_ref?%>
@@ -41,7 +41,7 @@
 <%#struct:union?%>  <%/struct:union?%>      xfer += <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);
 <%/field:cpp_exactly_one_adapter?%>
 <%#field:cpp_exactly_one_adapter?%>
-<%#struct:union?%>  <%/struct:union?%>      xfer += ::apache::thrift::adapt_detail::serializedSize<false, <%field:cpp_first_adapter%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>, [&] {return <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);});
+<%#struct:union?%>  <%/struct:union?%>      xfer += ::apache::thrift::adapt_detail::serializedSize<false, <%field:type_tag%>, <%field:cpp_first_adapter%>>(*prot_, <%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>, [&] {return <% > module_types_tcc/pm%>::serializedSize<false>(*prot_, <% > module_types_tcc/pm_value%>);});
 <%/field:cpp_exactly_one_adapter?%>
 <%/field:use_op_encode?%>
 <%#type:resolves_to_container_or_enum?%>

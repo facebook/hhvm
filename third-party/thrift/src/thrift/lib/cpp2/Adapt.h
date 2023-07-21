@@ -416,6 +416,7 @@ void validateFieldAdapter() {
 
 template <
     bool ZeroCopy,
+    typename Tag,
     typename Adapter,
     typename AdaptedT,
     typename Protocol,
@@ -425,25 +426,28 @@ struct adapter_serialized_size {
   uint32_t operator()(Protocol&, const AdaptedT&, FallbackF f) { return f(); }
 };
 
-template <typename Adapter, typename AdaptedT, typename Protocol>
-using serialized_size_type = decltype(Adapter::template serializedSize<false>(
-    std::declval<Protocol&>(), std::declval<AdaptedT&>()));
+template <typename Tag, typename Adapter, typename AdaptedT, typename Protocol>
+using serialized_size_type =
+    decltype(Adapter::template serializedSize<false, Tag>(
+        std::declval<Protocol&>(), std::declval<AdaptedT&>()));
 
 template <
     bool ZeroCopy,
+    typename Tag,
     typename Adapter,
     typename AdaptedT,
     typename Protocol,
     typename FallbackF>
 struct adapter_serialized_size<
     ZeroCopy,
+    Tag,
     Adapter,
     AdaptedT,
     Protocol,
     FallbackF,
-    folly::void_t<serialized_size_type<Adapter, AdaptedT, Protocol>>> {
+    folly::void_t<serialized_size_type<Tag, Adapter, AdaptedT, Protocol>>> {
   uint32_t operator()(Protocol& prot, const AdaptedT& val, FallbackF) {
-    return Adapter::template serializedSize<ZeroCopy>(prot, val);
+    return Adapter::template serializedSize<ZeroCopy, Tag>(prot, val);
   }
 };
 
@@ -478,19 +482,25 @@ uint32_t serializedSizeFixed(Protocol& protocol, float) {
 
 template <
     bool ZeroCopy,
+    typename Tag,
     typename Adapter,
     typename AdaptedT,
     typename Protocol,
     typename FallbackF>
 struct adapter_serialized_size<
     ZeroCopy,
+    Tag,
     Adapter,
     AdaptedT,
     Protocol,
     FallbackF,
     std::enable_if_t<
-        !folly::
-            is_detected_v<serialized_size_type, Adapter, AdaptedT, Protocol> &&
+        !folly::is_detected_v<
+            serialized_size_type,
+            Tag,
+            Adapter,
+            AdaptedT,
+            Protocol> &&
         std::is_arithmetic<decltype(Adapter::toThrift(
             std::declval<AdaptedT&>()))>::value>> {
   uint32_t operator()(Protocol& prot, const AdaptedT&, FallbackF) {
@@ -501,6 +511,7 @@ struct adapter_serialized_size<
 
 template <
     bool ZeroCopy,
+    typename Tag,
     typename Adapter,
     typename AdaptedT,
     typename Protocol,
@@ -508,6 +519,7 @@ template <
 uint32_t serializedSize(Protocol& prot, const AdaptedT& val, FallbackF f) {
   return adapter_serialized_size<
       ZeroCopy,
+      Tag,
       Adapter,
       AdaptedT,
       Protocol,

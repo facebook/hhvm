@@ -11,8 +11,8 @@ mstch_cpp2 src/module.thrift
 mstch_cpp2 src/includes.thrift
 go src/service.thrift
 go src/matching_names.thrift
-mstch_go src/service.thrift
-mstch_go src/matching_names.thrift
+#mstch_go src/service.thrift
+#mstch_go src/matching_names.thrift
 mstch_py3 src/service.thrift
 mstch_py3 src/matching_struct_names.thrift
 mstch_python src/service.thrift

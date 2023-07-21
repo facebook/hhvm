@@ -375,6 +375,13 @@ class ReflectionParameter implements Reflector {
     return new ReflectionClass($this->info['type']);
   }
 
+  /**
+   * This is the "type constraint" that is used for enforcement. For example,
+   * if the parameter's type hint is a type constant, this will return empty string.
+   *
+   * Unfortunate misnomer: this uses the 'type' field of the info struct, whereas
+   * the following function uses the 'type_hint' field.
+   */
   public function getTypehintText()[] {
     if (isset($this->info['type'])) {
       if ($this->info['type'] === 'self' && ($this->info['class'] ?? false)) {
@@ -385,6 +392,11 @@ class ReflectionParameter implements Reflector {
     return '';
   }
 
+  /**
+   * This is the "user type" of the parameter, which is meant to represent the
+   * literal type the user has written in the source. <<__Soft>> is rendered
+   * as "@" by this function.
+   */
   public function getTypeText()[] {
     return isset($this->info['type_hint']) ? $this->info['type_hint'] : '';
   }

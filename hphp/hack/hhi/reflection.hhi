@@ -281,7 +281,16 @@ class ReflectionParameter implements Reflector {
   public function getDefaultValue()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isDefaultValueConstant()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDefaultValueConstantName()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  /**
+   * This is the "type constraint" that is used for enforcement. For example,
+   * if the parameter's type hint is a type constant, this will return empty string.
+   */
   public function getTypehintText()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  /**
+   * This is the "user type" of the parameter, which is meant to represent the
+   * literal type the user has written in the source. <<__Soft>> is rendered
+   * as "@" by this function.
+   */
   public function getTypeText()[]: string;
   public function getDefaultValueText()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isVariadic()[]: HH\FIXME\MISSING_RETURN_TYPE;

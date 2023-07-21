@@ -248,7 +248,7 @@ class pp_ArrayData:
 
         specialized_obj = utils.cast_as_specialized_array_data_kind(self.val_obj)
         utils.debug_print(
-            f"pp_ArrayData::update() with specialized_obj (type {specialized_obj.type.name}); "
+            f"pp_ArrayData::_update() with specialized_obj (type {specialized_obj.type.name}); "
             f"specialized_obj.load_addr: 0x{specialized_obj.load_addr:x} + specialized_obj.type.size: {specialized_obj.type.size}"
         )
         char_ptr_type = utils.Type("char", self.val_obj.target).GetPointerType()

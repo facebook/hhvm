@@ -17,6 +17,7 @@ except ModuleNotFoundError:
 # Size accessors
 
 def array_data_size(array_data: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
+    utils.debug_print(f"array_data_size(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))")
     # Get non-synthetic because we've defined this type to have synthetic children
     array_data = array_data.GetNonSyntheticValue()
 

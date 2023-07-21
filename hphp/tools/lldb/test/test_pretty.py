@@ -234,7 +234,7 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
         with self.subTest("HPHP::LowPtr &"):
             self.run_until_breakpoint("takeLowPtrRef")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r'\(const HPHP::LowPtr<HPHP::Class> &\) v = 0x.* "InvalidArgumentException": {'
+            expected_output = r'\(const HPHP::LowPtr<HPHP::Class> &\) v = 0x.* "InvalidArgumentException"'
             # LLDB always prints the raw contents of references, so just check the first line
             self.assertRegex(output.split("\n")[0].strip(), expected_output)
 

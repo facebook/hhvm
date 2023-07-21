@@ -825,18 +825,23 @@ def has_array_kind(array_data: lldb.SBValue, *kinds: str) -> bool:
 
 
 def cast_as_specialized_array_data_kind(array_data: lldb.SBValue) -> lldb.SBValue:
+    # Currently does *not* take in a pointer to an ArrayData, but rather the value itself
+    debug_print(f"cast_as_specialized_array_data_kind(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))")
     heap_obj = array_data.children[0].children[0]  # HPHP::HeapObject
     m_kind = get(heap_obj, "m_kind")
     if has_array_kind(array_data, 'Vec'):
         pass
     elif has_array_kind(array_data, 'Dict'):
-        array_data = array_data.Cast(Type("HPHP::VanillaDict", array_data.target))
+        array_data = array_data.address_of.Cast(Type("HPHP::VanillaDict", array_data.target).GetPointerType()).deref
     elif has_array_kind(array_data, 'Keyset'):
-        array_data = array_data.Cast(Type("HPHP::VanillaKeyset", array_data.target))
+        array_data = array_data.address_of.Cast(Type("HPHP::VanillaKeyset", array_data.target).GetPointerType()).deref
     elif has_array_kind(array_data, 'BespokeVec', 'BespokeDict', 'BespokeKeyset'):
         print(f"Unsupported bespoke array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
     else:
         print(f"Invalid array type ('{m_kind}')! Run `expression -R -- {array_data.path}` to see its raw form", file=sys.stderr)
+
+    if array_data.GetError().Fail():
+        print(f"Unable to properly cast array data to specialized type: {array_data.GetError().GetCString()}", file=sys.stderr)
     return array_data
 
 

@@ -4537,11 +4537,6 @@ static struct mbstringExtension final : Extension {
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
-    // TODO make these PHP_INI_ALL and thread local once we use them
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_input",
-                     &http_input);
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_output",
-                     &http_output);
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
@@ -4609,15 +4604,7 @@ static struct mbstringExtension final : Extension {
 
     loadSystemlib();
   }
-
-  static std::string http_input;
-  static std::string http_output;
-  static std::string substitute_character;
-
 } s_mbstring_extension;
-
-std::string mbstringExtension::http_input = "pass";
-std::string mbstringExtension::http_output = "pass";
 
 ///////////////////////////////////////////////////////////////////////////////
 }

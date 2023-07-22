@@ -116,7 +116,15 @@ void testSerializedSizeBasicTypes() {
   testSerializedSize<Protocol, type::i64_t, type_class::integral>((int64_t)1);
   testSerializedSize<Protocol, type::float_t, type_class::floating_point>(1.5f);
   testSerializedSize<Protocol, type::double_t, type_class::floating_point>(1.5);
+  testSerializedSize<Protocol, type::string_t, type_class::string>(
+      std::string("foo"));
+  testSerializedSize<Protocol, type::string_t, type_class::string>(
+      folly::StringPiece("foo"));
   testSerializedSize<Protocol, type::string_t, type_class::string>("foo");
+  testSerializedSize<Protocol, type::binary_t, type_class::binary>(
+      std::string("foo"));
+  testSerializedSize<Protocol, type::binary_t, type_class::binary>(
+      folly::StringPiece("foo"));
   testSerializedSize<Protocol, type::binary_t, type_class::binary>("foo");
   enum class MyEnum { value = 1 };
   testSerializedSize<Protocol, type::enum_t<MyEnum>, type_class::enumeration>(
@@ -312,6 +320,8 @@ void testEncodeBasicTypes() {
   testEncode<Protocol, type::i64_t>(1);
   testEncode<Protocol, type::float_t>(1.5);
   testEncode<Protocol, type::double_t>(1.5);
+  testEncode<Protocol, type::string_t>(std::string("foo"), false);
+  testEncode<Protocol, type::string_t>(folly::StringPiece("foo"), false);
   testEncode<Protocol, type::string_t>("foo", false);
   testEncode<Protocol, type::binary_t>("foo");
   testEncode<Protocol, type::enum_t<int>>(1);

@@ -194,7 +194,7 @@ struct SerializedSize<ZeroCopy, type::double_t> {
 template <bool ZeroCopy>
 struct SerializedSize<ZeroCopy, type::string_t> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const std::string& s) const {
+  uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.serializedSizeString(s);
   }
 };
@@ -202,7 +202,7 @@ struct SerializedSize<ZeroCopy, type::string_t> {
 template <>
 struct SerializedSize<false, type::binary_t> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const std::string& s) const {
+  uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.serializedSizeBinary(s);
   }
 
@@ -215,7 +215,7 @@ struct SerializedSize<false, type::binary_t> {
 template <>
 struct SerializedSize<true, type::binary_t> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const std::string& s) const {
+  uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.serializedSizeZCBinary(s);
   }
   template <typename Protocol>
@@ -427,7 +427,7 @@ struct Encode<type::double_t> {
 template <>
 struct Encode<type::string_t> {
   template <typename Protocol>
-  uint32_t operator()(Protocol& prot, const std::string& s) const {
+  uint32_t operator()(Protocol& prot, folly::StringPiece s) const {
     return prot.writeString(s);
   }
 };

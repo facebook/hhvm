@@ -64,8 +64,6 @@ pub(crate) use {{program:crate}} as types;
 
 }}{{#program:has_adapters?}}{{>lib/mod.adapters}}{{/program:has_adapters?}}{{!
 
-}}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}{{!
-
 }}{{#program:nonexhaustiveStructs?}}
 
 mod dot_dot {{>lib/block}}{{!
@@ -81,3 +79,5 @@ mod dot_dot {{>lib/block}}{{!
 }}{{/program:nonexhaustiveStructs?}}
 
 pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}
+{{!
+}}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}

@@ -6016,39 +6016,6 @@ pub mod adapters {
   pub type FooWithAdapter = ::my::Adapter1;
 }
 
-/// These are here to ensure the `from_thrift_default` methods on adapters don't panic.
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_struct_Foo_default_does_not_panic() {
-        let _ = super::Foo::default();
-    }
-    #[test]
-    fn test_struct_Baz_default_does_not_panic() {
-        let _ = super::Baz::default();
-    }
-    #[test]
-    fn test_struct_Bar_default_does_not_panic() {
-        let _ = super::Bar::default();
-    }
-    #[test]
-    fn test_struct_StructWithFieldAdapter_default_does_not_panic() {
-        let _ = super::StructWithFieldAdapter::default();
-    }
-    #[test]
-    fn test_struct_MyStruct_default_does_not_panic() {
-        let _ = super::MyStruct::default();
-    }
-    #[test]
-    fn test_struct_AdaptTemplatedTestStruct_default_does_not_panic() {
-        let _ = super::AdaptTemplatedTestStruct::default();
-    }
-}
-
-// This is here to ensure you enable unittests on your Thrift library.
-#[cfg(feature = "thrift_library_unittests_disabled")]
-compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");
-
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -6085,3 +6052,36 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+
+/// These are here to ensure the `from_thrift_default` methods on adapters don't panic.
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_struct_Foo_default_does_not_panic() {
+        let _ = super::Foo::default();
+    }
+    #[test]
+    fn test_struct_Baz_default_does_not_panic() {
+        let _ = super::Baz::default();
+    }
+    #[test]
+    fn test_struct_Bar_default_does_not_panic() {
+        let _ = super::Bar::default();
+    }
+    #[test]
+    fn test_struct_StructWithFieldAdapter_default_does_not_panic() {
+        let _ = super::StructWithFieldAdapter::default();
+    }
+    #[test]
+    fn test_struct_MyStruct_default_does_not_panic() {
+        let _ = super::MyStruct::default();
+    }
+    #[test]
+    fn test_struct_AdaptTemplatedTestStruct_default_does_not_panic() {
+        let _ = super::AdaptTemplatedTestStruct::default();
+    }
+}
+
+// This is here to ensure you enable unittests on your Thrift library.
+#[cfg(feature = "thrift_library_unittests_disabled")]
+compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");

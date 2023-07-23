@@ -51,7 +51,7 @@ where
                     }}{{field:key}}{{!
                 }});
                 {{#field:type}}{{>lib/write}}{{/field:type}}({{!
-                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field::<{{struct:rust_name}}>(&{{/field:has_adapter?}}{{!
+                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                 }}inner{{!
                 }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
                 }}, p);

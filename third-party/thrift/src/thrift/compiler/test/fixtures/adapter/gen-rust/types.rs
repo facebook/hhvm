@@ -1371,27 +1371,27 @@ where
         match self {
             Self::intField(inner) => {
                 p.write_field_begin("intField", ::fbthrift::TType::I32, 1);
-                ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(&inner, 1), p);
+                ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(inner, 1), p);
                 p.write_field_end();
             }
             Self::setField(inner) => {
                 p.write_field_begin("setField", ::fbthrift::TType::Set, 4);
-                ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(&inner, 4), p);
+                ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(inner, 4), p);
                 p.write_field_end();
             }
             Self::mapField(inner) => {
                 p.write_field_begin("mapField", ::fbthrift::TType::Map, 6);
-                ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(&inner, 6), p);
+                ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(inner, 6), p);
                 p.write_field_end();
             }
             Self::binaryField(inner) => {
                 p.write_field_begin("binaryField", ::fbthrift::TType::String, 8);
-                ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(&inner, 8), p);
+                ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(inner, 8), p);
                 p.write_field_end();
             }
             Self::longField(inner) => {
                 p.write_field_begin("longField", ::fbthrift::TType::I64, 9);
-                ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(&inner, 9), p);
+                ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Baz>(inner, 9), p);
                 p.write_field_end();
             }
             Self::UnknownField(_) => {}

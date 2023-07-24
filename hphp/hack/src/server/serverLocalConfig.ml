@@ -256,7 +256,10 @@ type t = {
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
   ide_batch_process_changes: bool;
       (* clientIdeDaemon should synchronously process file-changes, both for saved-state changes and incremental changes *)
-  dump_tast_hashes: bool;  (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
+  dump_tast_hashes: bool;
+      (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
+  use_compressed_dep_graph: bool;
+      (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
 }
 
 let default =
@@ -345,6 +348,7 @@ let default =
     override_load_state_natively = false;
     use_server_revision_tracker_v2 = false;
     use_hh_distc_instead_of_hulk = true;
+    use_compressed_dep_graph = false;
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;
     ide_load_naming_table_on_disk = true;
@@ -1032,6 +1036,13 @@ let load_
       ~current_version
       config
   in
+  let use_compressed_dep_graph =
+    bool_if_min_version
+      "use_compressed_dep_graph"
+      ~default:default.use_compressed_dep_graph
+      ~current_version
+      config
+  in
   let hh_distc_fanout_threshold =
     int_
       "hh_distc_fanout_threshold"
@@ -1163,6 +1174,7 @@ let load_
     override_load_state_natively;
     use_server_revision_tracker_v2;
     use_hh_distc_instead_of_hulk;
+    use_compressed_dep_graph;
     hh_distc_fanout_threshold;
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
@@ -1211,6 +1223,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
       rust_provider_backend = options.rust_provider_backend;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
+      use_compressed_dep_graph = options.use_compressed_dep_graph;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       rust_elab = options.rust_elab;

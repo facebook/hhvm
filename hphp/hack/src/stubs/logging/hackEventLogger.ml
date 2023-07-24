@@ -67,6 +67,7 @@ type rollout_flags = {
   ide_load_naming_table_on_disk: bool;
   ide_naming_table_update_threshold: int;
   ide_batch_process_changes: bool;
+  use_compressed_dep_graph: bool;
 }
 
 let flush () = ()

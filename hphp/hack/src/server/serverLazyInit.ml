@@ -103,6 +103,7 @@ let run_saved_state_future
       Saved_state_loader.Naming_and_dep_table_info.naming_table_path =
         deptable_naming_table_blob_path;
       dep_table_path;
+      compressed_dep_table_path;
       naming_sqlite_table_path;
       errors_path;
     } =
@@ -120,10 +121,17 @@ let run_saved_state_future
       ServerArgs.ignore_hh_version genv.ServerEnv.options
     in
     let deptable = deptable_with_filename (Path.to_string dep_table_path) in
-    lock_and_load_deptable
-      ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
-      ~deptable
-      ~ignore_hh_version;
+    let use_compressed_dep_graph =
+      genv.local_config.ServerLocalConfig.use_compressed_dep_graph
+    in
+    if use_compressed_dep_graph then
+      let _ = compressed_dep_table_path in
+      () (* TODO: Decompress and load deptable *)
+    else
+      lock_and_load_deptable
+        ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
+        ~deptable
+        ~ignore_hh_version;
     let naming_table_fallback_path =
       if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
         Hh_logger.log "Using sqlite naming table from hack/64 saved state";
